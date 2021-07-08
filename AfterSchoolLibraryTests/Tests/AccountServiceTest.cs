@@ -745,6 +745,33 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(expected: activity2.ID, actual: activities[1].ID);
         }
 
+        [Theory(DisplayName = "GetActivitiesByIds Test")]
+        [InlineData(5)]
+        public void GetActivitiesByIdsTest(int n)
+        {
+            try
+            {
+                // Arrange
+                List<int> activityIds = new List<int>();
+                for (var i = 0; i < n; i++)
+                {
+                    var activity = ActivityFactory.Create(account, msgs, dc);
+                    activityIds.Add(activity.ID.Value);
+                }
+
+                // Act
+                var expected = account.GetActivities(ActivityIds: activityIds, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.Equal(expected: expected.Count, actual: n);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
         [Fact]
         public void GetActivityGroupTest()
         {
@@ -760,6 +787,33 @@ namespace AfterSchoolLibraryTests.Tests
                 Assert.Equal(expected: expected.ID, actual: activityGroup.ID);
                 Assert.Equal(expected: expected.Uid, actual: activityGroup.Uid);
                 Assert.Equal(expected: expected.Name, actual: activityGroup.Name);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Theory(DisplayName = "GetActivityGroups Test")]
+        [InlineData(5)]
+        public void GetActivityGroupsTest(int n)
+        {
+            try
+            {
+                // Arrange
+                List<int> activityGroupIds = new List<int>();
+                for (var i = 0; i < n; i++)
+                {
+                    var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+                    activityGroupIds.Add(activityGroup.ID.Value);
+                }
+
+                // Act
+                var expected = account.GetActivityGroups(activityGroupIds: activityGroupIds, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.Equal(expected: expected.Count, actual: n);
             }
             catch (Exception ex)
             {
@@ -1801,6 +1855,31 @@ namespace AfterSchoolLibraryTests.Tests
 
                 // Assert
                 Assert.False(expected);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact]
+        public void GetRegistrationTest()
+        {
+            try 
+            { 
+                // Arrange
+                var activity = ActivityFactory.Create(account, msgs, dc);
+                var registrant = RegistrantFactory.Create(msgs, dc);
+                var registration = RegistrationFactory.Create(account, registrant, msgs, dc);
+
+                // Act
+                var expected = account.GetRegistration(Uid: registration.Uid, msgs, dc);
+
+                // Assert
+                Assert.Equal(expected: expected.ID, actual: registration.ID);
+                Assert.Equal(expected: expected.Uid, actual: registration.Uid);
+                Assert.Equal(expected: expected.RegistrantId, actual: registration.RegistrantId);
             }
             catch (Exception ex)
             {
