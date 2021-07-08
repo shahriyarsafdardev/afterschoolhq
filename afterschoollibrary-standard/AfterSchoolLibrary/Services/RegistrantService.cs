@@ -195,13 +195,7 @@ namespace AfterSchoolLibrary.Services
                 if (participationObject.Schedule.IsNotEmpty() && participationObject.StartDate.HasValue && participationObject.StartDate.Value.IsBefore(DateTime.Now))
                 {
                     if (startDateTime.IsNotEmpty() && endDateTime.IsNotEmpty())
-                    {
-                        var dateSpan = DateTimeSpan.CompareDates(startDateTime, endDateTime.Value);
-                        if (plan.BillingPeriodTypeId == BillingPeriodType.Month && dateSpan.Months <= 1)
-                            isSubscriptionRequired = false;
-                        else if (plan.BillingPeriodTypeId == BillingPeriodType.Week && dateSpan.Days <= 7)
-                            isSubscriptionRequired = false;
-                    }
+                        isSubscriptionRequired = CheckIfSubscriptionRequired(plan, startDateTime, endDateTime.Value);
 
                     ChargeRegistrantMidPeriod(submittedRecord, checkoutObject, subscriptionPlanType, isSubscriptionRequired, loggedInUser, msgs, dc);
 
@@ -278,10 +272,6 @@ namespace AfterSchoolLibrary.Services
                                                                     loggedInUser,
                                                                     msgs,
                                                                     dc);
-
-                    //Bharat: this will be handled through web hook, see stripecontroller
-                    //if (msgs.HasNoErrors())
-                    //    AccountService.CreatePurchaseTransactionPayment(checkoutObject, loggedInUser, msgs, dc);
                 }                
             }
             else
@@ -289,6 +279,15 @@ namespace AfterSchoolLibrary.Services
                 var ra = checkoutObject.Registration.GetRegistrantActivity(participationObject, msgs, dc);
                 ra.ChangeSeatAssignment(RegistrationAssignmentType.ReservedPendingPayment, loggedInUser, msgs, dc);
             }
+        }
+
+        public static bool CheckIfSubscriptionRequired(SubscriptionPlan plan, DateTime startDateTime, DateTime endDateTime)
+        {
+            var dateSpan = DateTimeSpan.CompareDates(startDateTime, endDateTime);
+            if ((plan.BillingPeriodTypeId == BillingPeriodType.Month && dateSpan.Months <= 1) || (plan.BillingPeriodTypeId == BillingPeriodType.Week && dateSpan.Days <= 7))
+                return false;
+
+            return true;
         }
 
         private static void ChargeRegistrantMidPeriod(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, bool isSubscriptionRequired, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
