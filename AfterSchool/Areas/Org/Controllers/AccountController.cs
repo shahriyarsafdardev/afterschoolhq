@@ -839,6 +839,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     {
                         if (name.IsNotBlank()) form.Name = name;
                         if (description.IsNotBlank()) form.Description = description;
+                        if (formtype.IsNotBlank()) form.FormTypeId = (FormType)formtype.ToInteger();
 
                         amsgs.AddRange(form.Save(adc));
 
