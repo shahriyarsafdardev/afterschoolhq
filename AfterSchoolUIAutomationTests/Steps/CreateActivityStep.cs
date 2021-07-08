@@ -9,7 +9,7 @@ using TechTalk.SpecFlow;
 using AfterSchoolUIAutomationTests.Helpers.Extensions;
 using AfterSchoolUIAutomationTests.Parameters;
 
-namespace AfterSchoolUIAutomationTests.Steps
+namespace AfterSchoolUIAutomationTests2.Steps
 {
     [Binding]
     public sealed class CreateActivityStep : IDisposable
@@ -44,31 +44,41 @@ namespace AfterSchoolUIAutomationTests.Steps
             createActivityPage.ClickAccountButton();
         }
 
-        [Given(@"Navigate to the new activity page")]
-        public void NavigateToAddActivity()
+        [Given(@"Click on add activity button")]
+        public void ClickAddActivityButton()
         {
-            var addActivityUrl = Parameter.Get("CreateNewActivity", "AddActivityUrl");
-            //var correctedUrl = addActivityUrl.Replace("&amp;" , "&");
-            webDriver.Navigate().GoToUrl(addActivityUrl);
-            webDriver.WaitInSeconds(5);
+            createActivityPage.ClickAddActivity();
         }
+
+        //[Given(@"Navigate to the new activity page")]
+        //public void NavigateToAddActivity()
+        //{
+        //    var addActivityUrl = Parameter.Get("CreateNewActivity", "AddActivityUrl");
+        //    //var correctedUrl = addActivityUrl.Replace("&amp;" , "&");
+        //    webDriver.Navigate().GoToUrl(addActivityUrl);
+        //    webDriver.WaitInSeconds(5);
+        //}
 
         [Given(@"Populate settings section and save")]
         public void PopulateSettings()
         {
             createActivityPage.PopulateActivityName(Parameter.Get("CreateNewActivity", "ActivityName"));
             createActivityPage.PopulateTotalAvailableSeats(Parameter.Get("CreateNewActivity", "TotalAvailableSeats"));
-            createActivityPage.ToggleInviteOnly(Parameter.Get("CreateNewActivity", "InviteOnly"));
-            createActivityPage.SetSignUpPeriodOpen("07/07/2021");
-            createActivityPage.SetSignUpPeriodClose("08/31/2021");
+            //createActivityPage.ToggleInviteOnly(Parameter.Get("CreateNewActivity", "InviteOnly"));
+            createActivityPage.SetSignUpPeriodOpen(Parameter.Get("CreateNewActivity", "SignUpPeriodOpen"));
+            createActivityPage.SetSignUpPeriodClose(Parameter.Get("CreateNewActivity", "SignUpPeriodClose"));
             createActivityPage.ClickSaveAndNext();
         }
 
-        //[Given(@"Populate restrictions section and save")]
-        //public void PopulateRestrictions()
-        //{
-
-        //}
+        [Given(@"Populate restrictions section and save")]
+        public void PopulateRestrictions()
+        {
+            createActivityPage.SelectGender();
+            createActivityPage.RestrictedBy();
+            createActivityPage.MinimumGrade();
+            createActivityPage.MaximumGrade();
+            createActivityPage.ClickSaveAndNext();
+        }
 
         //[Given(@"Populate schedule section and save")]
         //public void PopulateSchedule()
@@ -105,6 +115,14 @@ namespace AfterSchoolUIAutomationTests.Steps
         //{
 
         //}
+        [Then(@"Verify Test")]
+        public void PopulateEmailContent()
+        {
+            string create = "Created";
+            create.Equals("Created");
+            webDriver.Quit();
+            webDriver.Dispose();
+        }
 
         public void Dispose()
         {
