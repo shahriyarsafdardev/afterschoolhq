@@ -17,6 +17,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         }
 
         //------------Finding Edit Account Profile WebElements-----------
+        private IWebElement AccountButtonElement => webDriver.FindElement(By.XPath("(//div[@id='accounts']//button)[1]"));
         private IWebElement UserFirstNameElement => webDriver.FindElement(By.Id("firstname"));
         private IWebElement UserLastNameElement => webDriver.FindElement(By.Id("lastname"));
         private IWebElement UserEmailElement => webDriver.FindElement(By.Id("email"));
@@ -26,9 +27,11 @@ namespace AfterSchoolUIAutomationTests.Pages
         private IWebElement ToastElement => webDriver.FindElement(By.XPath("//div[@class='gritter-content gritter-without-image']//span[@class='gritter-title']/text()"));
 
         //------------Edit Account Profile Helper Methods-----------
-        public void Navigate(string url)
+        public EditAccountProfilePage ClickAccountButton()
         {
-            webDriver.Navigate().GoToUrl(url);
+            AccountButtonElement.Click();
+            webDriver.WaitInSeconds(5);
+            return this;
         }
 
         public EditAccountProfilePage PopulateFirstName(string firstName)
@@ -81,7 +84,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         public string ToastMessage()
         {
             //webDriver.WaitInSeconds(2);
-            Thread.Sleep(2000);
+            //Thread.Sleep(2000);
             //WebDriverWait wait = new WebDriverWait(webDriver, new TimeSpan(0, 0, 5));
             //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.XPath("//div[@class='gritter-content gritter-without-image']//span[@class='gritter-title']/text()")));
             //return this;

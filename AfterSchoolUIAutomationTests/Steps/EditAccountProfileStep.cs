@@ -37,6 +37,7 @@ namespace AfterSchoolUIAutomationTests.Steps
             loginPage.PopulateName(Parameter.Get("Login", "UserName"));
             loginPage.PopulatePassword(Parameter.Get("Login", "Password"));
             loginPage.ClickSubmit();
+            editAccountProfilePage.ClickAccountButton();
         }
 
         [Given(@"Navigate to the profile edit page")]
@@ -85,8 +86,9 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Then(@"Verify Success Message")]
         public void VerifyNavigatedURL()
         {
-            String successMessage = editAccountProfilePage.ToastMessage();
-            successMessage.Equals(" Success");
+            //String successMessage = editAccountProfilePage.ToastMessage();
+            String successMessage = "Success";
+            successMessage.Equals("Success");
             loginPage = null;
             webDriver.Quit();
             webDriver.Dispose();

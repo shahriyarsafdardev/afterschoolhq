@@ -50,23 +50,14 @@ namespace AfterSchoolUIAutomationTests2.Steps
             createActivityPage.ClickAddActivity();
         }
 
-        //[Given(@"Navigate to the new activity page")]
-        //public void NavigateToAddActivity()
-        //{
-        //    var addActivityUrl = Parameter.Get("CreateNewActivity", "AddActivityUrl");
-        //    //var correctedUrl = addActivityUrl.Replace("&amp;" , "&");
-        //    webDriver.Navigate().GoToUrl(addActivityUrl);
-        //    webDriver.WaitInSeconds(5);
-        //}
-
         [Given(@"Populate settings section and save")]
         public void PopulateSettings()
         {
             createActivityPage.PopulateActivityName(Parameter.Get("CreateNewActivity", "ActivityName"));
             createActivityPage.PopulateTotalAvailableSeats(Parameter.Get("CreateNewActivity", "TotalAvailableSeats"));
-            //createActivityPage.ToggleInviteOnly(Parameter.Get("CreateNewActivity", "InviteOnly"));
-            createActivityPage.SetSignUpPeriodOpen(Parameter.Get("CreateNewActivity", "SignUpPeriodOpen"));
-            createActivityPage.SetSignUpPeriodClose(Parameter.Get("CreateNewActivity", "SignUpPeriodClose"));
+            createActivityPage.ToggleInviteOnly(Parameter.Get("CreateNewActivity", "InviteOnly"));
+            createActivityPage.SetSignUpPeriodOpen();
+            createActivityPage.SetSignUpPeriodClose();
             createActivityPage.ClickSaveAndNext();
         }
 
@@ -80,43 +71,59 @@ namespace AfterSchoolUIAutomationTests2.Steps
             createActivityPage.ClickSaveAndNext();
         }
 
-        //[Given(@"Populate schedule section and save")]
-        //public void PopulateSchedule()
-        //{
+        [Given(@"Populate schedule section and save")]
+        public void PopulateSchedule()
+        {
+            createActivityPage.HasSchedule(Parameter.Get("CreateNewActivity", "HasSchedule"));
+            //createActivityPage.RepeatsWeekly(Parameter.Get("CreateNewActivity", "IsWeekly"));
+            createActivityPage.WeekDays();
+            //createActivityPage.SetScheduleStartDate();
+            //createActivityPage.SetScheduleEndDate();
+            createActivityPage.ClickSaveAndNext();
+        }
 
-        //}
+        [Given(@"Populate about your activity section and save")]
+        public void PopulateAbout()
+        {
+            //createActivityPage.ActivityDetails(Parameter.Get("CreateNewActivity", "AboutActivity"));
+            createActivityPage.ClickSaveAndNext();
+        }
 
-        //[Given(@"Populate about your activity section and save")]
-        //public void PopulateAbout()
-        //{
+        [Given(@"Populate contact section and save")]
+        public void PopulateContact()
+        {
+            //createActivityPage.ActivityLedBy();
+            createActivityPage.ContactName(Parameter.Get("CreateNewActivity", "ContactName"));
+            createActivityPage.ContactPhone(Parameter.Get("CreateNewActivity", "ContactPhone"));
+            createActivityPage.ContactEmail(Parameter.Get("CreateNewActivity", "ContactEmail"));
+            createActivityPage.ClickSaveAndNext();
+        }
 
-        //}
+        [Given(@"Populate location section and save")]
+        public void PopulateLocation()
+        {
+            createActivityPage.PhysicalLocation();
+            //createActivityPage.ActivityLocation(Parameter.Get("CreateNewActivity", "ActivityLocation"));
+            createActivityPage.SelectAutoComplete(Parameter.Get("CreateNewActivity", "ActivityLocation"));
+            createActivityPage.ClickSaveAndNext();
+        }
 
-        //[Given(@"Populate contact section and save")]
-        //public void PopulateContact()
-        //{
+        [Given(@"Populate price and payment section and save")]
+        public void PopulatePriceAndPayment()
+        {
+            createActivityPage.DoParentsPay();
+            createActivityPage.RegistrationFee(Parameter.Get("CreateNewActivity", "RegistrationFee"));
+            createActivityPage.DoPriceParentpay();
+            createActivityPage.ClickSaveAndNext();
+        }
 
-        //}
-
-        //[Given(@"Populate location section and save")]
-        //public void PopulateLocation()
-        //{
-
-        //}
-
-        //[Given(@"Populate price and payment section and save")]
-        //public void PopulatePriceAndPayment()
-        //{
-
-        //}
-
-        //[Given(@"Populate email content and save")]
-        //public void PopulateEmailContent()
-        //{
-
-        //}
-        [Then(@"Verify Test")]
+        [Given(@"Populate email content and save")]
         public void PopulateEmailContent()
+        {
+
+        }
+        [Then(@"Verify Test")]
+        public void VerifyAccountCreationContent()
         {
             string create = "Created";
             create.Equals("Created");

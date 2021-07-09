@@ -34,10 +34,16 @@
     <AddActivityUrl>http://localhost:54849/Org/activity/editsetup?isnew=1&amp;type=1</AddActivityUrl>
     <ActivityName>Rock Climbing</ActivityName>
     <TotalAvailableSeats>25</TotalAvailableSeats>
-    <InviteOnly>Yes</InviteOnly>
-    <SignUpPeriodOpen>07/07/2021</SignUpPeriodOpen>
-    <SignUpPeriodClose>08/31/2021</SignUpPeriodClose>
-    <ActivityName></ActivityName>
+    <InviteOnly>No</InviteOnly>
+    <HasSchedule>Yes</HasSchedule>
+    <IsWeekly>Yes</IsWeekly>
+    <AboutActivity>This is about Acivty.</AboutActivity>
+    <ContactName>Steve Auston</ContactName>
+    <ContactPhone>2025550155</ContactPhone>
+    <ContactEmail>steveauston@yopmail.com</ContactEmail>
+    <ActivityLocation>New York, New York, USA</ActivityLocation>
+    <RegistrationFee>100</RegistrationFee>
+
   </CreateNewActivity>
 
 </PARAMETERS>
