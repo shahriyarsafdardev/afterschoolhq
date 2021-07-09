@@ -828,7 +828,7 @@ namespace AfterSchoolLibraryTests.Tests
             try
             {
                 // Arrange
-                var registrant = RegistrantFactory.Create(account, msgs, dc);
+                var registrant = RegistrantFactory.Create(account, isMaster: false, msgs, dc);
 
                 // Act                
                 var expected = account.GetRegistrant(Uid: registrant.Uid, msgs: msgs, dc: dc);
@@ -1902,11 +1902,11 @@ namespace AfterSchoolLibraryTests.Tests
                 var purchasingAccountOwner = WebUserFactory.Create("Cristine", "Trump", "CristineTrump@test.com", true, msgs, dc);
                 var billingAccount = AccountFactory.CreateWithFreePackage("Billing account", "BillingAccount@test.com", billingAccountOwner, AccountType.School, msgs, dc);
                 var purchasingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", purchasingAccountOwner, AccountType.School, msgs, dc);
-                var masterRegistrant = RegistrantFactory.Create(purchasingAccount, msgs, dc);
+                var masterRegistrant = RegistrantFactory.Create(purchasingAccount, isMaster: true, msgs, dc);
 
                 var activity = ActivityFactory.Create(billingAccount, msgs, dc: dc);
                 var activityGroup = ActivityGroupFactory.Create(billingAccount, ActivityGroupType.Session, msgs, dc);
-                var registrant = RegistrantFactory.Create(billingAccount, msgs, dc: dc);
+                var registrant = RegistrantFactory.Create(billingAccount, isMaster: false, msgs, dc: dc);
                 var registration = RegistrationFactory.Create(billingAccount, registrant, msgs, dc);
                 var registrantActivity = RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
 
@@ -2035,7 +2035,7 @@ namespace AfterSchoolLibraryTests.Tests
             catch (Exception ex)
             {
                 //Assert
-                Assert.False(false, ex.Message);
+                Assert.False(true, ex.Message);
             }
         }
     }

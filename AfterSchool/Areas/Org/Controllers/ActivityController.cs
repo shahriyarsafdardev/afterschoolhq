@@ -1960,8 +1960,9 @@ namespace AfterSchool.Areas.Org.Controllers
                     ras = activity.GetRegistrantActivities(true);
             }
 
+            //Review: we will bring all data to provider review but we will disable those in UI so provider will have proper idea.            
             if (ras.IsEmpty())
-                ras = activity.GetRegistrantActivities();
+                ras = activity.GetRegistrantActivities(includeInvited: true, msgs); 
 
             if (rat != RegistrationAssignmentType.NotSet)
                 ras = ras.Where(x => x.AssignmentTypeId == rat).OrderBy(x => x.SeatIndex).ToList();

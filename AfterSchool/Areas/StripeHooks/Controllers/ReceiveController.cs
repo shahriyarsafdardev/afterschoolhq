@@ -280,9 +280,9 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                 transactionFeePayer = billingAccount;
 
             //we will need this logic to ensure we are adding pro-rated amount in ActivityPayment and RegistrantSubscriptionPlan
-            decimal amountPaidByParent = stripeInvoice.AmountPaid > 0 ? (decimal)stripeInvoice.AmountPaid / 100 : 0m;
-            decimal amountReceivedByProvider = stripeInvoice.TransferData.Amount > 0 ? (decimal)stripeInvoice.TransferData.Amount / 100 : 0m;
-            bool isAmountProRated = amountReceivedByProvider < plan.CostPerPeriod;
+            var amountPaidByParent = stripeInvoice.AmountPaid > 0 ? (decimal)stripeInvoice.AmountPaid / 100 : 0m;
+            var amountReceivedByProvider = stripeInvoice.TransferData.Amount > 0 ? (decimal)stripeInvoice.TransferData.Amount / 100 : 0m;
+            var isAmountProRated = amountReceivedByProvider < plan.CostPerPeriod;
 
             // save transaction info and track payment to the activity as well.
             var checkoutObject = new CheckoutObject()

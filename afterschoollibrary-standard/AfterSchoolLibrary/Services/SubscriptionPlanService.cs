@@ -563,5 +563,14 @@ namespace AfterSchoolLibrary.Services
 
             return list;
         }
+
+        public static bool CheckIfSubscriptionRequired(this SubscriptionPlan plan, DateTime startDateTime, DateTime endDateTime)
+        {
+            var dateSpan = DateTimeSpan.CompareDates(startDateTime, endDateTime);
+            if ((plan.BillingPeriodTypeId == BillingPeriodType.Month && dateSpan.Months <= 1) || (plan.BillingPeriodTypeId == BillingPeriodType.Week && dateSpan.Days <= 7))
+                return false;
+
+            return true;
+        }
     }
 }

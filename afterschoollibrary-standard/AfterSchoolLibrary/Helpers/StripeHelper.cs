@@ -1967,7 +1967,8 @@ namespace AfterSchoolLibrary.Billing
             }
             catch (StripeException ex)
             {
-                msgs.Add($"No paymentIntent found with ID: {paymentIntentId}", MessageType.Notice, ex);
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Error retrieving payment source.", MessageType.UserError);
             }
 
             return paymentIntent;

@@ -59,8 +59,8 @@
                         <td>@account.ConvertToAccountTimeZone(ra.CreateDate.Value).ToLongDateTimeString()</td>
                         @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView))
                         {
-                            decimal amount = ra.GetAmountPaid();
-                            bool isProRated = ra.GetIsProRatedFlagByParent();
+                            var amount = ra.GetAmountPaid();
+                            var isProRated = ra.GetIsProRatedFlagByParent();
 
                             <td>
                                 @if (participationObject.IsFree)
@@ -103,55 +103,64 @@
                             </td>
                         }
                         <td>
-                            <select name="newassignmenttype" 
-                                    id="newassignmenttype-@ra.ID" 
-                                    class="form-control" 
-                                    onchange="moveRegistrantAssignment(@ra.RegistrantId, '@UI.JavascriptSafeString(ra.RegistrantName)', this)">
+                            @if (ra.CanAccessStatus())
+                            {
+                                <select name="newassignmenttype" 
+                                        id="newassignmenttype-@ra.ID" 
+                                        class="form-control" 
+                                        onchange="moveRegistrantAssignment(@ra.RegistrantId, '@UI.JavascriptSafeString(ra.RegistrantName)', this)">
 
-                                @foreach (var assignmenttype in Enum.GetValues(typeof(RegistrationAssignmentType)).Cast<RegistrationAssignmentType>())
-                                {
-                                    switch(assignmenttype)
+                                    @foreach (var assignmenttype in Enum.GetValues(typeof(RegistrationAssignmentType)).Cast<RegistrationAssignmentType>())
                                     {
-                                        case RegistrationAssignmentType.NotSet:
-                                            continue;
+                                        switch (assignmenttype)
+                                        {
+                                            case RegistrationAssignmentType.NotSet:
+                                                continue;
+                                        }
+                                        <option value="@((int)assignmenttype)" @(assignmenttype == ra.AssignmentTypeId ? "selected=\"selected\"" : "")>
+                                            @assignmenttype.ToString().SplitByUpperCase()
+                                        </option>
                                     }
-                                    <option value="@((int)assignmenttype)" @(assignmenttype == ra.AssignmentTypeId ? "selected=\"selected\"" : "")>
-                                        @assignmenttype.ToString().SplitByUpperCase()
-                                    </option>
-                                }
 
-                            </select>
+                                </select>
+                            } else 
+                            {
+                                <label>@((RegistrationAssignmentType)ra.AssignmentTypeId)</label>
+                            }
                         </td>
                         <td>
-                            @if (ra.AssignmentTypeId.NotIn(new List<RegistrationAssignmentType>() { RegistrationAssignmentType.NotSet, RegistrationAssignmentType.Withdrawn, RegistrationAssignmentType.Declined }))
-                            {
-                                <button id="btn-withdraw-@ra.Uid" class="btn btn-danger btn-sm" onclick="return processWithdraw('@ra.Uid', '@ra.ID', '@ra.RegistrantUid', '@ra.ParticipationObjectId', '@ra.ParticipationObjectTypeId', '@ra.RegistrantFirstName');">Withdraw</button>
-                            }                       
+                            @if (ra.CanAccessUtilityButtons())
+                            {                                
+                                <button id="btn-withdraw-@ra.Uid" class="btn btn-danger btn-sm" 
+                                        onclick="return processWithdraw('@ra.Uid', '@ra.ID', '@ra.RegistrantUid', '@ra.ParticipationObjectId', '@ra.ParticipationObjectTypeId', '@ra.RegistrantFirstName');">
+                                    Withdraw
+                                </button>
 
-                            @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && participationObject.IsNotFreeAndCanAcceptPayments && ra.GetAmountPaid() == 0 && ra.GetRegistrant().ParentRegistrantId.HasValue)
-                            {
-                                var showButton = true;
-
-                                if (activity.HasSubscriptionPlan())
+                                if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && participationObject.IsNotFreeAndCanAcceptPayments && ra.GetAmountPaid() == 0 && ra.GetRegistrant().ParentRegistrantId.HasValue)
                                 {
-                                    var subscriptionPlan = activity.GetSubscriptionPlan();
+                                    var showButton = true;
 
-                                    if (subscriptionPlan.SplitCostEvenly && !activity.RegistrationFinalized)
+                                    if (activity.HasSubscriptionPlan())
                                     {
-                                        showButton = false;
-                                    }
-                                }
+                                        var subscriptionPlan = activity.GetSubscriptionPlan();
 
-                                if (showButton)
-                                { 
-                                    <button class="btn btn-default btn-sm" 
-                                            data-modal="modal-waitinglist" 
-                                            id="btnsendinvoice-@ra.ID"
-                                            onclick="sendPaymentReminder(this, @ra.RegistrantId, '@UI.JavascriptSafeString(ra.RegistrantName)')">
-                                        Send Invoice
-                                    </button>
-                                }
-                            }                            
+                                        if (subscriptionPlan.SplitCostEvenly && !activity.RegistrationFinalized)
+                                        {
+                                            showButton = false;
+                                        }
+                                    }
+
+                                    if (showButton)
+                                    {
+                                        <button class="btn btn-default btn-sm" 
+                                                data-modal="modal-waitinglist" 
+                                                id="btnsendinvoice-@ra.ID"
+                                                onclick="sendPaymentReminder(this, @ra.RegistrantId, '@UI.JavascriptSafeString(ra.RegistrantName)')">
+                                            Send Invoice
+                                        </button>
+                                    }
+                                }   
+                            }
                         </td>
                     </tr>
                 }

@@ -195,9 +195,9 @@ namespace AfterSchoolLibrary.Services
                 if (participationObject.Schedule.IsNotEmpty() && participationObject.StartDate.HasValue && participationObject.StartDate.Value.IsBefore(DateTime.Now))
                 {
                     if (startDateTime.IsNotEmpty() && endDateTime.IsNotEmpty())
-                        isSubscriptionRequired = CheckIfSubscriptionRequired(plan, startDateTime, endDateTime.Value);
+                        isSubscriptionRequired = plan.CheckIfSubscriptionRequired(startDateTime, endDateTime.Value);
 
-                    ChargeRegistrantMidPeriod(submittedRecord, checkoutObject, subscriptionPlanType, isSubscriptionRequired, loggedInUser, msgs, dc);
+                    submittedRecord.ChargeRegistrantMidPeriod(checkoutObject, subscriptionPlanType, isSubscriptionRequired, loggedInUser, msgs, dc);
 
                     // we will update starting of subscription for this registrant to next cycle
                     if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
@@ -231,13 +231,7 @@ namespace AfterSchoolLibrary.Services
                                         { "ApprovedBy", loggedInUser.Uid.ToString() },
                                         { "DateRequested", DateTime.Now.ToShortDateTimeString() }
                                     },
-                                    msgs: msgs);
-
-                    //logic: (costperclass + ccfee + connenincefee)  * (100 - (platformFee * 100))/100
-                    //var amountPaid = ((subscription?.Plan?.Amount / 100) * subscription?.TransferData?.AmountPercent) / 100;
-
-                    //update checkoutobject so pro-rated amount gets reflected
-                    //checkoutObject.OverrideAmount = amountPaid;                    
+                                    msgs: msgs);               
 
                     if (msgs.HasErrors())
                         return;
@@ -281,21 +275,13 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-        public static bool CheckIfSubscriptionRequired(SubscriptionPlan plan, DateTime startDateTime, DateTime endDateTime)
-        {
-            var dateSpan = DateTimeSpan.CompareDates(startDateTime, endDateTime);
-            if ((plan.BillingPeriodTypeId == BillingPeriodType.Month && dateSpan.Months <= 1) || (plan.BillingPeriodTypeId == BillingPeriodType.Week && dateSpan.Days <= 7))
-                return false;
-
-            return true;
-        }
-
-        private static void ChargeRegistrantMidPeriod(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, bool isSubscriptionRequired, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void ChargeRegistrantMidPeriod(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, bool isSubscriptionRequired, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             var participationObject = checkoutObject.ParticipationObject;
             var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
             var billingAccount = checkoutObject.BillingAccount;
+            var masterRegistrant = submittedRecord.IsMaster ? submittedRecord : submittedRecord.GetMasterRegistrant(msgs, dc);
 
             //get the total number of periods for current cycle x
             var classesInCurrentCycle = participationObject.GetNumberOfClassesInCurrentCycle(plan.BillingPeriodTypeId, msgs, dc);
@@ -334,22 +320,20 @@ namespace AfterSchoolLibrary.Services
 
             if (checkoutObject.PaymentType == PaymentType.ACH)
             {
-                bankAccountPurchaseObject = new BankAccountPurchaseObject()
-                {
+                bankAccountPurchaseObject = new BankAccountPurchaseObject() {
                     StripeSourceId = checkoutObject.StripeSourceId
                 };
             }
             else if (checkoutObject.PaymentType == PaymentType.CreditCard)
             {
-                creditCardPurchaseObject = new CreditCardPurchaseObject()
-                {
+                creditCardPurchaseObject = new CreditCardPurchaseObject() {
                     StripeSourceId = checkoutObject.StripeSourceId
                 };
             }
 
             AccountService.ProcessPayment(
                 checkoutObject: new CheckoutObject()
-                {
+                {                    
                     OverrideAmount = amount,
                     AmountPaidByParent = amount,
                     AmountReceivedByProvider = calcObj.GetAmountToProvider(),
@@ -367,7 +351,7 @@ namespace AfterSchoolLibrary.Services
                     CreditCardFeePayer = checkoutObject.CreditCardFeePayer,
                     Registration = checkoutObject.Registration,
                     ParticipationObject = participationObject,
-                    MasterRegistrant = null,
+                    MasterRegistrant = masterRegistrant,
                     Description = "Pro-rating charge on joing mid-period",                        
 
                 },
@@ -1643,6 +1627,56 @@ namespace AfterSchoolLibrary.Services
             }
 
             return contact;
+        }
+
+        public static void ProcessActivityPayment(this Registrant registrant, CheckoutObject checkoutObject, Transaction transaction, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            // TODO: this is problematic, but a little better now
+            // you really don't know this is the amount paid, but it works for now
+            // var amountPaid = checkoutObject.TuitionCostNoFees;
+
+            // -- should be fixed now
+            // why is this being passed with no fees?
+
+            // Bharat: response to above question, (hypothetically) becuase in provider's student panel
+            // you(darye) wanted to show amount paid by parent without fees, and not the amount that we charged.
+            // I have updated this logic to add both AmountReceivedByProvider and AmountPaidByParent with flag IsAmountProRated
+            var amountPaid = checkoutObject.GetTotalCostToPurchaseTodayNoFees(msgs, dc);
+
+            if (checkoutObject.PostPayPlan.IsNotEmpty())
+                amountPaid = checkoutObject.GetPostPayPlanCostTodayWithFees();
+
+            if (checkoutObject.OverrideAmount.HasValue)
+                amountPaid = checkoutObject.OverrideAmount.Value;
+
+            if (checkoutObject.AmountPaidByParent.HasValue && checkoutObject.AmountReceivedByProvider.HasValue)
+            {
+                // need to track a payment for each activity/activitygroup
+                checkoutObject.ParticipationObject.AddPayment(
+                    amountReceivedByProvider: checkoutObject.AmountReceivedByProvider.Value,
+                    amountPaidByParent: checkoutObject.AmountPaidByParent.Value,
+                    isAmountProRated: checkoutObject.IsAmountProRated,
+                    registrant: registrant,
+                    transaction: transaction,
+                    registrantSubscriptionPlan: checkoutObject.RegistrantSubscriptionPlan,
+                    createDate: checkoutObject.Date,
+                    loggedInUser: loggedInUser,
+                    msgs: msgs,
+                    dc: dc);
+            }
+            else
+            {
+                // need to track a payment for each activity/activitygroup
+                checkoutObject.ParticipationObject.AddPayment(
+                    amount: amountPaid,
+                    registrant: registrant,
+                    transaction: transaction,
+                    registrantSubscriptionPlan: checkoutObject.RegistrantSubscriptionPlan,
+                    createDate: checkoutObject.Date,
+                    loggedInUser: loggedInUser,
+                    msgs: msgs,
+                    dc: dc);
+            }
         }
     }
 }

@@ -14,9 +14,9 @@ namespace AfterSchoolLibraryTests.Factories
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
-        public static Registrant Create(Account account, SystemMessages msgs, DatabaseConnection dc)
+        public static Registrant Create(Account account, bool isMaster = true, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var obj = new Registrant() { Email = "test@test.com", AccountId = account.ID };
+            var obj = new Registrant() { Email = "test@test.com", AccountId = account.ID, IsMaster = isMaster };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }

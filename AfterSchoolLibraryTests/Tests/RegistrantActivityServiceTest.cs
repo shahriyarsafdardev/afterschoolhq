@@ -37,7 +37,7 @@ namespace AfterSchoolLibraryTests.Tests
         [Theory(DisplayName = "test cases for GetAmountPaidTest, GetAmountPaidByParent, GetIsProRatedFlagByParent")]
         [InlineData(100, 6, 4, 110, false)] //no pro-rate
         [InlineData(100, 6, 4, 90, true)] //assume user joins mid-period and so as we have to keep pro-rated amount, its 94.3m(otherwise it would 100m)
-        public void ActivtyPayemntRelatedTest(decimal amount, decimal convenienceFee, decimal paymentTypeFee, decimal amountPaidByParent, bool isAmountProRated = false)
+        public void ActivityPayemntRelatedTest(decimal amount, decimal convenienceFee, decimal paymentTypeFee, decimal amountPaidByParent, bool isAmountProRated = false)
         {
             try
             {
@@ -48,7 +48,7 @@ namespace AfterSchoolLibraryTests.Tests
                 var purchasingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", purchasingAccountOwner, AccountType.School, msgs, dc);
                 var activity = ActivityFactory.Create(billingAccount, msgs, dc: dc);
 
-                var registrant = RegistrantFactory.Create(billingAccount, msgs, dc: dc);
+                var registrant = RegistrantFactory.Create(billingAccount, isMaster: false, msgs, dc: dc);
                 var registration = RegistrationFactory.Create(billingAccount, registrant, msgs, dc);
                 var registrantActivity = RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
 

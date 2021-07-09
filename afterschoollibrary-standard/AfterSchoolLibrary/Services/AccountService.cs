@@ -3067,7 +3067,7 @@ namespace AfterSchoolLibrary.Services
                     if (fromAccount.StripeDefaultCardId.IsEmpty())
                     {
                         fromAccount.StripeDefaultCardId = source.Id;
-                        fromAccount.Save(dc);
+                        msgs.AddRange(fromAccount.Save(dc));
                     }
 
                     return source.Id;
@@ -3077,7 +3077,7 @@ namespace AfterSchoolLibrary.Services
             return customer.DefaultSourceId;
         }
 
-        public static string CreateStripeCardFromToken(this Account fromAccount, string stripeToken, Stripe.Customer customer, SystemMessages msgs)
+        public static string CreateStripeCardFromToken(this Account fromAccount, string stripeToken, Stripe.Customer customer, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (stripeToken.IsEmpty())
                 msgs.Add("stripe token is not valid.", MessageType.Error);
@@ -3091,7 +3091,7 @@ namespace AfterSchoolLibrary.Services
                 if (card.IsNotEmpty())
                 {
                     //set this card as default           
-                    UpdateStripeCard(fromAccount, card.Id, customer, msgs);
+                    UpdateStripeCard(fromAccount, card.Id, customer, msgs, dc);
                     return card.Id;
                 }
             }
@@ -3099,7 +3099,7 @@ namespace AfterSchoolLibrary.Services
             return customer.DefaultSourceId;
         }
 
-        public static void UpdateStripeCard(this Account fromAccount, string cardId, Stripe.Customer customer, SystemMessages msgs)
+        public static void UpdateStripeCard(this Account fromAccount, string cardId, Stripe.Customer customer, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (cardId.IsEmpty())
                 msgs.Add("stripe card is not valid.", MessageType.Error);
@@ -3113,7 +3113,7 @@ namespace AfterSchoolLibrary.Services
                 
                 //set this card id to account, which will work as a default card                
                 fromAccount.StripeDefaultCardId = cardId;
-                fromAccount.Save();
+                msgs.AddRange(fromAccount.Save(dc));
             }
         }
 
@@ -3246,52 +3246,8 @@ namespace AfterSchoolLibrary.Services
 
             if (registrant.IsNotEmpty())
             {
-                // TODO: this is problematic, but a little better now
-                // you really don't know this is the amount paid, but it works for now
-                // var amountPaid = checkoutObject.TuitionCostNoFees;
-
-                // -- should be fixed now
-                // why is this being passed with no fees?
-
-                // Bharat: response to above question, (hypothetically) becuase in provider's student panel
-                // you(darye) wanted to show amount paid by parent without fees, and not the amount that we charged.
-                // I have updated this logic to add both AmountReceivedByProvider and AmountPaidByParent with flag IsAmountProRated
-                var amountPaid = checkoutObject.GetTotalCostToPurchaseTodayNoFees(msgs, dc);
-
-                if (checkoutObject.PostPayPlan.IsNotEmpty())
-                    amountPaid = checkoutObject.GetPostPayPlanCostTodayWithFees();
-
-                if (checkoutObject.OverrideAmount.HasValue)
-                    amountPaid = checkoutObject.OverrideAmount.Value;
-
-                if (checkoutObject.AmountPaidByParent.HasValue && checkoutObject.AmountReceivedByProvider.HasValue)
-                {
-                    // need to track a payment for each activity/activitygroup
-                    checkoutObject.ParticipationObject.AddPayment(
-                        amountReceivedByProvider: checkoutObject.AmountReceivedByProvider.Value,
-                        amountPaidByParent: checkoutObject.AmountPaidByParent.Value,
-                        isAmountProRated: checkoutObject.IsAmountProRated,
-                        registrant: registrant,
-                        transaction: transaction,
-                        registrantSubscriptionPlan: checkoutObject.RegistrantSubscriptionPlan,
-                        createDate: checkoutObject.Date,
-                        loggedInUser: loggedInUser,
-                        msgs: msgs,
-                        dc: dc);
-                }
-                else
-                {
-                    // need to track a payment for each activity/activitygroup
-                    checkoutObject.ParticipationObject.AddPayment(
-                        amount: amountPaid,
-                        registrant: registrant,
-                        transaction: transaction,
-                        registrantSubscriptionPlan: checkoutObject.RegistrantSubscriptionPlan,
-                        createDate: checkoutObject.Date,
-                        loggedInUser: loggedInUser,
-                        msgs: msgs,
-                        dc: dc);
-                }
+                //TODO: add a test case
+                registrant.ProcessActivityPayment(checkoutObject, transaction, loggedInUser, msgs, dc);
 
                 // if successful payment and reserved pending payment then it should be reserved
                 // TODO: Needs review!!
@@ -3304,7 +3260,8 @@ namespace AfterSchoolLibrary.Services
                         msgs,
                         dc);
 
-                    if (ra.IsNotEmpty() && ra.AssignmentTypeId != RegistrationAssignmentType.Reserved)
+                    //TODO: test this code
+                    if (!ra.IsAssigned(RegistrationAssignmentType.Reserved))                    
                         ra.ChangeSeatAssignment(RegistrationAssignmentType.Reserved, loggedInUser, msgs, dc);
                 }
             }
