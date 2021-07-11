@@ -269,16 +269,17 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (msgs.HasNoErrors())
                 {
                     // LOG: CurrentUser created Activity ActivityName for ActiivtyGroup ActivityGroupName
-                    WebSessionUtilities.LogActivity(
-                        webSessionId: SessionVariables.WebSession.ID.Value,
+
+                    SessionVariables.WebSession.LogActivity(
+                        account: currentAccount,
                         actor: currentWebUser,
                         actionType: WebSessionActionType.Created,
                         objectId: activity.ID.Value,
                         objectType: ObjectType.Activity,
                         objectText: activity.Name,
-                        indirectObjectId: activityGroup.ID.Value,
+                        indirectObjectId: activityGroup?.ID.Value,
                         indirectObjectType: ObjectType.ActivityGroup,
-                        indirectObjectText: activityGroup.Name);
+                        indirectObjectText: activityGroup?.Name);
                 }
             }
 
@@ -1648,8 +1649,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 var currentAccount = SessionVariables.CurrentAccount;
                 // LOG: CurrentWebUser Published Activity ActivityName to Account AccountName's Profile
-                WebSessionUtilities.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: SessionVariables.CurrentUser,
                     actionType: WebSessionActionType.Published,
                     objectId: activity.ID.Value,
@@ -1676,9 +1678,10 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 msgs.Add(string.Format("{0} has been unpublished", activity.Name), MessageType.Success);
                 var currentAccount = SessionVariables.CurrentAccount;
+
                 // LOG: CurrentWebUser Unpublished Activity ActivityName from Account AccountName's Profile
-                WebSessionUtilities.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: SessionVariables.CurrentUser,
                     actionType: WebSessionActionType.Unpublished,
                     objectId: activity.ID.Value,

@@ -8,6 +8,9 @@
         <th style="padding: 10px; text-align:center;">
           Number Present
         </th>
+		<th style="padding: 10px; text-align:center;">
+		  Number Pre-Paid
+		</th>
         <th style="padding: 10px; text-align:center;">
           Total Charge
         </th>

@@ -21,5 +21,6 @@ namespace AfterSchool.Models
         public bool IsClaimProcess { get; set; }
         public Account Account { get; set; }
         public bool IsRequestOnlyAccess { get; set; }
+        public SignUpType SignupType { get; set; }
     }
 }

@@ -1,12 +1,9 @@
 ﻿using AfterSchoolLibrary.Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using BasicLibrary;
-using AfterSchoolLibrary.Services;
-using AfterSchool.Helpers;
-using AfterSchoolLibrary.Helpers;
+using BasicLibrary.DataAccess;
 
 namespace AfterSchool.Models
 {
@@ -59,23 +56,22 @@ namespace AfterSchool.Models
             return session;
         }
 
-
-        public static void LogActivity(HttpRequestBase request, WebUser actor, WebSession webSession, WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet, ObjectType indirectObjectType = ObjectType.NotSet,
+        public static void LogActivity(this WebSession webSession, HttpRequestBase request, WebUser actor, Account account, WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet, ObjectType indirectObjectType = ObjectType.NotSet,
              int? objectId = (int?)null, string objectText = "",
              int? indirectObjectId = (int?)null, string indirectObjectText = "")
         {
             //if webSession is null then try to create it here
             if (webSession.IsEmpty())
             {
-                webSession = InitializeWebSession(request, SessionVariables.LoggedInUser, SessionVariables.CurrentAccount);
+                webSession = InitializeWebSession(request, actor, account);
                 SessionVariables.WebSession = webSession;
             }
 
             //LogActivity with websession id
-            if (webSession.IsNotEmpty())
-            {
+            if (webSession.IsNotEmpty() && account.IsNotEmpty())
                 LogActivity(
-                    webSession.ID.Value,
+                    webSession,
+                    account,
                     actor,
                     actionType,
                     objectType,
@@ -84,12 +80,13 @@ namespace AfterSchool.Models
                     objectText,
                     indirectObjectId,
                     indirectObjectText);
-            }
         }
 
-        public static void LogActivity(int webSessionId, WebUser actor, WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet, ObjectType indirectObjectType = ObjectType.NotSet,
+        public static void LogActivity(this WebSession webSession, Account account,
+            WebUser actor, WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet, ObjectType indirectObjectType = ObjectType.NotSet,
             int? objectId = (int?)null, string objectText = "",
-            int? indirectObjectId = (int?)null, string indirectObjectText = "")
+            int? indirectObjectId = (int?)null, string indirectObjectText = "",
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             //..actor	action		    Object		            ObjectType	        IndirectObjectId
             //..Bharat  Navigated to    FIRST SAMUEL CHURCH(W)  DirectoryAccount   ISYP
@@ -101,23 +98,28 @@ namespace AfterSchool.Models
             SaveLog(actor: actor,
                 actionStringFormat: actionStringDict.SingleOrDefault(kp => kp.Key == "ActionStringFormat").Value,
                 actionString: actionStringDict.SingleOrDefault(kp => kp.Key == "ActionString").Value,
-                webSessionId: webSessionId,
+                webSessionId: webSession.ID.Value,
                 actorId: actor.IsNotEmpty() ? actor.ID : null,
-                accountId: SessionVariables.CurrentAccount.IsNotEmpty() ? SessionVariables.CurrentAccount.ID : null,
+                accountId: account.IsNotEmpty() ? account.ID : null,
                 actionType: actionType,
                 objectType: objectType,
                 objectId: objectId,
-                indirectObjectId: indirectObjectId);
+                indirectObjectId: indirectObjectId,
+                msgs: msgs,
+                dc: dc);
         }
 
         public static void SaveLog(WebUser actor, int webSessionId, string actionStringFormat, string actionString, int? actorId = (int?)null, int? accountId = (int?)null,
             WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet, ObjectType indirectObjectType = ObjectType.NotSet,
-            int? objectId = (int?)null, int? indirectObjectId = (int?)null)
+            int? objectId = (int?)null, int? indirectObjectId = (int?)null,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
+            if (msgs.IsEmpty())
+                msgs = new SystemMessages();
+
             var action = new WebSessionAction();
             action.SessionId = webSessionId;
-            action.AccountId = accountId; //.. logged in account id
+            action.AccountId = accountId;
             action.ActionTypeId = actionType;
             action.ObjectTypeId = objectType;
             action.ObjectId = objectId;
@@ -127,7 +129,8 @@ namespace AfterSchool.Models
             action.ActionString = actionString;
             action.CreateDate = DateTime.UtcNow;
             action.CreatedBy = actor?.ID.Value;
-            msgs.AddRange(action.Save());
+
+            msgs.AddRange(action.Save(dc));
         }
     }
 }

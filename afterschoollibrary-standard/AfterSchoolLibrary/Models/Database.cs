@@ -382,7 +382,6 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Activity_LocationId ON [Activity] (LocationId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Activity_Uid ON [Activity] (Uid)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Activity_AccountId_Uid ON [Activity] (Uid,AccountId)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Activity_AccountId_Id ON [Activity] (Id,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Activity_ActivityGroupId ON [Activity] (ActivityGroupId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Activity_AccountId_ActivityGroupId ON [Activity] (ActivityGroupId,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Activity_AccountActivityGroupId ON [Activity] (AccountActivityGroupId)"));
@@ -411,7 +410,6 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivitySchedule_ActivityGroupId ON [ActivitySchedule] (ActivityGroupId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivitySchedule_AccountId_IsOngoing ON [ActivitySchedule] (AccountId,IsOngoing)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivitySchedule_ActivityGroupId_IsOngoing ON [ActivitySchedule] (ActivityGroupId,IsOngoing)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivitySchedule_AccountId_Id ON [ActivitySchedule] (Id,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityInstance_ActivityId ON [ActivityInstance] (ActivityId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityInstance_ActivityGroupId ON [ActivityInstance] (ActivityGroupId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityInstance_ActivityScheduleId ON [ActivityInstance] (ActivityScheduleId)"));
@@ -488,7 +486,6 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_AccountId_IsArchived_IsPublished ON [ActivityGroup] (AccountId,IsPublished,IsArchived)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_AccountId_IsInviteOnly_IsPublished ON [ActivityGroup] (AccountId,IsPublished,IsInviteOnly)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_AccountId_UniqueName ON [ActivityGroup] (AccountId,UniqueName)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_AccountId_Id ON [ActivityGroup] (Id,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_Uid ON [ActivityGroup] (Uid)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_AccountId_Uid ON [ActivityGroup] (Uid,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_IsPublished_Uid ON [ActivityGroup] (Uid,IsPublished)"));
@@ -543,7 +540,6 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityForm_IsPublished_Uid ON [ActivityForm] (Uid,IsPublished)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Form_AccountId ON [Form] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Form_Uid ON [Form] (Uid)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Form_AccountId_Id ON [Form] (Id,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestion_FormId ON [FormQuestion] (FormId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestion_FormId_IsActive ON [FormQuestion] (FormId,IsActive)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestion_FormQuestionGroupId ON [FormQuestion] (FormQuestionGroupId)"));
@@ -634,6 +630,8 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Transaction_BillerAccountId_IsDeleted ON [Transaction] (BillerAccountId,IsDeleted)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Transaction_IsDeleted_PayerAccountId ON [Transaction] (PayerAccountId,IsDeleted)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Transaction_Uid ON [Transaction] (Uid)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Transaction_BillerAccountId_Uid ON [Transaction] (Uid,BillerAccountId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Transaction_PayerAccountId_Uid ON [Transaction] (Uid,PayerAccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Transaction_BillerAccountId_IsDeleted_TransactionTypeId ON [Transaction] (BillerAccountId,TransactionTypeId,IsDeleted)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Transaction_IsDeleted_PayerAccountId_TransactionTypeId ON [Transaction] (PayerAccountId,TransactionTypeId,IsDeleted)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Transaction_StripeChargeOrRefundId ON [Transaction] (StripeChargeOrRefundId)"));

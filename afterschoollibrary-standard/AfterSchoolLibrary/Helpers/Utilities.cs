@@ -355,6 +355,7 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.CleanUpExtraParentAccounts_20200215.Do(amsgs, adc);
                     Migrations.ReattachTransactionsToNonDeletedAccounts_20200216.Do(amsgs, adc);
                     Migrations.FixTransactionsForDeletedAccounts_20200227.Do(amsgs, adc);
+                    Migrations.FixAccountPackageIsActive_20210603.Do(amsgs, adc);
 
                     if (Utilities.IsProduction)
                         Migrations.UpdateTransactionsFromStripe_20200320.Do(amsgs, adc);
@@ -382,6 +383,7 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.MigrateSessionToWebSession_20210312.Do(amsgs, adc);
                     Migrations.UpdateWebSessionAction_20210513.Do(amsgs, adc);
                     Migrations.UpdateWebSessionActionIndirectObjectType_20210517.Do(amsgs, adc);
+                    Migrations.AddFeatureTypeTeacher1099ToSchools_20210622.Do(amsgs, adc);
                     // Migrations.AddProfilesToAllAccounts_20200727.Do(amsgs, adc);
 
                     // amsgs.Add("rollback please", MessageType.Error);
@@ -2004,6 +2006,15 @@ namespace AfterSchoolLibrary.Helpers
                 return $"{(Utilities.IsProduction ? "support" : "dev")}@{ReplyHostName}";
             }
         }
+
+        public static string AppSalesEmailAddress
+        {
+            get
+            {
+                return $"{(Utilities.IsProduction ? "sales" : "dev")}@{ReplyHostName}";
+            }
+        }
+
 
         public static string AppNoReplyEmailAddress
         {

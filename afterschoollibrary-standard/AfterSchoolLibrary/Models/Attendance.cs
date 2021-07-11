@@ -190,7 +190,20 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<Attendance> LoadByActivityInstanceId(int ActivityInstanceId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<Attendance> LoadByActivityIdByIsCompletedWithPaging(int ActivityId, bool IsCompleted, string orderbyParam, OrderByDirectionEnum direction, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+            dq.OrderBys.Add(orderbyParam, direction);
+
+            dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
+            dq.Criterias.Add(ObjectMap["IsCompleted"], IsCompleted);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<Attendance> LoadByActivityInstanceId(int ActivityInstanceId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
@@ -257,6 +270,16 @@ namespace AfterSchoolLibrary.Models
             var criterias = new Hashtable() { { "ActivityId", activityId } };
 
             return Attendance.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<Attendance> LoadByActivityIdByDateRange(int ActivityId, DateTime StartDate, DateTime EndDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
+            dq.Criterias.Add(ObjectMap["Date"], StartDate, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+            dq.Criterias.Add(ObjectMap["Date"], EndDate, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
 

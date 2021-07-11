@@ -60,6 +60,7 @@ namespace AfterSchoolLibrary.Models
         public bool RegistrationFinalized { get; set; }
         public int? SeatsTaken { get; set; }
         public bool HidePreciseLocation { get; set; }
+        public bool IsPublished { get; set; }
 
         public ParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -77,6 +78,9 @@ namespace AfterSchoolLibrary.Models
 
         private void InitObject(int participationObjectId, ParticipationObjectType participationObjectType, bool loadAllDetails, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            this.SubscriptionPlans = new List<SubscriptionPlan>();
+            this.PostPayPlans = new List<SubscriptionPlan>();
+            this.PaymentPlans = new List<SubscriptionPlan>();
             switch (participationObjectType)
             {
                 case ParticipationObjectType.AccountActivityGroup:
@@ -126,6 +130,7 @@ namespace AfterSchoolLibrary.Models
             HidePreciseLocation = activity.HidePreciseLocation;
             AgeStart = activity.AgeStart;
             AgeEnd = activity.AgeEnd;
+            IsPublished = activity.IsPublished;
 
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {
@@ -850,7 +855,7 @@ namespace AfterSchoolLibrary.Models
             if ((plan?.NumberOfPeriodsPrePaid).IsPositive())
                 return GetPostPayCreditCardFee() * plan.NumberOfPeriodsPrePaid.Value;
 
-            return 0;
+            return GetPostPayCreditCardFee();
         }
 
         public decimal GetCheckoutPostPayConvenienceFee()
@@ -860,7 +865,7 @@ namespace AfterSchoolLibrary.Models
             if ((plan?.NumberOfPeriodsPrePaid).IsPositive())
                 return GetPostPayConvenienceFee() * plan.NumberOfPeriodsPrePaid.Value;
 
-            return 0;
+            return GetPostPayConvenienceFee();
         }
 
         public decimal GetPostPayCheckoutCostWithConvenienceFee()
@@ -870,7 +875,7 @@ namespace AfterSchoolLibrary.Models
             if ((plan?.NumberOfPeriodsPrePaid).IsPositive())
                 return plan.NumberOfPeriodsPrePaid.Value * GetPostPayCostWithConvenienceFee();
 
-            return 0;
+            return GetPostPayCostWithConvenienceFee();
         }
 
         public decimal GetPostPayCheckoutCostWithoutConvenienceFee()
@@ -887,17 +892,19 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetCheckoutCostWithConvenienceFee()
         {
-            if (this.PostPayPlans.Any())
+            if (this.PostPayPlans.IsNotEmpty() && this.PostPayPlans.Any())
                 return GetPostPayCheckoutCostWithConvenienceFee();
 
             if (this.Cost.HasValue)
             {
-                var activity = this.GetActivity();
-
-                if (activity.IsNotEmpty())
-                    return Cost.Value
-                        + (activity.IsConvenienceFeeTakenOutOfCost ? 0 : GetConvenienceFee());
-
+                if (this.IsActivity())
+                {
+                    var activity = this.GetActivity();
+                
+                    if (activity.IsNotEmpty())
+                        return Cost.Value
+                            + (activity.IsConvenienceFeeTakenOutOfCost ? 0 : GetConvenienceFee());
+                }
                 return Cost.Value + GetConvenienceFee();
             }
 

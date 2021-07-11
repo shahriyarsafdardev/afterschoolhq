@@ -123,4 +123,18 @@
         font-weight: bold;
         border-radius: 7px;
     }
+
+    .contactUsBtn {
+        padding: 13px 20px;
+        font-size: 11px;
+    }
+
+    .contactUsModal {
+        padding: 30px 60px;
+    }
+
+    .Contactmodaldialog {
+        width: auto !important;
+        margin: 30px 15px;
+    }
 }

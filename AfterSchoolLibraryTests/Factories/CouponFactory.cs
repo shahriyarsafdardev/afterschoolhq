@@ -21,7 +21,9 @@ namespace AfterSchoolLibraryTests.Factories
                 AmountTypeId = CouponAmountType.Percentage,
                 MaxNumberOfUsesAll = 1,
                 MaxNumberOfUsesPerPerson = 1,
-                Name = "Whatever"
+                Name = "Whatever",
+                Description = "test description",
+                IsDisabled = false                
             };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;

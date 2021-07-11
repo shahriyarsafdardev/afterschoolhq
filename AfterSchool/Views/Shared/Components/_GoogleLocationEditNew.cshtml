@@ -39,16 +39,44 @@
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         var input = document.getElementById('location');
 
-        console.log('Latitude: ' + '@Model.Latitude');
-        console.log('Longitude: ' + '@Model.Longitude');
-        console.log('DistanceFromOrigin: ' + '@Model.DistanceFromOrigin');
-
         var options = {
             @if (types.IsNotEmpty())
             {
                 @:types: ['@types'],
             }
         };
+
+        (function pacSelectFirst(input) {
+            // store the original event binding function
+            var _addEventListener = (input.addEventListener) ? input.addEventListener : input.attachEvent;
+
+            function addEventListenerWrapper(type, listener) {
+                // Simulate a 'down arrow' keypress on hitting 'return' when no pac suggestion is selected,
+                // and then trigger the original listener.
+                if (type == "keydown") {
+                    var orig_listener = listener;
+                    listener = function (event) {
+                        var suggestion_selected = $(".pac-item-selected").length > 0;
+                        if (event.which == 13 && !suggestion_selected) {
+                            event.preventDefault();
+                            var simulated_downarrow = $.Event("keydown", {
+                                keyCode: 40,
+                                which: 40
+                            });
+                            orig_listener.apply(input, [simulated_downarrow]);
+                        }
+
+                        orig_listener.apply(input, [event]);
+                    };
+                }
+
+                _addEventListener.apply(input, [type, listener]);
+            }
+
+            input.addEventListener = addEventListenerWrapper;
+            input.attachEvent = addEventListenerWrapper;
+
+        })(input);
 
         autocomplete = new google.maps.places.Autocomplete(input, options);
 
@@ -59,55 +87,59 @@
             const place = autocomplete.getPlace();
             const components = place.address_components;
 
-            $('#placeid').val(place.place_id);
-            $('#locationname').val(place.name);
+            if (typeof components !== 'undefined') {
+                $('#placeid').val(place.place_id);
+                $('#locationname').val(place.name);
 
-            const latitude = place?.geometry?.location?.lat();
-            const longitude = place?.geometry?.location?.lng();
+                const latitude = place?.geometry?.location?.lat();
+                const longitude = place?.geometry?.location?.lng();
 
-            $('#latitude').val(latitude);
-            $('#longitude').val(longitude);
+                $('#latitude').val(latitude);
+                $('#longitude').val(longitude);
 
-            for (component of components) {
+                for (component of components) {
 
-                const type = component.types[0];
-                const longName = component.long_name;
-                const shortName = component.short_name;
+                    const type = component.types[0];
+                    const longName = component.long_name;
+                    const shortName = component.short_name;
 
-                switch (type) {
-                    case 'street_number':
-                        $('#streetnumber').val(longName);
-                        break;
-                    case 'route':
-                        $('#streetname').val(shortName);
-                        break;
-                    case 'subpremise':
-                        $('#address2').val(longName);
-                        break;
-                    case 'neighborhood':
-                        $('#neighborhood').val(longName);
-                        break;
-                    case 'street_number':
-                        $('#address1').val(longName);
-                        break;
-                    case 'postal_code':
-                        $('#postalcode').val(longName);
-                        break;
-                    case 'locality':
-                        $('#city').val(longName);
-                        break;
-                    case 'administrative_area_level_2':
-                        $('#county').val(longName);
-                        break;
-                    case 'administrative_area_level_1':
-                        $('#state').val(longName);
-                        break;
-                    case 'country':
-                        $('#country').val(shortName);
-                        break;
+                    switch (type) {
+                        case 'street_number':
+                            $('#streetnumber').val(longName);
+                            break;
+                        case 'route':
+                            $('#streetname').val(shortName);
+                            break;
+                        case 'subpremise':
+                            $('#address2').val(longName);
+                            break;
+                        case 'neighborhood':
+                            $('#neighborhood').val(longName);
+                            break;
+                        case 'street_number':
+                            $('#address1').val(longName);
+                            break;
+                        case 'postal_code':
+                            $('#postalcode').val(longName);
+                            break;
+                        case 'locality':
+                            $('#city').val(longName);
+                            break;
+                        case 'administrative_area_level_2':
+                            $('#county').val(longName);
+                            break;
+                        case 'administrative_area_level_1':
+                            $('#state').val(longName);
+                            break;
+                        case 'country':
+                            $('#country').val(shortName);
+                            break;
+                    }
                 }
             }
 
+            if ($("#schoolnotfound").length)
+                $('#schoolnotfound').prop('checked', false);
         });
 
         $(input).on('focus', function () {
