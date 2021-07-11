@@ -547,7 +547,7 @@ namespace AfterSchoolLibrary.Models
             return new List<DayOfWeekASL>();
         }
 
-        public ActivitySchedule GetCopy()
+        public ActivitySchedule GetCopy(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var schedule = new ActivitySchedule
             {
@@ -561,8 +561,7 @@ namespace AfterSchoolLibrary.Models
                 IsOngoing = this.IsOngoing
             };
 
-            schedule.AddInstances(this.GetInstances());
-
+            schedule.AddInstances(this.GetInstances(msgs: msgs, dc: dc));
             return schedule;
         }
 
