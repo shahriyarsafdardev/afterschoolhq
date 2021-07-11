@@ -16,23 +16,6 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             var msgs = new SystemMessages();
             try
             {
-                // msgs.Add("trying to get signature", MessageType.Notice);
-
-                // return Ok(msgs.ToJSON());
-
-                // var stripeSignature = Request.Headers.Contains("Stripe-Signature") ? Request.Headers.GetValues("Stripe-Signature").First() : null;
-
-
-                //if (!AfterSchoolLibrary.Helpers.Utilities.IsLocalHost && stripeSignature.IsEmpty())
-                //{
-                //    msgs.Add("Invalid Signature", MessageType.Error);
-                //    SendLogEmail(msgs);
-                //    return Ok();
-                //}
-                // ,
-                //stripeSignature, 
-                //        "whsec_ImO7GlHXHiYs8pityQDZbBWJvF0eLEas"
-
                 msgs.Add("Getting serializedJson", MessageType.Notice);
                 var serializedJson = JsonConvert.SerializeObject(json);
                 msgs.Add("Getting stripeEvent", MessageType.Notice);
@@ -112,11 +95,9 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             var updateChargesEnabled = !account.StripeChargesEnabled && stripeAccount.ChargesEnabled;
             var updatePayoutsEnabled = !account.StripePayoutsEnabled && stripeAccount.PayoutsEnabled;
             msgs.Add("Getting SendStripeAccountVerified", MessageType.Notice);
+            
             if (msgs.HasNoErrors() && (updateChargesEnabled || updatePayoutsEnabled))
-            {
                 account.UpdateStripeChargesAndPayouts(stripeAccount, msgs);
-                // account.SendStripeAccountVerified(null);
-            }
 
             if (msgs.HasErrors())
                 return Return500(msgs);
@@ -319,7 +300,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         {
             var stripeInvoice = (Stripe.Invoice)stripeEvent.Data.Object;
             var customerId = stripeInvoice.CustomerId;
-            var account = AfterSchoolLibrary.Models.Account.LoadByStripeCustomerId(customerId, msgs);
+            var account = Account.LoadByStripeCustomerId(customerId, msgs);
             var subscriptionId = stripeInvoice.SubscriptionId;
             var registrantSubscription = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(subscriptionId, msgs);
             var plan = registrantSubscription.GetSubscriptionPlan(msgs);

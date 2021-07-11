@@ -3262,7 +3262,6 @@ namespace AfterSchoolLibrary.Services
 
             if (registrant.IsNotEmpty())
             {
-                //TODO: add a test case
                 registrant.ProcessActivityPayment(checkoutObject, transaction, loggedInUser, msgs, dc);
 
                 // if successful payment and reserved pending payment then it should be reserved
@@ -3275,8 +3274,7 @@ namespace AfterSchoolLibrary.Services
                         registrant.ID.Value,
                         msgs,
                         dc);
-
-                    //TODO: test this code
+                    
                     if (ra.IsNotEmpty() && !ra.IsAssigned(RegistrationAssignmentType.Reserved))                    
                         ra.ChangeSeatAssignment(RegistrationAssignmentType.Reserved, loggedInUser, msgs, dc);
                 }
