@@ -7,6 +7,8 @@ using System.Linq;
 using System;
 using BasicLibrary;
 using AfterSchoolLibrary.Billing;
+using System.Collections.Generic;
+using System.Configuration;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -424,9 +426,9 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         [Theory(DisplayName = "ChargeRegistrantMidPeriod Test")]
-        [InlineData(100, 83.33)]
-        [InlineData(10, 9.1)]
-        public void ChargeRegistrantMidPeriodTest(decimal amountPaidByParent, decimal amountReceivedByProvider)
+        [InlineData(100, 83.33, 6, 4)]
+        [InlineData(10, 9.1, 0.5, 0.5)]
+        public void ChargeRegistrantMidPeriodTest(decimal amountPaidByParent, decimal amountReceivedByProvider, decimal convenienceFee, decimal paymentTypeFee)
         {
             try
             {
@@ -434,19 +436,68 @@ namespace AfterSchoolLibraryTests.Tests
                 var billingAccountOwner = WebUserFactory.Create("Don", "John", "DonJohn@test.com", true, msgs, dc);
                 var payingAccountOwner = WebUserFactory.Create("Cristine", "Trump", "CristineTrump@test.com", true, msgs, dc);
                 var billingAccount = AccountFactory.CreateAccount(billingAccountOwner, AccountType.School, stripeChargesEnabled: true, stripePayoutsEnabled: true, msgs, dc);
-                var payingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", payingAccountOwner, AccountType.School, msgs, dc);
+                var payingAccount = AccountFactory.CreateAccount(payingAccountOwner, AccountType.School, stripeChargesEnabled: true, stripePayoutsEnabled: true, msgs, dc);
                 var masterRegistrant = RegistrantFactory.Create(payingAccount, isMaster: true, msgs, dc);
 
                 //UseStripeConnectedAccount is true for this package
                 var package = PackageFactory.CreateFreePackageWithUseStripeConnectedAccount(msgs, dc);
                 AccountPackageFactory.Create(billingAccount, package, msgs, dc);
+                AccountPackageFactory.Create(payingAccount, package, msgs, dc);
 
-                var activity = ActivityFactory.Create(billingAccount, msgs, dc: dc);
+                var schedule = ActivityScheduleFactory.Create(billingAccount, msgs, dc);
+                var activity = ActivityFactory.Create(billingAccount, schedule, msgs, dc: dc);
+                var startDates = new List<DateRange>()
+                {
+                    new DateRange() {StartDate = $"6/{DateTime.Now.Month}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(), EndDate = $"6/{DateTime.Now.Month}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()},
+                    new DateRange() {StartDate = $"7/{DateTime.Now.Month}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(), EndDate = $"7/{DateTime.Now.Month}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()},
+                    new DateRange() {StartDate = $"8/{DateTime.Now.Month}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(), EndDate = $"8/{DateTime.Now.Month}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()},
+                    new DateRange() {StartDate = $"6/{DateTime.Now.Month + 1}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(), EndDate = $"6/{DateTime.Now.Month + 1}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()},
+                    new DateRange() {StartDate = $"7/{DateTime.Now.Month + 1}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(), EndDate = $"7/{DateTime.Now.Month + 1}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()},
+                    new DateRange() {StartDate = $"8/{DateTime.Now.Month + 1}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(), EndDate = $"8/{DateTime.Now.Month + 1}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()},
+                    new DateRange() {StartDate = $"6/{DateTime.Now.Month + 2}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(), EndDate = $"6/{DateTime.Now.Month + 2}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()},
+                    new DateRange() {StartDate = $"7/{DateTime.Now.Month + 2}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(), EndDate = $"7/{DateTime.Now.Month + 2}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()},
+                    new DateRange() {StartDate = $"8/{DateTime.Now.Month + 2}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(), EndDate = $"8/{DateTime.Now.Month + 2}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()},
+                    new DateRange() {StartDate = $"6/{DateTime.Now.Month + 3}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(), EndDate = $"6/{DateTime.Now.Month + 3}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()},
+                    new DateRange() {StartDate = $"7/{DateTime.Now.Month + 3}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(), EndDate = $"7/{DateTime.Now.Month + 3}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()},
+                    new DateRange() {StartDate = $"8/{DateTime.Now.Month + 3}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(), EndDate = $"8/{DateTime.Now.Month + 3}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()},
+                    new DateRange() {StartDate = $"6/{DateTime.Now.Month + 4}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(), EndDate = $"6/{DateTime.Now.Month + 4}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()},
+                    new DateRange() {StartDate = $"7/{DateTime.Now.Month + 4}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(), EndDate = $"7/{DateTime.Now.Month + 4}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()},
+                    new DateRange() {StartDate = $"8/{DateTime.Now.Month + 4}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(), EndDate = $"8/{DateTime.Now.Month + 4}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()},
+                };
+
+                var endDates = new List<DateTime>() { };
+                ActivityScheduleFactory.Create(billingAccount, activity, schedule, startDates, endDates, user, msgs, dc);
+
                 var registrant = RegistrantFactory.Create(billingAccount, isMaster: false, msgs, dc: dc);
                 var registration = RegistrationFactory.Create(billingAccount, registrant, msgs, dc);
-                var participationObject = activity.GetParticipationObject(msgs, dc);
-
+                var registrantActivity = RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
                 var subscriptionPlan = SubscriptionPlanFactory.Create(billingAccount, activity, SubscriptionPlanType.Subscription, amountPaidByParent, msgs, dc);
+                var purchase = PurchaseFactory.Create(payingAccount, amountReceivedByProvider, registrantId: registrant.ID.Value, registrationId: registration.ID.Value, msgs, dc);
+                var registrantSubscriptionPlan = RegistrantSubscriptionPlanFactory.Create(registrant, subscriptionPlan, purchase, amount: amountReceivedByProvider, convenienceFee: convenienceFee, paymentTypeFee: paymentTypeFee, msgs, dc);
+                var participationObject = activity.GetParticipationObject(msgs, dc);
+                
+                var stripeBillingObject = AccountFactory.CreateStripeAccountAndCustomer(billingAccount, msgs, dc);
+                var stripePayingObject = AccountFactory.CreateStripeAccountAndCustomer(payingAccount, msgs, dc);
+                var sourceId = payingAccount.CreateStripeSourceFromToken(StripeHelper.TestSourceToken, stripePayingObject.Item2, msgs, dc);
+
+                CreditCardPurchaseObject creditCardPurchaseObject = new CreditCardPurchaseObject()
+                {
+                    StripeToken = StripeHelper.TestSourceToken,
+                    StripeSourceId = sourceId
+                };
+
+                Account convenienceFeePayer;
+                Account transactionFeePayer;
+
+                if (registrantSubscriptionPlan.ConvenienceFeesPaidBy == FeesPaidByType.Parent)
+                    convenienceFeePayer = payingAccount;
+                else
+                    convenienceFeePayer = billingAccount;
+
+                if (registrantSubscriptionPlan.PaymentTypeFeesPaidBy == FeesPaidByType.Parent)
+                    transactionFeePayer = payingAccount;
+                else
+                    transactionFeePayer = billingAccount;
 
                 var checkoutObject = new CheckoutObject()
                 {
@@ -456,12 +507,15 @@ namespace AfterSchoolLibraryTests.Tests
                     AmountPaidByParent = amountPaidByParent,
                     AmountReceivedByProvider = amountReceivedByProvider,
                     IsAmountProRated = true,
-                    MasterRegistrant = masterRegistrant,
+                    MasterRegistrant = registrant,
                     NumberOfSeats = 1,
                     ParticipationObject = participationObject,
                     SubscriptionPlan = subscriptionPlan,
                     PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
                     PaymentType = PaymentType.CreditCard,
+                    CreditCardPurchaseObject = creditCardPurchaseObject,
+                    ConvenienceFeePayer = convenienceFeePayer,
+                    CreditCardFeePayer = transactionFeePayer,
                     SavePaymentInfo = true,
                     Registration = registration
                 };
@@ -470,19 +524,74 @@ namespace AfterSchoolLibraryTests.Tests
                 masterRegistrant.ChargeRegistrantMidPeriod(checkoutObject, SubscriptionPlanType.Subscription, isSubscriptionRequired: true, user, msgs, dc);
 
                 // Assert
+                //get the total number of periods for current cycle x
+                var classesInCurrentCycle = participationObject.GetNumberOfClassesInCurrentCycle(subscriptionPlan.BillingPeriodTypeId, msgs, dc);
+
+                //get the total remaining periods in current cycle y
+                var classesRemainingInCurrentCycle = participationObject.GetNumberOfRemainingClassesInCurrentCycle(subscriptionPlan.BillingPeriodTypeId, msgs, dc);
+
+                //caluclated price of current cycle to charge p = (y * costperperiod)/ x
+                var currentCycleCharge = classesRemainingInCurrentCycle * subscriptionPlan.CostPerPeriod.Value / classesInCurrentCycle;
+
+                var calcObj = new FeeCalculationObject(currentCycleCharge, billingAccount, msgs, dc);
+                var convenienceFeeCharged = calcObj.GetConvenienceFee();
+                var ccFee = 0M;
+                if (checkoutObject.PaymentType == PaymentType.CreditCard)
+                    ccFee = calcObj.GetCreditCardFee();
+
+                var amount = calcObj.GetFinalTotalCost(paymentType: checkoutObject.PaymentType);
+
                 var activityPayment = ActivityPayment.LoadByParticipationObjectByRegistrant(participationObject.ObjectID.Value,
                     participationObject.ObjectType,
-                    masterRegistrant.ID.Value,
+                    registrant.ID.Value,
                     IsDeleted: false,
                     msgs,
                     dc).FirstOrDefault();
 
                 Assert.NotNull(activityPayment);
-                Assert.Equal(activityPayment?.Amount, amountReceivedByProvider);
-                Assert.Equal(activityPayment?.AmountPaidByParent, amountPaidByParent);
+                Assert.Equal(activityPayment?.Amount, calcObj.GetAmountToProvider());
+                Assert.Equal(activityPayment?.AmountPaidByParent, amount);
                 Assert.Equal(activityPayment?.ParticipationObjectId, participationObject.ObjectID.Value);
-                Assert.Equal(activityPayment?.RegistrantId, masterRegistrant.ID.Value);
+                Assert.Equal(activityPayment?.RegistrantId, registrant.ID.Value);
                 Assert.True(activityPayment?.IsProRated);
+
+                //purchase
+                var purchaseStored = registration.GetPurchase(msgs, dc);
+                Assert.NotNull(purchaseStored);
+                Assert.Equal(purchaseStored?.AmountPaid, amount);
+                Assert.Equal(purchaseStored?.RegistrationId, registration.ID.Value);
+                Assert.Equal(purchaseStored?.RegistrantId, masterRegistrant.ID.Value);
+                Assert.Equal(purchaseStored?.PurchaserAccountId, payingAccount.ID.Value);
+
+                //transaction
+                var transaction = Transaction.LoadByBillerAccountIdByIsDeleted(BillerAccountId: billingAccount.ID.Value, IsDeleted: false, msgs, dc).FirstOrDefault();
+                Assert.NotNull(transaction);
+                Assert.Equal(transaction?.PurchaseId, purchaseStored.ID.Value);
+                Assert.Equal(transaction?.Amount, amount);
+                Assert.Equal(transaction?.PaymentTypeFeeCharged, ccFee);
+                Assert.Equal(transaction?.ConvenienceFeeCharged, convenienceFeeCharged);
+                Assert.Equal(transaction?.PaymentTypeFeePayerAccountId, transactionFeePayer.ID.Value);
+                Assert.Equal(transaction?.ConvenienceFeePayerAccountId, convenienceFeePayer.ID.Value);
+                Assert.Equal(transaction?.BillerAccountId, billingAccount.ID.Value);
+                Assert.Equal(transaction?.PayerAccountId, payingAccount.ID.Value);
+
+                //check seat status
+                var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(checkoutObject.ParticipationObject.ObjectID.Value, 
+                    checkoutObject.ParticipationObject.ObjectType,
+                    registrant.ID.Value,
+                    msgs,
+                    dc);
+                Assert.True(ra.IsAssigned(RegistrationAssignmentType.Reserved));
+
+                //stripe checks
+                var product = StripeHelper.GetProduct(activity.Uid.ToString(), stripeAccountId: null, msgs);
+                Assert.NotNull(product);
+
+                var customer = payingAccount.GetStripeCustomer(msgs);
+                Assert.NotNull(customer);
+
+                var charge = StripeHelper.GetCharge(transaction.StripeChargeOrRefundId, msgs);
+                Assert.Equal(charge.Amount, amount * 100); //since stripe returns this way (amount * 100)
 
                 Assert.True(msgs.HasNoErrors());
             }

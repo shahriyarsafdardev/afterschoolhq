@@ -1150,6 +1150,22 @@ namespace AfterSchoolLibrary.Services
             return stripeAccount;
         }
 
+        public static Stripe.Account CreateStripeCustomAccount(this Account account, Stripe.AccountCreateOptions options, bool updateChargesAndPayouts, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var stripeAccount = StripeHelper.CreateCustomAccount(options, msgs);
+
+            if (stripeAccount.IsNotEmpty())
+            {
+                account.StripeUserId = stripeAccount.Id;
+                msgs.AddRange(account.Save(dc));
+
+                if (updateChargesAndPayouts)
+                    account.UpdateStripeChargesAndPayouts(stripeAccount, msgs, dc);
+            }
+
+            return stripeAccount;
+        }
+
         public static void UpdateStripeChargesAndPayouts(this Account account, Stripe.Account stripeAccount, SystemMessages msgs, DatabaseConnection dc = null)
         {
             account.StripeChargesEnabled = stripeAccount.ChargesEnabled;
@@ -2999,7 +3015,7 @@ namespace AfterSchoolLibrary.Services
             // only charge tuition during checkout, because subscriptions are billed through stripe
             var charge = StripeHelper.CreateCharge(
                                 fromCustomerId: customerId,
-                                destinationAccountId: useStripeConnectedAccount ? checkoutObject.BillingAccount.StripeUserId : null,
+                                destinationAccountId: useStripeConnectedAccount ? checkoutObject.BillingAccount?.StripeUserId : null,
                                 platformFee: useStripeConnectedAccount ? platformFeeAmount : new decimal?(),
                                 tokenOrSourceId: checkoutObject.StripeSourceId,
                                 totalAmount: amount,
@@ -3011,10 +3027,10 @@ namespace AfterSchoolLibrary.Services
                                     { "BillingAccountUid", checkoutObject.BillingAccount.Uid.ToString() },
                                     { "PayingAccountUid", checkoutObject.PayingAccount.Uid.ToString() },
                                     { "RegistrationUid", checkoutObject.Registration?.Uid.ToString() },
-                                    { "CreditCardFeePayer", checkoutObject.CreditCardFeePayer.Uid.ToString() },
-                                    { "ConvenienceFeePayer", checkoutObject.ConvenienceFeePayer.Uid.ToString() },
+                                    { "CreditCardFeePayer", checkoutObject.CreditCardFeePayer?.Uid.ToString() },
+                                    { "ConvenienceFeePayer", checkoutObject.ConvenienceFeePayer?.Uid.ToString() },
                                     { "PurchasedBy", checkoutObject.MasterRegistrant?.DisplayName },
-                                    { "BilledBy", checkoutObject.BillingAccount.Name }
+                                    { "BilledBy", checkoutObject.BillingAccount?.Name }
                                 },
                                 msgs: msgs
                             );
@@ -3261,7 +3277,7 @@ namespace AfterSchoolLibrary.Services
                         dc);
 
                     //TODO: test this code
-                    if (!ra.IsAssigned(RegistrationAssignmentType.Reserved))                    
+                    if (ra.IsNotEmpty() && !ra.IsAssigned(RegistrationAssignmentType.Reserved))                    
                         ra.ChangeSeatAssignment(RegistrationAssignmentType.Reserved, loggedInUser, msgs, dc);
                 }
             }

@@ -308,7 +308,7 @@ namespace AfterSchoolLibrary.Services
                 }
             }
 
-            var calcObj = new FeeCalculationObject(currentCycleCharge, billingAccount, msgs);
+            var calcObj = new FeeCalculationObject(currentCycleCharge, billingAccount, msgs, dc);
             var convenienceFee = calcObj.GetConvenienceFee();
             var ccFee = 0M;
             if (checkoutObject.PaymentType == PaymentType.CreditCard)

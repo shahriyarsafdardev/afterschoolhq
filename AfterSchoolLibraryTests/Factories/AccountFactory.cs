@@ -186,7 +186,7 @@ namespace AfterSchoolLibraryTests.Factories
             var dob = DateTime.UtcNow.AddYears(-25);
             var createOptions = new Stripe.AccountCreateOptions()
             {
-                Type = "custom",
+                Type = "custom",                
                 Country = "US",
                 DefaultCurrency = "usd",
                 Email = "test@test.com",
@@ -224,18 +224,18 @@ namespace AfterSchoolLibraryTests.Factories
                     },
                 },
                 Settings = new Stripe.AccountSettingsOptions()
-                {
+                {                    
                     Payouts = new Stripe.AccountSettingsPayoutsOptions()
-                    {
+                    {                        
                         DebitNegativeBalances = true,
                         StatementDescriptor = "AHQ transfer".MaxChars(22),
                         Schedule = new Stripe.AccountSettingsPayoutsScheduleOptions()
                         {
                             Interval = "manual",
                         }
-                    }
-                },
-                RequestedCapabilities = new List<string>() { "transfers", "card_payments" },
+                    },                    
+                },                
+                RequestedCapabilities = new List<string>() { "transfers", "card_payments", "legacy_payments" },
                 TosAcceptance = new Stripe.AccountTosAcceptanceOptions()
                 {
                     Date = DateTime.UtcNow,
@@ -250,7 +250,7 @@ namespace AfterSchoolLibraryTests.Factories
                 }
             };
 
-            var stripeAccount = account.CreateStripeCustomAccount(createOptions, msgs, dc);
+            var stripeAccount = account.CreateStripeCustomAccount(createOptions, updateChargesAndPayouts: false, msgs, dc);
             var customer = account.CreateStripeCustomer(msgs, dc);
 
             return (stripeAccount, customer);

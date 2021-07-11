@@ -322,7 +322,7 @@ namespace AfterSchoolLibrary.Services
 
         public static bool IsAssigned(this RegistrantActivity registrantActivity, RegistrationAssignmentType registrationAssignmentType)
         {
-            return registrantActivity.IsNotEmpty() && registrantActivity.AssignmentTypeId == registrationAssignmentType;
+            return registrantActivity.AssignmentTypeId == registrationAssignmentType;
         }
 
         public static bool CanAccessStatus(this RegistrantActivity registrantActivity)
