@@ -54,7 +54,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         private IWebElement ScheduleEndTimeElement => webDriver.FindElement(By.Id("dailyendtime"));
 
         //------------About Your Activity Section Web Elements-----------
-        private IWebElement AboutYourActivityElement => webDriver.FindElement(By.Id("details"));
+        private IWebElement AboutYourActivityElement => webDriver.FindElement(By.Id("details-div"));
 
         //------------Contact Section Web Elements-----------
         private IWebElement ActivityLedByElement => webDriver.FindElement(By.Id("leadertype"));
@@ -220,9 +220,6 @@ namespace AfterSchoolUIAutomationTests.Pages
             webDriver.WaitInSeconds(2);
             ScheduleStartDayElement.Click();
             webDriver.WaitInSeconds(2);
-            ScheduleStartTimeElement.Click();
-            var selectElement = new SelectElement(ScheduleStartTimeElement);
-            selectElement.SelectByValue("3:30 pm");
             return this;
         }
         public CreateActivityPage SetScheduleEndDate()
@@ -232,17 +229,30 @@ namespace AfterSchoolUIAutomationTests.Pages
             webDriver.WaitInSeconds(2);
             ScheduleEndDayElement.Click();
             webDriver.WaitInSeconds(2);
+            return this;
+        }
+        public CreateActivityPage SetScheduleStartTime()
+        {
+            webDriver.WaitInSeconds(2);
+            ScheduleStartTimeElement.Click();
+            var selectElement = new SelectElement(ScheduleStartTimeElement);
+            selectElement.SelectByValue("3:30 pm");
+            return this;
+        }
+        public CreateActivityPage SetScheduleEndTime()
+        {
+            webDriver.WaitInSeconds(2);
             ScheduleEndTimeElement.Click();
             var selectElement = new SelectElement(ScheduleEndTimeElement);
-            selectElement.SelectByValue("3:30 pm");
+            selectElement.SelectByValue("6:30 pm");
             return this;
         }
 
         //------------About Your Activity Section-----------//
         public CreateActivityPage ActivityDetails(string aboutActivity)
         {
-            webDriver.WaitInSeconds(1);
-            AboutYourActivityElement.SendKeys(aboutActivity);
+            webDriver.WaitInSeconds(3);
+            AboutYourActivityElement.SendKeys("Lorem ipsum dolor sit amet, consectetur adipiscing elit");
             return this;
         }
 
@@ -284,13 +294,6 @@ namespace AfterSchoolUIAutomationTests.Pages
             PhysicalLocationElement.Click();
             return this;
         }
-        //public CreateActivityPage ActivityLocation(string location)
-        //{
-        //    webDriver.WaitInSeconds(2);
-        //    ActivityLocationElement.Clear();
-        //    ActivityLocationElement.SendKeys(location);
-        //    return this;
-        //}
         public CreateActivityPage SelectAutoComplete(string location)
         {
             webDriver.WaitInSeconds(2);

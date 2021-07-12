@@ -77,8 +77,10 @@ namespace AfterSchoolUIAutomationTests2.Steps
             createActivityPage.HasSchedule(Parameter.Get("CreateNewActivity", "HasSchedule"));
             //createActivityPage.RepeatsWeekly(Parameter.Get("CreateNewActivity", "IsWeekly"));
             createActivityPage.WeekDays();
-            //createActivityPage.SetScheduleStartDate();
-            //createActivityPage.SetScheduleEndDate();
+            createActivityPage.SetScheduleStartDate();
+            createActivityPage.SetScheduleEndDate();
+            createActivityPage.SetScheduleStartTime();
+            createActivityPage.SetScheduleEndTime();
             createActivityPage.ClickSaveAndNext();
         }
 
@@ -103,7 +105,6 @@ namespace AfterSchoolUIAutomationTests2.Steps
         public void PopulateLocation()
         {
             createActivityPage.PhysicalLocation();
-            //createActivityPage.ActivityLocation(Parameter.Get("CreateNewActivity", "ActivityLocation"));
             createActivityPage.SelectAutoComplete(Parameter.Get("CreateNewActivity", "ActivityLocation"));
             createActivityPage.ClickSaveAndNext();
         }
