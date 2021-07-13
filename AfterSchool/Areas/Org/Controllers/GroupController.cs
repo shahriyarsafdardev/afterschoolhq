@@ -99,18 +99,14 @@ namespace AfterSchool.Areas.Org.Controllers
             if (id.IsNotGuid() && isnew.IsEmpty())
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            if (isnew.IsEmpty() && !isnew.ToBoolean())
-                group = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
-
             if (isnew.IsNotEmpty() && isnew.ToBoolean())
-            {
-                group = new ActivityGroup()
-                {
+                group = new ActivityGroup() { 
                     ID = new int?(),
                     RegistrationModeId = RegistrationMode.Register,
                     ActivityGroupTypeId = ActivityGroupType.Session
                 };
-            }
+            else
+                group = currentAccount.GetActivityGroup(id.ToGuid(), msgs);            
 
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Forms = currentAccount.GetForms(msgs);
