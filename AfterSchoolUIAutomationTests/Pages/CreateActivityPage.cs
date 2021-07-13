@@ -54,7 +54,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         private IWebElement ScheduleEndTimeElement => webDriver.FindElement(By.Id("dailyendtime"));
 
         //------------About Your Activity Section Web Elements-----------
-        private IWebElement AboutYourActivityElement => webDriver.FindElement(By.Id("details-div"));
+        private IWebElement AboutYourActivityElement => webDriver.FindElement(By.XPath("//div[@class='ql-editor ql-blank']"));
 
         //------------Contact Section Web Elements-----------
         private IWebElement ActivityLedByElement => webDriver.FindElement(By.Id("leadertype"));
@@ -253,6 +253,10 @@ namespace AfterSchoolUIAutomationTests.Pages
         {
             webDriver.WaitInSeconds(3);
             AboutYourActivityElement.SendKeys("Lorem ipsum dolor sit amet, consectetur adipiscing elit");
+
+            //((IJavaScriptExecutor)webDriver).ExecuteScript("alert('Hello');");
+            //((IJavaScriptExecutor)webDriver).ExecuteScript("quill.setText('About Your Activity');");
+            //((IJavaScriptExecutor)webDriver).ExecuteScript("quill.setText('About Your Activity');");
             return this;
         }
 

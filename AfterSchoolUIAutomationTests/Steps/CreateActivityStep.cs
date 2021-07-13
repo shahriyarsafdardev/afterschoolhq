@@ -9,7 +9,7 @@ using TechTalk.SpecFlow;
 using AfterSchoolUIAutomationTests.Helpers.Extensions;
 using AfterSchoolUIAutomationTests.Parameters;
 
-namespace AfterSchoolUIAutomationTests2.Steps
+namespace AfterSchoolUIAutomationTests.Steps
 {
     [Binding]
     public sealed class CreateActivityStep : IDisposable
@@ -87,7 +87,7 @@ namespace AfterSchoolUIAutomationTests2.Steps
         [Given(@"Populate about your activity section and save")]
         public void PopulateAbout()
         {
-            //createActivityPage.ActivityDetails(Parameter.Get("CreateNewActivity", "AboutActivity"));
+            createActivityPage.ActivityDetails(Parameter.Get("CreateNewActivity", "AboutActivity"));
             createActivityPage.ClickSaveAndNext();
         }
 
