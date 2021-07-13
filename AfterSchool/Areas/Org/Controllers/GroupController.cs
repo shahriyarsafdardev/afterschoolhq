@@ -200,7 +200,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
                 msgs.Add($"{UILabel.ActivityGroupLabel(group.ActivityGroupTypeId)} Saved", MessageType.Success);
                         
-            ViewBag.AccountPackage = currentAccount;
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Properties = group.GetGroupProperties(msgs: msgs);
             ViewBag.Messages = msgs;
             return View(group);
@@ -886,7 +886,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var session = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
             var form = session.GetForm(msgs);
             var questions = GetAddRegistrationQuestions(form, msgs);
-            var activities = session.GetActivities(ActivityType.Activity, false, false, null, null, false, msgs);
+            var activities = session.GetActivities(ActivityType.Activity, false, false, null, null, false, msgs).Select(x => x.GetParticipationObject(msgs)).ToList();
 
             questions.ForEach(question => {
                 var answer = Request[question.ToFormQuestionViewModel().Name];
@@ -896,6 +896,11 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 switch (question.QuestionDataTypeId)
                 {
+                    case QuestionDataType.RegistrantFirstName:
+                    case QuestionDataType.RegistrantLastName:
+                        if (answer.IsNotEmpty() && answer.Length < 3)
+                            msgs.Add($"{question.Text} must be of 3 characters", MessageType.UserError);
+                        break;
                     case QuestionDataType.RegistrantHomePhone:
                     case QuestionDataType.RegistrantWorkPhone:
                     case QuestionDataType.RegistrantMobilePhone:
@@ -916,6 +921,12 @@ namespace AfterSchool.Areas.Org.Controllers
             for (int i = 1; i <= activities.Count; i++)
             {
                 var postedValue = Request[$"activity-preference-{i}"];
+                var errorMessage = $"All the Activtiy Preferences are required.";
+                if (postedValue.IsEmpty())
+                    if (!msgs.HasMessageContainingText(errorMessage))
+                        msgs.Add(errorMessage, MessageType.UserError);                   
+                    
+
                 if (postedValue.IsGuid())
                 {
                     var activity = currentAccount.GetActivity(postedValue.ToGuid(), msgs);

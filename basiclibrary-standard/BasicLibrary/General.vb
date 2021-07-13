@@ -265,7 +265,7 @@ Public Class SystemMessages
 
     Public Function HasMessageContainingText(ByVal text As String) As Boolean
         For Each msg As SystemMessage In Me._items
-            If msg.Text.ToLower().Contains(text) Then
+            If msg.Text.ToLower().Contains(text.ToLower()) Then
                 Return True
             End If
         Next
