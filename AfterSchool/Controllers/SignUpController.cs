@@ -195,8 +195,10 @@ namespace AfterSchool.Controllers
                             msgs: amsgs,
                             dc: adc);
 
-                        if (user.IsNotEmpty() && amsgs.HasNoErrors())
-                            WebSessionUtilities.LogActivity(actor: user, Id: user.ID.Value, text: user.DisplayName, actionType: WebSessionActionType.Created, objectType: ObjectType.WebUser);                        
+                        if(model.SignupType.IsNotEmpty() && model.SignupType == SignUpType.Teacher1099)
+                        {
+                            model.OrgName = $"{model.FirstName} {model.LastName} Teacher";
+                        }
 
                         account = user.AddNewAccount(
                                orgName: model.OrgName,
@@ -205,8 +207,29 @@ namespace AfterSchool.Controllers
                                msgs: amsgs,
                                dc: adc);
 
-                        if (account.IsNotEmpty() && amsgs.HasNoErrors())
-                            WebSessionUtilities.LogActivity(actor: user, Id: account.ID.Value, text: account.Name, actionType: WebSessionActionType.Created, objectType: ObjectType.Account);
+                        if (user.IsNotEmpty() && account.IsNotEmpty() && amsgs.HasNoErrors())
+                        {
+                            // LOG: WebUserName Created Account Account
+                            SessionVariables.WebSession.LogActivity(
+                                account: account,
+                                actor: user,
+                                actionType: WebSessionActionType.Created,
+                                objectType: ObjectType.Account,
+                                objectId: account.ID.Value,
+                                objectText: account.Name
+                            );
+
+                            // LOG: WebUserName SignedUp
+                            SessionVariables.WebSession.LogActivity(
+                                account: account,
+                                actor: user,
+                                actionType: WebSessionActionType.SignedUp,
+                                objectType: ObjectType.WebUser,
+                                objectId: user.ID.Value,
+                                objectText: user.DisplayName
+                            );
+                        }
+                            
 
                         if (invitingAccount.IsNotEmpty())
                         {
@@ -239,8 +262,17 @@ namespace AfterSchool.Controllers
                 );
             }
 
+            
+
+
             if (msgs.HasNoErrors())
-                return RedirectToAction("index", "onboarding", new { area = "org" });
+            {
+                if (model.SignupType == SignUpType.Teacher1099)
+                    return RedirectToAction("paymentsoptions", "account", new { area = "org", isfullscreen = 1, signuptype = (int)model.SignupType });  
+                
+                return RedirectToAction("index", "onboarding", new { area = "org", showGettingStarted = true });
+            }
+                
 
             ViewBag.Messages = msgs;
 
@@ -434,6 +466,40 @@ namespace AfterSchool.Controllers
                         }
                         
                         SendGridHelper.AddOrUpdateContact(account, user, msgs);
+                    }
+
+                  
+                    switch (account.OnboardingStepDone)
+                    {
+                        case OnboardingStepType.AccountType:
+                            ViewBag.URL = Url.Action("ProgramInfo", "Onboarding", new { area = "org" });
+                            break;
+                        case OnboardingStepType.SocialLinks:
+                            ViewBag.URL = Url.Action("Done", "Onboarding", new { area = "org" });
+                            break;
+                        case OnboardingStepType.ProgramInfo:
+                            ViewBag.URL = Url.Action("AdditionalInfo", "Onboarding", new { area = "org" });
+                            break;
+                        
+                        case OnboardingStepType.AdditionalInfo:
+                            ViewBag.URL = Url.Action("ContactInfo", "Onboarding", new { area = "org" });
+                            break;
+                        case OnboardingStepType.ContactInfo:
+                            ViewBag.URL = Url.Action("Logo", "Onboarding", new { area = "org" });
+                            break;
+
+                        case OnboardingStepType.LogoAndHeader:
+                            ViewBag.URL = Url.Action("ServicesOffered", "Onboarding", new { area = "org" });
+                            break;
+
+                        case OnboardingStepType.ServicesOffered:
+                            ViewBag.URL = Url.Action("Links", "Onboarding", new { area = "org" });
+                            break;
+                        case OnboardingStepType.All:
+                            ViewBag.URL = Url.Action("Account", "R", new { accountname = account.UniqueName });
+                            break;                           
+                        default:
+                            break;
                     }
                 }
             }
@@ -997,12 +1063,13 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
-        public ActionResult Welcome(string invite, string isrequestonlyaccess)
+        public ActionResult Welcome(string invite, string isrequestonlyaccess, string signuptype)
         {
             var model = new SignUpIndexViewModel()
             {
                 IsRequestOnlyAccess = isrequestonlyaccess.IsBoolean() && isrequestonlyaccess.ToBoolean(),
-                InviteCodeToShare = invite.IsNotEmpty() ? invite : ""
+                InviteCodeToShare = invite.IsNotEmpty() ? invite : "",
+                SignupType = signuptype.IsNotEmpty() && signuptype.IsInteger() ? (SignUpType)signuptype.ToInteger() : SignUpType.NotSet,
             };
             return View(model);
         }

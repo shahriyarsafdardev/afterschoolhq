@@ -1,0 +1,17 @@
+﻿@{ 
+    var account = SessionVariables.CurrentAccount;
+    Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml"; 
+}
+
+@if (account.IsNotEmpty())
+{
+    <div class="row main-content main-content-welcome-pages">
+        <div class="welcome-box-width">
+            <div class="welcome-outer-ring">
+                <div class="onboarding-inner-ring">
+                    @{ Html.RenderPartial("~/Views/Shared/_GettingStarted.cshtml"); }
+                </div>
+            </div>
+        </div>
+    </div>
+}

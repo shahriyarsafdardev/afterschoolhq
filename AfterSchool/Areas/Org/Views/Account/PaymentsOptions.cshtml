@@ -6,6 +6,7 @@
     var isFullScreen = (bool)ViewBag.IsFullScreen;
     var supportEmail = (string)ViewBag.SupportEmail;
     var supportEmailHref = $"mailto:{supportEmail}";
+    //var openPaymentNotificationModal = ViewBag.ShowPaymentNotificationPopup != null ? ((string)ViewBag.ShowPaymentNotificationPopup).ToBoolean() : false; 
 
     ViewBag.Title = account.Name;
 
@@ -195,12 +196,12 @@
                                 </tbody>
                             </table>
                         </div>
-                        
+
                         <div class="clearfix"></div>
                         <br />
                         <div class="col-md-12" style="text-align:center">
                             <p>If you have any questions about how to setup your payments, our Support team will be happy to help!  <a href="@supportEmailHref">@supportEmail</a> </p>
-                        </div>                       
+                        </div>
                     </div>
                 }
             </div>
@@ -208,3 +209,12 @@
     </div>      
 </div>
 
+<script type="text/javascript">
+    @*PageEvent.add(PageEvent.AFTER_INIT, function () {
+        var openPaymentNotificationModal = @Json.Encode(openPaymentNotificationModal);
+        if (openPaymentNotificationModal) {
+            loadPaymentNotificationModal();
+            return false;
+        }
+    });*@
+</script>

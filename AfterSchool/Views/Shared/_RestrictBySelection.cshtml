@@ -10,7 +10,7 @@
     if (!minGradeLevelId.HasValue && !minGradeLevelId.HasValue && !agestart.HasValue && !ageend.HasValue)
     {
         minGradeLevelId = grades.FirstOrDefault().ID.Value;
-        maxGradeLevelId = grades.FirstOrDefault().ID.Value;
+        maxGradeLevelId = grades.LastOrDefault().ID.Value;
     }
 }
 

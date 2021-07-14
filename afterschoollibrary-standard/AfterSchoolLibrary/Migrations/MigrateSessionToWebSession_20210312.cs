@@ -18,12 +18,15 @@ namespace AfterSchoolLibrary.Migrations
                     //.. we have to go with raw sql query as we have lots of data in session table
                     try
                     {
-                        Helpers.Utilities.SystemLog("Session migration started");                        
+                        var count = WebSession.GetCount(null, amsgs, adc);
+                        if (count <= 0)
+                        {
+                            Helpers.Utilities.SystemLog("Session migration started");
 
-                        var dq = WebSession.get_DatabaseQuery(WebSession.ObjectMap, typeof(WebSession).Name);
-                        dq.Connection = adc;
-                        dq.Timeout = 0;
-                        var dt = dq.ExecuteSelect($@"
+                            var dq = WebSession.get_DatabaseQuery(WebSession.ObjectMap, typeof(WebSession).Name);
+                            dq.Connection = adc;
+                            dq.Timeout = 0;
+                            var dt = dq.ExecuteSelect($@"
                             SET IDENTITY_INSERT WebSession ON
 
                             INSERT INTO WebSession (ID, CreateDate, CreatedBy, LastModifiedDate, LastModifiedBy, IPAddress, IPAddressTimeZone, UserAgent, UserLocation, UrlReferrer, PreviousId, WebUserId, AccountId)
@@ -38,9 +41,10 @@ namespace AfterSchoolLibrary.Migrations
 	                            '{{objecttype}} Updated' AS ActionStringFormat, 
 	                            CASE WHEN ActivityId IS NULL THEN 'ActivityGroup Updated' ELSE 'Activity Updated' END AS ActionString
                             FROM SessionAction",
-                            amsgs);
+                                amsgs);
 
-                        Helpers.Utilities.SystemLog("Session migration completed");
+                            Helpers.Utilities.SystemLog("Session migration completed");
+                        }
                     }
                     catch (System.Exception ex)
                     {

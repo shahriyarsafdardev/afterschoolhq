@@ -1,6 +1,6 @@
 ﻿@model Registrant
 
-@{ 
+@{
     var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
 
     var registered = "Enrolled";
@@ -79,16 +79,17 @@
             btnText = "Update Profile &amp; Enroll";
             btnUrl = registerUrl;
         }
-        else if(participationObject.IsNotEmpty() && participationObject.RestrictByGrade() && !participationObject.IsStudentGradeInRange(Model))
+        else if (participationObject.IsNotEmpty() && participationObject.RestrictByGrade() && !participationObject.IsStudentGradeInRange(Model))
         {
             btnText = "Ineligible - Grade";
-            disabledText = " disabled=\"disabled\" ";
-            btnUrl = "#";
-        } else if(participationObject.IsNotEmpty() && !participationObject.RestrictByGrade() && !participationObject.IsStudentAgeInRange(Model))
+           // disabledText = " disabled=\"disabled\" ";
+           // btnUrl = "#";
+        }
+        else if (participationObject.IsNotEmpty() && !participationObject.RestrictByGrade() && !participationObject.IsStudentAgeInRange(Model))
         {
             btnText = "Ineligible - Age";
             disabledText = " disabled=\"disabled\" ";
-            btnUrl = "#";
+           // btnUrl = "#";
         }
         else
         {
@@ -96,36 +97,36 @@
         }
     }
 }
-    <div class="col-sm-12 col-md-6 col-lg-4">
-        <div class="panel">
-            <div class="heading panel-h3 text-center">
-                <div class="padding-30">
-                    @Model.DisplayName
-                    <p class="text-center text-small padding-v-10 text-muted">
-                        @Model.GetAnswer(QuestionDataType.RegistrantGrade).Text Grade
-                    </p>
-                </div>
-            </div>
-            <div class="panel-body">
-                <p>
-                    <a href="@btnUrl"
-                       id="btn-register-@Model.Uid"
-                       class="btn btn-register-primary btn-lg"
-                       @disabledText>
-                        @Html.Raw(btnText)
-                        &raquo;
-                    </a>
-                </p>
-                <p class="text-center">
-                    @if (Model.IsProfileCompleted)
-                    {
-                        <a href="@Url.Action("editstudentpersonal", "family", new { Area = "user", id = Model.Uid, student = Model?.Uid })">Update Profile</a>
-                    }
-                    else
-                    {
-                        <span>&nbsp;</span>
-                    }
+<div class="col-sm-12 col-md-6 col-lg-4">
+    <div class="panel">
+        <div class="heading panel-h3 text-center">
+            <div class="padding-30">
+                @Model.DisplayName
+                <p class="text-center text-small padding-v-10 text-muted">
+                    @Model.GetAnswer(QuestionDataType.RegistrantGrade).Text Grade
                 </p>
             </div>
         </div>
+        <div class="panel-body">
+            <p>
+                <a href="@btnUrl"
+                   id="btn-register-@Model.Uid"
+                   class="btn btn-register-primary btn-lg"
+                   @disabledText>
+                    @Html.Raw(btnText)
+                    &raquo;
+                </a>
+            </p>
+            <p class="text-center">
+                @if (Model.IsProfileCompleted)
+                {
+                    <a href="@Url.Action("editstudentpersonal", "family", new { Area = "user", id = Model.Uid, student = Model?.Uid })">Update Profile</a>
+                }
+                else
+                {
+                    <span>&nbsp;</span>
+                }
+            </p>
+        </div>
     </div>
+</div>

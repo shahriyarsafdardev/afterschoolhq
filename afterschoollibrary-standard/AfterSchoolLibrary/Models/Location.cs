@@ -58,12 +58,12 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "GooglePlaceId", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "StreetNumber", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "StreetName", System.Data.SqlDbType.NVarChar , "50");
-				_dp.Add(className, "Neighborhood", System.Data.SqlDbType.NVarChar , "50");
+				_dp.Add(className, "Neighborhood", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "County", System.Data.SqlDbType.NVarChar , "100");
-				_dp.Add(className, "Latitude", System.Data.SqlDbType.Decimal , "10,2");
-				_dp.Add(className, "Longitude", System.Data.SqlDbType.Decimal , "10,2");
-				_dp.Add(className, "DistanceFromOrigin", System.Data.SqlDbType.Decimal , "10,2");
-				
+                _dp.Add(className, "Latitude", System.Data.SqlDbType.Decimal, "10,2");
+                _dp.Add(className, "Longitude", System.Data.SqlDbType.Decimal, "10,2");
+                _dp.Add(className, "DistanceFromOrigin", System.Data.SqlDbType.Decimal, "10,2");
+
                 return _dp;
             }
         }

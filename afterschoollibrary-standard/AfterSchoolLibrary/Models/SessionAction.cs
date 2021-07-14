@@ -375,6 +375,25 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
+        public static List<SessionAction> LoadByAccountIdByActivityId(int ActivityId, int AccountId, List<SessionActionType> actionTypes, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.DebugMode = false;
+            dq.UseParameterizedQuery = false;
+            dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
+            dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+
+            if (actionTypes != null && actionTypes.Any())
+                dq.Criterias.Add(ObjectMap["SessionActionTypeId"], actionTypes.Select(x => (int)x).ToList(), BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.In);
+
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+            dq.OrderBys.Add(ObjectMap["CreateDate"], OrderByDirectionEnum.Descending);
+
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
         public static List<SessionAction> LoadByRegistrationPeriodId(int RegistrationPeriodId, List<SessionActionType> actionTypes, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;

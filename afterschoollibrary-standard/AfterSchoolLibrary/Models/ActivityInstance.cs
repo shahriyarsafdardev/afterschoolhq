@@ -271,7 +271,19 @@ namespace AfterSchoolLibrary.Models
                 .ToList();
         }
 
+		public static List<ActivityInstance> LoadByActivityScheduleIdByDateRange(int ActivityScheduleId, DateTime StartDateTime, DateTime EndDateTime, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
 
-        #endregion
+			var sql = $@"
+				SELECT * FROM ActivityInstance WHERE ActivityScheduleId = {ActivityScheduleId} AND StartDateTime >= '{StartDateTime}' AND EndDateTime <= '{EndDateTime}'
+			";
+
+			return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+
+		#endregion
     }
 }

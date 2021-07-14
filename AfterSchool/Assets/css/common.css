@@ -74,6 +74,10 @@
     font-size: 11px;
 }
 
+.font-size-16 {
+    font-size: 16px;
+}
+
 .main-content-welcome-pages {
     display: flex;
     justify-content: center;
@@ -280,7 +284,7 @@
 }
 
 .register-thankyou-2 {
-    font-size: 22px;
+    font-size: 30px;
     font-weight: 600;
     font-stretch: normal;
     font-style: normal;
@@ -493,6 +497,60 @@
     overflow-wrap: break-word;
 }
 
+.dotdark {
+    height: 15px;
+    width: 15px;
+    background-color: #00c5a3;
+    border-radius: 50%;
+    display: inline-block;
+    margin: 0 5px 0 0;
+}
+
+.dotlight {
+    height: 15px;
+    width: 15px;
+    background-color: #c3eae0;
+    border-radius: 50%;
+    display: inline-block;
+    margin: 0 5px 0 0;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.btn-free-profile {    
+    border-radius: 6px;
+    background-color: #00c5a3;
+    padding: 12px 16px;
+    font-size: 18px;
+}
+
+.font-styling-18 {
+    font-size: 16px;
+    letter-spacing: 0.32px;
+}
+
+.getting-started-info {
+    margin-left: 32px;
+    font-size: 16px;
+    letter-spacing: 0.28px;
+}
+
+.mobile-payment-btn {
+    font-size: 14px;
+    color: #00a38a;
+    text-decoration: underline;
+}
+
+.btn-activity-footer {
+    box-shadow: 0 0 4px 0px #555555;
+    background-color: #c3eae0;
+    border-color: #c3eae0;
+    padding: 10px 20px;
+    width: 180px;
+}
+
 .show-more {
     text-decoration: underline;
     margin-left: 10px;
@@ -511,4 +569,257 @@
     font-weight: 600;
     margin-left: 10px;
     float: left;
+}
+
+/*onboarding flow*/
+
+.modal-box {
+    border-radius: 10px;
+    box-shadow: 0 2px 12px 3px rgb(0 0 0 / 30%);
+}
+
+.modal-box-body {
+    margin: 30px 0 38px;
+    font-size: 19px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-align: center;
+    color: #4a4a4a;
+    overflow-wrap: break-word;
+}
+
+.close-icon-position {
+    padding: 2px;
+    font-size: 28px;
+    cursor: pointer !important;
+    top: 3px;
+    position: absolute;
+    right: 5px;
+}
+
+.view-activity-text {
+    text-decoration: underline;
+    font-size: 16px;
+    letter-spacing: 0.84px;
+}
+
+.selected-tr {
+    background-color: #f0f0f0;
+    border-radius: 6px;
+}
+
+.table-getting-started-options tr td {
+    border-top: none !important;
+}
+
+.close-icon {
+    position: fixed;
+    right: 3px;
+    top: 3px;
+}
+
+.close-icon-postion-2 {
+    padding: 2px;
+    font-size: 28px;
+    cursor: pointer !important;
+}
+
+.onboarding-phrase-1 {
+    font-size: 22px;
+    letter-spacing: 0.53px;
+}
+
+.popover-setup {
+    display: inline-block;
+    position: relative;
+    border-radius: 50%;
+    padding: 28px 20px;
+}
+
+.popover-menu {
+    border-radius: 4px;
+    border: 2px solid #49c5b6;
+    list-style-type: none;
+    margin: 180px 33px;
+    min-width: 100%;
+    padding: 0px;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    box-shadow: 0 2px 3px 0 rgba(63, 63, 68, 0.2);
+    transition-property: transform, opacity;
+    transition-duration: 200ms;
+    transition-timing-function: ease;
+    transform: scale(0.9);
+    transform-origin: top left;
+    display: block;
+    opacity: 0;
+    z-index: 10000000;
+    background: white;
+}
+
+    .popover-menu:after {
+        bottom: 101%;
+        left: 0.5rem;
+        border: solid transparent;
+        content: " ";
+        height: 0;
+        width: 0;
+        position: absolute;
+        pointer-events: none;
+        border-color: rgba(255, 255, 255, 0);
+        border-bottom-color: #49c5b6;
+        border-width: 7px;
+    }
+
+.popover-menu-item {
+    white-space: nowrap;
+    padding: 10px;
+}
+
+.popover-active .popover-menu {
+    transform: scale(1);
+    display: block;
+    opacity: 1;
+}
+
+.blur-bg {
+    display: none;
+    background-color: White;
+    background-repeat: no-repeat;
+    height: 100%;
+    opacity: 0.5;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000000;
+}
+
+.popover-dropdown {
+    float: left;
+    margin: 2px 0 2px 0;
+    padding: 2px 12px 0;
+    border-radius: 5.7px;
+    border: solid 1px #ffad49;
+    background-color: #4a4a4a;
+    width: 105px;
+    height: 35px;
+}
+
+.full-z-index {
+    z-index: 1000001;
+}
+
+.hidden-overflow {
+    overflow: hidden;
+}
+
+.checkbox-override {
+    padding: 0;
+}
+
+    .checkbox-override input[type="checkbox"]:checked + label:before {
+        content: "\e6cd" !important;
+        color: #00b492 !important;
+        border-color: #00b492 !important;
+    }
+
+.reg-login-bar-homepage {
+    float: left;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.finish-setup-anchor {
+    color: #b3b3b3;
+    padding: 8px 22px 9px 14px;
+}
+
+.cursor-no-drop {
+    cursor: no-drop !important;
+}
+
+
+.dropdown-label {
+    cursor: pointer;
+    width: 65px;
+    height: 13px;
+    margin: 0 8px 5px;
+    font-family: Montserrat;
+    font-size: 10px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: 0.23px;
+    text-align: center;
+    color: #dfdfdf;
+}
+
+    .dropdown-label:hover {
+        color: #00c5a3 !important;
+    }
+
+.dropdown-menu > li > a {
+    color: #b3b3b3;
+    cursor: pointer;
+}
+
+.dropdown-menu > li > .active-item:hover {
+    color: #ffffff !important;
+}
+
+.dropdown-menu > li > a:hover {
+    background-color: #434e52;
+}
+.pt-20{
+    padding-top:20px
+}
+.pb-20 {
+    padding-bottom: 20px;
+}
+
+.contactUsBtn {
+    background-color: white;
+    border: 3px solid #00b492;
+    border-radius: 5px;
+    padding: 13px 25px;
+}
+
+.contactSpan {
+    margin-left: 30px;
+    font-weight: bold;
+}
+
+.contactUsModal {
+    background-color: #F7F7F7;
+    padding: 45px 75px
+}
+
+.modalHeader {
+    padding-bottom: 30px;
+    font-weight: bold;
+    text-align: center;
+    font-size: 17px;
+}
+
+.Contactmodaldialog {
+    width: 65%;
+}
+
+.floatNone {
+    float: none;
+}
+
+
+
+.btnContactUsSubmit {
+    padding: 12px 65px;
+    border-radius: 5px;
+    margin-bottom: 30px;
+}
+
+.FontSizeTextdecoration {
+    text-decoration: underline;
+    font-size: 16px;
 }

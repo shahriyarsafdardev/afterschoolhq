@@ -1,5 +1,4 @@
 ﻿@model Account
-
 @{
     var currentUser = SessionVariables.CurrentUser;
     var currentAccount = SessionVariables.CurrentAccount;
@@ -9,8 +8,9 @@
     var dashboardUrl = Url.Action("index", "home", new { area = "user" });
     var session = (ParticipationObject)ViewData["session"];
     var isDuringProfileSetup = false;
-    var returnUrl = SessionVariables.RegistrationStartPageAccount?.HomePageUrl;    
+    var returnUrl = SessionVariables.RegistrationStartPageAccount?.HomePageUrl;
     var registrationStartPage = SessionVariables.RegistrationStartPageAccount;
+    var isAccount = ViewData["IsAccount"] != null ? (bool)ViewData["IsAccount"] : false;
 
     if (currentAccount.IsNotEmpty() && currentAccount.AccountTypeId != AccountType.Registrant)
     {
@@ -26,6 +26,31 @@
     if (ViewData["IsDuringProfileSetup"].IsNotEmpty() && ViewData["IsDuringProfileSetup"].ToString().IsBoolean())
     {
         isDuringProfileSetup = ViewData["IsDuringProfileSetup"].ToString().ToBoolean();
+    }
+
+    var currentLevel = AccountService.OnboardingCompletionStatus(currentAccount);
+    var currentProgress = AccountService.GetCurrentOnboardingProcess(currentAccount);    
+    var totalNumberOfOnboardingSteps = 4;
+    var hasAnyPaidActivity = currentAccount.IsNotEmpty() && currentAccount.HasPaidActivities();
+    //If there is no paid activity configured then we should not display Payment Modal and Progressbar to user
+    var totalStepsLeft = hasAnyPaidActivity ? totalNumberOfOnboardingSteps : totalNumberOfOnboardingSteps - 1;
+    var progressPercentage = ((Decimal)currentProgress.Count / totalStepsLeft) * 100;
+    
+
+    var isAccountAndLoggedInUserIsOwner = currentAccount.IsNotEmpty() &&
+        currentUser.IsNotEmpty() &&
+        (currentAccount.ID == Model.ID) &&
+        (currentUser.HasAccessTo(Model));
+
+    Activity unpublishActivity = null;
+    var url = "";
+    if (currentLevel == GettingStartedOptions.PublishActivity)
+    {
+        unpublishActivity = AccountService.GetUnpublishActivity(SessionVariables.CurrentAccount);
+        if (unpublishActivity.IsNotEmpty())
+        {
+            url = unpublishActivity.ShortHomePageUrl;
+        }
     }
 }
 
@@ -45,15 +70,143 @@
     }
 }
 
+<style>
+    .dropdown-menu > li > a:focus, .dropdown-menu > li > a:active {
+        color: #b3b3b3;
+    }
+</style>
+
+<div class="blur-bg"></div>
+
 <div class="reg-login-bar">
     @if (Model.IsNotEmpty() && Model.ID.HasValue)
     {
         <div class="row">
             <div class="col-md-6 col-sm-6 col-xs-12">
 
+                @if (isAccount && isAccountAndLoggedInUserIsOwner && progressPercentage != 100)
+                {
+                    <div id="popover-container" class="dropdown popover-dropdown">
+                        <a id="ddl-finish-setup" class="dropdown-toggle dropdown-label" onclick="return toggleList();">
+                            Finish Setup
+                            <div class="progress" style="height: 4px; margin-bottom: 0;">
+                                <div class="progress-bar" style="width:@progressPercentage%; background-color: #00AE83;"></div>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu" style="background-color: #434e52;">
+                            <li>
+                                @if (currentLevel == GettingStartedOptions.CreateProfile)
+                                {
+                                    <a class="active-item finish-setup-anchor" href="#">
+                                        <div class="am-checkbox checkbox-override" onclick="return redirectUser('@GettingStartedOptions.CreateProfile');">
+                                            <input id="chk-TopBar-getting-started-profile" name="GettingStartedSelection-TopBar" type="checkbox"
+                                                   value="@GettingStartedOptions.CreateProfile"
+                                                   @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.CreateProfile) ? "checked=\"checked\"" : "") />
+                                            <label for="chk-TopBar-getting-started-profile">Create Profile</label>
+                                        </div>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a href="#" class="finish-setup-anchor cursor-no-drop">
+                                        <div class="am-checkbox checkbox-override">
+                                            <input id="chk-TopBar-getting-started-profile" name="GettingStartedSelection-TopBar" type="checkbox" disabled="disabled"
+                                                   @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.CreateProfile) ? "checked=\"checked\"" : "") />
+                                            <label for="chk-TopBar-getting-started-profile">Create Profile</label>
+                                        </div>
+                                    </a>
+                                }
+                            </li>
+                            <li>
+                                @if (currentLevel == GettingStartedOptions.CreateFirstActivity || currentLevel == GettingStartedOptions.PublishActivity)
+                                {
+                                    <a class="active-item finish-setup-anchor" href="#">
+                                        <div class="am-checkbox checkbox-override" onclick="return redirectUser('@currentLevel');">
+                                            <input id="chk-TopBar-getting-started-first-activity" name="GettingStartedSelection-TopBar" type="checkbox"
+                                                   value="@GettingStartedOptions.CreateFirstActivity"
+                                                   @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.CreateFirstActivity) ? "checked=\"checked\"" : "") />
+                                            <label for="chk-TopBar-getting-started-first-activity">Create Your First Activity</label>
+                                        </div>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a href="#" class="finish-setup-anchor cursor-no-drop">
+                                        <div class="am-checkbox checkbox-override">
+                                            <input id="chk-TopBar-getting-started-first-activity" name="GettingStartedSelection-TopBar" type="checkbox" disabled="disabled"
+                                                   @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.CreateFirstActivity) ? "checked=\"checked\"" : "") />
+                                            <label for="chk-TopBar-getting-started-first-activity">Create Your First Activity</label>
+                                        </div>
+                                    </a>
+                                }
+                            </li>
+                            <li>
+                                @if (currentLevel == GettingStartedOptions.ValidateEmail)
+                                {
+                                    <a class="active-item finish-setup-anchor" href="#">
+                                        <div class="am-checkbox checkbox-override" onclick="return redirectUser('@GettingStartedOptions.ValidateEmail');">
+                                            <input id="chk-TopBar-getting-started-email" name="GettingStartedSelection-TopBar" type="checkbox"
+                                                   value="@GettingStartedOptions.ValidateEmail"
+                                                   @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.ValidateEmail) ? "checked=\"checked\"" : "") />
+                                            <label for="chk-TopBar-getting-started-email">Validate Email</label>
+                                        </div>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a href="#" class="finish-setup-anchor cursor-no-drop">
+                                        <div class="am-checkbox checkbox-override">
+                                            <input id="chk-TopBar-getting-started-email" name="GettingStartedSelection-TopBar" type="checkbox" disabled="disabled"
+                                                   @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.ValidateEmail) ? "checked=\"checked\"" : "") />
+                                            <label for="chk-TopBar-getting-started-email">Validate Email</label>
+                                        </div>
+                                    </a>
+                                }
+                            </li>
+                            <li>
+                                @if (currentLevel == GettingStartedOptions.AcceptPayments)
+                                {
+                                    <a class="active-item finish-setup-anchor" href="#">
+                                        <div class="am-checkbox checkbox-override" onclick="return redirectUser('@GettingStartedOptions.AcceptPayments');">
+                                            <input id="chk-TopBar-getting-started-payments" name="GettingStartedSelection-TopBar" type="checkbox"
+                                                   value="@GettingStartedOptions.AcceptPayments"
+                                                   @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.AcceptPayments) ? "checked=\"checked\"" : "") />
+                                            <label for="chk-TopBar-getting-started-payments">Accept Payments</label>
+                                        </div>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a href="#" class="finish-setup-anchor cursor-no-drop">
+                                        <div class="am-checkbox checkbox-override">
+                                            <input id="chk-TopBar-getting-started-payments" name="GettingStartedSelection-TopBar" type="checkbox" disabled="disabled"
+                                                   @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.AcceptPayments) ? "checked=\"checked\"" : "") />
+                                            <label for="chk-TopBar-getting-started-payments">Accept Payments</label>
+                                        </div>
+                                    </a>
+                                }
+
+                            </li>
+                        </ul>
+
+                        <ul class="popover-menu">
+                            <li class="popover-menu-item">
+                                You can complete remaining process from here.
+                                <br />
+                                <br />
+                                <button class="btn btn-success btn-xs" onclick="return popOverButton()">Got It.</button>
+                                <br />
+                                <div class="clearfix"></div>
+                            </li>
+                        </ul>
+                    </div>
+                }
+
                 @if (registrationStartPage.IsNotEmpty())
                 {
-                    <a href="@registrationStartPage.HomePageUrl"><span class="reg-login-bar-title">@registrationStartPage.Name</span></a>
+                    <a href="@registrationStartPage.HomePageUrl" class="reg-login-bar-homepage">
+                        <span class="reg-login-bar-title">@registrationStartPage.Name</span>
+                    </a>
                 }
                 else if (currentUser.IsNotEmpty())
                 {
@@ -66,6 +219,7 @@
                         <span class="reg-login-bar-title">@currentUser.DisplayName</span>
                     }
                 }
+
             </div>
 
             @if (!isDuringProfileSetup)
@@ -163,3 +317,50 @@
 </div>
 
 @{ Html.RenderPartial("~/Views/Shared/Registration/_LoginModal.cshtml", null, new ViewDataDictionary() { { "ReturnUrl", ViewData["LoginReturnUrl"] } }); }
+
+<script type="text/javascript">
+    function popOverButton() {
+        if ($("#popover-container").hasClass("popover-setup")) {
+            $("#popover-container").removeClass("popover-setup popover-active full-z-index");
+            $('.blur-bg').hide()
+            $('body').removeClass('hidden-overflow');
+            setOnboardingStepsAcknowledge();
+        }
+        else {
+            $("#popover-container").addClass("popover-setup popover-active full-z-index");
+            $('.blur-bg').show();
+            $('body').addClass('hidden-overflow');
+            toggleList();
+        }
+    }
+
+    function toggleList() {
+        var itm = $('#ddl-finish-setup');
+        $(itm).parent().toggleClass('open');
+    }
+
+    function redirectUser(item) {
+        showLoader()
+
+        if (item == '@GettingStartedOptions.CreateProfile') {
+            location.href = '@Url.Action("programinfo", "onboarding", new { area = "org" })';
+        } else if (item == '@GettingStartedOptions.CreateFirstActivity') {
+            location.href = '@Html.Raw(Url.Action("editsetup", "activity", new { area = "org", isnew = 1, type = (int)ActivityType.Activity }))';
+        } else if (item == '@GettingStartedOptions.PublishActivity') {
+            location.href = '@url';
+        } else if (item == '@GettingStartedOptions.ValidateEmail') {
+           javascript:AccountSetup.sendVerificationEmail();
+        } else if (item == '@GettingStartedOptions.AcceptPayments') {
+            hideLoader();
+            LoadPaymentModal();
+        }
+    }
+
+    function setOnboardingStepsAcknowledge() {
+        var url = '@Url.Action("SetOnboardingStepsAcknowledged", "Services", new { Area = "" })';
+        $.ajax({
+            type: "POST",
+            url: url
+        });
+    }
+</script>

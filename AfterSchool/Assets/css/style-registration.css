@@ -36,10 +36,24 @@ body.registration {
             #00ae85 100%);
 */
 
+.logo-wrapper {
+    padding: 10px;
+    border-radius: 5px;
+    width: 190px;
+    max-height: 190px;
+    margin: 25px auto;
+}
+
+    .logo-wrapper > img {
+        display: block;
+        margin: auto;
+        width: 100%;
+    }
+
 .reg-header-overlay {
 }
 
-.reg-header-logo{
+.reg-header-logo {
     margin: auto;
 }
 
@@ -73,10 +87,11 @@ body.registration {
     border-bottom-right-radius: 10px;
     text-align: center;
 }
-.reg-header .dropdown-menu > a {
-    color: #fff;
-    text-align: center;
-}
+
+    .reg-header .dropdown-menu > a {
+        color: #fff;
+        text-align: center;
+    }
 
 .activity-title {
     font-size: 4em;
@@ -106,9 +121,9 @@ body.registration {
     border: 2px solid #eaeaea;
 }
 
-.search-field:hover {
-    color: #00ae85;
-}
+    .search-field:hover {
+        color: #00ae85;
+    }
 
 .reg-form-control {
     border-radius: 10px;
@@ -139,7 +154,7 @@ body.registration {
     padding: 5px 0px 0px 10px;
 }
 
-.reg-login-bar .btn-link{
+.reg-login-bar .btn-link {
     color: white;
 }
 
@@ -154,8 +169,7 @@ body.registration {
     margin-bottom: 15px;
 }
 
-.activity-headline 
-{
+.activity-headline {
     margin-top: 20px;
     font-size: 1.15em;
 }
@@ -166,21 +180,20 @@ body.registration {
     font-size: 1.15em;
 }
 
-.activity-detail-block
-{
+.activity-detail-block {
     padding: 5px 0px;
     font-size: 1.15em;
 }
 
-.activity-detail-block h3{
-    display: block;
-    margin-bottom: 10px;
-    font-weight: 500;
-}
+    .activity-detail-block h3 {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 500;
+    }
 
-.activity-detail-block img{
-    max-width: 100%;
-}
+    .activity-detail-block img {
+        max-width: 100%;
+    }
 
 .seats-remaining {
     color: #d0021b;
@@ -204,19 +217,19 @@ body.registration {
     border: none;
 }
 
-.btn-register:hover, .btn-register-default:hover {
-    /* background: #139476; */
-    background-color: #444;
-    color: #fff;
-    transition: all 0.3s;
-}
+    .btn-register:hover, .btn-register-default:hover {
+        /* background: #139476; */
+        background-color: #444;
+        color: #fff;
+        transition: all 0.3s;
+    }
 
-.btn-register:active, .btn-register-default:active {
-    /* background: #139476; */
-    background-color: #444;
-    color: #fff;
-    transition: all 0.3s;
-}
+    .btn-register:active, .btn-register-default:active {
+        /* background: #139476; */
+        background-color: #444;
+        color: #fff;
+        transition: all 0.3s;
+    }
 
 
 .btn-register-primary {
@@ -234,27 +247,27 @@ body.registration {
     border: none;
 }
 
-.btn-register-primary:hover {
-    background: #139476;
-    color: #fff;
-    transition: all 0.3s;
-}
+    .btn-register-primary:hover {
+        background: #139476;
+        color: #fff;
+        transition: all 0.3s;
+    }
 
-.btn-register-primary:active {
-    background: #139476;
-    color: #fff;
-    transition: all 0.3s;
-}
+    .btn-register-primary:active {
+        background: #139476;
+        color: #fff;
+        transition: all 0.3s;
+    }
 
 .btn-register[disabled], .btn-register-default[disabled] {
     background: #9a9a9a;
 }
 
-.btn-register[disabled]:hover, .btn-register-default[disabled]:hover {
-    background: #9a9a9a;
-    color: #fff;
-    transition: all 0.3s;
-}
+    .btn-register[disabled]:hover, .btn-register-default[disabled]:hover {
+        background: #9a9a9a;
+        color: #fff;
+        transition: all 0.3s;
+    }
 
 .btn-register-default {
     background: #333;
@@ -276,17 +289,17 @@ body.registration {
     border: none;
 }
 
-.btn-header-action:hover {
-    background-color: #444;
-    color: #fff;
-    transition: all 0.3s;
-}
+    .btn-header-action:hover {
+        background-color: #444;
+        color: #fff;
+        transition: all 0.3s;
+    }
 
-.btn-header-action:active {
-    background-color: #444;
-    color: #fff;
-    transition: all 0.3s;
-}
+    .btn-header-action:active {
+        background-color: #444;
+        color: #fff;
+        transition: all 0.3s;
+    }
 
 .btn-header-action-callout {
     background-color: #ed4b4b;
@@ -303,17 +316,17 @@ body.registration {
     border: none;
 }
 
-.btn-header-action-callout:hover {
-    background-color: #444;
-    color: #fff;
-    transition: all 0.3s;
-}
+    .btn-header-action-callout:hover {
+        background-color: #444;
+        color: #fff;
+        transition: all 0.3s;
+    }
 
-.btn-header-action-callout:active {
-    background-color: #444;
-    color: #fff;
-    transition: all 0.3s;
-}
+    .btn-header-action-callout:active {
+        background-color: #444;
+        color: #fff;
+        transition: all 0.3s;
+    }
 
 .btn-waitlist {
     background: #ffad49;
@@ -329,11 +342,11 @@ body.registration {
     transition: all 0.3s;
 }
 
-.btn-waitlist:hover {
-    background: #e59b41;
-    color: #fff;
-    transition: all 0.3s;
-}
+    .btn-waitlist:hover {
+        background: #e59b41;
+        color: #fff;
+        transition: all 0.3s;
+    }
 
 .btn-register-xl {
     font-size: 11px;
@@ -354,34 +367,33 @@ body.registration {
     border-radius: 10px;
 }
 
-.participation-object > .panel > .panel-h3 {
-    background-color: #e7e7e7;
-    height: 70px;
-}
+    .participation-object > .panel > .panel-h3 {
+        background-color: #e7e7e7;
+        height: 70px;
+    }
 
-.participation-object > .panel > .panel-h3 > h3 {
-    vertical-align: middle;
-    display: table-cell;
-    width: 100%;
-    height: 70px;
-    padding-right: 20px;
-    color: #555;
-    font-size: 20px;
-}
+        .participation-object > .panel > .panel-h3 > h3 {
+            vertical-align: middle;
+            display: table-cell;
+            width: 100%;
+            height: 70px;
+            padding-right: 20px;
+            color: #555;
+            font-size: 20px;
+        }
 
-.participation-object > .panel > .panel-footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-}
+    .participation-object > .panel > .panel-footer {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+    }
 
 .participation-object-add > .panel {
     background-color: #2f3c40; /*#264770; /* #212a2d;*/
 }
 
-.participation-object-add > .panel > .panel-body {
-
-}
+    .participation-object-add > .panel > .panel-body {
+    }
 
 
 
@@ -390,28 +402,28 @@ body.registration {
     border-radius: 10px;
 }
 
-.participation-object-wide > .panel .panel-h3 {
-    padding-left: 0px;
-    padding-top: 10px;
-}
+    .participation-object-wide > .panel .panel-h3 {
+        padding-left: 0px;
+        padding-top: 10px;
+    }
 
-.participation-object-wide > .panel .panel-h3 > h3 {
-    color: #555;
-    font-size: 1.10em;
-    margin-top: 0px;
-}
+        .participation-object-wide > .panel .panel-h3 > h3 {
+            color: #555;
+            font-size: 1.10em;
+            margin-top: 0px;
+        }
 
-.participation-object-wide > .panel .panel-h3 > p {
-    color: #999;
-    font-size: .4em;
-    margin-bottom: 0px;
-}
+        .participation-object-wide > .panel .panel-h3 > p {
+            color: #999;
+            font-size: .4em;
+            margin-bottom: 0px;
+        }
 
-.participation-object-wide > .panel > .panel-footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-}
+    .participation-object-wide > .panel > .panel-footer {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+    }
 
 .registration-titlebar .org-logo-container {
     max-width: 900px;
@@ -474,17 +486,17 @@ body.registration {
     width: 90%;
 }
 
-.registration-titlebar .org-title-area .org-title {
-    position: relative;
-    margin-bottom: 15px;
-    color: #fff;
-    font-size: 3em;
-}
+    .registration-titlebar .org-title-area .org-title {
+        position: relative;
+        margin-bottom: 15px;
+        color: #fff;
+        font-size: 3em;
+    }
 
-.registration-titlebar .org-title-area .org-description {
-    position: relative;
-    color: #ededed;
-}
+    .registration-titlebar .org-title-area .org-description {
+        position: relative;
+        color: #ededed;
+    }
 
 .registration-titlebar .orghome-filters {
     padding: 10px;
@@ -504,20 +516,20 @@ body.registration {
     margin-top: -50px;
 }
 
-.participation-object-detail > .panel {
-    border-radius: 10px;
-    overflow: hidden;
-}
+    .participation-object-detail > .panel {
+        border-radius: 10px;
+        overflow: hidden;
+    }
 
 @media screen and (max-width: 375px) {
     .participation-object-detail {
         padding: 0px;
     }
 
-    .participation-object-detail > .panel {
-        margin: 0px;
-        border-radius: 0px;
-    }
+        .participation-object-detail > .panel {
+            margin: 0px;
+            border-radius: 0px;
+        }
 
     .panel:first-of-type {
         margin-left: -15px;
@@ -527,7 +539,7 @@ body.registration {
     }
 }
 
-.participation-object-detail > .panel > .panel-body{
+.participation-object-detail > .panel > .panel-body {
     padding-bottom: 150px;
 }
 
@@ -537,9 +549,9 @@ body.registration {
     padding: 20px;
 }
 
-.firsttime-information h2{
-    font-weight: bold;
-}
+    .firsttime-information h2 {
+        font-weight: bold;
+    }
 
 .am-checkbox input[type="checkbox"]:checked + label:before, .am-radio input[type="checkbox"]:checked + label:before, .am-checkbox input[type="radio"]:checked + label:before, .am-radio input[type="radio"]:checked + label:before {
     content: "\e6cd";

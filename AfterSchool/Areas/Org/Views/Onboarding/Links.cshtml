@@ -21,6 +21,13 @@
 
                 <form class="form form-horizontal" method="post" action="@Url.Action("links", "onboarding")">
 
+                    @{ Html.RenderPartial("~/Views/Shared/_Loaders.cshtml",
+                             new ViewDataDictionary() {
+                               { "count", 6 },
+                               { "activeDotNumber", 6 }
+                             });
+                    }
+
                     <div class="col-md-12 onboarding-form-group">
                         <h1 class="text-center register-thankyou-2">Enter links.</h1>
                     </div>
@@ -88,7 +95,7 @@
                     <div class="text-center">
                         <a href="@Url.Action("done", "onboarding")" class="text-muted" style="font-size: 16px; font-weight: normal; font-stretch: normal; font-style: normal; line-height: normal; letter-spacing: normal; color: #979797; text-align: center; text-decoration: underline;">I'll do this later</a>
                     </div>
-                    <div class="clearfix"></div>                  
+                    <div class="clearfix"></div>
 
                 </form>
             </div>

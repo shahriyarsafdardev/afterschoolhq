@@ -59,7 +59,8 @@ namespace AfterSchoolLibrary.Services
                     attendance.LastModifiedDate = DateTime.UtcNow;
                     amsgs.AddRange(attendance.Save(adc));
 
-                    attendance.GetAttendanceRegistrants(amsgs, adc).ForEach(attendanceRegistrant => {
+                    attendance.GetAttendanceRegistrants(amsgs, adc).ForEach(attendanceRegistrant =>
+                    {
                         attendanceRegistrant.UpdateIsPresent(attendanceRegistrant.ID.Value.In(attendanceRegistrantIds), loggedInUser, amsgs, adc);
                     });
                 },
@@ -82,6 +83,11 @@ namespace AfterSchoolLibrary.Services
         public static List<AttendanceRegistrant> GetAttendanceRegistrants(this Attendance attendance, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return AttendanceRegistrant.LoadByAttendanceId(attendance.ID.Value, dc: dc);
+        }
+
+        public static AttendanceRegistrant GetAttendanceRegistrant(this Attendance attendance, int registrantId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value, registrantId, msgs, dc).LastOrDefault();
         }
 
         public static int GetAttendanceRegistrantCount(this Attendance attendance, SystemMessages msgs = null, DatabaseConnection dc = null)

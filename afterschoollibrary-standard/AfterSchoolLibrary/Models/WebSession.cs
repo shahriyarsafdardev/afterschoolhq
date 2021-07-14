@@ -183,9 +183,9 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
+		
 
-
-		#endregion
+        #endregion
 
 		#region "UserDefined"
 
@@ -203,7 +203,50 @@ namespace AfterSchoolLibrary.Models
 
 			return dq.ExecuteSelect(sql, msgs);
 		}
-		
+
+		public static WebSession LoadMostRecentByUserId(int webUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["WebUserId"], webUserId);
+			dq.SelectRange.Start = 0;
+			dq.SelectRange.Length = 1;
+			dq.OrderBys.Add("CreateDate", OrderByDirectionEnum.Descending);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
+		public static WebSession LoadMostRecentByAccountId(int accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountId"], accountId);
+			dq.SelectRange.Start = 0;
+			dq.SelectRange.Length = 1;
+			dq.OrderBys.Add("CreateDate", OrderByDirectionEnum.Descending);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
+
+
+		public static bool DoesTableExists(SystemMessages msgs = null, DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+
+			var sql = $@"
+				SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'WebSession'";
+
+			var result = dq.ExecuteSelect(sql, msgs);
+
+			if (result != null && result.Rows.Count > 0)
+				return true;
+			
+		return false;
+		}
+
 		#endregion
-	}
+    }
 }

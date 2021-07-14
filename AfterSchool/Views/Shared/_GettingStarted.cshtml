@@ -1,0 +1,182 @@
+﻿@{
+    var currentLevel = AccountService.OnboardingCompletionStatus(SessionVariables.CurrentAccount);
+    var currentProgress = AccountService.GetCurrentOnboardingProcess(SessionVariables.CurrentAccount);
+    string phrase1 = "", phrase2 = "", phrase3 = "", phrase4 = "", url = "";
+    Activity unpublishActivity = null;
+   
+    if (currentLevel == GettingStartedOptions.CreateProfile)
+    {
+        phrase1 = "Awesome!";
+        phrase2 = "You have taken the first steps to completing AfterSchool HQ profile. We just have a few more questions so we can create a profile for your incredible program.";
+        phrase3 = "Here’s what’s next:";
+        phrase4 = "Create Your Free Profile";
+        url = Url.Action("programinfo", "onboarding", new { area = "org" });
+    }
+    else if (currentLevel == GettingStartedOptions.CreateFirstActivity)
+    {
+        phrase1 = "Great Job!";
+        phrase2 = "You have set up your AfterSchool HQ profile, completing the first step in joining our mission to enable education for children everywhere.";
+        phrase3 = "Here’s what’s next:";
+        phrase4 = "Create Your First Activity";
+        url = Url.Action("editsetup", "activity", new { area = "org", isnew = 1, type = (int)ActivityType.Activity });
+    }
+    else if (currentLevel == GettingStartedOptions.ValidateEmail)
+    {
+        phrase1 = "You’re crushing it!";
+        phrase2 = "Thanks for creating your first activity! This makes it easy for students to find exciting and fulfilling programs that fit their interests and schedule.";
+        phrase3 = "Here’s what’s next:";
+        phrase4 = "Re-Send Verification Email";
+        url = "javascript:AccountSetup.sendVerificationEmail();";
+    }
+    else if (currentLevel == GettingStartedOptions.PublishActivity)
+    {
+        unpublishActivity = AccountService.GetUnpublishActivity(SessionVariables.CurrentAccount);
+        if (unpublishActivity.IsNotEmpty())
+        {
+            url = unpublishActivity.ShortHomePageUrl;
+        }
+
+        phrase1 = "Perfect!";
+        phrase2 = "You have created your activity and validated email, but you still have to publish your activity.";
+        phrase3 = "Let's do that.";
+        phrase4 = "Review & Publish Your Activity";
+    }
+    else if (currentLevel == GettingStartedOptions.AcceptPayments)
+    {
+        phrase1 = "You’re almost done!";
+        phrase2 = "Just one step left to go. Let’s get your payment method setup so that students can start registering right away.";
+        phrase3 = "Here’s what’s next:";
+        phrase4 = "Set Up Payment Methods";
+        url = "javascript:LoadPaymentModal();";
+    }
+    else if (currentLevel == GettingStartedOptions.ProcessCompleted)
+    {
+        phrase1 = "That’s it, rockstar!";
+        phrase2 = "Your AfterSchool HQ account is all set up and ready to go. Thank you for joining our mission to keep students learning and engaged, in person and online.";
+        phrase4 = "View Profile";
+        url = SessionVariables.CurrentAccount.ShortHomePageUrl;
+    }
+}
+
+<style>
+    .am-checkbox input[type="checkbox"] + label:before {
+        margin-right: 10px;
+    }
+
+    .am-checkbox input[type="checkbox"]:disabled + label {
+        opacity: 1;
+    }
+
+        .am-checkbox input[type="checkbox"]:disabled + label:before {
+            opacity: 0.5;
+        }
+</style>
+
+<div class="close-icon" onclick="return closeModalAndOpenDropDown();">
+    <a class="close close-icon-postion-2">
+        <span aria-hidden="true">&times;</span>
+    </a>
+</div>
+
+<div class="col-md-12 onboarding-form-group text-center">
+    <img src="~/img/tempsnip.png" class="img-responsive" style="display: initial;" />
+    <h1 class="text-center register-thankyou-2 onboarding-phrase-1">@phrase1</h1>
+</div>
+
+<div class="clearfix"></div>
+<div class="text-medium-small text-center">
+    <p class="padding-v-10 font-styling-18">
+        @phrase2
+    </p>
+
+    @if (phrase3.IsNotEmpty())
+    {
+        <p class="padding-v-10 font-styling-18">
+            @phrase3
+        </p>
+    }
+</div>
+<div class="clearfix"></div>
+
+<table class="table table-hover table-getting-started-options">
+    <tbody>
+        <tr @(currentLevel == GettingStartedOptions.CreateProfile ? "class=selected-tr" : "" )>
+            <td>
+                <div class="am-checkbox">
+                    <input id="chk-getting-started-profile" name="GettingStartedSelection" type="checkbox" disabled
+                           value="@GettingStartedOptions.CreateProfile"
+                           @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.CreateProfile)  ? "checked=\"checked\"" : "") />
+                    <label for="chk-getting-started-profile" class="font-styling-18 text-bold">Create your profile.</label>
+                    <p class="getting-started-info">Parent need to know what you offer. This helps us match parents to your program.</p>
+                </div>
+            </td>
+        </tr>
+
+        <tr @(currentLevel == GettingStartedOptions.CreateFirstActivity ? "class=selected-tr" : "" )>
+            <td>
+                <div class="am-checkbox">
+                    <input id="chk-getting-started-activity" name="GettingStartedSelection" type="checkbox" disabled
+                           value="@GettingStartedOptions.CreateFirstActivity"
+                           @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.CreateFirstActivity) ? "checked=\"checked\"" : "") />
+                    <label for="chk-getting-started-activity" class="font-styling-18 text-bold">Create your first activity.</label>
+                    <p class="getting-started-info">Adding your first activity informs parents of your program's offerings and enables them to register online immediately.</p>
+                </div>
+            </td>
+        </tr>
+
+        <tr @(currentLevel == GettingStartedOptions.ValidateEmail ? "class=selected-tr" : "" )>
+            <td>
+                <div class="am-checkbox">
+                    <input id="chk-getting-started-email" name="GettingStartedSelection" type="checkbox" disabled
+                           value="@GettingStartedOptions.ValidateEmail"
+                           @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.ValidateEmail) ? "checked=\"checked\"" : "") />
+                    <label for="chk-getting-started-email" class="font-styling-18 text-bold">Validate your email.</label>
+                    <p class="getting-started-info">We need to confirm your identity before we publish your programs and activities.</p>
+                </div>
+            </td>
+        </tr>
+
+        <tr @(currentLevel == GettingStartedOptions.AcceptPayments ? "class=selected-tr" : "" )>
+            <td>
+                <div class="am-checkbox">
+                    <input id="chk-getting-started-payments" name="GettingStartedSelection" type="checkbox" disabled
+                           value="@GettingStartedOptions.AcceptPayments"
+                           @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.AcceptPayments) ? "checked=\"checked\"" : "") />
+                    <label for="chk-getting-started-payments" class="font-styling-18 text-bold">Accept payments.</label>
+                    <p class="getting-started-info">Let's get you set up to make payments. This not only makes it easier for payments to pay, but you will also receive funds quicker.</p>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>
+<div class="clearfix"></div>
+
+<div class="margin-v-30 text-center">
+    <a href="@url" class="btn btn-primary btn-free-profile">@phrase4</a>
+</div>
+
+@if (currentProgress.Contains(GettingStartedOptions.CreateProfile))
+    {
+    @* Dont show View Profile unless profile has been created *@
+    <div class="margin-v-30 text-center">
+        <a href="javascript:void(0)" onclick="closeModalAndOpenDropDown()" class="FontSizeTextdecoration">View Profile</a>
+    </div>
+    }
+
+<div class="clearfix"></div>
+
+<script type="text/javascript">
+    function closeModal() {
+        $('#modal-getting-started').modal('hide');
+    }
+    function closeModalAndOpenDropDown() {
+        // set onboarding modal closed
+
+        //$('#modal-getting-started').modal('hide');  
+        closeModal();
+        popOverButton();
+        
+    }
+   
+</script>
+

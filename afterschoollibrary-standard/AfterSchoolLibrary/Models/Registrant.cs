@@ -264,6 +264,15 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
+		public static Registrant LoadByUidByAccountId(Guid Uid, int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["Uid"], Uid);
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
 		public static List<Registrant> LoadByWebUserIdByIsDeleted(int WebUserId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
@@ -567,6 +576,9 @@ namespace AfterSchoolLibrary.Models
 
         public string GetFirstNameLastInitial()
         {
+            if (this.FirstName.Length < 3 )
+                return $"{this.FirstName} {this.LastName.MaskString(1)}.";
+            
             return $"{this.FirstName.MaskString(Math.Max(this.FirstName.Length - 3, 3))} {this.LastName.MaskString(1)}.";
         }
 

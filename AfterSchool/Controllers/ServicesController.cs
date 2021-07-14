@@ -38,7 +38,10 @@ namespace AfterSchool.Controllers
 
                 participationObjects.ForEach(participationObject => {
                     if ( participationObject.RestrictByGrade() && !participationObject.IsStudentGradeInRange(registrant, msgs))
+                    {
                         ineligibleActivities.Add($"Grades {participationObject.Name}: {participationObject.GetMinGradeLevel(msgs).Abbreviation} - {participationObject.GetMaxGradeLevel(msgs).Abbreviation}");
+                        msgs.Add($"You might need to update {registrant.Name}'s grade in order to register them", MessageType.Warning);
+                    }
 
                     if (!participationObject.RestrictByGrade() && !participationObject.IsStudentAgeInRange(registrant, msgs))
                         ineligibleActivities.Add($"Ages {participationObject.Name}: {participationObject.AgeStart} - {participationObject.AgeEnd}");
@@ -463,7 +466,16 @@ namespace AfterSchool.Controllers
 
                     if (msgs.HasNoErrors())
                     {
-                        WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID.Value, text: account.Name, actionType: WebSessionActionType.Contacted, objectType: ObjectType.ContactList);
+                        // LOG: Someone Contacted Account AccountName
+                        SessionVariables.WebSession.LogActivity(
+                            account: account,
+                            actor: SessionVariables.CurrentUser, 
+                            actionType: WebSessionActionType.Contacted,
+                            objectType: ObjectType.Account,
+                            objectId: account?.ID.Value, 
+                            objectText: account?.Name
+                        );
+                        
                         EmailHelper.SendContactProviderEmail(account, contact, msgs);
                     }
                 }
@@ -503,7 +515,16 @@ namespace AfterSchool.Controllers
 
                 if (msgs.HasNoErrors())
                 {
-                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID.Value, text: account.Name, actionType: WebSessionActionType.Followed, objectType: ObjectType.Account);
+                    // LOG: Someone Followed Account AccountName
+                    SessionVariables.WebSession.LogActivity(
+                        account: account,
+                        actor: SessionVariables.CurrentUser,
+                        actionType: WebSessionActionType.Followed,
+                        objectType: ObjectType.Account,
+                        objectId: account?.ID.Value,
+                        objectText: account?.Name
+                    );
+
                     return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
                 }
             }
@@ -541,13 +562,31 @@ namespace AfterSchool.Controllers
 
                 if (msgs.HasNoErrors())
                 {
-                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID.Value, text: account.Name, actionType: WebSessionActionType.Unfollowed, objectType: ObjectType.Account);
+                    // LOG: Someone Unfollowed Account AccountName
+                    SessionVariables.WebSession.LogActivity(
+                        account: account,
+                        actor: SessionVariables.CurrentUser,
+                        actionType: WebSessionActionType.Unfollowed,
+                        objectType: ObjectType.Account,
+                        objectId: account?.ID.Value,
+                        objectText: account?.Name
+                    );
                     return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
                 }
             }
 
             return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
 
+        }
+
+        #endregion
+
+        #region OnboardingStepsAcknowledged
+        public ActionResult SetOnboardingStepsAcknowledged()
+        {
+            CookieVariables.OnboardingStepsAcknowledged = true.ToString();
+
+            return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
         }
 
         #endregion
@@ -708,29 +747,46 @@ namespace AfterSchool.Controllers
             return Json(new { status, coupon, amount, calculatedAmountCC, calculatedAmountACH, calculatedCCFee, numberInMonths, subscriptionPlanAmount, postPayPlanAmount, discountString, messages = msgs }, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult SubmitContactForm(string name, string email, string message, string g_recaptcha_response)
+        public ActionResult SubmitContactForm(string name, string fromEmail, string pageName, string message, string phone, string MainSubject, string g_recaptcha_response)
         {
             if (!IsRequestFromApp())
                 return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
 
             var msgs = new SystemMessages();
-
+            string toEmail = "";
             if (name.IsBlank())
                 msgs.Add("Please enter your name", MessageType.UserError);
 
-            if (!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
+            if (fromEmail.IsBlank() || !fromEmail.IsMatch(BasicLibrary.Utilities.EmailRegEx))
                 msgs.Add("Please enter your email", MessageType.UserError);
 
             if (message.IsBlank())
                 msgs.Add("Please enter a message", MessageType.UserError);
 
+
+            if (phone.IsNotEmpty() && !phone.IsPhone())
+                msgs.Add("Phone number is not in a valid format", MessageType.UserError);  
+            
+           
             msgs.AddRange(RecaptchaHelper.Validate(g_recaptcha_response));
+                
+
+            switch(pageName)
+            {
+                case "search":
+                    toEmail = AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress;
+                    break;
+                // case "contact":
+                default:
+                    toEmail = AfterSchoolLibrary.Helpers.Email.AppSalesEmailAddress;
+                    break;
+            }
 
             if (msgs.HasNoErrors())
                 msgs.AddRange(EmailHelper.SendEmail(
-                    toEmail: "sales@afterschoolhq.com",
-                    subject: $"WEBSITE FORM FROM: {name}",
-                    body: string.Format("<p>from: <a href=\"mailto:{0}\">{0}</a></p><p>{1}</p>", email, message),
+                    toEmail: toEmail,
+                    subject: MainSubject.IsNotEmpty()? MainSubject: $"WEBSITE FORM FROM: {name}",
+                    body: string.Format("<p>from: <a href=\"mailto:{0}\">{0}</a></p><p>{1}</p>", fromEmail, message),
                     isAfterSchool: true));
 
             var status = msgs.HasNoErrors() ? "ok" : "error";

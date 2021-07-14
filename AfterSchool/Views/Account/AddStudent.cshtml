@@ -54,7 +54,7 @@
                         </p>
                     </div>
 
-                    <form class="form-horizontal" id="add-student-form" method="post" action="@Url.Action("addstudent", "account")">
+                    <form class="form-horizontal" id="add-student-form" method="post" action="@Url.Action("addstudent", "account")" onkeydown="return event.key != 'Enter';">
 
                         @foreach (var qvm in Model)
                         {
@@ -88,10 +88,16 @@
                             </div>
                             <div class="col-md-6">
                                 @{ Html.RenderPartial(
-                                       "~/Views/Shared/Components/_GoogleLocationEdit.cshtml", 
-                                       new Location() { }, 
-                                       new ViewDataDictionary() { { "types", "establishment" }, { "description", "Enter your school name" } }); 
-                                }
+                                        "~/Views/Shared/Components/_GoogleLocationEdit.cshtml",
+                                        new Location() { },
+                                        new ViewDataDictionary() { { "types", "establishment" }, { "description", "Enter your school name" } });
+                                }                                
+                                <div class="am-checkbox">
+                                    <input type="checkbox" id="schoolnotfound" name="schoolnotfound" value="true"/>
+                                    <label for="schoolnotfound">
+                                        I can’t find my child’s school or my child is homeschooled
+                                    </label>
+                                </div>
                             </div>
                         </div>
                         
@@ -120,6 +126,13 @@
             $('#btn-add-student').html('Saving Student Info...');
             $('#btn-add-student').prop('disabled', true);
         });
+
+        $('#schoolnotfound').click(function () {
+            if ($(this).prop("checked") == true) {
+                $('#location').val('');
+                $('#placeid').val('');
+            }
+        });
     });
 </script>
 
@@ -132,6 +145,6 @@
         {
             { "IsDuringCheckout", true },
             { "AllowToModifyCart", false }
-                    }
+        }
     );
 }

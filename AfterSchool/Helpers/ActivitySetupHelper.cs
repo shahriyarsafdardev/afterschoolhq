@@ -63,7 +63,7 @@ namespace AfterSchool.Helpers
             else if (cmd == "publish")
             {
                 if (canPublishActivity)
-                    return "Save &amp; Publish &raquo;";
+                    return "Save &amp; Review &raquo;";
 
                 if (isTop)
                     return "Submit &raquo;";

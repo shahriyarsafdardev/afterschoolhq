@@ -99,6 +99,15 @@ Public Module Extensions
         Dim day As Integer = Convert.ToInt32(aDate.DayOfWeek)
         Return aDate.AddDays(6 - day)
     End Function
+    <Extension>
+    Public Function FirstDateOfMonth(ByVal aDate As Date) As Date
+        Return New DateTime(aDate.Year, aDate.Month, 1)
+    End Function
+
+    <Extension>
+    Public Function LastDateOfMonth(ByVal aDate As Date) As Date
+        Return New DateTime(aDate.Year, aDate.Month, aDate.DaysInMonth(aDate.Year, aDate.Month))
+    End Function
 
     <Extension>
     Public Function AsList(Of T)(ByVal aObj As T) As List(Of T)
@@ -167,6 +176,11 @@ Public Module Extensions
     Public Function FarthestDate(ByVal aList As IEnumerable(Of DateTime), ByVal bDate As DateTime) As DateTime
         Return aList.OrderBy(Function(x) Math.Abs((bDate - x).Ticks)).Last()
     End Function
+    <Extension>
+    Public Function DatesAreInSameWeek(ByVal aDate As DateTime, ByVal bDate As DateTime) As Boolean
+        Return Equals(aDate.AddDays(-1 * aDate.DayOfWeek), bDate.AddDays(-1 * bDate.DayOfWeek))
+    End Function
+
 
     <Extension()>
     Public Function Shuffle(Of T)(ByVal value As IEnumerable(Of T)) As IEnumerable(Of T)
@@ -532,6 +546,19 @@ Public Module Extensions
         Catch ex As Exception
             Return False
         End Try
+    End Function
+    <Extension()>
+    Public Function IsNotGuid(ByVal aString As String) As Boolean
+        Try
+            Return Not IsGuid(aString)
+        Catch ex As Exception
+            Return False
+        End Try
+    End Function
+
+    <Extension()>
+    Public Function ToGuid(ByVal aObj As Object) As Guid
+        Return New Guid(aObj.ToString())
     End Function
 
     <Extension()>

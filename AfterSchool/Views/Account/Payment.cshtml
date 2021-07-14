@@ -11,7 +11,7 @@
     var accountCanAcceptPayments = (bool)ViewBag.AccountCanAcceptPayments;
     var paymentAccount = participationObject.PaymentAccount;
     var subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
-    var postPayPlan = participationObject.PostPayPlans.FirstOrDefault();
+    var postPayPlan = participationObject.PostPayPlans?.FirstOrDefault();
     var registrant = registration.GetRegistrant();
     var readyToAcceptPayment = subscriptionPlan.IsEmpty() || !subscriptionPlan.SplitCostEvenly || participationObject.RegistrationFinalized;
 }
@@ -32,7 +32,7 @@
             if (planStartDate.Date != DateTime.UtcNow.Date)
             {
                 startDateText = planStartDate.ToLongDateString();
-            }
+            } 
 
             <span>
                 @(includePlus ? "plus a" : "") subscription of <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> every <strong>@plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong> starting <strong>@startDateText</strong>
@@ -186,6 +186,12 @@
                                     {
                                         <p>Pay @PrintSubscriptionCost(subscriptionPlan, participationObject, false)</p>
                                     }
+
+                                    @if (participationObject.Schedule.IsNotEmpty() && participationObject.Schedule.EndDate.HasValue)
+                                    {
+                                        <p>Payments will automatically end after <strong> @participationObject.Schedule.EndDate.ToShortDateString() (Activity End Date) </strong>.</p>
+                                    }
+
                                     <hr />
                                 </div>
                             </div>
@@ -195,8 +201,8 @@
                             <div class="row">
                                 <div class="col-md-6 col-md-offset-3 col-sm-12 text-center text-medium-small">
                                     <p>
-                                        The cost will be <span class="text-bold">@participationObject.GetPostPayCostWithConvenienceFee().ToCurrency()</span> per class attended per student
-                                        @if (participationObject.GetPostPayCheckoutCostWithConvenienceFee() > 0)
+                                        The cost will be <span class="text-bold">@participationObject.GetPostPayCostWithConvenienceFee().ToCurrency()</span> per @postPayPlan.BillingPeriodTypeId.ToString().ToLower() attended per student
+                                        @if (participationObject.GetPostPayCheckoutCostWithConvenienceFee() > 0 && postPayPlan.NumberOfPeriodsPrePaid > 0)
                                         {
                                             <br />
                                             <span>

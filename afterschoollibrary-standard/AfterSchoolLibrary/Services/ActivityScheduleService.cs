@@ -106,5 +106,16 @@ namespace AfterSchoolLibrary.Services
 
             return schedule;
         }
+
+        public static bool IsEndingInTwoDays(this ActivitySchedule schedule, Account ownerAccount = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (schedule.IsNotEmpty())
+            {
+                var now = (ownerAccount ?? schedule.GetAccount(msgs, dc)).ConvertToAccountTimeZone(DateTime.UtcNow);
+                return now.AddDays(2).IsOnOrAfter(schedule.EndDate.Value);
+            }
+
+            return false;
+        }
     }
 }

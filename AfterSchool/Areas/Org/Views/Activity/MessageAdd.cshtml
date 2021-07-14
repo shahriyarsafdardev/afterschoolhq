@@ -4,6 +4,7 @@
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
 
     var registrants = (List<Registrant>)ViewBag.Registrants;
+    var body = ViewBag.Body;
     var registrantsPerColumn = Math.Ceiling(registrants.Count / 3.0).ToInteger();
 
     var accountPackage = SessionVariables.AccountPackage;
@@ -58,7 +59,7 @@
                     <div class="form-group">
                         <label class="col-sm-3 control-label">Message Body</label>
                         <div class="col-sm-6">
-                            <textarea name="body" id="body" required style="width: 100%" rows="5" class="form-control"></textarea>
+                            <textarea name="body" id="body" required style="width: 100%" rows="5" class="form-control">@body</textarea>
                             <p class="text-muted">Max of 1000 characters</p>
                         </div>
                     </div>
@@ -135,7 +136,7 @@
                         <label class="col-sm-3 control-label"></label>
                         <div class="col-sm-6">
                             <div class="pull-left">
-                                <a href="@Url.Action("messages", "activity", new { Model.Uid })" class="text-muted">
+                                <a href="@Url.Action("messages", "activity", new { id = Model.Uid })" class="text-muted">
                                     &laquo; Cancel
                                 </a>
                             </div>

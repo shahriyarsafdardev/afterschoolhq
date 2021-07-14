@@ -320,6 +320,24 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
+		public static Transaction LoadByUidByBillerAccountId(Guid Uid, int BillerAccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["Uid"], Uid);
+			dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
+		public static Transaction LoadByUidByPayerAccountId(Guid Uid, int PayerAccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["Uid"], Uid);
+			dq.Criterias.Add(ObjectMap["PayerAccountId"], PayerAccountId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
 		public static List<Transaction> LoadByBillerAccountIdByTransactionTypeIdByIsDeleted(int BillerAccountId, TransactionType TransactionTypeId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
@@ -617,17 +635,7 @@ namespace AfterSchoolLibrary.Models
             return BuildSearchQuery(BillerAccountId, PayerAccountId, search, startDate, endDate, participationObjects, isDeleted, msgs, dc).GetCount(msgs);
         }
 
-        public static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)> GetParticipationObjectsByBillerAccountId(int BillerAccountId, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-        {
-            return GetParticipationObjectsByBillerOrPayerAccountId(BillerAccountId, null, startDate, endDate, isDeleted, msgs, dc);
-        }
-
-        public static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)> GetParticipationObjectsByPayerAccountId(int PayerAccountId, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-        {
-            return GetParticipationObjectsByBillerOrPayerAccountId(null, PayerAccountId, startDate, endDate, isDeleted, msgs, dc);
-        }
-
-        private static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)> GetParticipationObjectsByBillerOrPayerAccountId(int? billerAccountId, int? payerAccountId, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)> GetParticipationObjectsByBillerOrPayerAccountId(int? billerAccountId, int? payerAccountId, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -1218,7 +1226,7 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["PaymentSourceTypeId"], (int)paymentSourceType);
 
             var results = dq.Select(msgs);
-            if (results.Rows.Any())
+            if (results.IsNotEmpty() && results.Rows.Any())
                 return results.Rows[0][0].ToString().ToDecimal();
 
             return 0;
@@ -1395,6 +1403,24 @@ namespace AfterSchoolLibrary.Models
                 return dt.Rows[0][0].ToString().ToDecimal();
 
             return 0;
+        }
+
+        public static List<Transaction> LoadByIdsByBillerAccountId(List<int> ids, int accountId, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["BillerAccountId"], accountId);
+            dq.Criterias.Add(ObjectMap["ID"], ids, DatabaseCriteriaOperatorEnum.In);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<Transaction> LoadByIdsByPayerAccountId(List<int> ids, int accountId, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["PayerAccountId"], accountId);
+            dq.Criterias.Add(ObjectMap["ID"], ids, DatabaseCriteriaOperatorEnum.In);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
         #endregion

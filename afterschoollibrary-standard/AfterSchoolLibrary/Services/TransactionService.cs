@@ -17,7 +17,7 @@ namespace AfterSchoolLibrary.Services
                 return 0;
 
             // handle old transactions
-            if (!transaction.ConvenienceFeePayerAccountId.HasValue)
+            if (!transaction.ConvenienceFeeCharged.HasValue && !transaction.ConvenienceFeePayerAccountId.HasValue)
                 return (transaction.Amount.Value * transaction.PlatformPercentFee.Value) + transaction.PlatformFlatFee.Value;
 
             var total = 0M;
@@ -75,9 +75,9 @@ namespace AfterSchoolLibrary.Services
                     return originalBillerAmount;
 
                 return transaction.Amount.Value;
-            }
+            };
 
-            return transaction.Amount.Value - transaction.GetFees() - transaction.GetRefundedAmountAHQ(msgs, dc);
+            return Math.Max(transaction.Amount.Value - transaction.GetFees() - transaction.GetRefundedAmountAHQ(msgs, dc),0);
         }
 
         public static decimal GetPayerAmount(this Transaction transaction)
@@ -338,7 +338,7 @@ namespace AfterSchoolLibrary.Services
                 if (allowFullAmountRefund)
                     return transaction.GetPayerAmount() - transaction.GetRefundedAmountAHQ(msgs, dc);
 
-                return transaction.GetBillerPayout(msgs, dc) + transaction.GetFeesChargedToBiller();
+                return transaction.GetBillerPayout(msgs, dc) + transaction.GetFeesChargedToBiller() - transaction.GetRefundedAmountAHQ(msgs, dc);
             }
 
             return 0;
@@ -638,8 +638,8 @@ namespace AfterSchoolLibrary.Services
                         var billerPayout = transaction.GetBillerPayout(msgs, dc);
                         var amountToReverse = Math.Min(billerPayout, refundAmount);
 
-                       var transferReversal = Billing.StripeHelper.CreateTransferReversal(stripeTransferId, amountToReverse, msgs);
-
+                        if (stripeTransferId.IsNotEmpty() && amountToReverse > 0)
+                           StripeHelper.CreateTransferReversal(stripeTransferId, amountToReverse, msgs);
                     }
                     else
                         msgs.Add("Error creating refund", MessageType.UserError);

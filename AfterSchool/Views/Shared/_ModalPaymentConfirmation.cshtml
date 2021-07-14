@@ -1,0 +1,153 @@
+﻿@model Account
+@{
+    var account = SessionVariables.CurrentAccount;
+    var currentUser = SessionVariables.CurrentUser;
+    var activityUid = ViewBag.ActivityUid != null ? (Guid)ViewBag.ActivityUid : new Guid();
+}
+
+<div id="modal-payment-confirmation" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content modal-min-width modal-box">
+            <div class="modal-body">
+                <div class="close-icon" onclick="return closePaymentModal();">
+                    <a class="close close-icon-position">
+                        <span aria-hidden="true">&times;</span>
+                    </a>
+                </div>
+
+                <div class="modal-box-body">
+                    <div class="col-md-12">
+                        <div class="margin-20">
+                            <h3 class="text-center text-bold">Last Step:</h3>
+                            <h3 class="text-center text-bold">Please choose how you want us to pay you.</h3>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr class="bg-success">
+                                            <th class="text-center text-bold text-white">
+                                                <h4>
+                                                    Get Paid<br />via Direct Deposit
+                                                </h4>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="text-center"><div class="padding-10 font-size-16">Get payouts daily</div></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-center"><div class="padding-10 font-size-16">Deposits take only 2 days</div></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-center"><div class="padding-10 font-size-16">No more trips to the bank</div></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-center"><div class="padding-10 font-size-16">Automated payouts</div></td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                @if (!account.HasStripeConnectedAccount)
+                                                {
+                                                    Session["activityUid"] = activityUid;
+                                                    var redirectUri = Server.UrlEncode($"{AfterSchoolLibrary.Helpers.Utilities.BaseUrl()}/org/account/oauthstripe/");
+                                                    var email = currentUser.Email.IsEmail() ? Server.UrlEncode(currentUser.Email) : Server.UrlEncode(account.Email);
+                                                    var website = Server.UrlEncode(account.ShortHomePageUrl);
+                                                    var linkUrl = $"https://connect.stripe.com/express/oauth/authorize?redirect_uri={redirectUri}&state={Request["source"]}&client_id={AfterSchoolLibrary.Billing.StripeHelper.PlatformClientId}&stripe_user[email]={email}&stripe_user[url]={website}";
+
+                                                    <a id="link-dd" href="@linkUrl" class="btn btn-alt5">
+                                                        @if (account.CanReceiveACHDeposits())
+                                                        {
+                                                            @:Upgrade to Automated Deposits
+                                                        }
+                                                        else
+                                                        {
+                                                            @:Choose Direct Deposits &raquo;
+                                                        }
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <button class="btn btn-alt5" disabled="disabled">
+                                                        <i class="s7-check-circle"></i> Connected
+                                                    </button>
+                                                }
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr class="bg-success">
+                                            <th class="text-center text-bold text-white">
+                                                <h4>
+                                                    Get Paid<br />via Check
+                                                </h4>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="text-center"><div class="padding-10 font-size-16">Get payouts bi-weekly</div></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-center"><div class="padding-10 font-size-16">Checks take 5 - 7 days</div></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-center"><div class="padding-10 font-size-16">You'll still have to deposit your check</div></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-center"><div class="padding-10 font-size-16">Must request payout</div></td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                @if (account.AccountTypeId.In(AccountService.LocationProviderAccountTypes))
+                                                {
+                                                    if (account.GetCheckPaymentAccount().IsEmpty())
+                                                    {
+                                                        <a id="link-check" href="@Url.Action("checksetup", "account", new { isnew = 1, area="org", isaccountredirect = 1 })" class="btn btn-default">
+                                                            Choose Checks &raquo;
+                                                        </a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <a id="link-check" href="@Url.Action("checksetup", "account", new { area="org", isaccountredirect = 1 })" class="btn btn-default">
+                                                            Update Payout Details &raquo;
+                                                        </a>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <a id="link-check" class="btn btn-default" disabled>
+                                                        Must be a school, community center, or church
+                                                    </a>
+                                                }
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="clearfix"></div>
+                            <br />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function closePaymentModal() {
+        $('#modal-payment-confirmation').modal('hide');
+        $('#modal-payment-confirmation-accountView').addClass('hide');
+        return false;
+    }
+</script>

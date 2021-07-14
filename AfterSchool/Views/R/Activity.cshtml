@@ -37,20 +37,28 @@
             showLocation = true;
         }
     }
+    
+    var isAccountAndLoggedInUserIsOwner = Model.IsNotEmpty() &&
+        Model.OwnerAccount.IsNotEmpty() &&
+        SessionVariables.CurrentAccount.IsNotEmpty() &&
+        SessionVariables.CurrentUser.IsNotEmpty() &&
+        (SessionVariables.CurrentAccount.ID == Model.OwnerAccount.ID) &&
+        (SessionVariables.CurrentUser.HasAccessTo(Model.OwnerAccount));
+    
 }
-
+<style>
+    .disabled {
+        cursor:not-allowed !important;
+        pointer-events: unset  !important;
+    }
+</style>
 @{
-    Html.RenderPartial(
-        "~/Views/Shared/Registration/_AccountTopBar.cshtml",
-        account,
-        new ViewDataDictionary()
-        {
-            { "LoginReturnUrl", Model.GetHomePageUrl() },
-            { "CanPublishActivity", ViewBag.CanPublishActivity },
-            { "ParticipationObject", Model },
-            { "Session", session }
-                                }
-    );
+    Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", account, new ViewDataDictionary() {
+        { "LoginReturnUrl", Model.GetHomePageUrl() },
+        { "CanPublishActivity", ViewBag.CanPublishActivity },
+        { "ParticipationObject", Model },
+        { "Session", session }
+    });
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -114,7 +122,7 @@
                                    { "canRegisterFor", ViewBag.CanRegisterFor },
                                    { "session", session },
                                    { "accountprofile", ViewBag.AccountProfile }
-                               }
+               }
                             );
                         }
                     </div>
@@ -269,6 +277,27 @@
     </div>
 </div>
 
+@if (isAccountAndLoggedInUserIsOwner)
+{
+<div id="footer-activity" class="activity-footer text-center hide">
+    <span class="span-upgrade-modal-close" onclick="return hideActivityRibbon()">X</span>
+    @if (Model.IsPublished)
+    {
+        <button class="btn btn-default btn-activity-footer">Share</button>
+        <a href="@Url.Action("editsetup", "activity", new { id = Model.Uid, area = "org" })" class="btn btn-default btn-activity-footer">Edit Activity</a>
+    }
+    else
+    {
+        <button class="btn btn-default btn-activity-footer" disabled>Share</button>
+        <a href="@Url.Action("editsetup", "activity", new { id = Model.Uid, area = "org" })" class="btn btn-default btn-activity-footer">Return to Edit</a>
+        <a href="@Url.Action("publish", "activity", new { id = Model.Uid, isFromActivityHome = true, area = "org" })" class="btn btn-default btn-activity-footer">Publish</a>
+    }
+
+</div>
+
+    Html.RenderPartial("~/Views/Shared/_GettingStartedModal.cshtml", Model.OwnerAccount, new ViewDataDictionary() { { "ActivityUid", Model.Uid }, { "IsActivityFree", Model.IsFree } });
+}
+
 @if (session.IsNotEmpty())
 {
     Html.RenderPartial("~/Views/Shared/Registration/_BrowseCart.cshtml", session);
@@ -281,3 +310,9 @@
 {
     @{ Html.RenderPartial("~/Views/Shared/Registration/_ShareMetaTags.cshtml", new RegistrationHeaderViewModel(Model, accountProfile)); }
 }
+
+<script type="text/javascript">
+    function hideActivityRibbon() {
+        $('#footer-activity').fadeOut();
+    };
+</script>

@@ -60,6 +60,7 @@ namespace AfterSchoolLibrary.Models
         public bool RegistrationFinalized { get; set; }
         public int? SeatsTaken { get; set; }
         public bool HidePreciseLocation { get; set; }
+        public bool IsPublished { get; set; }
 
         public ParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -77,6 +78,9 @@ namespace AfterSchoolLibrary.Models
 
         private void InitObject(int participationObjectId, ParticipationObjectType participationObjectType, bool loadAllDetails, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            this.SubscriptionPlans = new List<SubscriptionPlan>();
+            this.PostPayPlans = new List<SubscriptionPlan>();
+            this.PaymentPlans = new List<SubscriptionPlan>();
             switch (participationObjectType)
             {
                 case ParticipationObjectType.AccountActivityGroup:
@@ -126,6 +130,7 @@ namespace AfterSchoolLibrary.Models
             HidePreciseLocation = activity.HidePreciseLocation;
             AgeStart = activity.AgeStart;
             AgeEnd = activity.AgeEnd;
+            IsPublished = activity.IsPublished;
 
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {
@@ -486,6 +491,17 @@ namespace AfterSchoolLibrary.Models
             return null;
         }
 
+        public ActivityInstance GetUpcomingActivityInstance(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (IsActivity())
+            {
+                var instances = Schedule.GetUpcomingInstance(msgs, dc);
+                return instances.FirstOrDefault();
+            }
+
+            return null;
+        }
+
         public bool IsInSession(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (IsActivity())
@@ -582,6 +598,25 @@ namespace AfterSchoolLibrary.Models
                 return GetActivityGroup().RestrictByGrade();
 
             return true;
+        }
+
+        public ObjectType GetWebSessionObjectType()
+        {
+            switch (ObjectType)
+            {
+                case ParticipationObjectType.AccountActivityGroup:
+                    return global::ObjectType.AccountActivityGroup;
+
+                case ParticipationObjectType.Activity:
+                    return global::ObjectType.Activity;
+
+                case ParticipationObjectType.ActivityGroup:
+                    return global::ObjectType.ActivityGroup;
+
+                default:
+                    return global::ObjectType.NotSet;
+            }
+                
         }
 
         #endregion
@@ -758,7 +793,7 @@ namespace AfterSchoolLibrary.Models
         #region "PostPayPlan"
         public decimal GetPostPayCost()
         {
-            if (this.PostPayPlans.Any() && this.PostPayPlans.First().CostPerPeriod.HasValue)
+            if (this.PostPayPlans.IsNotEmpty() && this.PostPayPlans.Any() && this.PostPayPlans.First().CostPerPeriod.HasValue)
                 return this.PostPayPlans.First().CostPerPeriod.Value;
 
             return 0;
@@ -820,7 +855,7 @@ namespace AfterSchoolLibrary.Models
             if ((plan?.NumberOfPeriodsPrePaid).IsPositive())
                 return GetPostPayCreditCardFee() * plan.NumberOfPeriodsPrePaid.Value;
 
-            return 0;
+            return GetPostPayCreditCardFee();
         }
 
         public decimal GetCheckoutPostPayConvenienceFee()
@@ -830,7 +865,7 @@ namespace AfterSchoolLibrary.Models
             if ((plan?.NumberOfPeriodsPrePaid).IsPositive())
                 return GetPostPayConvenienceFee() * plan.NumberOfPeriodsPrePaid.Value;
 
-            return 0;
+            return GetPostPayConvenienceFee();
         }
 
         public decimal GetPostPayCheckoutCostWithConvenienceFee()
@@ -840,7 +875,7 @@ namespace AfterSchoolLibrary.Models
             if ((plan?.NumberOfPeriodsPrePaid).IsPositive())
                 return plan.NumberOfPeriodsPrePaid.Value * GetPostPayCostWithConvenienceFee();
 
-            return 0;
+            return GetPostPayCostWithConvenienceFee();
         }
 
         public decimal GetPostPayCheckoutCostWithoutConvenienceFee()
@@ -857,17 +892,19 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetCheckoutCostWithConvenienceFee()
         {
-            if (this.PostPayPlans.Any())
+            if (this.PostPayPlans.IsNotEmpty() && this.PostPayPlans.Any())
                 return GetPostPayCheckoutCostWithConvenienceFee();
 
             if (this.Cost.HasValue)
             {
-                var activity = this.GetActivity();
-
-                if (activity.IsNotEmpty())
-                    return Cost.Value
-                        + (activity.IsConvenienceFeeTakenOutOfCost ? 0 : GetConvenienceFee());
-
+                if (this.IsActivity())
+                {
+                    var activity = this.GetActivity();
+                
+                    if (activity.IsNotEmpty())
+                        return Cost.Value
+                            + (activity.IsConvenienceFeeTakenOutOfCost ? 0 : GetConvenienceFee());
+                }
                 return Cost.Value + GetConvenienceFee();
             }
 
@@ -902,6 +939,70 @@ namespace AfterSchoolLibrary.Models
                                 OwnerAccount,
                                 this)
                             .GetConvenienceFee();
+
+            return 0;
+        }
+
+        /// <summary>
+        /// use-case: simple scenario is classes are from Oct 1 - Dec 31, and someone signs up Nov 1, they should only have to pay for Nov 1 - Dec 31st.
+        /// We'd have to calculate the # of payments based on total periods and total activity instances 
+        /// </summary>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        public int? GetNumberOfRemainingPayments(int totalPeriods, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty())
+                msgs = new SystemMessages();
+
+            if (totalPeriods > 0 && Schedule.IsNotEmpty() && Schedule.ID.HasValue)
+            {
+                var activityInstances =  ActivityInstance.LoadByActivityScheduleId(Schedule.ID.Value, msgs);
+                var upcomingInstances = Schedule.GetUpcomingInstance(msgs);
+
+                var numberofPeriodsToBePaid = (upcomingInstances.Count * totalPeriods) / activityInstances.Count;
+                return Convert.ToInt32(Math.Ceiling(numberofPeriodsToBePaid.ToDecimal()));
+            }
+
+            return null;
+        }
+
+        public int GetNumberOfClassesInCurrentCycle(BillingPeriodType billingPeriodTypeId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var classes = 0;
+            if (Schedule.IsNotEmpty() && Schedule.ID.HasValue)
+            {
+                if (billingPeriodTypeId == BillingPeriodType.Month)
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.FirstDateOfMonth(), DateTime.Now.LastDateOfMonth(), msgs,dc).Count;
+                else if (billingPeriodTypeId == BillingPeriodType.Week)
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.FirstDateOfWeek(), DateTime.Now.LastDateOfWeek(), msgs,dc).Count;
+            }
+
+            return classes;
+        }
+
+        public int GetNumberOfRemainingClassesInCurrentCycle(BillingPeriodType billingPeriodTypeId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var classes = 0;
+            if (Schedule.IsNotEmpty() && Schedule.ID.HasValue)
+            {
+                if (billingPeriodTypeId == BillingPeriodType.Month)
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now, DateTime.Now.LastDateOfMonth(), msgs,dc).Count;
+                else if (billingPeriodTypeId == BillingPeriodType.Week)
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now, DateTime.Now.LastDateOfWeek(), msgs,dc).Count;
+            }                
+
+            return classes;
+        }
+
+        public int GetNumberOfRemainingClassesInNextCycle(BillingPeriodType billingPeriodTypeId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (Schedule.IsNotEmpty() && Schedule.ID.HasValue)
+            {
+                if (billingPeriodTypeId == BillingPeriodType.Month)
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.AddMonths(1).FirstDateOfMonth(), DateTime.Now.AddMonths(1).LastDateOfMonth(), msgs,dc).Count;
+                else if (billingPeriodTypeId == BillingPeriodType.Week)
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.AddWeeks(1).FirstDateOfWeek(), DateTime.Now.AddWeeks(1).LastDateOfWeek(), msgs,dc).Count;
+            }
 
             return 0;
         }

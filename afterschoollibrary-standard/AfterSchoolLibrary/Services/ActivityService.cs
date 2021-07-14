@@ -100,12 +100,12 @@ namespace AfterSchoolLibrary.Services
 
         public static string BuildHomePageUrl(string accountUniqueName, ActivityType activityType, string activityUniqueName)
         {
-            return $"{Helpers.Utilities.BaseUrl()}/{accountUniqueName}/{activityType.ToString().ToLower()}/{activityUniqueName.ToLower()}";
+            return $"{Helpers.Utilities.BaseUrl()}/{accountUniqueName}/{activityType.ToString().ToLower()}/{activityUniqueName?.ToLower()}";
         }
 
         public static string BuildShortHomePageUrl(string accountUniqueName, ActivityType activityType, string activityUniqueName)
         {
-            return $"{Helpers.Utilities.ShortBaseUrl()}/{accountUniqueName}/{activityType.ToString().ToLower()}/{activityUniqueName.ToLower()}";
+            return $"{Helpers.Utilities.ShortBaseUrl()}/{accountUniqueName}/{activityType.ToString().ToLower()}/{activityUniqueName?.ToLower()}";
         }
 
         public static bool IsFull(this Activity activity, DatabaseConnection dc = null)
@@ -513,7 +513,7 @@ namespace AfterSchoolLibrary.Services
                 {
                     var account = activity.GetAccount(amsgs, adc);
 
-                    newName = newName.MaxChars(50);
+                    newName = newName.MaxChars(75);
 
                     copy = activity.CopyFields();
                     copy.Name = newName;
@@ -828,6 +828,11 @@ namespace AfterSchoolLibrary.Services
             var hassubscriptionplan = values.GetValueOrDefault("hassubscriptionplan");
             var subscriptionplancost = values.GetValueOrDefault("subscriptionplancost");
             var subscriptionplanperiod = values.GetValueOrDefault("subscriptionplanperiod");
+            var subscriptionPlanPeriodNumber = values.GetValueOrDefault("subscriptionPlanPeriodNumber");
+            var subscriptionPaymentStartType = values.GetValueOrDefault("subscriptionPaymentStartType");
+            var subscriptionStartDate = values.GetValueOrDefault("subscriptionStartDate");
+            var subscriptionEndDate = values.GetValueOrDefault("subscriptionEndDate");
+            var isongoingsubscription = values.GetValueOrDefault("isongoingsubscription"); 
             var haspaymentplan = values.GetValueOrDefault("haspaymentplan");
             var paymentplancost = values.GetValueOrDefault("paymentplancost");
             var paymentplanperiod = values.GetValueOrDefault("paymentplanperiod");
@@ -854,6 +859,7 @@ namespace AfterSchoolLibrary.Services
             var isparentpricepaymentplan = values.GetValueOrDefault("isparentpricepaymentplan");
             var isparentpricesubscription = values.GetValueOrDefault("isparentpricesubscription");
             var prepaidperiodspostpay = values.GetValueOrDefault("prepaidperiodspostpay");
+            var postpayplanperiod = values.GetValueOrDefault("postpayplanperiod");
 
             var activityType = ActivityType.NotSet;
 
@@ -1223,9 +1229,14 @@ namespace AfterSchoolLibrary.Services
                                 hassubscriptionplan.IfEmpty(""),
                                 subscriptionplancost.IfEmpty(""),
                                 subscriptionplanperiod.IfEmpty(""),
+                                subscriptionPlanPeriodNumber.IfEmpty(""),
+                                subscriptionPaymentStartType.IfEmpty(""),
+                                subscriptionStartDate.IsNotEmpty() ? Convert.ToDateTime(subscriptionStartDate) : (DateTime?)null,
+                                subscriptionEndDate.IsNotEmpty() ? Convert.ToDateTime(subscriptionEndDate) : (DateTime?)null,
+                                isongoingsubscription.IfEmpty(""),
                                 splitcostevenly.IfEmpty(""),
                                 regfeedownpayment.IfEmpty(""),
-                                isparentpricesubscription.IfEmpty("0"),
+                                isparentpricesubscription.IfEmpty("0"),                                
                                 loggedInUserId,
                                 adc
                             ));
@@ -1252,6 +1263,7 @@ namespace AfterSchoolLibrary.Services
                                 postpaycost.IfEmpty(""),
                                 isparentpricepostpay.IfEmpty("0"),
                                 prepaidperiodspostpay.IfEmpty(""),
+                                postpayplanperiod.IfEmpty(""),
                                 loggedInUserId,
                                 adc
                             ));
@@ -1353,10 +1365,13 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        private static SystemMessages SetupSubscriptionPlan(this Activity activity, Account account, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string splitcostevenly, string regfeedownpayment, string isparentpricesubscription, int loggedInUserId, DatabaseConnection dc = null)
+        private static SystemMessages SetupSubscriptionPlan(this Activity activity, Account account, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string subscriptionPlanPeriodNumber, 
+            string subscriptionPaymentStartType, DateTime? subscriptionStartDate, DateTime? subscriptionEndDate, string isongoingsubscription, string splitcostevenly, string regfeedownpayment, string isparentpricesubscription,
+            int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var hasStripeChanges = true;
+            var paymentStartType = subscriptionPaymentStartType.ToInteger().ToEnum<PlanPaymentStartType>();
             var isParentPrice = isparentpricesubscription.ToBoolean();
 
             // first: desactivate the current plan if there are any changes
@@ -1365,7 +1380,10 @@ namespace AfterSchoolLibrary.Services
                 var plan = activity.GetSubscriptionPlan(msgs, dc);
 
                 hasStripeChanges = plan.CostPerPeriod.Value != subscriptionplancost.ToDecimal() ||
-                                    plan.BillingPeriodTypeId != (BillingPeriodType)subscriptionplanperiod.ToInteger() ||
+                                    plan.BillingPeriodTypeId != (BillingPeriodType)subscriptionplanperiod.ToInteger() ||                                    
+                                    plan.PaymentStartTypeId != paymentStartType ||                                    
+                                    (subscriptionStartDate.HasValue && subscriptionStartDate.Value != plan.StartDate) ||
+                                    (subscriptionEndDate.HasValue && subscriptionEndDate.Value != plan.EndDate) ||
                                     plan.IsConvenienceFeeTakenOutOfCost != isParentPrice;
 
                 // if has stripe changes or subscription option has been turned off
@@ -1387,6 +1405,10 @@ namespace AfterSchoolLibrary.Services
                     participationObjectId: activity.ID.Value,
                     costPerPeriod: subscriptionplancost.ToDecimal(),
                     billingPeriodType: (BillingPeriodType)subscriptionplanperiod.ToInteger(),
+                    paymentStartType: paymentStartType,
+                    subscriptionStartDate: subscriptionStartDate,
+                    subscriptionEndDate: subscriptionEndDate,
+                    isongoingsubscription: isongoingsubscription.ToBoolean(),
                     doesAutoRenew: true,
                     splitCostEvenly: splitcostevenly.ToBoolean(),
                     regFeeAsDownPayment: regfeedownpayment.ToBoolean(),
@@ -1438,7 +1460,9 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        private static SystemMessages SetupPostPayPlan(this Activity activity, Account account, string haspostpayplan, string postpaycost, string isparentpricepostpay, string prepaidperiodspostpay, int loggedInUserId, DatabaseConnection dc = null)
+        private static SystemMessages SetupPostPayPlan(this Activity activity, Account account, 
+            string haspostpayplan, string postpaycost, string isparentpricepostpay, string prepaidperiodspostpay, string postpayplanperiod,
+            int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var hasChanges = true;
@@ -1452,7 +1476,8 @@ namespace AfterSchoolLibrary.Services
 
                 hasChanges = plan.CostPerPeriod.Value != postpaycost.ToDecimal() || 
                             isParentPrice != plan.IsConvenienceFeeTakenOutOfCost ||
-                            prepaidPeriods != plan.NumberOfPeriodsPrePaid;
+                            prepaidPeriods != plan.NumberOfPeriodsPrePaid ||
+                            plan.BillingPeriodTypeId != (BillingPeriodType)postpayplanperiod.ToInteger();
 
                 // if has stripe changes or subscription option has been turned off
                 if (hasChanges || !haspostpayplan.ToBoolean())
@@ -1466,7 +1491,7 @@ namespace AfterSchoolLibrary.Services
                     participationObjectType: ParticipationObjectType.Activity,
                     participationObjectId: activity.ID.Value,
                     costPerPeriod: postpaycost.ToDecimal(),
-                    billingPeriodType: BillingPeriodType.Day,
+                    billingPeriodType: (BillingPeriodType)postpayplanperiod.ToInteger(),
                     isConvenienceFeeTakenOutOfCost: isParentPrice,
                     prepaidPeriods: prepaidPeriods,
                     loggedInUserId: loggedInUserId,
@@ -1866,6 +1891,15 @@ namespace AfterSchoolLibrary.Services
             return Models.Match.LoadByTeamId(activity.ID.Value, msgs, dc).IsNotEmpty();
         }
 
+        public static bool IsValidActivityInstance(this Activity activity, ActivityInstance activityInstance , SystemMessages msgs = null, DatabaseConnection dc = null)
+        {   
+            if (activityInstance?.ActivityScheduleId == activity.ActivityScheduleId)
+                return true;
+
+            msgs.Add("Invalid record error", MessageType.Error);
+            return false;
+        }
+
         public static bool HasNoTeamMatches(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Models.Match.LoadByTeamId(activity.ID.Value, msgs, dc).IsEmpty();
@@ -1877,11 +1911,8 @@ namespace AfterSchoolLibrary.Services
             if (activityInstanceId.HasValue)
             {
                 var activityInstance = ActivityInstance.Load(activityInstanceId.Value, msgs, dc);
-                if (activityInstance?.ActivityScheduleId != activity.ActivityScheduleId)
-                {
-                    msgs.Add("Invalid record error", MessageType.UserError);
+                if (!activity.IsValidActivityInstance(activityInstance, msgs, dc))                    
                     return null;
-                }
 
                 var attendance = activityInstance.GetAttendance(msgs, dc);
                 if (attendance.IsNotEmpty())
@@ -1892,11 +1923,27 @@ namespace AfterSchoolLibrary.Services
             var closestActivityInstance = activity.GetClosestPastActivityInstanceToDate(DateTime.UtcNow, msgs, dc);            
             if (closestActivityInstance.IsEmpty())
                 return null;
-
+            
+            
             var closestActivityInstanceAttendance = Attendance.LoadByActivityInstanceId(closestActivityInstance.ID.Value, msgs, dc).FirstOrDefault();
+            
+            if (closestActivityInstanceAttendance.IsNotEmpty())
+            {
+                var registrantActivities = activity.GetRegistrantActivities(msgs, dc);
+                var attendanceRegistrants = AttendanceRegistrant.LoadByAttendanceId(closestActivityInstanceAttendance.ID.Value, msgs, dc);
 
-            if (closestActivityInstanceAttendance.IsNotEmpty() && !activityInstanceId.HasValue)
-                return closestActivityInstanceAttendance;
+                //.. if student registers in between class, it should be listed in attendance
+                //.. for that we need entry of that user in AttendanceRegistrant table
+                if (registrantActivities.Count() > attendanceRegistrants.Count)
+                {
+                    // if a new student has registered then we do not need to create new Attendance. Instead we just need to add AttendanceRegistrant 
+                    // to existing Attendance only   
+                    activity.CreateNewAttendanceRegistrantByRegistrantActivities(closestActivityInstanceAttendance, attendanceRegistrants, registrantActivities, loggedInUser, msgs, dc);
+                }
+                  
+                if (!activityInstanceId.HasValue)
+                    return closestActivityInstanceAttendance;                
+            }
 
             // otherwise create a new attendance if there is no attendance id
             if (!attendanceId.HasValue)
@@ -1904,6 +1951,20 @@ namespace AfterSchoolLibrary.Services
 
             // otherwise return the attendance with given id
             return Attendance.Load(attendanceId.Value, msgs, dc);
+        }
+
+        public static List<AttendanceRegistrant> CreateNewAttendanceRegistrantByRegistrantActivities(this Activity activity,Attendance attendance, List<AttendanceRegistrant> attendanceRegistrants, List<RegistrantActivity> registrantActivities, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            List<AttendanceRegistrant> newAttendanceRegistrants = new List<AttendanceRegistrant>();
+            var newStudents = registrantActivities.Where(registrant => !attendanceRegistrants.Any(attendanceRegistrant =>
+                    attendanceRegistrant.RegistrantId == registrant.RegistrantId)).ToList();
+
+            newStudents
+                .ForEach(registrantActivity => {
+                    newAttendanceRegistrants.Add(AttendanceRegistrantService.CreateNew(attendance.ID.Value, registrantActivity.RegistrantId.Value,
+                        loggedInUser, msgs, dc));
+                });
+            return newAttendanceRegistrants;
         }
 
         public static ActivityInstance GetClosestPastActivityInstanceToDate(this Activity activity, DateTime date, SystemMessages msgs, DatabaseConnection dc)
@@ -2168,9 +2229,14 @@ namespace AfterSchoolLibrary.Services
             return Attendance.LoadByActivityId(activity.ID.Value, orderByParam, direction, start, length, msgs, dc);
         }
 
-        public static List<Attendance> GetCompletedAttendance(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Attendance> GetCompletedAttendance(this Activity activity,SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Attendance.LoadByActivityIdByIsCompleted(activity.ID.Value, true, msgs: msgs, dc: dc);
+            return Attendance.LoadByActivityIdByIsCompleted(activity.ID.Value,true, msgs: msgs, dc: dc);
+        }
+
+        public static List<Attendance> GetCompletedAttendanceWithPaging(this Activity activity, string orderByParam, OrderByDirectionEnum direction, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Attendance.LoadByActivityIdByIsCompletedWithPaging(activity.ID.Value, true, orderByParam, direction, start, length, msgs: msgs, dc: dc);
         }
 
         public static int GetAttendancePresentCount(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -2289,6 +2355,30 @@ namespace AfterSchoolLibrary.Services
             activity.LastModifiedDate = DateTime.UtcNow;
             activity.LastModifiedBy = loggedInUserId;
             return activity.Save(dc);
+        }
+
+        public static SystemMessages UpdateActivitySchedule(this Activity activity, int? ScheduleId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var wasSetToNull = activity.ActivityScheduleId.HasValue && !ScheduleId.HasValue;
+
+            activity.ActivityScheduleId = ScheduleId;
+            activity.LastModifiedDate = DateTime.UtcNow;
+            activity.LastModifiedBy = loggedInUserId;
+
+            msgs.AddRange(activity.Save(dc));
+
+            if (wasSetToNull)
+            {
+                var logs = new SystemMessages();
+                logs.Add(
+                    $"Schedule ID was set to null for: Account ({activity.AccountId}), Activity ({activity.ID}), Logged In User ({loggedInUserId})", 
+                    MessageType.Notice);
+                AfterSchoolLibrary.Helpers.Utilities.SystemLog(logs);
+            }
+
+            return msgs;
         }
 
         public static AccountProperty AddOrUpdateActivityProperty(this Activity activity, AccountPropertyType type, string value, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
@@ -2433,6 +2523,14 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
+        public static ActivityGroup GetActivityGroup(this Activity activity, int AccountId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (activity.IsNotEmpty() && activity.ActivityGroupId.HasValue)
+                return ActivityGroup.LoadByIdByAccountId(activity.ActivityGroupId.Value, AccountId, msgs, dc: dc);
+
+            return null;
+        }
+
         public static ActivitySchedule GetSchedule(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (activity.ActivityScheduleId.HasValue)
@@ -2504,7 +2602,7 @@ namespace AfterSchoolLibrary.Services
             var location = activity.GetLocation(msgs, dc);
             var locationOwner = location.GetHostAccount(msgs, dc);
 
-            if (locationOwner.HasAccountOwner)
+            if (locationOwner.IsNotEmpty() && locationOwner.HasAccountOwner)
             {
                 var accountOwner = locationOwner.GetAccountOwner(msgs, dc);
                 msgs.AddRange(Helpers.EmailHelper.SendPublishRequestNotification(activity, locationOwner, accountOwner, loggedInUser));
@@ -2552,6 +2650,45 @@ namespace AfterSchoolLibrary.Services
         public static bool RestrictByGrade(this Activity activity)
         {
             return activity.AgeStart.IsEmpty();
+        }
+
+        public static (DateTime? paymentStart, DateTime? paymentEnd) FinalizeStartAndEndDateForSubscription(this Activity activity, BillingPeriodType billingPeriodType, DayOfWeek dayOfWeek, DateTime dayOfMonth, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (!activity.HasSchedule)
+                return (null, null);
+
+            var schedule = activity.GetSchedule(msgs, dc);            
+            var startDate = schedule.GetUpcomingInstance(msgs, dc).FirstOrDefault().StartDateTime.Value;
+            var endDate = schedule.EndDate.Value;
+
+            if (billingPeriodType == BillingPeriodType.Week)
+            {
+                //.. if activity schedule starts on November 1st, 2021(Monday) ends on December 1st, 2021(Thursday) and provide choose weekly billing every sunday, 
+                //.. that would mean the parent would be first billed on Sunday Oct 31st and last billed on Sunday Nov 27th.
+                //.. but if start date is of today or past, we will find next sunday or user's choosen day                
+                var startingDay = startDate.AddDays(-1).IsOnOrBefore(DateTime.UtcNow) ? startDate.AddDays(((int)dayOfWeek - (int)startDate.DayOfWeek + 7) % 7) : startDate.AddDays(((int)dayOfWeek - (int)startDate.DayOfWeek - 7) % 7);
+
+                //int daysUntilLastPayment = ((int)dayOfWeek - (int)endDate.DayOfWeek - 7) % 7;
+                //var endingDay = endDate.AddDays(daysUntilLastPayment);
+                return (paymentStart: startingDay, paymentEnd: endDate);
+            }
+            else if (billingPeriodType == BillingPeriodType.Month)
+            {
+                //.. if provider chooses monthly payment cycle in this case with date November 5th,
+                //.. that would mean the parent would be first billed on November 5th.                
+
+                //.. if activity is in future
+                //var endingMonth = endDate.Month;
+                //if (schedule.StartDate.Value.IsAfter(DateTime.Now))
+                //    endingMonth += 1;
+
+                var startingDay = new DateTime(endDate.Year, startDate.Month, dayOfMonth.Day);
+                //var endingDay = new DateTime(endDate.Year, endingMonth, dayOfMonth.Day);
+
+                return (paymentStart: startingDay.IsAfter(DateTime.UtcNow) ? startingDay : DateTime.UtcNow, paymentEnd: endDate);
+            }
+
+            return (null, null);
         }
     }
 }

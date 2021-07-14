@@ -761,7 +761,7 @@ Public MustInherit Class BasicLookUpObject
         Get
             Dim _databaseParameters As DataAccess.DatabaseParameters = Nothing
             _databaseParameters = BasicObjectWithModified.BaseObjectMap(className, tableName)
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Name", tableName, SqlDbType.NVarChar, "50"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Name", tableName, SqlDbType.NVarChar, "75"))
             _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Description", tableName, SqlDbType.NVarChar, "400"))
             Return _databaseParameters
         End Get
@@ -1053,7 +1053,7 @@ Public MustInherit Class BaseLocation
         Get
             Dim _databaseParameters As DataAccess.DatabaseParameters = Nothing
             _databaseParameters = BaseAddress.BaseObjectMap(className, tableName)
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Name", tableName, SqlDbType.NVarChar, "50"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Name", tableName, SqlDbType.NVarChar, "500"))
             _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Description", tableName, SqlDbType.NVarChar, "100"))
             Return _databaseParameters
         End Get

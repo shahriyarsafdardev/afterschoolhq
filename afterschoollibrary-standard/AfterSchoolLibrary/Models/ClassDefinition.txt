@@ -114,8 +114,10 @@ loadmethod: AccountId, List<>
 loadmethod: AccountId|IsPublished, List<>
 loadmethod: LocationId, List<>
 loadmethod: Uid
+loadmethod: Uid|AccountId
 -loadmethod: ParentActivityId, List<>
 loadmethod: ActivityGroupId, List<>
+loadmethod: ActivityGroupId|AccountId, List<>
 loadmethod: AccountActivityGroupId, List<>
 loadmethod: ActivityScheduleId, List<>
 loadmethod: ProviderAccountId, List<>
@@ -135,7 +137,7 @@ property: IsTest, bool, Bit
 property: GooglePlaceId, string, NVarChar "400"
 property: StreetNumber, string, NVarChar "50"
 property: StreetName, string, NVarChar "50"
-property: Neighborhood, string, NVarChar "50"
+property: Neighborhood, string, NVarChar "100"
 property: County, string, NVarChar "100"
 property: Latitude, decimal?, Decimal "10,2"
 property: Longitude, decimal?, Decimal "10,2"
@@ -306,6 +308,7 @@ joinproperty: Account.Name, string, NVarChar
 loadmethod: ActivityId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: Uid
+loadmethod: Uid|AccountId
 loadmethod: AccountId, List<>
 [end]
 
@@ -618,6 +621,7 @@ baseproperty: EndDateTime, required
 loadmethod: AccountId, List<>
 loadmethod: Uid
 loadmethod: ActivityGroupId, List<>
+loadmethod: ActivityGroupId|AccountId, List<>
 loadmethod: AccountActivityGroupId, List<>
 [end]
 
@@ -686,6 +690,7 @@ loadmethod: AccountId|IsPublished|IsArchived, List<>
 loadmethod: AccountId|IsPublished|IsInviteOnly, List<>
 loadmethod: AccountId|UniqueName
 loadmethod: Uid
+loadmethod: Uid|AccountId
 loadmethod: Uid|IsPublished
 loadmethod: Uid|IsPublished|IsArchived
 loadmethod: Uid|IsPublished|IsInviteOnly
@@ -748,6 +753,7 @@ loadmethod: ParentRegistrantId, List<>
 loadmethod: AccountId|RegistrantTypeId|IsDeleted, List<>
 loadmethod: AccountId|IsContactOnly|IsDeleted, List<>
 loadmethod: Uid
+loadmethod: Uid|AccountId
 loadmethod: WebUserId|IsDeleted, List<>
 loadmethod: WebUserId|IsMaster|IsDeleted, List<>
 loadmethod: FirstRegistrantId, List<>
@@ -1060,6 +1066,7 @@ property: ConvenienceFeePayerAccountId, int?, Int, , which account is paying the
 property: CouponId, int?, Int
 property: CouponValue, decimal?, Decimal "10,2"
 loadmethod: Uid
+loadmethod: Uid|AccountId
 loadmethod: RegistrantId, List<>
 loadmethod: AccountId, List<>
 loadmethod: RegistrationPeriodId, List<>
@@ -1171,6 +1178,7 @@ joinproperty: Registrant.RegistrantTypeId, RegistrantType, Int
 joinproperty: Registrant.AccountId, int?, Int
 joinproperty: Attendance.ActivityId, int?, Int
 joinproperty: Attendance.IsCompleted, bool, Bit
+joinproperty: Attendance.Date, DateTime?, DateTime
 loadmethod: RegistrantId, List<>
 loadmethod: AttendanceId, List<>
 loadmethod: AttendanceId|RegistrantId, List<>
@@ -1223,6 +1231,7 @@ loadmethod: PackageId, List<>
 loadmethod: AccountId, List<>
 loadmethod: AccountId|IsActive
 loadmethod: Uid
+loadmethod: Uid|AccountId
 [end]
 
 [begin]
@@ -1430,6 +1439,9 @@ property: SplitCostEvenly, bool, Bit, , Split cost evenly amongst all parents si
 property: RegFeeAsDownPayment, bool, Bit, , Count the registration fee as a down payment
 property: IsConvenienceFeeTakenOutOfCost, bool, Bit
 property: NumberOfPeriodsPrePaid, int?, Int
+property: IsOngoingSubscription, bool, Bit
+property: StartDate, DateTime?, DateTime
+property: EndDate, DateTime?, DateTime
 loadmethod: ParticipationObjectId|ParticipationObjectTypeId|PlanTypeId, List<>, LoadByParticipationObject
 loadmethod: PlanOwnerAccountId, List<>
 [end]
@@ -1531,6 +1543,8 @@ property: CouponValue, decimal?, Decimal "10,2"
 loadmethod: BillerAccountId|IsDeleted, List<>
 loadmethod: PayerAccountId|IsDeleted, List<>
 loadmethod: Uid
+loadmethod: Uid|BillerAccountId
+loadmethod: Uid|PayerAccountId
 loadmethod: BillerAccountId|TransactionTypeId|IsDeleted, List<>
 loadmethod: PayerAccountId|TransactionTypeId|IsDeleted, List<>
 loadmethod: StripeChargeOrRefundId
@@ -1558,6 +1572,7 @@ loadmethod: AccountId, List<>
 loadmethod: AccountId|PayoutStatusId, List<>
 loadmethod: PayoutStatusId, List<>
 loadmethod: Uid
+loadmethod: Uid|AccountId
 [end]
 
 [begin]
@@ -1613,7 +1628,6 @@ type: Class
 name: Coupon
 description: Used to give discounts to parents during the purchase of a registration, product, etc
 inherits: BasicLookUpObject
-property: Description, string, NVarChar "400"
 property: Amount, decimal?, Money, required, Store the amount a percentage or flat amount. If percentage it should be stored as a decimal meaning 100% should be stored as 1.00
 property: AmountTypeId, CouponAmountType, Int, required, Either a percentage or a flat amount
 property: AccountId, int?, Int, required, the account that is the owner
@@ -1629,6 +1643,7 @@ baseproperty: Name, required
 loadmethod: AccountId, List<>
 loadmethod: AccountId|CouponCode
 loadmethod: Uid
+loadmethod: Uid|AccountId
 [end]
 
 [begin]
@@ -1732,6 +1747,7 @@ property: DeniedDate, DateTime?, DateTime
 property: RequestedRefundTypeId, RefundType, Int, Required
 property: ApprovedRefundTypeId, RefundType, Int, Required
 loadmethod: Uid
+loadmethod: Uid|AccountId
 loadmethod: TransactionId, List<>
 loadmethod: AccountId, List<>
 loadmethod: AccountId|RefundRequestStatusId, List<>
@@ -1790,22 +1806,21 @@ property: ActionTypeId, WebSessionActionType, Int
 property: ObjectTypeId, ObjectType, Int
 property: ObjectId, int?, Int
 property: IndirectObjectId, int?, Int
+property: IndirectObjectTypeId, ObjectType, Int
 property: ActionStringFormat, string, NVarChar "400"
 property: ActionString, string, NVarChar "400"
-join: WebUser.ID, WebUserId, LeftOuterJoin
+join: WebUser.ID, ActorId, LeftOuterJoin
 join: WebUser.ID, CreatedBy, LeftOuterJoin, CreatedBy
-join: Account.ID, AccountId, InnerJoin
+join: Account.ID, AccountId, LeftOuterJoin
 joinproperty: WebUser.Username, string, NVarChar
 joinproperty: WebUser.Email, string, NVarChar
 joinproperty: WebUser.FirstName, string, NVarChar
 joinproperty: WebUser.LastName, string, NVarChar
-joinproperty: WebUser.TimeZone, string, NVarChar
 joinproperty: CreatedBy.Username, string, NVarChar
 joinproperty: CreatedBy.Email, string, NVarChar
 joinproperty: CreatedBy.FirstName, string, NVarChar
 joinproperty: CreatedBy.LastName, string, NVarChar
 joinproperty: Account.Name, string, NVarChar
-joinproperty: Account.TimeZone, string, NVarChar
 joinproperty: Account.AccountTypeId, int?, Int
 loadmethod: Id, List<>
 loadmethod: WebUserId, List<>
@@ -1814,12 +1829,12 @@ loadmethod: Id|AccountId, List<>
 loadmethod: Id|WebUserId|AccountId, List<>
 loadmethod: ActionTypeId, List<>
 loadmethod: ActionTypeId|ObjectTypeId, List<>
-loadmethod: ObjectId, List<>
+loadmethod: ObjectId|ObjectTypeId, List<>
 loadmethod: ObjectId|ActionId, List<>
 loadmethod: ObjectId|IndirectObjectId, List<>
-loadmethod: IndirectObjectId, List<>
-loadmethod: ObjectId|ObjectTypeId, List<>
+loadmethod: IndirectObjectId|IndirectObjectTypeId, List<>
 loadmethod: WebUserId|ObjectId|ObjectTypeId, List<>
+loadmethod: WebUserId|ObjectId|ObjectTypeId|IndirectObjectId|IndirectObjectTypeId, List<>
 [end]
 
 [begin]
@@ -1840,7 +1855,7 @@ loadmethod: AccountId, List<>
 [begin]
 type: Enum
 name: WebSessionActionType
-values: NotSet, Created, Updated, Published, Unpublished, Sent, Registered, Paid, Refunded, Requested, Invited, Archived, Deleted, ManuallyRegistered, ManuallyPaid, ManuallyRefunded, Approved, Verified, Viewed, Moved, Navigated, Searched, Paged, Connected, LoggedIn, LoggedOut, Copied, Restored, Browsed, Followed, Unfollowed, Shared, Contacted, Interested
+values: NotSet, Created, Updated, Published, Unpublished, Sent, BeganRegistration, Registered, Paid, Refunded, Requested, Invited, Archived, Deleted, ManuallyRegistered, ManuallyPaid, ManuallyRefunded, Approved, Verified, Viewed, Moved, Navigated, Searched, Paged, Connected, SignedUp, LoggedIn, LoggedOut, Copied, Restored, Browsed, Followed, Unfollowed, Shared, Contacted, Interested, BrowsedAllActivities, Added
 [end]
 
 [begin]
@@ -1936,7 +1951,7 @@ values: NotSet, Individual, Organization
 [begin]
 type: Enum
 name: FeatureType
-values: NotSet, Attendance, AcceptPayments, EmailMessaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageExternalLeagues, UseStripeConnectedAccount, AcceptACH, ManageLeagues, ManageFieldTrips, ManagePermissionSlips, ManageLearningPods,	TextMessaging, AllowInvites, AllowStudentRegistration, AllowPaymentPlans, AllowSubscriptionPlans, AllowPayLater, StudentCRM, ManageCoupons
+values: NotSet, Attendance, AcceptPayments, EmailMessaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageExternalLeagues, UseStripeConnectedAccount, AcceptACH, ManageLeagues, ManageFieldTrips, ManagePermissionSlips, ManageLearningPods,	TextMessaging, AllowInvites, AllowStudentRegistration, AllowPaymentPlans, AllowSubscriptionPlans, AllowPayLater, StudentCRM, ManageCoupons, Teacher1099
 [end]
 
 [begin]
@@ -2152,11 +2167,24 @@ values: NotSet, ActivityCancellationNotice, AttendanceNotice, BehaviorNotice, Ge
 [begin]
 type: Enum
 name: PlanPaymentStartType
-values: NotSet, WhenActivityStarts, OnCheckout
+values: NotSet, WhenActivityStarts, OnCheckout, OnPeriodStart
 [end]
 
 [begin]
 type: Enum
 name: StripeRequirementStatus
 values: NotSet, PastDue, CurrentlyDue, EventuallyDue
+[end]
+[end]
+
+[begin]
+type: Enum
+name: GettingStartedOptions
+values: NotSet, CreateProfile, CreateFirstActivity, PublishActivity, ValidateEmail, AcceptPayments, ProcessCompleted
+[end]
+
+[begin]
+type: Enum
+name: SignUpType
+values: NotSet, NewAccountSignUp, TrialSignUp, ConvertingFromTrial, ChangePackage, ChangePackageDuringTrial, ChangeBillingPeriodType, Teacher1099
 [end]

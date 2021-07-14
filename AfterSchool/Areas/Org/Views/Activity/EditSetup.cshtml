@@ -4,7 +4,7 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var accountPackage = (AccountPackage)ViewBag.AccountPackage;
     var group = (ActivityGroup)ViewBag.Group;
-    var isFullScreen = (bool)ViewBag.IsFullScreen;
+    var isFullScreen = (bool)ViewBag.IsFullScreen;    
     var title = $"{(Model.ActivityGroupName.IsNotEmpty() ? $"{Model.ActivityGroupName} - " : "")}{Model.Name.IfBlank("New " + UILabel.ActivityLabel(Model.ActivityTypeId))}";    
 
     if (isFullScreen)
@@ -70,9 +70,12 @@
         var endDate = moment($('#registrationclosedate').val());
         var beginningTime = moment($('#registrationopentime').val(), 'h:mma');
         var endingTime = moment($('#registrationclosetime').val(), 'h:mma');
+        var isActivityGroup = @Json.Encode(group.IsNotEmpty());
 
-        if (endDate.isBefore(startDate) ||
-            (endDate.isSame(startDate) && (endingTime.isSame(beginningTime) || endingTime.isBefore(beginningTime))))
+        if (isActivityGroup)
+            return ActivitySetup.navigateActivity(url);
+
+        if (endDate.isBefore(startDate) || (endDate.isSame(startDate) && (endingTime.isSame(beginningTime) || endingTime.isBefore(beginningTime))))
         {
             Notifications.showBar({
                 title: 'Error',

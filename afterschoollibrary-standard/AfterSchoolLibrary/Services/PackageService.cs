@@ -109,7 +109,7 @@ namespace AfterSchoolLibrary.Services
         {
             var features = ((FeatureType[])Enum.GetValues(typeof(FeatureType))).ToList();
             var packages = Package.LoadByIsActive(true, msgs, dc);
-            packages.OrderBy(p => p.Price);
+            var paidPackages = packages.Where(m => m.Price > 0 && m.PricePerYear > 0).OrderBy(p => p.Price).ToList();
 
             if (!feature.In(features))
             {
@@ -117,7 +117,7 @@ namespace AfterSchoolLibrary.Services
                 return null;
             }
 
-            var packageWithFeature = GetFirstPackageWithFeatureFromPackages(feature, packages);
+            var packageWithFeature = GetFirstPackageWithFeatureFromPackages(feature, paidPackages);
 
             if (packageWithFeature.IsNotEmpty())
                 return packageWithFeature;

@@ -3,6 +3,7 @@
     Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml";
     var msgs = (SystemMessages)ViewBag.Messages;
     var clientSuccessManagerName = "Tatiana Givens";
+    var signupType = Model.SignupType.IsNotEmpty() ? Model.SignupType : SignUpType.NotSet;
     var EnumSignupPages = new
     {
         WelCome = 0,
@@ -18,12 +19,12 @@
 
 }
 
-<style>
+<style>    
 </style>
 
 <div class="row main-content main-content-welcome-pages">
 
-    <div id="signup-welcome">
+    <div id="signup-welcome" @(signupType == SignUpType.Teacher1099 ? "hidden" :"" )>
 
         <div class="visible-lg visible-md welcome-outer-ring">
             <div class="welcome-inner-ring">
@@ -281,9 +282,6 @@
         <div class="welcome-outer-ring m-b-20">
             <div class="search-inner-ring p-b-5">
                 <div class="margin-t-35">
-                    @*<div class="text-center">
-                            <div style="width: 15px; height: 15px; margin: 0 5px 0 0; background-color: #00c5a3; border-radius: 7px;"></div>
-                        </div>*@
 
                     <p class="register-thankyou-1">Thanks for joining our platform to provide learning opportunities for students everywhere.</p>
                     <p class="register-thankyou-2" style="margin-bottom: 20px;">We just need a little information to get started.</p>
@@ -426,7 +424,7 @@
         var headerThankYouNR3 = $('#header3-thankyou-not-recognized');
         var hiddenClaimAccountId = $('#hidden-claim-accountId'); // this one is for existing accounts
         var hiddenAccountName = $('#hidden-signup-accountName'); // this one is for creating new account flow and placed inside partial view
-        var hiddeAccountType = $('#hidden-signup-accountType');
+        var hiddenAccountType = $('#hidden-signup-accountType');
         var signupAccountSearchList = $('#signup-account-search-list');
         var signupAccountSearch = $('#signup-account-search');
         var signupSearchLable = $('#signup-search-label');
@@ -439,15 +437,20 @@
         var signupListOnClick = "signupListMouseClick";
         var spanRemainingCharCounter = $('#remaining-search-char-counter');
 
-        PageEvent.add(PageEvent.AFTER_INIT, function () {           
+        // check for teachers signing up for 1099, redirect to user registration
+        if (@Json.Encode(Model.SignupType) === @Json.Encode(SignUpType.Teacher1099)) {
+            signupWelcome.hide();
+            hiddenAccountType.val('@AccountType.Teacher');
+            proceedFurther('@EnumSignupPages.Register');
+        }
+
+
+        PageEvent.add(PageEvent.AFTER_INIT, function () {
+
+
+
             signupAccountSearch.keyup(function (e) {
                 var searchLength = signupAccountSearch.val().length;
-                if (searchLength <= 2) {
-                    signupAccountSearchList.html('');
-                    signupAccountSearchList.addClass('hide');
-                    btnContinue.attr('disabled', 'disabled');
-                    return false;
-                }
 
                 if (searchLength >= 40) {
                     spanRemainingCharCounter.text(50).css('color', 'red');
@@ -464,8 +467,15 @@
                 } else if (searchLength > 50) {
                     e.preventDefault();
                     e.stopPropagation();
-                    this.value = this.value.substring(0, 50);                    
+                    this.value = this.value.substring(0, 50);
                     spanRemainingCharCounter.text(0);
+                    return false;
+                }
+
+                if (searchLength <= 2) {
+                    signupAccountSearchList.html('');
+                    signupAccountSearchList.addClass('hide');
+                    btnContinue.attr('disabled', 'disabled');
                     return false;
                 }
 
@@ -497,7 +507,7 @@
             $(`#signup-search-listItem-${id}`).attr('style', signupListItemStyle);
         }
 
-        function signupListMouseClick(id, text, slug, isClaimed) {           
+        function signupListMouseClick(id, text, slug, isClaimed) {
             if (id && isGuid(id)) {
                 hiddenClaimAccountId.val(id);
                 selectedAccount = {
@@ -507,7 +517,7 @@
                 };
 
                 signupAccountSearch.val(text);
-                
+
                 if (isClaimed == false) {
                     var url = slug + '?claimprofile=1';
                     window.location = url ; //move to profile page
@@ -526,7 +536,7 @@
             btnContinue.removeAttr("disabled");
         }
 
-        function doAccountSearch(search, list) {            
+        function doAccountSearch(search, list) {
             if (search.val().length > 0 && !isSearching) {
                 isSearching = true;
 
@@ -616,7 +626,7 @@
                 // user clicked btn-ProgramForStudents, and going for name search for his/her program
                 isOrganization = false;
                 isSchool = false;
-                hiddeAccountType.val('@AccountType.Teacher');
+                hiddenAccountType.val('@AccountType.Teacher');
                 lblOrgSearchTitle.text('What\'s the name of your program?');
                 signupSearchLable.html('SEARCH OR ADD YOUR PROGRAM')
                 clearSearch();
@@ -681,7 +691,7 @@
 
         function setOrgTypeAndProceedFurther(input) {
             if (input) {
-                hiddeAccountType.val(input);
+                hiddenAccountType.val(input);
                 proceedFurther('@EnumSignupPages.SearchOrgName');
             }
         }

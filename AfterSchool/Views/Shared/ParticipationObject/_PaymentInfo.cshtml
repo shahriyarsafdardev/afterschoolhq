@@ -6,24 +6,31 @@
 
 @if (!Model.IsFree)
 {
-    if (Model.PostPayPlans.Any())
+    if (Model.PostPayPlans.IsNotEmpty() && Model.PostPayPlans.Any())
     {
         Html.RenderPartial(
             "~/Views/Shared/ParticipationObject/_TuitionAndPostPayPlans.cshtml",
             Model,
-            new ViewDataDictionary() { { "DisplayCheckoutPrice", true } });     
+            new ViewDataDictionary() { { "DisplayCheckoutPrice", true } });
     }
-    else if (!Model.PaymentPlans.Any())
+    else if (Model.SubscriptionPlans.IsNotEmpty() && Model.SubscriptionPlans.Any())
     {
         Html.RenderPartial(
-            "~/Views/Shared/ParticipationObject/_TuitionAndNoPaymentPlans.cshtml",
+          "~/Views/Shared/ParticipationObject/_SubscriptionPlan.cshtml",
+          Model,
+          new ViewDataDictionary() { { "DisplayCheckoutPrice", true } });
+    }
+    else if (Model.PaymentPlans.IsNotEmpty() && Model.PaymentPlans.Any())
+    {
+        Html.RenderPartial(
+            "~/Views/Shared/ParticipationObject/_TuitionAndPaymentPlans.cshtml",
             Model,
             new ViewDataDictionary() { { "DisplayCheckoutPrice", true } });
     }
     else
     {
         Html.RenderPartial(
-            "~/Views/Shared/ParticipationObject/_TuitionAndPaymentPlans.cshtml",
+            "~/Views/Shared/ParticipationObject/_TuitionAndNoPaymentPlans.cshtml",
             Model,
             new ViewDataDictionary() { { "DisplayCheckoutPrice", true } });
     }

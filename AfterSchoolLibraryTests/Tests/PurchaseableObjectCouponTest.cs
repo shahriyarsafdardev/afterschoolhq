@@ -35,22 +35,6 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         [Theory]
-        [InlineData(8, 10)]
-        [InlineData(15, 10)]
-        public void LoadPagingTest(int numberToCreate, int numberPerPage)
-        {
-            for (var i = 0; i < numberToCreate; i++)
-            {
-                var poc = PurchaseableObjectCouponFactory.Create(PurchaseableObject, Coupon, msgs, dc);
-            }
-
-            Assert.Equal(
-                Math.Min(numberPerPage, numberToCreate),
-                PurchaseableObjectCoupon.Load(null, 0, numberPerPage, msgs, dc).Count
-            );
-        }
-
-        [Theory]
         [InlineData(8)]
         [InlineData(2)]
         public void GetCountTest(int numberToCreate)

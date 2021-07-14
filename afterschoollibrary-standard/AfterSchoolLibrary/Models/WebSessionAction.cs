@@ -28,19 +28,18 @@ namespace AfterSchoolLibrary.Models
 		public ObjectType ObjectTypeId { get { return (ObjectType)MDV["ObjectTypeId"].Value; } set { MDV["ObjectTypeId"].Value = value; } }
 		public int? ObjectId { get { return (int?)MDV["ObjectId"].Value; } set { MDV["ObjectId"].Value = value; } }
 		public int? IndirectObjectId { get { return (int?)MDV["IndirectObjectId"].Value; } set { MDV["IndirectObjectId"].Value = value; } }
+		public ObjectType IndirectObjectTypeId { get { return (ObjectType)MDV["IndirectObjectTypeId"].Value; } set { MDV["IndirectObjectTypeId"].Value = value; } }
 		public string ActionStringFormat { get { return (string)MDV["ActionStringFormat"].Value; } set { MDV["ActionStringFormat"].Value = value; } }
 		public string ActionString { get { return (string)MDV["ActionString"].Value; } set { MDV["ActionString"].Value = value; } }
 		public string WebUserUsername { get { return (string)MDV["WebUserUsername"].Value; } }
 		public string WebUserEmail { get { return (string)MDV["WebUserEmail"].Value; } }
 		public string WebUserFirstName { get { return (string)MDV["WebUserFirstName"].Value; } }
 		public string WebUserLastName { get { return (string)MDV["WebUserLastName"].Value; } }
-		public string WebUserTimeZone { get { return (string)MDV["WebUserTimeZone"].Value; } }
 		public string CreatedByUsername { get { return (string)MDV["CreatedByUsername"].Value; } }
 		public string CreatedByEmail { get { return (string)MDV["CreatedByEmail"].Value; } }
 		public string CreatedByFirstName { get { return (string)MDV["CreatedByFirstName"].Value; } }
 		public string CreatedByLastName { get { return (string)MDV["CreatedByLastName"].Value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
-		public string AccountTimeZone { get { return (string)MDV["AccountTimeZone"].Value; } }
 		public int? AccountAccountTypeId { get { return (int?)MDV["AccountAccountTypeId"].Value; } }
 		
 
@@ -50,6 +49,7 @@ namespace AfterSchoolLibrary.Models
             this.LoadObjectValues(ObjectMap);
 			this.ActionTypeId = WebSessionActionType.NotSet;
 			this.ObjectTypeId = ObjectType.NotSet;
+			this.IndirectObjectTypeId = ObjectType.NotSet;
 			
         }
 
@@ -67,19 +67,18 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "ObjectTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ObjectId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IndirectObjectId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "IndirectObjectTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ActionStringFormat", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "ActionString", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "WebUserUsername", typeof(WebUser).Name, "Username", System.Data.SqlDbType.NVarChar, "WebUser");
 				_dp.Add(className, "WebUserEmail", typeof(WebUser).Name, "Email", System.Data.SqlDbType.NVarChar, "WebUser");
 				_dp.Add(className, "WebUserFirstName", typeof(WebUser).Name, "FirstName", System.Data.SqlDbType.NVarChar, "WebUser");
 				_dp.Add(className, "WebUserLastName", typeof(WebUser).Name, "LastName", System.Data.SqlDbType.NVarChar, "WebUser");
-				_dp.Add(className, "WebUserTimeZone", typeof(WebUser).Name, "TimeZone", System.Data.SqlDbType.NVarChar, "WebUser");
 				_dp.Add(className, "CreatedByUsername", typeof(WebUser).Name, "Username", System.Data.SqlDbType.NVarChar, "CreatedBy");
 				_dp.Add(className, "CreatedByEmail", typeof(WebUser).Name, "Email", System.Data.SqlDbType.NVarChar, "CreatedBy");
 				_dp.Add(className, "CreatedByFirstName", typeof(WebUser).Name, "FirstName", System.Data.SqlDbType.NVarChar, "CreatedBy");
 				_dp.Add(className, "CreatedByLastName", typeof(WebUser).Name, "LastName", System.Data.SqlDbType.NVarChar, "CreatedBy");
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
-				_dp.Add(className, "AccountTimeZone", typeof(Account).Name, "TimeZone", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountAccountTypeId", typeof(Account).Name, "AccountTypeId", System.Data.SqlDbType.Int, "Account");
 				
                 return _dp;
@@ -98,9 +97,9 @@ namespace AfterSchoolLibrary.Models
             get
             {
                 BasicLibrary.DataAccess.DatabaseQuery dq = BaseObject.get_DatabaseQuery(ObjectMap, typeof(WebSessionAction).Name);
-				dq.Joins.Add(WebUser.ObjectMap["ID"], WebSessionAction.ObjectMap["WebUserId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.LeftOuterJoin, "WebUser");
+				dq.Joins.Add(WebUser.ObjectMap["ID"], WebSessionAction.ObjectMap["ActorId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.LeftOuterJoin, "WebUser");
 				dq.Joins.Add(WebUser.ObjectMap["ID"], WebSessionAction.ObjectMap["CreatedBy"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.LeftOuterJoin, "CreatedBy");
-				dq.Joins.Add(Account.ObjectMap["ID"], WebSessionAction.ObjectMap["AccountId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.InnerJoin, "Account");
+				dq.Joins.Add(Account.ObjectMap["ID"], WebSessionAction.ObjectMap["AccountId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.LeftOuterJoin, "Account");
 				
                 return dq;
             }
@@ -188,6 +187,10 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IndirectObjectTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["ActionStringFormat"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
@@ -266,11 +269,12 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<WebSessionAction> LoadByObjectId(int ObjectId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<WebSessionAction> LoadByObjectIdByObjectTypeId(int ObjectId, ObjectType ObjectTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ObjectId"], ObjectId);
+			dq.Criterias.Add(ObjectMap["ObjectTypeId"], ObjectTypeId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
@@ -292,20 +296,12 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<WebSessionAction> LoadByIndirectObjectId(int IndirectObjectId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<WebSessionAction> LoadByIndirectObjectIdByIndirectObjectTypeId(int IndirectObjectId, ObjectType IndirectObjectTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["IndirectObjectId"], IndirectObjectId);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-		}
-
-		public static List<WebSessionAction> LoadByObjectIdByObjectTypeId(int ObjectId, ObjectType ObjectTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-		{
-			var dq = DatabaseQuery;
-			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["ObjectId"], ObjectId);
-			dq.Criterias.Add(ObjectMap["ObjectTypeId"], ObjectTypeId);
+			dq.Criterias.Add(ObjectMap["IndirectObjectTypeId"], IndirectObjectTypeId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
@@ -316,6 +312,18 @@ namespace AfterSchoolLibrary.Models
 			dq.Criterias.Add(ObjectMap["WebUserId"], WebUserId);
 			dq.Criterias.Add(ObjectMap["ObjectId"], ObjectId);
 			dq.Criterias.Add(ObjectMap["ObjectTypeId"], ObjectTypeId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<WebSessionAction> LoadByWebUserIdByObjectIdByObjectTypeIdByIndirectObjectIdByIndirectObjectTypeId(string WebUserId, int ObjectId, ObjectType ObjectTypeId, int IndirectObjectId, ObjectType IndirectObjectTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["WebUserId"], WebUserId);
+			dq.Criterias.Add(ObjectMap["ObjectId"], ObjectId);
+			dq.Criterias.Add(ObjectMap["ObjectTypeId"], ObjectTypeId);
+			dq.Criterias.Add(ObjectMap["IndirectObjectId"], IndirectObjectId);
+			dq.Criterias.Add(ObjectMap["IndirectObjectTypeId"], IndirectObjectTypeId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 

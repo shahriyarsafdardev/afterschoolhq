@@ -54,7 +54,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 var currentAccount = SessionVariables.CurrentAccount;
-                var activity = Activity.LoadByUid(activityUid.ToGuid(), currentAccount.ID.Value, msgs);
+                var activity = Activity.LoadByUidByAccountId(activityUid.ToGuid(), currentAccount.ID.Value, msgs);
                 var calcObject = new FeeCalculationObject(
                                     cost.ToDecimal(), 
                                     currentAccount, 
@@ -106,7 +106,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult MoveRegistrantAssignment(string id, string registrant, string assignmenttype)
         {
             var msgs = new SystemMessages();
-            var activity = Activity.LoadByUid(id.ToGuid(), msgs);
+            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
             var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
                 activity.ID.Value, 
                 ParticipationObjectType.Activity, 
@@ -167,7 +167,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (id.IsGuid())
             {
-                var activity = Activity.LoadByUid(id.ToGuid(), msgs);
+                var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
                 var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
                     activity.ID.Value, 
                     ParticipationObjectType.Activity, 
@@ -223,23 +223,24 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             Response.Clear();
 
-            if (id.IsNumber())
+            if (SessionVariables.CurrentAccount.IsNotEmpty() && id.IsInteger())
             {
-                var schedule = ActivitySchedule.Load(id.ToInteger());
-                var activities = schedule.GetActivities();
+                var schedule = ActivitySchedule.LoadByIdByAccountId(id.ToInteger(), SessionVariables.CurrentAccount.ID.Value, msgs);
 
-                WriteOutput(new { status = "ok", activities = activities.Select(x => new { x.ID, x.Name }) }, ResponseType.JSON);
-
+                if (schedule.IsEmpty())
+                    msgs.Add("Invalid data", MessageType.ApiUsageError);
+                else
+                {
+                    var activities = schedule.GetActivities();
+                    WriteOutput(new { status = "ok", activities = activities.Select(x => new { x.ID, x.Name }) }, ResponseType.JSON);
+                }
             }
             else
-            {
                 msgs.Add("Invalid data", MessageType.ApiUsageError);
-            }
 
             if (msgs.HasErrors())
-            {
                 HandleErrors(msgs, ResponseType.JSON);
-            }
+
             Response.End();
 
             return View();
@@ -249,58 +250,51 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult SetScheduleActivities(string id)
         {
             var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
             Response.Clear();
 
-            if (id.IsNumber())
+            if (currentUser.IsEmpty() || !currentUser.ID.HasValue)
+                msgs.Add("User is not logged in.", MessageType.UserError);
+
+            if (currentAccount.IsEmpty() || !currentAccount.ID.HasValue)
+                msgs.Add("Account is empty.", MessageType.UserError);
+
+            if (msgs.HasNoErrors() && id.IsInteger())
             {
                 Database.ExecuteTransaction
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        var schedule = ActivitySchedule.Load(id.ToInteger(), amsgs, adc);
+                        var schedule = ActivitySchedule.LoadByIdByAccountId(id.ToInteger(), currentAccount.ID.Value, amsgs, adc);
                         var currentActivities = schedule.GetActivities(amsgs, adc);
                         var activities = schedule.GetActivityGroup(amsgs, adc).GetActivities(amsgs, adc);
 
                         // remove
                         foreach (var item in currentActivities)
-                        {
                             if (!Request[$"activity-{item.ID}"].IsNumber())
-                            {
-                                item.ActivityScheduleId = null;
-                                amsgs.AddRange(item.Save(adc));
-                            }
-                        }
+                                item.UpdateActivitySchedule(null, currentUser.ID.Value, amsgs, adc);
 
                         // add
                         foreach (var item in activities)
-                        {
                             if (Request[$"activity-{item.ID}"].IsNumber())
-                            {
-                                item.ActivityScheduleId = schedule.ID;
-                                amsgs.AddRange(item.Save(adc));
-                            }
-                        }
+                                item.UpdateActivitySchedule(schedule.ID, currentUser.ID.Value, amsgs, adc);
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         msgs.AddRange(smsgs);
                         WriteOutput(new { status = "ok" }, ResponseType.JSON);
                     },
-                    onFailure: (SystemMessages fmsgs) =>
-                    {
-                        msgs.AddRange(fmsgs);
-                    }
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
                 );
             }
             else
-            {
                 msgs.Add("Invalid data", MessageType.ApiUsageError);
-            }
 
             if (msgs.HasErrors())
-            {
                 HandleErrors(msgs, ResponseType.JSON);
-            }
+
             Response.End();
 
             return View();
@@ -312,35 +306,25 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             Response.Clear();
 
-            if (id.IsGuid() && schedule.IsNumber())
+            if (id.IsGuid() && schedule.IsInteger())
             {
-                var activity = Activity.LoadByUid(id.ToGuid());
-                var sched = ActivitySchedule.Load(schedule.ToInteger());
+                var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+                var sched = ActivitySchedule.LoadByIdByAccountId(schedule.ToInteger(), SessionVariables.CurrentAccount.ID.Value, msgs);
 
                 if (activity.AccountId != SessionVariables.CurrentAccount.ID || sched.AccountId != SessionVariables.CurrentAccount.ID)
-                {
                     msgs.Add("Invalid data", MessageType.ApiUsageError);
-                }
 
                 if (msgs.HasNoErrors())
-                {
-                    activity.ActivityScheduleId = sched.ID;
-                    msgs.AddRange(activity.Save());
-                } 
+                    activity.UpdateActivitySchedule(sched.ID, SessionVariables.CurrentUser.ID.Value, msgs);
             }
             else
-            {
                 msgs.Add("Invalid data", MessageType.ApiUsageError);
-            }
 
             if (msgs.HasNoErrors())
-            {
                 WriteOutput(new { status = "ok" }, ResponseType.JSON);
-            }
             else
-            {
                 HandleErrors(msgs, ResponseType.JSON);
-            }
+            
             Response.End();
 
             return View();

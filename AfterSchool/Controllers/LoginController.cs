@@ -78,12 +78,19 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                if (user.IsNotEmpty())
-                    WebSessionUtilities.LogActivity(actor: user, actionType: WebSessionActionType.LoggedIn);
+                var currentAccount = SessionVariables.CurrentAccount;
 
                 // select account
-                if (SessionVariables.CurrentAccount.IsEmpty())
+                if (currentAccount.IsEmpty())
                     return RedirectToAction("select", "login", new {  returnurl });
+                
+                if (user.IsNotEmpty() && currentAccount.IsNotEmpty())
+                    // LOG: WebUserName LoggedIn
+                    SessionVariables.WebSession.LogActivity(
+                        account: currentAccount,
+                        actor: user,
+                        actionType: WebSessionActionType.LoggedIn
+                    );
 
                 if (returnurl.IsNotEmpty())
                     return HandleRedirectAfterLogin(returnurl);

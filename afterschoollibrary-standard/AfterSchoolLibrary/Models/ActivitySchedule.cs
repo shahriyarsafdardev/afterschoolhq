@@ -265,6 +265,15 @@ namespace AfterSchoolLibrary.Models
             return GetInstances(msgs: msgs, dc: dc).Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession).ToList();
         }
 
+        public static ActivitySchedule LoadByIdByAccountId(int Id, int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["Id"], Id);
+            dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
         public static ActivitySchedule LoadByAccountIdByName(int AccountId, string Name, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
@@ -616,7 +625,7 @@ namespace AfterSchoolLibrary.Models
 
         public List<Activity> GetActivities(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Activity.LoadByActivityScheduleId(this.ID.Value, msgs, dc);
+            return Activity.LoadByActivityScheduleIdByAccountId(this.ID.Value, this.AccountId.Value, msgs, dc);
         }
 
         public Account GetAccount(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -627,6 +636,14 @@ namespace AfterSchoolLibrary.Models
         public ActivityGroup GetActivityGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return ActivityGroup.Load(this.ActivityGroupId.Value, msgs, dc);
+        }
+
+        public List<ActivityInstance> GetUpcomingInstance(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return GetInSessionInstances(msgs, dc)
+                .Where(x => x.StartDateTime.Value > DateTime.UtcNow)
+                .OrderBy(x => x.StartDateTime.Value)
+                .ToList();
         }
 
         #endregion

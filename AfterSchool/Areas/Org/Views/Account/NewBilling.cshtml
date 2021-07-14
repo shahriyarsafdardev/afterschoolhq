@@ -98,11 +98,16 @@
                                                 </td>
 
                                                 <td class="text-center mobile-padding-zero">
-                                                    <div class="am-radio">
-                                                        <input type="radio" name="selectedpackage" id="selectedpackage-@p.ID-yearly" @yearlySelected value="@((int)BillingPeriodType.Year)_@p.Uid.ToString()" />
-                                                        <label for="selectedpackage-@p.ID-yearly">@p.PricePerYear.ToCurrency()</label>
-                                                    </div>
-                                                </td>
+                                                    @if (p.PricePerYear > 0)
+                                                    {                                                    
+                                                        <div class="am-radio">
+                                                            <input type="radio" name="selectedpackage" id="selectedpackage-@p.ID-yearly" @yearlySelected value="@((int)BillingPeriodType.Year)_@p.Uid.ToString()" />
+                                                            <label for="selectedpackage-@p.ID-yearly">@p.PricePerYear.ToCurrency()</label>
+                                                        </div>                                                    
+                                                    } else { 
+                                                        <div>-</div>
+                                                    }
+                                                </td>                                               
                                             </tr>
                                         }
 

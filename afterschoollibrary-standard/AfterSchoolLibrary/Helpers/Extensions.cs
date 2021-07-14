@@ -108,4 +108,119 @@ namespace AfterSchoolLibrary
         public static TValue GetValueOrDefault<TKey,TValue> (this IDictionary<TKey, TValue> dictionary, TKey key) =>
             dictionary.TryGetValue(key, out var ret) ? ret : default;
     }
+
+    public struct DateTimeSpan
+    {
+        public int Years { get; }
+        public int Months { get; }
+        public int Days { get; }
+        public int Hours { get; }
+        public int Minutes { get; }
+        public int Seconds { get; }
+        public int Milliseconds { get; }
+        public int TotalDays { get; }
+
+        public DateTimeSpan(int years, int months, int days, int hours, int minutes, int seconds, int milliseconds, int totalDays)
+        {
+            Years = years;
+            Months = months;
+            Days = days;
+            Hours = hours;
+            Minutes = minutes;
+            Seconds = seconds;
+            Milliseconds = milliseconds;
+            TotalDays = totalDays;
+        }
+
+        enum Phase { Years, Months, Days, Done }
+
+        public static DateTimeSpan CompareDates(DateTime date1, DateTime date2)
+        {
+            if (date2 < date1)
+            {
+                var sub = date1;
+                date1 = date2;
+                date2 = sub;
+            }
+
+            DateTime current = date1;
+            int years = 0;
+            int months = 0;
+            int days = 0;
+            int totalDays = (date2.Date - date1.Date).Days;
+
+            Phase phase = Phase.Years;
+            DateTimeSpan span = new DateTimeSpan();
+            int officialDay = current.Day;
+
+            while (phase != Phase.Done)
+            {
+                switch (phase)
+                {
+                    case Phase.Years:
+                        if (current.AddYears(years + 1) > date2)
+                        {
+                            phase = Phase.Months;
+                            current = current.AddYears(years);
+                        }
+                        else
+                        {
+                            years++;
+                        }
+                        break;
+                    case Phase.Months:
+                        if (current.AddMonths(months + 1) > date2)
+                        {
+                            phase = Phase.Days;
+                            current = current.AddMonths(months);
+                            if (current.Day < officialDay && officialDay <= DateTime.DaysInMonth(current.Year, current.Month))
+                                current = current.AddDays(officialDay - current.Day);
+                        }
+                        else
+                        {
+                            months++;
+                        }
+                        break;
+                    case Phase.Days:
+                        if (current.AddDays(days + 1) > date2)
+                        {
+                            current = current.AddDays(days);
+                            var timespan = date2 - current;
+                            span = new DateTimeSpan(years, months, days, timespan.Hours, timespan.Minutes, timespan.Seconds, timespan.Milliseconds, totalDays);
+                            phase = Phase.Done;
+                        }
+                        else
+                        {
+                            days++;
+                        }
+                        break;
+                }
+            }
+
+            return span;
+        }
+    }
+
+    public static class DateTimeExtensions
+    {
+        /// <summary>
+        /// Use to get the DateTime for the start of the week.
+        /// DateTime dt = DateTime.Now.StartOfWeek(DayOfWeek.Monday);
+        /// DateTime dt = DateTime.Now.StartOfWeek(DayOfWeek.Sunday);
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="startOfWeek"></param>
+        /// <returns></returns>
+        public static DateTime StartOfWeek(this DateTime dt, DayOfWeek startOfWeek)
+        {
+            int diff = (7 + (dt.DayOfWeek - startOfWeek)) % 7;
+            return dt.AddDays(-1 * diff).Date;
+        }
+
+        public static DateTime EndOfWeek(this DateTime dt, DayOfWeek startOfWeek)
+        {
+            int diff = (7 - (dt.DayOfWeek - startOfWeek)) % 7;
+            return dt.AddDays(1 * diff).Date;
+        }
+    }
 }

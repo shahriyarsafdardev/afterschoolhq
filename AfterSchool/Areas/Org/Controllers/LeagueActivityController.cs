@@ -209,11 +209,13 @@ namespace AfterSchool.Areas.Org.Controllers
             ActivityGroup activityGroup = null;
             var vb = ViewBag;
             string accountActivityGroup = null;
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentWebUser = SessionVariables.CurrentUser;
 
             if (group.IsGuid())
             {
                 activityGroup = ActivityGroup.LoadByUid(group.ToGuid());
-                accountActivityGroup = activityGroup.GetAccountActivityGroup(SessionVariables.CurrentAccount).ID.Value.ToString();
+                accountActivityGroup = activityGroup.GetAccountActivityGroup(currentAccount).ID.Value.ToString();
             }
 
             var values = new Dictionary<string, object>()
@@ -238,8 +240,8 @@ namespace AfterSchool.Areas.Org.Controllers
             if (activity.IsNotEmpty())
             {
                 activity = ActivityService.EditExisting(
-                    loggedInUserId: SessionVariables.CurrentUser.ID.Value,
-                    account: SessionVariables.CurrentAccount,
+                    loggedInUserId: currentWebUser.ID.Value,
+                    account: currentAccount,
                     activityId: activity.ID.Value.ToString(),
                     values: values,
                     msgs: msgs
@@ -252,21 +254,32 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (msgs.HasNoErrors() && !SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
                 {
                     var defaultForm = SessionVariables.CurrentAccount.GetDefaultForm();
-                    var newForm = defaultForm.Copy(SessionVariables.CurrentUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, (name + " form").MaxChars(100, "..."), msgs);
+                    var newForm = defaultForm.Copy(currentWebUser.ID.Value, currentAccount.ID.Value, (name + " form").MaxChars(100, "..."), msgs);
                     if (msgs.HasNoErrors())
                         values.Add("form", newForm.ID.Value.ToString());
                 }
 
                 activity = ActivityService.CreateNew(
-                    loggedInUserId: SessionVariables.CurrentUser.ID.Value,
-                    account: SessionVariables.CurrentAccount,
+                    loggedInUserId:currentWebUser.ID.Value,
+                    account: currentAccount,
                     values: values,
                     msgs: msgs
                 );
 
                 if (msgs.HasNoErrors())
                 {
-                    UpdateSession(SessionActionType.ActivityCreate, SessionVariables.CurrentAccount.ID, activity.ID);
+                    // LOG: CurrentUser created Activity ActivityName for ActiivtyGroup ActivityGroupName
+
+                    SessionVariables.WebSession.LogActivity(
+                        account: currentAccount,
+                        actor: currentWebUser,
+                        actionType: WebSessionActionType.Created,
+                        objectId: activity.ID.Value,
+                        objectType: ObjectType.Activity,
+                        objectText: activity.Name,
+                        indirectObjectId: activityGroup?.ID.Value,
+                        indirectObjectType: ObjectType.ActivityGroup,
+                        indirectObjectText: activityGroup?.Name);
                 }
             }
 
@@ -1633,7 +1646,20 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} has been published", activity.Name), MessageType.Success);
-                UpdateSession(SessionActionType.ActivityPublish, SessionVariables.CurrentAccount.ID, activity.ID);
+
+                var currentAccount = SessionVariables.CurrentAccount;
+                // LOG: CurrentWebUser Published Activity ActivityName to Account AccountName's Profile
+
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
+                    actor: SessionVariables.CurrentUser,
+                    actionType: WebSessionActionType.Published,
+                    objectId: activity.ID.Value,
+                    objectType: ObjectType.Activity,
+                    objectText: activity.Name,
+                    indirectObjectId: currentAccount.ID.Value,
+                    indirectObjectType: ObjectType.Account,
+                    indirectObjectText: $"{currentAccount.Name}'s Profile");
             }
 
             ViewBag.Messages = msgs;
@@ -1651,7 +1677,19 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} has been unpublished", activity.Name), MessageType.Success);
-                UpdateSession(SessionActionType.ActivityUnpublish, SessionVariables.CurrentAccount.ID, activity.ID);
+                var currentAccount = SessionVariables.CurrentAccount;
+
+                // LOG: CurrentWebUser Unpublished Activity ActivityName from Account AccountName's Profile
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
+                    actor: SessionVariables.CurrentUser,
+                    actionType: WebSessionActionType.Unpublished,
+                    objectId: activity.ID.Value,
+                    objectType: ObjectType.Activity,
+                    objectText: activity.Name,
+                    indirectObjectId: currentAccount.ID.Value,
+                    indirectObjectType: ObjectType.Account,
+                    indirectObjectText: $"{currentAccount.Name}'s Profile");
             }
 
             ViewBag.Messages = msgs;

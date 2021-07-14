@@ -4,6 +4,7 @@
     var subscriptionPlan = (SubscriptionPlan)ViewBag.SubscriptionPlan;
     var paymentPlan = (SubscriptionPlan)ViewBag.PaymentPlan;
     var postPayPlan = (SubscriptionPlan)ViewBag.PostPayPlan;
+    var postPayPlanBillingPeriod = (BillingPeriodType)(postPayPlan.IsNotEmpty() && postPayPlan.BillingPeriodTypeId.IsNotEmpty() ? postPayPlan.BillingPeriodTypeId : BillingPeriodType.Day);
     var canProcessPayments = (bool)ViewBag.CanProcessPayments;
     var accountPackage = (AccountPackage)ViewData["AccountPackage"];
     var paymentdisabled = "";
@@ -20,8 +21,7 @@
     var showAllowPaymentPlans = accountPackage.HasFeature(FeatureType.AllowPaymentPlans);
     var showAllowPaymentPlansPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowPaymentPlans);
 
-    var showAllowSubscriptionPlans = accountPackage.HasFeature(FeatureType.AllowSubscriptionPlans);
-    var showAllowSubscriptionPlansPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowSubscriptionPlans);
+    var allowAttendance = accountPackage.HasFeature(FeatureType.Attendance);
 }
 
 <div class="panel panel-default panel-small-padding">
@@ -132,7 +132,7 @@
             <div class="form-group">
                 <div class="row">
                     <label class="col-sm-3 control-label">Registration Payment Plan</label>
-                    <div class="col-sm-1" @if (!showAllowPaymentPlans) { <text> onclick="return showUpgradeMyPlan('@(showAllowPaymentPlansPackage.Name)','@(showAllowPaymentPlansPackage.ID)')"</text> }>
+                    <div class="col-sm-1" @if (!showAllowPaymentPlans) { <text> onclick="return showUpgradeMyPlan('@(showAllowPaymentPlansPackage.Name)','@(showAllowPaymentPlansPackage.ID)')" </text> }>
                         @{
                             Html.RenderPartial(
                             "~/Views/Shared/_SwitchButton.cshtml",
@@ -142,7 +142,7 @@
                                 { "checkboxname", "haspaymentplan" },
                                 { "checkboxid", "haspaymentplan" },
                                 { "disabled", !showAllowPaymentPlans }
-                            });
+            });
                         }
                     </div>
                 </div>
@@ -178,7 +178,7 @@
                         <div class="input-group input-group-lg xs-mb-15">
                             <span class="input-group-addon">Every</span>
                             <select name="paymentplanperiod" id="paymentplanperiod" class="form-control" required>
-                                @BillingPeriodOptions(paymentPlan)
+                                @BillingPeriodOptions(paymentPlan, SubscriptionPlanType.PaymentPlan)
                             </select>
                         </div>
                     </div>
@@ -199,7 +199,7 @@
                             <select name="paymentplanpaymentstarttype" id="paymentplanpaymentstarttype" class="form-control" required="required">
                                 @if (hasSchedule)
                                 {
-                                    foreach (var item in Enum.GetValues(typeof(PlanPaymentStartType)).Cast<PlanPaymentStartType>().Except(PlanPaymentStartType.NotSet.AsList()))
+                                    foreach (var item in Enum.GetValues(typeof(PlanPaymentStartType)).Cast<PlanPaymentStartType>().Except(new List<PlanPaymentStartType>() { PlanPaymentStartType.NotSet, PlanPaymentStartType.OnPeriodStart }))
                                     {
                                         var selected = (PlanPaymentStartType.WhenActivityStarts == item) ? "selected=\"selected\"" : "";
 
@@ -237,152 +237,37 @@
 
         </div>
 
+        @{Html.RenderPartial("~/Views/Shared/_SubscriptionPlan.cshtml", Model, 
+              new ViewDataDictionary() {
+                  { "subscriptionPlan", subscriptionPlan },
+                  { "accountPackage", accountPackage },
+                  { "paymentdisabled", paymentdisabled }
+              });
+        }
+
         <div class="panel-heading">
-            Subscription Options
+            Attendance-Based Billing Options
         </div>
 
         <div class="panel-body">
 
             <div class="form-group">
-
                 <div class="row">
-                    <label class="col-sm-3 control-label">Subscription</label>
-                    <div class="col-sm-1" @if (!showAllowSubscriptionPlans) { <text> onclick="return showUpgradeMyPlan('@(showAllowSubscriptionPlansPackage.Name)','@(showAllowSubscriptionPlansPackage.ID)')"</text> }>
+                    <label class="col-sm-3 control-label">Attendance-Based Billing Option</label>
+                    <div class="col-sm-1">
                         @{
                             Html.RenderPartial(
-                              "~/Views/Shared/_SwitchButton.cshtml",
-                              showAllowSubscriptionPlans ? Model.HasSubscriptionPlan() : false,
-                              new ViewDataDictionary()
-                              {
-                                { "checkboxname", "hassubscriptionplan" },
-                                { "checkboxid", "hassubscriptionplan" },
-                                { "disabled", !showAllowSubscriptionPlans }
-                              });
+                                "~/Views/Shared/_SwitchButton.cshtml",
+                                Model.HasPostPayPlan(),
+                                new ViewDataDictionary() {
+                                    { "checkboxname", "haspostpayplan" },
+                                    { "checkboxid", "haspostpayplan" }
+                                });
                         }
                     </div>
                 </div>
-
                 <br />
 
-                <div id="" class="row subscriptionplansection">
-                    <div class="col-md-3"></div>
-                    <div class="col-sm-6 col-md-9">
-                        <div class="input-group input-group-lg xs-mb-15">
-                            <span class="input-group-addon">Payment Amt $</span>
-                            <input type="number" class="form-control" id="subscriptionplancost"
-                                   name="subscriptionplancost" placeholder="Amount" onfocus="this.select()"
-                                   value="@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.CostPerPeriod.HasValue ? subscriptionPlan.CostPerPeriod.Value.ToString("0.00") : "0.00")"
-                                   required min="0.00" step=".01" @paymentdisabled />
-                        </div>
-                    </div>
-                    <div class="col-md-3"></div>
-                    <div class="col-sm-6 col-md-9">
-                        <div class="input-group input-group-lg xs-mb-15">
-                            <span class="input-group-addon">Every</span>
-                            <select name="subscriptionplanperiod" id="subscriptionplanperiod" class="form-control" required>
-                                @BillingPeriodOptions(subscriptionPlan)
-                            </select>
-                        </div>
-                        @*
-                        <p class="text-muted subscription-plan-cost-split">
-                            <em>The parent will be charged <span class="subscription-range">between</span> <span class="text-bold">$<span id="finalsubscriptionplancost-1">0.00</span></span> <span class="subscription-range"> and <span class="text-bold">$<span id="finalsubscriptionplancost-2" class="text-bold">0.00</span></span></span> every <span class="subscription-period-text text-bold"></span></em>
-                        </p>
-                        <p class="text-muted subscription-plan-cost-split">
-                            <em>If registration was closed now the parent would be charged <span class="text-bold">$<span id="finalsubscriptionplancost-3">0.00</span></span> every <span class="subscription-period-text text-bold"></span></em>
-                        </p>
-                        *@
-                        <p class="text-muted text-medium-small">
-                            <span id="pricetoparent-subscription-span">
-                                <em>The total cost will be <span class="text-bold">$<span id="pricetoparent-subscription">0.00</span></span> at checkout</em>.
-                            </span>
-                            <span id="amounttoprovider-subscription-span">
-                                <em>The total amount you will receive is <span class="text-bold">$<span id="amounttoprovider-subscription">0.00</span></span></em>.
-                            </span>
-                        </p>
-                        <div>
-                            <div class="am-checkbox">
-                                <input type="checkbox" name="isparentpricesubscription" id="isparentpricesubscription" value="1" @(subscriptionPlan.IsNotEmpty() && subscriptionPlan.IsConvenienceFeeTakenOutOfCost ? "checked=\"checked\"" : "") />
-                                <label for="isparentpricesubscription">Price is the amount the parent pays</label>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                @*
-                    <div class="row subscriptionplansection">
-                        <label class="col-sm-3 control-label">Apply Registration fee to subscription fees</label>
-                        <div class="col-sm-6 col-sm-9">
-                            @{Html.RenderPartial
-                                (
-                                    "~/Views/Shared/_SwitchButton.cshtml",
-                                    subscriptionPlan?.RegFeeAsDownPayment ?? false,
-                                    new ViewDataDictionary()
-                                    {
-                                    { "checkboxname", "regfeedownpayment" },
-                                    { "checkboxid", "regfeedownpayment" },
-                                    { "disabled", false }
-                                    }
-                                );
-                            }
-                        </div>
-                    </div>
-                *@
-
-                @if (Model.ActivityTypeId == ActivityType.LearningPod && false)
-                {
-                    <div class="row subscriptionplansection">
-                        <label class="col-sm-3 control-label">Parents split cost evenly</label>
-                        <div class="col-sm-6 col-sm-9">
-                            @{Html.RenderPartial
-                                      (
-                                          "~/Views/Shared/_SwitchButton.cshtml",
-                                          subscriptionPlan?.SplitCostEvenly ?? false,
-                                          new ViewDataDictionary()
-                                          {
-                                        { "checkboxname", "splitcostevenly" },
-                                        { "checkboxid", "splitcostevenly" },
-                                        { "disabled", false }
-          }
-                                      );
-                            }
-                        </div>
-                    </div>
-                }
-
-
-                <div class="row">
-                    <div class="col-sm-3"></div>
-                    <div class="col-sm-6 col-sm-9">
-                        <p class="text-muted padding-v-10">Subscriptions are used to bill users at specified intervals for ongoing participation.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="panel-heading">
-            Post Payment Options
-        </div>
-
-        <div class="panel-body">
-
-            <div class="form-group">
-                <div class="row">
-                    <label class="col-sm-3 control-label">Post Pay Option</label>
-                    <div class="col-sm-1">
-                        @{Html.RenderPartial
-                                (
-                                    "~/Views/Shared/_SwitchButton.cshtml",
-                                    Model.HasPostPayPlan(),
-                                    new ViewDataDictionary()
-                                    {
-                                { "checkboxname", "haspostpayplan" },
-                                { "checkboxid", "haspostpayplan" }
-}
-                                );
-                        }
-                    </div>
-                </div>
                 <div id="postpaysection" class="row">
                     <div class="col-md-3"></div>
                     <div class="col-sm-6 col-md-9">
@@ -395,7 +280,7 @@
                         </div>
                         <p class="text-muted text-medium-small">
                             <span id="pricetoparent-postpay-span">
-                                <em>The parent will be charged <span class="text-bold">$<span id="pricetoparent-postpay">0.00</span></span> per class attended</em>.
+                                <em>The parent will be charged <span class="text-bold">$<span id="pricetoparent-postpay">0.00</span></span> per <span id="pricetoparent-postpaybillingperiod">@(postPayPlanBillingPeriod.ToString().ToLower())</span> attended</em>.
                             </span>
                             <span id="amounttoprovider-postpay-span">
                                 <em>The total amount you will receive is <span class="text-bold">$<span id="amounttoprovider-postpay">0.00</span></span> per class attended</em>.
@@ -412,11 +297,13 @@
                             </div>
                         </div>
                     </div>
+                    <div class="clearfix"></div>
+
                     <div class="col-sm-3"></div>
                     <div class="col-sm-6 col-md-9">
                         <p></p>
                         <div class="input-group input-group-lg xs-mb-15">
-                            <span class="input-group-addon"># of Days to Pre-pay</span>
+                            <span class="input-group-addon"># of <span id="postpayprepaybillingperiod">@(postPayPlanBillingPeriod.ToString())</span>s to Pre-pay</span>
                             <input type="number" class="form-control" id="prepaidperiodspostpay"
                                    name="prepaidperiodspostpay" onfocus="this.select()"
                                    value="@(postPayPlan.IsNotEmpty() && postPayPlan.NumberOfPeriodsPrePaid.HasValue ? postPayPlan.NumberOfPeriodsPrePaid.ToString() : "0")"
@@ -431,11 +318,26 @@
                             </span>
                         </p>
                     </div>
+                    <div class="clearfix"></div>
+
+                    <div class="col-md-3">
+                        <label class="control-label">How do you want to charge attendance?</label>
+                    </div>
+                    <div class="col-sm-6 col-md-9">
+                        <div class="input-group input-group-lg xs-mb-15">
+                            <span class="input-group-addon">Every</span>
+                            <select name="postpayplanperiod" id="postpayplanperiod" class="form-control">
+                                @BillingPeriodOptions(postPayPlan, SubscriptionPlanType.PostPayPlan)
+                            </select>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
                 </div>
+
                 <div class="row">
                     <div class="col-sm-3"></div>
                     <div class="col-sm-9">
-                        <p class="text-muted padding-v-10">Post payment options are used to allow parents to pay based on attendance.</p>
+                        <p class="text-muted padding-v-10">Attendance-based billing options are used to allow parents to pay based on attendance.</p>
                     </div>
                 </div>
             </div>
@@ -455,6 +357,7 @@
         setSubscriptionPlanSection();
         setPaymentPlanSection();
         setPostPayPlanSection();
+        toggleSubscriptionPeriodWeek();
 
         $('#isparentpricecost').click(function () {
             calculateFinalPriceCost();
@@ -481,7 +384,23 @@
         });
 
         $('#haspostpayplan').change(function (cb) {
-            setPostPayPlanSection();
+           @if (!allowAttendance)
+           {
+              <text>
+                if (this.checked) {
+                    showUpgradeMyPlan('@(showAllowPaymentPlansPackage.Name)', '@(showAllowPaymentPlansPackage.ID)');
+                            $(this).removeAttr('checked'); //don't allow checkbox
+                }
+              </text>
+           }
+           else
+           {
+              <text>
+                 setPostPayPlanSection();
+              </text>
+           }
+
+           
         });
 
         $('#do-parents-pay-yes').click(function () {
@@ -491,6 +410,13 @@
         $('#do-parents-pay-no').click(function () {
             showTuitionCosts();
             $('#cost').val(0);
+        })
+
+        $('#postpayplanperiod').change(function () {
+            var updatedBillingPeriod = $('#postpayplanperiod :selected').text();
+            $('#pricetoparent-postpaybillingperiod').text(updatedBillingPeriod.toLowerCase());
+            $('#postpayprepaybillingperiod').text(updatedBillingPeriod);
+
         })
 
         if ('@Model.IsFree' == '@false') {
@@ -540,6 +466,12 @@
 
         $('#subscriptionplanperiod').change(function () {
             updateSubscriptionPeriodText();
+
+            toggleSubscriptionPeriodWeek();
+        });
+
+        $('#subscriptionPaymentStartType').change(function () {
+            toggleSubscriptionPeriodWeek();
         });
 
         $('#splitcostevenly').click(function () {
@@ -554,7 +486,50 @@
             updatePrePayDays();
         });
 
+        $('#subscriptionperiodstartweekday').change(function () {
+            toggleSubscriptionPeriodWeek();
+        });
+
+        $('#subscriptionperiodstartmonthday').change(function () {
+            toggleSubscriptionPeriodWeek();
+        });
     });
+
+    function toggleSubscriptionPeriodWeek() {
+        //.. if payment start == onPeriodStart and billing type is every month or week
+        if ($('#subscriptionPaymentStartType').val() == "3") {
+            if ($('#subscriptionplanperiod').val() == "1") {
+                Array.from($("#container-subscription-month, #container-subscription-enddate-label")).forEach(elem => { $(elem).removeClass("hide") });
+                $("#container-subscription-week").addClass("hide");
+                $("#subscriptionperiodstartmonthday").prop('required', true);
+                $("#subscriptionperiodstartweekday").prop('required', false);
+                LoadEndDate();
+            } else if ($('#subscriptionplanperiod').val() == "3") {
+                Array.from($("#container-subscription-week, #container-subscription-enddate-label")).forEach(elem => { $(elem).removeClass("hide") });
+                $("#container-subscription-month").addClass("hide");
+                $("#subscriptionperiodstartweekday").prop('required', true);
+                $("#subscriptionperiodstartmonthday").prop('required', false);
+                LoadEndDate();
+            } else {
+                clearSubscriptionPaymentHiddenInputs();
+                hideWeekMonthContainers();
+            }
+        } else {
+            clearSubscriptionPaymentHiddenInputs();
+            hideWeekMonthContainers();
+        }
+    }
+
+    function hideWeekMonthContainers() {
+        Array.from($("#container-subscription-month, #container-subscription-week, #container-subscription-enddate-label")).forEach(elem => { $(elem).addClass("hide") });
+        $("#subscriptionperiodstartweekday").prop('required', false);
+        $("#subscriptionperiodstartmonthday").prop('required', false);
+    }
+
+    function clearSubscriptionPaymentHiddenInputs() {
+        $('#subscriptionStartDate').val('');
+        $('#subscriptionEndDate').val('');
+    }
 
     function calculateFinalPriceCost() {
         calculateFinalPrice($('#cost').val(), $('#pricetoparent'), $('#amounttoprovider'), $('#isparentpricecost'));
@@ -648,7 +623,7 @@
 
                 if (callback) {
                     callback();
-                }                   
+                }
             }
         );
     }
@@ -739,8 +714,10 @@
     }
 
     function setChkParentPriceCost(enable) {
+        var isParentPricecostChecked = $('#isparentpricecost').prop('checked');
+
         if (enable) {
-            $('#isparentpricecost').prop('checked', false);
+            $('#isparentpricecost').prop('checked', isParentPricecostChecked);
             $('#isparentpricecost').prop('disabled', false);
         } else {
             $('#isparentpricecost').prop('checked', false);
@@ -779,26 +756,35 @@
 
 </script>
 
-@helper BillingPeriodOptions(SubscriptionPlan plan)
+@helper BillingPeriodOptions(SubscriptionPlan plan, SubscriptionPlanType type)
 {
-    var exceptions = new List<BillingPeriodType> { BillingPeriodType.NotSet };
+var exceptions = new List<BillingPeriodType> { BillingPeriodType.NotSet };
 
-    if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+{
+    exceptions = new List<BillingPeriodType> { BillingPeriodType.NotSet, BillingPeriodType.Day, BillingPeriodType.Year };
+}
+
+if (type.IsNotEmpty() && type == SubscriptionPlanType.PostPayPlan)
+{
+    exceptions = new List<BillingPeriodType> { BillingPeriodType.NotSet, BillingPeriodType.Month, BillingPeriodType.Year, BillingPeriodType.TwoWeeks };
+}
+
+foreach (var billingPeriodType in Enum.GetValues(typeof(BillingPeriodType)).Cast<BillingPeriodType>().Where(x => x.NotIn(exceptions)))
+{
+    var selected = "";
+    if (plan.IsEmpty() && billingPeriodType == BillingPeriodType.Month)
     {
-        exceptions = new List<BillingPeriodType> { BillingPeriodType.NotSet, BillingPeriodType.Day, BillingPeriodType.Year };
+        selected = " selected=\"selected\" ";
     }
-
-    foreach (var billingPeriodType in Enum.GetValues(typeof(BillingPeriodType)).Cast<BillingPeriodType>().Where(x => x.NotIn(exceptions)))
+    else if (plan.IsNotEmpty() && billingPeriodType == plan.BillingPeriodTypeId)
     {
-        var selected = "";
-        if (plan.IsEmpty() && billingPeriodType == BillingPeriodType.Month)
-        {
-            selected = " selected=\"selected\" ";
-        }
-        else if (plan.IsNotEmpty() && billingPeriodType == plan.BillingPeriodTypeId)
-        {
-            selected = " selected=\"selected\" ";
-        }
+        selected = " selected=\"selected\" ";
+    }
+    else if (type.IsNotEmpty() && type == SubscriptionPlanType.PostPayPlan && plan.IsEmpty() && billingPeriodType == BillingPeriodType.Day)
+    {
+        selected = " selected=\"selected\" ";
+    }
 
         <option value="@((int)billingPeriodType)" @selected>@billingPeriodType.ToString().SplitByUpperCase()</option>
     }

@@ -254,6 +254,14 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
+		public static int GetCountByAttendanceRegistrantId(int AttendanceRegistrantId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AttendanceRegistrantId"], AttendanceRegistrantId);
+			return dq.GetCount(msgs);
+		}
+
 		#endregion
     }
 }
