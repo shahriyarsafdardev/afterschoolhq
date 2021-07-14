@@ -38,6 +38,8 @@ namespace AfterSchoolLibraryTests
                 Database.UpdateData(dc);
                 dc.BeginTransaction();
 
+                // clean up data, sometimes tests run and data is stored
+                // temp work around
                 var dq = new DatabaseQuery();
                 dq.Connection = dc;
                 var sql = "EXEC sys.sp_msforeachtable 'DELETE FROM ?'";
