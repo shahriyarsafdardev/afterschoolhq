@@ -134,10 +134,10 @@ namespace AfterSchoolLibraryTests.Tests
             var activityForm = ActivityFormWebUserFactory.Create(account, activity, form, msgs, dc: dc);
             var attendance = new Attendance() { ActivityId = activity.ID.Value, ActivityInstanceId = activityInstance.ID.Value };
             attendance.Save(dc: dc);
-            var registrant = RegistrantFactory.Create(account, msgs, dc: dc);
+            var registrant = RegistrantFactory.Create(account, isMaster: false, msgs, dc: dc);
             var attendanceRegistrant = new AttendanceRegistrant() { AttendanceId = attendance.ID.Value, NumberPresent = 1, RegistrantId = registrant.ID.Value, NumberPossible = 1, NumberLate = 0 };
             attendanceRegistrant.Save(dc: dc);
-            var newRegistrant = RegistrantFactory.Create(account, msgs, dc: dc);
+            var newRegistrant = RegistrantFactory.Create(account, isMaster: false, msgs, dc: dc);
             var registrantActivity = RegistrantActivityFactory.Create(activity, newRegistrant, msgs, dc);
 
             List<AttendanceRegistrant> attendanceRegistrants = new List<AttendanceRegistrant>();
