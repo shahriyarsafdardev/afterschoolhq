@@ -11,8 +11,8 @@ using System.Configuration;
 
 namespace AfterSchoolLibrary.Models
 {
-    public class Database
-    {
+	public class Database
+	{
 		#region "ClassGenerator"
 		public static DatabaseCredentials ProductionCredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
 		public static DatabaseCredentials LocalCredentials { get { return new DatabaseCredentials("localhost", "AfterSchool", "AfterSchoolUser", "Nj8Ed$wpLfJ"); } }
@@ -21,8 +21,8 @@ namespace AfterSchoolLibrary.Models
 		public static DatabaseCredentials TestCredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
 		public static DatabaseCredentials StagingCredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
 		public static DatabaseCredentials LocalTestCredentials { get { return new DatabaseCredentials("localhost", "AfterSchoolTest", "AfterSchoolUser", "Nj8Ed$wpLfJ"); } }
-		public static DatabaseCredentials Credentials { get { if(Helpers.Utilities.IsProduction){return ProductionCredentials;} else if(Helpers.Utilities.IsCI){return CICredentials;} else if(Helpers.Utilities.IsStaging){return StagingCredentials;} else if(Helpers.Utilities.IsQA){return QACredentials;} else{return LocalCredentials;} } }
-		
+		public static DatabaseCredentials Credentials { get { if (Helpers.Utilities.IsProduction) { return ProductionCredentials; } else if (Helpers.Utilities.IsCI) { return CICredentials; } else if (Helpers.Utilities.IsStaging) { return StagingCredentials; } else if (Helpers.Utilities.IsQA) { return QACredentials; } else { return LocalCredentials; } } }
+
 
 		public static SystemMessages CreateTables(DatabaseConnection dc = null)
 		{
@@ -102,7 +102,7 @@ namespace AfterSchoolLibrary.Models
 			WebSession.Create(dc);
 			WebSessionAction.Create(dc);
 			WebSessionObjectSnapshot.Create(dc);
-			
+
 
 			return msgs;
 		}
@@ -185,183 +185,184 @@ namespace AfterSchoolLibrary.Models
 			WebSession.Alter(dc);
 			WebSessionAction.Alter(dc);
 			WebSessionObjectSnapshot.Alter(dc);
-			
+
 
 			return msgs;
 		}
-		
+
 		public static SystemMessages UpdateData(DatabaseConnection dc = null)
 		{
 			SystemMessages msgs = new SystemMessages();
 
 			//**UPDATES**//
-			WebUser.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, WebUser.ObjectMap, dc);
-			WebUser.Update(new Hashtable(){{"VerifiedAccount",false}}, new Hashtable(){{"VerifiedAccount", DBNull.Value}}, WebUser.ObjectMap, dc);
-			WebUser.Update(new Hashtable(){{"IsRegistered",false}}, new Hashtable(){{"IsRegistered", DBNull.Value}}, WebUser.ObjectMap, dc);
-			WebUser.Update(new Hashtable(){{"AllowTextMessages",false}}, new Hashtable(){{"AllowTextMessages", DBNull.Value}}, WebUser.ObjectMap, dc);
-			Activity.Update(new Hashtable(){{"AllowToPayLater",false}}, new Hashtable(){{"AllowToPayLater", DBNull.Value}}, Activity.ObjectMap, dc);
-			Activity.Update(new Hashtable(){{"GenderRestriction",0}}, new Hashtable(){{"GenderRestriction", DBNull.Value}}, Activity.ObjectMap, dc);
-			Activity.Update(new Hashtable(){{"RegistrationModeId",0}}, new Hashtable(){{"RegistrationModeId", DBNull.Value}}, Activity.ObjectMap, dc);
-			Activity.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, Activity.ObjectMap, dc);
-			Activity.Update(new Hashtable(){{"IsPublished",false}}, new Hashtable(){{"IsPublished", DBNull.Value}}, Activity.ObjectMap, dc);
-			Activity.Update(new Hashtable(){{"IsArchived",false}}, new Hashtable(){{"IsArchived", DBNull.Value}}, Activity.ObjectMap, dc);
-			Activity.Update(new Hashtable(){{"IsInviteOnly",false}}, new Hashtable(){{"IsInviteOnly", DBNull.Value}}, Activity.ObjectMap, dc);
-			Activity.Update(new Hashtable(){{"ActivityTypeId",0}}, new Hashtable(){{"ActivityTypeId", DBNull.Value}}, Activity.ObjectMap, dc);
-			Activity.Update(new Hashtable(){{"LeaderTypeId",0}}, new Hashtable(){{"LeaderTypeId", DBNull.Value}}, Activity.ObjectMap, dc);
-			Activity.Update(new Hashtable(){{"RequiresParentalConsent",false}}, new Hashtable(){{"RequiresParentalConsent", DBNull.Value}}, Activity.ObjectMap, dc);
-			Activity.Update(new Hashtable(){{"ActivityLocationTypeId",0}}, new Hashtable(){{"ActivityLocationTypeId", DBNull.Value}}, Activity.ObjectMap, dc);
-			Activity.Update(new Hashtable(){{"HidePreciseLocation",false}}, new Hashtable(){{"HidePreciseLocation", DBNull.Value}}, Activity.ObjectMap, dc);
-			Activity.Update(new Hashtable(){{"RegistrationFinalized",false}}, new Hashtable(){{"RegistrationFinalized", DBNull.Value}}, Activity.ObjectMap, dc);
-			Activity.Update(new Hashtable(){{"IsConvenienceFeeTakenOutOfCost",false}}, new Hashtable(){{"IsConvenienceFeeTakenOutOfCost", DBNull.Value}}, Activity.ObjectMap, dc);
-			Location.Update(new Hashtable(){{"IsDefault",false}}, new Hashtable(){{"IsDefault", DBNull.Value}}, Location.ObjectMap, dc);
-			Location.Update(new Hashtable(){{"LocationTypeId",0}}, new Hashtable(){{"LocationTypeId", DBNull.Value}}, Location.ObjectMap, dc);
-			Location.Update(new Hashtable(){{"IsTest",false}}, new Hashtable(){{"IsTest", DBNull.Value}}, Location.ObjectMap, dc);
-			ActivityDay.Update(new Hashtable(){{"Day",0}}, new Hashtable(){{"Day", DBNull.Value}}, ActivityDay.ObjectMap, dc);
-			ObjectTag.Update(new Hashtable(){{"ParticipationObjectTypeId",0}}, new Hashtable(){{"ParticipationObjectTypeId", DBNull.Value}}, ObjectTag.ObjectMap, dc);
-			ActivitySchedule.Update(new Hashtable(){{"RepeatsWeekly",false}}, new Hashtable(){{"RepeatsWeekly", DBNull.Value}}, ActivitySchedule.ObjectMap, dc);
-			ActivitySchedule.Update(new Hashtable(){{"IsOngoing",false}}, new Hashtable(){{"IsOngoing", DBNull.Value}}, ActivitySchedule.ObjectMap, dc);
-			ActivityInstance.Update(new Hashtable(){{"Day",0}}, new Hashtable(){{"Day", DBNull.Value}}, ActivityInstance.ObjectMap, dc);
-			ActivityInstance.Update(new Hashtable(){{"InstanceTypeId",0}}, new Hashtable(){{"InstanceTypeId", DBNull.Value}}, ActivityInstance.ObjectMap, dc);
-			ActivityMessage.Update(new Hashtable(){{"SendToStaff",false}}, new Hashtable(){{"SendToStaff", DBNull.Value}}, ActivityMessage.ObjectMap, dc);
-			ActivityMessageRegistrant.Update(new Hashtable(){{"SentText",false}}, new Hashtable(){{"SentText", DBNull.Value}}, ActivityMessageRegistrant.ObjectMap, dc);
-			ActivityMessageRegistrant.Update(new Hashtable(){{"SentEmail",false}}, new Hashtable(){{"SentEmail", DBNull.Value}}, ActivityMessageRegistrant.ObjectMap, dc);
-			Account.Update(new Hashtable(){{"IsAdminAccount",false}}, new Hashtable(){{"IsAdminAccount", DBNull.Value}}, Account.ObjectMap, dc);
-			Account.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, Account.ObjectMap, dc);
-			Account.Update(new Hashtable(){{"IsAfterSchool",false}}, new Hashtable(){{"IsAfterSchool", DBNull.Value}}, Account.ObjectMap, dc);
-			Account.Update(new Hashtable(){{"AccountTypeId",0}}, new Hashtable(){{"AccountTypeId", DBNull.Value}}, Account.ObjectMap, dc);
-			Account.Update(new Hashtable(){{"CreditCardFeesPaidBy",0}}, new Hashtable(){{"CreditCardFeesPaidBy", DBNull.Value}}, Account.ObjectMap, dc);
-			Account.Update(new Hashtable(){{"ConvenienceFeesPaidBy",0}}, new Hashtable(){{"ConvenienceFeesPaidBy", DBNull.Value}}, Account.ObjectMap, dc);
-			Account.Update(new Hashtable(){{"StripeChargesEnabled",false}}, new Hashtable(){{"StripeChargesEnabled", DBNull.Value}}, Account.ObjectMap, dc);
-			Account.Update(new Hashtable(){{"StripePayoutsEnabled",false}}, new Hashtable(){{"StripePayoutsEnabled", DBNull.Value}}, Account.ObjectMap, dc);
-			Account.Update(new Hashtable(){{"IsTest",false}}, new Hashtable(){{"IsTest", DBNull.Value}}, Account.ObjectMap, dc);
-			Account.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, Account.ObjectMap, dc);
-			Account.Update(new Hashtable(){{"IsClaimed",false}}, new Hashtable(){{"IsClaimed", DBNull.Value}}, Account.ObjectMap, dc);
-			Account.Update(new Hashtable(){{"OnboardingStepDone",0}}, new Hashtable(){{"OnboardingStepDone", DBNull.Value}}, Account.ObjectMap, dc);
-			AccountProfile.Update(new Hashtable(){{"GenderRestriction",0}}, new Hashtable(){{"GenderRestriction", DBNull.Value}}, AccountProfile.ObjectMap, dc);
-			AccountProfile.Update(new Hashtable(){{"IsOpenDuringCovid",false}}, new Hashtable(){{"IsOpenDuringCovid", DBNull.Value}}, AccountProfile.ObjectMap, dc);
-			AccountProfile.Update(new Hashtable(){{"IsELearningCenter",false}}, new Hashtable(){{"IsELearningCenter", DBNull.Value}}, AccountProfile.ObjectMap, dc);
-			AccountProfile.Update(new Hashtable(){{"IsAHQApproved",false}}, new Hashtable(){{"IsAHQApproved", DBNull.Value}}, AccountProfile.ObjectMap, dc);
-			AccountProfile.Update(new Hashtable(){{"IsVirtualProgram",false}}, new Hashtable(){{"IsVirtualProgram", DBNull.Value}}, AccountProfile.ObjectMap, dc);
-			CheckPaymentAccount.Update(new Hashtable(){{"IsVerified",false}}, new Hashtable(){{"IsVerified", DBNull.Value}}, CheckPaymentAccount.ObjectMap, dc);
-			CheckPaymentAccount.Update(new Hashtable(){{"LegalEntityTypeId",0}}, new Hashtable(){{"LegalEntityTypeId", DBNull.Value}}, CheckPaymentAccount.ObjectMap, dc);
-			BankPaymentAccount.Update(new Hashtable(){{"IsVerified",false}}, new Hashtable(){{"IsVerified", DBNull.Value}}, BankPaymentAccount.ObjectMap, dc);
-			BankPaymentAccount.Update(new Hashtable(){{"BankAccountTypeId",0}}, new Hashtable(){{"BankAccountTypeId", DBNull.Value}}, BankPaymentAccount.ObjectMap, dc);
-			StripeAccount.Update(new Hashtable(){{"LegalEntityTypeId",0}}, new Hashtable(){{"LegalEntityTypeId", DBNull.Value}}, StripeAccount.ObjectMap, dc);
-			StripeAccount.Update(new Hashtable(){{"RequiresFullSSN",false}}, new Hashtable(){{"RequiresFullSSN", DBNull.Value}}, StripeAccount.ObjectMap, dc);
-			StripeAccount.Update(new Hashtable(){{"VerificationStatusId",0}}, new Hashtable(){{"VerificationStatusId", DBNull.Value}}, StripeAccount.ObjectMap, dc);
-			StripeAccount.Update(new Hashtable(){{"ChargesEnabled",false}}, new Hashtable(){{"ChargesEnabled", DBNull.Value}}, StripeAccount.ObjectMap, dc);
-			StripeAccount.Update(new Hashtable(){{"PayoutsEnabled",false}}, new Hashtable(){{"PayoutsEnabled", DBNull.Value}}, StripeAccount.ObjectMap, dc);
-			StripeAccount.Update(new Hashtable(){{"RequiresDocument",false}}, new Hashtable(){{"RequiresDocument", DBNull.Value}}, StripeAccount.ObjectMap, dc);
-			StripeAccount.Update(new Hashtable(){{"RequiresAdditionalOwners",false}}, new Hashtable(){{"RequiresAdditionalOwners", DBNull.Value}}, StripeAccount.ObjectMap, dc);
-			StripeAccount.Update(new Hashtable(){{"FailedDetailsCode",0}}, new Hashtable(){{"FailedDetailsCode", DBNull.Value}}, StripeAccount.ObjectMap, dc);
-			AccountRelationship.Update(new Hashtable(){{"HostPermissionTypeId",0}}, new Hashtable(){{"HostPermissionTypeId", DBNull.Value}}, AccountRelationship.ObjectMap, dc);
-			AccountRelationship.Update(new Hashtable(){{"ApprovalStatusId",0}}, new Hashtable(){{"ApprovalStatusId", DBNull.Value}}, AccountRelationship.ObjectMap, dc);
-			AccountProperty.Update(new Hashtable(){{"AccountPropertyTypeId",0}}, new Hashtable(){{"AccountPropertyTypeId", DBNull.Value}}, AccountProperty.ObjectMap, dc);
-			AccountWebUser.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, AccountWebUser.ObjectMap, dc);
-			AccountWebUser.Update(new Hashtable(){{"IsDefault",false}}, new Hashtable(){{"IsDefault", DBNull.Value}}, AccountWebUser.ObjectMap, dc);
-			AccountWebUser.Update(new Hashtable(){{"UserTypeId",0}}, new Hashtable(){{"UserTypeId", DBNull.Value}}, AccountWebUser.ObjectMap, dc);
-			AccountWebUser.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, AccountWebUser.ObjectMap, dc);
-			AccountWebUser.Update(new Hashtable(){{"IsGhostAccount",false}}, new Hashtable(){{"IsGhostAccount", DBNull.Value}}, AccountWebUser.ObjectMap, dc);
-			RegistrationPeriod.Update(new Hashtable(){{"RegistrationModeId",0}}, new Hashtable(){{"RegistrationModeId", DBNull.Value}}, RegistrationPeriod.ObjectMap, dc);
-			ActivityRegistrationPeriod.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, ActivityRegistrationPeriod.ObjectMap, dc);
-			ActivityGroup.Update(new Hashtable(){{"RegistrationModeId",0}}, new Hashtable(){{"RegistrationModeId", DBNull.Value}}, ActivityGroup.ObjectMap, dc);
-			ActivityGroup.Update(new Hashtable(){{"IsPublished",false}}, new Hashtable(){{"IsPublished", DBNull.Value}}, ActivityGroup.ObjectMap, dc);
-			ActivityGroup.Update(new Hashtable(){{"IsArchived",false}}, new Hashtable(){{"IsArchived", DBNull.Value}}, ActivityGroup.ObjectMap, dc);
-			ActivityGroup.Update(new Hashtable(){{"IsInviteOnly",false}}, new Hashtable(){{"IsInviteOnly", DBNull.Value}}, ActivityGroup.ObjectMap, dc);
-			ActivityGroup.Update(new Hashtable(){{"HasLotteryRun",false}}, new Hashtable(){{"HasLotteryRun", DBNull.Value}}, ActivityGroup.ObjectMap, dc);
-			ActivityGroup.Update(new Hashtable(){{"ActivityGroupTypeId",0}}, new Hashtable(){{"ActivityGroupTypeId", DBNull.Value}}, ActivityGroup.ObjectMap, dc);
-			ActivityGroup.Update(new Hashtable(){{"GenderRestriction",0}}, new Hashtable(){{"GenderRestriction", DBNull.Value}}, ActivityGroup.ObjectMap, dc);
-			ActivityGroup.Update(new Hashtable(){{"CostUnitTypeId",0}}, new Hashtable(){{"CostUnitTypeId", DBNull.Value}}, ActivityGroup.ObjectMap, dc);
-			ActivityGroup.Update(new Hashtable(){{"RequiresParentalConsent",false}}, new Hashtable(){{"RequiresParentalConsent", DBNull.Value}}, ActivityGroup.ObjectMap, dc);
-			ActivityGroup.Update(new Hashtable(){{"AllowToPayLater",false}}, new Hashtable(){{"AllowToPayLater", DBNull.Value}}, ActivityGroup.ObjectMap, dc);
-			ActivityGroup.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, ActivityGroup.ObjectMap, dc);
-			AccountActivityGroup.Update(new Hashtable(){{"InviteStatusId",0}}, new Hashtable(){{"InviteStatusId", DBNull.Value}}, AccountActivityGroup.ObjectMap, dc);
-			AccountActivityGroup.Update(new Hashtable(){{"IsPublished",false}}, new Hashtable(){{"IsPublished", DBNull.Value}}, AccountActivityGroup.ObjectMap, dc);
-			AccountActivityGroup.Update(new Hashtable(){{"CostUnitTypeId",0}}, new Hashtable(){{"CostUnitTypeId", DBNull.Value}}, AccountActivityGroup.ObjectMap, dc);
-			Registrant.Update(new Hashtable(){{"RegistrantTypeId",0}}, new Hashtable(){{"RegistrantTypeId", DBNull.Value}}, Registrant.ObjectMap, dc);
-			Registrant.Update(new Hashtable(){{"IsMaster",false}}, new Hashtable(){{"IsMaster", DBNull.Value}}, Registrant.ObjectMap, dc);
-			Registrant.Update(new Hashtable(){{"IsContactOnly",false}}, new Hashtable(){{"IsContactOnly", DBNull.Value}}, Registrant.ObjectMap, dc);
-			Registrant.Update(new Hashtable(){{"IsParentOrGuardian",false}}, new Hashtable(){{"IsParentOrGuardian", DBNull.Value}}, Registrant.ObjectMap, dc);
-			Registrant.Update(new Hashtable(){{"AllowTextMessages",false}}, new Hashtable(){{"AllowTextMessages", DBNull.Value}}, Registrant.ObjectMap, dc);
-			Registrant.Update(new Hashtable(){{"ProfileStatusId",0}}, new Hashtable(){{"ProfileStatusId", DBNull.Value}}, Registrant.ObjectMap, dc);
-			Registrant.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, Registrant.ObjectMap, dc);
-			RegistrantWebUser.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, RegistrantWebUser.ObjectMap, dc);
-			ActivityPayment.Update(new Hashtable(){{"ParticipationObjectTypeId",0}}, new Hashtable(){{"ParticipationObjectTypeId", DBNull.Value}}, ActivityPayment.ObjectMap, dc);
-			ActivityPayment.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, ActivityPayment.ObjectMap, dc);
-			RegistrantActivity.Update(new Hashtable(){{"ParticipationObjectTypeId",0}}, new Hashtable(){{"ParticipationObjectTypeId", DBNull.Value}}, RegistrantActivity.ObjectMap, dc);
-			RegistrantActivity.Update(new Hashtable(){{"AssignmentTypeId",0}}, new Hashtable(){{"AssignmentTypeId", DBNull.Value}}, RegistrantActivity.ObjectMap, dc);
-			ActivityForm.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, ActivityForm.ObjectMap, dc);
-			ActivityForm.Update(new Hashtable(){{"IsPublished",false}}, new Hashtable(){{"IsPublished", DBNull.Value}}, ActivityForm.ObjectMap, dc);
-			Form.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, Form.ObjectMap, dc);
-			FormQuestion.Update(new Hashtable(){{"IsTemplate",false}}, new Hashtable(){{"IsTemplate", DBNull.Value}}, FormQuestion.ObjectMap, dc);
-			FormQuestion.Update(new Hashtable(){{"QuestionTypeId",0}}, new Hashtable(){{"QuestionTypeId", DBNull.Value}}, FormQuestion.ObjectMap, dc);
-			FormQuestion.Update(new Hashtable(){{"QuestionDataTypeId",0}}, new Hashtable(){{"QuestionDataTypeId", DBNull.Value}}, FormQuestion.ObjectMap, dc);
-			FormQuestion.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, FormQuestion.ObjectMap, dc);
-			FormQuestion.Update(new Hashtable(){{"IsRequired",false}}, new Hashtable(){{"IsRequired", DBNull.Value}}, FormQuestion.ObjectMap, dc);
-			FormQuestion.Update(new Hashtable(){{"IsLocked",false}}, new Hashtable(){{"IsLocked", DBNull.Value}}, FormQuestion.ObjectMap, dc);
-			FormQuestionGroup.Update(new Hashtable(){{"RegistrantTypeId",0}}, new Hashtable(){{"RegistrantTypeId", DBNull.Value}}, FormQuestionGroup.ObjectMap, dc);
-			FormQuestionGroup.Update(new Hashtable(){{"QuestionGroupDataTypeId",0}}, new Hashtable(){{"QuestionGroupDataTypeId", DBNull.Value}}, FormQuestionGroup.ObjectMap, dc);
-			FormQuestionAnswer.Update(new Hashtable(){{"QuestionDataTypeId",0}}, new Hashtable(){{"QuestionDataTypeId", DBNull.Value}}, FormQuestionAnswer.ObjectMap, dc);
-			Registration.Update(new Hashtable(){{"PaymentTypeId",0}}, new Hashtable(){{"PaymentTypeId", DBNull.Value}}, Registration.ObjectMap, dc);
-			Registration.Update(new Hashtable(){{"CompletionStatusId",0}}, new Hashtable(){{"CompletionStatusId", DBNull.Value}}, Registration.ObjectMap, dc);
-			ActivityWebUser.Update(new Hashtable(){{"IsLeader",false}}, new Hashtable(){{"IsLeader", DBNull.Value}}, ActivityWebUser.ObjectMap, dc);
-			Attendance.Update(new Hashtable(){{"IsCompleted",false}}, new Hashtable(){{"IsCompleted", DBNull.Value}}, Attendance.ObjectMap, dc);
-			Attendance.Update(new Hashtable(){{"IsCharged",false}}, new Hashtable(){{"IsCharged", DBNull.Value}}, Attendance.ObjectMap, dc);
-			AttendanceRegistrant.Update(new Hashtable(){{"IsPresent",false}}, new Hashtable(){{"IsPresent", DBNull.Value}}, AttendanceRegistrant.ObjectMap, dc);
-			AttendanceRegistrant.Update(new Hashtable(){{"IsLate",false}}, new Hashtable(){{"IsLate", DBNull.Value}}, AttendanceRegistrant.ObjectMap, dc);
-			Package.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, Package.ObjectMap, dc);
-			Package.Update(new Hashtable(){{"IsPopular",false}}, new Hashtable(){{"IsPopular", DBNull.Value}}, Package.ObjectMap, dc);
-			Package.Update(new Hashtable(){{"IsAfterSchool",false}}, new Hashtable(){{"IsAfterSchool", DBNull.Value}}, Package.ObjectMap, dc);
-			AccountPackage.Update(new Hashtable(){{"BillingPeriodTypeId",0}}, new Hashtable(){{"BillingPeriodTypeId", DBNull.Value}}, AccountPackage.ObjectMap, dc);
-			AccountPackage.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, AccountPackage.ObjectMap, dc);
-			PackageFeature.Update(new Hashtable(){{"FeatureTypeId",0}}, new Hashtable(){{"FeatureTypeId", DBNull.Value}}, PackageFeature.ObjectMap, dc);
-			AccountPackageFeature.Update(new Hashtable(){{"FeatureTypeId",0}}, new Hashtable(){{"FeatureTypeId", DBNull.Value}}, AccountPackageFeature.ObjectMap, dc);
-			File.Update(new Hashtable(){{"FileTypeId",0}}, new Hashtable(){{"FileTypeId", DBNull.Value}}, File.ObjectMap, dc);
-			SessionAction.Update(new Hashtable(){{"SessionActionTypeId",0}}, new Hashtable(){{"SessionActionTypeId", DBNull.Value}}, SessionAction.ObjectMap, dc);
-			CartItem.Update(new Hashtable(){{"PurchaseableObjectTypeId",0}}, new Hashtable(){{"PurchaseableObjectTypeId", DBNull.Value}}, CartItem.ObjectMap, dc);
-			CartItem.Update(new Hashtable(){{"ParticipationObjectTypeId",0}}, new Hashtable(){{"ParticipationObjectTypeId", DBNull.Value}}, CartItem.ObjectMap, dc);
-			CartItem.Update(new Hashtable(){{"Day",0}}, new Hashtable(){{"Day", DBNull.Value}}, CartItem.ObjectMap, dc);
-			PasswordResetToken.Update(new Hashtable(){{"Used",false}}, new Hashtable(){{"Used", DBNull.Value}}, PasswordResetToken.ObjectMap, dc);
-			SubscriptionPlan.Update(new Hashtable(){{"ParticipationObjectTypeId",0}}, new Hashtable(){{"ParticipationObjectTypeId", DBNull.Value}}, SubscriptionPlan.ObjectMap, dc);
-			SubscriptionPlan.Update(new Hashtable(){{"BillingPeriodTypeId",0}}, new Hashtable(){{"BillingPeriodTypeId", DBNull.Value}}, SubscriptionPlan.ObjectMap, dc);
-			SubscriptionPlan.Update(new Hashtable(){{"DoesAutoRenew",false}}, new Hashtable(){{"DoesAutoRenew", DBNull.Value}}, SubscriptionPlan.ObjectMap, dc);
-			SubscriptionPlan.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, SubscriptionPlan.ObjectMap, dc);
-			SubscriptionPlan.Update(new Hashtable(){{"PlanTypeId",0}}, new Hashtable(){{"PlanTypeId", DBNull.Value}}, SubscriptionPlan.ObjectMap, dc);
-			SubscriptionPlan.Update(new Hashtable(){{"PaymentStartTypeId",0}}, new Hashtable(){{"PaymentStartTypeId", DBNull.Value}}, SubscriptionPlan.ObjectMap, dc);
-			SubscriptionPlan.Update(new Hashtable(){{"SplitCostEvenly",false}}, new Hashtable(){{"SplitCostEvenly", DBNull.Value}}, SubscriptionPlan.ObjectMap, dc);
-			SubscriptionPlan.Update(new Hashtable(){{"RegFeeAsDownPayment",false}}, new Hashtable(){{"RegFeeAsDownPayment", DBNull.Value}}, SubscriptionPlan.ObjectMap, dc);
-			SubscriptionPlan.Update(new Hashtable(){{"IsConvenienceFeeTakenOutOfCost",false}}, new Hashtable(){{"IsConvenienceFeeTakenOutOfCost", DBNull.Value}}, SubscriptionPlan.ObjectMap, dc);
-			SubscriptionPlan.Update(new Hashtable(){{"IsOngoingSubscription",false}}, new Hashtable(){{"IsOngoingSubscription", DBNull.Value}}, SubscriptionPlan.ObjectMap, dc);
-			SubscriptionPlanPrePayment.Update(new Hashtable(){{"ParticipationObjectTypeId",0}}, new Hashtable(){{"ParticipationObjectTypeId", DBNull.Value}}, SubscriptionPlanPrePayment.ObjectMap, dc);
-			RegistrantSubscriptionPlan.Update(new Hashtable(){{"PaymentTypeFeesPaidBy",0}}, new Hashtable(){{"PaymentTypeFeesPaidBy", DBNull.Value}}, RegistrantSubscriptionPlan.ObjectMap, dc);
-			RegistrantSubscriptionPlan.Update(new Hashtable(){{"ConvenienceFeesPaidBy",0}}, new Hashtable(){{"ConvenienceFeesPaidBy", DBNull.Value}}, RegistrantSubscriptionPlan.ObjectMap, dc);
-			RegistrantSubscriptionPlan.Update(new Hashtable(){{"PaymentTypeId",0}}, new Hashtable(){{"PaymentTypeId", DBNull.Value}}, RegistrantSubscriptionPlan.ObjectMap, dc);
-			RegistrantSubscriptionPlan.Update(new Hashtable(){{"BillingPeriodTypeId",0}}, new Hashtable(){{"BillingPeriodTypeId", DBNull.Value}}, RegistrantSubscriptionPlan.ObjectMap, dc);
-			Transaction.Update(new Hashtable(){{"PaymentTypeId",0}}, new Hashtable(){{"PaymentTypeId", DBNull.Value}}, Transaction.ObjectMap, dc);
-			Transaction.Update(new Hashtable(){{"TransactionTypeId",0}}, new Hashtable(){{"TransactionTypeId", DBNull.Value}}, Transaction.ObjectMap, dc);
-			Transaction.Update(new Hashtable(){{"PaymentSourceTypeId",0}}, new Hashtable(){{"PaymentSourceTypeId", DBNull.Value}}, Transaction.ObjectMap, dc);
-			Transaction.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, Transaction.ObjectMap, dc);
-			Transaction.Update(new Hashtable(){{"UsedStripeConnect",false}}, new Hashtable(){{"UsedStripeConnect", DBNull.Value}}, Transaction.ObjectMap, dc);
-			Payout.Update(new Hashtable(){{"PayoutStatusId",0}}, new Hashtable(){{"PayoutStatusId", DBNull.Value}}, Payout.ObjectMap, dc);
-			Payout.Update(new Hashtable(){{"PaymentTypeId",0}}, new Hashtable(){{"PaymentTypeId", DBNull.Value}}, Payout.ObjectMap, dc);
-			Product.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, Product.ObjectMap, dc);
-			ProductOffering.Update(new Hashtable(){{"ParticipationObjectTypeId",0}}, new Hashtable(){{"ParticipationObjectTypeId", DBNull.Value}}, ProductOffering.ObjectMap, dc);
-			ProductPurchase.Update(new Hashtable(){{"ParticipationObjectTypeId",0}}, new Hashtable(){{"ParticipationObjectTypeId", DBNull.Value}}, ProductPurchase.ObjectMap, dc);
-			Coupon.Update(new Hashtable(){{"AmountTypeId",0}}, new Hashtable(){{"AmountTypeId", DBNull.Value}}, Coupon.ObjectMap, dc);
-			Coupon.Update(new Hashtable(){{"AppliesTo",0}}, new Hashtable(){{"AppliesTo", DBNull.Value}}, Coupon.ObjectMap, dc);
-			Coupon.Update(new Hashtable(){{"IsDisabled",false}}, new Hashtable(){{"IsDisabled", DBNull.Value}}, Coupon.ObjectMap, dc);
-			AttachedCoupon.Update(new Hashtable(){{"IsUsed",false}}, new Hashtable(){{"IsUsed", DBNull.Value}}, AttachedCoupon.ObjectMap, dc);
-			PurchaseableObjectCoupon.Update(new Hashtable(){{"PurchaseableObjectTypeId",0}}, new Hashtable(){{"PurchaseableObjectTypeId", DBNull.Value}}, PurchaseableObjectCoupon.ObjectMap, dc);
-			RefundRequest.Update(new Hashtable(){{"RequestFulfilled",false}}, new Hashtable(){{"RequestFulfilled", DBNull.Value}}, RefundRequest.ObjectMap, dc);
-			RefundRequest.Update(new Hashtable(){{"RefundRequestStatusId",0}}, new Hashtable(){{"RefundRequestStatusId", DBNull.Value}}, RefundRequest.ObjectMap, dc);
-			RefundRequest.Update(new Hashtable(){{"RequestedRefundTypeId",0}}, new Hashtable(){{"RequestedRefundTypeId", DBNull.Value}}, RefundRequest.ObjectMap, dc);
-			RefundRequest.Update(new Hashtable(){{"ApprovedRefundTypeId",0}}, new Hashtable(){{"ApprovedRefundTypeId", DBNull.Value}}, RefundRequest.ObjectMap, dc);
-			Subscriber.Update(new Hashtable(){{"ObjectTypeId",0}}, new Hashtable(){{"ObjectTypeId", DBNull.Value}}, Subscriber.ObjectMap, dc);
-			Subscriber.Update(new Hashtable(){{"SubscriberStatusId",0}}, new Hashtable(){{"SubscriberStatusId", DBNull.Value}}, Subscriber.ObjectMap, dc);
-			WebSessionAction.Update(new Hashtable(){{"ActionTypeId",0}}, new Hashtable(){{"ActionTypeId", DBNull.Value}}, WebSessionAction.ObjectMap, dc);
-			WebSessionAction.Update(new Hashtable(){{"ObjectTypeId",0}}, new Hashtable(){{"ObjectTypeId", DBNull.Value}}, WebSessionAction.ObjectMap, dc);
-			WebSessionAction.Update(new Hashtable(){{"IndirectObjectTypeId",0}}, new Hashtable(){{"IndirectObjectTypeId", DBNull.Value}}, WebSessionAction.ObjectMap, dc);
-			
+			WebUser.Update(new Hashtable() { { "IsActive", false } }, new Hashtable() { { "IsActive", DBNull.Value } }, WebUser.ObjectMap, dc);
+			WebUser.Update(new Hashtable() { { "VerifiedAccount", false } }, new Hashtable() { { "VerifiedAccount", DBNull.Value } }, WebUser.ObjectMap, dc);
+			WebUser.Update(new Hashtable() { { "IsRegistered", false } }, new Hashtable() { { "IsRegistered", DBNull.Value } }, WebUser.ObjectMap, dc);
+			WebUser.Update(new Hashtable() { { "AllowTextMessages", false } }, new Hashtable() { { "AllowTextMessages", DBNull.Value } }, WebUser.ObjectMap, dc);
+			Activity.Update(new Hashtable() { { "AllowToPayLater", false } }, new Hashtable() { { "AllowToPayLater", DBNull.Value } }, Activity.ObjectMap, dc);
+			Activity.Update(new Hashtable() { { "GenderRestriction", 0 } }, new Hashtable() { { "GenderRestriction", DBNull.Value } }, Activity.ObjectMap, dc);
+			Activity.Update(new Hashtable() { { "RegistrationModeId", 0 } }, new Hashtable() { { "RegistrationModeId", DBNull.Value } }, Activity.ObjectMap, dc);
+			Activity.Update(new Hashtable() { { "IsDeleted", false } }, new Hashtable() { { "IsDeleted", DBNull.Value } }, Activity.ObjectMap, dc);
+			Activity.Update(new Hashtable() { { "IsPublished", false } }, new Hashtable() { { "IsPublished", DBNull.Value } }, Activity.ObjectMap, dc);
+			Activity.Update(new Hashtable() { { "IsArchived", false } }, new Hashtable() { { "IsArchived", DBNull.Value } }, Activity.ObjectMap, dc);
+			Activity.Update(new Hashtable() { { "IsInviteOnly", false } }, new Hashtable() { { "IsInviteOnly", DBNull.Value } }, Activity.ObjectMap, dc);
+			Activity.Update(new Hashtable() { { "ActivityTypeId", 0 } }, new Hashtable() { { "ActivityTypeId", DBNull.Value } }, Activity.ObjectMap, dc);
+			Activity.Update(new Hashtable() { { "LeaderTypeId", 0 } }, new Hashtable() { { "LeaderTypeId", DBNull.Value } }, Activity.ObjectMap, dc);
+			Activity.Update(new Hashtable() { { "RequiresParentalConsent", false } }, new Hashtable() { { "RequiresParentalConsent", DBNull.Value } }, Activity.ObjectMap, dc);
+			Activity.Update(new Hashtable() { { "ActivityLocationTypeId", 0 } }, new Hashtable() { { "ActivityLocationTypeId", DBNull.Value } }, Activity.ObjectMap, dc);
+			Activity.Update(new Hashtable() { { "HidePreciseLocation", false } }, new Hashtable() { { "HidePreciseLocation", DBNull.Value } }, Activity.ObjectMap, dc);
+			Activity.Update(new Hashtable() { { "RegistrationFinalized", false } }, new Hashtable() { { "RegistrationFinalized", DBNull.Value } }, Activity.ObjectMap, dc);
+			Activity.Update(new Hashtable() { { "IsConvenienceFeeTakenOutOfCost", false } }, new Hashtable() { { "IsConvenienceFeeTakenOutOfCost", DBNull.Value } }, Activity.ObjectMap, dc);
+			Location.Update(new Hashtable() { { "IsDefault", false } }, new Hashtable() { { "IsDefault", DBNull.Value } }, Location.ObjectMap, dc);
+			Location.Update(new Hashtable() { { "LocationTypeId", 0 } }, new Hashtable() { { "LocationTypeId", DBNull.Value } }, Location.ObjectMap, dc);
+			Location.Update(new Hashtable() { { "IsTest", false } }, new Hashtable() { { "IsTest", DBNull.Value } }, Location.ObjectMap, dc);
+			ActivityDay.Update(new Hashtable() { { "Day", 0 } }, new Hashtable() { { "Day", DBNull.Value } }, ActivityDay.ObjectMap, dc);
+			ObjectTag.Update(new Hashtable() { { "ParticipationObjectTypeId", 0 } }, new Hashtable() { { "ParticipationObjectTypeId", DBNull.Value } }, ObjectTag.ObjectMap, dc);
+			ActivitySchedule.Update(new Hashtable() { { "RepeatsWeekly", false } }, new Hashtable() { { "RepeatsWeekly", DBNull.Value } }, ActivitySchedule.ObjectMap, dc);
+			ActivitySchedule.Update(new Hashtable() { { "IsOngoing", false } }, new Hashtable() { { "IsOngoing", DBNull.Value } }, ActivitySchedule.ObjectMap, dc);
+			ActivityInstance.Update(new Hashtable() { { "Day", 0 } }, new Hashtable() { { "Day", DBNull.Value } }, ActivityInstance.ObjectMap, dc);
+			ActivityInstance.Update(new Hashtable() { { "InstanceTypeId", 0 } }, new Hashtable() { { "InstanceTypeId", DBNull.Value } }, ActivityInstance.ObjectMap, dc);
+			ActivityMessage.Update(new Hashtable() { { "SendToStaff", false } }, new Hashtable() { { "SendToStaff", DBNull.Value } }, ActivityMessage.ObjectMap, dc);
+			ActivityMessageRegistrant.Update(new Hashtable() { { "SentText", false } }, new Hashtable() { { "SentText", DBNull.Value } }, ActivityMessageRegistrant.ObjectMap, dc);
+			ActivityMessageRegistrant.Update(new Hashtable() { { "SentEmail", false } }, new Hashtable() { { "SentEmail", DBNull.Value } }, ActivityMessageRegistrant.ObjectMap, dc);
+			Account.Update(new Hashtable() { { "IsAdminAccount", false } }, new Hashtable() { { "IsAdminAccount", DBNull.Value } }, Account.ObjectMap, dc);
+			Account.Update(new Hashtable() { { "IsActive", false } }, new Hashtable() { { "IsActive", DBNull.Value } }, Account.ObjectMap, dc);
+			Account.Update(new Hashtable() { { "IsAfterSchool", false } }, new Hashtable() { { "IsAfterSchool", DBNull.Value } }, Account.ObjectMap, dc);
+			Account.Update(new Hashtable() { { "AccountTypeId", 0 } }, new Hashtable() { { "AccountTypeId", DBNull.Value } }, Account.ObjectMap, dc);
+			Account.Update(new Hashtable() { { "CreditCardFeesPaidBy", 0 } }, new Hashtable() { { "CreditCardFeesPaidBy", DBNull.Value } }, Account.ObjectMap, dc);
+			Account.Update(new Hashtable() { { "ConvenienceFeesPaidBy", 0 } }, new Hashtable() { { "ConvenienceFeesPaidBy", DBNull.Value } }, Account.ObjectMap, dc);
+			Account.Update(new Hashtable() { { "StripeChargesEnabled", false } }, new Hashtable() { { "StripeChargesEnabled", DBNull.Value } }, Account.ObjectMap, dc);
+			Account.Update(new Hashtable() { { "StripePayoutsEnabled", false } }, new Hashtable() { { "StripePayoutsEnabled", DBNull.Value } }, Account.ObjectMap, dc);
+			Account.Update(new Hashtable() { { "IsTest", false } }, new Hashtable() { { "IsTest", DBNull.Value } }, Account.ObjectMap, dc);
+			Account.Update(new Hashtable() { { "IsDeleted", false } }, new Hashtable() { { "IsDeleted", DBNull.Value } }, Account.ObjectMap, dc);
+			Account.Update(new Hashtable() { { "IsClaimed", false } }, new Hashtable() { { "IsClaimed", DBNull.Value } }, Account.ObjectMap, dc);
+			Account.Update(new Hashtable() { { "OnboardingStepDone", 0 } }, new Hashtable() { { "OnboardingStepDone", DBNull.Value } }, Account.ObjectMap, dc);
+			AccountProfile.Update(new Hashtable() { { "GenderRestriction", 0 } }, new Hashtable() { { "GenderRestriction", DBNull.Value } }, AccountProfile.ObjectMap, dc);
+			AccountProfile.Update(new Hashtable() { { "IsOpenDuringCovid", false } }, new Hashtable() { { "IsOpenDuringCovid", DBNull.Value } }, AccountProfile.ObjectMap, dc);
+			AccountProfile.Update(new Hashtable() { { "IsELearningCenter", false } }, new Hashtable() { { "IsELearningCenter", DBNull.Value } }, AccountProfile.ObjectMap, dc);
+			AccountProfile.Update(new Hashtable() { { "IsAHQApproved", false } }, new Hashtable() { { "IsAHQApproved", DBNull.Value } }, AccountProfile.ObjectMap, dc);
+			AccountProfile.Update(new Hashtable() { { "IsVirtualProgram", false } }, new Hashtable() { { "IsVirtualProgram", DBNull.Value } }, AccountProfile.ObjectMap, dc);
+			CheckPaymentAccount.Update(new Hashtable() { { "IsVerified", false } }, new Hashtable() { { "IsVerified", DBNull.Value } }, CheckPaymentAccount.ObjectMap, dc);
+			CheckPaymentAccount.Update(new Hashtable() { { "LegalEntityTypeId", 0 } }, new Hashtable() { { "LegalEntityTypeId", DBNull.Value } }, CheckPaymentAccount.ObjectMap, dc);
+			BankPaymentAccount.Update(new Hashtable() { { "IsVerified", false } }, new Hashtable() { { "IsVerified", DBNull.Value } }, BankPaymentAccount.ObjectMap, dc);
+			BankPaymentAccount.Update(new Hashtable() { { "BankAccountTypeId", 0 } }, new Hashtable() { { "BankAccountTypeId", DBNull.Value } }, BankPaymentAccount.ObjectMap, dc);
+			StripeAccount.Update(new Hashtable() { { "LegalEntityTypeId", 0 } }, new Hashtable() { { "LegalEntityTypeId", DBNull.Value } }, StripeAccount.ObjectMap, dc);
+			StripeAccount.Update(new Hashtable() { { "RequiresFullSSN", false } }, new Hashtable() { { "RequiresFullSSN", DBNull.Value } }, StripeAccount.ObjectMap, dc);
+			StripeAccount.Update(new Hashtable() { { "VerificationStatusId", 0 } }, new Hashtable() { { "VerificationStatusId", DBNull.Value } }, StripeAccount.ObjectMap, dc);
+			StripeAccount.Update(new Hashtable() { { "ChargesEnabled", false } }, new Hashtable() { { "ChargesEnabled", DBNull.Value } }, StripeAccount.ObjectMap, dc);
+			StripeAccount.Update(new Hashtable() { { "PayoutsEnabled", false } }, new Hashtable() { { "PayoutsEnabled", DBNull.Value } }, StripeAccount.ObjectMap, dc);
+			StripeAccount.Update(new Hashtable() { { "RequiresDocument", false } }, new Hashtable() { { "RequiresDocument", DBNull.Value } }, StripeAccount.ObjectMap, dc);
+			StripeAccount.Update(new Hashtable() { { "RequiresAdditionalOwners", false } }, new Hashtable() { { "RequiresAdditionalOwners", DBNull.Value } }, StripeAccount.ObjectMap, dc);
+			StripeAccount.Update(new Hashtable() { { "FailedDetailsCode", 0 } }, new Hashtable() { { "FailedDetailsCode", DBNull.Value } }, StripeAccount.ObjectMap, dc);
+			AccountRelationship.Update(new Hashtable() { { "HostPermissionTypeId", 0 } }, new Hashtable() { { "HostPermissionTypeId", DBNull.Value } }, AccountRelationship.ObjectMap, dc);
+			AccountRelationship.Update(new Hashtable() { { "ApprovalStatusId", 0 } }, new Hashtable() { { "ApprovalStatusId", DBNull.Value } }, AccountRelationship.ObjectMap, dc);
+			AccountProperty.Update(new Hashtable() { { "AccountPropertyTypeId", 0 } }, new Hashtable() { { "AccountPropertyTypeId", DBNull.Value } }, AccountProperty.ObjectMap, dc);
+			AccountWebUser.Update(new Hashtable() { { "IsActive", false } }, new Hashtable() { { "IsActive", DBNull.Value } }, AccountWebUser.ObjectMap, dc);
+			AccountWebUser.Update(new Hashtable() { { "IsDefault", false } }, new Hashtable() { { "IsDefault", DBNull.Value } }, AccountWebUser.ObjectMap, dc);
+			AccountWebUser.Update(new Hashtable() { { "UserTypeId", 0 } }, new Hashtable() { { "UserTypeId", DBNull.Value } }, AccountWebUser.ObjectMap, dc);
+			AccountWebUser.Update(new Hashtable() { { "IsDeleted", false } }, new Hashtable() { { "IsDeleted", DBNull.Value } }, AccountWebUser.ObjectMap, dc);
+			AccountWebUser.Update(new Hashtable() { { "IsGhostAccount", false } }, new Hashtable() { { "IsGhostAccount", DBNull.Value } }, AccountWebUser.ObjectMap, dc);
+			RegistrationPeriod.Update(new Hashtable() { { "RegistrationModeId", 0 } }, new Hashtable() { { "RegistrationModeId", DBNull.Value } }, RegistrationPeriod.ObjectMap, dc);
+			ActivityRegistrationPeriod.Update(new Hashtable() { { "IsActive", false } }, new Hashtable() { { "IsActive", DBNull.Value } }, ActivityRegistrationPeriod.ObjectMap, dc);
+			ActivityGroup.Update(new Hashtable() { { "RegistrationModeId", 0 } }, new Hashtable() { { "RegistrationModeId", DBNull.Value } }, ActivityGroup.ObjectMap, dc);
+			ActivityGroup.Update(new Hashtable() { { "IsPublished", false } }, new Hashtable() { { "IsPublished", DBNull.Value } }, ActivityGroup.ObjectMap, dc);
+			ActivityGroup.Update(new Hashtable() { { "IsArchived", false } }, new Hashtable() { { "IsArchived", DBNull.Value } }, ActivityGroup.ObjectMap, dc);
+			ActivityGroup.Update(new Hashtable() { { "IsInviteOnly", false } }, new Hashtable() { { "IsInviteOnly", DBNull.Value } }, ActivityGroup.ObjectMap, dc);
+			ActivityGroup.Update(new Hashtable() { { "HasLotteryRun", false } }, new Hashtable() { { "HasLotteryRun", DBNull.Value } }, ActivityGroup.ObjectMap, dc);
+			ActivityGroup.Update(new Hashtable() { { "ActivityGroupTypeId", 0 } }, new Hashtable() { { "ActivityGroupTypeId", DBNull.Value } }, ActivityGroup.ObjectMap, dc);
+			ActivityGroup.Update(new Hashtable() { { "GenderRestriction", 0 } }, new Hashtable() { { "GenderRestriction", DBNull.Value } }, ActivityGroup.ObjectMap, dc);
+			ActivityGroup.Update(new Hashtable() { { "CostUnitTypeId", 0 } }, new Hashtable() { { "CostUnitTypeId", DBNull.Value } }, ActivityGroup.ObjectMap, dc);
+			ActivityGroup.Update(new Hashtable() { { "RequiresParentalConsent", false } }, new Hashtable() { { "RequiresParentalConsent", DBNull.Value } }, ActivityGroup.ObjectMap, dc);
+			ActivityGroup.Update(new Hashtable() { { "AllowToPayLater", false } }, new Hashtable() { { "AllowToPayLater", DBNull.Value } }, ActivityGroup.ObjectMap, dc);
+			ActivityGroup.Update(new Hashtable() { { "IsDeleted", false } }, new Hashtable() { { "IsDeleted", DBNull.Value } }, ActivityGroup.ObjectMap, dc);
+			AccountActivityGroup.Update(new Hashtable() { { "InviteStatusId", 0 } }, new Hashtable() { { "InviteStatusId", DBNull.Value } }, AccountActivityGroup.ObjectMap, dc);
+			AccountActivityGroup.Update(new Hashtable() { { "IsPublished", false } }, new Hashtable() { { "IsPublished", DBNull.Value } }, AccountActivityGroup.ObjectMap, dc);
+			AccountActivityGroup.Update(new Hashtable() { { "CostUnitTypeId", 0 } }, new Hashtable() { { "CostUnitTypeId", DBNull.Value } }, AccountActivityGroup.ObjectMap, dc);
+			Registrant.Update(new Hashtable() { { "RegistrantTypeId", 0 } }, new Hashtable() { { "RegistrantTypeId", DBNull.Value } }, Registrant.ObjectMap, dc);
+			Registrant.Update(new Hashtable() { { "IsMaster", false } }, new Hashtable() { { "IsMaster", DBNull.Value } }, Registrant.ObjectMap, dc);
+			Registrant.Update(new Hashtable() { { "IsContactOnly", false } }, new Hashtable() { { "IsContactOnly", DBNull.Value } }, Registrant.ObjectMap, dc);
+			Registrant.Update(new Hashtable() { { "IsParentOrGuardian", false } }, new Hashtable() { { "IsParentOrGuardian", DBNull.Value } }, Registrant.ObjectMap, dc);
+			Registrant.Update(new Hashtable() { { "AllowTextMessages", false } }, new Hashtable() { { "AllowTextMessages", DBNull.Value } }, Registrant.ObjectMap, dc);
+			Registrant.Update(new Hashtable() { { "ProfileStatusId", 0 } }, new Hashtable() { { "ProfileStatusId", DBNull.Value } }, Registrant.ObjectMap, dc);
+			Registrant.Update(new Hashtable() { { "IsDeleted", false } }, new Hashtable() { { "IsDeleted", DBNull.Value } }, Registrant.ObjectMap, dc);
+			RegistrantWebUser.Update(new Hashtable() { { "IsDeleted", false } }, new Hashtable() { { "IsDeleted", DBNull.Value } }, RegistrantWebUser.ObjectMap, dc);
+			ActivityPayment.Update(new Hashtable() { { "IsProRated", false } }, new Hashtable() { { "IsProRated", DBNull.Value } }, ActivityPayment.ObjectMap, dc);
+			ActivityPayment.Update(new Hashtable() { { "ParticipationObjectTypeId", 0 } }, new Hashtable() { { "ParticipationObjectTypeId", DBNull.Value } }, ActivityPayment.ObjectMap, dc);
+			ActivityPayment.Update(new Hashtable() { { "IsDeleted", false } }, new Hashtable() { { "IsDeleted", DBNull.Value } }, ActivityPayment.ObjectMap, dc);
+			RegistrantActivity.Update(new Hashtable() { { "ParticipationObjectTypeId", 0 } }, new Hashtable() { { "ParticipationObjectTypeId", DBNull.Value } }, RegistrantActivity.ObjectMap, dc);
+			RegistrantActivity.Update(new Hashtable() { { "AssignmentTypeId", 0 } }, new Hashtable() { { "AssignmentTypeId", DBNull.Value } }, RegistrantActivity.ObjectMap, dc);
+			ActivityForm.Update(new Hashtable() { { "IsActive", false } }, new Hashtable() { { "IsActive", DBNull.Value } }, ActivityForm.ObjectMap, dc);
+			ActivityForm.Update(new Hashtable() { { "IsPublished", false } }, new Hashtable() { { "IsPublished", DBNull.Value } }, ActivityForm.ObjectMap, dc);
+			Form.Update(new Hashtable() { { "IsActive", false } }, new Hashtable() { { "IsActive", DBNull.Value } }, Form.ObjectMap, dc);
+			FormQuestion.Update(new Hashtable() { { "IsTemplate", false } }, new Hashtable() { { "IsTemplate", DBNull.Value } }, FormQuestion.ObjectMap, dc);
+			FormQuestion.Update(new Hashtable() { { "QuestionTypeId", 0 } }, new Hashtable() { { "QuestionTypeId", DBNull.Value } }, FormQuestion.ObjectMap, dc);
+			FormQuestion.Update(new Hashtable() { { "QuestionDataTypeId", 0 } }, new Hashtable() { { "QuestionDataTypeId", DBNull.Value } }, FormQuestion.ObjectMap, dc);
+			FormQuestion.Update(new Hashtable() { { "IsActive", false } }, new Hashtable() { { "IsActive", DBNull.Value } }, FormQuestion.ObjectMap, dc);
+			FormQuestion.Update(new Hashtable() { { "IsRequired", false } }, new Hashtable() { { "IsRequired", DBNull.Value } }, FormQuestion.ObjectMap, dc);
+			FormQuestion.Update(new Hashtable() { { "IsLocked", false } }, new Hashtable() { { "IsLocked", DBNull.Value } }, FormQuestion.ObjectMap, dc);
+			FormQuestionGroup.Update(new Hashtable() { { "RegistrantTypeId", 0 } }, new Hashtable() { { "RegistrantTypeId", DBNull.Value } }, FormQuestionGroup.ObjectMap, dc);
+			FormQuestionGroup.Update(new Hashtable() { { "QuestionGroupDataTypeId", 0 } }, new Hashtable() { { "QuestionGroupDataTypeId", DBNull.Value } }, FormQuestionGroup.ObjectMap, dc);
+			FormQuestionAnswer.Update(new Hashtable() { { "QuestionDataTypeId", 0 } }, new Hashtable() { { "QuestionDataTypeId", DBNull.Value } }, FormQuestionAnswer.ObjectMap, dc);
+			Registration.Update(new Hashtable() { { "PaymentTypeId", 0 } }, new Hashtable() { { "PaymentTypeId", DBNull.Value } }, Registration.ObjectMap, dc);
+			Registration.Update(new Hashtable() { { "CompletionStatusId", 0 } }, new Hashtable() { { "CompletionStatusId", DBNull.Value } }, Registration.ObjectMap, dc);
+			ActivityWebUser.Update(new Hashtable() { { "IsLeader", false } }, new Hashtable() { { "IsLeader", DBNull.Value } }, ActivityWebUser.ObjectMap, dc);
+			Attendance.Update(new Hashtable() { { "IsCompleted", false } }, new Hashtable() { { "IsCompleted", DBNull.Value } }, Attendance.ObjectMap, dc);
+			Attendance.Update(new Hashtable() { { "IsCharged", false } }, new Hashtable() { { "IsCharged", DBNull.Value } }, Attendance.ObjectMap, dc);
+			AttendanceRegistrant.Update(new Hashtable() { { "IsPresent", false } }, new Hashtable() { { "IsPresent", DBNull.Value } }, AttendanceRegistrant.ObjectMap, dc);
+			AttendanceRegistrant.Update(new Hashtable() { { "IsLate", false } }, new Hashtable() { { "IsLate", DBNull.Value } }, AttendanceRegistrant.ObjectMap, dc);
+			Package.Update(new Hashtable() { { "IsActive", false } }, new Hashtable() { { "IsActive", DBNull.Value } }, Package.ObjectMap, dc);
+			Package.Update(new Hashtable() { { "IsPopular", false } }, new Hashtable() { { "IsPopular", DBNull.Value } }, Package.ObjectMap, dc);
+			Package.Update(new Hashtable() { { "IsAfterSchool", false } }, new Hashtable() { { "IsAfterSchool", DBNull.Value } }, Package.ObjectMap, dc);
+			AccountPackage.Update(new Hashtable() { { "BillingPeriodTypeId", 0 } }, new Hashtable() { { "BillingPeriodTypeId", DBNull.Value } }, AccountPackage.ObjectMap, dc);
+			AccountPackage.Update(new Hashtable() { { "IsActive", false } }, new Hashtable() { { "IsActive", DBNull.Value } }, AccountPackage.ObjectMap, dc);
+			PackageFeature.Update(new Hashtable() { { "FeatureTypeId", 0 } }, new Hashtable() { { "FeatureTypeId", DBNull.Value } }, PackageFeature.ObjectMap, dc);
+			AccountPackageFeature.Update(new Hashtable() { { "FeatureTypeId", 0 } }, new Hashtable() { { "FeatureTypeId", DBNull.Value } }, AccountPackageFeature.ObjectMap, dc);
+			File.Update(new Hashtable() { { "FileTypeId", 0 } }, new Hashtable() { { "FileTypeId", DBNull.Value } }, File.ObjectMap, dc);
+			SessionAction.Update(new Hashtable() { { "SessionActionTypeId", 0 } }, new Hashtable() { { "SessionActionTypeId", DBNull.Value } }, SessionAction.ObjectMap, dc);
+			CartItem.Update(new Hashtable() { { "PurchaseableObjectTypeId", 0 } }, new Hashtable() { { "PurchaseableObjectTypeId", DBNull.Value } }, CartItem.ObjectMap, dc);
+			CartItem.Update(new Hashtable() { { "ParticipationObjectTypeId", 0 } }, new Hashtable() { { "ParticipationObjectTypeId", DBNull.Value } }, CartItem.ObjectMap, dc);
+			CartItem.Update(new Hashtable() { { "Day", 0 } }, new Hashtable() { { "Day", DBNull.Value } }, CartItem.ObjectMap, dc);
+			PasswordResetToken.Update(new Hashtable() { { "Used", false } }, new Hashtable() { { "Used", DBNull.Value } }, PasswordResetToken.ObjectMap, dc);
+			SubscriptionPlan.Update(new Hashtable() { { "ParticipationObjectTypeId", 0 } }, new Hashtable() { { "ParticipationObjectTypeId", DBNull.Value } }, SubscriptionPlan.ObjectMap, dc);
+			SubscriptionPlan.Update(new Hashtable() { { "BillingPeriodTypeId", 0 } }, new Hashtable() { { "BillingPeriodTypeId", DBNull.Value } }, SubscriptionPlan.ObjectMap, dc);
+			SubscriptionPlan.Update(new Hashtable() { { "DoesAutoRenew", false } }, new Hashtable() { { "DoesAutoRenew", DBNull.Value } }, SubscriptionPlan.ObjectMap, dc);
+			SubscriptionPlan.Update(new Hashtable() { { "IsActive", false } }, new Hashtable() { { "IsActive", DBNull.Value } }, SubscriptionPlan.ObjectMap, dc);
+			SubscriptionPlan.Update(new Hashtable() { { "PlanTypeId", 0 } }, new Hashtable() { { "PlanTypeId", DBNull.Value } }, SubscriptionPlan.ObjectMap, dc);
+			SubscriptionPlan.Update(new Hashtable() { { "PaymentStartTypeId", 0 } }, new Hashtable() { { "PaymentStartTypeId", DBNull.Value } }, SubscriptionPlan.ObjectMap, dc);
+			SubscriptionPlan.Update(new Hashtable() { { "SplitCostEvenly", false } }, new Hashtable() { { "SplitCostEvenly", DBNull.Value } }, SubscriptionPlan.ObjectMap, dc);
+			SubscriptionPlan.Update(new Hashtable() { { "RegFeeAsDownPayment", false } }, new Hashtable() { { "RegFeeAsDownPayment", DBNull.Value } }, SubscriptionPlan.ObjectMap, dc);
+			SubscriptionPlan.Update(new Hashtable() { { "IsConvenienceFeeTakenOutOfCost", false } }, new Hashtable() { { "IsConvenienceFeeTakenOutOfCost", DBNull.Value } }, SubscriptionPlan.ObjectMap, dc);
+			SubscriptionPlan.Update(new Hashtable() { { "IsOngoingSubscription", false } }, new Hashtable() { { "IsOngoingSubscription", DBNull.Value } }, SubscriptionPlan.ObjectMap, dc);
+			SubscriptionPlanPrePayment.Update(new Hashtable() { { "ParticipationObjectTypeId", 0 } }, new Hashtable() { { "ParticipationObjectTypeId", DBNull.Value } }, SubscriptionPlanPrePayment.ObjectMap, dc);
+			RegistrantSubscriptionPlan.Update(new Hashtable() { { "PaymentTypeFeesPaidBy", 0 } }, new Hashtable() { { "PaymentTypeFeesPaidBy", DBNull.Value } }, RegistrantSubscriptionPlan.ObjectMap, dc);
+			RegistrantSubscriptionPlan.Update(new Hashtable() { { "ConvenienceFeesPaidBy", 0 } }, new Hashtable() { { "ConvenienceFeesPaidBy", DBNull.Value } }, RegistrantSubscriptionPlan.ObjectMap, dc);
+			RegistrantSubscriptionPlan.Update(new Hashtable() { { "PaymentTypeId", 0 } }, new Hashtable() { { "PaymentTypeId", DBNull.Value } }, RegistrantSubscriptionPlan.ObjectMap, dc);
+			RegistrantSubscriptionPlan.Update(new Hashtable() { { "BillingPeriodTypeId", 0 } }, new Hashtable() { { "BillingPeriodTypeId", DBNull.Value } }, RegistrantSubscriptionPlan.ObjectMap, dc);
+			Transaction.Update(new Hashtable() { { "PaymentTypeId", 0 } }, new Hashtable() { { "PaymentTypeId", DBNull.Value } }, Transaction.ObjectMap, dc);
+			Transaction.Update(new Hashtable() { { "TransactionTypeId", 0 } }, new Hashtable() { { "TransactionTypeId", DBNull.Value } }, Transaction.ObjectMap, dc);
+			Transaction.Update(new Hashtable() { { "PaymentSourceTypeId", 0 } }, new Hashtable() { { "PaymentSourceTypeId", DBNull.Value } }, Transaction.ObjectMap, dc);
+			Transaction.Update(new Hashtable() { { "IsDeleted", false } }, new Hashtable() { { "IsDeleted", DBNull.Value } }, Transaction.ObjectMap, dc);
+			Transaction.Update(new Hashtable() { { "UsedStripeConnect", false } }, new Hashtable() { { "UsedStripeConnect", DBNull.Value } }, Transaction.ObjectMap, dc);
+			Payout.Update(new Hashtable() { { "PayoutStatusId", 0 } }, new Hashtable() { { "PayoutStatusId", DBNull.Value } }, Payout.ObjectMap, dc);
+			Payout.Update(new Hashtable() { { "PaymentTypeId", 0 } }, new Hashtable() { { "PaymentTypeId", DBNull.Value } }, Payout.ObjectMap, dc);
+			Product.Update(new Hashtable() { { "IsActive", false } }, new Hashtable() { { "IsActive", DBNull.Value } }, Product.ObjectMap, dc);
+			ProductOffering.Update(new Hashtable() { { "ParticipationObjectTypeId", 0 } }, new Hashtable() { { "ParticipationObjectTypeId", DBNull.Value } }, ProductOffering.ObjectMap, dc);
+			ProductPurchase.Update(new Hashtable() { { "ParticipationObjectTypeId", 0 } }, new Hashtable() { { "ParticipationObjectTypeId", DBNull.Value } }, ProductPurchase.ObjectMap, dc);
+			Coupon.Update(new Hashtable() { { "AmountTypeId", 0 } }, new Hashtable() { { "AmountTypeId", DBNull.Value } }, Coupon.ObjectMap, dc);
+			Coupon.Update(new Hashtable() { { "AppliesTo", 0 } }, new Hashtable() { { "AppliesTo", DBNull.Value } }, Coupon.ObjectMap, dc);
+			Coupon.Update(new Hashtable() { { "IsDisabled", false } }, new Hashtable() { { "IsDisabled", DBNull.Value } }, Coupon.ObjectMap, dc);
+			AttachedCoupon.Update(new Hashtable() { { "IsUsed", false } }, new Hashtable() { { "IsUsed", DBNull.Value } }, AttachedCoupon.ObjectMap, dc);
+			PurchaseableObjectCoupon.Update(new Hashtable() { { "PurchaseableObjectTypeId", 0 } }, new Hashtable() { { "PurchaseableObjectTypeId", DBNull.Value } }, PurchaseableObjectCoupon.ObjectMap, dc);
+			RefundRequest.Update(new Hashtable() { { "RequestFulfilled", false } }, new Hashtable() { { "RequestFulfilled", DBNull.Value } }, RefundRequest.ObjectMap, dc);
+			RefundRequest.Update(new Hashtable() { { "RefundRequestStatusId", 0 } }, new Hashtable() { { "RefundRequestStatusId", DBNull.Value } }, RefundRequest.ObjectMap, dc);
+			RefundRequest.Update(new Hashtable() { { "RequestedRefundTypeId", 0 } }, new Hashtable() { { "RequestedRefundTypeId", DBNull.Value } }, RefundRequest.ObjectMap, dc);
+			RefundRequest.Update(new Hashtable() { { "ApprovedRefundTypeId", 0 } }, new Hashtable() { { "ApprovedRefundTypeId", DBNull.Value } }, RefundRequest.ObjectMap, dc);
+			Subscriber.Update(new Hashtable() { { "ObjectTypeId", 0 } }, new Hashtable() { { "ObjectTypeId", DBNull.Value } }, Subscriber.ObjectMap, dc);
+			Subscriber.Update(new Hashtable() { { "SubscriberStatusId", 0 } }, new Hashtable() { { "SubscriberStatusId", DBNull.Value } }, Subscriber.ObjectMap, dc);
+			WebSessionAction.Update(new Hashtable() { { "ActionTypeId", 0 } }, new Hashtable() { { "ActionTypeId", DBNull.Value } }, WebSessionAction.ObjectMap, dc);
+			WebSessionAction.Update(new Hashtable() { { "ObjectTypeId", 0 } }, new Hashtable() { { "ObjectTypeId", DBNull.Value } }, WebSessionAction.ObjectMap, dc);
+			WebSessionAction.Update(new Hashtable() { { "IndirectObjectTypeId", 0 } }, new Hashtable() { { "IndirectObjectTypeId", DBNull.Value } }, WebSessionAction.ObjectMap, dc);
+
 			//**ENDUPDATES**//
 
 			return msgs;
@@ -371,7 +372,7 @@ namespace AfterSchoolLibrary.Models
 		{
 			SystemMessages msgs = new SystemMessages();
 			BasicLibrary.DataAccess.DatabaseQuery dq = new BasicLibrary.DataAccess.DatabaseQuery();
-            dq.Connection = dc;
+			dq.Connection = dc;
 
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebUser_Uid ON [WebUser] (Uid)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebUser_IsActive_Uid ON [WebUser] (Uid,IsActive)"));
@@ -556,6 +557,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestionAnswer_FormQuestionId_RegistrantId ON [FormQuestionAnswer] (FormQuestionId,RegistrantId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestionAnswer_RegistrationId ON [FormQuestionAnswer] (RegistrationId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registration_Uid ON [Registration] (Uid)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registration_AccountId_Uid ON [Registration] (Uid,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registration_RegistrantId ON [Registration] (RegistrantId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registration_AccountId ON [Registration] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registration_RegistrationPeriodId ON [Registration] (RegistrationPeriodId)"));
@@ -704,124 +706,124 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_IndirectObjectId_IndirectObjectTypeId_ObjectId_ObjectTypeId_WebUserId ON [WebSessionAction] (WebUserId,ObjectId,ObjectTypeId,IndirectObjectId,IndirectObjectTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionObjectSnapshot_WebUserId ON [WebSessionObjectSnapshot] (WebUserId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionObjectSnapshot_AccountId ON [WebSessionObjectSnapshot] (AccountId)"));
-			
+
 
 			return msgs;
 		}
 
 		public static DatabaseConnection StartTransaction()
-        {
-            var dc = new DatabaseConnection(Database.Credentials.ConnectionString);
-            dc.Open();
-            dc.BeginTransaction();
-            return dc;
-        }
+		{
+			var dc = new DatabaseConnection(Database.Credentials.ConnectionString);
+			dc.Open();
+			dc.BeginTransaction();
+			return dc;
+		}
 
-        public static bool EndTransaction(DatabaseConnection dc, SystemMessages msgs, SuccessAction onSuccess = null, FailureAction onFailure = null)
-        {
-            return EndTransaction(dc, msgs.HasNoErrors(), msgs, null, null, true);
-        }
+		public static bool EndTransaction(DatabaseConnection dc, SystemMessages msgs, SuccessAction onSuccess = null, FailureAction onFailure = null)
+		{
+			return EndTransaction(dc, msgs.HasNoErrors(), msgs, null, null, true);
+		}
 
-        public static bool EndTransaction(DatabaseConnection dc, bool commit, SystemMessages msgs = null, SuccessAction onSuccess = null, FailureAction onFailure = null, bool closeTransaction = true)
-        {
-            if (commit)
-            {
-                if (closeTransaction)
-                {
-                    dc.CommitTransaction();
-                }
-                if (onSuccess.IsNotEmpty())
-                {                    
-                    onSuccess(msgs);
-                }
-            }
-            else
-            {
-                if (closeTransaction)
-                {
-                    dc.RollbackTransaction();
-                }
-                if (onFailure.IsNotEmpty())
-                {
-                    onFailure(msgs);
-                }
-            }
+		public static bool EndTransaction(DatabaseConnection dc, bool commit, SystemMessages msgs = null, SuccessAction onSuccess = null, FailureAction onFailure = null, bool closeTransaction = true)
+		{
+			if (commit)
+			{
+				if (closeTransaction)
+				{
+					dc.CommitTransaction();
+				}
+				if (onSuccess.IsNotEmpty())
+				{
+					onSuccess(msgs);
+				}
+			}
+			else
+			{
+				if (closeTransaction)
+				{
+					dc.RollbackTransaction();
+				}
+				if (onFailure.IsNotEmpty())
+				{
+					onFailure(msgs);
+				}
+			}
 
 			if (closeTransaction)
-            {
+			{
 				dc.Close();
 				dc.Dispose();
 				dc = null;
 			}
 
-            return true;
-        }
+			return true;
+		}
 
 		public delegate void TransactionAction(SystemMessages msgs, DatabaseConnection dc);
-        public delegate void FailureAction(SystemMessages msgs = null);
-        public delegate void SuccessAction(SystemMessages msgs = null);
+		public delegate void FailureAction(SystemMessages msgs = null);
+		public delegate void SuccessAction(SystemMessages msgs = null);
 		public delegate void ExceptionAction(SystemMessages msgs = null);
 
-        public static void ExecuteTransaction(TransactionAction action, SuccessAction onSuccess = null, FailureAction onFailure = null, ExceptionAction onException = null, DatabaseConnection dc = null, bool forceRollback = false)
-        {
-            var msgs = new SystemMessages();
-            var closeTransaction = false;
+		public static void ExecuteTransaction(TransactionAction action, SuccessAction onSuccess = null, FailureAction onFailure = null, ExceptionAction onException = null, DatabaseConnection dc = null, bool forceRollback = false)
+		{
+			var msgs = new SystemMessages();
+			var closeTransaction = false;
 
-            if (dc.IsEmpty())
-            {
-                dc = Database.StartTransaction();
-                closeTransaction = true;
-            }
+			if (dc.IsEmpty())
+			{
+				dc = Database.StartTransaction();
+				closeTransaction = true;
+			}
 
-            try
-            {
-                action(msgs, dc);
-            }
-            catch(Exception ex)
-            {
-                msgs.Add(ex.Message, MessageType.Error, ex);
+			try
+			{
+				action(msgs, dc);
+			}
+			catch (Exception ex)
+			{
+				msgs.Add(ex.Message, MessageType.Error, ex);
 
 				if (onException.IsNotEmpty())
 					onException(msgs);
-            }
-            finally
-            {
-                Database.EndTransaction(
-                    dc, 
-                    !forceRollback && msgs.HasNoErrors(),
-                    msgs,
-                    onSuccess: onSuccess,
-                    onFailure: onFailure,
-                    closeTransaction: closeTransaction
-                    );
-            }            
-        }
+			}
+			finally
+			{
+				Database.EndTransaction(
+					dc,
+					!forceRollback && msgs.HasNoErrors(),
+					msgs,
+					onSuccess: onSuccess,
+					onFailure: onFailure,
+					closeTransaction: closeTransaction
+					);
+			}
+		}
 
 		#endregion
 
 		#region "UserDefined"
 
-        #endregion
+		#endregion
 	}
 
 	public class DatabaseCredentials
-    {
-        public string Server { get; set; }
-        public string DatabaseName { get; set; }
-        public string Username { get; set; }
-        public string Password { get; set; }
+	{
+		public string Server { get; set; }
+		public string DatabaseName { get; set; }
+		public string Username { get; set; }
+		public string Password { get; set; }
 
 		public string ConnectionString { get { return string.Format("Data Source={0};User Id={1};Password={2};Initial Catalog={3};", Server, Username, Password, DatabaseName); } }
 
-        public DatabaseCredentials()
-        {
-        }
-        public DatabaseCredentials(string server, string databaseName, string username, string password)
-        {
-            this.Server = server;
-            this.DatabaseName = databaseName;
-            this.Username = username;
-            this.Password = password;
-        }
-    }
+		public DatabaseCredentials()
+		{
+		}
+		public DatabaseCredentials(string server, string databaseName, string username, string password)
+		{
+			this.Server = server;
+			this.DatabaseName = databaseName;
+			this.Username = username;
+			this.Password = password;
+		}
+	}
 }
