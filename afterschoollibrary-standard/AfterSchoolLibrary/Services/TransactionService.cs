@@ -344,6 +344,27 @@ namespace AfterSchoolLibrary.Services
             return 0;
         }
 
+        public static bool IsAmountRefundable(this Transaction transaction, decimal amount, bool allowFullAmountRefund = false, bool isPartialRefundWithConvenienceFee = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return amount >= 1 && amount <= transaction.GetRefundableAmount(allowFullAmountRefund, isPartialRefundWithConvenienceFee, msgs, dc);
+        }
+
+        public static decimal GetRefundableAmount(this Transaction transaction, bool allowFullAmountRefund = false, bool isPartialRefundWithConvenienceFee = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (transaction.IsCharge())
+            {
+                if (allowFullAmountRefund)
+                    return transaction.GetPayerAmount() - transaction.GetRefundedAmountAHQ(msgs, dc);
+
+                if (isPartialRefundWithConvenienceFee)
+                    return transaction.GetParentRefundableAmount();
+
+                return transaction.GetBillerPayout(msgs, dc) + transaction.GetFeesChargedToBiller() - transaction.GetRefundedAmountAHQ(msgs, dc);
+            }
+
+            return 0;
+        }
+
         public static bool HasRefundableAmount(this Transaction transaction, bool allowFullAmountRefund = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return transaction.GetRefundableAmount(allowFullAmountRefund, msgs, dc) > 0;
@@ -576,7 +597,7 @@ namespace AfterSchoolLibrary.Services
         {
             RefundRequest request = null;
 
-            if (!transaction.IsAmountRefundable(refundAmount, refundRequestStatus == RefundRequestStatus.RequestedByParent, msgs))
+            if (!transaction.IsAmountRefundable(refundAmount, refundRequestStatus == RefundRequestStatus.RequestedByParent, isPartialRefundWithConvenienceFee: true, msgs, dc))
                 msgs.Add("Amount is not refundable", MessageType.UserError);
 
             if (msgs.HasNoErrors())
