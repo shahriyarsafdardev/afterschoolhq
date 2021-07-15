@@ -128,14 +128,14 @@
                     @if (Model.RestrictByGrade())
                     {
                         <span>
-                            Grades: @ParticipationObjectUI.PrintGradeLevels(Model) 
+                            @ParticipationObjectUI.PrintGradeLevels(Model) 
                         </span>
 
                     }
                     else
                     {
                         <span>
-                            Ages: @ParticipationObjectUI.PrintAges(Model)
+                            @ParticipationObjectUI.PrintAges(Model)
                         </span>
                     }
 

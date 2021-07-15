@@ -13,7 +13,12 @@ namespace AfterSchool.Models
         public static string PrintGradeLevels(ParticipationObject participationObject)
         {
             if (participationObject.MinGradeId.HasValue && participationObject.MaxGradeId.HasValue)
-                return $"{participationObject.GetMinGradeLevel().Name} - {participationObject.GetMaxGradeLevel().Name}";
+            {
+                if (participationObject.MinGradeId.Value == participationObject.MaxGradeId.Value)
+                    return $"Grade: {participationObject.GetMinGradeLevel().Name}";
+
+                return $"Grades: {participationObject.GetMinGradeLevel().Name} to {participationObject.GetMaxGradeLevel().Name}";
+            }
 
             return "All Grades and Ages";
         }
@@ -21,7 +26,13 @@ namespace AfterSchool.Models
         public static string PrintAges(ParticipationObject participationObject)
         {
             if (participationObject.AgeStart.HasValue && participationObject.AgeEnd.HasValue)
-                return $"{participationObject.AgeStart.Value} - {participationObject.AgeEnd.Value}";
+            {
+                if (participationObject.AgeStart.Value == participationObject.AgeEnd.Value)
+                    return $"Age: {participationObject.AgeStart.Value}";
+
+                return $"Ages: {participationObject.AgeStart.Value} to {participationObject.AgeEnd.Value}";
+            }
+                
 
             return "All Grades and Ages";
         }
