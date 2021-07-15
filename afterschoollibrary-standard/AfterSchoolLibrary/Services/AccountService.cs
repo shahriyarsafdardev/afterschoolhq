@@ -2864,7 +2864,7 @@ namespace AfterSchoolLibrary.Services
                                             msgs,
                                             dc);
 
-            var totalConvenienceFeesReceived = account.GetTotalConvenienceFeesReceivedAsBiller(paymentType: null, startDate, endDate, msgs, dc);
+            var totalConvenienceFeesReceived = account.GetTotalConvenienceFeesReceivedAsBiller(null, startDate, endDate, msgs, dc);
             var totalRefunds = account.GetTotalAmountRefundedAHQ(search, true, startDate, endDate, msgs, dc);
             var totalRefundManual = account.GetTotalAmountRefundedManually(search, startDate, endDate, msgs, dc);
 
