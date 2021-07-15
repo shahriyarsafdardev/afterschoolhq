@@ -325,7 +325,7 @@ namespace AfterSchoolLibrary.Services
             return registrantActivity.AssignmentTypeId == registrationAssignmentType;
         }
 
-        public static bool CanAccessStatus(this RegistrantActivity registrantActivity)
+        public static bool IsRegistrantActivityStatusAccessible(this RegistrantActivity registrantActivity)
         {
             return registrantActivity.AssignmentTypeId.NotIn(new List<RegistrationAssignmentType>() { 
                 RegistrationAssignmentType.NotSet,
@@ -334,7 +334,7 @@ namespace AfterSchoolLibrary.Services
                 RegistrationAssignmentType.Invited });
         }
 
-        public static bool CanAccessUtilityButtons(this RegistrantActivity registrantActivity)
+        public static bool IsRegistrantActivityUtilityButtonsAccessible(this RegistrantActivity registrantActivity)
         {
             return registrantActivity.AssignmentTypeId.NotIn(new List<RegistrationAssignmentType>() {
                 RegistrationAssignmentType.NotSet,
