@@ -14,5 +14,5 @@ Scenario:  Try to create new individual account
 	Given  Populate customize your profile images and click continue
 	Given  Populate parents find your activity easily and click continue
 	Given  Populate enter links and click continue
-	When  Click on go to your profile 
-	Then  Match the current url with the expected url
+	When   Click on go to your profile 
+	Then   Match the current url with the expected url

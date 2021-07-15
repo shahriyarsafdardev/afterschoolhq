@@ -53,7 +53,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         }
 
         [When(@"Click on login")]
-        public void GivenEnterUserNameAndPassword()
+        public void ClickLogin()
         {
             loginPage.ClickSubmit();
         }
