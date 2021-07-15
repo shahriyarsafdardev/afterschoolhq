@@ -597,7 +597,7 @@ namespace AfterSchoolLibrary.Services
         {
             RefundRequest request = null;
 
-            if (!transaction.IsAmountRefundable(refundAmount, refundRequestStatus == RefundRequestStatus.RequestedByParent, isPartialRefundWithConvenienceFee: true, msgs, dc))
+            if (!transaction.IsAmountRefundable(refundAmount, refundRequestStatus == RefundRequestStatus.RequestedByParent, true, msgs, dc))
                 msgs.Add("Amount is not refundable", MessageType.UserError);
 
             if (msgs.HasNoErrors())
