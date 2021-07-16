@@ -428,7 +428,7 @@ namespace AfterSchoolLibrary.Models
             return msgs;
         }
 
-        public static AccountPackage LoadByAccountId(int AccountId, bool IsActive, string OrderByProperty, OrderByDirectionEnum orderByDirection, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static AccountPackage LoadFirstFromListByAccountIdByIsActiveByOrderProperty(int AccountId, bool IsActive, string OrderByProperty, OrderByDirectionEnum orderByDirection, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;

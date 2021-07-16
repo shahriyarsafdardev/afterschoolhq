@@ -745,6 +745,33 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(expected: activity2.ID, actual: activities[1].ID);
         }
 
+        [Theory(DisplayName = "GetActivitiesByIds Test")]
+        [InlineData(5)]
+        public void GetActivitiesByIdsTest(int n)
+        {
+            try
+            {
+                // Arrange
+                List<int> activityIds = new List<int>();
+                for (var i = 0; i < n; i++)
+                {
+                    var activity = ActivityFactory.Create(account, msgs, dc);
+                    activityIds.Add(activity.ID.Value);
+                }
+
+                // Act
+                var expected = account.GetActivities(ActivityIds: activityIds, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.Equal(expected: expected.Count, actual: n);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
         [Fact]
         public void GetActivityGroupTest()
         {
@@ -768,13 +795,40 @@ namespace AfterSchoolLibraryTests.Tests
             }
         }
 
+        [Theory(DisplayName = "GetActivityGroups Test")]
+        [InlineData(5)]
+        public void GetActivityGroupsTest(int n)
+        {
+            try
+            {
+                // Arrange
+                List<int> activityGroupIds = new List<int>();
+                for (var i = 0; i < n; i++)
+                {
+                    var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+                    activityGroupIds.Add(activityGroup.ID.Value);
+                }
+
+                // Act
+                var expected = account.GetActivityGroups(activityGroupIds: activityGroupIds, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.Equal(expected: expected.Count, actual: n);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
         [Fact]
         public void GetRegistrantTest()
         {
             try
             {
                 // Arrange
-                var registrant = RegistrantFactory.Create(account, msgs, dc);
+                var registrant = RegistrantFactory.Create(account, isMaster: false, msgs, dc);
 
                 // Act                
                 var expected = account.GetRegistrant(Uid: registrant.Uid, msgs: msgs, dc: dc);
@@ -1072,10 +1126,115 @@ namespace AfterSchoolLibraryTests.Tests
                 var account = AccountFactory.CreateWithFreePackage(accountOwner, AccountType.Church, msgs, dc);
 
                 // Act
-                var AccountWithFeature = AccountService.HasFeature(account, FeatureType.AcceptACH, msgs, dc);
+                var AccountWithFeature = account.HasFeature(FeatureType.AcceptACH, msgs, dc);
 
                 // Assert
                 Assert.True(AccountWithFeature);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "HasFeature False Case Test")]
+        public void HasFeatureEmptyAccountTest()
+        {
+            try
+            {
+                // Arrange
+                var accountWithNoPackage = AccountFactory.Create(user, msgs, dc);
+                
+                // Act
+                var accountWithFeature = AccountService.HasFeature(account: null, FeatureType.AcceptACH, msgs, dc);
+                var accountWithNoPackageFeature = AccountService.HasFeature(account: accountWithNoPackage, FeatureType.AcceptACH, msgs, dc);
+                
+                // Assert
+                Assert.False(accountWithFeature);
+                Assert.False(accountWithNoPackageFeature);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "GetActiveAccountPackage test")]
+        public void GetActiveAccountPackageTest()
+        {
+            try
+            {
+                // Arrange
+                var package = PackageFactory.Create(msgs, dc);
+                var accountPackage = AccountPackageFactory.Create(account, package, msgs, dc);
+
+                // Act
+                var expected = account.GetActiveAccountPackage(msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.NotNull(expected);
+                Assert.Equal(accountPackage.PackageName, expected.PackageName);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "GetActiveAccountPackage test 2")]
+        public void GetActiveAccountPackageEmptyAccountTest()
+        {
+            try
+            {
+                // Arrange & Act
+                var expected = AccountService.GetActiveAccountPackage(account: null, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.Null(expected);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "GetCheckPaymentAccount test")]
+        public void GetCheckPaymentAccountTest()
+        {
+            try
+            {
+                // Arrange
+                var checkPaymentAccount = CheckPaymentAccountFactory.Create(account, msgs, dc);
+
+                // Act
+                var expected = account.GetCheckPaymentAccount(msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.NotNull(expected);
+                Assert.Equal(checkPaymentAccount.Name, expected.Name);
+                Assert.Equal(checkPaymentAccount.LegalEntityTypeId, expected.LegalEntityTypeId);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "GetCheckPaymentAccount test 2")]
+        public void GetCheckPaymentAccountEmptyAccountTest()
+        {
+            try
+            {
+                // Arrange & Act
+                var expected = AccountService.GetCheckPaymentAccount(account: null, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.Null(expected);
             }
             catch (Exception ex)
             {
@@ -1538,6 +1697,346 @@ namespace AfterSchoolLibraryTests.Tests
             // Assert
             Assert.Null(expectedError);
             Assert.True(msgs.HasErrors());
+        }
+
+        [Fact(DisplayName = "UseStripeConnectDuringCheckout stripe is activated test")]
+        public void UseStripeConnectDuringCheckoutWithStripeTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.CreateAccount(accountOwner, AccountType.School, stripeChargesEnabled: true, stripePayoutsEnabled: true, msgs, dc);
+                
+                //UseStripeConnectedAccount is true for this package, so this test case will pass since it meets all criteria
+                var package = PackageFactory.CreateFreePackageWithUseStripeConnectedAccount(msgs, dc);
+                var accountPackage = AccountPackageFactory.Create(account, package, msgs, dc);
+
+                // Act
+                var expected = account.UseStripeConnectDuringCheckout(msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.True(expected);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "UseStripeConnectDuringCheckout test")]
+        public void UseStripeConnectDuringCheckoutTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.CreateAccount(accountOwner, AccountType.School, stripeChargesEnabled: true, stripePayoutsEnabled: true, msgs, dc);
+                var package = PackageFactory.CreateFreePackage(msgs, dc); //UseStripeConnectedAccount is false for this package, so this test case will fail
+                var accountPackage = AccountPackageFactory.Create(account, package, msgs, dc);
+
+                // Act
+                var expected = account.UseStripeConnectDuringCheckout(msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.False(expected);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "UseStripeConnectDuringCheckout stripeChargesEnabled test")]
+        public void UseStripeConnectDuringCheckoutWithStripeChargesEnabledTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.CreateAccount(accountOwner, AccountType.School, stripeChargesEnabled: true, stripePayoutsEnabled: true, msgs, dc);                
+                var package = PackageFactory.CreateFreePackageWithUseStripeConnectedAccount(msgs, dc);
+                var accountPackage = AccountPackageFactory.Create(account, package, msgs, dc);
+
+                // Act
+                var expected = account.UseStripeConnectDuringCheckout(msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.True(expected);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "UseStripeConnectDuringCheckout stripeCharges is disabled test")]
+        public void UseStripeConnectDuringCheckoutWithStripeChargesDisabledTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.CreateAccount(accountOwner, AccountType.School, stripeChargesEnabled: false, stripePayoutsEnabled: true, msgs, dc);
+                var package = PackageFactory.CreateFreePackageWithUseStripeConnectedAccount(msgs, dc);
+                var accountPackage = AccountPackageFactory.Create(account, package, msgs, dc);
+
+                // Act
+                var expected = account.UseStripeConnectDuringCheckout(msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.False(expected);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "UseStripeConnectDuringCheckout StripePayouts Enabled test")]
+        public void UseStripeConnectDuringCheckoutWithStripePayoutsEnabledTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.CreateAccount(accountOwner, AccountType.School, stripeChargesEnabled: true, stripePayoutsEnabled: true, msgs, dc);
+                var package = PackageFactory.CreateFreePackageWithUseStripeConnectedAccount(msgs, dc);
+                var accountPackage = AccountPackageFactory.Create(account, package, msgs, dc);
+
+                // Act
+                var expected = account.UseStripeConnectDuringCheckout(msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.True(expected);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "UseStripeConnectDuringCheckout StripePayouts is Disabled test")]
+        public void UseStripeConnectDuringCheckoutWithStripePayoutsDisabledTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.CreateAccount(accountOwner, AccountType.School, stripeChargesEnabled: true, stripePayoutsEnabled: false, msgs, dc);
+                var package = PackageFactory.CreateFreePackageWithUseStripeConnectedAccount(msgs, dc);
+                var accountPackage = AccountPackageFactory.Create(account, package, msgs, dc);
+
+                // Act
+                var expected = account.UseStripeConnectDuringCheckout(msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.False(expected);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "UseStripeConnectDuringCheckout Empty account test")]
+        public void UseStripeConnectDuringCheckoutEmptyAccountTest()
+        {
+            try
+            {
+                // Arrange && Act
+                var expected = AccountService.UseStripeConnectDuringCheckout(account: null, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.False(expected);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact]
+        public void GetRegistrationTest()
+        {
+            try 
+            { 
+                // Arrange
+                var activity = ActivityFactory.Create(account, msgs, dc);
+                var registrant = RegistrantFactory.Create(msgs, dc);
+                var registration = RegistrationFactory.Create(account, registrant, msgs, dc);
+
+                // Act
+                var expected = account.GetRegistration(Uid: registration.Uid, msgs, dc);
+
+                // Assert
+                Assert.Equal(expected: expected.ID, actual: registration.ID);
+                Assert.Equal(expected: expected.Uid, actual: registration.Uid);
+                Assert.Equal(expected: expected.RegistrantId, actual: registration.RegistrantId);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Theory(DisplayName = "CreatePurchaseTransactionPayment test")]
+        [InlineData(100, 6, 4, 110, 100, false)] //no pro-rate
+        [InlineData(100, 6, 4, 90, 83.33, true)] //assume user joins mid-period and so as we have to keep pro-rated amount, its 94.3m(otherwise it would 100m)
+        [InlineData(10, 2, 0, 12, 10, false)] //no pro-rate
+        [InlineData(10, 2, 0, 9.7, 9.1, true)]
+        public void CreatePurchaseTransactionPaymentTest(decimal amount, decimal convenienceFee, decimal paymentTypeFee, decimal amountPaidByParent, decimal amountReceivedByProvider, bool isAmountProRated = false)
+        {
+            try
+            {
+                // Arrange
+                var billingAccountOwner = WebUserFactory.Create("Don", "John", "DonJohn@test.com", true, msgs, dc);
+                var purchasingAccountOwner = WebUserFactory.Create("Cristine", "Trump", "CristineTrump@test.com", true, msgs, dc);
+                var billingAccount = AccountFactory.CreateWithFreePackage("Billing account", "BillingAccount@test.com", billingAccountOwner, AccountType.School, msgs, dc);
+                var purchasingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", purchasingAccountOwner, AccountType.School, msgs, dc);
+                var masterRegistrant = RegistrantFactory.Create(purchasingAccount, isMaster: true, msgs, dc);
+
+                var activity = ActivityFactory.Create(billingAccount, msgs, dc: dc);
+                var activityGroup = ActivityGroupFactory.Create(billingAccount, ActivityGroupType.Session, msgs, dc);
+                var registrant = RegistrantFactory.Create(billingAccount, isMaster: false, msgs, dc: dc);
+                var registration = RegistrationFactory.Create(billingAccount, registrant, msgs, dc);
+                var registrantActivity = RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
+
+                var subscriptionPlan = SubscriptionPlanFactory.Create(billingAccount, activity, SubscriptionPlanType.Subscription, amountPaidByParent, msgs, dc);
+                purchasingAccount.CreateStripeCustomer(msgs, dc);
+
+                var purchase = PurchaseFactory.Create(purchasingAccount, amount, registrantId: registrant.ID.Value, registrationId: registration.ID.Value, msgs, dc); // check: we are inserting row amount here
+                var registrantSubscriptionPlan = RegistrantSubscriptionPlanFactory.Create(registrant, subscriptionPlan, purchase, amount: amount, convenienceFee: convenienceFee, paymentTypeFee: paymentTypeFee, msgs, dc);
+                var participationObject = subscriptionPlan.GetParticipationObject(msgs, dc);
+
+                Account convenienceFeePayer;
+                Account transactionFeePayer;
+
+                if (registrantSubscriptionPlan.ConvenienceFeesPaidBy == FeesPaidByType.Parent)
+                    convenienceFeePayer = purchasingAccount;
+                else
+                    convenienceFeePayer = billingAccount;
+
+                if (registrantSubscriptionPlan.PaymentTypeFeesPaidBy == FeesPaidByType.Parent)
+                    transactionFeePayer = purchasingAccount;
+                else
+                    transactionFeePayer = billingAccount;
+
+                // save transaction info and track payment to the activity as well.
+                var checkoutObject = new CheckoutObject()
+                {
+                    PayingAccount = purchasingAccount,
+                    BillingAccount = billingAccount,
+                    OverrideAmount = amount,
+                    AmountPaidByParent = amountPaidByParent,
+                    AmountReceivedByProvider = amountReceivedByProvider,
+                    IsAmountProRated = isAmountProRated,
+                    ConvenienceFeeOverrideAmount = registrantSubscriptionPlan.ConvenienceFee,
+                    PaymentTypeFeeOverrideAmount = registrantSubscriptionPlan.PaymentTypeFee,
+                    ParticipationObject = participationObject,
+                    PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                    PaymentType = registrantSubscriptionPlan.PaymentTypeId,
+                    SubscriptionPlan = subscriptionPlan.PlanTypeId == SubscriptionPlanType.Subscription ? subscriptionPlan : null,
+                    PaymentPlan = subscriptionPlan.PlanTypeId == SubscriptionPlanType.PaymentPlan ? subscriptionPlan : null,
+                    MasterRegistrant = masterRegistrant,
+                    NumberOfSeats = 1,
+                    Registration = registration,
+                    RegistrantSubscriptionPlan = registrantSubscriptionPlan,
+                    ConvenienceFeePayer = convenienceFeePayer,
+                    CreditCardFeePayer = transactionFeePayer,
+                    Purchase = purchase
+                };
+
+                // Act
+                AccountService.CreatePurchaseTransactionPayment(checkoutObject, user, msgs, dc);
+
+                // Assert
+                //account
+                Assert.NotNull(billingAccount);
+                Assert.NotNull(purchasingAccount);
+
+                //activity
+                Assert.NotNull(activity);
+                Assert.Equal(activity?.AccountId, billingAccount.ID.Value);
+
+                //registrant
+                Assert.NotNull(registrant);
+                Assert.NotNull(masterRegistrant);
+                Assert.Equal(registrant?.AccountId, billingAccount.ID.Value);
+                Assert.Equal(masterRegistrant?.AccountId, purchasingAccount.ID.Value);
+
+                //registration
+                Assert.NotNull(registration);
+                Assert.Equal(registration?.RegistrantId, registrant.ID.Value);
+                Assert.Equal(registration?.AccountId, billingAccount.ID.Value);                
+
+                //registrantSubscriptionPlan
+                Assert.NotNull(registrantSubscriptionPlan);
+                Assert.Equal(registrantSubscriptionPlan?.Amount, amount);
+                Assert.Equal(registrantSubscriptionPlan?.SubscriptionPlanId, subscriptionPlan.ID.Value);
+                Assert.Equal(registrantSubscriptionPlan?.RegistrantId, registrant.ID.Value);
+                Assert.Equal(registrantSubscriptionPlan?.ConvenienceFee, convenienceFee);
+                Assert.Equal(registrantSubscriptionPlan?.PaymentTypeFee, paymentTypeFee);
+
+                //purchase
+                Assert.NotNull(purchase);
+                Assert.Equal(purchase?.ID, purchase.ID.Value);
+                Assert.Equal(purchase?.AmountPaid, amount);
+                Assert.Equal(purchase?.RegistrationId, registration.ID.Value);
+                Assert.Equal(purchase?.RegistrantId, registrant.ID.Value);
+                Assert.Equal(purchase?.PurchaserAccountId, purchasingAccount.ID.Value);
+
+                //subscription plan
+                Assert.NotNull(subscriptionPlan);
+                Assert.Equal(subscriptionPlan?.ParticipationObjectId, participationObject.ObjectID.Value);
+                Assert.Equal(subscriptionPlan?.ParticipationObjectTypeId, participationObject.ObjectType);
+                Assert.Equal(subscriptionPlan?.CostPerPeriod, amountPaidByParent); //here subscription plan will have amount with all fees
+                Assert.Equal(subscriptionPlan?.PlanOwnerAccountId, billingAccount.ID.Value);
+                Assert.Equal(BillingPeriodType.Month, subscriptionPlan?.BillingPeriodTypeId);
+                Assert.Equal(SubscriptionPlanType.Subscription, subscriptionPlan?.PlanTypeId);
+
+                //transaction
+                var transaction = Transaction.LoadByBillerAccountIdByIsDeleted(BillerAccountId: billingAccount.ID.Value, IsDeleted: false, msgs, dc).FirstOrDefault();
+                Assert.NotNull(transaction);
+                Assert.Equal(transaction?.PurchaseId, purchase.ID.Value);
+                Assert.Equal(transaction?.PaymentTypeFeeCharged, paymentTypeFee);
+                Assert.Equal(transaction?.ConvenienceFeeCharged, convenienceFee);
+                Assert.Equal(transaction?.PaymentTypeFeePayerAccountId, transactionFeePayer.ID.Value);
+                Assert.Equal(transaction?.ConvenienceFeePayerAccountId, convenienceFeePayer.ID.Value);
+                Assert.Equal(transaction?.BillerAccountId, billingAccount.ID.Value);
+                Assert.Equal(transaction?.PayerAccountId, purchasingAccount.ID.Value);
+
+                //activityPayment
+                var activityPayment = ActivityPayment.LoadByParticipationObjectByRegistrant(participationObject.ObjectID.Value, participationObject.ObjectType, registrant.ID.Value, false, msgs, dc).FirstOrDefault();
+                Assert.NotNull(activityPayment);
+                Assert.Equal(activityPayment?.Amount, amountReceivedByProvider);
+                Assert.Equal(activityPayment?.AmountPaidByParent, amountPaidByParent);
+                Assert.Equal(activityPayment?.ParticipationObjectId, participationObject.ObjectID.Value);
+                Assert.Equal(activityPayment?.IsProRated, isAmountProRated);
+                Assert.Equal(activityPayment?.RegistrantId, registrant.ID.Value);
+
+                //Stripe
+                var customer = purchasingAccount.GetStripeCustomer(msgs);
+                Assert.NotNull(customer);
+
+                var product = StripeHelper.GetProduct(activity.Uid.ToString(), stripeAccountId: null, msgs);
+                Assert.NotNull(product);
+
+                Assert.True(msgs.HasNoErrors());
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(true, ex.Message);
+            }
         }
     }
 }

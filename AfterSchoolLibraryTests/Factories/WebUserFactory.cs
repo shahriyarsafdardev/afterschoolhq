@@ -21,6 +21,13 @@ namespace AfterSchoolLibraryTests.Factories
             return obj;
         }
 
+        public static WebUser Create(string firstName, string lastName, string email, bool isActive, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var obj = new WebUser() { FirstName = firstName, LastName = lastName, Email = email, IsActive = isActive };
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
+
         public static WebUser CreateWithEmail(string email, SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new WebUser() { FirstName = "Don", LastName = "John", Email = email };

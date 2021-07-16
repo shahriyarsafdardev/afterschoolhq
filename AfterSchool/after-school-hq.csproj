@@ -1824,6 +1824,8 @@
     <Content Include="Views\Shared\_Loaders.cshtml" />
     <Content Include="Views\Shared\_GettingStartedModal.cshtml" />
     <Content Include="Views\Shared\_ModalPaymentConfirmation.cshtml" />
+    <Content Include="Views\Shared\_ActivityRegistrantsWithAllStatus.cshtml" />
+    <Content Include="Views\Shared\_ActivityRegistrantsForSpecificStatus.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

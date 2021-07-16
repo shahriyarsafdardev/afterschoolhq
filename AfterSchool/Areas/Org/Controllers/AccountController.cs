@@ -175,11 +175,12 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult PaymentsOptions()
+        public ActionResult PaymentsOptions(string showPaymentNotificationPopup)
         {
             var account = SessionVariables.CurrentAccount;
 
             ViewBag.Account = account;
+            ViewBag.ShowPaymentNotificationPopup = showPaymentNotificationPopup;
             ViewBag.IsFullScreen = GetIsFullScreen();
             ViewBag.SignupType = Request["signuptype"].IsNotEmpty() && Request["signuptype"].IsInteger() ? (SignUpType)Request["signuptype"].ToInteger() : SignUpType.NotSet;
             ViewBag.Messages = new SystemMessages();
@@ -1446,9 +1447,9 @@ namespace AfterSchool.Areas.Org.Controllers
                         customer = currentAccount.CreateStripeCustomer();
 
                         if (stripetoken.IsNotEmpty())
-                            currentAccount.CreateStripeCardFromToken(stripetoken, customer, msgs);
+                            currentAccount.CreateStripeCardFromToken(stripetoken, customer, amsgs, adc);
                         else if (cardId.IsNotEmpty())
-                            currentAccount.UpdateStripeCard(cardId, customer, msgs);
+                            currentAccount.UpdateStripeCard(cardId, customer, amsgs, adc);
 
                         if (amsgs.HasNoErrors())
                             newlyAddedPackage = currentAccount.AddPackage(package.ID.Value, billingPeriod, SessionVariables.LoggedInUser, amsgs, adc);

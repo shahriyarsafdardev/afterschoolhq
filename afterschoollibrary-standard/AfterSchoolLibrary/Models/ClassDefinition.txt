@@ -808,7 +808,9 @@ property: RegistrantId, int?, Int, required
 property: ActivityId, int?, Int
 property: AccountId, int?, Int
 property: Uid, Guid, UniqueIdentifier, required
-property: Amount, decimal?, Money
+property: Amount, decimal?, Money, , used to define AmountReceivedByProvider
+property: AmountPaidByParent, decimal?, Money
+property: IsProRated, bool, Bit
 property: ParticipationObjectTypeId, ParticipationObjectType, Int, required
 property: ParticipationObjectId, int?, Int, required
 property: TransactionId, int?, Int
@@ -1066,6 +1068,7 @@ property: ConvenienceFeePayerAccountId, int?, Int, , which account is paying the
 property: CouponId, int?, Int
 property: CouponValue, decimal?, Decimal "10,2"
 loadmethod: Uid
+loadmethod: Uid|AccountId
 loadmethod: RegistrantId, List<>
 loadmethod: AccountId, List<>
 loadmethod: RegistrationPeriodId, List<>

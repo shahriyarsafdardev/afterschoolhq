@@ -25,10 +25,27 @@ namespace AfterSchoolLibrary.Models
         public List<Product> Products { get; set; }
         public bool SavePaymentInfo { get; set; }
         public PaymentType PaymentType { get; set; }
+        
         /// <summary>
         /// override will sometimes be the manual payment or the subscription payment
         /// </summary>
         public decimal? OverrideAmount { get; set; }
+        
+        /// <summary>
+        /// after pro-rating the subscription, AmountPaidByParent will have actual amount parent paid
+        /// </summary>
+        public decimal? AmountPaidByParent { get; set; }
+        
+        /// <summary>
+        /// after pro-rating the subscription, AmountReceivedByProvider will hold the amount received by provider
+        /// </summary>
+        public decimal? AmountReceivedByProvider { get; set; }
+
+        /// <summary>
+        /// flag used denote whether amount is pro-rated for any plans or not. will be used mostly in ActivityPayment
+        /// </summary>
+        public bool IsAmountProRated { get; set; }
+
         public decimal? ConvenienceFeeOverrideAmount { get; set; }
         public decimal? PaymentTypeFeeOverrideAmount { get; set; }
         public string StripeChargeId { get; set; }

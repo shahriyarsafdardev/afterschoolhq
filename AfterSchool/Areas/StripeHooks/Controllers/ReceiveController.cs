@@ -279,14 +279,20 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             else
                 transactionFeePayer = billingAccount;
 
-            var overrideAmount = rsp.TotalPaidWithFees;
+            //we will need this logic to ensure we are adding pro-rated amount in ActivityPayment and RegistrantSubscriptionPlan
+            var amountPaidByParent = stripeInvoice.AmountPaid > 0 ? (decimal)stripeInvoice.AmountPaid / 100 : 0m;
+            var amountReceivedByProvider = stripeInvoice.TransferData.Amount > 0 ? (decimal)stripeInvoice.TransferData.Amount / 100 : 0m;
+            var isAmountProRated = amountReceivedByProvider < plan.CostPerPeriod;
 
             // save transaction info and track payment to the activity as well.
             var checkoutObject = new CheckoutObject()
             {
                 PayingAccount = purchasingAccount,
                 BillingAccount = billingAccount,
-                OverrideAmount = overrideAmount,
+                OverrideAmount = amountPaidByParent,
+                AmountPaidByParent = amountPaidByParent,
+                AmountReceivedByProvider = amountReceivedByProvider,
+                IsAmountProRated = isAmountProRated,
                 ConvenienceFeeOverrideAmount = rsp.ConvenienceFee,
                 PaymentTypeFeeOverrideAmount = rsp.PaymentTypeFee,
                 ParticipationObject = participationObject,

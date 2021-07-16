@@ -1,10 +1,9 @@
 ﻿using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
-using BasicLibrary.DataAccess;
 using Newtonsoft.Json;
-using Stripe;
 using System;
+using System.Collections.Generic;
 using System.Web.Http;
 
 namespace AfterSchool.Areas.WebHooks.Controllers
@@ -17,23 +16,6 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             var msgs = new SystemMessages();
             try
             {
-                // msgs.Add("trying to get signature", MessageType.Notice);
-
-                // return Ok(msgs.ToJSON());
-
-                // var stripeSignature = Request.Headers.Contains("Stripe-Signature") ? Request.Headers.GetValues("Stripe-Signature").First() : null;
-
-
-                //if (!AfterSchoolLibrary.Helpers.Utilities.IsLocalHost && stripeSignature.IsEmpty())
-                //{
-                //    msgs.Add("Invalid Signature", MessageType.Error);
-                //    SendLogEmail(msgs);
-                //    return Ok();
-                //}
-                // ,
-                //stripeSignature, 
-                //        "whsec_ImO7GlHXHiYs8pityQDZbBWJvF0eLEas"
-
                 msgs.Add("Getting serializedJson", MessageType.Notice);
                 var serializedJson = JsonConvert.SerializeObject(json);
                 msgs.Add("Getting stripeEvent", MessageType.Notice);
@@ -49,6 +31,10 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                         return InvoicePaymentSucceeded(stripeEvent, msgs);
                     case "invoice.payment_failed":
                         return InvoicePaymentFailed(stripeEvent, msgs);
+                    case "payment_intent.processing":
+                        return PaymentIntentProcessing(stripeEvent, msgs);
+                    case "customer.subscription.deleted":
+                        return SubscriptionCompleted(stripeEvent, msgs);
                     default:
                         return ReturnOK(msgs);
                 }
@@ -71,7 +57,6 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
         private IHttpActionResult ReturnOK(SystemMessages msgs)
         {
-            // SendLogEmail(msgs);
             return Ok(msgs.ToJSON());
         }
 
@@ -105,12 +90,14 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             msgs.Add("Getting serializedAccountJson", MessageType.Notice);
             var stripeAccount = stripeEvent.Data.Object as Stripe.Account;
 
+            CheckStripeAccountRequirements(stripeAccount, account, msgs);
+
+            var updateChargesEnabled = !account.StripeChargesEnabled && stripeAccount.ChargesEnabled;
+            var updatePayoutsEnabled = !account.StripePayoutsEnabled && stripeAccount.PayoutsEnabled;
             msgs.Add("Getting SendStripeAccountVerified", MessageType.Notice);
-            if (msgs.HasNoErrors() && !account.StripeChargesEnabled && stripeAccount.ChargesEnabled)
-            {
+            
+            if (msgs.HasNoErrors() && (updateChargesEnabled || updatePayoutsEnabled))
                 account.UpdateStripeChargesAndPayouts(stripeAccount, msgs);
-                account.SendStripeAccountVerified(null);
-            }
 
             if (msgs.HasErrors())
                 return Return500(msgs);
@@ -118,9 +105,95 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             return ReturnOK(msgs);
         }
 
+        private void CheckStripeAccountRequirements(Stripe.Account stripeAccount, AfterSchoolLibrary.Models.Account account, SystemMessages msgs)
+        {
+            var requirements = stripeAccount.Requirements;
+            var requirementStatus = GetStripeRequirementStatus(requirements);
+            if (requirementStatus > StripeRequirementStatus.NotSet)
+            {
+                var requirementList = new List<string>();
+                var mostUrgentRequirements = requirements.PastDue;
+
+                if (requirementStatus > StripeRequirementStatus.PastDue)
+                    mostUrgentRequirements = requirementStatus == StripeRequirementStatus.CurrentlyDue ? requirements.CurrentlyDue : requirements.EventuallyDue;
+
+                mostUrgentRequirements.ForEach(req =>
+                {
+                    var splitReq = req.Split('.');
+                    switch (splitReq[splitReq.Length - 1])
+                    {
+                        case "city":
+                            requirementList.Add("Address: City");
+                            break;
+                        case "line1":
+                            requirementList.Add("Address: Line1");
+                            break;
+                        case "postal_code":
+                            requirementList.Add("Address: Postal Code");
+                            break;
+                        case "state":
+                            requirementList.Add("Address: State");
+                            break;
+                        case "day":
+                            requirementList.Add("DOB: Day");
+                            break;
+                        case "month":
+                            requirementList.Add("DOB: Month");
+                            break;
+                        case "year":
+                            requirementList.Add("DOB: Year");
+                            break;
+                        case "title":
+                            requirementList.Add("Job Title");
+                            break;
+                        default:
+                            requirementList.Add(req);
+                            break;
+                    }
+                });
+
+                AfterSchoolLibrary.Helpers.EmailHelper.SendStripeHasUnfulFilledRequirementsEmail(stripeAccount, requirementList, requirementStatus, account, msgs);
+            }
+
+        }
+
+        private StripeRequirementStatus GetStripeRequirementStatus(Stripe.AccountRequirements requirements)
+        {
+            if (requirements.PastDue.Count > 0)
+                return StripeRequirementStatus.PastDue;
+
+            if (requirements.CurrentlyDue.Count > 0)
+                return StripeRequirementStatus.CurrentlyDue;
+
+            if (requirements.EventuallyDue.Count > 0)
+                return StripeRequirementStatus.EventuallyDue;
+
+            return StripeRequirementStatus.NotSet;
+        }
+
+        private IHttpActionResult PaymentIntentProcessing(Stripe.Event stripeEvent, SystemMessages msgs)
+        {
+            var paymentIntent = (Stripe.PaymentIntent)stripeEvent.Data.Object;
+            var stripeInvoice = paymentIntent.Invoice;
+
+            if (stripeInvoice.IsNotEmpty())
+                return ProcessInvoiceDetails(stripeInvoice, msgs);
+
+            return ReturnOK(msgs);
+        }
+
         private IHttpActionResult InvoicePaymentSucceeded(Stripe.Event stripeEvent, SystemMessages msgs)
         {
             var stripeInvoice = (Stripe.Invoice)stripeEvent.Data.Object;
+
+            if (stripeInvoice.IsNotEmpty())
+                return ProcessInvoiceDetails(stripeInvoice, msgs);
+
+            return Return500(msgs);
+        }
+
+        private IHttpActionResult ProcessInvoiceDetails(Stripe.Invoice stripeInvoice, SystemMessages msgs)
+        {
             var stripeSubscriptionId = stripeInvoice.SubscriptionId;
             var chargeId = stripeInvoice.ChargeId;
             var rsp = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(stripeSubscriptionId, msgs);
@@ -128,6 +201,20 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             if (rsp.IsEmpty())
             {
                 msgs.Add($"Ignoring - Registrant Subscription Plan not found - Stripe Sub ID {stripeSubscriptionId}", MessageType.Notice);
+                return ReturnOK(msgs);
+            }
+
+            var status = "succeeded";
+
+            if (stripeInvoice.PaymentIntent.IsNotEmpty())
+            {
+                msgs.Add($"Checking Payment Intent Status {stripeInvoice.PaymentIntent.Status} - Stripe Sub ID {stripeSubscriptionId}", MessageType.Notice);
+                status = stripeInvoice.PaymentIntent.Status;
+            }
+
+            if (stripeInvoice.AmountPaid <= 0 && status.NotIn(new string[] { "processing", "succeeded" }))
+            {
+                msgs.Add($"Ignoring - $0 was paid with no processing payment intent", MessageType.Notice);
                 return ReturnOK(msgs);
             }
 
@@ -158,8 +245,8 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             // send payment succeeded email
             purchasingAccount.SendSubscriptionPaymentSucceeded(rsp, plan);
 
-            AfterSchoolLibrary.Models.Account convenienceFeePayer;
-            AfterSchoolLibrary.Models.Account transactionFeePayer;
+            Account convenienceFeePayer;
+            Account transactionFeePayer;
 
             if (rsp.ConvenienceFeesPaidBy == FeesPaidByType.Parent)
                 convenienceFeePayer = purchasingAccount;
@@ -171,12 +258,20 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             else
                 transactionFeePayer = billingAccount;
 
+            //we will need this logic to ensure we are adding pro-rated amount in ActivityPayment and RegistrantSubscriptionPlan
+            var amountPaidByParent = stripeInvoice.AmountPaid > 0 ? (decimal)stripeInvoice.AmountPaid / 100 : 0m;
+            var amountReceivedByProvider = stripeInvoice.TransferData.Amount > 0 ? (decimal)stripeInvoice.TransferData.Amount / 100 : 0m;
+            var isAmountProRated = amountReceivedByProvider < plan.CostPerPeriod;
+
             // save transaction info and track payment to the activity as well.
             var checkoutObject = new CheckoutObject()
             {
                 PayingAccount = purchasingAccount,
                 BillingAccount = billingAccount,
-                OverrideAmount = rsp.TotalPaidWithFees,
+                OverrideAmount = amountPaidByParent,
+                AmountPaidByParent = amountPaidByParent,
+                AmountReceivedByProvider = amountReceivedByProvider,
+                IsAmountProRated = isAmountProRated,
                 ConvenienceFeeOverrideAmount = rsp.ConvenienceFee,
                 PaymentTypeFeeOverrideAmount = rsp.PaymentTypeFee,
                 ParticipationObject = participationObject,
@@ -205,7 +300,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         {
             var stripeInvoice = (Stripe.Invoice)stripeEvent.Data.Object;
             var customerId = stripeInvoice.CustomerId;
-            var account = AfterSchoolLibrary.Models.Account.LoadByStripeCustomerId(customerId, msgs);
+            var account = Account.LoadByStripeCustomerId(customerId, msgs);
             var subscriptionId = stripeInvoice.SubscriptionId;
             var registrantSubscription = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(subscriptionId, msgs);
             var plan = registrantSubscription.GetSubscriptionPlan(msgs);
@@ -215,6 +310,20 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
             if (msgs.HasErrors())
                 return Return500(msgs);
+
+            return ReturnOK(msgs);
+        }
+
+        private IHttpActionResult SubscriptionCompleted(Stripe.Event stripeEvent, SystemMessages msgs)
+        {
+            var subscription = (Stripe.Subscription)stripeEvent.Data.Object;
+
+            if (subscription.Plan.IsNotEmpty() && subscription.Plan.Id.IsNotEmpty())
+            {
+                var dbSubscription = SubscriptionPlan.LoadByStripePlanId(subscription.Plan.Id, msgs);
+                dbSubscription.IsActive = false;
+                dbSubscription.Save();
+            }
 
             return ReturnOK(msgs);
         }

@@ -134,10 +134,10 @@ namespace AfterSchoolLibraryTests.Tests
             var activityForm = ActivityFormWebUserFactory.Create(account, activity, form, msgs, dc: dc);
             var attendance = new Attendance() { ActivityId = activity.ID.Value, ActivityInstanceId = activityInstance.ID.Value };
             attendance.Save(dc: dc);
-            var registrant = RegistrantFactory.Create(account, msgs, dc: dc);
+            var registrant = RegistrantFactory.Create(account, isMaster: false, msgs, dc: dc);
             var attendanceRegistrant = new AttendanceRegistrant() { AttendanceId = attendance.ID.Value, NumberPresent = 1, RegistrantId = registrant.ID.Value, NumberPossible = 1, NumberLate = 0 };
             attendanceRegistrant.Save(dc: dc);
-            var newRegistrant = RegistrantFactory.Create(account, msgs, dc: dc);
+            var newRegistrant = RegistrantFactory.Create(account, isMaster: false, msgs, dc: dc);
             var registrantActivity = RegistrantActivityFactory.Create(activity, newRegistrant, msgs, dc);
 
             List<AttendanceRegistrant> attendanceRegistrants = new List<AttendanceRegistrant>();
@@ -163,6 +163,28 @@ namespace AfterSchoolLibraryTests.Tests
 
 
             Assert.True(activity.IsValidActivityInstance(activityInstance, msgs, dc));
+        }
+
+        /// <summary>
+        /// Tests that an activity instance does not have schedule id or not 
+        /// </summary>
+        [Fact]
+        public void IsNotValidActivityInstance()
+        {
+            // Arrange
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(user, msgs, dc);
+            var schedule = Factories.ActivityScheduleFactory.Create(account, msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, schedule, msgs, dc);
+            var wrongSchedule = Factories.ActivityScheduleFactory.Create(account, msgs, dc);
+            var activityInstance = Factories.ActivityInstanceFactory.Create(activity, schedule, msgs, dc);
+
+            // Act
+            activityInstance.ActivityScheduleId = wrongSchedule.ID.Value;
+            msgs.AddRange(activityInstance.Save(dc));
+
+            // Assert
+            Assert.False(activity.IsValidActivityInstance(activityInstance, msgs, dc));
         }
 
         [Theory(DisplayName = "GenerateUniqueName")]

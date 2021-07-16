@@ -1960,8 +1960,9 @@ namespace AfterSchool.Areas.Org.Controllers
                     ras = activity.GetRegistrantActivities(true);
             }
 
+            //Review: we will bring all data to provider review but we will disable those in UI so provider will have proper idea.            
             if (ras.IsEmpty())
-                ras = activity.GetRegistrantActivities();
+                ras = activity.GetRegistrantActivities(includeInvited: true, msgs); 
 
             if (rat != RegistrationAssignmentType.NotSet)
                 ras = ras.Where(x => x.AssignmentTypeId == rat).OrderBy(x => x.SeatIndex).ToList();
@@ -2689,6 +2690,7 @@ namespace AfterSchool.Areas.Org.Controllers
             // If the user has hit or exceeded the email quota then show the upgrade modal
             ViewBag.EmailCount = currentAccount.GetEmailCountForCurrentMessagePeriod();
             ViewBag.TextCount = currentAccount.GetTextMessageCountForCurrentMessagePeriod();
+            ViewBag.Body = "";
 
             return View(activity);
         }
@@ -2719,7 +2721,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                         .ToList();
 
                 //.. email messaging
-                if (sendtostaff.IsNotEmpty())
+                if (msgs.HasNoErrors())
                 {
                     // get current limit
                     var accountPackage = SessionVariables.AccountPackage;
@@ -2742,7 +2744,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             subject,
                             body,
                             registrantIds,
-                            sendtostaff.IsBoolean(),
+                            sendtostaff.IsBoolean() ? sendtostaff.ToBoolean() : false,
                             SessionVariables.CurrentUser.ID.Value,
                             msgs);
 
@@ -2762,6 +2764,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);            
             ViewBag.Registrants = activity.GetRegistrants();
+            ViewBag.Body = body;
             return View(activity);
         }
 

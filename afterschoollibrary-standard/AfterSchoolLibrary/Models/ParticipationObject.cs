@@ -775,9 +775,33 @@ namespace AfterSchoolLibrary.Models
                 ParticipationObjectId = this.ObjectID,
                 ParticipationObjectTypeId = this.ObjectType,
                 Amount = amount,
-                RegistrantId = registrant.ID,
-                AccountId = this.PaymentAccount.ID,
-                TransactionId = transaction.ID,
+                RegistrantId = registrant?.ID,
+                AccountId = this.PaymentAccount?.ID,
+                TransactionId = transaction?.ID,
+                RegistrantSubscriptionPlanId = registrantSubscriptionPlan?.ID,
+                CreateDate = createDate,
+                CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                LastModifiedDate = createDate,
+                LastModifiedBy = loggedInUser?.ID.IfEmpty(0)
+            };
+
+            msgs.AddRange(payment.Save(dc));
+
+            return payment;
+        }
+
+        public ActivityPayment AddPayment(decimal amountReceivedByProvider, decimal amountPaidByParent, bool isAmountProRated, Registrant registrant, Transaction transaction, RegistrantSubscriptionPlan registrantSubscriptionPlan, DateTime createDate, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var payment = new ActivityPayment()
+            {
+                ParticipationObjectId = this.ObjectID,
+                ParticipationObjectTypeId = this.ObjectType,
+                Amount = amountReceivedByProvider,
+                AmountPaidByParent = amountPaidByParent,
+                IsProRated = isAmountProRated,
+                RegistrantId = registrant?.ID,
+                AccountId = this.PaymentAccount?.ID,
+                TransactionId = transaction?.ID,
                 RegistrantSubscriptionPlanId = registrantSubscriptionPlan?.ID,
                 CreateDate = createDate,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),

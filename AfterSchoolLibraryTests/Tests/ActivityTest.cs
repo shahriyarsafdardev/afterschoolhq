@@ -502,7 +502,7 @@ namespace AfterSchoolLibraryTests.Tests
             var activityForm = Factories.ActivityFormWebUserFactory.Create(account, activity, form, msgs, dc: dc);
             var attendance = new Attendance() { ActivityId = activity.ID.Value, ActivityInstanceId = activityInstance.ID.Value };
             attendance.Save(dc: dc);
-            var registrant = Factories.RegistrantFactory.Create(account, msgs, dc: dc);
+            var registrant = Factories.RegistrantFactory.Create(account, isMaster: false, msgs, dc: dc);
             var attendanceRegistrant = new AttendanceRegistrant() { AttendanceId = attendance.ID.Value, NumberPresent = 1, RegistrantId = registrant.ID.Value, NumberPossible = 1, NumberLate = 0 };
             attendanceRegistrant.Save(dc: dc);
 
@@ -521,7 +521,7 @@ namespace AfterSchoolLibraryTests.Tests
             var activityForm = Factories.ActivityFormWebUserFactory.Create(account, activity, form, msgs, dc: dc);
             var attendance = new Attendance() { ActivityId = activity.ID.Value, ActivityInstanceId = activityInstance.ID.Value };
             attendance.Save(dc: dc);
-            var registrant = Factories.RegistrantFactory.Create(account, msgs, dc: dc);
+            var registrant = Factories.RegistrantFactory.Create(account, isMaster: false, msgs, dc: dc);
             var attendanceRegistrant = new AttendanceRegistrant() { AttendanceId = attendance.ID.Value, NumberPresent = 1, RegistrantId = registrant.ID.Value, NumberPossible = 1, NumberLate = 0 };
             attendanceRegistrant.Save(dc: dc);
 
@@ -541,7 +541,7 @@ namespace AfterSchoolLibraryTests.Tests
             var activityForm = Factories.ActivityFormWebUserFactory.Create(account, activity, form, msgs, dc: dc);
             var attendance = new Attendance() { ActivityId = activity.ID.Value, ActivityInstanceId = activityInstance.ID.Value };
             attendance.Save(dc: dc);
-            var registrant = Factories.RegistrantFactory.Create(account, msgs, dc: dc);
+            var registrant = Factories.RegistrantFactory.Create(account, isMaster: false, msgs, dc: dc);
             var attendanceRegistrant = new AttendanceRegistrant() { AttendanceId = attendance.ID.Value, NumberPresent = 1, RegistrantId = registrant.ID.Value, NumberPossible = 1, NumberLate = 0 };
             attendanceRegistrant.Save(dc: dc);
             attendance.Date = date;

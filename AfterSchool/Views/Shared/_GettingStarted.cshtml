@@ -3,7 +3,7 @@
     var currentProgress = AccountService.GetCurrentOnboardingProcess(SessionVariables.CurrentAccount);
     string phrase1 = "", phrase2 = "", phrase3 = "", phrase4 = "", url = "";
     Activity unpublishActivity = null;
-
+   
     if (currentLevel == GettingStartedOptions.CreateProfile)
     {
         phrase1 = "Awesome!";
@@ -154,9 +154,15 @@
 <div class="margin-v-30 text-center">
     <a href="@url" class="btn btn-primary btn-free-profile">@phrase4</a>
 </div>
-<div class="margin-v-30 text-center">
-    <a href="javascript:void(0)" onclick="closeModal()" class="FontSizeTextdecoration">View Profile</a>
-</div>
+
+@if (currentProgress.Contains(GettingStartedOptions.CreateProfile))
+    {
+    @* Dont show View Profile unless profile has been created *@
+    <div class="margin-v-30 text-center">
+        <a href="javascript:void(0)" onclick="closeModalAndOpenDropDown()" class="FontSizeTextdecoration">View Profile</a>
+    </div>
+    }
+
 <div class="clearfix"></div>
 
 <script type="text/javascript">
@@ -164,9 +170,12 @@
         $('#modal-getting-started').modal('hide');
     }
     function closeModalAndOpenDropDown() {
+        // set onboarding modal closed
+
         //$('#modal-getting-started').modal('hide');  
         closeModal();
         popOverButton();
+        
     }
    
 </script>
