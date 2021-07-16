@@ -10,6 +10,14 @@ namespace AfterSchool.Models
 {
     public static class ParticipationObjectUI
     {
+        public static string PrintAgeGradeRestrictions(ParticipationObject participationObject) 
+        {
+            if (participationObject.RestrictByGrade())
+                return PrintGradeLevels(participationObject);
+            else
+                return PrintAges(participationObject);
+        }
+
         public static string PrintGradeLevels(ParticipationObject participationObject)
         {
             if (participationObject.MinGradeId.HasValue && participationObject.MaxGradeId.HasValue)

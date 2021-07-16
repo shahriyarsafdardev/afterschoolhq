@@ -93,19 +93,9 @@
 
                             @if (!Model.ActivityType.HasValue || Model.ActivityType.Value.NotIn(new ActivityType[] { ActivityType.PermissionSlip, ActivityType.FieldTrip }))
                             {
-                                if (Model.RestrictByGrade())
-                                {
-                                    <span>
-                                        @ParticipationObjectUI.PrintGradeLevels(Model) &bull;
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span>
-                                        @ParticipationObjectUI.PrintAges(Model) &bull;
-                                    </span>
-                                }
-
+                                <span>
+                                    @ParticipationObjectUI.PrintAgeGradeRestrictions(Model)  &bull;
+                                </span>
                             }
 
                             @ParticipationObjectUI.PrintGenderRestrictions(Model)

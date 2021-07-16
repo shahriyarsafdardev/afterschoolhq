@@ -357,7 +357,7 @@ namespace AfterSchoolLibrary.Services
                     return transaction.GetPayerAmount() - transaction.GetRefundedAmountAHQ(msgs, dc);
 
                 if (isPartialRefundWithConvenienceFee)
-                    return transaction.GetParentRefundableAmount();
+                    return transaction.GetParentRefundableAmount(msgs, dc);
 
                 return transaction.GetBillerPayout(msgs, dc) + transaction.GetFeesChargedToBiller() - transaction.GetRefundedAmountAHQ(msgs, dc);
             }
@@ -380,7 +380,7 @@ namespace AfterSchoolLibrary.Services
             return true; // transaction.CreateDate.Value.IsAfter(DateTime.UtcNow.AddDays(-2));
         }
 
-        public static decimal GetParentRefundableAmount(this Transaction transaction)
+        public static decimal GetParentRefundableAmount(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var amount = transaction.GetPayerAmount();
 
@@ -391,7 +391,7 @@ namespace AfterSchoolLibrary.Services
                 amount -= transaction.PaymentTypeFeeCharged.Value;
 
             //partial refund, if any then deduct that too.
-            var refunded = transaction.GetRefundedAmount();
+            var refunded = transaction.GetRefundedAmount(msgs, dc);
             if (refunded.IsNotEmpty())
                 amount -= refunded;
 
