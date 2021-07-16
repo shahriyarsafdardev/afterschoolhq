@@ -53,8 +53,8 @@
                 <label class="col-sm-3 control-label">Registration Fee</label>
                 <div class="col-sm-9">
                     <div class="input-group input-group-lg xs-mb-15">
-                        <span class="input-group-addon">$</span>
-                        <input type="number" class="form-control" id="cost" name="cost" onfocus="this.select()" value="@(Model.CostPerRegistrant.HasValue ? Model.CostPerRegistrant.Value.ToString("0.00") : "0.00")" required min="0.00" step=".01" @paymentdisabled />
+                        <span class="input-group-addon">$</span>                    
+                        <input type="number" class="form-control" id="cost" name="cost" onfocus="this.select()" value="@(Model.CostPerRegistrant.HasValue ? Model.CostPerRegistrant.Value.ToString("N2", System.Globalization.CultureInfo.InvariantCulture) : "0.00")" required min="0.00" step=".01" @paymentdisabled />
                     </div>
                     <p class="text-muted text-medium-small">
                         <span id="pricetoparent-span">

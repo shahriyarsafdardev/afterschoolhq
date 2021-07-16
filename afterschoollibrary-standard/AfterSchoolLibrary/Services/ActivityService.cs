@@ -1028,7 +1028,7 @@ namespace AfterSchoolLibrary.Services
                 activity.Description = description.ToString().IfBlank("").MaxChars(1000);
 
             if (cost.IsNumber())
-                activity.CostPerRegistrant = cost.ToString().ToDecimal();
+                activity.CostPerRegistrant = cost.ToString().Replace(".", ",").ToDecimal(); //.ToDecimal() was changing 11.5 into 115 so used decimal.Parse
 
             if (costdescription != null)
                 activity.CostDescription = costdescription.ToString().IfBlank("").MaxChars(1000);
