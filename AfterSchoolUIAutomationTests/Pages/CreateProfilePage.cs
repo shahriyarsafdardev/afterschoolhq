@@ -44,8 +44,8 @@ namespace AfterSchoolUIAutomationTests.Pages
 
         private IWebElement GoToProfileElement => webDriver.FindElement(By.Id("btnGoProfile"));
 
-        private IWebElement location => webDriver.FindElement(By.XPath(""));
         private IWebElement H1GreatJob => webDriver.FindElement(By.XPath("//div[@class='col-md-12 onboarding-form-group text-center']//h1[@class='text-center register-thankyou-2 onboarding-phrase-1']"));
+        private IWebElement FinishSetupElement => webDriver.FindElement(By.Id("ddl-finish-setup"));
 
         ////------------Create Account Profile Helper Methods-----------
 
@@ -200,6 +200,11 @@ namespace AfterSchoolUIAutomationTests.Pages
         public string GetH1Text()
         {
             return H1GreatJob.Text;
+        }
+
+        public string FinishSetupText()
+        {
+            return FinishSetupElement.Text;
         }
 
         public void Dispose()

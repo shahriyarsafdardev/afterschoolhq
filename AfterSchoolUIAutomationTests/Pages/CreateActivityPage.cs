@@ -20,6 +20,10 @@ namespace AfterSchoolUIAutomationTests.Pages
         //------------Settings Section Web Elements-----------//
         private IWebElement AccountButtonElement => webDriver.FindElement(By.XPath("(//div[@id='accounts']//button)[1]"));
         private IWebElement AddActivityElement => webDriver.FindElement(By.XPath("//div[@class='pull-right']"));
+        private IWebElement ModalGettingStartedCloseBtnElement => webDriver.FindElement(By.XPath("(//div[@class='close-icon'])[1]//a"));
+        private IWebElement GotItButtonElement => webDriver.FindElement(By.XPath("//button[@class='btn btn-success btn-xs']"));
+        private IWebElement FinishSetupElement => webDriver.FindElement(By.Id("popover-container"));
+        private IWebElement CreateYourFirstActivityElement => webDriver.FindElement(By.XPath("(//div[@class='am-checkbox checkbox-override'])[2]//label"));
         private IWebElement ActivityName => webDriver.FindElement(By.Id("name"));
         private IWebElement TotalAvailableSeats => webDriver.FindElement(By.Id("seatsavailable"));
         private IWebElement InviteOnly => webDriver.FindElement(By.Id("inviteonly"));
@@ -73,6 +77,8 @@ namespace AfterSchoolUIAutomationTests.Pages
         //------------Email Section Web Elements-----------
         private IWebElement ShowAdvanceSettingElement => webDriver.FindElement(By.Id("btn-advanced-settings"));
         private IWebElement SaveButtonElement => webDriver.FindElement(By.XPath("//div[@class='col-sm-6 col-sm-offset-3']//button[text()=' Save']"));
+        private IWebElement SaveAndReviewButtonElement => webDriver.FindElement(By.XPath("//div[@class='col-sm-3']//button[text()='Save & Review »']"));
+        public IWebElement EmailConfirmationModalElement => webDriver.FindElement(By.XPath("//*[text()='Before we publish your activity lets confirm your email.']"));
 
 
         //------------Edit Account Profile Helper Methods-----------//
@@ -88,6 +94,30 @@ namespace AfterSchoolUIAutomationTests.Pages
         {
             AddActivityElement.Click();
             webDriver.WaitInSeconds(4);
+            return this;
+        }
+        public CreateActivityPage CloseGettingStartedModal()
+        {
+            ModalGettingStartedCloseBtnElement.Click();
+            webDriver.WaitInSeconds(2);
+            return this;
+        }
+        public CreateActivityPage ClickGotItButton()
+        {
+            GotItButtonElement.Click();
+            webDriver.WaitInSeconds(2);
+            return this;
+        }
+        public CreateActivityPage ClickFinishSetup()
+        {
+            //FinishSetupElement.Click();
+            //webDriver.WaitInSeconds(1);
+            return this;
+        }
+        public CreateActivityPage ClickCreateFirstActivity()
+        {
+            CreateYourFirstActivityElement.Click();
+            webDriver.WaitInSeconds(3);
             return this;
         }
         public CreateActivityPage PopulateActivityName(string activityName)
@@ -335,10 +365,10 @@ namespace AfterSchoolUIAutomationTests.Pages
             ShowAdvanceSettingElement.Click();
             return this;
         }
-        public CreateActivityPage SaveActivity()
+        public CreateActivityPage SaveAndReviewButton()
         {
             webDriver.WaitInSeconds(2);
-            SaveButtonElement.Click();
+            SaveAndReviewButtonElement.Click();
             webDriver.WaitInSeconds(5);
             return this;
         }

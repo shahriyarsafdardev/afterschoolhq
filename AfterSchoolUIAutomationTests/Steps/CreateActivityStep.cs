@@ -16,38 +16,91 @@ namespace AfterSchoolUIAutomationTests.Steps
     {
         private readonly ScenarioContext _scenarioContext;
         private IWebDriver webDriver;
-        private LoginPage loginPage;
-        public CreateActivityPage createActivityPage;
+        //private LoginPage loginPage;
+        private NewProviderSignUpFlowPage newProviderSignUpFlowPage;
+        private CreateProfilePage createProfilePage;
+        private CreateActivityPage createActivityPage;
 
         public CreateActivityStep(ScenarioContext scenarioContext)
         {
             _scenarioContext = scenarioContext;
             webDriver = new ChromeDriver(AppDomain.CurrentDomain.BaseDirectory);
-            loginPage = new LoginPage(webDriver);
+            //loginPage = new LoginPage(webDriver);
+            newProviderSignUpFlowPage = new NewProviderSignUpFlowPage(webDriver);
+            createProfilePage = new CreateProfilePage(webDriver);
             createActivityPage = new CreateActivityPage(webDriver);
         }
 
-        [Given(@"Login to Create Activity")]
-        public void GetLogIn()
+        [Given(@"Go through new provider signup flow for activity creation")]
+        public void GoThroughNewProviderSignupFlow()
         {
-            webDriver.Navigate().GoToUrl(Parameter.Get("Login", "LoginUrl"));
+            webDriver.Navigate().GoToUrl(Parameter.Get("AccountSigUp", "SignUpUrl"));
             webDriver.WaitInSeconds(2);
             webDriver.Manage().Window.Maximize();
-            loginPage.PopulateName(Parameter.Get("Login", "UserName"));
-            loginPage.PopulatePassword(Parameter.Get("Login", "Password"));
-            loginPage.ClickSubmit();
+            newProviderSignUpFlowPage.ClickSignUp();
+            newProviderSignUpFlowPage.ClickIndividualAccount();
+            newProviderSignUpFlowPage.ProvideProgramsForStudents();
+            newProviderSignUpFlowPage.PopulateProgramName(Parameter.Get("AccountSigUp", "ProgramName"));
+            newProviderSignUpFlowPage.ClickProgramSubmit();
+            newProviderSignUpFlowPage.PopulateFirstName(Parameter.Get("AccountSigUp", "FirstName"));
+            newProviderSignUpFlowPage.PopulateLasttName(Parameter.Get("AccountSigUp", "LasttName"));
+            newProviderSignUpFlowPage.PopulateEmail("testemail" + DateTime.Now.ToString("yyyyMMddHHmmss") + "@yopmail.com");
+            newProviderSignUpFlowPage.PopulateUserPassword(Parameter.Get("AccountSigUp", "UserPassword"));
+            newProviderSignUpFlowPage.PopulateUserPassword2(Parameter.Get("AccountSigUp", "UserPassword2"));
+            //newProviderSignUpFlowPage.CheckCaptcha();
+            newProviderSignUpFlowPage.ClickBasicInfoSubmit();
         }
 
-        [Given(@"Click on account button")]
-        public void ClickAccountButton()
+        [Given(@"Go through create profile flow for activity creation")]
+        public void GoThroughCreateProfileFlow()
         {
-            createActivityPage.ClickAccountButton();
+            createProfilePage.CreateYourFreeProfile();
+            createProfilePage.PopulateShortDescription(Parameter.Get("AccountSigUp", "ShortDescription"));
+            createProfilePage.SelectGender();
+            createProfilePage.SelectTimeZone();
+            createProfilePage.SaveAndContinueSubmit();
+            createProfilePage.SelectGradeOrAge();
+            createProfilePage.SelectMinGrade();
+            createProfilePage.SelectMaxAge();
+            createProfilePage.ShareInfoWithParentsSubmit();
+            createProfilePage.PopulatePhone(Parameter.Get("AccountSigUp", "Phone"));
+            createProfilePage.SelectAutoComplete(Parameter.Get("AccountSigUp", "AutoComplete"));
+            createProfilePage.ContactInfoSubmit();
+            string fileName = "musical-instruments-english.jpg";
+            //returns url of main directory which contains "/bin/Debug"
+            var url = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase);
+            //correction in path to point it in Root directory
+            var mainpath = url.Replace("\\bin\\Debug\\netcoreapp3.1", "") + "\\img\\" + fileName;
+            var imagepath = mainpath.Replace("file:\\", "");
+            createProfilePage.UploadProfileImage(imagepath);
+            createProfilePage.HeaderImageImage(imagepath);
+            createProfilePage.CustomizeProfileSubmit();
+            createProfilePage.PopulateProgramCategories(Parameter.Get("AccountSigUp", "ProgramCategories"));
+            createProfilePage.EasyActivitySubmit();
+            createProfilePage.EnterLinksSubmit();
+            createProfilePage.ClickGoToProfile();
+        }
+        [Given(@"Close getting started modal")]
+        public void CloseGettingStartedModal()
+        {
+            createActivityPage.CloseGettingStartedModal();
+        }
+        [Given(@"Click got it button")]
+        public void ClickGotItButton()
+        {
+            createActivityPage.ClickGotItButton();
         }
 
-        [Given(@"Click on add activity button")]
-        public void ClickAddActivityButton()
+        //[Given(@"Click on Finish Setup")]
+        //public void ClickFinishSetUpButton()
+        //{
+        //    createActivityPage.ClickFinishSetup();
+        //}
+
+        [Given(@"Click on Create First Activity")]
+        public void ClickCreateFirstActivityButton()
         {
-            createActivityPage.ClickAddActivity();
+            createActivityPage.ClickCreateFirstActivity();
         }
 
         [Given(@"Populate settings section and save")]
@@ -121,15 +174,14 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Given(@"Populate email content and save")]
         public void PopulateEmailContent()
         {
-
+            createActivityPage.SaveAndReviewButton();
         }
+
         [Then(@"Verify Test")]
         public void VerifyAccountCreationContent()
         {
-            string create = "Created";
-            create.Equals("Created");
-            webDriver.Quit();
-            webDriver.Dispose();
+            string create = "Before we publish your activity lets confirm your email.";
+            create.Equals(createActivityPage.EmailConfirmationModalElement.Text.Trim());
         }
 
         public void Dispose()

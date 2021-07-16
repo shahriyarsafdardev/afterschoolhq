@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using TechTalk.SpecFlow;
 
 namespace AfterSchoolUIAutomationTests.Steps
@@ -116,9 +117,9 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Then("Match current window url with the expected url")]
         public void ThenTheResultShouldBe()
         {
-            String SuccessMessage = createProfilePage.GetH1Text();
-            string ExpectedMessage = "Great Job!";
-            SuccessMessage.Equals(ExpectedMessage);
+            String curentUrl = webDriver.Url;
+            string expectedUrl = Parameter.Get("AccountSigUp", "ProgramName");
+            curentUrl.Contains(Regex.Replace(expectedUrl, @"\s+", ""));
         }
 
         public void Dispose()

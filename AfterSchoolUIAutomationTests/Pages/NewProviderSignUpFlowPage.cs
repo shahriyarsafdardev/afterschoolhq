@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace AfterSchoolUIAutomationTests.Pages
 {
-    public class NewProviderSignUpFlowPage
+    public class NewProviderSignUpFlowPage : IDisposable
     {
         private IWebDriver webDriver;
 
@@ -96,7 +96,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         public NewProviderSignUpFlowPage PopulateUserPassword2(string name)
         {
             Password2Element.SendKeys(name);
-            webDriver.WaitInSeconds(15);
+            webDriver.WaitInSeconds(1);
             return this;
         }
 
@@ -112,6 +112,15 @@ namespace AfterSchoolUIAutomationTests.Pages
             BasicInfoSubmitElement.Click();
             webDriver.WaitInSeconds(2);
             return this;
+        }
+
+        public void Dispose()
+        {
+            if (webDriver != null)
+            {
+                webDriver.Dispose();
+                webDriver = null;
+            }
         }
     }
 }
