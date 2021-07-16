@@ -1063,8 +1063,6 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var canProcessPayments = currentAccount.CanProcessPayments(msgs);
 
-            if (!canProcessPayments)
-                activity.AllowToPayLater = true;
 
             ViewBag.Messages = msgs;
             ViewBag.Account = currentAccount;
