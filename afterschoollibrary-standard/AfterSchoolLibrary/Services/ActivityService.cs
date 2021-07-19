@@ -358,6 +358,7 @@ namespace AfterSchoolLibrary.Services
                 ParticipationObjectId = activity.ID,
                 ParticipationObjectTypeId = ParticipationObjectType.Activity,
                 Amount = amount,
+                AmountPaidByParent = null,
                 RegistrantId = registrant.ID,
                 AccountId = activity.AccountId,
                 CreateDate = DateTime.UtcNow,

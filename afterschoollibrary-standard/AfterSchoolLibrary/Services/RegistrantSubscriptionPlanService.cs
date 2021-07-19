@@ -62,6 +62,7 @@ namespace AfterSchoolLibrary.Services
                 ParticipationObjectId = plan.ParticipationObjectId,
                 ParticipationObjectTypeId = plan.ParticipationObjectTypeId,
                 Amount = amount,
+                AmountPaidByParent = null,
                 RegistrantId = registrantSubscriptionPlan.RegistrantId,
                 AccountId = plan.PlanOwnerAccountId,
                 TransactionId = transaction.ID,
