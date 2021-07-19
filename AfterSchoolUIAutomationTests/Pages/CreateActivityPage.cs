@@ -20,7 +20,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         //------------Settings Section Web Elements-----------//
         private IWebElement AccountButtonElement => webDriver.FindElement(By.XPath("(//div[@id='accounts']//button)[1]"));
         private IWebElement AddActivityElement => webDriver.FindElement(By.XPath("//div[@class='pull-right']"));
-        private IWebElement ModalGettingStartedCloseBtnElement => webDriver.FindElement(By.XPath("(//div[@class='close-icon'])[1]//a"));
+        private IWebElement ModalGettingStartedCloseBtnElement => webDriver.FindElement(By.XPath("(//div[@class='close-icon'])[1]//a[@class='close close-icon-postion-2']//span"));
         private IWebElement GotItButtonElement => webDriver.FindElement(By.XPath("//button[@class='btn btn-success btn-xs']"));
         private IWebElement FinishSetupElement => webDriver.FindElement(By.Id("popover-container"));
         private IWebElement CreateYourFirstActivityElement => webDriver.FindElement(By.XPath("(//div[@class='am-checkbox checkbox-override'])[2]//label"));
@@ -78,10 +78,10 @@ namespace AfterSchoolUIAutomationTests.Pages
         private IWebElement ShowAdvanceSettingElement => webDriver.FindElement(By.Id("btn-advanced-settings"));
         private IWebElement SaveButtonElement => webDriver.FindElement(By.XPath("//div[@class='col-sm-6 col-sm-offset-3']//button[text()=' Save']"));
         private IWebElement SaveAndReviewButtonElement => webDriver.FindElement(By.XPath("//div[@class='col-sm-3']//button[text()='Save & Review »']"));
-        public IWebElement EmailConfirmationModalElement => webDriver.FindElement(By.XPath("//*[text()='Before we publish your activity lets confirm your email.']"));
+        public IWebElement EmailConfirmationModalElement => webDriver.FindElement(By.XPath("//div[@class='modal-box-body']"));
 
 
-        //------------Edit Account Profile Helper Methods-----------//
+        //------------Create Activity Helper Methods-----------//
 
         //------------Settings Section-----------//
         public CreateActivityPage ClickAccountButton()
@@ -331,6 +331,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         public CreateActivityPage SelectAutoComplete(string location)
         {
             webDriver.WaitInSeconds(2);
+            ActivityLocationElement.Clear();
             ActivityLocationElement.SendKeys(location);
             Thread.Sleep(5000);
             WebDriverWait wait = new WebDriverWait(webDriver, new TimeSpan(0, 0, 5));

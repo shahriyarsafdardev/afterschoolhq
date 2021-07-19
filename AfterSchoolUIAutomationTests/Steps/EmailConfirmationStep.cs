@@ -86,9 +86,81 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Given(@"Go through create activity flow for email confirmation")]
         public void GoThroughCreateActivityFlow()
         {
-            //ToDo:
+            createActivityPage.CloseGettingStartedModal();
+            createActivityPage.ClickGotItButton();
+            createActivityPage.ClickCreateFirstActivity();
+            createActivityPage.PopulateActivityName(Parameter.Get("CreateNewActivity", "ActivityName"));
+            createActivityPage.PopulateTotalAvailableSeats(Parameter.Get("CreateNewActivity", "TotalAvailableSeats"));
+            createActivityPage.ToggleInviteOnly(Parameter.Get("CreateNewActivity", "InviteOnly"));
+            createActivityPage.SetSignUpPeriodOpen();
+            createActivityPage.SetSignUpPeriodClose();
+            createActivityPage.ClickSaveAndNext();
+            createActivityPage.SelectGender();
+            createActivityPage.RestrictedBy();
+            createActivityPage.MinimumGrade();
+            createActivityPage.MaximumGrade();
+            createActivityPage.ClickSaveAndNext();
+            createActivityPage.HasSchedule(Parameter.Get("CreateNewActivity", "HasSchedule"));
+            //createActivityPage.RepeatsWeekly(Parameter.Get("CreateNewActivity", "IsWeekly"));
+            createActivityPage.WeekDays();
+            createActivityPage.SetScheduleStartDate();
+            createActivityPage.SetScheduleEndDate();
+            createActivityPage.SetScheduleStartTime();
+            createActivityPage.SetScheduleEndTime();
+            createActivityPage.ClickSaveAndNext();
+            createActivityPage.ActivityDetails(Parameter.Get("CreateNewActivity", "AboutActivity"));
+            createActivityPage.ClickSaveAndNext();
+            //createActivityPage.ActivityLedBy();
+            createActivityPage.ContactName(Parameter.Get("CreateNewActivity", "ContactName"));
+            createActivityPage.ContactPhone(Parameter.Get("CreateNewActivity", "ContactPhone"));
+            //createActivityPage.ContactEmail(Parameter.Get("CreateNewActivity", "ContactEmail"));
+            createActivityPage.ClickSaveAndNext();
+            createActivityPage.PhysicalLocation();
+            createActivityPage.SelectAutoComplete(Parameter.Get("CreateNewActivity", "ActivityLocation"));
+            createActivityPage.ClickSaveAndNext();
+            createActivityPage.DoParentsPay();
+            createActivityPage.RegistrationFee(Parameter.Get("CreateNewActivity", "RegistrationFee"));
+            createActivityPage.DoPriceParentpay();
+            createActivityPage.ClickSaveAndNext();
+            createActivityPage.SaveAndReviewButton();
         }
 
+        [Given(@"Close the email confirmation modal by clicking close button")]
+        public void CloseEmailModal()
+        {
+            emailConfirmationPage.CloseEmailCofirmationModal();
+        }
+
+        [Given(@"Open yopmail and populate email input box")]
+        public void OpenYopEmailAndPopulateEmailInput()
+        {
+            emailConfirmationPage.OpenYopEmailAndPopulateEmailInput();
+        }
+
+        [Given(@"Click yopmail text input button")]
+        public void ClickYopEmailTextInputBtn()
+        {
+            emailConfirmationPage.ClickYopEmailTextInputBtn();
+        }
+
+        [Given(@"Click confirmation email")]
+        public void ClickConfirmationLinkmail()
+        {
+            emailConfirmationPage.ClickConfirmationLinkmail();
+        }
+
+        [Given(@"Click email confirmation link")]
+        public void ClickEmailConfirmationLink()
+        {
+            emailConfirmationPage.ClickEmailConfirmationLink();
+        }
+
+        [Then(@"Verify the urls")]
+        public void VerifyAccountCreationContent()
+        {
+            string create = "UrlToTest";
+            create.Contains("UrlToTest");
+        }
 
         public void Dispose()
         {

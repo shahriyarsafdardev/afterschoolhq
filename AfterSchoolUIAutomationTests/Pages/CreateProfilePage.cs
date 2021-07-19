@@ -95,6 +95,8 @@ namespace AfterSchoolUIAutomationTests.Pages
         public CreateProfilePage SelectMinGrade()
         {
             webDriver.WaitInSeconds(2);
+            MinGradeElement.Click();
+            webDriver.WaitInSeconds(1);
             var minAge = MinGradeElement;
             var selectElement = new SelectElement(MinGradeElement);
             selectElement.SelectByValue("5");
@@ -104,6 +106,8 @@ namespace AfterSchoolUIAutomationTests.Pages
         public CreateProfilePage SelectMaxAge()
         {
             webDriver.WaitInSeconds(2);
+            MaxGradeElement.Click();
+            webDriver.WaitInSeconds(1);
             var maxAge = MaxGradeElement;
             var selectElement = new SelectElement(MaxGradeElement);
             selectElement.SelectByValue("13");

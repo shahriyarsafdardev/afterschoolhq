@@ -181,7 +181,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         public void VerifyAccountCreationContent()
         {
             string create = "Before we publish your activity lets confirm your email.";
-            create.Equals(createActivityPage.EmailConfirmationModalElement.Text.Trim());
+            create.Contains(createActivityPage.EmailConfirmationModalElement.Text.Trim());
         }
 
         public void Dispose()
