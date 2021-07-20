@@ -166,18 +166,38 @@ namespace AfterSchoolLibrary.Services
 
         public static Activity GetActivity(this Account account, int Id, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            Activity activity = null;
             if (account.IsNotEmpty())
-                return Activity.LoadByIdByAccountId(Id, account.ID.Value, msgs, dc);
-
-            return null;
+                activity = Activity.LoadByIdByAccountId(Id, account.ID.Value, msgs, dc);
+            // If schools need to publish an activity for a provider who is external to the school page
+            // I can see this activity if it is hosted at my location
+            if (activity.IsEmpty())
+            {
+                var locations = account.GetHostedLocations(msgs, dc);
+                locations.ForEach(location => {
+                    if (activity.LocationId == location.ID)
+                        activity = Activity.LoadByIdByAccountId(Id, activity.AccountId.Value, msgs, dc);
+                });
+            }
+            return activity;
         }
 
         public static Activity GetActivity(this Account account, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            Activity activity = null;
             if (account.IsNotEmpty())
-                return Activity.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
-
-            return null;
+                activity = Activity.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
+            // If schools need to publish an activity for a provider who is external to the school page
+            // I can see this activity if it is hosted at my location
+            if (activity.IsEmpty())
+            {
+                var locations = account.GetHostedLocations(msgs, dc);
+                locations.ForEach(location => {
+                    if (activity.LocationId == location.ID)
+                        activity = Activity.LoadByUidByAccountId(Uid, activity.AccountId.Value, msgs, dc);
+                });
+            }
+            return activity;
         }
 
         public static List<Activity> GetActivities(this Account account, List<int> ActivityIds, SystemMessages msgs = null, DatabaseConnection dc = null)
