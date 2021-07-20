@@ -174,9 +174,10 @@ namespace AfterSchoolLibrary.Services
             if (activity.IsEmpty())
             {
                 var locations = account.GetHostedLocations(msgs, dc);
+                var tempActivity = Activity.Load(Id, msgs, dc);
                 locations.ForEach(location => {
-                    if (activity.LocationId == location.ID)
-                        activity = Activity.LoadByIdByAccountId(Id, activity.AccountId.Value, msgs, dc);
+                    if (tempActivity.LocationId == location.ID)
+                        activity = Activity.LoadByIdByAccountId(Id, tempActivity.AccountId.Value, msgs, dc);
                 });
             }
             return activity;
@@ -192,9 +193,10 @@ namespace AfterSchoolLibrary.Services
             if (activity.IsEmpty())
             {
                 var locations = account.GetHostedLocations(msgs, dc);
+                var tempActivity = Activity.LoadByUid(Uid, msgs, dc);
                 locations.ForEach(location => {
-                    if (activity.LocationId == location.ID)
-                        activity = Activity.LoadByUidByAccountId(Uid, activity.AccountId.Value, msgs, dc);
+                    if (tempActivity.LocationId == location.ID)
+                        activity = Activity.LoadByUidByAccountId(Uid, tempActivity.AccountId.Value, msgs, dc);
                 });
             }
             return activity;
