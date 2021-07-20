@@ -16,7 +16,26 @@ namespace AfterSchoolLibrary.Migrations
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                
+                    // Loop through All Activity Payments
+                    ActivityPayment.Load(msgs: amsgs, dc: adc).ForEach(activityPayment =>
+                    {
+                        if (activityPayment.TransactionId.HasValue)
+                        {
+                            var transaction = Transaction.Load(activityPayment.TransactionId.Value, amsgs, adc);
+
+                            // Amount -> Amount Provider Received
+                            activityPayment.Amount = transaction.GetBillerAmount(amsgs, adc);
+
+                            // AmountPaidByParent -> Transaction Amount
+                            activityPayment.AmountPaidByParent = transaction.Amount.Value;
+
+                            // IsProRated = false
+                            activityPayment.IsProRated = false;
+
+                            amsgs.AddRange(activityPayment.Save(adc));
+                        }
+
+                    });
                 },
                 uniqueIdenfier: "UpdateActivityPayment_20210720-1",
                 msgs: msgs,
