@@ -103,7 +103,7 @@
                             </td>
                         }
                         <td>
-                            @if (ra.CanAccessStatus())
+                            @if (ra.IsRegistrantActivityStatusAccessible())
                             {
                                 <select name="newassignmenttype" 
                                         id="newassignmenttype-@ra.ID" 
@@ -129,7 +129,7 @@
                             }
                         </td>
                         <td>
-                            @if (ra.CanAccessUtilityButtons())
+                            @if (ra.IsRegistrantActivityUtilityButtonsAccessible())
                             {                                
                                 <button id="btn-withdraw-@ra.Uid" class="btn btn-danger btn-sm" 
                                         onclick="return processWithdraw('@ra.Uid', '@ra.ID', '@ra.RegistrantUid', '@ra.ParticipationObjectId', '@ra.ParticipationObjectTypeId', '@ra.RegistrantFirstName');">
