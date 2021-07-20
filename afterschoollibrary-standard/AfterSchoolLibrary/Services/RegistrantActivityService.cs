@@ -334,12 +334,21 @@ namespace AfterSchoolLibrary.Services
                 RegistrationAssignmentType.Invited });
         }
 
-        public static bool IsRegistrantActivityUtilityButtonsAccessible(this RegistrantActivity registrantActivity)
+        public static bool IsWithdrawEnabled(this RegistrantActivity registrantActivity)
         {
             return registrantActivity.AssignmentTypeId.NotIn(new List<RegistrationAssignmentType>() {
                 RegistrationAssignmentType.NotSet,
                 RegistrationAssignmentType.Withdrawn,
                 RegistrationAssignmentType.Declined 
+            });
+        }
+
+        public static bool IsSendInvoiceEnabled(this RegistrantActivity registrantActivity)
+        {
+            return registrantActivity.AssignmentTypeId.In(new List<RegistrationAssignmentType>() {
+                RegistrationAssignmentType.Reserved,
+                RegistrationAssignmentType.ReservedPendingParentalConsent,
+                RegistrationAssignmentType.ReservedPendingPayment
             });
         }
     }

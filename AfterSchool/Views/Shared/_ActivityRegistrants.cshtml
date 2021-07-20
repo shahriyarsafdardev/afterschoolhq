@@ -129,36 +129,35 @@
                             }
                         </td>
                         <td>
-                            @if (ra.IsRegistrantActivityUtilityButtonsAccessible())
-                            {                                
+                            @if (ra.IsWithdrawEnabled())
+                            {
                                 <button id="btn-withdraw-@ra.Uid" class="btn btn-danger btn-sm" 
                                         onclick="return processWithdraw('@ra.Uid', '@ra.ID', '@ra.RegistrantUid', '@ra.ParticipationObjectId', '@ra.ParticipationObjectTypeId', '@ra.RegistrantFirstName');">
                                     Withdraw
                                 </button>
+                            }
+                            @if (ra.IsSendInvoiceEnabled() && Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && participationObject.IsNotFreeAndCanAcceptPayments && ra.GetAmountPaid() == 0 && ra.GetRegistrant().ParentRegistrantId.HasValue)
+                            {
+                                var showButton = true;
 
-                                if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && participationObject.IsNotFreeAndCanAcceptPayments && ra.GetAmountPaid() == 0 && ra.GetRegistrant().ParentRegistrantId.HasValue)
+                                if (activity.HasSubscriptionPlan())
                                 {
-                                    var showButton = true;
+                                    var subscriptionPlan = activity.GetSubscriptionPlan();
 
-                                    if (activity.HasSubscriptionPlan())
+                                    if (subscriptionPlan.SplitCostEvenly && !activity.RegistrationFinalized)
                                     {
-                                        var subscriptionPlan = activity.GetSubscriptionPlan();
-
-                                        if (subscriptionPlan.SplitCostEvenly && !activity.RegistrationFinalized)
-                                        {
-                                            showButton = false;
-                                        }
+                                        showButton = false;
                                     }
+                                }
 
-                                    if (showButton)
-                                    {
-                                        <button class="btn btn-default btn-sm" 
-                                                data-modal="modal-waitinglist" 
-                                                id="btnsendinvoice-@ra.ID"
-                                                onclick="sendPaymentReminder(this, @ra.RegistrantId, '@UI.JavascriptSafeString(ra.RegistrantName)')">
-                                            Send Invoice
-                                        </button>
-                                    }
+                                if (showButton)
+                                {
+                                    <button class="btn btn-default btn-sm" 
+                                            data-modal="modal-waitinglist" 
+                                            id="btnsendinvoice-@ra.ID"
+                                            onclick="sendPaymentReminder(this, @ra.RegistrantId, '@UI.JavascriptSafeString(ra.RegistrantName)')">
+                                        Send Invoice
+                                    </button>
                                 }   
                             }
                         </td>
