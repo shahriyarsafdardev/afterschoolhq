@@ -730,6 +730,32 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         [Fact]
+        public void GetActivityByLocationHostAccountTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var schoolWebUser = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolWebUser, msgs, dc);
+            var location = LocationFactory.Create(schoolAccount, msgs, dc);
+
+            activity.LocationId = location.ID.Value;
+            msgs.AddRange(activity.Save(dc));
+
+            // Act
+            var expectedById = account.GetActivity(activity.ID.Value, msgs, dc);
+            var expectedByUid = account.GetActivity(activity.Uid, msgs, dc);
+
+            // Assert
+            Assert.Equal(expected: expectedById.ID, actual: activity.ID);
+            Assert.Equal(expected: expectedById.Uid, actual: activity.Uid);
+            Assert.Equal(expected: expectedById.Name, actual: activity.Name);
+
+            Assert.Equal(expected: expectedByUid.ID, actual: activity.ID);
+            Assert.Equal(expected: expectedByUid.Uid, actual: activity.Uid);
+            Assert.Equal(expected: expectedByUid.Name, actual: activity.Name);
+        }
+
+        [Fact]
         public void GetActivitiesTest()
         {
             // Arrange
