@@ -187,6 +187,8 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
         private IHttpActionResult InvoicePaymentSucceeded(Stripe.Event stripeEvent, SystemMessages msgs)
         {
+            AfterSchoolLibrary.Helpers.Utilities.SystemLog("InvoicePaymentSucceeded Called.");
+
             var stripeInvoice = (Stripe.Invoice)stripeEvent.Data.Object;
 
             if (stripeInvoice.IsNotEmpty())
@@ -197,6 +199,8 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
         private IHttpActionResult ProcessInvoiceDetails(Stripe.Invoice stripeInvoice, SystemMessages msgs)
         {
+            AfterSchoolLibrary.Helpers.Utilities.SystemLog("ProcessInvoiceDetails Called.");
+
             var stripeSubscriptionId = stripeInvoice.SubscriptionId;
             var chargeId = stripeInvoice.ChargeId;
             var rsp = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(stripeSubscriptionId, msgs);
@@ -292,6 +296,8 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             };
 
             billingAccount.ProcessSubscriptionPlanPayment(checkoutObject, plan, rsp, msgs);
+
+            AfterSchoolLibrary.Helpers.Utilities.SystemLog("ProcessSubscriptionPlanPayment completed.");
 
             if (msgs.HasErrors())
                 return Return500(msgs);

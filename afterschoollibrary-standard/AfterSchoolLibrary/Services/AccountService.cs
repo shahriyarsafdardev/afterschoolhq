@@ -3077,6 +3077,8 @@ namespace AfterSchoolLibrary.Services
 
         internal static Transaction AddTransaction(CheckoutObject checkoutObject, TransactionType transactionType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
+            AfterSchoolLibrary.Helpers.Utilities.SystemLog("AddTransaction Called.");
+
             return TransactionService.CreateNew(
                     checkoutObject,
                     transactionType,
@@ -3243,6 +3245,8 @@ namespace AfterSchoolLibrary.Services
 
         public static void ProcessSubscriptionPlanPayment(this Account billingAccount, CheckoutObject checkoutObject, SubscriptionPlan plan, RegistrantSubscriptionPlan registrantSubscriptionPlan, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            AfterSchoolLibrary.Helpers.Utilities.SystemLog("ProcessSubscriptionPlanPayment Called.");
+
             Database.ExecuteTransaction
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
@@ -3268,6 +3272,8 @@ namespace AfterSchoolLibrary.Services
 
         public static void CreatePurchaseTransactionPayment(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
+            AfterSchoolLibrary.Helpers.Utilities.SystemLog("CreatePurchaseTransactionPayment Called.");
+
             Registrant registrant = null;
 
             // not the master registrant record
