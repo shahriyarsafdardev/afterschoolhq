@@ -20,7 +20,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 msgs.Add("Getting serializedJson", MessageType.Notice);
                 var serializedJson = JsonConvert.SerializeObject(json);
                 msgs.Add("Getting stripeEvent", MessageType.Notice);
-                var stripeEvent = (Stripe.Event)Stripe.EventUtility.ParseEvent(serializedJson);
+                var stripeEvent = (Stripe.Event)Stripe.EventUtility.ParseEvent(serializedJson, throwOnApiVersionMismatch: false);
 
                 switch (stripeEvent.Type)
                 {
