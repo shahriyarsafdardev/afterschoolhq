@@ -2,6 +2,7 @@
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using Newtonsoft.Json;
+using Stripe;
 using System;
 using System.Collections.Generic;
 using System.Web.Http;
@@ -19,7 +20,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 msgs.Add("Getting serializedJson", MessageType.Notice);
                 var serializedJson = JsonConvert.SerializeObject(json);
                 msgs.Add("Getting stripeEvent", MessageType.Notice);
-                var stripeEvent = (Stripe.Event)Stripe.EventUtility.ParseEvent(serializedJson);
+                var stripeEvent = (Stripe.Event)Stripe.EventUtility.ParseEvent(serializedJson, throwOnApiVersionMismatch: false);
 
                 switch (stripeEvent.Type)
                 {
@@ -41,6 +42,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             }
             catch (Exception ex)
             {
+                AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(ex);
                 msgs.Add(ex.Message, MessageType.Error, ex);
                 return Return500(msgs);
             }
@@ -245,8 +247,8 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             // send payment succeeded email
             purchasingAccount.SendSubscriptionPaymentSucceeded(rsp, plan);
 
-            Account convenienceFeePayer;
-            Account transactionFeePayer;
+            AfterSchoolLibrary.Models.Account convenienceFeePayer;
+            AfterSchoolLibrary.Models.Account transactionFeePayer;
 
             if (rsp.ConvenienceFeesPaidBy == FeesPaidByType.Parent)
                 convenienceFeePayer = purchasingAccount;
@@ -300,7 +302,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         {
             var stripeInvoice = (Stripe.Invoice)stripeEvent.Data.Object;
             var customerId = stripeInvoice.CustomerId;
-            var account = Account.LoadByStripeCustomerId(customerId, msgs);
+            var account = AfterSchoolLibrary.Models.Account.LoadByStripeCustomerId(customerId, msgs);
             var subscriptionId = stripeInvoice.SubscriptionId;
             var registrantSubscription = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(subscriptionId, msgs);
             var plan = registrantSubscription.GetSubscriptionPlan(msgs);

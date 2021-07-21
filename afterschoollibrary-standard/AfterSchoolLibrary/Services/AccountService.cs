@@ -166,18 +166,40 @@ namespace AfterSchoolLibrary.Services
 
         public static Activity GetActivity(this Account account, int Id, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            Activity activity = null;
             if (account.IsNotEmpty())
-                return Activity.LoadByIdByAccountId(Id, account.ID.Value, msgs, dc);
-
-            return null;
+                activity = Activity.LoadByIdByAccountId(Id, account.ID.Value, msgs, dc);
+            // If schools need to publish an activity for a provider who is external to the school page
+            // I can see this activity if it is hosted at my location
+            if (activity.IsEmpty())
+            {
+                var locations = account.GetHostedLocations(msgs, dc);
+                var tempActivity = Activity.Load(Id, msgs, dc);
+                locations.ForEach(location => {
+                    if (tempActivity.LocationId == location.ID)
+                        activity = Activity.LoadByIdByAccountId(Id, tempActivity.AccountId.Value, msgs, dc);
+                });
+            }
+            return activity;
         }
 
         public static Activity GetActivity(this Account account, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            Activity activity = null;
             if (account.IsNotEmpty())
-                return Activity.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
-
-            return null;
+                activity = Activity.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
+            // If schools need to publish an activity for a provider who is external to the school page
+            // I can see this activity if it is hosted at my location
+            if (activity.IsEmpty())
+            {
+                var locations = account.GetHostedLocations(msgs, dc);
+                var tempActivity = Activity.LoadByUid(Uid, msgs, dc);
+                locations.ForEach(location => {
+                    if (tempActivity.LocationId == location.ID)
+                        activity = Activity.LoadByUidByAccountId(Uid, tempActivity.AccountId.Value, msgs, dc);
+                });
+            }
+            return activity;
         }
 
         public static List<Activity> GetActivities(this Account account, List<int> ActivityIds, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -3000,6 +3022,12 @@ namespace AfterSchoolLibrary.Services
             string customerId = null;
             var billingAccount = checkoutObject.BillingAccount;
 
+            if (billingAccount.IsEmpty())
+            {
+                msgs.Add("Stripe charge can not be processed.", MessageType.UserError);
+                return null;
+            }
+
             if (checkoutObject.SavePaymentInfo ||
                 checkoutObject.HasStripeSourceId ||
                 (checkoutObject.PayingAccount.IsNotEmpty() && checkoutObject.PayingAccount.StripeCustomerId.IsNotEmpty()))
@@ -3015,22 +3043,22 @@ namespace AfterSchoolLibrary.Services
             // only charge tuition during checkout, because subscriptions are billed through stripe
             var charge = StripeHelper.CreateCharge(
                                 fromCustomerId: customerId,
-                                destinationAccountId: useStripeConnectedAccount ? checkoutObject.BillingAccount?.StripeUserId : null,
+                                destinationAccountId: useStripeConnectedAccount ? billingAccount.StripeUserId : null,
                                 platformFee: useStripeConnectedAccount ? platformFeeAmount : new decimal?(),
                                 tokenOrSourceId: checkoutObject.StripeSourceId,
                                 totalAmount: amount,
                                 description: checkoutObject.Description,
-                                statementDescriptor: $"{checkoutObject.BillingAccount.Name}",
+                                statementDescriptor: $"{billingAccount.Name}",
                                 metaData: new Dictionary<string, string>()
                                 {
                                     { "ActivityUid", checkoutObject.ParticipationObject?.Uid.ToString() },
-                                    { "BillingAccountUid", checkoutObject.BillingAccount.Uid.ToString() },
+                                    { "BillingAccountUid", billingAccount.Uid.ToString() },
                                     { "PayingAccountUid", checkoutObject.PayingAccount.Uid.ToString() },
                                     { "RegistrationUid", checkoutObject.Registration?.Uid.ToString() },
                                     { "CreditCardFeePayer", checkoutObject.CreditCardFeePayer?.Uid.ToString() },
                                     { "ConvenienceFeePayer", checkoutObject.ConvenienceFeePayer?.Uid.ToString() },
                                     { "PurchasedBy", checkoutObject.MasterRegistrant?.DisplayName },
-                                    { "BilledBy", checkoutObject.BillingAccount?.Name }
+                                    { "BilledBy", billingAccount.Name }
                                 },
                                 msgs: msgs
                             );
@@ -3208,7 +3236,8 @@ namespace AfterSchoolLibrary.Services
             if (msgs.HasNoErrors())
             {
                 var charge = AccountService.CreateStripeChargeDuringCheckout(checkoutObject, msgs, dc);
-                checkoutObject.StripeChargeId = charge.Id;
+                if (charge.IsNotEmpty() && charge.Id.IsNotEmpty())
+                    checkoutObject.StripeChargeId = charge.Id;
             }
         }
 
