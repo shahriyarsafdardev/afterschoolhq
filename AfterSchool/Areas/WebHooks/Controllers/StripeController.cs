@@ -17,6 +17,8 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             var msgs = new SystemMessages();
             try
             {
+                AfterSchoolLibrary.Helpers.Utilities.SystemLog("/WebHooks/StripeController/Updated Called.");
+
                 msgs.Add("Getting serializedJson", MessageType.Notice);
                 var serializedJson = JsonConvert.SerializeObject(json);
                 msgs.Add("Getting stripeEvent", MessageType.Notice);
