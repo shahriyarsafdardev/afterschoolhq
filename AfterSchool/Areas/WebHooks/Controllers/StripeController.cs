@@ -2,6 +2,7 @@
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using Newtonsoft.Json;
+using Stripe;
 using System;
 using System.Collections.Generic;
 using System.Web.Http;
@@ -245,8 +246,8 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             // send payment succeeded email
             purchasingAccount.SendSubscriptionPaymentSucceeded(rsp, plan);
 
-            Account convenienceFeePayer;
-            Account transactionFeePayer;
+            AfterSchoolLibrary.Models.Account convenienceFeePayer;
+            AfterSchoolLibrary.Models.Account transactionFeePayer;
 
             if (rsp.ConvenienceFeesPaidBy == FeesPaidByType.Parent)
                 convenienceFeePayer = purchasingAccount;
@@ -300,7 +301,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         {
             var stripeInvoice = (Stripe.Invoice)stripeEvent.Data.Object;
             var customerId = stripeInvoice.CustomerId;
-            var account = Account.LoadByStripeCustomerId(customerId, msgs);
+            var account = AfterSchoolLibrary.Models.Account.LoadByStripeCustomerId(customerId, msgs);
             var subscriptionId = stripeInvoice.SubscriptionId;
             var registrantSubscription = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(subscriptionId, msgs);
             var plan = registrantSubscription.GetSubscriptionPlan(msgs);
