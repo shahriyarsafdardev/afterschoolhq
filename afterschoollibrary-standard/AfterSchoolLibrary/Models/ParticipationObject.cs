@@ -770,8 +770,6 @@ namespace AfterSchoolLibrary.Models
 
         public ActivityPayment AddPayment(decimal amount, Registrant registrant, Transaction transaction, RegistrantSubscriptionPlan registrantSubscriptionPlan, DateTime createDate, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            AfterSchoolLibrary.Helpers.Utilities.SystemLog("AddPayment Called.");
-
             var payment = new ActivityPayment()
             {
                 ParticipationObjectId = this.ObjectID,
@@ -794,8 +792,6 @@ namespace AfterSchoolLibrary.Models
 
         public ActivityPayment AddPayment(decimal amountReceivedByProvider, decimal amountPaidByParent, bool isAmountProRated, Registrant registrant, Transaction transaction, RegistrantSubscriptionPlan registrantSubscriptionPlan, DateTime createDate, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            AfterSchoolLibrary.Helpers.Utilities.SystemLog("AddPayment With AmountPaidByParent Called.");
-
             var payment = new ActivityPayment()
             {
                 ParticipationObjectId = this.ObjectID,

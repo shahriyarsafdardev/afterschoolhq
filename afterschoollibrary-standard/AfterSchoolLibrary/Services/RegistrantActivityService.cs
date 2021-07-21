@@ -188,8 +188,6 @@ namespace AfterSchoolLibrary.Services
 
         public static void ChangeSeatAssignment(this RegistrantActivity registrantActivity, RegistrationAssignmentType to, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            AfterSchoolLibrary.Helpers.Utilities.SystemLog("ChangeSeatAssignment Called.");
-
             if (registrantActivity.AssignmentTypeId == to)
                 return;
 

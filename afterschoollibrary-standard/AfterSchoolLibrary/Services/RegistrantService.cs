@@ -1631,8 +1631,6 @@ namespace AfterSchoolLibrary.Services
 
         public static void ProcessActivityPayment(this Registrant registrant, CheckoutObject checkoutObject, Transaction transaction, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            AfterSchoolLibrary.Helpers.Utilities.SystemLog("ProcessActivityPayment Called.");
-
             // TODO: this is problematic, but a little better now
             // you really don't know this is the amount paid, but it works for now
             // var amountPaid = checkoutObject.TuitionCostNoFees;

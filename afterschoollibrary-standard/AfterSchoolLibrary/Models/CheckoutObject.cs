@@ -541,8 +541,6 @@ namespace AfterSchoolLibrary.Models
 
         public Purchase CreateOrUpdatePurchase(WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            AfterSchoolLibrary.Helpers.Utilities.SystemLog("CreateOrUpdatePurchase Called.");
-
             if (this.Purchase.IsEmpty())
                 this.Purchase = this.Registration.GetPurchase(msgs, dc);
 
