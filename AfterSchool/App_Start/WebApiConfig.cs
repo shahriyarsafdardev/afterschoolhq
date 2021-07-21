@@ -11,11 +11,11 @@ namespace AfterSchool
         {
             config.MapHttpAttributeRoutes();
 
-            config.Routes.MapHttpRoute(
-                name: "StripeHooks",
-                routeTemplate: "stripehooks/{controller}/{id}",
-                defaults: new { id = RouteParameter.Optional }
-            );
+            //config.Routes.MapHttpRoute(
+            //    name: "StripeHooks",
+            //    routeTemplate: "stripehooks/{controller}/{id}",
+            //    defaults: new { id = RouteParameter.Optional }
+            //);
 
             config.Routes.MapHttpRoute(
                 name: "WebHooks",
