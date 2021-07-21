@@ -42,6 +42,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             }
             catch (Exception ex)
             {
+                AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(ex);
                 msgs.Add(ex.Message, MessageType.Error, ex);
                 return Return500(msgs);
             }
