@@ -3,6 +3,7 @@ using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
 using System;
 using static AfterSchoolLibrary.Services.AccountService;
+using System.Collections.Generic;
 
 namespace AfterSchoolLibraryTests.Factories
 {
@@ -38,6 +39,17 @@ namespace AfterSchoolLibraryTests.Factories
         public static Account CreateWithFreePackage(WebUser user, AccountType accountType, SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new Account() { OwnerId = user.ID, Name = "Test Account", Email = "test@test.com", AccountTypeId = accountType };
+            msgs.AddRange(obj.Save(dc: dc));
+
+            var package = PackageFactory.CreateFreePackage(msgs, dc);
+            var accountPackage = AccountPackageFactory.Create(obj, package, msgs, dc);
+
+            return obj;
+        }
+
+        public static Account CreateWithFreePackage(string name, string email, WebUser user, AccountType accountType, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var obj = new Account() { OwnerId = user.ID, Name = name, Email = email, AccountTypeId = accountType };
             msgs.AddRange(obj.Save(dc: dc));
 
             var package = PackageFactory.CreateFreePackage(msgs, dc);
@@ -167,6 +179,81 @@ namespace AfterSchoolLibraryTests.Factories
             );
 
             return newap;
+        }
+
+        public static (Stripe.Account, Stripe.Customer) CreateStripeAccountAndCustomer(Account account, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var dob = DateTime.UtcNow.AddYears(-25);
+            var createOptions = new Stripe.AccountCreateOptions()
+            {
+                Type = "custom",                
+                Country = "US",
+                DefaultCurrency = "usd",
+                Email = "test@test.com",
+                BusinessProfile = new Stripe.AccountBusinessProfileOptions()
+                {
+                    Url = "www.thebluehouse.co",
+                    //SupportEmail = "support@email.com",
+                    //SupportPhone = "317-316-0596",
+                    //SupportUrl = "www.support.com",
+                    Mcc = "8299",
+                    Name = "The Blue House"
+                },
+                BusinessType = LegalEntityType.Individual.ToString().ToLower(),
+                Individual = new Stripe.PersonCreateOptions()
+                {
+                    Address = new Stripe.AddressOptions()
+                    {
+                        City = "Fishers",
+                        Line1 = "12175",
+                        Line2 = "Visionary Way",
+                        Country = "US",
+                        PostalCode = "46038",
+                        State = "IN"
+                    },
+                    FirstName = "Darye",
+                    LastName = "Henry",
+                    Phone = "317-809-2345",
+                    SSNLast4 = "0000",
+                    Email = "darye@darye.com",
+                    Dob = new Stripe.DobOptions()
+                    {
+                        Day = dob.Day,
+                        Month = dob.Month,
+                        Year = dob.Year
+                    },
+                },
+                Settings = new Stripe.AccountSettingsOptions()
+                {                    
+                    Payouts = new Stripe.AccountSettingsPayoutsOptions()
+                    {                        
+                        DebitNegativeBalances = true,
+                        StatementDescriptor = "AHQ transfer".MaxChars(22),
+                        Schedule = new Stripe.AccountSettingsPayoutsScheduleOptions()
+                        {
+                            Interval = "manual",
+                        }
+                    },                    
+                },                
+                RequestedCapabilities = new List<string>() { "transfers", "card_payments", "legacy_payments" },
+                TosAcceptance = new Stripe.AccountTosAcceptanceOptions()
+                {
+                    Date = DateTime.UtcNow,
+                    Ip = "1.1.1.1",
+                    UserAgent = "Chrome"
+                },
+                ExternalAccount = new Stripe.AccountBankAccountOptions()
+                {
+                    RoutingNumber = "110000000",
+                    AccountNumber = "000123456789",
+                    Country = "US"
+                }
+            };
+
+            var stripeAccount = account.CreateStripeCustomAccount(createOptions, updateChargesAndPayouts: false, msgs, dc);
+            var customer = account.CreateStripeCustomer(msgs, dc);
+
+            return (stripeAccount, customer);
         }
     }
 }

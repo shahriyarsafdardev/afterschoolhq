@@ -808,7 +808,9 @@ property: RegistrantId, int?, Int, required
 property: ActivityId, int?, Int
 property: AccountId, int?, Int
 property: Uid, Guid, UniqueIdentifier, required
-property: Amount, decimal?, Money
+property: Amount, decimal?, Money, , used to define AmountReceivedByProvider
+property: AmountPaidByParent, decimal?, Money
+property: IsProRated, bool, Bit
 property: ParticipationObjectTypeId, ParticipationObjectType, Int, required
 property: ParticipationObjectId, int?, Int, required
 property: TransactionId, int?, Int

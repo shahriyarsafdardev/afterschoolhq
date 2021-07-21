@@ -1,0 +1,170 @@
+﻿@model List<RegistrantActivity>
+@{ 
+    var account = (Account)ViewData["Account"];
+    var activity = (Activity)ViewData["Activity"];
+    var participationObject = activity.GetParticipationObject();
+    var editaction = ViewData["EditAction"].ToString();
+    var editcontroller = ViewData["EditController"].ToString();
+    var headerTitle = (RegistrationAssignmentType)ViewData["HeaderTitle"];    
+    var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
+}
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">@headerTitle.ToString().SplitByUpperCase()</h3>
+  </div>
+  <div class="panel-body">
+    <div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th class="text-center">Seat Index</th>
+                <th>Date Registered</th>
+                @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView))
+                {
+                    <th>Amount Paid</th>
+                }
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Count > 0)
+            {
+                foreach (var ra in Model)
+                {
+                    <tr>
+                        <td>
+                            @if (ra.RegistrationId.HasValue && ra.AssignmentTypeId != RegistrationAssignmentType.Invited)
+                            {
+                                <a href="@Url.Action(editaction, editcontroller, new { id = ra.Uid })" class="btn btn-default btn-sm">
+                                    <i class="icon icon-left s7-user"></i> View Details
+                                </a>
+                            }
+                        </td>
+                        <td>@(!isTechSupport ? ra.RegistrantName.IfBlank(ra.RegistrantEmail) : ra.RegistrantEmail.ToMaskedData())</td>
+                        <td class="text-center">@ra.SeatIndex</td>
+                        <td>@account.ConvertToAccountTimeZone(ra.CreateDate.Value).ToLongDateTimeString()</td>
+                        @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView))
+                        {
+                            var amount = ra.GetAmountPaid();
+                            var isProRated = ra.GetIsProRatedFlagByParent();
+
+                            <td>
+                                @if (participationObject.IsFree)
+                                {
+                                    @:FREE
+                                }
+                                else
+                                {
+                                    @amount.ToCurrency()
+
+                                    if (isProRated)
+                                    {
+                                         <i class="s7-info icon-small" data-toggle="popover" data-trigger="hover" data-html="true" data-placement="top"
+                                               data-content="Amount paid for this student is pro-rated by AHQ system and Stripe.">
+                                            </i>
+                                    }
+
+                                    if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && participationObject.IsNotFreeAndCanAcceptPayments && ra.GetAmountPaid() == 0 && ra.GetRegistrant().ParentRegistrantId.HasValue)
+                                    {
+                                        var showButton = true;
+
+                                        if (activity.HasSubscriptionPlan())
+                                        {
+                                            var subscriptionPlan = activity.GetSubscriptionPlan();
+
+                                            if (subscriptionPlan.SplitCostEvenly && !activity.RegistrationFinalized)
+                                            {
+                                                showButton = false;
+                                            }
+                                        }
+
+                                        if (showButton)
+                                        { 
+                                            <i class="s7-info icon-small" data-toggle="popover" data-trigger="hover" data-html="true" data-placement="top"
+                                               data-content="Student registered with option of allow to pay later.">
+                                            </i>
+                                        }
+                                    }    
+                                }
+                            </td>
+                        }
+                        <td>
+                            @if (ra.IsRegistrantActivityStatusAccessible())
+                            {
+                                <select name="newassignmenttype" 
+                                        id="newassignmenttype-@ra.ID" 
+                                        class="form-control" 
+                                        onchange="moveRegistrantAssignment(@ra.RegistrantId, '@UI.JavascriptSafeString(ra.RegistrantName)', this)">
+
+                                    @foreach (var assignmenttype in Enum.GetValues(typeof(RegistrationAssignmentType)).Cast<RegistrationAssignmentType>())
+                                    {
+                                        switch (assignmenttype)
+                                        {
+                                            case RegistrationAssignmentType.NotSet:
+                                                continue;
+                                        }
+                                        <option value="@((int)assignmenttype)" @(assignmenttype == ra.AssignmentTypeId ? "selected=\"selected\"" : "")>
+                                            @assignmenttype.ToString().SplitByUpperCase()
+                                        </option>
+                                    }
+
+                                </select>
+                            } else 
+                            {
+                                <label>@((RegistrationAssignmentType)ra.AssignmentTypeId)</label>
+                            }
+                        </td>
+                        <td>
+                            @if (ra.IsWithdrawEnabled())
+                            { 
+                                <button id="btn-withdraw-@ra.Uid" class="btn btn-danger btn-sm" 
+                                        onclick="return processWithdraw('@ra.Uid', '@ra.ID', '@ra.RegistrantUid', '@ra.ParticipationObjectId', '@ra.ParticipationObjectTypeId', '@ra.RegistrantFirstName');">
+                                    Withdraw
+                                </button>
+                            }
+                            @if (ra.IsSendInvoiceEnabled() && Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && participationObject.IsNotFreeAndCanAcceptPayments && ra.GetAmountPaid() == 0 && ra.GetRegistrant().ParentRegistrantId.HasValue)
+                            {
+                                var showButton = true;
+
+                                if (activity.HasSubscriptionPlan())
+                                {
+                                    var subscriptionPlan = activity.GetSubscriptionPlan();
+
+                                    if (subscriptionPlan.SplitCostEvenly && !activity.RegistrationFinalized)
+                                    {
+                                        showButton = false;
+                                    }
+                                }
+
+                                if (showButton)
+                                {
+                                    <button class="btn btn-default btn-sm" 
+                                            data-modal="modal-waitinglist" 
+                                            id="btnsendinvoice-@ra.ID"
+                                            onclick="sendPaymentReminder(this, @ra.RegistrantId, '@UI.JavascriptSafeString(ra.RegistrantName)')">
+                                        Send Invoice
+                                    </button>
+                                    
+                                }   
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="8">There are no @UILabel.RegistrantLabel(true).ToLower()</td>
+                </tr>
+            }
+        </tbody>
+
+    </table>
+</div>
+  </div>
+</div>
+

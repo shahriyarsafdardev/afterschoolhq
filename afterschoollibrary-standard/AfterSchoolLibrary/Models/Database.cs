@@ -286,6 +286,7 @@ namespace AfterSchoolLibrary.Models
 			Registrant.Update(new Hashtable(){{"ProfileStatusId",0}}, new Hashtable(){{"ProfileStatusId", DBNull.Value}}, Registrant.ObjectMap, dc);
 			Registrant.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, Registrant.ObjectMap, dc);
 			RegistrantWebUser.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, RegistrantWebUser.ObjectMap, dc);
+			ActivityPayment.Update(new Hashtable(){{"IsProRated",false}}, new Hashtable(){{"IsProRated", DBNull.Value}}, ActivityPayment.ObjectMap, dc);
 			ActivityPayment.Update(new Hashtable(){{"ParticipationObjectTypeId",0}}, new Hashtable(){{"ParticipationObjectTypeId", DBNull.Value}}, ActivityPayment.ObjectMap, dc);
 			ActivityPayment.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, ActivityPayment.ObjectMap, dc);
 			RegistrantActivity.Update(new Hashtable(){{"ParticipationObjectTypeId",0}}, new Hashtable(){{"ParticipationObjectTypeId", DBNull.Value}}, RegistrantActivity.ObjectMap, dc);

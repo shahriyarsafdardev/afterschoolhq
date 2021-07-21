@@ -1,0 +1,337 @@
+﻿@model List<RegistrantActivity>
+@{ 
+    var account = (Account)ViewData["Account"];
+    var activity = (Activity)ViewData["Activity"];
+    var participationObject = activity.GetParticipationObject();
+    var editaction = ViewData["EditAction"].ToString();
+    var editcontroller = ViewData["EditController"].ToString();
+    var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
+
+    var reservedButPendingPayment = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment).ToList();
+    var reservedPendingParentalConsent = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingParentalConsent).ToList();
+    var reserved = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.Reserved).ToList();
+    var waiting = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.WaitingList).ToList();
+    var invited = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.Invited).ToList();
+    var applied = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.Applied).ToList();
+    var interested = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.Interested).ToList();
+    var withdrawn = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.Withdrawn).ToList();
+    var declined = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.Declined).ToList();
+}
+
+<div class="clearfix"></div>
+@if (reservedButPendingPayment.IsNotEmpty() && reservedButPendingPayment.Count > 0)
+{
+    Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
+      reservedButPendingPayment,
+      new ViewDataDictionary() {
+          { "Activity", activity },
+          { "Account", account },
+          { "EditAction", editaction },
+          { "EditController", editcontroller },
+          { "HeaderTitle", RegistrationAssignmentType.ReservedPendingPayment }
+      }
+    );
+}
+
+<div class="clearfix"></div>
+@if (reservedPendingParentalConsent.IsNotEmpty() && reservedPendingParentalConsent.Count > 0)
+{
+    Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
+      reservedPendingParentalConsent,
+      new ViewDataDictionary() {
+          { "Activity", activity },
+          { "Account", account },
+          { "EditAction", editaction },
+          { "EditController", editcontroller },
+          { "HeaderTitle", RegistrationAssignmentType.ReservedPendingParentalConsent }
+      }
+    );
+}
+
+<div class="clearfix"></div>
+@if (reserved.IsNotEmpty() && reserved.Count > 0)
+{
+    Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
+      reserved,
+      new ViewDataDictionary() {
+          { "Activity", activity },
+          { "Account", account },
+          { "EditAction", editaction },
+          { "EditController", editcontroller },
+          { "HeaderTitle", RegistrationAssignmentType.Reserved }
+      }
+    );
+}
+
+<div class="clearfix"></div>
+@if (waiting.IsNotEmpty() && waiting.Count > 0)
+{
+    Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
+      waiting,
+      new ViewDataDictionary() {
+          { "Activity", activity },
+          { "Account", account },
+          { "EditAction", editaction },
+          { "EditController", editcontroller },
+          { "HeaderTitle", RegistrationAssignmentType.WaitingList }
+      }
+    );
+}
+
+<div class="clearfix"></div>
+@if (invited.IsNotEmpty() && invited.Count > 0)
+{
+    Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
+      invited,
+      new ViewDataDictionary() {
+          { "Activity", activity },
+          { "Account", account },
+          { "EditAction", editaction },
+          { "EditController", editcontroller },
+          { "HeaderTitle", RegistrationAssignmentType.Invited }
+      }
+    );
+}
+
+<div class="clearfix"></div>
+@if (applied.IsNotEmpty() && applied.Count > 0)
+{
+    Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
+      applied,
+      new ViewDataDictionary() {
+          { "Activity", activity },
+          { "Account", account },
+          { "EditAction", editaction },
+          { "EditController", editcontroller },
+          { "HeaderTitle", RegistrationAssignmentType.Applied }
+      }
+    );
+}
+
+<div class="clearfix"></div>
+@if (interested.IsNotEmpty() && interested.Count > 0)
+{
+    Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
+      interested,
+      new ViewDataDictionary() {
+          { "Activity", activity },
+          { "Account", account },
+          { "EditAction", editaction },
+          { "EditController", editcontroller },
+          { "HeaderTitle", RegistrationAssignmentType.Interested }
+      }
+    );
+}
+
+<div class="clearfix"></div>
+@if (withdrawn.IsNotEmpty() && withdrawn.Count > 0)
+{
+    Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
+      withdrawn,
+      new ViewDataDictionary() {
+          { "Activity", activity },
+          { "Account", account },
+          { "EditAction", editaction },
+          { "EditController", editcontroller },
+          { "HeaderTitle", RegistrationAssignmentType.Withdrawn }
+      }
+    );
+}
+
+<div class="clearfix"></div>
+@if (declined.IsNotEmpty() && declined.Count > 0)
+{
+    Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
+      declined,
+      new ViewDataDictionary() {
+          { "Activity", activity },
+          { "Account", account },
+          { "EditAction", editaction },
+          { "EditController", editcontroller },
+          { "HeaderTitle", RegistrationAssignmentType.Declined }
+      }
+    );
+}
+
+<div id="modal-waitinglist" class="md-modal colored-header custom-width md-effect-9">
+    <form id="form-waitinglist" action="" method="post" class="form-inline">
+        <div class="md-content">
+            <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                <h3 class="modal-title">Manage <span id="registrant-name"></span> Waiting List</h3>
+            </div>
+            <div class="modal-body form">
+                <p>
+                    Move 
+                    <select id="numbertomove" name="numbertomove" class="form-control"></select>
+                    @UILabel.RegistrantLabel(true).ToLower()
+                    <select id="movefromto" name="movefromto" class="form-control">
+                        <option value="from">from</option>
+                        <option value="to">to</option>
+                    </select>
+                    the waiting list
+                </p>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+                <button type="submit" class="btn btn-primary">Update Waiting List &raquo;</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div id="withdraw-modal-container"></div>
+<script id="script-withdraw-template" type="text/template">
+
+    <div id="modal-withdraw-registrant-<%= registrantActivityUId %>" class="modal colored-header fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                    <h3 class="modal-title"><i class="s7-attention"></i> Withdrawal Confirmation</h3>
+                </div>
+
+                <div class="modal-body">
+                    Are you sure you want to withdraw <strong><%= registrantName %></strong> from <strong><%= activityName %></strong> ?
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+                    <button type="button" id="btn-manual-withdraw" class="btn btn-danger padding-h-20" onclick="return withdraw('<%= participationObjectId %>', '<%= registrantId %>', '<%= type %>', '<%= registrantActivityUId %>', '<%= registrantActivityId %>')">Withdraw &amp; Cancel Payments &raquo;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</script>
+
+<script>
+
+    function moveRegistrantAssignment(registrant, registrantName, selectBox) {
+        let newAssignment = selectBox.value;
+        let newAssignmentText = selectBox.options[selectBox.selectedIndex].text;
+        console.log(newAssignment, selectBox.selectedIndex, newAssignmentText)
+        moveRegistrantAssignment2(registrant, registrantName, newAssignment, newAssignmentText);
+    }
+
+    function moveRegistrantAssignment2(registrant, registrantName, newAssignment, newAssignmentText) {
+        $.get(
+            `@Url.Action("moveregistrantassignment", "services", new { id = activity.Uid })?registrant=${registrant}&assignmenttype=${newAssignment}`,
+            function (data) {
+                if (data && data.status == 'ok') {
+                    Notifications.showBar({
+                        title: 'Success',
+                        message: `${registrantName}'s seat has been moved to ${newAssignmentText}.`
+                    });
+                } else {
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: `Error updating the seat for ${registrantName}. Please <a href="mailto:@AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress" class="white">contact support</a>.`
+                    });
+                }
+            }
+        );
+    }
+
+    function sendPaymentReminder(obj, registrant, registrantName) {
+
+        let objId = $(obj).attr('id').split('-')[1];
+
+        $(obj).html('Sending...');
+        $(obj).prop('disabled', true);
+
+        $.get(
+            `@Url.Action("sendpaymentreminder", "services", new { id = activity.Uid })?registrant=${registrant}`,
+            function (data) {
+                if (data && data.status == 'ok') {
+                    Notifications.showBar({
+                        title: 'Success',
+                        message: `A payment reminder email has been sent to ${registrantName}.`
+                    });
+
+                    $(`#newassignmenttype-${objId}`).val(data.AssignmentType);
+
+                } else {
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: `Error sending payment reminder email to ${registrantName}. Please <a href="mailto:@AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress" class="white">contact support</a>.`
+                    });
+                }
+                $(obj).html('Send Invoice');
+                $(obj).prop('disabled', false);
+            }
+        );
+    }
+
+    function processWithdraw(registrantActivityUId, registrantActivityId, registrantId, participationObjectId, type, registrantName) {
+        //.. prepare source and template
+        var source = $("#script-withdraw-template").html();
+        var compiled = _.template(source);
+
+        //.. format data as JSON and combine with template
+        var compiledHtml = compiled({
+            registrantActivityUId: registrantActivityUId,
+            registrantActivityId: registrantActivityId,
+            registrantId: registrantId,
+            participationObjectId: participationObjectId,
+            registrantName: registrantName,
+            type: type,
+            activityName: '@activity.Name',
+        });
+
+        //.. update html to dom
+        $('#withdraw-modal-container').html(compiledHtml);
+        $('#modal-withdraw-registrant-' + registrantActivityUId).modal('show');
+
+        return false;
+    }
+
+    function withdraw(participationObjectId, registrantId, type, registrantActivityUId, registrantActivityId) {
+        if (participationObjectId && registrantId) {
+            showLoader();
+
+            var url = '@Url.Action("WithdrawRegistrant", "Activity", new { Area = "Org" })';
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: { participationObjectId: participationObjectId, registrantUId: registrantId, type },
+                success: function (data) {
+                    if (data && data.success == true) {
+
+                        $('#modal-withdraw-registrant-' + registrantActivityUId).modal('hide');
+
+                        var withdrawn = '@Json.Encode(RegistrationAssignmentType.Withdrawn)';
+                        $('#newassignmenttype-' + registrantActivityId).val(withdrawn); //status udpate to withdrawn
+                        $('#btn-withdraw-' + registrantActivityUId).attr('disabled', 'disabled');
+                        hideLoader();
+
+                        Notifications.showBar({
+                            title: 'Success',
+                            message: 'Registrant Withdrawn successfully.',
+                            success: true
+                        });
+                    } else {
+                        if (data && data.status == 'error') {
+                            $('#search-result').html('');
+
+                            var error = '';
+
+                            _.each(data.data, function (msg) {
+                                error += msg?.Text + '<br />';
+                            });
+
+                            hideLoader();
+
+                            Notifications.showBar({
+                                title: 'Error',
+                                message: error,
+                                success: false
+                            });
+                        }
+                    }
+                }
+            });
+        }
+    }
+</script>

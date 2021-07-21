@@ -1951,6 +1951,29 @@ namespace AfterSchoolLibrary.Billing
             return new Stripe.PaymentIntentService(StripeClient);
         }
 
+        public static Stripe.PaymentIntent GetPaymentIntent(string paymentIntentId, string stripeAccountId, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var requestOptions = new Stripe.RequestOptions();
+            if (stripeAccountId.IsNotEmpty())
+                requestOptions.StripeAccount = stripeAccountId;
+
+            Stripe.PaymentIntent paymentIntent = null;
+
+            try
+            {
+                paymentIntent = GetPaymentIntentService().Get(paymentIntentId, null, requestOptions);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Error retrieving payment source.", MessageType.UserError);
+            }
+
+            return paymentIntent;
+        }
+
         //..TODO: 
         //..Intialized payment intent to check if refund works properly for below task.
         //..I've kept this code as this will be usefull in future.

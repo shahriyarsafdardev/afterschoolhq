@@ -775,9 +775,33 @@ namespace AfterSchoolLibrary.Models
                 ParticipationObjectId = this.ObjectID,
                 ParticipationObjectTypeId = this.ObjectType,
                 Amount = amount,
-                RegistrantId = registrant.ID,
-                AccountId = this.PaymentAccount.ID,
-                TransactionId = transaction.ID,
+                RegistrantId = registrant?.ID,
+                AccountId = this.PaymentAccount?.ID,
+                TransactionId = transaction?.ID,
+                RegistrantSubscriptionPlanId = registrantSubscriptionPlan?.ID,
+                CreateDate = createDate,
+                CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                LastModifiedDate = createDate,
+                LastModifiedBy = loggedInUser?.ID.IfEmpty(0)
+            };
+
+            msgs.AddRange(payment.Save(dc));
+
+            return payment;
+        }
+
+        public ActivityPayment AddPayment(decimal amountReceivedByProvider, decimal amountPaidByParent, bool isAmountProRated, Registrant registrant, Transaction transaction, RegistrantSubscriptionPlan registrantSubscriptionPlan, DateTime createDate, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var payment = new ActivityPayment()
+            {
+                ParticipationObjectId = this.ObjectID,
+                ParticipationObjectTypeId = this.ObjectType,
+                Amount = amountReceivedByProvider,
+                AmountPaidByParent = amountPaidByParent,
+                IsProRated = isAmountProRated,
+                RegistrantId = registrant?.ID,
+                AccountId = this.PaymentAccount?.ID,
+                TransactionId = transaction?.ID,
                 RegistrantSubscriptionPlanId = registrantSubscriptionPlan?.ID,
                 CreateDate = createDate,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
@@ -985,10 +1009,11 @@ namespace AfterSchoolLibrary.Models
             var classes = 0;
             if (Schedule.IsNotEmpty() && Schedule.ID.HasValue)
             {
+                // Add one day because last day return datetime at beginning of day (12:00 am) 
                 if (billingPeriodTypeId == BillingPeriodType.Month)
-                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now, DateTime.Now.LastDateOfMonth(), msgs,dc).Count;
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.UtcNow, DateTime.UtcNow.LastDateOfMonth().AddDays(1), msgs,dc).Count;
                 else if (billingPeriodTypeId == BillingPeriodType.Week)
-                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now, DateTime.Now.LastDateOfWeek(), msgs,dc).Count;
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.UtcNow, DateTime.UtcNow.LastDateOfWeek().AddDays(1), msgs,dc).Count;
             }                
 
             return classes;

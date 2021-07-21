@@ -1172,6 +1172,22 @@ namespace AfterSchoolLibrary.Services
             return stripeAccount;
         }
 
+        public static Stripe.Account CreateStripeCustomAccount(this Account account, Stripe.AccountCreateOptions options, bool updateChargesAndPayouts, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var stripeAccount = StripeHelper.CreateCustomAccount(options, msgs);
+
+            if (stripeAccount.IsNotEmpty())
+            {
+                account.StripeUserId = stripeAccount.Id;
+                msgs.AddRange(account.Save(dc));
+
+                if (updateChargesAndPayouts)
+                    account.UpdateStripeChargesAndPayouts(stripeAccount, msgs, dc);
+            }
+
+            return stripeAccount;
+        }
+
         public static void UpdateStripeChargesAndPayouts(this Account account, Stripe.Account stripeAccount, SystemMessages msgs, DatabaseConnection dc = null)
         {
             account.StripeChargesEnabled = stripeAccount.ChargesEnabled;
@@ -3006,6 +3022,12 @@ namespace AfterSchoolLibrary.Services
             string customerId = null;
             var billingAccount = checkoutObject.BillingAccount;
 
+            if (billingAccount.IsEmpty())
+            {
+                msgs.Add("Stripe charge can not be processed.", MessageType.UserError);
+                return null;
+            }
+
             if (checkoutObject.SavePaymentInfo ||
                 checkoutObject.HasStripeSourceId ||
                 (checkoutObject.PayingAccount.IsNotEmpty() && checkoutObject.PayingAccount.StripeCustomerId.IsNotEmpty()))
@@ -3021,22 +3043,22 @@ namespace AfterSchoolLibrary.Services
             // only charge tuition during checkout, because subscriptions are billed through stripe
             var charge = StripeHelper.CreateCharge(
                                 fromCustomerId: customerId,
-                                destinationAccountId: useStripeConnectedAccount ? checkoutObject.BillingAccount.StripeUserId : null,
+                                destinationAccountId: useStripeConnectedAccount ? billingAccount.StripeUserId : null,
                                 platformFee: useStripeConnectedAccount ? platformFeeAmount : new decimal?(),
                                 tokenOrSourceId: checkoutObject.StripeSourceId,
                                 totalAmount: amount,
                                 description: checkoutObject.Description,
-                                statementDescriptor: $"{checkoutObject.BillingAccount.Name}",
+                                statementDescriptor: $"{billingAccount.Name}",
                                 metaData: new Dictionary<string, string>()
                                 {
                                     { "ActivityUid", checkoutObject.ParticipationObject?.Uid.ToString() },
-                                    { "BillingAccountUid", checkoutObject.BillingAccount.Uid.ToString() },
+                                    { "BillingAccountUid", billingAccount.Uid.ToString() },
                                     { "PayingAccountUid", checkoutObject.PayingAccount.Uid.ToString() },
                                     { "RegistrationUid", checkoutObject.Registration?.Uid.ToString() },
-                                    { "CreditCardFeePayer", checkoutObject.CreditCardFeePayer.Uid.ToString() },
-                                    { "ConvenienceFeePayer", checkoutObject.ConvenienceFeePayer.Uid.ToString() },
+                                    { "CreditCardFeePayer", checkoutObject.CreditCardFeePayer?.Uid.ToString() },
+                                    { "ConvenienceFeePayer", checkoutObject.ConvenienceFeePayer?.Uid.ToString() },
                                     { "PurchasedBy", checkoutObject.MasterRegistrant?.DisplayName },
-                                    { "BilledBy", checkoutObject.BillingAccount.Name }
+                                    { "BilledBy", billingAccount.Name }
                                 },
                                 msgs: msgs
                             );
@@ -3071,7 +3093,7 @@ namespace AfterSchoolLibrary.Services
         /// <param name="stripeToken"></param>
         /// <param name="msgs"></param>
         /// <returns></returns>
-        public static string CreateStripeSourceFromToken(this Account fromAccount, string stripeToken, Stripe.Customer customer, SystemMessages msgs)
+        public static string CreateStripeSourceFromToken(this Account fromAccount, string stripeToken, Stripe.Customer customer, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // stripe stuff
             // create payment source if not already existent on the user
@@ -3089,7 +3111,7 @@ namespace AfterSchoolLibrary.Services
                     if (fromAccount.StripeDefaultCardId.IsEmpty())
                     {
                         fromAccount.StripeDefaultCardId = source.Id;
-                        fromAccount.Save();
+                        msgs.AddRange(fromAccount.Save(dc));
                     }
 
                     return source.Id;
@@ -3099,7 +3121,7 @@ namespace AfterSchoolLibrary.Services
             return customer.DefaultSourceId;
         }
 
-        public static string CreateStripeCardFromToken(this Account fromAccount, string stripeToken, Stripe.Customer customer, SystemMessages msgs)
+        public static string CreateStripeCardFromToken(this Account fromAccount, string stripeToken, Stripe.Customer customer, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (stripeToken.IsEmpty())
                 msgs.Add("stripe token is not valid.", MessageType.Error);
@@ -3113,7 +3135,7 @@ namespace AfterSchoolLibrary.Services
                 if (card.IsNotEmpty())
                 {
                     //set this card as default           
-                    UpdateStripeCard(fromAccount, card.Id, customer, msgs);
+                    UpdateStripeCard(fromAccount, card.Id, customer, msgs, dc);
                     return card.Id;
                 }
             }
@@ -3121,7 +3143,7 @@ namespace AfterSchoolLibrary.Services
             return customer.DefaultSourceId;
         }
 
-        public static void UpdateStripeCard(this Account fromAccount, string cardId, Stripe.Customer customer, SystemMessages msgs)
+        public static void UpdateStripeCard(this Account fromAccount, string cardId, Stripe.Customer customer, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (cardId.IsEmpty())
                 msgs.Add("stripe card is not valid.", MessageType.Error);
@@ -3135,7 +3157,7 @@ namespace AfterSchoolLibrary.Services
                 
                 //set this card id to account, which will work as a default card                
                 fromAccount.StripeDefaultCardId = cardId;
-                fromAccount.Save();
+                msgs.AddRange(fromAccount.Save(dc));
             }
         }
 
@@ -3214,7 +3236,8 @@ namespace AfterSchoolLibrary.Services
             if (msgs.HasNoErrors())
             {
                 var charge = AccountService.CreateStripeChargeDuringCheckout(checkoutObject, msgs, dc);
-                checkoutObject.StripeChargeId = charge.Id;
+                if (charge.IsNotEmpty() && charge.Id.IsNotEmpty())
+                    checkoutObject.StripeChargeId = charge.Id;
             }
         }
 
@@ -3268,30 +3291,7 @@ namespace AfterSchoolLibrary.Services
 
             if (registrant.IsNotEmpty())
             {
-                // TODO: this is problematic, but a little better now
-                // you really don't know this is the amount paid, but it works for now
-                // var amountPaid = checkoutObject.TuitionCostNoFees;
-
-                // -- should be fixed now
-                // why is this being passed with no fees?
-                var amountPaid = checkoutObject.GetTotalCostToPurchaseTodayNoFees(msgs, dc);
-
-                if (checkoutObject.PostPayPlan.IsNotEmpty())
-                    amountPaid = checkoutObject.GetPostPayPlanCostTodayWithFees();
-
-                if (checkoutObject.OverrideAmount.HasValue)
-                    amountPaid = checkoutObject.OverrideAmount.Value;
-
-                // need to track a payment for each activity/activitygroup
-                checkoutObject.ParticipationObject.AddPayment(
-                    amount: amountPaid,
-                    registrant: registrant,
-                    transaction: transaction,
-                    registrantSubscriptionPlan: checkoutObject.RegistrantSubscriptionPlan,
-                    createDate: checkoutObject.Date,
-                    loggedInUser: loggedInUser,
-                    msgs: msgs,
-                    dc: dc);
+                registrant.ProcessActivityPayment(checkoutObject, transaction, loggedInUser, msgs, dc);
 
                 // if successful payment and reserved pending payment then it should be reserved
                 // TODO: Needs review!!
@@ -3303,8 +3303,8 @@ namespace AfterSchoolLibrary.Services
                         registrant.ID.Value,
                         msgs,
                         dc);
-
-                    if (ra.IsNotEmpty() && ra.AssignmentTypeId != RegistrationAssignmentType.Reserved)
+                    
+                    if (ra.IsNotEmpty() && !ra.IsAssigned(RegistrationAssignmentType.Reserved))                    
                         ra.ChangeSeatAssignment(RegistrationAssignmentType.Reserved, loggedInUser, msgs, dc);
                 }
             }
