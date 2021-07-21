@@ -14,6 +14,8 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         [HttpPost]
         public IHttpActionResult Updated([FromBody] dynamic json)
         {
+            AfterSchoolLibrary.Helpers.Utilities.SystemLog("StripeController Called.");
+
             var msgs = new SystemMessages();
             try
             {

@@ -14,7 +14,7 @@ namespace AfterSchool
             config.Routes.MapHttpRoute(
                 name: "WebHooks",
                 routeTemplate: "webhooks/{controller}/{id}",
-                defaults: new { id = RouteParameter.Optional }
+                defaults: new { id = RouteParameter.Optional, id2 = RouteParameter.Optional }
             );
 
             config.Routes.MapHttpRoute(
