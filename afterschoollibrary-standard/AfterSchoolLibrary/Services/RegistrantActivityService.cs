@@ -348,7 +348,8 @@ namespace AfterSchoolLibrary.Services
             return registrantActivity.AssignmentTypeId.In(new List<RegistrationAssignmentType>() {
                 RegistrationAssignmentType.Reserved,
                 RegistrationAssignmentType.ReservedPendingParentalConsent,
-                RegistrationAssignmentType.ReservedPendingPayment
+                RegistrationAssignmentType.ReservedPendingPayment,
+                RegistrationAssignmentType.Applied,
             });
         }
     }
