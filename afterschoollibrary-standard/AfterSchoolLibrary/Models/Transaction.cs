@@ -1084,7 +1084,37 @@ namespace AfterSchoolLibrary.Models
                 return results.Rows[0][0].ToString().ToDecimal();
 
             return 0;
-        }       
+        }
+
+        public static decimal GetTotalConvenienceFeesReceivedByBillerAccount(int BillerAccountId, PaymentType? paymentType, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+            dq.SelectParameters.Clear();
+
+            var sp = new SelectParameter(ObjectMap["Amount"]);
+            sp.Function = $"ISNULL(SUM({ObjectMap["ConvenienceFeeCharged"].ParameterFullName}), 0)";
+            dq.SelectParameters.Add(sp);
+
+            dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId);
+            dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted);
+
+            if (paymentType.HasValue)
+                dq.Criterias.Add(ObjectMap["PaymentTypeId"], (int)paymentType.Value);
+
+            if (startDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+
+            if (endDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+            var results = dq.Select(msgs);
+            if (results.Rows.Any())
+                return results.Rows[0][0].ToString().ToDecimal();
+
+            return 0;
+        }
 
         public static decimal GetTotalAmountPaidByPayerAccount(int PayerAccountId, string search, PaymentSourceType? paymentSourceType, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {

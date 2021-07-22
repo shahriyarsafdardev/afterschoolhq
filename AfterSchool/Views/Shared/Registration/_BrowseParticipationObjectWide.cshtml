@@ -125,19 +125,10 @@
                         </span>
                         <br />
                     }
-                    @if (Model.RestrictByGrade())
-                    {
-                        <span>
-                            Grades: @ParticipationObjectUI.PrintGradeLevels(Model) 
-                        </span>
-
-                    }
-                    else
-                    {
-                        <span>
-                            Ages: @ParticipationObjectUI.PrintAges(Model)
-                        </span>
-                    }
+                    
+                    <span>
+                        @ParticipationObjectUI.PrintAgeGradeRestrictions(Model)
+                    </span>
 
                     <br />
                     <span>
