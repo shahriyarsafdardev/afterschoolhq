@@ -1676,7 +1676,7 @@ namespace AfterSchoolLibrary.Services
             var form = FormService.GetOrCreateAfterSchoolAccountTemplateForm(msgs, dc);
 
             if (form.AccountId != formOwner.ID)
-                form = form.Copy(loggedInUser.ID.Value, formOwner.ID.Value, "Standard Reg Form", msgs, dc);
+                form = form.Copy(loggedInUser.ID.Value, formOwner.ID.Value, FormType.NotSet , "Standard Reg Form", msgs, dc);
 
             msgs.AddRange(formOwner.SetDefaultForm(form, loggedInUser, dc));
 
@@ -1714,7 +1714,7 @@ namespace AfterSchoolLibrary.Services
             var form = FormService.GetOrCreateAfterSchoolAccountInterestForm(msgs, dc);
 
             if (form.AccountId != formOwner.ID)
-                form = form.Copy(loggedInUser.ID.Value, formOwner.ID.Value, "Interest Form", msgs, dc);
+                form = form.Copy(loggedInUser.ID.Value, formOwner.ID.Value, FormType.Registration, "Interest Form", msgs, dc);
 
             msgs.AddRange(formOwner.SetInterestForm(form, loggedInUser, dc));
 
