@@ -1063,7 +1063,6 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var canProcessPayments = currentAccount.CanProcessPayments(msgs);
 
-
             ViewBag.Messages = msgs;
             ViewBag.Account = currentAccount;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
