@@ -139,8 +139,7 @@ namespace AfterSchoolLibraryTests.Tests
                 {
                     case RegistrationAssignmentType.NotSet:
                     case RegistrationAssignmentType.Withdrawn:
-                    case RegistrationAssignmentType.Declined:
-                    case RegistrationAssignmentType.Applied:
+                    case RegistrationAssignmentType.Declined:                    
                     case RegistrationAssignmentType.WaitingList:
                     case RegistrationAssignmentType.Invited:
                     case RegistrationAssignmentType.Interested:
@@ -148,6 +147,7 @@ namespace AfterSchoolLibraryTests.Tests
                         break;
 
                     case RegistrationAssignmentType.Reserved:
+                    case RegistrationAssignmentType.Applied:
                     case RegistrationAssignmentType.ReservedPendingPayment:
                     case RegistrationAssignmentType.ReservedPendingParentalConsent:
                         Assert.True(registrantActivity.IsSendInvoiceEnabled());
