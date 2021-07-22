@@ -769,8 +769,8 @@ namespace AfterSchoolLibraryTests.Tests
             msgs.AddRange(activity.Save(dc));
 
             // Act
-            var expectedById = account.GetActivity(activity.ID.Value, msgs, dc);
-            var expectedByUid = account.GetActivity(activity.Uid, msgs, dc);
+            var expectedById = schoolAccount.GetActivity(activity.ID.Value, msgs, dc);
+            var expectedByUid = schoolAccount.GetActivity(activity.Uid, msgs, dc);
 
             // Assert
             Assert.Equal(expected: expectedById.ID, actual: activity.ID);
@@ -795,17 +795,12 @@ namespace AfterSchoolLibraryTests.Tests
             msgs.AddRange(activity.Save(dc));
 
             // Act
-            var expectedById = account.GetActivity(activity.ID.Value, msgs, dc);
-            var expectedByUid = account.GetActivity(activity.Uid, msgs, dc);
+            var expectedById = schoolAccount.GetActivity(activity.ID.Value, msgs, dc);
+            var expectedByUid = schoolAccount.GetActivity(activity.Uid, msgs, dc);
 
             // Assert
-            Assert.Equal(expected: expectedById.ID, actual: activity.ID);
-            Assert.Equal(expected: expectedById.Uid, actual: activity.Uid);
-            Assert.Equal(expected: expectedById.Name, actual: activity.Name);
-
-            Assert.Equal(expected: expectedByUid.ID, actual: activity.ID);
-            Assert.Equal(expected: expectedByUid.Uid, actual: activity.Uid);
-            Assert.Equal(expected: expectedByUid.Name, actual: activity.Name);
+            Assert.Null(expectedById);
+            Assert.Null(expectedByUid);
         }
 
         [Fact]
