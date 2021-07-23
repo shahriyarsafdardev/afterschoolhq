@@ -344,6 +344,27 @@ namespace AfterSchoolLibrary.Services
             return 0;
         }
 
+        public static bool IsAmountRefundable(this Transaction transaction, decimal amount, bool allowFullAmountRefund = false, bool isPartialRefundWithConvenienceFee = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return amount >= 1 && amount <= transaction.GetRefundableAmount(allowFullAmountRefund, isPartialRefundWithConvenienceFee, msgs, dc);
+        }
+
+        public static decimal GetRefundableAmount(this Transaction transaction, bool allowFullAmountRefund = false, bool isPartialRefundWithConvenienceFee = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (transaction.IsCharge())
+            {
+                if (allowFullAmountRefund)
+                    return transaction.GetPayerAmount() - transaction.GetRefundedAmountAHQ(msgs, dc);
+
+                if (isPartialRefundWithConvenienceFee)
+                    return transaction.GetParentRefundableAmount(msgs, dc);
+
+                return transaction.GetBillerPayout(msgs, dc) + transaction.GetFeesChargedToBiller() - transaction.GetRefundedAmountAHQ(msgs, dc);
+            }
+
+            return 0;
+        }
+
         public static bool HasRefundableAmount(this Transaction transaction, bool allowFullAmountRefund = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return transaction.GetRefundableAmount(allowFullAmountRefund, msgs, dc) > 0;
@@ -359,7 +380,7 @@ namespace AfterSchoolLibrary.Services
             return true; // transaction.CreateDate.Value.IsAfter(DateTime.UtcNow.AddDays(-2));
         }
 
-        public static decimal GetParentRefundableAmount(this Transaction transaction)
+        public static decimal GetParentRefundableAmount(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var amount = transaction.GetPayerAmount();
 
@@ -370,7 +391,7 @@ namespace AfterSchoolLibrary.Services
                 amount -= transaction.PaymentTypeFeeCharged.Value;
 
             //partial refund, if any then deduct that too.
-            var refunded = transaction.GetRefundedAmount();
+            var refunded = transaction.GetRefundedAmount(msgs, dc);
             if (refunded.IsNotEmpty())
                 amount -= refunded;
 
@@ -576,7 +597,7 @@ namespace AfterSchoolLibrary.Services
         {
             RefundRequest request = null;
 
-            if (!transaction.IsAmountRefundable(refundAmount, refundRequestStatus == RefundRequestStatus.RequestedByParent, msgs))
+            if (!transaction.IsAmountRefundable(refundAmount, refundRequestStatus == RefundRequestStatus.RequestedByParent, true, msgs, dc))
                 msgs.Add("Amount is not refundable", MessageType.UserError);
 
             if (msgs.HasNoErrors())

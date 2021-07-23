@@ -1699,7 +1699,7 @@ namespace AfterSchoolLibrary.Services
             var form = FormService.GetOrCreateAfterSchoolAccountTemplateForm(msgs, dc);
 
             if (form.AccountId != formOwner.ID)
-                form = form.Copy(loggedInUser.ID.Value, formOwner.ID.Value, "Standard Reg Form", msgs, dc);
+                form = form.Copy(loggedInUser.ID.Value, formOwner.ID.Value, FormType.NotSet , "Standard Reg Form", msgs, dc);
 
             msgs.AddRange(formOwner.SetDefaultForm(form, loggedInUser, dc));
 
@@ -1737,7 +1737,7 @@ namespace AfterSchoolLibrary.Services
             var form = FormService.GetOrCreateAfterSchoolAccountInterestForm(msgs, dc);
 
             if (form.AccountId != formOwner.ID)
-                form = form.Copy(loggedInUser.ID.Value, formOwner.ID.Value, "Interest Form", msgs, dc);
+                form = form.Copy(loggedInUser.ID.Value, formOwner.ID.Value, FormType.Registration, "Interest Form", msgs, dc);
 
             msgs.AddRange(formOwner.SetInterestForm(form, loggedInUser, dc));
 
@@ -2903,6 +2903,40 @@ namespace AfterSchoolLibrary.Services
                     totalDebits;
         }
 
+        public static decimal GetMaxAmountAvailableForRefund(this Account account, string search, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var totalPayoutAmount = account.GetTotalPayoutAmount(search, null, startDate, endDate, msgs, dc);
+
+            var totalAmountBilledACH = account.GetTotalAmountBilledOut(
+                                        search,
+                                        PaymentSourceType.AfterSchoolPlatform,
+                                        PaymentType.ACH,
+                                        startDate,
+                                        endDate,
+                                        msgs,
+                                        dc);
+
+            var totalAmountBilledCredit = account.GetTotalAmountBilledOut(
+                                            search,
+                                            PaymentSourceType.AfterSchoolPlatform,
+                                            PaymentType.CreditCard,
+                                            startDate,
+                                            endDate,
+                                            msgs,
+                                            dc);
+
+            var totalConvenienceFeesReceived = account.GetTotalConvenienceFeesReceivedAsBiller(null, startDate, endDate, msgs, dc);
+            var totalRefunds = account.GetTotalAmountRefundedAHQ(search, true, startDate, endDate, msgs, dc);
+            var totalRefundManual = account.GetTotalAmountRefundedManually(search, startDate, endDate, msgs, dc);
+
+            return totalAmountBilledACH +
+                    totalAmountBilledCredit +
+                    totalConvenienceFeesReceived -
+                    totalPayoutAmount - 
+                    totalRefunds -
+                    totalRefundManual;
+        }
+
         public static int GetPayoutCount(this Account account, PayoutStatus? payoutStatus, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Payout.GetCountByAccountId(account.ID.Value, payoutStatus, startDate, endDate, msgs, dc);
@@ -3797,9 +3831,14 @@ namespace AfterSchoolLibrary.Services
         public static decimal GetTotalFeesPaidAsBiller(this Account account, string search, PaymentType? paymentType, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Transaction.GetTotalFeesPaidByBillerAccount(account.ID.Value, search, paymentType, startDate, endDate, false, msgs, dc);
+        }        
+
+        public static decimal GetTotalConvenienceFeesReceivedAsBiller(this Account account, PaymentType? paymentType, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.GetTotalConvenienceFeesReceivedByBillerAccount(account.ID.Value, paymentType, startDate, endDate, false, msgs, dc);
         }
 
-        public static decimal GetTotalAmountRefunded(this Account account, string search, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalAmountRefunded(this Account account, string search, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, search, null, startDate, endDate, false, msgs, dc) -        
                     Transaction.GetTotalConvenienceFeesNotPaidByPayerAccount(account.ID.Value, search, startDate, endDate, false, msgs, dc) -
