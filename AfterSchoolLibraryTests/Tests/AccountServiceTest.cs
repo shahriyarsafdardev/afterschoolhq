@@ -715,6 +715,16 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         [Fact]
+        public void GetActivityByIDFailingTest()
+        {
+            // Act
+            var expected = account.GetActivity(84930248, msgs, dc);
+
+            // Assert
+            Assert.Null(expected);
+        }
+
+        [Fact]
         public void GetActivityByUIDTest()
         {
             // Arrange
@@ -730,6 +740,23 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         [Fact]
+        public void GetActivityByUIDFailingTest()
+        {
+            try
+            {
+                // Act
+                var expected = account.GetActivity(Guid.NewGuid(), msgs, dc);
+
+                // Assert
+                Assert.Null(expected);
+            }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [Fact]
         public void GetActivityByLocationHostAccountTest()
         {
             // Arrange
@@ -742,8 +769,8 @@ namespace AfterSchoolLibraryTests.Tests
             msgs.AddRange(activity.Save(dc));
 
             // Act
-            var expectedById = account.GetActivity(activity.ID.Value, msgs, dc);
-            var expectedByUid = account.GetActivity(activity.Uid, msgs, dc);
+            var expectedById = schoolAccount.GetActivity(activity.ID.Value, msgs, dc);
+            var expectedByUid = schoolAccount.GetActivity(activity.Uid, msgs, dc);
 
             // Assert
             Assert.Equal(expected: expectedById.ID, actual: activity.ID);
@@ -753,6 +780,27 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(expected: expectedByUid.ID, actual: activity.ID);
             Assert.Equal(expected: expectedByUid.Uid, actual: activity.Uid);
             Assert.Equal(expected: expectedByUid.Name, actual: activity.Name);
+        }
+
+        [Fact]
+        public void GetActivityByLocationHostAccountFailingTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var schoolWebUser = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolWebUser, msgs, dc);
+            var location = LocationFactory.Create(msgs, dc);
+
+            activity.LocationId = location.ID.Value;
+            msgs.AddRange(activity.Save(dc));
+
+            // Act
+            var expectedById = schoolAccount.GetActivity(activity.ID.Value, msgs, dc);
+            var expectedByUid = schoolAccount.GetActivity(activity.Uid, msgs, dc);
+
+            // Assert
+            Assert.Null(expectedById);
+            Assert.Null(expectedByUid);
         }
 
         [Fact]
