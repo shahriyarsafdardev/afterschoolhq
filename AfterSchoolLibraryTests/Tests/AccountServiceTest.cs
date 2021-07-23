@@ -712,6 +712,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(expected: expected.ID, actual: activity.ID);
             Assert.Equal(expected: expected.Uid, actual: activity.Uid);
             Assert.Equal(expected: expected.Name, actual: activity.Name);
+            Assert.True(msgs.HasNoErrors());
         }
 
         [Fact]
@@ -722,6 +723,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             // Assert
             Assert.Null(expected);
+            Assert.True(msgs.HasNoErrors());
         }
 
         [Fact]
@@ -737,6 +739,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(expected: expected.ID, actual: activity.ID);
             Assert.Equal(expected: expected.Uid, actual: activity.Uid);
             Assert.Equal(expected: expected.Name, actual: activity.Name);
+            Assert.True(msgs.HasNoErrors());
         }
 
         [Fact]
@@ -749,6 +752,7 @@ namespace AfterSchoolLibraryTests.Tests
 
                 // Assert
                 Assert.Null(expected);
+                Assert.True(msgs.HasNoErrors());
             }
             catch(Exception ex)
             {
@@ -780,6 +784,8 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(expected: expectedByUid.ID, actual: activity.ID);
             Assert.Equal(expected: expectedByUid.Uid, actual: activity.Uid);
             Assert.Equal(expected: expectedByUid.Name, actual: activity.Name);
+
+            Assert.True(msgs.HasNoErrors());
         }
 
         [Fact]
@@ -801,6 +807,94 @@ namespace AfterSchoolLibraryTests.Tests
             // Assert
             Assert.Null(expectedById);
             Assert.Null(expectedByUid);
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void GetHostedActivityByIdTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var schoolWebUser = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolWebUser, msgs, dc);
+            var location = LocationFactory.Create(schoolAccount, msgs, dc);
+
+            activity.LocationId = location.ID.Value;
+            msgs.AddRange(activity.Save(dc));
+
+            // Act
+            var expectedById = schoolAccount.GetHostedActivity(activity.ID.Value, msgs, dc);
+            var expectedByUid = schoolAccount.GetHostedActivity(activity.Uid, msgs, dc);
+
+            // Assert
+            Assert.Equal(expected: expectedById.ID, actual: activity.ID);
+            Assert.Equal(expected: expectedById.Uid, actual: activity.Uid);
+            Assert.Equal(expected: expectedById.Name, actual: activity.Name);
+
+            Assert.Equal(expected: expectedByUid.ID, actual: activity.ID);
+            Assert.Equal(expected: expectedByUid.Uid, actual: activity.Uid);
+            Assert.Equal(expected: expectedByUid.Name, actual: activity.Name);
+
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void GetHostedActivityByIdFailingTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var schoolWebUser = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolWebUser, msgs, dc);
+            var location = LocationFactory.Create(schoolAccount, msgs, dc);
+
+            activity.LocationId = location.ID.Value;
+            msgs.AddRange(activity.Save(dc));
+
+            // Act
+            var expectedById = schoolAccount.GetHostedActivity(94378, msgs, dc);
+            var expectedByUid = schoolAccount.GetHostedActivity(Guid.NewGuid(), msgs, dc);
+
+            // Assert
+            Assert.Null(expectedById);
+            Assert.Null(expectedByUid);
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void GetHostedActivityByActivityTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var schoolWebUser = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolWebUser, msgs, dc);
+            var location = LocationFactory.Create(schoolAccount, msgs, dc);
+
+            activity.LocationId = location.ID.Value;
+            msgs.AddRange(activity.Save(dc));
+
+            // Act
+            var expected = schoolAccount.GetHostedActivity(activity, msgs, dc);
+
+            // Assert
+            Assert.Equal(expected: expected.ID, actual: activity.ID);
+            Assert.Equal(expected: expected.Uid, actual: activity.Uid);
+            Assert.Equal(expected: expected.Name, actual: activity.Name);
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void GetHostedActivityByActivityFailingTest()
+        {
+            // Arrange
+            var schoolWebUser = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolWebUser, msgs, dc);
+
+            // Act
+            var expected = schoolAccount.GetHostedActivity(null, msgs, dc);
+
+            // Assert
+            Assert.Null(expected);
+            Assert.True(msgs.HasNoErrors());
         }
 
         [Fact]
