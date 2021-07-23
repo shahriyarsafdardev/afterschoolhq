@@ -712,6 +712,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(expected: expected.ID, actual: activity.ID);
             Assert.Equal(expected: expected.Uid, actual: activity.Uid);
             Assert.Equal(expected: expected.Name, actual: activity.Name);
+            Assert.True(msgs.HasNoErrors());
         }
 
         [Fact]
@@ -722,6 +723,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             // Assert
             Assert.Null(expected);
+            Assert.True(msgs.HasNoErrors());
         }
 
         [Fact]
@@ -737,6 +739,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(expected: expected.ID, actual: activity.ID);
             Assert.Equal(expected: expected.Uid, actual: activity.Uid);
             Assert.Equal(expected: expected.Name, actual: activity.Name);
+            Assert.True(msgs.HasNoErrors());
         }
 
         [Fact]
@@ -749,6 +752,7 @@ namespace AfterSchoolLibraryTests.Tests
 
                 // Assert
                 Assert.Null(expected);
+                Assert.True(msgs.HasNoErrors());
             }
             catch(Exception ex)
             {
@@ -780,6 +784,8 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(expected: expectedByUid.ID, actual: activity.ID);
             Assert.Equal(expected: expectedByUid.Uid, actual: activity.Uid);
             Assert.Equal(expected: expectedByUid.Name, actual: activity.Name);
+
+            Assert.True(msgs.HasNoErrors());
         }
 
         [Fact]
@@ -801,6 +807,7 @@ namespace AfterSchoolLibraryTests.Tests
             // Assert
             Assert.Null(expectedById);
             Assert.Null(expectedByUid);
+            Assert.True(msgs.HasNoErrors());
         }
 
         [Fact]
@@ -827,6 +834,8 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(expected: expectedByUid.ID, actual: activity.ID);
             Assert.Equal(expected: expectedByUid.Uid, actual: activity.Uid);
             Assert.Equal(expected: expectedByUid.Name, actual: activity.Name);
+
+            Assert.True(msgs.HasNoErrors());
         }
 
         [Fact]
@@ -848,6 +857,7 @@ namespace AfterSchoolLibraryTests.Tests
             // Assert
             Assert.Null(expectedById);
             Assert.Null(expectedByUid);
+            Assert.True(msgs.HasNoErrors());
         }
 
         [Fact]
@@ -869,6 +879,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(expected: expected.ID, actual: activity.ID);
             Assert.Equal(expected: expected.Uid, actual: activity.Uid);
             Assert.Equal(expected: expected.Name, actual: activity.Name);
+            Assert.True(msgs.HasNoErrors());
         }
 
         [Fact]
@@ -883,6 +894,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             // Assert
             Assert.Null(expected);
+            Assert.True(msgs.HasNoErrors());
         }
 
         [Fact]
