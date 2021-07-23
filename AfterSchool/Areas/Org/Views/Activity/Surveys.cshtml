@@ -1,0 +1,54 @@
+﻿@model Activity
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+}
+@{Html.RenderPartial("OrgAccountHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model); }
+    <div class="panel panel-default">
+        <div class="panel-body surveypanelpadding">
+            <div class="row">
+                <div class="col-lg-6">
+                   <div style="font-size:22px">@Model.Name </div>
+                   <div style="font-size:14px; color:#B2B2B4">@Model.AccountName</div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="pull-right">
+                        <a href="@Url.Action("newsurvey", "activity", new { id = Model.Uid })" class="btn btn-success surveybtn">Send New Survey</a>
+                    </div>
+                </div>
+            </div>
+            <div style="clear:both"></div>
+            <div class="margin-t-35">
+                <table class="table surveyTable">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Survey Name</th>
+                            <th>Sent By</th>
+                            <th>Date Sent</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <a href="javascript:void(0)">View</a>
+                            </td>
+                            <td>
+                                Daily Reflection
+                            </td>
+                            <td>
+                                Margo Wilson
+                            </td>
+                            <td>
+
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

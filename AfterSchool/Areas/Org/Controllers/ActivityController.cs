@@ -1927,6 +1927,37 @@ namespace AfterSchool.Areas.Org.Controllers
         }
         #endregion
 
+        #region Surveys
+
+        public ActionResult Surveys(string id)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+
+            return View(activity);
+        }
+
+
+        public ActionResult NewSurvey(string id)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+
+            return View(activity);
+        }
+
+        #endregion
+
         [HttpGet]
         public ActionResult FinalizeRegistration(string id, string atype)
         {

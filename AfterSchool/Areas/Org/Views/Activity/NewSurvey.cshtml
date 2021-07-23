@@ -1,0 +1,27 @@
+﻿@model Activity
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+}
+@{Html.RenderPartial("OrgAccountHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model); }
+    <div class="panel panel-default">
+        <div class="panel-body surveypanelpadding">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div style="font-size:22px">@Model.Name</div>
+                    <div style="font-size:14px; color:#B2B2B4">@Model.AccountName</div>
+                </div>
+            </div>
+            <div style="clear:both"></div>
+            <div class="row">
+                <div class="col-lg-6">
+
+                </div>
+            </div>
+        </div>
+     </div>
+</div>
+
