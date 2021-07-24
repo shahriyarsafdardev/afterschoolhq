@@ -2297,7 +2297,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult RequestToPublish(string id)
+        public ActionResult RequestToPublish(string id, bool isFromActivityHome = false)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
@@ -2321,6 +2321,10 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity);
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.IsFullScreen = isNewActivity;
+
+            if (isFromActivityHome)
+                return Redirect(activity.ShortHomePageUrl);
+
             return View("publishdetail", activity);
         }
 
