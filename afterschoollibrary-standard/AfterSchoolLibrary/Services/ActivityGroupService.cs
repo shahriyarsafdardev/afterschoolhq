@@ -294,7 +294,8 @@ namespace AfterSchoolLibrary.Services
                                 var newForm = defaultForm.Copy(
                                     loggedInUser.ID.Value,
                                     account.ID.Value,
-                                    (group.Name + " Form").MaxChars(100, "..."),
+                                    FormType.NotSet,
+                                    (group.Name + " Form").MaxChars(100, "..."),                                    
                                     amsgs,
                                     adc);
                                 group.FormId = newForm.ID;

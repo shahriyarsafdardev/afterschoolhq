@@ -1090,34 +1090,5 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.True(ActivityService.SendRegistrationSummaryReport(activity.ID.Value,"test", dc).HasNoErrors());
         }
-
-        [Fact]
-        public void IsPublicallyViewableTest()
-        {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
-
-            activity.Publish(user, msgs, dc);
-
-            Assert.True(activity.IsPubliclyViewable);
-            Assert.True(msgs.HasNoErrors());
-
-        }
-
-        [Fact]
-        public void IsPublicallyViewableFailingTest()
-        {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
-
-            msgs.AddRange(activity.MoveToArchive(user.ID.Value, dc));
-            activity.Publish(user, msgs, dc);
-
-            Assert.False(activity.IsPubliclyViewable);
-            Assert.True(msgs.HasNoErrors());
-
-        }
     }
 }
