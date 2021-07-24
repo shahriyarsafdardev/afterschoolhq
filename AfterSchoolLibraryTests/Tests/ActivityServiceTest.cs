@@ -261,6 +261,30 @@ namespace AfterSchoolLibraryTests.Tests
             activity.SetProvider(account, schoolUser, msgs, dc);
 
             Assert.Equal(activity.ProviderAccountId, account.ID);
+        }
+
+        [Fact]
+        public void SetLocationTest()
+        {
+            var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
+            var location = LocationFactory.Create(ActivityOwnerAccount, msgs, dc);
+
+            activity.SetLocation(location, LoggedInUser, msgs, dc);
+
+            Assert.Equal(location.ID.Value, activity.LocationId.Value);
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void GetLocationTest()
+        {
+            var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
+            var location = LocationFactory.Create(ActivityOwnerAccount, msgs, dc);
+
+            activity.SetLocation(location, LoggedInUser, msgs, dc);
+            var activityLocation = activity.GetLocation(msgs, dc);
+
+            Assert.Equal(location.ID.Value, activityLocation.ID.Value);
             Assert.True(msgs.HasNoErrors());
         }
 

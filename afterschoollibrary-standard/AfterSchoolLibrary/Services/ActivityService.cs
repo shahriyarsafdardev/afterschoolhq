@@ -119,11 +119,22 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static Location GetLocation(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {            
+        {
             if (activity.LocationId.HasValue)
                 return Location.Load(activity.LocationId.Value, msgs, dc);
 
             return null;
+        }
+
+        public static void SetLocation(this Activity activity, Location location, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (activity.IsNotEmpty() && location.IsNotEmpty() && location.ID.HasValue)
+            {
+                activity.LocationId = location.ID;
+                activity.LastModifiedDate = DateTime.UtcNow;
+                activity.LastModifiedBy = loggedInUser.ID;
+                msgs.AddRange(activity.Save(dc));
+            }
         }
 
         public static ParticipationObject GetParticipationObject(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
