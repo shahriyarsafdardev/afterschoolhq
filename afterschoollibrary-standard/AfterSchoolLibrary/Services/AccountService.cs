@@ -282,7 +282,7 @@ namespace AfterSchoolLibrary.Services
 
             activities.AddRange(
                 Activity.LoadByProviderAccountId(account.ID.Value, msgs, dc)
-                    .Where(activity => activity.IsOpenUpcomingOrRecentlyClosed(msgs, dc))
+                    .Where(activity => activity.IsOpenUpcomingOrRecentlyClosed(msgs, dc) && activity.IsPubliclyViewable)
             );
 
             return activities.DistinctBy(activity => activity.ID).ToList();
@@ -301,7 +301,7 @@ namespace AfterSchoolLibrary.Services
                 );
             }            
 
-            return activities;
+            return activities.DistinctBy(x => x.ID.Value).ToList();
         }
 
         public static List<ActivityForm> GetActivityForms(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -733,7 +733,7 @@ namespace AfterSchoolLibrary.Services
             var periods = account.GetOpenRegistrationPeriods(msgs, dc);
             periods.AddRange(account.GetUpcomingRegistrationPeriods(msgs, dc));
             periods.AddRange(account.GetRecentlyClosedRegistrationPeriods(msgs, dc));
-            return periods;
+            return periods.DistinctBy(x => x.ID).ToList();
         }
 
         #endregion
