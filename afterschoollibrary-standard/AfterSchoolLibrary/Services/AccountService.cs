@@ -733,8 +733,7 @@ namespace AfterSchoolLibrary.Services
             var periods = account.GetOpenRegistrationPeriods(msgs, dc);
             periods.AddRange(account.GetUpcomingRegistrationPeriods(msgs, dc));
             periods.AddRange(account.GetRecentlyClosedRegistrationPeriods(msgs, dc));
-            periods.DistinctBy(x => x.ID).ToList();
-            return periods;
+            return periods.DistinctBy(x => x.ID).ToList();
         }
 
         #endregion
