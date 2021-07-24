@@ -16,11 +16,9 @@ namespace AfterSchoolLibraryTests.Tests
     {
         private WebUser user { get; set; }
         private Account account { get; set; }
-        private ITestOutputHelper outputHelper { get; set; }
 
         public AccountServiceTest(ITestOutputHelper output) : base(output)
         {
-            outputHelper = output;
             user = WebUserFactory.Create(msgs, dc);
             account = AccountFactory.Create(user, msgs, dc);
         }
