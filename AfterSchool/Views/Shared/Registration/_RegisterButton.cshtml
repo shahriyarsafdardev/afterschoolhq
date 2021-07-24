@@ -172,7 +172,8 @@ else
                 Registration Closed
             </button>
         }
-        else {
+        else 
+        {
             var anotherChildString = anotherChild ? $"Again for New Child" : "";
 
             <a href="@(IsPublished? Model.GetRegistrationPageUrl().ToString(): "javascript:void(0)")" class="@(IsPublished?"":"disabled") btn btn-register btn-block"  @IsPublished>
