@@ -322,7 +322,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     if (msgs.HasNoErrors() && !SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
                     {
                         var defaultForm = currentAccount.GetDefaultForm();
-                        var newForm = defaultForm.Copy(currentUser.ID.Value, currentAccount.ID.Value, (name + " form").MaxChars(100, "..."), msgs);
+                        var newForm = defaultForm.Copy(currentUser.ID.Value, currentAccount.ID.Value, FormType.Registration, (name + " form").MaxChars(100, "..."),  msgs);
                         if (msgs.HasNoErrors())
                         {
                             if (values.Any(m => m.Key == "form"))
@@ -1960,8 +1960,9 @@ namespace AfterSchool.Areas.Org.Controllers
                     ras = activity.GetRegistrantActivities(true);
             }
 
+            //Review: we will bring all data to provider review but we will disable those in UI so provider will have proper idea.            
             if (ras.IsEmpty())
-                ras = activity.GetRegistrantActivities();
+                ras = activity.GetRegistrantActivities(includeInvited: true, msgs); 
 
             if (rat != RegistrationAssignmentType.NotSet)
                 ras = ras.Where(x => x.AssignmentTypeId == rat).OrderBy(x => x.SeatIndex).ToList();

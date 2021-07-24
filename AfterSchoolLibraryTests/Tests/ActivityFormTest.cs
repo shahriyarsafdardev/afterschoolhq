@@ -36,6 +36,14 @@ namespace AfterSchoolLibraryTests.Tests
         {
             Assert.NotNull(Activity.Load(activity.ID.Value, dc: dc));
         }
+        [Fact]
+        public void CopyFormTest()
+        {            
+            var copyForm = form.Copy(user.ID.Value, account.ID.Value, FormType.Survey,"Test Survey Form", msgs, dc);
+
+            Assert.True(copyForm.FormTypeId == FormType.Survey);
+            Assert.True(copyForm.Name == "Test Survey Form");
+        }
         /// <summary>
         /// Gets the number of ActivityForms in the DB
         /// </summary>

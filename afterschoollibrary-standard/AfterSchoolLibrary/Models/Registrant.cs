@@ -576,6 +576,9 @@ namespace AfterSchoolLibrary.Models
 
         public string GetFirstNameLastInitial()
         {
+            if (this.FirstName.Length < 3 )
+                return $"{this.FirstName} {this.LastName.MaskString(1)}.";
+            
             return $"{this.FirstName.MaskString(Math.Max(this.FirstName.Length - 3, 3))} {this.LastName.MaskString(1)}.";
         }
 

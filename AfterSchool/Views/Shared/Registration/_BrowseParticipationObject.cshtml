@@ -70,19 +70,12 @@
                     @ParticipationObjectUI.PrintDaysOfWeekOrStartDate(Model)
                 </span>
                 &bull;
-                @if (Model.RestrictByGrade())
-                {
-                    <span>
-                        Grades: @ParticipationObjectUI.PrintGradeLevels(Model)
-                    </span>
-                }
-                else
-                {
-                    <span>
-                        Ages: @ParticipationObjectUI.PrintAges(Model);
-                    </span>
-                }
+               
+                <span>
+                    @ParticipationObjectUI.PrintAgeGradeRestrictions(Model)
+                </span>                
                 &bull;
+
                 <span class="badge badge-light-gray">
                     @ParticipationObjectUI.PrintGenderRestrictions(Model)
                 </span>

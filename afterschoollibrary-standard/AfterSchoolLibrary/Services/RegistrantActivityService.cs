@@ -280,6 +280,28 @@ namespace AfterSchoolLibrary.Services
                 dc);
         }
 
+        public static decimal GetAmountPaidByParent(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityPayment.GetAmountPaidByParentByParticipationObjectByRegistrant(
+                registrantActivity.ParticipationObjectId.Value,
+                registrantActivity.ParticipationObjectTypeId,
+                registrantActivity.RegistrantId.Value,
+                false,
+                msgs,
+                dc);
+        }
+
+        public static bool GetIsProRatedFlagByParent(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityPayment.GetIsProRatedFlagByParentByParticipationObjectByRegistrant(
+                registrantActivity.ParticipationObjectId.Value,
+                registrantActivity.ParticipationObjectTypeId,
+                registrantActivity.RegistrantId.Value,
+                false,
+                msgs,
+                dc);
+        }
+
         public static SystemMessages SendPaymentReminder(this RegistrantActivity registrantActivity)
         {
             return Helpers.EmailHelper.SendPaymentReminder(registrantActivity);
@@ -296,6 +318,39 @@ namespace AfterSchoolLibrary.Services
                 return registrantActivity.RegistrantName.IfBlank(registrantActivity.RegistrantEmail);
 
             return registrantActivity.RegistrantUid.ToString();
+        }
+
+        public static bool IsAssigned(this RegistrantActivity registrantActivity, RegistrationAssignmentType registrationAssignmentType)
+        {
+            return registrantActivity.AssignmentTypeId == registrationAssignmentType;
+        }
+
+        public static bool IsRegistrantActivityStatusAccessible(this RegistrantActivity registrantActivity)
+        {
+            return registrantActivity.AssignmentTypeId.NotIn(new List<RegistrationAssignmentType>() { 
+                RegistrationAssignmentType.NotSet,
+                RegistrationAssignmentType.Withdrawn,
+                RegistrationAssignmentType.Declined,
+                RegistrationAssignmentType.Invited });
+        }
+
+        public static bool IsWithdrawEnabled(this RegistrantActivity registrantActivity)
+        {
+            return registrantActivity.AssignmentTypeId.NotIn(new List<RegistrationAssignmentType>() {
+                RegistrationAssignmentType.NotSet,
+                RegistrationAssignmentType.Withdrawn,
+                RegistrationAssignmentType.Declined 
+            });
+        }
+
+        public static bool IsSendInvoiceEnabled(this RegistrantActivity registrantActivity)
+        {
+            return registrantActivity.AssignmentTypeId.In(new List<RegistrationAssignmentType>() {
+                RegistrationAssignmentType.Reserved,
+                RegistrationAssignmentType.ReservedPendingParentalConsent,
+                RegistrationAssignmentType.ReservedPendingPayment,
+                RegistrationAssignmentType.Applied,
+            });
         }
     }
 }
