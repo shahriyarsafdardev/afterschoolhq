@@ -30,7 +30,7 @@ namespace AfterSchoolLibraryTests
             {
                 AfterSchoolLibrary.Helpers.Utilities.InitializeApp();
 
-                if (Environment.GetEnvironmentVariable("NET_ENV", EnvironmentVariableTarget.User) == "TEST")
+                if (Environment.GetEnvironmentVariable("NET_ENV", EnvironmentVariableTarget.Process) == "TEST")
                     dc = new DatabaseConnection(Database.TestCredentials.ConnectionString);
                 else
                     dc = new DatabaseConnection(Database.LocalTestCredentials.ConnectionString);
