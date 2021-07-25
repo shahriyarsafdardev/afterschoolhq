@@ -22,7 +22,7 @@ namespace AfterSchoolLibrary.Models
 		{
 			get
 			{
-				return new DatabaseCredentials(Environment.GetEnvironmentVariable("DB_HOST", EnvironmentVariableTarget.Machine), Environment.GetEnvironmentVariable("DB_NAME", EnvironmentVariableTarget.Machine), Environment.GetEnvironmentVariable("DB_USER", EnvironmentVariableTarget.Machine), Environment.GetEnvironmentVariable("DB_PASSWORD", EnvironmentVariableTarget.Machine));
+				return new DatabaseCredentials(Environment.GetEnvironmentVariable("DB_HOST", EnvironmentVariableTarget.Process), Environment.GetEnvironmentVariable("DB_NAME", EnvironmentVariableTarget.Process), Environment.GetEnvironmentVariable("DB_USER", EnvironmentVariableTarget.Process), Environment.GetEnvironmentVariable("DB_PASSWORD", EnvironmentVariableTarget.Process));
 			}
 		}
 		public static DatabaseCredentials StagingCredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }		
