@@ -2436,7 +2436,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Unpublish(string id)
+        public ActionResult Unpublish(string id, bool isFromActivityHome = false)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -2448,8 +2448,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var mustRequestToPublish = MustRequestToPublish(activity);
             
-            if (mustRequestToPublish)
-                msgs.Add("You do not have permissions to unpublish", MessageType.UserError);
+            //if (mustRequestToPublish)
+            //    msgs.Add("You do not have permissions to unpublish", MessageType.UserError);
 
             if (msgs.HasNoErrors())
                 activity.Unpublish(currentUser, msgs);
@@ -2477,6 +2477,10 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.MustRequestToPublish = mustRequestToPublish;
             ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity);
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
+
+            if (isFromActivityHome)
+                return Redirect(activity.ShortHomePageUrl);
+
             return View("publishdetail", activity);
         }
 

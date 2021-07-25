@@ -286,13 +286,20 @@
         <button class="btn btn-default btn-activity-footer" disabled>Share</button>
         <a href="@Url.Action("editsetup", "activity", new { id = Model.Uid, area = "org" })" class="btn btn-default btn-activity-footer">Return to Edit</a>
 
-        if (canPublishActivity)
-        {
-            <a href="@Url.Action("publish", "activity", new { id = Model.Uid, isFromActivityHome = true, area = "org" })" class="btn btn-default btn-activity-footer">Publish</a>
+        if (Model.IsPublished)
+        {            
+            <a href="@Url.Action("unpublish", "activity", new { id = Model.Uid, isFromActivityHome = true, area = "org" })" class="btn btn-default btn-activity-footer">Unpublish</a>
         }
         else
         {
-            <a href="@Url.Action("requesttopublish", "activity", new { id = Model.Uid, isFromActivityHome = true, area = "org" })" class="btn btn-default btn-activity-footer">Request to Publish</a>
+            if (canPublishActivity)
+            {
+                <a href="@Url.Action("publish", "activity", new { id = Model.Uid, isFromActivityHome = true, area = "org" })" class="btn btn-default btn-activity-footer">Publish</a>
+            }
+            else
+            {
+                <a href="@Url.Action("requesttopublish", "activity", new { id = Model.Uid, isFromActivityHome = true, area = "org" })" class="btn btn-default btn-activity-footer">Request to Publish</a>
+            }
         }
     }
 
