@@ -40,7 +40,7 @@ namespace AfterSchoolLibrary.Models
             this.LoadObjectValues(ObjectMap);
 			this.Uid = Guid.NewGuid();
 			this.IsActive = false;
-			this.FormTypeId = FormType.Registration;
+			this.FormTypeId = FormType.NotSet;
 			
         }
 
