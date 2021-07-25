@@ -269,7 +269,20 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
+        public static List<Attendance> LoadByActivityIdByIsCompletedWithPaging(int ActivityId, bool IsCompleted, string orderbyParam, OrderByDirectionEnum direction, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+            dq.OrderBys.Add(orderbyParam, direction);
 
-        #endregion
-    }
+            dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
+            dq.Criterias.Add(ObjectMap["IsCompleted"], IsCompleted);
+
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+    #endregion
+}
 }

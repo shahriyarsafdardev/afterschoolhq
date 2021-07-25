@@ -1920,7 +1920,7 @@ values: NotSet, OrganizationHomeView, RegistrationFormView, RegistrationComplete
 [begin]
 type: Enum
 name: QuestionType
-values: NotSet, TextBox, TextArea, RadioList, CheckboxList, Checkbox, DropDownList, Email, Date, Number, RadioMatrix, TextBlock, FileUpload
+values: NotSet, TextBox, TextArea, RadioList, CheckboxList, Checkbox, DropDownList, Email, Date, Number, RadioMatrix, TextBlock, FileUpload, Video, Audio, Photo, Emoji, Rating
 [end]
 
 [begin]
