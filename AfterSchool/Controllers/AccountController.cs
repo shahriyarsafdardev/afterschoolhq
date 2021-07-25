@@ -2180,7 +2180,7 @@ namespace AfterSchool.Controllers
         public ActionResult GetStartedStudent(string regaccount)
         {
             // disable and redirect to get started parent (since there is no way for students to register directly
-            return RedirectToAction("GetStarted", new { regaccount });
+            return RedirectToAction("getstarted", new { regaccount });
 
             if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentAccount.AccountTypeId == AccountType.Registrant)
                 return RedirectToAction("select");
