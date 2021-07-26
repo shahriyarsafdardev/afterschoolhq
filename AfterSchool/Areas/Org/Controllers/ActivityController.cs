@@ -1957,7 +1957,7 @@ namespace AfterSchool.Areas.Org.Controllers
             LoadEditSetupViewBag(activity, activityGroup, msgs);
 
             var activityIds = new List<int>();
-            activityIds.Add(id.ToInteger());
+            activityIds.Add(activity.ID.Value);
 
             var rats = new List<RegistrationAssignmentType>();
             rats.Add(RegistrationAssignmentType.NotSet);

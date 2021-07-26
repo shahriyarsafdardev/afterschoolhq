@@ -9,7 +9,7 @@
     var showManageForms = accountPackage.HasFeature(FeatureType.ManageForms);
     var showManageFormFields = forms.Count >= maxFormCount ? false : true;
 
-    var Students = ViewBag.Students;
+    var Students = (List<Registration>)ViewBag.Students;
 }
 @{Html.RenderPartial("OrgAccountHeader");}
 
@@ -70,9 +70,10 @@
 
             <div class="row">
                 <div class="col-lg-9 col-md-9">
-                    @foreach(var student in Students)
+                    @foreach (var student in Students)
                     {
-
+                        <input id="students-@student.ID" name="@student.RegistrantName" type="checkbox" class="newCheckbox" style="margin: -5px 0px;" />
+                        <label for="students-@student.ID" class="margin-h-10 mobile-padding">@student.RegistrantName</label>
                     }
                 </div>
             </div>
