@@ -94,7 +94,7 @@
                     @{
                         Html.RenderPartial(
                         "~/Views/Shared/_SwitchButton.cshtml",
-                        Model.AllowToPayLater ? true : false,
+                        Model.AllowToPayLater,
                         new ViewDataDictionary()
                         {
                             { "checkboxname", "allowtopaylater" },
