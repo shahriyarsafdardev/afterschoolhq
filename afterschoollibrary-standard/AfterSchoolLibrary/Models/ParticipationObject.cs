@@ -645,17 +645,26 @@ namespace AfterSchoolLibrary.Models
 
         public ActivityGroup GetActivityGroup()
         {
-            return (ActivityGroup)this.Object;
+            if (IsActivityGroup())
+                return (ActivityGroup)this.Object;
+
+            return null;
         }
 
         public AccountActivityGroup GetAccountActivityGroup()
         {
-            return (AccountActivityGroup)this.Object;
+            if (IsAccountActivityGroup())
+                return (AccountActivityGroup)this.Object;
+
+            return null;
         }
 
         public Activity GetActivity()
         {
-            return (Activity)this.Object;
+            if (IsActivity())
+                return (Activity)this.Object;
+
+            return null;
         }
 
         public int? GetActivityGroupId()

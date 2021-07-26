@@ -164,42 +164,65 @@ namespace AfterSchoolLibrary.Services
 
         #region Activities
 
-        public static Activity GetActivity(this Account account, int Id, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Activity GetActivity(this Account account, int activityId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Activity activity = null;
+
             if (account.IsNotEmpty())
-                activity = Activity.LoadByIdByAccountId(Id, account.ID.Value, msgs, dc);
-            // If schools need to publish an activity for a provider who is external to the school page
-            // I can see this activity if it is hosted at my location
-            if (activity.IsEmpty())
             {
-                var locations = account.GetHostedLocations(msgs, dc);
-                var tempActivity = Activity.Load(Id, msgs, dc);
-                locations.ForEach(location => {
-                    if (tempActivity.LocationId == location.ID)
-                        activity = Activity.LoadByIdByAccountId(Id, tempActivity.AccountId.Value, msgs, dc);
-                });
+                activity = Activity.LoadByIdByAccountId(activityId, account.ID.Value, msgs, dc);
+                // If schools need to publish an activity for a provider who is external to the school page
+                // I can see this activity if it is hosted at my location
+                if (activity.IsEmpty())
+                    activity = account.GetHostedActivity(activityId, msgs, dc);
             }
+
             return activity;
         }
 
-        public static Activity GetActivity(this Account account, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Activity GetActivity(this Account account, Guid activityUid, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Activity activity = null;
+
             if (account.IsNotEmpty())
-                activity = Activity.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
-            // If schools need to publish an activity for a provider who is external to the school page
-            // I can see this activity if it is hosted at my location
-            if (activity.IsEmpty())
+            {
+                activity = Activity.LoadByUidByAccountId(activityUid, account.ID.Value, msgs, dc);
+                // If schools need to publish an activity for a provider who is external to the school page
+                // I can see this activity if it is hosted at my location
+                if (activity.IsEmpty())
+                    activity = account.GetHostedActivity(activityUid, msgs, dc);
+            }
+
+            return activity;
+        }
+
+        public static Activity GetHostedActivity(this Account account, Guid activityUid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.GetHostedActivity(Activity.LoadByUid(activityUid, msgs, dc), msgs, dc);
+        }
+
+        public static Activity GetHostedActivity(this Account account, int activityId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.GetHostedActivity(Activity.Load(activityId, msgs, dc), msgs, dc);
+        }
+
+        public static Activity GetHostedActivity(this Account account, Activity tempActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            Activity hostedActivity = null;
+
+            if (tempActivity.IsNotEmpty())
             {
                 var locations = account.GetHostedLocations(msgs, dc);
-                var tempActivity = Activity.LoadByUid(Uid, msgs, dc);
-                locations.ForEach(location => {
-                    if (tempActivity.LocationId == location.ID)
-                        activity = Activity.LoadByUidByAccountId(Uid, tempActivity.AccountId.Value, msgs, dc);
-                });
+
+                if (locations.IsNotEmpty())
+                    locations.ForEach(location =>
+                    {
+                        if (tempActivity.LocationId == location.ID)
+                            hostedActivity = tempActivity;
+                    });
             }
-            return activity;
+
+            return hostedActivity;
         }
 
         public static List<Activity> GetActivities(this Account account, List<int> ActivityIds, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -259,7 +282,7 @@ namespace AfterSchoolLibrary.Services
 
             activities.AddRange(
                 Activity.LoadByProviderAccountId(account.ID.Value, msgs, dc)
-                    .Where(activity => activity.IsOpenUpcomingOrRecentlyClosed(msgs, dc))
+                    .Where(activity => activity.IsOpenUpcomingOrRecentlyClosed(msgs, dc) && activity.IsPubliclyViewable)
             );
 
             return activities.DistinctBy(activity => activity.ID).ToList();
@@ -278,7 +301,7 @@ namespace AfterSchoolLibrary.Services
                 );
             }            
 
-            return activities;
+            return activities.DistinctBy(x => x.ID.Value).ToList();
         }
 
         public static List<ActivityForm> GetActivityForms(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -710,7 +733,7 @@ namespace AfterSchoolLibrary.Services
             var periods = account.GetOpenRegistrationPeriods(msgs, dc);
             periods.AddRange(account.GetUpcomingRegistrationPeriods(msgs, dc));
             periods.AddRange(account.GetRecentlyClosedRegistrationPeriods(msgs, dc));
-            return periods;
+            return periods.DistinctBy(x => x.ID).ToList();
         }
 
         #endregion
