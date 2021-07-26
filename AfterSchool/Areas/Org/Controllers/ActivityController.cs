@@ -2308,15 +2308,17 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var isNewActivity = Request["isnew"] == "1";
 
-            activity.RequestToPublish(SessionVariables.CurrentUser, msgs);           
+            var locationOwner = activity.GetLocationOwner(msgs);
+            activity.RequestToPublish(locationOwner, SessionVariables.CurrentUser, msgs);
 
             if (msgs.HasNoErrors())
-                if (isNewActivity)
-                    msgs.Add("Your request to publish has been submitted", MessageType.Success);            
+                if (isFromActivityHome)
+                    msgs.Add($"Your request to publish has been sent to {locationOwner.Name}", MessageType.Success);
                 else
                     msgs.Add("Activity saved successfully", MessageType.Success);
 
             ViewBag.Messages = msgs;
+            TempData["Messages"] = msgs;
             ViewBag.MustRequestToPublish = MustRequestToPublish(activity);
             ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity);
             ViewBag.IsActivityLeader = IsActivityLeader(activity);

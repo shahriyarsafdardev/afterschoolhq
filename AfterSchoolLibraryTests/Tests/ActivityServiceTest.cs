@@ -288,6 +288,22 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors());
         }
 
+        [Fact]
+        public void GetLocationOwnerTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
+            var location = LocationFactory.Create(ActivityOwnerAccount, msgs, dc);
+
+            // Act
+            activity.SetLocation(location, LoggedInUser, msgs, dc);
+            var locationOwner = activity.GetLocationOwner(msgs, dc);
+
+            // Assert
+            Assert.Equal(ActivityOwnerAccount.ID.Value, locationOwner.ID.Value);
+            Assert.True(msgs.HasNoErrors());
+        }
+
         #region Activity Copy Functionality
 
         [Fact]

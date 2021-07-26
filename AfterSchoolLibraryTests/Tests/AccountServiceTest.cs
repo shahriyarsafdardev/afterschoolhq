@@ -2298,6 +2298,40 @@ namespace AfterSchoolLibraryTests.Tests
             }
         }
 
+        [Fact]
+        public void IsApprovedAsVisitorToTest()
+        {            
+            // Arrange
+            var visitorOwner = WebUserFactory.Create(msgs, dc);
+            var visitorAccount = AccountFactory.Create(visitorOwner, msgs, dc);
+            var hostOwner = WebUserFactory.Create(msgs, dc);
+            var hostAccount = AccountFactory.Create(hostOwner, msgs, dc);
+            var accountRelationship = AccountRelationshipService.CreateNew(hostAccount, visitorAccount, ApprovalStatus.Approved, HostPermissionType.Edit, user, msgs, dc);
+
+            // Act
+            var expected = visitorAccount.IsApprovedAsVisitorTo(hostAccount: hostAccount, msgs: msgs, dc: dc);
+
+            // Assert
+            Assert.True(expected);
+        }
+
+        [Fact]
+        public void IsApprovedAsVisitorToFailingTest()
+        {
+            // Arrange
+            var visitorOwner = WebUserFactory.Create(msgs, dc);
+            var visitorAccount = AccountFactory.Create(visitorOwner, msgs, dc);
+            var hostOwner = WebUserFactory.Create(msgs, dc);
+            var hostAccount = AccountFactory.Create(hostOwner, msgs, dc);
+            var accountRelationship = AccountRelationshipService.CreateNew(hostAccount, visitorAccount, ApprovalStatus.Denied, HostPermissionType.Edit, user, msgs, dc);
+
+            // Act
+            var expected = visitorAccount.IsApprovedAsVisitorTo(hostAccount: hostAccount, msgs: msgs, dc: dc);
+
+            // Assert
+            Assert.False(expected);
+        }
+
         [Theory]
         [InlineData(100, 4, 6)]
         [InlineData(10, 1, 2)]

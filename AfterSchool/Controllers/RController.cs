@@ -348,8 +348,11 @@ namespace AfterSchool.Controllers
             if (isUnsupportedBrowser())
                 return RedirectUnsupportedBrowser();
 
-            ParticipationObject participationObject = null;
             var msgs = new SystemMessages();
+            if (TempData["Messages"] != null && ((SystemMessages)TempData["Messages"]).IsNotEmpty())
+                msgs.AddRange((SystemMessages)TempData["Messages"]);
+
+            ParticipationObject participationObject = null;            
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
             var canPublishActivity = false;
             var accountProfile = account?.GetAccountProfile(msgs);
