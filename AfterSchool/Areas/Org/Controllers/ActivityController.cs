@@ -1964,12 +1964,12 @@ namespace AfterSchool.Areas.Org.Controllers
 
 
             ViewBag.Students = currentAccount.SearchRegistrations(
-              "",
               null,
-              activityIds,
+              null,
+              null,
               ParticipationObjectType.Activity,
               RegistrationStatus.NotSet,
-              rats,
+              null,
               null,
               null,
               msgs);
