@@ -1,6 +1,13 @@
 ﻿@model Activity
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
+    var accountPackage = (AccountPackage)ViewData["AccountPackage"];
+    var forms = (List<Form>)ViewBag.Forms;
+    var manageFormsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageForms);
+    var maxFormCount = accountPackage.IsNotEmpty() ? (int)accountPackage.GetFeature(FeatureType.ManageForms).Max.Value : 0;
+    var activeForm = (ActivityForm)ViewBag.ActiveForm;
+    var showManageForms = accountPackage.HasFeature(FeatureType.ManageForms);
+    var showManageFormFields = forms.Count >= maxFormCount ? false : true;
 }
 @{Html.RenderPartial("OrgAccountHeader");}
 
@@ -17,8 +24,28 @@
             </div>
             <div style="clear:both"></div>
             <div class="row">
-                <div class="col-lg-6">
+                <div class="col-md-6" @if (!showManageForms) { <text> onclick="return showUpgradeMyPlan()" </text> }>
+                    <select name="form" id="form" class="form-control" @(activeForm.IsNotEmpty() && forms.Any(m => m.ID == activeForm.FormId) ? "required" : "") @if (!showManageForms) { <text> disabled="disabled" </text> }>
+                        @if (showManageFormFields)
+                        {
+                            <option value="0"> + New Form</option>
+                        }
 
+                        @foreach (var form in forms)
+                        {
+                            <option value="@form.ID" @(activeForm?.FormId == form.ID ? "selected=\"selected\"" : "")>@form.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    @if (showManageForms)
+                    {
+                        <a id="editForm" class="btn btn-block btn-link" href="@Url.Action("edit","form", new { id = activeForm?.ID })" target="_blank">Edit Form</a>
+                    }
+                    else
+                    {
+                        <a class="btn btn-block btn-link" href="#" onclick="return showUpgradeMyPlan('@(manageFormsPackage.Name)',@(manageFormsPackage.ID))">Edit Form</a>
+                    }
                 </div>
             </div>
         </div>

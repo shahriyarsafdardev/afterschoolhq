@@ -1952,6 +1952,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 return HttpNotFound();
 
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+            var activityGroup = activity.GetActivityGroup(currentAccount.ID.Value, msgs);
+
+            LoadEditSetupViewBag(activity, activityGroup, msgs);
 
             return View(activity);
         }
