@@ -837,3 +837,72 @@
 .surveyTable tr th {
     font-weight: bold !important;
 }
+
+.btnNewSurvey {
+    border-radius: 10px;
+    color: #00AE85;
+    border: 1px solid #00AE85;
+    padding: 10px 20px
+}
+
+.newInput {
+    border: 2px solid #D1D1D1;
+    box-sizing: border-box;
+    border-radius: 10px;
+    color: #494949;
+}
+
+.newDropDown {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: transparent;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='black' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+    background-repeat: no-repeat;
+    background-position-x: 98%;
+    background-position-y: 8px;
+}
+
+
+.newCheckbox {
+    position: relative;
+    width: 1.5em;
+    height: 1.5em;
+    color: #363839;
+    border: 1px solid #bdc1c6;
+    border-radius: 4px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    outline: 0;
+    cursor: pointer;
+    transition: background 175ms cubic-bezier(0.1, 0.1, 0.25, 1);
+}
+
+.newCheckbox::before {
+     position: absolute;
+     content: "";
+     display: block;
+     top: 0px;
+     left: 6px;
+     width: 7px;
+     height: 13px;
+     border-style: solid;
+     border-color: #fff;
+     border-width: 0 2px 2px 0;
+     transform: rotate(45deg);
+     opacity: 0;
+ }
+
+.newCheckbox:checked {
+    color: #fff;
+    border-color: #00C5A3;
+    background: #00C5A3;
+}
+
+.newCheckbox:checked::before {
+     opacity: 1;
+}
+.newCheckbox:checked ~ label::before {
+     -webkit-clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}

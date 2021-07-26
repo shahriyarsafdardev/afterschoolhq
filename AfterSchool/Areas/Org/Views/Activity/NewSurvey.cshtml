@@ -8,6 +8,8 @@
     var activeForm = (ActivityForm)ViewBag.ActiveForm;
     var showManageForms = accountPackage.HasFeature(FeatureType.ManageForms);
     var showManageFormFields = forms.Count >= maxFormCount ? false : true;
+
+    var Students = ViewBag.Students;
 }
 @{Html.RenderPartial("OrgAccountHeader");}
 
@@ -23,13 +25,9 @@
                 </div>
             </div>
             <div style="clear:both"></div>
-            <div class="row">
+            <div class="row margin-t-30">
                 <div class="col-md-6" @if (!showManageForms) { <text> onclick="return showUpgradeMyPlan()" </text> }>
-                    <select name="form" id="form" class="form-control" @(activeForm.IsNotEmpty() && forms.Any(m => m.ID == activeForm.FormId) ? "required" : "") @if (!showManageForms) { <text> disabled="disabled" </text> }>
-                        @if (showManageFormFields)
-                        {
-                            <option value="0"> + New Form</option>
-                        }
+                    <select name="form" id="form" class="form-control newDropDown newInput" @(activeForm.IsNotEmpty() && forms.Any(m => m.ID == activeForm.FormId) ? "required" : "") @if (!showManageForms) { <text> disabled="disabled" </text> }>
 
                         @foreach (var form in forms)
                         {
@@ -38,17 +36,55 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    @if (showManageForms)
+                    <a href="javascript:void(0)" class="btn btnNewSurvey">Add New Survey</a>
+                </div>
+            </div>
+            <div style="clear:both"></div>
+
+            <div class="row margin-t-10">
+                <div class="col-lg-6 col-md-6  ">
+                    <input type="text" class="form-control newInput" name="Title" placeholder="Add Title" />
+                </div>
+            </div>
+            <div style="clear:both"></div>
+
+            <div class="row margin-t-30">
+                <div class="col-lg-6">
+                    <input id="allowmultiple" name="allowmultiple" type="checkbox" class="newCheckbox" style="margin: -5px 0px;" />
+                    <label for="allowmultiple" class="margin-h-10 mobile-padding">Allow multiple submissions per person?</label>
+                </div>
+            </div>
+            <div style="clear:both"></div>
+
+            <div class="row margin-t-30">
+                <div class="col-lg-4">
+                    <input id="students" name="students" type="checkbox" class="newCheckbox" style="margin: -5px 0px;" />
+                    <label for="students" class="margin-h-10 mobile-padding">Students</label>
+                </div>
+                <div class="col-lg-4">
+                    <input type="hidden" name="selectedIndividuals" value="false" />
+                    <button class="" id="selectStudents">Select Students</button>
+                </div>
+            </div>
+            <div style="clear:both"></div>
+
+            <div class="row">
+                <div class="col-lg-9 col-md-9">
+                    @foreach(var student in Students)
                     {
-                        <a id="editForm" class="btn btn-block btn-link" href="@Url.Action("edit","form", new { id = activeForm?.ID })" target="_blank">Edit Form</a>
-                    }
-                    else
-                    {
-                        <a class="btn btn-block btn-link" href="#" onclick="return showUpgradeMyPlan('@(manageFormsPackage.Name)',@(manageFormsPackage.ID))">Edit Form</a>
+
                     }
                 </div>
             </div>
         </div>
-     </div>
+    </div>
 </div>
+
+@section scripts{
+    <script>
+        $(document).ready(function () {
+
+        })
+    </script>
+}
 

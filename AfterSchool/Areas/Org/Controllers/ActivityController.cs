@@ -1956,6 +1956,25 @@ namespace AfterSchool.Areas.Org.Controllers
 
             LoadEditSetupViewBag(activity, activityGroup, msgs);
 
+            var activityIds = new List<int>();
+            activityIds.Add(id.ToInteger());
+
+            var rats = new List<RegistrationAssignmentType>();
+            rats.Add(RegistrationAssignmentType.NotSet);
+
+
+            ViewBag.Students = currentAccount.SearchRegistrations(
+              "",
+              null,
+              activityIds,
+              ParticipationObjectType.Activity,
+              RegistrationStatus.NotSet,
+              rats,
+              null,
+              null,
+              msgs);
+
+
             return View(activity);
         }
 
