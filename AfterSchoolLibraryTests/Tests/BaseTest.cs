@@ -38,6 +38,13 @@ namespace AfterSchoolLibraryTests
                 Database.UpdateData(dc);
                 dc.BeginTransaction();
 
+                // clean up data, sometimes tests run and data is stored
+                // temp work around
+                var dq = new DatabaseQuery();
+                dq.Connection = dc;
+                var sql = "EXEC sys.sp_msforeachtable 'DELETE FROM ?'";
+                dq.ExecuteSql(sql);
+
                 // need some default data in the AfterSchool admin account in order to run certain tests
                 msgs.AddRange(AccountService.CreateAfterSchoolAccount(null, null, null, null, dc));
                 msgs.AddRange(GradeLevel.CreateDefaultGradeLevels(dc));

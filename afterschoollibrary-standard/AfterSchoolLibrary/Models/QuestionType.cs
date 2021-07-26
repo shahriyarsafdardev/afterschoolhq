@@ -12,5 +12,10 @@ public enum QuestionType
 	Number,
 	RadioMatrix,
 	TextBlock,
-	FileUpload
+	FileUpload,
+	Video,
+	Audio,
+	Photo,
+	Emoji,
+	Rating
 }

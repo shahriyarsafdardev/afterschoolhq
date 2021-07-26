@@ -9,7 +9,11 @@ namespace AfterSchoolLibrary.Helpers
         {
             var sql = $@"
             IF(OBJECT_ID('tempdb..#temp_accounts_1') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_1 END
-			IF(OBJECT_ID('tempdb..#temp_accounts_2') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_2 END";
+			IF(OBJECT_ID('tempdb..#temp_accounts_2') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_2 END
+			IF(OBJECT_ID('tempdb..#temp_accounts_3') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_3 END
+			IF(OBJECT_ID('tempdb..#temp_accounts_4') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_4 END
+			IF(OBJECT_ID('tempdb..#temp_accounts_5') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_5 END
+			IF(OBJECT_ID('tempdb..#temp_accounts_6') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_6 END";
 
             sql += $"\n";
 
@@ -214,56 +218,183 @@ namespace AfterSchoolLibrary.Helpers
             {
                 sql += $@"
             
-			SELECT *
-			INTO #temp_accounts_2
-			FROM (
-				--accounts with current activities or now enrolling
-				SELECT DISTINCT 
-					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
-					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 1 as Priority
-				FROM #temp_accounts_1 
-				WHERE 
-					IsAccountNowEnrolling = 1
-				
-				UNION ALL
+                if ((Select DISTINCT Count(DISTINCT AccountId) FROM    #temp_accounts_1  Where IsAccountNowEnrolling = 1) > {((PageNum + 1) * PageSize)})
+				   begin 
+					   if((Select DISTINCT Count(DISTINCT AccountId) FROM    #temp_accounts_1  Where IsAccountNowEnrolling = 1 AND HeaderImage is not null AND (Headline is not null AND Headline != '')) > 10)
+							begin
+								SELECT *
+								INTO #temp_accounts_2
+								FROM (SELECT DISTINCT 
+												AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+												IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 1 as Priority
+												From #temp_accounts_1 
+										Where IsAccountNowEnrolling = 1 AND HeaderImage is not null AND (Headline is not null AND Headline != '')
+								
+										) as filteredData
+									
+								SELECT DISTINCT
+									AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+									IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, Priority
+								FROM #temp_accounts_2
+								ORDER BY Priority asc
+                                OFFSET {(PageNum * PageSize)} ROWS 
+			                    FETCH {(PageNum == 0 ? "first" : "next")} {PageSize} ROWS only;
+						 end                      
 
-				-- accounts with header image or logo next
-				SELECT DISTINCT 
-					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
-					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 2 as Priority
-				FROM #temp_accounts_1 
-				WHERE 
-					AccountId NOT IN (
-						SELECT DISTINCT AccountId FROM #temp_accounts_1 
-						WHERE IsAccountNowEnrolling = 1
-					) AND (HeaderImage is not null or Logo is not null)
+					   else if ((Select Count(DISTINCT AccountId) FROM    #temp_accounts_1  Where IsAccountNowEnrolling = 1 AND HeaderImage is not null ) > {((PageNum + 1) * PageSize)})
+							begin 
+							SELECT *
+							INTO #temp_accounts_3
+							FROM(
+								 SELECT DISTINCT 
+											AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+											IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 1 as Priority
+											From #temp_accounts_1 
+									Where IsAccountNowEnrolling = 1 AND HeaderImage is not null AND (Headline is not null AND Headline != '')		
+									
+								 UNION ALL				
+								 
+								 SELECT DISTINCT 
+											AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+											IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 2 as Priority
+											From #temp_accounts_1 
+									Where IsAccountNowEnrolling = 1 AND HeaderImage is not null AND (Headline is null or Headline = '')	
+									
+									) as filteredData
 
-				UNION ALL
+                          		SELECT DISTINCT
+									AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+									IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, Priority
+								FROM #temp_accounts_3
+								ORDER BY Priority asc
+                                OFFSET {(PageNum * PageSize)} ROWS 
+			                    FETCH {(PageNum == 0 ? "first" : "next")} {PageSize} ROWS only;
+							end
+					   else if ((Select  Count(DISTINCT AccountId) FROM    #temp_accounts_1  Where IsAccountNowEnrolling = 1 AND Headline is not null  ) > {((PageNum + 1) * PageSize)})
+							begin
+							 SELECT *
+							INTO #temp_accounts_4
+							FROM(
+								SELECT DISTINCT 
+													AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+													IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 1 as Priority
+													From #temp_accounts_1 
+								   Where IsAccountNowEnrolling = 1 AND HeaderImage is not null AND (Headline is not null AND Headline != '')	
+								 UNION ALL		
+								 SELECT DISTINCT 
+											AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+											IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 2 as Priority
+											From #temp_accounts_1 
+									Where IsAccountNowEnrolling = 1 AND HeaderImage is null AND (Headline is not null AND Headline != '')								
+						   				
+																												
+							  ) as filteredData
 
-				-- all other accounts
-				SELECT DISTINCT 
-					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, 0 as IsAccountNowEnrolling, IsELearningCenter, 
-					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 3 as Priority
-				FROM #temp_accounts_1
-				WHERE
-					AccountId NOT IN (
-						SELECT DISTINCT AccountId FROM #temp_accounts_1 
-						WHERE IsAccountNowEnrolling = 1		
-					)
-					AND HeaderImage is null and Logo is null --because we already filtered this in second query, so no need of those accounts now
-			) as filteredData							
+							   SELECT DISTINCT
+									AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+									IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, Priority
+								FROM #temp_accounts_4
+								ORDER BY Priority asc
+                                OFFSET {(PageNum * PageSize)} ROWS 
+			                    FETCH {(PageNum == 0 ? "first" : "next")} {PageSize} ROWS only;
+							end
+					   else
+						   begin
+								SELECT *
+								INTO #temp_accounts_5
+								FROM(SELECT DISTINCT 
+												AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+												IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 1 as Priority
+												From #temp_accounts_1 
+										Where IsAccountNowEnrolling = 1 
+								
+								
+										) as filteredData
 
-			SELECT DISTINCT
-				AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
-				IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, Priority
-			FROM #temp_accounts_2
-			ORDER BY Priority asc
-            OFFSET {(PageNum * PageSize)} ROWS 
-			FETCH {(PageNum == 0 ? "first" : "next")} {PageSize} ROWS only;
+								SELECT DISTINCT
+									AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+									IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, Priority
+								FROM #temp_accounts_5
+								ORDER BY Priority asc
+                               OFFSET {(PageNum * PageSize)} ROWS 
+			                   FETCH {(PageNum == 0 ? "first" : "next")} {PageSize} ROWS only;
+						  end
+			     end
+				else
+				 begin
+					SELECT * INTO #temp_accounts_6 FROM
+				    (  --accounts with current activities or now enrolling and has headerimage and has headline
+					SELECT DISTINCT 
+						AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+						IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 1 as Priority
+					FROM #temp_accounts_1 
+					WHERE 
+						IsAccountNowEnrolling = 1 AND HeaderImage is not null AND (Headline is not null AND Headline != '')					
+					UNION ALL
+
+					-- accounts with now enrolling and has headerimage but not headline
+					SELECT DISTINCT 
+						AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+						IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 2 as Priority
+					FROM #temp_accounts_1 
+					WHERE 
+						IsAccountNowEnrolling = 1 AND HeaderImage is not null AND (Headline is null or Headline = '')
+					UNION ALL
+
+					-- accounts  with now enrolling and has no headerimage but headline
+					SELECT DISTINCT 
+						AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+						IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 3 as Priority
+					FROM #temp_accounts_1 
+					WHERE 
+						IsAccountNowEnrolling = 1 AND HeaderImage is null AND (Headline is not null AND Headline != '')
+
+					UNION ALL
+
+					-- accounts  with now enrolling but without headerimage and headline
+					SELECT DISTINCT 
+						AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+						IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 4 as Priority
+					FROM #temp_accounts_1 
+					WHERE 
+						IsAccountNowEnrolling = 1 AND HeaderImage is null AND (Headline is null or Headline = '')
+
+					UNION ALL
+
+
+					-- all other accounts
+					SELECT DISTINCT 
+						AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, 0 as IsAccountNowEnrolling, IsELearningCenter, 
+						IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 5 as Priority
+					FROM #temp_accounts_1
+					WHERE
+						AccountId NOT IN (
+							SELECT DISTINCT AccountId FROM #temp_accounts_1 
+							WHERE IsAccountNowEnrolling = 1		
+						)
+
+				 ) as Filterdata
+
+				 SELECT DISTINCT
+								AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+								IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, Priority
+							FROM #temp_accounts_6
+							ORDER BY Priority asc
+                   OFFSET {(PageNum * PageSize)} ROWS 
+			       FETCH {(PageNum == 0 ? "first" : "next")} {PageSize} ROWS only;
+			    end
+
+           
             
-			DROP TABLE #temp_accounts_1
-			DROP TABLE #temp_accounts_2";
+			DROP TABLE #temp_accounts_1";
 
+            sql += $@"
+            IF(OBJECT_ID('tempdb..#temp_accounts_2') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_2 END 
+			IF(OBJECT_ID('tempdb..#temp_accounts_3') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_3 END
+			IF(OBJECT_ID('tempdb..#temp_accounts_4') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_4 END
+			IF(OBJECT_ID('tempdb..#temp_accounts_5') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_5 END
+			IF(OBJECT_ID('tempdb..#temp_accounts_6') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_6 END";
+        
             }
 
             return sql;

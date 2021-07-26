@@ -533,67 +533,75 @@ namespace AfterSchoolLibraryTests.Tests
                 //caluclated price of current cycle to charge p = (y * costperperiod)/ x
                 var currentCycleCharge = classesRemainingInCurrentCycle * subscriptionPlan.CostPerPeriod.Value / classesInCurrentCycle;
 
-                var calcObj = new FeeCalculationObject(currentCycleCharge, billingAccount, msgs, dc);
-                var convenienceFeeCharged = calcObj.GetConvenienceFee();
-                var ccFee = 0M;
-                if (checkoutObject.PaymentType == PaymentType.CreditCard)
-                    ccFee = calcObj.GetCreditCardFee();
+                if (classesInCurrentCycle <= 0 || classesRemainingInCurrentCycle <= 0)
+                {
+                    Assert.Equal(0, currentCycleCharge);
+                    Assert.True(msgs.HasNoErrors());
+                }
+                else
+                {
+                    var calcObj = new FeeCalculationObject(currentCycleCharge, billingAccount, msgs, dc);
+                    var convenienceFeeCharged = calcObj.GetConvenienceFee();
+                    var ccFee = 0M;
+                    if (checkoutObject.PaymentType == PaymentType.CreditCard)
+                        ccFee = calcObj.GetCreditCardFee();
 
-                var amount = calcObj.GetFinalTotalCost(paymentType: checkoutObject.PaymentType);
+                    var amount = calcObj.GetFinalTotalCost(paymentType: checkoutObject.PaymentType);
 
-                var activityPayment = ActivityPayment.LoadByParticipationObjectByRegistrant(participationObject.ObjectID.Value,
-                    participationObject.ObjectType,
-                    registrant.ID.Value,
-                    IsDeleted: false,
-                    msgs,
-                    dc).FirstOrDefault();
+                    var activityPayment = ActivityPayment.LoadByParticipationObjectByRegistrant(participationObject.ObjectID.Value,
+                        participationObject.ObjectType,
+                        registrant.ID.Value,
+                        IsDeleted: false,
+                        msgs,
+                        dc).FirstOrDefault();
 
-                Assert.NotNull(activityPayment);
-                Assert.Equal(activityPayment?.Amount, calcObj.GetAmountToProvider());
-                Assert.Equal(activityPayment?.AmountPaidByParent, amount);
-                Assert.Equal(activityPayment?.ParticipationObjectId, participationObject.ObjectID.Value);
-                Assert.Equal(activityPayment?.RegistrantId, registrant.ID.Value);
-                Assert.True(activityPayment?.IsProRated);
+                    Assert.NotNull(activityPayment);
+                    Assert.Equal(activityPayment?.Amount, calcObj.GetAmountToProvider());
+                    Assert.Equal(activityPayment?.AmountPaidByParent, amount);
+                    Assert.Equal(activityPayment?.ParticipationObjectId, participationObject.ObjectID.Value);
+                    Assert.Equal(activityPayment?.RegistrantId, registrant.ID.Value);
+                    Assert.True(activityPayment?.IsProRated);
 
-                //purchase
-                var purchaseStored = registration.GetPurchase(msgs, dc);
-                Assert.NotNull(purchaseStored);
-                Assert.Equal(purchaseStored?.AmountPaid, amount);
-                Assert.Equal(purchaseStored?.RegistrationId, registration.ID.Value);
-                Assert.Equal(purchaseStored?.RegistrantId, masterRegistrant.ID.Value);
-                Assert.Equal(purchaseStored?.PurchaserAccountId, payingAccount.ID.Value);
+                    //purchase
+                    var purchaseStored = registration.GetPurchase(msgs, dc);
+                    Assert.NotNull(purchaseStored);
+                    Assert.Equal(purchaseStored?.AmountPaid, amount);
+                    Assert.Equal(purchaseStored?.RegistrationId, registration.ID.Value);
+                    Assert.Equal(purchaseStored?.RegistrantId, masterRegistrant.ID.Value);
+                    Assert.Equal(purchaseStored?.PurchaserAccountId, payingAccount.ID.Value);
 
-                //transaction
-                var transaction = Transaction.LoadByBillerAccountIdByIsDeleted(BillerAccountId: billingAccount.ID.Value, IsDeleted: false, msgs, dc).FirstOrDefault();
-                Assert.NotNull(transaction);
-                Assert.Equal(transaction?.PurchaseId, purchaseStored.ID.Value);
-                Assert.Equal(transaction?.Amount, amount);
-                Assert.Equal(transaction?.PaymentTypeFeeCharged, ccFee);
-                Assert.Equal(transaction?.ConvenienceFeeCharged, convenienceFeeCharged);
-                Assert.Equal(transaction?.PaymentTypeFeePayerAccountId, transactionFeePayer.ID.Value);
-                Assert.Equal(transaction?.ConvenienceFeePayerAccountId, convenienceFeePayer.ID.Value);
-                Assert.Equal(transaction?.BillerAccountId, billingAccount.ID.Value);
-                Assert.Equal(transaction?.PayerAccountId, payingAccount.ID.Value);
+                    //transaction
+                    var transaction = Transaction.LoadByBillerAccountIdByIsDeleted(BillerAccountId: billingAccount.ID.Value, IsDeleted: false, msgs, dc).FirstOrDefault();
+                    Assert.NotNull(transaction);
+                    Assert.Equal(transaction?.PurchaseId, purchaseStored.ID.Value);
+                    Assert.Equal(transaction?.Amount, amount);
+                    Assert.Equal(transaction?.PaymentTypeFeeCharged, ccFee);
+                    Assert.Equal(transaction?.ConvenienceFeeCharged, convenienceFeeCharged);
+                    Assert.Equal(transaction?.PaymentTypeFeePayerAccountId, transactionFeePayer.ID.Value);
+                    Assert.Equal(transaction?.ConvenienceFeePayerAccountId, convenienceFeePayer.ID.Value);
+                    Assert.Equal(transaction?.BillerAccountId, billingAccount.ID.Value);
+                    Assert.Equal(transaction?.PayerAccountId, payingAccount.ID.Value);
 
-                //check seat status
-                var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(checkoutObject.ParticipationObject.ObjectID.Value, 
-                    checkoutObject.ParticipationObject.ObjectType,
-                    registrant.ID.Value,
-                    msgs,
-                    dc);
-                Assert.True(ra.IsAssigned(RegistrationAssignmentType.Reserved));
+                    //check seat status
+                    var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(checkoutObject.ParticipationObject.ObjectID.Value,
+                        checkoutObject.ParticipationObject.ObjectType,
+                        registrant.ID.Value,
+                        msgs,
+                        dc);
+                    Assert.True(ra.IsAssigned(RegistrationAssignmentType.Reserved));
 
-                //stripe checks
-                var product = StripeHelper.GetProduct(activity.Uid.ToString(), stripeAccountId: null, msgs);
-                Assert.NotNull(product);
+                    //stripe checks
+                    var product = StripeHelper.GetProduct(activity.Uid.ToString(), stripeAccountId: null, msgs);
+                    Assert.NotNull(product);
 
-                var customer = payingAccount.GetStripeCustomer(msgs);
-                Assert.NotNull(customer);
+                    var customer = payingAccount.GetStripeCustomer(msgs);
+                    Assert.NotNull(customer);
 
-                var charge = StripeHelper.GetCharge(transaction.StripeChargeOrRefundId, msgs);
-                Assert.Equal(charge.Amount, amount * 100); //since stripe returns this way (amount * 100)
+                    var charge = StripeHelper.GetCharge(transaction.StripeChargeOrRefundId, msgs);
+                    Assert.Equal(charge.Amount, amount * 100); //since stripe returns this way (amount * 100)
 
-                Assert.True(msgs.HasNoErrors());
+                    Assert.True(msgs.HasNoErrors());
+                }
             }
             catch (Exception ex)
             {
