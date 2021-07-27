@@ -877,6 +877,7 @@
     cursor: pointer;
     top: 5px;
     left: 5px;
+    border: 1px solid #00AE85;
     transition: background 175ms cubic-bezier(0.1, 0.1, 0.25, 1);
 }
 
@@ -920,4 +921,43 @@
 
 .mainStudentDiv div:nth-child(even) {
     background: #F2F2F5;
+}
+
+.selectStudents {
+    padding: 10px 50px;
+    border-radius: 10px;    
+}
+
+.selectStudents[data-toggle="off"]:after {
+    content: url("data:image/svg+xml;utf8,<svg fill='black' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>"); /*here you can add any image url / sign you want for arrow down*/
+    position: absolute;
+    top:8px;
+}
+
+.selectStudents[data-toggle="on"]:after {
+    content: url("data:image/svg+xml;utf8,<svg fill='black' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>"); /*here you can add any image url / sign you want for arrow down*/
+    position: absolute;
+    top: 4px;
+    transform: rotate(180deg);
+}
+
+.btnNewColorSurvey {
+    background-color: #00AE85;
+    border-radius: 10px;
+    color: white;
+    padding: 14px 42px;
+    font-size: 18px;
+}
+
+.surveyCheck {
+    padding: 12px 83px 12px 19px;
+    border: solid 1px #b2b2b4;
+    background-color: #ffffff;
+    font-family: Montserrat;
+    font-size: 18px;
+    font-weight: 300;
+    color: #282828;
+}
+#resendModal{
+    top:200px
 }

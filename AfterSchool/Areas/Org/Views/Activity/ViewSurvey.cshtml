@@ -1,0 +1,107 @@
+﻿@model Activity
+
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+}
+@{Html.RenderPartial("OrgAccountHeader");}
+<div class="main-content">
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model); }
+    <div class="panel panel-default">
+        <div class="panel-body surveypanelpadding">
+            <div class="row">
+                <div class="col-lg-3">
+                    <div style="font-size:22px">Survey Name </div>
+                    <div style="font-size:14px; color:#B2B2B4">@Model.Name | July 08,2021</div>
+                    <a href="javascript:void(0)" onclick="exportToExcel();" style="font-size:14px; color:#00ae85">Export Survey Results</a>
+                </div>
+                <div class="col-lg-3">
+                    <div class="surveyCheck">0 Survey Sent</div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="surveyCheck">0 Completed</div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="pull-right">
+                        <a href="javascript:void(0)" class="btn btn-success surveybtn" data-toggle="modal" data-target="#resendModal">Remind To All Incomplete</a>
+                    </div>
+                </div>
+            </div>
+            <div style="clear:both"></div>
+            <div class="margin-t-35 mainTableDiv" id="exportable">
+                <table class="table surveyTable">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Last Modified</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <a href="@Url.Action("viewsurveyresult", "activity", new { id=0, activitId = Model.Uid })">View</a>
+                            </td>
+                            <td>
+                                Mathew Reflection
+                            </td>
+                            <td>
+                                Complete
+                            </td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="resendModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="border-radius: 10px;">
+            
+            <div class="modal-body">
+               <div class="text-center" style="font-size: 22px;  font-weight: bold;color: #282828; margin-bottom:17px;">Resend to <span id="CountStudent">0</span> Student</div>
+               <div class="text-center"><input type="button" class="btn btnNewColorSurvey" value="Send Survey" style="padding: 12px 72px;" /></div>
+            </div>
+           
+        </div>
+    </div>
+</div>
+
+@section scripts{
+<script>
+    function exportToExcel() {
+        var htmls = "";
+        var uri = 'data:application/vnd.ms-excel;base64,';
+        var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
+        var base64 = function (s) {
+            return window.btoa(unescape(encodeURIComponent(s)))
+        };
+
+        var format = function (s, c) {
+            return s.replace(/{(\w+)}/g, function (m, p) {
+                return c[p];
+            })
+        };
+
+        htmls = document.getElementById("exportable").innerHTML;
+
+        var ctx = {
+            worksheet: 'Worksheet',
+            table: htmls
+        }
+
+
+        var link = document.createElement("a");
+        link.download = "export.xls";
+        link.href = uri + base64(format(template, ctx));
+        link.click();
+
+    }
+</script>
+}

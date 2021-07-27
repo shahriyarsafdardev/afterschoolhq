@@ -50,7 +50,7 @@
 
             <div class="row margin-t-30">
                 <div class="col-lg-6">
-                    <input id="allowmultiple" name="allowmultiple" type="checkbox" class="newCheckbox"  />
+                    <input id="allowmultiple" name="allowmultiple" type="checkbox" class="newCheckbox" />
                     <label for="allowmultiple" class="margin-h-10 mobile-padding">Allow multiple submissions per person?</label>
                 </div>
             </div>
@@ -62,24 +62,48 @@
                     <label for="students" class="margin-h-10 mobile-padding">Students</label>
                 </div>
                 <div class="col-lg-4">
-                    <input type="hidden" name="selectedIndividuals" value="false" />
-                    <button class="btn" id="selectStudents">Select Students</button>
+                    <input type="hidden" name="selectedIndividuals" class="selectedIndividuals" value="false" />
+                    <div class="" style="position:relative">
+                        <button class="btn selectStudents" id="selectStudents" data-toggle="off">Select Individual Students</button>
+                    </div>
                 </div>
             </div>
             <div style="clear:both"></div>
 
-            <div class="row studentDiv hide margin-t-10">
-                <div class="col-lg-9 col-md-9">
+            <div class=" studentDiv hide margin-t-10" style="margin-left: -10px;">
+                <div class="col-lg-8 col-md-8">
                     <div class="mainStudentDiv">
                         @foreach (var student in Students)
                         {
                             <div>
                                 <input id="students-@student.ID" name="@student.RegistrantName" type="checkbox" class="newCheckbox" style="" />
                                 <label for="students-@student.ID" class="margin-h-10 mobile-padding">@student.RegistrantName</label>
-                            </div>                          
+                            </div>
                         }
                     </div>
                 </div>
+            </div>
+            <div style="clear:both"></div>
+            <div class="row margin-t-10">
+                <div class="col-lg-4">
+                    <input id="parents" name="parents" type="checkbox" class="newCheckbox" />
+                    <label for="parents" class="margin-h-10 mobile-padding">Parents</label>
+                </div>
+            </div>
+            <div class="row margin-t-10">
+                <div class="col-lg-4">
+                    <input id="staff" name="staff" type="checkbox" class="newCheckbox" />
+                    <label for="staff" class="margin-h-10 mobile-padding">Staff</label>
+                </div>
+            </div>
+            <div class="row margin-t-30">
+                <div class="col-lg-8 col-md-8">
+                    <textarea id="optional" name="optional" class="newInput" style="height:150px;width:100%;padding:10px" placeholder="Add special intructions (optional)"></textarea>
+                </div>
+            </div>
+
+            <div class=" margin-t-30 text-center">
+                <input type="button" class="btn btnNewColorSurvey" value="Send & Notify" />
             </div>
         </div>
     </div>
@@ -90,7 +114,12 @@
         $(document).ready(function () {
             $("#selectStudents").on('click', function () {
                 $('.studentDiv').toggleClass('hide');
-                 
+                $(".selectedIndividuals").val() == "false" ? $(".selectedIndividuals").val("true") : $(".selectedIndividuals").val("false");
+                if ($(this).attr('data-toggle') == 'on') {
+                    $(this).attr('data-toggle', 'off');
+                } else {
+                    $(this).attr('data-toggle', 'on');
+                }
             })
         })
     </script>

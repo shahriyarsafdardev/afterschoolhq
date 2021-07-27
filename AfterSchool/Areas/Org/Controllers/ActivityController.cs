@@ -1978,6 +1978,20 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(activity);
         }
 
+
+        public ActionResult ViewSurvey(int id, string activitId)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+
+            var activity = currentAccount.GetActivity(activitId.ToGuid(), msgs);
+
+            return View(activity);
+        }
+
         #endregion
 
         [HttpGet]
