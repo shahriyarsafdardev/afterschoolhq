@@ -26,11 +26,7 @@ namespace AfterSchoolLibrary.Models
 		/// Required.
 		/// </summary>
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
-		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
-		/// <summary>
-		/// Required.
-		/// </summary>
-		public FormType FormTypeId { get { return (FormType)MDV["FormTypeId"].Value; } set { MDV["FormTypeId"].Value = value; } }
+		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }		
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		
 
@@ -39,8 +35,7 @@ namespace AfterSchoolLibrary.Models
             this.Config(ObjectMap, DatabaseQuery, typeof(Form).Name, "ID");
             this.LoadObjectValues(ObjectMap);
 			this.Uid = Guid.NewGuid();
-			this.IsActive = false;
-			this.FormTypeId = FormType.NotSet;
+			this.IsActive = false;		
 			
         }
 
@@ -53,8 +48,7 @@ namespace AfterSchoolLibrary.Models
                 _dp = BasicLookUpObject.get_BaseObjectMap(className);
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
-				_dp.Add(className, "IsActive", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "FormTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "IsActive", System.Data.SqlDbType.Bit);				
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				
                 return _dp;
@@ -112,9 +106,7 @@ namespace AfterSchoolLibrary.Models
 				msgs.Add("AccountId is required on Form object", MessageType.Error);
 			if (this.Uid.IsEmpty())
 				msgs.Add("Uid is required on Form object", MessageType.Error);
-			if (this.FormTypeId.IsEmpty())
-				msgs.Add("FormTypeId is required on Form object", MessageType.Error);
-			
+					
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Form).Name));
 
@@ -147,11 +139,6 @@ namespace AfterSchoolLibrary.Models
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["IsActive"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["FormTypeId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
 			
 
             return msgs;
@@ -226,7 +213,7 @@ namespace AfterSchoolLibrary.Models
             return FormQuestionGroup.GetCount(new Hashtable() { { "FormId", this.ID.Value } }, msgs, dc);
         }
 
-        public Form Copy(int loggedInUserId, int newAccountId,   FormType formType, string formName = null, SystemMessages msgs = null, DatabaseConnection dc = null  )
+        public Form Copy(int loggedInUserId, int newAccountId, string formName = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();           
             var form = new Form
@@ -235,7 +222,6 @@ namespace AfterSchoolLibrary.Models
                 Description = this.Description,
                 LastModifiedDate = DateTime.UtcNow,
                 CreateDate = DateTime.UtcNow,
-                FormTypeId = formType,
                 LastModifiedBy = loggedInUserId,
                 CreatedBy = loggedInUserId,
                 AccountId = newAccountId,
