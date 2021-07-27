@@ -304,6 +304,21 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors());
         }
 
+        [Fact]
+        public void GetLocationOwnerFailingTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
+
+            // Act
+            // we are not setting any location with this activity, so location owner will be empty
+            var locationOwner = activity.GetLocationOwner(msgs, dc);
+
+            // Assert
+            Assert.Null(locationOwner);
+            Assert.True(msgs.HasNoErrors());
+        }
+
         #region Activity Copy Functionality
 
         [Fact]

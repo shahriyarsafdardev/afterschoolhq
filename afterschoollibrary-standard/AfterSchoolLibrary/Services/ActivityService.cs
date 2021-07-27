@@ -2620,7 +2620,7 @@ namespace AfterSchoolLibrary.Services
         public static Account GetLocationOwner(this Activity activity, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var location = activity.GetLocation(msgs, dc);
-            return location.GetHostAccount(msgs, dc);
+            return location?.GetHostAccount(msgs, dc);
         }
 
         public static void RequestToPublish(this Activity activity, Account locationOwner, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
