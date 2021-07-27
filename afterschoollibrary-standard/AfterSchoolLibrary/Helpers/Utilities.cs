@@ -384,6 +384,8 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.UpdateWebSessionAction_20210513.Do(amsgs, adc);
                     Migrations.UpdateWebSessionActionIndirectObjectType_20210517.Do(amsgs, adc);
                     Migrations.AddFeatureTypeTeacher1099ToSchools_20210622.Do(amsgs, adc);
+                    Migrations.UpdateLocationLatLongColumn_20210725.Do(amsgs, adc);
+
                     // Migrations.AddProfilesToAllAccounts_20200727.Do(amsgs, adc);
 
                     // amsgs.Add("rollback please", MessageType.Error);
