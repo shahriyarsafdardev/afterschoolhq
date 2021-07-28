@@ -43,7 +43,21 @@
     <ContactEmail>steveauston@yopmail.com</ContactEmail>
     <ActivityLocation>New York, New York, USA</ActivityLocation>
     <RegistrationFee>100</RegistrationFee>
-
   </CreateNewActivity>
+  <!-- Stripe Account Payments -->
+  <StripeAccountPayments>
+    <FirstName>user_good</FirstName>
+    <LastName>pass_good</LastName>
+    <DD>12</DD>
+    <MM>12</MM>
+    <YYYY>1992</YYYY>
+    <AddressLine1>12175 ,</AddressLine1>
+    <AddressLine2>Visionary Way</AddressLine2>
+    <City>Fishers</City>
+    <State>Indiana</State>
+    <ZIP>46038</ZIP>
+    <PhoneNumber>(202) 555-0155</PhoneNumber>
+    <SSN>000-00-0000</SSN>
+  </StripeAccountPayments>
 
 </PARAMETERS>
