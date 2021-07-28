@@ -961,3 +961,7 @@
 #resendModal{
     top:200px
 }
+.linkGreen, .linkGreen:active, .linkGreen:focus, .linkGreen:visited {
+    color: #00ae85;
+    font-size: 18px;
+}

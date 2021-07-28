@@ -41,7 +41,7 @@
                     <tbody>
                         <tr>
                             <td>
-                                <a href="@Url.Action("viewsurveyresult", "activity", new { id=0, activitId = Model.Uid })">View</a>
+                                <a href="@Url.Action("viewsurveyresult", "activity", new { id=0, activitId = Model.Uid })" class="linkGreen">View</a>
                             </td>
                             <td>
                                 Mathew Reflection
@@ -50,7 +50,9 @@
                                 Complete
                             </td>
                             <td></td>
-                            <td></td>
+                            <td>
+                                <a href="javascript:void(0)" class="linkGreen">Resend reminder</a>
+                            </td>
                         </tr>
                     </tbody>
                 </table>

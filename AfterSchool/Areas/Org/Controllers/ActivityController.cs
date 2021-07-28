@@ -1962,7 +1962,6 @@ namespace AfterSchool.Areas.Org.Controllers
             var rats = new List<RegistrationAssignmentType>();
             rats.Add(RegistrationAssignmentType.NotSet);
 
-
             ViewBag.Students = currentAccount.SearchRegistrations(
               null,
               null,
@@ -1976,6 +1975,14 @@ namespace AfterSchool.Areas.Org.Controllers
 
 
             return View(activity);
+        }
+
+
+        [HttpPost]
+        public ActionResult SaveSurvey(string id,string formId, string name, string optionalText, bool parents,bool selectedIndividuals, bool? allowmultiple, bool? students, bool? staff, List<SelectListItem> studentList)
+        {
+
+            return RedirectToAction("Surveys", new { id });
         }
 
 

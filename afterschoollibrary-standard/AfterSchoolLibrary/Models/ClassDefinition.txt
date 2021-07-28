@@ -1013,6 +1013,7 @@ inherits: BasicObjectWithModified
 property: FormQuestionId, int?, Int, required
 property: RegistrantId, int?, Int
 property: ActivityId, int?, Int
+property: SurveyFeedbackId, int?, Int
 property: RegistrationId, int?, Int
 property: Text, string, NVarChar "400"
 property: Description, string, NVarChar "4000"
@@ -1020,6 +1021,7 @@ property: QuestionDataTypeId, QuestionDataType, Int
 property: QuestionText, string, NVarChar "400", , Used to keep the question text just in case the question text changes on the original
 join: FormQuestion.ID, FormQuestionId, LeftOuterJoin
 join: Registration.ID, RegistrationId, LeftOuterJoin
+join: SurveyFeedback.ID, SurveyFeedbackId, LeftOuterJoin
 join: FormQuestionGroup.ID, FormQuestion.FormQuestionGroupId, LeftOuterJoin
 joinproperty: FormQuestion.QuestionDataTypeId, QuestionDataType, Int
 joinproperty: FormQuestion.QuestionTypeId, QuestionType, Int
@@ -1037,6 +1039,7 @@ loadmethod: RegistrantId|ActivityId, List<>
 loadmethod: FormQuestionId, List<>
 loadmethod: FormQuestionId|RegistrantId
 loadmethod: RegistrationId, List<>
+loadmethod: SurveyFeedbackId, List<>
 [end]
 
 [begin]
@@ -1855,6 +1858,56 @@ join: WebUser.ID, WebUserId, LeftOuterJoin
 join: WebUser.ID, CreatedBy, LeftOuterJoin, CreatedBy
 loadmethod: WebUserId, List<>
 loadmethod: AccountId, List<>
+[end]
+
+[begin]
+type: Class
+name: SurveyRequest
+serializable: true
+description: table to save details of all suvrye request created by providers.
+inherits: BasicObjectWithModified
+property: FormId, int?, Int
+property: ActivityId, int?, Int
+property: AccountId, int?, Int
+property: Name, string, NVarChar "200"
+property: InstructionsText, string, NVarChar "500"
+property: MultipleResponsesEnabled, bool?, Bit
+join: Account.ID, AccountId, LeftOuterJoin
+join: Form.ID, FormId, LeftOuterJoin
+join: Activity.ID, ActivityId, LeftOuterJoin
+loadmethod: AccountId, List<>
+loadmethod: ActivityId, List<>
+loadmethod: FormId, List<>
+loadmethod: Uid
+[end]
+
+[begin]
+type: Class
+name: SurveyFeedback
+serializable: true
+description: Saves Survey Feddback responses.
+inherits: BasicObjectWithModified
+property: SurveyId, int?, Int
+property: ActivityId, int?, Int
+property: RegistrantId, int?, Int
+property: AttendanceId, int?, Int
+property: DueDate, DateTime?, DateTime
+property: SurveyFeedbackStatusTypeId, SurveyFeedbackStatus, Int
+join: Activity.ID, ActivityId, LeftOuterJoin
+join: Registrant.ID, RegistrantId, LeftOuterJoin
+join: SurveyRequest.ID, SurveyId, LeftOuterJoin
+join: Attendance.ID, AttendanceId, LeftOuterJoin
+loadmethod: RegistrantId, List<>
+loadmethod: ActivityId, List<>
+loadmethod: SurveyId, List<>
+loadmethod: AttendanceId, List<>
+loadmethod: Uid
+[end]
+
+[begin]
+type: Enum
+name: SurveyFeedbackStatus
+values: NotSet, New, InProgress, Completed
 [end]
 
 [begin]

@@ -9,119 +9,138 @@
     var showManageForms = accountPackage.HasFeature(FeatureType.ManageForms);
     var showManageFormFields = forms.Count >= maxFormCount ? false : true;
 
-    var Students = (List<Registration>)ViewBag.Students;
+    var studentList = new List<SelectListItem>(); 
+    foreach (var student in (List<Registration>)ViewBag.Students)
+    {
+        studentList.Add(new SelectListItem {
+            Text = student.RegistrantName,
+            Value = student.Uid.ToString()
+        });
+    }
 }
-@{Html.RenderPartial("OrgAccountHeader");}
+    @{Html.RenderPartial("OrgAccountHeader");}
 
-<div class="main-content">
+    <div class="main-content">
 
-    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model); }
-    <div class="panel panel-default">
-        <div class="panel-body surveypanelpadding">
-            <div class="row">
-                <div class="col-lg-6">
-                    <div style="font-size:22px">@Model.Name</div>
-                    <div style="font-size:14px; color:#B2B2B4">@Model.AccountName</div>
-                </div>
-            </div>
-            <div style="clear:both"></div>
-            <div class="row margin-t-30">
-                <div class="col-md-6" @if (!showManageForms) { <text> onclick="return showUpgradeMyPlan()" </text> }>
-                    <select name="form" id="form" class="form-control newDropDown newInput" @(activeForm.IsNotEmpty() && forms.Any(m => m.ID == activeForm.FormId) ? "required" : "") @if (!showManageForms) { <text> disabled="disabled" </text> }>
-
-                        @foreach (var form in forms)
-                        {
-                            <option value="@form.ID" @(activeForm?.FormId == form.ID ? "selected=\"selected\"" : "")>@form.Name</option>
-                        }
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <a href="javascript:void(0)" class="btn btnNewSurvey">Add New Survey</a>
-                </div>
-            </div>
-            <div style="clear:both"></div>
-
-            <div class="row margin-t-10">
-                <div class="col-lg-6 col-md-6  ">
-                    <input type="text" class="form-control newInput" name="Title" placeholder="Add Title" />
-                </div>
-            </div>
-            <div style="clear:both"></div>
-
-            <div class="row margin-t-30">
-                <div class="col-lg-6">
-                    <input id="allowmultiple" name="allowmultiple" type="checkbox" class="newCheckbox" />
-                    <label for="allowmultiple" class="margin-h-10 mobile-padding">Allow multiple submissions per person?</label>
-                </div>
-            </div>
-            <div style="clear:both"></div>
-
-            <div class="row margin-t-30">
-                <div class="col-lg-4">
-                    <input id="students" name="students" type="checkbox" class="newCheckbox" />
-                    <label for="students" class="margin-h-10 mobile-padding">Students</label>
-                </div>
-                <div class="col-lg-4">
-                    <input type="hidden" name="selectedIndividuals" class="selectedIndividuals" value="false" />
-                    <div class="" style="position:relative">
-                        <button class="btn selectStudents" id="selectStudents" data-toggle="off">Select Individual Students</button>
+        @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model); }
+        <div class="panel panel-default">
+            <div class="panel-body surveypanelpadding">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div style="font-size:22px">@Model.Name</div>
+                        <div style="font-size:14px; color:#B2B2B4">@Model.AccountName</div>
                     </div>
                 </div>
-            </div>
-            <div style="clear:both"></div>
+                @using (Html.BeginForm("SaveSurvey", "Activity", FormMethod.Post))
+                {
+                    <input type="hidden" name="id" value="@Model.Uid" />
+                    <div style="clear:both"></div>
+                    <div class="row margin-t-30">
+                        <div class="col-md-6" @if (!showManageForms) { <text> onclick="return showUpgradeMyPlan()" </text> }>
+                            <select name="formId" id="formId" class="form-control newDropDown newInput" @(activeForm.IsNotEmpty() && forms.Any(m => m.ID == activeForm.FormId) ? "required" : "") @if (!showManageForms) { <text> disabled="disabled" </text> }>
 
-            <div class=" studentDiv hide margin-t-10" style="margin-left: -10px;">
-                <div class="col-lg-8 col-md-8">
-                    <div class="mainStudentDiv">
-                        @foreach (var student in Students)
-                        {
-                            <div>
-                                <input id="students-@student.ID" name="@student.RegistrantName" type="checkbox" class="newCheckbox" style="" />
-                                <label for="students-@student.ID" class="margin-h-10 mobile-padding">@student.RegistrantName</label>
+                                @foreach (var form in forms)
+                                {
+                                    <option value="@form.ID" @(activeForm?.FormId == form.ID ? "selected=\"selected\"" : "")>@form.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="javascript:void(0)" class="btn btnNewSurvey">Add New Survey</a>
+                        </div>
+                    </div>
+                    <div style="clear:both"></div>
+
+                    <div class="row margin-t-10">
+                        <div class="col-lg-6 col-md-6  ">
+                            <input type="text" class="form-control newInput" name="name" placeholder="Add Title" />
+                        </div>
+                    </div>
+                    <div style="clear:both"></div>
+
+                    <div class="row margin-t-30">
+                        <div class="col-lg-6">
+                            <input id="allowmultiple" name="allowmultiple" type="checkbox" class="newCheckbox" value="true" />
+                            <input type="hidden" value="false" name="allowmultiple" />
+                            <label for="allowmultiple" class="margin-h-10 mobile-padding">Allow multiple submissions per person?</label>
+                        </div>
+                    </div>
+                    <div style="clear:both"></div>
+
+                    <div class="row margin-t-30">
+                        <div class="col-lg-4">
+                            <input id="students" name="students" type="checkbox" class="newCheckbox" value="true" />
+                            <input type="hidden" value="false" name="students" />
+                            <label for="students" class="margin-h-10 mobile-padding">Students</label>
+                        </div>
+                        <div class="col-lg-4">
+                            <input type="hidden" name="selectedIndividuals" class="selectedIndividuals" value="false" />
+                            <div class="" style="position:relative">
+                                <button class="btn selectStudents" id="selectStudents" data-toggle="off" type="button">Select Individual Students</button>
                             </div>
-                        }
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div style="clear:both"></div>
-            <div class="row margin-t-10">
-                <div class="col-lg-4">
-                    <input id="parents" name="parents" type="checkbox" class="newCheckbox" />
-                    <label for="parents" class="margin-h-10 mobile-padding">Parents</label>
-                </div>
-            </div>
-            <div class="row margin-t-10">
-                <div class="col-lg-4">
-                    <input id="staff" name="staff" type="checkbox" class="newCheckbox" />
-                    <label for="staff" class="margin-h-10 mobile-padding">Staff</label>
-                </div>
-            </div>
-            <div class="row margin-t-30">
-                <div class="col-lg-8 col-md-8">
-                    <textarea id="optional" name="optional" class="newInput" style="height:150px;width:100%;padding:10px" placeholder="Add special intructions (optional)"></textarea>
-                </div>
-            </div>
+                    <div style="clear:both"></div>
 
-            <div class=" margin-t-30 text-center">
-                <input type="button" class="btn btnNewColorSurvey" value="Send & Notify" />
+                    <div class=" studentDiv hide margin-t-10" style="margin-left: -10px;">
+                        <div class="col-lg-8 col-md-8">
+                            <div class="mainStudentDiv">
+                                @for (int i = 0; i < studentList.Count(); i++)
+                                {
+                                    <div>
+                                        @Html.CheckBoxFor(m => studentList[i].Selected, new { @class = "newCheckbox" })
+                                        
+                                        <span class="margin-h-10 mobile-padding">@Html.DisplayFor(m => studentList[i].Text)</span>
+                                        @Html.HiddenFor(m => studentList[i].Value)
+                                        @Html.HiddenFor(m => studentList[i].Text)
+                                    </div>                                  
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div style="clear:both"></div>
+                    <div class="row margin-t-10">
+                        <div class="col-lg-4">
+                            <input id="parents" name="parents" type="checkbox" class="newCheckbox" value="true" />
+                            <input type="hidden" value="false" name="parents" />
+                            <label for="parents" class="margin-h-10 mobile-padding">Parents</label>
+                        </div>
+                    </div>
+                    <div class="row margin-t-10">
+                        <div class="col-lg-4">
+                            <input id="staff" name="staff" type="checkbox" class="newCheckbox" value="true" />
+                            <input type="hidden" value="false" name="staff" />
+                            <label for="staff" class="margin-h-10 mobile-padding">Staff</label>
+                        </div>
+                    </div>
+                    <div class="row margin-t-30">
+                        <div class="col-lg-8 col-md-8">
+                            <textarea id="optional" name="optionalText" class="newInput" style="height:150px;width:100%;padding:10px" placeholder="Add special intructions (optional)"></textarea>
+                        </div>
+                    </div>
+
+                    <div class=" margin-t-30 text-center">
+                        <input type="submit" class="btn btnNewColorSurvey" value="Send & Notify" />
+                    </div>
+                }
             </div>
         </div>
     </div>
-</div>
 
-@section scripts{
-    <script>
-        $(document).ready(function () {
-            $("#selectStudents").on('click', function () {
-                $('.studentDiv').toggleClass('hide');
-                $(".selectedIndividuals").val() == "false" ? $(".selectedIndividuals").val("true") : $(".selectedIndividuals").val("false");
-                if ($(this).attr('data-toggle') == 'on') {
-                    $(this).attr('data-toggle', 'off');
-                } else {
-                    $(this).attr('data-toggle', 'on');
-                }
+    @section scripts{
+        <script>
+            $(document).ready(function () {
+                $("#selectStudents").on('click', function () {
+                    $('.studentDiv').toggleClass('hide');
+                    if ($(this).attr('data-toggle') == 'on') {
+                        $(this).attr('data-toggle', 'off');
+                        $(".selectedIndividuals").val("false")
+                    } else {
+                        $(this).attr('data-toggle', 'on');
+                        $(".selectedIndividuals").val("true")
+                    }
+                })
             })
-        })
-    </script>
-}
+        </script>
+    }
 
