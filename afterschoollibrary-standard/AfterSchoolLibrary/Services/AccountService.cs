@@ -164,20 +164,65 @@ namespace AfterSchoolLibrary.Services
 
         #region Activities
 
-        public static Activity GetActivity(this Account account, int Id, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Activity GetActivity(this Account account, int activityId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (account.IsNotEmpty())
-                return Activity.LoadByIdByAccountId(Id, account.ID.Value, msgs, dc);
+            Activity activity = null;
 
-            return null;
+            if (account.IsNotEmpty())
+            {
+                activity = Activity.LoadByIdByAccountId(activityId, account.ID.Value, msgs, dc);
+                // If schools need to publish an activity for a provider who is external to the school page
+                // I can see this activity if it is hosted at my location
+                if (activity.IsEmpty())
+                    activity = account.GetHostedActivity(activityId, msgs, dc);
+            }
+
+            return activity;
         }
 
-        public static Activity GetActivity(this Account account, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Activity GetActivity(this Account account, Guid activityUid, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (account.IsNotEmpty())
-                return Activity.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
+            Activity activity = null;
 
-            return null;
+            if (account.IsNotEmpty())
+            {
+                activity = Activity.LoadByUidByAccountId(activityUid, account.ID.Value, msgs, dc);
+                // If schools need to publish an activity for a provider who is external to the school page
+                // I can see this activity if it is hosted at my location
+                if (activity.IsEmpty())
+                    activity = account.GetHostedActivity(activityUid, msgs, dc);
+            }
+
+            return activity;
+        }
+
+        public static Activity GetHostedActivity(this Account account, Guid activityUid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.GetHostedActivity(Activity.LoadByUid(activityUid, msgs, dc), msgs, dc);
+        }
+
+        public static Activity GetHostedActivity(this Account account, int activityId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.GetHostedActivity(Activity.Load(activityId, msgs, dc), msgs, dc);
+        }
+
+        public static Activity GetHostedActivity(this Account account, Activity tempActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            Activity hostedActivity = null;
+
+            if (tempActivity.IsNotEmpty())
+            {
+                var locations = account.GetHostedLocations(msgs, dc);
+
+                if (locations.IsNotEmpty())
+                    locations.ForEach(location =>
+                    {
+                        if (tempActivity.LocationId == location.ID)
+                            hostedActivity = tempActivity;
+                    });
+            }
+
+            return hostedActivity;
         }
 
         public static List<Activity> GetActivities(this Account account, List<int> ActivityIds, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -237,7 +282,7 @@ namespace AfterSchoolLibrary.Services
 
             activities.AddRange(
                 Activity.LoadByProviderAccountId(account.ID.Value, msgs, dc)
-                    .Where(activity => activity.IsOpenUpcomingOrRecentlyClosed(msgs, dc))
+                    .Where(activity => activity.IsOpenUpcomingOrRecentlyClosed(msgs, dc) && activity.IsPubliclyViewable)
             );
 
             return activities.DistinctBy(activity => activity.ID).ToList();
@@ -256,7 +301,7 @@ namespace AfterSchoolLibrary.Services
                 );
             }            
 
-            return activities;
+            return activities.DistinctBy(x => x.ID.Value).ToList();
         }
 
         public static List<ActivityForm> GetActivityForms(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -688,7 +733,7 @@ namespace AfterSchoolLibrary.Services
             var periods = account.GetOpenRegistrationPeriods(msgs, dc);
             periods.AddRange(account.GetUpcomingRegistrationPeriods(msgs, dc));
             periods.AddRange(account.GetRecentlyClosedRegistrationPeriods(msgs, dc));
-            return periods;
+            return periods.DistinctBy(x => x.ID).ToList();
         }
 
         #endregion
@@ -2858,6 +2903,40 @@ namespace AfterSchoolLibrary.Services
                     totalDebits;
         }
 
+        public static decimal GetMaxAmountAvailableForRefund(this Account account, string search, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var totalPayoutAmount = account.GetTotalPayoutAmount(search, null, startDate, endDate, msgs, dc);
+
+            var totalAmountBilledACH = account.GetTotalAmountBilledOut(
+                                        search,
+                                        PaymentSourceType.AfterSchoolPlatform,
+                                        PaymentType.ACH,
+                                        startDate,
+                                        endDate,
+                                        msgs,
+                                        dc);
+
+            var totalAmountBilledCredit = account.GetTotalAmountBilledOut(
+                                            search,
+                                            PaymentSourceType.AfterSchoolPlatform,
+                                            PaymentType.CreditCard,
+                                            startDate,
+                                            endDate,
+                                            msgs,
+                                            dc);
+
+            var totalConvenienceFeesReceived = account.GetTotalConvenienceFeesReceivedAsBiller(null, startDate, endDate, msgs, dc);
+            var totalRefunds = account.GetTotalAmountRefundedAHQ(search, true, startDate, endDate, msgs, dc);
+            var totalRefundManual = account.GetTotalAmountRefundedManually(search, startDate, endDate, msgs, dc);
+
+            return totalAmountBilledACH +
+                    totalAmountBilledCredit +
+                    totalConvenienceFeesReceived -
+                    totalPayoutAmount - 
+                    totalRefunds -
+                    totalRefundManual;
+        }
+
         public static int GetPayoutCount(this Account account, PayoutStatus? payoutStatus, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Payout.GetCountByAccountId(account.ID.Value, payoutStatus, startDate, endDate, msgs, dc);
@@ -3000,6 +3079,12 @@ namespace AfterSchoolLibrary.Services
             string customerId = null;
             var billingAccount = checkoutObject.BillingAccount;
 
+            if (billingAccount.IsEmpty())
+            {
+                msgs.Add("Stripe charge can not be processed.", MessageType.UserError);
+                return null;
+            }
+
             if (checkoutObject.SavePaymentInfo ||
                 checkoutObject.HasStripeSourceId ||
                 (checkoutObject.PayingAccount.IsNotEmpty() && checkoutObject.PayingAccount.StripeCustomerId.IsNotEmpty()))
@@ -3015,22 +3100,22 @@ namespace AfterSchoolLibrary.Services
             // only charge tuition during checkout, because subscriptions are billed through stripe
             var charge = StripeHelper.CreateCharge(
                                 fromCustomerId: customerId,
-                                destinationAccountId: useStripeConnectedAccount ? checkoutObject.BillingAccount?.StripeUserId : null,
+                                destinationAccountId: useStripeConnectedAccount ? billingAccount.StripeUserId : null,
                                 platformFee: useStripeConnectedAccount ? platformFeeAmount : new decimal?(),
                                 tokenOrSourceId: checkoutObject.StripeSourceId,
                                 totalAmount: amount,
                                 description: checkoutObject.Description,
-                                statementDescriptor: $"{checkoutObject.BillingAccount.Name}",
+                                statementDescriptor: $"{billingAccount.Name}",
                                 metaData: new Dictionary<string, string>()
                                 {
                                     { "ActivityUid", checkoutObject.ParticipationObject?.Uid.ToString() },
-                                    { "BillingAccountUid", checkoutObject.BillingAccount.Uid.ToString() },
+                                    { "BillingAccountUid", billingAccount.Uid.ToString() },
                                     { "PayingAccountUid", checkoutObject.PayingAccount.Uid.ToString() },
                                     { "RegistrationUid", checkoutObject.Registration?.Uid.ToString() },
                                     { "CreditCardFeePayer", checkoutObject.CreditCardFeePayer?.Uid.ToString() },
                                     { "ConvenienceFeePayer", checkoutObject.ConvenienceFeePayer?.Uid.ToString() },
                                     { "PurchasedBy", checkoutObject.MasterRegistrant?.DisplayName },
-                                    { "BilledBy", checkoutObject.BillingAccount?.Name }
+                                    { "BilledBy", billingAccount.Name }
                                 },
                                 msgs: msgs
                             );
@@ -3208,7 +3293,8 @@ namespace AfterSchoolLibrary.Services
             if (msgs.HasNoErrors())
             {
                 var charge = AccountService.CreateStripeChargeDuringCheckout(checkoutObject, msgs, dc);
-                checkoutObject.StripeChargeId = charge.Id;
+                if (charge.IsNotEmpty() && charge.Id.IsNotEmpty())
+                    checkoutObject.StripeChargeId = charge.Id;
             }
         }
 
@@ -3745,9 +3831,14 @@ namespace AfterSchoolLibrary.Services
         public static decimal GetTotalFeesPaidAsBiller(this Account account, string search, PaymentType? paymentType, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Transaction.GetTotalFeesPaidByBillerAccount(account.ID.Value, search, paymentType, startDate, endDate, false, msgs, dc);
+        }        
+
+        public static decimal GetTotalConvenienceFeesReceivedAsBiller(this Account account, PaymentType? paymentType, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.GetTotalConvenienceFeesReceivedByBillerAccount(account.ID.Value, paymentType, startDate, endDate, false, msgs, dc);
         }
 
-        public static decimal GetTotalAmountRefunded(this Account account, string search, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalAmountRefunded(this Account account, string search, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, search, null, startDate, endDate, false, msgs, dc) -        
                     Transaction.GetTotalConvenienceFeesNotPaidByPayerAccount(account.ID.Value, search, startDate, endDate, false, msgs, dc) -

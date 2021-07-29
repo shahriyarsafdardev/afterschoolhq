@@ -17,6 +17,7 @@ namespace AfterSchoolLibraryTests.Tests
         private Account PlanOwner { get; }
 
         private ActivityGroup ActivityGroup { get; }
+        private AccountActivityGroup AccountActivityGroup { get; }
         private ActivitySchedule Schedule { get; }
         private Activity Activity { get; }
         private List<ActivityInstance> Instances { get; }
@@ -31,6 +32,7 @@ namespace AfterSchoolLibraryTests.Tests
             ActivityOwnerAccount = AccountFactory.Create(AccountOwner, msgs, dc);
             PlanOwner = AccountFactory.CreateAccount(AccountOwner, msgs, dc);
             ActivityGroup = ActivityGroupFactory.Create(ActivityOwnerAccount,ActivityGroupType.Session,20, msgs, dc);
+            AccountActivityGroup = AccountActivityGroupFactory.Create(ActivityOwnerAccount, ActivityGroup, msgs, dc);
             Schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, ActivityGroup, DateTime.UtcNow.FirstDateOfMonth(), msgs, dc);
             Location = LocationFactory.Create(ActivityOwnerAccount, msgs, dc);
             Activity = ActivityFactory.Create(ActivityOwnerAccount, Schedule, ActivityGroup, Location,20, msgs, dc);
@@ -119,6 +121,84 @@ namespace AfterSchoolLibraryTests.Tests
             
             Assert.True(classes.IsNotEmpty());
             Assert.True(classes.Equals(remainingDays));
+        }
+
+        [Fact]
+        public void IsActivityTest()
+        {
+            var participationObject = Activity.GetParticipationObject(msgs, dc);
+
+            Assert.True(participationObject.IsActivity());
+            Assert.False(participationObject.IsActivityGroup());
+            Assert.False(participationObject.IsAccountActivityGroup());
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void IsActivityGroupTest()
+        {
+            var participationObject = ActivityGroup.GetParticipationObject(msgs, dc);
+
+            Assert.True(participationObject.IsActivityGroup());
+            Assert.False(participationObject.IsActivity());
+            Assert.False(participationObject.IsAccountActivityGroup());
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void IsAccountActivityGroupTest()
+        {
+            var participationObject = AccountActivityGroup.GetParticipationObject(msgs, dc);
+
+            Assert.True(participationObject.IsAccountActivityGroup());
+            Assert.False(participationObject.IsActivityGroup());
+            Assert.False(participationObject.IsActivity());
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void GetActivityTest()
+        {
+            var participationObject = Activity.GetParticipationObject(msgs, dc);
+            var aag = participationObject.GetAccountActivityGroup();
+            var ag = participationObject.GetActivityGroup();
+            var a = participationObject.GetActivity();
+
+            Assert.NotNull(a);
+            Assert.Null(aag);
+            Assert.Null(ag);
+            Assert.Equal(Activity.ID, a.ID);
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void GetActivityGroupTest()
+        {
+            var participationObject = ActivityGroup.GetParticipationObject(msgs, dc);
+            var aag = participationObject.GetAccountActivityGroup();
+            var ag = participationObject.GetActivityGroup();
+            var a = participationObject.GetActivity();
+
+            Assert.NotNull(ag);
+            Assert.Null(aag);
+            Assert.Null(a);
+            Assert.Equal(ActivityGroup.ID, ag.ID);
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void GetAccountActivityGroupTest()
+        {
+            var participationObject = AccountActivityGroup.GetParticipationObject(msgs, dc);
+            var aag = participationObject.GetAccountActivityGroup();
+            var ag = participationObject.GetActivityGroup();
+            var a = participationObject.GetActivity();
+
+            Assert.NotNull(aag);
+            Assert.Null(ag);
+            Assert.Null(a);
+            Assert.Equal(AccountActivityGroup.ID, aag.ID);
+            Assert.True(msgs.HasNoErrors());
         }
     }
 }
