@@ -12,6 +12,10 @@ namespace AfterSchoolLibrary.Billing
     {
         private static string TestSecretKey { get { return "sk_test_gfeMjl5rgl16L1HHITh3YT5s"; } }
         private static string TestPublishableKey { get { return "pk_test_wuL50O8i1mAzrmV2xDAXuClJ"; } }
+
+        private static string StagingSecretKey { get { return "sk_test_51JIMdPKRCGzrZhdtfWdqperobTbUALbC7jM1hJ6NnKm3C3fR1cFMQxERjehcxzOThlKYw0V3juhXLyAKzcViAC2H00EXqsFG7H"; } }
+        private static string StagingPublishableKey { get { return "pk_test_51JIMdPKRCGzrZhdtgviypkNlwXqh1u4nVGshwYPVZCGp1Dk95MedDZaN7jy2cwBzGVFaLe2YafD6vLJTr1L5a8Gk00fkzGdARrs"; } }
+
         private static string LiveSecretKey { get { return ConfigurationManager.AppSettings["Stripe.LiveSecretKey"]; } }
         private static string LivePublishableKey { get { return ConfigurationManager.AppSettings["Stripe.LivePublishableKey"]; } }
 
@@ -34,30 +38,25 @@ namespace AfterSchoolLibrary.Billing
         {
             get
             {
-                if(Helpers.Utilities.IsProduction)
+                if (Helpers.Utilities.IsProduction)
                     return LiveSecretKey;
-
-                return TestSecretKey;
+                else if (Helpers.Utilities.IsStaging)
+                    return StagingSecretKey;
+                else
+                    return TestSecretKey;
             }
         }
+
         public static string PublishableKey
         {
             get
             {
                 if (Helpers.Utilities.IsProduction)
                     return LivePublishableKey;
-
-                return TestPublishableKey;
-            }
-        }
-        public static string PlatformClientId
-        {
-            get
-            {
-                if (Helpers.Utilities.IsProduction)
-                    return LivePlatformClientId;
-
-                return DevPlatformClientId;
+                else if (Helpers.Utilities.IsStaging)
+                    return StagingPublishableKey;
+                else
+                    return TestPublishableKey;
             }
         }
 
