@@ -14,7 +14,7 @@ namespace AfterSchoolLibrary.Billing
         private static string TestPublishableKey { get { return "pk_test_wuL50O8i1mAzrmV2xDAXuClJ"; } }
 
         private static string StagingSecretKey { get { return "sk_test_51JIMdPKRCGzrZhdtfWdqperobTbUALbC7jM1hJ6NnKm3C3fR1cFMQxERjehcxzOThlKYw0V3juhXLyAKzcViAC2H00EXqsFG7H"; } }
-        private static string StagingPublishableKey { get { return "pk_test_51JIMdPKRCGzrZhdtgviypkNlwXqh1u4nVGshwYPVZCGp1Dk95MedDZaN7jy2cwBzGVFaLe2YafD6vLJTr1L5a8Gk00fkzGdARrs"; } }
+        private static string StagingPublishableKey { get { return "pk_test_51JIMdPKRCGzrZhdtgviypkNlwXqh1u4nVGshwYPVZCGp1Dk95MedDZaN7jy2cwBzGVFaLe2YafD6vLJTr1L5a8Gk00fkzGdARr"; } }
 
         private static string LiveSecretKey { get { return ConfigurationManager.AppSettings["Stripe.LiveSecretKey"]; } }
         private static string LivePublishableKey { get { return ConfigurationManager.AppSettings["Stripe.LivePublishableKey"]; } }
