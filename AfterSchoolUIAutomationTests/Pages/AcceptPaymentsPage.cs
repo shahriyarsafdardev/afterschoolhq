@@ -16,14 +16,18 @@ namespace AfterSchoolUIAutomationTests.Pages
 
         //------------Finding Accept Payments WebElements-----------//
         private IWebElement ContinueToYourAccountElement => webDriver.FindElement(By.XPath("//p[@class='text-white']//a"));
-        private IWebElement MoreDropdownElement => webDriver.FindElement(By.XPath("//button[@class='btn btn-header-action dropdown-toggle']"));
+        private IWebElement CloseModalBtnElement => webDriver.FindElement(By.XPath("(//div[@class='close-icon'])[1]//a[@class='close close-icon-postion-2']"));
+        private IWebElement GotItButtonElement => webDriver.FindElement(By.XPath("//button[@class='btn btn-success btn-xs']"));
+        private IWebElement FinishSetupElement => webDriver.FindElement(By.Id("popover-container"));
+        private IWebElement MoreDropdownElement => webDriver.FindElement(By.XPath("(//button[@class='btn btn-header-action dropdown-toggle'])[2]"));
         private IWebElement EnableBtnElement => webDriver.FindElement(By.XPath("(//div[@class='dropdown-menu pointer'])[2]//a"));
         private IWebElement ChooseDirectDepositElement => webDriver.FindElement(By.XPath("//table[@class='table table-bordered']//a"));
 
         //----------------Get Paid by Afterschool HQ Elements---------------------//
         private IWebElement IndividualSoleProprietorElement => webDriver.FindElement(By.XPath("(//div[@class='Box-root Padding-left--8'])[1]//label[@Class='PressableControlLabel-label']//span"));
         private IWebElement TestPhoneNumberElement => webDriver.FindElement(By.XPath("(//div[@class='Box-root Flex-flex Flex-alignItems--baseline Flex-direction--row Flex-justifyContent--flexStart'])[4]//span[@class='ButtonLink-label Text-color--blue Text-fontSize--14 Text-fontWeight--medium Text-lineHeight--20 Text-numericSpacing--proportional Text-typeface--base Text-wrap--noWrap Text-display--block']"));
-        private IWebElement NextBtnGetPaidElement => webDriver.FindElement(By.XPath("(//div[@class='Box-root Flex-flex Flex-alignItems--baseline Flex-direction--row Flex-justifyContent--flexStart'])[5]//span[@class='Button-label Text-color--white Text-fontSize--16 Text-fontWeight--medium Text-lineHeight--28 Text-numericSpacing--proportional Text-typeface--base Text-wrap--noWrap Text-display--block']"));
+        private IWebElement NextBtnGetPaidElement => webDriver.FindElement(By.XPath("//div[@class='Box-root Padding-left--8']//div[@class='SVGInline SVGInline--cleaned SVG Icon Icon--arrowRight Button-icon Icon-color Icon-color--white Box-root Flex-flex']"));
+        private IWebElement UseTestCaseElement => webDriver.FindElement(By.XPath("//div[@class='Box-root Flex-flex Flex-alignItems--baseline Flex-direction--row Flex-justifyContent--center']//span[@class='Button-label Text-color--default Text-fontSize--14 Text-fontWeight--medium Text-lineHeight--20 Text-numericSpacing--proportional Text-typeface--base Text-wrap--noWrap Text-display--block']"));
 
         //----------------Personal Details Elements---------------------//
         private IWebElement FirstNameElement => webDriver.FindElement(By.Id("first_name"));
@@ -35,7 +39,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         private IWebElement Address2Element => webDriver.FindElement(By.XPath("(//div[@class='PressableCore-base Box-root'])[10]//input"));
         private IWebElement CityElement => webDriver.FindElement(By.XPath("(//div[@class='PressableCore-base Box-root'])[11]//input"));
         private IWebElement StateSelectElement => webDriver.FindElement(By.XPath("(//div[@class='PressableCore-base Box-root'])[12]//select"));
-        private IWebElement ZIPElement => webDriver.FindElement(By.XPath("(//div[@class='PressableCore-base Box-root'])[13]"));
+        private IWebElement ZIPElement => webDriver.FindElement(By.XPath("(//div[@class='PressableCore-base Box-root'])[13]//input"));
         private IWebElement PhoneElement => webDriver.FindElement(By.XPath("(//div[@class='PressableCore-base Box-root'])[14]//input"));
         private IWebElement SSNElement => webDriver.FindElement(By.XPath("(//div[@class='PressableCore-base Box-root'])[16]//input"));
         private IWebElement NextBtnPersonalDetailElement => webDriver.FindElement(By.XPath("//div[@class='Box-root Flex-flex Flex-alignItems--baseline Flex-direction--rowReversed Flex-justifyContent--center']//span[@class='Button-label Text-color--white Text-fontSize--16 Text-fontWeight--medium Text-lineHeight--28 Text-numericSpacing--proportional Text-typeface--base Text-wrap--noWrap Text-display--block']"));
@@ -56,10 +60,24 @@ namespace AfterSchoolUIAutomationTests.Pages
 
         //------------Finding Accept Payments Helper Methods-----------//
         #region AcceptPaymentsHelperMethods
-        public AcceptPaymentsPage ClickContinueToAccountButton()
+
+        public AcceptPaymentsPage NavigateToFinishSetup(string url)
         {
             webDriver.WaitInSeconds(2);
-            ContinueToYourAccountElement.Click();
+            webDriver.Navigate().GoToUrl(url);
+            return this;
+        }
+
+        public AcceptPaymentsPage ClickCloseModal()
+        {
+            webDriver.WaitInSeconds(2);
+            CloseModalBtnElement.Click();
+            return this;
+        }
+        public AcceptPaymentsPage ClickGotItButton()
+        {
+            GotItButtonElement.Click();
+            webDriver.WaitInSeconds(2);
             return this;
         }
         public AcceptPaymentsPage ClickMoreDropdownButton()
@@ -85,7 +103,7 @@ namespace AfterSchoolUIAutomationTests.Pages
 
         public AcceptPaymentsPage ClickIndividualSoleProprietorRadio()
         {
-            webDriver.WaitInSeconds(6);
+            webDriver.WaitInSeconds(8);
             IndividualSoleProprietorElement.Click();
             return this;
         }
@@ -104,9 +122,16 @@ namespace AfterSchoolUIAutomationTests.Pages
             return this;
         }
 
+        public AcceptPaymentsPage ClickUseTestCode()
+        {
+            webDriver.WaitInSeconds(4);
+            UseTestCaseElement.Click();
+            return this;
+        }
+
         public AcceptPaymentsPage PopulateFirstName(string FirstName)
         {
-            webDriver.WaitInSeconds(2);
+            webDriver.WaitInSeconds(14);
             FirstNameElement.SendKeys(FirstName);
             return this;
         }
@@ -179,6 +204,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         public AcceptPaymentsPage PopulatePhoneNumber(string phone)
         {
             webDriver.WaitInSeconds(1);
+            PhoneElement.Clear();
             PhoneElement.SendKeys(phone);
             return this;
         }
@@ -201,7 +227,7 @@ namespace AfterSchoolUIAutomationTests.Pages
 
         public AcceptPaymentsPage ClickBussinessWebsiteDetails()
         {
-            webDriver.WaitInSeconds(2);
+            webDriver.WaitInSeconds(6);
             string weburl = NextBtnPersonalDetailElement.Text.Trim();
             int pos = weburl.LastIndexOf("/") + 1;
             string activityName = weburl.Substring(pos, weburl.Length - pos);

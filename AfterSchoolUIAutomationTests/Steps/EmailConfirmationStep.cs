@@ -9,7 +9,7 @@ using TechTalk.SpecFlow;
 using AfterSchoolUIAutomationTests.Helpers.Extensions;
 using AfterSchoolUIAutomationTests.Parameters;
 
-namespace AfterSchoolUIAutomationTests.Steps
+namespace AfterSchoolUIAutomationTests2.Steps
 {
     [Binding]
     public sealed class EmailConfirmationStep : IDisposable
@@ -143,23 +143,17 @@ namespace AfterSchoolUIAutomationTests.Steps
             emailConfirmationPage.ClickYopEmailTextInputBtn();
         }
 
-        [Given(@"Click confirmation email")]
-        public void ClickConfirmationLinkmail()
+        [Given(@"Click confirmation email and link")]
+        public void ClickConfirmationMailAndLink()
         {
-            emailConfirmationPage.ClickConfirmationLinkmail();
+            emailConfirmationPage.ClickConfirmationMailAndLink();
         }
 
-        [Given(@"Click email confirmation link")]
-        public void ClickEmailConfirmationLink()
-        {
-            emailConfirmationPage.ClickEmailConfirmationLink();
-        }
-
-        [Then(@"Verify the urls")]
+        [Then(@"Verify the email verification message")]
         public void VerifyAccountCreationContent()
         {
-            string create = "UrlToTest";
-            create.Contains("UrlToTest");
+            string create = "Thank you! Your email has been verified.";
+            create.Contains(emailConfirmationPage.EmailConfirmationComplete());
         }
 
         public void Dispose()

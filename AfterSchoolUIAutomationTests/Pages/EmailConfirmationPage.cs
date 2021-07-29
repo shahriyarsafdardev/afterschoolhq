@@ -21,8 +21,10 @@ namespace AfterSchoolUIAutomationTests.Pages
         private IWebElement ActivityProviderEmailElement => webDriver.FindElement(By.XPath("(//div[@class='activity-detail-block'])[3]//a"));
         private IWebElement YopEmailTextInputElement => webDriver.FindElement(By.XPath("//div[@class='tooltip click']//input"));
         private IWebElement YopEmailRefreshBtnElement => webDriver.FindElement(By.Id("refreshbut"));
-        private IWebElement ConfirmationLinkmailElement => webDriver.FindElement(By.XPath("(//div[@class='m'])[2]"));
-        private IWebElement EmailLinkElement => webDriver.FindElement(By.Id("(//table[2]//a)[2]"));
+        private IWebElement Email1Element => webDriver.FindElement(By.XPath("(//div[@class='mctn']//div[@class='m'])[1]//button//span[@class='lmf']"));
+        private IWebElement Email2Element => webDriver.FindElement(By.XPath("(//div[@class='mctn']//div[@class='m'])[2]//button//span[@class='lmf']"));
+        private IWebElement VerificationLinkInEmailElement => webDriver.FindElement(By.XPath("(//table[2]//a)[2]"));
+        private IWebElement SuccessMessageElement => webDriver.FindElement(By.XPath("//div[@class='panel-body']//p[@class='text-white']"));
 
         //------------Finding Email Confirmation Helper Methods-----------//
 
@@ -54,20 +56,29 @@ namespace AfterSchoolUIAutomationTests.Pages
             return this;
         }
 
-        public EmailConfirmationPage ClickConfirmationLinkmail()
+        public EmailConfirmationPage ClickConfirmationMailAndLink()
         {
-            webDriver.WaitInSeconds(2);
-            ConfirmationLinkmailElement.Click();
-            return this;
+            webDriver.WaitInSeconds(4);
+            Email1Element.Click();
+            if (webDriver.IsElementPresent(By.XPath("(//table[2]//a)[2]")))
+            {
+                VerificationLinkInEmailElement.Click();
+                return this;
+            }
+            else
+            {
+                Email2Element.Click();
+                webDriver.WaitInSeconds(3);
+                VerificationLinkInEmailElement.Click();
+                return this;
+            }
         }
 
-        public EmailConfirmationPage ClickEmailConfirmationLink()
+        public string EmailConfirmationComplete()
         {
-            webDriver.WaitInSeconds(2);
-            EmailLinkElement.Click();
-            return this;
+            webDriver.WaitInSeconds(5);
+            return SuccessMessageElement.Text;
         }
-
 
         public void Dispose()
         {
