@@ -20,6 +20,7 @@ namespace AfterSchoolLibrary.Billing
         private static string LivePublishableKey { get { return ConfigurationManager.AppSettings["Stripe.LivePublishableKey"]; } }
 
         private static string DevPlatformClientId { get { return "ca_7kmNt22jLhXZWtyVV1884Kng6mgs79Jv"; } }
+        private static string StagingPlatformClientId { get { return "ca_JwMhWaF2B2i2OntwfomRxhcmhjrJduce"; } }
         private static string LivePlatformClientId { get { return ConfigurationManager.AppSettings["Stripe.LivePlatformClientId"]; } }
 
         public const decimal StripePercentFee = .029M;
@@ -66,8 +67,10 @@ namespace AfterSchoolLibrary.Billing
             {
                 if (Helpers.Utilities.IsProduction)
                     return LivePlatformClientId;
-
-                return DevPlatformClientId;
+                else if (Helpers.Utilities.IsStaging)
+                    return StagingPlatformClientId;
+                else
+                    return DevPlatformClientId;
             }
         }
 
