@@ -2011,6 +2011,13 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(activity);
         }
 
+        public ActionResult ExportCSV(int id)
+        {
+            var msgs = new SystemMessages();
+            SurveyRequestService.ExportSurveyRequestToCSV(new List<string> {"Name", "Status", "Last Modified" }, id, msgs);
+            return Json(true, JsonRequestBehavior.AllowGet);
+        }
+
         #endregion
 
         [HttpGet]

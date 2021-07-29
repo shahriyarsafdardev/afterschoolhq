@@ -884,5 +884,10 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             return View("messagedetail", am);
         }
+
+        public ActionResult Surveys()
+        {
+            return View();
+        }
     }
 }

@@ -13,13 +13,16 @@
         }
         else
         {
-            <a href="#" class="btn btn-alt6@(actionName == "index" ? "-active" : "")"  onclick="return showUpgradeMyPlan('@(studentCRMPackage.Name)',@(studentCRMPackage.ID))">
+            <a href="#" class="btn btn-alt6@(actionName == "index" ? "-active" : "")" onclick="return showUpgradeMyPlan('@(studentCRMPackage.Name)',@(studentCRMPackage.ID))">
                 <i class="s7-graph2"></i>  Students
             </a>
         }
 
         <a href="@Url.Action("messages", "registration")" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")">
             <i class="s7-graph2"></i>  Messages
+        </a>
+        <a href="@Url.Action("surveys", "registration")" class="btn btn-alt6@(actionName == "surveys" ? "-active" : "")">
+            <i class="s7-cloud"></i>  Surveys
         </a>
     </div>
     <div class="hidden-lg hidden-sm hidden-md">
