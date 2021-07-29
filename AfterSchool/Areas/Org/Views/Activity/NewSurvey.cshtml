@@ -14,7 +14,7 @@
     {
         studentList.Add(new SelectListItem {
             Text = student.RegistrantName,
-            Value = student.Uid.ToString()
+            Value = student.ID.ToString()
         });
     }
 }
@@ -34,6 +34,7 @@
                 @using (Html.BeginForm("SaveSurvey", "Activity", FormMethod.Post))
                 {
                     <input type="hidden" name="id" value="@Model.Uid" />
+                    <input type="hidden" name="activityId" value="@Model.ID" />
                     <div style="clear:both"></div>
                     <div class="row margin-t-30">
                         <div class="col-md-6" @if (!showManageForms) { <text> onclick="return showUpgradeMyPlan()" </text> }>
@@ -89,11 +90,11 @@
                                 {
                                     <div>
                                         @Html.CheckBoxFor(m => studentList[i].Selected, new { @class = "newCheckbox" })
-                                        
+
                                         <span class="margin-h-10 mobile-padding">@Html.DisplayFor(m => studentList[i].Text)</span>
                                         @Html.HiddenFor(m => studentList[i].Value)
                                         @Html.HiddenFor(m => studentList[i].Text)
-                                    </div>                                  
+                                    </div>
                                 }
                             </div>
                         </div>

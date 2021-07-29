@@ -1956,12 +1956,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
             LoadEditSetupViewBag(activity, activityGroup, msgs);
 
-            var activityIds = new List<int>();
-            activityIds.Add(activity.ID.Value);
-
-            var rats = new List<RegistrationAssignmentType>();
-            rats.Add(RegistrationAssignmentType.NotSet);
-
             ViewBag.Students = currentAccount.SearchRegistrations(
               null,
               null,
@@ -1979,8 +1973,26 @@ namespace AfterSchool.Areas.Org.Controllers
 
 
         [HttpPost]
-        public ActionResult SaveSurvey(string id,string formId, string name, string optionalText, bool parents,bool selectedIndividuals, bool? allowmultiple, bool? students, bool? staff, List<SelectListItem> studentList)
+        public ActionResult SaveSurvey(string id,int activityId, int formId, string name, string optionalText, bool parents,bool selectedIndividuals, bool allowmultiple, bool? students, bool? staff, List<SelectListItem> studentList)
         {
+            var msgs = new SystemMessages();
+
+            if (selectedIndividuals){
+                foreach(var student in studentList)
+                {
+                    if(student.Selected)
+                    {
+                        SurveyRequestService.CreateNewSurveyRequest(formId, activityId, student.Value.ToInteger(), name, optionalText, allowmultiple, msgs);
+                    }
+                }
+            }
+            else
+            {
+                foreach (var student in studentList)
+                {
+                    SurveyRequestService.CreateNewSurveyRequest(formId, activityId, student.Value.ToInteger(), name, optionalText, allowmultiple, msgs);
+                }
+            }
 
             return RedirectToAction("Surveys", new { id });
         }
