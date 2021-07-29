@@ -1117,6 +1117,9 @@ namespace AfterSchoolLibrary.Services
 
         public static void CompleteStripeConnect(this Account account, string code, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
+            var teest = "AccountId: " + account.ID + " code: " + code + " loggedInUser: " + loggedInUser.ID;
+            AfterSchoolLibrary.Helpers.Utilities.SystemLog(teest);
+
             var token = StripeHelper.CompleteOAuthConnection(code, msgs);
 
             account.StripePublishableKey = token.StripePublishableKey;

@@ -1534,13 +1534,11 @@ namespace AfterSchool.Areas.Org.Controllers
 
         public ActionResult OAuthStripe()
         {
-            AfterSchoolLibrary.Helpers.Utilities.SystemLog("OAuthStripe called");
             var currentAccount = SessionVariables.CurrentAccount;
 
             if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
-            AfterSchoolLibrary.Helpers.Utilities.SystemLog("current account is not empty");
             var msgs = new SystemMessages();
 
             //.. user is redirected from onbording
@@ -1551,8 +1549,6 @@ namespace AfterSchool.Areas.Org.Controllers
                 currentAccount.CompleteStripeConnect(Request["code"], SessionVariables.CurrentUser, msgs);
             else
                 msgs.Add("It appears you have canceled your request to connect your Stripe account.", MessageType.Notice);
-
-            AfterSchoolLibrary.Helpers.Utilities.SystemLog("msgs has no errors");
 
             if (msgs.HasNoErrors())
             {
