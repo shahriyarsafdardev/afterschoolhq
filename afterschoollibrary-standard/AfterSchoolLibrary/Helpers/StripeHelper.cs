@@ -60,6 +60,17 @@ namespace AfterSchoolLibrary.Billing
             }
         }
 
+        public static string PlatformClientId
+        {
+            get
+            {
+                if (Helpers.Utilities.IsProduction)
+                    return LivePlatformClientId;
+
+                return DevPlatformClientId;
+            }
+        }
+
         private static string StripeAccessToken { get { return StripeHelper.SecretKey; } }
         private static StripeClient StripeClient { get { return new StripeClient(apiKey: StripeAccessToken); } }
 
