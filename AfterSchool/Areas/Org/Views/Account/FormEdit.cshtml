@@ -7,8 +7,7 @@
     var questionGroup = (FormQuestionGroup)ViewBag.QuestionGroup;
     var qgId = new int?();
     var questions = new List<FormQuestion>();
-    var typesWithRating = new List<QuestionType>() { QuestionType.Rating };
-    var typesWithOptions = new List<QuestionType>() { QuestionType.CheckboxList, QuestionType.DropDownList, QuestionType.RadioList, QuestionType.RadioMatrix, QuestionType.Emoji };
+    var typesWithOptions = new List<QuestionType>() { QuestionType.CheckboxList, QuestionType.DropDownList, QuestionType.RadioList, QuestionType.RadioMatrix };
     var typesUserCannotAdd = new List<QuestionType>() { QuestionType.TextBlock, QuestionType.NotSet, QuestionType.RadioMatrix };
 
     if (questionGroup.IsNotEmpty())
@@ -65,26 +64,12 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label">Form Type</label>
+                                    <label class="col-sm-3 control-label">Description</label>
                                     <div class="col-sm-9">
-                                        <select class="form-control formtype-select" id="formtype" name="formtype">
-                                            @foreach (var type in Enum.GetValues(typeof(FormType)).Cast<FormType>())
-                                            {
-                                                <option value="@((int)type)" @(type == Model.FormTypeId ? "selected=\"selected\"" : "")>
-                                                    @type.ToString().SplitByUpperCase()
-                                                </option>
-                                            }
-                                        </select>
-                                    </div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label class="col-sm-3 control-label">Description</label>
-                                        <div class="col-sm-9">
-                                            <textarea name="description" id="description" class="form-control" rows="5">@Model.Description</textarea>
-                                        </div>
+                                        <textarea name="description" id="description" class="form-control" rows="5">@Model.Description</textarea>
                                     </div>
                                 </div>
+                            </div>
                         </div>
                     }
                     else
@@ -128,37 +113,20 @@
                             </div>
                             <div class="panel-body">
                                 <div class="table-responsive">
-                                    <table class="table table-striped question-table" id="question-table">
+                                    <table class="table table-striped" id="question-table">
                                         <thead>
                                             <tr>
-                                                <th>Order</th>
                                                 <th>Question Label</th>
                                                 <th></th>
                                                 <th></th>
                                                 <th>Ask? (<a href="javascript:checkAllActive()">All</a> / <a href="javascript:uncheckAllActive()">None</a>)</th>
                                                 <th>Required? (<a href="javascript:checkAllRequired()">All</a> / <a href="javascript:uncheckAllRequired()">None</a>)</th>
-                                                <th>Answer Description? (<a href="javascript:checkAllRequired()">All</a> / <a href="javascript:uncheckAllRequired()">None</a>)</th>
-                                                <th>Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach (var question in questions)
                                             {
-                                                <tr class="questionRow">
-                                                    <td>
-                                                        <label class="lbl-display-order" id="displayOrderlabel-@question.ID">
-                                                            @question.DisplayOrder
-                                                        </label>
-                                                        <input type="hidden"
-                                                               id="sortorder-@question.ID"
-                                                               name="displayOrderId-@question.ID" class="displayOrderId"
-                                                               value=" @question.DisplayOrder" />
-                                                        <input type="hidden"
-                                                               id="questionid-@question.ID"
-                                                               name="questionid-@question.ID"
-                                                               class="questionId"
-                                                               value=" @question.ID" />
-                                                    </td>
+                                                <tr>
                                                     <td>
                                                         @if (question.QuestionTypeId != QuestionType.TextBlock)
                                                         {
@@ -239,30 +207,19 @@
                                                                id="link-text-@question.ID"
                                                                name="link-text-@question.ID"
                                                                value="@question.Link" />
-                                                        <button type="button"
-                                                                class="btn btn-default md-trigger btn-space hide"
-                                                                data-modal="modal-rating"
-                                                                onclick="setRating(@question.ID)"
-                                                                id="btn-setratings-@question.ID">
-                                                            Edit Ratings
-                                                        </button>
-                                                        <input type="hidden"
-                                                               id="rating-text-@question.ID"
-                                                               name="rating-text-@question.ID"
-                                                               value="@question.Options" />
                                                     </td>
 
                                                     <td>
                                                         @{Html.RenderPartial(
-                                                                          "~/Views/Shared/_SwitchButton.cshtml",
-                                                                          question.IsActive,
-                                                                          new ViewDataDictionary()
-                                                                          {
+                                                                    "~/Views/Shared/_SwitchButton.cshtml",
+                                                                    question.IsActive,
+                                                                    new ViewDataDictionary()
+                                                                    {
                                                                             { "checkboxname", "active-" + question.ID },
                                                                             { "checkboxid", "active-" + question.ID },
                                                                             { "disabled", question.IsLocked },
                                                                             { "classname", "question-isactive" }
-});}
+                          });}
                                                     </td>
                                                     <td>
                                                         @if (question.QuestionTypeId != QuestionType.TextBlock)
@@ -276,23 +233,8 @@
                                                                             { "checkboxid", "required-" + question.ID },
                                                                             { "disabled", question.IsLocked },
                                                                             { "classname", "question-isrequired" }
-});
+                           });
                                                         }
-                                                    </td>
-                                                    <td>
-                                                        @{Html.RenderPartial(
-                                                                            "~/Views/Shared/_SwitchButton.cshtml",
-                                                                            question.IsAnswerDescriptionEnabled,
-                                                                            new ViewDataDictionary()
-                                                                            {
-                                                                            { "checkboxname", "answerDescription-" + question.ID },
-                                                                            { "checkboxid", "answerDescription-" + question.ID },
-                                                                            { "disabled", question.IsLocked },
-                                                                            { "classname", "question-IsAnswerDescriptionEnabled" }
-});}
-                                                    </td>
-                                                    <td>
-                                                        <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteQuestion('@question.Text', '@Url.Action("delete","Account", new { id = @question.ID.ToString()})')"><span class="text-danger"><i class="s7-trash"></i></span></button>
                                                     </td>
                                                 </tr>
                                             }
@@ -352,12 +294,12 @@
                         </li>
 
                         @{ Html.RenderPartial("_FormEditMenu",
-                                         Model,
-                                         new ViewDataDictionary() {
+                                 Model,
+                                 new ViewDataDictionary() {
                                         { "RegistrantType", RegistrantType.Individual },
                                         { "QuestionGroups", individualGroups },
                                         { "QuestionGroupId", qgId }
-});
+                 });
                         }
 
                         <li class="dd-item">
@@ -370,12 +312,12 @@
                         </li>
 
                         @{ Html.RenderPartial("_FormEditMenu",
-                                         Model,
-                                         new ViewDataDictionary() {
+                                 Model,
+                                 new ViewDataDictionary() {
                                         { "RegistrantType", RegistrantType.Organization },
                                         { "QuestionGroups", organizationGroups },
                                         { "QuestionGroupId", qgId }
-});
+                 });
                         }
 
                     </ol>
@@ -389,66 +331,31 @@
 
 </div>
 
-<!------- Options and Emoji Modal Pop-up------------->
+
 <div id="modal-options" class="md-modal colored-header custom-width md-effect-9">
-    <form id="form-options" name="form-options" action="#" method="post">
+    <form id="form-options" action="#" method="post">
         <div class="md-content">
             <div class="modal-header">
                 <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
-                <h3 class="modal-title">Edit <span id="modal-options-title">Options</span></h3>
+                <h3 class="modal-title">Edit Options</h3>
             </div>
             <div class="modal-body form">
 
                 <p>Update your options here. Your options are not saved until you hit the save button on the screen</p>
 
-                <div class="table-responsive">
-                    <table class="table options-table emoji-option-table" id="options-table">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>Value <span style="color:red">*</span></th>
-                                <th>Description (optional)</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="questionRow">
-                                <td>
-                                    Option 1
-                                </td>
-                                <td>
-                                    <input type="text" value="" id="option-1" required class="form-control col-sm-3 option" onfocus="this.select()" />
-                                </td>
-                                <td>
-                                    <input type="text" value="" id="optionDescription-1" class="form-control col-sm-3 optionDescription" onfocus="this.select()" />
-                                </td>
-                                <td>
-                                    <button type="button" class="btn btn-default btn-sm md-trigger" onclick="removeOption($(this).closest('tr').attr('id'))"><span class="text-danger"><i class="s7-trash"></i></span></button>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td colspan="4">
-                                    <button type="button" class="btn btn-default" onclick="addOption()">
-                                        <i class="s7-plus"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="form-group">
+                    <label><span id="question-options-label"></span> (options must be separated by commas)</label>
+                    <textarea class="form-control" id="question-options" name="question-options" rows="6" placeholder="ex: option 1, option 2, option 3"></textarea>
                 </div>
-
-
             </div>
             <div class="modal-footer">
                 <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-                <button type="button" data-dismiss="modal" class="btn btn-primary" onclick="updateOptions()">Done</button>
+                <button type="button" data-dismiss="modal" class="btn btn-primary md-close" onclick="updateOptions()">Done</button>
             </div>
         </div>
     </form>
 </div>
-<!------- Enf of Options and Emoji Modal Pop-up------------->
-<!------- Link Modal Pop-up------------->
+
 <div id="modal-link" class="md-modal colored-header custom-width md-effect-9">
     <form id="form-link" action="#" method="post">
         <div class="md-content">
@@ -472,63 +379,6 @@
         </div>
     </form>
 </div>
-<!------- End of Link Modal Pop-up------------->
-<!------- Rating Modal Pop-up------------->
-<div id="modal-rating" class="md-modal colored-header custom-width md-effect-9">
-    <form id="form-rating" action="#" method="post">
-        <div class="md-content">
-            <div class="modal-header">
-                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
-                <h3 class="modal-title">Edit Rating</h3>
-            </div>
-            <div class="modal-body form">
-
-                <p>Enter Min, Max and Increment values. Your options are not saved until you hit the save button on the screen</p>
-
-                <div class="form-group">
-                    @*<label><span id="question-rating-label1"></span></label>*@
-                    <label><span id="question-rating-label1"></span></label>
-                    <input class="form-control" id="question-rating-min" name="question-rating-min" required placeholder="Enter the minimum value" />
-                </div>
-
-                <div class="form-group">
-                    <label><span id="question-rating-label2"></span></label>
-                    <input class="form-control" id="question-rating-max" name="question-rating-max" required placeholder="Enter the maximum value" />
-                </div>
-
-                <div class="form-group">
-                    <label><span id="question-rating-label3"></span></label>
-                    <input class="form-control" id="question-rating-increment" name="question-rating-increment" placeholder="Enter the increment value" />
-                </div>
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-                <button type="button" data-dismiss="modal" class="btn btn-primary md-close" onclick="updateRating()">Done</button>
-            </div>
-        </div>
-    </form>
-</div>
-<!-------End of Rating Modal Pop-up------------->
-<!------- Delete Modal Pop-up------------->
-<div id="modal-delete" class="md-modal colored-header custom-width md-effect-9">
-    <div class="md-content">
-        <div class="modal-header">
-            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
-            <h3 class="modal-title">Delete Question</h3>
-        </div>
-        <div class="modal-body form">
-
-            <p>Are you sure you want to delete <strong><span id="delete-question-name"></span></strong>? </p><p>This action cannot be undone.</p>
-
-        </div>
-        <div class="modal-footer">
-            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-            <a class="btn btn-danger" href="#" id="delete-question-button">Delete &raquo;</a>
-        </div>
-    </div>
-</div>
-<!-------End of Delete Modal Pop-up------------->
 
 <script>
     var selectedQuestion = null;
@@ -543,17 +393,6 @@
 
     function getLabelTextbox() {
         return `<input type="text" id="text-${getQuestionCount()}" name="new-text-${getQuestionCount()}" value="" required class="form-control col-sm-3" onfocus="this.select()" data-tooltip-id="text-${getQuestionCount()}" placeholder="Enter your question" />`;
-    }
-    function getSortOrder() {
-
-        var rowCount = $('#question-table tr').length;
-        return `<label class="lbl-display-order" id="displayOrderlabel-${getQuestionCount()}">${--rowCount}</label>
-                 <input type="hidden" id="questionid-${getQuestionCount()}" name="questionid-${getQuestionCount()}" class="questionId" value="${getQuestionCount()}" />
-                <input type="hidden" id="sortorder-${getQuestionCount()}" name="new-sort-${getQuestionCount()}" class="displayOrderId" value="${rowCount} " />`;
-    }
-
-    function getDeleteIcon() {
-        return `<button class="btn btn-default btn-sm md-trigger" onclick="$(this).closest('tr').remove();"><span class="text-danger"><i class="s7-trash"></i></span></button>`;
     }
 
     function getShowCheckbox() {
@@ -580,18 +419,6 @@
             });}`.replace(/::number::/g, getQuestionCount());
     }
 
-    function getDescriptionCheckbox() {
-        return `@{Html.RenderPartial(
-            "~/Views/Shared/_SwitchButton.cshtml",
-            false,
-            new ViewDataDictionary()
-            {
-                { "checkboxname", "new-description-enabled-::number::" },
-                { "checkboxid", "description-::number::" },
-                { "disabled", false }
-            });}`.replace(/::number::/g, getQuestionCount());
-    }
-
     function getQuestionTypeList() {
         var rtn = `<select class="form-control" onChange="showEditButton(${getQuestionCount()})" id="questiontype-${getQuestionCount()}" name="new-questiontype-${getQuestionCount()}">`;
         @foreach (var type in Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>().Where(questionType => !typesUserCannotAdd.Contains(questionType)))
@@ -603,7 +430,7 @@
     }
 
     function getOptionsLinks() {
-        return `<button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-options" onclick="setOptions(${getQuestionCount()})" id="btn-setoptions-${getQuestionCount()}">Edit Options</button><input type="hidden" id="options-text-${getQuestionCount()}" name="new-options-text-${getQuestionCount()}" value="" /><button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-link" onclick="setLink(${getQuestionCount()})" id="btn-setlink-${getQuestionCount()}">Add/Edit Link</button><input type="hidden" id="link-text-${getQuestionCount()}" name="new-link-text-${getQuestionCount()}" value="" /><button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-rating" onclick="setRating(${getQuestionCount()})" id="btn-setratings-${getQuestionCount()}">Set Rating</button><input type="hidden" id="displayOrderId-${getQuestionCount()}" name="displayOrderId-${getQuestionCount()}" class="displayOrderId" value="" />`;
+        return `<button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-options" onclick="setOptions(${getQuestionCount()})" id="btn-setoptions-${getQuestionCount()}">Edit Options</button><input type="hidden" id="options-text-${getQuestionCount()}" name="new-options-text-${getQuestionCount()}" value="" /><button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-link" onclick="setLink(${getQuestionCount()})" id="btn-setlink-${getQuestionCount()}">Add/Edit Link</button><input type="hidden" id="link-text-${getQuestionCount()}" name="new-link-text-${getQuestionCount()}" value="" />`;
     }
 
     function getDescription() {
@@ -614,53 +441,14 @@
         return `<input type="hidden" id="questiontype-${getQuestionCount()}" name="new-questiontype-${getQuestionCount()}"" value="@((int)QuestionType.TextBlock)" />`
     }
 
-    function getOptionsRowCount() {
-        var rowCount = $('#options-table tr').length;
-        return rowCount - 1;
-    }
-
     function addQuestion() {
         $('#question-table')
             .find('tr')
             .last()
-            .before(`<tr><td>${getSortOrder()}</td><td>${getLabelTextbox()}</td><td>${getQuestionTypeList()}</td><td>${getOptionsLinks()}</td><td>${getShowCheckbox()}</td><td>${getRequiredCheckbox()}</td><td>${getDescriptionCheckbox()}</td><td>${getDeleteIcon()}</td></tr>`);
+            .before(`<tr><td>${getLabelTextbox()}</td><td>${getQuestionTypeList()}</td><td>${getOptionsLinks()}</td><td>${getShowCheckbox()}</td><td>${getRequiredCheckbox()}</td></tr>`);
 
         incrementQuestionCount();
         $('.md-trigger').modalEffects();
-        var rowCount = $('#question-table tr').length;
-    }
-
-    function addOptionRow(optionType, optionNo, optionValue, optionDescriptionValue) {
-        $('#options-table')
-            .find('tr')
-            .last()
-            .before(`<tr class="questionRow" id="${optionType}-${optionNo+1}"><td>${optionType} ${optionNo+1}</td><td><input type="text" value="${optionValue}" required class="form-control col-sm-3 option" onfocus="this.select()" /></td><td><input type="text" value="${optionDescriptionValue}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" /></td><td><button class="btn btn-default btn-sm md-trigger" onclick="removeOption($(this).closest('tr').attr('id'))"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
-    }
-
-    function addOption() {
-        var optionType = "Option";
-        if ($('#modal-options-title').text() == 'Emojis') {
-            optionType = "Emoji";
-        }
-        $('#options-table')
-            .find('tr')
-            .last()
-            .before(`<tr class="questionRow" id="${optionType}-${getOptionsRowCount()}"><td>${optionType} ${getOptionsRowCount()}</td><td><input type="text" value="" id="option- ${getOptionsRowCount()}" required class="form-control col-sm-3 option" onfocus="this.select()" /></td><td><input type="text" value="" id="optionDescription- ${getOptionsRowCount()}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" /></td><td><button type="button" class="btn btn-default btn-sm md-trigger" onclick="removeOption($(this).closest('tr').attr('id'))"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
-    }
-
-    function removeOption(id) {
-        event.preventDefault();
-        var index = id.split("-")[1];
-        var optionType = id.split("-")[0];
-        $("#" + id).remove();
-        var totalRows = $('#options-table tr').length - 2;
-        $("#options-table tbody tr").each(function (i) {
-            var newid = i + 1;
-            if (i < totalRows) {
-                $(this).find($('td:first-child')).text(optionType + " " + newid);
-                $(this).attr("id", optionType + "-" + newid);
-            }
-        });
     }
 
     function addTextBlock() {
@@ -668,102 +456,36 @@
             .find('tr')
             .last()
             .before(`<tr><td colspan="3">${getDescription()}${getTextBlockQuestionType()}</td><td>${getShowCheckbox()}</td><td></td></tr>`);
+
         incrementQuestionCount();
     }
 
+
+
     function showEditButton(id) {
         var arr = [@Html.Raw(typesWithOptions.Select(x=> "'" + ((int)x) + "'").ToStringList())];
-        var arrRating = [@Html.Raw(typesWithRating.Select(x=> "'" + ((int)x) + "'").ToStringList())];
         var select = $(`#questiontype-${id}`);
-
         if (arr.indexOf(select.val()) > -1) {
             $(`#btn-setoptions-${id}`).removeClass('hide');
             $(`#btn-setlink-${id}`).addClass('hide');
-            $(`#btn-setratings-${id}`).addClass('hide');
-        }
-        else if (arrRating.indexOf(select.val()) > -1) {
-            $(`#btn-setoptions-${id}`).addClass('hide');
-            $(`#btn-setlink-${id}`).addClass('hide');
-            $(`#btn-setratings-${id}`).removeClass('hide');
-        }
-        else if (select.val() == '@((int)QuestionType.Checkbox)') {
+        } else if (select.val() == '@((int)QuestionType.Checkbox)') {
             $(`#btn-setoptions-${id}`).addClass('hide');
             $(`#btn-setlink-${id}`).removeClass('hide');
-            $(`#btn-setratings-${id}`).addClass('hide');
-        }
-        else {
+        } else {
             $(`#btn-setoptions-${id}`).addClass('hide');
             $(`#btn-setlink-${id}`).addClass('hide');
-            $(`#btn-setratings-${id}`).addClass('hide');
         }
     }
 
-    //--Set options type based on emoji/option question type and their labels
     function setOptions(id) {
         selectedQuestion = id;
-        var optionType = "Option";
-        $('#modal-options-title').text("Options");
-
-        //---1---If options type is emoji, then set emoji option and labels
-        if ($('#questiontype-' + id).val() == 16) {
-            $('#modal-options-title').text("Emojis");
-            optionType = "Emoji";
-        }
-
-        //---2---Get option values from hidden field
-        var options = $('#options-text-' + selectedQuestion).val();
-        var rowCount = $("#options-table tr").length - 1;
-
-        //---3---Initialize Modal table, so that for other questions, old question data get removed. we will keep the header and footer rows
-        $("#options-table tr").each(function (index) {
-            if (index != 0 && index != rowCount) {
-                $(this).remove();
-            }
-        });
-
-        //---4--If options have value then parse string, create rows and populate with values.
-        if (options != '') {
-            var numberofOptionRows = (options.split(",").length);
-            indivdualOption = options.split(',');
-            //---Check if numberofOptionRows has value
-            for (var i = 0; i < numberofOptionRows; i++) {
-                var optionRow = indivdualOption[i];
-                var optionRowArray = optionRow.split('=');
-                optionNo = i;
-                optionValue = optionRowArray[0];
-                optionDescriptionValue = optionRowArray[1];
-                //create new row for option modal
-                addOptionRow(optionType, optionNo, optionValue, optionDescriptionValue)
-            }
-            indivdualOption = null;
-        }
+        $('#question-options-label').html($('#text-' + id).val());
+        $('#question-options').val($('#options-text-' + id).val());
     }
 
     function updateOptions() {
         if (!isNaN(selectedQuestion)) {
-            var optionString = '';
-            var rowCount = $("#options-table tr").length - 1;
-            var validation = true;
-            $("#options-table tr").each(function (index) {
-                if (index != 0 && index != rowCount) {
-                    if ($(this).find("input.option").val() == "") {
-                        $(this).find("input.option").addClass("danger");
-                        validation = false;
-                    }
-                    else {
-                        $(this).find("input.option").removeClass("danger");
-                    }
-                    var rowOption = $(this).find("input.option").val() + "=" + $(this).find("input.optionDescription").val() + ",";
-                    optionString = optionString + rowOption;
-                }
-            });
-            if (validation == true) {
-                var commaIndex = optionString.lastIndexOf(",");
-                var optionWithoutLastComma = optionString.substring(0, commaIndex);
-                $('#options-text-' + selectedQuestion).val(optionWithoutLastComma);
-                $("#modal-options").removeClass("md-show");
-            }
-            else return false;
+            $('#options-text-' + selectedQuestion).val($('#question-options').val());
         }
     }
 
@@ -778,36 +500,6 @@
         if (!isNaN(selectedLinkQuestion)) {
             $('#link-text-' + selectedLinkQuestion).val($('#question-link').val());
         }
-    }
-
-    //called when rating modal is going to display
-    function setRating(id) {
-        selectedLinkQuestion = id;
-        var ratingString = $('#options-text-' + id).val();
-        var ratingValues = ratingString.split(",");
-        $('#question-rating-label').html($('#text-' + id).val());
-        //if question exist then read data from hidden field and populate text fields
-        if (ratingValues.length > 1) {
-            $('#question-rating-min').val(ratingValues[0]);
-            $('#question-rating-max').val(ratingValues[1])
-            ratingValues.length > 2 ? $('#question-rating-increment').val(ratingValues[2]) : $('#question-rating-increment').val('');
-        }
-        //setting default values
-        else {
-            $('#question-rating-min').val('1');
-            $('#question-rating-max').val('5');
-            $('#question-rating-increment').val('1');
-        }
-    }
-
-    function updateRating() {
-            $('#options-text-' + selectedLinkQuestion).val($('#question-rating-min').val() + "," + $('#question-rating-max').val() + "," + $('#question-rating-increment').val());
-    }
-
-    function deleteQuestion(name, url) {
-        event.preventDefault();
-        $('#delete-question-name').html(name);
-        $('#delete-question-button').attr('href', url);
     }
 
     function navigateForm(url) {
@@ -850,40 +542,6 @@
         $('.questiontype-select').each(function () {
             var id = $(this).attr('id').split('-')[1];
             showEditButton(id);
-        });
-    });
-</script>
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
-<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/themes/smoothness/jquery-ui.css" />
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js"></script>
-<script type="text/javascript">
-    $(function () {
-        var selectQuestionId, oldPosition, newPosition;
-        $("#question-table").sortable({
-            items: 'tr',
-            cursor: 'pointer',
-            axis: 'y',
-            dropOnEmpty: false,
-            start: function (e, ui) {
-                ui.item.addClass("selected");
-                var questionId = $(ui.item).find(".questionId").val();
-                oldPosition = ui.item.index();
-                var rowCount = $('#question-table tr').length;
-            },
-            stop: function (e, ui) {
-                var inputs = $('input.currentposition');
-                var nbElems = inputs.length;
-                $('input.currentposition').each(function (idx) {
-                    $(this).val(nbElems - idx);
-                });
-                var totalRows = $('#question-table tr').length - 2;
-                $("#question-table tbody tr").each(function (i) {
-                    if (i < totalRows) {
-                        $(this).find(".lbl-display-order").text(i + 1);
-                        $(this).find(".displayOrderId").val(i + 1);
-                    }
-                });
-            }
         });
     });
 </script>
