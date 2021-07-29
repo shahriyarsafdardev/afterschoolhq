@@ -173,8 +173,8 @@ namespace AfterSchool.Areas.User.Controllers
 
             if (msgs.HasNoErrors())
             {
-                if(returntocheckout.IsNotEmpty())
-                    return RedirectToAction("select", "Account", new { Area = "" });
+                //if(returntocheckout.IsNotEmpty())
+                //    return RedirectToAction("select", "Account", new { Area = "" });
                 
                 return RedirectToAction("EditHealth", new { id = registrant.Uid, reg, student });
             }
