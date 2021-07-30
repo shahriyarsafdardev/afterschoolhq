@@ -1,8 +1,9 @@
 ﻿@model List<RefundRequest>
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
-    var totalRequestAmount = Model.Sum(request => Math.Min(request.Amount.Value, request.GetTransaction().GetBillerAmount()));
+    var totalRequestAmount = Model.Sum(request => Math.Min(request.Amount.Value, request.GetTransaction().GetPayerAmount()));
     var totalAmountAvailable = (decimal)ViewBag.AmountAvailableToRefund;
+    var totalAmountRefunded = (decimal)ViewBag.AmountRefunded;
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -20,6 +21,15 @@
 
         <div class="panel-body">
             <div class="row">
+                <div class="col-md-3">
+                    <div class="widget widget-tile widget-bordered">
+                        <div class="data-info">
+                            <div data-toggle="counter" data-end="@totalAmountRefunded" id="lblAmountRefunded" data-decimals="2" data-suffix="" class="value">@totalAmountRefunded.ToCurrency()</div>
+                            <div class="desc">Total Amount Refunded</div>
+                        </div>
+                        <div class="icon"><span class=""></span></div>
+                    </div>
+                </div>
                 <div class="col-md-3">
                     <div class="widget widget-tile widget-bordered">
                         <div class="data-info">
@@ -80,7 +90,7 @@
                                         @transaction.Description
                                     </td>
                                     <td class="text-center">
-                                        @transaction.GetBillerAmount().ToCurrency()
+                                        @transaction.GetPayerAmount().ToCurrency()
                                     </td>
                                     <td class="text-center">
                                         @request.Amount.ToCurrency()

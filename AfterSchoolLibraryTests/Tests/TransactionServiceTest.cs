@@ -251,6 +251,85 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(refund.IsNotEmpty());
             Assert.True(transaction.IsTotallyRefunded(true, msgs, dc));
         }
+        
+        [Theory]
+        [InlineData(110, 6, 4)]
+        public void GetRefundableAmountWithCCFeeTest(decimal amount, decimal convenienceFee, decimal paymentTypeFee)
+        {
+            try
+            {
+                var transaction = TransactionFactory.Create(
+                    BillerAccount,
+                    PayerAccount,
+                    PaymentType.ACH,
+                    amount, //here this will be a payer amount as we are dealing with transaction table
+                    0,
+                    0,
+                    BillerAccount.ID.Value,
+                    PayerAccount.ID.Value,
+                    convenienceFee,
+                    paymentTypeFee,
+                    msgs,
+                    dc,
+                    TransactionType.Charge
+                );
 
+                var refundableAmount = transaction.GetRefundableAmount(allowFullAmountRefund: false, isPartialRefundWithConvenienceFee: true, msgs: msgs, dc: dc);
+                var expectedRefund = amount - paymentTypeFee;
+                var expectedRefund2 = transaction.GetBillerAmount(msgs, dc) + convenienceFee;
+
+                Assert.Equal(refundableAmount, expectedRefund);
+                Assert.Equal(refundableAmount, expectedRefund2);
+                Assert.True(msgs.HasNoErrors());
+            }
+            catch (Exception ex)
+            {
+                Assert.False(true, ex.Message);
+            }           
+        }
+
+        [Theory]
+        [InlineData(110, 6, 4)]
+        public void IsAmountRefundableWithCCFeeTest(decimal amount, decimal convenienceFee, decimal paymentTypeFee)
+        {
+            try
+            {
+                var transaction = TransactionFactory.Create(
+                    BillerAccount,
+                    PayerAccount,
+                    PaymentType.ACH,
+                    amount, //here this will be a payer amount as we are dealing with transaction table
+                    0,
+                    0,
+                    BillerAccount.ID.Value,
+                    PayerAccount.ID.Value,
+                    convenienceFee,
+                    paymentTypeFee,
+                    msgs,
+                    dc,
+                    TransactionType.Charge
+                );
+
+                var issAmountRefundable1 = transaction.IsAmountRefundable(107, allowFullAmountRefund: false, isPartialRefundWithConvenienceFee: true, msgs: msgs, dc: dc);
+                var issAmountRefundable2 = transaction.IsAmountRefundable(110, allowFullAmountRefund: false, isPartialRefundWithConvenienceFee: true, msgs: msgs, dc: dc);
+                var issAmountRefundable3 = transaction.IsAmountRefundable(106, allowFullAmountRefund: false, isPartialRefundWithConvenienceFee: true, msgs: msgs, dc: dc);
+                var issAmountRefundable4 = transaction.IsAmountRefundable(108, allowFullAmountRefund: false, isPartialRefundWithConvenienceFee: true, msgs: msgs, dc: dc);
+                var issAmountRefundable5 = transaction.IsAmountRefundable(100, allowFullAmountRefund: false, isPartialRefundWithConvenienceFee: true, msgs: msgs, dc: dc);
+                var issAmountRefundable6 = transaction.IsAmountRefundable(0, allowFullAmountRefund: false, isPartialRefundWithConvenienceFee: true, msgs: msgs, dc: dc);
+
+                Assert.False(issAmountRefundable1);
+                Assert.False(issAmountRefundable2);
+                Assert.True(issAmountRefundable3);                
+                Assert.False(issAmountRefundable4);
+                Assert.True(issAmountRefundable5);
+                Assert.False(issAmountRefundable6);
+
+                Assert.True(msgs.HasNoErrors());
+            }
+            catch (Exception ex)
+            {
+                Assert.False(true, ex.Message);
+            }
+        }
     }
 }

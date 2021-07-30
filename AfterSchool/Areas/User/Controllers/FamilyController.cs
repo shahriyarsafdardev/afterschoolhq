@@ -67,7 +67,7 @@ namespace AfterSchool.Areas.User.Controllers
         }
 
         [HttpGet]
-        public ActionResult EditStudentPersonal(string id, string returntocheckout)
+        public ActionResult EditStudentPersonal(string id, string resetgrade)
         {
             var msgs = new SystemMessages();
             Registrant registrant = null;
@@ -91,7 +91,7 @@ namespace AfterSchool.Areas.User.Controllers
             }
 
             ViewBag.Messages = msgs;
-            ViewBag.ReturnToCheckout = returntocheckout.IsNotEmpty();
+            ViewBag.ResetGrade = resetgrade.IsNotEmpty().ToString().ToLower();
 
             return View(registrant);
         }
@@ -100,7 +100,7 @@ namespace AfterSchool.Areas.User.Controllers
         // and we also need location parameters like decimal latitude and decimal longitude to be nullable, as placeid can be empty
         // when user checks 'schoolnotfound', so formcollection is used.
         [HttpPost]
-        public ActionResult EditStudentPersonal(string id, string reg, string student,  string returntocheckout, FormCollection formCollection)
+        public ActionResult EditStudentPersonal(string id, string reg, string student, string returnUrl, FormCollection formCollection)
         {
             var msgs = new SystemMessages();
             Registrant registrant = null;
@@ -172,15 +172,9 @@ namespace AfterSchool.Areas.User.Controllers
             }
 
             if (msgs.HasNoErrors())
-            {
-                if(returntocheckout.IsNotEmpty())
-                    return RedirectToAction("select", "Account", new { Area = "" });
-                
-                return RedirectToAction("EditHealth", new { id = registrant.Uid, reg, student });
-            }
+                return RedirectToAction("EditHealth", new { id = registrant.Uid, reg, student, returnUrl });
 
             ViewBag.Messages = msgs;
-            ViewBag.ReturnToCheckout = returntocheckout.IsNotEmpty();
 
             return View(registrant);
         }
@@ -238,7 +232,7 @@ namespace AfterSchool.Areas.User.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditHealth(string id, string reg, string student)
+        public ActionResult EditHealth(string id, string reg, string student, string returnUrl)
         {
             var msgs = new SystemMessages();
             Registrant registrant = null;
@@ -297,6 +291,10 @@ namespace AfterSchool.Areas.User.Controllers
 
                 ViewBag.QuestionViewModels = qvms;
             }
+
+
+            if (returnUrl.IsNotEmpty())
+                return Redirect(returnUrl);
 
             if (student.IsGuid())
             {

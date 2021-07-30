@@ -11,18 +11,18 @@ using System.Configuration;
 
 namespace AfterSchoolLibrary.Models
 {
-	public class Database
-	{
+    public class Database
+    {
 		#region "ClassGenerator"
 		public static DatabaseCredentials ProductionCredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
 		public static DatabaseCredentials LocalCredentials { get { return new DatabaseCredentials("localhost", "AfterSchool", "AfterSchoolUser", "Nj8Ed$wpLfJ"); } }
 		public static DatabaseCredentials CICredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
 		public static DatabaseCredentials QACredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
-		public static DatabaseCredentials TestCredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
-		public static DatabaseCredentials StagingCredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
+		public static DatabaseCredentials TestCredentials { get { return new DatabaseCredentials("afterschool-nonprod.cdyenngbc33v.us-east-2.rds.amazonaws.com", "AfterSchoolTest", "AfterSchoolTestUser", "jUp$dBh8D9o)3Rf"); } }
+		public static DatabaseCredentials StagingCredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }		
 		public static DatabaseCredentials LocalTestCredentials { get { return new DatabaseCredentials("localhost", "AfterSchoolTest", "AfterSchoolUser", "Nj8Ed$wpLfJ"); } }
-		public static DatabaseCredentials Credentials { get { if (Helpers.Utilities.IsProduction) { return ProductionCredentials; } else if (Helpers.Utilities.IsCI) { return CICredentials; } else if (Helpers.Utilities.IsStaging) { return StagingCredentials; } else if (Helpers.Utilities.IsQA) { return QACredentials; } else { return LocalCredentials; } } }
-
+		public static DatabaseCredentials Credentials { get { if(Helpers.Utilities.IsProduction){return ProductionCredentials;} else if(Helpers.Utilities.IsCI){return CICredentials;} else if(Helpers.Utilities.IsStaging){return StagingCredentials;} else if(Helpers.Utilities.IsQA){return QACredentials;} else{return LocalCredentials;} } }
+		
 
 		public static SystemMessages CreateTables(DatabaseConnection dc = null)
 		{
@@ -102,7 +102,7 @@ namespace AfterSchoolLibrary.Models
 			WebSession.Create(dc);
 			WebSessionAction.Create(dc);
 			WebSessionObjectSnapshot.Create(dc);
-
+			
 
 			return msgs;
 		}
@@ -293,13 +293,13 @@ namespace AfterSchoolLibrary.Models
 			RegistrantActivity.Update(new Hashtable(){{"AssignmentTypeId",0}}, new Hashtable(){{"AssignmentTypeId", DBNull.Value}}, RegistrantActivity.ObjectMap, dc);
 			ActivityForm.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, ActivityForm.ObjectMap, dc);
 			ActivityForm.Update(new Hashtable(){{"IsPublished",false}}, new Hashtable(){{"IsPublished", DBNull.Value}}, ActivityForm.ObjectMap, dc);
-			Form.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, Form.ObjectMap, dc);
+			Form.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, Form.ObjectMap, dc);			
 			FormQuestion.Update(new Hashtable(){{"IsTemplate",false}}, new Hashtable(){{"IsTemplate", DBNull.Value}}, FormQuestion.ObjectMap, dc);
 			FormQuestion.Update(new Hashtable(){{"QuestionTypeId",0}}, new Hashtable(){{"QuestionTypeId", DBNull.Value}}, FormQuestion.ObjectMap, dc);
 			FormQuestion.Update(new Hashtable(){{"QuestionDataTypeId",0}}, new Hashtable(){{"QuestionDataTypeId", DBNull.Value}}, FormQuestion.ObjectMap, dc);
 			FormQuestion.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, FormQuestion.ObjectMap, dc);
 			FormQuestion.Update(new Hashtable(){{"IsRequired",false}}, new Hashtable(){{"IsRequired", DBNull.Value}}, FormQuestion.ObjectMap, dc);
-			FormQuestion.Update(new Hashtable(){{"IsLocked",false}}, new Hashtable(){{"IsLocked", DBNull.Value}}, FormQuestion.ObjectMap, dc);
+			FormQuestion.Update(new Hashtable(){{"IsLocked",false}}, new Hashtable(){{"IsLocked", DBNull.Value}}, FormQuestion.ObjectMap, dc);			
 			FormQuestionGroup.Update(new Hashtable(){{"RegistrantTypeId",0}}, new Hashtable(){{"RegistrantTypeId", DBNull.Value}}, FormQuestionGroup.ObjectMap, dc);
 			FormQuestionGroup.Update(new Hashtable(){{"QuestionGroupDataTypeId",0}}, new Hashtable(){{"QuestionGroupDataTypeId", DBNull.Value}}, FormQuestionGroup.ObjectMap, dc);
 			FormQuestionAnswer.Update(new Hashtable(){{"QuestionDataTypeId",0}}, new Hashtable(){{"QuestionDataTypeId", DBNull.Value}}, FormQuestionAnswer.ObjectMap, dc);
@@ -473,7 +473,6 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountWebUser_AccountId_UserTypeId ON [AccountWebUser] (AccountId,UserTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrationPeriod_AccountId ON [RegistrationPeriod] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrationPeriod_Uid ON [RegistrationPeriod] (Uid)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrationPeriod_AccountId_Id ON [RegistrationPeriod] (Id,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrationPeriod_ActivityGroupId ON [RegistrationPeriod] (ActivityGroupId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrationPeriod_AccountId_ActivityGroupId ON [RegistrationPeriod] (ActivityGroupId,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrationPeriod_AccountActivityGroupId ON [RegistrationPeriod] (AccountActivityGroupId)"));
@@ -706,124 +705,124 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_IndirectObjectId_IndirectObjectTypeId_ObjectId_ObjectTypeId_WebUserId ON [WebSessionAction] (WebUserId,ObjectId,ObjectTypeId,IndirectObjectId,IndirectObjectTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionObjectSnapshot_WebUserId ON [WebSessionObjectSnapshot] (WebUserId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionObjectSnapshot_AccountId ON [WebSessionObjectSnapshot] (AccountId)"));
-
+			
 
 			return msgs;
 		}
 
 		public static DatabaseConnection StartTransaction()
-		{
-			var dc = new DatabaseConnection(Database.Credentials.ConnectionString);
-			dc.Open();
-			dc.BeginTransaction();
-			return dc;
-		}
+        {
+            var dc = new DatabaseConnection(Database.Credentials.ConnectionString);
+            dc.Open();
+            dc.BeginTransaction();
+            return dc;
+        }
 
-		public static bool EndTransaction(DatabaseConnection dc, SystemMessages msgs, SuccessAction onSuccess = null, FailureAction onFailure = null)
-		{
-			return EndTransaction(dc, msgs.HasNoErrors(), msgs, null, null, true);
-		}
+        public static bool EndTransaction(DatabaseConnection dc, SystemMessages msgs, SuccessAction onSuccess = null, FailureAction onFailure = null)
+        {
+            return EndTransaction(dc, msgs.HasNoErrors(), msgs, null, null, true);
+        }
 
-		public static bool EndTransaction(DatabaseConnection dc, bool commit, SystemMessages msgs = null, SuccessAction onSuccess = null, FailureAction onFailure = null, bool closeTransaction = true)
-		{
-			if (commit)
-			{
-				if (closeTransaction)
-				{
-					dc.CommitTransaction();
-				}
-				if (onSuccess.IsNotEmpty())
-				{
-					onSuccess(msgs);
-				}
-			}
-			else
-			{
-				if (closeTransaction)
-				{
-					dc.RollbackTransaction();
-				}
-				if (onFailure.IsNotEmpty())
-				{
-					onFailure(msgs);
-				}
-			}
+        public static bool EndTransaction(DatabaseConnection dc, bool commit, SystemMessages msgs = null, SuccessAction onSuccess = null, FailureAction onFailure = null, bool closeTransaction = true)
+        {
+            if (commit)
+            {
+                if (closeTransaction)
+                {
+                    dc.CommitTransaction();
+                }
+                if (onSuccess.IsNotEmpty())
+                {                    
+                    onSuccess(msgs);
+                }
+            }
+            else
+            {
+                if (closeTransaction)
+                {
+                    dc.RollbackTransaction();
+                }
+                if (onFailure.IsNotEmpty())
+                {
+                    onFailure(msgs);
+                }
+            }
 
 			if (closeTransaction)
-			{
+            {
 				dc.Close();
 				dc.Dispose();
 				dc = null;
 			}
 
-			return true;
-		}
+            return true;
+        }
 
 		public delegate void TransactionAction(SystemMessages msgs, DatabaseConnection dc);
-		public delegate void FailureAction(SystemMessages msgs = null);
-		public delegate void SuccessAction(SystemMessages msgs = null);
+        public delegate void FailureAction(SystemMessages msgs = null);
+        public delegate void SuccessAction(SystemMessages msgs = null);
 		public delegate void ExceptionAction(SystemMessages msgs = null);
 
-		public static void ExecuteTransaction(TransactionAction action, SuccessAction onSuccess = null, FailureAction onFailure = null, ExceptionAction onException = null, DatabaseConnection dc = null, bool forceRollback = false)
-		{
-			var msgs = new SystemMessages();
-			var closeTransaction = false;
+        public static void ExecuteTransaction(TransactionAction action, SuccessAction onSuccess = null, FailureAction onFailure = null, ExceptionAction onException = null, DatabaseConnection dc = null, bool forceRollback = false)
+        {
+            var msgs = new SystemMessages();
+            var closeTransaction = false;
 
-			if (dc.IsEmpty())
-			{
-				dc = Database.StartTransaction();
-				closeTransaction = true;
-			}
+            if (dc.IsEmpty())
+            {
+                dc = Database.StartTransaction();
+                closeTransaction = true;
+            }
 
-			try
-			{
-				action(msgs, dc);
-			}
-			catch (Exception ex)
-			{
-				msgs.Add(ex.Message, MessageType.Error, ex);
+            try
+            {
+                action(msgs, dc);
+            }
+            catch(Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.Error, ex);
 
 				if (onException.IsNotEmpty())
 					onException(msgs);
-			}
-			finally
-			{
-				Database.EndTransaction(
-					dc,
-					!forceRollback && msgs.HasNoErrors(),
-					msgs,
-					onSuccess: onSuccess,
-					onFailure: onFailure,
-					closeTransaction: closeTransaction
-					);
-			}
-		}
+            }
+            finally
+            {
+                Database.EndTransaction(
+                    dc, 
+                    !forceRollback && msgs.HasNoErrors(),
+                    msgs,
+                    onSuccess: onSuccess,
+                    onFailure: onFailure,
+                    closeTransaction: closeTransaction
+                    );
+            }            
+        }
 
 		#endregion
 
 		#region "UserDefined"
 
-		#endregion
+        #endregion
 	}
 
 	public class DatabaseCredentials
-	{
-		public string Server { get; set; }
-		public string DatabaseName { get; set; }
-		public string Username { get; set; }
-		public string Password { get; set; }
+    {
+        public string Server { get; set; }
+        public string DatabaseName { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
 
 		public string ConnectionString { get { return string.Format("Data Source={0};User Id={1};Password={2};Initial Catalog={3};", Server, Username, Password, DatabaseName); } }
 
-		public DatabaseCredentials()
-		{
-		}
-		public DatabaseCredentials(string server, string databaseName, string username, string password)
-		{
-			this.Server = server;
-			this.DatabaseName = databaseName;
-			this.Username = username;
-			this.Password = password;
-		}
-	}
+        public DatabaseCredentials()
+        {
+        }
+        public DatabaseCredentials(string server, string databaseName, string username, string password)
+        {
+            this.Server = server;
+            this.DatabaseName = databaseName;
+            this.Username = username;
+            this.Password = password;
+        }
+    }
 }

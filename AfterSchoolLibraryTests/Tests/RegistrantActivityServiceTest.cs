@@ -76,5 +76,90 @@ namespace AfterSchoolLibraryTests.Tests
             }
             
         }
+
+
+        [Fact]
+        public void IsWithdrawEnabledTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var registrant = RegistrantFactory.Create(msgs, dc);
+            var registration = RegistrationFactory.Create(account, registrant, msgs, dc);
+            var registrantActivity = RegistrantActivityFactory.Create(activity, registrant, registration, msgs, dc);
+
+            foreach (RegistrationAssignmentType registrationAssignment in Enum.GetValues(typeof(RegistrationAssignmentType)))
+            {
+                // Act
+                registrantActivity.AssignmentTypeId = registrationAssignment;
+
+                // Assert
+                switch (registrantActivity.AssignmentTypeId)
+                {
+                    case RegistrationAssignmentType.NotSet:
+                    case RegistrationAssignmentType.Withdrawn:
+                    case RegistrationAssignmentType.Declined:
+                        Assert.False(registrantActivity.IsWithdrawEnabled());
+                        break;
+
+                    case RegistrationAssignmentType.Reserved:
+                    case RegistrationAssignmentType.Applied:
+                    case RegistrationAssignmentType.WaitingList:
+                    case RegistrationAssignmentType.Invited:
+                    case RegistrationAssignmentType.ReservedPendingPayment:
+                    case RegistrationAssignmentType.ReservedPendingParentalConsent:
+                    case RegistrationAssignmentType.Interested:
+                        Assert.True(registrantActivity.IsWithdrawEnabled());
+                        break;
+                    
+                    // Test should fail if values are added to the enum without updating tests
+                    default:
+                        Assert.True(false);
+                        break;
+                }
+            }
+
+        }
+
+        [Fact]
+        public void IsSendInvoiceEnabledTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var registrant = RegistrantFactory.Create(msgs, dc);
+            var registration = RegistrationFactory.Create(account, registrant, msgs, dc);
+            var registrantActivity = RegistrantActivityFactory.Create(activity, registrant, registration, msgs, dc);
+
+            foreach (RegistrationAssignmentType registrationAssignment in Enum.GetValues(typeof(RegistrationAssignmentType)))
+            {
+                // Act
+                registrantActivity.AssignmentTypeId = registrationAssignment;
+
+                // Assert
+                switch (registrantActivity.AssignmentTypeId)
+                {
+                    case RegistrationAssignmentType.NotSet:
+                    case RegistrationAssignmentType.Withdrawn:
+                    case RegistrationAssignmentType.Declined:                    
+                    case RegistrationAssignmentType.WaitingList:
+                    case RegistrationAssignmentType.Invited:
+                    case RegistrationAssignmentType.Interested:
+                        Assert.False(registrantActivity.IsSendInvoiceEnabled());
+                        break;
+
+                    case RegistrationAssignmentType.Reserved:
+                    case RegistrationAssignmentType.Applied:
+                    case RegistrationAssignmentType.ReservedPendingPayment:
+                    case RegistrationAssignmentType.ReservedPendingParentalConsent:
+                        Assert.True(registrantActivity.IsSendInvoiceEnabled());
+                        break;
+
+                    // Test should fail if values are added to the enum without updating tests
+                    default:
+                        Assert.True(false);
+                        break;
+                }
+            }
+
+        }
     }
 }
