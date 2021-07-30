@@ -2480,6 +2480,14 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
+        public static void SetProvider(this Activity activity, Account providerAccount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            activity.ProviderAccountId = providerAccount.ID;
+            activity.LastModifiedDate = DateTime.UtcNow;
+            activity.LastModifiedBy = loggedInUser.ID;
+            msgs.AddRange(activity.Save(dc));
+        }
+
         public static void NotifyProviderOfNewActivity(this Activity activity, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (!activity.ProviderAccountId.HasValue)

@@ -352,7 +352,7 @@ namespace AfterSchoolLibrary.Services
                 { "IsPublished", true }, 
                 { "IsDeleted", false }, 
                 { "isArchived", false } 
-            }, msgs, dc);
+            }, msgs, dc) + Activity.GetCountByProviderAccountId(account.ID.Value, msgs, dc);
         }
 
         public static int GetActiveAndNonPublishedActivityCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -399,7 +399,8 @@ namespace AfterSchoolLibrary.Services
             if (account.IsEmpty())
                 return false;
 
-            var accountOwner = account.GetAccountOwner(msgs);    
+            var accountOwner = account.GetAccountOwner(msgs); 
+            
             if (account.HasPaidActivities())
                 return account.HasAccountProfile(msgs) && account.HasActiveActivities(msgs) && accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount && account.CanProcessPayments();
             

@@ -9,6 +9,7 @@ using AfterSchoolLibrary.Billing;
 using BasicLibrary;
 using AfterSchool.Models;
 using System.Linq;
+using Amazon.S3.Model;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -1600,15 +1601,25 @@ namespace AfterSchoolLibraryTests.Tests
                 // Arrange
                 var accountOwner = WebUserFactory.Create(msgs, dc);
                 var account = AccountFactory.Create(accountOwner, msgs, dc);
-                var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+                var schoolAccountOwner = WebUserFactory.Create(msgs, dc);
+                var schoolAccount = AccountFactory.Create(schoolAccountOwner, msgs, dc);
 
                 // Act
-                var addactivity = ActivityFactory.Create(account, activityGroup, msgs, dc);
+                var addactivity = ActivityFactory.Create(account, msgs, dc);
                 addactivity.Publish(accountOwner, msgs, dc);
+
+                var schoolActivity = ActivityFactory.Create(schoolAccount, msgs, dc);
+                schoolActivity.SetProvider(account, schoolAccountOwner, msgs, dc);
+                schoolActivity.Publish(schoolAccountOwner, msgs, dc);
+
+                var schoolActivity2 = ActivityFactory.Create(schoolAccount, msgs, dc);
+                schoolActivity2.Publish(schoolAccountOwner, msgs, dc);
+
                 var GetActivityCount = AccountService.GetActiveAndPublishedActivityCount(account, msgs, dc);
 
                 // Assert
-                Assert.True(GetActivityCount > 0);
+                Assert.Equal(2, GetActivityCount);
+                Assert.True(msgs.HasNoErrors());
             }
             catch (Exception ex)
             {
