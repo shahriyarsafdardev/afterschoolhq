@@ -3068,6 +3068,8 @@ namespace AfterSchoolLibrary.Services
             if (msgs.HasNoErrors())
             {
                 var bankAccount = Helpers.PlaidHelper.CreateStripeBankAccount(plaidToken.AccessToken, bankAccountPurchaseObject.PlaidAccountId, msgs);
+
+                Helpers.Utilities.SystemLog("StripeCustomerId: " + fromAccount.StripeCustomerId + " StripeBankAccountToken: " + bankAccount.StripeBankAccountToken);
                 var source = StripeHelper.AttachSourceToCustomer(fromAccount.StripeCustomerId, bankAccount.StripeBankAccountToken, null, msgs);
                 //return customer.DefaultSourceId;
                 return source.Id;
