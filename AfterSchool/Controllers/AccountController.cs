@@ -1536,7 +1536,7 @@ namespace AfterSchool.Controllers
                 return RedirectToAction(
                     "editstudentpersonal",
                     "family",
-                    new { Area = "user", id = currentRegistrant.Uid, reg = registration?.Uid, student = currentRegistrant?.Uid });
+                    new { Area = "user", id = currentRegistrant.Uid, reg = registration?.Uid, student = currentRegistrant?.Uid, returnUrl = Url.Action("select", "account") });
 
             // check grade eligibility (extra check)
             if (!participationObject.IsStudentGradeInRange(currentRegistrant, msgs))
