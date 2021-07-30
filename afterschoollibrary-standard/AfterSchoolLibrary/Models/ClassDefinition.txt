@@ -1863,6 +1863,7 @@ name: SurveyRequest
 serializable: true
 description: table to save details of all suvrye request created by providers.
 inherits: BasicObjectWithModified
+property: Uid, Guid, UniqueIdentifier, required
 property: FormId, int?, Int
 property: ActivityId, int?, Int
 property: AccountId, int?, Int
@@ -1876,6 +1877,9 @@ loadmethod: AccountId, List<>
 loadmethod: ActivityId, List<>
 loadmethod: FormId, List<>
 loadmethod: Uid
+loadmethod: Uid|AccountId
+loadmethod: Uid|ActivityId
+loadmethod: Uid|FormId
 [end]
 
 [begin]
@@ -1884,6 +1888,7 @@ name: SurveyFeedback
 serializable: true
 description: Saves Survey Feddback responses.
 inherits: BasicObjectWithModified
+property: Uid, Guid, UniqueIdentifier, required
 property: SurveyId, int?, Int
 property: ActivityId, int?, Int
 property: RegistrantId, int?, Int
@@ -1899,6 +1904,10 @@ loadmethod: ActivityId, List<>
 loadmethod: SurveyId, List<>
 loadmethod: AttendanceId, List<>
 loadmethod: Uid
+loadmethod: Uid|ActivityId
+loadmethod: Uid|SurveyId
+loadmethod: Uid|RegistrantId
+loadmethod: Uid|AttendanceId
 [end]
 
 [begin]

@@ -1939,8 +1939,11 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
+            ViewBag.Surveys = SurveyRequest.LoadByActivityId(activity.ID.Value, msgs);
+
             return View(activity);
         }
+
 
 
         public ActionResult NewSurvey(string id)
@@ -1976,13 +1979,18 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult SaveSurvey(string id,int activityId, int formId, string name, string optionalText, bool parents,bool selectedIndividuals, bool allowmultiple, bool? students, bool? staff, List<SelectListItem> studentList)
         {
             var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
 
             if (selectedIndividuals){
                 foreach(var student in studentList)
                 {
                     if(student.Selected)
                     {
-                        SurveyRequestService.CreateNewSurveyRequest(formId, activityId, student.Value.ToInteger(), name, optionalText, allowmultiple, msgs);
+                        SurveyRequestService.AddSurvey(formId, activityId, student.Value.ToInteger(), name, optionalText, allowmultiple, currentAccount.ID.Value, currentUser.ID.Value, msgs);
                     }
                 }
             }
@@ -1990,13 +1998,14 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 foreach (var student in studentList)
                 {
-                    SurveyRequestService.CreateNewSurveyRequest(formId, activityId, student.Value.ToInteger(), name, optionalText, allowmultiple, msgs);
+                    SurveyRequestService.AddSurvey(formId, activityId, student.Value.ToInteger(), name, optionalText, allowmultiple, currentAccount.ID.Value, currentUser.ID.Value, msgs);
                 }
             }
 
             return RedirectToAction("Surveys", new { id });
         }
 
+      
 
         public ActionResult ViewSurvey(int id, string activitId)
         {
@@ -2014,8 +2023,10 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult ExportCSV(int id)
         {
             var msgs = new SystemMessages();
-            SurveyRequestService.ExportSurveyRequestToCSV(new List<string> {"Name", "Status", "Last Modified" }, id, msgs);
-            return Json(true, JsonRequestBehavior.AllowGet);
+            var currentAccount = SessionVariables.CurrentAccount;
+
+            var fileLink = SurveyRequestService.ExportSurveyRequestToCSV(new List<string> {"Name", "Status", "Last Modified" }, id, currentAccount.ID.Value, "ExportCSV", msgs);
+            return Json(new { fileLink }, JsonRequestBehavior.AllowGet);
         }
 
         #endregion

@@ -9,7 +9,7 @@ namespace AfterSchoolLibrary.Services
 {
     public static class SurveyFeedbackService
     {
-        public static SurveyFeedback CreateSurveyFeedback(int surveyId, int activityId, int registrantId, int attendanceId, SurveyFeedbackStatus surveyFeedbackStatus, SystemMessages msgs, DatabaseConnection dc = null)
+        public static SurveyFeedback CreateSurveyFeedback(int surveyId, int activityId, int registrantId, int? attendanceId, SurveyFeedbackStatus surveyFeedbackStatus, int accountId, int userId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -25,6 +25,10 @@ namespace AfterSchoolLibrary.Services
                       ActivityId = activityId,
                       RegistrantId = registrantId,
                       AttendanceId = attendanceId,
+                      CreatedBy = userId,
+                      CreateDate = DateTime.Now,
+                      LastModifiedDate = DateTime.Now,
+                      LastModifiedBy = userId,
                       DueDate = null,
                       SurveyFeedbackStatusTypeId = surveyFeedbackStatus
                    };
@@ -40,7 +44,7 @@ namespace AfterSchoolLibrary.Services
             return surveyFeedback;
         }
 
-        public static void UpdateFeedbackStatus(this SurveyFeedback surveyFeedback, SurveyFeedbackStatus surveyFeedbackStatus, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void UpdateFeedbackStatus(this SurveyFeedback surveyFeedback, SurveyFeedbackStatus surveyFeedbackStatus, DateTime lastModified, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -49,6 +53,7 @@ namespace AfterSchoolLibrary.Services
                action: (SystemMessages amsgs, DatabaseConnection adc) =>
                {
                    surveyFeedback.SurveyFeedbackStatusTypeId = surveyFeedbackStatus;
+                   surveyFeedback.LastModifiedDate = lastModified;
                    msgs.AddRange(surveyFeedback.Save(dc));
                },
                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
@@ -57,6 +62,38 @@ namespace AfterSchoolLibrary.Services
                dc: dc
             );
            
+        }
+
+        public static SurveyFeedback GetSurveyFeedbackBySurveyId(this SurveyRequest survey, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (survey.IsNotEmpty())
+                return SurveyFeedback.LoadByUidBySurveyId(Uid, survey.ID.Value, msgs, dc);
+
+            return null;
+        }
+
+        public static SurveyFeedback GetSurveyFeedbackByActivityId(this Activity activity, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (activity.IsNotEmpty())
+                return SurveyFeedback.LoadByUidByActivityId(Uid, activity.ID.Value, msgs, dc);
+
+            return null;
+        }
+
+        public static SurveyFeedback GetSurveyFeedbackByRegistrantId(this Registrant registrant, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (registrant.IsNotEmpty())
+                return SurveyFeedback.LoadByUidByRegistrantId(Uid, registrant.ID.Value, msgs, dc);
+
+            return null;
+        }
+
+        public static SurveyFeedback GetSurveyFeedbackByAttendanceId(this Attendance attendance, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (attendance.IsNotEmpty())
+                return SurveyFeedback.LoadByUidByAttendanceId(Uid, attendance.ID.Value, msgs, dc);
+
+            return null;
         }
     }
 }

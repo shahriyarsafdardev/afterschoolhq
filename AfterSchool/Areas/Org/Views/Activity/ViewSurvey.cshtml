@@ -12,7 +12,7 @@
                 <div class="col-lg-3">
                     <div style="font-size:22px">Survey Name </div>
                     <div style="font-size:14px; color:#B2B2B4">@Model.Name | July 08,2021</div>
-                    <a href="javascript:void(0)" onclick="exportToExcel();" style="font-size:14px; color:#00ae85">Export Survey Results</a>
+                    <a href="@Url.Action("ExportCSV", "activity", new { id = Model.ID })" style="font-size:14px; color:#00ae85">Export Survey Results</a>
                 </div>
                 <div class="col-lg-3">
                     <div class="surveyCheck">0 Survey Sent</div>
