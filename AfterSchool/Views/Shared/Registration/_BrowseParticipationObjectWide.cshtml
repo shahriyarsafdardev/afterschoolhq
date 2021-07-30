@@ -121,7 +121,7 @@
                     @if (Model.Schedule.IsNotEmpty())
                     {
                         <span>
-                            Days of the Week: @Model.Schedule.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString()).ToStringList(",")
+                            Days of the Week: @Model.Schedule.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString()).ToStringList(", ")
                         </span>
                         <br />
                     }
