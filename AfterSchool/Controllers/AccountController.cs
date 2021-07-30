@@ -1530,7 +1530,7 @@ namespace AfterSchool.Controllers
                 return RedirectToAction(
                     "editpersonal",
                     "family",
-                    new { Area = "user", id = parentOrGuardian.Uid, reg = registration?.Uid, student = currentRegistrant?.Uid });
+                    new { Area = "user", id = parentOrGuardian.Uid, reg = registration?.Uid, student = currentRegistrant?.Uid, returnUrl = Url.Action("select", "account") });
 
             if (!currentRegistrant.IsProfileCompleted)
                 return RedirectToAction(
