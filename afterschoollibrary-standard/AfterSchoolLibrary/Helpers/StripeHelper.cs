@@ -1074,7 +1074,7 @@ namespace AfterSchoolLibrary.Billing
             }
             catch (StripeException ex)
             {
-                AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(ex);
+                Helpers.Utilities.SystemErrorLog(ex);
                 msgs.Add(ex.Message, MessageType.UserError, ex);
                 msgs.Add($"Source was not attached", MessageType.UserError);
             }

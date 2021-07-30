@@ -1117,9 +1117,6 @@ namespace AfterSchoolLibrary.Services
 
         public static void CompleteStripeConnect(this Account account, string code, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var teest = "AccountId: " + account.ID + " code: " + code + " loggedInUser: " + loggedInUser.ID;
-            AfterSchoolLibrary.Helpers.Utilities.SystemLog(teest);
-
             var token = StripeHelper.CompleteOAuthConnection(code, msgs);
 
             account.StripePublishableKey = token.StripePublishableKey;
@@ -3068,8 +3065,6 @@ namespace AfterSchoolLibrary.Services
             if (msgs.HasNoErrors())
             {
                 var bankAccount = Helpers.PlaidHelper.CreateStripeBankAccount(plaidToken.AccessToken, bankAccountPurchaseObject.PlaidAccountId, msgs);
-
-                Helpers.Utilities.SystemLog("StripeCustomerId: " + fromAccount.StripeCustomerId + " StripeBankAccountToken: " + bankAccount.StripeBankAccountToken);
                 var source = StripeHelper.AttachSourceToCustomer(fromAccount.StripeCustomerId, bankAccount.StripeBankAccountToken, null, msgs);
                 //return customer.DefaultSourceId;
                 return source.Id;
