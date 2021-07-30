@@ -345,7 +345,7 @@ namespace AfterSchoolLibrary.Services
             return Activity.GetCount(new Hashtable() { { "AccountId", account.ID.Value } }, msgs, dc);
         }
 
-        public static int GetProviderAccountActivityCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetExternallyProvidedActivityCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Activity.GetCount(
                 new Hashtable() {
@@ -358,7 +358,7 @@ namespace AfterSchoolLibrary.Services
                 dc);
         }
 
-        public static List<Activity> GetProviderAccountActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Activity> GetExternallyProvidedActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Activity.Load(
                 new Hashtable() {
@@ -410,7 +410,7 @@ namespace AfterSchoolLibrary.Services
 
         public static bool HasActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.GetActivityCount(msgs, dc) > 0 || account.GetExternalLeagueCount(msgs, dc) > 0 || account.GetProviderAccountActivityCount(msgs, dc) > 0;
+            return account.GetActivityCount(msgs, dc) > 0 || account.GetExternalLeagueCount(msgs, dc) > 0 || account.GetExternallyProvidedActivityCount(msgs, dc) > 0;
         }
 
         public static bool HasActiveActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -422,7 +422,7 @@ namespace AfterSchoolLibrary.Services
         {
             return account.HasActivities(msgs, dc) &&
                 (account.GetActivities(msgs, dc).Any(activity => !activity.GetIsFree(msgs, dc)) ||
-                account.GetProviderAccountActivities(msgs, dc).Any(activity => !activity.GetIsFree(msgs, dc)));
+                account.GetExternallyProvidedActivities(msgs, dc).Any(activity => !activity.GetIsFree(msgs, dc)));
             // return account.GetAllActiveAndNonPublishedActivities(msgs, dc).Any(activity => !activity.IsFree);
         }
         public static bool IsOnboardingCompleted(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)

@@ -37,7 +37,7 @@
 
     if (firstActivity.IsEmpty())
     {
-        firstActivity = Model.GetProviderAccountActivities(msgs).FirstOrDefault();
+        firstActivity = Model.GetExternallyProvidedActivities(msgs).FirstOrDefault();
         isExternallyProvidedActivity = true;
     }
 

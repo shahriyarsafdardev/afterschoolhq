@@ -1757,6 +1757,55 @@ namespace AfterSchoolLibraryTests.Tests
             }
         }
 
+        [Fact]
+        public void GetExternallyProvidedActivityCountTest()
+        {
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, msgs, dc);
+            var schoolAccountOwner = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolAccountOwner, msgs, dc);
+
+            // Act
+            var addactivity = ActivityFactory.Create(account, msgs, dc);
+            addactivity.Publish(accountOwner, msgs, dc);
+
+            var schoolActivity = ActivityFactory.Create(schoolAccount, msgs, dc);
+            schoolActivity.SetProvider(account, schoolAccountOwner, msgs, dc);
+            schoolActivity.Publish(schoolAccountOwner, msgs, dc);
+
+            var schoolActivity2 = ActivityFactory.Create(schoolAccount, msgs, dc);
+            schoolActivity2.Publish(schoolAccountOwner, msgs, dc);
+
+            Assert.Equal(1, account.GetExternallyProvidedActivityCount(msgs, dc));
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void GetExternallyProvidedActivitiesTest()
+        {
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, msgs, dc);
+            var schoolAccountOwner = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolAccountOwner, msgs, dc);
+
+            // Act
+            var addactivity = ActivityFactory.Create(account, msgs, dc);
+            addactivity.Publish(accountOwner, msgs, dc);
+
+            var schoolActivity = ActivityFactory.Create(schoolAccount, msgs, dc);
+            schoolActivity.SetProvider(account, schoolAccountOwner, msgs, dc);
+            schoolActivity.Publish(schoolAccountOwner, msgs, dc);
+
+            var schoolActivity2 = ActivityFactory.Create(schoolAccount, msgs, dc);
+            schoolActivity2.Publish(schoolAccountOwner, msgs, dc);
+
+            var activities = account.GetExternallyProvidedActivities(msgs, dc);
+
+            Assert.Single(activities);
+            Assert.Equal(schoolActivity.ID, activities.First().ID);
+            Assert.True(msgs.HasNoErrors());
+        }
+
         [Fact(DisplayName = "AddContact test")]
         public void AddContactTest()
         {
