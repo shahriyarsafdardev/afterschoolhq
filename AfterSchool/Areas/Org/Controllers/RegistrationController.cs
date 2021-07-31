@@ -357,14 +357,14 @@ namespace AfterSchool.Areas.Org.Controllers
                     actionType: WebSessionActionType.Updated,
                     objectId: registrantActivity.ID,
                     objectType: ObjectType.RegistrantActivity,
-                    objectText: $"{registration.GetRegistrant().GetFirstNameLastInitial()}'s assignment type to {ratTo}",
+                    objectText: $"{registration.GetRegistrant()?.GetFirstNameLastInitial()}'s assignment type to {ratTo}",
                     indirectObjectId: registrantActivity.GetActivityId(),
                     indirectObjectType: ObjectType.Activity,
-                    indirectObjectText: registrantActivity.GetActivity().Name);
+                    indirectObjectText: registrantActivity.GetActivity()?.Name);
 
                 msgs.Add(string.Format("{0} has been moved to {1} for {2}", 
-                    selectedRegistration.ToRegistrant().Name, ratTo.ToString().SplitByUpperCase(), 
-                    registrantActivity.GetParticipationObject(msgs).Name), 
+                    selectedRegistration.ToRegistrant()?.Name, ratTo.ToString().SplitByUpperCase(), 
+                    registrantActivity.GetParticipationObject(msgs)?.Name), 
                     MessageType.Success);
             }
 
