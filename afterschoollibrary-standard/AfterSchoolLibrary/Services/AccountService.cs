@@ -191,6 +191,10 @@ namespace AfterSchoolLibrary.Services
                 // I can see this activity if it is hosted at my location
                 if (activity.IsEmpty())
                     activity = account.GetHostedActivity(activityUid, msgs, dc);
+
+                //if current account is external provider, we will have to get activity using only uid since we will not be able to fetch it using LoadByUidByAccountId
+                if (activity.IsEmpty())
+                    activity = Activity.LoadByUid(activityUid, msgs, dc);
             }
 
             return activity;
@@ -641,7 +645,8 @@ namespace AfterSchoolLibrary.Services
                 new Hashtable() {
                     { "AccountId", account.ID.Value },
                     { "ActivityGroupTypeId", (int)ActivityGroupType.Session },
-                    { "IsArchived", IsArchived }
+                    { "IsArchived", IsArchived },
+                    { "IsDeleted", false }
                 },
                 msgs: msgs,
                 dc: dc);
