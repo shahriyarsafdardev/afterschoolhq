@@ -175,6 +175,10 @@ namespace AfterSchoolLibrary.Services
                 // I can see this activity if it is hosted at my location
                 if (activity.IsEmpty())
                     activity = account.GetHostedActivity(activityId, msgs, dc);
+
+                //if current account is external provider
+                if (activity.IsEmpty())
+                    activity = account.GetExternallyProvidedActivity(activityId, msgs, dc);
             }
 
             return activity;
@@ -191,19 +195,48 @@ namespace AfterSchoolLibrary.Services
                 // I can see this activity if it is hosted at my location
                 if (activity.IsEmpty())
                     activity = account.GetHostedActivity(activityUid, msgs, dc);
+
+                //if current account is external provider
+                if (activity.IsEmpty())
+                    activity = account.GetExternallyProvidedActivity(activityUid, msgs, dc);
             }
 
             return activity;
         }
 
+        public static Activity GetExternallyProvidedActivity(this Account account, Guid activityUid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Activity.LoadByUidByProviderAccountId(activityUid, account.ID.Value, msgs, dc);
+        }
+
+        public static Activity GetExternallyProvidedActivity(this Account account, int activityId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var activity = Activity.Load(activityId, msgs, dc);
+            
+            if (activity.IsNotEmpty())
+                return Activity.LoadByUidByProviderAccountId(activity.Uid, account.ID.Value, msgs, dc);
+
+            return null;
+        }
+
         public static Activity GetHostedActivity(this Account account, Guid activityUid, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.GetHostedActivity(Activity.LoadByUid(activityUid, msgs, dc), msgs, dc);
+            var activity = Activity.LoadByUid(activityUid, msgs, dc);
+
+            if (activity.IsNotEmpty())
+                return account.GetHostedActivity(activity, msgs, dc);
+
+            return null;
         }
 
         public static Activity GetHostedActivity(this Account account, int activityId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.GetHostedActivity(Activity.Load(activityId, msgs, dc), msgs, dc);
+            var activity = Activity.Load(activityId, msgs, dc);
+
+            if (activity.IsNotEmpty())
+                return account.GetHostedActivity(activity, msgs, dc);
+
+            return null;
         }
 
         public static Activity GetHostedActivity(this Account account, Activity tempActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -267,7 +300,7 @@ namespace AfterSchoolLibrary.Services
             );
 
             participationObjects.AddRange(
-                account.GetPublishedSessions(msgs, dc).Select(x => x.GetParticipationObject(msgs, dc))
+                account.GetOpenPublishedSessions(msgs, dc).Select(x => x.GetParticipationObject(msgs, dc))
             );
 
             return participationObjects;
@@ -609,9 +642,9 @@ namespace AfterSchoolLibrary.Services
             return ActivityGroup.LoadByAccountIdByActivityGroupTypeId(account.ID.Value, ActivityGroupType.Session, msgs, dc);
         }
 
-        public static List<ActivityGroup> GetPublishedSessions(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<ActivityGroup> GetOpenPublishedSessions(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var groups = ActivityGroup.LoadByAccountIdByIsPublishedByIsArchived(account.ID.Value, true, false, msgs, dc);
+            var groups = ActivityGroup.LoadByAccountIdByIsPublishedByIsArchivedByIsDeleted(account.ID.Value, true, false, false, msgs, dc);
 
             if (!groups.Any())
                 return new List<ActivityGroup>();
@@ -641,7 +674,8 @@ namespace AfterSchoolLibrary.Services
                 new Hashtable() {
                     { "AccountId", account.ID.Value },
                     { "ActivityGroupTypeId", (int)ActivityGroupType.Session },
-                    { "IsArchived", IsArchived }
+                    { "IsArchived", IsArchived },
+                    { "IsDeleted", false }
                 },
                 msgs: msgs,
                 dc: dc);
@@ -2903,6 +2937,40 @@ namespace AfterSchoolLibrary.Services
                     totalDebits;
         }
 
+        public static decimal GetMaxAmountAvailableForRefund(this Account account, string search, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var totalPayoutAmount = account.GetTotalPayoutAmount(search, null, startDate, endDate, msgs, dc);
+
+            var totalAmountBilledACH = account.GetTotalAmountBilledOut(
+                                        search,
+                                        PaymentSourceType.AfterSchoolPlatform,
+                                        PaymentType.ACH,
+                                        startDate,
+                                        endDate,
+                                        msgs,
+                                        dc);
+
+            var totalAmountBilledCredit = account.GetTotalAmountBilledOut(
+                                            search,
+                                            PaymentSourceType.AfterSchoolPlatform,
+                                            PaymentType.CreditCard,
+                                            startDate,
+                                            endDate,
+                                            msgs,
+                                            dc);
+
+            var totalConvenienceFeesReceived = account.GetTotalConvenienceFeesReceivedAsBiller(null, startDate, endDate, msgs, dc);
+            var totalRefunds = account.GetTotalAmountRefundedAHQ(search, true, startDate, endDate, msgs, dc);
+            var totalRefundManual = account.GetTotalAmountRefundedManually(search, startDate, endDate, msgs, dc);
+
+            return totalAmountBilledACH +
+                    totalAmountBilledCredit +
+                    totalConvenienceFeesReceived -
+                    totalPayoutAmount - 
+                    totalRefunds -
+                    totalRefundManual;
+        }
+
         public static int GetPayoutCount(this Account account, PayoutStatus? payoutStatus, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Payout.GetCountByAccountId(account.ID.Value, payoutStatus, startDate, endDate, msgs, dc);
@@ -3797,9 +3865,14 @@ namespace AfterSchoolLibrary.Services
         public static decimal GetTotalFeesPaidAsBiller(this Account account, string search, PaymentType? paymentType, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Transaction.GetTotalFeesPaidByBillerAccount(account.ID.Value, search, paymentType, startDate, endDate, false, msgs, dc);
+        }        
+
+        public static decimal GetTotalConvenienceFeesReceivedAsBiller(this Account account, PaymentType? paymentType, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.GetTotalConvenienceFeesReceivedByBillerAccount(account.ID.Value, paymentType, startDate, endDate, false, msgs, dc);
         }
 
-        public static decimal GetTotalAmountRefunded(this Account account, string search, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalAmountRefunded(this Account account, string search, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, search, null, startDate, endDate, false, msgs, dc) -        
                     Transaction.GetTotalConvenienceFeesNotPaidByPayerAccount(account.ID.Value, search, startDate, endDate, false, msgs, dc) -
@@ -4321,6 +4394,29 @@ namespace AfterSchoolLibrary.Services
         {
             return account.GetActivityMessageRegistrantsForCurrentMessagePeriod().Where(amr => amr.SentEmail).ToList().Count();
         }
+
+        public static bool WillExceedEmailQuota(this Account account, AccountPackage accountPackage, int messageCount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            // get current limit
+            var maxEmailCount = accountPackage.HasFeature(FeatureType.EmailMessaging, msgs, dc) ? (int)accountPackage.GetFeature(FeatureType.EmailMessaging).Max.Value : 0;
+
+            // get current quota
+            var amr = ActivityMessageRegistrant.LoadByCreatedBy(loggedInUser.ID.Value.ToString(), msgs, dc).Where(m => m.CreateDate > DateTime.Now.AddMonths(-1).Date);
+            var usedEmailQuota = account.GetEmailCountForCurrentMessagePeriod(msgs, dc);
+
+            //add additional registransts
+            usedEmailQuota += messageCount;
+
+            // if exceeds, return error
+            if (usedEmailQuota > maxEmailCount)
+            {                
+                msgs.Add("Email quota exceeded for current user.", MessageType.UserError);
+                return true;
+            }
+
+            return false;
+        }
+
         #endregion
 
         #region REFUND-REQUEST

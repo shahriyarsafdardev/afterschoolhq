@@ -644,3 +644,6 @@
 .s7-airplay:before {
 	content: "\e67f";
 }
+.question-table tbody tr:hover {
+	background: #ccc !important;
+}

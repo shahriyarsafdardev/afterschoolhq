@@ -46,6 +46,20 @@ namespace AfterSchoolLibraryTests.Factories
             return obj;
         }
 
+        public static RegistrationPeriod Create(Account account, ActivityGroup activityGroup, DateTime startDate, DateTime endDate, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var obj = new RegistrationPeriod()
+            {
+                AccountId = account.ID,
+                StartDateTime = startDate,
+                EndDateTime = endDate,
+                ActivityGroupId = activityGroup.ID
+            };
+
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
+
         public static RegistrationPeriod Create(Account account, AccountActivityGroup aag, SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new RegistrationPeriod()

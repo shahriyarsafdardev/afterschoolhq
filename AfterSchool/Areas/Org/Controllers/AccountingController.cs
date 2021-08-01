@@ -369,8 +369,12 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult RefundRequests()
         {
             var currentAccount = SessionVariables.CurrentAccount;
-            ViewBag.Messages = new SystemMessages();
-            ViewBag.AmountAvailableToRefund = currentAccount.GetMaxAmountAvailableForPayout(search: null);
+            var msgs = new SystemMessages();
+            
+            ViewBag.AmountAvailableToRefund = currentAccount.GetMaxAmountAvailableForRefund(search: null, msgs: msgs);
+            ViewBag.AmountRefunded = currentAccount.GetTotalAmountRefunded(search: null, msgs: msgs);
+            ViewBag.Messages = msgs;
+
             return View(currentAccount.GetRefundRequests().OrderByDescending(request => request.CreateDate).ToList());
         }
 

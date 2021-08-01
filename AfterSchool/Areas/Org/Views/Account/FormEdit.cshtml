@@ -211,15 +211,15 @@
 
                                                     <td>
                                                         @{Html.RenderPartial(
-                                                                  "~/Views/Shared/_SwitchButton.cshtml",
-                                                                  question.IsActive,
-                                                                  new ViewDataDictionary()
-                                                                  {
+                                                                    "~/Views/Shared/_SwitchButton.cshtml",
+                                                                    question.IsActive,
+                                                                    new ViewDataDictionary()
+                                                                    {
                                                                             { "checkboxname", "active-" + question.ID },
                                                                             { "checkboxid", "active-" + question.ID },
                                                                             { "disabled", question.IsLocked },
                                                                             { "classname", "question-isactive" }
-                                                                });}
+                          });}
                                                     </td>
                                                     <td>
                                                         @if (question.QuestionTypeId != QuestionType.TextBlock)
@@ -233,7 +233,7 @@
                                                                             { "checkboxid", "required-" + question.ID },
                                                                             { "disabled", question.IsLocked },
                                                                             { "classname", "question-isrequired" }
-                                                               });
+                           });
                                                         }
                                                     </td>
                                                 </tr>
@@ -272,7 +272,7 @@
                     <div class="col-sm-8">
                         <button type="submit" class="btn btn-default btn-lg btn-block"><i class="s7-diskette"></i> Save</button>
                     </div>
-                    @if (questionGroups.Last().ID != qgId && qgId!=0)
+                    @if (questionGroups.Last().ID != qgId && qgId != 0)
                     {
                         <div class="col-sm-2">
                             <button type="submit" class="btn btn-primary btn-lg btn-block" onclick="navigateForm('@Url.Action("formedit", "account", new { id = Model.ID, qg = qgId, cmd = "next" })')">Next &raquo;</button>
@@ -294,12 +294,12 @@
                         </li>
 
                         @{ Html.RenderPartial("_FormEditMenu",
-                                Model,
-                                new ViewDataDictionary() {
+                                 Model,
+                                 new ViewDataDictionary() {
                                         { "RegistrantType", RegistrantType.Individual },
                                         { "QuestionGroups", individualGroups },
                                         { "QuestionGroupId", qgId }
-                                });
+                 });
                         }
 
                         <li class="dd-item">
@@ -312,12 +312,12 @@
                         </li>
 
                         @{ Html.RenderPartial("_FormEditMenu",
-                                Model,
-                                new ViewDataDictionary() {
+                                 Model,
+                                 new ViewDataDictionary() {
                                         { "RegistrantType", RegistrantType.Organization },
                                         { "QuestionGroups", organizationGroups },
                                         { "QuestionGroupId", qgId }
-                                });
+                 });
                         }
 
                     </ol>

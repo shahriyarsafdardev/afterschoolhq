@@ -4,7 +4,7 @@
     var account = SessionVariables.CurrentAccount;
     var schedule = (ActivitySchedule)ViewData["schedule"];
     var controller = (string)ViewData["controller"];
-    var isTechSupport = (bool)SessionVariables.LoggedInUser.IsTechSupport(SessionVariables.CurrentAccount);
+    var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
     const int FUTURE_INSTANCES_TO_SHOW = 8;
 }
 

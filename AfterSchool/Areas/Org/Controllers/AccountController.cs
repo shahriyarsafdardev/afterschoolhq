@@ -799,12 +799,14 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult FormEdit(string id, string copyfrom, string qg, string name, string description, string cmd)
+        public ActionResult FormEdit(string id, string copyfrom, string qg, string name, string description,  string cmd)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             if (currentAccount.IsEmpty() || id.IsEmpty() || copyfrom.IsEmpty())
                 return HttpNotFound();
+
+
 
             var msgs = new SystemMessages();
             Form form = null;
@@ -886,7 +888,6 @@ namespace AfterSchool.Areas.Org.Controllers
                                         question.Description = Request.Params[$"description-{question.ID}"];
                                         question.Options = Request.Params[$"options-text-{question.ID}"];
                                         question.Link = Request.Params[$"link-text-{question.ID}"];
-
                                         question.QuestionTypeId = (QuestionType)Request.Params[$"questiontype-{question.ID}"].ToInteger();
                                     }
 
@@ -924,7 +925,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                     };
                                     amsgs.AddRange(question.Save(adc));
                                 }
-                            }
+                            }                            
                         }
                     },
                     onSuccess: (SystemMessages smsgs) =>
