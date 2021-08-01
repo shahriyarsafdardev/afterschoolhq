@@ -13,6 +13,11 @@ localtestname: AfterSchoolTest
 localtestserver: localhost
 localtestusername: AfterSchoolUser
 localtestpassword: Nj8Ed$wpLfJ
+
+testname: AfterSchoolTest
+testserver: afterschool-nonprod.cdyenngbc33v.us-east-2.rds.amazonaws.com
+testusername: AfterSchoolTestUser
+testpassword: jUp$dBh8D9o)3Rf
 [end]
 
 [begin]
