@@ -710,6 +710,7 @@ namespace AfterSchoolLibraryTests.Tests
             var expected = account.GetActivity(activity.ID.Value, msgs, dc);
 
             // Assert
+            Assert.NotNull(expected);
             Assert.Equal(expected: expected.ID, actual: activity.ID);
             Assert.Equal(expected: expected.Uid, actual: activity.Uid);
             Assert.Equal(expected: expected.Name, actual: activity.Name);
@@ -895,6 +896,30 @@ namespace AfterSchoolLibraryTests.Tests
 
             // Assert
             Assert.Null(expected);
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void GetExternallyProvidedActivityTest()
+        {
+            var schoolWebUser = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolWebUser, msgs, dc);
+            var location = LocationFactory.Create(schoolAccount, msgs, dc);
+            var expected = ActivityFactory.Create(schoolAccount, location, msgs, dc);
+            var expected2 = ActivityFactory.Create(account, location, msgs, dc);
+
+            expected.ProviderAccountId = account.ID.Value;
+            msgs.AddRange(expected.Save(dc));
+
+            var actual = account.GetExternallyProvidedActivity(expected.Uid, msgs, dc);
+            var actual2 = account.GetExternallyProvidedActivity(expected.ID.Value, msgs, dc);
+            var actual3 = account.GetExternallyProvidedActivity(expected2.ID.Value, msgs, dc);
+
+            Assert.NotNull(actual);
+            Assert.NotNull(actual2);
+            Assert.Equal(expected.Uid, actual.Uid);
+            Assert.Equal(expected.ID, actual.ID);
+            Assert.Null(actual3);
             Assert.True(msgs.HasNoErrors());
         }
 
@@ -2450,6 +2475,29 @@ namespace AfterSchoolLibraryTests.Tests
                 //Assert
                 Assert.False(true, ex.Message);
             }
+        }
+
+        [Fact]
+        public void GetOpenPublishedSessionsTest()
+        {
+            var activityGroup1 = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+            var activityGroup2 = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+            var activityGroup3 = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+            var regPeriod1 = RegistrationPeriodFactory.Create(account, activityGroup1, msgs, dc);
+            var regPeriod2 = RegistrationPeriodFactory.Create(account, activityGroup2, msgs, dc);
+            var regPeriod3 = RegistrationPeriodFactory.Create(account, activityGroup2, DateTime.UtcNow.AddDays(1), DateTime.UtcNow.AddDays(4), msgs, dc);
+
+            msgs.AddRange(activityGroup1.SetIsPublished(true, user.ID.Value, dc));
+            msgs.AddRange(activityGroup2.SetIsPublished(true, user.ID.Value, dc));
+            msgs.AddRange(activityGroup3.SetIsPublished(true, user.ID.Value, dc));
+
+            activityGroup2.SetIsDeleted(user.ID.Value, true, msgs, dc);
+
+            var sessions = account.GetOpenPublishedSessions(msgs, dc);
+
+            Assert.Single(sessions);
+            Assert.Equal(activityGroup1.ID, sessions.First().ID);
+            Assert.True(msgs.HasNoErrors());
         }
     }
 }

@@ -25,6 +25,9 @@ namespace AfterSchoolLibrary.Helpers
             get
             {
                 if (Utilities.IsLocalHost)
+                    return DevelopmentSecretKey;
+
+                if (Utilities.IsStaging)
                     return SandboxSecretKey;
 
                 if (Utilities.IsProduction)
@@ -39,6 +42,9 @@ namespace AfterSchoolLibrary.Helpers
             get
             {
                 if (Utilities.IsLocalHost)
+                    return "development";
+
+                if (Utilities.IsStaging)
                     return "sandbox";
 
                 if (Utilities.IsProduction)
@@ -125,6 +131,9 @@ namespace Plaid
                 get
                 {
                     if (AfterSchoolLibrary.Helpers.Utilities.IsLocalHost)
+                        return DevelopmentBaseUrl;
+
+                    if (AfterSchoolLibrary.Helpers.Utilities.IsStaging)
                         return SandboxBaseUrl;
 
                     if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)

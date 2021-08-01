@@ -271,8 +271,8 @@
 
                                 if (currentUser.HasMultipleAccounts())
                                 {
-                                    var registrationAccount = SessionVariables.CurrentUser.GetRegistrantAccount();
-                                    if (registrationAccount.IsNotEmpty())
+                                    var registrationAccount = currentUser.GetRegistrantAccount();
+                                    if (registrationAccount.IsNotEmpty() && currentAccount.ID != registrationAccount.ID)
                                     {
                                         <a class="btn btn-link" href="@Url.Action("select", "login", new { area = "", id = registrationAccount.Uid.ToString() })">Switch to @registrationAccount.Name</a>
                                     }
