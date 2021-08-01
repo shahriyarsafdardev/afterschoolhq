@@ -175,6 +175,10 @@ namespace AfterSchoolLibrary.Services
                 // I can see this activity if it is hosted at my location
                 if (activity.IsEmpty())
                     activity = account.GetHostedActivity(activityId, msgs, dc);
+
+                //if current account is external provider
+                if (activity.IsEmpty())
+                    activity = account.GetExternallyProvidedActivity(activityId, msgs, dc);
             }
 
             return activity;
@@ -192,22 +196,47 @@ namespace AfterSchoolLibrary.Services
                 if (activity.IsEmpty())
                     activity = account.GetHostedActivity(activityUid, msgs, dc);
 
-                //if current account is external provider, we will have to get activity using only uid since we will not be able to fetch it using LoadByUidByAccountId
+                //if current account is external provider
                 if (activity.IsEmpty())
-                    activity = Activity.LoadByUid(activityUid, msgs, dc);
+                    activity = account.GetExternallyProvidedActivity(activityUid, msgs, dc);
             }
 
             return activity;
         }
 
+        public static Activity GetExternallyProvidedActivity(this Account account, Guid activityUid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Activity.LoadByUidByProviderAccountId(activityUid, account.ID.Value, msgs, dc);
+        }
+
+        public static Activity GetExternallyProvidedActivity(this Account account, int activityId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var activity = Activity.Load(activityId, msgs, dc);
+            
+            if (activity.IsNotEmpty())
+                return Activity.LoadByUidByProviderAccountId(activity.Uid, account.ID.Value, msgs, dc);
+
+            return null;
+        }
+
         public static Activity GetHostedActivity(this Account account, Guid activityUid, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.GetHostedActivity(Activity.LoadByUid(activityUid, msgs, dc), msgs, dc);
+            var activity = Activity.LoadByUid(activityUid, msgs, dc);
+
+            if (activity.IsNotEmpty())
+                return account.GetHostedActivity(activity, msgs, dc);
+
+            return null;
         }
 
         public static Activity GetHostedActivity(this Account account, int activityId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.GetHostedActivity(Activity.Load(activityId, msgs, dc), msgs, dc);
+            var activity = Activity.Load(activityId, msgs, dc);
+
+            if (activity.IsNotEmpty())
+                return account.GetHostedActivity(activity, msgs, dc);
+
+            return null;
         }
 
         public static Activity GetHostedActivity(this Account account, Activity tempActivity, SystemMessages msgs = null, DatabaseConnection dc = null)

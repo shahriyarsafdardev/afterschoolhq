@@ -709,6 +709,7 @@ namespace AfterSchoolLibraryTests.Tests
             var expected = account.GetActivity(activity.ID.Value, msgs, dc);
 
             // Assert
+            Assert.NotNull(expected);
             Assert.Equal(expected: expected.ID, actual: activity.ID);
             Assert.Equal(expected: expected.Uid, actual: activity.Uid);
             Assert.Equal(expected: expected.Name, actual: activity.Name);
@@ -894,6 +895,30 @@ namespace AfterSchoolLibraryTests.Tests
 
             // Assert
             Assert.Null(expected);
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void GetExternallyProvidedActivityTest()
+        {
+            var schoolWebUser = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolWebUser, msgs, dc);
+            var location = LocationFactory.Create(schoolAccount, msgs, dc);
+            var expected = ActivityFactory.Create(schoolAccount, location, msgs, dc);
+            var expected2 = ActivityFactory.Create(account, location, msgs, dc);
+
+            expected.ProviderAccountId = account.ID.Value;
+            msgs.AddRange(expected.Save(dc));
+
+            var actual = account.GetExternallyProvidedActivity(expected.Uid, msgs, dc);
+            var actual2 = account.GetExternallyProvidedActivity(expected.ID.Value, msgs, dc);
+            var actual3 = account.GetExternallyProvidedActivity(expected2.ID.Value, msgs, dc);
+
+            Assert.NotNull(actual);
+            Assert.NotNull(actual2);
+            Assert.Equal(expected.Uid, actual.Uid);
+            Assert.Equal(expected.ID, actual.ID);
+            Assert.Null(actual3);
             Assert.True(msgs.HasNoErrors());
         }
 
