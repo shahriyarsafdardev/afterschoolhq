@@ -2416,5 +2416,28 @@ namespace AfterSchoolLibraryTests.Tests
                 Assert.False(true, ex.Message);
             }
         }
+
+        [Fact]
+        public void GetOpenPublishedSessionsTest()
+        {
+            var activityGroup1 = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+            var activityGroup2 = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+            var activityGroup3 = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+            var regPeriod1 = RegistrationPeriodFactory.Create(account, activityGroup1, msgs, dc);
+            var regPeriod2 = RegistrationPeriodFactory.Create(account, activityGroup2, msgs, dc);
+            var regPeriod3 = RegistrationPeriodFactory.Create(account, activityGroup2, DateTime.UtcNow.AddDays(1), DateTime.UtcNow.AddDays(4), msgs, dc);
+
+            msgs.AddRange(activityGroup1.SetIsPublished(true, user.ID.Value, dc));
+            msgs.AddRange(activityGroup2.SetIsPublished(true, user.ID.Value, dc));
+            msgs.AddRange(activityGroup3.SetIsPublished(true, user.ID.Value, dc));
+
+            activityGroup2.SetIsDeleted(user.ID.Value, true, msgs, dc);
+
+            var sessions = account.GetOpenPublishedSessions(msgs, dc);
+
+            Assert.Single(sessions);
+            Assert.Equal(activityGroup1.ID, sessions.First().ID);
+            Assert.True(msgs.HasNoErrors());
+        }
     }
 }

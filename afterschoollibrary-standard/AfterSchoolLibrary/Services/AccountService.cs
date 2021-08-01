@@ -300,7 +300,7 @@ namespace AfterSchoolLibrary.Services
             );
 
             participationObjects.AddRange(
-                account.GetPublishedSessions(msgs, dc).Select(x => x.GetParticipationObject(msgs, dc))
+                account.GetOpenPublishedSessions(msgs, dc).Select(x => x.GetParticipationObject(msgs, dc))
             );
 
             return participationObjects;
@@ -642,9 +642,9 @@ namespace AfterSchoolLibrary.Services
             return ActivityGroup.LoadByAccountIdByActivityGroupTypeId(account.ID.Value, ActivityGroupType.Session, msgs, dc);
         }
 
-        public static List<ActivityGroup> GetPublishedSessions(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<ActivityGroup> GetOpenPublishedSessions(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var groups = ActivityGroup.LoadByAccountIdByIsPublishedByIsArchived(account.ID.Value, true, false, msgs, dc);
+            var groups = ActivityGroup.LoadByAccountIdByIsPublishedByIsArchivedByIsDeleted(account.ID.Value, true, false, false, msgs, dc);
 
             if (!groups.Any())
                 return new List<ActivityGroup>();
