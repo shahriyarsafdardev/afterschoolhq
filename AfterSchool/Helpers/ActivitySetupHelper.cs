@@ -62,13 +62,11 @@ namespace AfterSchool.Helpers
             }
             else if (cmd == "publish")
             {
-                if (canPublishActivity)
-                    return "Save &amp; Review &raquo;";
-
                 if (isTop)
-                    return "Submit &raquo;";
+                    return "Review &raquo;";
 
-                return "Submit to Publish &raquo;";
+                return "Save &amp; Review &raquo;";
+                // return "Submit to Publish &raquo;";
             }
             else if (cmd == "signupperiods")
             {

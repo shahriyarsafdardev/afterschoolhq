@@ -2468,7 +2468,7 @@ namespace AfterSchoolLibrary.Services
         public static bool IsApprovedAsVisitorTo(this Account visitorAccount, Account hostAccount, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var relationship = AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value, visitorAccount.ID.Value, msgs, dc);
-            return relationship.ApprovalStatusId == ApprovalStatus.Approved;
+            return relationship.IsNotEmpty() && relationship.ApprovalStatusId == ApprovalStatus.Approved;
         }
 
         public static AccountRelationship ApproveAccessToAccount(this Account hostAccount, Account visitorAccount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
