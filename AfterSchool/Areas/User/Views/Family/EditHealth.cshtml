@@ -24,7 +24,7 @@
         </div>
 
         <div class="panel-body">
-            <form class="form-horizontal" id="form-save-health" method="post" action="@Url.Action("edithealth", "family", new { id = Model.Uid, reg = Request["reg"], student = Request["student"] })">
+            <form class="form-horizontal" id="form-save-health" method="post" action="@Url.Action("edithealth", "family", new { id = Model.Uid, reg = Request["reg"], student = Request["student"], returnUrl = Request["returnurl"] })">
 
                 @foreach (var qvm in qvms)
                 {

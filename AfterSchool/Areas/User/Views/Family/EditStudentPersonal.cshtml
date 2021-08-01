@@ -3,11 +3,17 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var qvms = (List<FormQuestionViewModel>)ViewBag.QuestionViewModels;
     var school = (Location)ViewBag.School;
-    var returnToCheckout = (bool)ViewBag.ReturnToCheckout;  
     Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
     var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
     var regName = !isTechSupport ? Model.Name : Model.GetFirstNameLastInitial();
     var gradeFormId = qvms.Where(qvm => qvm.Question.Text == "Grade").FirstOrDefault()?.Id;
+    var exitUrl = Url.Action("index", (Request["reg"].IsGuid() ? "home" : "family"));
+    var resetGrade = ViewBag.ResetGrade;
+
+    if (Request["returnurl"].IsNotBlank())
+    {
+        exitUrl = Request["returnurl"];
+    }
 }
 
 <div class="main-content">
@@ -20,7 +26,7 @@
             <i class="s7-user"></i> @regName - Personal Info
 
             <div class="pull-right">
-                <a href="@Url.Action("index", (Request["reg"].IsGuid() ? "home" : "family"))" class="btn btn-default">
+                <a href="@exitUrl" class="btn btn-default">
                     Exit
                 </a>
             </div>
@@ -45,7 +51,7 @@
             <form class="form-horizontal" 
                   id="form-save-personal" 
                   method="post" 
-                  action="@Url.Action("editstudentpersonal", "family", new { id = Model.Uid, reg = Request["reg"], student = Request["student"], returnToCheckout = returnToCheckout.ToString() })">
+                  action="@Url.Action("editstudentpersonal", "family", new { id = Model.Uid, reg = Request["reg"], student = Request["student"], returnUrl = Request["returnUrl"] })">
 
                 @foreach (var qvm in qvms)
                 {
@@ -101,7 +107,7 @@
             }
         });
 
-        if (@Json.Encode(returnToCheckout)) {
+        if (@resetGrade) {
             $('#@gradeFormId').val(null);
         }
 
