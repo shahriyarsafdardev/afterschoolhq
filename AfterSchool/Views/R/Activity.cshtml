@@ -278,7 +278,7 @@
     <span class="span-upgrade-modal-close" onclick="return hideActivityRibbon()">X</span>
     @if (Model.IsPublished)
     {
-        <button class="btn btn-default btn-activity-footer">Share</button>
+        <button class="btn btn-default btn-activity-footer btn-share">Share</button>
         <a href="@Url.Action("editsetup", "activity", new { id = Model.Uid, area = "org" })" class="btn btn-default btn-activity-footer">Edit Activity</a>
     }
     else
