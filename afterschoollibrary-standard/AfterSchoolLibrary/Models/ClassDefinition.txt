@@ -116,7 +116,6 @@ loadmethod: LocationId, List<>
 loadmethod: Uid
 loadmethod: Uid|AccountId
 loadmethod: Uid|ProviderAccountId
-loadmethod: ID|ProviderAccountId
 -loadmethod: ParentActivityId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: ActivityGroupId|AccountId, List<>
