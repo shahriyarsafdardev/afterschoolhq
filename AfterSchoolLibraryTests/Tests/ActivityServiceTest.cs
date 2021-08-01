@@ -231,6 +231,39 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(paymentStart.HasValue && paymentEnd.HasValue);
         }
 
+        [Fact]
+        public void GetProviderTest()
+        {
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(user, msgs, dc);
+            var schoolUser = Factories.WebUserFactory.Create(msgs, dc);
+            var schoolAccount = Factories.AccountFactory.Create(schoolUser, msgs, dc);
+
+            var activity = Factories.ActivityFactory.Create(schoolAccount, msgs, dc);
+            activity.SetProvider(account, schoolUser, msgs, dc);
+
+            var provider = activity.GetProvider(msgs, dc);
+
+            Assert.Equal(account.ID, provider.ID);
+            Assert.True(msgs.HasNoErrors());
+
+        }
+
+        [Fact]
+        public void SetProviderTest()
+        {
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(user, msgs, dc);
+            var schoolUser = Factories.WebUserFactory.Create(msgs, dc);
+            var schoolAccount = Factories.AccountFactory.Create(schoolUser, msgs, dc);
+
+            var activity = Factories.ActivityFactory.Create(schoolAccount, msgs, dc);
+            activity.SetProvider(account, schoolUser, msgs, dc);
+
+            Assert.Equal(activity.ProviderAccountId, account.ID);
+            Assert.True(msgs.HasNoErrors());
+        }
+
         #region Activity Copy Functionality
 
         [Fact]
