@@ -4394,6 +4394,29 @@ namespace AfterSchoolLibrary.Services
         {
             return account.GetActivityMessageRegistrantsForCurrentMessagePeriod().Where(amr => amr.SentEmail).ToList().Count();
         }
+
+        public static bool WillExceedEmailQuota(this Account account, AccountPackage accountPackage, int messageCount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            // get current limit
+            var maxEmailCount = accountPackage.HasFeature(FeatureType.EmailMessaging, msgs, dc) ? (int)accountPackage.GetFeature(FeatureType.EmailMessaging).Max.Value : 0;
+
+            // get current quota
+            var amr = ActivityMessageRegistrant.LoadByCreatedBy(loggedInUser.ID.Value.ToString(), msgs, dc).Where(m => m.CreateDate > DateTime.Now.AddMonths(-1).Date);
+            var usedEmailQuota = account.GetEmailCountForCurrentMessagePeriod(msgs, dc);
+
+            //add additional registransts
+            usedEmailQuota += messageCount;
+
+            // if exceeds, return error
+            if (usedEmailQuota > maxEmailCount)
+            {                
+                msgs.Add("Email quota exceeded for current user.", MessageType.UserError);
+                return true;
+            }
+
+            return false;
+        }
+
         #endregion
 
         #region REFUND-REQUEST
