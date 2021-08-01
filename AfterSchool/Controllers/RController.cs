@@ -348,11 +348,16 @@ namespace AfterSchool.Controllers
             if (isUnsupportedBrowser())
                 return RedirectUnsupportedBrowser();
 
-            ParticipationObject participationObject = null;
             var msgs = new SystemMessages();
+            if (TempData["Messages"] != null && ((SystemMessages)TempData["Messages"]).IsNotEmpty())
+                msgs.AddRange((SystemMessages)TempData["Messages"]);
+
+            ParticipationObject participationObject = null;            
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
             var canPublishActivity = false;
             var accountProfile = account?.GetAccountProfile(msgs);
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
             ParticipationObject session = null;
 
             if (account.IsNotEmpty())
@@ -373,16 +378,19 @@ namespace AfterSchool.Controllers
                     AddNoCacheHeaders();
                 }
 
-                if (!activity.IsPublished &&
-                    activity.GetLocation().IsNotEmpty() &&
-                    activity.GetLocation().HostAccountId.IsNotEmpty() &&
-                    activity.GetLocation().HostAccountId != activity.AccountId)
-                {
-                    var accountOwnerId = activity.GetLocation().GetHostAccount().OwnerId;
+                if (currentUser.IsNotEmpty() && currentAccount.IsNotEmpty())
+                    canPublishActivity = currentUser.CanPublishActivity(currentAccount, activity, msgs);
 
-                    if (SessionVariables.CurrentUser.ID == accountOwnerId)
-                        canPublishActivity = true;
-                }
+                //if (!activity.IsPublished &&
+                //    activity.GetLocation().IsNotEmpty() &&
+                //    activity.GetLocation().HostAccountId.IsNotEmpty() &&
+                //    activity.GetLocation().HostAccountId != activity.AccountId)
+                //{
+                //    var accountOwnerId = activity.GetLocation().GetHostAccount().OwnerId;
+
+                //    if (SessionVariables.CurrentUser.ID == accountOwnerId)
+                //        canPublishActivity = true;
+                //}
             }
             else
                 return HttpNotFound();

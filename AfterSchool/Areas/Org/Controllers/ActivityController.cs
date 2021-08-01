@@ -2297,7 +2297,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult RequestToPublish(string id)
+        public ActionResult RequestToPublish(string id, bool isFromActivityHome = false)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
@@ -2308,19 +2308,25 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var isNewActivity = Request["isnew"] == "1";
 
-            activity.RequestToPublish(SessionVariables.CurrentUser, msgs);           
+            var locationOwner = activity.GetLocationOwner(msgs);
+            activity.RequestToPublish(locationOwner, SessionVariables.CurrentUser, msgs);
 
             if (msgs.HasNoErrors())
-                if (isNewActivity)
-                    msgs.Add("Your request to publish has been submitted", MessageType.Success);            
+                if (isFromActivityHome)
+                    msgs.Add($"Your request to publish has been sent to {locationOwner.Name}", MessageType.Success);
                 else
                     msgs.Add("Activity saved successfully", MessageType.Success);
 
             ViewBag.Messages = msgs;
+            TempData["Messages"] = msgs;
             ViewBag.MustRequestToPublish = MustRequestToPublish(activity);
             ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity);
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.IsFullScreen = isNewActivity;
+
+            if (isFromActivityHome)
+                return Redirect(activity.ShortHomePageUrl);
+
             return View("publishdetail", activity);
         }
 
@@ -2432,7 +2438,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Unpublish(string id)
+        public ActionResult Unpublish(string id, bool isFromActivityHome = false)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -2444,8 +2450,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var mustRequestToPublish = MustRequestToPublish(activity);
             
-            if (mustRequestToPublish)
-                msgs.Add("You do not have permissions to unpublish", MessageType.UserError);
+            //if (mustRequestToPublish)
+            //    msgs.Add("You do not have permissions to unpublish", MessageType.UserError);
 
             if (msgs.HasNoErrors())
                 activity.Unpublish(currentUser, msgs);
@@ -2473,6 +2479,10 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.MustRequestToPublish = mustRequestToPublish;
             ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity);
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
+
+            if (isFromActivityHome)
+                return Redirect(activity.ShortHomePageUrl);
+
             return View("publishdetail", activity);
         }
 

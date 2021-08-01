@@ -231,6 +231,94 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(paymentStart.HasValue && paymentEnd.HasValue);
         }
 
+        [Fact]
+        public void GetProviderTest()
+        {
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(user, msgs, dc);
+            var schoolUser = Factories.WebUserFactory.Create(msgs, dc);
+            var schoolAccount = Factories.AccountFactory.Create(schoolUser, msgs, dc);
+
+            var activity = Factories.ActivityFactory.Create(schoolAccount, msgs, dc);
+            activity.SetProvider(account, schoolUser, msgs, dc);
+
+            var provider = activity.GetProvider(msgs, dc);
+
+            Assert.Equal(account.ID, provider.ID);
+            Assert.True(msgs.HasNoErrors());
+
+        }
+
+        [Fact]
+        public void SetProviderTest()
+        {
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(user, msgs, dc);
+            var schoolUser = Factories.WebUserFactory.Create(msgs, dc);
+            var schoolAccount = Factories.AccountFactory.Create(schoolUser, msgs, dc);
+
+            var activity = Factories.ActivityFactory.Create(schoolAccount, msgs, dc);
+            activity.SetProvider(account, schoolUser, msgs, dc);
+
+            Assert.Equal(activity.ProviderAccountId, account.ID);
+        }
+
+        [Fact]
+        public void SetLocationTest()
+        {
+            var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
+            var location = LocationFactory.Create(ActivityOwnerAccount, msgs, dc);
+
+            activity.SetLocation(location, LoggedInUser, msgs, dc);
+
+            Assert.Equal(location.ID.Value, activity.LocationId.Value);
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void GetLocationTest()
+        {
+            var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
+            var location = LocationFactory.Create(ActivityOwnerAccount, msgs, dc);
+
+            activity.SetLocation(location, LoggedInUser, msgs, dc);
+            var activityLocation = activity.GetLocation(msgs, dc);
+
+            Assert.Equal(location.ID.Value, activityLocation.ID.Value);
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void GetLocationOwnerTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
+            var location = LocationFactory.Create(ActivityOwnerAccount, msgs, dc);
+
+            // Act
+            activity.SetLocation(location, LoggedInUser, msgs, dc);
+            var locationOwner = activity.GetLocationOwner(msgs, dc);
+
+            // Assert
+            Assert.Equal(ActivityOwnerAccount.ID.Value, locationOwner.ID.Value);
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void GetLocationOwnerFailingTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
+
+            // Act
+            // we are not setting any location with this activity, so location owner will be empty
+            var locationOwner = activity.GetLocationOwner(msgs, dc);
+
+            // Assert
+            Assert.Null(locationOwner);
+            Assert.True(msgs.HasNoErrors());
+        }
+
         #region Activity Copy Functionality
 
         [Fact]

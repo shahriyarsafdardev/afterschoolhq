@@ -817,7 +817,20 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-        public bool IsFree
+		public static int GetCountByProviderAccountId(int ProviderAccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ProviderAccountId"], ProviderAccountId);
+			return dq.GetCount(msgs);
+		}
+
+		public bool GetIsFree(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			return (!this.CostPerRegistrant.HasValue || this.CostPerRegistrant.Value == 0) && !this.HasSubscriptionPlan(msgs, dc) && !this.HasPaymentPlan(msgs, dc) && !this.HasPostPayPlan(msgs, dc);
+		}
+
+		public bool IsFree
         {
             get
             {

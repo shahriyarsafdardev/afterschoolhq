@@ -2,13 +2,18 @@
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = Model.Name;
+
     var account = (Account)ViewBag.Account;
     var msgs = (SystemMessages)ViewBag.Messages;
     var session = (ParticipationObject)ViewBag.Session;
     var showLocation = false;
     var hidePreciseLocation = false;
     var accountProfile = (AccountProfile)ViewBag.AccountProfile;
+    var canPublishActivity = (bool)ViewBag.CanPublishActivity;
     var instruction = "";
+    var currentAccount = SessionVariables.CurrentAccount;
+    var currentUser = SessionVariables.CurrentUser;
+
     if (Model.ActivityLocationType == ActivityLocationType.Physical)
     {
         instruction = "In-Person Instruction";
@@ -40,10 +45,10 @@
     
     var isAccountAndLoggedInUserIsOwner = Model.IsNotEmpty() &&
         Model.OwnerAccount.IsNotEmpty() &&
-        SessionVariables.CurrentAccount.IsNotEmpty() &&
-        SessionVariables.CurrentUser.IsNotEmpty() &&
-        (SessionVariables.CurrentAccount.ID == Model.OwnerAccount.ID) &&
-        (SessionVariables.CurrentUser.HasAccessTo(Model.OwnerAccount));
+        currentAccount.IsNotEmpty() &&
+        currentUser.IsNotEmpty() &&
+        (currentAccount.ID == Model.OwnerAccount.ID) &&
+        (currentUser.HasAccessTo(Model.OwnerAccount));
     
 }
 <style>
@@ -273,14 +278,29 @@
     <span class="span-upgrade-modal-close" onclick="return hideActivityRibbon()">X</span>
     @if (Model.IsPublished)
     {
-        <button class="btn btn-default btn-activity-footer">Share</button>
+        <button class="btn btn-default btn-activity-footer btn-share">Share</button>
         <a href="@Url.Action("editsetup", "activity", new { id = Model.Uid, area = "org" })" class="btn btn-default btn-activity-footer">Edit Activity</a>
     }
     else
     {
         <button class="btn btn-default btn-activity-footer" disabled>Share</button>
         <a href="@Url.Action("editsetup", "activity", new { id = Model.Uid, area = "org" })" class="btn btn-default btn-activity-footer">Return to Edit</a>
-        <a href="@Url.Action("publish", "activity", new { id = Model.Uid, isFromActivityHome = true, area = "org" })" class="btn btn-default btn-activity-footer">Publish</a>
+
+        if (Model.IsPublished)
+        {            
+            <a href="@Url.Action("unpublish", "activity", new { id = Model.Uid, isFromActivityHome = true, area = "org" })" class="btn btn-default btn-activity-footer">Unpublish</a>
+        }
+        else
+        {
+            if (canPublishActivity)
+            {
+                <a href="@Url.Action("publish", "activity", new { id = Model.Uid, isFromActivityHome = true, area = "org" })" class="btn btn-default btn-activity-footer">Publish</a>
+            }
+            else
+            {
+                <a href="@Url.Action("requesttopublish", "activity", new { id = Model.Uid, isFromActivityHome = true, area = "org" })" class="btn btn-default btn-activity-footer">Request to Publish</a>
+            }
+        }
     }
 
 </div>
