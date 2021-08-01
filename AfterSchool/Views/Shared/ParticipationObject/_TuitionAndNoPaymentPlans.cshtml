@@ -7,6 +7,13 @@
     {
         displayCheckoutPrice = ViewData["DisplayCheckoutPrice"].ToString().ToBoolean();
     }
+
+    var youOrProvider = "you";
+
+    if (Model.IsActivity() && Model.GetActivity().ProviderAccountId.HasValue)
+    {
+        youOrProvider = Model.GetActivity().GetProvider().Name;
+    }
 }
 
 <p>
@@ -18,7 +25,7 @@
         }
         else
         {
-            <span>You will receive</span>
+            <span>@youOrProvider.ToProperCase() will receive</span>
         }
     }
 
@@ -33,7 +40,7 @@
                 }
                 else
                 {
-                    <span>You will receive</span>
+                    <span>@youOrProvider.ToProperCase() will receive</span>
                 }
             }
             

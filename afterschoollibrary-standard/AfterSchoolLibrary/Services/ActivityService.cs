@@ -2483,7 +2483,7 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        public static Account GetProvider(this Activity activity, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Account GetProvider(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (activity.ProviderAccountId.HasValue)
                 return Account.Load(activity.ProviderAccountId.Value, msgs, dc);
