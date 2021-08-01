@@ -9,6 +9,7 @@ using AfterSchool.Models;
 using Hangfire;
 using System.Collections.Specialized;
 using BasicLibrary.DataAccess;
+using AfterSchoolLibrary;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -350,6 +351,9 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 selectedRegistration.WasUpdated(msgs);
 
+                var participationObject = registrantActivity.GetParticipationObject(msgs);
+                var registrant = registrantActivity.GetRegistrant(msgs);
+
                 // LOG: Someone Updated RegistrantActivity {registrant.Name} assignment type to {ratTo} for Activty ActivityName
                 SessionVariables.WebSession.LogActivity(
                     account: currentAccount,
@@ -357,14 +361,14 @@ namespace AfterSchool.Areas.Org.Controllers
                     actionType: WebSessionActionType.Updated,
                     objectId: registrantActivity.ID,
                     objectType: ObjectType.RegistrantActivity,
-                    objectText: $"{registration.GetRegistrant()?.GetFirstNameLastInitial()}'s assignment type to {ratTo}",
-                    indirectObjectId: registrantActivity.GetActivityId(),
-                    indirectObjectType: ObjectType.Activity,
-                    indirectObjectText: registrantActivity.GetActivity()?.Name);
+                    objectText: $"{registrant.GetFirstNameLastInitial()}'s assignment type to {ratTo}",
+                    indirectObjectId: participationObject.ObjectID,
+                    indirectObjectType: participationObject.ObjectType.ToObjectType(),
+                    indirectObjectText: participationObject.Name);
 
-                msgs.Add(string.Format("{0} has been moved to {1} for {2}", 
-                    selectedRegistration.ToRegistrant()?.Name, ratTo.ToString().SplitByUpperCase(), 
-                    registrantActivity.GetParticipationObject(msgs)?.Name), 
+                msgs.Add(string.Format("{0} has been moved to {1} for {2}",
+                    registrant.Name, ratTo.ToString().SplitByUpperCase(),
+                    participationObject.Name), 
                     MessageType.Success);
             }
 
