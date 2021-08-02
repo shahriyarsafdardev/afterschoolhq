@@ -13,7 +13,7 @@
     var youOrProvider = "you";
     var currentAccount = SessionVariables.CurrentAccount;
 
-    if (Model.IsActivity() && Model.GetActivity().ProviderAccountId.HasValue && Model.GetActivity().ProviderAccountId != currentAccount.ID)
+    if (Model.IsActivity() && Model.GetActivity().ProviderAccountId.HasValue && Model.GetActivity().ProviderAccountId != currentAccount?.ID)
     {
         youOrProvider = Model.GetActivity().GetProvider().Name;
     }
