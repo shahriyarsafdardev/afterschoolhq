@@ -410,7 +410,7 @@ namespace AfterSchoolLibrary.Services
         {
             return Activity.GetCount(new Hashtable() { 
                 { "AccountId", account.ID.Value }, 
-                { "IsPublished", true }, 
+                //{ "IsPublished", true }, 
                 { "IsDeleted", false }, 
                 { "isArchived", false } 
             }, msgs, dc) + Activity.GetCountByProviderAccountId(account.ID.Value, msgs, dc);
@@ -423,7 +423,7 @@ namespace AfterSchoolLibrary.Services
                 { "IsPublished", false },
                 { "IsDeleted", false },
                 { "isArchived", false }
-            }, msgs, dc);
+            }, msgs, dc) + Activity.GetCountByProviderAccountId(account.ID.Value, msgs, dc);
         }
 
         public static List<Activity> GetAllActiveAndNonPublishedActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -489,7 +489,7 @@ namespace AfterSchoolLibrary.Services
             if (!HasAccountProfile)
                 return GettingStartedOptions.CreateProfile;
 
-            else if (!HasActivities && activitycount < 1)
+            else if (!HasActivities || activitycount < 1)
                 return GettingStartedOptions.CreateFirstActivity;
             
             else if (!VerifiedAccount)

@@ -763,7 +763,7 @@ namespace AfterSchoolLibrary.Models
         public bool IsExternalToAccount(Account account)
         {
             if (IsExternallyProvided())
-                return GetActivity().ProviderAccountId != account.ID;
+                return GetActivity().ProviderAccountId == account.ID;
 
             return false;
         }
