@@ -380,17 +380,6 @@ namespace AfterSchool.Controllers
 
                 if (currentUser.IsNotEmpty() && currentAccount.IsNotEmpty())
                     canPublishActivity = currentUser.CanPublishActivity(currentAccount, activity, msgs);
-
-                //if (!activity.IsPublished &&
-                //    activity.GetLocation().IsNotEmpty() &&
-                //    activity.GetLocation().HostAccountId.IsNotEmpty() &&
-                //    activity.GetLocation().HostAccountId != activity.AccountId)
-                //{
-                //    var accountOwnerId = activity.GetLocation().GetHostAccount().OwnerId;
-
-                //    if (SessionVariables.CurrentUser.ID == accountOwnerId)
-                //        canPublishActivity = true;
-                //}
             }
             else
                 return HttpNotFound();
@@ -456,6 +445,7 @@ namespace AfterSchool.Controllers
             ViewBag.Account = account;
             ViewBag.CanRegisterFor = canRegisterFor;
             ViewBag.AccountProfile = account.GetAccountProfile(msgs);
+            ViewBag.CanPublishActivity = false;
 
             // LOG: Somone Viewed Session SessionName by Account AccountName
             SessionVariables.WebSession.LogActivity(
@@ -518,6 +508,7 @@ namespace AfterSchool.Controllers
             ViewBag.Messages = msgs;
             ViewBag.Account = account;
             ViewBag.AccountProfile = account.GetAccountProfile(msgs);
+            ViewBag.CanPublishActivity = false;
 
             // LOG: Somone Viewed League LeagueName by Account AccountName
             SessionVariables.WebSession.LogActivity(
