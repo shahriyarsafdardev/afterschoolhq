@@ -9,6 +9,15 @@
     }
 
     var billingPeriod = Model.PostPayPlans.FirstOrDefault()?.BillingPeriodTypeId.ToString().ToLower();
+
+    var youOrProvider = "you";
+    var currentAccount = SessionVariables.CurrentAccount;
+
+    if (Model.IsActivity() && Model.GetActivity().ProviderAccountId.HasValue && Model.GetActivity().ProviderAccountId != currentAccount?.ID)
+    {
+        youOrProvider = Model.GetActivity().GetProvider().Name;
+    }
+
 }
 
 <p>    
@@ -44,7 +53,7 @@
                     with a pre-payment of <strong>@((Model.GetPostPayCostWithConvenienceFee() * Model.PostPayPlans.First().NumberOfPeriodsPrePaid.Value).ToCurrency())</strong>
                 </span>
                     }
-                    and you will receive
+                    and @youOrProvider will receive
                     <strong>@Model.GetPostPayProviderAmount().ToCurrency()</strong>
                     per class attended per student
                 </span>

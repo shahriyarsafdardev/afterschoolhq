@@ -55,5 +55,25 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.Equal(expectedResult, WebUserService.LoginByEmail(email, testingPassword, msgs, dc).IsNotEmpty());
         }
+
+        [Fact]
+        public void CanPublishActivityTest()
+        {
+            var user = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(user, msgs, dc);
+            var activity = ActivityFactory.Create(account, msgs, dc);
+
+            var schoolUser = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolUser, msgs, dc);
+            var location = LocationFactory.Create(schoolAccount, msgs, dc);
+
+            activity.SetLocation(location, user, msgs, dc);
+
+            var canUserPublish = user.CanPublishActivity(account, activity, msgs, dc);
+            var canSchoolUserPublish = schoolUser.CanPublishActivity(schoolAccount, activity, msgs, dc);
+
+            Assert.False(canUserPublish);
+            Assert.True(canSchoolUserPublish);
+        }
     }
 }

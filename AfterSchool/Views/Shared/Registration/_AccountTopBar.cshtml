@@ -232,7 +232,8 @@
 
                             @if (currentUser.IsNotEmpty())
                             {
-                                if (canPublishActivity && participationObject.IsNotEmpty())
+                                
+                                if (canPublishActivity && participationObject.IsNotEmpty() && participationObject.IsExternalToAccount(currentAccount))
                                 {
                                     <a href="@Url.Action("publishdetail", "activity", new { Area = "org", id = participationObject.Uid })"
                                        class="btn btn-primary btn-sm">
@@ -271,8 +272,8 @@
 
                                 if (currentUser.HasMultipleAccounts())
                                 {
-                                    var registrationAccount = SessionVariables.CurrentUser.GetRegistrantAccount();
-                                    if (registrationAccount.IsNotEmpty())
+                                    var registrationAccount = currentUser.GetRegistrantAccount();
+                                    if (registrationAccount.IsNotEmpty() && currentAccount.ID != registrationAccount.ID)
                                     {
                                         <a class="btn btn-link" href="@Url.Action("select", "login", new { area = "", id = registrationAccount.Uid.ToString() })">Switch to @registrationAccount.Name</a>
                                     }

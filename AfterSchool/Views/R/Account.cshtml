@@ -33,6 +33,14 @@
     var currentLevel = AccountService.OnboardingCompletionStatus(Model);
     var isStripeIntegrated = TempData["IsStripeIntegrated"] != null;
     var firstActivity = Model.GetActivities(msgs)?.FirstOrDefault();
+    var isExternallyProvidedActivity = false;
+
+    if (firstActivity.IsEmpty())
+    {
+        firstActivity = Model.GetExternallyProvidedActivities(msgs).FirstOrDefault();
+        isExternallyProvidedActivity = true;
+    }
+
     var isAccountAndLoggedInUserIsOwner = SessionVariables.CurrentAccount.IsNotEmpty() &&
         SessionVariables.CurrentUser.IsNotEmpty() &&
         (SessionVariables.CurrentAccount.ID == Model.ID) &&
@@ -572,10 +580,18 @@
                         Account setup complete!
                     </div>
                     <div id="modal-email-confirmation-btn" class="margin-v-30 text-center">
-                        <a href="#" class="btn btn-primary btn-free-profile" style="padding: 12px 20px;" onclick="return hideAcceptPaymentModal()">View Activity</a>
-                        <div class="clearfix"></div>
-                        <br />
-                        <a href="@Url.Action("editsetup", "activity", new { id = firstActivity?.Uid, area = "org" })" class="view-activity-text">Return to activity draft</a>
+
+                        @if (isExternallyProvidedActivity)
+                        {
+                            <a href="#" class="btn btn-primary btn-free-profile" style="padding: 12px 20px;" onclick="return $('#modal-acceptpayment-done').modal('hide');">View Profile</a>
+                        }
+                        else
+                        {
+                            <a href="#" class="btn btn-primary btn-free-profile" style="padding: 12px 20px;" onclick="return hideAcceptPaymentModal()">View Activity</a>
+                            <div class="clearfix"></div>
+                            <br />
+                            <a href="@Url.Action("editsetup", "activity", new { id = firstActivity?.Uid, area = "org" })" class="view-activity-text">Return to activity draft</a>
+                        }
                     </div>
                 </div>
             </div>
