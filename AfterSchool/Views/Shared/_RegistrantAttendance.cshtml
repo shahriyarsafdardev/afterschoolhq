@@ -14,7 +14,7 @@
         <div class="panel-heading">
             <div class="pull-right">
                 <a href="@Url.Action("attendance", controller, new { id = Model.ActivityUid })" class="btn btn-default btn-space">&laquo; Back to List</a>
-                <button type="submit" class="btn btn-primary btn-space"><i class="icon icon-left s7-diskette"></i> Save Attendance</button>
+                <button type="submit" class="btn btn-primary btn-space" @(attendanceRegistrants.Count == 0 ? "disabled=\"disabled\"" : "")><i class="icon icon-left s7-diskette"></i> Save Attendance</button>
             </div>
             <i class="s7-check"></i> Take Attendance
         </div>
