@@ -145,8 +145,15 @@ namespace AfterSchoolLibrary.Services
         }
         public static bool HasAccessTo(this WebUser user, Account a, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var awu = AccountWebUser.LoadByAccountIdByWebUserId(a.ID.Value, user.ID.Value, msgs, dc);
-            return awu.IsNotEmpty() && awu.IsActive;
+            if (user.IsNotEmpty() && a.IsNotEmpty())
+            {
+                var awu = AccountWebUser.LoadByAccountIdByWebUserId(a.ID.Value, user.ID.Value, msgs, dc);
+
+                if (awu.IsNotEmpty())
+                    return awu.IsNotEmpty() && awu.IsActive;
+            }
+
+            return false;
         }
         public static bool HasAccessToActivity(this WebUser user, Activity a, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
