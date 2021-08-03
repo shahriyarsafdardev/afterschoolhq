@@ -1,6 +1,6 @@
 ﻿@model List<FormQuestionAnswer>
 @{ 
-    var isTechSupport = (bool)SessionVariables.LoggedInUser.IsTechSupport(SessionVariables.CurrentAccount);
+    var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
 }
 
 @foreach (var group in Model.Select(x => x.ToFormQuestionGroup()).DistinctBy(x => x.QuestionGroupDataTypeId).OrderBy(x => x.DisplayOrder))

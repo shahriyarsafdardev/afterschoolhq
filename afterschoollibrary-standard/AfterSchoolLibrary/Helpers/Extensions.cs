@@ -105,6 +105,26 @@ namespace AfterSchoolLibrary
             return objectType;
         }
 
+        public static ObjectType ToObjectType(this ParticipationObjectType participationObjectType)
+        {
+            var objectType = ObjectType.NotSet;
+
+            switch (participationObjectType)
+            {
+                case ParticipationObjectType.AccountActivityGroup:
+                    objectType = ObjectType.AccountActivityGroup;
+                    break;
+                case ParticipationObjectType.Activity:
+                    objectType = ObjectType.Activity;
+                    break;
+                case ParticipationObjectType.ActivityGroup:
+                    objectType = ObjectType.ActivityGroup;
+                    break;
+            }
+
+            return objectType;
+        }
+
         public static TValue GetValueOrDefault<TKey,TValue> (this IDictionary<TKey, TValue> dictionary, TKey key) =>
             dictionary.TryGetValue(key, out var ret) ? ret : default;
     }

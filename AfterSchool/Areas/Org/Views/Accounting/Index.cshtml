@@ -291,7 +291,7 @@
                                             var hasUnfulfilledRequest = transaction.HasUnfulfilledRefundRequests();
                                             var disableRequest = hasUnfulfilledRequest || !transaction.CanRefundViaStripe();
 
-                                            <button onclick="requestRefund('@transaction.Uid', @transaction.GetRefundableAmount().ToString("#.00"))"
+                                            <button onclick="requestRefund('@transaction.Uid', @transaction.GetRefundableAmount(isPartialRefundWithConvenienceFee: true).ToString("#.00"))"
                                                     class="md-trigger btn btn-sm btn-default"
                                                     data-modal="modal-request-refund"
                                                     @(disableRequest ? "disabled=\"disabled\"" : "")>

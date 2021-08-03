@@ -19,7 +19,7 @@
     }
 
     var IsPublished = false;
-    var activity = Model.IsSession() ? null : Model.GetActivity();
+    var activity = Model.GetActivity();
 
     if (activity.IsNotEmpty())
     {
@@ -172,7 +172,8 @@ else
                 Registration Closed
             </button>
         }
-        else {
+        else 
+        {
             var anotherChildString = anotherChild ? $"Again for New Child" : "";
 
             <a href="@(IsPublished? Model.GetRegistrationPageUrl().ToString(): "javascript:void(0)")" class="@(IsPublished?"":"disabled") btn btn-register btn-block"  @IsPublished>

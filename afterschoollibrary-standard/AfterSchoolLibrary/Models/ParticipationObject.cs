@@ -645,17 +645,26 @@ namespace AfterSchoolLibrary.Models
 
         public ActivityGroup GetActivityGroup()
         {
-            return (ActivityGroup)this.Object;
+            if (IsActivityGroup())
+                return (ActivityGroup)this.Object;
+
+            return null;
         }
 
         public AccountActivityGroup GetAccountActivityGroup()
         {
-            return (AccountActivityGroup)this.Object;
+            if (IsAccountActivityGroup())
+                return (AccountActivityGroup)this.Object;
+
+            return null;
         }
 
         public Activity GetActivity()
         {
-            return (Activity)this.Object;
+            if (IsActivity())
+                return (Activity)this.Object;
+
+            return null;
         }
 
         public int? GetActivityGroupId()
@@ -741,6 +750,22 @@ namespace AfterSchoolLibrary.Models
                 return PostPayPlans.FirstOrDefault();
 
             return null;
+        }
+
+        public bool IsExternallyProvided()
+        {
+            if (IsActivity())
+                return GetActivity().ProviderAccountId.HasValue;
+
+            return false;
+        }
+
+        public bool IsExternalToAccount(Account account)
+        {
+            if (IsExternallyProvided())
+                return GetActivity().ProviderAccountId != account.ID;
+
+            return false;
         }
 
         #endregion
@@ -1009,10 +1034,11 @@ namespace AfterSchoolLibrary.Models
             var classes = 0;
             if (Schedule.IsNotEmpty() && Schedule.ID.HasValue)
             {
+                // Add one day because last day return datetime at beginning of day (12:00 am) 
                 if (billingPeriodTypeId == BillingPeriodType.Month)
-                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now, DateTime.Now.LastDateOfMonth(), msgs,dc).Count;
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.UtcNow, DateTime.UtcNow.LastDateOfMonth().AddDays(1), msgs,dc).Count;
                 else if (billingPeriodTypeId == BillingPeriodType.Week)
-                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now, DateTime.Now.LastDateOfWeek(), msgs,dc).Count;
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.UtcNow, DateTime.UtcNow.LastDateOfWeek().AddDays(1), msgs,dc).Count;
             }                
 
             return classes;

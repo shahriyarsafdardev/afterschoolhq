@@ -560,8 +560,8 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult MessageAdd(string id, string deliveryMethod, string subject, string body, string sendtostaff)
         {
-            var account = SessionVariables.CurrentAccount;
-            var currentuser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
 
             if (subject.IsEmpty())
@@ -574,7 +574,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (id.IsNotGuid())
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            var group = account.GetActivityGroup(id.ToGuid(), msgs);
+            var group = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
 
             if (msgs.HasNoErrors())
             {
@@ -583,24 +583,35 @@ namespace AfterSchool.Areas.Org.Controllers
                                         .Select(x => x.ID.Value)
                                         .ToList();
 
-                am = group.AddMessage(
-                        subject, 
-                        body, 
-                        registrantIds,
-                        sendtostaff.IsBoolean(),
-                        currentuser.ID.Value, 
-                        msgs);
+                if (msgs.HasNoErrors())
+                {
+                    var willExceedQuota = currentAccount.WillExceedEmailQuota(SessionVariables.AccountPackage, registrantIds.Count, currentUser, msgs);
 
-                BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, currentuser.ID.Value, msgs, null));
-            }            
+                    if (!willExceedQuota)
+                    {
+                        am = group.AddMessage(
+                               subject,
+                               body,
+                               registrantIds,
+                               sendtostaff.IsBoolean() ? sendtostaff.ToBoolean() : false,
+                               currentUser.ID.Value,
+                               msgs);
 
-            if (msgs.HasNoErrors())
-            {
-                msgs.Add("Your message will been sent to the selected registrants", MessageType.Success);
-                ViewBag.Registrants = am.GetActivityMessageRegistrants(msgs);
-                ViewBag.Messages = msgs;
-                return View("messagedetail", am);
-            }
+                        BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, null, null));
+
+                        if (msgs.HasNoErrors())
+                        {
+                            msgs.Add("Your message will been sent to the selected registrants", MessageType.Success);
+                            ViewBag.Registrants = am.GetActivityMessageRegistrants(msgs);
+                            ViewBag.Messages = msgs;
+                            return View("messagedetail", am);
+                        }
+                    }
+
+                }
+
+               
+            }  
             
             ViewBag.Registrants = group.GetRegistrants(msgs);
             ViewBag.Messages = msgs;
