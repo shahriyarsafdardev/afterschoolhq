@@ -99,13 +99,13 @@
 }
 <div class="col-sm-12 col-md-6 col-lg-4">
     <div class="panel border-none">
-        <div class="heading panel-h3 text-center bg-color-f0f0">
+        <div class="heading panel-h3 text-center bg-color-f0f0 p-l-0">
             <div class="student-register-fn-ln">
-                <span>@Model.FirstName</span><br/>
-                <span class="font-size-20">@Model.LastName</span>              
+                <span class="font-size-18 font-weight-bold">@Model.FirstName</span><br/>
+                <span class="font-size-16">@Model.LastName</span>              
             </div>
         </div>
-        <div class="panel-body p-15-35">
+        <div class="panel-body p-15-25">
             <p class="text-center text-small padding-v-10 text-muted font-size-16 p-b-0">
                 @Model.GetAnswer(QuestionDataType.RegistrantGrade).Text Grade
             </p>

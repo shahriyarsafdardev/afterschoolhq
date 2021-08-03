@@ -841,9 +841,15 @@
 .p-b-0 {
     padding-bottom: 0;
 }
+.p-l-0{
+    padding-left:0 !important
+}
 .font-size-20 {
     font-size: 20px;
 }
-.p-15-35 {
-    padding: 15px 35px;
+.font-size-18 {
+    font-size: 18px;
+}
+.p-15-25 {
+    padding: 15px 25px;
 }
