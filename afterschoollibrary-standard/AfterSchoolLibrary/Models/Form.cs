@@ -216,8 +216,7 @@ namespace AfterSchoolLibrary.Models
 
         public Form Copy(int loggedInUserId, int newAccountId, string formName = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
+            if (msgs.IsEmpty()) msgs = new SystemMessages();           
             var form = new Form
             {
                 Name = formName.IfEmpty(this.Name),

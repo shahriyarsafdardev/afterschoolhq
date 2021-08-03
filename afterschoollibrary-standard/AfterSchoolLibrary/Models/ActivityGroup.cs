@@ -350,23 +350,25 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<ActivityGroup> LoadByAccountIdByIsPublishedByIsArchived(int AccountId, bool IsPublished, bool IsArchived, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivityGroup> LoadByAccountIdByIsPublishedByIsArchivedByIsDeleted(int AccountId, bool IsPublished, bool IsArchived, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
 			dq.Criterias.Add(ObjectMap["IsPublished"], IsPublished);
 			dq.Criterias.Add(ObjectMap["IsArchived"], IsArchived);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<ActivityGroup> LoadByAccountIdByIsPublishedByIsInviteOnly(int AccountId, bool IsPublished, bool IsInviteOnly, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivityGroup> LoadByAccountIdByIsPublishedByIsInviteOnlyByIsDeleted(int AccountId, bool IsPublished, bool IsInviteOnly, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
 			dq.Criterias.Add(ObjectMap["IsPublished"], IsPublished);
 			dq.Criterias.Add(ObjectMap["IsInviteOnly"], IsInviteOnly);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 

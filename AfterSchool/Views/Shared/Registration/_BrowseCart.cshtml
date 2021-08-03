@@ -74,7 +74,7 @@
 
         PageEvent.add(PageEvent.AFTER_INIT, function () {
 
-            $('.btn-cart').click(function () {
+            $('.btn-cart').click(function (e) {
 
                 const btnCart = $(this);
                 const uid = btnCart.attr('uid');
@@ -84,6 +84,8 @@
                 } else {
                     removeFromCartUI(btnCart, uid);
                 }
+
+                e.stopPropagation();
             });
 
             $('.cart-tab').click(function () {

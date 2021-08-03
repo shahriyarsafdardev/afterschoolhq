@@ -91,7 +91,7 @@ namespace AfterSchoolLibraryTests.Tests
                 // Arrange
                 var user = WebUserFactory.Create(msgs: msgs, dc: dc);
                 var account = AccountFactory.Create(user: user, msgs: msgs, dc: dc);
-                var registrant = RegistrantFactory.Create(account, msgs, dc);
+                var registrant = RegistrantFactory.Create(account, isMaster: false, msgs, dc);
 
                 // Act                
                 var expected = Registrant.LoadByUidByAccountId(Uid: registrant.Uid, AccountId: account.ID.Value, msgs: msgs, dc: dc);

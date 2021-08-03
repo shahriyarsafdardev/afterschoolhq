@@ -248,5 +248,33 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.True(transaction.ID.HasValue);
         }
+
+        [Theory]
+        [InlineData(100, 4, 6)]
+        [InlineData(10, 1, 2)]
+        public void GetTotalConvenienceFeesReceivedByBillerAccountTest(decimal amount, decimal paymentTypeFee, decimal convenienceFee)
+        {
+            try
+            {
+                // Arrange
+                var billingAccountOwner = WebUserFactory.CreateWithEmail("DonJohn@test.com", msgs, dc);
+                var purchasingAccountOwner = WebUserFactory.CreateWithEmail("CristineTrump@test.com", msgs, dc);
+                var billerAccount = AccountFactory.CreateWithFreePackage(billingAccountOwner, AccountType.School, msgs, dc);
+                var payerAccount = AccountFactory.CreateWithFreePackage(purchasingAccountOwner, AccountType.School, msgs, dc);
+
+                var transaction = TransactionFactory.Create(billerAccount, payerAccount, PaymentType.CreditCard, amount, 0, 0, billerAccount.ID.Value, billerAccount.ID.Value, convenienceFee, paymentTypeFee, msgs, dc);
+
+                // Act
+                var expected = Transaction.GetTotalConvenienceFeesReceivedByBillerAccount(BillerAccountId: billerAccount.ID.Value, paymentType: PaymentType.CreditCard, startDate: null, endDate: null, isDeleted: false, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.Equal(expected: expected, actual: convenienceFee);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(true, ex.Message);
+            }
+        }
     }
 }

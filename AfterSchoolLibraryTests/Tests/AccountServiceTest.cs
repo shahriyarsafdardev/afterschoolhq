@@ -9,6 +9,7 @@ using AfterSchoolLibrary.Billing;
 using BasicLibrary;
 using AfterSchool.Models;
 using System.Linq;
+using Amazon.S3.Model;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -709,9 +710,22 @@ namespace AfterSchoolLibraryTests.Tests
             var expected = account.GetActivity(activity.ID.Value, msgs, dc);
 
             // Assert
+            Assert.NotNull(expected);
             Assert.Equal(expected: expected.ID, actual: activity.ID);
             Assert.Equal(expected: expected.Uid, actual: activity.Uid);
             Assert.Equal(expected: expected.Name, actual: activity.Name);
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void GetActivityByIDFailingTest()
+        {
+            // Act
+            var expected = account.GetActivity(84930248, msgs, dc);
+
+            // Assert
+            Assert.Null(expected);
+            Assert.True(msgs.HasNoErrors());
         }
 
         [Fact]
@@ -727,6 +741,186 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(expected: expected.ID, actual: activity.ID);
             Assert.Equal(expected: expected.Uid, actual: activity.Uid);
             Assert.Equal(expected: expected.Name, actual: activity.Name);
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void GetActivityByUIDFailingTest()
+        {
+            try
+            {
+                // Act
+                var expected = account.GetActivity(Guid.NewGuid(), msgs, dc);
+
+                // Assert
+                Assert.Null(expected);
+                Assert.True(msgs.HasNoErrors());
+            }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [Fact]
+        public void GetActivityByLocationHostAccountTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var schoolWebUser = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolWebUser, msgs, dc);
+            var location = LocationFactory.Create(schoolAccount, msgs, dc);
+
+            activity.LocationId = location.ID.Value;
+            msgs.AddRange(activity.Save(dc));
+
+            // Act
+            var expectedById = schoolAccount.GetActivity(activity.ID.Value, msgs, dc);
+            var expectedByUid = schoolAccount.GetActivity(activity.Uid, msgs, dc);
+
+            // Assert
+            Assert.Equal(expected: expectedById.ID, actual: activity.ID);
+            Assert.Equal(expected: expectedById.Uid, actual: activity.Uid);
+            Assert.Equal(expected: expectedById.Name, actual: activity.Name);
+
+            Assert.Equal(expected: expectedByUid.ID, actual: activity.ID);
+            Assert.Equal(expected: expectedByUid.Uid, actual: activity.Uid);
+            Assert.Equal(expected: expectedByUid.Name, actual: activity.Name);
+
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void GetActivityByLocationHostAccountFailingTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var schoolWebUser = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolWebUser, msgs, dc);
+            var location = LocationFactory.Create(msgs, dc);
+
+            activity.LocationId = location.ID.Value;
+            msgs.AddRange(activity.Save(dc));
+
+            // Act
+            var expectedById = schoolAccount.GetActivity(activity.ID.Value, msgs, dc);
+            var expectedByUid = schoolAccount.GetActivity(activity.Uid, msgs, dc);
+
+            // Assert
+            Assert.Null(expectedById);
+            Assert.Null(expectedByUid);
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void GetHostedActivityByIdTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var schoolWebUser = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolWebUser, msgs, dc);
+            var location = LocationFactory.Create(schoolAccount, msgs, dc);
+
+            activity.LocationId = location.ID.Value;
+            msgs.AddRange(activity.Save(dc));
+
+            // Act
+            var expectedById = schoolAccount.GetHostedActivity(activity.ID.Value, msgs, dc);
+            var expectedByUid = schoolAccount.GetHostedActivity(activity.Uid, msgs, dc);
+
+            // Assert
+            Assert.Equal(expected: expectedById.ID, actual: activity.ID);
+            Assert.Equal(expected: expectedById.Uid, actual: activity.Uid);
+            Assert.Equal(expected: expectedById.Name, actual: activity.Name);
+
+            Assert.Equal(expected: expectedByUid.ID, actual: activity.ID);
+            Assert.Equal(expected: expectedByUid.Uid, actual: activity.Uid);
+            Assert.Equal(expected: expectedByUid.Name, actual: activity.Name);
+
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void GetHostedActivityByIdFailingTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var schoolWebUser = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolWebUser, msgs, dc);
+            var location = LocationFactory.Create(schoolAccount, msgs, dc);
+
+            activity.LocationId = location.ID.Value;
+            msgs.AddRange(activity.Save(dc));
+
+            // Act
+            var expectedById = schoolAccount.GetHostedActivity(94378, msgs, dc);
+            var expectedByUid = schoolAccount.GetHostedActivity(Guid.NewGuid(), msgs, dc);
+
+            // Assert
+            Assert.Null(expectedById);
+            Assert.Null(expectedByUid);
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void GetHostedActivityByActivityTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var schoolWebUser = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolWebUser, msgs, dc);
+            var location = LocationFactory.Create(schoolAccount, msgs, dc);
+
+            activity.LocationId = location.ID.Value;
+            msgs.AddRange(activity.Save(dc));
+
+            // Act
+            var expected = schoolAccount.GetHostedActivity(activity, msgs, dc);
+
+            // Assert
+            Assert.Equal(expected: expected.ID, actual: activity.ID);
+            Assert.Equal(expected: expected.Uid, actual: activity.Uid);
+            Assert.Equal(expected: expected.Name, actual: activity.Name);
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void GetHostedActivityByActivityFailingTest()
+        {
+            // Arrange
+            var schoolWebUser = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolWebUser, msgs, dc);
+
+            // Act
+            var expected = schoolAccount.GetHostedActivity(null, msgs, dc);
+
+            // Assert
+            Assert.Null(expected);
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void GetExternallyProvidedActivityTest()
+        {
+            var schoolWebUser = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolWebUser, msgs, dc);
+            var location = LocationFactory.Create(schoolAccount, msgs, dc);
+            var expected = ActivityFactory.Create(schoolAccount, location, msgs, dc);
+            var expected2 = ActivityFactory.Create(account, location, msgs, dc);
+
+            expected.ProviderAccountId = account.ID.Value;
+            msgs.AddRange(expected.Save(dc));
+
+            var actual = account.GetExternallyProvidedActivity(expected.Uid, msgs, dc);
+            var actual2 = account.GetExternallyProvidedActivity(expected.ID.Value, msgs, dc);
+            var actual3 = account.GetExternallyProvidedActivity(expected2.ID.Value, msgs, dc);
+
+            Assert.NotNull(actual);
+            Assert.NotNull(actual2);
+            Assert.Equal(expected.Uid, actual.Uid);
+            Assert.Equal(expected.ID, actual.ID);
+            Assert.Null(actual3);
+            Assert.True(msgs.HasNoErrors());
         }
 
         [Fact]
@@ -823,12 +1017,169 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         [Fact]
+        public void GetPublishedActivitiesTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var schoolWebUser = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolWebUser, msgs, dc);
+            var period = RegistrationPeriodFactory.Create(account, msgs, dc);
+
+            msgs.AddRange(period.AddActivity(activity, true, user.ID.Value, dc));
+
+            activity.Publish(user, msgs, dc);
+
+            // Act 
+            var activities = account.GetPublishedActivities(msgs, dc);
+
+            // Assert
+            Assert.Single(activities);
+            Assert.True(activity.IsPubliclyViewable);
+            Assert.True(msgs.HasNoErrors());
+            Assert.Equal(expected: activity.ID.Value, actual: activities.First().ID.Value);
+        }
+
+        [Fact]
+        public void GetPublishedActivitiesFailingTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var period = RegistrationPeriodFactory.Create(account, msgs, dc);
+
+            msgs.AddRange(period.AddActivity(activity, true, user.ID.Value, dc));
+
+            activity.Publish(user, msgs, dc);
+
+            msgs.AddRange(activity.MoveToArchive(user.ID.Value, dc));
+
+            // Act 
+            var activities = account.GetPublishedActivities(msgs, dc);
+
+            // Assert
+            Assert.Empty(activities);
+            Assert.False(activity.IsPubliclyViewable);
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void GetPublishedActivitiesSchoolAccountTest()
+        {
+            // Arrange
+            var schoolWebUser = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolWebUser, msgs, dc);
+            var location = LocationFactory.Create(schoolAccount, msgs, dc);
+            var activity = ActivityFactory.Create(schoolAccount, msgs, dc);
+            var period = RegistrationPeriodFactory.Create(schoolAccount, msgs, dc);
+
+            activity.LocationId = location.ID.Value;
+            activity.ProviderAccountId = account.ID.Value;
+            msgs.AddRange(activity.Save(dc));
+
+            msgs.AddRange(period.AddActivity(activity, true, user.ID.Value, dc));
+
+            activity.Publish(user, msgs, dc);
+
+            // Act 
+            var activities = account.GetPublishedActivities(msgs, dc);
+
+            // Assert
+            Assert.Single(activities);
+            Assert.True(activity.IsPubliclyViewable);
+            Assert.True(msgs.HasNoErrors());
+            Assert.Equal(expected: activity.ID.Value, actual: activities.First().ID.Value);
+        }
+
+        [Fact]
+        public void GetPublishedActivitiesSchoolAccountFailingTest()
+        {
+            // Arrange
+            var schoolWebUser = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolWebUser, msgs, dc);
+            var location = LocationFactory.Create(schoolAccount, msgs, dc);
+            var activity = ActivityFactory.Create(schoolAccount, msgs, dc);
+            var period = RegistrationPeriodFactory.Create(schoolAccount, msgs, dc);
+
+            activity.LocationId = location.ID.Value;
+            activity.ProviderAccountId = account.ID.Value;
+            msgs.AddRange(activity.Save(dc));
+
+            msgs.AddRange(period.AddActivity(activity, true, user.ID.Value, dc));
+
+            activity.Publish(user, msgs, dc);
+
+            msgs.AddRange(activity.MoveToArchive(user.ID.Value, dc));
+
+            // Act 
+            var activities = account.GetPublishedActivities(msgs, dc);
+
+            // Assert
+            Assert.Empty(activities);
+            Assert.False(activity.IsPubliclyViewable);
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void GetPublishedActivitiesInLocationsTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var schoolWebUser = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolWebUser, msgs, dc);
+            var location = LocationFactory.Create(schoolAccount, msgs, dc);
+            var period = RegistrationPeriodFactory.Create(account, msgs, dc);
+
+            activity.LocationId = location.ID.Value;
+            msgs.AddRange(activity.Save(dc));
+
+            msgs.AddRange(period.AddActivity(activity, true, user.ID.Value, dc));
+
+            activity.Publish(user, msgs, dc);
+
+            // Act 
+            var activities = account.GetPublishedActivitiesInLocations(location.ID.Value.AsList(), msgs, dc);
+
+            // Assert
+            Assert.Single(activities);
+            Assert.True(activity.IsPubliclyViewable);
+            Assert.True(msgs.HasNoErrors());
+            Assert.Equal(expected: activity.ID.Value, actual: activities.First().ID.Value);
+        }
+
+        [Fact]
+        public void GetPublishedActivitiesInLocationsFailingTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var schoolWebUser = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolWebUser, msgs, dc);
+            var location = LocationFactory.Create(schoolAccount, msgs, dc);
+            var period = RegistrationPeriodFactory.Create(account, msgs, dc);
+
+            activity.LocationId = location.ID.Value;
+            msgs.AddRange(activity.Save(dc));
+
+            msgs.AddRange(period.AddActivity(activity, true, user.ID.Value, dc));
+
+            activity.Publish(user, msgs, dc);
+
+            msgs.AddRange(activity.MoveToArchive(user.ID.Value, dc));
+
+            // Act 
+            var activities = account.GetPublishedActivitiesInLocations(location.ID.Value.AsList(), msgs, dc);
+
+            // Assert
+            Assert.Empty(activities);
+            Assert.False(activity.IsPubliclyViewable);
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
         public void GetRegistrantTest()
         {
             try
             {
                 // Arrange
-                var registrant = RegistrantFactory.Create(account, msgs, dc);
+                var registrant = RegistrantFactory.Create(account, isMaster: false, msgs, dc);
 
                 // Act                
                 var expected = account.GetRegistrant(Uid: registrant.Uid, msgs: msgs, dc: dc);
@@ -1275,15 +1626,25 @@ namespace AfterSchoolLibraryTests.Tests
                 // Arrange
                 var accountOwner = WebUserFactory.Create(msgs, dc);
                 var account = AccountFactory.Create(accountOwner, msgs, dc);
-                var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+                var schoolAccountOwner = WebUserFactory.Create(msgs, dc);
+                var schoolAccount = AccountFactory.Create(schoolAccountOwner, msgs, dc);
 
                 // Act
-                var addactivity = ActivityFactory.Create(account, activityGroup, msgs, dc);
+                var addactivity = ActivityFactory.Create(account, msgs, dc);
                 addactivity.Publish(accountOwner, msgs, dc);
+
+                var schoolActivity = ActivityFactory.Create(schoolAccount, msgs, dc);
+                schoolActivity.SetProvider(account, schoolAccountOwner, msgs, dc);
+                schoolActivity.Publish(schoolAccountOwner, msgs, dc);
+
+                var schoolActivity2 = ActivityFactory.Create(schoolAccount, msgs, dc);
+                schoolActivity2.Publish(schoolAccountOwner, msgs, dc);
+
                 var GetActivityCount = AccountService.GetActiveAndPublishedActivityCount(account, msgs, dc);
 
                 // Assert
-                Assert.True(GetActivityCount > 0);
+                Assert.Equal(2, GetActivityCount);
+                Assert.True(msgs.HasNoErrors());
             }
             catch (Exception ex)
             {
@@ -1419,6 +1780,55 @@ namespace AfterSchoolLibraryTests.Tests
                 //Assert
                 Assert.False(false, ex.Message);
             }
+        }
+
+        [Fact]
+        public void GetExternallyProvidedActivityCountTest()
+        {
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, msgs, dc);
+            var schoolAccountOwner = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolAccountOwner, msgs, dc);
+
+            // Act
+            var addactivity = ActivityFactory.Create(account, msgs, dc);
+            addactivity.Publish(accountOwner, msgs, dc);
+
+            var schoolActivity = ActivityFactory.Create(schoolAccount, msgs, dc);
+            schoolActivity.SetProvider(account, schoolAccountOwner, msgs, dc);
+            schoolActivity.Publish(schoolAccountOwner, msgs, dc);
+
+            var schoolActivity2 = ActivityFactory.Create(schoolAccount, msgs, dc);
+            schoolActivity2.Publish(schoolAccountOwner, msgs, dc);
+
+            Assert.Equal(1, account.GetExternallyProvidedActivityCount(msgs, dc));
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void GetExternallyProvidedActivitiesTest()
+        {
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, msgs, dc);
+            var schoolAccountOwner = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolAccountOwner, msgs, dc);
+
+            // Act
+            var addactivity = ActivityFactory.Create(account, msgs, dc);
+            addactivity.Publish(accountOwner, msgs, dc);
+
+            var schoolActivity = ActivityFactory.Create(schoolAccount, msgs, dc);
+            schoolActivity.SetProvider(account, schoolAccountOwner, msgs, dc);
+            schoolActivity.Publish(schoolAccountOwner, msgs, dc);
+
+            var schoolActivity2 = ActivityFactory.Create(schoolAccount, msgs, dc);
+            schoolActivity2.Publish(schoolAccountOwner, msgs, dc);
+
+            var activities = account.GetExternallyProvidedActivities(msgs, dc);
+
+            Assert.Single(activities);
+            Assert.Equal(schoolActivity.ID, activities.First().ID);
+            Assert.True(msgs.HasNoErrors());
         }
 
         [Fact(DisplayName = "AddContact test")]
@@ -1886,6 +2296,242 @@ namespace AfterSchoolLibraryTests.Tests
                 //Assert
                 Assert.False(false, ex.Message);
             }
+        }
+
+        [Fact]
+        public void IsApprovedAsVisitorToTest()
+        {            
+            // Arrange
+            var visitorOwner = WebUserFactory.Create(msgs, dc);
+            var visitorAccount = AccountFactory.Create(visitorOwner, msgs, dc);
+            var hostOwner = WebUserFactory.Create(msgs, dc);
+            var hostAccount = AccountFactory.Create(hostOwner, msgs, dc);
+            var accountRelationship = AccountRelationshipService.CreateNew(hostAccount, visitorAccount, ApprovalStatus.Approved, HostPermissionType.Edit, user, msgs, dc);
+
+            // Act
+            var expected = visitorAccount.IsApprovedAsVisitorTo(hostAccount: hostAccount, msgs: msgs, dc: dc);
+
+            // Assert
+            Assert.True(expected);
+        }
+
+        [Fact]
+        public void IsApprovedAsVisitorToFailingTest()
+        {
+            // Arrange
+            var visitorOwner = WebUserFactory.Create(msgs, dc);
+            var visitorAccount = AccountFactory.Create(visitorOwner, msgs, dc);
+            var hostOwner = WebUserFactory.Create(msgs, dc);
+            var hostAccount = AccountFactory.Create(hostOwner, msgs, dc);
+            var accountRelationship = AccountRelationshipService.CreateNew(hostAccount, visitorAccount, ApprovalStatus.Denied, HostPermissionType.Edit, user, msgs, dc);
+
+            // Act
+            var expected = visitorAccount.IsApprovedAsVisitorTo(hostAccount: hostAccount, msgs: msgs, dc: dc);
+
+            // Assert
+            Assert.False(expected);
+        }
+
+        [Theory]
+        [InlineData(100, 4, 6)]
+        [InlineData(10, 1, 2)]
+        public void GetMaxAmountAvailableForRefundTest(decimal amount, decimal paymentTypeFee, decimal convenienceFee)
+        {
+            try
+            {
+                // Arrange
+                var billingAccountOwner = WebUserFactory.CreateWithEmail("DonJohn@test.com", msgs, dc);
+                var purchasingAccountOwner = WebUserFactory.CreateWithEmail("CristineTrump@test.com", msgs, dc);
+                var billerAccount = AccountFactory.CreateWithFreePackage(billingAccountOwner, AccountType.School, msgs, dc);
+                var payerAccount = AccountFactory.CreateWithFreePackage(purchasingAccountOwner, AccountType.School, msgs, dc);
+
+                var transaction = TransactionFactory.Create(billerAccount, payerAccount, PaymentType.CreditCard, amount, 0, 0, billerAccount.ID.Value, billerAccount.ID.Value, convenienceFee, paymentTypeFee, msgs, dc);
+
+                // Act
+                var expected = billerAccount.GetMaxAmountAvailableForRefund(search: null, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.Equal(expected: expected, actual: amount + convenienceFee);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(true, ex.Message);
+            }
+        }
+
+        [Theory(DisplayName = "CreatePurchaseTransactionPayment test")]
+        [InlineData(100, 6, 4, 110, 100, false)] //no pro-rate
+        [InlineData(100, 6, 4, 90, 83.33, true)] //assume user joins mid-period and so as we have to keep pro-rated amount, its 94.3m(otherwise it would 100m)
+        [InlineData(10, 2, 0, 12, 10, false)] //no pro-rate
+        [InlineData(10, 2, 0, 9.7, 9.1, true)]
+        public void CreatePurchaseTransactionPaymentTest(decimal amount, decimal convenienceFee, decimal paymentTypeFee, decimal amountPaidByParent, decimal amountReceivedByProvider, bool isAmountProRated = false)
+        {
+            try
+            {
+                // Arrange
+                var billingAccountOwner = WebUserFactory.Create("Don", "John", "DonJohn@test.com", true, msgs, dc);
+                var purchasingAccountOwner = WebUserFactory.Create("Cristine", "Trump", "CristineTrump@test.com", true, msgs, dc);
+                var billingAccount = AccountFactory.CreateWithFreePackage("Billing account", "BillingAccount@test.com", billingAccountOwner, AccountType.School, msgs, dc);
+                var purchasingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", purchasingAccountOwner, AccountType.School, msgs, dc);
+                var masterRegistrant = RegistrantFactory.Create(purchasingAccount, isMaster: true, msgs, dc);
+
+                var activity = ActivityFactory.Create(billingAccount, msgs, dc: dc);
+                var activityGroup = ActivityGroupFactory.Create(billingAccount, ActivityGroupType.Session, msgs, dc);
+                var registrant = RegistrantFactory.Create(billingAccount, isMaster: false, msgs, dc: dc);
+                var registration = RegistrationFactory.Create(billingAccount, registrant, msgs, dc);
+                var registrantActivity = RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
+
+                var subscriptionPlan = SubscriptionPlanFactory.Create(billingAccount, activity, SubscriptionPlanType.Subscription, amountPaidByParent, msgs, dc);
+                purchasingAccount.CreateStripeCustomer(msgs, dc);
+
+                var purchase = PurchaseFactory.Create(purchasingAccount, amount, registrantId: registrant.ID.Value, registrationId: registration.ID.Value, msgs, dc); // check: we are inserting row amount here
+                var registrantSubscriptionPlan = RegistrantSubscriptionPlanFactory.Create(registrant, subscriptionPlan, purchase, amount: amount, convenienceFee: convenienceFee, paymentTypeFee: paymentTypeFee, msgs, dc);
+                var participationObject = subscriptionPlan.GetParticipationObject(msgs, dc);
+
+                Account convenienceFeePayer;
+                Account transactionFeePayer;
+
+                if (registrantSubscriptionPlan.ConvenienceFeesPaidBy == FeesPaidByType.Parent)
+                    convenienceFeePayer = purchasingAccount;
+                else
+                    convenienceFeePayer = billingAccount;
+
+                if (registrantSubscriptionPlan.PaymentTypeFeesPaidBy == FeesPaidByType.Parent)
+                    transactionFeePayer = purchasingAccount;
+                else
+                    transactionFeePayer = billingAccount;
+
+                // save transaction info and track payment to the activity as well.
+                var checkoutObject = new CheckoutObject()
+                {
+                    PayingAccount = purchasingAccount,
+                    BillingAccount = billingAccount,
+                    OverrideAmount = amount,
+                    AmountPaidByParent = amountPaidByParent,
+                    AmountReceivedByProvider = amountReceivedByProvider,
+                    IsAmountProRated = isAmountProRated,
+                    ConvenienceFeeOverrideAmount = registrantSubscriptionPlan.ConvenienceFee,
+                    PaymentTypeFeeOverrideAmount = registrantSubscriptionPlan.PaymentTypeFee,
+                    ParticipationObject = participationObject,
+                    PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                    PaymentType = registrantSubscriptionPlan.PaymentTypeId,
+                    SubscriptionPlan = subscriptionPlan.PlanTypeId == SubscriptionPlanType.Subscription ? subscriptionPlan : null,
+                    PaymentPlan = subscriptionPlan.PlanTypeId == SubscriptionPlanType.PaymentPlan ? subscriptionPlan : null,
+                    MasterRegistrant = masterRegistrant,
+                    NumberOfSeats = 1,
+                    Registration = registration,
+                    RegistrantSubscriptionPlan = registrantSubscriptionPlan,
+                    ConvenienceFeePayer = convenienceFeePayer,
+                    CreditCardFeePayer = transactionFeePayer,
+                    Purchase = purchase
+                };
+
+                // Act
+                AccountService.CreatePurchaseTransactionPayment(checkoutObject, user, msgs, dc);
+
+                // Assert
+                //account
+                Assert.NotNull(billingAccount);
+                Assert.NotNull(purchasingAccount);
+
+                //activity
+                Assert.NotNull(activity);
+                Assert.Equal(activity?.AccountId, billingAccount.ID.Value);
+
+                //registrant
+                Assert.NotNull(registrant);
+                Assert.NotNull(masterRegistrant);
+                Assert.Equal(registrant?.AccountId, billingAccount.ID.Value);
+                Assert.Equal(masterRegistrant?.AccountId, purchasingAccount.ID.Value);
+
+                //registration
+                Assert.NotNull(registration);
+                Assert.Equal(registration?.RegistrantId, registrant.ID.Value);
+                Assert.Equal(registration?.AccountId, billingAccount.ID.Value);                
+
+                //registrantSubscriptionPlan
+                Assert.NotNull(registrantSubscriptionPlan);
+                Assert.Equal(registrantSubscriptionPlan?.Amount, amount);
+                Assert.Equal(registrantSubscriptionPlan?.SubscriptionPlanId, subscriptionPlan.ID.Value);
+                Assert.Equal(registrantSubscriptionPlan?.RegistrantId, registrant.ID.Value);
+                Assert.Equal(registrantSubscriptionPlan?.ConvenienceFee, convenienceFee);
+                Assert.Equal(registrantSubscriptionPlan?.PaymentTypeFee, paymentTypeFee);
+
+                //purchase
+                Assert.NotNull(purchase);
+                Assert.Equal(purchase?.ID, purchase.ID.Value);
+                Assert.Equal(purchase?.AmountPaid, amount);
+                Assert.Equal(purchase?.RegistrationId, registration.ID.Value);
+                Assert.Equal(purchase?.RegistrantId, registrant.ID.Value);
+                Assert.Equal(purchase?.PurchaserAccountId, purchasingAccount.ID.Value);
+
+                //subscription plan
+                Assert.NotNull(subscriptionPlan);
+                Assert.Equal(subscriptionPlan?.ParticipationObjectId, participationObject.ObjectID.Value);
+                Assert.Equal(subscriptionPlan?.ParticipationObjectTypeId, participationObject.ObjectType);
+                Assert.Equal(subscriptionPlan?.CostPerPeriod, amountPaidByParent); //here subscription plan will have amount with all fees
+                Assert.Equal(subscriptionPlan?.PlanOwnerAccountId, billingAccount.ID.Value);
+                Assert.Equal(BillingPeriodType.Month, subscriptionPlan?.BillingPeriodTypeId);
+                Assert.Equal(SubscriptionPlanType.Subscription, subscriptionPlan?.PlanTypeId);
+
+                //transaction
+                var transaction = Transaction.LoadByBillerAccountIdByIsDeleted(BillerAccountId: billingAccount.ID.Value, IsDeleted: false, msgs, dc).FirstOrDefault();
+                Assert.NotNull(transaction);
+                Assert.Equal(transaction?.PurchaseId, purchase.ID.Value);
+                Assert.Equal(transaction?.PaymentTypeFeeCharged, paymentTypeFee);
+                Assert.Equal(transaction?.ConvenienceFeeCharged, convenienceFee);
+                Assert.Equal(transaction?.PaymentTypeFeePayerAccountId, transactionFeePayer.ID.Value);
+                Assert.Equal(transaction?.ConvenienceFeePayerAccountId, convenienceFeePayer.ID.Value);
+                Assert.Equal(transaction?.BillerAccountId, billingAccount.ID.Value);
+                Assert.Equal(transaction?.PayerAccountId, purchasingAccount.ID.Value);
+
+                //activityPayment
+                var activityPayment = ActivityPayment.LoadByParticipationObjectByRegistrant(participationObject.ObjectID.Value, participationObject.ObjectType, registrant.ID.Value, false, msgs, dc).FirstOrDefault();
+                Assert.NotNull(activityPayment);
+                Assert.Equal(activityPayment?.Amount, amountReceivedByProvider);
+                Assert.Equal(activityPayment?.AmountPaidByParent, amountPaidByParent);
+                Assert.Equal(activityPayment?.ParticipationObjectId, participationObject.ObjectID.Value);
+                Assert.Equal(activityPayment?.IsProRated, isAmountProRated);
+                Assert.Equal(activityPayment?.RegistrantId, registrant.ID.Value);
+
+                //Stripe
+                var customer = purchasingAccount.GetStripeCustomer(msgs);
+                Assert.NotNull(customer);
+
+                var product = StripeHelper.GetProduct(activity.Uid.ToString(), stripeAccountId: null, msgs);
+                Assert.NotNull(product);
+
+                Assert.True(msgs.HasNoErrors());
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(true, ex.Message);
+            }
+        }
+
+        [Fact]
+        public void GetOpenPublishedSessionsTest()
+        {
+            var activityGroup1 = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+            var activityGroup2 = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+            var activityGroup3 = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+            var regPeriod1 = RegistrationPeriodFactory.Create(account, activityGroup1, msgs, dc);
+            var regPeriod2 = RegistrationPeriodFactory.Create(account, activityGroup2, msgs, dc);
+            var regPeriod3 = RegistrationPeriodFactory.Create(account, activityGroup2, DateTime.UtcNow.AddDays(1), DateTime.UtcNow.AddDays(4), msgs, dc);
+
+            msgs.AddRange(activityGroup1.SetIsPublished(true, user.ID.Value, dc));
+            msgs.AddRange(activityGroup2.SetIsPublished(true, user.ID.Value, dc));
+            msgs.AddRange(activityGroup3.SetIsPublished(true, user.ID.Value, dc));
+
+            activityGroup2.SetIsDeleted(user.ID.Value, true, msgs, dc);
+
+            var sessions = account.GetOpenPublishedSessions(msgs, dc);
+
+            Assert.Single(sessions);
+            Assert.Equal(activityGroup1.ID, sessions.First().ID);
+            Assert.True(msgs.HasNoErrors());
         }
     }
 }

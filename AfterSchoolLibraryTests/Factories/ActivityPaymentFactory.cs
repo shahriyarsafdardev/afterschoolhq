@@ -21,6 +21,24 @@ namespace AfterSchoolLibraryTests.Factories
             return obj;
         }
 
+        public static ActivityPayment Create(Account account, Activity activity, Registrant registrant, RegistrantSubscriptionPlan registrantSubscriptionPlan, decimal amount, decimal amountPaidByParent, bool isProRated, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var obj = new ActivityPayment()
+            {
+                AccountId = account.ID,
+                ParticipationObjectId = activity.ID,
+                ParticipationObjectTypeId = ParticipationObjectType.Activity,
+                Amount = amount,
+                AmountPaidByParent = amountPaidByParent,
+                IsProRated = isProRated,
+                RegistrantSubscriptionPlanId = registrantSubscriptionPlan.ID,
+                RegistrantId = registrant.ID,
+                TransactionId = null,
+            };
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
+
         public static ActivityPayment Create(Account account, Activity activity, RegistrantSubscriptionPlan registrantSubscriptionPlan, Transaction transaction, SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new ActivityPayment()

@@ -502,7 +502,7 @@ namespace AfterSchoolLibraryTests.Tests
             var activityForm = Factories.ActivityFormWebUserFactory.Create(account, activity, form, msgs, dc: dc);
             var attendance = new Attendance() { ActivityId = activity.ID.Value, ActivityInstanceId = activityInstance.ID.Value };
             attendance.Save(dc: dc);
-            var registrant = Factories.RegistrantFactory.Create(account, msgs, dc: dc);
+            var registrant = Factories.RegistrantFactory.Create(account, isMaster: false, msgs, dc: dc);
             var attendanceRegistrant = new AttendanceRegistrant() { AttendanceId = attendance.ID.Value, NumberPresent = 1, RegistrantId = registrant.ID.Value, NumberPossible = 1, NumberLate = 0 };
             attendanceRegistrant.Save(dc: dc);
 
@@ -521,7 +521,7 @@ namespace AfterSchoolLibraryTests.Tests
             var activityForm = Factories.ActivityFormWebUserFactory.Create(account, activity, form, msgs, dc: dc);
             var attendance = new Attendance() { ActivityId = activity.ID.Value, ActivityInstanceId = activityInstance.ID.Value };
             attendance.Save(dc: dc);
-            var registrant = Factories.RegistrantFactory.Create(account, msgs, dc: dc);
+            var registrant = Factories.RegistrantFactory.Create(account, isMaster: false, msgs, dc: dc);
             var attendanceRegistrant = new AttendanceRegistrant() { AttendanceId = attendance.ID.Value, NumberPresent = 1, RegistrantId = registrant.ID.Value, NumberPossible = 1, NumberLate = 0 };
             attendanceRegistrant.Save(dc: dc);
 
@@ -541,7 +541,7 @@ namespace AfterSchoolLibraryTests.Tests
             var activityForm = Factories.ActivityFormWebUserFactory.Create(account, activity, form, msgs, dc: dc);
             var attendance = new Attendance() { ActivityId = activity.ID.Value, ActivityInstanceId = activityInstance.ID.Value };
             attendance.Save(dc: dc);
-            var registrant = Factories.RegistrantFactory.Create(account, msgs, dc: dc);
+            var registrant = Factories.RegistrantFactory.Create(account, isMaster: false, msgs, dc: dc);
             var attendanceRegistrant = new AttendanceRegistrant() { AttendanceId = attendance.ID.Value, NumberPresent = 1, RegistrantId = registrant.ID.Value, NumberPossible = 1, NumberLate = 0 };
             attendanceRegistrant.Save(dc: dc);
             attendance.Date = date;
@@ -1089,6 +1089,35 @@ namespace AfterSchoolLibraryTests.Tests
             var activity = Factories.ActivityFactory.Create(account, msgs, dc);
 
             Assert.True(ActivityService.SendRegistrationSummaryReport(activity.ID.Value,"test", dc).HasNoErrors());
+        }
+
+        [Fact]
+        public void IsPublicallyViewableTest()
+        {
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(user, msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+
+            activity.Publish(user, msgs, dc);
+
+            Assert.True(activity.IsPubliclyViewable);
+            Assert.True(msgs.HasNoErrors());
+
+        }
+
+        [Fact]
+        public void IsPublicallyViewableFailingTest()
+        {
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(user, msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+
+            msgs.AddRange(activity.MoveToArchive(user.ID.Value, dc));
+            activity.Publish(user, msgs, dc);
+
+            Assert.False(activity.IsPubliclyViewable);
+            Assert.True(msgs.HasNoErrors());
+
         }
     }
 }

@@ -1874,8 +1874,9 @@ namespace AfterSchool.Areas.Org.Controllers
                     ras = activity.GetRegistrantActivities(true, msgs);
             }
 
+            //Review: we will bring all data to provider review but we will disable those in UI so provider will have proper idea.            
             if (ras.IsEmpty())
-                ras = activity.GetRegistrantActivities(msgs);
+                ras = activity.GetRegistrantActivities(includeInvited: true, msgs); 
 
             if (rat != RegistrationAssignmentType.NotSet)
                 ras = ras.Where(x => x.AssignmentTypeId == rat).OrderBy(x => x.SeatIndex).ToList();
@@ -2191,18 +2192,19 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult RequestToPublish(string id)
+        public ActionResult RequestToPublish(string id, bool isFromActivityHome = false)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();            
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var isNewActivity = Request["isnew"] == "1";
 
-            activity.RequestToPublish(SessionVariables.CurrentUser, msgs);           
+            var locationOwner = activity.GetLocationOwner(msgs);
+            activity.RequestToPublish(locationOwner, SessionVariables.CurrentUser, msgs);
 
             if (msgs.HasNoErrors())
-                if (isNewActivity)
-                    msgs.Add("Your request to publish has been submitted", MessageType.Success);            
+                if (isFromActivityHome)
+                    msgs.Add($"Your request to publish has been sent to {locationOwner.Name}", MessageType.Success);
                 else
                     msgs.Add("Activity saved successfully", MessageType.Success);
             
@@ -2211,6 +2213,10 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
             ViewBag.IsFullScreen = isNewActivity;
             ViewBag.Messages = msgs;
+            TempData["Messages"] = msgs;
+
+            if (isFromActivityHome)
+                return Redirect(activity.ShortHomePageUrl);
 
             return View("publishdetail", activity);
         }
@@ -2322,7 +2328,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Unpublish(string id)
+        public ActionResult Unpublish(string id, bool isFromActivityHome = false)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -2330,8 +2336,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var mustRequestToPublish = MustRequestToPublish(activity, msgs);
             
-            if (mustRequestToPublish)
-                msgs.Add("You do not have permissions to unpublish", MessageType.UserError);
+            //if (mustRequestToPublish)
+            //    msgs.Add("You do not have permissions to unpublish", MessageType.UserError);
 
             if (msgs.HasNoErrors())
                 activity.Unpublish(currentUser, msgs);
@@ -2359,6 +2365,9 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity, msgs);
             ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
             ViewBag.Messages = msgs;
+
+            if (isFromActivityHome)
+                return Redirect(activity.ShortHomePageUrl);
 
             return View("publishdetail", activity);
         }
@@ -2567,6 +2576,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult MessageAdd(string id, string deliveryMethod, string subject, string body, string sendtostaff, string sendtextmessages)
         {
             var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
 
             if (subject.IsEmpty())
@@ -2587,39 +2597,25 @@ namespace AfterSchool.Areas.Org.Controllers
                 //.. email messaging
                 if (msgs.HasNoErrors())
                 {
-                    // get current limit
-                    var accountPackage = SessionVariables.AccountPackage;
-                    var maxEmailCount = accountPackage.HasFeature(FeatureType.EmailMessaging, msgs) ? (int)accountPackage.GetFeature(FeatureType.EmailMessaging, msgs).Max.Value : 0;
-
-                    // get current quota
-                    var amr = ActivityMessageRegistrant.LoadByCreatedBy(SessionVariables.CurrentUser.ID.Value.ToString(), msgs).Where(m => m.CreateDate > DateTime.Now.AddMonths(-1).Date);
-                    var usedEmailQuota = currentAccount.GetEmailCountForCurrentMessagePeriod(msgs);
-
-                    //add additional registransts
-                    usedEmailQuota = usedEmailQuota + registrantIds.Count;
-
-                    // if exceeds, return error
-                    if (usedEmailQuota > maxEmailCount)
-                        msgs.Add("Email quota exceeded for current user.", MessageType.UserError);
-
-                    if (msgs.HasNoErrors())
+                    var willExceedQuota = currentAccount.WillExceedEmailQuota(SessionVariables.AccountPackage, registrantIds.Count, currentUser, msgs);
+                   
+                    if (!willExceedQuota)
                     {
                         am = activity.AddMessage(
                             subject,
                             body,
                             registrantIds,
                             sendtostaff.IsBoolean() && sendtostaff.ToBoolean(),
-                            SessionVariables.CurrentUser.ID.Value,
+                            currentUser.ID.Value,
                             msgs);
 
-                        BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, SessionVariables.CurrentUser.ID.Value, msgs, null));
+                        BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, msgs, null));
 
                         msgs.Add("Your message will been sent to the selected registrants", MessageType.Success);
                         ViewBag.Registrants = am.GetActivityMessageRegistrants(msgs);                        
                         ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
                         ViewBag.Messages = msgs;
 
-                        return View("messagedetail", am.Reload());
                     }
                 }
             }

@@ -28,7 +28,12 @@ namespace AfterSchoolLibrary.Models
 		/// Required.
 		/// </summary>
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
+		/// <summary>
+		/// used to define AmountReceivedByProvider
+		/// </summary>
 		public decimal? Amount { get { return (decimal?)MDV["Amount"].Value; } set { MDV["Amount"].Value = value; } }
+		public decimal? AmountPaidByParent { get { return (decimal?)MDV["AmountPaidByParent"].Value; } set { MDV["AmountPaidByParent"].Value = value; } }
+		public bool IsProRated { get { return (bool)MDV["IsProRated"].Value; } set { MDV["IsProRated"].Value = value; } }
 		/// <summary>
 		/// Required.
 		/// </summary>
@@ -47,6 +52,7 @@ namespace AfterSchoolLibrary.Models
             this.Config(ObjectMap, DatabaseQuery, typeof(ActivityPayment).Name, "ID");
             this.LoadObjectValues(ObjectMap);
 			this.Uid = Guid.NewGuid();
+			this.IsProRated = false;
 			this.ParticipationObjectTypeId = ParticipationObjectType.NotSet;
 			this.IsDeleted = false;
 			
@@ -64,6 +70,8 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "Amount", System.Data.SqlDbType.Money);
+				_dp.Add(className, "AmountPaidByParent", System.Data.SqlDbType.Money);
+				_dp.Add(className, "IsProRated", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "ParticipationObjectTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ParticipationObjectId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "TransactionId", System.Data.SqlDbType.Int);
@@ -168,6 +176,14 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["Amount"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AmountPaidByParent"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsProRated"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -339,6 +355,47 @@ namespace AfterSchoolLibrary.Models
 
             return 0;
         }
+
+		public static decimal GetAmountPaidByParentByParticipationObjectByRegistrant(int objectId, ParticipationObjectType objectType, int registrantId, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+		{
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.UseParameterizedQuery = false;
+			dq.SelectParameters.Clear();
+			var sp = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["AmountPaidByParent"]);
+			sp.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
+			dq.SelectParameters.Add(sp);
+			dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int)objectType);
+			dq.Criterias.Add(ObjectMap["participationObjectId"], objectId);
+			dq.Criterias.Add(ObjectMap["registrantId"], registrantId);
+			dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted);
+
+			var results = dq.Select(msgs);
+			if (results.Rows.Any())
+				return results.Rows[0][0].ToString().ToDecimal();
+
+			return 0;
+		}
+
+		public static bool GetIsProRatedFlagByParentByParticipationObjectByRegistrant(int objectId, ParticipationObjectType objectType, int registrantId, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+		{
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.UseParameterizedQuery = false;
+			dq.SelectParameters.Clear();
+			var sp = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["IsProRated"]);			
+			dq.SelectParameters.Add(sp);
+			dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int)objectType);
+			dq.Criterias.Add(ObjectMap["participationObjectId"], objectId);
+			dq.Criterias.Add(ObjectMap["registrantId"], registrantId);
+			dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted);
+
+			var results = dq.Select(msgs);
+			if (results.Rows.Any())
+				return results.Rows[0][0].ToString().ToBoolean();
+
+			return false;
+		}
 
 		public Transaction GetTransaction(SystemMessages msgs = null, DatabaseConnection dc = null)
 		{

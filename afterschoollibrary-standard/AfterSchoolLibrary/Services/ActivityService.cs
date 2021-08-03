@@ -119,11 +119,22 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static Location GetLocation(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {            
+        {
             if (activity.LocationId.HasValue)
                 return Location.Load(activity.LocationId.Value, msgs, dc);
 
             return null;
+        }
+
+        public static void SetLocation(this Activity activity, Location location, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (activity.IsNotEmpty() && location.IsNotEmpty() && location.ID.HasValue)
+            {
+                activity.LocationId = location.ID;
+                activity.LastModifiedDate = DateTime.UtcNow;
+                activity.LastModifiedBy = loggedInUser.ID;
+                msgs.AddRange(activity.Save(dc));
+            }
         }
 
         public static ParticipationObject GetParticipationObject(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -358,6 +369,7 @@ namespace AfterSchoolLibrary.Services
                 ParticipationObjectId = activity.ID,
                 ParticipationObjectTypeId = ParticipationObjectType.Activity,
                 Amount = amount,
+                AmountPaidByParent = null,
                 RegistrantId = registrant.ID,
                 AccountId = activity.AccountId,
                 CreateDate = DateTime.UtcNow,
@@ -2471,12 +2483,20 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        public static Account GetProvider(this Activity activity, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Account GetProvider(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (activity.ProviderAccountId.HasValue)
                 return Account.Load(activity.ProviderAccountId.Value, msgs, dc);
 
             return null;
+        }
+
+        public static void SetProvider(this Activity activity, Account providerAccount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            activity.ProviderAccountId = providerAccount.ID;
+            activity.LastModifiedDate = DateTime.UtcNow;
+            activity.LastModifiedBy = loggedInUser.ID;
+            msgs.AddRange(activity.Save(dc));
         }
 
         public static void NotifyProviderOfNewActivity(this Activity activity, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
@@ -2597,11 +2617,14 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
-        public static void RequestToPublish(this Activity activity, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Account GetLocationOwner(this Activity activity, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var location = activity.GetLocation(msgs, dc);
-            var locationOwner = location.GetHostAccount(msgs, dc);
+            return location?.GetHostAccount(msgs, dc);
+        }
 
+        public static void RequestToPublish(this Activity activity, Account locationOwner, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
             if (locationOwner.IsNotEmpty() && locationOwner.HasAccountOwner)
             {
                 var accountOwner = locationOwner.GetAccountOwner(msgs, dc);

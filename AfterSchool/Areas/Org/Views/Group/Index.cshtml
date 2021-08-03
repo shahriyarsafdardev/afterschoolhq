@@ -15,7 +15,7 @@
 
         <div class="panel-heading">
             <div class="pull-right">
-                <a class="btn btn-primary btn-space" href="@Url.Action("edit", controller)">
+                <a class="btn btn-primary btn-space" href="@Url.Action("edit", controller, new { isnew = 1 })">
                     <i class="icon icon-left s7-plus"></i>
                     Add @UILabel.ActivityGroupLabel(activityGroupType)
                 </a>

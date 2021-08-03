@@ -35,7 +35,7 @@ namespace AfterSchoolLibraryTests.Tests
         public void LoadTest()
         {
             Assert.NotNull(Activity.Load(activity.ID.Value, dc: dc));
-        }
+        }        
         /// <summary>
         /// Gets the number of ActivityForms in the DB
         /// </summary>
