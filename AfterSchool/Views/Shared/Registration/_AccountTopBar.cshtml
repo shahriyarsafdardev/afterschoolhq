@@ -39,7 +39,7 @@
 
     var isAccountAndLoggedInUserIsOwner = currentAccount.IsNotEmpty() &&
         currentUser.IsNotEmpty() &&
-        (currentAccount.ID == Model.ID) &&
+        (currentAccount.ID == Model?.ID) &&
         (currentUser.HasAccessTo(Model));
 
     Activity unpublishActivity = null;
