@@ -3,10 +3,6 @@
 
 @AcceptPayments
 Scenario: Accept payments for the account
-	#Given  Go through new provider signup flow for accept payments
-	#Given  Go through create profile flow for accept payments
-	#Given  Go through create activity flow for accept payments
-	#Given  Go through email confirmation flow for accept payments
 	Given  Go through login flow for accept payments
 	Given  Navigate to the finish setup page
 	Given  Click close button of modal

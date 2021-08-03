@@ -1,13 +1,19 @@
-﻿Feature: EmailConfirmation
-	Email Confirmation For Account Registartion
+﻿Feature: AcceptPayments
+	Accept payments for the account
 
-@mytag
-Scenario: Email Confirmation For Account Registartion
-	Given  Go through new provider signup flow for email confirmation
-	Given  Go through create profile flow for email confirmation
-	Given  Go through create activity flow for email confirmation
-	Given  Close the email confirmation modal by clicking close button
-	Given  Open yopmail and populate email input box
-	Given  Click yopmail text input button
-	Given  Click confirmation email and link
-	Then   Verify the email verification message
+@AcceptPayments
+Scenario: Accept payments for the account
+	Given  Go through login flow for accept payments
+	Given  Navigate to the finish setup page
+	Given  Click close button of modal
+	Given  Click the got it button
+	Given  Click more dropdown option button
+	Given  Click enable payments button
+	Given  Click choose direct deposits button
+	Given  Populate get paid by after school hq form details and click next
+	Given  Click use test code button
+	Given  Populate personal form details and click next
+	Given  Populate bussiness details form and click next
+	Given  Populate select an account for payouts and click next
+	Given  Review your details and click save
+	Then   Verify account success message

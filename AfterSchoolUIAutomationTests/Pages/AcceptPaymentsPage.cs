@@ -131,7 +131,7 @@ namespace AfterSchoolUIAutomationTests.Pages
 
         public AcceptPaymentsPage PopulateFirstName(string FirstName)
         {
-            webDriver.WaitInSeconds(14);
+            webDriver.WaitInSeconds(18);
             FirstNameElement.SendKeys(FirstName);
             return this;
         }
@@ -204,8 +204,9 @@ namespace AfterSchoolUIAutomationTests.Pages
         public AcceptPaymentsPage PopulatePhoneNumber(string phone)
         {
             webDriver.WaitInSeconds(1);
-            PhoneElement.Clear();
-            PhoneElement.SendKeys(phone);
+            //PhoneElement.Clear();
+            //webDriver.WaitInSeconds(1);
+            //PhoneElement.SendKeys(phone);
             return this;
         }
 
@@ -228,10 +229,10 @@ namespace AfterSchoolUIAutomationTests.Pages
         public AcceptPaymentsPage ClickBussinessWebsiteDetails()
         {
             webDriver.WaitInSeconds(6);
-            string weburl = NextBtnPersonalDetailElement.Text.Trim();
+            string weburl = BussinessWebsiteElement.GetAttribute("value");
             int pos = weburl.LastIndexOf("/") + 1;
             string activityName = weburl.Substring(pos, weburl.Length - pos);
-            NextBtnPersonalDetailElement.Click();
+            BussinessWebsiteElement.Click();
             webDriver.WaitInSeconds(1);
             AddProductDescriptionInsteadElement.Click();
             webDriver.WaitInSeconds(2);

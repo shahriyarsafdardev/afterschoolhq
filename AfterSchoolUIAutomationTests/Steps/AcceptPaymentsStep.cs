@@ -9,7 +9,7 @@ using TechTalk.SpecFlow;
 using AfterSchoolUIAutomationTests.Helpers.Extensions;
 using AfterSchoolUIAutomationTests.Parameters;
 
-namespace AfterSchoolUIAutomationTests.Steps
+namespace AfterSchoolUIAutomationTests2.Steps
 {
     [Binding]
     public sealed class AcceptPaymentsStep : IDisposable
@@ -239,6 +239,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         {
             string create = "Account setup complete!";
             create.Equals(acceptPaymentsPage.AccountSetupComplete().Trim());
+            webDriver.WaitInSeconds(2);
         }
 
 
