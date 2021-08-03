@@ -45,7 +45,7 @@
                         {
                             <tr>
                                 <td>
-                                    <a href="#" class="btn btn-default hide">View</a>
+                                    <a href="@Url.Action("loginto", "school", new { id = account.Uid })" class="btn btn-primary btn-sm">Login</a>
                                 </td>
                                 <td>@account.Name</td>
                                 <td>@account.GetAccountOwner().DisplayName</td>
