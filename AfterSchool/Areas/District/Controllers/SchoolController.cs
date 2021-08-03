@@ -51,6 +51,32 @@ namespace AfterSchool.Areas.District.Controllers
         }
 
         [HttpGet]
+        public ActionResult LoginTo(string id)
+        {
+            var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
+
+            if (id.IsGuid())
+            {
+                var account = Account.LoadByUid(id.ToGuid(), msgs);
+                var visitorAccountIds = currentAccount.GetVisitorAccounts(AccountType.School.AsList()).Select(x => x.ID.Value);
+
+                if (account.ID.Value.In(visitorAccountIds))
+                {
+                    if (!currentUser.HasAccessTo(account, msgs))
+                        account.AddUser(currentUser, UserType.Administrator, currentUser, msgs);
+
+                    LoadSessionInfo(currentUser, account, false, msgs);
+
+                    return LoginRedirect();
+                }
+            }
+
+            return RedirectToAction("index");
+        }
+
+        [HttpGet]
         public ActionResult Invite()
         {
             ViewBag.Messages = new SystemMessages();
