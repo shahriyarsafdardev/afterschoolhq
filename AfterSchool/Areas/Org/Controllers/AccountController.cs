@@ -108,10 +108,13 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Location()
         {
             var currentAccount = SessionVariables.CurrentAccount;
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Messages = new SystemMessages();
-            ViewBag.Location = currentAccount.GetDefaultLocation();
+            var msgs = new SystemMessages();
+
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;            
+            ViewBag.Location = currentAccount.GetDefaultLocation(msgs);
             ViewBag.IsFullScreen = GetIsFullScreen();
+            ViewBag.Messages = msgs;
+
             return View(currentAccount);
         }
 
@@ -160,17 +163,18 @@ namespace AfterSchool.Areas.Org.Controllers
                     hostAccountId: hostAccountId,
                     visitorAccount: currentAccount,
                     loggedInUser: currentUser,
-                    msgs: msgs
-                    );
+                    msgs: msgs);
 
                 if (msgs.HasNoErrors())
                     currentAccount.SetDefaultLocation(newLocation, currentUser, msgs);
             }
 
-            ViewBag.Messages = msgs;
+            
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Location = currentAccount.GetDefaultLocation();
+            ViewBag.Location = currentAccount.GetDefaultLocation(msgs);
             ViewBag.IsFullScreen = GetIsFullScreen();
+            ViewBag.Messages = msgs;
+
             return View(currentAccount);
         }
 
@@ -238,16 +242,19 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors() && Request["isaccountredirect"] == "1")
             {
                 TempData["IsStripeIntegrated"] = true;
-                return Redirect(SessionVariables.CurrentAccount.ShortHomePageUrl);
+                return Redirect(currentAccount.ShortHomePageUrl);
             }
 
             if (msgs.HasNoErrors() && Request["isnew"] == "1")
                 return RedirectToAction("paymentsdone", new { isnew = 1 });
 
+            var model = currentAccount.GetCheckPaymentAccount(msgs) ?? new CheckPaymentAccount();
+
             ViewBag.Account = currentAccount;
             ViewBag.IsFullScreen = GetIsFullScreen();
             ViewBag.Messages = msgs;
-            return View(currentAccount.GetCheckPaymentAccount() ?? new CheckPaymentAccount());
+
+            return View(model);
         }
 
 
@@ -256,12 +263,12 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
+            var model = BankInfoViewModel.FromBankPaymentAccount(currentAccount.GetBankPaymentAccount(msgs) ?? new BankPaymentAccount());
 
             ViewBag.Account = currentAccount;
             ViewBag.IsFullScreen = GetIsFullScreen();
-            ViewBag.Messages = new SystemMessages();
-
-            var model = BankInfoViewModel.FromBankPaymentAccount(currentAccount.GetBankPaymentAccount(msgs) ?? new BankPaymentAccount());
+            ViewBag.Messages = msgs;
+            
             return View(model);
         }
 
@@ -329,11 +336,12 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult PaymentsEntity()
         {
             //.. this view is depreciated and paymentsoptions is the right view
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
-            var paymentsEntityVM = PaymentsEntityViewModel.LoadFromStripeAccount(SessionVariables.CurrentAccount.GetStripeCustomAccount(msgs));
+            var paymentsEntityVM = PaymentsEntityViewModel.LoadFromStripeAccount(currentAccount.GetStripeCustomAccount(msgs));
 
             ViewBag.Messages = msgs;
-            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.Account = currentAccount;
             ViewBag.IsFullScreen = GetIsFullScreen();
             return View(paymentsEntityVM);
         }
@@ -467,10 +475,13 @@ namespace AfterSchool.Areas.Org.Controllers
                     return RedirectToAction("paymentsbank", "account", new { isnew = Request["isnew"] });
             }
 
+            var model = PaymentsEntityViewModel.LoadFromStripeAccount(account.GetStripeCustomAccount(msgs));
+            
             ViewBag.Messages = msgs;
             ViewBag.Account = account;
             ViewBag.IsFullScreen = GetIsFullScreen();
-            return View(PaymentsEntityViewModel.LoadFromStripeAccount(account.GetStripeCustomAccount(msgs)));
+
+            return View(model);
         }
 
         [HttpGet]
@@ -751,7 +762,8 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult FormEdit(string id, string qg)
         {
             var currentAccount = SessionVariables.CurrentAccount;
-            if (currentAccount.IsEmpty() || id.IsEmpty())
+            
+            if (id.IsEmpty())
                 return HttpNotFound();
 
             var msgs = new SystemMessages();
@@ -803,12 +815,11 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
-            if (currentAccount.IsEmpty() || id.IsEmpty() || copyfrom.IsEmpty())
-                return HttpNotFound();
-
-
-
             var msgs = new SystemMessages();
+
+            if (id.IsEmpty() || copyfrom.IsEmpty())
+                return HttpNotFound();
+            
             Form form = null;
             FormQuestionGroup questionGroup = null;
 
@@ -1221,7 +1232,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
                 msgs.Add("Saved Successfully", MessageType.Success);
-
+            
             return View(StyleViewBag(msgs));
         }
 
@@ -1323,9 +1334,8 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Billing()
         {
-            Account currentAccount = SessionVariables.CurrentAccount;
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
-
             var packages = currentAccount.GetAccountPackages(msgs);
 
             if (packages.Count <= 0 || !packages.Any(m => !m.IsFree))
@@ -1344,7 +1354,6 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var accountPackage = SessionVariables.AccountPackage;
-
             var msgs = new SystemMessages();
 
             if (accountPackage.IsEmpty())
@@ -1420,10 +1429,6 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var accountPackage = SessionVariables.AccountPackage;
-
-            if (currentAccount.IsEmpty())
-                return HttpNotFound();
-
             var msgs = new SystemMessages();
 
             Package package = null;
@@ -1445,7 +1450,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         package = Package.LoadByUid(selectedPackageArr[1].ToGuid(), amsgs, adc);
 
-                        customer = currentAccount.CreateStripeCustomer();
+                        customer = currentAccount.CreateStripeCustomer(amsgs, adc);
 
                         if (stripetoken.IsNotEmpty())
                             currentAccount.CreateStripeCardFromToken(stripetoken, customer, amsgs, adc);
@@ -1510,7 +1515,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
             
-            ViewBag.Packages = Package.LoadByIsActive(true);
+            ViewBag.Packages = Package.LoadByIsActive(true, msgs);
             ViewBag.AccountPackage = currentAccount.GetActiveAccountPackage(msgs);
             ViewBag.Messages = msgs;
             return View(currentAccount);
@@ -1526,7 +1531,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             SessionVariables.AccountPackage = currentAccount.GetActiveAccountPackage(msgs);
 
-            ViewBag.Packages = Package.LoadByIsActive(true);
+            ViewBag.Packages = Package.LoadByIsActive(true, msgs);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Messages = msgs;
             return View("Packages", currentAccount);
@@ -1535,10 +1540,6 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult OAuthStripe()
         {
             var currentAccount = SessionVariables.CurrentAccount;
-
-            if (currentAccount.IsEmpty())
-                return HttpNotFound();
-
             var msgs = new SystemMessages();
 
             //.. user is redirected from onbording
@@ -1580,6 +1581,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
 
             SessionVariables.CurrentAccount.DisconnectStripeConnect(SessionVariables.CurrentUser, msgs);
+            
+            ViewBag.Messages = msgs;
 
             return RedirectToAction("PaymentsOptions");
         }
