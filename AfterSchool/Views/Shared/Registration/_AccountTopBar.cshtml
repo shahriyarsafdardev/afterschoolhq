@@ -3,8 +3,9 @@
     var currentUser = SessionVariables.CurrentUser;
     var currentAccount = SessionVariables.CurrentAccount;
     var accountOrDashboard = "Account";
-    var canPublishActivity = ViewData["CanPublishActivity"].IsNotEmpty() ? ViewData["CanPublishActivity"].ToString().ToBoolean() : false;
     var participationObject = (ParticipationObject)ViewData["ParticipationObject"];
+    var isLocationOwnerRquestToPublish = ViewData["IsLocationOwner"].IsNotEmpty() ? ViewData["IsLocationOwner"].ToString().ToBoolean() : false;
+    var isExternalAccountsRequestToPublish = participationObject.IsNotEmpty() && !participationObject.IsPublished && participationObject.IsExternalToAccount(currentAccount);
     var dashboardUrl = Url.Action("index", "home", new { area = "user" });
     var session = (ParticipationObject)ViewData["session"];
     var isDuringProfileSetup = false;
@@ -29,13 +30,13 @@
     }
 
     var currentLevel = AccountService.OnboardingCompletionStatus(currentAccount);
-    var currentProgress = AccountService.GetCurrentOnboardingProcess(currentAccount);    
+    var currentProgress = AccountService.GetCurrentOnboardingProcess(currentAccount);
     var totalNumberOfOnboardingSteps = 4;
     var hasAnyPaidActivity = currentAccount.IsNotEmpty() && currentAccount.HasPaidActivities();
     //If there is no paid activity configured then we should not display Payment Modal and Progressbar to user
     var totalStepsLeft = hasAnyPaidActivity ? totalNumberOfOnboardingSteps : totalNumberOfOnboardingSteps - 1;
     var progressPercentage = ((Decimal)currentProgress.Count / totalStepsLeft) * 100;
-    
+
 
     var isAccountAndLoggedInUserIsOwner = currentAccount.IsNotEmpty() &&
         currentUser.IsNotEmpty() &&
@@ -232,10 +233,8 @@
 
                             @if (currentUser.IsNotEmpty())
                             {
-                                //canPublishActivity: if location based request required from school account
-                                //participationObject.IsExternalToAccount: if external account selected on contact
-                                if (canPublishActivity || (participationObject.IsNotEmpty() && !participationObject.IsPublished && participationObject.IsExternalToAccount(currentAccount)))
-                                {
+                                if (isLocationOwnerRquestToPublish || isExternalAccountsRequestToPublish)
+                                {                                    
                                     <a href="@Url.Action("publishdetail", "activity", new { Area = "org", id = participationObject.Uid })"
                                        class="btn btn-primary btn-sm">
                                         Approve &amp; Publish Activity &raquo;

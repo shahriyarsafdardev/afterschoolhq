@@ -60,6 +60,7 @@
 @{
     Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", account, new ViewDataDictionary() {
         { "LoginReturnUrl", Model.GetHomePageUrl() },
+        { "IsLocationOwner", ViewBag.IsLocationOwner },
         { "CanPublishActivity", ViewBag.CanPublishActivity },
         { "ParticipationObject", Model },
         { "Session", session }
