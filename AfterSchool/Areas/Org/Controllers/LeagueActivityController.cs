@@ -968,17 +968,16 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Copy(string id, string activitynamecopy, string usesameformcopy)
         {
             var msgs = new SystemMessages();
-            var activity = Activity.LoadByUid(id.ToGuid()).Copy(activitynamecopy, true, SessionVariables.CurrentUser.ID.Value, msgs);
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs).Copy(activitynamecopy, true, currentUser.ID.Value, msgs);
 
             ViewBag.Messages = msgs;
+            
             if (msgs.HasNoErrors())
-            {
                 return RedirectToAction("editsetup", new { id = activity.Uid });
-            }
-            else
-            {
-                return RedirectToAction("index", "activity");
-            }
+
+            return RedirectToAction("index", "activity");
         }
 
         [HttpGet]
@@ -1007,24 +1006,20 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Archive(string id)
         {
             var msgs = new SystemMessages();
-            var activity = Activity.LoadByUid(id.ToGuid());
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             if (activity.IsNotEmpty())
-            {
-                msgs.AddRange(activity.MoveToArchive(SessionVariables.CurrentUser.ID.Value));
-            }
+                msgs.AddRange(activity.MoveToArchive(currentUser.ID.Value));
 
             ViewBag.Messages = msgs;
 
             if (msgs.HasNoErrors())
-            {
-                msgs.Add(string.Format("{0} has been archived", activity.Name), MessageType.Success);
-            }
+                msgs.Add($"{activity.Name} has been archived", MessageType.Success);
 
             if (Request.UrlReferrer.IsNotEmpty())
-            {
-                Response.Redirect(Request.UrlReferrer.ToString(), true);
-            }
+                return Redirect(Request.UrlReferrer.ToString());
 
             return RedirectToAction("index", "activity");
         }
@@ -1033,52 +1028,32 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Restore(string id)
         {
             var msgs = new SystemMessages();
-            var activity = Activity.LoadByUid(id.ToGuid());
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             if (activity.IsNotEmpty())
-            {
-                msgs.AddRange(activity.MoveFromArchive(SessionVariables.CurrentUser.ID.Value));
-            }
+                msgs.AddRange(activity.MoveFromArchive(currentUser.ID.Value));
 
             ViewBag.Messages = msgs;
 
             if (msgs.HasNoErrors())
-            {
-                msgs.Add(string.Format("{0} has been restored", activity.Name), MessageType.Success);
-            }
+                msgs.Add($"{activity.Name} has been restored", MessageType.Success);
 
             if (Request.UrlReferrer.IsNotEmpty())
-            {
-                Response.Redirect(Request.UrlReferrer.ToString(), true);
-            }
+                return Redirect(Request.UrlReferrer.ToString());
 
             return RedirectToAction("index", "activity");
         }
 
-        //[HttpPost]
-        //public ActionResult NewOffering(string id, string activitynameoffer)
-        //{
-        //    var msgs = new SystemMessages();
-        //    var activity = Activity.LoadByUid(id.ToGuid());
-        //    var childActivity = activity.CreateChild(activitynameoffer, SessionVariables.LoggedInUser.ID.Value, msgs);
-
-        //    ViewBag.Messages = msgs;
-        //    if (msgs.HasNoErrors())
-        //    {
-        //        return RedirectToAction("editsetup", new { id = childActivity.ID });
-        //    }
-        //    else
-        //    {
-        //        return RedirectToAction("index", "activity");
-        //    }
-        //}
-
         [HttpGet]
         public ActionResult Attendance(string id)
         {
-            var activity = Activity.LoadByUid(id.ToGuid());
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             return View(activity);
