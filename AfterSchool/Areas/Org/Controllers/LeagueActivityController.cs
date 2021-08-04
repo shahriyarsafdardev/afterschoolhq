@@ -985,24 +985,20 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Delete(string id)
         {
             var msgs = new SystemMessages();
-            var activity = Activity.LoadByUid(id.ToGuid());
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             if (activity.IsNotEmpty())
-            {
-                msgs.AddRange(activity.MarkAsDeleted(SessionVariables.CurrentUser.ID.Value));
-            }
+                msgs.AddRange(activity.MarkAsDeleted(currentUser.ID.Value));
 
             ViewBag.Messages = msgs;
 
             if (msgs.HasNoErrors())
-            {
-                msgs.Add(string.Format("{0} has been deleted", activity.Name), MessageType.Success);
-            }
+                msgs.Add($"{activity.Name} has been deleted", MessageType.Success);
 
             if (Request.UrlReferrer.IsNotEmpty())
-            {
-                Response.Redirect(Request.UrlReferrer.ToString(), true);
-            }
+                return Redirect(Request.UrlReferrer.ToString());
 
             return RedirectToAction("index", "activity");
         }
