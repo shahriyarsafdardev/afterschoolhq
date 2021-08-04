@@ -1091,8 +1091,10 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult TrackAttendance(string id, string att, string activityinstance)
         {
             var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var presentStudents = new List<int>();
-            var activity = Activity.LoadByUid(id.ToGuid());
             var attendance = AfterSchoolLibrary.Models.Attendance.Load(att.ToInteger(), msgs);
 
             if (!activityinstance.IsNumber())
@@ -1104,7 +1106,7 @@ namespace AfterSchool.Areas.Org.Controllers
             });
 
             if (msgs.HasNoErrors())
-                attendance.UpdateAttendance(activityinstance.ToInteger(), presentStudents, SessionVariables.CurrentUser, msgs);
+                attendance.UpdateAttendance(activityinstance.ToInteger(), presentStudents, currentUser, msgs);
 
 
             ViewBag.Messages = msgs;
@@ -1117,7 +1119,9 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Registrants(string id, string atype)
         {
-            var activity = Activity.LoadByUid(id.ToGuid());
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             List<RegistrantActivity> ras = null;
             var rat = RegistrationAssignmentType.NotSet;
 
@@ -1134,7 +1138,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if(rat != RegistrationAssignmentType.NotSet)
                 ras = ras.Where(x => x.AssignmentTypeId == rat).OrderBy(x => x.SeatIndex).ToList();
 
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.Registrants = ras;
             ViewBag.AssignmentType = rat;
@@ -1145,7 +1149,8 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult RegistrantSummary(string id)
         {
             var msgs = new SystemMessages();
-            var activity = Activity.LoadByUid(id.ToGuid());
+            var currentAccount = SessionVariables.CurrentAccount;
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             BackgroundJob.Enqueue(() => 
                 ActivityService.SendRegistrationSummaryReport(activity.ID.Value, UILabel.ActivityLabel(activity.ActivityTypeId, false), null)
@@ -1163,7 +1168,10 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult RegistrantDownload(string id)
         {
-            var activity = Activity.LoadByUid(id.ToGuid());
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+
             var af = activity.GetActiveActivityForm();
             var questions = af.GetForm().GetAllQuestions();
 
@@ -1277,365 +1285,37 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(ra);
         }
 
-        //[HttpGet]
-        //public ActionResult RegistrantImport(string id)
-        //{
-        //    var activity = Activity.LoadByUid(id.ToGuid());
-        //    ViewBag.Step = 1;
-        //    ViewBag.StepLabel = "Upload";
-        //    ViewBag.Messages = new SystemMessages();
-        //    return View(activity);
-        //}
-
-        //[HttpPost]
-        //public ActionResult RegistrantImport(string id, HttpPostedFileBase importfile, string csv)
-        //{
-        //    var msgs = new SystemMessages();
-        //    var activity = Activity.LoadByUid(id.ToGuid());
-        //    var af = activity.GetActiveActivityForm();
-        //    string extension = "";
-        //    var questions = af.GetForm().GetAllQuestions();
-
-        //    if (csv.IsBlank())
-        //    {
-        //        if (importfile.IsEmpty())
-        //        {
-        //            msgs.Add("Please upload a file", MessageType.UserError);
-        //        }
-        //        else if (!new string[] { ".xls", ".csv", ".xlsx" }.Contains(Path.GetExtension(importfile.FileName)))
-        //        {
-        //            msgs.Add("Please upload a valid file", MessageType.UserError);
-        //        }
-        //        else
-        //        {
-        //            extension = Path.GetExtension(importfile.FileName);
-        //        }
-
-        //        if (msgs.HasNoErrors())
-        //        {
-        //            ViewBag.Step = 2;
-        //            ViewBag.StepLabel = "Review";
-
-        //            //import
-        //            var sr = new StreamReader(importfile.InputStream);
-
-        //            List<string> headers = new List<string>();
-        //            List<string> headersWithData = new List<string>();
-        //            List<List<string>> rows = new List<List<string>>();
-        //            List<List<ImportField>> validatedRows = new List<List<ImportField>>();
-
-        //            if (extension == ".csv")
-        //            {
-        //                CsvHelper.CsvReader reader = new CsvHelper.CsvReader(sr);
-        //                reader.Configuration.Delimiter = ",";
-        //                reader.Configuration.HasHeaderRecord = true;
-        //                reader.Configuration.TrimOptions = CsvHelper.Configuration.TrimOptions.Trim;
-
-        //                while (reader.Read())
-        //                {
-        //                    if (headers.Count == 0)
-        //                    {
-        //                        headers = reader.Context.HeaderRecord.ToList();
-        //                    }
-
-        //                    var row = new List<string>();
-        //                    for (var i = 0; i < headers.Count; i++)
-        //                    {
-        //                        var header = headers[i];
-        //                        var field = reader.GetField<string>(i);
-        //                        if (questions.Select(x => x.QuestionDataTypeId.ToString().ToLower()).Contains(header.ToLower()) && field.IsNotBlank())
-        //                        {
-        //                            row.Add(field);
-        //                            if (!headersWithData.Contains(header))
-        //                            {
-        //                                headersWithData.Add(header);
-        //                            }
-        //                        }
-        //                    }
-
-        //                    rows.Add(row);
-        //                }
-        //            }
-
-        //            foreach (var row in rows)
-        //            {
-        //                var validatedRow = new List<ImportField>();
-
-        //                for (var i = 0; i < headersWithData.Count; i++)
-        //                {
-        //                    var validatedField = new ImportField();
-        //                    validatedField.Value = row[i];
-
-        //                    var field = row[i].ToLower();
-        //                    var question = questions.Where(x => x.QuestionDataTypeId.ToString().ToLower() == headersWithData[i].ToLower()).First();
-
-        //                    validatedField.Value = field;
-
-        //                    if (field.Length > 1000)
-        //                    {
-        //                        validatedField.Messages.Add("Must be less than or equal to 1000 characters. Data will be truncated.", MessageType.Warning);
-        //                    }
-
-        //                    switch (question.QuestionTypeId)
-        //                    {
-        //                        case QuestionType.Date:
-
-        //                            if (field.IsNotBlank() && !field.IsDateTime())
-        //                            {
-        //                                validatedField.Messages.Add("Must be a valid date", MessageType.UserError);
-        //                            }
-
-        //                            break;
-
-        //                        case QuestionType.Checkbox:
-
-        //                            if (field.IsNotBlank() && !field.IsBoolean())
-        //                            {
-        //                                validatedField.Messages.Add("Must be one of the following values: 0, 1, T, F, True, False", MessageType.UserError);
-        //                            }
-
-        //                            break;
-
-        //                        case QuestionType.TextBox:
-        //                        case QuestionType.TextArea:
-
-        //                            break;
-
-        //                        case QuestionType.Email:
-
-        //                            if (field.IsNotBlank() && !field.IsMatch(BasicLibrary.Utilities.EmailRegEx))
-        //                            {
-        //                                validatedField.Messages.Add("Must be a valid email address", MessageType.UserError);
-        //                            }
-
-        //                            break;
-
-        //                        case QuestionType.DropDownList:
-        //                        case QuestionType.RadioList:
-
-        //                            if (field.IsNotBlank())
-        //                            {
-        //                                var options = question.Options.Split(',').Select(x => x.Trim().ToLower()).Where(x => x.Length > 0);
-
-        //                                if (!options.Contains(field))
-        //                                {
-        //                                    validatedField.Messages.Add("Must be one of the following values: " + question.Options.Replace(",", ", "), MessageType.UserError);
-        //                                }
-        //                            }
-
-        //                            break;
-
-        //                        case QuestionType.CheckboxList:
-
-        //                            if (field.IsNotBlank())
-        //                            {
-        //                                var options = question.Options.Split(',').Select(x => x.Trim().ToLower());
-        //                                var fieldvalues = field.Split(',').Select(x => x.Trim().ToLower()).Where(x => x.Length > 0);
-
-        //                                foreach (var fieldvalue in fieldvalues)
-        //                                {
-        //                                    if (!options.Contains(fieldvalue))
-        //                                    {
-        //                                        validatedField.Messages.Add("Must be one of the following values: " + question.Options.Replace(",", ", "), MessageType.UserError);
-        //                                    }
-        //                                }
-        //                            }
-
-        //                            break;
-        //                    }
-
-        //                    validatedRow.Add(validatedField);
-        //                }
-
-        //                validatedRows.Add(validatedRow);
-        //            }
-
-        //            var csvString = new System.Text.StringBuilder();
-        //            foreach (var header in headersWithData)
-        //            {
-        //                csvString.Append(header);
-        //                csvString.Append(",");
-        //            }
-        //            csvString.Append("\n");
-
-        //            foreach (var row in rows)
-        //            {
-        //                foreach (var field in row)
-        //                {
-        //                    csvString.Append(field);
-        //                    csvString.Append(",");
-        //                }
-        //                csvString.Append("\n");
-        //            }
-
-        //            ViewBag.Headers = headersWithData;
-        //            ViewBag.Rows = validatedRows;
-        //            ViewBag.Csv = csvString.ToString();
-        //        }
-
-        //    }
-        //    else
-        //    {
-        //        ViewBag.Step = 3;
-        //        ViewBag.StepLabel = "Import Complete";
-
-        //        //import
-        //        var sr = new StringReader(csv);
-
-        //        List<string> headers = new List<string>();
-        //        List<string> headersWithData = new List<string>();
-        //        List<List<string>> rows = new List<List<string>>();
-        //        List<List<ImportField>> validatedRows = new List<List<ImportField>>();
-
-        //        //do import
-        //        CsvHelper.CsvReader reader = new CsvHelper.CsvReader(sr);
-        //        reader.Configuration.Delimiter = ",";
-        //        reader.Configuration.HasHeaderRecord = true;
-        //        reader.Configuration.TrimOptions = CsvHelper.Configuration.TrimOptions.Trim;
-
-        //        Database.ExecuteTransaction(
-        //            action: (SystemMessages amsgs, DatabaseConnection adc) => {
-        //                while (reader.Read())
-        //                {
-        //                    if (headers.Count == 0)
-        //                    {
-        //                        headers = reader.Context.HeaderRecord.ToList();
-        //                    }
-
-        //                    //assuming 1 seat per registrant line for now
-        //                    var seatsRequested = 1;
-        //                    var seatsLeft = activity.GetSeatsRemaining();
-        //                    var seatCount = 0;
-        //                    var waitingListSeatCount = 0;
-        //                    var applicationSeatCount = 0;
-        //                    var invitationSeatCount = 0;
-        //                    var declinedSeatCount = 0;
-
-        //                    if (seatsRequested > seatsLeft)
-        //                    {
-        //                        seatCount = 0;
-        //                        waitingListSeatCount = 1;
-        //                    }
-        //                    else
-        //                    {
-        //                        seatCount = 1;
-        //                        waitingListSeatCount = 0;
-        //                    }
-
-        //                    var hasSeatsAvailable = activity.GetRegistrantCount(amsgs, adc) < activity.SeatsAvailable;
-
-        //                    // TODO: need to verify if this really should be the master account. What is master
-        //                    var registrant = SessionVariables.CurrentAccount.AddRegistrant(0, RegistrantType.Individual, true, amsgs, dc: adc);
-        //                    var period = activity.GetCurrentRegistrationPeriod(amsgs, adc);
-
-        //                    var registration = registrant.AddRegistration(
-        //                        SessionVariables.CurrentAccount.ID.Value, 
-        //                        activity.ActivityGroupId,
-        //                        activity.AccountActivityGroupId,
-        //                        period?.ID,
-        //                        RegistrationCompletionStatus.RequiresParentSignature,
-        //                        SessionVariables.LoggedInUser.ID.Value, 
-        //                        amsgs, 
-        //                        adc);
-
-        //                    var ra = registrant.AddOrUpdateParticipationObject(
-        //                        registration.ID.Value, 
-        //                        af.ActivityId.Value, 
-        //                        ParticipationObjectType.Activity,
-        //                        RegistrationAssignmentType.Reserved,
-        //                        null,
-        //                        null,
-        //                        SessionVariables.LoggedInUser.ID.Value,
-        //                        amsgs, 
-        //                        dc: adc);
-
-        //                    for (var i = 0; i < headers.Count; i++)
-        //                    {
-        //                        var header = headers[i];
-        //                        if (header.IsNotBlank())
-        //                        {
-        //                            var field = reader.GetField<string>(i);
-        //                            var question = questions.Where(x => x.QuestionDataTypeId.ToString().ToLower() == headers[i].ToLower()).First();
-
-        //                            if (field.IsNotBlank())
-        //                            {
-        //                                var answer = registration.AddAnswer(field, question, registrant, 0, amsgs, dc: adc);
-        //                            }
-        //                        }
-        //                    }
-        //                }
-        //            },
-        //            onSuccess: (SystemMessages smsgs) => {
-        //                msgs.AddRange(smsgs);
-        //            },
-        //            onFailure: (SystemMessages fmsgs) => {
-        //                msgs.AddRange(fmsgs);
-        //            }
-        //        );
-        //    }
-
-        //    ViewBag.Messages = msgs;
-        //    return View(activity);
-        //}
-
-        //[HttpGet]
-        //public ActionResult GetImportSample(string id)
-        //{
-        //    var msgs = new SystemMessages();
-        //    var activity = Activity.LoadByUid(id.ToGuid());
-        //    var af = activity.GetActiveActivityForm();
-
-        //    var questions = af.GetForm().GetAllQuestions().OrderBy(x => (x.DisplayOrder.Value + 1) * (x.FormQuestionGroupDisplayOrder.Value + 1));
-
-        //    var swriter = new StringWriter();
-        //    var csvWriter = new CsvHelper.CsvWriter(swriter);
-        //    csvWriter.Configuration.HasHeaderRecord = true;
-
-        //    foreach (var question in questions)
-        //    {
-        //        csvWriter.WriteField(question.QuestionDataTypeId.ToString());
-        //    }
-        //    csvWriter.NextRecord();
-
-        //    string csv = swriter.GetStringBuilder().ToString();
-
-        //    Response.Clear();
-        //    Response.Write(csv);
-        //    Response.AddHeader("Content-Disposition", "attachment; filename=importsample.csv");
-        //    Response.AddHeader("Content-Type", "text/csv");
-        //    Response.AddHeader("Content-Length", System.Text.Encoding.UTF8.GetByteCount(csv).ToString());
-        //    Response.End();
-
-        //    return View();
-        //}
-
         [HttpGet]
         public ActionResult PublishDetail(string id)
         {
-            var activity = Activity.LoadByUid(id.ToGuid());
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+
             ViewBag.Messages = new SystemMessages();
-            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.Account = currentAccount;
             return View(activity);
         }
 
         [HttpGet]
         public ActionResult Publish(string id)
         {
-            SystemMessages msgs = new SystemMessages();
-            var activity = Activity.LoadByUid(id.ToGuid());
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
-            msgs.AddRange(activity.SetIsPublished(true, SessionVariables.CurrentUser.ID.Value));            
+            msgs.AddRange(activity.SetIsPublished(true, currentUser.ID.Value));            
 
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} has been published", activity.Name), MessageType.Success);
 
-                var currentAccount = SessionVariables.CurrentAccount;
                 // LOG: CurrentWebUser Published Activity ActivityName to Account AccountName's Profile
 
                 SessionVariables.WebSession.LogActivity(
                     account: currentAccount,
-                    actor: SessionVariables.CurrentUser,
+                    actor: currentUser,
                     actionType: WebSessionActionType.Published,
                     objectId: activity.ID.Value,
                     objectType: ObjectType.Activity,
@@ -1652,20 +1332,21 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Unpublish(string id)
         {
-            SystemMessages msgs = new SystemMessages();
-            var activity = Activity.LoadByUid(id.ToGuid());
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
-            msgs.AddRange(activity.SetIsPublished(false, SessionVariables.CurrentUser.ID.Value));            
+            msgs.AddRange(activity.SetIsPublished(false, currentUser.ID.Value));            
 
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} has been unpublished", activity.Name), MessageType.Success);
-                var currentAccount = SessionVariables.CurrentAccount;
 
                 // LOG: CurrentWebUser Unpublished Activity ActivityName from Account AccountName's Profile
                 SessionVariables.WebSession.LogActivity(
                     account: currentAccount,
-                    actor: SessionVariables.CurrentUser,
+                    actor: currentUser,
                     actionType: WebSessionActionType.Unpublished,
                     objectId: activity.ID.Value,
                     objectType: ObjectType.Activity,
@@ -1682,23 +1363,10 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Form(string id, string qg)
         {
-            var activity = Activity.LoadByUid(id.ToGuid());
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var activityForm = activity.GetActiveActivityForm();
-
-            //create form(s) if there is no form
-            //if (activityForm.IsEmpty() && !activity.IsChildActivity)
-            //{               
-            //    activity.CopyDefaultForm(SessionVariables.LoggedInUser.ID.Value);
-            //    activityForm = activity.GetActiveActivityForm();
-
-            //    List<Activity> children = activity.GetChildActivities();
-            //    foreach(var child in children)
-            //    {
-            //        var af = child.AddFormAndActivitate(activityForm.ToForm(true), SessionVariables.LoggedInUser.ID.Value);
-            //        af.IsPublished = activityForm.IsPublished;
-            //        af.Save();
-            //    }
-            //}
 
             var questionGroups = activityForm.GetForm().GetQuestionGroups();
             var individualGroups = questionGroups.Where(x => x.RegistrantTypeId == RegistrantType.Individual).ToList();
@@ -1738,7 +1406,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Description is required", MessageType.UserError);
             }
 
-            var activity = Activity.LoadByUid(id.ToGuid());
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var activityForm = activity.GetActiveActivityForm();
             FormQuestionGroup questionGroup = null;
 
@@ -1763,7 +1433,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         if (questionGroup.IsNotEmpty())
                         {
                             questionGroup.Name = Request.Params[string.Format("name-{0}", questionGroup.ID)];
-                            questionGroup.LastModifiedBy = SessionVariables.CurrentUser.ID;
+                            questionGroup.LastModifiedBy = currentUser.ID;
                             questionGroup.LastModifiedDate = DateTime.UtcNow;
                             amsgs.AddRange(questionGroup.Save(adc));
                         }
@@ -1830,8 +1500,11 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Messages(string id)
         {
-            var activity = Activity.LoadByUid(id.ToGuid());
-            ViewBag.Messages = new SystemMessages();
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+
+            ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             return View(activity);
@@ -1851,7 +1524,9 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult MessageAdd(string id)
         {
-            var activity = Activity.LoadByUid(id.ToGuid());
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             ViewBag.Messages = new SystemMessages();
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
@@ -1868,6 +1543,9 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult MessageAdd(string id, string subject, string body, string sendtostaff)
         {
             var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             if (subject.IsEmpty())
                 msgs.Add("Subject is required", MessageType.UserError);
@@ -1875,7 +1553,6 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Body is required", MessageType.UserError);
 
             ActivityMessage am = null;
-            var activity = Activity.LoadByUid(id.ToGuid());
 
             if(msgs.HasNoErrors())
             {
@@ -1883,9 +1560,9 @@ namespace AfterSchool.Areas.Org.Controllers
                     .Where(x => Request[$"registrant-{x.ID.ToString()}"].IsNotBlank())
                     .Select(x => x.ID.Value)
                     .ToList();
-                am = activity.AddMessage(subject, body, registrantIds, sendtostaff.IsBoolean(), SessionVariables.CurrentUser.ID.Value, msgs);
+                am = activity.AddMessage(subject, body, registrantIds, sendtostaff.IsBoolean(), currentUser.ID.Value, msgs);
 
-                BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, SessionVariables.CurrentUser.ID.Value, null, null));
+                BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, null, null));
             }                
 
             ViewBag.Messages = msgs;
@@ -1907,7 +1584,9 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Team(string id)
         {
-            var activity = Activity.LoadByUid(id.ToGuid());
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             LoadTeamViewBag(activity);
             return View(activity);
@@ -1934,13 +1613,16 @@ namespace AfterSchool.Areas.Org.Controllers
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) => {
 
-                    activity = Activity.LoadByUid(id.ToGuid(), amsgs, adc);
+                    var currentAccount = SessionVariables.CurrentAccount;
+                    var currentUser = SessionVariables.CurrentUser;
+                    activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+
                     account = activity.GetAccount(amsgs, adc);
                     users = account.GetActiveMembers(msgs: amsgs, dc: adc).Select(x => x.ToWebUser()).ToList();
 
                     foreach (var user in users)
                     {
-                        var doNotSkip = !(activity.CreatedBy.Value == user.ID.Value || SessionVariables.CurrentUser.ID == user.ID);
+                        var doNotSkip = !(activity.CreatedBy.Value == user.ID.Value || currentUser.ID == user.ID);
 
                         if (doNotSkip)
                         {
@@ -1954,7 +1636,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                     awu.ActivityId = activity.ID;
                                     awu.WebUserId = user.ID;
                                     awu.CreateDate = DateTime.UtcNow;
-                                    awu.CreatedBy = SessionVariables.CurrentUser.ID;
+                                    awu.CreatedBy = currentUser.ID;
                                 }
 
                                 if (Request["isleader-" + user.ID.Value.ToString()].IsNotEmpty())
@@ -1967,7 +1649,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                 }
 
                                 awu.LastModifiedDate = DateTime.UtcNow;
-                                awu.LastModifiedBy = SessionVariables.CurrentUser.ID;
+                                awu.LastModifiedBy = currentUser.ID;
                                 amsgs.AddRange(awu.Save(adc));
 
                             }
@@ -2002,8 +1684,8 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Schedule(string id)
         {
             var msgs = new SystemMessages();
-
-            var team = Activity.LoadByUid(id.ToGuid());
+            var currentAccount = SessionVariables.CurrentAccount;
+            var team = currentAccount.GetActivity(id.ToGuid(), msgs);
             var activityInstances = MatchService.GetTeamActivityInstances(team.ID.Value, msgs);
 
             ViewBag.Messages = msgs;
