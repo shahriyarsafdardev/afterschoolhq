@@ -33,7 +33,7 @@
         if (modifyCart) {
             location.href = '@Model.GetBrowseUrl()';
         } else {
-            location.href = '@Url.Action("select", "account")';
+            // location.href = '@Url.Action("select", "account")';
         }
     }
 
@@ -88,9 +88,7 @@
     }
 
     function redirectToChildProfile(event) {
-        console.log("registrantUid", event.data.registrantUid);
-        var action = '@Url.Action("editstudentpersonal", "Family", new { Area = "user", id = "registrantUid", returnToCheckout = "1", forceupdategrade = "1" })'.replace("registrantUid", event.data.registrantUid);
-        console.log(action);
+        var action = '@Url.Action("editstudentpersonal", "Family", new { Area = "user", id = "registrantUid", returnUrl = Request.Url.AbsolutePath })&resetgrade=1'.replace("registrantUid", event.data.registrantUid);
         location.href = action;
     }
 </script>

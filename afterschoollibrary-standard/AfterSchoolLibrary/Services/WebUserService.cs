@@ -145,8 +145,15 @@ namespace AfterSchoolLibrary.Services
         }
         public static bool HasAccessTo(this WebUser user, Account a, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var awu = AccountWebUser.LoadByAccountIdByWebUserId(a.ID.Value, user.ID.Value, msgs, dc);
-            return awu.IsNotEmpty() && awu.IsActive;
+            if (user.IsNotEmpty() && a.IsNotEmpty())
+            {
+                var awu = AccountWebUser.LoadByAccountIdByWebUserId(a.ID.Value, user.ID.Value, msgs, dc);
+
+                if (awu.IsNotEmpty())
+                    return awu.IsNotEmpty() && awu.IsActive;
+            }
+
+            return false;
         }
         public static bool HasAccessToActivity(this WebUser user, Activity a, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -160,8 +167,8 @@ namespace AfterSchoolLibrary.Services
 
         public static bool CanPublishActivity(this WebUser user, Account currentAccount, Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var location = activity.GetLocation();
-            var hostAccount = location?.GetHostAccount();
+            var location = activity.GetLocation(msgs, dc);
+            var hostAccount = location?.GetHostAccount(msgs, dc);
 
             // if host account doesn't exist, is unclaimed, or is actually the same as the current account
             if (hostAccount.IsEmpty() || !hostAccount.HasAccountOwner || hostAccount.ID == currentAccount.ID)

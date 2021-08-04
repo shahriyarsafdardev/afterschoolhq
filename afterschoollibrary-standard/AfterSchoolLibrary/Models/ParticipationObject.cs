@@ -752,6 +752,22 @@ namespace AfterSchoolLibrary.Models
             return null;
         }
 
+        public bool IsExternallyProvided()
+        {
+            if (IsActivity())
+                return GetActivity().ProviderAccountId.HasValue;
+
+            return false;
+        }
+
+        public bool IsExternalToAccount(Account account)
+        {
+            if (IsExternallyProvided())
+                return GetActivity().ProviderAccountId != account.ID;
+
+            return false;
+        }
+
         #endregion
 
         #region Financial
