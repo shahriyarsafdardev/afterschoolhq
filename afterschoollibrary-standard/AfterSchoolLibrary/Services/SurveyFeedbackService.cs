@@ -95,5 +95,21 @@ namespace AfterSchoolLibrary.Services
 
             return null;
         }
+
+        public static List<SurveyFeedback> GetSurveyFeedbacksByActivity(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (activity.IsNotEmpty())
+                return SurveyFeedback.LoadByActivityId(activity.ID.Value, msgs, dc);
+
+            return null;
+        }
+
+        public static WebUser GetCreatedBy(this SurveyFeedback surveyFeedback, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (surveyFeedback.CreatedBy.HasValue)
+                return WebUser.Load(surveyFeedback.CreatedBy.Value, msgs, dc);
+
+            return null;
+        }
     }
 }

@@ -1914,6 +1914,7 @@ loadmethod: Uid|ActivityId
 loadmethod: Uid|SurveyId
 loadmethod: Uid|RegistrantId
 loadmethod: Uid|AttendanceId
+loadmethod: SurveyId|ActivityId
 [end]
 
 [begin]

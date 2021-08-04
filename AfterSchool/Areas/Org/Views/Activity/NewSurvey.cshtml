@@ -14,7 +14,7 @@
     {
         studentList.Add(new SelectListItem {
             Text = student.RegistrantName,
-            Value = student.AccountId.ToString()
+            Value = student.RegistrantId.ToString()
         });
     }
 }
@@ -61,9 +61,9 @@
 
                     <div class="row margin-t-30">
                         <div class="col-lg-6">
-                            <input id="allowmultiple" name="allowmultiple" type="checkbox" class="newCheckbox" value="true" />
-                            <input type="hidden" value="false" name="allowmultiple" />
-                            <label for="allowmultiple" class="margin-h-10 mobile-padding">Allow multiple submissions per person?</label>
+                            <input id="allowMultiple" name="allowMultiple" type="checkbox" class="newCheckbox" value="true" />
+                            <input type="hidden" value="false" name="allowMultiple" />
+                            <label for="allowMultiple" class="margin-h-10 mobile-padding">Allow multiple submissions per person?</label>
                         </div>
                     </div>
                     <div style="clear:both"></div>
@@ -100,7 +100,8 @@
                         </div>
                     </div>
                     <div style="clear:both"></div>
-                    <div class="row margin-t-10">
+                    <!--parents and staff checkbox code commented for now, will use later-->
+                    @*<div class="row margin-t-10">
                         <div class="col-lg-4">
                             <input id="parents" name="parents" type="checkbox" class="newCheckbox" value="true" />
                             <input type="hidden" value="false" name="parents" />
@@ -113,7 +114,7 @@
                             <input type="hidden" value="false" name="staff" />
                             <label for="staff" class="margin-h-10 mobile-padding">Staff</label>
                         </div>
-                    </div>
+                    </div>*@
                     <div class="row margin-t-30">
                         <div class="col-lg-8 col-md-8">
                             <textarea id="optional" name="optionalText" class="newInput" style="height:150px;width:100%;padding:10px" placeholder="Add special intructions (optional)"></textarea>

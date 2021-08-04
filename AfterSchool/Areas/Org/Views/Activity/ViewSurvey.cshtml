@@ -2,6 +2,8 @@
 
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
+    var suryveyFeedbacks = (List<SurveyFeedback>)ViewBag.GetSurveyFeedback;
+    var survey = (SurveyRequest)ViewBag.Survey;
 }
 @{Html.RenderPartial("OrgAccountHeader");}
 <div class="main-content">
@@ -10,15 +12,15 @@
         <div class="panel-body surveypanelpadding">
             <div class="row">
                 <div class="col-lg-3">
-                    <div style="font-size:22px">Survey Name </div>
-                    <div style="font-size:14px; color:#B2B2B4">@Model.Name | July 08,2021</div>
-                    <a href="@Url.Action("ExportCSV", "activity", new { id = Model.ID })" style="font-size:14px; color:#00ae85">Export Survey Results</a>
+                    <div style="font-size:22px">@survey.Name</div>
+                    <div style="font-size:14px; color:#B2B2B4">@Model.Name | @(survey.CreateDate.IsNotEmpty() ? survey.CreateDate.Value.ToString("MMMM dd, yyyy") :"")</div>
+                    <a href="@Url.Action("ExportCSV", "activity", new { id = Model.ID })" class="exportBtn" style="font-size:14px; color:#00ae85"  download>Export Survey Results</a>
                 </div>
                 <div class="col-lg-3">
-                    <div class="surveyCheck">0 Survey Sent</div>
+                    <div class="surveyCheck">@suryveyFeedbacks.Count() Survey Sent</div>
                 </div>
                 <div class="col-lg-3">
-                    <div class="surveyCheck">0 Completed</div>
+                    <div class="surveyCheck">@suryveyFeedbacks.Where(a => a.SurveyFeedbackStatusTypeId == SurveyFeedbackStatus.Completed).Count() Completed</div>
                 </div>
                 <div class="col-lg-3">
                     <div class="pull-right">
@@ -39,21 +41,26 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>
-                                <a href="@Url.Action("viewsurveyresult", "activity", new { id=0, activitId = Model.Uid })" class="linkGreen">View</a>
-                            </td>
-                            <td>
-                                Mathew Reflection
-                            </td>
-                            <td>
-                                Complete
-                            </td>
-                            <td></td>
-                            <td>
-                                <a href="javascript:void(0)" class="linkGreen">Resend reminder</a>
-                            </td>
-                        </tr>
+                        @foreach (var surveyFeedback in suryveyFeedbacks)
+                        {
+                            <tr>
+                                <td>
+                                    <a href="@Url.Action("viewsurveyresult", "activity", new { id = surveyFeedback.ID, activitId = Model.Uid })" class="linkGreen">View</a>
+                                </td>
+                                <td>
+                                   @surveyFeedback.GetCreatedBy().DisplayName
+                                </td>
+                                <td>
+                                    @surveyFeedback.SurveyFeedbackStatusTypeId.ToString()
+                                </td>
+                                <td>
+                                    @(surveyFeedback.LastModifiedDate.IsNotEmpty() ? survey.LastModifiedDate.Value.ToString("dd/MM/yyyy") : "")
+                                </td>
+                                <td>
+                                    <a href="javascript:void(0)" class="linkGreen">Resend reminder</a>
+                                </td>
+                            </tr>
+                        }
                     </tbody>
                 </table>
             </div>
@@ -77,33 +84,10 @@
 
 @section scripts{
 <script>
-    function exportToExcel() {
-        var htmls = "";
-        var uri = 'data:application/vnd.ms-excel;base64,';
-        var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
-        var base64 = function (s) {
-            return window.btoa(unescape(encodeURIComponent(s)))
-        };
-
-        var format = function (s, c) {
-            return s.replace(/{(\w+)}/g, function (m, p) {
-                return c[p];
-            })
-        };
-
-        htmls = document.getElementById("exportable").innerHTML;
-
-        var ctx = {
-            worksheet: 'Worksheet',
-            table: htmls
-        }
-
-
-        var link = document.createElement("a");
-        link.download = "export.xls";
-        link.href = uri + base64(format(template, ctx));
-        link.click();
-
-    }
+    $(document).ready(function () {
+        $(".exportBtn").on('click', function () {
+            setTimeout(function () { $("#modal-saving").addClass("hide"); }, 500);
+        });
+    })
 </script>
 }

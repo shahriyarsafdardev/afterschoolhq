@@ -9,17 +9,11 @@ namespace AfterSchoolLibrary.Services
 {
     public static class SurveyRequestService
     {
-        public static void AddSurvey(int formId, int activityId, int studentId, string name, string optionalText, bool allowmultiple, int accountId, int userId, SystemMessages msgs)
+        public static SurveyRequest AddSurvey(int formId, int activityId, string name, string optionalText, bool allowmultiple, int accountId, int userId, SystemMessages msgs)
         {
-            var surveyRequest = CreateNewSurveyRequest(formId, activityId, accountId, name, optionalText, allowmultiple, userId, msgs);
-            SurveyFeedbackService.CreateSurveyFeedback(surveyRequest.ID.Value, activityId, studentId, null, SurveyFeedbackStatus.New, accountId, userId, msgs);
+            return CreateNewSurveyRequest(formId, activityId, accountId, name, optionalText, allowmultiple, userId, msgs);
         }
 
-        public static void AddSurveyWithAttendanceId(int formId, int activityId, int studentId, string name, string optionalText, bool allowmultiple, int accountId, int userId, int? attendanceId, SystemMessages msgs)
-        {
-            var surveyRequest = CreateNewSurveyRequest(formId, activityId, accountId, name, optionalText, allowmultiple, userId, msgs);
-            SurveyFeedbackService.CreateSurveyFeedback(surveyRequest.ID.Value, activityId, studentId, attendanceId, SurveyFeedbackStatus.New, accountId, userId, msgs);
-        }
 
         public static WebUser GetCreatedBy(this SurveyRequest surveyRequest, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -62,7 +56,6 @@ namespace AfterSchoolLibrary.Services
                dc: dc
            );
 
-
             return surveyRequest;
         }
 
@@ -80,7 +73,7 @@ namespace AfterSchoolLibrary.Services
                 var getSurveyRequest = SurveyRequest.Load(surveyFeedback.SurveyId.Value);
                 var registrant = Registrant.Load(surveyFeedback.RegistrantId.Value);
 
-                table.Add(AddRegistrantRow(registrant.Name, nameof(surveyFeedback.SurveyFeedbackStatusTypeId), surveyFeedback.LastModifiedDate));
+                table.Add(AddRegistrantRow(registrant.Name, surveyFeedback.SurveyFeedbackStatusTypeId.ToString(), surveyFeedback.LastModifiedDate));
             });
 
             var csv = CsvFile.Create(table);
