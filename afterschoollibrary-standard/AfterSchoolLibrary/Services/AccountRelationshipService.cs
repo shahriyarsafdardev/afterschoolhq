@@ -19,14 +19,14 @@ namespace AfterSchoolLibrary.Services
             return Account.Load(ar.VisitorAccountId.Value, msgs, dc);
         }
 
-        public static AccountRelationship GetOrCreateNew(Account hostAccount, Account visitorAccount, ApprovalStatus approvalStatus, HostPermissionType hostPermissionType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static AccountRelationship GetOrCreateNew(Account hostAccount, Account visitorAccount, ApprovalStatus approvalStatus, HostPermissionType hostPermissionType, bool requiresPublishPermission, bool showAllPrograms, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var accountRelationship = AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value, visitorAccount.ID.Value, msgs, dc);
 
-            return accountRelationship ?? CreateNew(hostAccount, visitorAccount, approvalStatus, hostPermissionType, loggedInUser, msgs, dc);
+            return accountRelationship ?? CreateNew(hostAccount, visitorAccount, approvalStatus, hostPermissionType, requiresPublishPermission, showAllPrograms, loggedInUser, msgs, dc);
         }
 
-        public static AccountRelationship CreateNew(Account hostAccount, Account visitorAccount, ApprovalStatus approvalStatus, HostPermissionType hostPermissionType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static AccountRelationship CreateNew(Account hostAccount, Account visitorAccount, ApprovalStatus approvalStatus, HostPermissionType hostPermissionType, bool requiresPublishPermission, bool showAllPrograms, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var accountRelationship = AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value, visitorAccount.ID.Value, msgs, dc);
 
@@ -38,6 +38,8 @@ namespace AfterSchoolLibrary.Services
                     HostAccountId = hostAccount.ID,
                     ApprovalStatusId = approvalStatus,
                     HostPermissionTypeId = hostPermissionType,
+                    RequiresPublishPermission = requiresPublishPermission,
+                    ShowAllPrograms = showAllPrograms,
                     CreatedBy = loggedInUser.ID,
                     CreateDate = DateTime.UtcNow,
                     LastModifiedBy = loggedInUser.ID,

@@ -1388,7 +1388,16 @@ namespace AfterSchoolLibraryTests.Tests
                 var visitorAccount = AccountFactory.Create(visitorOwner, msgs, dc);
                 var hostOwner = WebUserFactory.Create(msgs, dc);
                 var hostAccount = AccountFactory.Create(hostOwner, msgs, dc);
-                var accountRelationship = AccountRelationshipService.CreateNew(hostAccount, visitorAccount, ApprovalStatus.Approved, HostPermissionType.Edit, user, msgs, dc);
+                var accountRelationship = AccountRelationshipService.CreateNew(
+                    hostAccount, 
+                    visitorAccount, 
+                    ApprovalStatus.Approved, 
+                    HostPermissionType.Edit,
+                    true,
+                    false,
+                    user, 
+                    msgs, 
+                    dc);
                 
                 // Act                
                 var expected = hostAccount.GetAccountRelationship(hostAccountId: accountRelationship.ID.Value, msgs: msgs, dc: dc);
@@ -2306,7 +2315,16 @@ namespace AfterSchoolLibraryTests.Tests
             var visitorAccount = AccountFactory.Create(visitorOwner, msgs, dc);
             var hostOwner = WebUserFactory.Create(msgs, dc);
             var hostAccount = AccountFactory.Create(hostOwner, msgs, dc);
-            var accountRelationship = AccountRelationshipService.CreateNew(hostAccount, visitorAccount, ApprovalStatus.Approved, HostPermissionType.Edit, user, msgs, dc);
+            var accountRelationship = AccountRelationshipService.CreateNew(
+                hostAccount, 
+                visitorAccount, 
+                ApprovalStatus.Approved, 
+                HostPermissionType.Edit, 
+                true,
+                false,
+                user, 
+                msgs, 
+                dc);
 
             // Act
             var expected = visitorAccount.IsApprovedAsVisitorTo(hostAccount: hostAccount, msgs: msgs, dc: dc);
@@ -2323,7 +2341,16 @@ namespace AfterSchoolLibraryTests.Tests
             var visitorAccount = AccountFactory.Create(visitorOwner, msgs, dc);
             var hostOwner = WebUserFactory.Create(msgs, dc);
             var hostAccount = AccountFactory.Create(hostOwner, msgs, dc);
-            var accountRelationship = AccountRelationshipService.CreateNew(hostAccount, visitorAccount, ApprovalStatus.Denied, HostPermissionType.Edit, user, msgs, dc);
+            var accountRelationship = AccountRelationshipService.CreateNew(
+                hostAccount,
+                visitorAccount,
+                ApprovalStatus.Denied,
+                HostPermissionType.Edit,
+                true,
+                false,
+                user,
+                msgs,
+                dc);
 
             // Act
             var expected = visitorAccount.IsApprovedAsVisitorTo(hostAccount: hostAccount, msgs: msgs, dc: dc);
@@ -2532,6 +2559,26 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Single(sessions);
             Assert.Equal(activityGroup1.ID, sessions.First().ID);
             Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void IsLocationOwnerTest()
+        {
+            var user = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(user, msgs, dc);
+            var activity = ActivityFactory.Create(account, msgs, dc);
+
+            var schoolUser = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolUser, msgs, dc);
+            var location = LocationFactory.Create(schoolAccount, msgs, dc);
+
+            activity.SetLocation(location, user, msgs, dc);
+
+            var isUserAccountLocationOwner = account.IsLocationOwner(activity, msgs, dc);
+            var isSchoolProviderLocationOwner = schoolAccount.IsLocationOwner(activity, msgs, dc);
+
+            Assert.False(isUserAccountLocationOwner);
+            Assert.True(isSchoolProviderLocationOwner);
         }
     }
 }

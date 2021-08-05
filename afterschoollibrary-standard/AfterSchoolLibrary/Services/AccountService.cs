@@ -2523,6 +2523,8 @@ namespace AfterSchoolLibrary.Services
                     visitorAccount, 
                     ApprovalStatus.Approved, 
                     hostPermissionType, 
+                    true,
+                    false,
                     loggedInUser, 
                     msgs, 
                     dc);
@@ -2564,6 +2566,8 @@ namespace AfterSchoolLibrary.Services
                     visitorAccount,
                     approvalStatus,
                     hostPermissionType,
+                    true,
+                    false,
                     loggedInUser,
                     msgs,
                     dc);
@@ -2588,6 +2592,8 @@ namespace AfterSchoolLibrary.Services
                     visitorAccount,
                     approvalStatus,
                     hostPermissionType,
+                    true,
+                    false,
                     loggedInUser,
                     msgs,
                     dc);

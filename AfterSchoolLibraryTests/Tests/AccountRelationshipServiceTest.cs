@@ -26,7 +26,16 @@ namespace AfterSchoolLibraryTests.Tests
             var hostOwner = WebUserFactory.Create(msgs, dc);
             var hostAccount = AccountFactory.Create(hostOwner, msgs, dc);
 
-            var accountRelationship = AccountRelationshipService.CreateNew(hostAccount, visitorAccount, ApprovalStatus.Approved, HostPermissionType.Edit, LoggedInUser, msgs, dc);
+            var accountRelationship = AccountRelationshipService.CreateNew(
+                hostAccount, 
+                visitorAccount, 
+                ApprovalStatus.Approved, 
+                HostPermissionType.Edit,
+                true,
+                false, 
+                LoggedInUser, 
+                msgs, 
+                dc);
 
             Assert.True(accountRelationship.ID.HasValue);
         }
@@ -39,8 +48,27 @@ namespace AfterSchoolLibraryTests.Tests
             var hostOwner = WebUserFactory.Create(msgs, dc);
             var hostAccount = AccountFactory.Create(hostOwner, msgs, dc);
 
-            var accountRelationship1 = AccountRelationshipService.CreateNew(hostAccount, visitorAccount, ApprovalStatus.Approved, HostPermissionType.Edit, LoggedInUser, msgs, dc);
-            var accountRelationship2 = AccountRelationshipService.CreateNew(hostAccount, visitorAccount, ApprovalStatus.Approved, HostPermissionType.Edit, LoggedInUser, msgs, dc);
+            var accountRelationship1 = AccountRelationshipService.CreateNew(
+                hostAccount, 
+                visitorAccount, 
+                ApprovalStatus.Approved,
+                HostPermissionType.Edit,
+                true,
+                false, 
+                LoggedInUser, 
+                msgs, 
+                dc);
+
+            var accountRelationship2 = AccountRelationshipService.CreateNew(
+                hostAccount, 
+                visitorAccount, 
+                ApprovalStatus.Approved, 
+                HostPermissionType.Edit,
+                true,
+                false,
+                LoggedInUser, 
+                msgs, 
+                dc);
 
             Assert.Equal(1, AccountRelationship.GetCount(msgs: msgs, dc: dc));
         }
