@@ -311,7 +311,7 @@ namespace AfterSchool.Controllers
         public ActionResult New(string id, string a)
         {
             // if logged in while signing up a new account logout to prevent confusion
-            Logout();
+            Logout(Request.Url.ToString());
 
             var msgs = new SystemMessages();
             WebUser wu = null;
