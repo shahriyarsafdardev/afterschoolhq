@@ -233,7 +233,7 @@
                             @if (currentUser.IsNotEmpty())
                             {
                                 
-                                if (canPublishActivity && !participationObject.IsPublished && participationObject.IsNotEmpty() && participationObject.IsExternalToAccount(currentAccount))
+                                if (canPublishActivity && !participationObject.IsPublished && participationObject.IsNotEmpty() && participationObject.IsExternalToAccount(currentAccount) && participationObject.OwnerAccount.ID != Model.ID)
                                 {
                                     <a href="@Url.Action("publishdetail", "activity", new { Area = "org", id = participationObject.Uid })"
                                        class="btn btn-primary btn-sm">
