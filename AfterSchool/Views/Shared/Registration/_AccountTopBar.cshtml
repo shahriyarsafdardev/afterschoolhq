@@ -4,12 +4,20 @@
     var currentAccount = SessionVariables.CurrentAccount;
     var accountOrDashboard = "Account";
     var participationObject = (ParticipationObject)ViewData["ParticipationObject"];
+    var canPublishActivity = ViewData["CanPublishActivity"].IsNotEmpty() ? ViewData["CanPublishActivity"].ToString().ToBoolean() : false;
     var dashboardUrl = Url.Action("index", "home", new { area = "user" });
     var session = (ParticipationObject)ViewData["session"];
     var isDuringProfileSetup = false;
     var returnUrl = SessionVariables.RegistrationStartPageAccount?.HomePageUrl;
     var registrationStartPage = SessionVariables.RegistrationStartPageAccount;
     var isAccount = ViewData["IsAccount"] != null ? (bool)ViewData["IsAccount"] : false;
+
+    var enableApproveButton = canPublishActivity && 
+        !participationObject.IsPublished && 
+        participationObject.IsNotEmpty() && 
+        participationObject.IsExternalToAccount(currentAccount) && 
+        participationObject.OwnerAccount.ID != Model.ID &&
+        !participationObject.IsAccountActivityGroup();
 
     if (currentAccount.IsNotEmpty() && currentAccount.AccountTypeId != AccountType.Registrant)
     {
@@ -232,7 +240,7 @@
                             @if (currentUser.IsNotEmpty())
                             {
                                 
-                                if (canPublishActivity && !participationObject.IsPublished && participationObject.IsNotEmpty() && participationObject.IsExternalToAccount(currentAccount) && participationObject.OwnerAccount.ID != Model.ID)
+                                if (enableApproveButton)
                                 {
                                     <a href="@Url.Action("publishdetail", "activity", new { Area = "org", id = participationObject.Uid })"
                                        class="btn btn-primary btn-sm">

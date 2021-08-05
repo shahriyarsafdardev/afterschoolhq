@@ -248,9 +248,9 @@ namespace AfterSchoolLibrary.Services
             return user.SendVerificationEmail();
         }
 
-        public static SystemMessages SendVerificationEmail(this WebUser user, bool isAfterSchool = true)
+        public static SystemMessages SendVerificationEmail(this WebUser user, string redirectUrl = null, bool isAfterSchool = true)
         {
-            return Helpers.EmailHelper.SendEmailVerification(user, isAfterSchool);
+            return Helpers.EmailHelper.SendEmailVerification(user, redirectUrl, isAfterSchool);
         }
 
         public static SystemMessages SendWelcomePurchase(string userFirstName, string userEmail, bool isAfterSchool = true)

@@ -442,6 +442,15 @@ namespace AfterSchoolLibrary.Services
             }, msgs, dc) + Activity.GetCountByProviderAccountId(account.ID.Value, msgs, dc);
         }
 
+        public static int GetActiveActivityCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Activity.GetCount(new Hashtable() {
+                { "AccountId", account.ID.Value },
+                { "IsDeleted", false },
+                { "isArchived", false }
+            }, msgs, dc) + Activity.GetCountByProviderAccountId(account.ID.Value, msgs, dc);
+        }
+
         public static List<Activity> GetAllActiveAndNonPublishedActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Activity.Load(new Hashtable() {
@@ -491,7 +500,7 @@ namespace AfterSchoolLibrary.Services
             var accountOwner = account.GetAccountOwner(msgs);
             var HasAccountProfile = account.HasAccountProfile(msgs);
             var HasActivities = account.HasActiveActivities(msgs);
-            var activitycount= account.GetActiveAndNonPublishedActivityCount(msgs);
+            var activitycount = account.GetActiveActivityCount(msgs);
             var VerifiedAccount = accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount;
             var HasPaymentConfigured = account.CanProcessPayments(msgs);
            

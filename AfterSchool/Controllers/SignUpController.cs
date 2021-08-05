@@ -123,7 +123,7 @@ namespace AfterSchool.Controllers
                             SendGridHelper.AddOrUpdateContact(account, user, msgs);
                         }                        
 
-                        BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(user, account.IsAfterSchool));
+                        BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(user, null, true));
                         BackgroundJob.Enqueue(() => WebUserService.SendWelcomePurchase(user.FirstName, user.Email, account.IsAfterSchool));
                     },
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
@@ -250,11 +250,9 @@ namespace AfterSchool.Controllers
                         LoadSessionInfo(user, account, msgs: msgs);
 
                         if (user.IsNotEmpty() && account.IsNotEmpty())
-                        {
                             SendGridHelper.AddOrUpdateContact(account, user, msgs);
-                        }
 
-                        BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(user, account.IsAfterSchool));
+                        BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(user, null, true));
                         BackgroundJob.Enqueue(() => WebUserService.SendWelcomePurchase(user.FirstName, user.Email, account.IsAfterSchool));
                     },
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
@@ -426,22 +424,18 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
-        public ActionResult Verify(string id)
+        public ActionResult Verify(string id, string redirectUrl)
         {
             var msgs = new SystemMessages();
 
             if (!id.IsGuid())
-            {
                 msgs.Add("Invalid verification code", MessageType.UserError);
-            }
             else if (!WebUser.ExistsByUid(id.ToGuid(), msgs))
-            {
                 msgs.Add("Invalid verification code", MessageType.UserError);
-            }
 
             if (msgs.HasNoErrors())
             {
-                var user = WebUser.LoadByUid(id.ToGuid());
+                var user = WebUser.LoadByUid(id.ToGuid(), msgs);
                 msgs.AddRange(user.MarkAsVerified());
 
                 if (msgs.HasNoErrors())
@@ -451,9 +445,7 @@ namespace AfterSchool.Controllers
 
                     // if logged in reload with new verified value
                     if (currentUser.IsNotEmpty() && currentUser.Uid == id.ToGuid())
-                    {
                         SessionVariables.CurrentUser = WebUser.Load(currentUser.ID.Value);
-                    }
 
                     var account = SessionVariables.CurrentAccount;                    
                     if (user.IsNotEmpty())
@@ -467,39 +459,47 @@ namespace AfterSchool.Controllers
                         
                         SendGridHelper.AddOrUpdateContact(account, user, msgs);
                     }
-
                   
-                    switch (account.OnboardingStepDone)
+                    if (redirectUrl.IsNotEmpty())
                     {
-                        case OnboardingStepType.AccountType:
-                            ViewBag.URL = Url.Action("ProgramInfo", "Onboarding", new { area = "org" });
-                            break;
-                        case OnboardingStepType.SocialLinks:
-                            ViewBag.URL = Url.Action("Done", "Onboarding", new { area = "org" });
-                            break;
-                        case OnboardingStepType.ProgramInfo:
-                            ViewBag.URL = Url.Action("AdditionalInfo", "Onboarding", new { area = "org" });
-                            break;
+                        ViewBag.URL = redirectUrl;
+                    }
+                    else
+                    {
+
+                        switch (account.OnboardingStepDone)
+                        {
+                            case OnboardingStepType.AccountType:
+                                ViewBag.URL = Url.Action("ProgramInfo", "Onboarding", new { area = "org" });
+                                break;
+                            case OnboardingStepType.SocialLinks:
+                                ViewBag.URL = Url.Action("Done", "Onboarding", new { area = "org" });
+                                break;
+                            case OnboardingStepType.ProgramInfo:
+                                ViewBag.URL = Url.Action("AdditionalInfo", "Onboarding", new { area = "org" });
+                                break;
                         
-                        case OnboardingStepType.AdditionalInfo:
-                            ViewBag.URL = Url.Action("ContactInfo", "Onboarding", new { area = "org" });
-                            break;
-                        case OnboardingStepType.ContactInfo:
-                            ViewBag.URL = Url.Action("Logo", "Onboarding", new { area = "org" });
-                            break;
+                            case OnboardingStepType.AdditionalInfo:
+                                ViewBag.URL = Url.Action("ContactInfo", "Onboarding", new { area = "org" });
+                                break;
+                            case OnboardingStepType.ContactInfo:
+                                ViewBag.URL = Url.Action("Logo", "Onboarding", new { area = "org" });
+                                break;
 
-                        case OnboardingStepType.LogoAndHeader:
-                            ViewBag.URL = Url.Action("ServicesOffered", "Onboarding", new { area = "org" });
-                            break;
+                            case OnboardingStepType.LogoAndHeader:
+                                ViewBag.URL = Url.Action("ServicesOffered", "Onboarding", new { area = "org" });
+                                break;
 
-                        case OnboardingStepType.ServicesOffered:
-                            ViewBag.URL = Url.Action("Links", "Onboarding", new { area = "org" });
-                            break;
-                        case OnboardingStepType.All:
-                            ViewBag.URL = Url.Action("Account", "R", new { accountname = account.UniqueName });
-                            break;                           
-                        default:
-                            break;
+                            case OnboardingStepType.ServicesOffered:
+                                ViewBag.URL = Url.Action("Links", "Onboarding", new { area = "org" });
+                                break;
+                            case OnboardingStepType.All:
+                                ViewBag.URL = Url.Action("Account", "R", new { accountname = account.UniqueName });
+                                break;                           
+                            default:
+                                break;
+                        }
+
                     }
                 }
             }
@@ -762,7 +762,7 @@ namespace AfterSchool.Controllers
                 user = WebUserService.CreateNew(firstname, lastname, email, phone, password1, true, true, false, false, null);
 
                 if (msgs.HasNoErrors() && !user.VerifiedAccount)
-                    msgs.AddRange(user.SendVerificationEmail(SessionVariables.IsAfterSchool.Value));
+                    msgs.AddRange(user.SendVerificationEmail());
             }
 
             if (msgs.HasNoErrors())

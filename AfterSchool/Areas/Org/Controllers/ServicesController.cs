@@ -562,9 +562,9 @@ namespace AfterSchool.Areas.Org.Controllers
         //    return View();
         //}
 
-        public ActionResult SendVerificationEmail()
+        public ActionResult SendVerificationEmail(string redirectUrl)
         {
-            var msgs = SessionVariables.CurrentUser.SendVerificationEmail(SessionVariables.IsAfterSchool.Value);
+            var msgs = SessionVariables.CurrentUser.SendVerificationEmail(redirectUrl, SessionVariables.IsAfterSchool.Value);
 
             Response.Clear();
             WriteOutput(new { status = "ok", messages = msgs }, ResponseType.JSON);
