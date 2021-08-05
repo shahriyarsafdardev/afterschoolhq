@@ -542,7 +542,7 @@
     </div>
 
     <div id="modal-payment-confirmation-accountView" class="hide">
-        @{ Html.RenderPartial("~/Views/Shared/_ModalPaymentConfirmation.cshtml", Model, new ViewDataDictionary() { { "ActivityUid", firstActivity?.Uid } }); };
+        @{ Html.RenderPartial("~/Views/Shared/_ModalPaymentConfirmation.cshtml", Model); };
     </div>
 
     <div id="modal-acceptpayment-done" class="modal fade" tabindex="-1" role="dialog">
