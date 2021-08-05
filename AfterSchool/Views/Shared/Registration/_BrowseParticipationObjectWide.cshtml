@@ -6,6 +6,7 @@
     var locations = (List<Location>)ViewBag.Locations;
     var showSeatsRemaining = true;
     var showLocation = false;
+    var accountProfile = (AccountProfile)ViewBag.AccountProfile;
 
     if (Model.SeatsRemaining.HasValue && Model.SeatsRemaining.Value <= 40)
     {
@@ -55,7 +56,24 @@
      name="@Model.Name">
 
     <div class="panel" style="overflow: hidden;">
-        
+
+        @if (accountProfile.IsNotEmpty() && accountProfile.AccountId != Model.OwnerAccount.ID)
+        {
+            <div style="padding:5px;" class="bg-alt4 badge-blue">
+                <div class="text-white text-bold">
+                    @if (Model.ActivityLocationType == ActivityLocationType.Virtual)
+                    {
+                        <span>Virtual program</span>
+                    }
+                    else
+                    {
+                        <span>In-person</span>
+                    }
+                    provided by <a href="@Model.OwnerAccount.HomePageUrl" class="text-white">@Model.OwnerAccount.Name</a>
+                </div>
+            </div>
+        }
+
         <div class="panel-body" onclick="location.href='@Model.GetHomePageUrl(true)'" style="cursor:pointer">
 
             <div class="col-md-4">
@@ -83,7 +101,7 @@
                             </span>
                         }
                     </p>
-                </div>                
+                </div>
 
                 <p class="activity-description text-muted hide">
                     @Html.Raw(Model.Description.MaxChars(80, "...").IfEmpty(BasicLibrary.Utilities.RemoveHTMLAndEntities(Model.Details).MaxChars(80, "...")))
@@ -111,6 +129,7 @@
 
             <div class="col-md-4">
                 <div class="padding-v-10">
+
                     @if (Model.StartDate.HasValue)
                     {
                         <span>
@@ -125,7 +144,7 @@
                         </span>
                         <br />
                     }
-                    
+
                     <span>
                         @ParticipationObjectUI.PrintAgeGradeRestrictions(Model)
                     </span>

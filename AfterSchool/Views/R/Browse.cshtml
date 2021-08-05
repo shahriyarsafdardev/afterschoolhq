@@ -58,9 +58,9 @@
         @if (registrationOpen.Any())
         {
             Html.RenderPartial(
-                "~/Views/Shared/Registration/_BrowseParticipationObjectList.cshtml", 
-                registrationOpen, 
-                new ViewDataDictionary() { { "title", "Open for Registration" } });
+                "~/Views/Shared/Registration/_BrowseParticipationObjectList.cshtml",
+                registrationOpen,
+                new ViewDataDictionary() { { "title", "Open for Registration" }, { "accountprofile", accountProfile } });
         }
 
         @if (registrationWillOpen.Any())
@@ -68,7 +68,7 @@
             Html.RenderPartial(
                 "~/Views/Shared/Registration/_BrowseParticipationObjectList.cshtml",
                 registrationOpen,
-                new ViewDataDictionary() { { "title", "Registration Opening Soon" } });
+                new ViewDataDictionary() { { "title", "Registration Opening Soon" }, { "accountprofile", accountProfile } });
         }
 
         @if (registrationClosed.Any())
@@ -76,7 +76,7 @@
             Html.RenderPartial(
                 "~/Views/Shared/Registration/_BrowseParticipationObjectList.cshtml",
                 registrationOpen,
-                new ViewDataDictionary() { { "title", "Registration Closed" } });
+                new ViewDataDictionary() { { "title", "Registration Closed" }, { "accountprofile", accountProfile } });
         }
 
         @if (featuredProviders.Any())
