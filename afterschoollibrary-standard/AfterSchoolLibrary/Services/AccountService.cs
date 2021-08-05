@@ -299,16 +299,16 @@ namespace AfterSchoolLibrary.Services
             {
                 participationObjects.AddRange(
                     visitor.GetPublishedActivitiesInLocations(hostedLocationIds, msgs, dc)
-                        .Select(activity => activity.GetParticipationObject(msgs))
-                        .DistinctBy(participationObject => new { participationObject.ObjectID, participationObject.ObjectType }));
+                        .Select(activity => activity.GetParticipationObject(msgs)));
 
                 if (visitor.CanShowAllActivitiesOn(account))
                     participationObjects.AddRange(visitor.GetPublishedActivities(msgs, dc)
-                        .Select(activity => activity.GetParticipationObject(msgs, dc))
-                        .DistinctBy(participationObject => new { participationObject.ObjectID, participationObject.ObjectType }));
+                        .Select(activity => activity.GetParticipationObject(msgs, dc)));
             });
 
-            return participationObjects;
+            return participationObjects
+                .DistinctBy(participationObject => new { participationObject.ObjectID, participationObject.ObjectType })
+                .ToList();
         }
 
         public static List<Activity> GetPublishedActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
