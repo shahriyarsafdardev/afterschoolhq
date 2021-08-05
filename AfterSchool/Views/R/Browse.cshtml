@@ -88,7 +88,12 @@
 
                 @foreach(var item in featuredProviders)
                 {
-                    Html.RenderPartial("~/Views/Shared/Registration/_BrowseProvider.cshtml", item.GetAccountProfile());
+                    var featuredProfile = item.GetAccountProfile();
+
+                    if (featuredProfile.IsNotEmpty())
+                    {
+                        Html.RenderPartial("~/Views/Shared/Registration/_BrowseProvider.cshtml", featuredProfile);
+                    }
                 }
 
             </div>
