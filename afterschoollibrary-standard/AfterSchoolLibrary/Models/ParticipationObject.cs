@@ -762,6 +762,9 @@ namespace AfterSchoolLibrary.Models
             if (IsExternallyProvided())
                 return Provider.ID != account.ID;
 
+            if (Location.IsNotEmpty())
+                return Location.HostAccountId == account.ID && OwnerAccount.ID != account.ID;
+
             return false;
         }
 

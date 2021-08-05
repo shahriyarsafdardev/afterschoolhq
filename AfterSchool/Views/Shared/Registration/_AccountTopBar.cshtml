@@ -15,8 +15,7 @@
     var enableApproveButton = canPublishActivity && 
         !participationObject.IsPublished && 
         participationObject.IsNotEmpty() && 
-        participationObject.IsExternalToAccount(currentAccount) && 
-        participationObject.OwnerAccount.ID != Model.ID &&
+        participationObject.IsExternalToAccount(currentAccount) &&
         !participationObject.IsAccountActivityGroup();
 
     if (currentAccount.IsNotEmpty() && currentAccount.AccountTypeId != AccountType.Registrant)
