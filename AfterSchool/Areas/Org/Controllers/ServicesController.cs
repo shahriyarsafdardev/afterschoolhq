@@ -105,6 +105,35 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
+        public ActionResult UpdateShowAllPrograms(int arId, bool isChecked)
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+
+            var ar = AccountRelationship.Load(arId, msgs);
+
+            if (ar.IsEmpty())
+                msgs.Add("Invalid request", MessageType.UserError);
+
+            if (msgs.HasNoErrors() && ar.HostAccountId != currentAccount.ID)
+                msgs.Add("Invalid request", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                ar.UpdateShowAllPrograms(isChecked, SessionVariables.CurrentUser, msgs);
+
+                if (msgs.HasNoErrors())
+                    return Json(new
+                    {
+                        status = "ok",
+                        messages = msgs
+                    }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
         public ActionResult InviteTreasurer(string firstname, string lastname, string email)
         {
             var msgs = new SystemMessages();
