@@ -57,19 +57,42 @@
 
     <div class="panel" style="overflow: hidden;">
 
-        @if (accountProfile.IsNotEmpty() && accountProfile.AccountId != Model.OwnerAccount.ID)
+        @if (accountProfile.IsNotEmpty() && (accountProfile.AccountId != Model.OwnerAccount.ID || Model.Provider.IsNotEmpty()))
         {
+            var hasProvider = Model.Provider.IsNotEmpty();
+            var isProviderProfile = hasProvider && Model.Provider.ID == accountProfile.AccountId;
+
             <div style="padding:5px;" class="bg-alt4 badge-blue">
                 <div class="text-white text-bold">
                     @if (Model.ActivityLocationType == ActivityLocationType.Virtual)
                     {
-                        <span>Virtual program</span>
+                        <span>Virtual</span>
                     }
                     else
                     {
                         <span>In-person</span>
                     }
-                    provided by <a href="@Model.OwnerAccount.HomePageUrl" class="text-white">@Model.OwnerAccount.Name</a>
+
+                    <span>activity</span>
+
+                    @if (isProviderProfile)
+                    {
+                        <span>at <a href="@Model.OwnerAccount.HomePageUrl" class="text-white">@Model.OwnerAccount.Name</a></span>
+                    }
+                    else
+                    {
+                        if (hasProvider)
+                        {
+                            <span>by <a href="@Model.Provider.HomePageUrl" class="text-white">@Model.Provider.Name</a></span>
+                        }
+                        else
+                        {
+                            <span>by <a href="@Model.OwnerAccount.HomePageUrl" class="text-white">@Model.OwnerAccount.Name</a></span>
+                        }
+                    }
+
+
+
                 </div>
             </div>
         }
