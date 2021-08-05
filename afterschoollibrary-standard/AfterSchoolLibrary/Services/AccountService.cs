@@ -4460,5 +4460,22 @@ namespace AfterSchoolLibrary.Services
         }
 
         #endregion
+
+        #region Locations
+
+        public static bool IsLocationOwner(this Account currentAccount, Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var location = activity?.GetLocation(msgs, dc);
+            var hostAccount = location?.GetHostAccount(msgs, dc);
+
+            // this will be used to check whether logged in account is location owner or not.
+            if (hostAccount.IsNotEmpty() && hostAccount.HasAccountOwner && hostAccount.ID == currentAccount.ID)
+                return true;
+
+            return false;
+        }
+
+        #endregion
+
     }
 }

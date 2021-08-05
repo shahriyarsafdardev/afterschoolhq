@@ -355,7 +355,6 @@ namespace AfterSchool.Controllers
             ParticipationObject participationObject = null;            
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
             var canPublishActivity = false;
-            var isLocationOwner = false;
             var accountProfile = account?.GetAccountProfile(msgs);
             var currentUser = SessionVariables.CurrentUser;
             var currentAccount = SessionVariables.CurrentAccount;
@@ -380,10 +379,7 @@ namespace AfterSchool.Controllers
                 }
 
                 if (currentUser.IsNotEmpty() && currentAccount.IsNotEmpty())
-                {
                     canPublishActivity = currentUser.CanPublishActivity(currentAccount, activity, msgs);
-                    isLocationOwner = currentUser.IsLocationOwner(currentAccount, activity, msgs);
-                }
             }
             else
                 return HttpNotFound();
@@ -395,7 +391,6 @@ namespace AfterSchool.Controllers
             ViewBag.Messages = msgs;
             ViewBag.Account = account;
             ViewBag.CanPublishActivity = canPublishActivity;
-            ViewBag.IsLocationOwner = isLocationOwner;
             ViewBag.CanRegisterFor = true;
             ViewBag.Session = session;
             ViewBag.AccountProfile = accountProfile;

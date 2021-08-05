@@ -4,7 +4,6 @@
     var currentAccount = SessionVariables.CurrentAccount;
     var accountOrDashboard = "Account";
     var participationObject = (ParticipationObject)ViewData["ParticipationObject"];
-    var isLocationOwnerRquestToPublish = ViewData["IsLocationOwner"].IsNotEmpty() ? ViewData["IsLocationOwner"].ToString().ToBoolean() : false;
     var isExternalAccountsRequestToPublish = participationObject.IsNotEmpty() && !participationObject.IsPublished && participationObject.IsExternalToAccount(currentAccount);
     var dashboardUrl = Url.Action("index", "home", new { area = "user" });
     var session = (ParticipationObject)ViewData["session"];
@@ -233,7 +232,7 @@
 
                             @if (currentUser.IsNotEmpty())
                             {
-                                if (isLocationOwnerRquestToPublish || isExternalAccountsRequestToPublish)
+                                if (isExternalAccountsRequestToPublish)
                                 {                                    
                                     <a href="@Url.Action("publishdetail", "activity", new { Area = "org", id = participationObject.Uid })"
                                        class="btn btn-primary btn-sm">
