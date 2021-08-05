@@ -29,19 +29,27 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>
-                                <a href="@Url.Action("viewsurvey", "activity", new { })">View</a>
-                            </td>
-                            <td>
-                                Daily Reflection
-                            </td>
-                            <td>Activity</td>
-                            <td>
-                                Margo Wilson
-                            </td>
-                            <td></td>
-                        </tr>
+                        @foreach (var survey in (List<SurveyRequest>)ViewBag.Surveys)
+                        {
+                            var activity = SurveyRequestService.GetActivity(survey);
+                            <tr>
+                                <td>
+                                    <a href="@Url.Action("viewsurvey", "activity", new { id = survey.ID, activitId = activity.Uid })">View</a>
+                                </td>
+                                <td>
+                                    @survey.Name
+                                </td>
+                                <td>
+                                    @activity.UniqueName
+                                </td>
+                                <td>
+                                    @SurveyRequestService.GetCreatedBy(survey).DisplayName
+                                </td>
+                                <td>
+                                    @(survey.CreateDate.IsNotEmpty() ? survey.CreateDate.Value.ToString("dd/MM/yyyy") : "")
+                                </td>
+                            </tr>
+                        }
                     </tbody>
                 </table>
             </div>

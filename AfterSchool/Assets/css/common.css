@@ -963,3 +963,18 @@
     color: #00ae85;
     font-size: 14px;
 }
+
+.viewSurvey {
+    background-color: #f6f6f6;
+    padding: 15px 20px;
+    margin: 11px 0 15px 1px;
+}
+.viewSurveyHead {
+    color: #282828;
+    font-size: 16px;
+}
+.viewSurveyAnswer {
+    color: #494949;
+    font-size: 16px;
+    font-weight: 300;
+}

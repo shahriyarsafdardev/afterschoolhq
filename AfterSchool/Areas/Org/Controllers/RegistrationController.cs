@@ -891,6 +891,11 @@ namespace AfterSchool.Areas.Org.Controllers
 
         public ActionResult Surveys()
         {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+
+            ViewBag.Surveys = SurveyRequest.LoadByAccountId(currentAccount.ID.Value, msgs);
+
             return View();
         }
     }

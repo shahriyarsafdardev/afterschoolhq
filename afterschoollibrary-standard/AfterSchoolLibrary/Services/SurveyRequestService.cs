@@ -23,6 +23,14 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
+        public static Activity GetActivity(this SurveyRequest surveyRequest, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (surveyRequest.CreatedBy.HasValue)
+                return Activity.Load(surveyRequest.ActivityId.Value, msgs, dc);
+
+            return null;
+        }
+
 
         public static SurveyRequest CreateNewSurveyRequest(int formId, int activityId, int accountId, string name, string instrcutionsText, bool alloMultipleResponse, int userId, SystemMessages msgs, DatabaseConnection dc = null)
         {

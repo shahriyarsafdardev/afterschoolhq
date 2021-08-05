@@ -2043,6 +2043,21 @@ namespace AfterSchool.Areas.Org.Controllers
             return File(filedata, "application/octet-stream", "ExportResults.csv");
         }
 
+        public ActionResult ViewSurveyResults(int id, string activityId)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+
+            var getSurveyFeedback = SurveyFeedback.Load(id, msgs);
+            var activity = currentAccount.GetActivity(activityId.ToGuid(), msgs);         
+            ViewBag.FormQuestionAnswers = FormQuestionAnswer.LoadBySurveyFeedbackId(getSurveyFeedback.ID.Value, msgs);
+            ViewBag.SurveyName = SurveyRequest.Load(getSurveyFeedback.SurveyId.Value).Name;
+            ViewBag.RegistrantName = Registrant.Load(getSurveyFeedback.RegistrantId.Value).Name;
+            ViewBag.SurveyFeedback = getSurveyFeedback;
+
+            return View(activity);
+        }
+
         #endregion
 
         [HttpGet]

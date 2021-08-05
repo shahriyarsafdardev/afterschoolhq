@@ -1,0 +1,31 @@
+﻿@model Activity
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var surveyFeedback = (SurveyFeedback)ViewBag.SurveyFeedback;
+}
+@{Html.RenderPartial("OrgAccountHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model); }
+    <div class="panel panel-default">
+        <div class="panel-body surveypanelpadding">
+            <div class="col-lg-6">
+                <div style="font-size:22px">@ViewBag.RegistrantName</div>
+                <div style="font-size:14px; color:#B2B2B4">@ViewBag.SurveyName | @(surveyFeedback.CreateDate.IsNotEmpty() ? surveyFeedback.CreateDate.Value.ToString("MMMM dd, yyyy") : "")</div>
+            </div>
+            <div style="clear:both"></div>
+            <div class="row">
+                @foreach (var question in (List<FormQuestionAnswer>)ViewBag.FormQuestionAnswers)
+                {
+                    <div class="col-lg-12">
+                        <div class="viewSurvey">
+                            <div class="viewSurveyHead">@question.QuestionText</div>
+                            <div class="viewSurveyAnswer">@question.Text</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

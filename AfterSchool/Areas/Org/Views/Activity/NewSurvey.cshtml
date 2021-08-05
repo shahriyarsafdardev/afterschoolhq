@@ -37,9 +37,8 @@
                     <input type="hidden" name="activityId" value="@Model.ID" />
                     <div style="clear:both"></div>
                     <div class="row margin-t-30">
-                        <div class="col-md-6" @if (!showManageForms) { <text> onclick="return showUpgradeMyPlan()" </text> }>
-                            <select name="formId" id="formId" class="form-control newDropDown newInput" @(activeForm.IsNotEmpty() && forms.Any(m => m.ID == activeForm.FormId) ? "required" : "") @if (!showManageForms) { <text> disabled="disabled" </text> }>
-
+                        <div class="col-md-6">
+                            <select name="formId" id="formId" class="form-control newDropDown newInput" @(activeForm.IsNotEmpty() && forms.Any(m => m.ID == activeForm.FormId) ? "required" : "")>
                                 @foreach (var form in forms)
                                 {
                                     <option value="@form.ID" @(activeForm?.FormId == form.ID ? "selected=\"selected\"" : "")>@form.Name</option>
@@ -47,7 +46,7 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <a href="javascript:void(0)" class="btn btnNewSurvey">Add New Survey</a>
+                            <a href="@Url.Action("forms", "account", new { area = "org"})" class="btn btnNewSurvey">Add New Survey</a>
                         </div>
                     </div>
                     <div style="clear:both"></div>
