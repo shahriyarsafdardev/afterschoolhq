@@ -116,7 +116,6 @@
     }
 
     function resendValidationEmail() {
-        console.log('resendValidationEmail');
         AccountSetup.sendVerificationEmail('@currentUrl');
         $('#modal-email-confirmation-text').html('An email has been sent to <span style="color: #00b492;">@accountOwner.Email</span> Please check your inbox for next steps.');
         $('#modal-email-confirmation-btn').hide();
