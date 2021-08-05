@@ -1391,7 +1391,7 @@ namespace AfterSchoolLibraryTests.Tests
                 var accountRelationship = AccountRelationshipService.CreateNew(hostAccount, visitorAccount, ApprovalStatus.Approved, HostPermissionType.Edit, user, msgs, dc);
                 
                 // Act                
-                var expected = hostAccount.GetAccountRelationship(Id: accountRelationship.ID.Value, msgs: msgs, dc: dc);
+                var expected = hostAccount.GetAccountRelationship(hostAccountId: accountRelationship.ID.Value, msgs: msgs, dc: dc);
 
                 // Assert
                 Assert.Equal(expected: expected.ID, actual: accountRelationship.ID);                

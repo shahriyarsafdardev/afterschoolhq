@@ -385,6 +385,7 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.UpdateWebSessionActionIndirectObjectType_20210517.Do(amsgs, adc);
                     Migrations.AddFeatureTypeTeacher1099ToSchools_20210622.Do(amsgs, adc);
                     Migrations.UpdateLocationLatLongColumn_20210725.Do(amsgs, adc);
+                    Migrations.UpdateAccountRelationshipPublish_20210804.Do(amsgs, adc);
 
                     // Migrations.AddProfilesToAllAccounts_20200727.Do(amsgs, adc);
 

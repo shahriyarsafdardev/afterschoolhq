@@ -174,6 +174,9 @@ namespace AfterSchoolLibrary.Services
             if (hostAccount.IsEmpty() || !hostAccount.HasAccountOwner || hostAccount.ID == currentAccount.ID)
                 return true;
 
+            if (hostAccount.IsNotEmpty())
+                return !currentAccount.RequiresPublishPermissionFor(hostAccount, msgs, dc);
+
             return false;
         }
 

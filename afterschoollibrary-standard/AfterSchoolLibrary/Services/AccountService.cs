@@ -2306,10 +2306,18 @@ namespace AfterSchoolLibrary.Services
 
         #region AccountRelationships
 
-        public static AccountRelationship GetAccountRelationship(this Account account, int Id, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static AccountRelationship GetAccountRelationship(this Account account, Account hostAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (hostAccount.IsNotEmpty() && account.IsNotEmpty())
+                return account.GetAccountRelationship(hostAccount.ID.Value, msgs, dc);
+
+            return null;
+        }
+
+        public static AccountRelationship GetAccountRelationship(this Account account, int hostAccountId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (account.IsNotEmpty())
-                return AccountRelationship.LoadByIdByHostAccountId(Id, account.ID.Value, msgs, dc);
+                return AccountRelationship.LoadByIdByHostAccountId(hostAccountId, account.ID.Value, msgs, dc);
 
             return null;
         }
@@ -2469,6 +2477,15 @@ namespace AfterSchoolLibrary.Services
         {
             var relationship = AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value, visitorAccount.ID.Value, msgs, dc);
             return relationship.IsNotEmpty() && relationship.ApprovalStatusId == ApprovalStatus.Approved;
+        }
+
+        public static bool RequiresPublishPermissionFor(this Account visitorAccount, Account hostAccount, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var relationship = AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value, visitorAccount.ID.Value, msgs, dc);
+
+            return relationship.IsEmpty() || 
+                relationship.ApprovalStatusId == ApprovalStatus.Denied ||
+                relationship.RequiresPublishPermission;
         }
 
         public static AccountRelationship ApproveAccessToAccount(this Account hostAccount, Account visitorAccount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)

@@ -256,6 +256,7 @@ namespace AfterSchoolLibrary.Models
 			StripeAccount.Update(new Hashtable(){{"FailedDetailsCode",0}}, new Hashtable(){{"FailedDetailsCode", DBNull.Value}}, StripeAccount.ObjectMap, dc);
 			AccountRelationship.Update(new Hashtable(){{"HostPermissionTypeId",0}}, new Hashtable(){{"HostPermissionTypeId", DBNull.Value}}, AccountRelationship.ObjectMap, dc);
 			AccountRelationship.Update(new Hashtable(){{"ApprovalStatusId",0}}, new Hashtable(){{"ApprovalStatusId", DBNull.Value}}, AccountRelationship.ObjectMap, dc);
+			AccountRelationship.Update(new Hashtable(){{"RequiresPublishPermission",false}}, new Hashtable(){{"RequiresPublishPermission", DBNull.Value}}, AccountRelationship.ObjectMap, dc);
 			AccountProperty.Update(new Hashtable(){{"AccountPropertyTypeId",0}}, new Hashtable(){{"AccountPropertyTypeId", DBNull.Value}}, AccountProperty.ObjectMap, dc);
 			AccountWebUser.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, AccountWebUser.ObjectMap, dc);
 			AccountWebUser.Update(new Hashtable(){{"IsDefault",false}}, new Hashtable(){{"IsDefault", DBNull.Value}}, AccountWebUser.ObjectMap, dc);

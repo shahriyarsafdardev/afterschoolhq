@@ -1,0 +1,17 @@
+﻿@model List<ParticipationObject>
+
+@{ 
+    var title = ViewData["title"];
+}
+
+<div class="row">
+    <div class="col-md-12 text-center">
+        <h3>@title</h3>
+    </div>
+
+    @foreach (var item in Model)
+    {
+        Html.RenderPartial("~/Views/Shared/Registration/_BrowseParticipationObjectWide.cshtml", item);
+    }
+</div>
+<hr />

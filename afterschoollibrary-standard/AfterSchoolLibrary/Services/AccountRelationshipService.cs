@@ -70,5 +70,13 @@ namespace AfterSchoolLibrary.Services
 
             return msgs;
         }
+
+        public static void UpdateRequiresPublishPermission(this AccountRelationship accountRelationship, bool requiresPublishPermission, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            accountRelationship.RequiresPublishPermission = requiresPublishPermission;
+            accountRelationship.LastModifiedDate = DateTime.UtcNow;
+            accountRelationship.LastModifiedBy = loggedInUser.ID.Value;
+            msgs.AddRange(accountRelationship.Save(dc));
+        }
     }
 }

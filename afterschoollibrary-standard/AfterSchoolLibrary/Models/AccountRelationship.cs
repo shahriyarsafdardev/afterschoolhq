@@ -28,6 +28,7 @@ namespace AfterSchoolLibrary.Models
 		public int? VisitorAccountId { get { return (int?)MDV["VisitorAccountId"].Value; } set { MDV["VisitorAccountId"].Value = value; } }
 		public HostPermissionType HostPermissionTypeId { get { return (HostPermissionType)MDV["HostPermissionTypeId"].Value; } set { MDV["HostPermissionTypeId"].Value = value; } }
 		public ApprovalStatus ApprovalStatusId { get { return (ApprovalStatus)MDV["ApprovalStatusId"].Value; } set { MDV["ApprovalStatusId"].Value = value; } }
+		public bool RequiresPublishPermission { get { return (bool)MDV["RequiresPublishPermission"].Value; } set { MDV["RequiresPublishPermission"].Value = value; } }
 		public AccountType AccountAccountTypeId { get { return (AccountType)MDV["AccountAccountTypeId"].Value; } }
 		
 
@@ -37,6 +38,7 @@ namespace AfterSchoolLibrary.Models
             this.LoadObjectValues(ObjectMap);
 			this.HostPermissionTypeId = HostPermissionType.NotSet;
 			this.ApprovalStatusId = ApprovalStatus.NotSet;
+			this.RequiresPublishPermission = false;
 			
         }
 
@@ -51,6 +53,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "VisitorAccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "HostPermissionTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ApprovalStatusId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "RequiresPublishPermission", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "AccountAccountTypeId", typeof(Account).Name, "AccountTypeId", System.Data.SqlDbType.Int, "Account");
 				
                 return _dp;
@@ -144,6 +147,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["ApprovalStatusId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["RequiresPublishPermission"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
