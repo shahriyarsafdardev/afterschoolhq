@@ -426,7 +426,7 @@ namespace AfterSchoolLibrary.Services
         {
             return Activity.GetCount(new Hashtable() { 
                 { "AccountId", account.ID.Value }, 
-                { "IsPublished", true }, 
+                //{ "IsPublished", true }, 
                 { "IsDeleted", false }, 
                 { "isArchived", false } 
             }, msgs, dc) + Activity.GetCountByProviderAccountId(account.ID.Value, msgs, dc);
@@ -439,7 +439,7 @@ namespace AfterSchoolLibrary.Services
                 { "IsPublished", false },
                 { "IsDeleted", false },
                 { "isArchived", false }
-            }, msgs, dc);
+            }, msgs, dc) + Activity.GetCountByProviderAccountId(account.ID.Value, msgs, dc);
         }
 
         public static List<Activity> GetAllActiveAndNonPublishedActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -479,16 +479,9 @@ namespace AfterSchoolLibrary.Services
             if (account.IsEmpty())
                 return false;
 
-            var accountOwner = account.GetAccountOwner(msgs); 
-            
-            if (account.HasPaidActivities())
-                return account.HasAccountProfile(msgs) && account.HasActiveActivities(msgs) && accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount && account.CanProcessPayments();
-            
-            return account.HasAccountProfile(msgs) && account.HasActiveActivities(msgs) && accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount;
-            
-            
-        }
-        
+            var accountOwner = account.GetAccountOwner(msgs);
+            return account.HasAccountProfile(msgs) && account.HasActiveActivities(msgs) && accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount && account.CanProcessPayments();
+        }        
 
         public static GettingStartedOptions OnboardingCompletionStatus(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -505,7 +498,7 @@ namespace AfterSchoolLibrary.Services
             if (!HasAccountProfile)
                 return GettingStartedOptions.CreateProfile;
 
-            else if (!HasActivities && activitycount < 1)
+            else if (!HasActivities || activitycount < 1)
                 return GettingStartedOptions.CreateFirstActivity;
             
             else if (!VerifiedAccount)
@@ -4500,5 +4493,22 @@ namespace AfterSchoolLibrary.Services
         }
 
         #endregion
+
+        #region Locations
+
+        public static bool IsLocationOwner(this Account currentAccount, Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var location = activity?.GetLocation(msgs, dc);
+            var hostAccount = location?.GetHostAccount(msgs, dc);
+
+            // this will be used to check whether logged in account is location owner or not.
+            if (hostAccount.IsNotEmpty() && hostAccount.HasAccountOwner && hostAccount.ID == currentAccount.ID)
+                return true;
+
+            return false;
+        }
+
+        #endregion
+
     }
 }

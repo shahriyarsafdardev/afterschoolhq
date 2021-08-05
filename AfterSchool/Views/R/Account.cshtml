@@ -523,25 +523,7 @@
     </div>
 </div>
 
-
-@*Leaving out of this Release, needs more design*@
-@*<button id="btn-welcome-user" type="button" class="btn btn-default btn-space md-trigger hide" data-modal="modal-welcome-user">
-        welcome user
-    </button>*@
-
-@* dont think this is needed anymore.. *@
-@*<div> 
-    @{
-        Html.RenderPartial("~/Views/Shared/_Modal.cshtml", new ModalViewModel()
-        {
-            ID = "modal-welcome-user",
-            Title = "Welcome To Your Profile.",
-            HtmlBody = $"<p>This is your organizations profile. you can review your dashboard and create activities from there.</p>",
-        });
-    }
-</div>*@
-
-@if (isAccountAndLoggedInUserIsOwner && !onboardingStepsAcknowledged)
+@if (isAccountAndLoggedInUserIsOwner || !onboardingStepsAcknowledged)
 {
     <div id="footer-account" class="activity-footer text-center hide">
         <span class="span-upgrade-modal-close" onclick="return hideActivityRibbon()">X</span>

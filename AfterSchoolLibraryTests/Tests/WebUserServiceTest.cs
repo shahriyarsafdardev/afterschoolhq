@@ -107,5 +107,25 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.False(canUser4Publish);
             Assert.False(canUser5Publish);
         }
+
+        [Fact]
+        public void IsLocationOwnerTest()
+        {
+            var user = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(user, msgs, dc);
+            var activity = ActivityFactory.Create(account, msgs, dc);
+
+            var schoolUser = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolUser, msgs, dc);
+            var location = LocationFactory.Create(schoolAccount, msgs, dc);
+
+            activity.SetLocation(location, user, msgs, dc);
+
+            var isUserLocationOwner = user.IsLocationOwner(account, activity, msgs, dc);
+            var isSchoolProviderLocationOwner = schoolUser.IsLocationOwner(schoolAccount, activity, msgs, dc);
+
+            Assert.False(isUserLocationOwner);
+            Assert.True(isSchoolProviderLocationOwner);
+        }
     }
 }

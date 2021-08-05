@@ -3,7 +3,6 @@
     var currentUser = SessionVariables.CurrentUser;
     var currentAccount = SessionVariables.CurrentAccount;
     var accountOrDashboard = "Account";
-    var canPublishActivity = ViewData["CanPublishActivity"].IsNotEmpty() ? ViewData["CanPublishActivity"].ToString().ToBoolean() : false;
     var participationObject = (ParticipationObject)ViewData["ParticipationObject"];
     var dashboardUrl = Url.Action("index", "home", new { area = "user" });
     var session = (ParticipationObject)ViewData["session"];
@@ -29,13 +28,13 @@
     }
 
     var currentLevel = AccountService.OnboardingCompletionStatus(currentAccount);
-    var currentProgress = AccountService.GetCurrentOnboardingProcess(currentAccount);    
+    var currentProgress = AccountService.GetCurrentOnboardingProcess(currentAccount);
     var totalNumberOfOnboardingSteps = 4;
     var hasAnyPaidActivity = currentAccount.IsNotEmpty() && currentAccount.HasPaidActivities();
     //If there is no paid activity configured then we should not display Payment Modal and Progressbar to user
     var totalStepsLeft = hasAnyPaidActivity ? totalNumberOfOnboardingSteps : totalNumberOfOnboardingSteps - 1;
     var progressPercentage = ((Decimal)currentProgress.Count / totalStepsLeft) * 100;
-    
+
 
     var isAccountAndLoggedInUserIsOwner = currentAccount.IsNotEmpty() &&
         currentUser.IsNotEmpty() &&
