@@ -91,7 +91,7 @@
         <div class="row">
             <div class="col-md-6 col-sm-6 col-xs-12">
 
-                @if (isAccount && isAccountAndLoggedInUserIsOwner && progressPercentage != 100)
+                @if (isAccount && isAccountAndLoggedInUserIsOwner && Model.OnboardingCompletionStatus() != GettingStartedOptions.ProcessCompleted)
                 {
                     <div id="popover-container" class="dropdown popover-dropdown">
                         <a id="ddl-finish-setup" class="dropdown-toggle dropdown-label" onclick="return toggleList();">
