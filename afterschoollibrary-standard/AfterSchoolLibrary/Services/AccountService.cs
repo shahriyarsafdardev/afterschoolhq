@@ -287,14 +287,6 @@ namespace AfterSchoolLibrary.Services
                                             .Select(location => location.ID.Value)
                                             .ToList();
 
-            account.GetApprovedVisitorAccounts(msgs, dc).ForEach(visitor =>
-            {
-                participationObjects.AddRange(
-                    visitor.GetPublishedActivitiesInLocations(hostedLocationIds, msgs, dc)
-                        .Select(activity => activity.GetParticipationObject(msgs))
-                        .DistinctBy(participationObject => new { participationObject.ObjectID, participationObject.ObjectType }));
-            });
-
             participationObjects.AddRange(
                 account.GetPublishedExternalLeagues(msgs, dc).Select(x => x.GetParticipationObject(msgs, dc))
             );
@@ -302,6 +294,19 @@ namespace AfterSchoolLibrary.Services
             participationObjects.AddRange(
                 account.GetOpenPublishedSessions(msgs, dc).Select(x => x.GetParticipationObject(msgs, dc))
             );
+
+            account.GetApprovedVisitorAccounts(msgs, dc).ForEach(visitor =>
+            {
+                participationObjects.AddRange(
+                    visitor.GetPublishedActivitiesInLocations(hostedLocationIds, msgs, dc)
+                        .Select(activity => activity.GetParticipationObject(msgs))
+                        .DistinctBy(participationObject => new { participationObject.ObjectID, participationObject.ObjectType }));
+
+                if (visitor.CanShowAllActivitiesOn(account))
+                    participationObjects.AddRange(visitor.GetPublishedActivities(msgs, dc)
+                        .Select(activity => activity.GetParticipationObject(msgs, dc))
+                        .DistinctBy(participationObject => new { participationObject.ObjectID, participationObject.ObjectType }));
+            });
 
             return participationObjects;
         }
@@ -319,6 +324,17 @@ namespace AfterSchoolLibrary.Services
             );
 
             return activities.DistinctBy(activity => activity.ID).ToList();
+        }
+
+        public static bool CanShowAllActivitiesOn(this Account visitorAccount, Account hostAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var ar = visitorAccount.GetRequestForAccount(hostAccount, msgs, dc);
+
+            return ar.IsNotEmpty() && 
+                ar.ApprovalStatusId != ApprovalStatus.NotSet && 
+                ar.ApprovalStatusId != ApprovalStatus.Denied && 
+                !ar.RequiresPublishPermission && 
+                ar.ShowAllPrograms;
         }
 
         public static List<Activity> GetPublishedActivitiesInLocations(this Account account, List<int> locationIds, SystemMessages msgs = null, DatabaseConnection dc = null)
