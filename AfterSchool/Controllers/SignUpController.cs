@@ -340,7 +340,10 @@ namespace AfterSchool.Controllers
                     }
 
                     if (msgs.HasNoErrors())
+                    {
                         awu.Activate(wu, msgs);
+                        account.SetIsActive(true, wu, msgs);
+                    }
 
                     if (msgs.HasNoErrors())
                         return Redirect(AfterSchoolLibrary.Helpers.Utilities.LoginUrl());
