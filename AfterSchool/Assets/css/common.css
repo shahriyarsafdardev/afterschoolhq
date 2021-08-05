@@ -978,3 +978,16 @@
     font-size: 16px;
     font-weight: 300;
 }
+
+.iconsViewResults {
+    top: 22px;
+    position: relative;
+}
+
+.arrowBtns {
+    font-size: 28px;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 4px 13px 0 #dadada;
+    cursor:pointer;
+}

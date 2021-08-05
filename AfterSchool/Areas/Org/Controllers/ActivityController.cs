@@ -2048,8 +2048,19 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
 
-            var getSurveyFeedback = SurveyFeedback.Load(id, msgs);
-            var activity = currentAccount.GetActivity(activityId.ToGuid(), msgs);         
+            var getSurveyFeedback = SurveyFeedback.Load(id, msgs);            
+            var activity = currentAccount.GetActivity(activityId.ToGuid(), msgs);
+            var getSurveyFeedbacksUsingActivity = SurveyFeedback.LoadByActivityId(activity.ID.Value, msgs);
+            ViewBag.NextExists = false;
+            ViewBag.PrevExists = false;
+
+            if (getSurveyFeedbacksUsingActivity.SkipWhile(x => x != getSurveyFeedback).Skip(1).DefaultIfEmpty(getSurveyFeedbacksUsingActivity[0]).FirstOrDefault().IsNotEmpty())
+                ViewBag.NextExists = true;
+            
+            if(getSurveyFeedbacksUsingActivity.TakeWhile(x => x != getSurveyFeedback).DefaultIfEmpty(getSurveyFeedbacksUsingActivity[getSurveyFeedbacksUsingActivity.Count - 1]).LastOrDefault().IsNotEmpty())
+                ViewBag.PrevExists = true;
+
+
             ViewBag.FormQuestionAnswers = FormQuestionAnswer.LoadBySurveyFeedbackId(getSurveyFeedback.ID.Value, msgs);
             ViewBag.SurveyName = SurveyRequest.Load(getSurveyFeedback.SurveyId.Value).Name;
             ViewBag.RegistrantName = Registrant.Load(getSurveyFeedback.RegistrantId.Value).Name;

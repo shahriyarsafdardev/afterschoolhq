@@ -14,6 +14,12 @@
                 <div style="font-size:22px">@ViewBag.RegistrantName</div>
                 <div style="font-size:14px; color:#B2B2B4">@ViewBag.SurveyName | @(surveyFeedback.CreateDate.IsNotEmpty() ? surveyFeedback.CreateDate.Value.ToString("MMMM dd, yyyy") : "")</div>
             </div>
+            <div class="col-lg-6">
+                <div class="pull-right iconsViewResults">
+                    <span class="s7-angle-left arrowBtns"></span>
+                    <span class="s7-angle-right arrowBtns"></span>
+                </div>
+            </div>
             <div style="clear:both"></div>
             <div class="row">
                 @foreach (var question in (List<FormQuestionAnswer>)ViewBag.FormQuestionAnswers)
