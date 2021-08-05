@@ -11,7 +11,6 @@ namespace AfterSchool.Areas.Org.Controllers
     {
         public ScheduleController() : base(AccountService.ProviderAccountTypes.ToList())
         {
-
         }
 
         [HttpGet]
@@ -19,8 +18,8 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
-            
-            if (currentAccount.IsEmpty() ||!id.IsInteger())
+
+            if (!id.IsInteger())
                 return new HttpStatusCodeResult(System.Net.HttpStatusCode.BadRequest);
 
             var schedule = currentAccount.GetActivitySchedule(id.ToInteger(), msgs);
@@ -38,7 +37,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
 
-            if (currentAccount.IsEmpty() || !id.IsInteger())
+            if (!id.IsInteger())
                 return new HttpStatusCodeResult(System.Net.HttpStatusCode.BadRequest);
 
             var schedule = new ActivitySchedule();
@@ -60,7 +59,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
 
-            if (currentAccount.IsEmpty() || !id.IsInteger() || activity.IsNotGuid())
+            if (!id.IsInteger() || activity.IsNotGuid())
                 return new HttpStatusCodeResult(System.Net.HttpStatusCode.BadRequest);
 
             var schedule = new ActivitySchedule();
@@ -71,7 +70,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Schedules = currentAccount.GetActivitySchedules(msgs);
             ViewBag.Messages = msgs;
-            ViewBag.ShowScheduleList = true;            
+            ViewBag.ShowScheduleList = true;
             ViewBag.ActivityId = activity;
             return View(schedule);
         }
@@ -84,7 +83,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
 
-            if (currentAccount.IsEmpty() || !id.IsInteger())
+            if (!id.IsInteger())
                 return new HttpStatusCodeResult(System.Net.HttpStatusCode.BadRequest);
 
             var schedule = new ActivitySchedule();
