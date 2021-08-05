@@ -62,7 +62,7 @@
             var hasProvider = Model.Provider.IsNotEmpty();
             var isProviderProfile = hasProvider && Model.Provider.ID == accountProfile.AccountId;
 
-            <div style="padding:5px;" class="bg-alt4 badge-blue">
+            <div style="padding:5px;" class="@((hasProvider && !isProviderProfile) ? "badge-success" : "badge-blue")">
                 <div class="text-white text-bold">
                     @if (Model.ActivityLocationType == ActivityLocationType.Virtual)
                     {
