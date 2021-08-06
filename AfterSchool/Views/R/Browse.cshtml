@@ -67,7 +67,7 @@
         {
             Html.RenderPartial(
                 "~/Views/Shared/Registration/_BrowseParticipationObjectList.cshtml",
-                registrationOpen,
+                registrationWillOpen,
                 new ViewDataDictionary() { { "title", "Registration Opening Soon" }, { "accountprofile", accountProfile } });
         }
 
@@ -75,7 +75,7 @@
         {
             Html.RenderPartial(
                 "~/Views/Shared/Registration/_BrowseParticipationObjectList.cshtml",
-                registrationOpen,
+                registrationClosed,
                 new ViewDataDictionary() { { "title", "Registration Closed" }, { "accountprofile", accountProfile } });
         }
 
