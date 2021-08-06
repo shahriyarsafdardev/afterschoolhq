@@ -286,7 +286,7 @@ namespace AfterSchoolLibraryTests.Tests
         public void SendVerificationEmailTest(string email, bool result)
         {
             var user = Factories.WebUserFactory.CreateWithEmail(email, msgs, dc: dc);
-            Assert.Equal(user.SendVerificationEmail(true).HasNoErrors(), result);
+            Assert.Equal(user.SendVerificationEmail().HasNoErrors(), result);
         }
 
         [Fact(DisplayName = "Marks user's email as verified")]

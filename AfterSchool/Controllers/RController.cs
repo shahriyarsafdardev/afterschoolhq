@@ -216,6 +216,7 @@ namespace AfterSchool.Controllers
             var participationObjects = new List<ParticipationObject>();
             var locations = new List<Location>();
             var grades = GradeLevel.Load(msgs: msgs);
+            var featuredProviders = new List<Account>();
 
             List<ParticipationObject> regOpened = null;
             List<ParticipationObject> regWillOpen = null;
@@ -240,6 +241,8 @@ namespace AfterSchool.Controllers
                     objectId: account.ID,
                     objectText: account.Name
                  );
+
+                featuredProviders = account.GetApprovedVisitorAccounts(msgs);
             }
             else
             {
@@ -267,6 +270,7 @@ namespace AfterSchool.Controllers
             ViewBag.Locations = locations;
             ViewBag.ParticipationObjects = participationObjects;
             ViewBag.AccountProfile = account.GetAccountProfile(msgs);
+            ViewBag.FeaturedProviders = featuredProviders;
 
             return View(account);
         }

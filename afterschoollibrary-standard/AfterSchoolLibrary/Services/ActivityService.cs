@@ -1586,6 +1586,8 @@ namespace AfterSchoolLibrary.Services
                         visitorAccount: providerAccount,
                         hostPermissionType: HostPermissionType.ApproveOnly,
                         approvalStatus: ApprovalStatus.Approved,
+                        requiresPublishPermission: true,
+                        showAllPrograms: false,
                         loggedInUser: loggedInUser,
                         dc: dc));
 
