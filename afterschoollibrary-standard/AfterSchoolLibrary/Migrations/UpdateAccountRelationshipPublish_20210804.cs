@@ -16,10 +16,11 @@ namespace AfterSchoolLibrary.Migrations
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    AccountRelationship.Update(
+                    amsgs.AddRange(AccountRelationship.Update(
                         new Hashtable() { { "RequiresPublishPermission", true } }, 
                         new Hashtable(), 
-                        AccountRelationship.ObjectMap);
+                        AccountRelationship.ObjectMap, 
+                        adc));
                 },
                 uniqueIdenfier: "UpdateAccountRelationshipPublish_20210804",
                 msgs: msgs,

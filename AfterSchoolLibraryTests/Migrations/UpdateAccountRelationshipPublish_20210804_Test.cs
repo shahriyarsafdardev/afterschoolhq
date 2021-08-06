@@ -40,7 +40,7 @@ namespace AfterSchoolLibraryTests.Migrations
             // Assert
             Assert.True(msgs.HasNoErrors());
             Assert.NotNull(ar);
-            Assert.False(ar.RequiresPublishPermission);
+            Assert.True(ar.RequiresPublishPermission);
             Assert.True(ar.ShowAllPrograms);
         }
     }
