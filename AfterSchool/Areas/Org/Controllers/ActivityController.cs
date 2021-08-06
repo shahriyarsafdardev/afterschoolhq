@@ -2309,10 +2309,14 @@ namespace AfterSchool.Areas.Org.Controllers
             var isNewActivity = Request["isnew"] == "1";
 
             var locationOwner = activity.GetLocationOwner(msgs);
-            activity.RequestToPublish(locationOwner, SessionVariables.CurrentUser, msgs);
 
-            if (msgs.HasNoErrors())
+            if (locationOwner.IsNotEmpty())
+            {
+                activity.RequestToPublish(locationOwner, SessionVariables.CurrentUser, msgs);
                 msgs.Add($"Your request to publish has been sent to {locationOwner.Name}", MessageType.Success);
+            } 
+            else
+                msgs.Add("Activity saved successfully", MessageType.Success);
 
             ViewBag.Messages = msgs;
             TempData["Messages"] = msgs;
