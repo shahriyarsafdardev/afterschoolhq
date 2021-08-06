@@ -73,5 +73,43 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(1, AccountRelationship.GetCount(msgs: msgs, dc: dc));
         }
 
+        [Fact]
+        public void UpdateRequiresPublishPermissionTest()
+        {
+            var visitorOwner = WebUserFactory.Create(msgs, dc);
+            var visitorAccount = AccountFactory.Create(visitorOwner, msgs, dc);
+            var hostOwner = WebUserFactory.Create(msgs, dc);
+            var hostAccount = AccountFactory.Create(hostOwner, msgs, dc);
+
+            msgs.AddRange(hostAccount.AddVisitorAccount(visitorAccount, HostPermissionType.ApproveOnly, ApprovalStatus.Approved, true, false, hostOwner, dc));
+
+            var ar = visitorAccount.GetRequestForAccount(hostAccount, msgs, dc);
+
+            ar.UpdateRequiresPublishPermission(false, hostOwner, msgs, dc);
+
+            Assert.True(msgs.HasNoErrors());
+            Assert.NotNull(ar);
+            Assert.False(ar.RequiresPublishPermission);
+        }
+
+        [Fact]
+        public void UpdateShowAllProgramsTest()
+        {
+            var visitorOwner = WebUserFactory.Create(msgs, dc);
+            var visitorAccount = AccountFactory.Create(visitorOwner, msgs, dc);
+            var hostOwner = WebUserFactory.Create(msgs, dc);
+            var hostAccount = AccountFactory.Create(hostOwner, msgs, dc);
+
+            msgs.AddRange(hostAccount.AddVisitorAccount(visitorAccount, HostPermissionType.ApproveOnly, ApprovalStatus.Approved, true, false, hostOwner, dc));
+
+            var ar = visitorAccount.GetRequestForAccount(hostAccount, msgs, dc);
+
+            ar.UpdateShowAllPrograms(true, hostOwner, msgs, dc);
+
+            Assert.True(msgs.HasNoErrors());
+            Assert.NotNull(ar);
+            Assert.True(ar.RequiresPublishPermission);
+        }
+
     }
 }

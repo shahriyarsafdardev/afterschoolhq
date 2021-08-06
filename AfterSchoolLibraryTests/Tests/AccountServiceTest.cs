@@ -1400,7 +1400,7 @@ namespace AfterSchoolLibraryTests.Tests
                     dc);
                 
                 // Act                
-                var expected = hostAccount.GetAccountRelationship(hostAccountId: accountRelationship.ID.Value, msgs: msgs, dc: dc);
+                var expected = hostAccount.GetAccountRelationship(accountRelationshipId: accountRelationship.ID.Value, msgs: msgs, dc: dc);
 
                 // Assert
                 Assert.Equal(expected: expected.ID, actual: accountRelationship.ID);                

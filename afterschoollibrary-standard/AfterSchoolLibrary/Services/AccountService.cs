@@ -2324,18 +2324,10 @@ namespace AfterSchoolLibrary.Services
 
         #region AccountRelationships
 
-        public static AccountRelationship GetAccountRelationship(this Account account, Account hostAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (hostAccount.IsNotEmpty() && account.IsNotEmpty())
-                return account.GetAccountRelationship(hostAccount.ID.Value, msgs, dc);
-
-            return null;
-        }
-
-        public static AccountRelationship GetAccountRelationship(this Account account, int hostAccountId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static AccountRelationship GetAccountRelationship(this Account account, int accountRelationshipId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (account.IsNotEmpty())
-                return AccountRelationship.LoadByIdByHostAccountId(hostAccountId, account.ID.Value, msgs, dc);
+                return AccountRelationship.LoadByIdByHostAccountId(accountRelationshipId, account.ID.Value, msgs, dc);
 
             return null;
         }
