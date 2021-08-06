@@ -287,7 +287,7 @@
         <a href="@Url.Action("editsetup", "activity", new { id = Model.Uid, area = "org" })" class="btn btn-default btn-activity-footer">Return to Edit</a>
 
         if (Model.IsPublished)
-        {            
+        {
             <a href="@Url.Action("unpublish", "activity", new { id = Model.Uid, isFromActivityHome = true, area = "org" })" class="btn btn-default btn-activity-footer">Unpublish</a>
         }
         else

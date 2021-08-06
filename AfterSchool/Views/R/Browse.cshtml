@@ -7,6 +7,7 @@
     var cart = (Cart)ViewBag.Cart;
     var locations = (List<Location>)ViewBag.Locations;
     var registrationOpen = (List<ParticipationObject>)ViewBag.RegistrationOpened;
+    var featuredProviders = (List<Account>)ViewBag.FeaturedProviders;
     var registrationClosed = (List<ParticipationObject>)ViewBag.RegistrationClosed;
     var registrationWillOpen = (List<ParticipationObject>)ViewBag.RegistrationWillOpen;
     var session = (ParticipationObject)ViewBag.Session;
@@ -56,48 +57,48 @@
 
         @if (registrationOpen.Any())
         {
-            <div class="row">
-                <div class="col-md-12 text-center">
-                    <h3>Open for Registration</h3>
-                </div>
-
-                @foreach (var item in registrationOpen)
-                {
-                    Html.RenderPartial("~/Views/Shared/Registration/_BrowseParticipationObjectWide.cshtml", item);
-                }
-            </div>
-            <hr />
+            Html.RenderPartial(
+                "~/Views/Shared/Registration/_BrowseParticipationObjectList.cshtml",
+                registrationOpen,
+                new ViewDataDictionary() { { "title", "Open for Registration" }, { "accountprofile", accountProfile } });
         }
 
         @if (registrationWillOpen.Any())
         {
-            <div class="row">
-                <div class="col-md-12 text-center">
-                    <h3>Registration Opening Soon</h3>
-                </div>
-
-                @foreach (var item in registrationWillOpen)
-                {
-                    Html.RenderPartial("~/Views/Shared/Registration/_BrowseParticipationObjectWide.cshtml", item);
-                }
-            </div>
-            <hr />
+            Html.RenderPartial(
+                "~/Views/Shared/Registration/_BrowseParticipationObjectList.cshtml",
+                registrationWillOpen,
+                new ViewDataDictionary() { { "title", "Registration Opening Soon" }, { "accountprofile", accountProfile } });
         }
 
         @if (registrationClosed.Any())
         {
+            Html.RenderPartial(
+                "~/Views/Shared/Registration/_BrowseParticipationObjectList.cshtml",
+                registrationClosed,
+                new ViewDataDictionary() { { "title", "Registration Closed" }, { "accountprofile", accountProfile } });
+        }
+
+        @if (featuredProviders.IsNotEmpty() && featuredProviders.Any())
+        {
             <div class="row">
                 <div class="col-md-12 text-center">
-                    <h3>Registration Closed</h3>
+                    <h3>Featured Programs</h3>
                 </div>
 
-                @foreach (var item in registrationClosed)
+                @foreach(var item in featuredProviders)
                 {
-                    Html.RenderPartial("~/Views/Shared/Registration/_BrowseParticipationObjectWide.cshtml", item);
+                    var featuredProfile = item.GetAccountProfile();
+
+                    if (featuredProfile.IsNotEmpty())
+                    {
+                        Html.RenderPartial("~/Views/Shared/Registration/_BrowseProvider.cshtml", featuredProfile);
+                    }
                 }
+
             </div>
-            <hr />
         }
+
     </div>
 
 
