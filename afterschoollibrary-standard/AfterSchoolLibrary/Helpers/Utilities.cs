@@ -386,6 +386,11 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.AddFeatureTypeTeacher1099ToSchools_20210622.Do(amsgs, adc);
                     Migrations.UpdateLocationLatLongColumn_20210725.Do(amsgs, adc);
                     Migrations.UpdateAccountRelationshipPublish_20210804.Do(amsgs, adc);
+                    // RUN LATER: Migrations.ResetFreeAcctsToFreePackage_20210805.Do(amsgs, adc);
+
+
+
+
 
                     // Migrations.AddProfilesToAllAccounts_20200727.Do(amsgs, adc);
 
