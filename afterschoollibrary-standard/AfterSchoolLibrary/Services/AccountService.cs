@@ -426,7 +426,7 @@ namespace AfterSchoolLibrary.Services
         {
             return Activity.GetCount(new Hashtable() { 
                 { "AccountId", account.ID.Value }, 
-                //{ "IsPublished", true }, 
+                { "IsPublished", true },
                 { "IsDeleted", false }, 
                 { "isArchived", false } 
             }, msgs, dc) + Activity.GetCountByProviderAccountId(account.ID.Value, msgs, dc);
@@ -473,7 +473,7 @@ namespace AfterSchoolLibrary.Services
 
         public static bool HasActiveActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.GetActiveAndPublishedActivityCount(msgs, dc) > 0;
+            return account.GetActiveActivityCount(msgs, dc) > 0;
         }
 
         public static bool HasPaidActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
