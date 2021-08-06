@@ -111,5 +111,13 @@ namespace AfterSchoolLibrary.Services
 
             return null;
         }
+
+        public static Registrant GetRegistrantName(this SurveyFeedback surveyFeedback, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (surveyFeedback.RegistrantId.HasValue)
+                return Registrant.Load(surveyFeedback.RegistrantId.Value, msgs, dc);
+
+            return null;
+        }
     }
 }

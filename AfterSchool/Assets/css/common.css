@@ -982,6 +982,7 @@
 .iconsViewResults {
     top: 22px;
     position: relative;
+    right: -13px;
 }
 
 .arrowBtns {
@@ -989,5 +990,7 @@
     background-color: white;
     border-radius: 5px;
     box-shadow: 0 4px 13px 0 #dadada;
-    cursor:pointer;
+}
+.noCursor{
+    cursor:not-allowed;
 }

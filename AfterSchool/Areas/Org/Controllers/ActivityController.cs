@@ -2009,7 +2009,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
       
 
-        public ActionResult ViewSurvey(int id, string activitId)
+        public ActionResult ViewSurvey(int id, string activityId)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
@@ -2017,7 +2017,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
-            var activity = currentAccount.GetActivity(activitId.ToGuid(), msgs);
+            var activity = currentAccount.GetActivity(activityId.ToGuid(), msgs);
 
             ViewBag.GetSurveyFeedback = activity.GetSurveyFeedbacksByActivity(msgs).Where(a=>a.SurveyId == id).ToList();
             ViewBag.Survey = SurveyRequest.Load(id);
@@ -2051,14 +2051,14 @@ namespace AfterSchool.Areas.Org.Controllers
             var getSurveyFeedback = SurveyFeedback.Load(id, msgs);            
             var activity = currentAccount.GetActivity(activityId.ToGuid(), msgs);
             var getSurveyFeedbacksUsingActivity = SurveyFeedback.LoadByActivityId(activity.ID.Value, msgs);
-            ViewBag.NextExists = false;
-            ViewBag.PrevExists = false;
+        
+            var findIndex = getSurveyFeedbacksUsingActivity.FindIndex(a => a.ID == getSurveyFeedback.ID);
 
-            if (getSurveyFeedbacksUsingActivity.SkipWhile(x => x != getSurveyFeedback).Skip(1).DefaultIfEmpty(getSurveyFeedbacksUsingActivity[0]).FirstOrDefault().IsNotEmpty())
-                ViewBag.NextExists = true;
+            if (findIndex >= 0  && (findIndex + 1) < getSurveyFeedbacksUsingActivity.Count)
+                ViewBag.NextExists = getSurveyFeedbacksUsingActivity[findIndex + 1].ID;
             
-            if(getSurveyFeedbacksUsingActivity.TakeWhile(x => x != getSurveyFeedback).DefaultIfEmpty(getSurveyFeedbacksUsingActivity[getSurveyFeedbacksUsingActivity.Count - 1]).LastOrDefault().IsNotEmpty())
-                ViewBag.PrevExists = true;
+            if((findIndex - 1) >= 0)
+                ViewBag.PrevExists = getSurveyFeedbacksUsingActivity[findIndex - 1].ID;
 
 
             ViewBag.FormQuestionAnswers = FormQuestionAnswer.LoadBySurveyFeedbackId(getSurveyFeedback.ID.Value, msgs);

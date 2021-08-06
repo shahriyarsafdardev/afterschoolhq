@@ -48,7 +48,7 @@
                                     <a href="@Url.Action("viewsurveyresults", "activity", new { id = surveyFeedback.ID, activityId = Model.Uid })" class="linkGreen">View</a>
                                 </td>
                                 <td>
-                                   @surveyFeedback.GetCreatedBy().DisplayName
+                                   @surveyFeedback.GetRegistrantName().DisplayName
                                 </td>
                                 <td>
                                     @surveyFeedback.SurveyFeedbackStatusTypeId.ToString()

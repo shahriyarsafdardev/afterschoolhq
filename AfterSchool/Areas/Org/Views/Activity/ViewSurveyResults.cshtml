@@ -12,12 +12,12 @@
         <div class="panel-body surveypanelpadding">
             <div class="col-lg-6">
                 <div style="font-size:22px">@ViewBag.RegistrantName</div>
-                <div style="font-size:14px; color:#B2B2B4">@ViewBag.SurveyName | @(surveyFeedback.CreateDate.IsNotEmpty() ? surveyFeedback.CreateDate.Value.ToString("MMMM dd, yyyy") : "")</div>
+                <div style="font-size:14px; "><a href="@Url.Action("ViewSurvey", "activity", new { id = surveyFeedback.SurveyId, activityId = Model.Uid })" style="color:#B2B2B4">@ViewBag.SurveyName | @(surveyFeedback.CreateDate.IsNotEmpty() ? surveyFeedback.CreateDate.Value.ToString("MMMM dd, yyyy") : "")</a></div>
             </div>
             <div class="col-lg-6">
                 <div class="pull-right iconsViewResults">
-                    <span class="s7-angle-left arrowBtns"></span>
-                    <span class="s7-angle-right arrowBtns"></span>
+                     <a href="@(ViewBag.PrevExists != null ? Url.Action("viewsurveyresults", "activity", new { id = ViewBag.PrevExists, activityId = Model.Uid }) : "javascript:void(0)")" style="color: #494949;" class="@(ViewBag.PrevExists != null ? "" : "noCursor")"><span class="s7-angle-left arrowBtns"></span></a>
+                     <a href="@(ViewBag.NextExists != null ? Url.Action("viewsurveyresults", "activity", new { id = ViewBag.NextExists, activityId = Model.Uid }) : "javascript:void(0)")" style="color: #494949;" class="@(ViewBag.NextExists != null ? "" : "noCursor")"><span class="s7-angle-right arrowBtns"></span></a>
                 </div>
             </div>
             <div style="clear:both"></div>

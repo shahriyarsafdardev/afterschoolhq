@@ -11,7 +11,25 @@
         <div class="panel-body surveypanelpadding">
             <div class="row">
                 <div class="col-lg-6">
-                    <div style="font-size:22px">@Model.Name </div>
+                    <div style="">
+                        <span style="float:left;font-size:22px; margin-right:15px;">@Model.Name</span>
+                            <div class="dropdown">
+                              <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                <i class="s7-edit"></i>
+                               </button>
+                              <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                                  <li><a href="javascript:void(0)">Sort By:</a></li>
+                                  <li role="separator" class="divider"></li>
+                                  <li class="sort" data-index="3" data-order="asc"><a href="#">Newest to oldest</a></li>
+                                  <li role="separator" class="divider"></li>
+                                  <li class="sort" data-index="3" data-order="desc"><a href="#">Oldest to newest</a></li>
+                                  <li role="separator" class="divider"></li>
+                                  <li class="sort" data-index="2" data-order="asc"><a href="#">Sender</a></li>
+                                  <li role="separator" class="divider"></li>
+                                  <li class="sort" data-index="1" data-order="asc"><a href="#">Name</a></li>
+                              </ul>
+                        </div>
+                     </div>
                     <div style="font-size:14px; color:#B2B2B4">@Model.AccountName</div>
                 </div>
                 <div class="col-lg-6">
@@ -36,7 +54,7 @@
                         {
                             <tr>
                                 <td>
-                                    <a href="@Url.Action("viewsurvey", "activity", new { id = survey.ID, activitId = Model.Uid })">View</a>
+                                    <a href="@Url.Action("viewsurvey", "activity", new { id = survey.ID, activityId = Model.Uid })">View</a>
                                 </td>
                                 <td>
                                     @survey.Name
@@ -55,3 +73,27 @@
         </div>
     </div>
 </div>
+
+@section scripts{
+     <script>
+         $(document).ready(function(){
+             $('.sort').click(function () {
+                 var index = $(this).attr("data-index");
+                 var order = $(this).attr("data-order");
+                 var table = $(".surveyTable");
+                 var rows = table.find('tr:gt(0)').toArray().sort(comparer(index))
+                 this.asc = !this.asc
+                 if (order == "desc") { rows = rows.reverse();}
+                 for (var i = 0; i < rows.length; i++) { table.append(rows[i]) }
+             })
+             function comparer(index) {
+                 return function (a, b) {
+                     var valA = getCellValue(a, index), valB = getCellValue(b, index)
+                     return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.toString().localeCompare(valB)
+                 }
+             }
+             function getCellValue(row, index) { return $(row).children('td').eq(index).text() }
+     
+         })
+    </script>
+}
