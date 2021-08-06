@@ -440,6 +440,8 @@ namespace AfterSchool.Areas.Admin.Controllers
                                        account,
                                        HostPermissionType.Edit,
                                        ApprovalStatus.Approved,
+                                       true,
+                                       false,
                                        SessionVariables.CurrentUser,
                                        adc
                                    )

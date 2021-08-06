@@ -2475,6 +2475,8 @@ namespace AfterSchoolLibrary.Services
                     hostAccount,
                     hostPermissionType,
                     ApprovalStatus.Requested,
+                    true,
+                    false,
                     loggedInUser,
                     msgs,
                     dc);
@@ -2557,7 +2559,7 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        public static SystemMessages AddVisitorAccount(this Account hostAccount, Account visitorAccount, HostPermissionType hostPermissionType, ApprovalStatus approvalStatus, WebUser loggedInUser, DatabaseConnection dc = null)
+        public static SystemMessages AddVisitorAccount(this Account hostAccount, Account visitorAccount, HostPermissionType hostPermissionType, ApprovalStatus approvalStatus, bool requiresPublishPermission, bool showAllPrograms, WebUser loggedInUser, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
@@ -2566,8 +2568,8 @@ namespace AfterSchoolLibrary.Services
                     visitorAccount,
                     approvalStatus,
                     hostPermissionType,
-                    true,
-                    false,
+                    requiresPublishPermission,
+                    showAllPrograms,
                     loggedInUser,
                     msgs,
                     dc);
@@ -2585,15 +2587,15 @@ namespace AfterSchoolLibrary.Services
         /// <param name="loggedInUser"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        private static AccountRelationship AddHostAccount(this Account visitorAccount, Account hostAccount, HostPermissionType hostPermissionType, ApprovalStatus approvalStatus, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        private static AccountRelationship AddHostAccount(this Account visitorAccount, Account hostAccount, HostPermissionType hostPermissionType, ApprovalStatus approvalStatus, bool requiresPublishPermission, bool showAllPrograms, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return AccountRelationshipService.CreateNew(
                     hostAccount,
                     visitorAccount,
                     approvalStatus,
                     hostPermissionType,
-                    true,
-                    false,
+                    requiresPublishPermission,
+                    showAllPrograms,
                     loggedInUser,
                     msgs,
                     dc);
