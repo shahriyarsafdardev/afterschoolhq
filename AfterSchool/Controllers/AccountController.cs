@@ -556,7 +556,10 @@ namespace AfterSchool.Controllers
                 if (password1 != password2)
                     msgs.Add("Passwords must match", MessageType.UserError);
 
-                msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
+                if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+                {
+                    msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
+                }
             }
 
             if (!agree.IsBoolean())

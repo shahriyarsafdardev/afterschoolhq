@@ -126,50 +126,51 @@
 
                             if (qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone)
                             {
-                                <div class="row">
-                                    <div class="col-md-6 col-md-offset-3">
-                                        <div class="am-checkbox text-center">
-                                            <input type="checkbox" id="textnotifications" name="textnotifications" value="1" @(Request["textnotifications"] == "1" || System.Web.HttpContext.Current.Request.HttpMethod.ToString() == "GET" ? " checked=\"checked\" " : "") />
-                                            <label for="textnotifications">
-                                                I would like to receive text messages about my student&#39;s activities&#46;
-                                                Notifications may include information about attendance&#44; reminders&#44; and important information&#46;
-                                            </label>
+                    <div class="row">
+                        <div class="col-md-6 col-md-offset-3">
+                            <div class="am-checkbox text-center">
+                                <input type="checkbox" id="textnotifications" name="textnotifications" value="1" @(Request["textnotifications"] == "1" || System.Web.HttpContext.Current.Request.HttpMethod.ToString() == "GET" ? " checked=\"checked\" " : "") />
+                                <label for="textnotifications">
+                                    I would like to receive text messages about my student&#39;s activities&#46;
+                                    Notifications may include information about attendance&#44; reminders&#44; and important information&#46;
+                                </label>
+                            </div>
+                        </div>
+                    </div>}
+            }
+
+                        @if (currentUser.IsEmpty())
+                        {
+                    <div class="form-group new-account">
+                        <label for="password1" class="control-label col-md-3">
+                            Password <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-md-6">
+                            <input type="password" class="form-control" id="password1" name="password1" />
+                        </div>
+                    </div>
+
+                                    <div class="form-group new-account">
+                                        <label for="password1" class="control-label col-md-3">
+                                            Verify Password <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="col-md-6">
+                                            <input type="password" class="form-control" id="password2" name="password2" />
                                         </div>
+                                    </div>}
+
+                        @{ if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+                           {
+                            if (currentUser.IsEmpty())
+                            {
+                                <div class="row padding-v-20">
+                                    <div class="form-group text-center">
+                                        @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", ""); }
                                     </div>
                                 </div>
-                            }
-                        }
-
-                        @if (currentUser.IsEmpty())
-                        {
-                            <div class="form-group new-account">
-                                <label for="password1" class="control-label col-md-3">
-                                    Password <span class="text-danger">*</span>
-                                </label>
-                                <div class="col-md-6">
-                                    <input type="password" class="form-control" id="password1" name="password1" />
-                                </div>
-                            </div>
-
-                            <div class="form-group new-account">
-                                <label for="password1" class="control-label col-md-3">
-                                    Verify Password <span class="text-danger">*</span>
-                                </label>
-                                <div class="col-md-6">
-                                    <input type="password" class="form-control" id="password2" name="password2" />
-                                </div>
-                            </div>
-                        }
-
-
-                        @if (currentUser.IsEmpty())
-                        {
-                            <div class="row padding-v-20">
-                                <div class="form-group text-center">
-                                    @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", ""); }
-                                </div>
-                            </div>
-                        }
+                            } 
+                           }
+                           }
 
                         <div class="row padding-v-20">
                             <div class="col-md-6 col-md-offset-3">
