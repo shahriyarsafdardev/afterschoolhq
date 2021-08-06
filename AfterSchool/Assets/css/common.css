@@ -994,3 +994,28 @@
 .noCursor{
     cursor:not-allowed;
 }
+
+.filterIcon {
+    font-size: 24px;
+    color: #494949;
+    transform: rotate(90deg);
+    display: inline-block;
+    position: relative;
+    top: 5px;
+    font-weight: bold;
+}
+
+.sortFilterAnchor {
+    color: #282828 !important;
+    font-size: 15px;
+    padding: 3px 20px !important;
+}
+.selectedFilter {
+    color: #00ae85 !important;
+}
+.DDLMain .dropdown-menu > li:hover{
+    background-color:transparent !important;
+}
+.DDLMain .dropdown-menu > li > a:hover {
+    background-color: transparent !important;
+}
