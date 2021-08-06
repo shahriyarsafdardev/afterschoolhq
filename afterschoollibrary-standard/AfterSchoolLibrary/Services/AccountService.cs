@@ -287,14 +287,6 @@ namespace AfterSchoolLibrary.Services
                                             .Select(location => location.ID.Value)
                                             .ToList();
 
-            account.GetApprovedVisitorAccounts(msgs, dc).ForEach(visitor =>
-            {
-                participationObjects.AddRange(
-                    visitor.GetPublishedActivitiesInLocations(hostedLocationIds, msgs, dc)
-                        .Select(activity => activity.GetParticipationObject(msgs))
-                        .DistinctBy(participationObject => new { participationObject.ObjectID, participationObject.ObjectType }));
-            });
-
             participationObjects.AddRange(
                 account.GetPublishedExternalLeagues(msgs, dc).Select(x => x.GetParticipationObject(msgs, dc))
             );
@@ -303,7 +295,20 @@ namespace AfterSchoolLibrary.Services
                 account.GetOpenPublishedSessions(msgs, dc).Select(x => x.GetParticipationObject(msgs, dc))
             );
 
-            return participationObjects;
+            account.GetApprovedVisitorAccounts(msgs, dc).ForEach(visitor =>
+            {
+                participationObjects.AddRange(
+                    visitor.GetPublishedActivitiesInLocations(hostedLocationIds, msgs, dc)
+                        .Select(activity => activity.GetParticipationObject(msgs)));
+
+                if (visitor.CanShowAllActivitiesOn(account))
+                    participationObjects.AddRange(visitor.GetPublishedActivities(msgs, dc)
+                        .Select(activity => activity.GetParticipationObject(msgs, dc)));
+            });
+
+            return participationObjects
+                .DistinctBy(participationObject => new { participationObject.ObjectID, participationObject.ObjectType })
+                .ToList();
         }
 
         public static List<Activity> GetPublishedActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -319,6 +324,17 @@ namespace AfterSchoolLibrary.Services
             );
 
             return activities.DistinctBy(activity => activity.ID).ToList();
+        }
+
+        public static bool CanShowAllActivitiesOn(this Account visitorAccount, Account hostAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var ar = visitorAccount.GetRequestForAccount(hostAccount, msgs, dc);
+
+            return ar.IsNotEmpty() && 
+                ar.ApprovalStatusId != ApprovalStatus.NotSet && 
+                ar.ApprovalStatusId != ApprovalStatus.Denied && 
+                !ar.RequiresPublishPermission && 
+                ar.ShowAllPrograms;
         }
 
         public static List<Activity> GetPublishedActivitiesInLocations(this Account account, List<int> locationIds, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -410,7 +426,7 @@ namespace AfterSchoolLibrary.Services
         {
             return Activity.GetCount(new Hashtable() { 
                 { "AccountId", account.ID.Value }, 
-                { "IsPublished", true }, 
+                { "IsPublished", true },
                 { "IsDeleted", false }, 
                 { "isArchived", false } 
             }, msgs, dc) + Activity.GetCountByProviderAccountId(account.ID.Value, msgs, dc);
@@ -423,7 +439,16 @@ namespace AfterSchoolLibrary.Services
                 { "IsPublished", false },
                 { "IsDeleted", false },
                 { "isArchived", false }
-            }, msgs, dc);
+            }, msgs, dc) + Activity.GetCountByProviderAccountId(account.ID.Value, msgs, dc);
+        }
+
+        public static int GetActiveActivityCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Activity.GetCount(new Hashtable() {
+                { "AccountId", account.ID.Value },
+                { "IsDeleted", false },
+                { "isArchived", false }
+            }, msgs, dc) + Activity.GetCountByProviderAccountId(account.ID.Value, msgs, dc);
         }
 
         public static List<Activity> GetAllActiveAndNonPublishedActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -448,7 +473,7 @@ namespace AfterSchoolLibrary.Services
 
         public static bool HasActiveActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.GetActiveAndPublishedActivityCount(msgs, dc) > 0;
+            return account.GetActiveActivityCount(msgs, dc) > 0;
         }
 
         public static bool HasPaidActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -463,16 +488,9 @@ namespace AfterSchoolLibrary.Services
             if (account.IsEmpty())
                 return false;
 
-            var accountOwner = account.GetAccountOwner(msgs); 
-            
-            if (account.HasPaidActivities())
-                return account.HasAccountProfile(msgs) && account.HasActiveActivities(msgs) && accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount && account.CanProcessPayments();
-            
-            return account.HasAccountProfile(msgs) && account.HasActiveActivities(msgs) && accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount;
-            
-            
-        }
-        
+            var accountOwner = account.GetAccountOwner(msgs);
+            return account.HasAccountProfile(msgs) && account.HasActiveActivities(msgs) && accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount && account.CanProcessPayments();
+        }        
 
         public static GettingStartedOptions OnboardingCompletionStatus(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -482,14 +500,14 @@ namespace AfterSchoolLibrary.Services
             var accountOwner = account.GetAccountOwner(msgs);
             var HasAccountProfile = account.HasAccountProfile(msgs);
             var HasActivities = account.HasActiveActivities(msgs);
-            var activitycount= account.GetActiveAndNonPublishedActivityCount(msgs);
+            var activitycount = account.GetActiveActivityCount(msgs);
             var VerifiedAccount = accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount;
             var HasPaymentConfigured = account.CanProcessPayments(msgs);
            
             if (!HasAccountProfile)
                 return GettingStartedOptions.CreateProfile;
 
-            else if (!HasActivities && activitycount < 1)
+            else if (!HasActivities || activitycount < 1)
                 return GettingStartedOptions.CreateFirstActivity;
             
             else if (!VerifiedAccount)
@@ -2306,10 +2324,10 @@ namespace AfterSchoolLibrary.Services
 
         #region AccountRelationships
 
-        public static AccountRelationship GetAccountRelationship(this Account account, int Id, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static AccountRelationship GetAccountRelationship(this Account account, int accountRelationshipId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (account.IsNotEmpty())
-                return AccountRelationship.LoadByIdByHostAccountId(Id, account.ID.Value, msgs, dc);
+                return AccountRelationship.LoadByIdByHostAccountId(accountRelationshipId, account.ID.Value, msgs, dc);
 
             return null;
         }
@@ -2449,6 +2467,8 @@ namespace AfterSchoolLibrary.Services
                     hostAccount,
                     hostPermissionType,
                     ApprovalStatus.Requested,
+                    true,
+                    false,
                     loggedInUser,
                     msgs,
                     dc);
@@ -2471,6 +2491,15 @@ namespace AfterSchoolLibrary.Services
             return relationship.IsNotEmpty() && relationship.ApprovalStatusId == ApprovalStatus.Approved;
         }
 
+        public static bool RequiresPublishPermissionFor(this Account visitorAccount, Account hostAccount, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var relationship = AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value, visitorAccount.ID.Value, msgs, dc);
+
+            return relationship.IsEmpty() || 
+                relationship.ApprovalStatusId == ApprovalStatus.Denied ||
+                relationship.RequiresPublishPermission;
+        }
+
         public static AccountRelationship ApproveAccessToAccount(this Account hostAccount, Account visitorAccount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return ApproveAccessToAccount(hostAccount, visitorAccount, HostPermissionType.ApproveOnly, loggedInUser, msgs, dc);
@@ -2488,6 +2517,8 @@ namespace AfterSchoolLibrary.Services
                     visitorAccount, 
                     ApprovalStatus.Approved, 
                     hostPermissionType, 
+                    true,
+                    false,
                     loggedInUser, 
                     msgs, 
                     dc);
@@ -2520,7 +2551,7 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        public static SystemMessages AddVisitorAccount(this Account hostAccount, Account visitorAccount, HostPermissionType hostPermissionType, ApprovalStatus approvalStatus, WebUser loggedInUser, DatabaseConnection dc = null)
+        public static SystemMessages AddVisitorAccount(this Account hostAccount, Account visitorAccount, HostPermissionType hostPermissionType, ApprovalStatus approvalStatus, bool requiresPublishPermission, bool showAllPrograms, WebUser loggedInUser, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
@@ -2529,6 +2560,8 @@ namespace AfterSchoolLibrary.Services
                     visitorAccount,
                     approvalStatus,
                     hostPermissionType,
+                    requiresPublishPermission,
+                    showAllPrograms,
                     loggedInUser,
                     msgs,
                     dc);
@@ -2546,13 +2579,15 @@ namespace AfterSchoolLibrary.Services
         /// <param name="loggedInUser"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        private static AccountRelationship AddHostAccount(this Account visitorAccount, Account hostAccount, HostPermissionType hostPermissionType, ApprovalStatus approvalStatus, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        private static AccountRelationship AddHostAccount(this Account visitorAccount, Account hostAccount, HostPermissionType hostPermissionType, ApprovalStatus approvalStatus, bool requiresPublishPermission, bool showAllPrograms, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return AccountRelationshipService.CreateNew(
                     hostAccount,
                     visitorAccount,
                     approvalStatus,
                     hostPermissionType,
+                    requiresPublishPermission,
+                    showAllPrograms,
                     loggedInUser,
                     msgs,
                     dc);
@@ -4467,5 +4502,22 @@ namespace AfterSchoolLibrary.Services
         }
 
         #endregion
+
+        #region Locations
+
+        public static bool IsLocationOwner(this Account currentAccount, Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var location = activity?.GetLocation(msgs, dc);
+            var hostAccount = location?.GetHostAccount(msgs, dc);
+
+            // this will be used to check whether logged in account is location owner or not.
+            if (hostAccount.IsNotEmpty() && hostAccount.HasAccountOwner && hostAccount.ID == currentAccount.ID)
+                return true;
+
+            return false;
+        }
+
+        #endregion
+
     }
 }

@@ -7,6 +7,8 @@
     var groups = (List<ActivityGroup>)ViewData["Groups"];
     var needToUpgrade = (bool)ViewData["NeedToUpgrade"];
     var activityType = ActivityType.Activity;
+    var currentUser = SessionVariables.CurrentUser;
+    var currentAccount = SessionVariables.CurrentAccount;
 
     if (ViewData["ActivityType"] != null)
     {
@@ -64,7 +66,7 @@
             </div>
             <div class="widget-tile">
                 <hr />
-                <p>Welcome, @SessionVariables.CurrentUser.FirstName!</p>
+                <p>Welcome, @currentUser.FirstName!</p>
 
                 @if (managePermissionSlips)
                 {
@@ -95,7 +97,7 @@
             </div>
             <div class="widget-tile">
                 <hr />
-                <p>Welcome, @SessionVariables.CurrentUser.FirstName!</p>
+                <p>Welcome, @currentUser.FirstName!</p>
                 <p>You haven't created any @UILabel.ActivityLabel(activityType, true).ToLower() yet. In order to get started, <a href="@addUrl"> Create your first @UILabel.ActivityLabel(activityType).ToLower()</a>.</p>
                 <p>&nbsp;</p>
                 <p>
@@ -179,7 +181,7 @@ else
                     {
                         var reservedTextClass = activity.IsFull() ? "text-danger text-bold" : "";
                         var waitingTextClass = activity.IsWaitingListFull() ? "text-danger text-bold" : "";
-                        var showLink = activity.BelongsTo(SessionVariables.CurrentAccount);
+                        var showLink = activity.BelongsTo(currentAccount);
 
                         <tr>
                             <td>
@@ -341,7 +343,7 @@ else
                                         <a href="@Url.Action("publishdetail", "activity", new { id = activity.Uid })" class="btn btn-default btn-sm">Publish...</a>
                                     }
 
-                                    @if (activity.AccountId == SessionVariables.CurrentAccount.ID)
+                                    @if (activity.AccountId == currentAccount.ID)
                                     { 
                                         if (activityType == ActivityType.PermissionSlip)
                                         {
@@ -368,7 +370,7 @@ else
                                         }
                                     }
 
-                                    @if (SessionVariables.CurrentUser.IsActivityLeader(activity))
+                                    @if (currentUser.IsActivityLeader(activity))
                                     {
                                         if (!activity.IsGroupArchived)
                                         {

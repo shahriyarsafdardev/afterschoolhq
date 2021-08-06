@@ -37,7 +37,6 @@ namespace AfterSchoolLibraryTests.Migrations
 
                 // Act                   
                  AfterSchoolLibrary.Migrations.AddFeatureTypeTeacher1099ToSchools_20210622.Do(msgs, dc);
-
         
                 var expectedSchoolTeacher1099Feature = SchoolAccount.GetAccountPackageFeature(FeatureType.Teacher1099, msgs, dc);
                 var expectedProviderTeacher1099Feature = ProviderAccount.GetAccountPackageFeature(FeatureType.Teacher1099, msgs, dc);

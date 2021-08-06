@@ -6,6 +6,7 @@
     var locations = (List<Location>)ViewBag.Locations;
     var showSeatsRemaining = true;
     var showLocation = false;
+    var accountProfile = (AccountProfile)ViewBag.AccountProfile;
 
     if (Model.SeatsRemaining.HasValue && Model.SeatsRemaining.Value <= 40)
     {
@@ -55,7 +56,47 @@
      name="@Model.Name">
 
     <div class="panel" style="overflow: hidden;">
-        
+
+        @if (accountProfile.IsNotEmpty() && (accountProfile.AccountId != Model.OwnerAccount.ID || Model.Provider.IsNotEmpty()))
+        {
+            var hasProvider = Model.Provider.IsNotEmpty();
+            var isProviderProfile = hasProvider && Model.Provider.ID == accountProfile.AccountId;
+
+            <div style="padding:5px;" class="@((hasProvider && !isProviderProfile) ? "badge-success" : "badge-blue")">
+                <div class="text-white text-bold">
+                    @if (Model.ActivityLocationType == ActivityLocationType.Virtual)
+                    {
+                        <span>Virtual</span>
+                    }
+                    else
+                    {
+                        <span>In-person</span>
+                    }
+
+                    <span>activity</span>
+
+                    @if (isProviderProfile)
+                    {
+                        <span>at <a href="@Model.OwnerAccount.HomePageUrl" class="text-white">@Model.OwnerAccount.Name</a></span>
+                    }
+                    else
+                    {
+                        if (hasProvider)
+                        {
+                            <span>by <a href="@Model.Provider.HomePageUrl" class="text-white">@Model.Provider.Name</a></span>
+                        }
+                        else
+                        {
+                            <span>by <a href="@Model.OwnerAccount.HomePageUrl" class="text-white">@Model.OwnerAccount.Name</a></span>
+                        }
+                    }
+
+
+
+                </div>
+            </div>
+        }
+
         <div class="panel-body" onclick="location.href='@Model.GetHomePageUrl(true)'" style="cursor:pointer">
 
             <div class="col-md-4">
@@ -83,7 +124,7 @@
                             </span>
                         }
                     </p>
-                </div>                
+                </div>
 
                 <p class="activity-description text-muted hide">
                     @Html.Raw(Model.Description.MaxChars(80, "...").IfEmpty(BasicLibrary.Utilities.RemoveHTMLAndEntities(Model.Details).MaxChars(80, "...")))
@@ -111,6 +152,7 @@
 
             <div class="col-md-4">
                 <div class="padding-v-10">
+
                     @if (Model.StartDate.HasValue)
                     {
                         <span>
@@ -125,7 +167,7 @@
                         </span>
                         <br />
                     }
-                    
+
                     <span>
                         @ParticipationObjectUI.PrintAgeGradeRestrictions(Model)
                     </span>

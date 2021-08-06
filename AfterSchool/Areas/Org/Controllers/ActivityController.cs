@@ -2312,10 +2312,7 @@ namespace AfterSchool.Areas.Org.Controllers
             activity.RequestToPublish(locationOwner, SessionVariables.CurrentUser, msgs);
 
             if (msgs.HasNoErrors())
-                if (isFromActivityHome)
-                    msgs.Add($"Your request to publish has been sent to {locationOwner.Name}", MessageType.Success);
-                else
-                    msgs.Add("Activity saved successfully", MessageType.Success);
+                msgs.Add($"Your request to publish has been sent to {locationOwner.Name}", MessageType.Success);
 
             ViewBag.Messages = msgs;
             TempData["Messages"] = msgs;
