@@ -79,7 +79,7 @@
                 new ViewDataDictionary() { { "title", "Registration Closed" }, { "accountprofile", accountProfile } });
         }
 
-        @if (featuredProviders.Any())
+        @if (featuredProviders.IsNotEmpty() && featuredProviders.Any())
         {
             <div class="row">
                 <div class="col-md-12 text-center">
