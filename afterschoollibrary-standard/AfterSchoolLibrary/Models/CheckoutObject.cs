@@ -264,7 +264,7 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetAmountToApplyToCoupon(SystemMessages msgs, DatabaseConnection dc)
         {
-            if (ParticipationObject.IsActivityGroup())
+            if (!ParticipationObject.IsActivity())
                 return 0;
 
             var activity = ParticipationObject.GetActivity();
@@ -280,7 +280,7 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetRegistrationCostWithConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (ParticipationObject.IsActivityGroup())
+            if (!ParticipationObject.IsActivity())
                 return 0;
 
             var activity = ParticipationObject.GetActivity();
