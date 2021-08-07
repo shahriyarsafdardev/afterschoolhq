@@ -90,7 +90,7 @@
                 {
                     var featuredProfile = item.GetAccountProfile();
 
-                    if (featuredProfile.IsNotEmpty())
+                    if (featuredProfile.IsNotEmpty() && featuredProfile.LocationId.HasValue)
                     {
                         Html.RenderPartial("~/Views/Shared/Registration/_BrowseProvider.cshtml", featuredProfile);
                     }
