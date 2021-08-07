@@ -277,34 +277,40 @@ namespace AfterSchoolLibrary.Services
         public static List<ParticipationObject> GetPublishedParticipationObjects(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var participationObjects = new List<ParticipationObject>();
+            var topParticipationObjects = new List<ParticipationObject>();
+            var bottomParticipationObjects = new List<ParticipationObject>();
 
-            participationObjects.AddRange(
+            topParticipationObjects.AddRange(
                 account.GetPublishedActivities(msgs, dc)
                 .Select(activity => activity.GetParticipationObject(msgs, dc))
             );
+
+            topParticipationObjects.AddRange(
+                account.GetPublishedExternalLeagues(msgs, dc).Select(x => x.GetParticipationObject(msgs, dc))
+            );
+
+            topParticipationObjects.AddRange(
+                account.GetOpenPublishedSessions(msgs, dc).Select(x => x.GetParticipationObject(msgs, dc))
+            );
+
+            participationObjects.AddRange(topParticipationObjects.Shuffle());
 
             var hostedLocationIds = account.GetHostedLocations(msgs, dc)
                                             .Select(location => location.ID.Value)
                                             .ToList();
 
-            participationObjects.AddRange(
-                account.GetPublishedExternalLeagues(msgs, dc).Select(x => x.GetParticipationObject(msgs, dc))
-            );
-
-            participationObjects.AddRange(
-                account.GetOpenPublishedSessions(msgs, dc).Select(x => x.GetParticipationObject(msgs, dc))
-            );
-
             account.GetApprovedVisitorAccounts(msgs, dc).ForEach(visitor =>
             {
-                participationObjects.AddRange(
+                bottomParticipationObjects.AddRange(
                     visitor.GetPublishedActivitiesInLocations(hostedLocationIds, msgs, dc)
                         .Select(activity => activity.GetParticipationObject(msgs)));
 
                 if (visitor.CanShowAllActivitiesOn(account))
-                    participationObjects.AddRange(visitor.GetPublishedActivities(msgs, dc)
+                    bottomParticipationObjects.AddRange(visitor.GetPublishedActivities(msgs, dc)
                         .Select(activity => activity.GetParticipationObject(msgs, dc)));
             });
+
+            participationObjects.AddRange(bottomParticipationObjects.Shuffle());
 
             return participationObjects
                 .DistinctBy(participationObject => new { participationObject.ObjectID, participationObject.ObjectType })
