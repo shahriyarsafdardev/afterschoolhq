@@ -319,6 +319,26 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors());
         }
 
+        [Fact]
+        public void IsOpenTest()
+        {
+            var activity1 = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
+            var activity2 = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
+            var activity3 = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
+            var period1 = RegistrationPeriodFactory.Create(ActivityOwnerAccount, msgs, dc);
+            var period2 = RegistrationPeriodFactory.Create(ActivityOwnerAccount, DateTime.UtcNow.AddDays(-12), DateTime.UtcNow.AddDays(-1), msgs, dc);
+            var period3 = RegistrationPeriodFactory.Create(ActivityOwnerAccount, DateTime.UtcNow.AddDays(1), DateTime.UtcNow.AddDays(12), msgs, dc);
+
+            msgs.AddRange(period1.AddActivity(activity1, true, LoggedInUser.ID.Value, dc));
+            msgs.AddRange(period2.AddActivity(activity2, true, LoggedInUser.ID.Value, dc));
+            msgs.AddRange(period3.AddActivity(activity3, true, LoggedInUser.ID.Value, dc));
+
+            Assert.True(msgs.HasNoErrors());
+            Assert.True(activity1.IsOpen(msgs, dc));
+            Assert.False(activity2.IsOpen(msgs, dc));
+            Assert.False(activity3.IsOpen(msgs, dc));
+        }
+
         #region Activity Copy Functionality
 
         [Fact]
