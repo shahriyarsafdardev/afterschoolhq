@@ -340,7 +340,7 @@ namespace AfterSchoolLibrary.Services
 
             if (getExternallyProvidedActivities)
                 activities.AddRange(Activity.LoadByProviderAccountId(account.ID.Value, msgs, dc)
-                        .Where(activity => activity.IsOpenUpcomingOrRecentlyClosed(msgs, dc) && activity.IsPubliclyViewable));
+                        .Where(activity => activity.IsOpen(msgs, dc) && activity.IsPubliclyViewable));
 
             return activities.DistinctBy(activity => activity.ID).ToList();
         }
