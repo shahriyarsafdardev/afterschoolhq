@@ -1084,7 +1084,7 @@ namespace AfterSchoolLibraryTests.Tests
             activity3.Publish(user, msgs, dc);
 
             // Act 
-            var activities = account.GetPublishedOpenedActivities(msgs, dc);
+            var activities = account.GetPublishedOpenedActivities(msgs: msgs, dc: dc);
 
             // Assert
             Assert.Single(activities);

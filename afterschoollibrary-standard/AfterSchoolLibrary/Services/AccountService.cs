@@ -293,23 +293,22 @@ namespace AfterSchoolLibrary.Services
                 account.GetOpenPublishedSessions(msgs, dc).Select(x => x.GetParticipationObject(msgs, dc))
             );
 
-            participationObjects.AddRange(topParticipationObjects.Shuffle());
-
             var hostedLocationIds = account.GetHostedLocations(msgs, dc)
                                             .Select(location => location.ID.Value)
                                             .ToList();
 
             account.GetApprovedVisitorAccounts(msgs, dc).ForEach(visitor =>
             {
-                bottomParticipationObjects.AddRange(
+                topParticipationObjects.AddRange(
                     visitor.GetPublishedActivitiesInLocations(hostedLocationIds, msgs, dc)
                         .Select(activity => activity.GetParticipationObject(msgs)));
 
                 if (visitor.CanShowAllActivitiesOn(account))
-                    bottomParticipationObjects.AddRange(visitor.GetPublishedOpenedActivities(msgs, dc)
+                    bottomParticipationObjects.AddRange(visitor.GetPublishedOpenedActivities(false, msgs, dc)
                         .Select(activity => activity.GetParticipationObject(msgs, dc)));
             });
 
+            participationObjects.AddRange(topParticipationObjects.Shuffle());
             participationObjects.AddRange(bottomParticipationObjects.Shuffle());
 
             return participationObjects
@@ -332,17 +331,16 @@ namespace AfterSchoolLibrary.Services
             return activities.DistinctBy(activity => activity.ID).ToList();
         }
 
-        public static List<Activity> GetPublishedOpenedActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Activity> GetPublishedOpenedActivities(this Account account, bool getExternallyProvidedActivities = true, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var periods = account.GetOpenRegistrationPeriods(msgs, dc);
             var activities = new List<Activity>();
 
             periods.ForEach(period => activities.AddRange(period.GetActivities(msgs, dc).Where(x => x.IsPubliclyViewable)));
 
-            activities.AddRange(
-                Activity.LoadByProviderAccountId(account.ID.Value, msgs, dc)
-                    .Where(activity => activity.IsOpenUpcomingOrRecentlyClosed(msgs, dc) && activity.IsPubliclyViewable)
-            );
+            if (getExternallyProvidedActivities)
+                activities.AddRange(Activity.LoadByProviderAccountId(account.ID.Value, msgs, dc)
+                        .Where(activity => activity.IsOpenUpcomingOrRecentlyClosed(msgs, dc) && activity.IsPubliclyViewable));
 
             return activities.DistinctBy(activity => activity.ID).ToList();
         }
