@@ -2403,6 +2403,8 @@ namespace AfterSchoolLibrary.Services
         {
             return AccountRelationship.LoadByApproved(hostAccount.ID.Value, msgs, dc)
                 .Select(accountRelationship => accountRelationship.GetVisitorAccount(msgs, dc))
+                .Where(account => !account.IsDeleted && account.IsActive)
+                .OrderBy(account => account.HasActiveActivities(msgs, dc))
                 .ToList();
         }
 
