@@ -303,13 +303,16 @@ namespace AfterSchoolLibrary.Models
                     .Select(x => x.ActivityId.Value)
                     .ToList();
 
-            return Activity.LoadListWithLocations(
-                    activityIds,
-                    locationIds,
-                    msgs,
-                    dc)
-                .Where(x => !x.IsDeleted)
-                .ToList();
+            if (activityIds.Any())
+                return Activity.LoadListWithLocations(
+                        activityIds,
+                        locationIds,
+                        msgs,
+                        dc)
+                    .Where(x => !x.IsDeleted)
+                    .ToList();
+
+            return new List<Activity>();
         }
 
         public List<Activity> GetActivities(SystemMessages msgs = null, DatabaseConnection dc = null)

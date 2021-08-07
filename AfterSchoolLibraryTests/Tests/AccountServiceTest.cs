@@ -1649,7 +1649,7 @@ namespace AfterSchoolLibraryTests.Tests
                 var schoolActivity2 = ActivityFactory.Create(schoolAccount, msgs, dc);
                 schoolActivity2.Publish(schoolAccountOwner, msgs, dc);
 
-                var GetActivityCount = AccountService.GetActiveAndPublishedActivityCount(account, msgs, dc);
+                var GetActivityCount = AccountService.GetActiveAndPublishedActivityCount(account, true, msgs, dc);
 
                 // Assert
                 Assert.Equal(2, GetActivityCount);

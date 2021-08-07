@@ -277,34 +277,40 @@ namespace AfterSchoolLibrary.Services
         public static List<ParticipationObject> GetPublishedParticipationObjects(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var participationObjects = new List<ParticipationObject>();
+            var topParticipationObjects = new List<ParticipationObject>();
+            var bottomParticipationObjects = new List<ParticipationObject>();
 
-            participationObjects.AddRange(
+            topParticipationObjects.AddRange(
                 account.GetPublishedActivities(msgs, dc)
                 .Select(activity => activity.GetParticipationObject(msgs, dc))
             );
+
+            topParticipationObjects.AddRange(
+                account.GetPublishedExternalLeagues(msgs, dc).Select(x => x.GetParticipationObject(msgs, dc))
+            );
+
+            topParticipationObjects.AddRange(
+                account.GetOpenPublishedSessions(msgs, dc).Select(x => x.GetParticipationObject(msgs, dc))
+            );
+
+            participationObjects.AddRange(topParticipationObjects.Shuffle());
 
             var hostedLocationIds = account.GetHostedLocations(msgs, dc)
                                             .Select(location => location.ID.Value)
                                             .ToList();
 
-            participationObjects.AddRange(
-                account.GetPublishedExternalLeagues(msgs, dc).Select(x => x.GetParticipationObject(msgs, dc))
-            );
-
-            participationObjects.AddRange(
-                account.GetOpenPublishedSessions(msgs, dc).Select(x => x.GetParticipationObject(msgs, dc))
-            );
-
             account.GetApprovedVisitorAccounts(msgs, dc).ForEach(visitor =>
             {
-                participationObjects.AddRange(
+                bottomParticipationObjects.AddRange(
                     visitor.GetPublishedActivitiesInLocations(hostedLocationIds, msgs, dc)
                         .Select(activity => activity.GetParticipationObject(msgs)));
 
                 if (visitor.CanShowAllActivitiesOn(account))
-                    participationObjects.AddRange(visitor.GetPublishedActivities(msgs, dc)
+                    bottomParticipationObjects.AddRange(visitor.GetPublishedActivities(msgs, dc)
                         .Select(activity => activity.GetParticipationObject(msgs, dc)));
             });
+
+            participationObjects.AddRange(bottomParticipationObjects.Shuffle());
 
             return participationObjects
                 .DistinctBy(participationObject => new { participationObject.ObjectID, participationObject.ObjectType })
@@ -422,14 +428,19 @@ namespace AfterSchoolLibrary.Services
                 dc);
         }
 
-        public static int GetActiveAndPublishedActivityCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetActiveAndPublishedActivityCount(this Account account, bool includeExternallyPublished, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Activity.GetCount(new Hashtable() { 
-                { "AccountId", account.ID.Value }, 
+            var count = Activity.GetCount(new Hashtable() {
+                { "AccountId", account.ID.Value },
                 { "IsPublished", true },
-                { "IsDeleted", false }, 
-                { "isArchived", false } 
-            }, msgs, dc) + Activity.GetCountByProviderAccountId(account.ID.Value, msgs, dc);
+                { "IsDeleted", false },
+                { "isArchived", false }
+            }, msgs, dc);
+            
+            if (includeExternallyPublished)
+             count += Activity.GetCountByProviderAccountId(account.ID.Value, msgs, dc);
+
+            return count;
         }
 
         public static int GetActiveAndNonPublishedActivityCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -2403,6 +2414,8 @@ namespace AfterSchoolLibrary.Services
         {
             return AccountRelationship.LoadByApproved(hostAccount.ID.Value, msgs, dc)
                 .Select(accountRelationship => accountRelationship.GetVisitorAccount(msgs, dc))
+                .Where(account => !account.IsDeleted && account.IsActive)
+                .OrderBy(account => account.GetActiveAndPublishedActivityCount(false, msgs, dc) > 0)
                 .ToList();
         }
 

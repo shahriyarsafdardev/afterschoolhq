@@ -523,7 +523,7 @@
     </div>
 </div>
 
-@if (isAccountAndLoggedInUserIsOwner || !onboardingStepsAcknowledged)
+@if (isAccountAndLoggedInUserIsOwner)
 {
     <div id="footer-account" class="activity-footer text-center hide">
         <span class="span-upgrade-modal-close" onclick="return hideActivityRibbon()">X</span>
@@ -531,15 +531,18 @@
         <a href="@Url.Action("editsetup", "activity", new { isnew = 1, type = (int)ActivityType.Activity, area = "org", source = Request["source"]})" class="btn btn-default btn-activity-footer">Add Activity</a>
     </div>
 
-    <div id="modal-getting-started" class="modal fade" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-body account-getting-started-padding">
-                    @{ Html.RenderPartial("~/Views/Shared/_GettingStarted.cshtml"); }
+    if (!onboardingStepsAcknowledged || !isOnboadingCompleted)
+    {
+        <div id="modal-getting-started" class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-body account-getting-started-padding">
+                        @{ Html.RenderPartial("~/Views/Shared/_GettingStarted.cshtml"); }
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    }
 
     <div id="modal-payment-confirmation-accountView" class="hide">
         @{ Html.RenderPartial("~/Views/Shared/_ModalPaymentConfirmation.cshtml", Model); };
@@ -588,7 +591,7 @@
         var isOnboadingCompleted = @Json.Encode(isOnboadingCompleted);
         var isProcessCompleted = @Json.Encode(GettingStartedOptions.ProcessCompleted);
         var isStripeIntegrated = @Json.Encode(isStripeIntegrated);
-        
+
         if (currentLevel == isProcessCompleted && isStripeIntegrated) {
             $('#modal-acceptpayment-done').modal({
                 backdrop: 'static'
@@ -612,6 +615,10 @@
     function hideActivityRibbon() {
         $('#footer-account').fadeOut();
     };
+
+    function hideAcceptPaymentModal() {
+        $('#modal-acceptpayment-done').modal('hide');
+    }
 
     function LoadPaymentModal() {
         $('#modal-getting-started').modal('hide');
