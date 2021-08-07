@@ -18,13 +18,7 @@
         canRegiserFor = ViewData["canRegisterFor"].ToString().ToBoolean();
     }
 
-    var IsPublished = false;
-    var activity = Model.GetActivity();
-
-    if (activity.IsNotEmpty())
-    {
-        IsPublished = activity.IsPublished;
-    }
+    var IsPublished = Model.IsPublished;
 }
 
 @if (!Model.OwnerAccount.ID.HasValue)

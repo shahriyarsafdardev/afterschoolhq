@@ -192,6 +192,7 @@ namespace AfterSchoolLibrary.Models
             StartDate = activityGroup.StartDate;
             EndDate = activityGroup.EndDate;
             LastModifiedDate = activityGroup.LastModifiedDate;
+            IsPublished = activityGroup.IsPublished;
 
             if (loadAllDetails)
             {
@@ -237,6 +238,7 @@ namespace AfterSchoolLibrary.Models
             RegistrationMode = RegistrationMode.Apply; // aag.RegistrationModeId;
             IsRegistrationFree = (!aag.Cost.HasValue || aag.Cost.Value == 0.ToDecimal());
             LastModifiedDate = activityGroup.LastModifiedDate;
+            IsPublished = aag.IsPublished;
 
             if (loadAllDetails)
             {
