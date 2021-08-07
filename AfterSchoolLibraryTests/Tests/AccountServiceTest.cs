@@ -1062,6 +1062,38 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         [Fact]
+        public void GetPublishedOpenActivitiesTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var activity2 = ActivityFactory.Create(account, msgs, dc);
+            var activity3 = ActivityFactory.Create(account, msgs, dc);
+            var activity4 = ActivityFactory.Create(account, msgs, dc);
+            var period = RegistrationPeriodFactory.Create(account, msgs, dc);
+            var period2 = RegistrationPeriodFactory.Create(account, DateTime.UtcNow.AddDays(1), DateTime.UtcNow.AddDays(12), msgs, dc);
+            var period3 = RegistrationPeriodFactory.Create(account, DateTime.UtcNow.AddDays(-12), DateTime.UtcNow.AddDays(-1), msgs, dc);
+            var period4 = RegistrationPeriodFactory.Create(account, msgs, dc);
+
+            msgs.AddRange(period.AddActivity(activity, true, user.ID.Value, dc));
+            msgs.AddRange(period2.AddActivity(activity2, true, user.ID.Value, dc));
+            msgs.AddRange(period3.AddActivity(activity3, true, user.ID.Value, dc));
+            msgs.AddRange(period4.AddActivity(activity4, true, user.ID.Value, dc));
+
+            activity.Publish(user, msgs, dc);
+            activity2.Publish(user, msgs, dc);
+            activity3.Publish(user, msgs, dc);
+
+            // Act 
+            var activities = account.GetPublishedOpenedActivities(msgs, dc);
+
+            // Assert
+            Assert.Single(activities);
+            Assert.True(activity.IsPubliclyViewable);
+            Assert.True(msgs.HasNoErrors());
+            Assert.Equal(expected: activity.ID.Value, actual: activities.First().ID.Value);
+        }
+
+        [Fact]
         public void GetPublishedActivitiesSchoolAccountTest()
         {
             // Arrange
