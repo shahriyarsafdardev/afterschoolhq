@@ -422,14 +422,19 @@ namespace AfterSchoolLibrary.Services
                 dc);
         }
 
-        public static int GetActiveAndPublishedActivityCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetActiveAndPublishedActivityCount(this Account account, bool includeExternallyPublished, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Activity.GetCount(new Hashtable() { 
-                { "AccountId", account.ID.Value }, 
+            var count = Activity.GetCount(new Hashtable() {
+                { "AccountId", account.ID.Value },
                 { "IsPublished", true },
-                { "IsDeleted", false }, 
-                { "isArchived", false } 
-            }, msgs, dc) + Activity.GetCountByProviderAccountId(account.ID.Value, msgs, dc);
+                { "IsDeleted", false },
+                { "isArchived", false }
+            }, msgs, dc);
+            
+            if (includeExternallyPublished)
+             count += Activity.GetCountByProviderAccountId(account.ID.Value, msgs, dc);
+
+            return count;
         }
 
         public static int GetActiveAndNonPublishedActivityCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -2404,7 +2409,7 @@ namespace AfterSchoolLibrary.Services
             return AccountRelationship.LoadByApproved(hostAccount.ID.Value, msgs, dc)
                 .Select(accountRelationship => accountRelationship.GetVisitorAccount(msgs, dc))
                 .Where(account => !account.IsDeleted && account.IsActive)
-                .OrderBy(account => account.HasActiveActivities(msgs, dc))
+                .OrderBy(account => account.GetActiveAndPublishedActivityCount(false, msgs, dc) > 0)
                 .ToList();
         }
 
