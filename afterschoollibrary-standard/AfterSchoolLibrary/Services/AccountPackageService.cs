@@ -16,5 +16,16 @@ namespace AfterSchoolLibrary.Services
 
             return null;
         }
+
+        public static void RemoveFeature(this AccountPackage accountPackage, FeatureType featureType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (accountPackage.IsNotEmpty())
+            {
+                var apf = AccountPackageFeature.LoadByAccountPackageIdByFeatureTypeId(accountPackage.ID.Value, featureType, msgs, dc);
+
+                if (apf.IsNotEmpty())
+                    msgs.AddRange(apf.Delete(dc));
+            }
+        }
     }
 }

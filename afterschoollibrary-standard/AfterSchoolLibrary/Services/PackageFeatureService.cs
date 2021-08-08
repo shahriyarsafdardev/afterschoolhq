@@ -36,13 +36,14 @@ namespace AfterSchoolLibrary.Services
                     var pageSize = 50;
                     var start = 0;
 
-                    while(totalProcessed == 0)
+                    while(totalProcessed <= accountCount)
                     {
                         var accounts = Account.Search(null, AccountService.ProviderAccountTypes.ToList(), false, start, pageSize, amsgs, adc);
 
                         accounts.ForEach(account => packageFeature.EnsureAccountHasPackageFeature(account, accountTypes, loggedInUser, amsgs, adc));
 
                         start += pageSize;
+                        totalProcessed = start + 1;
                     }
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
@@ -75,6 +76,8 @@ namespace AfterSchoolLibrary.Services
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     var accountFeatures = AccountPackageFeature.LoadByFeatureTypeId(packageFeature.FeatureTypeId, amsgs, adc);
+
+                    packageFeature.EnsureAllAccountsHavePackageFeature(accountTypes, loggedInUser, amsgs, adc);
 
                     accountFeatures.ForEach(accountFeature => {
                         packageFeature.ResetAccountFeatureToPackageFeature(

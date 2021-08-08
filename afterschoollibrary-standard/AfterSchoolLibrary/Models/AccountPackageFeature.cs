@@ -158,21 +158,13 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static List<AccountPackageFeature> LoadByFeatureTypeId(FeatureType FeatureTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-		{
-			var dq = DatabaseQuery;
-			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["FeatureTypeId"], FeatureTypeId);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-		}
-
 		
 
         #endregion
 
 		#region "UserDefined"
 
-        public static bool HasAccountPackageIdByFeatureTypeId(int AccountPackageId, FeatureType FeatureTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static bool HasAccountPackageByFeatureTypeId(int AccountPackageId, FeatureType FeatureTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -182,7 +174,7 @@ namespace AfterSchoolLibrary.Models
             return dq.GetCount(msgs) > 0;
         }
 
-        public static bool HasAccountPackageIdByFeatureTypeIds(int AccountPackageId, List<FeatureType> FeatureTypeIds, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static bool HasAccountPackageByFeatureTypeIds(int AccountPackageId, List<FeatureType> FeatureTypeIds, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -190,6 +182,14 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["FeatureTypeId"], FeatureTypeIds.Select(x=> (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
             dq.Criterias.Add(ObjectMap["Max"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
             return dq.GetCount(msgs) == FeatureTypeIds.Count;
+        }
+
+        public static List<AccountPackageFeature> LoadByFeatureTypeId(FeatureType FeatureTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["FeatureTypeId"], (int)FeatureTypeId);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
         public decimal GetMaxValue()

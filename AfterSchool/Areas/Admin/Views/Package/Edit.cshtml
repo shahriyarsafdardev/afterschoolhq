@@ -5,8 +5,6 @@
     string disableAttr = "";
     string readonlyAttr = "";
     var features = (List<PackageFeature>)ViewBag.Features;
-    //disableAttr = Model.IsAnyAccountUsing() && AfterSchoolLibrary.Helpers.Utilities.IsLiveServer ? " disabled=\"disabled\" " : "";
-    //readonlyAttr = Model.IsAnyAccountUsing() && AfterSchoolLibrary.Helpers.Utilities.IsLiveServer ? " readonly=\"readonly\" " : "";
     var featureTypes = System.Enum.GetValues(typeof(FeatureType)).Cast<FeatureType>().OrderBy(x => x.ToString());
 }
 
@@ -114,10 +112,33 @@
 
                     <div class="form-group">
                         <label class="col-sm-3 control-label">@type.ToString().SplitByUpperCase()</label>
-                        <div class="col-sm-6">
+                        <div class="col-sm-1">
                             <input id="@type" type="number" class="form-control" name="@type" value="@value" min="0" step="0.01" required @readonlyAttr
                                    onfocus="this.select()"
                                    oninput="this.value = !!this.value && Math.abs(this.value) >= 0 ? this.value : null"/>
+                        </div>
+                        <div class="col-sm-8">
+                            @if (Model.ID.HasValue)
+                            {
+                                <button type="button" class="btn btn-default btn-sm md-trigger" data-modal="resetConfirmationModal" onclick="resetFeature(@((int)type), '@type', '@AccountService.IndividualProviderAccountTypes.Select(x => (int)x).ToStrings().ToStringList()', false, 'This will reset all accounts with the account type of @AccountService.IndividualProviderAccountTypes.Select(x => x.ToString()).ToStringList(", ", ", or ") where the account value is less than ' + document.getElementById('@type').value)">
+                                    Reset Provider Accts (&lt;)
+                                </button>
+                                <button type="button" class="btn btn-default btn-sm md-trigger" data-modal="resetConfirmationModal" onclick="resetFeature(@((int)type), '@type', '@AccountService.IndividualProviderAccountTypes.Select(x => (int)x).ToStrings().ToStringList()', true, 'This will reset all accounts with the account type of @AccountService.IndividualProviderAccountTypes.Select(x => x.ToString()).ToStringList(", ", ", or ") to ' + document.getElementById('@type').value)">
+                                    Reset Provider Accts (all)
+                                </button>
+                                <button type="button" class="btn btn-default btn-sm md-trigger" data-modal="resetConfirmationModal" onclick="resetFeature(@((int)type), '@type', '@AccountService.LocationProviderAccountTypes.Select(x => (int)x).ToStrings().ToStringList()', false, 'This will reset all accounts with the account type of @AccountService.LocationProviderAccountTypes.Select(x => x.ToString()).ToStringList(", ", ", or ") where the account value is less than ' + document.getElementById('@type').value)">
+                                    Reset School Accts (&lt;)
+                                </button>
+                                <button type="button" class="btn btn-default btn-sm md-trigger" data-modal="resetConfirmationModal" onclick="resetFeature(@((int)type), '@type', '@AccountService.LocationProviderAccountTypes.Select(x => (int)x).ToStrings().ToStringList()', true, 'This will reset all accounts with the account type of @AccountService.LocationProviderAccountTypes.Select(x => x.ToString()).ToStringList(", ", ", or ") to ' + document.getElementById('@type').value)">
+                                    Reset School Accts (all)
+                                </button>
+                                <button type="button" class="btn btn-default btn-sm md-trigger" data-modal="resetConfirmationModal" onclick="resetFeature(@((int)type), '@type', '@AccountService.ProviderAccountTypes.Select(x => (int)x).ToStrings().ToStringList()', false, 'This will reset all accounts with the account type of @AccountService.ProviderAccountTypes.Select(x => x.ToString()).ToStringList(", ", ", or ") where the account value is less than ' + document.getElementById('@type').value)">
+                                    Reset All Accts (&lt;)
+                                </button>
+                                <button type="button" class="btn btn-default btn-sm md-trigger" data-modal="resetConfirmationModal" onclick="resetFeature(@((int)type), '@type', '@AccountService.ProviderAccountTypes.Select(x => (int)x).ToStrings().ToStringList()', true, 'This will reset all accounts with the account type of @AccountService.ProviderAccountTypes.Select(x => x.ToString()).ToStringList(", ", ", or ") to ' + document.getElementById('@type').value)">
+                                    Reset All Accts (all)
+                                </button>
+                            }
                         </div>
                     </div>
                 }
@@ -131,9 +152,33 @@
                     </div>
                 </div>
             </form>
+
+            <form id="frmFeatureReset" method="post" action="@Url.Action("resetfeature", "package", new { id = @Model.ID })" class="form-horizontal">
+
+                <input type="hidden" name="packageId" id="packageId" value="@Model.ID" />
+                <input type="hidden" name="featureTypeId" id="featureTypeId" value="" />
+                <input type="hidden" name="featureValue" id="featureValue" value="" />
+                <input type="hidden" name="accountTypeIds" id="accountTypeIds" value="" />
+                <input type="hidden" name="resetIfAcctValueGreaterThan" id="resetIfAcctValueGreaterThan" value="" />
+
+            </form>
         </div>
     </div>
 </div>
+
+@{  
+    Html.RenderPartial(
+        "~/Views/Shared/_Modal.cshtml", 
+        new ModalViewModel() 
+        { 
+            ActionButtonHtml = "Continue &gt; ",
+            HtmlBody = "",
+            Title = "Are you sure?",
+            ActionButtonId = "resetConfirmationButton",
+            ID = "resetConfirmationModal"
+        }
+    ); 
+}
 
 
 @section Scripts
@@ -158,5 +203,20 @@
                 });
             }
         }
+
+        PageEvent.add(PageEvent.AFTER_INIT, function () {
+            $('#resetConfirmationButton').click(function () {
+                $('#frmFeatureReset').submit();
+            });
+        });
+
+        function resetFeature(featureTypeId, featureValue, accountTypeIds, resetIfAcctValueGreaterThan, confirmationMsg) {
+            $('#featureTypeId').val(featureTypeId);
+            $('#featureValue').val($('#' + featureValue).val());
+            $('#accountTypeIds').val(accountTypeIds);
+            $('#resetIfAcctValueGreaterThan').val(resetIfAcctValueGreaterThan);
+            $('#resetConfirmationModal').find('.modal-body').html(confirmationMsg + '. This action cannot be undone.');
+        }
+
     </script>
 }

@@ -918,7 +918,7 @@ namespace AfterSchoolLibrary.Services
             var accountPackage = account.GetActiveAccountPackage(msgs, dc);
 
             if (accountPackage.IsNotEmpty())
-                return AccountPackageFeature.HasAccountPackageIdByFeatureTypeId(accountPackage.ID.Value, featureType, msgs, dc);
+                return AccountPackageFeature.HasAccountPackageByFeatureTypeId(accountPackage.ID.Value, featureType, msgs, dc);
 
             return false;
         }
@@ -928,7 +928,7 @@ namespace AfterSchoolLibrary.Services
             var accountPackage = account.GetActiveAccountPackage(msgs, dc);
 
             if (accountPackage.IsNotEmpty())
-                return AccountPackageFeature.HasAccountPackageIdByFeatureTypeIds(accountPackage.ID.Value, featureTypes, msgs, dc);
+                return AccountPackageFeature.HasAccountPackageByFeatureTypeIds(accountPackage.ID.Value, featureTypes, msgs, dc);
 
             return false;
         }
