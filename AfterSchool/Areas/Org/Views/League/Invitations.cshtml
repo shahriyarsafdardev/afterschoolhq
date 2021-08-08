@@ -22,33 +22,34 @@
         }
     }
 }
-<p>League Invitations</p>
-<div class="table-responsive">
-    <table class="table table-hover">
-        <thead>
-            <tr>
-                <th></th>
-                <th>
-                    @(activityGroupType == ActivityGroupType.Session ? "Session" : "League")
-                </th>
-                <th class="text-center">
-                    Team Registration Dates
-                </th>
-                <th class="text-center">
-                    Accept/Decline
-                </th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (pendingInvites.Count > 0)
-            {
-                foreach (var pendingInvite in pendingInvites)
+
+@if (pendingInvites.Any())
+{
+    <p>League Invitations</p>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>
+                        @(activityGroupType == ActivityGroupType.Session ? "Session" : "League")
+                    </th>
+                    <th class="text-center">
+                        Team Registration Dates
+                    </th>
+                    <th class="text-center">
+                        Accept/Decline
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var pendingInvite in pendingInvites)
                 {
                     var period = pendingInvite.GetLatestRegistrationPeriod();
                     <tr>
                         <td>
-                            <a href="@Url.Action("summary", controller, new {id = pendingInvite.Uid})" class=" hide btn btn-default btn-sm"><i class="icon icon-left s7-date"></i> View</a>
+                            <a href="@Url.Action("summary", controller, new { id = pendingInvite.Uid })" class=" hide btn btn-default btn-sm"><i class="icon icon-left s7-date"></i> View</a>
                         </td>
                         <td>@pendingInvite.Name</td>
                         <td class="text-center">
@@ -81,18 +82,10 @@
                         </td>
                     </tr>
                 }
-            }
-            else
-            {
-                <tr>
-                    <td colspan="4">
-                        You currently have no League invitations.
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
+            </tbody>
+        </table>
+    </div>
+}
 
 @if (recentlyDeclinedInvites.Any())
 {
