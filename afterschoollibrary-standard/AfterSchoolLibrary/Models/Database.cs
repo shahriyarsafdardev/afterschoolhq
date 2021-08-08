@@ -594,6 +594,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_PackageFeature_FeatureTypeId_PackageId ON [PackageFeature] (PackageId,FeatureTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountPackageFeature_AccountPackageId ON [AccountPackageFeature] (AccountPackageId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountPackageFeature_AccountPackageId_FeatureTypeId ON [AccountPackageFeature] (AccountPackageId,FeatureTypeId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountPackageFeature_FeatureTypeId ON [AccountPackageFeature] (FeatureTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_File_AccountId ON [File] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityFile_ActivityId ON [ActivityFile] (ActivityId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityFile_FileId ON [ActivityFile] (FileId)"));

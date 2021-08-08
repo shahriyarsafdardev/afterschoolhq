@@ -1268,6 +1268,7 @@ property: FeatureTypeId, FeatureType, Int
 property: Max, decimal?, Decimal "10,2"
 loadmethod: AccountPackageId, List<>
 loadmethod: AccountPackageId|FeatureTypeId
+loadmethod: FeatureTypeId, List<>
 [end]
 
 [begin]

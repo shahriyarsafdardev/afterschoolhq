@@ -9,6 +9,7 @@ using AfterSchoolLibrary.Billing;
 using Lob.Models;
 using AfterSchool.Models;
 using System.Data;
+using Twilio.Rest.Api.V2010.Account.Usage.Record;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -867,6 +868,19 @@ namespace AfterSchoolLibrary.Services
                 return AccountPackage.LoadFirstFromListByAccountIdByIsActiveByOrderProperty(account.ID.Value, true, "CreateDate", OrderByDirectionEnum.Descending, msgs, dc);
 
             return null;
+        }
+
+        public static bool IsActiveAccountPackage(this Account account, Package package, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.IsActiveAccountPackage(package.ID, msgs, dc);
+        }
+
+        public static bool IsActiveAccountPackage(this Account account, int? packageId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (account.IsNotEmpty())
+                return account.GetActiveAccountPackage(msgs, dc)?.PackageId == packageId;
+
+            return false;
         }
 
         public static List<AccountPackage> GetAccountPackages(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
