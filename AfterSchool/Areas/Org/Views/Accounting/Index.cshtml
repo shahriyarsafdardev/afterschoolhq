@@ -2,7 +2,7 @@
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var account = SessionVariables.CurrentAccount;
-    var canProcessPayments = account.CanProcessPayments(msgs);
+    var useStripeConnectedAccount = account.HasFeature(FeatureType.UseStripeConnectedAccount);
     var transactionCount = ((PagingModel)ViewBag.PagingModel).TotalCount;
     var totalTransactionAmount = (decimal)ViewBag.TotalAmountPaid;
     var totalAmountRefunded = (decimal)ViewBag.TotalAmountRefunded;
@@ -500,8 +500,8 @@
     }
 
     function requestPayout() {
-        var canProcessPayments = @Json.Encode(canProcessPayments);
-        if (canProcessPayments) {
+        var useStripeConnectedAccount = @Json.Encode(useStripeConnectedAccount);
+        if (!useStripeConnectedAccount) {
             $("#TransactionIds").val(this.selectedTransactions.join());
             $("#requestPayoutForm").submit();
         } else {
