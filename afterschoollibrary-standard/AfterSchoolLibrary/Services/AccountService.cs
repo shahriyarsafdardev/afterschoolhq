@@ -9,6 +9,7 @@ using AfterSchoolLibrary.Billing;
 using Lob.Models;
 using AfterSchool.Models;
 using System.Data;
+using Twilio.Rest.Api.V2010.Account.Usage.Record;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -17,7 +18,12 @@ namespace AfterSchoolLibrary.Services
         public static bool HasFeature(this Account account, FeatureType featureType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (account.IsNotEmpty())
-                return (bool)account.GetActiveAccountPackage(msgs, dc)?.HasFeature(featureType, msgs, dc);
+            {
+                var ap = account.GetActiveAccountPackage(msgs, dc);
+
+                if (ap.IsNotEmpty())
+                    return (bool)ap.HasFeature(featureType, msgs, dc);
+            }
 
             return false;
         }
@@ -864,6 +870,19 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
+        public static bool IsActiveAccountPackage(this Account account, Package package, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.IsActiveAccountPackage(package.ID, msgs, dc);
+        }
+
+        public static bool IsActiveAccountPackage(this Account account, int? packageId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (account.IsNotEmpty())
+                return account.GetActiveAccountPackage(msgs, dc)?.PackageId == packageId;
+
+            return false;
+        }
+
         public static List<AccountPackage> GetAccountPackages(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return AccountPackage.LoadByAccountId(account.ID.Value, msgs, dc);
@@ -899,7 +918,7 @@ namespace AfterSchoolLibrary.Services
             var accountPackage = account.GetActiveAccountPackage(msgs, dc);
 
             if (accountPackage.IsNotEmpty())
-                return AccountPackageFeature.HasAccountPackageIdByFeatureTypeId(accountPackage.ID.Value, featureType, msgs, dc);
+                return AccountPackageFeature.HasAccountPackageByFeatureTypeId(accountPackage.ID.Value, featureType, msgs, dc);
 
             return false;
         }
@@ -909,7 +928,7 @@ namespace AfterSchoolLibrary.Services
             var accountPackage = account.GetActiveAccountPackage(msgs, dc);
 
             if (accountPackage.IsNotEmpty())
-                return AccountPackageFeature.HasAccountPackageIdByFeatureTypeIds(accountPackage.ID.Value, featureTypes, msgs, dc);
+                return AccountPackageFeature.HasAccountPackageByFeatureTypeIds(accountPackage.ID.Value, featureTypes, msgs, dc);
 
             return false;
         }
@@ -4062,6 +4081,7 @@ namespace AfterSchoolLibrary.Services
                     description: $"Transfer from AHQ to {account.Name} requested by {requestor.DisplayName} and approved by {loggedInUser.DisplayName}",
                     transferIdentifier: payout.Uid.ToString(),
                     destinationId: account.StripeUserId,
+                    chargeId: null,
                     metaData: metaData,
                     msgs: msgs);
 

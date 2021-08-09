@@ -18,51 +18,31 @@ namespace AfterSchoolLibrary.Migrations
                 {
                     var freePackage = Package.LoadByIsActive(true, amsgs, adc).Last(package => package.IsFree(BillingPeriodType.Month));
                     var freePackageFeatures = freePackage.GetFeatures(amsgs, adc);
-                    var accounts = Account.LoadByAccountTypeIds(AccountService.ProviderAccountTypesAndNotSet.ToList(), false, null, null, amsgs, adc);
 
-                    accounts.ForEach(account => {
-                        var accountPackage = account.GetActiveAccountPackage(amsgs, adc);
+                    freePackageFeatures.ForEach(packageFeature =>
+                    {
+                        var resetIfAcctValueIsGreaterThan = false;
+                        var accountTypes = AccountService.ProviderAccountTypes;
 
-                        if (accountPackage.PackageId == freePackage.ID)
+                        switch (packageFeature.FeatureTypeId)
                         {
-                            freePackageFeatures.ForEach(packageFeature =>
-                            {
-                                var accountPackageFeature = accountPackage.GetFeature(packageFeature.FeatureTypeId, amsgs, adc);
+                            case FeatureType.ManageLeagues:
+                                resetIfAcctValueIsGreaterThan = true;
+                                break;
 
-                                if (accountPackageFeature.IsEmpty())
-                                {
-                                    accountPackage.AddPackageFeature(packageFeature, new WebUser() { ID = 0 }, amsgs, adc);
-                                }
-                                else
-                                {
-                                    switch(accountPackageFeature.FeatureTypeId)
-                                    {
-                                        case FeatureType.PaymentsPercentageFee:
-                                        case FeatureType.PaymentsPercentageFlatFee:
-                                            break;
-                                        case FeatureType.ManageLeagues:
-                                            accountPackage.AddOrUpdatePackageFeature(
-                                                packageFeature.FeatureTypeId,
-                                                0,
-                                                new WebUser() { ID = 0 },
-                                                amsgs,
-                                                adc);
-                                            break;
-                                        default:
-                                            if (accountPackageFeature.Max < packageFeature.Max)
-                                                accountPackage.AddOrUpdatePackageFeature(
-                                                    packageFeature.FeatureTypeId,
-                                                    packageFeature.Max.Value,
-                                                    new WebUser() { ID = 0 },
-                                                    amsgs,
-                                                    adc);
-                                            
-                                            break;
-                                    }
-                                }
-
-                            });
+                            case FeatureType.UseStripeConnectedAccount:
+                                resetIfAcctValueIsGreaterThan = true;
+                                accountTypes = AccountService.IndividualProviderAccountTypes;
+                                break;
                         }
+
+                        packageFeature.ResetAllAccountFeaturesToPackageFeature(
+                            accountTypes.ToList(),
+                            resetIfAcctValueIsGreaterThan,
+                            new WebUser() { ID = 0 }, 
+                            amsgs, 
+                            adc);
+
                     });
 
                 },
