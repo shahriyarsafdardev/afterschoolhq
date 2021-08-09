@@ -9,7 +9,7 @@ using TechTalk.SpecFlow;
 using AfterSchoolUIAutomationTests.Helpers.Extensions;
 using AfterSchoolUIAutomationTests.Parameters;
 
-namespace AfterSchoolUIAutomationTests.Steps
+namespace AfterSchoolUIAutomationTests2.Steps
 {
     [Binding]
     public sealed class NewParentAccountActivityRegistrationStep : IDisposable
@@ -63,6 +63,18 @@ namespace AfterSchoolUIAutomationTests.Steps
             newParentAccountActivityRegistrationPage.PopulateZipCode(Parameter.Get("NewParentAccountActivityRegistration", "Zipcode"));
             newParentAccountActivityRegistrationPage.ClickHomeAddressNextBtn();
         }
+
+        [Given(@"Populate fields in step 3 additional parent, guardian form details and click save & continue")]
+        public void PopulateAdditionalParentGuardianFormAndClickNext()
+        {
+            //newParentAccountActivityRegistrationPage.GuardianFirstName(Parameter.Get("NewParentAccountActivityRegistration", ""));
+            //newParentAccountActivityRegistrationPage.GuardianLastName(Parameter.Get("NewParentAccountActivityRegistration", ""));
+            //newParentAccountActivityRegistrationPage.GuardianEmailElement(Parameter.Get("NewParentAccountActivityRegistration", ""));
+            //newParentAccountActivityRegistrationPage.GuardianMobileElement(Parameter.Get("NewParentAccountActivityRegistration", ""));
+            //newParentAccountActivityRegistrationPage.ClickHomeAddressNextBtn();
+        }
+
+
 
 
         public void Dispose()
