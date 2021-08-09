@@ -1940,7 +1940,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             ViewBag.Surveys = SurveyRequest.LoadByActivityId(activity.ID.Value, msgs);
-
+            ViewBag.Messages = msgs;
             return View(activity);
         }
 
@@ -1970,7 +1970,7 @@ namespace AfterSchool.Areas.Org.Controllers
               null,
               msgs);
 
-
+            ViewBag.Messages = msgs;
             return View(activity);
         }
 
@@ -2003,7 +2003,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     SurveyFeedbackService.CreateSurveyFeedback(surveyRequest.ID.Value, activityId, student.Value.ToInteger(), null, SurveyFeedbackStatus.New, currentAccount.ID.Value, currentUser.ID.Value, msgs);
                 }
             }
-
+            ViewBag.Messages = msgs;
             return RedirectToAction("Surveys", new { id });
         }
 
@@ -2021,6 +2021,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.GetSurveyFeedback = activity.GetSurveyFeedbacksByActivity(msgs).Where(a=>a.SurveyId == id).ToList();
             ViewBag.Survey = SurveyRequest.Load(id);
+            ViewBag.Messages = msgs;
 
             return View(activity);
         }
@@ -2032,15 +2033,15 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var fileLink = SurveyRequestService.ExportSurveyRequestToCSV(new List<string> {"Name", "Status", "Last Modified" }, id, currentAccount.ID.Value, "ExportCSV", msgs);
 
-            var filePath = Server.MapPath("~/ExportSurvey.csv");
+            var filePath = Server.MapPath("~/Uploads/" + Guid.NewGuid()+"ExportSurvey.csv");
 
             var client = new System.Net.WebClient();
             client.DownloadFile(fileLink, filePath);          
-
             byte[] filedata = System.IO.File.ReadAllBytes(filePath);
-
             client.Dispose();
-            return File(filedata, "application/octet-stream", "ExportResults.csv");
+
+            BackgroundJob.Enqueue(() => SurveyRequestService.DeleteCSVFile(filePath));
+            return File(filedata, "application/octet-stream", "ExportSurvey.csv");
         }
 
         public ActionResult ViewSurveyResults(int id, string activityId)
@@ -2065,6 +2066,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.SurveyName = SurveyRequest.Load(getSurveyFeedback.SurveyId.Value).Name;
             ViewBag.RegistrantName = Registrant.Load(getSurveyFeedback.RegistrantId.Value).Name;
             ViewBag.SurveyFeedback = getSurveyFeedback;
+            ViewBag.Messages = msgs;
 
             return View(activity);
         }

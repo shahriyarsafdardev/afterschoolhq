@@ -5,30 +5,29 @@
 @{Html.RenderPartial("OrgAccountHeader");}
 
 <div class="main-content">
-
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
     @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model); }
     <div class="panel panel-default">
         <div class="panel-body surveypanelpadding">
             <div class="row">
                 <div class="col-lg-6">
-                    <div style="" class="DDLMain">
-                        <span style="float:left;font-size:22px; margin-right:15px;">@Model.Name</span>
-                            <div class="dropdown" style="width: 54%;">
-                               <i class="s7-edit filterIcon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"></i>
-                              
-                              <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
-                                  <li><a href="javascript:void(0)" class="sortFilterAnchor" style="font-weight: bold;">Sort By:</a></li>
-                                  <li role="separator" class="divider"></li>
-                                  <li class="sort" data-index="3" data-order="asc"><a href="javascript:void(0)" class="sortFilterAnchor">Newest to oldest</a></li>
-                                  <li role="separator" class="divider"></li>
-                                  <li class="sort" data-index="3" data-order="desc"><a href="javascript:void(0)" class="sortFilterAnchor">Oldest to newest</a></li>
-                                  <li role="separator" class="divider"></li>
-                                  <li class="sort" data-index="2" data-order="asc"><a href="javascript:void(0)" class="sortFilterAnchor">Sender</a></li>
-                                  <li role="separator" class="divider"></li>
-                                  <li class="sort" data-index="1" data-order="asc"><a href="javascript:void(0)" class="sortFilterAnchor">Name</a></li>
-                              </ul>
+                    <div class="DDLMain">
+                        <span class="titleName">@Model.Name</span>
+                        <div class="dropdown" style="width: 54%;">
+                            <i class="s7-edit filterIcon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"></i>
+                            <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
+                                <li><a href="javascript:void(0)" class="sortFilterAnchor" style="font-weight: bold;">Sort By:</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li class="sort" data-index="3" data-order="desc"><a href="javascript:void(0)" class="sortFilterAnchor">Newest to oldest</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li class="sort" data-index="3" data-order="asc"><a href="javascript:void(0)" class="sortFilterAnchor">Oldest to newest</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li class="sort" data-index="2" data-order="asc"><a href="javascript:void(0)" class="sortFilterAnchor">Sender</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li class="sort" data-index="1" data-order="asc"><a href="javascript:void(0)" class="sortFilterAnchor">Name</a></li>
+                            </ul>
                         </div>
-                     </div>
+                    </div>
                     <div style="font-size:14px; color:#B2B2B4;clear: both;">@Model.AccountName</div>
                 </div>
                 <div class="col-lg-6">
@@ -39,7 +38,7 @@
             </div>
             <div style="clear:both"></div>
             <div class="margin-t-35">
-                <table class="table surveyTable">
+                <table class="table surveyTable sortTable">
                     <thead>
                         <tr>
                             <th></th>
@@ -74,27 +73,5 @@
 </div>
 
 @section scripts{
-     <script>
-         $(document).ready(function(){
-             $('.sort').click(function () {
-                 var index = $(this).attr("data-index");
-                 var order = $(this).attr("data-order");
-                 $(".selectedFilter").removeClass("selectedFilter");
-                 $(this).find("a").addClass("selectedFilter");
-                 var table = $(".surveyTable");
-                 var rows = table.find('tr:gt(0)').toArray().sort(comparer(index))
-                 this.asc = !this.asc
-                 if (order == "desc") { rows = rows.reverse();}
-                 for (var i = 0; i < rows.length; i++) { table.append(rows[i]) }
-             })
-             function comparer(index) {
-                 return function (a, b) {
-                     var valA = getCellValue(a, index), valB = getCellValue(b, index)
-                     return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.toString().localeCompare(valB)
-                 }
-             }
-             function getCellValue(row, index) { return $(row).children('td').eq(index).text() }
-     
-         })
-    </script>
+     <script src="~/Assets/lib/customTableSorter.js"></script>
 }

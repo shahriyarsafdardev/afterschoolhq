@@ -6,7 +6,7 @@
 @{Html.RenderPartial("OrgAccountHeader");}
 
 <div class="main-content">
-
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
     @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model); }
     <div class="panel panel-default">
         <div class="panel-body surveypanelpadding">
@@ -16,8 +16,8 @@
             </div>
             <div class="col-lg-6">
                 <div class="pull-right iconsViewResults">
-                     <a href="@(ViewBag.PrevExists != null ? Url.Action("viewsurveyresults", "activity", new { id = ViewBag.PrevExists, activityId = Model.Uid }) : "javascript:void(0)")" style="color: #494949;" class="@(ViewBag.PrevExists != null ? "" : "noCursor")"><span class="s7-angle-left arrowBtns"></span></a>
-                     <a href="@(ViewBag.NextExists != null ? Url.Action("viewsurveyresults", "activity", new { id = ViewBag.NextExists, activityId = Model.Uid }) : "javascript:void(0)")" style="color: #494949;" class="@(ViewBag.NextExists != null ? "" : "noCursor")"><span class="s7-angle-right arrowBtns"></span></a>
+                    <a href="@(ViewBag.PrevExists != null ? Url.Action("viewsurveyresults", "activity", new { id = ViewBag.PrevExists, activityId = Model.Uid }) : "javascript:void(0)")" style="color: #494949;" class="@(ViewBag.PrevExists != null ? "" : "noCursor")"><span class="s7-angle-left arrowBtns"></span></a>
+                    <a href="@(ViewBag.NextExists != null ? Url.Action("viewsurveyresults", "activity", new { id = ViewBag.NextExists, activityId = Model.Uid }) : "javascript:void(0)")" style="color: #494949;" class="@(ViewBag.NextExists != null ? "" : "noCursor")"><span class="s7-angle-right arrowBtns"></span></a>
                 </div>
             </div>
             <div style="clear:both"></div>

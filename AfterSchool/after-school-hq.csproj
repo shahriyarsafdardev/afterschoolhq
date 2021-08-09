@@ -670,6 +670,7 @@
     <Content Include="Assets\css\media_xs.css" />
     <Content Include="Assets\js\ahq-profiles.js" />
     <Content Include="Assets\js\underscore-min.js" />
+    <Content Include="Assets\lib\customTableSorter.js" />
     <Content Include="case-study-cfi70.html" />
     <Content Include="contact.html" />
     <Content Include="Content\quill.bubble.css" />
@@ -1844,6 +1845,7 @@
     <Folder Include="Areas\WebHooks\Views\Shared\" />
     <Folder Include="Areas\WebHooks\Views\Stripe\" />
     <Folder Include="Areas\WebHooks\Views\Twilio\" />
+    <Folder Include="Uploads\" />
     <Folder Include="Views\Indianapolis\" />
     <Folder Include="Views\Sitemap\" />
     <Folder Include="Views\User\" />

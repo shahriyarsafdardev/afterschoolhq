@@ -6,19 +6,40 @@
 
 @{Html.RenderPartial("OrgAccountHeader");}
 <div class="main-content">
-
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
     @{Html.RenderPartial("_RegistrationHeader");}
     <div id="studentcrmcontainer" class="panel panel-default">
         <div class="panel-body">
             <div class="row">
-                <div class="col-lg-6">
-                    <div style="font-size:22px">@user.FirstName @user.LastName</div>
+                <div class="col-lg-3">
+
+                    <div  class="DDLMain">
+                        <span  class="titleName">@user.FirstName @user.LastName</span>
+                        <div class="dropdown">
+                            <i class="s7-edit filterIcon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"></i>
+
+                            <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
+                                <li><a href="javascript:void(0)" class="sortFilterAnchor" style="font-weight: bold;">Sort By:</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li class="sort" data-index="4" data-order="desc"><a href="javascript:void(0)" class="sortFilterAnchor">Newest to oldest</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li class="sort" data-index="4" data-order="asc"><a href="javascript:void(0)" class="sortFilterAnchor">Oldest to newest</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li class="sort" data-index="2" data-order="asc"><a href="javascript:void(0)" class="sortFilterAnchor">Group by Activity</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li class="sort" data-index="3" data-order="asc"><a href="javascript:void(0)" class="sortFilterAnchor">Group by Sender</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li class="sort" data-index="1" data-order="asc"><a href="javascript:void(0)" class="sortFilterAnchor">Alphabetically</a></li>
+
+                            </ul>
+                        </div>
+                    </div>
                 </div>
-                
+
             </div>
             <div style="clear:both"></div>
             <div class="margin-t-35">
-                <table class="table surveyTable">
+                <table class="table surveyTable sortTable">
                     <thead>
                         <tr>
                             <th></th>
@@ -56,3 +77,6 @@
         </div>
     </div>
 </div>
+@section scripts{
+    <script src="~/Assets/lib/customTableSorter.js"></script>
+}

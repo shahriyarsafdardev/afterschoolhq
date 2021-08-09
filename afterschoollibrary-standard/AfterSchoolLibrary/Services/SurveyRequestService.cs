@@ -135,5 +135,13 @@ namespace AfterSchoolLibrary.Services
 
             return null;
         }
+
+        public static void DeleteCSVFile(string path)
+        {
+            if (System.IO.File.Exists(path))
+            {
+                System.IO.File.Delete(path);
+            }
+        }
     }
 }
