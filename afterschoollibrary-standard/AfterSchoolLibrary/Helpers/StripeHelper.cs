@@ -662,8 +662,8 @@ namespace AfterSchoolLibrary.Billing
             } 
             catch (StripeException ex)
             {
-                msgs.Add(ex.Message, MessageType.UserError, ex);
-                msgs.Add($"Unable to retrieve price", MessageType.ApiError);
+                //msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Unable to retrieve price", MessageType.Notice);
             }
 
             return price;
