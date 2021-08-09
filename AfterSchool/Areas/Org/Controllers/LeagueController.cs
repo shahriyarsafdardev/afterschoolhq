@@ -26,11 +26,13 @@ namespace AfterSchool.Areas.Org.Controllers
             var groups = new List<ActivityGroup>();  //internal Leagues
             var extAccountActivityGroups = new List<AccountActivityGroup>();
             var acceptedInvites = new List<ActivityGroup>();
+            var recentlyDeclinedInvites = new List<ActivityGroup>();
             var pendingInvites = new List<ActivityGroup>();
             var internalGroups = new List<ActivityGroup>();
             int pageNumber = 1;
             int recordsPerPage = 10;
             bool isArchived = false;
+            var currentAccount = SessionVariables.CurrentAccount;
 
             if (pn.IsNumber() && pn.ToInteger() > 0)
                 pageNumber = pn.ToInteger();
@@ -46,12 +48,20 @@ namespace AfterSchool.Areas.Org.Controllers
             var totalCount = 0;
             var hasArchivedGroups = false;
 
-            totalCount = SessionVariables.CurrentAccount.GetLeagueCount(isArchived);
-            groups = SessionVariables.CurrentAccount.GetLeagues(isArchived, start, length).OrderByDescending(x => x.CreateDate).ToList();
-            extAccountActivityGroups = AccountActivityGroup.LoadByAccountId(SessionVariables.CurrentAccount.ID.Value);
+            totalCount = currentAccount.GetLeagueCount(isArchived);
+            groups = currentAccount.GetLeagues(isArchived, start, length).OrderByDescending(x => x.CreateDate).ToList();
+            extAccountActivityGroups = AccountActivityGroup.LoadByAccountId(currentAccount.ID.Value);
 
             acceptedInvites = extAccountActivityGroups
                 .Where(aag => aag.InviteStatusId == InviteStatus.Accepted && !aag.ActivityGroupIsArchived)
+                .Select(aag => aag.GetActivityGroup())
+                .ToList();
+
+            recentlyDeclinedInvites = extAccountActivityGroups
+                .Where(aag => 
+                    aag.InviteStatusId == InviteStatus.Declined && 
+                    !aag.ActivityGroupIsArchived && 
+                    aag.CreateDate.Value.IsAfter(DateTime.UtcNow.AddDays(-30)))
                 .Select(aag => aag.GetActivityGroup())
                 .ToList();
 
@@ -81,6 +91,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.pendingInvites = pendingInvites;
             ViewBag.acceptedInvites = acceptedInvites;
             ViewBag.ExternalGroups = acceptedInvites;
+            ViewBag.RecentlyDeclinedInvites = recentlyDeclinedInvites;
             ViewBag.InternalGroups = internalGroups;
             
             return groups;
