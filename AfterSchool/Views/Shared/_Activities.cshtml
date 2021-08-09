@@ -370,7 +370,7 @@ else
                                         }
                                     }
 
-                                    @if (currentUser.IsActivityLeader(activity))
+                                    @if (currentUser.IsActivityLeader(activity) || SessionVariables.AccountUserType.In(AccountService.AdminUserTypes))
                                     {
                                         if (!activity.IsGroupArchived)
                                         {
@@ -384,7 +384,10 @@ else
                                             }
                                         }
 
-                                        <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("delete", "activity", new { id = activity.Uid.ToString() })')"><span class="text-danger"><i class="s7-trash"></i></span></button>
+                                        if (currentUser.IsActivityLeader(activity))
+                                        {
+                                            <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("delete", "activity", new { id = activity.Uid.ToString() })')"><span class="text-danger"><i class="s7-trash"></i></span></button>
+                                        }
                                     }
                                 </div>
                             </td>
