@@ -403,19 +403,9 @@ namespace AfterSchoolLibrary.Models
             return !this.IsFree && this.IsTrialOver && !account.HasPaymentCard;
         }
 
-        public void ResetFeatureList()
-        {
-            this._Features = null;
-        }
-
-        private List<AccountPackageFeature> _Features;
         public List<AccountPackageFeature> GetFeatures(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if(_Features.IsEmpty())
-            {
-                _Features = AccountPackageFeature.LoadByAccountPackageId(this.ID.Value, msgs, dc);
-            }
-            return _Features;
+            return AccountPackageFeature.LoadByAccountPackageId(this.ID.Value, msgs, dc);
         }
 
         public SystemMessages UpdateTrialDays(int trialDays, DatabaseConnection dc)

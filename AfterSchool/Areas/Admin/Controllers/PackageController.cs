@@ -9,6 +9,7 @@ using AfterSchoolLibrary;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using System.Data;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchool.Areas.Admin.Controllers
 {
@@ -143,6 +144,37 @@ namespace AfterSchool.Areas.Admin.Controllers
             ViewBag.Features = features;
             ViewBag.Messages = msgs;
             return View(package);
+        }
+
+        public ActionResult ResetFeature(int packageId, int featureTypeId, decimal featureValue, string accountTypeIds, bool resetIfAcctValueGreaterThan)
+        {
+            var msgs = new SystemMessages();
+            var package = Package.Load(packageId, msgs);
+            var featureType = featureTypeId.ToEnum<FeatureType>();
+            var packageFeature = package.GetFeature(featureType, msgs);
+            var accountTypeIdList = accountTypeIds.Split(',').Select(x => (AccountType)x.ToInteger()).ToList();
+            var currentUser = SessionVariables.CurrentUser;
+
+            packageFeature.Max = featureValue;
+            packageFeature.LastModifiedBy = currentUser.ID.Value;
+            packageFeature.LastModifiedDate = DateTime.UtcNow;
+            msgs.AddRange(packageFeature.Save());
+
+            packageFeature.ResetAllAccountFeaturesToPackageFeature(
+                accountTypeIdList, 
+                resetIfAcctValueGreaterThan, 
+                currentUser, 
+                msgs);
+
+
+            var features = package.GetFeatures(msgs);
+
+            msgs.Add("Package Saved and account features have been reset", MessageType.Success);
+
+            ViewBag.Features = features;
+            ViewBag.Messages = msgs;
+
+            return View("edit", package);
         }
 
         [HttpGet]
