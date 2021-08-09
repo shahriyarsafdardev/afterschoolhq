@@ -256,6 +256,8 @@ namespace AfterSchoolLibrary.Models
 			StripeAccount.Update(new Hashtable(){{"FailedDetailsCode",0}}, new Hashtable(){{"FailedDetailsCode", DBNull.Value}}, StripeAccount.ObjectMap, dc);
 			AccountRelationship.Update(new Hashtable(){{"HostPermissionTypeId",0}}, new Hashtable(){{"HostPermissionTypeId", DBNull.Value}}, AccountRelationship.ObjectMap, dc);
 			AccountRelationship.Update(new Hashtable(){{"ApprovalStatusId",0}}, new Hashtable(){{"ApprovalStatusId", DBNull.Value}}, AccountRelationship.ObjectMap, dc);
+			AccountRelationship.Update(new Hashtable(){{"RequiresPublishPermission",false}}, new Hashtable(){{"RequiresPublishPermission", DBNull.Value}}, AccountRelationship.ObjectMap, dc);
+			AccountRelationship.Update(new Hashtable(){{"ShowAllPrograms",false}}, new Hashtable(){{"ShowAllPrograms", DBNull.Value}}, AccountRelationship.ObjectMap, dc);
 			AccountProperty.Update(new Hashtable(){{"AccountPropertyTypeId",0}}, new Hashtable(){{"AccountPropertyTypeId", DBNull.Value}}, AccountProperty.ObjectMap, dc);
 			AccountWebUser.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, AccountWebUser.ObjectMap, dc);
 			AccountWebUser.Update(new Hashtable(){{"IsDefault",false}}, new Hashtable(){{"IsDefault", DBNull.Value}}, AccountWebUser.ObjectMap, dc);
@@ -592,6 +594,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_PackageFeature_FeatureTypeId_PackageId ON [PackageFeature] (PackageId,FeatureTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountPackageFeature_AccountPackageId ON [AccountPackageFeature] (AccountPackageId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountPackageFeature_AccountPackageId_FeatureTypeId ON [AccountPackageFeature] (AccountPackageId,FeatureTypeId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountPackageFeature_FeatureTypeId ON [AccountPackageFeature] (FeatureTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_File_AccountId ON [File] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityFile_ActivityId ON [ActivityFile] (ActivityId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityFile_FileId ON [ActivityFile] (FileId)"));

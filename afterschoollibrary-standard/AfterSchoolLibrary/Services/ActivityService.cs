@@ -1586,6 +1586,8 @@ namespace AfterSchoolLibrary.Services
                         visitorAccount: providerAccount,
                         hostPermissionType: HostPermissionType.ApproveOnly,
                         approvalStatus: ApprovalStatus.Approved,
+                        requiresPublishPermission: true,
+                        showAllPrograms: false,
                         loggedInUser: loggedInUser,
                         dc: dc));
 
@@ -2598,6 +2600,20 @@ namespace AfterSchoolLibrary.Services
                 return true;
             
             if (regPeriod.IsRecentlyClosed(account, msgs, dc))
+                return true;
+
+            return false;
+        }
+
+        public static bool IsOpen(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var regPeriod = activity.GetActiveRegistrationPeriod(msgs, dc);
+
+            if (regPeriod.IsEmpty())
+                return false;
+
+            var account = activity.GetAccount(msgs, dc);
+            if (regPeriod.IsOpen(account, msgs, dc))
                 return true;
 
             return false;

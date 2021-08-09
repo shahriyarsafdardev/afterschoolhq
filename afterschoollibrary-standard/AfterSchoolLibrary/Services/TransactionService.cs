@@ -77,7 +77,7 @@ namespace AfterSchoolLibrary.Services
                 return transaction.Amount.Value;
             };
 
-            return Math.Max(transaction.Amount.Value - transaction.GetFees() - transaction.GetRefundedAmountAHQ(msgs, dc),0);
+            return Math.Max(transaction.Amount.Value - transaction.GetFees() - transaction.GetRefundedAmountAHQ(msgs, dc), 0);
         }
 
         public static decimal GetPayerAmount(this Transaction transaction)
@@ -793,6 +793,64 @@ namespace AfterSchoolLibrary.Services
             }
 
             return false;
+        }
+
+        public static Stripe.Charge GetStripeCharge(this Transaction transaction, SystemMessages msgs)
+        {
+            if (transaction.TransactionTypeId == TransactionType.Charge)
+                return StripeHelper.GetCharge(transaction.StripeChargeOrRefundId, msgs);
+
+            return null;
+        }
+
+        public static bool HasStripeTransfer(this Transaction transaction, SystemMessages msgs)
+        {
+            var charge = transaction.GetStripeCharge(msgs);
+
+            if (charge.IsNotEmpty())
+                return charge.TransferId.IsNotEmpty() || charge.TransferGroup.IsNotEmpty();
+
+            return false;
+        }
+
+        public static Stripe.Transfer CreateStripeTransfer(this Transaction transaction, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (transaction.UsedStripeConnect)
+                return null;
+
+            if (transaction.HasStripeTransfer(msgs))
+            {
+                msgs.Add("Already has associated transfer", MessageType.Notice);
+                return null;
+            }
+
+            var billerAmount = transaction.GetBillerAmount(msgs, dc);
+            var billerAccount = transaction.GetBillerAccount(msgs, dc);
+            var hasStripeUserId = billerAccount.StripeUserId.IsNotEmpty();
+            var useStripeConnectedAccount = billerAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
+
+            if (hasStripeUserId && useStripeConnectedAccount && !transaction.PayoutId.HasValue && billerAccount.StripePayoutsEnabled)
+            {
+                var transfer = StripeHelper.CreateTransfer(
+                                billerAmount,
+                                transaction.Description,
+                                transaction.Uid.ToString(),
+                                billerAccount.StripeUserId,
+                                transaction.StripeChargeOrRefundId,
+                                new Dictionary<string, string>()
+                                {
+                                    { "TransactionUid", transaction.Uid.ToString() },
+                                    { "StripeCharge", transaction.StripeChargeOrRefundId },
+                                },
+                                msgs);
+
+                if (transfer.IsEmpty())
+                    msgs.Add("Error creating transfer", MessageType.UserError);
+
+                return transfer;
+            }
+
+            return null;
         }
     }
 }

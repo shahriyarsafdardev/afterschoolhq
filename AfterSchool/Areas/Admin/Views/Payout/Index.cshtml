@@ -181,6 +181,12 @@
                                                         Deny
                                                     </button>
                                                 }
+
+                                                <button class="btn btn-sm btn-default md-trigger"
+                                                        data-modal="modal-payout-delete"
+                                                        onclick="deletePayout('@payout.Uid', @payout.Amount.Value, '@UI.JavascriptSafeString(account.Name)')">
+                                                    Delete
+                                                </button>
                                             }
                                             else if (payout.PayoutStatusId.In(new List<PayoutStatus> { PayoutStatus.Approved, PayoutStatus.InProgress }))
                                             {
@@ -324,12 +330,30 @@
     </form>
 </div>
 
+@{ 
+    Html.RenderPartial(
+        "~/Views/Shared/_Modal.cshtml",
+        new ModalViewModel() { 
+            ActionButtonHtml = "Delete Payout &gt;",
+            ActionButtonId = "btn-delete-payout",
+            ID = "modal-payout-delete",
+            HtmlBody = "Are you sure you want to delete this payout for <span class=\"delete-payout-account\"></span> in the amount of <span class=\"delete-payout-amount\"></span>? This action cannot be undone.",
+            Title = "Delete Payout Confirmation"
+        });
+}
+
 <script>
     var selectedPayoutId = null;
 
     function approve(payoutId, amount, accountName) {
         $('.approve-payout-amount').html(amount);
         $('.approve-payout-account').html(accountName);
+        selectedPayoutId = payoutId;
+    }
+
+    function deletePayout(payoutId, amount, accountName) {
+        $('.delete-payout-amount').html(amount);
+        $('.delete-payout-account').html(accountName);
         selectedPayoutId = payoutId;
     }
 
@@ -372,12 +396,6 @@
                 }
             }
         )
-    }
-
-    function deny(payoutId, amount, accountName) {
-        $('.deny-payout-amount').html(amount);
-        $('.deny-payout-account').html(accountName);
-        selectedPayoutId = payoutId;
     }
 
     function showApproveWaiting() {
@@ -475,6 +493,27 @@
                 showComplete,
                 showCompleteWaiting,
                 showCompleteDone
+            );
+        });
+
+        $('#btn-delete-payout').click(function () {
+            $.post(
+                '@Url.Action("delete", "payout")',
+                'uid=' + selectedPayoutId,
+                function (data) {
+                    if (data && data.status == 'ok') {
+
+                        Notifications.showBar({
+                            title: 'Success',
+                            success: true,
+                            message: 'Payout deleted.'
+                        });
+                        reloadPage();
+
+                    } else {                       
+                        Notifications.showErrors(data.messages);
+                    }
+                }
             );
         });
     });
