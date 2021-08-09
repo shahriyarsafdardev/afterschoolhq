@@ -24,10 +24,16 @@
         hidden = ViewData["hidden"].ToString();
     }
 
+    var onclick = "";
+    if (ViewData["onclick"].IsNotEmpty())
+    {
+        onclick = $"onclick=\"{ViewData["onclick"].ToString()}\"";
+    }
+
 }
 
 <div class="switch-button switch-button-yesno @hidden">
-    <input type="checkbox" name="@ViewData["checkboxname"]" id="@ViewData["checkboxid"]" value="1" @(Model ? " checked=\"checked\" " : "") @disabled @required class="@className" />
+    <input type="checkbox" name="@ViewData["checkboxname"]" id="@ViewData["checkboxid"]" @Html.Raw(onclick) value="1" @(Model ? " checked=\"checked\" " : "") @disabled @required class="@className" />
     <span>
         <label for="@ViewData["checkboxid"]"></label>
     </span>

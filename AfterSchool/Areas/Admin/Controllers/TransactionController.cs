@@ -135,6 +135,27 @@ namespace AfterSchool.Areas.Admin.Controllers
             return Json(new { status = "error", messages = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
         }
 
+        [HttpGet]
+        public ActionResult CreateTransfer(string id)
+        {
+            var msgs = new SystemMessages();
+
+            if (id.IsGuid())
+            {
+                var transaction = Transaction.LoadByUid(id.ToGuid(), msgs);
+
+                if (transaction.IsNotEmpty())
+                {
+                    var transfer = transaction.CreateStripeTransfer(msgs);
+
+                    if (msgs.HasNoErrors() && transfer.IsNotEmpty())
+                        return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+                }
+            }
+
+            return Json(new { status = "error", messages = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
+        }
+
         [HttpPost]
         public ActionResult Create(Guid accountUid, decimal amount, int transactionType, string note)
         {

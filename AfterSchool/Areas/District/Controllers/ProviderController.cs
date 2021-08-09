@@ -111,6 +111,8 @@ namespace AfterSchool.Areas.District.Controllers
                                 account,
                                 HostPermissionType.Edit,
                                 ApprovalStatus.Approved,
+                                true,
+                                false,
                                 SessionVariables.CurrentUser,
                                 adc
                             )

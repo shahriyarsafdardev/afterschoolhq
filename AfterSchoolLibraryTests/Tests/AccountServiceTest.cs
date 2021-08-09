@@ -1062,6 +1062,38 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         [Fact]
+        public void GetPublishedOpenActivitiesTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var activity2 = ActivityFactory.Create(account, msgs, dc);
+            var activity3 = ActivityFactory.Create(account, msgs, dc);
+            var activity4 = ActivityFactory.Create(account, msgs, dc);
+            var period = RegistrationPeriodFactory.Create(account, msgs, dc);
+            var period2 = RegistrationPeriodFactory.Create(account, DateTime.UtcNow.AddDays(1), DateTime.UtcNow.AddDays(12), msgs, dc);
+            var period3 = RegistrationPeriodFactory.Create(account, DateTime.UtcNow.AddDays(-12), DateTime.UtcNow.AddDays(-1), msgs, dc);
+            var period4 = RegistrationPeriodFactory.Create(account, msgs, dc);
+
+            msgs.AddRange(period.AddActivity(activity, true, user.ID.Value, dc));
+            msgs.AddRange(period2.AddActivity(activity2, true, user.ID.Value, dc));
+            msgs.AddRange(period3.AddActivity(activity3, true, user.ID.Value, dc));
+            msgs.AddRange(period4.AddActivity(activity4, true, user.ID.Value, dc));
+
+            activity.Publish(user, msgs, dc);
+            activity2.Publish(user, msgs, dc);
+            activity3.Publish(user, msgs, dc);
+
+            // Act 
+            var activities = account.GetPublishedOpenedActivities(msgs: msgs, dc: dc);
+
+            // Assert
+            Assert.Single(activities);
+            Assert.True(activity.IsPubliclyViewable);
+            Assert.True(msgs.HasNoErrors());
+            Assert.Equal(expected: activity.ID.Value, actual: activities.First().ID.Value);
+        }
+
+        [Fact]
         public void GetPublishedActivitiesSchoolAccountTest()
         {
             // Arrange
@@ -1388,10 +1420,19 @@ namespace AfterSchoolLibraryTests.Tests
                 var visitorAccount = AccountFactory.Create(visitorOwner, msgs, dc);
                 var hostOwner = WebUserFactory.Create(msgs, dc);
                 var hostAccount = AccountFactory.Create(hostOwner, msgs, dc);
-                var accountRelationship = AccountRelationshipService.CreateNew(hostAccount, visitorAccount, ApprovalStatus.Approved, HostPermissionType.Edit, user, msgs, dc);
+                var accountRelationship = AccountRelationshipService.CreateNew(
+                    hostAccount, 
+                    visitorAccount, 
+                    ApprovalStatus.Approved, 
+                    HostPermissionType.Edit,
+                    true,
+                    false,
+                    user, 
+                    msgs, 
+                    dc);
                 
                 // Act                
-                var expected = hostAccount.GetAccountRelationship(Id: accountRelationship.ID.Value, msgs: msgs, dc: dc);
+                var expected = hostAccount.GetAccountRelationship(accountRelationshipId: accountRelationship.ID.Value, msgs: msgs, dc: dc);
 
                 // Assert
                 Assert.Equal(expected: expected.ID, actual: accountRelationship.ID);                
@@ -1640,7 +1681,7 @@ namespace AfterSchoolLibraryTests.Tests
                 var schoolActivity2 = ActivityFactory.Create(schoolAccount, msgs, dc);
                 schoolActivity2.Publish(schoolAccountOwner, msgs, dc);
 
-                var GetActivityCount = AccountService.GetActiveAndPublishedActivityCount(account, msgs, dc);
+                var GetActivityCount = AccountService.GetActiveAndPublishedActivityCount(account, true, msgs, dc);
 
                 // Assert
                 Assert.Equal(2, GetActivityCount);
@@ -2306,7 +2347,16 @@ namespace AfterSchoolLibraryTests.Tests
             var visitorAccount = AccountFactory.Create(visitorOwner, msgs, dc);
             var hostOwner = WebUserFactory.Create(msgs, dc);
             var hostAccount = AccountFactory.Create(hostOwner, msgs, dc);
-            var accountRelationship = AccountRelationshipService.CreateNew(hostAccount, visitorAccount, ApprovalStatus.Approved, HostPermissionType.Edit, user, msgs, dc);
+            var accountRelationship = AccountRelationshipService.CreateNew(
+                hostAccount, 
+                visitorAccount, 
+                ApprovalStatus.Approved, 
+                HostPermissionType.Edit, 
+                true,
+                false,
+                user, 
+                msgs, 
+                dc);
 
             // Act
             var expected = visitorAccount.IsApprovedAsVisitorTo(hostAccount: hostAccount, msgs: msgs, dc: dc);
@@ -2323,7 +2373,16 @@ namespace AfterSchoolLibraryTests.Tests
             var visitorAccount = AccountFactory.Create(visitorOwner, msgs, dc);
             var hostOwner = WebUserFactory.Create(msgs, dc);
             var hostAccount = AccountFactory.Create(hostOwner, msgs, dc);
-            var accountRelationship = AccountRelationshipService.CreateNew(hostAccount, visitorAccount, ApprovalStatus.Denied, HostPermissionType.Edit, user, msgs, dc);
+            var accountRelationship = AccountRelationshipService.CreateNew(
+                hostAccount,
+                visitorAccount,
+                ApprovalStatus.Denied,
+                HostPermissionType.Edit,
+                true,
+                false,
+                user,
+                msgs,
+                dc);
 
             // Act
             var expected = visitorAccount.IsApprovedAsVisitorTo(hostAccount: hostAccount, msgs: msgs, dc: dc);
@@ -2532,6 +2591,26 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Single(sessions);
             Assert.Equal(activityGroup1.ID, sessions.First().ID);
             Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void IsLocationOwnerTest()
+        {
+            var user = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(user, msgs, dc);
+            var activity = ActivityFactory.Create(account, msgs, dc);
+
+            var schoolUser = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolUser, msgs, dc);
+            var location = LocationFactory.Create(schoolAccount, msgs, dc);
+
+            activity.SetLocation(location, user, msgs, dc);
+
+            var isUserAccountLocationOwner = account.IsLocationOwner(activity, msgs, dc);
+            var isSchoolProviderLocationOwner = schoolAccount.IsLocationOwner(activity, msgs, dc);
+
+            Assert.False(isUserAccountLocationOwner);
+            Assert.True(isSchoolProviderLocationOwner);
         }
     }
 }

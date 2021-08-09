@@ -123,6 +123,8 @@ namespace AfterSchoolLibrary.Services
                         visitorAccount: visitorAccount,
                         approvalStatus: ApprovalStatus.Requested,
                         hostPermissionType: HostPermissionType.ApproveOnly,
+                        requiresPublishPermission: true,
+                        showAllPrograms: false,
                         loggedInUser: loggedInUser,
                         msgs: msgs,
                         dc: dc);
