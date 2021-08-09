@@ -32,6 +32,7 @@
         theme: 'snow'
     });
 
+    var valueOnPageLoadFor_@javascriptVarName = "";
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         $('form').submit(function () {
 
@@ -48,12 +49,23 @@
         @(javascriptVarName).getModule('toolbar').addHandler('image', () => {
             selectLocalImage@(javascriptAppendName)();
         });
+
+        valueOnPageLoadFor_@javascriptVarName = @(javascriptVarName).getText().trim();
+
+        $(".reset").on('click', function () {
+             @(javascriptVarName).root.innerHTML = valueOnPageLoadFor_@javascriptVarName;
+             $('#@ViewData["id"]').val(@(javascriptVarName).root.innerHTML);
+             $('#@ViewData["id"]').attr('data', @(javascriptVarName).getText());
+        });
     });
+
+ 
 
     @(javascriptVarName).on('text-change', function () {
         $('#@ViewData["id"]').val(@(javascriptVarName).root.innerHTML);
         $('#@ViewData["id"]').attr('data', @(javascriptVarName).getText());
     });
+
 
     function selectLocalImage@(javascriptAppendName)() {
         const input = document.createElement('input');
