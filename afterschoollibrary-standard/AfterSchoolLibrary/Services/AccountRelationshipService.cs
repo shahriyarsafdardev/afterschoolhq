@@ -19,14 +19,14 @@ namespace AfterSchoolLibrary.Services
             return Account.Load(ar.VisitorAccountId.Value, msgs, dc);
         }
 
-        public static AccountRelationship GetOrCreateNew(Account hostAccount, Account visitorAccount, ApprovalStatus approvalStatus, HostPermissionType hostPermissionType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static AccountRelationship GetOrCreateNew(Account hostAccount, Account visitorAccount, ApprovalStatus approvalStatus, HostPermissionType hostPermissionType, bool requiresPublishPermission, bool showAllPrograms, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var accountRelationship = AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value, visitorAccount.ID.Value, msgs, dc);
 
-            return accountRelationship ?? CreateNew(hostAccount, visitorAccount, approvalStatus, hostPermissionType, loggedInUser, msgs, dc);
+            return accountRelationship ?? CreateNew(hostAccount, visitorAccount, approvalStatus, hostPermissionType, requiresPublishPermission, showAllPrograms, loggedInUser, msgs, dc);
         }
 
-        public static AccountRelationship CreateNew(Account hostAccount, Account visitorAccount, ApprovalStatus approvalStatus, HostPermissionType hostPermissionType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static AccountRelationship CreateNew(Account hostAccount, Account visitorAccount, ApprovalStatus approvalStatus, HostPermissionType hostPermissionType, bool requiresPublishPermission, bool showAllPrograms, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var accountRelationship = AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value, visitorAccount.ID.Value, msgs, dc);
 
@@ -38,6 +38,8 @@ namespace AfterSchoolLibrary.Services
                     HostAccountId = hostAccount.ID,
                     ApprovalStatusId = approvalStatus,
                     HostPermissionTypeId = hostPermissionType,
+                    RequiresPublishPermission = requiresPublishPermission,
+                    ShowAllPrograms = showAllPrograms,
                     CreatedBy = loggedInUser.ID,
                     CreateDate = DateTime.UtcNow,
                     LastModifiedBy = loggedInUser.ID,
@@ -69,6 +71,26 @@ namespace AfterSchoolLibrary.Services
                 msgs.Add("No access request found", MessageType.UserError);
 
             return msgs;
+        }
+        
+        public static void UpdateRequiresPublishPermission(this AccountRelationship accountRelationship, bool requiresPublishPermission, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            accountRelationship.RequiresPublishPermission = requiresPublishPermission;
+
+            if (requiresPublishPermission)
+                accountRelationship.ShowAllPrograms = false;
+
+            accountRelationship.LastModifiedDate = DateTime.UtcNow;
+            accountRelationship.LastModifiedBy = loggedInUser.ID.Value;
+            msgs.AddRange(accountRelationship.Save(dc));
+        }
+
+        public static void UpdateShowAllPrograms(this AccountRelationship accountRelationship, bool showAllPrograms, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            accountRelationship.ShowAllPrograms = showAllPrograms;
+            accountRelationship.LastModifiedDate = DateTime.UtcNow;
+            accountRelationship.LastModifiedBy = loggedInUser.ID.Value;
+            msgs.AddRange(accountRelationship.Save(dc));
         }
     }
 }

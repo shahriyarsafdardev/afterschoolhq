@@ -172,6 +172,10 @@
                                 var registrant = transaction.GetPurchase()?.GetRegistrant();
                                 var currentStatus = transaction.GetStatus();
                                 var disableChk = !transaction.CanRequestPayout() ? "disabled" : "";
+                                var billerAccount = transaction.GetBillerAccount();
+                                var payerAccount = transaction.GetPayerAccount();
+                                var useStripeConnect = billerAccount.HasFeature(FeatureType.UseStripeConnectedAccount);
+                                var enableTransfer = !transaction.UsedStripeConnect && !transaction.PayoutId.HasValue && useStripeConnect && billerAccount.StripePayoutsEnabled;
 
                                 <tr id="row-@transaction.Uid">
                                     <td>
@@ -181,10 +185,10 @@
                                         @transaction.CreateDate.ToShortDateTimeString()
                                     </td>
                                     <td>
-                                        @transaction.GetBillerAccount().Name
+                                        @billerAccount.Name
                                     </td>
                                     <td>
-                                        @transaction.GetPayerAccount().Name
+                                        @payerAccount.Name
                                     </td>
                                     <td>
                                         @transaction.Description
@@ -250,6 +254,16 @@
                                                     @(!transaction.HasRefundableAmount(true) ? "disabled=\"disabled\"" : "")>
                                                 <i class="s7-back"></i>
                                             </button>
+
+                                            @if (enableTransfer)
+                                            {
+                                                <button onclick="setTransaction('@transaction.Uid', '@transaction.GetTransactionNumber()', '@transaction.GetBillerAmount().ToCurrency()')"
+                                                        class="md-trigger btn btn-sm btn-alt6"
+                                                        data-modal="modal-create-transfer">
+                                                    <i class="s7-culture"></i>
+                                                </button>
+                                            }
+
                                             <button onclick="setTransaction('@transaction.Uid', '@transaction.GetTransactionNumber()')"
                                                     class="md-trigger btn btn-sm btn-danger"
                                                     data-modal="modal-delete">
@@ -374,8 +388,39 @@
     </div>
 </div>
 
+@{ 
+    Html.RenderPartial(
+        "~/Views/Shared/_Modal.cshtml",
+        new ModalViewModel()
+        {
+            ID = "modal-create-transfer",
+            Title = "Create Stripe Transfer",
+            ActionButtonId = "btn-create-transfer",
+            ActionButtonHtml = "Create Transfer",
+            HtmlBody = "Are you sure you want to create a Stripe transfer for the amount of <span class=\"transaction-amount\"></span>?"
+        });
+}
+
 <script>
     var transactionUid = null;
+
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#btn-create-transfer').click(function () {
+
+            $.get(
+                '@Url.Action("createtransfer", "transaction")/' + transactionUid,
+                function (data) {
+                    if (data && data.status == 'ok') {
+                        Notifications.showMessage('Success', 'A stripe transfer has been created', true)
+                    } else {
+                        Notifications.showErrors(data.messages);
+                    }
+                }
+            );
+
+            $('#modal-create-transfer').removeClass('md-show');
+        });
+    });
 
     function setTransaction(uid, id, amount) {
         transactionUid = uid;

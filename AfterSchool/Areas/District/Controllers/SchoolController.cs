@@ -136,6 +136,8 @@ namespace AfterSchool.Areas.District.Controllers
                                 account, 
                                 HostPermissionType.ApproveOnly,
                                 ApprovalStatus.Approved, 
+                                true,
+                                false,
                                 SessionVariables.CurrentUser, 
                                 adc
                             )

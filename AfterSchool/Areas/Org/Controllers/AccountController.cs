@@ -803,7 +803,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
-            if (currentAccount.IsEmpty() || id.IsEmpty() || copyfrom.IsEmpty())
+            if (currentAccount.IsEmpty() || id.IsEmpty())
                 return HttpNotFound();
 
 

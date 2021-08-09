@@ -116,7 +116,7 @@ namespace AfterSchoolLibrary.Services
 
                     // verify if there is a password and the user hasn't changed their email
                     if (password.IsNotBlank() && user.Email.ToLower() != registrant.Email.ToLower())
-                        user.SendVerificationEmail(isAfterSchool);
+                        user.SendVerificationEmail();
                 },
                 onFailure: (SystemMessages fmsgs) =>
                 {

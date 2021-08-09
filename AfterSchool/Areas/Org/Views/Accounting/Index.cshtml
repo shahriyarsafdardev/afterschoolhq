@@ -2,7 +2,7 @@
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var account = SessionVariables.CurrentAccount;
-    var canProcessPayments = account.CanProcessPayments(msgs);
+    var useStripeConnectedAccount = account.HasFeature(FeatureType.UseStripeConnectedAccount);
     var transactionCount = ((PagingModel)ViewBag.PagingModel).TotalCount;
     var totalTransactionAmount = (decimal)ViewBag.TotalAmountPaid;
     var totalAmountRefunded = (decimal)ViewBag.TotalAmountRefunded;
@@ -364,7 +364,7 @@
             </div>
             <div class="form-group">
                 <label for="request-reason">Reason</label>
-                <input type="text" id="refund-reason" maxlength="100" class="form-control" />
+                <input type="text" id="refund-reason" maxlength="100" class="form-control" oninput="enableRequestRefundButton()" />
                 <p class="text-muted text-small" id="refund-request-reason-notes">Please enter a reason</p>
             </div>
             <input type="hidden" id="refund-request-transaction-uid" value="" />
@@ -463,6 +463,11 @@
         return true;
     }
 
+    function enableRequestRefundButton() {
+        $('#btn-request-refund').prop('disabled', false);
+        $('#refund-request-reason-notes').removeClass('text-danger');
+    }
+
     function processRefundRequest() {
 
         const uid = $('#refund-request-transaction-uid').val();
@@ -495,8 +500,8 @@
     }
 
     function requestPayout() {
-        var canProcessPayments = @Json.Encode(canProcessPayments);
-        if (canProcessPayments) {
+        var useStripeConnectedAccount = @Json.Encode(useStripeConnectedAccount);
+        if (!useStripeConnectedAccount) {
             $("#TransactionIds").val(this.selectedTransactions.join());
             $("#requestPayoutForm").submit();
         } else {

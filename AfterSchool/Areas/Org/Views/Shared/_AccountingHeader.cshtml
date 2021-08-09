@@ -2,6 +2,8 @@
 @{
     var actionName = ViewContext.RouteData.Values["action"].ToString().ToLower();
     var couponPackage = PackageService.GetPackageWithAnyFeaturesLowestPrice(new List<FeatureType>() { FeatureType.ManageCoupons });
+    var currentAccount = SessionVariables.CurrentAccount;
+    var hasPayouts = currentAccount.GetPayouts(null, null, null, null, null).Any();
 }
 
 <div class="btn-toolbar">
@@ -10,10 +12,13 @@
             Transactions
         </a>
 
-        @if (SessionVariables.CurrentAccount.CanProcessPayments())
+        @if (currentAccount.CanProcessPayments())
         {
-            <a class="btn btn-alt6@(actionName == "payouts" ? "-active" : "")" href="@Url.Action("payouts", "accounting")"> Payouts </a>
-        } 
+            if (hasPayouts)
+            {
+                <a class="btn btn-alt6@(actionName == "payouts" ? "-active" : "")" href="@Url.Action("payouts", "accounting")"> Payouts </a>
+            }
+        }
         else
         {
             <a class="btn btn-alt6@(actionName == "payouts" ? "-active" : "")" href="#" onclick="return loadPaymentRestrictionModal();"> Payouts </a>
