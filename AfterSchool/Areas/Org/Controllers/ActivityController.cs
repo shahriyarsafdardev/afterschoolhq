@@ -854,7 +854,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ActivitySchedule sched = null;
 
             if (msgs.HasNoErrors())
-                sched = activity.GetSchedule();
+                sched = activity.GetSchedule(msgs: msgs);
             else
                 sched = ActivitySchedule.GetNewDefaultSchedule(inSessionDates);
 
@@ -864,6 +864,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Schedules = currentAccount.GetActivitySchedules(msgs);
             ViewBag.ShowScheduleList = currentAccountPackage.HasFeature(FeatureType.ManageActivityGroups, msgs);
             ViewBag.IsFullScreen = GetIsFullScreen(activity);
+            ViewBag.Messages = msgs;
 
             if (msgs.HasNoErrors())
             {
