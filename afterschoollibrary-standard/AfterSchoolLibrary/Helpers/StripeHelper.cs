@@ -356,7 +356,7 @@ namespace AfterSchoolLibrary.Billing
             return new TransferReversalService(StripeClient);
         }
 
-        public static Transfer CreateTransfer(decimal amount, string description, string transferIdentifier, string destinationId, Dictionary<string, string> metaData, SystemMessages msgs)
+        public static Transfer CreateTransfer(decimal amount, string description, string transferIdentifier, string destinationId, string chargeId, Dictionary<string, string> metaData, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -369,6 +369,9 @@ namespace AfterSchoolLibrary.Billing
                 Description = description,
                 TransferGroup = transferIdentifier
             };
+
+            if (chargeId.IsNotEmpty())
+                options.SourceTransaction = chargeId;
 
             Transfer transfer = null;
 

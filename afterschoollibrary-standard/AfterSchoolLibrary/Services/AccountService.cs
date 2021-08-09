@@ -17,7 +17,12 @@ namespace AfterSchoolLibrary.Services
         public static bool HasFeature(this Account account, FeatureType featureType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (account.IsNotEmpty())
-                return (bool)account.GetActiveAccountPackage(msgs, dc)?.HasFeature(featureType, msgs, dc);
+            {
+                var ap = account.GetActiveAccountPackage(msgs, dc);
+
+                if (ap.IsNotEmpty())
+                    return (bool)ap.HasFeature(featureType, msgs, dc);
+            }
 
             return false;
         }
@@ -4062,6 +4067,7 @@ namespace AfterSchoolLibrary.Services
                     description: $"Transfer from AHQ to {account.Name} requested by {requestor.DisplayName} and approved by {loggedInUser.DisplayName}",
                     transferIdentifier: payout.Uid.ToString(),
                     destinationId: account.StripeUserId,
+                    null,
                     metaData: metaData,
                     msgs: msgs);
 

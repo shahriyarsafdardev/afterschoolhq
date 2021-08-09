@@ -1550,6 +1550,12 @@ namespace AfterSchool.Areas.Org.Controllers
             else
                 msgs.Add("It appears you have canceled your request to connect your Stripe account.", MessageType.Notice);
 
+            // check if account has existing transactions that need to be connected with transfers
+            if (msgs.HasNoErrors())
+            {
+                
+            }
+
             if (msgs.HasNoErrors())
             {
                 if (id.IsNotEmpty())
