@@ -328,7 +328,7 @@ namespace AfterSchoolLibrary.Models
             if (priceId.IsNotEmpty())
                 price = Billing.StripeHelper.GetPrice(priceId, msgs);
 
-            if (msgs.HasNoErrors())
+            if (price.IsEmpty())
             {
                 price = Billing.StripeHelper.CreatePrice(
                      productId,
