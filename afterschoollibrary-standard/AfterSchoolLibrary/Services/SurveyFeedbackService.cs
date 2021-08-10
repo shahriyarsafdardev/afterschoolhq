@@ -1,4 +1,5 @@
-﻿using AfterSchoolLibrary.Models;
+﻿using AfterSchoolLibrary.Helpers;
+using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System;
@@ -62,6 +63,11 @@ namespace AfterSchoolLibrary.Services
                dc: dc
             );
            
+        }
+
+        public static void NotifyStudents(SurveyFeedback surveyFeedback, SystemMessages msgs)
+        {
+            EmailHelper.SendSurveyEmail(surveyFeedback, msgs);
         }
 
         public static SurveyFeedback GetSurveyFeedbackBySurveyId(this SurveyRequest survey, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)

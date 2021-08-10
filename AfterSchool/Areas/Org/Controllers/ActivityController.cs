@@ -1987,27 +1987,44 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var surveyRequest = SurveyRequestService.AddSurvey(formId, activityId, name, optionalText, allowMultiple, currentAccount.ID.Value, currentUser.ID.Value, msgs);
 
-            if (selectedIndividuals){
-                foreach(var student in studentList)
-                {
-                    if(student.Selected)
-                    {
-                        SurveyFeedbackService.CreateSurveyFeedback(surveyRequest.ID.Value, activityId, student.Value.ToInteger(), null, SurveyFeedbackStatus.New, currentAccount.ID.Value, currentUser.ID.Value, msgs);
-                    }
-                }
-            }
-            else
-            {
-                foreach (var student in studentList)
-                {
-                    SurveyFeedbackService.CreateSurveyFeedback(surveyRequest.ID.Value, activityId, student.Value.ToInteger(), null, SurveyFeedbackStatus.New, currentAccount.ID.Value, currentUser.ID.Value, msgs);
-                }
-            }
+            if (selectedIndividuals)
+                CreateSurveys(surveyRequest.ID.Value, activityId, studentList.Where(a => a.Selected).ToList(), currentAccount.ID.Value, currentUser.ID.Value, msgs);
+            else 
+                CreateSurveys(surveyRequest.ID.Value, activityId, studentList, currentAccount.ID.Value, currentUser.ID.Value, msgs);
+
             ViewBag.Messages = msgs;
             return RedirectToAction("Surveys", new { id });
         }
 
-      
+        public static void CreateSurveys(int surveyRequestId, int activityId, List<SelectListItem> studentList, int currentAccountId, int currentUserId, SystemMessages msgs)
+        {
+            foreach (var student in studentList)
+            {
+                var surveyFeedback = SurveyFeedbackService.CreateSurveyFeedback(surveyRequestId, activityId, student.Value.ToInteger(), null, SurveyFeedbackStatus.New, currentAccountId, currentUserId, msgs);
+                BackgroundJob.Enqueue(() => SurveyFeedbackService.NotifyStudents(surveyFeedback, null));
+            }
+        }
+
+        public ActionResult ResendNotification(int id, int surveyId)
+        {
+            
+            if(id == 0){
+                var surveyFeedbacks = SurveyFeedback.LoadBySurveyId(surveyId).Where(a => a.SurveyFeedbackStatusTypeId != SurveyFeedbackStatus.Completed);
+                foreach(var surveyFeedback in surveyFeedbacks)
+                {
+                    BackgroundJob.Enqueue(() => SurveyFeedbackService.NotifyStudents(surveyFeedback, null));
+                }
+            }
+            else{
+                var surveyFeedback = SurveyFeedback.Load(id);
+                BackgroundJob.Enqueue(() => SurveyFeedbackService.NotifyStudents(surveyFeedback, null));
+            }
+
+         
+            return Json(new { msg = "Reminder sent", success = true}, JsonRequestBehavior.AllowGet);
+          
+        }
+
 
         public ActionResult ViewSurvey(int id, string activityId)
         {

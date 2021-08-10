@@ -86,6 +86,39 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
+        public static SystemMessages SendSurveyEmail(SurveyFeedback surveyFeedback, SystemMessages msgs)
+        {
+            msgs = msgs ?? new SystemMessages();
+            var getRegistrant = Registrant.Load(surveyFeedback.RegistrantId.Value);
+            var getSurvey = SurveyRequest.Load(surveyFeedback.SurveyId.Value);
+
+            var model = new NameValueCollection()
+            {
+                { "Name", getRegistrant.Name },
+                { "Link", Utilities.SurveyBaseUrl+"/survey/"+surveyFeedback.SurveyId},
+                { "SurveyName", getSurvey.Name}
+            };
+
+            var subject = $"You have received a survey request";
+            var body = ProcessTemplate(
+                        EmailTemplates.Survey,
+                        model,
+                        "survey_email",
+                        msgs);
+
+            var mailMsgs = SendGridHelper.SendMail(
+                            fromEmail: Email.SendGridNoReplyEmailAddress(),
+                            toEmail: new SendGrid.Helpers.Mail.EmailAddress(getRegistrant.Email),
+                            subject: subject,
+                            body: body,
+                            emailTemplateId: SendGridHelper.GetGenericTemplateId());
+
+            msgs.AddRange(mailMsgs);
+
+            return msgs;
+        }
+
+
         public static SystemMessages SendAccountConfirmationEmail(ParticipationObject participationObject, Registration registration)
         {
             var msgs = new SystemMessages();

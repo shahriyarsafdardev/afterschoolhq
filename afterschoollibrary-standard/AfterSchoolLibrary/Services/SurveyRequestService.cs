@@ -14,7 +14,7 @@ namespace AfterSchoolLibrary.Services
             return CreateNewSurveyRequest(formId, activityId, accountId, name, optionalText, allowmultiple, userId, msgs);
         }
 
-
+ 
         public static WebUser GetCreatedBy(this SurveyRequest surveyRequest, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (surveyRequest.CreatedBy.HasValue)

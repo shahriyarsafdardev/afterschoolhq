@@ -42,7 +42,7 @@
                 </div>
                 <div class="col-lg-3">
                     <div class="pull-right">
-                        <a href="javascript:void(0)" class="btn btn-success surveybtn" data-toggle="modal" data-target="#resendModal">Remind To All Incomplete</a>
+                        <a href="javascript:void(0)" class="btn btn-success surveybtn reminder" data-count="@suryveyFeedbacks.Where(a => a.SurveyFeedbackStatusTypeId != SurveyFeedbackStatus.Completed).Count()">Remind To All Incomplete</a>
                     </div>
                 </div>
             </div>
@@ -75,7 +75,10 @@
                                     @(surveyFeedback.LastModifiedDate.IsNotEmpty() ? survey.LastModifiedDate.Value.ToString("dd/MM/yyyy") : "")
                                 </td>
                                 <td>
-                                    <a href="javascript:void(0)" class="linkGreen">Resend reminder</a>
+                                    @if (surveyFeedback.SurveyFeedbackStatusTypeId != SurveyFeedbackStatus.Completed)
+                                    {
+                                       <a href="javascript:void(0)" class="linkGreen reminder" data-count="1" data-id="@surveyFeedback.ID">Send Reminder</a>
+                                    }
                                 </td>
                             </tr>
                         }
@@ -93,7 +96,7 @@
 
             <div class="modal-body">
                 <div class="text-center" style="font-size: 22px;  font-weight: bold;color: #282828; margin-bottom:17px;">Resend to <span id="CountStudent">0</span> Student</div>
-                <div class="text-center"><input type="button" class="btn btnNewColorSurvey" value="Send Survey" style="padding: 12px 72px;" /></div>
+                <div class="text-center"><input type="button" class="btn btnNewColorSurvey sendReminderBtn" value="Send Survey" style="padding: 12px 72px;" data-id="0" /></div>
             </div>
 
         </div>
@@ -106,6 +109,36 @@
         $(document).ready(function () {
             $(".exportBtn").on('click', function () {
                 setTimeout(function () { $("#modal-saving").addClass("hide"); }, 500);
+            });
+
+            $(".reminder").on('click', function () {
+                $('#resendModal').modal('show');
+                $("#CountStudent").html($(this).attr("data-count"));
+                if ($(this).attr("data-count") == 1)
+                    $(".sendReminderBtn").attr("data-id", $(this).attr("data-id"));
+                else
+                    $(".sendReminderBtn").attr("data-id", 0);
+            });
+
+            $(".sendReminderBtn").on('click', function () {
+                $('#resendModal').modal('hide');
+                var id = $(this).attr('data-id');
+                $.get('/Org/activity/ResendNotification/' + id + "?surveyId=@survey.ID", function (data) {
+                    if (data.success) {
+                        Notifications.showBar({
+                            title: "",
+                            message: "Reminder sent",
+                            success: true
+                        });
+                    }
+                    else {
+                        Notifications.showBar({
+                            title: "",
+                            message: "Something went wrong",
+                            success: false
+                        });
+                    }
+                });
             });
         })
     </script>
