@@ -87,9 +87,6 @@ namespace AfterSchool.Areas.Org.Controllers
             if (schedule.IsNotEmpty())
                 id = schedule;
 
-            if (currentAccount.IsEmpty() || !id.IsInteger())
-                return new HttpStatusCodeResult(System.Net.HttpStatusCode.BadRequest);
-
             var activitySchedule = new ActivitySchedule();
             var scheduleRepeat = Request.Form.Filter("schedulerepeat-");
             var meetingOpenInfo = Request.Form.Filter("meeting-open-");
@@ -97,8 +94,6 @@ namespace AfterSchool.Areas.Org.Controllers
             var days = ActivityScheduleUI.PrepDaysOfWeek(scheduleRepeat);
             var scheduleDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, meetingOpenInfo);
             var scheduleDatesClosed = ActivityScheduleUI.PrepScheduleDatesClosed(meetingClosedInfo);
-
-
 
             if (id.ToInteger() > 0)
                 activitySchedule = ActivitySchedule.EditExisting(id, name, scheduledetails, repeatsweekly.IsBoolean() && repeatsweekly.ToBoolean(), isongoing.IsBoolean() && isongoing.ToBoolean(), startdate.ToDateTime(), enddate.ToDateTime(), dailystarttime.ToDateTime(), dailyendtime.ToDateTime(), scheduleDates, scheduleDatesClosed, currentUser.ID.Value, msgs);
