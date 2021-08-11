@@ -97,8 +97,6 @@ namespace AfterSchool.Areas.Org.Controllers
             var scheduleDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, meetingOpenInfo);
             var scheduleDatesClosed = ActivityScheduleUI.PrepScheduleDatesClosed(meetingClosedInfo);
 
-
-
             if (id.ToInteger() > 0)
                 activitySchedule = ActivitySchedule.EditExisting(id, name, scheduledetails, repeatsweekly.IsBoolean() && repeatsweekly.ToBoolean(), isongoing.IsBoolean() && isongoing.ToBoolean(), startdate.ToDateTime(), enddate.ToDateTime(), dailystarttime.ToDateTime(), dailyendtime.ToDateTime(), scheduleDates, scheduleDatesClosed, currentUser.ID.Value, msgs);
             else
