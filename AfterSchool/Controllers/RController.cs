@@ -216,6 +216,7 @@ namespace AfterSchool.Controllers
             var participationObjects = new List<ParticipationObject>();
             var locations = new List<Location>();
             var grades = GradeLevel.Load(msgs: msgs);
+            var featuredProviders = new List<Account>();
 
             List<ParticipationObject> regOpened = null;
             List<ParticipationObject> regWillOpen = null;
@@ -240,6 +241,8 @@ namespace AfterSchool.Controllers
                     objectId: account.ID,
                     objectText: account.Name
                  );
+
+                featuredProviders = account.GetApprovedVisitorAccounts(msgs);
             }
             else
             {
@@ -267,6 +270,7 @@ namespace AfterSchool.Controllers
             ViewBag.Locations = locations;
             ViewBag.ParticipationObjects = participationObjects;
             ViewBag.AccountProfile = account.GetAccountProfile(msgs);
+            ViewBag.FeaturedProviders = featuredProviders;
 
             return View(account);
         }
@@ -348,11 +352,16 @@ namespace AfterSchool.Controllers
             if (isUnsupportedBrowser())
                 return RedirectUnsupportedBrowser();
 
-            ParticipationObject participationObject = null;
             var msgs = new SystemMessages();
+            if (TempData["Messages"] != null && ((SystemMessages)TempData["Messages"]).IsNotEmpty())
+                msgs.AddRange((SystemMessages)TempData["Messages"]);
+
+            ParticipationObject participationObject = null;            
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
             var canPublishActivity = false;
             var accountProfile = account?.GetAccountProfile(msgs);
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
             ParticipationObject session = null;
 
             if (account.IsNotEmpty())
@@ -373,16 +382,8 @@ namespace AfterSchool.Controllers
                     AddNoCacheHeaders();
                 }
 
-                if (!activity.IsPublished &&
-                    activity.GetLocation().IsNotEmpty() &&
-                    activity.GetLocation().HostAccountId.IsNotEmpty() &&
-                    activity.GetLocation().HostAccountId != activity.AccountId)
-                {
-                    var accountOwnerId = activity.GetLocation().GetHostAccount().OwnerId;
-
-                    if (SessionVariables.CurrentUser.ID == accountOwnerId)
-                        canPublishActivity = true;
-                }
+                if (currentUser.IsNotEmpty() && currentAccount.IsNotEmpty())
+                    canPublishActivity = currentUser.CanPublishActivity(currentAccount, activity, msgs);
             }
             else
                 return HttpNotFound();
@@ -448,6 +449,7 @@ namespace AfterSchool.Controllers
             ViewBag.Account = account;
             ViewBag.CanRegisterFor = canRegisterFor;
             ViewBag.AccountProfile = account.GetAccountProfile(msgs);
+            ViewBag.CanPublishActivity = false;
 
             // LOG: Somone Viewed Session SessionName by Account AccountName
             SessionVariables.WebSession.LogActivity(
@@ -510,6 +512,7 @@ namespace AfterSchool.Controllers
             ViewBag.Messages = msgs;
             ViewBag.Account = account;
             ViewBag.AccountProfile = account.GetAccountProfile(msgs);
+            ViewBag.CanPublishActivity = false;
 
             // LOG: Somone Viewed League LeagueName by Account AccountName
             SessionVariables.WebSession.LogActivity(
@@ -605,6 +608,7 @@ namespace AfterSchool.Controllers
             if (account.IsEmpty() || account.IsDeleted)
                 return HttpNotFound();
 
+            var featuredProviders = new List<Account>();
             var session = ActivityGroup.LoadByAccountIdByUniqueName(account.ID.Value, sessionname, msgs);
 
             if (session.IsEmpty())
@@ -637,7 +641,10 @@ namespace AfterSchool.Controllers
                 willOpen = participationObjects;
             else
                 closed = participationObjects;
-
+            if (account.IsNotEmpty())
+            {
+                featuredProviders = account.GetApprovedVisitorAccounts(msgs);
+            }            
             ViewBag.Session = session.GetParticipationObject(msgs);
             ViewBag.Grades = GradeLevel.Load(msgs: msgs);
             ViewBag.Messages = msgs;
@@ -648,6 +655,7 @@ namespace AfterSchool.Controllers
             ViewBag.RegistrationClosed = closed;
             ViewBag.RegistrationWillOpen = willOpen;
             ViewBag.AccountProfile = account.GetAccountProfile(msgs);
+            ViewBag.FeaturedProviders = featuredProviders;
 
             return View("browse", account);
         }

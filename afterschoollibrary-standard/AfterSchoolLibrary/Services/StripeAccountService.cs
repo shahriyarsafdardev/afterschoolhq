@@ -183,6 +183,7 @@ namespace AfterSchoolLibrary.Services
                 description: $"Transfer from AHQ to {account.Name} requested by {requestor.DisplayName} and approved by {loggedInUser.DisplayName}",
                 transferIdentifier: payout.Uid.ToString(),
                 destinationId: account.StripeUserId,
+                chargeId: null,
                 metaData: metaData,
                 msgs: msgs);
 

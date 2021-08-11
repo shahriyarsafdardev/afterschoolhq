@@ -9,6 +9,7 @@
     var currentLevel = AccountService.OnboardingCompletionStatus(Model);
     var isStripeIntegrated = TempData["IsStripeIntegrated"] != null;
     var IsActivityFree = (bool)ViewBag.IsActivityFree;
+    var currentUrl = Request.Url.ToString();
 }
 
 <div id="modal-email-confirmation" class="modal fade" tabindex="-1" role="dialog">
@@ -53,10 +54,10 @@
                     Account setup complete!
                 </div>
                 <div id="modal-email-confirmation-btn" class="margin-v-30 text-center">
-                    <a href="#" class="btn btn-primary btn-free-profile" style="padding: 12px 20px;"  onclick="return hideAcceptPaymentModal()">View Activity</a>
+                    <a href="#" class="btn btn-primary btn-free-profile" style="padding: 12px 20px;"  onclick="location.reload()">Continue</a>
                     <div class="clearfix"></div>
                     <br />
-                    <a href="@Url.Action("editsetup", "activity", new { id = activityUid, area = "org" })" class="view-activity-text">Return to activity draft</a>
+                    <a href="@Url.Action("editsetup", "activity", new { id = activityUid, area = "org" })" class="view-activity-text">Return to edit activity</a>
                 </div>
             </div>
         </div>
@@ -71,6 +72,7 @@
     var isProcessCompleted = @Json.Encode(GettingStartedOptions.ProcessCompleted);
     var isStripeIntegrated = @Json.Encode(isStripeIntegrated);
     var isfreeActivity = @Json.Encode(IsActivityFree);
+
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         if (currentLevel == isEmailToBeValidated) {
             $('#modal-email-confirmation').modal({
@@ -80,10 +82,14 @@
             $('#footer-activity').removeClass('hide');
         }
         // we do not need to show payment modal, if activity is Free
-        else if (currentLevel == isPaymentSetupToBeDone && !isfreeActivity) {
+        else if (currentLevel == isPaymentSetupToBeDone) {
+            if (!isfreeActivity) {
                 $('#modal-payment-confirmation').modal({
-                backdrop: 'static'
-            });
+                    backdrop: 'static'
+                });
+            } else if (@activityUid.IsNotEmpty().ToString().ToLower()) {
+                $('#footer-activity').removeClass('hide');
+            }
         } else if (currentLevel == isProcessCompleted && isStripeIntegrated) {
             $('#modal-acceptpayment-done').modal({
                 backdrop: 'static'
@@ -110,13 +116,9 @@
     }
 
     function resendValidationEmail() {
-        AccountSetup.sendVerificationEmail();
+        AccountSetup.sendVerificationEmail('@currentUrl');
         $('#modal-email-confirmation-text').html('An email has been sent to <span style="color: #00b492;">@accountOwner.Email</span> Please check your inbox for next steps.');
         $('#modal-email-confirmation-btn').hide();
         $('#footer-activity').removeClass('hide');
-    }
-
-    function hideAcceptPaymentModal() {
-        $('#modal-acceptpayment-done').modal('hide');
     }
 </script>

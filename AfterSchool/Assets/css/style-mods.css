@@ -36,7 +36,7 @@ div.border-light-gray {
 }
 
 /* TEXT */
-.text-white, a.text-white{
+.text-white, a.text-white, a.text-white:hover{
     color:#fff;
 }
 
@@ -478,6 +478,14 @@ a.white:hover{
 .badge-light-gray {
     background-color: #efefef;
     color: #767676;
+}
+
+.badge-charcoal {
+    background-color: #333;
+}
+
+.badge-dark-gray {
+    background-color: #777;
 }
 
 .badge-full-width {

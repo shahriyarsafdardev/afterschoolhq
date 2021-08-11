@@ -119,11 +119,22 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static Location GetLocation(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {            
+        {
             if (activity.LocationId.HasValue)
                 return Location.Load(activity.LocationId.Value, msgs, dc);
 
             return null;
+        }
+
+        public static void SetLocation(this Activity activity, Location location, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (activity.IsNotEmpty() && location.IsNotEmpty() && location.ID.HasValue)
+            {
+                activity.LocationId = location.ID;
+                activity.LastModifiedDate = DateTime.UtcNow;
+                activity.LastModifiedBy = loggedInUser.ID;
+                msgs.AddRange(activity.Save(dc));
+            }
         }
 
         public static ParticipationObject GetParticipationObject(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -1575,6 +1586,8 @@ namespace AfterSchoolLibrary.Services
                         visitorAccount: providerAccount,
                         hostPermissionType: HostPermissionType.ApproveOnly,
                         approvalStatus: ApprovalStatus.Approved,
+                        requiresPublishPermission: true,
+                        showAllPrograms: false,
                         loggedInUser: loggedInUser,
                         dc: dc));
 
@@ -2472,12 +2485,20 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        public static Account GetProvider(this Activity activity, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Account GetProvider(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (activity.ProviderAccountId.HasValue)
                 return Account.Load(activity.ProviderAccountId.Value, msgs, dc);
 
             return null;
+        }
+
+        public static void SetProvider(this Activity activity, Account providerAccount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            activity.ProviderAccountId = providerAccount.ID;
+            activity.LastModifiedDate = DateTime.UtcNow;
+            activity.LastModifiedBy = loggedInUser.ID;
+            msgs.AddRange(activity.Save(dc));
         }
 
         public static void NotifyProviderOfNewActivity(this Activity activity, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
@@ -2584,6 +2605,20 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
+        public static bool IsOpen(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var regPeriod = activity.GetActiveRegistrationPeriod(msgs, dc);
+
+            if (regPeriod.IsEmpty())
+                return false;
+
+            var account = activity.GetAccount(msgs, dc);
+            if (regPeriod.IsOpen(account, msgs, dc))
+                return true;
+
+            return false;
+        }
+
         public static bool IsOpenOrUpcoming(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var regPeriod = activity.GetActiveRegistrationPeriod(msgs, dc);
@@ -2598,11 +2633,14 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
-        public static void RequestToPublish(this Activity activity, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Account GetLocationOwner(this Activity activity, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var location = activity.GetLocation(msgs, dc);
-            var locationOwner = location.GetHostAccount(msgs, dc);
+            return location?.GetHostAccount(msgs, dc);
+        }
 
+        public static void RequestToPublish(this Activity activity, Account locationOwner, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
             if (locationOwner.IsNotEmpty() && locationOwner.HasAccountOwner)
             {
                 var accountOwner = locationOwner.GetAccountOwner(msgs, dc);
