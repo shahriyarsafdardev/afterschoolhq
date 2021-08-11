@@ -2007,7 +2007,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
         public ActionResult ResendNotification(int id, int surveyId)
         {
-            
             if(id == 0){
                 var surveyFeedbacks = SurveyFeedback.LoadBySurveyId(surveyId).Where(a => a.SurveyFeedbackStatusTypeId != SurveyFeedbackStatus.Completed);
                 foreach(var surveyFeedback in surveyFeedbacks)
@@ -2020,9 +2019,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 BackgroundJob.Enqueue(() => SurveyFeedbackService.NotifyStudents(surveyFeedback, null));
             }
 
-         
             return Json(new { msg = "Reminder sent", success = true}, JsonRequestBehavior.AllowGet);
-          
         }
 
 

@@ -13,7 +13,7 @@
             <div class="row">
                 <div class="col-lg-3">
 
-                    <div  class="DDLMain">
+                    <div class="DDLMain">
                         <span  class="titleName">@user.FirstName @user.LastName</span>
                         <div class="dropdown">
                             <i class="s7-edit filterIcon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"></i>
@@ -53,10 +53,10 @@
                         @foreach (var survey in (List<SurveyRequest>)ViewBag.Surveys)
                         {
                             var activity = SurveyRequestService.GetActivity(survey);
-
+                            var surveyFeedback = SurveyFeedback.LoadBySurveyIdByActivityId(survey.ID.Value, activity.ID.Value);
                             <tr>
                                 <td>
-                                    <a href="@Url.Action("viewsurvey", "activity", new { id = survey.ID, activityId = activity.Uid })">View</a>
+                                    <a href="@Url.Action("viewsurveyresults", "activity", new { id = surveyFeedback.ID, activityId = activity.Uid })">View</a>
                                 </td>
                                 <td>
                                     @survey.Name
