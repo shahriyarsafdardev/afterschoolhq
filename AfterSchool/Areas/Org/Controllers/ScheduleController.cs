@@ -84,6 +84,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
 
+            if (currentAccount.IsEmpty())
+                return new HttpStatusCodeResult(System.Net.HttpStatusCode.BadRequest);
             if (schedule.IsNotEmpty())
                 id = schedule;
 
