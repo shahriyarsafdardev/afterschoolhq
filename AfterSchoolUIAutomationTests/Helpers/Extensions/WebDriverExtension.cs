@@ -32,7 +32,7 @@ namespace AfterSchoolUIAutomationTests.Helpers.Extensions
             //StringBuilder telNo = new StringBuilder(12);
             string telNo = "202-555-";
             int number;
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 4; i++)
             {
                 number = rand.Next(0, 9); // digit between 0 (incl) and 8 (excl)
                 telNo = telNo + number;

@@ -150,38 +150,37 @@
                         </div>
                     </div>
 
-                                    <div class="form-group new-account">
-                                        <label for="password1" class="control-label col-md-3">
-                                            Verify Password <span class="text-danger">*</span>
-                                        </label>
-                                        <div class="col-md-6">
-                                            <input type="password" class="form-control" id="password2" name="password2" />
-                                        </div>
-                                    </div>}
+                    <div class="form-group new-account">
+                        <label for="password1" class="control-label col-md-3">
+                            Verify Password <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-md-6">
+                            <input type="password" class="form-control" id="password2" name="password2" />
+                        </div>
+                    </div>}
 
-                        @{ if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
-                           {
+                    @{ if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+                        {
                             if (currentUser.IsEmpty())
                             {
-                                <div class="row padding-v-20">
-                                    <div class="form-group text-center">
-                                        @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", ""); }
-                                    </div>
-                                </div>
-                            } 
-                           }
-                           }
-
-                        <div class="row padding-v-20">
-                            <div class="col-md-6 col-md-offset-3">
-                                <div class="am-checkbox text-center">
-                                    <input type="checkbox" id="agree" name="agree" value="1" @(Request["agree"] == "1" ? " checked=\"checked\" " : "") />
-                                    <label for="agree">
-                                        I agree to the <a href="@Url.Action("tos", "legal")" target="_blank">terms and conditions</a> of using @UILabel.ProductName()
-                                    </label>
+                            <div class="row padding-v-20">
+                                <div class="form-group text-center">
+                                    @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", ""); }
                                 </div>
                             </div>
-                        </div>
+                            <div class="row padding-v-20">
+                                <div class="col-md-6 col-md-offset-3">
+                                    <div class="am-checkbox text-center">
+                                        <input type="checkbox" id="agree" name="agree" value="1" @(Request["agree"] == "1" ? " checked=\"checked\" " : "") />
+                                        <label for="agree">
+                                            I agree to the <a href="@Url.Action("tos", "legal")" target="_blank">terms and conditions</a> of using @UILabel.ProductName()
+                                        </label>
+                                    </div>
+                                </div>
+                            </div> 
+                            }
+                         } 
+                        }
 
 
                         <div class="row padding-v-20">

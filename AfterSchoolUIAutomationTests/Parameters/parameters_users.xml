@@ -71,21 +71,23 @@
     <StreetAddress>Street Address</StreetAddress>
     <City>New York</City>
     <State>Indiana</State>
-    <Zipcode>123456</Zipcode>
-    <GuardianFirstName>123456</GuardianFirstName>
-    <GuardianLastName>123456</GuardianLastName>
-    <GuardianEmail>123456</GuardianEmail>
-    <GuardianMobile>123456</GuardianMobile>
-    <EmergencyContactFirstName>123456</EmergencyContactFirstName>
-    <EmergencyContactLastName>123456</EmergencyContactLastName>
-    <EmergencyContactPhone>123456</EmergencyContactPhone>
-    <StudentFirstName>123456</StudentFirstName>
-    <StudentLastName>123456</StudentLastName>
-    <StudentPhone>123456</StudentPhone>
-    <StudentDOB>123456</StudentDOB>
-    <StudentGrade>123456</StudentGrade>
-    <StudentGender>123456</StudentGender>
-    <StudentSchool>New York University, New York, NY, USA</StudentSchool>
+    <Zipcode>420333</Zipcode>
+    <GuardianFirstName>George</GuardianFirstName>
+    <GuardianLastName>Fernendous</GuardianLastName>
+    <GuardianEmail>george@yopmail.com</GuardianEmail>
+    <GuardianMobile>(202) 555-2121</GuardianMobile>
+    <EmergencyContactFirstName>Michael</EmergencyContactFirstName>
+    <EmergencyContactLastName>Johnson</EmergencyContactLastName>
+    <EmergencyContactPhone>(202) 555-2121</EmergencyContactPhone>
+    <StudentFirstName>Andrew</StudentFirstName>
+    <StudentLastName>Strauss</StudentLastName>
+    <StudentPhone>(202) 555-2121</StudentPhone>
+    <StudentDOB>05/05/2014</StudentDOB>
+    <StudentGrade>3rd</StudentGrade>
+    <StudentGender>Male</StudentGender>
+    <StudentSchool>New York, New York, USA</StudentSchool>
+    <DoctorName>Dr. Steve Waugh</DoctorName>
+    <DoctorPhone>(202) 555-2121</DoctorPhone>
 
   </NewParentAccountActivityRegistration>
 

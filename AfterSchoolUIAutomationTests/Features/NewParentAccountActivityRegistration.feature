@@ -11,4 +11,4 @@ Scenario: New Parent Account And Activity Registration
 	Given Populate fields in step 4 emergency contacts form details and click save & continue
 	Given Populate fields in step 5 student information form details and click save & continue
 	Given Populate fields in step 6 health information form details and click save & continue
-	Given Enter parent e signature and click complete registration
+	Then  Verify complete registration message

@@ -23,13 +23,15 @@ namespace AfterSchoolUIAutomationTests2.Steps
             _scenarioContext = scenarioContext;
             webDriver = new ChromeDriver(AppDomain.CurrentDomain.BaseDirectory);
             newParentAccountActivityRegistrationPage = new NewParentAccountActivityRegistrationPage(webDriver);
+            var options = new ChromeOptions();
+            options.AddArgument("no-sandbox");
         }
 
         [Given(@"Navigate to the session publish url and click register now")]
         public void NavigateToActivityUrlAndClickRegister()
         {
             webDriver.Navigate().GoToUrl(Parameter.Get("NewParentAccountActivityRegistration", "ActivityPublishedURL"));
-            webDriver.WaitInSeconds(4);
+            webDriver.WaitInSeconds(10);
             webDriver.Manage().Window.Maximize();
             webDriver.WaitInSeconds(2);
             newParentAccountActivityRegistrationPage.ClickRegisterNow();
@@ -67,15 +69,51 @@ namespace AfterSchoolUIAutomationTests2.Steps
         [Given(@"Populate fields in step 3 additional parent, guardian form details and click save & continue")]
         public void PopulateAdditionalParentGuardianFormAndClickNext()
         {
-            //newParentAccountActivityRegistrationPage.GuardianFirstName(Parameter.Get("NewParentAccountActivityRegistration", ""));
-            //newParentAccountActivityRegistrationPage.GuardianLastName(Parameter.Get("NewParentAccountActivityRegistration", ""));
-            //newParentAccountActivityRegistrationPage.GuardianEmailElement(Parameter.Get("NewParentAccountActivityRegistration", ""));
-            //newParentAccountActivityRegistrationPage.GuardianMobileElement(Parameter.Get("NewParentAccountActivityRegistration", ""));
-            //newParentAccountActivityRegistrationPage.ClickHomeAddressNextBtn();
+            newParentAccountActivityRegistrationPage.PopulateGuardianFirstName(Parameter.Get("NewParentAccountActivityRegistration", "GuardianFirstName"));
+            newParentAccountActivityRegistrationPage.PopulateGuardianLastName(Parameter.Get("NewParentAccountActivityRegistration", "GuardianLastName"));
+            newParentAccountActivityRegistrationPage.PopulateGuardianEmail(Parameter.Get("NewParentAccountActivityRegistration", "GuardianEmail"));
+            newParentAccountActivityRegistrationPage.PopulateGuardianMobile(Parameter.Get("NewParentAccountActivityRegistration", "GuardianMobile"));
+            newParentAccountActivityRegistrationPage.ClickParentGuardianNextBtn();
         }
 
+        [Given(@"Populate fields in step 4 emergency contacts form details and click save & continue")]
+        public void PopulateEmergencyContactsFormAndClickNext()
+        {
+            newParentAccountActivityRegistrationPage.PopulateEmergencyContactFirstName(Parameter.Get("NewParentAccountActivityRegistration", "EmergencyContactFirstName"));
+            newParentAccountActivityRegistrationPage.PopulateEmergencyContactLastName(Parameter.Get("NewParentAccountActivityRegistration", "EmergencyContactLastName"));
+            newParentAccountActivityRegistrationPage.PopulateEmergencyContactPhone(Parameter.Get("NewParentAccountActivityRegistration", "EmergencyContactPhone"));
+            newParentAccountActivityRegistrationPage.ClickEmergencyNextBtn();
+        }
 
+        [Given(@"Populate fields in step 5 student information form details and click save & continue")]
+        public void PopulateStudentInformationFormAndClickNext()
+        {
+            newParentAccountActivityRegistrationPage.PopulateStudentFirstName(Parameter.Get("NewParentAccountActivityRegistration", "StudentFirstName"));
+            newParentAccountActivityRegistrationPage.PopulateStudentLastName(Parameter.Get("NewParentAccountActivityRegistration", "StudentLastName"));
+            newParentAccountActivityRegistrationPage.PopulateStudentPhone(Parameter.Get("NewParentAccountActivityRegistration", "StudentPhone"));
+            newParentAccountActivityRegistrationPage.PopulateStudentDOB(Parameter.Get("NewParentAccountActivityRegistration", "StudentDOB"));
+            newParentAccountActivityRegistrationPage.SetStudentGrade(Parameter.Get("NewParentAccountActivityRegistration", "StudentGrade"));
+            newParentAccountActivityRegistrationPage.SetStudentGender();
+            newParentAccountActivityRegistrationPage.SelectAutoCompleteSchool(Parameter.Get("NewParentAccountActivityRegistration", "StudentSchool"));
+            newParentAccountActivityRegistrationPage.ClickStudentInfoBtn();
+        }
 
+        [Given(@"Populate fields in step 6 health information form details and click save & continue")]
+        public void PopulateHealthInformationFormAndClickNext()
+        {
+            newParentAccountActivityRegistrationPage.PopulateDoctorName(Parameter.Get("NewParentAccountActivityRegistration", "DoctorName"));
+            newParentAccountActivityRegistrationPage.PopulateDoctorPhone(Parameter.Get("NewParentAccountActivityRegistration", "DoctorPhone"));
+            newParentAccountActivityRegistrationPage.SetStudentImmunization();
+            newParentAccountActivityRegistrationPage.ClickStudentHealthNextBtn();
+        }
+
+        [Then(@"Verify complete registration message")]
+        public void VerifyCompleteRegistrationMessage()
+        {
+            string completed = "Complete registration for";
+            completed.Contains(newParentAccountActivityRegistrationPage.RegistrationComplete().Trim());
+            webDriver.WaitInSeconds(2);
+        }
 
         public void Dispose()
         {

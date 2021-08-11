@@ -561,9 +561,12 @@ namespace AfterSchool.Controllers
                     msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
                 }
             }
-
-            if (!agree.IsBoolean())
-                msgs.Add("You must agree to the terms of service", MessageType.UserError);
+            if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+            {
+                if (!agree.IsBoolean())
+                    msgs.Add("You must agree to the terms of service", MessageType.UserError);
+            }
+            
 
             if (msgs.HasNoErrors())
             {

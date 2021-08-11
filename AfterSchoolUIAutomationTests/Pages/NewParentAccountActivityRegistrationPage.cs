@@ -25,7 +25,8 @@ namespace AfterSchoolUIAutomationTests.Pages
         private IWebElement PhoneElement => webDriver.FindElement(By.Id("question-9490"));
         private IWebElement Password1Element => webDriver.FindElement(By.Id("password1"));
         private IWebElement Password2Element => webDriver.FindElement(By.Id("password2"));
-        private IWebElement IAgreeElement => webDriver.FindElement(By.XPath("//input[@id='agree']"));
+        private IWebElement IAgreeElement => webDriver.FindElement(By.XPath("(//div[@class='am-checkbox text-center'])[2]//label/text()[1]"));
+        //private IWebElement IAgreeElement => webDriver.FindElement(By.XPath("//input[@name='agree' and @id='agree']"));
         private IWebElement SaveAndContParentSignUpElement => webDriver.FindElement(By.XPath("//button[@id='btn-create-account']"));
         #endregion
 
@@ -42,24 +43,35 @@ namespace AfterSchoolUIAutomationTests.Pages
         private IWebElement GuardianLastNameElement => webDriver.FindElement(By.Id("question-9488"));
         private IWebElement GuardianEmailElement => webDriver.FindElement(By.Id("question-9489"));
         private IWebElement GuardianMobileElement => webDriver.FindElement(By.Id("question-9490"));
+        private IWebElement SaveAndContParentGuardianElement => webDriver.FindElement(By.XPath("//button[@id='btn-add-parent']"));
         #endregion
 
         #region Step 4 Emergency WebElements
-        private IWebElement EmergencyContactFirstName => webDriver.FindElement(By.Id("question-9487"));
-        private IWebElement EmergencyContactLastName => webDriver.FindElement(By.Id("question-9488"));
-        private IWebElement EmergencyContactPhone => webDriver.FindElement(By.Id("question-9489"));
+        private IWebElement EmergencyContactFirstNameElement => webDriver.FindElement(By.Id("question-9526"));
+        private IWebElement EmergencyContactLastNameElement => webDriver.FindElement(By.Id("question-9527"));
+        private IWebElement EmergencyContactPhoneElement => webDriver.FindElement(By.Id("question-9528"));
+        private IWebElement SaveAndContEmergencyElement => webDriver.FindElement(By.XPath("//button[@id='btn-emergency-contact']"));
         #endregion
 
-        #region Step 5 Student Information
-        private IWebElement StudentFirstName => webDriver.FindElement(By.Id("question-9487"));
-        private IWebElement StudentLastName => webDriver.FindElement(By.Id("question-9488"));
-        private IWebElement StudentPhone => webDriver.FindElement(By.Id("question-9490"));
-        private IWebElement StudentDOB => webDriver.FindElement(By.Id("question-9494"));
-        private IWebElement StudentGrade => webDriver.FindElement(By.Id("question-9494"));
-        private IWebElement StudentGender => webDriver.FindElement(By.Id("question-9495-male"));
-        private IWebElement StudentSchool => webDriver.FindElement(By.Id("location"));
+        #region Step 5 Student Information WebElements
+        private IWebElement StudentFirstNameElement => webDriver.FindElement(By.Id("question-9487"));
+        private IWebElement StudentLastNameElement => webDriver.FindElement(By.Id("question-9488"));
+        private IWebElement StudentPhoneElement => webDriver.FindElement(By.Id("question-9490"));
+        private IWebElement StudentDOBElement => webDriver.FindElement(By.Id("question-9493"));
+        private IWebElement StudentDOBDateElement => webDriver.FindElement(By.XPath("//div[@class='datetimepicker-days']//table/tbody/tr[3]/td[3]"));
+        private IWebElement StudentGradeElement => webDriver.FindElement(By.Id("question-9494"));
+        private IWebElement StudentGenderElement => webDriver.FindElement(By.XPath("(//div[@class='am-radio inline'])[1]//label"));
+        private IWebElement StudentSchoolElement => webDriver.FindElement(By.Id("location"));
+        private IWebElement SaveAndContStudentInfoElement => webDriver.FindElement(By.XPath("//button[@id='btn-add-student']"));
         #endregion
 
+        #region Step 6 Student Health Information WebElements
+        private IWebElement StudentDoctorNameElemnt => webDriver.FindElement(By.Id("question-9532"));
+        private IWebElement StudentDoctorPhone => webDriver.FindElement(By.Id("question-9533"));
+        private IWebElement StudentImmunizationElement => webDriver.FindElement(By.XPath("(//div[@class='am-radio inline'])[1]//label"));
+        private IWebElement SaveAndContStudentHealthElement => webDriver.FindElement(By.XPath("//button[@id='btn-add-health']"));
+        private IWebElement CompleteRegistrationElement => webDriver.FindElement(By.XPath("//h1[@class='activity-title']//span"));
+        #endregion
 
 
 
@@ -119,7 +131,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         public NewParentAccountActivityRegistrationPage ClickIAgreeCheck()
         {
             //IAgreeElement.Click();
-            webDriver.WaitInSeconds(4);
+            webDriver.WaitInSeconds(1);
             return this;
         }
         public NewParentAccountActivityRegistrationPage ClickParentSignUpNextBtn()
@@ -166,12 +178,161 @@ namespace AfterSchoolUIAutomationTests.Pages
 
         #endregion
 
+        #region Step 3 Additional Parent, Guardian Helper Methods
+        public NewParentAccountActivityRegistrationPage PopulateGuardianFirstName(string firstName)
+        {
+            GuardianFirstNameElement.Clear();
+            GuardianFirstNameElement.SendKeys(firstName);
+            webDriver.WaitInSeconds(1);
+            return this;
+        }
+        public NewParentAccountActivityRegistrationPage PopulateGuardianLastName(string lastName)
+        {
+            GuardianLastNameElement.Clear();
+            GuardianLastNameElement.SendKeys(lastName);
+            webDriver.WaitInSeconds(1);
+            return this;
+        }
+        public NewParentAccountActivityRegistrationPage PopulateGuardianEmail(string email)
+        {
+            GuardianEmailElement.SendKeys(email);
+            webDriver.WaitInSeconds(1);
+            return this;
+        }
+        public NewParentAccountActivityRegistrationPage PopulateGuardianMobile(string mobile)
+        {
+            GuardianMobileElement.SendKeys(mobile);
+            webDriver.WaitInSeconds(1);
+            return this;
+        }
+        public NewParentAccountActivityRegistrationPage ClickParentGuardianNextBtn()
+        {
+            SaveAndContParentGuardianElement.Click();
+            webDriver.WaitInSeconds(4);
+            return this;
+        }
+        #endregion
 
+        #region Step 4 Emergency Helper Methods
+        public NewParentAccountActivityRegistrationPage PopulateEmergencyContactFirstName(string firstName)
+        {
+            EmergencyContactFirstNameElement.SendKeys(firstName);
+            webDriver.WaitInSeconds(1);
+            return this;
+        }
+        public NewParentAccountActivityRegistrationPage PopulateEmergencyContactLastName(string lastName)
+        {
+            EmergencyContactLastNameElement.SendKeys(lastName);
+            webDriver.WaitInSeconds(1);
+            return this;
+        }
+        public NewParentAccountActivityRegistrationPage PopulateEmergencyContactPhone(string phone)
+        {
+            EmergencyContactPhoneElement.SendKeys(phone);
+            webDriver.WaitInSeconds(1);
+            return this;
+        }
+        public NewParentAccountActivityRegistrationPage ClickEmergencyNextBtn()
+        {
+            SaveAndContEmergencyElement.Click();
+            webDriver.WaitInSeconds(4);
+            return this;
+        }
+        #endregion
 
+        #region Step 5 Student Information Helper Methods
+        public NewParentAccountActivityRegistrationPage PopulateStudentFirstName(string firstName)
+        {
+            StudentFirstNameElement.SendKeys(firstName);
+            webDriver.WaitInSeconds(1);
+            return this;
+        }
+        public NewParentAccountActivityRegistrationPage PopulateStudentLastName(string lastName)
+        {
+            StudentLastNameElement.Clear();
+            StudentLastNameElement.SendKeys(lastName);
+            webDriver.WaitInSeconds(1);
+            return this;
+        }
+        public NewParentAccountActivityRegistrationPage PopulateStudentPhone(string phone)
+        {
+            StudentPhoneElement.Clear();
+            StudentPhoneElement.SendKeys(phone);
+            webDriver.WaitInSeconds(1);
+            return this;
+        }
+        public NewParentAccountActivityRegistrationPage PopulateStudentDOB(string dob)
+        {
+            webDriver.WaitInSeconds(2);
+            StudentDOBElement.Click();
+            webDriver.WaitInSeconds(2);
+            StudentDOBDateElement.Click();
+            webDriver.WaitInSeconds(2);
+            return this;
+        }
+        public NewParentAccountActivityRegistrationPage SetStudentGrade(string grade)
+        {
+            StudentGradeElement.Click();
+            var selectElement = new SelectElement(StudentGradeElement);
+            selectElement.SelectByValue(grade);
+            webDriver.WaitInSeconds(2);
+            return this;
+        }
+        public NewParentAccountActivityRegistrationPage SetStudentGender()
+        {
+            StudentGenderElement.Click();
+            webDriver.WaitInSeconds(2);
+            return this;
+        }
+        public NewParentAccountActivityRegistrationPage SelectAutoCompleteSchool(string location)
+        {
+            StudentSchoolElement.SendKeys(location);
+            webDriver.WaitInSeconds(1);
+            Thread.Sleep(5000);
+            WebDriverWait wait = new WebDriverWait(webDriver, new TimeSpan(0, 0, 5));
+            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.XPath("(//div[@class='pac-container pac-logo']//div[@class='pac-item'])[1]"))).Click();
+            webDriver.WaitInSeconds(4);
+            return this;
+        }
+        public NewParentAccountActivityRegistrationPage ClickStudentInfoBtn()
+        {
+            SaveAndContStudentInfoElement.Click();
+            webDriver.WaitInSeconds(4);
+            return this;
+        }
+        #endregion
 
-
-
-
+        #region Step 6 Student Health Information Helper Methods
+        public NewParentAccountActivityRegistrationPage PopulateDoctorName(string name)
+        {
+            StudentDoctorNameElemnt.SendKeys(name);
+            webDriver.WaitInSeconds(1);
+            return this;
+        }
+        public NewParentAccountActivityRegistrationPage PopulateDoctorPhone(string phone)
+        {
+            StudentDoctorPhone.SendKeys(phone);
+            webDriver.WaitInSeconds(1);
+            return this;
+        }
+        public NewParentAccountActivityRegistrationPage SetStudentImmunization()
+        {
+            StudentImmunizationElement.Click();
+            webDriver.WaitInSeconds(2);
+            return this;
+        }
+        public NewParentAccountActivityRegistrationPage ClickStudentHealthNextBtn()
+        {
+            SaveAndContStudentHealthElement.Click();
+            webDriver.WaitInSeconds(4);
+            return this;
+        }
+        public string RegistrationComplete()
+        {
+            webDriver.WaitInSeconds(1);
+            return CompleteRegistrationElement.Text;
+        }
+        #endregion
 
         public void Dispose()
         {
