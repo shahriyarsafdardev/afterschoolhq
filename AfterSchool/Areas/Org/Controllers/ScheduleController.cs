@@ -78,16 +78,16 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult Edit(string id, string name, string scheduledetails, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string scheduledates, string isongoing, string activity, string group)
+        public ActionResult Edit(string id, string schedule, string name, string scheduledetails, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string scheduledates, string isongoing, string activity, string group)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
 
-            if (currentAccount.IsEmpty() || !id.IsInteger())
-                return new HttpStatusCodeResult(System.Net.HttpStatusCode.BadRequest);
+            if (schedule.IsNotEmpty())
+                id = schedule;
 
-            var schedule = new ActivitySchedule();
+            var activitySchedule = new ActivitySchedule();
             var scheduleRepeat = Request.Form.Filter("schedulerepeat-");
             var meetingOpenInfo = Request.Form.Filter("meeting-open-");
             var meetingClosedInfo = Request.Form.Filter("meeting-closed-");
@@ -96,11 +96,11 @@ namespace AfterSchool.Areas.Org.Controllers
             var scheduleDatesClosed = ActivityScheduleUI.PrepScheduleDatesClosed(meetingClosedInfo);
 
             if (id.ToInteger() > 0)
-                schedule = ActivitySchedule.EditExisting(id, name, scheduledetails, repeatsweekly.IsBoolean() && repeatsweekly.ToBoolean(), isongoing.IsBoolean() && isongoing.ToBoolean(), startdate.ToDateTime(), enddate.ToDateTime(), dailystarttime.ToDateTime(), dailyendtime.ToDateTime(), scheduleDates, scheduleDatesClosed, currentUser.ID.Value, msgs);
+                activitySchedule = ActivitySchedule.EditExisting(id, name, scheduledetails, repeatsweekly.IsBoolean() && repeatsweekly.ToBoolean(), isongoing.IsBoolean() && isongoing.ToBoolean(), startdate.ToDateTime(), enddate.ToDateTime(), dailystarttime.ToDateTime(), dailyendtime.ToDateTime(), scheduleDates, scheduleDatesClosed, currentUser.ID.Value, msgs);
             else
             {
                 var groupId = group.IsGuid() ? currentAccount.GetActivityGroup(group.ToGuid(), msgs).ID : null;
-                schedule = ActivityScheduleService.CreateNew(name, scheduledetails, repeatsweekly.IsBoolean() && repeatsweekly.ToBoolean(), isongoing.IsBoolean() && isongoing.ToBoolean(), startdate.ToDateTime(), enddate.ToDateTime(), dailystarttime.ToDateTime(), dailyendtime.ToDateTime(), scheduleDates, scheduleDatesClosed, currentAccount.ID.Value, groupId, currentUser.ID.Value, msgs);
+                activitySchedule = ActivityScheduleService.CreateNew(name, scheduledetails, repeatsweekly.IsBoolean() && repeatsweekly.ToBoolean(), isongoing.IsBoolean() && isongoing.ToBoolean(), startdate.ToDateTime(), enddate.ToDateTime(), dailystarttime.ToDateTime(), dailyendtime.ToDateTime(), scheduleDates, scheduleDatesClosed, currentAccount.ID.Value, groupId, currentUser.ID.Value, msgs);
             }
 
             if (msgs.HasNoErrors())
@@ -114,12 +114,12 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 if (activity.IsGuid())
-                    return RedirectToAction("editschedule", "activity", new { id = activity, schedule = schedule.ID });
+                    return RedirectToAction("editschedule", "activity", new { id = activity, schedule = activitySchedule.ID });
                 else if (group.IsGuid())
                     return RedirectToAction("schedules", "group", new { id = group });
             }
 
-            return View(schedule);
+            return View(activitySchedule);
         }
     }
 }

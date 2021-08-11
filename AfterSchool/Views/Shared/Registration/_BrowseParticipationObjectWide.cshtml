@@ -53,16 +53,20 @@
      days="@ParticipationObjectUI.PrintDaysOfWeekList(Model)"
      location="@(Model.Location?.FormatAddress(false))"
      gender="@((int)Model.GenderRestriction)"
-     name="@Model.Name">
+     name="@Model.Name"
+     isvirtual="@((Model.ActivityLocationType == ActivityLocationType.Virtual) ? "1" : "0")"
+     isphysical="@((Model.ActivityLocationType == ActivityLocationType.Physical || Model.ActivityLocationType == ActivityLocationType.NotSet) ? "1" : "0")"
+     issport="@((Model.IsAccountActivityGroup()) ? "1" : "0")">
 
     <div class="panel" style="overflow: hidden;">
 
-        @if (accountProfile.IsNotEmpty() && (accountProfile.AccountId != Model.OwnerAccount.ID || Model.Provider.IsNotEmpty()))
+        @if (accountProfile.IsNotEmpty())
         {
             var hasProvider = Model.Provider.IsNotEmpty();
             var isProviderProfile = hasProvider && Model.Provider.ID == accountProfile.AccountId;
-
-            <div style="padding:5px;" class="@((hasProvider && !isProviderProfile) ? "badge-success" : "badge-blue")">
+            var isProvidedAtHostAccount = Model.Location?.HostAccountId == accountProfile.AccountId || !hasProvider;
+            <!-- badge-success badge-blue badge-dark-gray -->
+            <div style="padding:5px;" class="badge-dark-gray">
                 <div class="text-white text-bold">
                     @if (Model.ActivityLocationType == ActivityLocationType.Virtual)
                     {
@@ -163,7 +167,7 @@
                     @if (Model.Schedule.IsNotEmpty())
                     {
                         <span>
-                            Days of the Week: @Model.Schedule.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().Substring(0,3)).ToStringList(", ")
+                            Days of the Week: @Model.Schedule.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().Substring(0, 3)).ToStringList(", ")
                         </span>
                         <br />
                     }
