@@ -853,3 +853,11 @@
 .p-15-25 {
     padding: 15px 25px;
 }
+
+.long-text-ellipses {
+    width: 225px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+}
