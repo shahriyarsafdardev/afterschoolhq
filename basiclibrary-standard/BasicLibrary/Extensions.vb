@@ -594,7 +594,7 @@ Public Module Extensions
             y.Add(aList.Last())
             x.AddRange(aList.Except(y))
 
-            Return String.Join(separator, x.ToArray()) & separator & finalSeparator & aList.Last().Replace("  ", " ")
+            Return String.Join(separator, x.ToArray()) & finalSeparator & aList.Last().Replace("  ", " ")
         ElseIf finalSeparator.IsNotBlank And aList.Count = 2 Then
             Return String.Join(finalSeparator, aList.ToArray())
         Else

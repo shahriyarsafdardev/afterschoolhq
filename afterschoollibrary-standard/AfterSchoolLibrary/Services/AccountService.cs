@@ -9,6 +9,7 @@ using AfterSchoolLibrary.Billing;
 using Lob.Models;
 using AfterSchool.Models;
 using System.Data;
+using Twilio.Rest.Api.V2010.Account.Usage.Record;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -17,7 +18,12 @@ namespace AfterSchoolLibrary.Services
         public static bool HasFeature(this Account account, FeatureType featureType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (account.IsNotEmpty())
-                return (bool)account.GetActiveAccountPackage(msgs, dc)?.HasFeature(featureType, msgs, dc);
+            {
+                var ap = account.GetActiveAccountPackage(msgs, dc);
+
+                if (ap.IsNotEmpty())
+                    return (bool)ap.HasFeature(featureType, msgs, dc);
+            }
 
             return false;
         }
@@ -277,34 +283,39 @@ namespace AfterSchoolLibrary.Services
         public static List<ParticipationObject> GetPublishedParticipationObjects(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var participationObjects = new List<ParticipationObject>();
+            var topParticipationObjects = new List<ParticipationObject>();
+            var bottomParticipationObjects = new List<ParticipationObject>();
 
-            participationObjects.AddRange(
+            topParticipationObjects.AddRange(
                 account.GetPublishedActivities(msgs, dc)
                 .Select(activity => activity.GetParticipationObject(msgs, dc))
+            );
+
+            topParticipationObjects.AddRange(
+                account.GetPublishedExternalLeagues(msgs, dc).Select(x => x.GetParticipationObject(msgs, dc))
+            );
+
+            topParticipationObjects.AddRange(
+                account.GetOpenPublishedSessions(msgs, dc).Select(x => x.GetParticipationObject(msgs, dc))
             );
 
             var hostedLocationIds = account.GetHostedLocations(msgs, dc)
                                             .Select(location => location.ID.Value)
                                             .ToList();
 
-            participationObjects.AddRange(
-                account.GetPublishedExternalLeagues(msgs, dc).Select(x => x.GetParticipationObject(msgs, dc))
-            );
-
-            participationObjects.AddRange(
-                account.GetOpenPublishedSessions(msgs, dc).Select(x => x.GetParticipationObject(msgs, dc))
-            );
-
             account.GetApprovedVisitorAccounts(msgs, dc).ForEach(visitor =>
             {
-                participationObjects.AddRange(
+                topParticipationObjects.AddRange(
                     visitor.GetPublishedActivitiesInLocations(hostedLocationIds, msgs, dc)
                         .Select(activity => activity.GetParticipationObject(msgs)));
 
                 if (visitor.CanShowAllActivitiesOn(account))
-                    participationObjects.AddRange(visitor.GetPublishedActivities(msgs, dc)
+                    bottomParticipationObjects.AddRange(visitor.GetPublishedOpenedActivities(false, msgs, dc)
                         .Select(activity => activity.GetParticipationObject(msgs, dc)));
             });
+
+            participationObjects.AddRange(topParticipationObjects.Shuffle());
+            participationObjects.AddRange(bottomParticipationObjects.Shuffle());
 
             return participationObjects
                 .DistinctBy(participationObject => new { participationObject.ObjectID, participationObject.ObjectType })
@@ -322,6 +333,20 @@ namespace AfterSchoolLibrary.Services
                 Activity.LoadByProviderAccountId(account.ID.Value, msgs, dc)
                     .Where(activity => activity.IsOpenUpcomingOrRecentlyClosed(msgs, dc) && activity.IsPubliclyViewable)
             );
+
+            return activities.DistinctBy(activity => activity.ID).ToList();
+        }
+
+        public static List<Activity> GetPublishedOpenedActivities(this Account account, bool getExternallyProvidedActivities = true, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var periods = account.GetOpenRegistrationPeriods(msgs, dc);
+            var activities = new List<Activity>();
+
+            periods.ForEach(period => activities.AddRange(period.GetActivities(msgs, dc).Where(x => x.IsPubliclyViewable)));
+
+            if (getExternallyProvidedActivities)
+                activities.AddRange(Activity.LoadByProviderAccountId(account.ID.Value, msgs, dc)
+                        .Where(activity => activity.IsOpen(msgs, dc) && activity.IsPubliclyViewable));
 
             return activities.DistinctBy(activity => activity.ID).ToList();
         }
@@ -422,14 +447,19 @@ namespace AfterSchoolLibrary.Services
                 dc);
         }
 
-        public static int GetActiveAndPublishedActivityCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetActiveAndPublishedActivityCount(this Account account, bool includeExternallyPublished, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Activity.GetCount(new Hashtable() { 
-                { "AccountId", account.ID.Value }, 
+            var count = Activity.GetCount(new Hashtable() {
+                { "AccountId", account.ID.Value },
                 { "IsPublished", true },
-                { "IsDeleted", false }, 
-                { "isArchived", false } 
-            }, msgs, dc) + Activity.GetCountByProviderAccountId(account.ID.Value, msgs, dc);
+                { "IsDeleted", false },
+                { "isArchived", false }
+            }, msgs, dc);
+            
+            if (includeExternallyPublished)
+             count += Activity.GetCountByProviderAccountId(account.ID.Value, msgs, dc);
+
+            return count;
         }
 
         public static int GetActiveAndNonPublishedActivityCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -840,6 +870,19 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
+        public static bool IsActiveAccountPackage(this Account account, Package package, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.IsActiveAccountPackage(package.ID, msgs, dc);
+        }
+
+        public static bool IsActiveAccountPackage(this Account account, int? packageId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (account.IsNotEmpty())
+                return account.GetActiveAccountPackage(msgs, dc)?.PackageId == packageId;
+
+            return false;
+        }
+
         public static List<AccountPackage> GetAccountPackages(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return AccountPackage.LoadByAccountId(account.ID.Value, msgs, dc);
@@ -875,7 +918,7 @@ namespace AfterSchoolLibrary.Services
             var accountPackage = account.GetActiveAccountPackage(msgs, dc);
 
             if (accountPackage.IsNotEmpty())
-                return AccountPackageFeature.HasAccountPackageIdByFeatureTypeId(accountPackage.ID.Value, featureType, msgs, dc);
+                return AccountPackageFeature.HasAccountPackageByFeatureTypeId(accountPackage.ID.Value, featureType, msgs, dc);
 
             return false;
         }
@@ -885,7 +928,7 @@ namespace AfterSchoolLibrary.Services
             var accountPackage = account.GetActiveAccountPackage(msgs, dc);
 
             if (accountPackage.IsNotEmpty())
-                return AccountPackageFeature.HasAccountPackageIdByFeatureTypeIds(accountPackage.ID.Value, featureTypes, msgs, dc);
+                return AccountPackageFeature.HasAccountPackageByFeatureTypeIds(accountPackage.ID.Value, featureTypes, msgs, dc);
 
             return false;
         }
@@ -2403,6 +2446,8 @@ namespace AfterSchoolLibrary.Services
         {
             return AccountRelationship.LoadByApproved(hostAccount.ID.Value, msgs, dc)
                 .Select(accountRelationship => accountRelationship.GetVisitorAccount(msgs, dc))
+                .Where(account => !account.IsDeleted && account.IsActive)
+                .OrderBy(account => account.GetActiveAndPublishedActivityCount(false, msgs, dc) > 0)
                 .ToList();
         }
 
@@ -4036,6 +4081,7 @@ namespace AfterSchoolLibrary.Services
                     description: $"Transfer from AHQ to {account.Name} requested by {requestor.DisplayName} and approved by {loggedInUser.DisplayName}",
                     transferIdentifier: payout.Uid.ToString(),
                     destinationId: account.StripeUserId,
+                    chargeId: null,
                     metaData: metaData,
                     msgs: msgs);
 
