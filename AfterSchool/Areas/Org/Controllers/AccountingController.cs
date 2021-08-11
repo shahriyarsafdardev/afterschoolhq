@@ -363,7 +363,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.AmountAvailableToRefund = currentAccount.GetMaxAmountAvailableForRefund(search: null, msgs: msgs);
             ViewBag.AmountRefunded = currentAccount.GetTotalAmountRefunded(search: null, msgs: msgs);
 
-            var model = currentAccount.GetRefundRequests().OrderByDescending(request => request.CreateDate).ToList();
+            var model = currentAccount.GetRefundRequests(msgs).OrderByDescending(request => request.CreateDate).ToList();
 
             ViewBag.Messages = msgs;
 

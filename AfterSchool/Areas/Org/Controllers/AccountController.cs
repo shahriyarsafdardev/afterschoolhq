@@ -835,10 +835,10 @@ namespace AfterSchool.Areas.Org.Controllers
             if (id.ToInteger() == 0)
             {
                 if (copyfrom.IsNumber())
-                    form = currentAccount.GetForm(id.ToInteger(), msgs)?
+                    form = currentAccount.GetForm(copyfrom.ToInteger(), msgs)?
                         .Copy(currentUser.ID.Value, currentAccount.ID.Value, null, msgs);
                 else
-                    form = currentAccount.GetDefaultForm(msgs)
+                    form = currentAccount.GetDefaultForm(msgs)?
                         .Copy(currentUser.ID.Value, currentAccount.ID.Value, null, msgs);
             }
             else

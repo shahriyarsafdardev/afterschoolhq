@@ -658,6 +658,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
 
+            if (id.IsEmpty() || id.IsNotGuid())
+                return HttpNotFound();
+
             if (details.IsEmpty())
                 msgs.Add($"{UILabel.ActivityLabel()} Details is required", MessageType.UserError);
 
@@ -1131,24 +1134,21 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Account = currentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.IsFullScreen = GetIsFullScreen(activity);
+            ViewBag.Messages = msgs;
 
             if (msgs.HasNoErrors())
             {
                 switch (cmd)
                 {
-                    case "prev":
-                        ViewBag.Messages = msgs;
+                    case "prev":                        
                         ViewBag.ActiveMenu = "EditLocation";
                         return View("EditLocation", activity);
                     case "next":
-                        ViewBag.Messages = msgs;
                         ViewBag.ActiveMenu = "EditConfirmation";
                         return View("EditConfirmation", activity);
                     case "done":
-                        ViewBag.Messages = msgs;
                         return RedirectToAction("activities", "group", new { id = activity.ActivityGroupUid });
                     case "publish":
-                        ViewBag.Messages = msgs;
                         return RedirectToAction("publish", "activity", new { id = activity.Uid, isnew = Request["isnew"], source = Request["source"] });
                 }
             }
@@ -1230,7 +1230,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 switch (cmd)
                 {
                     case "prev":
-                        if (activity.CanAcceptPayments())
+                        if (activity.CanAcceptPayments(msgs))
                         {
                             LoadEditCostViewBag(activity, msgs);
                             return View("EditCost", activity);
@@ -2615,8 +2615,6 @@ namespace AfterSchool.Areas.Org.Controllers
                         msgs.Add("Your message will been sent to the selected registrants", MessageType.Success);
                         ViewBag.Registrants = am.GetActivityMessageRegistrants(msgs);
                         ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
-                        ViewBag.Messages = msgs;
-
                     }
                 }
             }
