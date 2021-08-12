@@ -823,7 +823,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
 
-            if (id.IsEmpty() || copyfrom.IsEmpty())
+            if (id.IsEmpty() && copyfrom.IsEmpty())
                 return HttpNotFound();
 
             Form form = null;
