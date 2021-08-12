@@ -608,6 +608,7 @@ namespace AfterSchool.Controllers
             if (account.IsEmpty() || account.IsDeleted)
                 return HttpNotFound();
 
+            var featuredProviders = new List<Account>();
             var session = ActivityGroup.LoadByAccountIdByUniqueName(account.ID.Value, sessionname, msgs);
 
             if (session.IsEmpty())
@@ -640,7 +641,10 @@ namespace AfterSchool.Controllers
                 willOpen = participationObjects;
             else
                 closed = participationObjects;
-
+            if (account.IsNotEmpty())
+            {
+                featuredProviders = account.GetApprovedVisitorAccounts(msgs);
+            }            
             ViewBag.Session = session.GetParticipationObject(msgs);
             ViewBag.Grades = GradeLevel.Load(msgs: msgs);
             ViewBag.Messages = msgs;
@@ -651,6 +655,7 @@ namespace AfterSchool.Controllers
             ViewBag.RegistrationClosed = closed;
             ViewBag.RegistrationWillOpen = willOpen;
             ViewBag.AccountProfile = account.GetAccountProfile(msgs);
+            ViewBag.FeaturedProviders = featuredProviders;
 
             return View("browse", account);
         }
