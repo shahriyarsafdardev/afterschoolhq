@@ -15,7 +15,7 @@
     <span>
         @if (!Model.IsRegistrationFree)
         {
-             <span>Pay</span> <strong>@Model.Cost.ToCurrency()</strong> <span>today plus</span>
+            <span>Pay</span> <strong>@Model.Cost.ToCurrency()</strong> <span>today plus</span>
         }
 
         @if (subscriptionPlan.SplitCostEvenly)
@@ -32,7 +32,23 @@
             <span>
                 <strong>@ParticipationObjectUI.PrintPlanFee(subscriptionPlan, Model.OwnerAccount, displayCheckoutPrice)</strong>
                 every
-                <strong>@Model.SubscriptionPlans.First().BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong>
+                <strong>@subscriptionPlan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong>
+
+                @if (subscriptionPlan.StartDate.HasValue)
+                {
+                    <span>starting on <strong>@subscriptionPlan.StartDate.ToShortDateString()</strong></span>
+                }
+
+                @if (subscriptionPlan.EndDate.HasValue)
+                {
+                    if (subscriptionPlan.StartDate.HasValue)
+                    {
+                        <span> and </span>
+                    }
+
+                    <span>ending on <strong>@subscriptionPlan.EndDate.ToShortDateString()</strong></span>
+                }
+
             </span>
         }
 
