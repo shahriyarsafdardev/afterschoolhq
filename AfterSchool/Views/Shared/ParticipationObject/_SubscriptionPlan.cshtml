@@ -15,7 +15,7 @@
     <span>
         @if (!Model.IsRegistrationFree)
         {
-            <span>plus</span>
+             <span>Pay</span> <strong>@Model.Cost.ToCurrency()</strong> <span>today plus</span>
         }
 
         @if (subscriptionPlan.SplitCostEvenly)

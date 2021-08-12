@@ -22,12 +22,15 @@
                 <th>Name</th>
                 <th class="text-center">Seat Index</th>
                 <th>Date Registered</th>
-                @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView))
+                @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && headerTitle != RegistrationAssignmentType.Interested)
                 {
-                    <th>Amount Paid</th>
+                 <th>Amount Paid</th>
                 }
-                <th>Status</th>
-                <th></th>
+                @if (headerTitle != RegistrationAssignmentType.Interested)
+                {
+                    <th>Status</th>
+                    <th></th>
+                }
             </tr>
         </thead>
         <tbody>
@@ -47,7 +50,7 @@
                         <td>@(!isTechSupport ? ra.RegistrantName.IfBlank(ra.RegistrantEmail) : ra.RegistrantEmail.ToMaskedData())</td>
                         <td class="text-center">@ra.SeatIndex</td>
                         <td>@account.ConvertToAccountTimeZone(ra.CreateDate.Value).ToLongDateTimeString()</td>
-                        @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView))
+                        @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && headerTitle != RegistrationAssignmentType.Interested)
                         {
                             var amount = ra.GetAmountPaid();
                             var isProRated = ra.GetIsProRatedFlagByParent();
@@ -92,6 +95,8 @@
                                 }
                             </td>
                         }
+                        @if (headerTitle != RegistrationAssignmentType.Interested)
+                        {
                         <td>
                             @if (ra.IsRegistrantActivityStatusAccessible())
                             {
@@ -152,6 +157,7 @@
                                 }   
                             }
                         </td>
+                        }
                     </tr>
                 }
             }
