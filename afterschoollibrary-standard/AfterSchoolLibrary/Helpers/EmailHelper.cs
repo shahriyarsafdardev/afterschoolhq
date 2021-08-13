@@ -86,16 +86,17 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        public static SystemMessages SendSurveyEmail(SurveyFeedback surveyFeedback, SystemMessages msgs)
+
+        public static SystemMessages SendSurveyEmail(SurveyResponse surveyResponse, SystemMessages msgs)
         {
             msgs = msgs ?? new SystemMessages();
-            var getRegistrant = Registrant.Load(surveyFeedback.RegistrantId.Value);
-            var getSurvey = SurveyRequest.Load(surveyFeedback.SurveyId.Value);
+            var getRegistrant = Registrant.Load(surveyResponse.RegistrantId.Value);
+            var getSurvey = SurveyRequest.Load(surveyResponse.SurveyId.Value);
 
             var model = new NameValueCollection()
             {
                 { "Name", getRegistrant.Name },
-                { "Link", Utilities.SurveyBaseUrl+"/survey/"+surveyFeedback.SurveyId},
+                { "Link", Utilities.SurveyBaseUrl+"/survey/"+surveyResponse.SurveyId},
                 { "SurveyName", getSurvey.Name}
             };
 

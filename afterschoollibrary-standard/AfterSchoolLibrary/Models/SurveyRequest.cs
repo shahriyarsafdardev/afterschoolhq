@@ -18,23 +18,32 @@ namespace AfterSchoolLibrary.Models
     {
 		#region "ClassGenerator"
 
+		public string Name { get { return (string)MDV["Name"].Value; } set { MDV["Name"].Value = value; } }
+		public string Description { get { return (string)MDV["Description"].Value; } set { MDV["Description"].Value = value; } }
 		/// <summary>
 		/// Required.
 		/// </summary>
-		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
-		public int? FormId { get { return (int?)MDV["FormId"].Value; } set { MDV["FormId"].Value = value; } }
-		public int? ActivityId { get { return (int?)MDV["ActivityId"].Value; } set { MDV["ActivityId"].Value = value; } }
-		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
-		public string Name { get { return (string)MDV["Name"].Value; } set { MDV["Name"].Value = value; } }
-		public string InstructionsText { get { return (string)MDV["InstructionsText"].Value; } set { MDV["InstructionsText"].Value = value; } }
-		public bool? MultipleResponsesEnabled { get { return (bool?)MDV["MultipleResponsesEnabled"].Value; } set { MDV["MultipleResponsesEnabled"].Value = value; } }
+		public int AccountId { get { return (int)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
+		/// <summary>
+		/// Required.
+		/// </summary>
+		public int ActivityId { get { return (int)MDV["ActivityId"].Value; } set { MDV["ActivityId"].Value = value; } }
+		/// <summary>
+		/// Required.
+		/// </summary>
+		public int FormId { get { return (int)MDV["FormId"].Value; } set { MDV["FormId"].Value = value; } }
+		public DateTime? DueDate { get { return (DateTime?)MDV["DueDate"].Value; } set { MDV["DueDate"].Value = value; } }
+		/// <summary>
+		/// Required.
+		/// </summary>
+		public bool MultipleResponsesEnabled { get { return (bool)MDV["MultipleResponsesEnabled"].Value; } set { MDV["MultipleResponsesEnabled"].Value = value; } }
 		
 
         public SurveyRequest()
         {
             this.Config(ObjectMap, DatabaseQuery, typeof(SurveyRequest).Name, "ID");
             this.LoadObjectValues(ObjectMap);
-			this.Uid = Guid.NewGuid();
+			this.MultipleResponsesEnabled = false;
 			
         }
 
@@ -45,12 +54,12 @@ namespace AfterSchoolLibrary.Models
                 BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
                 string className = typeof(SurveyRequest).Name;
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
-				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
-				_dp.Add(className, "FormId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "ActivityId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "Name", System.Data.SqlDbType.NVarChar , "400");
+				_dp.Add(className, "Description", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "Name", System.Data.SqlDbType.NVarChar , "200");
-				_dp.Add(className, "InstructionsText", System.Data.SqlDbType.NVarChar , "500");
+				_dp.Add(className, "ActivityId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "FormId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "DueDate", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "MultipleResponsesEnabled", System.Data.SqlDbType.Bit);
 				
                 return _dp;
@@ -106,8 +115,6 @@ namespace AfterSchoolLibrary.Models
         {
 			var msgs = new SystemMessages();
 
-			if (this.Uid.IsEmpty())
-				msgs.Add("Uid is required on SurveyRequest object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(SurveyRequest).Name));
@@ -131,15 +138,11 @@ namespace AfterSchoolLibrary.Models
             BasicLibrary.DataAccess.DatabaseParameters dps;
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["Uid"]);
+			dps.Add(ObjectMap["Name"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["FormId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["ActivityId"]);
+			dps.Add(ObjectMap["Description"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -147,11 +150,15 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["Name"]);
+			dps.Add(ObjectMap["ActivityId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["InstructionsText"]);
+			dps.Add(ObjectMap["FormId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["DueDate"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -192,7 +199,7 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static SurveyRequest LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static SurveyRequest LoadByUid(string Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
@@ -200,7 +207,7 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static SurveyRequest LoadByUidByAccountId(Guid Uid, int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static SurveyRequest LoadByUidByAccountId(string Uid, int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
@@ -209,7 +216,7 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static SurveyRequest LoadByUidByActivityId(Guid Uid, int ActivityId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static SurveyRequest LoadByUidByActivityId(string Uid, int ActivityId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
@@ -218,7 +225,7 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static SurveyRequest LoadByUidByFormId(Guid Uid, int FormId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static SurveyRequest LoadByUidByFormId(string Uid, int FormId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;

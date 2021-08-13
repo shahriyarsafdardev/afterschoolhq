@@ -26,7 +26,7 @@ namespace AfterSchoolLibrary.Services
         public static Activity GetActivity(this SurveyRequest surveyRequest, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (surveyRequest.CreatedBy.HasValue)
-                return Activity.Load(surveyRequest.ActivityId.Value, msgs, dc);
+                return Activity.Load(surveyRequest.ActivityId, msgs, dc);
 
             return null;
         }
@@ -52,7 +52,7 @@ namespace AfterSchoolLibrary.Services
                        LastModifiedBy = userId,
                        LastModifiedDate = DateTime.Now,
                        Name = name,
-                       InstructionsText = instrcutionsText,
+                       Description = instrcutionsText,
                        MultipleResponsesEnabled = alloMultipleResponse
                    };
 
@@ -112,29 +112,7 @@ namespace AfterSchoolLibrary.Services
             return row;
         }
 
-        public static SurveyRequest GetSurveyRequestByAccountId(this Account account, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (account.IsNotEmpty())
-                return SurveyRequest.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
-
-            return null;
-        }
-
-        public static SurveyRequest GetSurveyRequestByActivityId(this Activity activity, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (activity.IsNotEmpty())
-                return SurveyRequest.LoadByUidByActivityId(Uid, activity.ID.Value, msgs, dc);
-
-            return null;
-        }
-
-        public static SurveyRequest GetSurveyRequestByForm(this Form form, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (form.IsNotEmpty())
-                return SurveyRequest.LoadByUidByFormId(Uid, form.ID.Value, msgs, dc);
-
-            return null;
-        }
+    
 
         public static void DeleteCSVFile(string path)
         {

@@ -103,7 +103,7 @@ namespace AfterSchoolLibrary.Models
 			WebSessionAction.Create(dc);
 			WebSessionObjectSnapshot.Create(dc);
 			SurveyRequest.Create(dc);
-			SurveyFeedback.Create(dc);
+			SurveyResponse.Create(dc);
 			
 
 			return msgs;
@@ -188,7 +188,7 @@ namespace AfterSchoolLibrary.Models
 			WebSessionAction.Alter(dc);
 			WebSessionObjectSnapshot.Alter(dc);
 			SurveyRequest.Alter(dc);
-			SurveyFeedback.Alter(dc);
+			SurveyResponse.Alter(dc);
 			
 
 			return msgs;
@@ -368,7 +368,8 @@ namespace AfterSchoolLibrary.Models
 			WebSessionAction.Update(new Hashtable(){{"ActionTypeId",0}}, new Hashtable(){{"ActionTypeId", DBNull.Value}}, WebSessionAction.ObjectMap, dc);
 			WebSessionAction.Update(new Hashtable(){{"ObjectTypeId",0}}, new Hashtable(){{"ObjectTypeId", DBNull.Value}}, WebSessionAction.ObjectMap, dc);
 			WebSessionAction.Update(new Hashtable(){{"IndirectObjectTypeId",0}}, new Hashtable(){{"IndirectObjectTypeId", DBNull.Value}}, WebSessionAction.ObjectMap, dc);
-			SurveyFeedback.Update(new Hashtable(){{"SurveyFeedbackStatusTypeId",0}}, new Hashtable(){{"SurveyFeedbackStatusTypeId", DBNull.Value}}, SurveyFeedback.ObjectMap, dc);
+			SurveyRequest.Update(new Hashtable(){{"MultipleResponsesEnabled",false}}, new Hashtable(){{"MultipleResponsesEnabled", DBNull.Value}}, SurveyRequest.ObjectMap, dc);
+			SurveyResponse.Update(new Hashtable(){{"SurveyFeedbackStatusTypeId",0}}, new Hashtable(){{"SurveyFeedbackStatusTypeId", DBNull.Value}}, SurveyResponse.ObjectMap, dc);
 			
 			//**ENDUPDATES**//
 
@@ -563,7 +564,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestionAnswer_FormQuestionId ON [FormQuestionAnswer] (FormQuestionId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestionAnswer_FormQuestionId_RegistrantId ON [FormQuestionAnswer] (FormQuestionId,RegistrantId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestionAnswer_RegistrationId ON [FormQuestionAnswer] (RegistrationId)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestionAnswer_SurveyFeedbackId ON [FormQuestionAnswer] (SurveyFeedbackId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestionAnswer_SurveyResponseId ON [FormQuestionAnswer] (SurveyResponseId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registration_Uid ON [Registration] (Uid)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registration_AccountId_Uid ON [Registration] (Uid,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registration_RegistrantId ON [Registration] (RegistrantId)"));
@@ -600,7 +601,6 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_PackageFeature_FeatureTypeId_PackageId ON [PackageFeature] (PackageId,FeatureTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountPackageFeature_AccountPackageId ON [AccountPackageFeature] (AccountPackageId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountPackageFeature_AccountPackageId_FeatureTypeId ON [AccountPackageFeature] (AccountPackageId,FeatureTypeId)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountPackageFeature_FeatureTypeId ON [AccountPackageFeature] (FeatureTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_File_AccountId ON [File] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityFile_ActivityId ON [ActivityFile] (ActivityId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityFile_FileId ON [ActivityFile] (FileId)"));
@@ -722,16 +722,11 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyRequest_AccountId_Uid ON [SurveyRequest] (Uid,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyRequest_ActivityId_Uid ON [SurveyRequest] (Uid,ActivityId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyRequest_FormId_Uid ON [SurveyRequest] (Uid,FormId)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyFeedback_RegistrantId ON [SurveyFeedback] (RegistrantId)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyFeedback_ActivityId ON [SurveyFeedback] (ActivityId)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyFeedback_SurveyId ON [SurveyFeedback] (SurveyId)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyFeedback_AttendanceId ON [SurveyFeedback] (AttendanceId)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyFeedback_Uid ON [SurveyFeedback] (Uid)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyFeedback_ActivityId_Uid ON [SurveyFeedback] (Uid,ActivityId)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyFeedback_SurveyId_Uid ON [SurveyFeedback] (Uid,SurveyId)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyFeedback_RegistrantId_Uid ON [SurveyFeedback] (Uid,RegistrantId)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyFeedback_AttendanceId_Uid ON [SurveyFeedback] (Uid,AttendanceId)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyFeedback_ActivityId_SurveyId ON [SurveyFeedback] (SurveyId,ActivityId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyResponse_RegistrantId ON [SurveyResponse] (RegistrantId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyResponse_SurveyId ON [SurveyResponse] (SurveyId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyResponse_Uid ON [SurveyResponse] (Uid)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyResponse_SurveyId_Uid ON [SurveyResponse] (Uid,SurveyId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyResponse_RegistrantId_Uid ON [SurveyResponse] (Uid,RegistrantId)"));
 			
 
 			return msgs;

@@ -2,7 +2,7 @@
 
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
-    var suryveyFeedbacks = (List<SurveyFeedback>)ViewBag.GetSurveyFeedback;
+    var surveyResponses = (List<SurveyResponse>)ViewBag.GetSurveyFeedback;
     var survey = (SurveyRequest)ViewBag.Survey;
 }
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -35,14 +35,14 @@
                     <a href="@Url.Action("ExportCSV", "activity", new { id = Model.ID })" class="exportBtn" style="font-size:14px; color:#00ae85" download>Export Survey Results</a>
                 </div>
                 <div class="col-lg-3">
-                    <div class="surveyCheck">@suryveyFeedbacks.Count() Survey Sent</div>
+                    <div class="surveyCheck">@surveyResponses.Count() Survey Sent</div>
                 </div>
                 <div class="col-lg-3">
-                    <div class="surveyCheck">@suryveyFeedbacks.Where(a => a.SurveyFeedbackStatusTypeId == SurveyFeedbackStatus.Completed).Count() Completed</div>
+                    <div class="surveyCheck">@surveyResponses.Where(a => a.SurveyFeedbackStatusTypeId == SurveyFeedbackStatus.Completed).Count() Completed</div>
                 </div>
                 <div class="col-lg-3">
                     <div class="pull-right">
-                        <a href="javascript:void(0)" class="btn btn-success surveybtn reminder" data-count="@suryveyFeedbacks.Where(a => a.SurveyFeedbackStatusTypeId != SurveyFeedbackStatus.Completed).Count()">Remind To All Incomplete</a>
+                        <a href="javascript:void(0)" class="btn btn-success surveybtn reminder" data-count="@surveyResponses.Where(a => a.SurveyFeedbackStatusTypeId != SurveyFeedbackStatus.Completed).Count()">Remind To All Incomplete</a>
                     </div>
                 </div>
             </div>
@@ -59,25 +59,25 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var surveyFeedback in suryveyFeedbacks)
+                        @foreach (var surveyResponse in surveyResponses)
                         {
                             <tr>
                                 <td>
-                                    <a href="@Url.Action("viewsurveyresults", "activity", new { id = surveyFeedback.ID, activityId = Model.Uid })" class="linkGreen">View</a>
+                                    <a href="@Url.Action("viewsurveyresults", "activity", new { id = surveyResponse.ID, activityId = Model.Uid })" class="linkGreen">View</a>
                                 </td>
                                 <td>
-                                    @surveyFeedback.GetRegistrantName().DisplayName
+                                    @surveyResponse.GetRegistrantName().DisplayName
                                 </td>
                                 <td>
-                                    @surveyFeedback.SurveyFeedbackStatusTypeId.ToString()
+                                    @surveyResponse.SurveyFeedbackStatusTypeId.ToString()
                                 </td>
                                 <td>
-                                    @(surveyFeedback.LastModifiedDate.IsNotEmpty() ? survey.LastModifiedDate.Value.ToString("dd/MM/yyyy") : "")
+                                    @(surveyResponse.LastModifiedDate.IsNotEmpty() ? survey.LastModifiedDate.Value.ToString("dd/MM/yyyy") : "")
                                 </td>
                                 <td>
-                                    @if (surveyFeedback.SurveyFeedbackStatusTypeId != SurveyFeedbackStatus.Completed)
+                                    @if (surveyResponse.SurveyFeedbackStatusTypeId != SurveyFeedbackStatus.Completed)
                                     {
-                                       <a href="javascript:void(0)" class="linkGreen reminder" data-count="1" data-id="@surveyFeedback.ID">Send Reminder</a>
+                                       <a href="javascript:void(0)" class="linkGreen reminder" data-count="1" data-id="@surveyResponse.ID">Send Reminder</a>
                                     }
                                 </td>
                             </tr>

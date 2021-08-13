@@ -53,10 +53,10 @@
                         @foreach (var survey in (List<SurveyRequest>)ViewBag.Surveys)
                         {
                             var activity = SurveyRequestService.GetActivity(survey);
-                            var surveyFeedback = SurveyFeedback.LoadBySurveyIdByActivityId(survey.ID.Value, activity.ID.Value);
+                            var surveyResponse = SurveyResponse.LoadBySurveyId(survey.ID.Value).FirstOrDefault();
                             <tr>
                                 <td>
-                                    <a href="@Url.Action("viewsurveyresults", "activity", new { id = surveyFeedback.ID, activityId = activity.Uid })">View</a>
+                                    <a href="@Url.Action("viewsurveyresults", "activity", new { id = surveyResponse.ID, activityId = activity.Uid })">View</a>
                                 </td>
                                 <td>
                                     @survey.Name

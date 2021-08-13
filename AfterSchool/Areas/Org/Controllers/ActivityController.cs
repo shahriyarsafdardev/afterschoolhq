@@ -1988,35 +1988,35 @@ namespace AfterSchool.Areas.Org.Controllers
             var surveyRequest = SurveyRequestService.AddSurvey(formId, activityId, name, optionalText, allowMultiple, currentAccount.ID.Value, currentUser.ID.Value, msgs);
 
             if (selectedIndividuals)
-                CreateSurveys(surveyRequest.ID.Value, activityId, studentList.Where(a => a.Selected).ToList(), currentAccount.ID.Value, currentUser.ID.Value, msgs);
+                CreateSurveys(surveyRequest.ID.Value, studentList.Where(a => a.Selected).ToList(), currentUser.ID.Value, msgs);
             else 
-                CreateSurveys(surveyRequest.ID.Value, activityId, studentList, currentAccount.ID.Value, currentUser.ID.Value, msgs);
+                CreateSurveys(surveyRequest.ID.Value, studentList, currentUser.ID.Value, msgs);
 
             ViewBag.Messages = msgs;
             return RedirectToAction("Surveys", new { id });
         }
 
-        public static void CreateSurveys(int surveyRequestId, int activityId, List<SelectListItem> studentList, int currentAccountId, int currentUserId, SystemMessages msgs)
+        public static void CreateSurveys(int surveyRequestId, List<SelectListItem> studentList, int currentUserId, SystemMessages msgs)
         {
             foreach (var student in studentList)
             {
-                var surveyFeedback = SurveyFeedbackService.CreateSurveyFeedback(surveyRequestId, activityId, student.Value.ToInteger(), null, SurveyFeedbackStatus.New, currentAccountId, currentUserId, msgs);
-                BackgroundJob.Enqueue(() => SurveyFeedbackService.NotifyStudents(surveyFeedback, null));
+                var surveyResponse = SurveyResponseService.CreateSurveyFeedback(surveyRequestId, student.Value.ToInteger(), SurveyFeedbackStatus.New, currentUserId, msgs);
+                BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, null));
             }
         }
 
         public ActionResult ResendNotification(int id, int surveyId)
         {
             if(id == 0){
-                var surveyFeedbacks = SurveyFeedback.LoadBySurveyId(surveyId).Where(a => a.SurveyFeedbackStatusTypeId != SurveyFeedbackStatus.Completed);
-                foreach(var surveyFeedback in surveyFeedbacks)
+                var surveyResponses = SurveyResponse.LoadBySurveyId(surveyId).Where(a => a.SurveyFeedbackStatusTypeId != SurveyFeedbackStatus.Completed);
+                foreach(var surveyResponse in surveyResponses)
                 {
-                    BackgroundJob.Enqueue(() => SurveyFeedbackService.NotifyStudents(surveyFeedback, null));
+                    BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, null));
                 }
             }
             else{
-                var surveyFeedback = SurveyFeedback.Load(id);
-                BackgroundJob.Enqueue(() => SurveyFeedbackService.NotifyStudents(surveyFeedback, null));
+                var surveyResponse = SurveyResponse.Load(id);
+                BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, null));
             }
 
             return Json(new { msg = "Reminder sent", success = true}, JsonRequestBehavior.AllowGet);
@@ -2033,7 +2033,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var activity = currentAccount.GetActivity(activityId.ToGuid(), msgs);
 
-            ViewBag.GetSurveyFeedback = activity.GetSurveyFeedbacksByActivity(msgs).Where(a=>a.SurveyId == id).ToList();
+            ViewBag.GetSurveyFeedback = SurveyResponse.LoadBySurveyId(id, msgs);
             ViewBag.Survey = SurveyRequest.Load(id);
             ViewBag.Messages = msgs;
 
@@ -2063,23 +2063,25 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
 
-            var getSurveyFeedback = SurveyFeedback.Load(id, msgs);            
+            var getSurveyResponse = SurveyResponse.Load(id, msgs);            
             var activity = currentAccount.GetActivity(activityId.ToGuid(), msgs);
-            var getSurveyFeedbacksUsingActivity = SurveyFeedback.LoadByActivityId(activity.ID.Value, msgs);
-        
-            var findIndex = getSurveyFeedbacksUsingActivity.FindIndex(a => a.ID == getSurveyFeedback.ID);
 
-            if (findIndex >= 0  && (findIndex + 1) < getSurveyFeedbacksUsingActivity.Count)
-                ViewBag.NextExists = getSurveyFeedbacksUsingActivity[findIndex + 1].ID;
+            var getAllSurveys = SurveyRequest.LoadByActivityId(activity.ID.Value, msgs);
+            var getSurveyResponses = SurveyResponse.LoadBySurveyId(getAllSurveys.FirstOrDefault().ID.Value);
+        
+            var findIndex = getSurveyResponses.FindIndex(a => a.ID == getSurveyResponse.ID);
+
+            if (findIndex >= 0  && (findIndex + 1) < getSurveyResponses.Count)
+                ViewBag.NextExists = getSurveyResponses[findIndex + 1].ID;
             
             if((findIndex - 1) >= 0)
-                ViewBag.PrevExists = getSurveyFeedbacksUsingActivity[findIndex - 1].ID;
+                ViewBag.PrevExists = getSurveyResponses[findIndex - 1].ID;
 
 
-            ViewBag.FormQuestionAnswers = FormQuestionAnswer.LoadBySurveyFeedbackId(getSurveyFeedback.ID.Value, msgs);
-            ViewBag.SurveyName = SurveyRequest.Load(getSurveyFeedback.SurveyId.Value).Name;
-            ViewBag.RegistrantName = Registrant.Load(getSurveyFeedback.RegistrantId.Value).Name;
-            ViewBag.SurveyFeedback = getSurveyFeedback;
+            ViewBag.FormQuestionAnswers = FormQuestionAnswer.LoadBySurveyResponseId(getSurveyResponse.ID.Value, msgs);
+            ViewBag.SurveyName = SurveyRequest.Load(getSurveyResponse.SurveyId.Value).Name;
+            ViewBag.RegistrantName = Registrant.Load(getSurveyResponse.RegistrantId.Value).Name;
+            ViewBag.SurveyFeedback = getSurveyResponse;
             ViewBag.Messages = msgs;
 
             return View(activity);

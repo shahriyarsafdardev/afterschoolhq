@@ -65,11 +65,6 @@ namespace AfterSchoolLibrary.Services
            
         }
 
-        public static void NotifyStudents(SurveyFeedback surveyFeedback, SystemMessages msgs)
-        {
-            EmailHelper.SendSurveyEmail(surveyFeedback, msgs);
-        }
-
         public static SurveyFeedback GetSurveyFeedbackBySurveyId(this SurveyRequest survey, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (survey.IsNotEmpty())

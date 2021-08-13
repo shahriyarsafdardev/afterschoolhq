@@ -1,7 +1,7 @@
 ﻿@model Activity
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
-    var surveyFeedback = (SurveyFeedback)ViewBag.SurveyFeedback;
+    var surveyResponse = (SurveyResponse)ViewBag.SurveyFeedback;
 }
 @{Html.RenderPartial("OrgAccountHeader");}
 
@@ -12,7 +12,7 @@
         <div class="panel-body surveypanelpadding">
             <div class="col-lg-6">
                 <div style="font-size:22px">@ViewBag.RegistrantName</div>
-                <div style="font-size:14px; "><a href="@Url.Action("ViewSurvey", "activity", new { id = surveyFeedback.SurveyId, activityId = Model.Uid })" style="color:#B2B2B4">@ViewBag.SurveyName | @(surveyFeedback.CreateDate.IsNotEmpty() ? surveyFeedback.CreateDate.Value.ToString("MMMM dd, yyyy") : "")</a></div>
+                <div style="font-size:14px; "><a href="@Url.Action("ViewSurvey", "activity", new { id = surveyResponse.SurveyId, activityId = Model.Uid })" style="color:#B2B2B4">@ViewBag.SurveyName | @(surveyResponse.CreateDate.IsNotEmpty() ? surveyResponse.CreateDate.Value.ToString("MMMM dd, yyyy") : "")</a></div>
             </div>
             <div class="col-lg-6">
                 <div class="pull-right iconsViewResults">

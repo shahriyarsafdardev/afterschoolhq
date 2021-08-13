@@ -1019,14 +1019,14 @@ inherits: BasicObjectWithModified
 property: FormQuestionId, int?, Int, required
 property: RegistrantId, int?, Int
 property: ActivityId, int?, Int
-property: SurveyFeedbackId, int?, Int
+property: SurveyResponseId, int?, Int
 property: RegistrationId, int?, Int
 property: Text, string, NVarChar "400"
 property: QuestionDataTypeId, QuestionDataType, Int
 property: QuestionText, string, NVarChar "400", , Used to keep the question text just in case the question text changes on the original
 join: FormQuestion.ID, FormQuestionId, LeftOuterJoin
 join: Registration.ID, RegistrationId, LeftOuterJoin
-join: SurveyFeedback.ID, SurveyFeedbackId, LeftOuterJoin
+join: SurveyResponse.ID, SurveyResponseId, LeftOuterJoin
 join: FormQuestionGroup.ID, FormQuestion.FormQuestionGroupId, LeftOuterJoin
 joinproperty: FormQuestion.QuestionDataTypeId, QuestionDataType, Int
 joinproperty: FormQuestion.QuestionTypeId, QuestionType, Int
@@ -1044,7 +1044,7 @@ loadmethod: RegistrantId|ActivityId, List<>
 loadmethod: FormQuestionId, List<>
 loadmethod: FormQuestionId|RegistrantId
 loadmethod: RegistrationId, List<>
-loadmethod: SurveyFeedbackId, List<>
+loadmethod: SurveyResponseId, List<>
 [end]
 
 [begin]
@@ -1871,13 +1871,13 @@ name: SurveyRequest
 serializable: true
 description: table to save details of all suvrye request created by providers.
 inherits: BasicObjectWithModified
-property: Uid, Guid, UniqueIdentifier, required
-property: FormId, int?, Int
-property: ActivityId, int?, Int
-property: AccountId, int?, Int
-property: Name, string, NVarChar "200"
-property: InstructionsText, string, NVarChar "500"
-property: MultipleResponsesEnabled, bool?, Bit
+property: Name, string, NVarChar "400"
+property: Description, string, NVarChar "400"
+property: AccountId, int, Int, required
+property: ActivityId, int, Int, required
+property: FormId, int, Int, required
+property: DueDate, DateTime?, DateTime
+property: MultipleResponsesEnabled, bool, Bit, required
 join: Account.ID, AccountId, LeftOuterJoin
 join: Form.ID, FormId, LeftOuterJoin
 join: Activity.ID, ActivityId, LeftOuterJoin
@@ -1892,31 +1892,20 @@ loadmethod: Uid|FormId
 
 [begin]
 type: Class
-name: SurveyFeedback
+name: SurveyResponse
 serializable: true
-description: Saves Survey Feddback responses.
+description: Saves Survey responses.
 inherits: BasicObjectWithModified
-property: Uid, Guid, UniqueIdentifier, required
 property: SurveyId, int?, Int
-property: ActivityId, int?, Int
 property: RegistrantId, int?, Int
-property: AttendanceId, int?, Int
-property: DueDate, DateTime?, DateTime
 property: SurveyFeedbackStatusTypeId, SurveyFeedbackStatus, Int
-join: Activity.ID, ActivityId, LeftOuterJoin
 join: Registrant.ID, RegistrantId, LeftOuterJoin
 join: SurveyRequest.ID, SurveyId, LeftOuterJoin
-join: Attendance.ID, AttendanceId, LeftOuterJoin
 loadmethod: RegistrantId, List<>
-loadmethod: ActivityId, List<>
 loadmethod: SurveyId, List<>
-loadmethod: AttendanceId, List<>
 loadmethod: Uid
-loadmethod: Uid|ActivityId
 loadmethod: Uid|SurveyId
 loadmethod: Uid|RegistrantId
-loadmethod: Uid|AttendanceId
-loadmethod: SurveyId|ActivityId
 [end]
 
 [begin]

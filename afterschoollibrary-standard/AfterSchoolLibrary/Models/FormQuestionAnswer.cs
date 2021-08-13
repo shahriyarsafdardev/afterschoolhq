@@ -24,7 +24,7 @@ namespace AfterSchoolLibrary.Models
 		public int? FormQuestionId { get { return (int?)MDV["FormQuestionId"].Value; } set { MDV["FormQuestionId"].Value = value; } }
 		public int? RegistrantId { get { return (int?)MDV["RegistrantId"].Value; } set { MDV["RegistrantId"].Value = value; } }
 		public int? ActivityId { get { return (int?)MDV["ActivityId"].Value; } set { MDV["ActivityId"].Value = value; } }
-		public int? SurveyFeedbackId { get { return (int?)MDV["SurveyFeedbackId"].Value; } set { MDV["SurveyFeedbackId"].Value = value; } }
+		public int? SurveyResponseId { get { return (int?)MDV["SurveyResponseId"].Value; } set { MDV["SurveyResponseId"].Value = value; } }
 		public int? RegistrationId { get { return (int?)MDV["RegistrationId"].Value; } set { MDV["RegistrationId"].Value = value; } }
 		public string Text { get { return (string)MDV["Text"].Value; } set { MDV["Text"].Value = value; } }
 		public QuestionDataType QuestionDataTypeId { get { return (QuestionDataType)MDV["QuestionDataTypeId"].Value; } set { MDV["QuestionDataTypeId"].Value = value; } }
@@ -62,7 +62,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "FormQuestionId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrantId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ActivityId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "SurveyFeedbackId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "SurveyResponseId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrationId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Text", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "QuestionDataTypeId", System.Data.SqlDbType.Int);
@@ -96,7 +96,7 @@ namespace AfterSchoolLibrary.Models
                 BasicLibrary.DataAccess.DatabaseQuery dq = BaseObject.get_DatabaseQuery(ObjectMap, typeof(FormQuestionAnswer).Name);
 				dq.Joins.Add(FormQuestion.ObjectMap["ID"], FormQuestionAnswer.ObjectMap["FormQuestionId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.LeftOuterJoin, "FormQuestion");
 				dq.Joins.Add(Registration.ObjectMap["ID"], FormQuestionAnswer.ObjectMap["RegistrationId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.LeftOuterJoin, "Registration");
-				dq.Joins.Add(SurveyFeedback.ObjectMap["ID"], FormQuestionAnswer.ObjectMap["SurveyFeedbackId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.LeftOuterJoin, "SurveyFeedback");
+				dq.Joins.Add(SurveyResponse.ObjectMap["ID"], FormQuestionAnswer.ObjectMap["SurveyResponseId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.LeftOuterJoin, "SurveyResponse");
 				dq.Joins.Add(FormQuestionGroup.ObjectMap["ID"], FormQuestion.ObjectMap["FormQuestionGroupId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.LeftOuterJoin, "FormQuestionGroup");
 				
                 return dq;
@@ -169,7 +169,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["SurveyFeedbackId"]);
+			dps.Add(ObjectMap["SurveyResponseId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -250,11 +250,11 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<FormQuestionAnswer> LoadBySurveyFeedbackId(int SurveyFeedbackId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<FormQuestionAnswer> LoadBySurveyResponseId(int SurveyResponseId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["SurveyFeedbackId"], SurveyFeedbackId);
+			dq.Criterias.Add(ObjectMap["SurveyResponseId"], SurveyResponseId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
