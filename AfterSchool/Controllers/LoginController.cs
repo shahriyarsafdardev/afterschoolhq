@@ -26,6 +26,15 @@ namespace AfterSchool.Controllers
                 if (!currentUser.IsRegistered)
                     return Redirect(AfterSchoolLibrary.Helpers.Utilities.CompleteSignUpUrl(currentUser.Uid, Request["returnurl"]));
 
+                if (invite.IsGuid())
+                {
+                    if (currentUser.HasMultipleAccounts())
+                        return RedirectToAction("select", "login", new { returnurl = Request["returnurl"], invite });
+
+                    if (currentAccount.AccountTypeId == AccountType.Registrant)
+                        return RedirectToAction("welcome", "signup", new { returnurl = Request["returnurl"], invite });
+                }
+
                 HandleInvite(invite, currentAccount, currentUser, msgs);
 
                 if (Request["returnurl"].IsNotEmpty())
@@ -41,6 +50,9 @@ namespace AfterSchool.Controllers
                 if (!account.IsEmpty() && !account.UniqueName.IsEmpty())
                     return Redirect($"/{account.UniqueName}");
             }
+
+            if (invite.IsGuid())
+                msgs.Add("Login to accept your invite", MessageType.Notice);
 
             ViewBag.LoginType = "Internal";
             ViewBag.Messages = msgs;

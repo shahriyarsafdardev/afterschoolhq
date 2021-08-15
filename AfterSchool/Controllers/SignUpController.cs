@@ -1057,7 +1057,13 @@ namespace AfterSchool.Controllers
             Account invitingAccount = null;
 
             if (invite.IsGuid())
-                invitingAccount = Account.LoadByInviteCodeToShare(invite.ToGuid());
+            {
+                var currentAccount = SessionVariables.CurrentAccount;
+                var currentUser = SessionVariables.CurrentUser;
+
+                if (currentAccount.IsNotEmpty() && currentUser.IsNotEmpty() && currentAccount.AccountTypeId != AccountType.Registrant)
+                    return RedirectToAction("index", "login", new { returnurl = Request["returnurl"], invite });
+            }
 
             var model = new SignUpIndexViewModel()
             {
