@@ -26,7 +26,9 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult GetStartedPayments(string id)
         {
-            ViewBag.Messages = new SystemMessages();
+            var msgs = new SystemMessages();
+            HandleTempMessages(msgs);
+            ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.IsFullScreen = true;
             return View(SessionVariables.CurrentAccount);

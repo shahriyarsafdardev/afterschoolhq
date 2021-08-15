@@ -19,7 +19,14 @@
 
                         <div>
                             <p class="text-center text-white">
-                                Please select your account below
+                                @if (Request["invite"].IsGuid())
+                                {
+                                    <span>Please select your account to connect your invite to below</span>
+                                }
+                                else
+                                {
+                                    <span>Please select your account below</span>
+                                }
                             </p>
                         </div>
 
@@ -41,7 +48,7 @@
                             function selectAccount(uid) {
                                 $('#accounts').addClass('hide');
                                 $('#loading').removeClass('hide');
-                                location.href = '/login/select/' + uid + '?returnurl=@ViewBag.ReturnUrl';
+                                location.href = '/login/select/' + uid + '?returnurl=@ViewBag.ReturnUrl&invite=@ViewBag.Invite';
                             }
                         </script>
 
