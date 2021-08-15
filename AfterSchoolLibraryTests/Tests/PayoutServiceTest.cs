@@ -26,6 +26,7 @@ namespace AfterSchoolLibraryTests.Tests
             var payerUser = WebUserFactory.Create(msgs, dc);
             var payerAccount = AccountFactory.Create(payerUser, msgs, dc);
             var payout = PayoutFactory.Create(billerAccount, msgs, dc);
+            var payout2 = PayoutFactory.Create(billerAccount, msgs, dc);
             var transactionCount = 5;
 
             for (var i = 0; i < transactionCount; i++)
@@ -35,14 +36,21 @@ namespace AfterSchoolLibraryTests.Tests
                 msgs.AddRange(transaction.Save(dc));
             }
 
+            // create one that isn't attached to the payout
+            var transaction2 = TransactionFactory.Create(billerAccount, payerAccount, PaymentType.ACH, msgs, dc);
+            transaction2.PayoutId = payout2.ID.Value;
+            msgs.AddRange(transaction2.Save(dc));
+
             payout.DeleteAndUpdateTransactions(billerUser, msgs, dc);
 
             var transactions = AfterSchoolLibrary.Models.Transaction.LoadByPayoutIdByIsDeleted(payout.ID.Value, false, msgs, dc);
+            var transaction2Reload = AfterSchoolLibrary.Models.Transaction.LoadByPayoutIdByIsDeleted(payout2.ID.Value, false, msgs, dc);
             var payoutReload = Payout.Load(payout.ID.Value, msgs, dc);
 
             Assert.True(msgs.HasNoErrors());
             Assert.Empty(transactions);
             Assert.Null(payoutReload);
+            Assert.Single(transaction2Reload);
         }        
 
     }
