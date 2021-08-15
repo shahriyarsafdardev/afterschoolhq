@@ -164,12 +164,12 @@ namespace AfterSchool.Areas.Admin.Controllers
 
                 if (payout.IsNotEmpty())
                 {
-                    var id = payout.ID.Value;
+                    var payoutId = payout.ID.Value;
 
                     msgs.AddRange(payout.Delete());
 
                     if (msgs.HasNoErrors())
-                        Transaction.LoadByPayoutIdByIsDeleted(id, false, msgs).ForEach(transaction => {
+                        Transaction.LoadByPayoutIdByIsDeleted(payoutId, false, msgs).ForEach(transaction => {
                             transaction.PayoutId = null;
                             msgs.AddRange(transaction.Save());
                         });
