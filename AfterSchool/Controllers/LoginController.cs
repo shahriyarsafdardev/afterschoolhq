@@ -154,6 +154,7 @@ namespace AfterSchool.Controllers
             if (invite.IsGuid())
                 accounts = accounts.Where(a => a.AccountTypeId.In(AccountService.ProviderAccountTypes)).ToList();
 
+            ViewBag.Invite = invite;
             ViewBag.ReturnUrl = returnurl;
             ViewBag.Messages = msgs;
             return View(accounts);

@@ -48,7 +48,7 @@
                             function selectAccount(uid) {
                                 $('#accounts').addClass('hide');
                                 $('#loading').removeClass('hide');
-                                location.href = '/login/select/' + uid + '?returnurl=@ViewBag.ReturnUrl';
+                                location.href = '/login/select/' + uid + '?returnurl=@ViewBag.ReturnUrl&invite=@ViewBag.Invite';
                             }
                         </script>
 
