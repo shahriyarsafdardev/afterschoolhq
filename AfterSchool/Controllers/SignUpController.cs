@@ -1058,6 +1058,8 @@ namespace AfterSchool.Controllers
 
             if (invite.IsGuid())
             {
+                invitingAccount = Account.LoadByInviteCodeToShare(invite.ToGuid());
+
                 var currentAccount = SessionVariables.CurrentAccount;
                 var currentUser = SessionVariables.CurrentUser;
 
