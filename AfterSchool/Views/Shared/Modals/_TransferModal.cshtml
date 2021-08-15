@@ -1,0 +1,40 @@
+﻿@{
+    Html.RenderPartial(
+        "~/Views/Shared/_Modal.cshtml",
+        new ModalViewModel()
+        {
+            ID = "modal-create-transfer",
+            Title = "Create Stripe Transfer",
+            ActionButtonId = "transferModal-btn-create-transfer",
+            ActionButtonHtml = "Create Transfer",
+            HtmlBody = "Are you sure you want to create a Stripe transfer for the amount of <span class=\"transferModal-transaction-amount\"></span>?"
+        });
+}
+
+<script>
+
+    var transferModal_transactionUid = null;
+
+     PageEvent.add(PageEvent.AFTER_INIT, function () {
+         $('#transferModal-btn-create-transfer').click(function () {
+
+            $.get(
+                '@Url.Action(ViewData["action"].ToString(), ViewData["controller"].ToString(), new { area = ViewData["area"] })/' + transferModal_transactionUid,
+                function (data) {
+                    if (data && data.status == 'ok') {
+                        Notifications.showMessage('Success', 'A stripe transfer has been created', true)
+                    } else {
+                        Notifications.showErrors(data.messages);
+                    }
+                }
+            );
+
+            $('#modal-create-transfer').removeClass('md-show');
+        });
+     });
+
+    function transferModal_setTransaction(uid, amount) {
+        transferModal_transactionUid = uid;
+        $('.transferModal-transaction-amount').html(amount);
+    }
+</script>
