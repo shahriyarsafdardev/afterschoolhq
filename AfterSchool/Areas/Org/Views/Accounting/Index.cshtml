@@ -14,6 +14,7 @@
 
     var isSearchResult = Request["sdate"].IsNotBlank() || Request["edate"].IsNotBlank() || Request["q"].IsNotBlank();
     var payoutMsg = account.HasStripeConnectedAccount ? "Pending Payout" : "Available for Payout";
+    var isSchoolAccount = account.AccountTypeId.In(AccountService.LocationProviderAccountTypes);
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -529,7 +530,8 @@
 
     function requestPayout() {
         var useStripeConnectedAccount = @Json.Encode(useStripeConnectedAccount);
-        if (!useStripeConnectedAccount) {
+        var isSchoolAccount = @Json.Encode(isSchoolAccount);
+        if (!useStripeConnectedAccount && isSchoolAccount) {
             $("#TransactionIds").val(this.selectedTransactions.join());
             $("#requestPayoutForm").submit();
         } else {
