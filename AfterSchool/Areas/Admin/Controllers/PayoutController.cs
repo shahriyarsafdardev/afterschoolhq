@@ -160,26 +160,13 @@ namespace AfterSchool.Areas.Admin.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var payout = Payout.LoadByUid(uid.ToGuid(), msgs);
+                Payout.LoadByUid(uid.ToGuid(), msgs).DeleteAndUpdateTransactions(SessionVariables.CurrentUser, msgs);
 
-                if (payout.IsNotEmpty())
-                {
-                    var payoutId = payout.ID.Value;
-
-                    msgs.AddRange(payout.Delete());
-
-                    if (msgs.HasNoErrors())
-                        Transaction.LoadByPayoutIdByIsDeleted(payoutId, false, msgs).ForEach(transaction => {
-                            transaction.PayoutId = null;
-                            msgs.AddRange(transaction.Save());
-                        });
-
-                    if (msgs.HasNoErrors())
-                        return Json(new
-                        {
-                            status = "ok",
-                        }, JsonRequestBehavior.AllowGet);
-                }
+                if (msgs.HasNoErrors())
+                    return Json(new
+                    {
+                        status = "ok",
+                    }, JsonRequestBehavior.AllowGet);
             }
 
             return Json(new
