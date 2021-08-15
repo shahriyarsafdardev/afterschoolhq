@@ -1057,7 +1057,7 @@ namespace AfterSchool.Controllers
             Account invitingAccount = null;
 
             if (invite.IsGuid())
-                invitingAccount = Account.LoadByUid(invite.ToGuid());
+                invitingAccount = Account.LoadByInviteCodeToShare(invite.ToGuid());
 
             var model = new SignUpIndexViewModel()
             {

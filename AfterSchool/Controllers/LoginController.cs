@@ -5,6 +5,7 @@ using BasicLibrary.DataAccess;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
+using System.Linq;
 
 namespace AfterSchool.Controllers
 {
@@ -25,13 +26,12 @@ namespace AfterSchool.Controllers
                 if (!currentUser.IsRegistered)
                     return Redirect(AfterSchoolLibrary.Helpers.Utilities.CompleteSignUpUrl(currentUser.Uid, Request["returnurl"]));
 
-                if (HandleInvite(invite, currentAccount, currentUser, msgs))
-                    return HandleInviteRedirect(Request["returnurl"], msgs);
+                HandleInvite(invite, currentAccount, currentUser, msgs);
 
                 if (Request["returnurl"].IsNotEmpty())
-                    return HandleRedirectAfterLogin(Request["returnurl"]);
+                    return HandleRedirectAfterLogin(Request["returnurl"], msgs);
 
-                return LoginRedirect();
+                return LoginRedirect(msgs: msgs);
             }
 
             if (!Request["Account"].IsEmpty())
@@ -86,8 +86,8 @@ namespace AfterSchool.Controllers
                 // select account
                 if (currentAccount.IsEmpty())
                     return RedirectToAction("select", "login", new {  returnurl, invite });
-                
-                HandleInvite()
+
+                HandleInvite(invite, currentAccount, user, msgs);
 
                 if (user.IsNotEmpty() && currentAccount.IsNotEmpty())
                     // LOG: WebUserName LoggedIn
@@ -98,16 +98,16 @@ namespace AfterSchool.Controllers
                     );
 
                 if (returnurl.IsNotEmpty())
-                    return HandleRedirectAfterLogin(returnurl);
+                    return HandleRedirectAfterLogin(returnurl, msgs);
 
-                return LoginRedirect();
+                return LoginRedirect(msgs: msgs);
             }
 
             return View();
         }
 
         [HttpGet]
-        public ActionResult Select(string id, string returnurl)
+        public ActionResult Select(string id, string returnurl, string invite)
         {
             var msgs = new SystemMessages();
             Account account = null;
@@ -118,6 +118,7 @@ namespace AfterSchool.Controllers
             if (account.IsNotEmpty())
             {
                 var remember = CookieVariables.CurrentUser.IsGuid();
+                var currentUser = SessionVariables.CurrentUser;
 
                 if (account.AccountTypeId == AccountType.AfterSchool)
                     remember = false;
@@ -125,16 +126,21 @@ namespace AfterSchool.Controllers
                 ClearCookies();
                 LoadSessionInfo(SessionVariables.CurrentUser, account, remember);
 
-                if (returnurl.IsNotEmpty())
-                    return Redirect(returnurl);
+                HandleInvite(invite, account, currentUser, msgs);
 
-                return LoginRedirect();
+                if (returnurl.IsNotEmpty())
+                    return HandleRedirectAfterLogin(returnurl, msgs);
+
+                return LoginRedirect(msgs: msgs);
             }
 
             if (SessionVariables.CurrentUser.IsEmpty())
                 return RedirectToAction("Index");
 
             var accounts = SessionVariables.CurrentUser.GetAccounts(msgs);
+
+            if (invite.IsGuid())
+                accounts = accounts.Where(a => a.AccountTypeId.In(AccountService.ProviderAccountTypes)).ToList();
 
             ViewBag.ReturnUrl = returnurl;
             ViewBag.Messages = msgs;

@@ -126,8 +126,11 @@ namespace AfterSchool.Models
             }
         }
 
-        protected ActionResult LoginRedirect(Account registrationAccount = null)
+        protected ActionResult LoginRedirect(Account registrationAccount = null, SystemMessages msgs = null)
         {
+            if (msgs.IsNotEmpty())
+                TempData["msgs"] = msgs;
+
             if (SessionVariables.CurrentAccount.IsEmpty())
             {
                 return RedirectToAction("select", "login");
@@ -271,21 +274,30 @@ namespace AfterSchool.Models
 
         internal bool HandleInvite(string invite, Account currentAccount, WebUser currentUser, SystemMessages msgs)
         {
-            if (invite.IsGuid())
+            // if there is no invite then who cares and move on
+            if (invite.IsNotEmpty())
             {
-                var invitingAccount = Account.LoadByInviteCodeToShare(invite.ToGuid(), msgs);
-
-                if (invitingAccount.IsNotEmpty())
-                    invitingAccount.ApproveAccessToAccount(currentAccount, currentUser, msgs);
-                else
+                if (!invite.IsGuid())
                     msgs.Add("Invalid invitation code", MessageType.UserError);
+
+                if (currentAccount.IsEmpty())
+                    msgs.Add("Invalid account", MessageType.UserError);
+
+                Account invitingAccount = null;
+
+                if (msgs.HasNoErrors())
+                {
+                    invitingAccount = Account.LoadByInviteCodeToShare(invite.ToGuid(), msgs);
+
+                    if (invitingAccount.IsEmpty())
+                        msgs.Add("Invalid invitation code", MessageType.UserError);
+                }
+
+                if (msgs.HasNoErrors())
+                    invitingAccount.ApproveAccessToAccount(currentAccount, currentUser, msgs);
 
                 if (msgs.HasNoErrors())
                     msgs.Add($"You can now publish activities to {invitingAccount.Name}", MessageType.Success);
-            }
-            else
-            {
-                msgs.Add("Invalid invitation code", MessageType.UserError);
             }
 
             return msgs.HasNoErrors();
@@ -308,14 +320,15 @@ namespace AfterSchool.Models
                 msgs.AddRange((SystemMessages)TempData["msgs"]);
         }
 
-        internal ActionResult HandleRedirectAfterLogin(string returnUrl)
+        internal ActionResult HandleRedirectAfterLogin(string returnUrl, SystemMessages msgs = null)
         {
-            ActionResult actionResult = LoginRedirect();
+            ActionResult actionResult = LoginRedirect(msgs: msgs);
             var account = SessionVariables.CurrentAccount;
             const string adminPath = "/admin/";
             const string registrantPath = "/user/";
             const string districtPath = "/district/";
             const string orgPath = "/org/";
+
             if(returnUrl.IsNotEmpty())
             {
                 switch (account.AccountTypeId)
@@ -339,7 +352,6 @@ namespace AfterSchool.Models
 
                 }
             }
-
 
             return actionResult;
         }

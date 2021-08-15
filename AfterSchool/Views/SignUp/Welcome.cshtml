@@ -34,101 +34,118 @@
 {
     if (showInviteWelcome)
     {
-        <span>You have been invited you to take the first step towards streamlining the promotion and management of your enrichment program at {@Model.InvitingAccount.Name}.</span>
+        <span>You have been invited you to take the first step towards streamlining the promotion and management of your enrichment program at <strong>@Model.InvitingAccount.Name</strong>.</span>
     }
     else
     {
         <span>Boisterous cheers and applause for taking the first step towards streamlining the promotion and management of your enrichment program.</span>
     }
-
-    <span>To get your program up and running on our platform, we just need a few bits of information from you.</span>
 }
 @helper PrintWelcomeParagraph3()
 {
-    <span>I promise it will be quick, painless, and well worth a few minutes of your time.</span>
+    <span>To get your program up and running on our platform, we just need a few bits of information from you. I promise it will be quick, painless, and well worth a few minutes of your time.</span>
+}
+
+@helper PrintGraphic(string clientSuccessManagerName)
+{
+    <div>
+        <img src="~/img/client_success_manager_color.jpeg" alt="@clientSuccessManagerName" class="img-client-success-manager">
+        <div class="padding-v-10 text-center">
+            <p class="manager-name">@clientSuccessManagerName</p>
+            <p class="manager-position">Client Success Manager</p>
+        </div>
+    </div>
+}
+
+@helper PrintGraphicSmall(string clientSuccessManagerName)
+{
+<div class="row">
+    <div class="pull-left margin-l-20">
+        <img src="~/img/client_success_manager_color.jpeg" alt="@clientSuccessManagerName" class="img-client-success-manager" style="max-height: 150px;">
+    </div>
+    <div class="pull-left margin-l-20">
+        <p class="manager-name">@clientSuccessManagerName</p>
+        <p class="manager-position">Client Success Manager</p>
+    </div>
+    <div class="clearfix"></div>
+</div>
 }
 
 <div class="row main-content main-content-welcome-pages">
 
     <div id="signup-welcome" @(signupType == SignUpType.Teacher1099 ? "hidden" : "" )>
 
-        <div class="visible-lg visible-md welcome-outer-ring">
+        <div class="welcome-outer-ring visible-lg visible-xl visible-md">
             <div class="welcome-inner-ring">
+                <div class="row">
 
-                <div class="pull-left">
-                    <img src="~/img/client_success_manager_color.jpeg" alt="@clientSuccessManagerName" class="img-client-success-manager">
-                    <div class="clearfix"></div>
-                    <p class="manager-name">@clientSuccessManagerName</p>
-                    <p class="manager-position">Client Success Manager</p>
+                    <div class="col-md-4 col-lg-4">
+                        @PrintGraphic(clientSuccessManagerName)
+                    </div>
+
+                    <div class="col-md-8 col-lg-8">
+                        <span class="welcome-text">Welcome</span>
+                        <p class="common-font padding-v-10" style="font-size: 20px;">
+                            @PrintWelcomeParagraph1()
+                        </p>
+                        <p class="common-font" style="font-size: 18px;">
+                            @PrintWelcomeParagraph2(showInviteWelcome)
+                        </p>
+                        <p class="common-font" style="font-size: 18px;">
+                            @PrintWelcomeParagraph3()
+                        </p>
+
+                        <div class="margin-t-30">
+                            <button id="btn-GetStarted" type="button" class="col-md-3 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-proceedfuther" onclick="return proceedFurther('@EnumSignupPages.WelCome')">
+                                Get Started
+                            </button>
+
+                        </div>
+
+                        <p class="common-font text-center padding-v-10" style="font-size: 16px;">
+                            <a href="@Url.Action("index", "login", new { invite = Model.InviteCodeToShare })">Already have an account? Login &raquo;</a>
+                        </p>
+                    </div>
+
                 </div>
-
-                <div>
-                    <span class="welcome-text">Welcome</span>
-                    <p class="common-font" style="font-size: 20px; margin: 6px 1px 17px 36px;">
-                        @PrintWelcomeParagraph1()
-                    </p>
-                    <p class="common-font" style="font-size: 18px; margin: 17px 0 25px 37px;">
-                        @PrintWelcomeParagraph2(showInviteWelcome)
-                    </p>
-                    <p class="common-font" style="font-size: 18px;">
-                        @PrintWelcomeParagraph3()
-                    </p>
-                    <button id="btn-GetStarted" type="button" class="col-md-3 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-proceedfuther" onclick="return proceedFurther('@EnumSignupPages.WelCome')">
-                        Get Started
-                    </button>
-
-                    <p>
-                        <a href="@Url.Action("index", "login", new { invite = Model.InviteCodeToShare })">Already have an account? Login &raquo;</a>
-                    </p>
-
-                    <div class="clearfix"></div>
-                </div>
-                <div class="clearfix"></div>
             </div>
-            <div class="clearfix"></div>
         </div>
 
-        <div class="visible-xs visible-sm welcome-outer-ring" style="margin-bottom: 20px;">
+        <div class="welcome-outer-ring visible-xs visible-sm margin-b-20">
             <div class="mobile-inner-ring">
-                <h2 class="text-center welcome-text">Welcome</h2>
-                <div class="clearfix"></div>
-                <br />
 
-                <div class="col-sm-12 col-xs-12 text-center">
-                    <p class="common-font" style="font-size: 20px; margin: 6px 1px 17px 0px;">
-                        @PrintWelcomeParagraph1()
-                    </p>
-                    <p class="common-font" style="font-size: 18px; margin: 17px 0 25px 0px;">
-                        @PrintWelcomeParagraph2()
-                    </p>
-                    <p class="common-font" style="font-size: 18px;">
-                        @PrintWelcomeParagraph3()
-                    </p>
-                </div>
+                <div class="row padding-20">
 
-                <div class="col-sm-12 col-xs-12 margin-t-30">
-                    <div class="pull-left">
-                        <img src="~/img/client_success_manager_color.jpeg" alt="@clientSuccessManagerName" style="max-width: 70px; border-radius: 6px; border: solid 1px #00c5a3;">
+                    <div class="col-sm-12 col-md-6 col-lg-8">
+                        <span class="text-center welcome-text">Welcome</span>
+                        <p class="common-font padding-v-10" style="font-size: 20px;">
+                            @PrintWelcomeParagraph1()
+                        </p>
+                        <p class="common-font" style="font-size: 18px;">
+                            @PrintWelcomeParagraph2(showInviteWelcome)
+                        </p>
+                        <p class="common-font" style="font-size: 18px;">
+                            @PrintWelcomeParagraph3()
+                        </p>
                     </div>
-                    <div class="pull-left" style="margin-left: 20px;">
-                        <p style=" font-family: Montserrat; font-size: 18px; font-weight: bold; font-stretch: normal; font-style: normal; line-height: normal; letter-spacing: normal; text-align: left; color: #00c5a3;">@clientSuccessManagerName</p>
-                        <p style=" font-family: Montserrat; font-size: 18px; font-weight: normal; font-stretch: normal; font-style: normal; line-height: normal; letter-spacing: normal; text-align: left; color: #4a4a4a;">Client Success Manager</p>
+
+                    <div class="col-sm-12 padding-v-20">
+                        @PrintGraphicSmall(clientSuccessManagerName)
+                    </div>
+
+                    <div class="col-sm-12 col-md-6 col-lg-8">
+                        <button id="btn-GetStarted" type="button" class="col-md-3 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-proceedfuther margin-t-30" onclick="return proceedFurther('@EnumSignupPages.WelCome')">
+                            Get Started
+                        </button>
+
+                        <p class="common-font text-center padding-v-10" style="font-size: 16px;">
+                            <a href="@Url.Action("index", "login", new { invite = Model.InviteCodeToShare })">Already have an account? Login &raquo;</a>
+                        </p>
                     </div>
                 </div>
-
-                <div class="clearfix"></div>
-                <div class="text-center margin-v-40">
-                    <button id="btn-GetStarted" type="button" class="col-md-3 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-proceedfuther" onclick="return proceedFurther('@EnumSignupPages.WelCome')">Get Started</button>
-                    <div class="clearfix"></div>
-                </div>
-
-                <div class="clearfix"></div>
             </div>
-
-            <div class="clearfix"></div>
         </div>
 
-        <div class="clearfix"></div>
     </div>
 
     <div class="clearfix"></div>

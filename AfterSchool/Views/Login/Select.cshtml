@@ -19,7 +19,14 @@
 
                         <div>
                             <p class="text-center text-white">
-                                Please select your account below
+                                @if (Request["invite"].IsGuid())
+                                {
+                                    <span>Please select your account to connect your invite to below</span>
+                                }
+                                else
+                                {
+                                    <span>Please select your account below</span>
+                                }
                             </p>
                         </div>
 
