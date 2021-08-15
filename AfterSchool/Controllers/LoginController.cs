@@ -13,7 +13,7 @@ namespace AfterSchool.Controllers
         //
         // GET: /Login/
         [HttpGet]
-        public ActionResult Index(string regaccount)
+        public ActionResult Index(string regaccount, string invite)
         {
             var msgs = new SystemMessages();
             var currentUser = SessionVariables.CurrentUser;
@@ -24,6 +24,9 @@ namespace AfterSchool.Controllers
             {
                 if (!currentUser.IsRegistered)
                     return Redirect(AfterSchoolLibrary.Helpers.Utilities.CompleteSignUpUrl(currentUser.Uid, Request["returnurl"]));
+
+                if (HandleInvite(invite, currentAccount, currentUser, msgs))
+                    return HandleInviteRedirect(Request["returnurl"], msgs);
 
                 if (Request["returnurl"].IsNotEmpty())
                     return HandleRedirectAfterLogin(Request["returnurl"]);
@@ -46,7 +49,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult Index(string username, string password, string remember, string returnurl)
+        public ActionResult Index(string username, string password, string remember, string returnurl, string invite)
         {
             var msgs = new SystemMessages();
 
@@ -82,8 +85,10 @@ namespace AfterSchool.Controllers
 
                 // select account
                 if (currentAccount.IsEmpty())
-                    return RedirectToAction("select", "login", new {  returnurl });
+                    return RedirectToAction("select", "login", new {  returnurl, invite });
                 
+                HandleInvite()
+
                 if (user.IsNotEmpty() && currentAccount.IsNotEmpty())
                     // LOG: WebUserName LoggedIn
                     SessionVariables.WebSession.LogActivity(
@@ -263,29 +268,6 @@ namespace AfterSchool.Controllers
 
             return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.DenyGet);
         }
-
-        //public ActionResult Account(string id)
-        //{
-        //    string url = ControllerContext.RouteData.Values["url"].ToString();
-        //    if (url != "favicon.ico")
-        //    {
-        //        bool redirectToLogin = true;
-        //        if (SessionVariables.LoggedInUser.IsEmpty() && !url.ToString().Contains("/"))
-        //        {
-        //            SessionVariables.CurrentAccount = AfterSchoolLibrary.Account.LoadByUniqueName(url);
-        //            if (!SessionVariables.CurrentAccount.IsEmpty())
-        //            {
-        //                redirectToLogin = false;
-        //            }
-        //        }
-        //        if(redirectToLogin) 
-        //        {
-        //            Response.Redirect("/");
-        //        }
-        //    }
-
-        //    return View();
-        //}
 
     }
 }

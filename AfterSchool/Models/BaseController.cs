@@ -269,6 +269,45 @@ namespace AfterSchool.Models
             return RedirectToAction("index", "Login", new { returnurl = returnUrl, area = "" });
         }
 
+        internal bool HandleInvite(string invite, Account currentAccount, WebUser currentUser, SystemMessages msgs)
+        {
+            if (invite.IsGuid())
+            {
+                var invitingAccount = Account.LoadByInviteCodeToShare(invite.ToGuid(), msgs);
+
+                if (invitingAccount.IsNotEmpty())
+                    invitingAccount.ApproveAccessToAccount(currentAccount, currentUser, msgs);
+                else
+                    msgs.Add("Invalid invitation code", MessageType.UserError);
+
+                if (msgs.HasNoErrors())
+                    msgs.Add($"You can now publish activities to {invitingAccount.Name}", MessageType.Success);
+            }
+            else
+            {
+                msgs.Add("Invalid invitation code", MessageType.UserError);
+            }
+
+            return msgs.HasNoErrors();
+        }
+
+        internal ActionResult HandleInviteRedirect(string returnUrl = "", SystemMessages msgs = null)
+        {
+            if (msgs.IsNotEmpty())
+                TempData["msgs"] = msgs;
+
+            if (returnUrl.IsNotEmpty())
+                return Redirect(returnUrl);
+
+            return RedirectToAction("index", "home");
+        }
+
+        internal void HandleTempMessages(SystemMessages msgs)
+        {
+            if (TempData.IsNotEmpty() && TempData["msgs"].IsNotEmpty())
+                msgs.AddRange((SystemMessages)TempData["msgs"]);
+        }
+
         internal ActionResult HandleRedirectAfterLogin(string returnUrl)
         {
             ActionResult actionResult = LoginRedirect();

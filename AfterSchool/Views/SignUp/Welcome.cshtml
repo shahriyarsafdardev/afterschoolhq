@@ -17,14 +17,40 @@
         SearchSchool = 8,
     };
 
+    var showInviteWelcome = false;
+
+    if (Model.InviteCodeToShare.IsNotEmpty())
+    {
+        showInviteWelcome = true;
+    }
+
 }
 
-<style>    
-</style>
+@helper PrintWelcomeParagraph1()
+{
+    <span>Thank you for joining us at AfterSchool HQ!</span>
+}
+@helper PrintWelcomeParagraph2(bool showInviteWelcome)
+{
+    if (showInviteWelcome)
+    {
+        <span>You have been invited you to take the first step towards streamlining the promotion and management of your enrichment program at {@Model.InvitingAccount.Name}.</span>
+    }
+    else
+    {
+        <span>Boisterous cheers and applause for taking the first step towards streamlining the promotion and management of your enrichment program.</span>
+    }
+
+    <span>To get your program up and running on our platform, we just need a few bits of information from you.</span>
+}
+@helper PrintWelcomeParagraph3()
+{
+    <span>I promise it will be quick, painless, and well worth a few minutes of your time.</span>
+}
 
 <div class="row main-content main-content-welcome-pages">
 
-    <div id="signup-welcome" @(signupType == SignUpType.Teacher1099 ? "hidden" :"" )>
+    <div id="signup-welcome" @(signupType == SignUpType.Teacher1099 ? "hidden" : "" )>
 
         <div class="visible-lg visible-md welcome-outer-ring">
             <div class="welcome-inner-ring">
@@ -38,10 +64,23 @@
 
                 <div>
                     <span class="welcome-text">Welcome</span>
-                    <p class="common-font" style="font-size: 20px; margin: 6px 1px 17px 36px;">Thank you for joining us at AfterSchool HQ! </p>
-                    <p class="common-font" style="font-size: 18px; margin: 17px 0 25px 37px;">Boisterous cheers and applause for taking the first step towards streamlining the promotion and management of your enrichment program. To get your program up and running on our platform, we just need a few bits of information from you. </p>
-                    <p class="common-font" style="font-size: 18px;">I promise it will be quick, painless, and well worth a few minutes of your time.</p>
-                    <button id="btn-GetStarted" type="button" class="col-md-3 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-proceedfuther" onclick="return proceedFurther('@EnumSignupPages.WelCome')">Get Started</button>
+                    <p class="common-font" style="font-size: 20px; margin: 6px 1px 17px 36px;">
+                        @PrintWelcomeParagraph1()
+                    </p>
+                    <p class="common-font" style="font-size: 18px; margin: 17px 0 25px 37px;">
+                        @PrintWelcomeParagraph2(showInviteWelcome)
+                    </p>
+                    <p class="common-font" style="font-size: 18px;">
+                        @PrintWelcomeParagraph3()
+                    </p>
+                    <button id="btn-GetStarted" type="button" class="col-md-3 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-proceedfuther" onclick="return proceedFurther('@EnumSignupPages.WelCome')">
+                        Get Started
+                    </button>
+
+                    <p>
+                        <a href="@Url.Action("index", "login", new { invite = Model.InviteCodeToShare })">Already have an account? Login &raquo;</a>
+                    </p>
+
                     <div class="clearfix"></div>
                 </div>
                 <div class="clearfix"></div>
@@ -56,9 +95,15 @@
                 <br />
 
                 <div class="col-sm-12 col-xs-12 text-center">
-                    <p class="common-font" style="font-size: 20px; margin: 6px 1px 17px 0px;">Thank you for joining us at AfterSchool HQ! </p>
-                    <p class="common-font" style="font-size: 18px; margin: 17px 0 25px 0px;">Boisterous cheers and applause for taking the first step towards streamlining the promotion and management of your enrichment program. To get your program up and running on our platform, we just need a few bits of information from you. </p>
-                    <p class="common-font" style="font-size: 18px;">I promise it will be quick, painless, and well worth a few minutes of your time.</p>
+                    <p class="common-font" style="font-size: 20px; margin: 6px 1px 17px 0px;">
+                        @PrintWelcomeParagraph1()
+                    </p>
+                    <p class="common-font" style="font-size: 18px; margin: 17px 0 25px 0px;">
+                        @PrintWelcomeParagraph2()
+                    </p>
+                    <p class="common-font" style="font-size: 18px;">
+                        @PrintWelcomeParagraph3()
+                    </p>
                 </div>
 
                 <div class="col-sm-12 col-xs-12 margin-t-30">
@@ -249,8 +294,8 @@
 
                     <div class="row margin-t-35">
                         <div class="col-md-12">
-                            <label id="signup-search-label"></label>  
-                            <span class="label" style="color: #777777;">(Max character Limit 50)</span> 
+                            <label id="signup-search-label"></label>
+                            <span class="label" style="color: #777777;">(Max character Limit 50)</span>
                             <span class="label" style="color: #777777;">(Remaining <span id="remaining-search-char-counter">50</span> characters)</span>
                             <input id="signup-account-search" type="text" class="form-control" autocomplete="off" />
                             <div id="signup-account-search-list" class="border-light-gray pointer hide"></div>
@@ -371,7 +416,7 @@
     <div class="clearfix"></div>
     <div id="signup-thank-you" style="display: none;">
         <div class="welcome-outer-ring">
-            <div class="search-inner-ring" style="min-height: 509px;padding-bottom: 5px;">                    
+            <div class="search-inner-ring" style="min-height: 509px;padding-bottom: 5px;">
                 <h2 class="text-center">Thank You!</h2>
                 <div class="clearfix"></div><br />
                 <h5 id="header-thankyou-not-recognized" class="text-center" style="display: none;">We have sent an email with instructions to <strong id="lbl-org-member-email"></strong>.</h5>
@@ -387,7 +432,7 @@
                 <h5 id="header-thankyou-recognized" class="text-center" style="display: none;">We see that you have email from same domain. We have sent you instruction to claim your account.</h5>
                 <h5 id="header-thankyou-request-access" class="text-center" style="display: none;font-size: 22px; font-weight: 600; font-stretch: normal; font-style: normal; line-height: normal; letter-spacing: 0.53px; text-align: center; color: rgb(74, 74, 74); margin-bottom: 40px;" ">Your access request has been sent to the owner of this profile.</h5>
                 <div class="clearfix"></div><br />
-            </div>            
+            </div>
         </div>
     </div>
 </div>
