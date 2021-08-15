@@ -303,17 +303,6 @@ namespace AfterSchool.Models
             return msgs.HasNoErrors();
         }
 
-        internal ActionResult HandleInviteRedirect(string returnUrl = "", SystemMessages msgs = null)
-        {
-            if (msgs.IsNotEmpty())
-                TempData["msgs"] = msgs;
-
-            if (returnUrl.IsNotEmpty())
-                return Redirect(returnUrl);
-
-            return RedirectToAction("index", "home");
-        }
-
         internal void HandleTempMessages(SystemMessages msgs)
         {
             if (TempData.IsNotEmpty() && TempData["msgs"].IsNotEmpty())
