@@ -1063,8 +1063,11 @@ namespace AfterSchool.Controllers
                 var currentAccount = SessionVariables.CurrentAccount;
                 var currentUser = SessionVariables.CurrentUser;
 
-                if (currentAccount.IsNotEmpty() && currentUser.IsNotEmpty() && currentAccount.AccountTypeId != AccountType.Registrant)
-                    return RedirectToAction("index", "login", new { returnurl = Request["returnurl"], invite });
+                if (currentAccount.IsNotEmpty() && currentUser.IsNotEmpty())
+                {
+                    if (currentUser.HasMultipleAccounts() || currentAccount.AccountTypeId != AccountType.Registrant)
+                        return RedirectToAction("index", "login", new { returnurl = Request["returnurl"], invite });
+                }
             }
 
             var model = new SignUpIndexViewModel()
