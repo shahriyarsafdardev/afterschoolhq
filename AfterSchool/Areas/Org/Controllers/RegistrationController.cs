@@ -895,6 +895,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
 
             ViewBag.Surveys = SurveyRequest.LoadByAccountId(currentAccount.ID.Value, msgs);
+
             ViewBag.Messages = msgs;
             return View();
         }

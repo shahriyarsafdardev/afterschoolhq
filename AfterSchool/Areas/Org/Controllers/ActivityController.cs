@@ -2047,6 +2047,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var fileLink = SurveyRequestService.ExportSurveyRequestToCSV(new List<string> {"Name", "Status", "Last Modified" }, id, currentAccount.ID.Value, "ExportCSV", msgs);
 
+            if (!Directory.Exists(Server.MapPath("~/Uploads")))
+                Directory.CreateDirectory(Server.MapPath("~/Uploads"));
+
             var filePath = Server.MapPath("~/Uploads/" + Guid.NewGuid()+"ExportSurvey.csv");
 
             var client = new System.Net.WebClient();

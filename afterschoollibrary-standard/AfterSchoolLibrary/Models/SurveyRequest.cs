@@ -37,6 +37,7 @@ namespace AfterSchoolLibrary.Models
 		/// Required.
 		/// </summary>
 		public bool MultipleResponsesEnabled { get { return (bool)MDV["MultipleResponsesEnabled"].Value; } set { MDV["MultipleResponsesEnabled"].Value = value; } }
+		public bool IsDeleted { get { return (bool)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
 		
 
         public SurveyRequest()
@@ -44,6 +45,7 @@ namespace AfterSchoolLibrary.Models
             this.Config(ObjectMap, DatabaseQuery, typeof(SurveyRequest).Name, "ID");
             this.LoadObjectValues(ObjectMap);
 			this.MultipleResponsesEnabled = false;
+			this.IsDeleted = false;
 			
         }
 
@@ -61,6 +63,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "FormId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "DueDate", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "MultipleResponsesEnabled", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -163,6 +166,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["MultipleResponsesEnabled"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsDeleted"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

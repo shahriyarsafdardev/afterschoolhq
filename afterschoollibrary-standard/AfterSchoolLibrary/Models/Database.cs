@@ -369,7 +369,9 @@ namespace AfterSchoolLibrary.Models
 			WebSessionAction.Update(new Hashtable(){{"ObjectTypeId",0}}, new Hashtable(){{"ObjectTypeId", DBNull.Value}}, WebSessionAction.ObjectMap, dc);
 			WebSessionAction.Update(new Hashtable(){{"IndirectObjectTypeId",0}}, new Hashtable(){{"IndirectObjectTypeId", DBNull.Value}}, WebSessionAction.ObjectMap, dc);
 			SurveyRequest.Update(new Hashtable(){{"MultipleResponsesEnabled",false}}, new Hashtable(){{"MultipleResponsesEnabled", DBNull.Value}}, SurveyRequest.ObjectMap, dc);
+			SurveyRequest.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, SurveyRequest.ObjectMap, dc);
 			SurveyResponse.Update(new Hashtable(){{"SurveyFeedbackStatusTypeId",0}}, new Hashtable(){{"SurveyFeedbackStatusTypeId", DBNull.Value}}, SurveyResponse.ObjectMap, dc);
+			SurveyResponse.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, SurveyResponse.ObjectMap, dc);
 			
 			//**ENDUPDATES**//
 

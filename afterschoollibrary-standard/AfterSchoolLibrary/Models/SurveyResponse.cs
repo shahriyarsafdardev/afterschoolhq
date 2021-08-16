@@ -21,6 +21,7 @@ namespace AfterSchoolLibrary.Models
 		public int? SurveyId { get { return (int?)MDV["SurveyId"].Value; } set { MDV["SurveyId"].Value = value; } }
 		public int? RegistrantId { get { return (int?)MDV["RegistrantId"].Value; } set { MDV["RegistrantId"].Value = value; } }
 		public SurveyFeedbackStatus SurveyFeedbackStatusTypeId { get { return (SurveyFeedbackStatus)MDV["SurveyFeedbackStatusTypeId"].Value; } set { MDV["SurveyFeedbackStatusTypeId"].Value = value; } }
+		public bool IsDeleted { get { return (bool)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
 		
 
         public SurveyResponse()
@@ -28,6 +29,7 @@ namespace AfterSchoolLibrary.Models
             this.Config(ObjectMap, DatabaseQuery, typeof(SurveyResponse).Name, "ID");
             this.LoadObjectValues(ObjectMap);
 			this.SurveyFeedbackStatusTypeId = SurveyFeedbackStatus.NotSet;
+			this.IsDeleted = false;
 			
         }
 
@@ -41,6 +43,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "SurveyId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrantId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "SurveyFeedbackStatusTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -126,6 +129,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["SurveyFeedbackStatusTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsDeleted"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

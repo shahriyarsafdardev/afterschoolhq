@@ -69,7 +69,7 @@
                                     @surveyResponse.GetRegistrantName().DisplayName
                                 </td>
                                 <td>
-                                    @surveyResponse.SurveyFeedbackStatusTypeId.ToString()
+                                    @surveyResponse.SurveyFeedbackStatusTypeId.ToString().SplitByUpperCase()
                                 </td>
                                 <td>
                                     @(surveyResponse.LastModifiedDate.IsNotEmpty() ? survey.LastModifiedDate.Value.ToString("dd/MM/yyyy") : "")
@@ -95,7 +95,7 @@
         <div class="modal-content" style="border-radius: 10px;">
 
             <div class="modal-body">
-                <div class="text-center" style="font-size: 22px;  font-weight: bold;color: #282828; margin-bottom:17px;">Resend to <span id="CountStudent">0</span> Student</div>
+                <div class="text-center" style="font-size: 22px;  font-weight: bold;color: #282828; margin-bottom:17px;">Resend to <span id="CountStudent">0</span> Student<span id="addS"></span></div>
                 <div class="text-center"><input type="button" class="btn btnNewColorSurvey sendReminderBtn" value="Send Survey" style="padding: 12px 72px;" data-id="0" /></div>
             </div>
 
@@ -114,10 +114,14 @@
             $(".reminder").on('click', function () {
                 $('#resendModal').modal('show');
                 $("#CountStudent").html($(this).attr("data-count"));
-                if ($(this).attr("data-count") == 1)
+                if ($(this).attr("data-count") == 1) {
                     $(".sendReminderBtn").attr("data-id", $(this).attr("data-id"));
-                else
+                    $("#addS").html("");
+                }
+                else {
                     $(".sendReminderBtn").attr("data-id", 0);
+                    $("#addS").html("s");
+                }
             });
 
             $(".sendReminderBtn").on('click', function () {

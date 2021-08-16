@@ -28,7 +28,7 @@
                 <div class="row">
                     <div class="col-lg-6">
                         <div style="font-size:22px">@Model.Name</div>
-                        <div style="font-size:14px; color:#B2B2B4">@Model.AccountName</div>
+                        <div style="font-size:14px; color:#B2B2B4">@SessionVariables.CurrentAccount.Name</div>
                     </div>
                 </div>
                 @using (Html.BeginForm("SaveSurvey", "Activity", FormMethod.Post))
