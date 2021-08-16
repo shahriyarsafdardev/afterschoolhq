@@ -59,7 +59,7 @@
             }
 
         }
-        else if (participationObject.IsSession())
+        else if (participationObject.IsSession() && registered != "Applied")
         {
             btnText = $"Add To Existing Registration";
         }
@@ -120,7 +120,7 @@
             <p class="text-center">
                 @if (Model.IsProfileCompleted)
                 {
-                    <a href="@Url.Action("editstudentpersonal", "family", new { Area = "user", id = Model.Uid, student = Model?.Uid })">Update Profile</a>
+                    <a href="@Url.Action("editstudentpersonal", "family", new { Area = "user", id = Model.Uid, student = Model?.Uid, returnUrl = Request.Url.AbsolutePath })">Update Profile</a>
                 }
                 else
                 {

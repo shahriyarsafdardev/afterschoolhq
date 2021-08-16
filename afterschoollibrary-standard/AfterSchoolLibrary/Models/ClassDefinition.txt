@@ -13,6 +13,11 @@ localtestname: AfterSchoolTest
 localtestserver: localhost
 localtestusername: AfterSchoolUser
 localtestpassword: Nj8Ed$wpLfJ
+
+testname: AfterSchoolTest
+testserver: afterschool-nonprod.cdyenngbc33v.us-east-2.rds.amazonaws.com
+testusername: AfterSchoolTestUser
+testpassword: jUp$dBh8D9o)3Rf
 [end]
 
 [begin]
@@ -115,6 +120,7 @@ loadmethod: AccountId|IsPublished, List<>
 loadmethod: LocationId, List<>
 loadmethod: Uid
 loadmethod: Uid|AccountId
+loadmethod: Uid|ProviderAccountId
 -loadmethod: ParentActivityId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: ActivityGroupId|AccountId, List<>
@@ -509,6 +515,8 @@ property: HostAccountId, int?, Int, required
 property: VisitorAccountId, int?, Int, required
 property: HostPermissionTypeId, HostPermissionType, Int
 property: ApprovalStatusId, ApprovalStatus, Int
+property: RequiresPublishPermission, bool, Bit
+property: ShowAllPrograms, bool, Bit
 join: Account.ID, VisitorAccountId, InnerJoin
 joinproperty: Account.AccountTypeId, AccountType, Int
 loadmethod: HostAccountId, List<>
@@ -686,8 +694,8 @@ baseproperty: Name, required
 loadmethod: AccountId, List<>
 loadmethod: AccountId|ActivityGroupTypeId, List<>
 loadmethod: AccountId|IsPublished, List<>
-loadmethod: AccountId|IsPublished|IsArchived, List<>
-loadmethod: AccountId|IsPublished|IsInviteOnly, List<>
+loadmethod: AccountId|IsPublished|IsArchived|IsDeleted, List<>
+loadmethod: AccountId|IsPublished|IsInviteOnly|IsDeleted, List<>
 loadmethod: AccountId|UniqueName
 loadmethod: Uid
 loadmethod: Uid|AccountId

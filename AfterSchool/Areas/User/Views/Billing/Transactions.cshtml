@@ -216,7 +216,7 @@
             </div>
             <div class="form-group">
                 <label for="request-reason">Reason</label>
-                <input type="text" id="refund-reason" maxlength="100" class="form-control" />
+                <input type="text" id="refund-reason" maxlength="100" class="form-control" oninput="enableRequestRefundButton()" />
                 <p class="text-muted text-small" id="refund-request-reason-notes">Please enter a reason</p>
             </div>
             <input type="hidden" id="refund-request-transaction-uid" value="" />
@@ -271,6 +271,11 @@
         $('#refund-request-notes').removeClass('text-danger');
         $('#refund-request-reason-notes').removeClass('text-danger');
         return true;
+    }
+
+    function enableRequestRefundButton() {
+        $('#btn-request-refund').prop('disabled', false);
+        $('#refund-request-reason-notes').removeClass('text-danger');
     }
 
     function processRefundRequest() {

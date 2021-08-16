@@ -25,7 +25,7 @@ namespace AfterSchoolLibrary.Models
 		public int? RegistrantId { get { return (int?)MDV["RegistrantId"].Value; } set { MDV["RegistrantId"].Value = value; } }
 		public int? ActivityId { get { return (int?)MDV["ActivityId"].Value; } set { MDV["ActivityId"].Value = value; } }
 		public int? RegistrationId { get { return (int?)MDV["RegistrationId"].Value; } set { MDV["RegistrationId"].Value = value; } }
-		public string Text { get { return (string)MDV["Text"].Value; } set { MDV["Text"].Value = value; } }		
+		public string Text { get { return (string)MDV["Text"].Value; } set { MDV["Text"].Value = value; } }
 		public QuestionDataType QuestionDataTypeId { get { return (QuestionDataType)MDV["QuestionDataTypeId"].Value; } set { MDV["QuestionDataTypeId"].Value = value; } }
 		/// <summary>
 		/// Used to keep the question text just in case the question text changes on the original
@@ -62,7 +62,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "RegistrantId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ActivityId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrationId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "Text", System.Data.SqlDbType.NVarChar , "400");				
+				_dp.Add(className, "Text", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "QuestionDataTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "QuestionText", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "FormQuestionQuestionDataTypeId", typeof(FormQuestion).Name, "QuestionDataTypeId", System.Data.SqlDbType.Int, "FormQuestion");
@@ -171,7 +171,7 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["Text"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));			
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["QuestionDataTypeId"]);

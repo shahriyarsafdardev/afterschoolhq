@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using BasicLibrary.DataAccess;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore.Update;
+using System.Web;
 
 namespace AfterSchoolLibrary.Helpers
 {
@@ -1562,7 +1563,7 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        public static SystemMessages SendEmailVerification(WebUser user, bool isAfterSchool)
+        public static SystemMessages SendEmailVerification(WebUser user, string redirectUrl, bool isAfterSchool)
         {
             var msgs = new SystemMessages();            
 
@@ -1570,7 +1571,7 @@ namespace AfterSchoolLibrary.Helpers
             {
                 { "FirstName", user.FirstName },
                 { "ProductName", Utilities.AppName(isAfterSchool) },
-                { "VerificationLink", $"{Email.BaseUrl()}signup/verify/{user.Uid.ToString()}" },
+                { "VerificationLink", $"{Email.BaseUrl()}signup/verify/{user.Uid.ToString()}?redirectUrl={HttpUtility.UrlEncode(redirectUrl)}" },
                 { "SupportEmail", Email.AppSupportEmailAddress },
             };
 

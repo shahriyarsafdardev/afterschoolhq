@@ -723,7 +723,6 @@
     <Content Include="img\image-2.png" />
     <Content Include="img\image-9.png" />
     <Content Include="img\IPS.png" />
-    <Content Include="img\lawrence.png" />
     <Content Include="img\lazyload-ph.png" />
     <Content Include="img\logo-white.png" />
     <Content Include="img\logo.png" />
@@ -1825,6 +1824,9 @@
     <Content Include="Views\Shared\_ModalPaymentConfirmation.cshtml" />
     <Content Include="Views\Shared\_ActivityRegistrantsWithAllStatus.cshtml" />
     <Content Include="Views\Shared\_ActivityRegistrantsForSpecificStatus.cshtml" />
+    <Content Include="Views\Shared\Registration\_BrowseParticipationObjectList.cshtml" />
+    <Content Include="Views\Shared\Modals\_TransferModal.cshtml" />
+    <Content Include="Views\Shared\Modals\_TransferModal-TransferButton.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -151,6 +151,32 @@ namespace AfterSchool.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        public ActionResult Delete(string uid)
+        {
+            var msgs = new SystemMessages();
+
+            if (!uid.IsGuid())
+                msgs.Add("Invalid payout", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                Payout.LoadByUid(uid.ToGuid(), msgs).DeleteAndUpdateTransactions(SessionVariables.CurrentUser, msgs);
+
+                if (msgs.HasNoErrors())
+                    return Json(new
+                    {
+                        status = "ok",
+                    }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new
+            {
+                status = "error",
+                messages = msgs
+            }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
         public ActionResult GetBankInfo(string uid)
         {
             var msgs = new SystemMessages();
