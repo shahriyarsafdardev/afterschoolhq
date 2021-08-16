@@ -37,9 +37,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 return RedirectToAction("getstartedpayments", "account");
 
             if (account.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, null, null, null, null) == 0)
-                return RedirectToAction("getstarted");
-            
-          
+                return RedirectToAction("getstarted");                      
 
             var msgs = new SystemMessages();
             var actions = SessionAction.LoadByAccountId(
@@ -72,6 +70,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var totalPaid = account.GetTotalAmountBilledOut(search: null, paymentSourceType: PaymentSourceType.AfterSchoolPlatform, msgs: msgs) +
                             account.GetTotalAmountBilledOut(search: null, paymentSourceType: PaymentSourceType.ManualProvider, msgs: msgs);
 
+            HandleTempMessages(msgs);
+
             ViewBag.Messages = msgs;
             ViewBag.Actions = actions;
             ViewBag.HasVisitorAccountsToApprove = account.GetRequestedVisitorAccountsCount(msgs) > 0;
@@ -91,6 +91,9 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult GetStarted()
         {
+            var msgs = new SystemMessages();
+            HandleTempMessages(msgs);
+            ViewBag.Messages = msgs;
             return View();
         }
     }

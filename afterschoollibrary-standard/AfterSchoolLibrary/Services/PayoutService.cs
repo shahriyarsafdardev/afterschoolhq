@@ -125,6 +125,22 @@ namespace AfterSchoolLibrary.Services
 
         }
 
+        public static void DeleteAndUpdateTransactions(this Payout payout, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (payout.IsEmpty())
+                return;
+
+            msgs.AddRange(payout.Delete(dc)); // this is hard deleting, but if we're deleting then this is a mistake anyway
+
+            if (msgs.HasNoErrors())
+                Transaction.LoadByPayoutIdByIsDeleted(payout.ID.Value, false, msgs, dc).ForEach(transaction => {
+                    transaction.PayoutId = null;
+                    transaction.LastModifiedBy = loggedInUser.ID;
+                    transaction.LastModifiedDate = DateTime.UtcNow;
+                    msgs.AddRange(transaction.Save(dc));
+                });
+        }
+
         private static void SendMoney(this Payout payout, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (payout.PayoutStatusId != PayoutStatus.Approved)

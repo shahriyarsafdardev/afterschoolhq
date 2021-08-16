@@ -675,5 +675,28 @@ namespace AfterSchool.Areas.Org.Controllers
 
         #endregion
 
+        [HttpGet]
+        public ActionResult CreateTransfer(string id)
+        {
+            var msgs = new SystemMessages();
+
+            if (id.IsGuid() && SessionVariables.AccountUserType == UserType.TechSupport)
+            {
+                var currentAccount = SessionVariables.CurrentAccount;
+                var currentUser = SessionVariables.CurrentUser;
+                var transaction = currentAccount.GetBillerTransaction(id.ToGuid(), msgs);
+
+                if (transaction.IsNotEmpty())
+                {
+                    var transfer = transaction.CreateStripeTransfer(currentUser, msgs);
+
+                    if (msgs.HasNoErrors() && transfer.IsNotEmpty())
+                        return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+                }
+            }
+
+            return Json(new { status = "error", messages = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
+        }
+
     }
 }

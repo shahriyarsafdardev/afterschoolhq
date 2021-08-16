@@ -17,7 +17,7 @@
                         
                         @Html.Raw(UI.RenderMessagesToHtml(msgs))
 
-                        @{ Html.RenderPartial("_Login", null, new ViewDataDictionary() { { "ReturnUrl", Request["returnurl"] } }); }
+                        @{ Html.RenderPartial("_Login", null, new ViewDataDictionary() { { "ReturnUrl", Request["returnurl"] }, { "Invite", Request["invite"] } }); }
                     </div>
                 </div>
             </div>
