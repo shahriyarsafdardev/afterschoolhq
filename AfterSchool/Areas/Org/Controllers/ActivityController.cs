@@ -838,6 +838,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         loggedInUserId: currentUser.ID.Value,
                         account: currentAccount,
                         activityId: null,
+                        values: values
                         msgs: msgs
                     );
             }
