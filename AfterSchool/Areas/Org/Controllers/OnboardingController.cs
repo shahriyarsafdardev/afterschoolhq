@@ -38,6 +38,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var account = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
 
+            HandleTempMessages(msgs);
+
             ViewBag.Messages = msgs;
             ViewBag.CurrentUser = currentUser;
 
@@ -58,7 +60,13 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult GettingStarted() => View();
+        public ActionResult GettingStarted()
+        {
+            var msgs = new SystemMessages();
+            HandleTempMessages(msgs);
+            ViewBag.Messages = msgs;
+            return View();
+        }
 
         [HttpGet]
         public ActionResult ProgramInfo()
@@ -69,6 +77,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
             var headline = profile.IsNotEmpty() ? profile.Headline : "";
             var genderrestrictions = profile.IsNotEmpty() ? (int)profile.GenderRestriction : (int)GenderRestrictionType.None;
+
+            HandleTempMessages(msgs);
 
             ViewBag.Headline = headline;
             ViewBag.GenderRestriction = genderrestrictions;
@@ -92,6 +102,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var account = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
+
+            HandleTempMessages(msgs);
 
             if (title.IsEmpty())
                 msgs.Add("Program Name is required", MessageType.UserError);
@@ -147,6 +159,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var ageStart = profile.GetAgeStart();
             var ageEnd = profile.GetAgeEnd();
 
+            HandleTempMessages(msgs);
+
             ViewBag.Grades = grades;
             ViewBag.Messages = msgs;
             ViewBag.ELC = profile.IsNotEmpty() && profile.IsELearningCenter;
@@ -168,6 +182,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var account = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
+
+            HandleTempMessages(msgs);
 
             var isOpenDuringCovid = opencovid.IsBoolean() && opencovid.ToBoolean();
             var isElc = elearningcenter.IsBoolean() && elearningcenter.ToBoolean();
@@ -222,6 +238,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var account = SessionVariables.CurrentAccount;
             var profile = account.GetAccountProfile(msgs);
             var location = profile.GetLocation();
+
+            HandleTempMessages(msgs);
+
             ViewBag.Location = location ?? new Location();            
             ViewBag.Email = profile.ProfileEmail.IsNotEmpty() ? profile.ProfileEmail : account.Email;            
             ViewBag.Phone = profile.ProfilePhone.IsNotEmpty() ? profile.ProfilePhone : account.Phone;
@@ -240,7 +259,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var account = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
-            
+
+            HandleTempMessages(msgs);
 
             if (email.IsEmpty())
                 msgs.Add("Program Email is required", MessageType.UserError);
@@ -322,6 +342,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var profile = account.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
             var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
 
+            HandleTempMessages(msgs);
+
             if (profile.Logo.IsNotBlank())
                 ViewBag.LogoUrl = ah.GetFileLink(profile.Logo, true, null, true);
 
@@ -339,6 +361,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var account = SessionVariables.CurrentAccount;
             var profile = account.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
             var allowedFiles = new string[] { ".png", ".jpg", ".jpeg" };
+
+            HandleTempMessages(msgs);
 
             if (logo.IsNotEmpty())
             {
@@ -392,6 +416,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var account = SessionVariables.CurrentAccount;
             var profile = account.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
 
+            HandleTempMessages(msgs);
+
             ViewBag.ServiceOffered = profile.GetProperties(AccountPropertyType.ServiceOffered, msgs);
             ViewBag.TimeOffered = profile.GetProperties(AccountPropertyType.TimeOffered, msgs);
             ViewBag.PricingOption = profile.GetProperties(AccountPropertyType.PricingOption, msgs);
@@ -412,6 +438,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var account = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
+
+            HandleTempMessages(msgs);
 
             if (msgs.HasNoErrors())
             {
@@ -454,6 +482,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
 
+            HandleTempMessages(msgs);
+
             ViewBag.Messages = msgs;
             return View(account);
         }
@@ -465,6 +495,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var account = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
+
+            HandleTempMessages(msgs);
 
             if (website.IsNotEmpty() && !website.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
                 msgs.Add("Please enter a valid website address", MessageType.UserError);
@@ -522,6 +554,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
+
+            HandleTempMessages(msgs);
 
             account.OnboardingStepDone = OnboardingStepType.All;
             msgs.AddRange(account.Save());

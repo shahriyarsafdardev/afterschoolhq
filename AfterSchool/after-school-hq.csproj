@@ -1831,6 +1831,8 @@
     <Content Include="Views\Shared\_ActivityRegistrantsWithAllStatus.cshtml" />
     <Content Include="Views\Shared\_ActivityRegistrantsForSpecificStatus.cshtml" />
     <Content Include="Views\Shared\Registration\_BrowseParticipationObjectList.cshtml" />
+    <Content Include="Views\Shared\Modals\_TransferModal.cshtml" />
+    <Content Include="Views\Shared\Modals\_TransferModal-TransferButton.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

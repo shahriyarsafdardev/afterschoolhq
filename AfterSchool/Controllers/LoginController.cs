@@ -5,6 +5,7 @@ using BasicLibrary.DataAccess;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
+using System.Linq;
 
 namespace AfterSchool.Controllers
 {
@@ -13,7 +14,7 @@ namespace AfterSchool.Controllers
         //
         // GET: /Login/
         [HttpGet]
-        public ActionResult Index(string regaccount)
+        public ActionResult Index(string regaccount, string invite)
         {
             var msgs = new SystemMessages();
             var currentUser = SessionVariables.CurrentUser;
@@ -25,10 +26,21 @@ namespace AfterSchool.Controllers
                 if (!currentUser.IsRegistered)
                     return Redirect(AfterSchoolLibrary.Helpers.Utilities.CompleteSignUpUrl(currentUser.Uid, Request["returnurl"]));
 
-                if (Request["returnurl"].IsNotEmpty())
-                    return HandleRedirectAfterLogin(Request["returnurl"]);
+                if (invite.IsGuid())
+                {
+                    if (currentUser.HasMultipleAccounts())
+                        return RedirectToAction("select", "login", new { returnurl = Request["returnurl"], invite });
 
-                return LoginRedirect();
+                    if (currentAccount.AccountTypeId == AccountType.Registrant)
+                        return RedirectToAction("welcome", "signup", new { returnurl = Request["returnurl"], invite });
+                }
+
+                HandleInvite(invite, currentAccount, currentUser, msgs);
+
+                if (Request["returnurl"].IsNotEmpty())
+                    return HandleRedirectAfterLogin(Request["returnurl"], msgs);
+
+                return LoginRedirect(msgs: msgs);
             }
 
             if (!Request["Account"].IsEmpty())
@@ -39,6 +51,9 @@ namespace AfterSchool.Controllers
                     return Redirect($"/{account.UniqueName}");
             }
 
+            if (invite.IsGuid())
+                msgs.Add("Login to accept your invite", MessageType.Notice);
+
             ViewBag.LoginType = "Internal";
             ViewBag.Messages = msgs;
             ViewBag.RegistrationAccount = regaccount;
@@ -46,7 +61,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult Index(string username, string password, string remember, string returnurl)
+        public ActionResult Index(string username, string password, string remember, string returnurl, string invite)
         {
             var msgs = new SystemMessages();
 
@@ -82,8 +97,10 @@ namespace AfterSchool.Controllers
 
                 // select account
                 if (currentAccount.IsEmpty())
-                    return RedirectToAction("select", "login", new {  returnurl });
-                
+                    return RedirectToAction("select", "login", new {  returnurl, invite });
+
+                HandleInvite(invite, currentAccount, user, msgs);
+
                 if (user.IsNotEmpty() && currentAccount.IsNotEmpty())
                     // LOG: WebUserName LoggedIn
                     SessionVariables.WebSession.LogActivity(
@@ -93,16 +110,16 @@ namespace AfterSchool.Controllers
                     );
 
                 if (returnurl.IsNotEmpty())
-                    return HandleRedirectAfterLogin(returnurl);
+                    return HandleRedirectAfterLogin(returnurl, msgs);
 
-                return LoginRedirect();
+                return LoginRedirect(msgs: msgs);
             }
 
             return View();
         }
 
         [HttpGet]
-        public ActionResult Select(string id, string returnurl)
+        public ActionResult Select(string id, string returnurl, string invite)
         {
             var msgs = new SystemMessages();
             Account account = null;
@@ -113,6 +130,7 @@ namespace AfterSchool.Controllers
             if (account.IsNotEmpty())
             {
                 var remember = CookieVariables.CurrentUser.IsGuid();
+                var currentUser = SessionVariables.CurrentUser;
 
                 if (account.AccountTypeId == AccountType.AfterSchool)
                     remember = false;
@@ -120,10 +138,12 @@ namespace AfterSchool.Controllers
                 ClearCookies();
                 LoadSessionInfo(SessionVariables.CurrentUser, account, remember);
 
-                if (returnurl.IsNotEmpty())
-                    return Redirect(returnurl);
+                HandleInvite(invite, account, currentUser, msgs);
 
-                return LoginRedirect();
+                if (returnurl.IsNotEmpty())
+                    return HandleRedirectAfterLogin(returnurl, msgs);
+
+                return LoginRedirect(msgs: msgs);
             }
 
             if (SessionVariables.CurrentUser.IsEmpty())
@@ -131,6 +151,10 @@ namespace AfterSchool.Controllers
 
             var accounts = SessionVariables.CurrentUser.GetAccounts(msgs);
 
+            if (invite.IsGuid())
+                accounts = accounts.Where(a => a.AccountTypeId.In(AccountService.ProviderAccountTypes)).ToList();
+
+            ViewBag.Invite = invite;
             ViewBag.ReturnUrl = returnurl;
             ViewBag.Messages = msgs;
             return View(accounts);
@@ -263,29 +287,6 @@ namespace AfterSchool.Controllers
 
             return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.DenyGet);
         }
-
-        //public ActionResult Account(string id)
-        //{
-        //    string url = ControllerContext.RouteData.Values["url"].ToString();
-        //    if (url != "favicon.ico")
-        //    {
-        //        bool redirectToLogin = true;
-        //        if (SessionVariables.LoggedInUser.IsEmpty() && !url.ToString().Contains("/"))
-        //        {
-        //            SessionVariables.CurrentAccount = AfterSchoolLibrary.Account.LoadByUniqueName(url);
-        //            if (!SessionVariables.CurrentAccount.IsEmpty())
-        //            {
-        //                redirectToLogin = false;
-        //            }
-        //        }
-        //        if(redirectToLogin) 
-        //        {
-        //            Response.Redirect("/");
-        //        }
-        //    }
-
-        //    return View();
-        //}
 
     }
 }
