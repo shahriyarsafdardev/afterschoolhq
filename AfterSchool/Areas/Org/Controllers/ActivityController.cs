@@ -833,15 +833,9 @@ namespace AfterSchool.Areas.Org.Controllers
                         msgs: msgs
                     );
                 }
-            } else {
-                activity = ActivityService.EditExisting(
-                        loggedInUserId: currentUser.ID.Value,
-                        account: currentAccount,
-                        activityId: null,
-                        values: values
-                        msgs: msgs
-                    );
-            }
+            } else
+                activity.RemoveActivitySchedule(currentUser, currentAccount, msgs);
+
 
             // Show Success Message
             // LOG: Someone Updated Activity ActivityName for Account AccountName
