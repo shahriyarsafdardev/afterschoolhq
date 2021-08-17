@@ -1915,7 +1915,7 @@ namespace AfterSchool.Areas.Org.Controllers
             return RedirectToAction("Surveys", new { id });
         }
 
-        public static IDictionary<string, string> ToDictionary(System.Collections.Specialized.NameValueCollection source)
+        private static IDictionary<string, string> ToDictionary(System.Collections.Specialized.NameValueCollection source)
         {
             return source.Cast<string>().Select(s => new { Key = s, Value = source[s] }).ToDictionary(p => p.Key, p => p.Value);
         }
