@@ -296,6 +296,7 @@ namespace AfterSchoolLibrary.Models
 			ActivityForm.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, ActivityForm.ObjectMap, dc);
 			ActivityForm.Update(new Hashtable(){{"IsPublished",false}}, new Hashtable(){{"IsPublished", DBNull.Value}}, ActivityForm.ObjectMap, dc);
 			Form.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, Form.ObjectMap, dc);
+			Form.Update(new Hashtable(){{"FormTypeId",0}}, new Hashtable(){{"FormTypeId", DBNull.Value}}, Form.ObjectMap, dc);
 			FormQuestion.Update(new Hashtable(){{"IsTemplate",false}}, new Hashtable(){{"IsTemplate", DBNull.Value}}, FormQuestion.ObjectMap, dc);
 			FormQuestion.Update(new Hashtable(){{"QuestionTypeId",0}}, new Hashtable(){{"QuestionTypeId", DBNull.Value}}, FormQuestion.ObjectMap, dc);
 			FormQuestion.Update(new Hashtable(){{"QuestionDataTypeId",0}}, new Hashtable(){{"QuestionDataTypeId", DBNull.Value}}, FormQuestion.ObjectMap, dc);
@@ -594,7 +595,6 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_PackageFeature_FeatureTypeId_PackageId ON [PackageFeature] (PackageId,FeatureTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountPackageFeature_AccountPackageId ON [AccountPackageFeature] (AccountPackageId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountPackageFeature_AccountPackageId_FeatureTypeId ON [AccountPackageFeature] (AccountPackageId,FeatureTypeId)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountPackageFeature_FeatureTypeId ON [AccountPackageFeature] (FeatureTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_File_AccountId ON [File] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityFile_ActivityId ON [ActivityFile] (ActivityId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityFile_FileId ON [ActivityFile] (FileId)"));
