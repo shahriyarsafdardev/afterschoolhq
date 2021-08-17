@@ -11,6 +11,7 @@ using Hangfire;
 using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary;
 using AfterSchoolLibrary.Helpers;
+using System.IO;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -1843,7 +1844,7 @@ namespace AfterSchool.Areas.Org.Controllers
         #endregion
 
         #region Surveys
-
+        [HttpGet]
         public ActionResult Surveys(string id)
         {
             var currentAccount = SessionVariables.CurrentAccount;
@@ -1860,7 +1861,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
 
-
+        [HttpGet]
         public ActionResult NewSurvey(string id)
         {
             var currentAccount = SessionVariables.CurrentAccount;
@@ -1891,43 +1892,60 @@ namespace AfterSchool.Areas.Org.Controllers
 
 
         [HttpPost]
-        public ActionResult SaveSurvey(string id,int activityId, int formId, string name, string optionalText, bool selectedIndividuals, bool allowMultiple, bool? students, List<SelectListItem> studentList)
+        public ActionResult SaveSurvey(string id, string activityId, string formId, string name, string optionalText, string isEveryIndividualSelected, string isAllowMultiple)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
 
+            var students = ToDictionary(Request.Form.Filter("studentList"));
+            var studentList = ConvertToStudentsList(students);
+
             if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
-            var surveyRequest = SurveyRequestService.AddSurvey(formId, activityId, name, optionalText, allowMultiple, currentAccount.ID.Value, currentUser.ID.Value, msgs);
+            var surveyRequest = SurveyRequestService.AddSurvey(formId.ToInteger(), activityId.ToInteger(), name, optionalText, isAllowMultiple.ToBoolean(), currentAccount.ID.Value, currentUser.ID.Value, msgs);
 
-            if (selectedIndividuals)
+            if (isEveryIndividualSelected.ToBoolean())
                 CreateSurveys(surveyRequest.ID.Value, studentList.Where(a => a.Selected).ToList(), currentUser.ID.Value, msgs);
-            else 
+            else
                 CreateSurveys(surveyRequest.ID.Value, studentList, currentUser.ID.Value, msgs);
 
             ViewBag.Messages = msgs;
             return RedirectToAction("Surveys", new { id });
         }
 
-        public static void CreateSurveys(int surveyRequestId, List<SelectListItem> studentList, int currentUserId, SystemMessages msgs)
+        public static IDictionary<string, string> ToDictionary(System.Collections.Specialized.NameValueCollection source)
         {
-            foreach (var student in studentList)
-            {
-                var surveyResponse = SurveyResponseService.CreateSurveyFeedback(surveyRequestId, student.Value.ToInteger(), SurveyFeedbackStatus.New, currentUserId, msgs);
-                BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, null));
-            }
+            return source.Cast<string>().Select(s => new { Key = s, Value = source[s] }).ToDictionary(p => p.Key, p => p.Value);
         }
 
+        private static List<SelectListItem> ConvertToStudentsList(IDictionary<string, string> students)
+        {
+            var studentsList = new List<SelectListItem>();
+            for (var i = 0; i < students.Count(); )
+            {
+                studentsList.Add(new SelectListItem { Text = students.ElementAt(i+2).Value, Value = students.ElementAt(i+1).Value, Selected = students.ElementAt(i).Value.Contains("true") ? true : false });
+                i = i + 3;
+            }
+            return studentsList;
+        }
+
+        private static void CreateSurveys(int surveyRequestId, List<SelectListItem> studentList, int currentUserId, SystemMessages msgs)
+        {
+              studentList.ForEach(student => {
+                  var surveyResponse = SurveyResponseService.CreateSurveyFeedback(surveyRequestId, student.Value.ToInteger(), SurveyFeedbackStatus.New, currentUserId, msgs);
+                  BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, null));
+              });
+        }
+        [HttpGet]
         public ActionResult ResendNotification(int id, int surveyId)
         {
             if(id == 0){
-                var surveyResponses = SurveyResponse.LoadBySurveyId(surveyId).Where(a => a.SurveyFeedbackStatusTypeId != SurveyFeedbackStatus.Completed);
-                foreach(var surveyResponse in surveyResponses)
-                {
+                var surveyResponses = SurveyResponse.LoadBySurveyId(surveyId).Where(a => a.SurveyFeedbackStatusTypeId != SurveyFeedbackStatus.Completed).ToList();
+                surveyResponses.ForEach(surveyResponse => {
                     BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, null));
-                }
+                });
             }
             else{
                 var surveyResponse = SurveyResponse.Load(id);
@@ -1937,7 +1955,7 @@ namespace AfterSchool.Areas.Org.Controllers
             return Json(new { msg = "Reminder sent", success = true}, JsonRequestBehavior.AllowGet);
         }
 
-
+        [HttpGet]
         public ActionResult ViewSurvey(int id, string activityId)
         {
             var currentAccount = SessionVariables.CurrentAccount;
@@ -1975,7 +1993,7 @@ namespace AfterSchool.Areas.Org.Controllers
             BackgroundJob.Enqueue(() => SurveyRequestService.DeleteCSVFile(filePath));
             return File(filedata, "application/octet-stream", "ExportSurvey.csv");
         }
-
+        [HttpGet]
         public ActionResult ViewSurveyResults(int id, string activityId)
         {
             var currentAccount = SessionVariables.CurrentAccount;
