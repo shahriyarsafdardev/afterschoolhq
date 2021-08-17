@@ -833,6 +833,13 @@ namespace AfterSchool.Areas.Org.Controllers
                         msgs: msgs
                     );
                 }
+            } else {
+                activity = ActivityService.EditExisting(
+                        loggedInUserId: currentUser.ID.Value,
+                        account: currentAccount,
+                        activityId: null,
+                        msgs: msgs
+                    );
             }
 
             // Show Success Message
