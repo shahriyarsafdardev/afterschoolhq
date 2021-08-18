@@ -1,4 +1,4 @@
-﻿
+﻿@model Registration
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var user = WebUser.Load(SessionVariables.CurrentUser.ID.Value);
@@ -7,14 +7,14 @@
 @{Html.RenderPartial("OrgAccountHeader");}
 <div class="main-content">
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
-    @{Html.RenderPartial("_RegistrationHeader");}
+    @{Html.RenderPartial("_RegistrationEditHeader", Model);}
     <div id="studentcrmcontainer" class="panel panel-default">
         <div class="panel-body">
             <div class="row">
                 <div class="col-lg-3">
 
                     <div class="DDLMain">
-                        <span  class="titleName">@user.FirstName @user.LastName</span>
+                        <span class="titleName">@user.FirstName @user.LastName</span>
                         <div class="dropdown">
                             <i class="s7-edit filterIcon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"></i>
 
@@ -50,13 +50,13 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var survey in (List<SurveyRequest>)ViewBag.Surveys)
+                        @foreach (var surveyResponse in (List<SurveyResponse>)ViewBag.SurveyResponses)
                         {
+                            var survey = SurveyRequest.Load(surveyResponse.SurveyId.Value);
                             var activity = SurveyRequestService.GetActivity(survey);
-
                             <tr>
                                 <td>
-                                    <a href="@Url.Action("viewsurvey", "activity", new { id = survey.ID, activityId = activity.Uid })">View</a>
+                                    <a href="@Url.Action("viewsurveyresults", "activity", new { id = surveyResponse.ID, activityId = activity.Uid})">View</a>
                                 </td>
                                 <td>
                                     @survey.Name

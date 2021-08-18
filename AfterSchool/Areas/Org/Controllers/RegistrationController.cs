@@ -883,15 +883,23 @@ namespace AfterSchool.Areas.Org.Controllers
             return View("messagedetail", am);
         }
 
-        public ActionResult Surveys()
+        [HttpGet]
+        public ActionResult Surveys(string id, string r)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
+            var registration = currentAccount.GetRegistration(id.ToGuid(), msgs);
+            var registrant = Registrant.Load(registration.RegistrantId.Value);
 
-            ViewBag.Surveys = SurveyRequest.LoadByAccountId(currentAccount.ID.Value, msgs);
+            LoadRegistrationViewBag(registration, r, msgs);
+
+            if (registration.IsEmpty())
+                return new HttpStatusCodeResult(System.Net.HttpStatusCode.NotFound);
+
+            ViewBag.SurveyResponses = SurveyResponse.LoadByRegistrantId(registrant.ID.Value, msgs);
 
             ViewBag.Messages = msgs;
-            return View();
+            return View(registration);
         }
     }
 }

@@ -32,7 +32,7 @@
                         </div>
                     </div>
                     <div style="font-size:14px; color:#B2B2B4; clear:both">@Model.Name | @(survey.CreateDate.IsNotEmpty() ? survey.CreateDate.Value.ToString("MMMM dd, yyyy") : "")</div>
-                    <a href="@Url.Action("ExportCSV", "activity", new { id = Model.ID })" class="exportBtn" style="font-size:14px; color:#00ae85" download>Export Survey Results</a>
+                    <a href="@Url.Action("ExportCSV", "activity", new { id = survey.ID })" class="exportBtn" style="font-size:14px; color:#00ae85" download>Export Survey Results</a>
                 </div>
                 <div class="col-lg-3">
                     <div class="surveyCheck">@surveyResponses.Count() Survey Sent</div>

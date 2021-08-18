@@ -21,9 +21,6 @@
         <a href="@Url.Action("messages", "registration")" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")">
             <i class="s7-graph2"></i>  Messages
         </a>
-        <a href="@Url.Action("surveys", "registration")" class="btn btn-alt6@(actionName == "surveys" ? "-active" : "")">
-            <i class="s7-cloud"></i>  Surveys
-        </a>
     </div>
     <div class="hidden-lg hidden-sm hidden-md">
         <select class="form-control" onchange="this.value == '#' ? showUpgradeMyPlan('@(studentCRMPackage.Name)',@(studentCRMPackage.ID)) : location.href = this.value;">
