@@ -14,6 +14,7 @@
 
     var isSearchResult = Request["sdate"].IsNotBlank() || Request["edate"].IsNotBlank() || Request["q"].IsNotBlank();
     var payoutMsg = account.HasStripeConnectedAccount ? "Pending Payout" : "Available for Payout";
+    var isSchoolAccount = account.AccountTypeId.In(AccountService.LocationProviderAccountTypes);
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -65,7 +66,7 @@
                 <div class="col-md-2">
                     <div class="form-group">
                         <input type="text" class="form-control" id="search" value="@Request["q"]" />
-                        
+
                         <select id="participationObjects" class="form-control hide">
                             <option data-type="" value="">Activities</option>
                             @foreach (var po in (List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)>)ViewBag.ParticipationObjects)
@@ -191,16 +192,23 @@
                             <th class="text-center">Status</th>
                             <th class="text-center">Type</th>
                             <th class="text-center">Refunds</th>
+                            @if (SessionVariables.AccountUserType == UserType.TechSupport)
+                            {
+                                <th class="text-center">Xfers</th>
+                            }
                         </tr>
                     </thead>
                     <tbody>
                         @if (Model.Count > 0)
                         {
+                            var useStripeConnect = account.HasFeature(FeatureType.UseStripeConnectedAccount);
+
                             foreach (var transaction in Model)
                             {
                                 var registrant = transaction.GetPurchase()?.GetRegistrant();
                                 var currentStatus = transaction.GetStatus();
                                 var disableChk = !transaction.CanRequestPayout() ? "disabled" : "";
+                                var enableTransfer = !transaction.UsedStripeConnect && !transaction.PayoutId.HasValue && useStripeConnect && account.StripePayoutsEnabled;
 
                                 <tr id="@transaction.Uid">
                                     <td>
@@ -253,9 +261,9 @@
                                     <td class="text-center">
                                         @if (transaction.IsCharge())
                                         {
-                                           @transaction.GetFees().ToCurrency()
+                                            @transaction.GetFees().ToCurrency()
 
-                                           <i class="s7-info icon-small" data-toggle="popover" data-trigger="hover" data-html="true" data-content="Convenience Fees: @transaction.ConvenienceFeeCharged.ToCurrency() <br/> Credit Card Fees: @transaction.PaymentTypeFeeCharged.ToCurrency()" data-placement="top"></i>
+                                            <i class="s7-info icon-small" data-toggle="popover" data-trigger="hover" data-html="true" data-content="Convenience Fees: @transaction.ConvenienceFeeCharged.ToCurrency() <br/> Credit Card Fees: @transaction.PaymentTypeFeeCharged.ToCurrency()" data-placement="top"></i>
                                         }
                                         else
                                         {
@@ -321,6 +329,16 @@
                                             </button>
                                         }
                                     </td>
+
+                                    @if (SessionVariables.AccountUserType == UserType.TechSupport)
+                                    {
+                                        <td class="text-center">
+                                            @if (enableTransfer)
+                                            {
+                                                Html.RenderPartial("~/Views/Shared/Modals/_TransferModal-TransferButton.cshtml", transaction);
+                                            }
+                                        </td>
+                                    }
                                 </tr>
                             }
                         }
@@ -343,7 +361,7 @@
                     { "controller", "accounting" },
                     { "action", "index" },
                     { "querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}&poId={Request["poId"]}&poTypeId={Request["poTypeId"]}" }
-    }
+}
                 );
             }
         </div>
@@ -401,6 +419,17 @@
 <form action="@Url.Action("RequestPayout","Accounting")" id="requestPayoutForm" method="post">
     @Html.Hidden("TransactionIds")
 </form>
+
+@{ Html.RenderPartial(
+        "~/Views/Shared/Modals/_TransferModal.cshtml",
+        null,
+        new ViewDataDictionary
+        {
+           { "controller", "accounting" },
+           { "action", "createtransfer" },
+           { "area", "org" }
+        });
+}
 
 <script>
 
@@ -501,7 +530,8 @@
 
     function requestPayout() {
         var useStripeConnectedAccount = @Json.Encode(useStripeConnectedAccount);
-        if (!useStripeConnectedAccount) {
+        var isSchoolAccount = @Json.Encode(isSchoolAccount);
+        if (!useStripeConnectedAccount && isSchoolAccount) {
             $("#TransactionIds").val(this.selectedTransactions.join());
             $("#requestPayoutForm").submit();
         } else {

@@ -12,29 +12,45 @@
 @if (Model.SubscriptionPlans.Any())
 {
     var subscriptionPlan = Model.SubscriptionPlans.First();
-<span>
-    @if (!Model.IsRegistrationFree)
-    {
-        <span>Pay</span> <strong>@Model.Cost.ToCurrency()</strong> <span>today plus</span>
-    }
+    <span>
+        @if (!Model.IsRegistrationFree)
+        {
+            <span>Pay</span> <strong>@Model.Cost.ToCurrency()</strong> <span>today plus</span>
+        }
 
     @if (subscriptionPlan.SplitCostEvenly)
     {
         @*<span>
                 between <strong>@ParticipationObjectUI.PrintMinPlanFee(subscriptionPlan, Model.OwnerAccount, displayCheckoutPrice)</strong> and <strong>@ParticipationObjectUI.PrintMaxPlanFee(subscriptionPlan, Model.OwnerAccount, displayCheckoutPrice)</strong>
             </span>*@
-        <span>
-            a fee to be determined after all students are registered
-        </span>
-    }
-    else
-    {
-        <span>
-            <strong>@ParticipationObjectUI.PrintPlanFee(subscriptionPlan, Model.OwnerAccount, displayCheckoutPrice)</strong>
-            every
-            <strong>@Model.SubscriptionPlans.First().BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong>
-        </span>
-    }
+            <span>
+                a fee to be determined after all students are registered
+            </span>
+        }
+        else
+        {
+            <span>
+                <strong>@ParticipationObjectUI.PrintPlanFee(subscriptionPlan, Model.OwnerAccount, displayCheckoutPrice)</strong>
+                every
+                <strong>@subscriptionPlan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong>
+
+                @if (subscriptionPlan.StartDate.HasValue)
+                {
+                    <span>starting on <strong>@subscriptionPlan.StartDate.ToShortDateString()</strong></span>
+                }
+
+                @if (subscriptionPlan.EndDate.HasValue)
+                {
+                    if (subscriptionPlan.StartDate.HasValue)
+                    {
+                        <span> and </span>
+                    }
+
+                    <span>ending on <strong>@subscriptionPlan.EndDate.ToShortDateString()</strong></span>
+                }
+
+            </span>
+        }
 
 
     @*
