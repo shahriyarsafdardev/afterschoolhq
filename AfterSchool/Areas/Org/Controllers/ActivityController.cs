@@ -1862,10 +1862,10 @@ namespace AfterSchool.Areas.Org.Controllers
 
 
         [HttpGet]
-        public ActionResult NewSurvey(string id)
+        public ActionResult NewSurvey(string id, SystemMessages msgs)
         {
             var currentAccount = SessionVariables.CurrentAccount;
-            var msgs = new SystemMessages();
+            msgs = msgs ?? new SystemMessages();
 
             if (currentAccount.IsEmpty())
                 return HttpNotFound();
@@ -1904,15 +1904,28 @@ namespace AfterSchool.Areas.Org.Controllers
             if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
-            var surveyRequest = SurveyRequestService.AddSurvey(formId.ToInteger(), activityId.ToInteger(), name, optionalText, isAllowMultiple.ToBoolean(), currentAccount.ID.Value, currentUser.ID.Value, msgs);
+            if (name.IsEmpty())
+                msgs.Add("Survey title is required", MessageType.Error);
 
-            if (isEveryIndividualSelected.ToBoolean())
-                CreateSurveys(surveyRequest.ID.Value, studentList.Where(a => a.Selected).ToList(), currentUser.ID.Value, msgs);
+            if (!studentList.Any(a => a.Selected) && Request.Form["students"].ToString() == "false")
+                msgs.Add("Select Students", MessageType.Error);
+
+            if (msgs.Count == 0)
+            {
+                var surveyRequest = SurveyRequestService.AddSurvey(formId.ToInteger(), activityId.ToInteger(), name, optionalText, isAllowMultiple.ToBoolean(), currentAccount.ID.Value, currentUser.ID.Value, msgs);
+
+                if (isEveryIndividualSelected.ToBoolean())
+                    CreateSurveys(surveyRequest.ID.Value, studentList.Where(a => a.Selected).ToList(), currentUser.ID.Value, msgs);
+                else
+                    CreateSurveys(surveyRequest.ID.Value, studentList, currentUser.ID.Value, msgs);
+
+                ViewBag.Messages = msgs;
+                return RedirectToAction("Surveys", new { id });
+            }
             else
-                CreateSurveys(surveyRequest.ID.Value, studentList, currentUser.ID.Value, msgs);
-
-            ViewBag.Messages = msgs;
-            return RedirectToAction("Surveys", new { id });
+            {
+                return RedirectToAction("NewSurvey", new { id,  msgs });
+            }
         }
 
         private static IDictionary<string, string> ToDictionary(System.Collections.Specialized.NameValueCollection source)
