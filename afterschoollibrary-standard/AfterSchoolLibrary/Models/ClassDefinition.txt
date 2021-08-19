@@ -1024,6 +1024,7 @@ property: RegistrationId, int?, Int
 property: Text, string, NVarChar "400"
 property: QuestionDataTypeId, QuestionDataType, Int
 property: QuestionText, string, NVarChar "400", , Used to keep the question text just in case the question text changes on the original
+property: Uid, Guid, UniqueIdentifier, required
 join: FormQuestion.ID, FormQuestionId, LeftOuterJoin
 join: Registration.ID, RegistrationId, LeftOuterJoin
 join: SurveyResponse.ID, SurveyResponseId, LeftOuterJoin
@@ -1879,6 +1880,7 @@ property: FormId, int, Int, required
 property: DueDate, DateTime?, DateTime
 property: MultipleResponsesEnabled, bool, Bit, required
 property: IsDeleted, bool, Bit
+property: Uid, Guid, UniqueIdentifier, required
 join: Account.ID, AccountId, LeftOuterJoin
 join: Form.ID, FormId, LeftOuterJoin
 join: Activity.ID, ActivityId, LeftOuterJoin
@@ -1901,6 +1903,7 @@ property: SurveyId, int?, Int
 property: RegistrantId, int?, Int
 property: SurveyFeedbackStatusTypeId, SurveyFeedbackStatus, Int
 property: IsDeleted, bool, Bit
+property: Uid, Guid, UniqueIdentifier, required
 join: Registrant.ID, RegistrantId, LeftOuterJoin
 join: SurveyRequest.ID, SurveyId, LeftOuterJoin
 loadmethod: RegistrantId, List<>
@@ -1908,6 +1911,29 @@ loadmethod: SurveyId, List<>
 loadmethod: Uid
 loadmethod: Uid|SurveyId
 loadmethod: Uid|RegistrantId
+[end]
+
+[begin]
+type: Class
+name: RegistrantInviteCode
+serializable: true
+description: Saves Registrant Invite Code, related to Survey.
+inherits: BasicObjectWithModified
+property: SurveyResponseId, int?, Int
+property: RegistrantId, int?, Int
+property: Code, string, NVarChar "400"
+property: ExpiryDate, DateTime?, DateTime
+property: IsDeleted, bool, Bit
+property: Uid, Guid, UniqueIdentifier, required
+join: Registrant.ID, RegistrantId, LeftOuterJoin
+join: SurveyResponse.ID, SurveyResponseId, LeftOuterJoin
+loadmethod: RegistrantId, List<>
+loadmethod: SurveyResponseId, List<>
+loadmethod: Uid
+loadmethod: Uid|SurveyResponseId
+loadmethod: Uid|RegistrantId
+loadmethod: IsDeleted|Code
+loadmethod: Code
 [end]
 
 [begin]

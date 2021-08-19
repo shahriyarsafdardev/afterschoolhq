@@ -28,6 +28,7 @@ namespace AfterSchoolLibrary.Services
                        CreateDate = DateTime.Now,
                        LastModifiedDate = DateTime.Now,
                        LastModifiedBy = userId,
+                       Uid = Guid.NewGuid(),
                        SurveyFeedbackStatusTypeId = surveyFeedbackStatus
                    };
 

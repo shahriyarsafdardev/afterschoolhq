@@ -53,6 +53,7 @@ namespace AfterSchoolLibrary.Services
                        LastModifiedDate = DateTime.Now,
                        Name = name,
                        Description = instrcutionsText,
+                       Uid = Guid.NewGuid(),
                        MultipleResponsesEnabled = alloMultipleResponse
                    };
 

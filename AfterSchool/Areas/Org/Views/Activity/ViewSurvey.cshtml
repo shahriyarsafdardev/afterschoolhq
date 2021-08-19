@@ -63,7 +63,10 @@
                         {
                             <tr>
                                 <td>
-                                    <a href="@Url.Action("viewsurveyresults", "activity", new { id = surveyResponse.ID, activityId = Model.Uid })" class="linkGreen">View</a>
+                                    @if (surveyResponse.SurveyFeedbackStatusTypeId == SurveyFeedbackStatus.Completed)
+                                    {
+                                       <a href="@Url.Action("viewsurveyresults", "activity", new { id = surveyResponse.ID, activityId = Model.Uid })" class="linkGreen">View</a>
+                                    }
                                 </td>
                                 <td>
                                     @surveyResponse.GetRegistrantName().DisplayName

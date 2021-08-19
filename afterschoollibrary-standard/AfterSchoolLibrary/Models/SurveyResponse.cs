@@ -22,6 +22,10 @@ namespace AfterSchoolLibrary.Models
 		public int? RegistrantId { get { return (int?)MDV["RegistrantId"].Value; } set { MDV["RegistrantId"].Value = value; } }
 		public SurveyFeedbackStatus SurveyFeedbackStatusTypeId { get { return (SurveyFeedbackStatus)MDV["SurveyFeedbackStatusTypeId"].Value; } set { MDV["SurveyFeedbackStatusTypeId"].Value = value; } }
 		public bool IsDeleted { get { return (bool)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
+		/// <summary>
+		/// Required.
+		/// </summary>
+		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		
 
         public SurveyResponse()
@@ -30,6 +34,7 @@ namespace AfterSchoolLibrary.Models
             this.LoadObjectValues(ObjectMap);
 			this.SurveyFeedbackStatusTypeId = SurveyFeedbackStatus.NotSet;
 			this.IsDeleted = false;
+			this.Uid = Guid.NewGuid();
 			
         }
 
@@ -44,6 +49,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "RegistrantId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "SurveyFeedbackStatusTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				
                 return _dp;
             }
@@ -97,6 +103,8 @@ namespace AfterSchoolLibrary.Models
         {
 			var msgs = new SystemMessages();
 
+			if (this.Uid.IsEmpty())
+				msgs.Add("Uid is required on SurveyResponse object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(SurveyResponse).Name));
@@ -135,6 +143,10 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["IsDeleted"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["Uid"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -161,7 +173,7 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static SurveyResponse LoadByUid(string Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static SurveyResponse LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
@@ -169,7 +181,7 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static SurveyResponse LoadByUidBySurveyId(string Uid, int SurveyId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static SurveyResponse LoadByUidBySurveyId(Guid Uid, int SurveyId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
@@ -178,7 +190,7 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static SurveyResponse LoadByUidByRegistrantId(string Uid, int RegistrantId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static SurveyResponse LoadByUidByRegistrantId(Guid Uid, int RegistrantId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;

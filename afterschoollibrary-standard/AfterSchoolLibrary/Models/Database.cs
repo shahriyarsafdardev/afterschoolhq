@@ -104,6 +104,7 @@ namespace AfterSchoolLibrary.Models
 			WebSessionObjectSnapshot.Create(dc);
 			SurveyRequest.Create(dc);
 			SurveyResponse.Create(dc);
+			RegistrantInviteCode.Create(dc);
 			
 
 			return msgs;
@@ -189,6 +190,7 @@ namespace AfterSchoolLibrary.Models
 			WebSessionObjectSnapshot.Alter(dc);
 			SurveyRequest.Alter(dc);
 			SurveyResponse.Alter(dc);
+			RegistrantInviteCode.Alter(dc);
 			
 
 			return msgs;
@@ -372,6 +374,7 @@ namespace AfterSchoolLibrary.Models
 			SurveyRequest.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, SurveyRequest.ObjectMap, dc);
 			SurveyResponse.Update(new Hashtable(){{"SurveyFeedbackStatusTypeId",0}}, new Hashtable(){{"SurveyFeedbackStatusTypeId", DBNull.Value}}, SurveyResponse.ObjectMap, dc);
 			SurveyResponse.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, SurveyResponse.ObjectMap, dc);
+			RegistrantInviteCode.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, RegistrantInviteCode.ObjectMap, dc);
 			
 			//**ENDUPDATES**//
 
@@ -729,6 +732,13 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyResponse_Uid ON [SurveyResponse] (Uid)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyResponse_SurveyId_Uid ON [SurveyResponse] (Uid,SurveyId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyResponse_RegistrantId_Uid ON [SurveyResponse] (Uid,RegistrantId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantInviteCode_RegistrantId ON [RegistrantInviteCode] (RegistrantId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantInviteCode_SurveyResponseId ON [RegistrantInviteCode] (SurveyResponseId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantInviteCode_Uid ON [RegistrantInviteCode] (Uid)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantInviteCode_SurveyResponseId_Uid ON [RegistrantInviteCode] (Uid,SurveyResponseId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantInviteCode_RegistrantId_Uid ON [RegistrantInviteCode] (Uid,RegistrantId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantInviteCode_Code_IsDeleted ON [RegistrantInviteCode] (IsDeleted,Code)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantInviteCode_Code ON [RegistrantInviteCode] (Code)"));
 			
 
 			return msgs;

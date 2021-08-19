@@ -32,6 +32,10 @@ namespace AfterSchoolLibrary.Models
 		/// Used to keep the question text just in case the question text changes on the original
 		/// </summary>
 		public string QuestionText { get { return (string)MDV["QuestionText"].Value; } set { MDV["QuestionText"].Value = value; } }
+		/// <summary>
+		/// Required.
+		/// </summary>
+		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		public QuestionDataType FormQuestionQuestionDataTypeId { get { return (QuestionDataType)MDV["FormQuestionQuestionDataTypeId"].Value; } }
 		public QuestionType FormQuestionQuestionTypeId { get { return (QuestionType)MDV["FormQuestionQuestionTypeId"].Value; } }
 		public int? FormQuestionFormId { get { return (int?)MDV["FormQuestionFormId"].Value; } }
@@ -49,6 +53,7 @@ namespace AfterSchoolLibrary.Models
             this.Config(ObjectMap, DatabaseQuery, typeof(FormQuestionAnswer).Name, "ID");
             this.LoadObjectValues(ObjectMap);
 			this.QuestionDataTypeId = QuestionDataType.NotSet;
+			this.Uid = Guid.NewGuid();
 			
         }
 
@@ -67,6 +72,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "Text", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "QuestionDataTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "QuestionText", System.Data.SqlDbType.NVarChar , "400");
+				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "FormQuestionQuestionDataTypeId", typeof(FormQuestion).Name, "QuestionDataTypeId", System.Data.SqlDbType.Int, "FormQuestion");
 				_dp.Add(className, "FormQuestionQuestionTypeId", typeof(FormQuestion).Name, "QuestionTypeId", System.Data.SqlDbType.Int, "FormQuestion");
 				_dp.Add(className, "FormQuestionFormId", typeof(FormQuestion).Name, "FormId", System.Data.SqlDbType.Int, "FormQuestion");
@@ -134,6 +140,8 @@ namespace AfterSchoolLibrary.Models
 
 			if (this.FormQuestionId.IsEmpty())
 				msgs.Add("FormQuestionId is required on FormQuestionAnswer object", MessageType.Error);
+			if (this.Uid.IsEmpty())
+				msgs.Add("Uid is required on FormQuestionAnswer object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(FormQuestionAnswer).Name));
@@ -186,6 +194,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["QuestionText"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["Uid"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

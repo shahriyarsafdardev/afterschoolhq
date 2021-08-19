@@ -56,7 +56,10 @@
                             var activity = SurveyRequestService.GetActivity(survey);
                             <tr>
                                 <td>
-                                    <a href="@Url.Action("viewsurveyresults", "activity", new { id = surveyResponse.ID, activityId = activity.Uid})">View</a>
+                                     @if (surveyResponse.SurveyFeedbackStatusTypeId == SurveyFeedbackStatus.Completed)
+                                     {
+                                       <a href="@Url.Action("viewsurveyresults", "activity", new { id = surveyResponse.ID, activityId = activity.Uid })">View</a>
+                                     }
                                 </td>
                                 <td>
                                     @survey.Name

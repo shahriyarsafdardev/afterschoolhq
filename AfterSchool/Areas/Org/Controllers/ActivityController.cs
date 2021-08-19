@@ -1938,7 +1938,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var studentsList = new List<SelectListItem>();
             for (var i = 0; i < students.Count(); )
             {
-                studentsList.Add(new SelectListItem { Text = students.ElementAt(i+2).Value, Value = students.ElementAt(i+1).Value, Selected = students.ElementAt(i).Value.Contains("true") ? true : false });
+                studentsList.Add(new SelectListItem { Text = students.ElementAt(i+2).Value, Value = students.ElementAt(i+1).Value, Selected = students.ElementAt(i).Value.Contains("true")});
                 i = i + 3;
             }
             return studentsList;
@@ -1948,6 +1948,8 @@ namespace AfterSchool.Areas.Org.Controllers
         {
               studentList.ForEach(student => {
                   var surveyResponse = SurveyResponseService.CreateSurveyFeedback(surveyRequestId, student.Value.ToInteger(), SurveyFeedbackStatus.New, currentUserId, msgs);
+                  var getRegistrant = Registrant.Load(student.Value.ToInteger());
+                  var getMaster = getRegistrant.GetParentOrGuardian(null);
                   BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, null));
               });
         }
@@ -2015,8 +2017,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var getSurveyResponse = SurveyResponse.Load(id, msgs);            
             var activity = currentAccount.GetActivity(activityId.ToGuid(), msgs);
 
-            var getAllSurveys = SurveyRequest.LoadByActivityId(activity.ID.Value, msgs);
-            var getSurveyResponses = SurveyResponse.LoadBySurveyId(getAllSurveys.FirstOrDefault().ID.Value);
+            var getSurveyResponses = SurveyResponse.LoadBySurveyId(getSurveyResponse.SurveyId.Value).Where(a => a.SurveyFeedbackStatusTypeId == SurveyFeedbackStatus.Completed).ToList();
         
             var findIndex = getSurveyResponses.FindIndex(a => a.ID == getSurveyResponse.ID);
 
