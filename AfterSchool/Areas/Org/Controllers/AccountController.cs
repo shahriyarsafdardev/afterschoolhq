@@ -819,7 +819,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult FormEdit(string id, string copyfrom, string qg, string name, string description, string cmd)
+        public ActionResult FormEdit(string id, string copyfrom, string qg, string name, string description, string cmd, string formtype)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -838,10 +838,10 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 if (copyfrom.IsNumber())
                     form = currentAccount.GetForm(copyfrom.ToInteger(), msgs)?
-                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, null, msgs);
+                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, (FormType)formtype.ToInteger(), null, msgs, null);
                 else
                     form = currentAccount.GetDefaultForm(msgs)?
-                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, null, msgs);
+                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, (FormType)formtype.ToInteger(), null, msgs, null);
             }
             else
                 form = currentAccount.GetForm(id.ToInteger(), msgs);
@@ -853,6 +853,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     {
                         if (name.IsNotBlank()) form.Name = name;
                         if (description.IsNotBlank()) form.Description = description;
+                        if (formtype.IsNotBlank()) form.FormTypeId = (FormType)formtype.ToInteger();
 
                         amsgs.AddRange(form.Save(adc));
 
@@ -899,6 +900,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                 {
                                     question.IsActive = Request.Params[$"active-{question.ID}"].IsBoolean();
                                     question.IsRequired = Request.Params[$"required-{question.ID}"].IsBoolean();
+                                    question.IsAnswerDescriptionEnabled = Request.Params[$"answerDescription-{question.ID}"].IsBoolean();
 
                                     if (question.QuestionDataTypeId == QuestionDataType.NotSet)
                                     {
@@ -907,6 +909,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                         question.Description = Request.Params[$"description-{question.ID}"];
                                         question.Options = Request.Params[$"options-text-{question.ID}"];
                                         question.Link = Request.Params[$"link-text-{question.ID}"];
+                                        question.DisplayOrder = Request.Params[$"displayOrderId-{question.ID}"].ToInteger();
                                         question.QuestionTypeId = (QuestionType)Request.Params[$"questiontype-{question.ID}"].ToInteger();
                                     }
 
@@ -930,7 +933,8 @@ namespace AfterSchool.Areas.Org.Controllers
                                         LastModifiedDate = DateTime.UtcNow,
                                         CreatedBy = currentUser.ID,
                                         LastModifiedBy = currentUser.ID,
-                                        DisplayOrder = questionGroup.GetQuestionCount(amsgs, adc) + 1,
+                                        DisplayOrder = Request.Params[string.Format("new-sort-{0}", i)].ToInteger(),
+                                        //questionGroup.GetQuestionCount(amsgs, adc) + 1,
                                         FormQuestionGroupId = questionGroup.ID,
                                         IsTemplate = false,
                                         QuestionDataTypeId = QuestionDataType.NotSet,
@@ -940,7 +944,8 @@ namespace AfterSchool.Areas.Org.Controllers
                                         Link = Request.Params[string.Format("new-link-text-{0}", i)],
                                         Description = Request.Params[string.Format("new-description-{0}", i)],
                                         IsActive = Request.Params[string.Format("new-active-{0}", i)].IsBoolean(),
-                                        IsRequired = Request.Params[string.Format("new-required-{0}", i)].IsBoolean()
+                                        IsRequired = Request.Params[string.Format("new-required-{0}", i)].IsBoolean(),
+                                        IsAnswerDescriptionEnabled = Request.Params[string.Format("new-description-enabled-{0}", i)].IsBoolean()
                                     };
                                     amsgs.AddRange(question.Save(adc));
                                 }
@@ -998,6 +1003,37 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.OrganizationGroups = organizationGroups;
             ViewBag.QuestionGroup = questionGroup;
             return View(form);
+        }
+
+        [HttpGet]
+        public ActionResult Delete(string id)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+            var questionToDelete = FormQuestion.Load(id.ToInteger(), msgs);
+            questionToDelete.Delete();
+            // Show Success Message
+            // LOG: Someone has Deleted Question.
+            if (msgs.HasNoErrors())
+            {
+                msgs.Add(string.Format("{0} has been deleted", questionToDelete.Text), MessageType.Success);
+                SessionVariables.WebSession.LogActivity(
+                   account: currentAccount,
+                   actor: currentUser,
+                   actionType: WebSessionActionType.Deleted,
+                   objectType: ObjectType.FormQuestion,
+                   objectId: id.ToInteger(),
+                   objectText: questionToDelete.Text,
+                   indirectObjectType: ObjectType.FormQuestion,  // Need to know about indirectObjectType
+                   indirectObjectId: currentAccount.ID.Value,
+                   indirectObjectText: currentAccount.Name
+               );
+            }
+            ViewBag.Messages = msgs;
+            return Redirect(Request.UrlReferrer.ToString());
         }
 
         private AccountProfile StyleViewBag(SystemMessages msgs)
