@@ -1928,7 +1928,7 @@ property: Uid, Guid, UniqueIdentifier, required
 join: Registrant.ID, RegistrantId, LeftOuterJoin
 join: SurveyResponse.ID, SurveyResponseId, LeftOuterJoin
 loadmethod: RegistrantId, List<>
-loadmethod: SurveyResponseId, List<>
+loadmethod: SurveyResponseId
 loadmethod: Uid
 loadmethod: Uid|SurveyResponseId
 loadmethod: Uid|RegistrantId

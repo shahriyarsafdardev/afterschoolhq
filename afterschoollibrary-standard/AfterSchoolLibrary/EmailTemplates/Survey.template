@@ -1,5 +1,6 @@
 ﻿<div>
   <p>Hello @Model.Name,</p>
-  <p>You have got a @Model.SurveyName request (Survey request), you can <a href="@Model.Link" target="_blank">take survey here</a>, it should not take more than 5 minutes.</p>
-  <p>Thanks</p>
+  <p>You have got a @Model.SurveyName request (Survey request).</p>
+  <p>You can <a href="@Model.Link" target="_blank">take survey here</a>, it should not take more than 5 minutes.</p>
+ <p>Thanks</p>
 </div>

@@ -87,11 +87,13 @@ namespace AfterSchoolLibrary.Helpers
         }
 
 
-        public static SystemMessages SendSurveyEmail(SurveyResponse surveyResponse, SystemMessages msgs)
+        public static SystemMessages SendSurveyEmail(SurveyResponse surveyResponse, string code, SystemMessages msgs)
         {
             msgs = msgs ?? new SystemMessages();
             var getRegistrant = Registrant.Load(surveyResponse.RegistrantId.Value);
             var getSurvey = SurveyRequest.Load(surveyResponse.SurveyId.Value);
+            var getRegistrantParent = getRegistrant.GetParentOrGuardian(msgs);
+            var IsEmailSame = false;
 
             var model = new NameValueCollection()
             {
@@ -100,23 +102,42 @@ namespace AfterSchoolLibrary.Helpers
                 { "SurveyName", getSurvey.Name}
             };
 
+            if (code.IsNotEmpty())
+                model.Add(new NameValueCollection() { { "InviteCode", code } });
+
+            if (getRegistrant.Email == getRegistrantParent.Email)
+                IsEmailSame = true;
+
+
             var subject = $"You have received a survey request";
             var body = ProcessTemplate(
-                        EmailTemplates.Survey,
+                        code.IsNotEmpty() ? EmailTemplates.Survey_Code : EmailTemplates.Survey,
                         model,
-                        "survey_email",
+                        code.IsNotEmpty() ? "survey_code_email" : "survey_code",
                         msgs);
 
-            var mailMsgs = SendGridHelper.SendMail(
-                            fromEmail: Email.SendGridNoReplyEmailAddress(),
-                            toEmail: new SendGrid.Helpers.Mail.EmailAddress(getRegistrant.Email),
-                            subject: subject,
-                            body: body,
-                            emailTemplateId: SendGridHelper.GetGenericTemplateId());
-
-            msgs.AddRange(mailMsgs);
+            if (IsEmailSame) {
+                SendSurveyEmailLastStep(subject, getRegistrant.Email, body, msgs);
+            }
+            else{
+                //send both
+                SendSurveyEmailLastStep(subject, getRegistrant.Email, body, msgs);
+                SendSurveyEmailLastStep(subject, getRegistrantParent.Email, body, msgs);
+            }
 
             return msgs;
+        }
+
+        public static void SendSurveyEmailLastStep(string subject, string email, string body, SystemMessages msgs)
+        {
+            var mailMsgs = SendGridHelper.SendMail(
+                         fromEmail: Email.SendGridNoReplyEmailAddress(),
+                         toEmail: new SendGrid.Helpers.Mail.EmailAddress(email),
+                         subject: subject,
+                         body: body,
+                         emailTemplateId: SendGridHelper.GetGenericTemplateId());
+
+            msgs.AddRange(mailMsgs);
         }
 
 

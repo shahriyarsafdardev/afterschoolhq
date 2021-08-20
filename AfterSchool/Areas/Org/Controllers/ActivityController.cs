@@ -1949,8 +1949,15 @@ namespace AfterSchool.Areas.Org.Controllers
               studentList.ForEach(student => {
                   var surveyResponse = SurveyResponseService.CreateSurveyFeedback(surveyRequestId, student.Value.ToInteger(), SurveyFeedbackStatus.New, currentUserId, msgs);
                   var getRegistrant = Registrant.Load(student.Value.ToInteger());
-                  var getMaster = getRegistrant.GetParentOrGuardian(null);
-                  BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, null));
+                  if (getRegistrant.WebUserId.IsEmpty())
+                  {
+                      var createInviteCode = RegistrantInviteCodeService.Create(surveyResponse.ID.Value, getRegistrant.ID.Value, currentUserId, msgs, null);
+                      BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, createInviteCode.Code, null));
+                  }
+                  else
+                  {
+                      BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, null, null));
+                  }
               });
         }
         [HttpGet]
@@ -1959,15 +1966,24 @@ namespace AfterSchool.Areas.Org.Controllers
             if(id == 0){
                 var surveyResponses = SurveyResponse.LoadBySurveyId(surveyId).Where(a => a.SurveyFeedbackStatusTypeId != SurveyFeedbackStatus.Completed).ToList();
                 surveyResponses.ForEach(surveyResponse => {
-                    BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, null));
+                    CheckRegistrantInviteCodeAndSendEmail(surveyResponse);
                 });
             }
             else{
                 var surveyResponse = SurveyResponse.Load(id);
-                BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, null));
+                CheckRegistrantInviteCodeAndSendEmail(surveyResponse);
             }
 
             return Json(new { msg = "Reminder sent", success = true}, JsonRequestBehavior.AllowGet);
+        }
+
+        private void CheckRegistrantInviteCodeAndSendEmail(SurveyResponse surveyResponse)
+        {
+            var checkIfInviteCodeExists = RegistrantInviteCode.CheckBySurveyResponseIdExpiryDate(surveyResponse.ID.Value, DateTime.Now);
+            if (checkIfInviteCodeExists.IsNotEmpty())
+                BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, checkIfInviteCodeExists.Code, null));
+            else
+                BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, null, null));
         }
 
         [HttpGet]

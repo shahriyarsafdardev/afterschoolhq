@@ -170,12 +170,12 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<RegistrantInviteCode> LoadBySurveyResponseId(int SurveyResponseId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static RegistrantInviteCode LoadBySurveyResponseId(int SurveyResponseId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["SurveyResponseId"], SurveyResponseId);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
 		public static RegistrantInviteCode LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -221,11 +221,26 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		
+
 
         #endregion
 
-		#region "UserDefined"
+        #region "UserDefined"
+
+        public static RegistrantInviteCode CheckBySurveyResponseIdExpiryDate(int id, DateTime expiryDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dcs2 = new DatabaseCriterias(LogicalOperatorType.And);
+            dcs2.Add(ObjectMap["ExpiryDate"], expiryDate, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
+
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["SurveyResponseId"], id);
+            dq.Criterias.Add(dcs2);
+
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
+
 
         #endregion
     }

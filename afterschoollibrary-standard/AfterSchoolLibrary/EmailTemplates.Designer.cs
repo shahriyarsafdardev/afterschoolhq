@@ -443,6 +443,16 @@ namespace AfterSchoolLibrary {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] Survey_Code {
+            get {
+                object obj = ResourceManager.GetObject("Survey_Code", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] TeamSubmittedToDistrict_Notification {
             get {
                 object obj = ResourceManager.GetObject("TeamSubmittedToDistrict_Notification", resourceCulture);
