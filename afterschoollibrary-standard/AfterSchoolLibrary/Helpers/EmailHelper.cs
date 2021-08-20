@@ -105,7 +105,8 @@ namespace AfterSchoolLibrary.Helpers
             if (code.IsNotEmpty())
                 model.Add(new NameValueCollection() { { "InviteCode", code } });
 
-            if (getRegistrant.Email == getRegistrantParent.Email)
+
+            if (getRegistrant.Email == (getRegistrantParent.IsNotEmpty() ? getRegistrantParent.Email : ""))
                 IsEmailSame = true;
 
 
@@ -122,7 +123,8 @@ namespace AfterSchoolLibrary.Helpers
             else{
                 //send both
                 SendSurveyEmailLastStep(subject, getRegistrant.Email, body, msgs);
-                SendSurveyEmailLastStep(subject, getRegistrantParent.Email, body, msgs);
+                if(getRegistrantParent.IsNotEmpty())
+                    SendSurveyEmailLastStep(subject, getRegistrantParent.Email, body, msgs);
             }
 
             return msgs;
