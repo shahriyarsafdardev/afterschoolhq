@@ -833,7 +833,9 @@ namespace AfterSchool.Areas.Org.Controllers
                         msgs: msgs
                     );
                 }
-            }
+            } else
+                activity.RemoveActivitySchedule(currentUser, currentAccount, msgs);
+
 
             // Show Success Message
             // LOG: Someone Updated Activity ActivityName for Account AccountName
