@@ -106,14 +106,18 @@ namespace AfterSchoolLibrary.Services
                     "activity_message",
                     msgs);
 
-                ActivityMessageService.SendTextMessage(
-                    member.Phone,
-                    loggedInUser.DisplayName,
-                    activityMessage.Subject,
-                    activityName,
-                    activityMessage.Uid.ToString(),
-                    null,
-                    msgs);
+                if(member.Phone.IsNotEmpty())
+                {
+                    ActivityMessageService.SendTextMessage(
+                        member.Phone,
+                        loggedInUser.DisplayName,
+                        activityMessage.Subject,
+                        activityName,
+                        activityMessage.Uid.ToString(),
+                        null,
+                        msgs);
+                }
+
             });
         }
 

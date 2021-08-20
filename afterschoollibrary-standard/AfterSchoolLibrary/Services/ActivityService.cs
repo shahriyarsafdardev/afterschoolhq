@@ -2555,9 +2555,13 @@ namespace AfterSchoolLibrary.Services
 
         public static ActivitySchedule GetSchedule(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (msgs.IsEmpty())
+                msgs = new SystemMessages();
+            
             if (activity.ActivityScheduleId.HasValue)
                 return ActivitySchedule.LoadWithInstances(activity.ActivityScheduleId.Value, msgs, dc);
-
+            
+            msgs.Add("No Schedule exists for this activity", MessageType.Notice);
             return null;
         }
 
@@ -2737,7 +2741,10 @@ namespace AfterSchoolLibrary.Services
             
             var schedule = activity.GetSchedule(msgs, dc);
 
-            if (schedule.IsNotEmpty() && activity.AccountId.Value == currentAccount.ID.Value)
+            if (schedule.IsEmpty())
+                return;
+
+            if (currentAccount.HasActivityPermissions(activity, msgs))
             {
                 activity.ActivityScheduleId = null;
                 activity.LastModifiedBy = currentUser.ID.Value;

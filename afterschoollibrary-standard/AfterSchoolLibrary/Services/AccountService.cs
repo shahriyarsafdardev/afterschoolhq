@@ -628,6 +628,16 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
+        public static bool HasActivityPermissions(this Account account, Activity activity, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (account.ID.Value == activity.AccountId.Value || account.ID.Value == activity.GetLocationOwner(msgs, dc).ID.Value)
+                return true;
+
+            msgs.Add("Account does not have permission to edit activity", MessageType.UserError);
+            return false;
+                
+        }
+
         #endregion
 
         #region Contacts
