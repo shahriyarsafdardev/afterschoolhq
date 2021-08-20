@@ -185,7 +185,22 @@ namespace AfterSchoolLibrary.Services
                     GooglePlaceId = googlePlaceId,
                     CreateDate = DateTime.UtcNow,
                     CreatedBy = loggedInUser?.ID,
-                };            
+                };
+
+            if (locationName.IsEmpty())
+                msgs.Add("Location Name is required", MessageType.UserError);
+
+            if (city.IsEmpty())
+                msgs.Add("Location City is required", MessageType.UserError);
+
+            if (state.IsEmpty())
+                msgs.Add("Location State is required", MessageType.UserError);
+
+            if (postalCode.IsEmpty())
+                msgs.Add("Location Postal Code is required", MessageType.UserError);
+
+            if (country.IsEmpty())
+                msgs.Add("Location Country is required", MessageType.UserError);
 
             location.Name = locationName;
             location.StreetNumber = streetNumber;
