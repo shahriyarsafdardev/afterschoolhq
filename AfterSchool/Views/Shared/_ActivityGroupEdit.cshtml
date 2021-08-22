@@ -200,6 +200,13 @@
                 }
             });
 
+            $('#maxgrade').change(function () {
+
+                if (parseInt($('#mingrade').val()) > parseInt($(this).val()) ) {
+                    $('#mingrade').val($(this).val());
+                }
+            });
+
             gradeCheck();
         }
     );
