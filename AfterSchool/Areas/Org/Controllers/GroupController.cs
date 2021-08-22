@@ -630,7 +630,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var am = account.GetActivityMessage(id.ToGuid(), msgs);
             var group = am.GetActivityGroup(msgs);
 
-            BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, account.ID.Value, msgs, null));
+            BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, account.ID.Value, null, null));
 
             if (msgs.HasNoErrors())
             {
