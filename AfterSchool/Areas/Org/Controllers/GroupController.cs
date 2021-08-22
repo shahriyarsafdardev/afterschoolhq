@@ -390,8 +390,10 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var group = account.GetActivityGroup(id.ToGuid(), msgs);
             var loggedInUserId = SessionVariables.CurrentUser.ID.Value;
+            var groupId = group.ID.Value;
 
-            ActivityGroupService.SendLotteryResults(group.ID.Value, loggedInUserId, msgs, null);
+            // cannot pass objects into the BackgroundJob.Enqueue
+            BackgroundJob.Enqueue(() => ActivityGroupService.SendLotteryResults(groupId, loggedInUserId, null, null));
             ViewBag.Messages = msgs;
 
             return RedirectToAction("registrations", new { id = group.Uid, emailed = 1 });
