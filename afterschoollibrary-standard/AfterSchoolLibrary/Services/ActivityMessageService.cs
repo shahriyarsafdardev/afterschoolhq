@@ -107,7 +107,6 @@ namespace AfterSchoolLibrary.Services
                     msgs);
 
                 if(member.Phone.IsNotEmpty())
-                {
                     ActivityMessageService.SendTextMessage(
                         member.Phone,
                         loggedInUser.DisplayName,
@@ -116,21 +115,26 @@ namespace AfterSchoolLibrary.Services
                         activityMessage.Uid.ToString(),
                         null,
                         msgs);
-                }
 
             });
         }
 
         internal static MessageResource SendTextMessage(string phone, string senderName, string subject, string activityName, string messageUid, string registrantUid, SystemMessages msgs)
         {
-            var aOrAn = subject[0].In("aeiouAEIOU") ? "an" : "a";
+            if (phone.IsNotEmpty())
+            {
+                var aOrAn = subject[0].In("aeiouAEIOU") ? "an" : "a";
 
-            return TwilioHelper.SendSMS(
-                phone,
-                $"{senderName} has sent {aOrAn} {subject} for {activityName}\nPlease review your message: {Helpers.Utilities.ShortBaseUrl()}/msg/{messageUid}",
-                messageUid,
-                registrantUid,
-                msgs);
+                return TwilioHelper.SendSMS(
+                    phone,
+                    $"{senderName} has sent {aOrAn} {subject} for {activityName}\nPlease review your message: {Helpers.Utilities.ShortBaseUrl()}/msg/{messageUid}",
+                    messageUid,
+                    registrantUid,
+                    msgs);
+            }
+
+            return null;
+
         }
 
         internal static void SendEmailMessage(Account account, string activityName, string fromName, string toEmail, string toName, string replyToEmail, string replyToName, string subject, string body, string utmCampaign, SystemMessages msgs)
