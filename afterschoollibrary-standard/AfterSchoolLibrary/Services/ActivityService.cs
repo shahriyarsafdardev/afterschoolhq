@@ -2555,8 +2555,7 @@ namespace AfterSchoolLibrary.Services
 
         public static ActivitySchedule GetSchedule(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (msgs.IsEmpty())
-                msgs = new SystemMessages();
+            msgs = msgs ?? new SystemMessages();
             
             if (activity.ActivityScheduleId.HasValue)
                 return ActivitySchedule.LoadWithInstances(activity.ActivityScheduleId.Value, msgs, dc);
