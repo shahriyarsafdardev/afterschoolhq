@@ -833,7 +833,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         msgs: msgs
                     );
                 }
-            } else
+            } else if (activity.HasSchedule)
                 activity.RemoveActivitySchedule(currentUser, currentAccount, msgs);
 
 
