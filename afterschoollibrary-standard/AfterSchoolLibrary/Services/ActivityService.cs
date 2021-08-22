@@ -2754,9 +2754,8 @@ namespace AfterSchoolLibrary.Services
                     msgs.AddRange(activity.Save(dc));
                     msgs.AddRange(schedule.Delete(dc));
                 }
-            }
-
-            msgs.Add("Error Removing Schedule", MessageType.UserError);
+            } else
+                msgs.Add("Error Removing Schedule", MessageType.UserError);
         }
     }
 }
