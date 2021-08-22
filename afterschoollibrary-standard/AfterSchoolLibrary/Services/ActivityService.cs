@@ -2740,24 +2740,23 @@ namespace AfterSchoolLibrary.Services
 
         public static void RemoveActivitySchedule(this Activity activity, WebUser currentUser, Account currentAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (msgs.IsEmpty())
-                msgs = new SystemMessages();
-            
-            var schedule = activity.GetSchedule(msgs, dc);
-
-            if (schedule.IsEmpty())
-                return;
-
+            msgs = msgs ?? new SystemMessages();
+                
             if (currentAccount.HasActivityPermissions(activity, msgs))
             {
-                activity.ActivityScheduleId = null;
-                activity.LastModifiedBy = currentUser.ID.Value;
-                activity.LastModifiedDate = DateTime.UtcNow;
-                msgs.AddRange(activity.Save(dc));
-                msgs.AddRange(schedule.Delete(dc));
+                var schedule = activity.GetSchedule(msgs, dc);
+
+                if (schedule.IsNotEmpty())
+                {
+                    activity.ActivityScheduleId = null;
+                    activity.LastModifiedBy = currentUser.ID.Value;
+                    activity.LastModifiedDate = DateTime.UtcNow;
+                    msgs.AddRange(activity.Save(dc));
+                    msgs.AddRange(schedule.Delete(dc));
+                }
             }
-            else
-                msgs.Add("Error Removing Schedule", MessageType.UserError);
+
+            msgs.Add("Error Removing Schedule", MessageType.UserError);
         }
     }
 }
