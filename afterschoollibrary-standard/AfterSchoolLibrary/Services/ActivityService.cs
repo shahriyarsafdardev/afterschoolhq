@@ -2752,9 +2752,12 @@ namespace AfterSchoolLibrary.Services
                     activity.LastModifiedBy = currentUser.ID.Value;
                     activity.LastModifiedDate = DateTime.UtcNow;
                     msgs.AddRange(activity.Save(dc));
+
+                    return;
                 }
-            } else
-                msgs.Add("Error Removing Schedule", MessageType.UserError);
+            } 
+            
+            msgs.Add("Error Removing Schedule", MessageType.UserError);
         }
     }
 }
