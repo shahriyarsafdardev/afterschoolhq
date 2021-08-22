@@ -229,7 +229,7 @@ namespace AfterSchoolLibrary.Services
 
         public static void Send(int id, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-           if (msgs.IsEmpty()) msgs = new SystemMessages();
+            msgs = msgs ?? new SystemMessages();
             var am = ActivityMessage.Load(id, msgs, dc);
 
             if (am.ActivityId.HasValue)

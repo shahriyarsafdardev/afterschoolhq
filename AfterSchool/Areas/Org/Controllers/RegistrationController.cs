@@ -837,7 +837,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         currentUser.ID.Value,
                         msgs);
 
-                BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, msgs, null));
+                BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, null, null));
             }
 
             ViewBag.Registrations = registrations;
