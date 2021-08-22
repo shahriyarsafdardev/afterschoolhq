@@ -2555,9 +2555,12 @@ namespace AfterSchoolLibrary.Services
 
         public static ActivitySchedule GetSchedule(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            msgs = msgs ?? new SystemMessages();
+            
             if (activity.ActivityScheduleId.HasValue)
                 return ActivitySchedule.LoadWithInstances(activity.ActivityScheduleId.Value, msgs, dc);
-
+            
+            msgs.Add("No Schedule exists for this activity", MessageType.Notice);
             return null;
         }
 
@@ -2635,8 +2638,13 @@ namespace AfterSchoolLibrary.Services
 
         public static Account GetLocationOwner(this Activity activity, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var location = activity.GetLocation(msgs, dc);
-            return location?.GetHostAccount(msgs, dc);
+            if (activity.IsNotEmpty())
+            {
+                var location = activity.GetLocation(msgs, dc);
+                return location?.GetHostAccount(msgs, dc);
+            }
+
+            return null;
         }
 
         public static void RequestToPublish(this Activity activity, Account locationOwner, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
@@ -2732,21 +2740,23 @@ namespace AfterSchoolLibrary.Services
 
         public static void RemoveActivitySchedule(this Activity activity, WebUser currentUser, Account currentAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (msgs.IsEmpty())
-                msgs = new SystemMessages();
-            
-            var schedule = activity.GetSchedule(msgs, dc);
-
-            if (schedule.IsNotEmpty() && activity.AccountId.Value == currentAccount.ID.Value)
+            msgs = msgs ?? new SystemMessages();
+                
+            if (currentAccount.HasActivityPermissions(activity, msgs))
             {
-                activity.ActivityScheduleId = null;
-                activity.LastModifiedBy = currentUser.ID.Value;
-                activity.LastModifiedDate = DateTime.UtcNow;
-                msgs.AddRange(activity.Save(dc));
-                msgs.AddRange(schedule.Delete(dc));
+                var schedule = activity.GetSchedule(msgs, dc);
+
+                if (schedule.IsNotEmpty())
+                {
+                    activity.ActivityScheduleId = null;
+                    activity.LastModifiedBy = currentUser.ID.Value;
+                    activity.LastModifiedDate = DateTime.UtcNow;
+                    msgs.AddRange(activity.Save(dc));
+                    msgs.AddRange(schedule.Delete(dc));
+                }
             }
-            else
-                msgs.Add("Error Removing Schedule", MessageType.UserError);
+
+            msgs.Add("Error Removing Schedule", MessageType.UserError);
         }
     }
 }
