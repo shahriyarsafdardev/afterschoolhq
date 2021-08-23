@@ -215,8 +215,9 @@
                                    onfocus="this.select()"
                                    oninput="validity.valid||(value='');"
                                    @if (!showWaitingList) { <text> disabled="disabled" </text> } />
-                            <div style="position:absolute; left:0; right:0; top:0; bottom:0; " id="waitingListDiv"></div>
-                        </div>
+                            @if (!showWaitingList)
+                            {<div style="position:absolute; left:0; right:0; top:0; bottom:0; " id="waitingListDiv"></div>}
+                            </div>
                     </div>
                 }
 
