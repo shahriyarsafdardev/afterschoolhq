@@ -91,14 +91,14 @@ namespace AfterSchoolLibrary.Helpers
         {
             msgs = msgs ?? new SystemMessages();
             var getRegistrant = Registrant.Load(surveyResponse.RegistrantId.Value);
-            var getSurvey = SurveyRequest.Load(surveyResponse.SurveyId.Value);
+            var getSurvey = SurveyRequest.Load(surveyResponse.SurveyRequestId.Value);
             var getRegistrantParent = getRegistrant.GetParentOrGuardian(msgs);
             var IsEmailSame = false;
 
             var model = new NameValueCollection()
             {
                 { "Name", getRegistrant.Name },
-                { "Link", Utilities.SurveyBaseUrl+"/survey/"+surveyResponse.SurveyId},
+                { "Link", Utilities.SurveyBaseUrl+"/survey/"+surveyResponse.SurveyRequestId},
                 { "SurveyName", getSurvey.Name}
             };
 

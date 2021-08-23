@@ -76,10 +76,10 @@ namespace AfterSchoolLibrary.Services
             var table = new List<List<string>>();
             table.Add(AddHeadersToCSVReport(headers));
 
-            var getSurveyResponses = SurveyResponse.LoadBySurveyId(id, msgs);
+            var getSurveyResponses = SurveyResponse.LoadBySurveyRequestId(id, msgs);
 
             getSurveyResponses.ForEach(getSurveyResponse => {
-                var getSurveyRequest = SurveyRequest.Load(getSurveyResponse.SurveyId.Value);
+                var getSurveyRequest = SurveyRequest.Load(getSurveyResponse.SurveyRequestId.Value);
                 var registrant = Registrant.Load(getSurveyResponse.RegistrantId.Value);
 
                 table.Add(AddRegistrantRow(registrant.Name, getSurveyResponse.SurveyFeedbackStatusTypeId.ToString().SplitByUpperCase(), getSurveyResponse.LastModifiedDate));

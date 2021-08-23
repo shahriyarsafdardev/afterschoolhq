@@ -1972,7 +1972,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult ResendNotification(int id, int surveyId)
         {
             if(id == 0){
-                var surveyResponses = SurveyResponse.LoadBySurveyId(surveyId).Where(a => a.SurveyFeedbackStatusTypeId != SurveyFeedbackStatus.Completed).ToList();
+                var surveyResponses = SurveyResponse.LoadBySurveyRequestId(surveyId).Where(a => a.SurveyFeedbackStatusTypeId != SurveyFeedbackStatus.Completed).ToList();
                 surveyResponses.ForEach(surveyResponse => {
                     CheckRegistrantInviteCodeAndSendEmail(surveyResponse);
                 });
@@ -2005,7 +2005,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var activity = currentAccount.GetActivity(activityId.ToGuid(), msgs);
 
-            ViewBag.GetSurveyFeedback = SurveyResponse.LoadBySurveyId(id, msgs);
+            ViewBag.GetSurveyFeedback = SurveyResponse.LoadBySurveyRequestId(id, msgs);
             ViewBag.Survey = SurveyRequest.Load(id);
             ViewBag.Messages = msgs;
 
@@ -2041,7 +2041,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var getSurveyResponse = SurveyResponse.Load(id, msgs);            
             var activity = currentAccount.GetActivity(activityId.ToGuid(), msgs);
 
-            var getSurveyResponses = SurveyResponse.LoadBySurveyId(getSurveyResponse.SurveyId.Value).Where(a => a.SurveyFeedbackStatusTypeId == SurveyFeedbackStatus.Completed).ToList();
+            var getSurveyResponses = SurveyResponse.LoadBySurveyRequestId(getSurveyResponse.SurveyRequestId.Value).Where(a => a.SurveyFeedbackStatusTypeId == SurveyFeedbackStatus.Completed).ToList();
         
             var findIndex = getSurveyResponses.FindIndex(a => a.ID == getSurveyResponse.ID);
 
@@ -2053,7 +2053,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
 
             ViewBag.FormQuestionAnswers = FormQuestionAnswer.LoadBySurveyResponseId(getSurveyResponse.ID.Value, msgs);
-            ViewBag.SurveyName = SurveyRequest.Load(getSurveyResponse.SurveyId.Value).Name;
+            ViewBag.SurveyName = SurveyRequest.Load(getSurveyResponse.SurveyRequestId.Value).Name;
             ViewBag.RegistrantName = Registrant.Load(getSurveyResponse.RegistrantId.Value).Name;
             ViewBag.SurveyFeedback = getSurveyResponse;
             ViewBag.Messages = msgs;

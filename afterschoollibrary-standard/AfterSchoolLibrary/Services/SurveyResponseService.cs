@@ -22,7 +22,7 @@ namespace AfterSchoolLibrary.Services
                {
                    surveyResponse = new SurveyResponse()
                    {
-                       SurveyId = surveyId,
+                       SurveyRequestId = surveyId,
                        RegistrantId = registrantId,
                        CreatedBy = userId,
                        CreateDate = DateTime.Now,
@@ -74,7 +74,7 @@ namespace AfterSchoolLibrary.Services
         public static List<SurveyResponse> GetSurveyFeedbackBySurveyId(this SurveyResponse survey, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (survey.IsNotEmpty())
-                return SurveyResponse.LoadBySurveyId(survey.ID.Value, msgs, dc);
+                return SurveyResponse.LoadBySurveyRequestId(survey.ID.Value, msgs, dc);
 
             return null;
         }

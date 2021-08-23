@@ -18,7 +18,7 @@ namespace AfterSchoolLibrary.Models
     {
 		#region "ClassGenerator"
 
-		public int? SurveyId { get { return (int?)MDV["SurveyId"].Value; } set { MDV["SurveyId"].Value = value; } }
+		public int? SurveyRequestId { get { return (int?)MDV["SurveyRequestId"].Value; } set { MDV["SurveyRequestId"].Value = value; } }
 		public int? RegistrantId { get { return (int?)MDV["RegistrantId"].Value; } set { MDV["RegistrantId"].Value = value; } }
 		public SurveyFeedbackStatus SurveyFeedbackStatusTypeId { get { return (SurveyFeedbackStatus)MDV["SurveyFeedbackStatusTypeId"].Value; } set { MDV["SurveyFeedbackStatusTypeId"].Value = value; } }
 		public bool IsDeleted { get { return (bool)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
@@ -45,7 +45,7 @@ namespace AfterSchoolLibrary.Models
                 BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
                 string className = typeof(SurveyResponse).Name;
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
-				_dp.Add(className, "SurveyId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "SurveyRequestId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrantId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "SurveyFeedbackStatusTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
@@ -68,7 +68,7 @@ namespace AfterSchoolLibrary.Models
             {
                 BasicLibrary.DataAccess.DatabaseQuery dq = BaseObject.get_DatabaseQuery(ObjectMap, typeof(SurveyResponse).Name);
 				dq.Joins.Add(Registrant.ObjectMap["ID"], SurveyResponse.ObjectMap["RegistrantId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.LeftOuterJoin, "Registrant");
-				dq.Joins.Add(SurveyRequest.ObjectMap["ID"], SurveyResponse.ObjectMap["SurveyId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.LeftOuterJoin, "SurveyRequest");
+				dq.Joins.Add(SurveyRequest.ObjectMap["ID"], SurveyResponse.ObjectMap["SurveyRequestId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.LeftOuterJoin, "SurveyRequest");
 				
                 return dq;
             }
@@ -128,7 +128,7 @@ namespace AfterSchoolLibrary.Models
             BasicLibrary.DataAccess.DatabaseParameters dps;
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["SurveyId"]);
+			dps.Add(ObjectMap["SurveyRequestId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -165,11 +165,11 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<SurveyResponse> LoadBySurveyId(int SurveyId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<SurveyResponse> LoadBySurveyRequestId(int SurveyRequestId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["SurveyId"], SurveyId);
+			dq.Criterias.Add(ObjectMap["SurveyRequestId"], SurveyRequestId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
@@ -181,12 +181,12 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static SurveyResponse LoadByUidBySurveyId(Guid Uid, int SurveyId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static SurveyResponse LoadByUidBySurveyRequestId(Guid Uid, int SurveyRequestId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["Uid"], Uid);
-			dq.Criterias.Add(ObjectMap["SurveyId"], SurveyId);
+			dq.Criterias.Add(ObjectMap["SurveyRequestId"], SurveyRequestId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 

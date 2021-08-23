@@ -1899,17 +1899,17 @@ name: SurveyResponse
 serializable: true
 description: Saves Survey responses.
 inherits: BasicObjectWithModified
-property: SurveyId, int?, Int
+property: SurveyRequestId, int?, Int
 property: RegistrantId, int?, Int
 property: SurveyFeedbackStatusTypeId, SurveyFeedbackStatus, Int
 property: IsDeleted, bool, Bit
 property: Uid, Guid, UniqueIdentifier, required
 join: Registrant.ID, RegistrantId, LeftOuterJoin
-join: SurveyRequest.ID, SurveyId, LeftOuterJoin
+join: SurveyRequest.ID, SurveyRequestId, LeftOuterJoin
 loadmethod: RegistrantId, List<>
-loadmethod: SurveyId, List<>
+loadmethod: SurveyRequestId, List<>
 loadmethod: Uid
-loadmethod: Uid|SurveyId
+loadmethod: Uid|SurveyRequestId
 loadmethod: Uid|RegistrantId
 [end]
 

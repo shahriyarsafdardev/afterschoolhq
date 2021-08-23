@@ -728,9 +728,9 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyRequest_ActivityId_Uid ON [SurveyRequest] (Uid,ActivityId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyRequest_FormId_Uid ON [SurveyRequest] (Uid,FormId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyResponse_RegistrantId ON [SurveyResponse] (RegistrantId)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyResponse_SurveyId ON [SurveyResponse] (SurveyId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyResponse_SurveyRequestId ON [SurveyResponse] (SurveyRequestId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyResponse_Uid ON [SurveyResponse] (Uid)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyResponse_SurveyId_Uid ON [SurveyResponse] (Uid,SurveyId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyResponse_SurveyRequestId_Uid ON [SurveyResponse] (Uid,SurveyRequestId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyResponse_RegistrantId_Uid ON [SurveyResponse] (Uid,RegistrantId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantInviteCode_RegistrantId ON [RegistrantInviteCode] (RegistrantId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantInviteCode_SurveyResponseId ON [RegistrantInviteCode] (SurveyResponseId)"));

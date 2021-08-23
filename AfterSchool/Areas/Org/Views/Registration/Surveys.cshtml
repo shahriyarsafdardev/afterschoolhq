@@ -52,7 +52,7 @@
                     <tbody>
                         @foreach (var surveyResponse in (List<SurveyResponse>)ViewBag.SurveyResponses)
                         {
-                            var survey = SurveyRequest.Load(surveyResponse.SurveyId.Value);
+                            var survey = SurveyRequest.Load(surveyResponse.SurveyRequestId.Value);
                             var activity = SurveyRequestService.GetActivity(survey);
                             <tr>
                                 <td>
