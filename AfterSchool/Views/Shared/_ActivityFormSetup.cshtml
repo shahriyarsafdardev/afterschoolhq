@@ -209,12 +209,13 @@
                             Waiting List Seats <span class="text-danger">*</span>
                             <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Can be any positive number" data-placement="top"></i>
                         </label>
-                        <div class="col-sm-9" @if (!showWaitingList) { <text> onclick="return showUpgradeMyPlan('@(waitingListPackage.Name)',@(waitingListPackage.ID))"</text> }>
-                            <input id="waitinglistseats"  class="form-control" type="number" name="waitinglistseats" value="@Model.WaitingListSeats" required step="1" 
+                        <div style="position:relative;" class="col-sm-9" @if (!showWaitingList) { <text> onclick="return showUpgradeMyPlan('@(waitingListPackage.Name)',@(waitingListPackage.ID))" </text> }>
+                            <input id="waitinglistseats" class="form-control" type="number" name="waitinglistseats" value="@Model.WaitingListSeats" required step="1"
                                    min="0"
                                    onfocus="this.select()"
-                                   oninput="this.value = this.value > @maxWaitingListCount ? Math.abs(@maxWaitingListCount) : Math.abs(this.value)"
-                                   @if (!showWaitingList) { <text> disabled="disabled"</text> } />
+                                   oninput="validity.valid||(value='');"
+                                   @if (!showWaitingList) { <text> disabled="disabled" </text> } />
+                            <div style="position:absolute; left:0; right:0; top:0; bottom:0; " id="waitingListDiv"></div>
                         </div>
                     </div>
                 }
@@ -306,6 +307,16 @@
         $('input[name=registrationclosedate],input[name=registrationopendate],#registrationopentime,#registrationclosetime').on('change', function () {
             validateSetup(0, event);
         });
+
+        $("#waitingListDiv").on('click', function () {
+            @if(!showWaitingList)
+            {
+                 <text>
+                     showUpgradeMyPlan('@(waitingListPackage.Name)',@(waitingListPackage.ID))
+                 </text>
+            }
+           
+        })
     });
 
     function checkPeriodVal() {
