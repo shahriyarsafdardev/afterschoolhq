@@ -12,7 +12,7 @@
         <div class="panel-body surveypanelpadding">
             <div class="col-lg-6">
                 <div style="font-size:22px">@ViewBag.RegistrantName</div>
-                <div style="font-size:14px; "><a href="@Url.Action("ViewSurvey", "activity", new { id = surveyResponse.SurveyId, activityId = Model.Uid })" style="color:#B2B2B4">@ViewBag.SurveyName | @(surveyResponse.CreateDate.IsNotEmpty() ? surveyResponse.CreateDate.Value.ToString("MMMM dd, yyyy") : "")</a></div>
+                <div style="font-size:14px; "><a href="@Url.Action("ViewSurvey", "activity", new { id = surveyResponse.SurveyRequestId, activityId = Model.Uid })" style="color:#B2B2B4">@ViewBag.SurveyName | @(surveyResponse.CreateDate.IsNotEmpty() ? surveyResponse.CreateDate.Value.ToString("MMMM dd, yyyy") : "")</a></div>
             </div>
             <div class="col-lg-6">
                 <div class="pull-right iconsViewResults">
@@ -24,12 +24,52 @@
             <div class="row">
                 @foreach (var question in (List<FormQuestionAnswer>)ViewBag.FormQuestionAnswers)
                 {
-                    <div class="col-lg-12">
-                        <div class="viewSurvey">
-                            <div class="viewSurveyHead">@question.QuestionText</div>
-                            <div class="viewSurveyAnswer">@question.Text</div>
+                    if (question.FormQuestionQuestionTypeId != QuestionType.Audio && question.FormQuestionQuestionTypeId != QuestionType.Video && question.FormQuestionQuestionTypeId != QuestionType.FileUpload)
+                    {
+                        <div class="col-lg-12">
+                            <div class="viewSurvey">
+                                <div class="viewSurveyHead">@question.QuestionText</div>
+                                <div class="viewSurveyAnswer">@question.Text</div>
+                            </div>
                         </div>
-                    </div>
+                    }
+                    else if (question.FormQuestionQuestionTypeId == QuestionType.Audio)
+                    {
+                        <div class="col-lg-12">
+                            <div class="viewSurvey">
+                                <div class="viewSurveyHead">@question.QuestionText</div>
+                                <div class="viewSurveyAnswer">
+                                    <audio controls="controls" id="audio_player">
+                                        <source src="@question.Text">
+                                    </audio>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else if (question.FormQuestionQuestionTypeId == QuestionType.Video)
+                    {
+                        <div class="col-lg-12">
+                            <div class="viewSurvey">
+                                <div class="viewSurveyHead">@question.QuestionText</div>
+                                <div class="viewSurveyAnswer">
+                                    <video id="clip" controls preload=auto width=640 height=264 data-setup="{}">
+                                        <source src="@question.Text" />
+                                    </video>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else if (question.FormQuestionQuestionTypeId == QuestionType.FileUpload)
+                    {
+                        <div class="col-lg-12">
+                            <div class="viewSurvey">
+                                <div class="viewSurveyHead">@question.QuestionText</div>
+                                <div class="viewSurveyAnswer">
+                                  <a href="@question.Text" target="_blank">@question.Text</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
                 }
             </div>
         </div>
