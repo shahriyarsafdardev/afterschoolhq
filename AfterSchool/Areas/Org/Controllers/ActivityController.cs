@@ -789,29 +789,31 @@ namespace AfterSchool.Areas.Org.Controllers
             Dictionary<string, object> values = null;
 
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
-            if (activity.IsNotEmpty() && hasschedule.IsBoolean() && hasschedule.ToBoolean())
+            if (activity.IsNotEmpty())
             {
-                var filteredParams = Request.Params.Filter("schedulerepeat-");
-                var days = ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
-
-                if (days.Count == 0 && repeatsweekly == "1")
-                    msgs.Add("Please select at least one day", MessageType.UserError);
-
-                if (msgs.HasNoErrors())
+                if (hasschedule.IsBoolean() && hasschedule.ToBoolean())
                 {
-                    inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
-                    outOfSessionDates = ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
+                    var filteredParams = Request.Params.Filter("schedulerepeat-");
+                    var days = ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
 
-                    inSessionDates.ForEach(dateRange =>
+                    if (days.Count == 0 && repeatsweekly == "1")
+                        msgs.Add("Please select at least one day", MessageType.UserError);
+
+                    if (msgs.HasNoErrors())
                     {
-                        if (dateRange.StartDate > dateRange.EndDate)
-                            msgs.Add("Please ensure start dates and end times are earlier than the corresponding end date and end times", MessageType.UserError);
-                    });
-                }
+                        inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
+                        outOfSessionDates = ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
 
-                if (msgs.HasNoErrors())
-                {
-                    values = new Dictionary<string, object>()
+                        inSessionDates.ForEach(dateRange =>
+                        {
+                            if (dateRange.StartDate > dateRange.EndDate)
+                                msgs.Add("Please ensure start dates and end times are earlier than the corresponding end date and end times", MessageType.UserError);
+                        });
+                    }
+
+                    if (msgs.HasNoErrors())
+                    {
+                        values = new Dictionary<string, object>()
                     {
                         { "scheduledetails", scheduledetails},
                         { "days", days.Select(x => (int)x).ToStrings().ToStringList() },
@@ -826,15 +828,21 @@ namespace AfterSchool.Areas.Org.Controllers
                         { "isongoing", isongoing }
                     };
 
-                    activity = ActivityService.EditExisting(
-                        loggedInUserId: currentUser.ID.Value,
-                        account: currentAccount,
-                        activityId: activity.ID.Value.ToString(),
-                        values: values,
-                        msgs: msgs
-                    );
+                        activity = ActivityService.EditExisting(
+                            loggedInUserId: currentUser.ID.Value,
+                            account: currentAccount,
+                            activityId: activity.ID.Value.ToString(),
+                            values: values,
+                            msgs: msgs
+                        );
+                    }
                 }
-            }
+                else if (activity.HasSchedule)
+                {
+                    activity.RemoveActivitySchedule(currentUser, currentAccount, msgs);
+                }
+            } 
+
 
             // Show Success Message
             // LOG: Someone Updated Activity ActivityName for Account AccountName
