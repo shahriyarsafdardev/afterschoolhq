@@ -12,7 +12,6 @@
     var showSeats = Model.ActivityTypeId.NotIn(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip });
     var showInviteOnly = accountPackage.HasFeature(FeatureType.AllowInvites);
     var showWaitingList = accountPackage.HasFeature(FeatureType.WaitingList);
-    var maxWaitingListCount = showWaitingList ? (int)accountPackage.GetFeature(FeatureType.WaitingList).Max.Value : 0;
     var showAllowApplications = accountPackage.HasFeature(FeatureType.AllowApplications);
     var showManageForms = accountPackage.HasFeature(FeatureType.ManageForms);
     var maxFormCount = accountPackage.IsNotEmpty() ? (int)accountPackage.GetFeature(FeatureType.ManageForms).Max.Value : 0;
