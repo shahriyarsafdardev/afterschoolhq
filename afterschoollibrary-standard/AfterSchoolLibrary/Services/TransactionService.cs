@@ -813,7 +813,7 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
-        public static Stripe.Transfer CreateStripeTransfer(this Transaction transaction, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Stripe.Transfer CreateStripeTransfer(this Transaction transaction, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (transaction.UsedStripeConnect)
                 return null;
@@ -841,6 +841,7 @@ namespace AfterSchoolLibrary.Services
                                 {
                                     { "TransactionUid", transaction.Uid.ToString() },
                                     { "StripeCharge", transaction.StripeChargeOrRefundId },
+                                    { "LoggedInUser", loggedInUser.Uid.ToString() },
                                 },
                                 msgs);
 

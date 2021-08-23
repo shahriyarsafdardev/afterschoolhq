@@ -59,7 +59,7 @@
             }
 
         }
-        else if (participationObject.IsSession())
+        else if (participationObject.IsSession()) //&& registered != "Applied" (NOTE: removed by Darye, not sure what this is doing, logic is not obvious - basing code on a text field doesn't seem right and needs more explanation if this is the right thing to do.
         {
             btnText = $"Add To Existing Registration";
         }
@@ -82,14 +82,14 @@
         else if (participationObject.IsNotEmpty() && participationObject.RestrictByGrade() && !participationObject.IsStudentGradeInRange(Model))
         {
             btnText = "Ineligible - Grade";
-           // disabledText = " disabled=\"disabled\" ";
-           // btnUrl = "#";
+            // disabledText = " disabled=\"disabled\" ";
+            // btnUrl = "#";
         }
         else if (participationObject.IsNotEmpty() && !participationObject.RestrictByGrade() && !participationObject.IsStudentAgeInRange(Model))
         {
             btnText = "Ineligible - Age";
             disabledText = " disabled=\"disabled\" ";
-           // btnUrl = "#";
+            // btnUrl = "#";
         }
         else
         {
