@@ -759,6 +759,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (schedule.IsEmpty())
                 schedule = ActivitySchedule.GetNewDefaultSchedule(activity.GetActiveRegistrationPeriod(msgs));
 
+            if (schedule.IsEmpty())
+                msgs.Add("No Schedule exists for this activity", MessageType.Notice);
+
             ViewBag.Schedule = schedule;
             ViewBag.ShowScheduleList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups, msgs);
             ViewBag.Messages = msgs;
@@ -838,7 +841,27 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
                 else if (activity.HasSchedule)
                 {
+                    var scheduleRemoved = activity.GetSchedule(msgs);
                     activity.RemoveActivitySchedule(currentUser, currentAccount, msgs);
+                    // Show Success Message
+                    // LOG: Someone Removed Schedule From for Activity AccountName
+                    if (msgs.HasNoErrors())
+                    {
+                        msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
+
+                        SessionVariables.WebSession.LogActivity(
+                            account: currentAccount,
+                            actor: currentUser,
+                            actionType: WebSessionActionType.Removed,
+                            objectType: ObjectType.ActivitySchedule,
+                            objectId: scheduleRemoved.ID.Value,
+                            objectText: scheduleRemoved.Name,
+                            indirectObjectType: ObjectType.Activity,
+                            indirectObjectId: activity.ID.Value,
+                            indirectObjectText: activity.Name
+                        );
+                    }
+                    msgs.Add($"Schedule removed from ${activity.Name}", MessageType.Notice);
                 }
             } 
 
