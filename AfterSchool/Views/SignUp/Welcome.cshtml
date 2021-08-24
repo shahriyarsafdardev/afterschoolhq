@@ -580,6 +580,11 @@
 
                 signupAccountSearch.val(text);
 
+                if (lblOrgSearchTitle.text() == 'Find your school, organization or program') {
+                    var profileUrl = slug;
+                    window.location = profileUrl; //move to profile page
+                }
+
                 if (isClaimed == false) {
                     var url = slug + '?claimprofile=1';
                     window.location = url ; //move to profile page
