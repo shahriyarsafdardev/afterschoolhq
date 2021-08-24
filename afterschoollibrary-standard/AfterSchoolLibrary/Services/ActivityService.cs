@@ -2559,8 +2559,7 @@ namespace AfterSchoolLibrary.Services
             
             if (activity.ActivityScheduleId.HasValue)
                 return ActivitySchedule.LoadWithInstances(activity.ActivityScheduleId.Value, msgs, dc);
-            
-            msgs.Add("No Schedule exists for this activity", MessageType.Notice);
+
             return null;
         }
 
