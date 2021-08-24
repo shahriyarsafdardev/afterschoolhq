@@ -1056,6 +1056,8 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.TeachingMethods = teachingMethods;
             ViewBag.IsFullScreen = GetIsFullScreen();
             ViewBag.Messages = msgs;
+            ViewBag.Email = profile.ProfileEmail.IsNotEmpty() ? profile.ProfileEmail : account.Email;
+            ViewBag.Phone = profile.ProfilePhone.IsNotEmpty() ? profile.ProfilePhone : account.Phone;
 
             return profile;
         }
