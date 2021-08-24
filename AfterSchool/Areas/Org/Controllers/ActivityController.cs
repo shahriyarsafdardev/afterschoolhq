@@ -843,7 +843,10 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     var scheduleRemoved = activity.GetSchedule(msgs);
                     activity.RemoveActivitySchedule(currentUser, currentAccount, msgs);
+
                     // Show Success Message
+                    msgs.Add($"Schedule removed from {activity.Name}", MessageType.Success);
+
                     // LOG: Someone Removed Schedule From for Activity AccountName
                     if (msgs.HasNoErrors())
                     {
@@ -861,7 +864,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             indirectObjectText: activity.Name
                         );
                     }
-                    msgs.Add($"Schedule removed from ${activity.Name}", MessageType.Notice);
+                    
                 }
             } 
 
