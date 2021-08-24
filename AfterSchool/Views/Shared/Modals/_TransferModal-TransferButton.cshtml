@@ -1,0 +1,7 @@
+﻿@model Transaction 
+
+<button onclick="transferModal_setTransaction('@Model.Uid', '@Model.GetBillerAmount().ToCurrency()')"
+        class="md-trigger btn btn-sm btn-alt6"
+        data-modal="modal-create-transfer">
+    <i class="s7-culture"></i>
+</button>
