@@ -759,9 +759,6 @@ namespace AfterSchool.Areas.Org.Controllers
             if (schedule.IsEmpty())
                 schedule = ActivitySchedule.GetNewDefaultSchedule(activity.GetActiveRegistrationPeriod(msgs));
 
-            if (schedule.IsEmpty())
-                msgs.Add("No Schedule exists for this activity", MessageType.Notice);
-
             ViewBag.Schedule = schedule;
             ViewBag.ShowScheduleList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups, msgs);
             ViewBag.Messages = msgs;
