@@ -231,6 +231,114 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(paymentStart.HasValue && paymentEnd.HasValue);
         }
 
+        [Fact]
+        public void GetProviderTest()
+        {
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(user, msgs, dc);
+            var schoolUser = Factories.WebUserFactory.Create(msgs, dc);
+            var schoolAccount = Factories.AccountFactory.Create(schoolUser, msgs, dc);
+
+            var activity = Factories.ActivityFactory.Create(schoolAccount, msgs, dc);
+            activity.SetProvider(account, schoolUser, msgs, dc);
+
+            var provider = activity.GetProvider(msgs, dc);
+
+            Assert.Equal(account.ID, provider.ID);
+            Assert.True(msgs.HasNoErrors());
+
+        }
+
+        [Fact]
+        public void SetProviderTest()
+        {
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(user, msgs, dc);
+            var schoolUser = Factories.WebUserFactory.Create(msgs, dc);
+            var schoolAccount = Factories.AccountFactory.Create(schoolUser, msgs, dc);
+
+            var activity = Factories.ActivityFactory.Create(schoolAccount, msgs, dc);
+            activity.SetProvider(account, schoolUser, msgs, dc);
+
+            Assert.Equal(activity.ProviderAccountId, account.ID);
+        }
+
+        [Fact]
+        public void SetLocationTest()
+        {
+            var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
+            var location = LocationFactory.Create(ActivityOwnerAccount, msgs, dc);
+
+            activity.SetLocation(location, LoggedInUser, msgs, dc);
+
+            Assert.Equal(location.ID.Value, activity.LocationId.Value);
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void GetLocationTest()
+        {
+            var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
+            var location = LocationFactory.Create(ActivityOwnerAccount, msgs, dc);
+
+            activity.SetLocation(location, LoggedInUser, msgs, dc);
+            var activityLocation = activity.GetLocation(msgs, dc);
+
+            Assert.Equal(location.ID.Value, activityLocation.ID.Value);
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void GetLocationOwnerTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
+            var location = LocationFactory.Create(ActivityOwnerAccount, msgs, dc);
+
+            // Act
+            activity.SetLocation(location, LoggedInUser, msgs, dc);
+            var locationOwner = activity.GetLocationOwner(msgs, dc);
+
+            // Assert
+            Assert.Equal(ActivityOwnerAccount.ID.Value, locationOwner.ID.Value);
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void GetLocationOwnerFailingTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
+
+            // Act
+            // we are not setting any location with this activity, so location owner will be empty
+            var locationOwner = activity.GetLocationOwner(msgs, dc);
+
+            // Assert
+            Assert.Null(locationOwner);
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void IsOpenTest()
+        {
+            var activity1 = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
+            var activity2 = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
+            var activity3 = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
+            var period1 = RegistrationPeriodFactory.Create(ActivityOwnerAccount, msgs, dc);
+            var period2 = RegistrationPeriodFactory.Create(ActivityOwnerAccount, DateTime.UtcNow.AddDays(-12), DateTime.UtcNow.AddDays(-1), msgs, dc);
+            var period3 = RegistrationPeriodFactory.Create(ActivityOwnerAccount, DateTime.UtcNow.AddDays(1), DateTime.UtcNow.AddDays(12), msgs, dc);
+
+            msgs.AddRange(period1.AddActivity(activity1, true, LoggedInUser.ID.Value, dc));
+            msgs.AddRange(period2.AddActivity(activity2, true, LoggedInUser.ID.Value, dc));
+            msgs.AddRange(period3.AddActivity(activity3, true, LoggedInUser.ID.Value, dc));
+
+            Assert.True(msgs.HasNoErrors());
+            Assert.True(activity1.IsOpen(msgs, dc));
+            Assert.False(activity2.IsOpen(msgs, dc));
+            Assert.False(activity3.IsOpen(msgs, dc));
+        }
+
         #region Activity Copy Functionality
 
         [Fact]
@@ -496,6 +604,31 @@ namespace AfterSchoolLibraryTests.Tests
 
         #endregion
 
+        #region Remove Activity Schedule Test
 
+        [Fact(DisplayName="RemoveActivityTest")]
+        public void RemoveActivityTest()
+        {
+            // Arrange
+            var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
+            var activityWithSchedule = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
+            var activityWithoutSchedule = ActivityFactory.Create(ActivityOwnerAccount, schedule, msgs, dc);
+            var differentAccount = AccountFactory.Create(LoggedInUser, msgs, dc);
+            var scheduleForActivityWithDifferentAccount = ActivityScheduleFactory.Create(differentAccount, msgs, dc);
+            var activityWithDifferentAccount = ActivityFactory.Create(differentAccount,scheduleForActivityWithDifferentAccount, msgs, dc);
+
+            // Act
+            activityWithSchedule.RemoveActivitySchedule(LoggedInUser, ActivityOwnerAccount, msgs, dc);
+            activityWithoutSchedule.RemoveActivitySchedule(LoggedInUser, ActivityOwnerAccount, msgs, dc);
+            activityWithDifferentAccount.RemoveActivitySchedule(LoggedInUser, ActivityOwnerAccount, msgs, dc);
+
+            // Assert
+            Assert.False(activityWithSchedule.HasSchedule);
+            Assert.True(msgs.HasErrors());
+            Assert.Equal(expected: "Error Removing Schedule", actual: msgs[0].Text);
+            Assert.True(activityWithDifferentAccount.HasSchedule);
+        }
+
+        #endregion
     }
 }

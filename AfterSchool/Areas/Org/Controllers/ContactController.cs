@@ -572,7 +572,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     else
                     {
                         activity = period.GetActivities(msgs).FirstOrDefault();
-                        returnUrl = Url.Action("registrants", "activity", new { id = activity.ID });
+                        returnUrl = Url.Action("registrants", "activity", new { id = activity.Uid });
                         activities.Add(activity);
                     }
 
@@ -635,7 +635,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     {
                         activity = period.GetActivities().FirstOrDefault();
                         msgs.AddRange(InviteContactList(list, invitemessage, period, activity));
-                        ViewBag.ReturnUrl = Url.Action("registrants", "activity", new { id = activity.ID });
+                        ViewBag.ReturnUrl = Url.Action("registrants", "activity", new { id = activity.Uid });
                     }
 
                     break;

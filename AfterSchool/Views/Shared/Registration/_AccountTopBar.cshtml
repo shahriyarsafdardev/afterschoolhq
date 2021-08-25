@@ -3,14 +3,20 @@
     var currentUser = SessionVariables.CurrentUser;
     var currentAccount = SessionVariables.CurrentAccount;
     var accountOrDashboard = "Account";
-    var canPublishActivity = ViewData["CanPublishActivity"].IsNotEmpty() ? ViewData["CanPublishActivity"].ToString().ToBoolean() : false;
     var participationObject = (ParticipationObject)ViewData["ParticipationObject"];
+    var canPublishActivity = ViewData["CanPublishActivity"].IsNotEmpty() ? ViewData["CanPublishActivity"].ToString().ToBoolean() : false;
     var dashboardUrl = Url.Action("index", "home", new { area = "user" });
     var session = (ParticipationObject)ViewData["session"];
     var isDuringProfileSetup = false;
     var returnUrl = SessionVariables.RegistrationStartPageAccount?.HomePageUrl;
     var registrationStartPage = SessionVariables.RegistrationStartPageAccount;
     var isAccount = ViewData["IsAccount"] != null ? (bool)ViewData["IsAccount"] : false;
+
+    var enableApproveButton = canPublishActivity && 
+        !participationObject.IsPublished && 
+        participationObject.IsNotEmpty() && 
+        participationObject.IsExternalToAccount(currentAccount) &&
+        !participationObject.IsAccountActivityGroup();
 
     if (currentAccount.IsNotEmpty() && currentAccount.AccountTypeId != AccountType.Registrant)
     {
@@ -29,17 +35,17 @@
     }
 
     var currentLevel = AccountService.OnboardingCompletionStatus(currentAccount);
-    var currentProgress = AccountService.GetCurrentOnboardingProcess(currentAccount);    
+    var currentProgress = AccountService.GetCurrentOnboardingProcess(currentAccount);
     var totalNumberOfOnboardingSteps = 4;
     var hasAnyPaidActivity = currentAccount.IsNotEmpty() && currentAccount.HasPaidActivities();
     //If there is no paid activity configured then we should not display Payment Modal and Progressbar to user
     var totalStepsLeft = hasAnyPaidActivity ? totalNumberOfOnboardingSteps : totalNumberOfOnboardingSteps - 1;
     var progressPercentage = ((Decimal)currentProgress.Count / totalStepsLeft) * 100;
-    
+
 
     var isAccountAndLoggedInUserIsOwner = currentAccount.IsNotEmpty() &&
         currentUser.IsNotEmpty() &&
-        (currentAccount.ID == Model.ID) &&
+        (currentAccount.ID == Model?.ID) &&
         (currentUser.HasAccessTo(Model));
 
     Activity unpublishActivity = null;
@@ -84,7 +90,7 @@
         <div class="row">
             <div class="col-md-6 col-sm-6 col-xs-12">
 
-                @if (isAccount && isAccountAndLoggedInUserIsOwner && progressPercentage != 100)
+                @if (isAccount && isAccountAndLoggedInUserIsOwner && Model.OnboardingCompletionStatus() != GettingStartedOptions.ProcessCompleted)
                 {
                     <div id="popover-container" class="dropdown popover-dropdown">
                         <a id="ddl-finish-setup" class="dropdown-toggle dropdown-label" onclick="return toggleList();">
@@ -232,7 +238,8 @@
 
                             @if (currentUser.IsNotEmpty())
                             {
-                                if (canPublishActivity && participationObject.IsNotEmpty())
+                                
+                                if (enableApproveButton)
                                 {
                                     <a href="@Url.Action("publishdetail", "activity", new { Area = "org", id = participationObject.Uid })"
                                        class="btn btn-primary btn-sm">
@@ -271,8 +278,8 @@
 
                                 if (currentUser.HasMultipleAccounts())
                                 {
-                                    var registrationAccount = SessionVariables.CurrentUser.GetRegistrantAccount();
-                                    if (registrationAccount.IsNotEmpty())
+                                    var registrationAccount = currentUser.GetRegistrantAccount();
+                                    if (registrationAccount.IsNotEmpty() && currentAccount?.ID != registrationAccount.ID)
                                     {
                                         <a class="btn btn-link" href="@Url.Action("select", "login", new { area = "", id = registrationAccount.Uid.ToString() })">Switch to @registrationAccount.Name</a>
                                     }
@@ -293,7 +300,7 @@
             }
         </div>
     }
-    else
+    else if (false)
     {
         <div class="row">
             <div class="pull-right">

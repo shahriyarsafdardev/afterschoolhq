@@ -1052,7 +1052,7 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult AddStudent()
         {
-            var results = CheckRedirect();
+            var results = CheckRedirect(checkForEmptyCart: true);
             if (results.IsNotEmpty()) return results;
 
             var msgs = new SystemMessages();
@@ -1530,13 +1530,13 @@ namespace AfterSchool.Controllers
                 return RedirectToAction(
                     "editpersonal",
                     "family",
-                    new { Area = "user", id = parentOrGuardian.Uid, reg = registration?.Uid, student = currentRegistrant?.Uid });
+                    new { Area = "user", id = parentOrGuardian.Uid, reg = registration?.Uid, student = currentRegistrant?.Uid, returnUrl = Url.Action("select", "account") });
 
             if (!currentRegistrant.IsProfileCompleted)
                 return RedirectToAction(
                     "editstudentpersonal",
                     "family",
-                    new { Area = "user", id = currentRegistrant.Uid, reg = registration?.Uid, student = currentRegistrant?.Uid });
+                    new { Area = "user", id = currentRegistrant.Uid, reg = registration?.Uid, student = currentRegistrant?.Uid, returnUrl = Url.Action("select", "account") });
 
             // check grade eligibility (extra check)
             if (!participationObject.IsStudentGradeInRange(currentRegistrant, msgs))
@@ -2179,6 +2179,9 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult GetStartedStudent(string regaccount)
         {
+            // disable and redirect to get started parent (since there is no way for students to register directly
+            return RedirectToAction("getstarted", new { regaccount });
+
             if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentAccount.AccountTypeId == AccountType.Registrant)
                 return RedirectToAction("select");
 

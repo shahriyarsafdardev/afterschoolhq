@@ -13,6 +13,11 @@ localtestname: AfterSchoolTest
 localtestserver: localhost
 localtestusername: AfterSchoolUser
 localtestpassword: Nj8Ed$wpLfJ
+
+testname: AfterSchoolTest
+testserver: afterschool-nonprod.cdyenngbc33v.us-east-2.rds.amazonaws.com
+testusername: AfterSchoolTestUser
+testpassword: jUp$dBh8D9o)3Rf
 [end]
 
 [begin]
@@ -115,6 +120,7 @@ loadmethod: AccountId|IsPublished, List<>
 loadmethod: LocationId, List<>
 loadmethod: Uid
 loadmethod: Uid|AccountId
+loadmethod: Uid|ProviderAccountId
 -loadmethod: ParentActivityId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: ActivityGroupId|AccountId, List<>
@@ -139,9 +145,9 @@ property: StreetNumber, string, NVarChar "50"
 property: StreetName, string, NVarChar "50"
 property: Neighborhood, string, NVarChar "100"
 property: County, string, NVarChar "100"
-property: Latitude, decimal?, Decimal "10,2"
-property: Longitude, decimal?, Decimal "10,2"
-property: DistanceFromOrigin, decimal?, Decimal "10,2"
+property: Latitude, decimal?, Decimal "30,5"
+property: Longitude, decimal?, Decimal "30,5"
+property: DistanceFromOrigin, decimal?, Decimal "30,5"
 baseproperty: State, required
 loadmethod: HostAccountId, List<>
 loadmethod: HostAccountId|IsDefault
@@ -509,6 +515,8 @@ property: HostAccountId, int?, Int, required
 property: VisitorAccountId, int?, Int, required
 property: HostPermissionTypeId, HostPermissionType, Int
 property: ApprovalStatusId, ApprovalStatus, Int
+property: RequiresPublishPermission, bool, Bit
+property: ShowAllPrograms, bool, Bit
 join: Account.ID, VisitorAccountId, InnerJoin
 joinproperty: Account.AccountTypeId, AccountType, Int
 loadmethod: HostAccountId, List<>
@@ -686,8 +694,8 @@ baseproperty: Name, required
 loadmethod: AccountId, List<>
 loadmethod: AccountId|ActivityGroupTypeId, List<>
 loadmethod: AccountId|IsPublished, List<>
-loadmethod: AccountId|IsPublished|IsArchived, List<>
-loadmethod: AccountId|IsPublished|IsInviteOnly, List<>
+loadmethod: AccountId|IsPublished|IsArchived|IsDeleted, List<>
+loadmethod: AccountId|IsPublished|IsInviteOnly|IsDeleted, List<>
 loadmethod: AccountId|UniqueName
 loadmethod: Uid
 loadmethod: Uid|AccountId
@@ -950,7 +958,6 @@ inherits: BasicLookUpObject
 property: AccountId, int?, Int, required
 property: Uid, Guid, UniqueIdentifier, required
 property: IsActive, bool, Bit
-property: FormTypeId, FormType, Int, required
 join: Account.ID, AccountId, InnerJoin
 joinproperty: Account.Name, string, NVarChar
 loadmethod: AccountId, List<>
@@ -972,7 +979,6 @@ property: QuestionDataTypeId, QuestionDataType, Int
 property: IsActive, bool, Bit
 property: IsRequired, bool, Bit
 property: IsLocked, bool, Bit
-property: IsAnswerDescriptionEnabled, bool, Bit
 property: Options, string, NVarChar "1000"
 property: Link, string, NVarChar "1000"
 property: DependsOnQuestionId, int?, Int
@@ -1015,7 +1021,6 @@ property: RegistrantId, int?, Int
 property: ActivityId, int?, Int
 property: RegistrationId, int?, Int
 property: Text, string, NVarChar "400"
-property: Description, string, NVarChar "4000"
 property: QuestionDataTypeId, QuestionDataType, Int
 property: QuestionText, string, NVarChar "400", , Used to keep the question text just in case the question text changes on the original
 join: FormQuestion.ID, FormQuestionId, LeftOuterJoin
@@ -1875,11 +1880,6 @@ name: AHQObjectType
 values: NotSet, Account, Activity, ActivityGroup, AccountActivityGroup
 [end]
 
-[begin]
-type: Enum
-name: FormType
-values: NotSet, Registration, Survey
-[end]
 
 [begin]
 type: Enum
@@ -1920,7 +1920,7 @@ values: NotSet, OrganizationHomeView, RegistrationFormView, RegistrationComplete
 [begin]
 type: Enum
 name: QuestionType
-values: NotSet, TextBox, TextArea, RadioList, CheckboxList, Checkbox, DropDownList, Email, Date, Number, RadioMatrix, TextBlock, FileUpload
+values: NotSet, TextBox, TextArea, RadioList, CheckboxList, Checkbox, DropDownList, Email, Date, Number, RadioMatrix, TextBlock, FileUpload, Video, Audio, Photo, Emoji, Rating
 [end]
 
 [begin]

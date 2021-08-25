@@ -4,6 +4,7 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var requestingVisitors = (List<Account>)ViewBag.RequestingVisitors;
     var approvedVisitors = (List<Account>)ViewBag.ApprovedVisitors;
+    var currentAccount = SessionVariables.CurrentAccount;
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.ID.ToString());}
@@ -24,11 +25,23 @@
                 </div>
                 <div class="message">
                     <p class="text-center">
-                        Invite Providers to create an account to list their @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() on your @UILabel.ActivityLabel(ActivityType.Activity).ToLower() home page.<br />
 
-                        Invite Link to Share with providers: <a href="@Model.HostAccountInviteUrl" target="_blank">@Model.HostAccountInviteUrl</a>
-                        <br/>
-                        Invite Link to Share with teachers to setup 1099 payments: <a href="@Model.HostAccountTeacherInviteUrl" target="_blank">@Model.HostAccountTeacherInviteUrl</a>
+                        <span>
+                            Invite Providers to create an account to list their @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() on your @UILabel.ActivityLabel(ActivityType.Activity).ToLower() home page.<br />
+                        </span>
+
+                        <span>
+                            Invite Link to Share with providers: <a href="@Model.HostAccountInviteUrl" target="_blank">@Model.HostAccountInviteUrl</a>
+                            <br/>
+                        </span>
+
+                        @if (currentAccount.HasFeature(FeatureType.Teacher1099))
+                        {
+                            <span>
+                                Invite Link to Share with teachers to setup 1099 payments: <a href="@Model.HostAccountTeacherInviteUrl" target="_blank">@Model.HostAccountTeacherInviteUrl</a>
+                            </span>
+                        }
+
                     </p>
                 </div>
             </div>
@@ -96,6 +109,8 @@
                                     <th>Contact</th>
                                     <th>Email</th>
                                     <th>Phone</th>
+                                    <th>Requires Publish Permision</th>
+                                    <th>Show All Programs</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -112,6 +127,36 @@
                                             <td>@user.DisplayName</td>
                                             <td><a href="mailto:@user.Email">@user.Email</a></td>
                                             <td>@user.Phone</td>
+                                            <td>
+                                                @{
+                                                    Html.RenderPartial(
+                                                      "~/Views/Shared/_SwitchButton.cshtml",
+                                                      request.RequiresPublishPermission,
+                                                      new ViewDataDictionary()
+                                                      {
+                                                            { "checkboxname", $"requirespublishpermission_{request.ID}" },
+                                                            { "checkboxid", $"requirespublishpermission-{request.ID}" },
+                                                            { "disabled", false },
+                                                            { "onclick", $"updateRequiresPublishPermission('requirespublishpermission-{request.ID}')" }
+                                                      }
+                                                    );
+                                                }
+                                            </td>
+                                            <td>
+                                                @{
+                                                    Html.RenderPartial(
+                                                      "~/Views/Shared/_SwitchButton.cshtml",
+                                                      request.ShowAllPrograms,
+                                                      new ViewDataDictionary()
+                                                      {
+                                                            { "checkboxname", $"showallprograms-{request.ID}" },
+                                                            { "checkboxid", $"showallprograms-{request.ID}" },
+                                                            { "disabled", request.RequiresPublishPermission },
+                                                            { "onclick", $"updateShowAllPrograms('showallprograms-{request.ID}')" }
+                      }
+                                                    );
+                                                }
+                                            </td>
                                             <td>
                                                 <a href="@Url.Action("denyvisitor", "account", new { id = request.ID })" class="btn btn-default">Deny</a>
                                             </td>
@@ -133,3 +178,54 @@
         </div>
     </div>
 </div>
+                                    
+<script type="text/javascript">
+
+    function updateRequiresPublishPermission(id) {
+
+        var checked = $('#' + id).is(':checked'); //.children().first()
+        var idParam = id.split('-')[1];
+        var params = 'ischecked='+checked+'&arid='+idParam;
+
+        $.post(
+            '@Url.Action("updatepublishpermission", "services")',
+            params,
+            function (data) {
+                if (data && data.status == 'ok') {
+                    Notifications.showMessage('Success', 'Your settings have been saved', true);
+                    toggleShowAllPrograms(idParam, checked);
+                } else {
+                    Notifications.showErrors(data.messages);
+                }
+            }
+        )
+    }
+
+    function updateShowAllPrograms(id) {
+
+        var checked = $('#' + id).is(':checked'); //.children().first()
+        var idParam = id.split('-')[1];
+        var params = 'ischecked='+checked+'&arid='+idParam;
+
+        $.post(
+            '@Url.Action("updateshowallprograms", "services")',
+            params,
+            function (data) {
+                if (data && data.status == 'ok') {
+                    Notifications.showMessage('Success', 'Your settings have been saved', true);
+                } else {
+                    Notifications.showErrors(data.messages);
+                }
+            }
+        )
+    }
+
+    function toggleShowAllPrograms(id, disable) {
+        $('#showallprograms-' + id).prop('disabled', disable)
+
+        if (disable) {
+            $('#showallprograms-' + id).prop('checked', false);
+        }
+    }
+
+</script>

@@ -192,6 +192,7 @@ namespace AfterSchoolLibrary.Models
             StartDate = activityGroup.StartDate;
             EndDate = activityGroup.EndDate;
             LastModifiedDate = activityGroup.LastModifiedDate;
+            IsPublished = activityGroup.IsPublished;
 
             if (loadAllDetails)
             {
@@ -237,6 +238,7 @@ namespace AfterSchoolLibrary.Models
             RegistrationMode = RegistrationMode.Apply; // aag.RegistrationModeId;
             IsRegistrationFree = (!aag.Cost.HasValue || aag.Cost.Value == 0.ToDecimal());
             LastModifiedDate = activityGroup.LastModifiedDate;
+            IsPublished = aag.IsPublished;
 
             if (loadAllDetails)
             {
@@ -750,6 +752,30 @@ namespace AfterSchoolLibrary.Models
                 return PostPayPlans.FirstOrDefault();
 
             return null;
+        }
+
+        public bool IsExternallyProvided()
+        {
+            return Provider.IsNotEmpty();
+        }
+
+        public bool IsExternalToAccount(Account account)
+        {
+            if (IsExternallyProvided())
+                return Provider.ID != account.ID;
+
+            if (Location.IsNotEmpty())
+                return Location.HostAccountId == account.ID && OwnerAccount.ID != account.ID;
+
+            return false;
+        }
+
+        public bool IsExternalProvider(Account account)
+        {
+            if (IsExternallyProvided())
+                return Provider.ID == account.ID;
+
+            return false;
         }
 
         #endregion

@@ -5,8 +5,8 @@
     var hasArchivedGroups = (bool)ViewBag.HasArchivedGroups;
     var controller = ViewBag.GroupController;
 
-   
     var pendingInvites = (List<ActivityGroup>)ViewBag.pendingInvites;
+    var recentlyDeclinedInvites = (List<ActivityGroup>)ViewBag.recentlyDeclinedInvites;
 
     var previousLink = "#";
     var nextLink = "#";
@@ -22,6 +22,9 @@
         }
     }
 }
+
+@if (pendingInvites.Any())
+{
     <p>League Invitations</p>
     <div class="table-responsive">
         <table class="table table-hover">
@@ -41,70 +44,119 @@
                 </tr>
             </thead>
             <tbody>
-                @if (pendingInvites.Count > 0)
+                @foreach (var pendingInvite in pendingInvites)
                 {
-                    foreach (var pendingInvite in pendingInvites)
-                    {
-                        var period = pendingInvite.GetLatestRegistrationPeriod();
-                        <tr>
-                            <td>
-                                <a href="@Url.Action("summary", controller, new {id = pendingInvite.Uid})" class=" hide btn btn-default btn-sm"><i class="icon icon-left s7-date"></i> View</a>
-                            </td>
-                            <td>@pendingInvite.Name</td>
-                            <td class="text-center">
-                                @if (pendingInvite.IsOpenNow())
-                                {
-                                    <span>Teams must be submitted by @period.EndDateTime.ToLongDateTimeString()</span>
-                                }
-                                else if (pendingInvite.WillOpen())
-                                {
-                                    <span>Team registration will open @period.EndDateTime.ToLongDateTimeString()</span>
-                                }
-                                else
-                                {
-                                    <span>Team registration closed @period.EndDateTime.ToLongDateTimeString()</span>
-                                }
-                            </td>
-                            <td>
-                                <div class="btn-group">
-                                    <button class="btn btn-primary md-trigger"
-                                            data-modal="modal-accept"
-                                            onclick="acceptInvitation('@pendingInvite.Name', '@Url.Action("UpdateInvitation", controller, new { id = pendingInvite.ID.Value.ToString(), inviteStatus = InviteStatus.Accepted })')">
-                                        <i class="s7-copy-file"></i> Accept
-                                    </button>
-                                    <button class="btn btn-danger md-trigger"
-                                            data-modal="modal-decline"
-                                            onclick="declineInvitation('@pendingInvite.Name', '@Url.Action("UpdateInvitation", controller, new { id = pendingInvite.ID.Value.ToString(), inviteStatus = InviteStatus.Declined })')">
-                                        <i class="s7-albums"></i> Decline
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                }
-                else
-                {
+                    var period = pendingInvite.GetLatestRegistrationPeriod();
                     <tr>
-                        <td colspan="4">
-                            You currently have no League invitations. 
+                        <td>
+                            <a href="@Url.Action("summary", controller, new { id = pendingInvite.Uid })" class=" hide btn btn-default btn-sm"><i class="icon icon-left s7-date"></i> View</a>
+                        </td>
+                        <td>@pendingInvite.Name</td>
+                        <td class="text-center">
+                            @if (pendingInvite.IsOpenNow())
+                            {
+                                <span>Teams must be submitted by @period.EndDateTime.ToLongDateTimeString()</span>
+                            }
+                            else if (pendingInvite.WillOpen())
+                            {
+                                <span>Team registration will open @period.EndDateTime.ToLongDateTimeString()</span>
+                            }
+                            else
+                            {
+                                <span>Team registration closed @period.EndDateTime.ToLongDateTimeString()</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-primary md-trigger"
+                                        data-modal="modal-accept"
+                                        onclick="acceptInvitation('@pendingInvite.Name', '@Url.Action("UpdateInvitation", controller, new { id = pendingInvite.ID.Value.ToString(), inviteStatus = InviteStatus.Accepted })')">
+                                    <i class="s7-copy-file"></i> Accept
+                                </button>
+                                <button class="btn btn-danger md-trigger"
+                                        data-modal="modal-decline"
+                                        onclick="declineInvitation('@pendingInvite.Name', '@Url.Action("UpdateInvitation", controller, new { id = pendingInvite.ID.Value.ToString(), inviteStatus = InviteStatus.Declined })')">
+                                    <i class="s7-albums"></i> Decline
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
+}
 
-    @*@html.renderpartial(
-        "~/views/shared/_paging.cshtml",
-        paging,
-        new ViewDataDictionary()
-        {
-{ "id", "" },
-{ "querystring", string.format("archive={0}", request["archive"]) },
-{ "action", "index" },
-{ "controller", controller }
-        }
-    );*@
+@if (recentlyDeclinedInvites.Any())
+{
+    <p>Recently Declined Invites</p>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>
+                        @(activityGroupType == ActivityGroupType.Session ? "Session" : "League")
+                    </th>
+                    <th class="text-center">
+                        Team Registration Dates
+                    </th>
+                    <th class="text-center">
+                        Accept
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var invite in recentlyDeclinedInvites)
+                {
+                    var period = invite.GetLatestRegistrationPeriod();
+                    <tr>
+                        <td>
+                            <a href="@Url.Action("summary", controller, new { id = invite.Uid })" class=" hide btn btn-default btn-sm"><i class="icon icon-left s7-date"></i> View</a>
+                        </td>
+                        <td>@invite.Name</td>
+                        <td class="text-center">
+                            @if (invite.IsOpenNow())
+                            {
+                                <span>Teams must be submitted by @period.EndDateTime.ToLongDateTimeString()</span>
+                            }
+                            else if (invite.WillOpen())
+                            {
+                                <span>Team registration will open @period.EndDateTime.ToLongDateTimeString()</span>
+                            }
+                            else
+                            {
+                                <span>Team registration closed @period.EndDateTime.ToLongDateTimeString()</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-primary md-trigger"
+                                        data-modal="modal-accept"
+                                        onclick="acceptInvitation('@invite.Name', '@Url.Action("UpdateInvitation", controller, new { id = invite.ID.Value.ToString(), inviteStatus = InviteStatus.Accepted })')">
+                                    <i class="s7-copy-file"></i> Accept
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@*@html.renderpartial(
+            "~/views/shared/_paging.cshtml",
+            paging,
+            new ViewDataDictionary()
+            {
+    { "id", "" },
+    { "querystring", string.format("archive={0}", request["archive"]) },
+    { "action", "index" },
+    { "controller", controller }
+            }
+        );*@
 
 
 

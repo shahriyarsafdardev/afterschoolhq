@@ -145,8 +145,15 @@ namespace AfterSchoolLibrary.Services
         }
         public static bool HasAccessTo(this WebUser user, Account a, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var awu = AccountWebUser.LoadByAccountIdByWebUserId(a.ID.Value, user.ID.Value, msgs, dc);
-            return awu.IsNotEmpty() && awu.IsActive;
+            if (user.IsNotEmpty() && a.IsNotEmpty())
+            {
+                var awu = AccountWebUser.LoadByAccountIdByWebUserId(a.ID.Value, user.ID.Value, msgs, dc);
+
+                if (awu.IsNotEmpty())
+                    return awu.IsNotEmpty() && awu.IsActive;
+            }
+
+            return false;
         }
         public static bool HasAccessToActivity(this WebUser user, Activity a, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -160,12 +167,15 @@ namespace AfterSchoolLibrary.Services
 
         public static bool CanPublishActivity(this WebUser user, Account currentAccount, Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var location = activity.GetLocation();
-            var hostAccount = location?.GetHostAccount();
+            var location = activity.GetLocation(msgs, dc);
+            var hostAccount = location?.GetHostAccount(msgs, dc);
 
             // if host account doesn't exist, is unclaimed, or is actually the same as the current account
             if (hostAccount.IsEmpty() || !hostAccount.HasAccountOwner || hostAccount.ID == currentAccount.ID)
                 return true;
+
+            if (hostAccount.IsNotEmpty())
+                return !currentAccount.RequiresPublishPermissionFor(hostAccount, msgs, dc);
 
             return false;
         }
@@ -238,9 +248,9 @@ namespace AfterSchoolLibrary.Services
             return user.SendVerificationEmail();
         }
 
-        public static SystemMessages SendVerificationEmail(this WebUser user, bool isAfterSchool = true)
+        public static SystemMessages SendVerificationEmail(this WebUser user, string redirectUrl = null, bool isAfterSchool = true)
         {
-            return Helpers.EmailHelper.SendEmailVerification(user, isAfterSchool);
+            return Helpers.EmailHelper.SendEmailVerification(user, redirectUrl, isAfterSchool);
         }
 
         public static SystemMessages SendWelcomePurchase(string userFirstName, string userEmail, bool isAfterSchool = true)

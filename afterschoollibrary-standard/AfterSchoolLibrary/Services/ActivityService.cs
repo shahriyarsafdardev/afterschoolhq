@@ -119,11 +119,22 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static Location GetLocation(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {            
+        {
             if (activity.LocationId.HasValue)
                 return Location.Load(activity.LocationId.Value, msgs, dc);
 
             return null;
+        }
+
+        public static void SetLocation(this Activity activity, Location location, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (activity.IsNotEmpty() && location.IsNotEmpty() && location.ID.HasValue)
+            {
+                activity.LocationId = location.ID;
+                activity.LastModifiedDate = DateTime.UtcNow;
+                activity.LastModifiedBy = loggedInUser.ID;
+                msgs.AddRange(activity.Save(dc));
+            }
         }
 
         public static ParticipationObject GetParticipationObject(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -544,7 +555,7 @@ namespace AfterSchoolLibrary.Services
                         else
                             formToCopy = account.GetDefaultForm(amsgs, adc);
 
-                        var newForm = formToCopy.Copy(loggedInUserId, copy.AccountId.Value, FormType.NotSet, null, amsgs, dc: adc);
+                        var newForm = formToCopy.Copy(loggedInUserId, copy.AccountId.Value, null, amsgs, dc: adc);
                         copy.AddFormAndActivitate(newForm, loggedInUserId, false, amsgs, dc: adc);
                     }
 
@@ -700,7 +711,7 @@ namespace AfterSchoolLibrary.Services
             {
                 var account = activity.GetAccount(dc: dc);
                 var formToCopy = account.GetDefaultForm(dc: dc);
-                var newForm = formToCopy.Copy(loggedInUserId, activity.AccountId.Value, FormType.Registration, null, msgs, dc: dc);
+                var newForm = formToCopy.Copy(loggedInUserId, activity.AccountId.Value, null, msgs, dc: dc);
                 var af = activity.AddFormAndActivitate(newForm, loggedInUserId, false, msgs, dc: dc);
 
                 account.DefaultFormId = af.FormId;
@@ -1570,6 +1581,8 @@ namespace AfterSchoolLibrary.Services
                         visitorAccount: providerAccount,
                         hostPermissionType: HostPermissionType.ApproveOnly,
                         approvalStatus: ApprovalStatus.Approved,
+                        requiresPublishPermission: true,
+                        showAllPrograms: false,
                         loggedInUser: loggedInUser,
                         dc: dc));
 
@@ -1808,7 +1821,7 @@ namespace AfterSchoolLibrary.Services
                 {
                     //if creating a new form, copy from the default form
                     var defaultForm = account.GetDefaultForm(dc: dc);
-                    newForm = defaultForm.Copy(loggedInUserId, account.ID.Value, FormType.Registration, null, msgs, dc: dc);
+                    newForm = defaultForm.Copy(loggedInUserId, account.ID.Value, null, msgs, dc: dc);
                     newForm.Name = (activity.Name + " Form").MaxChars(100, "...");
                     msgs.AddRange(newForm.Save(dc: dc));
                 }
@@ -2467,12 +2480,20 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        public static Account GetProvider(this Activity activity, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Account GetProvider(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (activity.ProviderAccountId.HasValue)
                 return Account.Load(activity.ProviderAccountId.Value, msgs, dc);
 
             return null;
+        }
+
+        public static void SetProvider(this Activity activity, Account providerAccount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            activity.ProviderAccountId = providerAccount.ID;
+            activity.LastModifiedDate = DateTime.UtcNow;
+            activity.LastModifiedBy = loggedInUser.ID;
+            msgs.AddRange(activity.Save(dc));
         }
 
         public static void NotifyProviderOfNewActivity(this Activity activity, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
@@ -2529,9 +2550,12 @@ namespace AfterSchoolLibrary.Services
 
         public static ActivitySchedule GetSchedule(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            msgs = msgs ?? new SystemMessages();
+            
             if (activity.ActivityScheduleId.HasValue)
                 return ActivitySchedule.LoadWithInstances(activity.ActivityScheduleId.Value, msgs, dc);
-
+            
+            msgs.Add("No Schedule exists for this activity", MessageType.Notice);
             return null;
         }
 
@@ -2579,6 +2603,20 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
+        public static bool IsOpen(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var regPeriod = activity.GetActiveRegistrationPeriod(msgs, dc);
+
+            if (regPeriod.IsEmpty())
+                return false;
+
+            var account = activity.GetAccount(msgs, dc);
+            if (regPeriod.IsOpen(account, msgs, dc))
+                return true;
+
+            return false;
+        }
+
         public static bool IsOpenOrUpcoming(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var regPeriod = activity.GetActiveRegistrationPeriod(msgs, dc);
@@ -2593,11 +2631,19 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
-        public static void RequestToPublish(this Activity activity, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Account GetLocationOwner(this Activity activity, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var location = activity.GetLocation(msgs, dc);
-            var locationOwner = location.GetHostAccount(msgs, dc);
+            if (activity.IsNotEmpty())
+            {
+                var location = activity.GetLocation(msgs, dc);
+                return location?.GetHostAccount(msgs, dc);
+            }
 
+            return null;
+        }
+
+        public static void RequestToPublish(this Activity activity, Account locationOwner, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
             if (locationOwner.IsNotEmpty() && locationOwner.HasAccountOwner)
             {
                 var accountOwner = locationOwner.GetAccountOwner(msgs, dc);
@@ -2685,6 +2731,28 @@ namespace AfterSchoolLibrary.Services
             }
 
             return (null, null);
+        }
+
+        public static void RemoveActivitySchedule(this Activity activity, WebUser currentUser, Account currentAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            msgs = msgs ?? new SystemMessages();
+                
+            if (currentAccount.HasActivityPermissions(activity, msgs))
+            {
+                var schedule = activity.GetSchedule(msgs, dc);
+
+                if (schedule.IsNotEmpty())
+                {
+                    activity.ActivityScheduleId = null;
+                    activity.LastModifiedBy = currentUser.ID.Value;
+                    activity.LastModifiedDate = DateTime.UtcNow;
+                    msgs.AddRange(activity.Save(dc));
+
+                    return;
+                }
+            } 
+            
+            msgs.Add("Error Removing Schedule", MessageType.UserError);
         }
     }
 }

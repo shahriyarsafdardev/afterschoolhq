@@ -172,6 +172,10 @@
                                 var registrant = transaction.GetPurchase()?.GetRegistrant();
                                 var currentStatus = transaction.GetStatus();
                                 var disableChk = !transaction.CanRequestPayout() ? "disabled" : "";
+                                var billerAccount = transaction.GetBillerAccount();
+                                var payerAccount = transaction.GetPayerAccount();
+                                var useStripeConnect = billerAccount.HasFeature(FeatureType.UseStripeConnectedAccount);
+                                var enableTransfer = !transaction.UsedStripeConnect && !transaction.PayoutId.HasValue && useStripeConnect && billerAccount.StripePayoutsEnabled;
 
                                 <tr id="row-@transaction.Uid">
                                     <td>
@@ -181,10 +185,10 @@
                                         @transaction.CreateDate.ToShortDateTimeString()
                                     </td>
                                     <td>
-                                        @transaction.GetBillerAccount().Name
+                                        @billerAccount.Name
                                     </td>
                                     <td>
-                                        @transaction.GetPayerAccount().Name
+                                        @payerAccount.Name
                                     </td>
                                     <td>
                                         @transaction.Description
@@ -250,6 +254,12 @@
                                                     @(!transaction.HasRefundableAmount(true) ? "disabled=\"disabled\"" : "")>
                                                 <i class="s7-back"></i>
                                             </button>
+
+                                            @if (enableTransfer)
+                                            {
+                                                Html.RenderPartial("~/Views/Shared/Modals/_TransferModal-TransferButton.cshtml", transaction);
+                                            }
+
                                             <button onclick="setTransaction('@transaction.Uid', '@transaction.GetTransactionNumber()')"
                                                     class="md-trigger btn btn-sm btn-danger"
                                                     data-modal="modal-delete">
@@ -373,6 +383,17 @@
         </div>
     </div>
 </div>
+
+@{ Html.RenderPartial(
+        "~/Views/Shared/Modals/_TransferModal.cshtml",
+        null,
+        new ViewDataDictionary
+        {
+           { "controller", "transaction" },
+           { "action", "createtransfer" },
+           { "area", "admin" }
+        });
+}
 
 <script>
     var transactionUid = null;
