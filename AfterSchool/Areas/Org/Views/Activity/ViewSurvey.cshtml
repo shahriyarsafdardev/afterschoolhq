@@ -42,7 +42,10 @@
                 </div>
                 <div class="col-lg-3">
                     <div class="pull-right">
-                        <a href="javascript:void(0)" class="btn btn-success surveybtn reminder" data-count="@surveyResponses.Where(a => a.SurveyFeedbackStatusTypeId != SurveyFeedbackStatus.Completed).Count()">Remind To All Incomplete</a>
+                        @if (@surveyResponses.Where(a => a.SurveyFeedbackStatusTypeId == SurveyFeedbackStatus.Completed).Count() != @surveyResponses.Count())
+                        {
+                          <a href="javascript:void(0)" class="btn btn-success surveybtn reminder" data-count="@surveyResponses.Where(a => a.SurveyFeedbackStatusTypeId != SurveyFeedbackStatus.Completed).Count()">Remind To All Incomplete</a>
+                        }
                     </div>
                 </div>
             </div>
