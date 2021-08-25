@@ -1046,12 +1046,7 @@ namespace AfterSchoolLibrary.Services
                 activity.CostDescription = costdescription.ToString().IfBlank("").MaxChars(1000);
 
             if (allowtopaylater.IsNotEmpty() && allowtopaylater.ToString().IsBoolean())
-            {
-                if (account.CanProcessPayments(msgs, dc))
-                    activity.AllowToPayLater = allowtopaylater.ToString().ToBoolean();
-                else
-                    activity.AllowToPayLater = true;
-            }
+                 activity.AllowToPayLater = allowtopaylater.ToString().ToBoolean();
 
             if (regmode.IsNumber())
                 activity.RegistrationModeId = (RegistrationMode)regmode.ToString().ToInteger();
