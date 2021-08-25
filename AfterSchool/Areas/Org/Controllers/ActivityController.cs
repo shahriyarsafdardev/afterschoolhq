@@ -838,7 +838,30 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
                 else if (activity.HasSchedule)
                 {
+                    var scheduleRemoved = activity.GetSchedule(msgs);
                     activity.RemoveActivitySchedule(currentUser, currentAccount, msgs);
+
+                    // Show Success Message
+                    msgs.Add($"Schedule removed from {activity.Name}", MessageType.Success);
+
+                    // LOG: Someone Removed Schedule From for Activity AccountName
+                    if (msgs.HasNoErrors())
+                    {
+                        msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
+
+                        SessionVariables.WebSession.LogActivity(
+                            account: currentAccount,
+                            actor: currentUser,
+                            actionType: WebSessionActionType.Removed,
+                            objectType: ObjectType.ActivitySchedule,
+                            objectId: scheduleRemoved.ID.Value,
+                            objectText: scheduleRemoved.Name,
+                            indirectObjectType: ObjectType.Activity,
+                            indirectObjectId: activity.ID.Value,
+                            indirectObjectText: activity.Name
+                        );
+                    }
+                    
                 }
             } 
 

@@ -97,32 +97,34 @@ namespace AfterSchoolLibrary.Helpers
                     var browsedTemplate = "{actorName} {actionType} {objectText}'s Programs ";
                     return FormatTemplate(browsedTemplate, formatParams);
 
-                //  --- Remaining ActionTypes ---
-                //  case WebSessionActionType.Created:
-                //  case WebSessionActionType.Updated:
-
-                //  case WebSessionActionType.Published:
-                //  case WebSessionActionType.Unpublished:
-                //  case WebSessionActionType.Sent:
-
-                //  case WebSessionActionType.Archived:
-                //  case WebSessionActionType.ManuallyRegistered:
-                //  case WebSessionActionType.ManuallyPaid:
-                //  case WebSessionActionType.ManuallyRefunded:
-                //  case WebSessionActionType.Approved:
-                //  case WebSessionActionType.Verified:
-                //  case WebSessionActionType.Viewed:
-                //  case WebSessionActionType.Searched:
-                //  case WebSessionActionType.Paged:
-                //  case WebSessionActionType.Connected:
-                //  case WebSessionActionType.Copied:
-                //  case WebSessionActionType.Restored:
-
-                //  case WebSessionActionType.Followed:
-                //  case WebSessionActionType.Unfollowed:
-                //  case WebSessionActionType.Shared:
-                //  case WebSessionActionType.Contacted:
-                // case WebSessionActionType.Added:
+                #region Remaining Action Types
+                /* 
+                 *  --- Remaining ActionTypes ---
+                 *  case WebSessionActionType.Created:
+                 *  case WebSessionActionType.Updated:
+                 *  case WebSessionActionType.Published:
+                 *  case WebSessionActionType.Unpublished:
+                 *  case WebSessionActionType.Sent:
+                 *  case WebSessionActionType.Archived:
+                 *  case WebSessionActionType.ManuallyRegistered:
+                 *  case WebSessionActionType.ManuallyPaid:
+                 *  case WebSessionActionType.ManuallyRefunded:
+                 *  case WebSessionActionType.Approved:
+                 *  case WebSessionActionType.Verified:
+                 *  case WebSessionActionType.Viewed:
+                 *  case WebSessionActionType.Searched:
+                 *  case WebSessionActionType.Paged:
+                 *  case WebSessionActionType.Connected:
+                 *  case WebSessionActionType.Copied:
+                 *  case WebSessionActionType.Restored:
+                 *  case WebSessionActionType.Followed:
+                 *  case WebSessionActionType.Unfollowed:
+                 *  case WebSessionActionType.Shared:
+                 *  case WebSessionActionType.Contacted:
+                 *  case WebSessionActionType.Added:
+                 *  case WebSessionActionType.Removed:
+                */
+                #endregion
                 default:
                     var actorActionObjectTypeTextTemplate = "{actorName} {actionType} {objectType} {objectText}";
                     return FormatTemplate(actorActionObjectTypeTextTemplate, formatParams);
@@ -203,6 +205,7 @@ namespace AfterSchoolLibrary.Helpers
                 case WebSessionActionType.Navigated:
                 case WebSessionActionType.Browsed:
                 case WebSessionActionType.Moved:
+                case WebSessionActionType.Removed:
                     var fromTemplate = " from {indirectObjectType} {indirectObjectText}";
                     return AppendFormatTemplate(actionStringDict, fromTemplate, formatParams);
 
