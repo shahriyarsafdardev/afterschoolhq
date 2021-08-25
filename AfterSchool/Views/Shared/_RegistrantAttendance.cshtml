@@ -6,6 +6,7 @@
     var controller = (string)ViewData["controller"];
     var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
     const int FUTURE_INSTANCES_TO_SHOW = 8;
+    var getRegistrantActivity = (List<RegistrantActivity>)ViewData["RegistrantActivity"];
 }
 
 <form method="post" action="@Url.Action("trackattendance", controller, new { id = Model.ActivityUid, att = Model.ID })" class="form-horizontal">
@@ -57,6 +58,8 @@
 
                         @foreach (var attendanceRegistrant in attendanceRegistrants)
                         {
+                            if (getRegistrantActivity.Any(a => a.RegistrantId == attendanceRegistrant.RegistrantId && a.AssignmentTypeId != RegistrationAssignmentType.Withdrawn))
+                            { 
                             <tr>
                                 <td>@(isTechSupport ? attendanceRegistrant.RegistrantId.ToString() : attendanceRegistrant.RegistrantName)</td>
                                 <td>
@@ -83,6 +86,7 @@
                                     }
                                 </td>
                             </tr>
+                            }
                         }
 
                     </table>
