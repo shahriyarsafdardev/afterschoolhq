@@ -226,7 +226,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (id.IsGuid())
             {
                 var activity = Activity.LoadByUid(id.ToGuid(),msgs);
-                if (activity != null)
+                if (activity.IsNotEmpty())
                 {
 
                     var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
