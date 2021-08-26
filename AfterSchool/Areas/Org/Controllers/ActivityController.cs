@@ -846,8 +846,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     // LOG: Someone Removed Schedule From for Activity AccountName
                     if (msgs.HasNoErrors())
-                    {
-
                         SessionVariables.WebSession.LogActivity(
                             account: currentAccount,
                             actor: currentUser,
@@ -859,8 +857,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             indirectObjectId: activity.ID.Value,
                             indirectObjectText: activity.Name
                         );
-                    }
-                    
+
                 }
             } 
 
