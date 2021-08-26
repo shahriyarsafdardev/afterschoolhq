@@ -846,9 +846,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     // LOG: Someone Removed Schedule From for Activity AccountName
                     if (msgs.HasNoErrors())
-                    {
-                        msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-
                         SessionVariables.WebSession.LogActivity(
                             account: currentAccount,
                             actor: currentUser,
@@ -860,8 +857,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             indirectObjectId: activity.ID.Value,
                             indirectObjectText: activity.Name
                         );
-                    }
-                    
+
                 }
             } 
 
@@ -1054,8 +1050,6 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var canProcessPayments = currentAccount.CanProcessPayments(msgs);
 
-            if (!canProcessPayments)
-                activity.AllowToPayLater = true;
 
             ViewBag.Account = currentAccount;
             ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);

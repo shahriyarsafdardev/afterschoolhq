@@ -812,3 +812,40 @@
     text-decoration: underline;
     font-size: 16px;
 }
+
+.border-none{
+    border:none !important;
+}
+
+.bg-color-f0f0 {
+    background-color: #F0F0F0;
+}
+
+.student-register-fn-ln {
+    padding: 15px 0px 8px;
+    color: #4A4A4A;
+}
+
+.p-b-0 {
+    padding-bottom: 0;
+}
+.p-l-0{
+    padding-left:0 !important
+}
+.font-size-20 {
+    font-size: 20px;
+}
+.font-size-18 {
+    font-size: 18px;
+}
+.p-15-25 {
+    padding: 15px 25px;
+}
+
+.long-text-ellipses {
+    width: 225px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+}
