@@ -847,7 +847,6 @@ namespace AfterSchool.Areas.Org.Controllers
                     // LOG: Someone Removed Schedule From for Activity AccountName
                     if (msgs.HasNoErrors())
                     {
-                        msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
 
                         SessionVariables.WebSession.LogActivity(
                             account: currentAccount,
