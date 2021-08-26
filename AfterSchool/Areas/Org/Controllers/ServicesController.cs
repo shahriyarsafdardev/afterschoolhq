@@ -225,42 +225,51 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (id.IsGuid())
             {
-                var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
-                var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
-                    activity.ID.Value, 
-                    ParticipationObjectType.Activity, 
-                    registrant.ToInteger(), msgs);
-                var assignmentType = ra.AssignmentTypeId;
-                var reservedTypes = new RegistrationAssignmentType[] { RegistrationAssignmentType.Reserved, RegistrationAssignmentType.ReservedPendingPayment };
-
-                if (ra.IsNotEmpty())
+                var activity = Activity.LoadByUid(id.ToGuid(),msgs);
+                if (activity != null)
                 {
-                    if (ra.AssignmentTypeId.NotIn(reservedTypes))
+
+                    var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
+                        activity.ID.Value,
+                        ParticipationObjectType.Activity,
+                        registrant.ToInteger(), msgs);
+                    var assignmentType = ra.AssignmentTypeId;
+                    var reservedTypes = new RegistrationAssignmentType[] { RegistrationAssignmentType.Reserved, RegistrationAssignmentType.ReservedPendingPayment };
+
+                    if (ra.IsNotEmpty())
                     {
-                        var reg = ra.ToRegistrant();
+                        if (ra.AssignmentTypeId.NotIn(reservedTypes))
+                        {
+                            var reg = ra.ToRegistrant();
 
-                        assignmentType = RegistrationAssignmentType.ReservedPendingPayment;
+                            assignmentType = RegistrationAssignmentType.ReservedPendingPayment;
 
-                        reg.AddOrUpdateParticipationObject(
-                            ra.RegistrationId.Value,
-                            activity.ID.Value,
-                            ParticipationObjectType.Activity,
-                            assignmentType,
-                            ra.RegistrationPeriodId,
-                            ra.ActivityGroupId,
-                            null,
-                            SessionVariables.CurrentUser.ID.Value,
-                            msgs);
+                            reg.AddOrUpdateParticipationObject(
+                                ra.RegistrationId.Value,
+                                activity.ID.Value,
+                                ParticipationObjectType.Activity,
+                                assignmentType,
+                                ra.RegistrationPeriodId,
+                                ra.ActivityGroupId,
+                                null,
+                                SessionVariables.CurrentUser.ID.Value,
+                                msgs);
+                        }
+
+                        msgs.AddRange(ra.SendPaymentReminder());
+
+                        WriteOutput(new { status = "ok", AssignmentType = (int)assignmentType }, ResponseType.JSON);
                     }
-
-                    msgs.AddRange(ra.SendPaymentReminder());
-
-                    WriteOutput(new { status = "ok", AssignmentType = (int)assignmentType }, ResponseType.JSON);
+                    else
+                    {
+                        msgs.Add("Invalid data", MessageType.UserError);
+                    }
                 }
                 else
                 {
                     msgs.Add("Invalid data", MessageType.UserError);
                 }
+            
             }
             else
             {
