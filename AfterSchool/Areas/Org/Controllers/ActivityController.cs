@@ -1915,6 +1915,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
             ViewBag.Registrants = ras;
             ViewBag.AssignmentType = rat;
+            ViewBag.IsReadOnlySeatStatus = activity.GetParticipationObject(msgs).IsExternalToAccount(SessionVariables.CurrentAccount);
             ViewBag.Messages = msgs;
         }
 
