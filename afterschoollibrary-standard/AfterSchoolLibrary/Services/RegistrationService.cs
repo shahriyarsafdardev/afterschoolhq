@@ -349,7 +349,7 @@ namespace AfterSchoolLibrary.Services
             );
         }
 
-        private static string UploadCSV(Account account, string filename, string csv, SystemMessages msgs)
+        public static string UploadCSV(Account account, string filename, string csv, SystemMessages msgs)
         {
             var ms = new System.IO.MemoryStream(Encoding.UTF8.GetBytes(csv));
             var ah = new AmazonHelper(

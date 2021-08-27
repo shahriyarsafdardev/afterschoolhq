@@ -86,6 +86,63 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
+
+        public static SystemMessages SendSurveyEmail(SurveyResponse surveyResponse, string code, SystemMessages msgs)
+        {
+            msgs = msgs ?? new SystemMessages();
+            var getRegistrant = Registrant.Load(surveyResponse.RegistrantId.Value);
+            var getSurvey = SurveyRequest.Load(surveyResponse.SurveyRequestId.Value);
+            var getRegistrantParent = getRegistrant.GetParentOrGuardian(msgs);
+            var IsEmailSame = false;
+
+            var model = new NameValueCollection()
+            {
+                { "Name", getRegistrant.Name },
+                { "Link", Utilities.SurveyBaseUrl+"/survey/"+surveyResponse.SurveyRequestId},
+                { "SurveyName", getSurvey.Name}
+            };
+
+            if (code.IsNotEmpty())
+                model.Add(new NameValueCollection() { { "InviteCode", code } });
+
+
+            if (getRegistrant.Email == (getRegistrantParent.IsNotEmpty() ? getRegistrantParent.Email : ""))
+                IsEmailSame = true;
+
+
+            var subject = $"You have received a survey request";
+            var body = ProcessTemplate(
+                        code.IsNotEmpty() ? EmailTemplates.Survey_Code : EmailTemplates.Survey,
+                        model,
+                        code.IsNotEmpty() ? "survey_code_email" : "survey_code",
+                        msgs);
+
+            if (IsEmailSame) {
+                SendSurveyEmailLastStep(subject, getRegistrant.Email, body, msgs);
+            }
+            else{
+                //send both
+                SendSurveyEmailLastStep(subject, getRegistrant.Email, body, msgs);
+                if(getRegistrantParent.IsNotEmpty())
+                    SendSurveyEmailLastStep(subject, getRegistrantParent.Email, body, msgs);
+            }
+
+            return msgs;
+        }
+
+        public static void SendSurveyEmailLastStep(string subject, string email, string body, SystemMessages msgs)
+        {
+            var mailMsgs = SendGridHelper.SendMail(
+                         fromEmail: Email.SendGridNoReplyEmailAddress(),
+                         toEmail: new SendGrid.Helpers.Mail.EmailAddress(email),
+                         subject: subject,
+                         body: body,
+                         emailTemplateId: SendGridHelper.GetGenericTemplateId());
+
+            msgs.AddRange(mailMsgs);
+        }
+
+
         public static SystemMessages SendAccountConfirmationEmail(ParticipationObject participationObject, Registration registration)
         {
             var msgs = new SystemMessages();

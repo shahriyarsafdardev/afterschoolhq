@@ -1021,13 +1021,16 @@ inherits: BasicObjectWithModified
 property: FormQuestionId, int?, Int, required
 property: RegistrantId, int?, Int
 property: ActivityId, int?, Int
+property: SurveyResponseId, int?, Int
 property: RegistrationId, int?, Int
 property: Text, string, NVarChar "400"
 property: Description, string, NVarChar "4000"
 property: QuestionDataTypeId, QuestionDataType, Int
 property: QuestionText, string, NVarChar "400", , Used to keep the question text just in case the question text changes on the original
+property: Uid, Guid, UniqueIdentifier, required
 join: FormQuestion.ID, FormQuestionId, LeftOuterJoin
 join: Registration.ID, RegistrationId, LeftOuterJoin
+join: SurveyResponse.ID, SurveyResponseId, LeftOuterJoin
 join: FormQuestionGroup.ID, FormQuestion.FormQuestionGroupId, LeftOuterJoin
 joinproperty: FormQuestion.QuestionDataTypeId, QuestionDataType, Int
 joinproperty: FormQuestion.QuestionTypeId, QuestionType, Int
@@ -1045,6 +1048,7 @@ loadmethod: RegistrantId|ActivityId, List<>
 loadmethod: FormQuestionId, List<>
 loadmethod: FormQuestionId|RegistrantId
 loadmethod: RegistrationId, List<>
+loadmethod: SurveyResponseId, List<>
 [end]
 
 [begin]
@@ -1863,6 +1867,82 @@ join: WebUser.ID, WebUserId, LeftOuterJoin
 join: WebUser.ID, CreatedBy, LeftOuterJoin, CreatedBy
 loadmethod: WebUserId, List<>
 loadmethod: AccountId, List<>
+[end]
+
+[begin]
+type: Class
+name: SurveyRequest
+serializable: true
+description: table to save details of all suvrye request created by providers.
+inherits: BasicObjectWithModified
+property: Name, string, NVarChar "400"
+property: Description, string, NVarChar "400"
+property: AccountId, int, Int, required
+property: ActivityId, int, Int, required
+property: FormId, int, Int, required
+property: DueDate, DateTime?, DateTime
+property: MultipleResponsesEnabled, bool, Bit, required
+property: IsDeleted, bool, Bit
+property: Uid, Guid, UniqueIdentifier, required
+join: Account.ID, AccountId, LeftOuterJoin
+join: Form.ID, FormId, LeftOuterJoin
+join: Activity.ID, ActivityId, LeftOuterJoin
+loadmethod: AccountId, List<>
+loadmethod: ActivityId, List<>
+loadmethod: FormId, List<>
+loadmethod: Uid
+loadmethod: Uid|AccountId
+loadmethod: Uid|ActivityId
+loadmethod: Uid|FormId
+[end]
+
+[begin]
+type: Class
+name: SurveyResponse
+serializable: true
+description: Saves Survey responses.
+inherits: BasicObjectWithModified
+property: SurveyRequestId, int?, Int
+property: RegistrantId, int?, Int
+property: SurveyFeedbackStatusTypeId, SurveyFeedbackStatus, Int
+property: IsDeleted, bool, Bit
+property: Uid, Guid, UniqueIdentifier, required
+join: Registrant.ID, RegistrantId, LeftOuterJoin
+join: SurveyRequest.ID, SurveyRequestId, LeftOuterJoin
+loadmethod: RegistrantId, List<>
+loadmethod: SurveyRequestId, List<>
+loadmethod: Uid
+loadmethod: Uid|SurveyRequestId
+loadmethod: Uid|RegistrantId
+[end]
+
+[begin]
+type: Class
+name: RegistrantInviteCode
+serializable: true
+description: Saves Registrant Invite Code, related to Survey.
+inherits: BasicObjectWithModified
+property: SurveyResponseId, int?, Int
+property: RegistrantId, int?, Int
+property: Code, string, NVarChar "400"
+property: ExpiryDate, DateTime?, DateTime
+property: IsDeleted, bool, Bit
+property: Uid, Guid, UniqueIdentifier, required
+join: Registrant.ID, RegistrantId, LeftOuterJoin
+join: SurveyResponse.ID, SurveyResponseId, LeftOuterJoin
+loadmethod: RegistrantId, List<>
+loadmethod: SurveyResponseId
+loadmethod: Uid
+loadmethod: Uid|SurveyResponseId
+loadmethod: Uid|RegistrantId
+loadmethod: IsDeleted|Code
+loadmethod: Code
+[end]
+
+[begin]
+type: Enum
+name: SurveyFeedbackStatus
+values: NotSet, New, InProgress, Completed
 [end]
 
 [begin]

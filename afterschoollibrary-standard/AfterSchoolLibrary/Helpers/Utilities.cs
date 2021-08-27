@@ -35,6 +35,21 @@ namespace AfterSchoolLibrary.Helpers
             return BaseUrl() + "/paypal/notification/";
         }
 
+        public static string SurveyBaseUrl
+        {
+            get
+            {
+                if (IsQA)
+                    return "app-qa.afterschoolhq.com";
+                else if (IsStaging)
+                    return "app-dev.afterschoolhq.com";
+                else if (IsProduction)
+                    return "app.afterschoolhq.com";
+                else
+                    return "http://localhost:54849";
+            }
+        }
+
         public static string Environment
         {
             get

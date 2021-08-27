@@ -837,7 +837,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         currentUser.ID.Value,
                         msgs);
 
-                BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, msgs, null));
+                BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, null, null));
             }
 
             ViewBag.Registrations = registrations;
@@ -881,6 +881,25 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = msgs;
             return View("messagedetail", am);
+        }
+
+        [HttpGet]
+        public ActionResult Surveys(string id, string r)
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var registration = currentAccount.GetRegistration(id.ToGuid(), msgs);
+            var registrant = Registrant.Load(registration.RegistrantId.Value);
+
+            LoadRegistrationViewBag(registration, r, msgs);
+
+            if (registration.IsEmpty())
+                return new HttpStatusCodeResult(System.Net.HttpStatusCode.NotFound);
+
+            ViewBag.SurveyResponses = SurveyResponse.LoadByRegistrantId(registrant.ID.Value, msgs);
+
+            ViewBag.Messages = msgs;
+            return View(registration);
         }
     }
 }

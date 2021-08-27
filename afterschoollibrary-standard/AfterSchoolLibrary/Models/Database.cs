@@ -102,6 +102,9 @@ namespace AfterSchoolLibrary.Models
 			WebSession.Create(dc);
 			WebSessionAction.Create(dc);
 			WebSessionObjectSnapshot.Create(dc);
+			SurveyRequest.Create(dc);
+			SurveyResponse.Create(dc);
+			RegistrantInviteCode.Create(dc);
 			
 
 			return msgs;
@@ -185,6 +188,9 @@ namespace AfterSchoolLibrary.Models
 			WebSession.Alter(dc);
 			WebSessionAction.Alter(dc);
 			WebSessionObjectSnapshot.Alter(dc);
+			SurveyRequest.Alter(dc);
+			SurveyResponse.Alter(dc);
+			RegistrantInviteCode.Alter(dc);
 			
 
 			return msgs;
@@ -366,6 +372,11 @@ namespace AfterSchoolLibrary.Models
 			WebSessionAction.Update(new Hashtable(){{"ActionTypeId",0}}, new Hashtable(){{"ActionTypeId", DBNull.Value}}, WebSessionAction.ObjectMap, dc);
 			WebSessionAction.Update(new Hashtable(){{"ObjectTypeId",0}}, new Hashtable(){{"ObjectTypeId", DBNull.Value}}, WebSessionAction.ObjectMap, dc);
 			WebSessionAction.Update(new Hashtable(){{"IndirectObjectTypeId",0}}, new Hashtable(){{"IndirectObjectTypeId", DBNull.Value}}, WebSessionAction.ObjectMap, dc);
+			SurveyRequest.Update(new Hashtable(){{"MultipleResponsesEnabled",false}}, new Hashtable(){{"MultipleResponsesEnabled", DBNull.Value}}, SurveyRequest.ObjectMap, dc);
+			SurveyRequest.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, SurveyRequest.ObjectMap, dc);
+			SurveyResponse.Update(new Hashtable(){{"SurveyFeedbackStatusTypeId",0}}, new Hashtable(){{"SurveyFeedbackStatusTypeId", DBNull.Value}}, SurveyResponse.ObjectMap, dc);
+			SurveyResponse.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, SurveyResponse.ObjectMap, dc);
+			RegistrantInviteCode.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, RegistrantInviteCode.ObjectMap, dc);
 			
 			//**ENDUPDATES**//
 
@@ -560,6 +571,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestionAnswer_FormQuestionId ON [FormQuestionAnswer] (FormQuestionId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestionAnswer_FormQuestionId_RegistrantId ON [FormQuestionAnswer] (FormQuestionId,RegistrantId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestionAnswer_RegistrationId ON [FormQuestionAnswer] (RegistrationId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestionAnswer_SurveyResponseId ON [FormQuestionAnswer] (SurveyResponseId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registration_Uid ON [Registration] (Uid)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registration_AccountId_Uid ON [Registration] (Uid,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registration_RegistrantId ON [Registration] (RegistrantId)"));
@@ -710,6 +722,25 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_IndirectObjectId_IndirectObjectTypeId_ObjectId_ObjectTypeId_WebUserId ON [WebSessionAction] (WebUserId,ObjectId,ObjectTypeId,IndirectObjectId,IndirectObjectTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionObjectSnapshot_WebUserId ON [WebSessionObjectSnapshot] (WebUserId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionObjectSnapshot_AccountId ON [WebSessionObjectSnapshot] (AccountId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyRequest_AccountId ON [SurveyRequest] (AccountId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyRequest_ActivityId ON [SurveyRequest] (ActivityId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyRequest_FormId ON [SurveyRequest] (FormId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyRequest_Uid ON [SurveyRequest] (Uid)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyRequest_AccountId_Uid ON [SurveyRequest] (Uid,AccountId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyRequest_ActivityId_Uid ON [SurveyRequest] (Uid,ActivityId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyRequest_FormId_Uid ON [SurveyRequest] (Uid,FormId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyResponse_RegistrantId ON [SurveyResponse] (RegistrantId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyResponse_SurveyRequestId ON [SurveyResponse] (SurveyRequestId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyResponse_Uid ON [SurveyResponse] (Uid)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyResponse_SurveyRequestId_Uid ON [SurveyResponse] (Uid,SurveyRequestId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyResponse_RegistrantId_Uid ON [SurveyResponse] (Uid,RegistrantId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantInviteCode_RegistrantId ON [RegistrantInviteCode] (RegistrantId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantInviteCode_SurveyResponseId ON [RegistrantInviteCode] (SurveyResponseId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantInviteCode_Uid ON [RegistrantInviteCode] (Uid)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantInviteCode_SurveyResponseId_Uid ON [RegistrantInviteCode] (Uid,SurveyResponseId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantInviteCode_RegistrantId_Uid ON [RegistrantInviteCode] (Uid,RegistrantId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantInviteCode_Code_IsDeleted ON [RegistrantInviteCode] (IsDeleted,Code)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantInviteCode_Code ON [RegistrantInviteCode] (Code)"));
 			
 
 			return msgs;
