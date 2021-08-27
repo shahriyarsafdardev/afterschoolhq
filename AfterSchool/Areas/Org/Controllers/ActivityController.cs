@@ -1927,10 +1927,18 @@ namespace AfterSchool.Areas.Org.Controllers
                 else
                     CreateSurveys(surveyRequest.ID.Value, studentList, currentUser.ID.Value, msgs);
 
-                msgs.Add("Survey notifications sent successfully<br/>", MessageType.Success);
+                if (msgs.HasNoErrors())
+                {
+                    msgs.Add("Survey notifications sent successfully<br/>", MessageType.Success);
 
-                TempData["msgs"] = msgs;
-                return RedirectToAction("Surveys", new { id , msgs });
+                    TempData["msgs"] = msgs;
+                    return RedirectToAction("Surveys", new { id, msgs });
+                }
+                else
+                {
+                    TempData["msgs"] = msgs;
+                    return RedirectToAction("NewSurvey", new { id, msgs });
+                }
             }
             else
             {
