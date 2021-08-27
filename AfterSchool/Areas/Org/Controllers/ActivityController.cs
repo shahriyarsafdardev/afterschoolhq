@@ -1856,7 +1856,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Surveys(string id)
         {
             var currentAccount = SessionVariables.CurrentAccount;
-            var msgs = new SystemMessages();
+            var msgs = TempData["msgs"].IsNotEmpty() ? (SystemMessages)TempData["msgs"] : new SystemMessages();
 
             if (currentAccount.IsEmpty())
                 return HttpNotFound();
@@ -1870,10 +1870,10 @@ namespace AfterSchool.Areas.Org.Controllers
 
 
         [HttpGet]
-        public ActionResult NewSurvey(string id, SystemMessages msgs)
+        public ActionResult NewSurvey(string id)
         {
             var currentAccount = SessionVariables.CurrentAccount;
-            msgs = msgs ?? new SystemMessages();
+            var msgs = TempData["msgs"].IsNotEmpty() ? (SystemMessages)TempData["msgs"] : new SystemMessages();
 
             if (currentAccount.IsEmpty())
                 return HttpNotFound();
@@ -1918,7 +1918,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (!studentList.Any(a => a.Selected) && Request.Form["students"].ToString() == "false")
                 msgs.Add("Select Students", MessageType.Error);
 
-            if (msgs.Count == 0)
+            if (msgs.HasNoErrors())
             {
                 var surveyRequest = SurveyRequestService.AddSurvey(formId.ToInteger(), activityId.ToInteger(), name, optionalText, isAllowMultiple.ToBoolean(), currentAccount.ID.Value, currentUser.ID.Value, msgs);
 
@@ -1927,11 +1927,14 @@ namespace AfterSchool.Areas.Org.Controllers
                 else
                     CreateSurveys(surveyRequest.ID.Value, studentList, currentUser.ID.Value, msgs);
 
-                ViewBag.Messages = msgs;
-                return RedirectToAction("Surveys", new { id });
+                msgs.Add("Survey notifications sent successfully<br/>", MessageType.Success);
+
+                TempData["msgs"] = msgs;
+                return RedirectToAction("Surveys", new { id , msgs });
             }
             else
             {
+                TempData["msgs"] = msgs;
                 return RedirectToAction("NewSurvey", new { id,  msgs });
             }
         }
