@@ -165,11 +165,15 @@
                 });
 
                 $("#send").on('click', function (e) {
+                    $("#modal-saving").addClass('hide');
                     e.preventDefault();
 
-                    if (form.valid()) {
+                    if ($("#surveyForm").valid()) {
                         $("#surveyForm").submit();
+                        $("#modal-saving").addClass('position-fixed');
+                        $("#modal-saving").show();
                     }
+                    
                 })
 
             })

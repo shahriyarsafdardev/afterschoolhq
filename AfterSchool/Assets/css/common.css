@@ -1026,3 +1026,7 @@
     cursor:pointer
 }
 
+.position-fixed{
+    position:fixed !important;
+}
+
