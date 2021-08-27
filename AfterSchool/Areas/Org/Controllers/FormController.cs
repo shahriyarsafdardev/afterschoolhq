@@ -88,16 +88,20 @@ namespace AfterSchool.Areas.Org.Controllers
             if (description.IsEmpty() && qg.IsBlank() && false)
                 msgs.Add("Description is required", MessageType.UserError);
 
+            FormType formType = FormType.NotSet;
+
+            if (Request.Form["formtype"].IsNotEmpty())
+                formType = (FormType)Enum.Parse(typeof(FormType), Request.Form["formtype"].ToString());
 
             if (id.ToInteger() == 0)
             {
                 if (copyfrom.IsNumber())
                     form = Form.Load(copyfrom.ToInteger(), msgs)
-                        .Copy(SessionVariables.CurrentUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, null, msgs);
+                        .Copy(SessionVariables.CurrentUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, formType, null, msgs);
                 else
                     form = SessionVariables.CurrentAccount
                         .GetDefaultForm(msgs)
-                        .Copy(SessionVariables.CurrentUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, null, msgs);
+                        .Copy(SessionVariables.CurrentUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, formType, null, msgs);
             }
             else
             {

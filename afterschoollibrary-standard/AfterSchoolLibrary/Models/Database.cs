@@ -296,6 +296,7 @@ namespace AfterSchoolLibrary.Models
 			ActivityForm.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, ActivityForm.ObjectMap, dc);
 			ActivityForm.Update(new Hashtable(){{"IsPublished",false}}, new Hashtable(){{"IsPublished", DBNull.Value}}, ActivityForm.ObjectMap, dc);
 			Form.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, Form.ObjectMap, dc);
+			Form.Update(new Hashtable(){{"FormTypeId",0}}, new Hashtable(){{"FormTypeId", DBNull.Value}}, Form.ObjectMap, dc);
 			FormQuestion.Update(new Hashtable(){{"IsTemplate",false}}, new Hashtable(){{"IsTemplate", DBNull.Value}}, FormQuestion.ObjectMap, dc);
 			FormQuestion.Update(new Hashtable(){{"QuestionTypeId",0}}, new Hashtable(){{"QuestionTypeId", DBNull.Value}}, FormQuestion.ObjectMap, dc);
 			FormQuestion.Update(new Hashtable(){{"QuestionDataTypeId",0}}, new Hashtable(){{"QuestionDataTypeId", DBNull.Value}}, FormQuestion.ObjectMap, dc);
