@@ -228,7 +228,14 @@
                                         @transaction.CreateDate.ToShortDateTimeString()
                                     </td>
                                     <td>
-                                        @transaction.GetPayerAccount().Name
+                                        @if (registrant != null)
+                                        {
+                                            @transaction.GetPayerAccount().Name
+                                        }
+                                        else
+                                        {
+                                        <span>N/A</span>
+                                        }
                                     </td>
                                     <td>
                                         @if (transaction.IsCharge() && registrant.IsNotEmpty())

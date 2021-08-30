@@ -376,7 +376,8 @@
                         @Html.AntiForgeryToken()
 
                         <input id="hidden-claim-accountId" type="hidden" name="accountId" />
-                        <input id="hidden-account-profileUrl" type="hidden" name="profileUrl" />
+                        <input id="hidden-account-profileUrl" type="hidden" name="profileUrl" value="" />
+                        <input id="hidden-current-page" type="hidden" name="currentPage" value="" />
 
                         <div class="col-md-12 onboarding-form-group">
                             <label class="onboarding-lable">FIRST NAME</label>
@@ -584,23 +585,17 @@
 
                 if (isSchool) {
                     var profileUrl = slug;
-                    hiddenAccountProfileUrl.val(profileUrl);
+                    $("#hidden-account-profileUrl").val(profileUrl);
                     signupAccountSearchList.addClass('hide');
-                    window.location = profileUrl; //move to profile page
                 }
 
                 if (isClaimed == false) {
                     var url = slug + '?claimprofile=1';
-                    window.location = url ; //move to profile page
+                    window.location = url; //move to profile page
                 }
             } else {
                 selectedAccount = null; //support for back click
                 hiddenAccountName.val(signupAccountSearch.val())
-
-                if (isSchool) {
-                    window.location = `@Url.Content("~/parents.html")`;
-                    return;
-                }
             }
 
             signupAccountSearchList.addClass('hide');
@@ -717,6 +712,7 @@
                 isOrganization = false;
                 lblOrgSearchTitle.text('Find your school, organization or program');
                 signupSearchLable.html('SEARCH OR ADD YOUR SCHOOL, ORGANIZATION OR PRORAM NAME')
+                $("#hidden-current-page").val('@EnumSignupPages.SearchSchool');
                 clearSearch();
                 signupIndividualType.hide();
                 signupSearchName.show();
@@ -733,10 +729,16 @@
 
         function decideToProceedFurther(input) {
 
-            if ((isSchool && page === '@EnumSignupPages.SearchSchool' && hiddenAccountProfileUrl.val().length > 0)) {
-                var profileUrl = hiddenAccountProfileUrl.val();
+            if (((isSchool) && ($("#hidden-current-page").val() == '@EnumSignupPages.SearchSchool') && ($("#hidden-account-profileUrl").val().length > 0))) {
+                var profileUrl = $("#hidden-account-profileUrl").val();
                 window.location = profileUrl; //move to profile page
                 return;
+            } else if ((isSchool) && ($("#hidden-current-page").val() == '@EnumSignupPages.SearchSchool') && ($("#hidden-account-profileUrl").val().length < 1) )
+            {
+                selectedAccount = null; //support for back click
+                hiddenAccountName.val(signupAccountSearch.val())
+                    window.location = `@Url.Content("~/parents.html")`;
+                    return;
             }
 
             if (input && $(input).hasClass('disabled')) {
