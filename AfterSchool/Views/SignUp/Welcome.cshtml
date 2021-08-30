@@ -34,7 +34,7 @@
 {
     if (showInviteWelcome)
     {
-        <span>You have been invited you to take the first step towards streamlining the promotion and management of your enrichment program at <strong>@Model.InvitingAccount.Name</strong>.</span>
+        <span>You have been invited you to take the first step towards streamlining the promotion and management of your enrichment program at <strong>@(Model.InvitingAccount.IsNotEmpty() ? Model.InvitingAccount.Name : "'Account Not Found'")</strong>.</span>
     }
     else
     {
