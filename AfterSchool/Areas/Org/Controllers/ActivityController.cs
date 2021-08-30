@@ -304,7 +304,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     if (msgs.HasNoErrors() && !SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms, msgs))
                     {
                         var defaultForm = currentAccount.GetDefaultForm(msgs);
-                        var newForm = defaultForm.Copy(currentUser.ID.Value, currentAccount.ID.Value, (name + " form").MaxChars(100, "..."), msgs);
+                        var newForm = defaultForm.Copy(currentUser.ID.Value, currentAccount.ID.Value, FormType.Registration, (name + " form").MaxChars(100, "..."), msgs);
                         if (msgs.HasNoErrors())
                         {
                             if (values.Any(m => m.Key == "form"))
@@ -788,29 +788,31 @@ namespace AfterSchool.Areas.Org.Controllers
             Dictionary<string, object> values = null;
 
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
-            if (activity.IsNotEmpty() && hasschedule.IsBoolean() && hasschedule.ToBoolean())
+            if (activity.IsNotEmpty())
             {
-                var filteredParams = Request.Params.Filter("schedulerepeat-");
-                var days = ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
-
-                if (days.Count == 0 && repeatsweekly == "1")
-                    msgs.Add("Please select at least one day", MessageType.UserError);
-
-                if (msgs.HasNoErrors())
+                if (hasschedule.IsBoolean() && hasschedule.ToBoolean())
                 {
-                    inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
-                    outOfSessionDates = ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
+                    var filteredParams = Request.Params.Filter("schedulerepeat-");
+                    var days = ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
 
-                    inSessionDates.ForEach(dateRange =>
+                    if (days.Count == 0 && repeatsweekly == "1")
+                        msgs.Add("Please select at least one day", MessageType.UserError);
+
+                    if (msgs.HasNoErrors())
                     {
-                        if (dateRange.StartDate > dateRange.EndDate)
-                            msgs.Add("Please ensure start dates and end times are earlier than the corresponding end date and end times", MessageType.UserError);
-                    });
-                }
+                        inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
+                        outOfSessionDates = ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
 
-                if (msgs.HasNoErrors())
-                {
-                    values = new Dictionary<string, object>()
+                        inSessionDates.ForEach(dateRange =>
+                        {
+                            if (dateRange.StartDate > dateRange.EndDate)
+                                msgs.Add("Please ensure start dates and end times are earlier than the corresponding end date and end times", MessageType.UserError);
+                        });
+                    }
+
+                    if (msgs.HasNoErrors())
+                    {
+                        values = new Dictionary<string, object>()
                     {
                         { "scheduledetails", scheduledetails},
                         { "days", days.Select(x => (int)x).ToStrings().ToStringList() },
@@ -825,15 +827,40 @@ namespace AfterSchool.Areas.Org.Controllers
                         { "isongoing", isongoing }
                     };
 
-                    activity = ActivityService.EditExisting(
-                        loggedInUserId: currentUser.ID.Value,
-                        account: currentAccount,
-                        activityId: activity.ID.Value.ToString(),
-                        values: values,
-                        msgs: msgs
-                    );
+                        activity = ActivityService.EditExisting(
+                            loggedInUserId: currentUser.ID.Value,
+                            account: currentAccount,
+                            activityId: activity.ID.Value.ToString(),
+                            values: values,
+                            msgs: msgs
+                        );
+                    }
                 }
-            }
+                else if (activity.HasSchedule)
+                {
+                    var scheduleRemoved = activity.GetSchedule(msgs);
+                    activity.RemoveActivitySchedule(currentUser, currentAccount, msgs);
+
+                    // Show Success Message
+                    msgs.Add($"Schedule removed from {activity.Name}", MessageType.Success);
+
+                    // LOG: Someone Removed Schedule From for Activity AccountName
+                    if (msgs.HasNoErrors())
+                        SessionVariables.WebSession.LogActivity(
+                            account: currentAccount,
+                            actor: currentUser,
+                            actionType: WebSessionActionType.Removed,
+                            objectType: ObjectType.ActivitySchedule,
+                            objectId: scheduleRemoved.ID.Value,
+                            objectText: scheduleRemoved.Name,
+                            indirectObjectType: ObjectType.Activity,
+                            indirectObjectId: activity.ID.Value,
+                            indirectObjectText: activity.Name
+                        );
+
+                }
+            } 
+
 
             // Show Success Message
             // LOG: Someone Updated Activity ActivityName for Account AccountName
@@ -1023,8 +1050,6 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var canProcessPayments = currentAccount.CanProcessPayments(msgs);
 
-            if (!canProcessPayments)
-                activity.AllowToPayLater = true;
 
             ViewBag.Account = currentAccount;
             ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
@@ -1886,6 +1911,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
             ViewBag.Registrants = ras;
             ViewBag.AssignmentType = rat;
+            ViewBag.IsReadOnlySeatStatus = activity.GetParticipationObject(msgs).IsExternalToAccount(SessionVariables.CurrentAccount);
             ViewBag.Messages = msgs;
         }
 
