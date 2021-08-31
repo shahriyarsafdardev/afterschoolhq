@@ -2028,7 +2028,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
 
-            var fileLink = SurveyRequestService.ExportSurveyRequestToCSV(new List<string> {"Name", "Status", "Last Modified" }, id, currentAccount.ID.Value, "ExportCSV", msgs);
+            var fileLink = SurveyRequestService.ExportSurveyRequestToCSV(id, currentAccount.ID.Value, "ExportCSV", msgs);
 
             if (!Directory.Exists(Server.MapPath("~/Uploads")))
                 Directory.CreateDirectory(Server.MapPath("~/Uploads"));

@@ -3,6 +3,7 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace AfterSchoolLibrary.Services
@@ -69,20 +70,22 @@ namespace AfterSchoolLibrary.Services
         }
 
 
-        public static string ExportSurveyRequestToCSV(List<string> headers, int id, int accountId, string fileName, SystemMessages msgs)
+        public static string ExportSurveyRequestToCSV(int id, int accountId, string fileName, SystemMessages msgs)
         {
             var account = Account.Load(accountId);
 
-            var table = new List<List<string>>();
-            table.Add(AddHeadersToCSVReport(headers));
+            var getSurvey = SurveyRequest.Load(id, msgs);
+            var getSurveyResponses = SurveyResponse.LoadBySurveyRequestId(id, msgs).Where(a => a.SurveyFeedbackStatusTypeId == SurveyFeedbackStatus.Completed).ToList();
+           
 
-            var getSurveyResponses = SurveyResponse.LoadBySurveyRequestId(id, msgs);
+            var table = new List<List<string>>();
 
             getSurveyResponses.ForEach(getSurveyResponse => {
                 var getSurveyRequest = SurveyRequest.Load(getSurveyResponse.SurveyRequestId.Value);
                 var registrant = Registrant.Load(getSurveyResponse.RegistrantId.Value);
+                var getFormQuestions = FormQuestionAnswer.LoadBySurveyResponseId(getSurveyResponse.ID.Value, msgs);
 
-                table.Add(AddRegistrantRow(registrant.Name, getSurveyResponse.SurveyFeedbackStatusTypeId.ToString().SplitByUpperCase(), getSurveyResponse.LastModifiedDate));
+                table.Add(AddQuestionAnswerRow(getSurvey.CreateDate, getSurveyResponse.LastModifiedDate, registrant.Name, getFormQuestions));
             });
 
             var csv = CsvFile.Create(table);
@@ -90,6 +93,24 @@ namespace AfterSchoolLibrary.Services
             var fileLink = RegistrationService.UploadCSV(account, fileName, csv, msgs);
 
             return fileLink;
+        }
+
+
+        private static List<string> AddQuestionAnswerRow(DateTime? createDate, DateTime? lastModifiedDate, string name, List<FormQuestionAnswer> formQuestionAnswers)
+        {
+            var row = new List<string>();
+
+            row.Add(createDate.IsNotEmpty() ? createDate.Value.ToString("dd/MM/yyyy") : "");
+            row.Add(lastModifiedDate.IsNotEmpty() ? lastModifiedDate.Value.ToString("dd/MM/yyyy") : "");
+            row.Add(name);
+
+            formQuestionAnswers.ForEach(formQuestionAnswer =>
+            {
+                row.Add(formQuestionAnswer.QuestionText);
+                row.Add(formQuestionAnswer.Text);
+            });
+
+            return row;
         }
 
         private static List<string> AddRegistrantRow(string name, string status, DateTime? lastModifiedDate)
