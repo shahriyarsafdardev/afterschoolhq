@@ -2641,7 +2641,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         msgs.Add("Your message will been sent to the selected registrants", MessageType.Success);
                         ViewBag.Registrants = am.GetActivityMessageRegistrants(msgs);
                         ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
-
+                        ViewBag.Messages = msgs;
                         return View("messagedetail", am.Reload());
                     }
                 }
