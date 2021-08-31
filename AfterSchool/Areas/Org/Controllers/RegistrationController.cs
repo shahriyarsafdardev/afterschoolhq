@@ -868,7 +868,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var am = currentAccount.GetActivityMessage(id.ToGuid(), msgs);
 
-            BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, msgs, null));
+            BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, null, null));
 
             ViewBag.Registrants = am.GetActivityMessageRegistrants(msgs);
 
