@@ -628,6 +628,19 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
+        public static bool HasActivityPermissions(this Account account, Activity activity, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (account.IsNotEmpty() && activity.IsNotEmpty())
+            {
+                if (account.ID == activity.AccountId || account.ID == activity.GetLocationOwner(msgs, dc)?.ID)
+                    return true;
+            }
+
+            msgs.Add("Account does not have permission to edit activity", MessageType.UserError);
+            return false;
+                
+        }
+
         #endregion
 
         #region Contacts
@@ -1826,7 +1839,7 @@ namespace AfterSchoolLibrary.Services
             var form = FormService.GetOrCreateAfterSchoolAccountTemplateForm(msgs, dc);
 
             if (form.AccountId != formOwner.ID)
-                form = form.Copy(loggedInUser.ID.Value, formOwner.ID.Value, "Standard Reg Form", msgs, dc);
+                form = form.Copy(loggedInUser.ID.Value, formOwner.ID.Value, FormType.Registration, "Standard Reg Form", msgs, dc);
 
             msgs.AddRange(formOwner.SetDefaultForm(form, loggedInUser, dc));
 
@@ -1864,7 +1877,7 @@ namespace AfterSchoolLibrary.Services
             var form = FormService.GetOrCreateAfterSchoolAccountInterestForm(msgs, dc);
 
             if (form.AccountId != formOwner.ID)
-                form = form.Copy(loggedInUser.ID.Value, formOwner.ID.Value, "Interest Form", msgs, dc);
+                form = form.Copy(loggedInUser.ID.Value, formOwner.ID.Value, FormType.Registration, "Interest Form", msgs, dc);
 
             msgs.AddRange(formOwner.SetInterestForm(form, loggedInUser, dc));
 

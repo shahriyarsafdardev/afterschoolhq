@@ -293,7 +293,8 @@ namespace AfterSchoolLibrary.Services
                                 var defaultForm = account.GetOrCreateDefaultForm(loggedInUser, amsgs, adc);
                                 var newForm = defaultForm.Copy(
                                     loggedInUser.ID.Value,
-                                    account.ID.Value,                                    
+                                    account.ID.Value,
+                                    FormType.Registration,
                                     (group.Name + " Form").MaxChars(100, "..."),                                    
                                     amsgs,
                                     adc);

@@ -257,11 +257,7 @@
 
                                             @if (enableTransfer)
                                             {
-                                                <button onclick="setTransaction('@transaction.Uid', '@transaction.GetTransactionNumber()', '@transaction.GetBillerAmount().ToCurrency()')"
-                                                        class="md-trigger btn btn-sm btn-alt6"
-                                                        data-modal="modal-create-transfer">
-                                                    <i class="s7-culture"></i>
-                                                </button>
+                                                Html.RenderPartial("~/Views/Shared/Modals/_TransferModal-TransferButton.cshtml", transaction);
                                             }
 
                                             <button onclick="setTransaction('@transaction.Uid', '@transaction.GetTransactionNumber()')"
@@ -388,39 +384,19 @@
     </div>
 </div>
 
-@{ 
-    Html.RenderPartial(
-        "~/Views/Shared/_Modal.cshtml",
-        new ModalViewModel()
+@{ Html.RenderPartial(
+        "~/Views/Shared/Modals/_TransferModal.cshtml",
+        null,
+        new ViewDataDictionary
         {
-            ID = "modal-create-transfer",
-            Title = "Create Stripe Transfer",
-            ActionButtonId = "btn-create-transfer",
-            ActionButtonHtml = "Create Transfer",
-            HtmlBody = "Are you sure you want to create a Stripe transfer for the amount of <span class=\"transaction-amount\"></span>?"
+           { "controller", "transaction" },
+           { "action", "createtransfer" },
+           { "area", "admin" }
         });
 }
 
 <script>
     var transactionUid = null;
-
-    PageEvent.add(PageEvent.AFTER_INIT, function () {
-        $('#btn-create-transfer').click(function () {
-
-            $.get(
-                '@Url.Action("createtransfer", "transaction")/' + transactionUid,
-                function (data) {
-                    if (data && data.status == 'ok') {
-                        Notifications.showMessage('Success', 'A stripe transfer has been created', true)
-                    } else {
-                        Notifications.showErrors(data.messages);
-                    }
-                }
-            );
-
-            $('#modal-create-transfer').removeClass('md-show');
-        });
-    });
 
     function setTransaction(uid, id, amount) {
         transactionUid = uid;

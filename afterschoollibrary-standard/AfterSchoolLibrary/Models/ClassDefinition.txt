@@ -958,6 +958,7 @@ inherits: BasicLookUpObject
 property: AccountId, int?, Int, required
 property: Uid, Guid, UniqueIdentifier, required
 property: IsActive, bool, Bit
+property: FormTypeId, FormType, Int, required
 join: Account.ID, AccountId, InnerJoin
 joinproperty: Account.Name, string, NVarChar
 loadmethod: AccountId, List<>
@@ -1865,7 +1866,7 @@ loadmethod: AccountId, List<>
 [begin]
 type: Enum
 name: WebSessionActionType
-values: NotSet, Created, Updated, Published, Unpublished, Sent, BeganRegistration, Registered, Paid, Refunded, Requested, Invited, Archived, Deleted, ManuallyRegistered, ManuallyPaid, ManuallyRefunded, Approved, Verified, Viewed, Moved, Navigated, Searched, Paged, Connected, SignedUp, LoggedIn, LoggedOut, Copied, Restored, Browsed, Followed, Unfollowed, Shared, Contacted, Interested, BrowsedAllActivities, Added
+values: NotSet, Created, Updated, Published, Unpublished, Sent, BeganRegistration, Registered, Paid, Refunded, Requested, Invited, Archived, Deleted, ManuallyRegistered, ManuallyPaid, ManuallyRefunded, Approved, Verified, Viewed, Moved, Navigated, Searched, Paged, Connected, SignedUp, LoggedIn, LoggedOut, Copied, Restored, Browsed, Followed, Unfollowed, Shared, Contacted, Interested, BrowsedAllActivities, Added, Removed
 [end]
 
 [begin]
@@ -2186,6 +2187,12 @@ type: Enum
 name: StripeRequirementStatus
 values: NotSet, PastDue, CurrentlyDue, EventuallyDue
 [end]
+[end]
+
+[begin]
+type: Enum
+name: FormType
+values: NotSet, Registration, Survey
 [end]
 
 [begin]
