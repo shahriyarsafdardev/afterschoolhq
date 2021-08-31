@@ -2636,11 +2636,13 @@ namespace AfterSchool.Areas.Org.Controllers
                             currentUser.ID.Value,
                             msgs);
 
-                        BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, msgs, null));
+                        BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, null, null));
 
                         msgs.Add("Your message will been sent to the selected registrants", MessageType.Success);
                         ViewBag.Registrants = am.GetActivityMessageRegistrants(msgs);
                         ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
+                        ViewBag.Messages = msgs;
+                        return View("messagedetail", am.Reload());
                     }
                 }
             }
