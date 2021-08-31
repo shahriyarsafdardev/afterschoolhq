@@ -830,10 +830,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
             Form form = null;
             FormQuestionGroup questionGroup = null;
-            FormType formType = FormType.NotSet;
-
-            if(Request.Form["formtype"].IsNotEmpty())
-                formType = (FormType)Enum.Parse(typeof(FormType), Request.Form["formtype"].ToString());
 
             if (name.IsEmpty() && qg.IsBlank())
                 msgs.Add("Name is required", MessageType.UserError);
@@ -842,10 +838,10 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 if (copyfrom.IsNumber())
                     form = currentAccount.GetForm(copyfrom.ToInteger(), msgs)?
-                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, formType, null, msgs);
+                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, null, msgs);
                 else
                     form = currentAccount.GetDefaultForm(msgs)?
-                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, formType, null, msgs);
+                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, null, msgs);
             }
             else
                 form = currentAccount.GetForm(id.ToInteger(), msgs);
@@ -857,7 +853,6 @@ namespace AfterSchool.Areas.Org.Controllers
                     {
                         if (name.IsNotBlank()) form.Name = name;
                         if (description.IsNotBlank()) form.Description = description;
-                        form.FormTypeId = formType;
 
                         amsgs.AddRange(form.Save(adc));
 
