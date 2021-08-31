@@ -1958,6 +1958,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 );
             }
 
+            RegistrantsViewBag(activity, assignmenttype, null, msgs);
             ViewBag.Messages = msgs;
             return RedirectToAction("registrants", new { id });
         }
@@ -1975,9 +1976,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             msgs.Add("Your report will be sent shortly", MessageType.Success);
 
-            ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
-            ViewBag.Registrants = activity.GetRegistrantActivities(msgs);
-            ViewBag.AssignmentType = RegistrationAssignmentType.NotSet;
+            RegistrantsViewBag(activity, null, null, msgs);
             ViewBag.Messages = msgs;
             return View("Registrants", activity);
         }
@@ -2039,7 +2038,7 @@ namespace AfterSchool.Areas.Org.Controllers
             Response.BinaryWrite(filebytes);
             Response.End();
 
-            ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
+            RegistrantsViewBag(activity, null, null, msgs);
             ViewBag.Messages = msgs;
 
             return View("Registrants", activity);
@@ -2636,7 +2635,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             currentUser.ID.Value,
                             msgs);
 
-                        BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, msgs, null));
+                         ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, msgs, null);
 
                         msgs.Add("Your message will been sent to the selected registrants", MessageType.Success);
                         ViewBag.Registrants = am.GetActivityMessageRegistrants(msgs);
