@@ -843,7 +843,7 @@ namespace AfterSchoolLibrary.Helpers
                 customMessage = registrationThankYou;
 
                 if (customMessage == "Thank you for registering")
-                    customMessage += ".";
+                    customMessage += ". ";
 
                 if (isParentCopy || loggedInUser.HasAccessTo(billingAccount))
                 {
@@ -863,7 +863,7 @@ namespace AfterSchoolLibrary.Helpers
                     if (showTable)
                         customMessage += " for the following:";
                     else
-                        customMessage += ".";
+                        customMessage += ". ";
 
                     if (addClosingP)
                         customMessage += "</p>";

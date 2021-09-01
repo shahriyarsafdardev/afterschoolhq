@@ -376,6 +376,8 @@
                         @Html.AntiForgeryToken()
 
                         <input id="hidden-claim-accountId" type="hidden" name="accountId" />
+                        <input id="hidden-account-profileUrl" type="hidden" name="profileUrl" value="" />
+                        <input id="hidden-current-page" type="hidden" name="currentPage" value="" />
 
                         <div class="col-md-12 onboarding-form-group">
                             <label class="onboarding-lable">FIRST NAME</label>
@@ -462,6 +464,8 @@
         var isSearching = false;
         var isOrganization = false;
         var isSchool = false;
+        var isSearchSchoolPage =  false;
+        var hasAccountProfileUrl = false;
         var selectedAccount = '';
         var signupWelcome = $('#signup-welcome');
         var signupSelectUsertype = $('#signup-select-usertype');
@@ -485,6 +489,7 @@
         var headerThankYouNR2 = $('#header2-thankyou-not-recognized');
         var headerThankYouNR3 = $('#header3-thankyou-not-recognized');
         var hiddenClaimAccountId = $('#hidden-claim-accountId'); // this one is for existing accounts
+        var hiddenAccountProfileUrl = $('#hidden-account-profileUrl'); // this one is for account profile url
         var hiddenAccountName = $('#hidden-signup-accountName'); // this one is for creating new account flow and placed inside partial view
         var hiddenAccountType = $('#hidden-signup-accountType');
         var signupAccountSearchList = $('#signup-account-search-list');
@@ -580,18 +585,20 @@
 
                 signupAccountSearch.val(text);
 
+                if (isSchool) {
+                    var profileUrl = slug;
+                    hiddenAccountProfileUrl = profileUrl;
+                    hasAccountProfileUrl = true;
+                    signupAccountSearchList.addClass('hide');
+                }
+
                 if (isClaimed == false) {
                     var url = slug + '?claimprofile=1';
-                    window.location = url ; //move to profile page
+                    window.location = url; //move to profile page
                 }
             } else {
                 selectedAccount = null; //support for back click
                 hiddenAccountName.val(signupAccountSearch.val())
-
-                if (isSchool) {
-                    window.location = `@Url.Content("~/parents.html")`;
-                    return;
-                }
             }
 
             signupAccountSearchList.addClass('hide');
@@ -708,6 +715,8 @@
                 isOrganization = false;
                 lblOrgSearchTitle.text('Find your school, organization or program');
                 signupSearchLable.html('SEARCH OR ADD YOUR SCHOOL, ORGANIZATION OR PRORAM NAME')
+                $("#hidden-current-page").val('@EnumSignupPages.SearchSchool');
+                isSearchSchoolPage = true;
                 clearSearch();
                 signupIndividualType.hide();
                 signupSearchName.show();
@@ -723,6 +732,18 @@
         }
 
         function decideToProceedFurther(input) {
+
+            if (isSchool && isSearchSchoolPage && hasAccountProfileUrl) {
+                window.location = hiddenAccountProfileUrl; //move to profile page
+                return;
+            } else if (isSchool && isSearchSchoolPage && !hasAccountProfileUrl)
+            {
+                selectedAccount = null; //support for back click
+                hiddenAccountName.val(signupAccountSearch.val())
+                    window.location = `@Url.Content("~/parents.html")`;
+                    return;
+            }
+
             if (input && $(input).hasClass('disabled')) {
                 Notifications.showBar({
                     title: 'Error',
@@ -883,6 +904,7 @@
         function clearSearch() {
             selectedAccount = null;
             hiddenClaimAccountId.val('');
+            hiddenAccountProfileUrl.val('');
             hiddenAccountName.val('');
             signupAccountSearch.val('');
             btnContinue.attr('disabled', 'disabled');
