@@ -958,7 +958,6 @@ inherits: BasicLookUpObject
 property: AccountId, int?, Int, required
 property: Uid, Guid, UniqueIdentifier, required
 property: IsActive, bool, Bit
-property: FormTypeId, FormType, Int, required
 join: Account.ID, AccountId, InnerJoin
 joinproperty: Account.Name, string, NVarChar
 loadmethod: AccountId, List<>
@@ -2187,12 +2186,6 @@ type: Enum
 name: StripeRequirementStatus
 values: NotSet, PastDue, CurrentlyDue, EventuallyDue
 [end]
-[end]
-
-[begin]
-type: Enum
-name: FormType
-values: NotSet, Registration, Survey
 [end]
 
 [begin]
