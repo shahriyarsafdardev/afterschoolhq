@@ -85,7 +85,7 @@ namespace AfterSchoolLibrary.Services
                 var registrant = Registrant.Load(getSurveyResponse.RegistrantId.Value);
                 var getFormQuestions = FormQuestionAnswer.LoadBySurveyResponseId(getSurveyResponse.ID.Value, msgs);
 
-                table.Add(AddQuestionAnswerRow(getSurvey.CreateDate, getSurveyResponse.LastModifiedDate, registrant.Name, getFormQuestions));
+                table.Add(AddQuestionAnswerRow(getSurvey.CreateDate, getSurveyResponse.LastModifiedDate, registrant.FirstName, registrant.LastName, getFormQuestions));
             });
 
             var csv = CsvFile.Create(table);
@@ -96,13 +96,14 @@ namespace AfterSchoolLibrary.Services
         }
 
 
-        private static List<string> AddQuestionAnswerRow(DateTime? createDate, DateTime? lastModifiedDate, string name, List<FormQuestionAnswer> formQuestionAnswers)
+        private static List<string> AddQuestionAnswerRow(DateTime? createDate, DateTime? lastModifiedDate, string firstName, string lastName, List<FormQuestionAnswer> formQuestionAnswers)
         {
             var row = new List<string>();
 
             row.Add(createDate.IsNotEmpty() ? createDate.Value.ToString("dd/MM/yyyy") : "");
             row.Add(lastModifiedDate.IsNotEmpty() ? lastModifiedDate.Value.ToString("dd/MM/yyyy") : "");
-            row.Add(name);
+            row.Add(firstName);
+            row.Add(lastName);
 
             formQuestionAnswers.ForEach(formQuestionAnswer =>
             {
