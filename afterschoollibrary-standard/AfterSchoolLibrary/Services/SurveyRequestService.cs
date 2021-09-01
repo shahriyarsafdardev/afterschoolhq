@@ -76,16 +76,24 @@ namespace AfterSchoolLibrary.Services
 
             var getSurvey = SurveyRequest.Load(id, msgs);
             var getSurveyResponses = SurveyResponse.LoadBySurveyRequestId(id, msgs).Where(a => a.SurveyFeedbackStatusTypeId == SurveyFeedbackStatus.Completed).ToList();
-           
+            var getFormQuestions = FormQuestion.Load(getSurvey.FormId, msgs).AsList();
 
             var table = new List<List<string>>();
+
+            List<string> questions = null;
+            getFormQuestions.ForEach(getFormQuestion => {
+                questions.Add("Create Date");
+                questions.Add("Submit Date");
+                questions.Add(getFormQuestion.Text);
+            });
+            table.Add(questions);
 
             getSurveyResponses.ForEach(getSurveyResponse => {
                 var getSurveyRequest = SurveyRequest.Load(getSurveyResponse.SurveyRequestId.Value);
                 var registrant = Registrant.Load(getSurveyResponse.RegistrantId.Value);
-                var getFormQuestions = FormQuestionAnswer.LoadBySurveyResponseId(getSurveyResponse.ID.Value, msgs);
+                var getFormQuestionAnswers = FormQuestionAnswer.LoadBySurveyResponseId(getSurveyResponse.ID.Value, msgs);
 
-                table.Add(AddQuestionAnswerRow(getSurvey.CreateDate, getSurveyResponse.LastModifiedDate, registrant.FirstName, registrant.LastName, getFormQuestions));
+                table.Add(AddQuestionAnswerRow(getSurvey.CreateDate, getSurveyResponse.LastModifiedDate, registrant.FirstName, registrant.LastName, getFormQuestionAnswers));
             });
 
             var csv = CsvFile.Create(table);
@@ -107,7 +115,6 @@ namespace AfterSchoolLibrary.Services
 
             formQuestionAnswers.ForEach(formQuestionAnswer =>
             {
-                row.Add(formQuestionAnswer.QuestionText);
                 row.Add(formQuestionAnswer.Text);
             });
 
