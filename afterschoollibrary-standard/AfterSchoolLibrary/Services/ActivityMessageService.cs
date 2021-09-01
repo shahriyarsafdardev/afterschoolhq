@@ -106,7 +106,7 @@ namespace AfterSchoolLibrary.Services
                     "activity_message",
                     msgs);
 
-                if(member.Phone.IsNotEmpty())
+                if (member.Phone.IsNotEmpty())
                     ActivityMessageService.SendTextMessage(
                         member.Phone,
                         loggedInUser.DisplayName,
@@ -115,7 +115,8 @@ namespace AfterSchoolLibrary.Services
                         activityMessage.Uid.ToString(),
                         null,
                         msgs);
-
+                else
+                    msgs.Add($"No phone number was found for {member.FullName}, no SMS was sent to them", MessageType.Notice);
             });
         }
 
