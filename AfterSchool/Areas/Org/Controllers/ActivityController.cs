@@ -1514,6 +1514,8 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Schedule = activity.GetSchedule(msgs);
             ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
             ViewBag.Messages = msgs;
+            var participationObject = activity.GetParticipationObject();
+            ViewBag.RegistrantActivity = RegistrantActivity.LoadByParticipationObject(participationObject.GetId().Value, ParticipationObjectType.Activity, msgs);
             return View(attendance);
         }
 
