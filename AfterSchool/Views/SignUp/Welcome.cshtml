@@ -464,6 +464,8 @@
         var isSearching = false;
         var isOrganization = false;
         var isSchool = false;
+        var isSearchSchoolPage =  false;
+        var hasAccountProfileUrl = false;
         var selectedAccount = '';
         var signupWelcome = $('#signup-welcome');
         var signupSelectUsertype = $('#signup-select-usertype');
@@ -585,7 +587,8 @@
 
                 if (isSchool) {
                     var profileUrl = slug;
-                    $("#hidden-account-profileUrl").val(profileUrl);
+                    hiddenAccountProfileUrl = profileUrl;
+                    hasAccountProfileUrl = true;
                     signupAccountSearchList.addClass('hide');
                 }
 
@@ -713,6 +716,7 @@
                 lblOrgSearchTitle.text('Find your school, organization or program');
                 signupSearchLable.html('SEARCH OR ADD YOUR SCHOOL, ORGANIZATION OR PRORAM NAME')
                 $("#hidden-current-page").val('@EnumSignupPages.SearchSchool');
+                isSearchSchoolPage = true;
                 clearSearch();
                 signupIndividualType.hide();
                 signupSearchName.show();
@@ -729,11 +733,10 @@
 
         function decideToProceedFurther(input) {
 
-            if (((isSchool) && ($("#hidden-current-page").val() == '@EnumSignupPages.SearchSchool') && ($("#hidden-account-profileUrl").val().length > 0))) {
-                var profileUrl = $("#hidden-account-profileUrl").val();
-                window.location = profileUrl; //move to profile page
+            if (isSchool && isSearchSchoolPage && hasAccountProfileUrl) {
+                window.location = hiddenAccountProfileUrl; //move to profile page
                 return;
-            } else if ((isSchool) && ($("#hidden-current-page").val() == '@EnumSignupPages.SearchSchool') && ($("#hidden-account-profileUrl").val().length < 1) )
+            } else if (isSchool && isSearchSchoolPage && !hasAccountProfileUrl)
             {
                 selectedAccount = null; //support for back click
                 hiddenAccountName.val(signupAccountSearch.val())
