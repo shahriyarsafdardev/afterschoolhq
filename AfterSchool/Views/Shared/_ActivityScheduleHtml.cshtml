@@ -4,25 +4,32 @@
 }
 @if (Model.RepeatsWeekly)
 {
-    <span>
-        We will meet from <strong>@Model.DailyStartTime.ToShortTimeString()</strong> to <strong>@Model.DailyEndTime.ToShortTimeString()</strong> every <strong>@Model.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().MaxChars(3)).ToStringList(", ", ", & ")</strong> starting <strong>@Model.StartDate.ToShortDateString()</strong> 
-        
-        @if (!Model.IsOngoing)
-        {
-            <span>and ending on <strong>@Model.EndDate.ToShortDateString()</strong></span>
-        }
-        
-        <br />
+<span>
+    We will meet from <strong>@Model.DailyStartTime.ToShortTimeString()</strong> to <strong>@Model.DailyEndTime.ToShortTimeString()</strong>
 
-        @if (instances.Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession).Any())
-        {   <br />
-            <span>
-                We will <strong><em>not</em></strong> meet on the following dates: @instances.Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession).Select(range => range.StartDateTime.ToShortDateString()).ToStringList(", ")
-            </span>
-        }
+    @if (Model.GetDaysOfTheWeek().Any())
+    {
+        <span>every <strong>@Model.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().MaxChars(3)).ToStringList(", ", ", & ")</strong></span>
+    }
 
-        
-    </span>
+    starting <strong>@Model.StartDate.ToShortDateString()</strong>
+
+    @if (!Model.IsOngoing)
+    {
+        <span>and ending on <strong>@Model.EndDate.ToShortDateString()</strong></span>
+    }
+
+    <br />
+
+    @if (instances.Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession).Any())
+    {<br />
+        <span>
+            We will <strong><em>not</em></strong> meet on the following dates: @instances.Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession).Select(range => range.StartDateTime.ToShortDateString()).ToStringList(", ")
+        </span>
+    }
+
+
+</span>
 
 }
 else
