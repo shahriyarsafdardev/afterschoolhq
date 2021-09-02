@@ -166,7 +166,7 @@ namespace AfterSchoolLibrary.Models
 				msgs.Add("Amount is required on Transaction object", MessageType.Error);
 			if (this.BillerAccountId.IsEmpty())
 				msgs.Add("BillerAccountId is required on Transaction object", MessageType.Error);
-			if (this.PayerAccountId.IsEmpty() && this.PaymentTypeId.IsEmpty())
+			if (this.PayerAccountId.IsEmpty())
 				msgs.Add("PayerAccountId is required on Transaction object", MessageType.Error);
 			if (this.PaymentTypeId.IsEmpty())
 				msgs.Add("PaymentTypeId is required on Transaction object", MessageType.Error);

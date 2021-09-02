@@ -307,7 +307,7 @@ namespace AfterSchoolLibrary.Services
             return Helpers.EmailHelper.SendPaymentReminder(registrantActivity);
         }
 
-        public static Account GetActivityAccount(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc =null)
+        public static Account GetActivityAccount(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return registrantActivity.GetParticipationObject().OwnerAccount;
         }
@@ -327,7 +327,7 @@ namespace AfterSchoolLibrary.Services
 
         public static bool IsRegistrantActivityStatusAccessible(this RegistrantActivity registrantActivity)
         {
-            return registrantActivity.AssignmentTypeId.NotIn(new List<RegistrationAssignmentType>() { 
+            return registrantActivity.AssignmentTypeId.NotIn(new List<RegistrationAssignmentType>() {
                 RegistrationAssignmentType.NotSet,
                 RegistrationAssignmentType.Withdrawn,
                 RegistrationAssignmentType.Declined,
@@ -339,7 +339,7 @@ namespace AfterSchoolLibrary.Services
             return registrantActivity.AssignmentTypeId.NotIn(new List<RegistrationAssignmentType>() {
                 RegistrationAssignmentType.NotSet,
                 RegistrationAssignmentType.Withdrawn,
-                RegistrationAssignmentType.Declined 
+                RegistrationAssignmentType.Declined
             });
         }
 
@@ -351,6 +351,24 @@ namespace AfterSchoolLibrary.Services
                 RegistrationAssignmentType.ReservedPendingPayment,
                 RegistrationAssignmentType.Applied,
             });
+        }
+
+        private static RegistrationAssignmentType[] ReservedRegistrantAssignmentTypes
+        {
+            get
+            {
+                return new RegistrationAssignmentType[]
+                {
+                    RegistrationAssignmentType.Reserved,
+                    RegistrationAssignmentType.ReservedPendingParentalConsent,
+                    RegistrationAssignmentType.ReservedPendingPayment,
+                };
+            }
+        }
+
+        public static bool IsReservedRegistrationAssignmentType(this RegistrantActivity registrantActivity)
+        {
+            return registrantActivity.AssignmentTypeId.In(ReservedRegistrantAssignmentTypes);
         }
     }
 }

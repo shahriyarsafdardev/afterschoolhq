@@ -6,8 +6,8 @@
     var controller = (string)ViewData["controller"];
     var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
     const int FUTURE_INSTANCES_TO_SHOW = 8;
-    var getRegistrantActivity = (List<RegistrantActivity>)ViewData["RegistrantActivity"];
-    var isAttendanceDisabled = attendanceRegistrants.Count == 0 || getRegistrantActivity.Where(a => a.AssignmentTypeId == RegistrationAssignmentType.Reserved || a.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingParentalConsent || a.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment).Count() == 0 ? "disabled=\"disabled\"" : "";
+    var registrantActivities = (List<RegistrantActivity>)ViewData["RegistrantActivities"];
+    var isAttendanceDisabled = attendanceRegistrants.Count == 0 || registrantActivities.Where(a => a.AssignmentTypeId == RegistrationAssignmentType.Reserved || a.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingParentalConsent || a.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment).Count() == 0 ? "disabled=\"disabled\"" : "";
 }
 
 <form method="post" action="@Url.Action("trackattendance", controller, new { id = Model.ActivityUid, att = Model.ID })" class="form-horizontal">
@@ -59,7 +59,7 @@
 
                         @foreach (var attendanceRegistrant in attendanceRegistrants)
                         {
-                            if (getRegistrantActivity.Any(a => a.RegistrantId == attendanceRegistrant.RegistrantId && (a.AssignmentTypeId == RegistrationAssignmentType.Reserved || a.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingParentalConsent || a.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment)))
+                            if (registrantActivities.Any(registrantActivity => registrantActivity.RegistrantId == attendanceRegistrant.RegistrantId && registrantActivity.IsReservedRegistrationAssignmentType()))
                             { 
                             <tr>
                                 <td>@(isTechSupport ? attendanceRegistrant.RegistrantId.ToString() : attendanceRegistrant.RegistrantName)</td>
