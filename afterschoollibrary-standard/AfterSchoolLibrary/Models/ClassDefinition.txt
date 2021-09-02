@@ -1907,6 +1907,7 @@ property: RegistrantId, int?, Int
 property: SurveyFeedbackStatusTypeId, SurveyFeedbackStatus, Int
 property: IsDeleted, bool, Bit
 property: Uid, Guid, UniqueIdentifier, required
+property: LastAttendedFormQuestionAnswerUid, Guid, UniqueIdentifier
 join: Registrant.ID, RegistrantId, LeftOuterJoin
 join: SurveyRequest.ID, SurveyRequestId, LeftOuterJoin
 loadmethod: RegistrantId, List<>

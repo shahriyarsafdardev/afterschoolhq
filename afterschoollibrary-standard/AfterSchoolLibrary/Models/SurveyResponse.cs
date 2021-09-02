@@ -26,6 +26,7 @@ namespace AfterSchoolLibrary.Models
 		/// Required.
 		/// </summary>
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
+		public Guid LastAttendedFormQuestionAnswerUid { get { return (Guid)MDV["LastAttendedFormQuestionAnswerUid"].Value; } set { MDV["LastAttendedFormQuestionAnswerUid"].Value = value; } }
 		
 
         public SurveyResponse()
@@ -35,6 +36,7 @@ namespace AfterSchoolLibrary.Models
 			this.SurveyFeedbackStatusTypeId = SurveyFeedbackStatus.NotSet;
 			this.IsDeleted = false;
 			this.Uid = Guid.NewGuid();
+			this.LastAttendedFormQuestionAnswerUid = Guid.NewGuid();
 			
         }
 
@@ -50,6 +52,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "SurveyFeedbackStatusTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
+				_dp.Add(className, "LastAttendedFormQuestionAnswerUid", System.Data.SqlDbType.UniqueIdentifier);
 				
                 return _dp;
             }
@@ -145,6 +148,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["Uid"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["LastAttendedFormQuestionAnswerUid"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
