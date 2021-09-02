@@ -596,7 +596,14 @@
         var rtn = `<select class="form-control" onChange="showEditButton(${getQuestionCount()})" id="questiontype-${getQuestionCount()}" name="new-questiontype-${getQuestionCount()}">`;
         @foreach (var type in Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>().Where(questionType => !typesUserCannotAdd.Contains(questionType)))
         {
-            @:rtn += '<option value="@((int)type)">@type.ToString().SplitByUpperCase()</option>';
+            if (FormType.Survey != Model.FormTypeId && (type == QuestionType.Audio || type == QuestionType.Video || type == QuestionType.Photo || type == QuestionType.Emoji || type == QuestionType.Rating))
+            {
+                continue;
+            }
+            else
+            {
+                @:rtn += '<option value="@((int)type)">@type.ToString().SplitByUpperCase()</option>';
+            }
         }
         rtn += '</select>';
         return rtn;
