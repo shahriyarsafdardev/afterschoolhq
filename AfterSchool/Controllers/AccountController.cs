@@ -1058,7 +1058,7 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult AddStudent()
         {
-            var results = CheckRedirect();
+            var results = CheckRedirect(checkForEmptyCart: true);
             if (results.IsNotEmpty()) return results;
 
             var msgs = new SystemMessages();

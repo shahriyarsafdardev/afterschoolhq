@@ -641,10 +641,7 @@ namespace AfterSchool.Controllers
                 willOpen = participationObjects;
             else
                 closed = participationObjects;
-            if (account.IsNotEmpty())
-            {
-                featuredProviders = account.GetApprovedVisitorAccounts(msgs);
-            }            
+
             ViewBag.Session = session.GetParticipationObject(msgs);
             ViewBag.Grades = GradeLevel.Load(msgs: msgs);
             ViewBag.Messages = msgs;

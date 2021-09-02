@@ -28,6 +28,7 @@
     var showStudentCRM = accountPackage.HasFeature(FeatureType.StudentCRM);
     var allowInvitesPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowInvites);
     var studentCRMPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.StudentCRM);
+    var isReadOnlySeatStatus = (bool)ViewBag.IsReadOnlySeatStatus;
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
@@ -209,17 +210,18 @@
             <div class="clearfix"></div>
             <br />
             @{Html.RenderPartial(
-                    "~/Views/Shared/_ActivityRegistrantsWithAllStatus.cshtml",
-                    ras,
-                    new ViewDataDictionary()
-                    {
+                "~/Views/Shared/_ActivityRegistrantsWithAllStatus.cshtml",
+                ras,
+                new ViewDataDictionary()
+                {
                     { "Activity", Model },
                     { "Account", account },
                     { "EditAction", "registrantdetail" },
                     { "EditController", "activity" },
-                    { "AssignmentType", assignmentType }
-                    }
-               );}
+                    { "AssignmentType", assignmentType },
+                    { "IsReadOnlySeatStatus", isReadOnlySeatStatus }
+                }
+            );}
 
         </div>
     </div>

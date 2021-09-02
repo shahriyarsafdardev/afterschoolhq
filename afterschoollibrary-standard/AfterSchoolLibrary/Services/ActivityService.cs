@@ -1046,12 +1046,7 @@ namespace AfterSchoolLibrary.Services
                 activity.CostDescription = costdescription.ToString().IfBlank("").MaxChars(1000);
 
             if (allowtopaylater.IsNotEmpty() && allowtopaylater.ToString().IsBoolean())
-            {
-                if (account.CanProcessPayments(msgs, dc))
-                    activity.AllowToPayLater = allowtopaylater.ToString().ToBoolean();
-                else
-                    activity.AllowToPayLater = true;
-            }
+                 activity.AllowToPayLater = allowtopaylater.ToString().ToBoolean();
 
             if (regmode.IsNumber())
                 activity.RegistrationModeId = (RegistrationMode)regmode.ToString().ToInteger();
@@ -2555,6 +2550,8 @@ namespace AfterSchoolLibrary.Services
 
         public static ActivitySchedule GetSchedule(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            msgs = msgs ?? new SystemMessages();
+            
             if (activity.ActivityScheduleId.HasValue)
                 return ActivitySchedule.LoadWithInstances(activity.ActivityScheduleId.Value, msgs, dc);
 
@@ -2635,8 +2632,13 @@ namespace AfterSchoolLibrary.Services
 
         public static Account GetLocationOwner(this Activity activity, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var location = activity.GetLocation(msgs, dc);
-            return location?.GetHostAccount(msgs, dc);
+            if (activity.IsNotEmpty())
+            {
+                var location = activity.GetLocation(msgs, dc);
+                return location?.GetHostAccount(msgs, dc);
+            }
+
+            return null;
         }
 
         public static void RequestToPublish(this Activity activity, Account locationOwner, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
@@ -2728,6 +2730,28 @@ namespace AfterSchoolLibrary.Services
             }
 
             return (null, null);
+        }
+
+        public static void RemoveActivitySchedule(this Activity activity, WebUser currentUser, Account currentAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            msgs = msgs ?? new SystemMessages();
+                
+            if (currentAccount.HasActivityPermissions(activity, msgs))
+            {
+                var schedule = activity.GetSchedule(msgs, dc);
+
+                if (schedule.IsNotEmpty())
+                {
+                    activity.ActivityScheduleId = null;
+                    activity.LastModifiedBy = currentUser.ID.Value;
+                    activity.LastModifiedDate = DateTime.UtcNow;
+                    msgs.AddRange(activity.Save(dc));
+
+                    return;
+                }
+            } 
+            
+            msgs.Add("Error Removing Schedule", MessageType.UserError);
         }
     }
 }

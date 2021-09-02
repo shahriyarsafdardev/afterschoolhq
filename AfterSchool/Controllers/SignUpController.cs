@@ -105,13 +105,9 @@ namespace AfterSchool.Controllers
                         if (invitingAccount.IsNotEmpty())
                         {
                             if (model.IsRequestOnlyAccess)
-                            {
                                 account.RequestAccessToAccount(invitingAccount, HostPermissionType.ApproveOnly, user, msgs, adc);
-                            }
                             else
-                            {
                                 invitingAccount.ApproveAccessToAccount(account, user, amsgs, adc);
-                            }
                         }
 
                     },
@@ -121,9 +117,7 @@ namespace AfterSchool.Controllers
                         LoadSessionInfo(user, account, msgs: msgs);
 
                         if (user.IsNotEmpty() && account.IsNotEmpty())
-                        {
                             SendGridHelper.AddOrUpdateContact(account, user, msgs);
-                        }                        
 
                         BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(user, null, true));
                         BackgroundJob.Enqueue(() => WebUserService.SendWelcomePurchase(user.FirstName, user.Email, account.IsAfterSchool));
@@ -202,9 +196,7 @@ namespace AfterSchool.Controllers
                             dc: adc);
 
                         if(model.SignupType.IsNotEmpty() && model.SignupType == SignUpType.Teacher1099)
-                        {
                             model.OrgName = $"{model.FirstName} {model.LastName} Teacher";
-                        }
 
                         account = user.AddNewAccount(
                                orgName: model.OrgName,
@@ -215,8 +207,10 @@ namespace AfterSchool.Controllers
 
                         if (user.IsNotEmpty() && account.IsNotEmpty() && amsgs.HasNoErrors())
                         {
+                            var webSession = SessionVariables.WebSession;
+
                             // LOG: WebUserName Created Account Account
-                            SessionVariables.WebSession.LogActivity(
+                            webSession.LogActivity(
                                 account: account,
                                 actor: user,
                                 actionType: WebSessionActionType.Created,
@@ -226,7 +220,7 @@ namespace AfterSchool.Controllers
                             );
 
                             // LOG: WebUserName SignedUp
-                            SessionVariables.WebSession.LogActivity(
+                            webSession.LogActivity(
                                 account: account,
                                 actor: user,
                                 actionType: WebSessionActionType.SignedUp,
@@ -236,17 +230,12 @@ namespace AfterSchool.Controllers
                             );
                         }
                             
-
                         if (invitingAccount.IsNotEmpty())
                         {
                             if (model.IsRequestOnlyAccess)
-                            {
                                 account.RequestAccessToAccount(invitingAccount, HostPermissionType.ApproveOnly, user, msgs, adc);
-                            }
                             else
-                            {
                                 invitingAccount.ApproveAccessToAccount(account, user, amsgs, adc);
-                            }
                         }
 
                     },
@@ -265,9 +254,6 @@ namespace AfterSchool.Controllers
                     onException: (SystemMessages emsgs) => msgs.AddRange(emsgs)
                 );
             }
-
-            
-
 
             if (msgs.HasNoErrors())
             {
@@ -1074,11 +1060,28 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult Welcome(string invite, string isrequestonlyaccess, string signuptype)
         {
+            Account invitingAccount = null;
+
+            if (invite.IsGuid())
+            {
+                invitingAccount = Account.LoadByInviteCodeToShare(invite.ToGuid());
+
+                var currentAccount = SessionVariables.CurrentAccount;
+                var currentUser = SessionVariables.CurrentUser;
+
+                if (currentAccount.IsNotEmpty() && currentUser.IsNotEmpty())
+                {
+                    if (currentUser.HasMultipleAccounts() || currentAccount.AccountTypeId != AccountType.Registrant)
+                        return RedirectToAction("index", "login", new { returnurl = Request["returnurl"], invite });
+                }
+            }
+
             var model = new SignUpIndexViewModel()
             {
                 IsRequestOnlyAccess = isrequestonlyaccess.IsBoolean() && isrequestonlyaccess.ToBoolean(),
                 InviteCodeToShare = invite.IsNotEmpty() ? invite : "",
                 SignupType = signuptype.IsNotEmpty() && signuptype.IsInteger() ? (SignUpType)signuptype.ToInteger() : SignUpType.NotSet,
+                InvitingAccount = invitingAccount,
             };
             return View(model);
         }

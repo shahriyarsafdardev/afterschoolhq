@@ -142,11 +142,12 @@ namespace AfterSchool.Areas.Admin.Controllers
 
             if (id.IsGuid())
             {
+                var currentUser = SessionVariables.CurrentUser;
                 var transaction = Transaction.LoadByUid(id.ToGuid(), msgs);
 
                 if (transaction.IsNotEmpty())
                 {
-                    var transfer = transaction.CreateStripeTransfer(msgs);
+                    var transfer = transaction.CreateStripeTransfer(currentUser, msgs);
 
                     if (msgs.HasNoErrors() && transfer.IsNotEmpty())
                         return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);

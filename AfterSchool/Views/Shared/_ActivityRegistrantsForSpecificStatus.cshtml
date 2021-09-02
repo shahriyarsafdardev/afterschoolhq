@@ -7,6 +7,7 @@
     var editcontroller = ViewData["EditController"].ToString();
     var headerTitle = (RegistrationAssignmentType)ViewData["HeaderTitle"];    
     var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
+    var isReadOnly = (bool)ViewData["IsReadOnly"];
 }
 
 <div class="panel panel-default">
@@ -22,12 +23,15 @@
                 <th>Name</th>
                 <th class="text-center">Seat Index</th>
                 <th>Date Registered</th>
-                @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView))
+                @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && headerTitle != RegistrationAssignmentType.Interested)
                 {
-                    <th>Amount Paid</th>
+                 <th>Amount Paid</th>
                 }
-                <th>Status</th>
-                <th></th>
+                @if (headerTitle != RegistrationAssignmentType.Interested)
+                {
+                    <th>Status</th>
+                    <th></th>
+                }
             </tr>
         </thead>
         <tbody>
@@ -47,7 +51,7 @@
                         <td>@(!isTechSupport ? ra.RegistrantName.IfBlank(ra.RegistrantEmail) : ra.RegistrantEmail.ToMaskedData())</td>
                         <td class="text-center">@ra.SeatIndex</td>
                         <td>@account.ConvertToAccountTimeZone(ra.CreateDate.Value).ToLongDateTimeString()</td>
-                        @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView))
+                        @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && headerTitle != RegistrationAssignmentType.Interested)
                         {
                             var amount = ra.GetAmountPaid();
                             var isProRated = ra.GetIsProRatedFlagByParent();
@@ -92,13 +96,16 @@
                                 }
                             </td>
                         }
+                        @if (headerTitle != RegistrationAssignmentType.Interested)
+                        {
                         <td>
                             @if (ra.IsRegistrantActivityStatusAccessible())
                             {
                                 <select name="newassignmenttype" 
                                         id="newassignmenttype-@ra.ID" 
                                         class="form-control" 
-                                        onchange="moveRegistrantAssignment(@ra.RegistrantId, '@UI.JavascriptSafeString(ra.RegistrantName)', this)">
+                                        onchange="moveRegistrantAssignment(@ra.RegistrantId, '@UI.JavascriptSafeString(ra.RegistrantName)', this)"
+                                        @(isReadOnly ? "disable" : "")>
 
                                     @foreach (var assignmenttype in Enum.GetValues(typeof(RegistrationAssignmentType)).Cast<RegistrationAssignmentType>())
                                     {
@@ -119,14 +126,14 @@
                             }
                         </td>
                         <td>
-                            @if (ra.IsWithdrawEnabled())
+                            @if (ra.IsWithdrawEnabled() && !isReadOnly)
                             { 
                                 <button id="btn-withdraw-@ra.Uid" class="btn btn-danger btn-sm" 
                                         onclick="return processWithdraw('@ra.Uid', '@ra.ID', '@ra.RegistrantUid', '@ra.ParticipationObjectId', '@ra.ParticipationObjectTypeId', '@ra.RegistrantFirstName');">
                                     Withdraw
                                 </button>
                             }
-                            @if (ra.IsSendInvoiceEnabled() && Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && participationObject.IsNotFreeAndCanAcceptPayments && ra.GetAmountPaid() == 0 && ra.GetRegistrant().ParentRegistrantId.HasValue)
+                            @if (ra.IsSendInvoiceEnabled() && Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && participationObject.IsNotFreeAndCanAcceptPayments && ra.GetAmountPaid() == 0 && ra.GetRegistrant().ParentRegistrantId.HasValue && !isReadOnly)
                             {
                                 var showButton = true;
 
@@ -152,6 +159,7 @@
                                 }   
                             }
                         </td>
+                        }
                     </tr>
                 }
             }

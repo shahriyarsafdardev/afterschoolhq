@@ -160,8 +160,7 @@ namespace AfterSchool.Areas.Admin.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var payout = Payout.LoadByUid(uid.ToGuid(), msgs);
-                msgs.AddRange(payout.Delete());
+                Payout.LoadByUid(uid.ToGuid(), msgs).DeleteAndUpdateTransactions(SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
                     return Json(new

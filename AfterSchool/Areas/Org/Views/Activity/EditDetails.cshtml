@@ -1,7 +1,7 @@
 ﻿@model Activity
 @{
     ViewBag.Title = ((Account)ViewBag.Account).Name;
-    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+    var msgs = (SystemMessages)ViewBag.Messages;
     var accountPackage = (AccountPackage)ViewBag.AccountPackage;
     var isFullScreen = (bool)ViewBag.IsFullScreen;
     if (isFullScreen)
