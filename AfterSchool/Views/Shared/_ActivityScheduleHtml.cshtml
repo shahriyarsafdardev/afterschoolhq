@@ -12,7 +12,7 @@
         <span>every <strong>@Model.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().MaxChars(3)).ToStringList(", ", ", & ")</strong></span>
     }
 
-    starting <strong>@Model.StartDate.ToShortDateString()</strong>
+    starting on <strong>@Model.StartDate.ToShortDateString()</strong>
 
     @if (!Model.IsOngoing)
     {
