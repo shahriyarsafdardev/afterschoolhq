@@ -80,19 +80,17 @@ namespace AfterSchoolLibrary.Services
 
             var table = new List<List<string>>();
 
-            List<string> questions = null;
-            getFormQuestions.ForEach(getFormQuestion => {
-                questions.Add("Create Date");
-                questions.Add("Submit Date");
-                questions.Add(getFormQuestion.Text);
-            });
-            table.Add(questions);
+            var isFirstRow = true;
 
             getSurveyResponses.ForEach(getSurveyResponse => {
                 var getSurveyRequest = SurveyRequest.Load(getSurveyResponse.SurveyRequestId.Value);
                 var registrant = Registrant.Load(getSurveyResponse.RegistrantId.Value);
                 var getFormQuestionAnswers = FormQuestionAnswer.LoadBySurveyResponseId(getSurveyResponse.ID.Value, msgs);
-
+                if (isFirstRow)
+                {
+                    table.Add(AddHeaders(getFormQuestionAnswers));
+                    isFirstRow = false;
+                }
                 table.Add(AddQuestionAnswerRow(getSurvey.CreateDate, getSurveyResponse.LastModifiedDate, registrant.FirstName, registrant.LastName, getFormQuestionAnswers));
             });
 
@@ -103,6 +101,20 @@ namespace AfterSchoolLibrary.Services
             return fileLink;
         }
 
+        private static List<string> AddHeaders(List<FormQuestionAnswer> getFormQuestionAnswers)
+        {
+            var row = new List<string>();
+            row.Add("Create Date");
+            row.Add("Submit Date");
+            row.Add("First Name");
+            row.Add("Last Name");
+            getFormQuestionAnswers.ForEach(getFormQuestionAnswer =>
+            {
+                row.Add(getFormQuestionAnswer.QuestionText);
+            });
+
+            return row;
+        }
 
         private static List<string> AddQuestionAnswerRow(DateTime? createDate, DateTime? lastModifiedDate, string firstName, string lastName, List<FormQuestionAnswer> formQuestionAnswers)
         {
@@ -132,15 +144,7 @@ namespace AfterSchoolLibrary.Services
             return row;
         }
 
-        public static List<string> AddHeadersToCSVReport(List<string> headers)
-        {
-            var row = new List<string>();
-            foreach(var header in headers)
-            {
-                row.Add(header);
-            }
-            return row;
-        }
+  
 
     
 
