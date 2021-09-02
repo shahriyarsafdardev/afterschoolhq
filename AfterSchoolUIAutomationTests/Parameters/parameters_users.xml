@@ -88,7 +88,13 @@
     <StudentSchool>New York, New York, USA</StudentSchool>
     <DoctorName>Dr. Steve Waugh</DoctorName>
     <DoctorPhone>(202) 555-2121</DoctorPhone>
-
   </NewParentAccountActivityRegistration>
+
+  <ActivityPayLaterRegistration>
+    <PayLaterActivityPublishedURL>http://localhost:54849/CookingSchool/activity/paylateractivity</PayLaterActivityPublishedURL>
+    <ParentEmailAddress>testparent1@yopmail.com</ParentEmailAddress>
+    <FirstName>Stephny</FirstName>
+    <LastName>Macmahon</LastName>
+  </ActivityPayLaterRegistration>
 
 </PARAMETERS>
