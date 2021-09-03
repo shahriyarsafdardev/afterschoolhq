@@ -32,63 +32,73 @@ namespace AfterSchoolUIAutomationTests2.Steps
             webDriver.WaitInSeconds(5);
             webDriver.Manage().Window.Maximize();
             webDriver.WaitInSeconds(2);
-
         }
 
         [Given(@"Click on Register Now")]
         public void ClickRegisterNow()
         {
-            //activityPayLaterRegistrationPage.ClickRegisterNow();
+            activityPayLaterRegistrationPage.ClickRegisterNow();
         }
 
         [Given(@"Enter already registered parent email and click Next")]
         public void ParentLogin()
         {
-            //activityPayLaterRegistrationPage.ClickRegisterNow();
+            activityPayLaterRegistrationPage.PopulateEmail(Parameter.Get("ActivityPayLaterRegistration", "ParentEmailAddress"));
+            activityPayLaterRegistrationPage.ClickNextBtn();
         }
 
         [Given(@"Enter password and click Log me in")]
         public void VerifyLoginPassword()
         {
-            //activityPayLaterRegistrationPage.ClickRegisterNow();
+            activityPayLaterRegistrationPage.PopulatePassword(Parameter.Get("ActivityPayLaterRegistration", "ParentEmailPassword"));
+            activityPayLaterRegistrationPage.ClickLoginBtn();
         }
 
         [Given(@"Click add child button")]
         public void AddChild()
         {
-            //activityPayLaterRegistrationPage.ClickRegisterNow();
+            activityPayLaterRegistrationPage.ClickAddNewChildBtn();
         }
 
         [Given(@"Fill in the student information form and click save & continue button")]
         public void PopulateStudentInformationFormAndClickNext()
         {
-            //activityPayLaterRegistrationPage.ClickRegisterNow();
+            activityPayLaterRegistrationPage.PopulateStudentFirstname(Parameter.Get("ActivityPayLaterRegistration", "StudentFirstName"));
+            activityPayLaterRegistrationPage.PopulateStudentDOB("dob");
+            activityPayLaterRegistrationPage.SetStudentGrade("5th");
+            activityPayLaterRegistrationPage.SetStudentGender();
+            activityPayLaterRegistrationPage.SelectAutoCompleteSchool(Parameter.Get("ActivityPayLaterRegistration", "StudentLocation"));
+            activityPayLaterRegistrationPage.ClickStudentInfoBtn();
         }
 
         [Given(@"Fill in the health information form and click save & continue button")]
         public void PopulateHealthInformationFormAndClickNext()
         {
-            //activityPayLaterRegistrationPage.ClickRegisterNow();
+            activityPayLaterRegistrationPage.PopulateDoctorName(Parameter.Get("ActivityPayLaterRegistration", "DoctorName"));
+            activityPayLaterRegistrationPage.PopulateDoctorPhone(Parameter.Get("ActivityPayLaterRegistration", "DoctorPhone"));
+            activityPayLaterRegistrationPage.SetStudentImmunization();
+            activityPayLaterRegistrationPage.ClickStudentHealthNextBtn();
         }
 
         [Given(@"Enter parent e-signature and click e-sign and continue to payment button")]
         public void EnterParentESignature()
         {
-            //activityPayLaterRegistrationPage.ClickRegisterNow();
+            activityPayLaterRegistrationPage.PopulateParentESign(Parameter.Get("ActivityPayLaterRegistration", "ParentESign"));
+            activityPayLaterRegistrationPage.ClickESignNextBtn();
         }
 
         [Given(@"Click on request to pay later link")]
         public void RequestPayLater()
         {
-            //activityPayLaterRegistrationPage.ClickRegisterNow();
+            activityPayLaterRegistrationPage.ClickPayLaterNextBtn();
         }
 
-        [Then(@"Verify complete registration message")]
+        [Then(@"Verify registration success message")]
         public void VerifyThankyouMessage()
         {
-            //string completed = "Thank you";
-            //completed.Contains(activityPayLaterRegistrationPage.RegistrationComplete().Trim());
-            //webDriver.WaitInSeconds(2);
+            string completed = "Thank You";
+            completed.Equals(activityPayLaterRegistrationPage.RegistrationComplete().Trim());
+            webDriver.WaitInSeconds(2);
         }
 
         public void Dispose()

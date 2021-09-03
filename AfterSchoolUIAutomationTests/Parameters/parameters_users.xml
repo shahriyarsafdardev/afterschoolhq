@@ -93,8 +93,12 @@
   <ActivityPayLaterRegistration>
     <PayLaterActivityPublishedURL>http://localhost:54849/CookingSchool/activity/paylateractivity</PayLaterActivityPublishedURL>
     <ParentEmailAddress>testparent1@yopmail.com</ParentEmailAddress>
-    <FirstName>Stephny</FirstName>
-    <LastName>Macmahon</LastName>
+    <ParentEmailPassword>12345678</ParentEmailPassword>
+    <StudentFirstName>Child 1</StudentFirstName>
+    <StudentLocation>New York, New York, USA</StudentLocation>
+    <DoctorName>Dr. Steve Waugh</DoctorName>
+    <DoctorPhone>(202) 555-2121</DoctorPhone>
+    <ParentESign>Test Parent ESign</ParentESign>
   </ActivityPayLaterRegistration>
 
 </PARAMETERS>

@@ -12,4 +12,4 @@ Scenario: Parent registers a student for pay later activity.
 	Given Fill in the health information form and click save & continue button
 	Given Enter parent e-signature and click e-sign and continue to payment button
 	Given Click on request to pay later link
-	Then  Verify if thank you element is displayed on web
+	Then  Verify registration success message
