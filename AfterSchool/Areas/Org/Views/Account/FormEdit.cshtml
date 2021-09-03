@@ -9,11 +9,7 @@
     var questions = new List<FormQuestion>();
     var typesWithRating = new List<QuestionType>() { QuestionType.Rating };
     var typesWithOptions = new List<QuestionType>() { QuestionType.CheckboxList, QuestionType.DropDownList, QuestionType.RadioList, QuestionType.RadioMatrix, QuestionType.Emoji };
-    var typesUserCannotAdd = new List<QuestionType>() { QuestionType.TextBlock, QuestionType.NotSet, QuestionType.RadioMatrix };
-    if(Model.FormTypeId != FormType.Survey)
-    {
-        typesUserCannotAdd.AddRange(new List<QuestionType> { QuestionType.Audio, QuestionType.Video, QuestionType.Photo, QuestionType.Emoji, QuestionType.Rating });
-    }
+    var typesUserCannotAdd = Model.GetTypesUserCannotAdd();
 
     if (questionGroup.IsNotEmpty())
     {
