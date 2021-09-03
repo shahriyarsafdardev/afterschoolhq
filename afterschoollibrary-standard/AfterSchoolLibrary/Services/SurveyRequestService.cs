@@ -74,24 +74,19 @@ namespace AfterSchoolLibrary.Services
         {
             var account = Account.Load(accountId);
 
-            var getSurvey = SurveyRequest.Load(id, msgs);
-            var getSurveyResponses = SurveyResponse.LoadBySurveyRequestId(id, msgs).Where(a => a.SurveyFeedbackStatusTypeId == SurveyFeedbackStatus.Completed).ToList();
-            var getFormQuestions = FormQuestion.Load(getSurvey.FormId, msgs).AsList();
+            var survey = SurveyRequest.Load(id, msgs);
+            var surveyResponses = SurveyResponse.LoadBySurveyRequestId(id, msgs).Where(a => a.SurveyFeedbackStatusTypeId == SurveyFeedbackStatus.Completed).ToList();
+            var formQuestions = FormQuestion.LoadByFormId(survey.FormId, msgs);
 
             var table = new List<List<string>>();
+            table.Add(AddHeaders(formQuestions));
 
-            var isFirstRow = true;
+            surveyResponses.ForEach(surveyResponse => {
+                var getSurveyRequest = SurveyRequest.Load(surveyResponse.SurveyRequestId.Value);
+                var registrant = Registrant.Load(surveyResponse.RegistrantId.Value);
+                var formQuestionAnswers = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value, msgs);
 
-            getSurveyResponses.ForEach(getSurveyResponse => {
-                var getSurveyRequest = SurveyRequest.Load(getSurveyResponse.SurveyRequestId.Value);
-                var registrant = Registrant.Load(getSurveyResponse.RegistrantId.Value);
-                var getFormQuestionAnswers = FormQuestionAnswer.LoadBySurveyResponseId(getSurveyResponse.ID.Value, msgs);
-                if (isFirstRow)
-                {
-                    table.Add(AddHeaders(getFormQuestionAnswers));
-                    isFirstRow = false;
-                }
-                table.Add(AddQuestionAnswerRow(getSurvey.CreateDate, getSurveyResponse.LastModifiedDate, registrant.FirstName, registrant.LastName, getFormQuestionAnswers));
+                table.Add(AddQuestionAnswerRow(survey.CreateDate, surveyResponse.LastModifiedDate, registrant.FirstName, registrant.LastName, formQuestionAnswers));
             });
 
             var csv = CsvFile.Create(table);
@@ -101,16 +96,16 @@ namespace AfterSchoolLibrary.Services
             return fileLink;
         }
 
-        private static List<string> AddHeaders(List<FormQuestionAnswer> getFormQuestionAnswers)
+        private static List<string> AddHeaders(List<FormQuestion> formQuestions)
         {
             var row = new List<string>();
             row.Add("Create Date");
             row.Add("Submit Date");
             row.Add("First Name");
             row.Add("Last Name");
-            getFormQuestionAnswers.ForEach(getFormQuestionAnswer =>
+            formQuestions.ForEach(formQuestion =>
             {
-                row.Add(getFormQuestionAnswer.QuestionText);
+                row.Add(formQuestion.Text);
             });
 
             return row;
