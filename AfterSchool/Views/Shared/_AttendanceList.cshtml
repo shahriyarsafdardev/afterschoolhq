@@ -21,7 +21,15 @@
     <div class="col-md-3">
         <div class="widget widget-tile widget-bordered">
             <div class="data-info">
-                <div data-toggle="counter" data-end="@list.Count" data-decimals="0" data-suffix="" class="value">@list.Count</div>
+                @if (list != null)
+                {
+                    <div data-toggle="counter" data-end="@list.Count" data-decimals="0" data-suffix="" class="value">@list.Count</div>
+                }
+                else
+                {
+                    <div data-toggle="counter" data-end="0" data-decimals="0" data-suffix="" class="value">0</div>
+                }
+
                 <div class="desc">Meetings</div>
             </div>
             <div class="icon"><span class="s7-users"></span></div>
@@ -81,7 +89,7 @@
             </tr>
         </thead>
         <tbody>
-            @if (list.Count > 0)
+            @if (list != null && list.Count > 0)
             {
                 foreach (var attendance in list)
                 {
