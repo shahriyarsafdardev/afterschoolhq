@@ -103,7 +103,7 @@ namespace AfterSchoolLibrary.Services
             row.Add("Submit Date");
             row.Add("First Name");
             row.Add("Last Name");
-            formQuestions.ForEach(formQuestion =>
+            formQuestions.OrderBy(a=>a.DisplayOrder).ToList().ForEach(formQuestion =>
             {
                 row.Add(formQuestion.Text);
             });
@@ -120,7 +120,7 @@ namespace AfterSchoolLibrary.Services
             row.Add(firstName);
             row.Add(lastName);
 
-            formQuestionAnswers.ForEach(formQuestionAnswer =>
+            formQuestionAnswers.OrderBy(a => a.FormQuestionDisplayOrder).ToList().ForEach(formQuestionAnswer =>
             {
                 row.Add(formQuestionAnswer.Text);
             });
