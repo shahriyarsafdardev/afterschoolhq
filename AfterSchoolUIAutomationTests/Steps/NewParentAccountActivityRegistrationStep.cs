@@ -9,7 +9,7 @@ using TechTalk.SpecFlow;
 using AfterSchoolUIAutomationTests.Helpers.Extensions;
 using AfterSchoolUIAutomationTests.Parameters;
 
-namespace AfterSchoolUIAutomationTests2.Steps
+namespace AfterSchoolUIAutomationTests.Steps
 {
     [Binding]
     public sealed class NewParentAccountActivityRegistrationStep : IDisposable
