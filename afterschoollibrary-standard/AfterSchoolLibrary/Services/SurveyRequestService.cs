@@ -1,6 +1,7 @@
 ﻿using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -74,26 +75,19 @@ namespace AfterSchoolLibrary.Services
         {
             var account = Account.Load(accountId);
 
-            var getSurvey = SurveyRequest.Load(id, msgs);
-            var getSurveyResponses = SurveyResponse.LoadBySurveyRequestId(id, msgs).Where(a => a.SurveyFeedbackStatusTypeId == SurveyFeedbackStatus.Completed).ToList();
-            var getFormQuestions = FormQuestion.Load(getSurvey.FormId, msgs).AsList();
+            var survey = SurveyRequest.Load(id, msgs);
+            var surveyResponses = SurveyResponse.LoadBySurveyRequestId(id, msgs).Where(a => a.SurveyFeedbackStatusTypeId == SurveyFeedbackStatus.Completed).ToList();
+            var formQuestions = FormQuestion.LoadByFormIdByIsActive(survey.FormId, true, msgs);
 
             var table = new List<List<string>>();
+            table.Add(AddHeaders(formQuestions));
 
-            List<string> questions = null;
-            getFormQuestions.ForEach(getFormQuestion => {
-                questions.Add("Create Date");
-                questions.Add("Submit Date");
-                questions.Add(getFormQuestion.Text);
-            });
-            table.Add(questions);
+            surveyResponses.ForEach(surveyResponse => {
+                var getSurveyRequest = SurveyRequest.Load(surveyResponse.SurveyRequestId.Value);
+                var registrant = Registrant.Load(surveyResponse.RegistrantId.Value);
+                var formQuestionAnswers = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value, msgs);
 
-            getSurveyResponses.ForEach(getSurveyResponse => {
-                var getSurveyRequest = SurveyRequest.Load(getSurveyResponse.SurveyRequestId.Value);
-                var registrant = Registrant.Load(getSurveyResponse.RegistrantId.Value);
-                var getFormQuestionAnswers = FormQuestionAnswer.LoadBySurveyResponseId(getSurveyResponse.ID.Value, msgs);
-
-                table.Add(AddQuestionAnswerRow(getSurvey.CreateDate, getSurveyResponse.LastModifiedDate, registrant.FirstName, registrant.LastName, getFormQuestionAnswers));
+                table.Add(AddQuestionAnswerRow(survey.CreateDate, surveyResponse.LastModifiedDate, registrant.FirstName, registrant.LastName, formQuestionAnswers));
             });
 
             var csv = CsvFile.Create(table);
@@ -103,6 +97,20 @@ namespace AfterSchoolLibrary.Services
             return fileLink;
         }
 
+        private static List<string> AddHeaders(List<FormQuestion> formQuestions)
+        {
+            var row = new List<string>();
+            row.Add("Create Date");
+            row.Add("Submit Date");
+            row.Add("First Name");
+            row.Add("Last Name");
+            formQuestions.OrderBy(a=>a.DisplayOrder).ToList().ForEach(formQuestion =>
+            {
+                row.Add(formQuestion.Text);
+            });
+
+            return row;
+        }
 
         private static List<string> AddQuestionAnswerRow(DateTime? createDate, DateTime? lastModifiedDate, string firstName, string lastName, List<FormQuestionAnswer> formQuestionAnswers)
         {
@@ -113,9 +121,17 @@ namespace AfterSchoolLibrary.Services
             row.Add(firstName);
             row.Add(lastName);
 
-            formQuestionAnswers.ForEach(formQuestionAnswer =>
+            formQuestionAnswers.OrderBy(a => a.FormQuestionDisplayOrder).ToList().ForEach(formQuestionAnswer =>
             {
-                row.Add(formQuestionAnswer.Text);
+                if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.TextArea)
+                {
+                    dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
+                    row.Add(Convert.ToString(json.blocks[0].text));
+                }
+                else
+                {
+                    row.Add(formQuestionAnswer.Text);
+                }
             });
 
             return row;
@@ -132,15 +148,7 @@ namespace AfterSchoolLibrary.Services
             return row;
         }
 
-        public static List<string> AddHeadersToCSVReport(List<string> headers)
-        {
-            var row = new List<string>();
-            foreach(var header in headers)
-            {
-                row.Add(header);
-            }
-            return row;
-        }
+  
 
     
 
