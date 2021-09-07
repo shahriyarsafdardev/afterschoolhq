@@ -1,6 +1,6 @@
 ﻿<div>
   <p>Hello @Model.Name,</p>
   <p>You have got a @Model.SurveyName request (Survey request).</p>
-  <p>Here is your invite code @Model.InviteCode</p>
+  <p>Here is your invite code @Model.InviteCode (Sign up here @Model.SignUpLink)</p>
  <p>Thanks</p>
 </div>
