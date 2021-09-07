@@ -32,7 +32,7 @@
                             <div class="col-lg-12">
                                 <div class="viewSurvey">
                                     <div class="viewSurveyHead">@question.QuestionText</div>
-                                    <div class="viewSurveyAnswer">@Html.Raw(json.Text)</div>
+                                    <div class="viewSurveyAnswer">@Html.Raw(json.blocks[0].text)</div>
                                 </div>
                             </div>
                         }
