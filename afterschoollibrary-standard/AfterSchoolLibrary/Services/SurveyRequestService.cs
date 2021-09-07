@@ -1,6 +1,7 @@
 ﻿using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -76,7 +77,7 @@ namespace AfterSchoolLibrary.Services
 
             var survey = SurveyRequest.Load(id, msgs);
             var surveyResponses = SurveyResponse.LoadBySurveyRequestId(id, msgs).Where(a => a.SurveyFeedbackStatusTypeId == SurveyFeedbackStatus.Completed).ToList();
-            var formQuestions = FormQuestion.LoadByFormId(survey.FormId, msgs);
+            var formQuestions = FormQuestion.LoadByFormIdByIsActive(survey.FormId, true, msgs);
 
             var table = new List<List<string>>();
             table.Add(AddHeaders(formQuestions));
@@ -122,7 +123,15 @@ namespace AfterSchoolLibrary.Services
 
             formQuestionAnswers.OrderBy(a => a.FormQuestionDisplayOrder).ToList().ForEach(formQuestionAnswer =>
             {
-                row.Add(formQuestionAnswer.Text);
+                if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.TextArea)
+                {
+                    dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
+                    row.Add(json.Text);
+                }
+                else
+                {
+                    row.Add(formQuestionAnswer.Text);
+                }
             });
 
             return row;
