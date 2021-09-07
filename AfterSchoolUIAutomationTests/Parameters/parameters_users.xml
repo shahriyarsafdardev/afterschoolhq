@@ -101,4 +101,39 @@
     <ParentESign>Test Parent ESign</ParentESign>
   </ActivityPayLaterRegistration>
 
+  <NewParentAccountActivityPayment>
+    <ActivityPublishedURL>http://localhost:54849/CookingSchool/activity/brotbrötchencookingclass</ActivityPublishedURL>
+    <ParentEmailAddress>parent8_hq@yopmail.com</ParentEmailAddress>
+    <FirstName>Stephny</FirstName>
+    <LastName>Macmahon</LastName>
+    <Phone>(202) 555-0155</Phone>
+    <Password1>12345678</Password1>
+    <Password2>12345678</Password2>
+    <StreetAddress>Street Address</StreetAddress>
+    <City>New York</City>
+    <State>Indiana</State>
+    <Zipcode>420333</Zipcode>
+    <GuardianFirstName>George</GuardianFirstName>
+    <GuardianLastName>Fernendous</GuardianLastName>
+    <GuardianEmail>george@yopmail.com</GuardianEmail>
+    <GuardianMobile>(202) 555-2121</GuardianMobile>
+    <EmergencyContactFirstName>Michael</EmergencyContactFirstName>
+    <EmergencyContactLastName>Johnson</EmergencyContactLastName>
+    <EmergencyContactPhone>(202) 555-2121</EmergencyContactPhone>
+    <StudentFirstName>Andrew</StudentFirstName>
+    <StudentLastName>Strauss</StudentLastName>
+    <StudentPhone>(202) 555-2121</StudentPhone>
+    <StudentDOB>05/05/2014</StudentDOB>
+    <StudentGrade>3rd</StudentGrade>
+    <StudentGender>Male</StudentGender>
+    <StudentSchool>New York, New York, USA</StudentSchool>
+    <DoctorName>Dr. Steve Waugh</DoctorName>
+    <DoctorPhone>(202) 555-2121</DoctorPhone>
+    <ParentESign>Test Parent Esign</ParentESign>
+    <CreditCard>4111 1111 1111 1111</CreditCard>
+    <CreditCardExpireDate>09/26</CreditCardExpireDate>
+    <CreditCardCVC>212</CreditCardCVC>
+    <CreditCardZIP>12345</CreditCardZIP>
+  </NewParentAccountActivityPayment>
+
 </PARAMETERS>
