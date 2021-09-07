@@ -126,7 +126,7 @@ namespace AfterSchoolLibrary.Services
                 if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.TextArea)
                 {
                     dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
-                    row.Add(json.blocks[0].text);
+                    row.Add(Convert.ToString(json.blocks[0].text));
                 }
                 else
                 {
