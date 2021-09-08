@@ -1343,7 +1343,7 @@ namespace AfterSchoolLibrary.Services
         {
             var masterRegistrant = registrant.GetMasterRegistrant(msgs, dc);
 
-            if (!loggedInUser.IsTechSupportOrOwner(account, msgs, dc) && 
+            if (!loggedInUser.IsTechSupportOwnerOrAdmin(account, msgs, dc) && 
                 !loggedInUser.HasAccessToRegistrant(masterRegistrant, msgs, dc))
             {
                 msgs.Add("You don't have permission to modify this registration", MessageType.UserError);
