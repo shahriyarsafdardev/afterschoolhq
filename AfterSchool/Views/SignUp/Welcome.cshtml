@@ -34,7 +34,7 @@
 {
     if (showInviteWelcome)
     {
-        <span>You have been invited you to take the first step towards streamlining the promotion and management of your enrichment program at <strong>@Model.InvitingAccount.Name</strong>.</span>
+        <span>You have been invited you to take the first step towards streamlining the promotion and management of your enrichment program at <strong>@(Model.InvitingAccount.IsNotEmpty() ? Model.InvitingAccount.Name : "'Account Not Found'")</strong>.</span>
     }
     else
     {
@@ -455,6 +455,34 @@
         </div>
     </div>
 </div>
+
+
+<div class="modal" tabindex="-1" role="dialog" id="NoAccountFoundPopup">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="padding-top:0">
+                <h5 class="text-center">Invite account not found</h5>
+                <p>
+                    Oh no! Your invite got lost in transit! We’ll have that sorted out in no time. <strong>Please follow the instructions below and then proceed with your account setup.</strong>
+                </p>
+
+                <p>To connect your account with the account that invited you, please contact our support team with:</p>
+
+                <ul>
+                    <li>The email address you’re using to sign up</li>
+                    <li>The name or email address of the account that invited you.</li>
+                </ul>
+
+                <p class="text-center"><a href=" https://afterschoolhq.zendesk.com/hc/en-us/requests/new" target="_blank" class="btn btn-primary">Contact Support</a></p>
+            </div>
+        </div>
+    </div>
+</div>
 @section Scripts
 {
     <script src="~/Scripts/jquery.validate.js"></script>
@@ -563,7 +591,13 @@
                     doAccountSearch(signupAccountSearch, signupAccountSearchList)
                 }, 250);
 
+              
             });
+
+              @if(showInviteWelcome && Model.InvitingAccount.IsEmpty())
+              {
+                    <text>$("#NoAccountFoundPopup").modal('show');</text>
+              }
         });
 
         function signupListMouseOver(id) {
