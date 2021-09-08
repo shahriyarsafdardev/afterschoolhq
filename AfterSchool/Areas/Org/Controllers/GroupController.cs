@@ -1449,7 +1449,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     case "prev":
                         return RedirectToAction("editcontact", new { id = league.Uid, isnew = Request["isnew"], saved = 1 });
-                    case "next":
+                    case "next": case "onlynext":
                         return RedirectToAction("editconfirmation", new { id = league.Uid, isnew = Request["isnew"], saved = 1 });
                     case "publish":
                         return RedirectToAction("publish", new { id = league.Uid, isnew = Request["isnew"], saved = 1 });
