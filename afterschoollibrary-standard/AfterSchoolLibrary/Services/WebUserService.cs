@@ -821,5 +821,11 @@ namespace AfterSchoolLibrary.Services
             var userType = loggedInUser.GetUserType(account, msgs, dc);
             return userType.In(new List<UserType>() { UserType.TechSupport, UserType.Owner });
         }
+
+        public static bool IsTechSupportOwnerOrAdmin(this WebUser loggedInUser, Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var userType = loggedInUser.GetUserType(account, msgs, dc);
+            return userType.In(new List<UserType>() { UserType.TechSupport, UserType.Owner, UserType.Administrator });
+        }
     }
 }

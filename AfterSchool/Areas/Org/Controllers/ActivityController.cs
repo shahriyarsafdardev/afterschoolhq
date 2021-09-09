@@ -2584,7 +2584,12 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
-            ViewBag.Registrants = activity.GetRegistrants(msgs)
+
+            var assignmentTypes = new RegistrationAssignmentType[] { RegistrationAssignmentType.Applied, RegistrationAssignmentType.WaitingList, RegistrationAssignmentType.Reserved, RegistrationAssignmentType.ReservedPendingParentalConsent, RegistrationAssignmentType.ReservedPendingPayment };
+
+            ViewBag.Registrants = activity.GetRegistrantActivities(msgs)
+                                    .Where(ra => ra.AssignmentTypeId.In(assignmentTypes))
+                                    .Select(ra => ra.ToRegistrant())
                                     .OrderBy(x => x.FirstName)
                                     .ToList();
 
