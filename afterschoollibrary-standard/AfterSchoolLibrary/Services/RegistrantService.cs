@@ -1344,6 +1344,13 @@ namespace AfterSchoolLibrary.Services
             var masterRegistrant = registrant.GetMasterRegistrant(msgs, dc);
             var ras = registrant.GetRegistrantActivities(msgs, dc);
             var ra = ras.Find(item => item.ParticipationObjectId == participationObjectId && item.ParticipationObjectTypeId == participationObjectType);
+
+            if (ra.IsEmpty())
+            {
+                msgs.Add("Registration not found", MessageType.Notice);
+                return;
+            }
+
             var activity = ra.GetActivity(msgs, dc);
             var hasAccessToActivity = activity.IsNotEmpty() ? ActivityWebUser.LoadByActivityIdByWebUserId(activity.ID.Value, loggedInUser.ID.Value, msgs, dc).IsNotEmpty() : false;
 
@@ -1352,12 +1359,6 @@ namespace AfterSchoolLibrary.Services
                 && !hasAccessToActivity)
             {
                 msgs.Add("You don't have permission to modify this registration", MessageType.UserError);
-                return;
-            }
-
-            if (ra.IsEmpty())
-            {
-                msgs.Add("Registration not found", MessageType.Notice);
                 return;
             }
 
