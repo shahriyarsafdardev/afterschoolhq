@@ -8,7 +8,7 @@ using AfterSchoolLibrary.Models;
 
 namespace AfterSchoolLibrary.Services
 {
-    public class FormService
+    public static class FormService
     {
         /// <summary>
         /// get template from default afterschool account with ID = 1
@@ -114,6 +114,24 @@ namespace AfterSchoolLibrary.Services
             }
 
             return f;
+        }
+
+        private static List<QuestionType> SurveyOnlyQuestionTypes
+        {
+            get
+            {
+                return new List<QuestionType> { QuestionType.Audio, QuestionType.Video, QuestionType.Photo, QuestionType.Emoji, QuestionType.Rating };
+            }
+        }
+
+        public static List<QuestionType> GetTypesUserCannotAdd(this Form form)
+        {
+            var typesUserCannotAdd = new List<QuestionType>() { QuestionType.TextBlock, QuestionType.NotSet, QuestionType.RadioMatrix };
+
+            if (form.FormTypeId != FormType.Survey)
+                 typesUserCannotAdd.AddRange(SurveyOnlyQuestionTypes);
+
+            return typesUserCannotAdd;
         }
 
         /// <summary>
@@ -490,7 +508,7 @@ namespace AfterSchoolLibrary.Services
             return qhs;
         }
 
-        private void CreateOrganizationQuestionGroup()
+        private static void CreateOrganizationQuestionGroup()
         {
             var questions = new List<QuestionHolder>()
                 {   

@@ -9,7 +9,7 @@
     var questions = new List<FormQuestion>();
     var typesWithRating = new List<QuestionType>() { QuestionType.Rating };
     var typesWithOptions = new List<QuestionType>() { QuestionType.CheckboxList, QuestionType.DropDownList, QuestionType.RadioList, QuestionType.RadioMatrix, QuestionType.Emoji };
-    var typesUserCannotAdd = new List<QuestionType>() { QuestionType.TextBlock, QuestionType.NotSet, QuestionType.RadioMatrix };
+    var typesUserCannotAdd = Model.GetTypesUserCannotAdd();
 
     if (questionGroup.IsNotEmpty())
     {
@@ -596,7 +596,7 @@
         var rtn = `<select class="form-control" onChange="showEditButton(${getQuestionCount()})" id="questiontype-${getQuestionCount()}" name="new-questiontype-${getQuestionCount()}">`;
         @foreach (var type in Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>().Where(questionType => !typesUserCannotAdd.Contains(questionType)))
         {
-            @:rtn += '<option value="@((int)type)">@type.ToString().SplitByUpperCase()</option>';
+              @:rtn += '<option value="@((int)type)">@type.ToString().SplitByUpperCase()</option>';
         }
         rtn += '</select>';
         return rtn;
