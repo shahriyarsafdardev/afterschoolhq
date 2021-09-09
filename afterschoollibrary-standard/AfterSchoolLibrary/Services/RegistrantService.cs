@@ -1342,20 +1342,23 @@ namespace AfterSchoolLibrary.Services
         public static void WithdrawRegistration(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType, WebUser loggedInUser, Account account, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var masterRegistrant = registrant.GetMasterRegistrant(msgs, dc);
-
-            if (!loggedInUser.IsTechSupportOwnerOrAdmin(account, msgs, dc) && 
-                !loggedInUser.HasAccessToRegistrant(masterRegistrant, msgs, dc))
-            {
-                msgs.Add("You don't have permission to modify this registration", MessageType.UserError);
-                return;
-            }
-
             var ras = registrant.GetRegistrantActivities(msgs, dc);
             var ra = ras.Find(item => item.ParticipationObjectId == participationObjectId && item.ParticipationObjectTypeId == participationObjectType);
 
             if (ra.IsEmpty())
             {
                 msgs.Add("Registration not found", MessageType.Notice);
+                return;
+            }
+
+            var activity = ra.GetActivity(msgs, dc);
+            var hasAccessToActivity = activity.IsNotEmpty() ? ActivityWebUser.LoadByActivityIdByWebUserId(activity.ID.Value, loggedInUser.ID.Value, msgs, dc).IsNotEmpty() : false;
+
+            if (!loggedInUser.IsTechSupportOwnerOrAdmin(account, msgs, dc)
+                && !loggedInUser.HasAccessToRegistrant(masterRegistrant, msgs, dc)
+                && !hasAccessToActivity)
+            {
+                msgs.Add("You don't have permission to modify this registration", MessageType.UserError);
                 return;
             }
 
