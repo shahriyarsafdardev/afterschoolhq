@@ -848,11 +848,16 @@ namespace AfterSchool.Areas.Org.Controllers
                     else
                     {
                         form = FormService.CreateBlankForm(form, currentUser.ID.Value, currentAccount.ID.Value, name, description, msgs);
+                        ViewBag.QuestionGroups = new List<FormQuestionGroup>(); // to avoid errors
                     }
                 }
                 else
                     form = currentAccount.GetForm(id.ToInteger(), msgs);
-           
+
+            var questions = new List<FormQuestion>();
+            var questionGroups = new List<FormQuestionGroup>();
+            var individualGroups = new List<FormQuestionGroup>();
+            var organizationGroups = new List<FormQuestionGroup>();
 
             if (msgs.HasNoErrors() && ((FormType)formtype.ToInteger() != FormType.Survey) && id.ToInteger() != 0)
             {
@@ -864,8 +869,6 @@ namespace AfterSchool.Areas.Org.Controllers
                         if (formtype.IsNotBlank()) form.FormTypeId = (FormType)formtype.ToInteger();
 
                         amsgs.AddRange(form.Save(adc));
-
-                        var questions = new List<FormQuestion>();
 
                         if (qg.IsNumber())
                         {
@@ -974,12 +977,12 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if ((FormType)formtype.ToInteger() != FormType.Survey)
             {
-                var questionGroups = form.GetQuestionGroups(msgs);
-                var individualGroups = questionGroups
+                questionGroups = form.GetQuestionGroups(msgs);
+                individualGroups = questionGroups
                     .Where(x => x.RegistrantTypeId == RegistrantType.Individual)
                     .OrderBy(x => x.DisplayOrder)
                     .ToList();
-                var organizationGroups = questionGroups
+                organizationGroups = questionGroups
                     .Where(x => x.RegistrantTypeId == RegistrantType.Organization)
                     .OrderBy(x => x.DisplayOrder)
                     .ToList();
@@ -1006,14 +1009,12 @@ namespace AfterSchool.Areas.Org.Controllers
                         if (currentIndex < questionGroups.Count - 1) questionGroup = questionGroups[currentIndex + 1];
                         break;
                 }
-
-               
-                ViewBag.QuestionGroups = questionGroups;
-                ViewBag.IndividualGroups = individualGroups;
-                ViewBag.OrganizationGroups = organizationGroups;
-                ViewBag.QuestionGroup = questionGroup;
             }
-             ViewBag.Messages = msgs;
+            ViewBag.QuestionGroups = questionGroups;
+            ViewBag.IndividualGroups = individualGroups;
+            ViewBag.OrganizationGroups = organizationGroups;
+            ViewBag.QuestionGroup = questionGroup;
+            ViewBag.Messages = msgs;
             return View(form);
         }
 
