@@ -731,7 +731,11 @@
                 var optionRowArray = optionRow.split('=');
                 optionNo = i;
                 optionValue = optionRowArray[0];
-                optionDescriptionValue = optionRowArray[1];
+
+                var optionDescriptionValue = '';
+                if (optionRowArray[1]) {
+                    optionDescriptionValue = optionRowArray[1];
+                }
                 //create new row for option modal
                 addOptionRow(optionType, optionNo, optionValue, optionDescriptionValue)
             }
@@ -753,7 +757,17 @@
                     else {
                         $(this).find("input.option").removeClass("danger");
                     }
-                    var rowOption = $(this).find("input.option").val() + "=" + $(this).find("input.optionDescription").val() + ",";
+
+                    var optVal = $(this).find("input.option").val();
+                    var optDesc = $(this).find("input.optionDescription").val();
+                    var rowOption;
+
+                    if (optDesc) {
+                        rowOption = `${optVal}=${optDesc},`
+                    } else {
+                        rowOption = `${optVal},`
+                    }
+
                     optionString = optionString + rowOption;
                 }
             });
