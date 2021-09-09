@@ -831,25 +831,30 @@ namespace AfterSchool.Areas.Org.Controllers
             Form form = null;
             FormQuestionGroup questionGroup = null;
 
-            if ((FormType)formtype.ToInteger() != FormType.Survey)
-            {
                 if (name.IsEmpty() && qg.IsBlank())
                     msgs.Add("Name is required", MessageType.UserError);
 
                 if (id.ToInteger() == 0)
                 {
-                    if (copyfrom.IsNumber())
-                        form = currentAccount.GetForm(copyfrom.ToInteger(), msgs)?
-                            .Copy(currentUser.ID.Value, currentAccount.ID.Value, (FormType)formtype.ToInteger(), null, msgs, null);
+                    if ((FormType)formtype.ToInteger() != FormType.Survey)
+                    {
+                        if (copyfrom.IsNumber())
+                            form = currentAccount.GetForm(copyfrom.ToInteger(), msgs)?
+                                .Copy(currentUser.ID.Value, currentAccount.ID.Value, (FormType)formtype.ToInteger(), null, msgs, null);
+                        else
+                            form = currentAccount.GetDefaultForm(msgs)?
+                                .Copy(currentUser.ID.Value, currentAccount.ID.Value, (FormType)formtype.ToInteger(), null, msgs, null);
+                    }
                     else
-                        form = currentAccount.GetDefaultForm(msgs)?
-                            .Copy(currentUser.ID.Value, currentAccount.ID.Value, (FormType)formtype.ToInteger(), null, msgs, null);
+                    {
+                        form = FormService.CreateBlankForm(form, currentUser.ID.Value, currentAccount.ID.Value, name, description, msgs);
+                    }
                 }
                 else
                     form = currentAccount.GetForm(id.ToInteger(), msgs);
-            }
+           
 
-            if (msgs.HasNoErrors())
+            if (msgs.HasNoErrors() && ((FormType)formtype.ToInteger() != FormType.Survey) && id.ToInteger() != 0)
             {
                 Database.ExecuteTransaction(
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
@@ -1002,12 +1007,13 @@ namespace AfterSchool.Areas.Org.Controllers
                         break;
                 }
 
-                ViewBag.Messages = msgs;
+               
                 ViewBag.QuestionGroups = questionGroups;
                 ViewBag.IndividualGroups = individualGroups;
                 ViewBag.OrganizationGroups = organizationGroups;
                 ViewBag.QuestionGroup = questionGroup;
             }
+             ViewBag.Messages = msgs;
             return View(form);
         }
 

@@ -132,6 +132,41 @@ namespace AfterSchoolLibrary.Services
             return AddNewAfterSchoolInterestForm(msgs, dc);
         }
 
+        public static Form CreateBlankForm(Form form, int userId, int id, string name, string description, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+               Database.ExecuteTransaction(
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        form = new Form
+                        {
+                            Name = name,
+                            Description = description,
+                            LastModifiedDate = DateTime.UtcNow,
+                            CreateDate = DateTime.UtcNow,
+                            FormTypeId = FormType.Survey,
+                            LastModifiedBy = userId,
+                            CreatedBy = userId,
+                            AccountId = id,
+                            IsActive = true,
+                            Uid = Guid.NewGuid()
+                        };
+                        msgs.AddRange(form.Save(dc: dc));
+
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+                        msgs.Add("Form Saved", MessageType.Success);
+                    },
+                    onFailure: (SystemMessages fmsgs) =>
+                    {
+                        msgs.AddRange(fmsgs);
+                    }
+                );
+
+            return form;
+        }
+
         public static Form AddNewAfterSchoolInterestForm(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
