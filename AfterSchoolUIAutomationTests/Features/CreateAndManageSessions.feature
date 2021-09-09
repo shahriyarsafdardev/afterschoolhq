@@ -4,12 +4,14 @@
 @mytag
 Scenario: Create New Session, Session Activity And Manage Session
 	Given Login to the school account
-	Given Navigate to the sessions section
-	Given Click on add session
+	Given Navigate to the sessions section and click on add session
 	Given Populate new session form and click save
-	#Given Click sign up periods tab
-	#Given Click add sign up period button
-	#Given Click save sign up period button
-	#Given Click activities tab and then click add activity
-	#Given Go through activity creation steps and click save and review
+	Given Populate Signup Periods and click save
+	Given Populate setting form and click save
+	Given Populate restrictions form and click save
+	Given Populate schedule form and click save
+	Given Populate about activity form and click save
+	Given Populate activity contact form and click save
+	Given Populate activity location form and click save
+	Given Populate price and click save
 	#Then then veriy the session is published

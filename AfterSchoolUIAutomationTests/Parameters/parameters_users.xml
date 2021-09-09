@@ -136,4 +136,19 @@
     <CreditCardZIP>12345</CreditCardZIP>
   </NewParentAccountActivityPayment>
 
+
+  <CreateAndManageSessions>
+    <SessionName>Test Session 1</SessionName>
+    <SessionDetails>Test Session 1 Details</SessionDetails>
+    <SessionActivityName>Test Session 1 Activity 1</SessionActivityName>
+    <HasSchedule>Yes</HasSchedule>
+    <IsWeekly>Yes</IsWeekly>
+    <AboutActivity>This is About Activity. Lorem ipsum dolor sit amet, consectetur adipiscing elit.</AboutActivity>
+    <ContactName>Contact Name</ContactName>
+    <ContactPhone>(202) 555-2121</ContactPhone>
+    <ContactEmail>george@yopmail.com</ContactEmail>
+    <Location>New York, New York, USA</Location>
+    <Fee>100</Fee>
+  </CreateAndManageSessions>
+
 </PARAMETERS>
