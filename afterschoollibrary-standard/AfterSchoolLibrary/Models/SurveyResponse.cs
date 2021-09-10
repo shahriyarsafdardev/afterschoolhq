@@ -36,7 +36,6 @@ namespace AfterSchoolLibrary.Models
 			this.SurveyFeedbackStatusTypeId = SurveyFeedbackStatus.NotSet;
 			this.IsDeleted = false;
 			this.Uid = Guid.NewGuid();
-			this.LastAttendedFormQuestionAnswerUid = Guid.NewGuid();
 			
         }
 
