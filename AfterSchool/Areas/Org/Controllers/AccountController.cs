@@ -859,7 +859,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var individualGroups = new List<FormQuestionGroup>();
             var organizationGroups = new List<FormQuestionGroup>();
 
-            if (msgs.HasNoErrors() && ((FormType)formtype.ToInteger() != FormType.Survey) && id.ToInteger() != 0)
+            if (msgs.HasNoErrors() && ((FormType)formtype.ToInteger() != FormType.Survey))
             {
                 Database.ExecuteTransaction(
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>

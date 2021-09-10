@@ -673,7 +673,7 @@
         $('#question-table')
             .find('tr')
             .last()
-            .before(`<tr><td colspan="3">${getDescription()}${getTextBlockQuestionType()}</td><td>${getShowCheckbox()}</td><td></td></tr>`);
+            .before(`<tr><td>${getSortOrder()}</td><td colspan="3">${getDescription()}${getTextBlockQuestionType()}</td><td>${getShowCheckbox()}</td><td></td><td></td><td>${getDeleteIcon()}</td></tr>`);
         incrementQuestionCount();
     }
 
