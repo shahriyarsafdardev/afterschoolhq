@@ -11,9 +11,13 @@ namespace AfterSchoolLibrary.Services
 {
     public static class SurveyRequestService
     {
-        public static SurveyRequest AddSurvey(int formId, int activityId, string name, string optionalText, bool allowmultiple, int accountId, int userId, SystemMessages msgs)
+        public static SurveyRequest AddSurvey(int formId, int activityId, string name, string dueDate, string optionalText, bool allowmultiple, int accountId, int userId, SystemMessages msgs)
         {
-            return CreateNewSurveyRequest(formId, activityId, accountId, name, optionalText, allowmultiple, userId, msgs);
+            DateTime? duedate = null;
+            if (dueDate.IsNotEmpty())
+                duedate = dueDate.ToDateTime();
+
+            return CreateNewSurveyRequest(formId, activityId, accountId, name, duedate, optionalText, allowmultiple, userId, msgs);
         }
 
  
@@ -34,7 +38,7 @@ namespace AfterSchoolLibrary.Services
         }
 
 
-        public static SurveyRequest CreateNewSurveyRequest(int formId, int activityId, int accountId, string name, string instrcutionsText, bool alloMultipleResponse, int userId, SystemMessages msgs, DatabaseConnection dc = null)
+        public static SurveyRequest CreateNewSurveyRequest(int formId, int activityId, int accountId, string name, DateTime? dueDate, string instrcutionsText, bool alloMultipleResponse, int userId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -56,6 +60,7 @@ namespace AfterSchoolLibrary.Services
                        Name = name,
                        Description = instrcutionsText,
                        Uid = Guid.NewGuid(),
+                       DueDate = dueDate ?? dueDate,
                        MultipleResponsesEnabled = alloMultipleResponse
                    };
 

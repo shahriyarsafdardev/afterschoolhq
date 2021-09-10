@@ -18,7 +18,8 @@
         });
     }
 }
-    @{Html.RenderPartial("OrgAccountHeader");}
+<link href="~/Assets/css/survey.css" rel="stylesheet" />
+@{Html.RenderPartial("OrgAccountHeader");}
 
 <div class="main-content">
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -58,9 +59,7 @@
                 </div>
                 <div class="row margin-t-10">
                     <div class="col-lg-6 col-md-6 ">
-                        <div data-min-view="2" data-date-format="mm/dd/yyyy" class=" date datetimepicker datetimepicker-mobile">
-                            <input type="text" class="form-control newInput" id="duedate" name="duedate" onfocus="this.select()" data-type="date" placeholder="Due Date (Optional)" />
-                        </div>
+                        <input type="text" class="form-control newInput" id="dueDate" name="dueDate" value="@DateTime.Now.ToShortDateString()" placeholder="Due Date (Optional)" />
                     </div>
                 </div>
                 <div style="clear:both"></div>
@@ -151,6 +150,15 @@
                     }
                 });
 
+                $("#dueDate").datetimepicker({
+                    format: "dd/mm/yyyy",
+                    autoclose: true,
+                    todayBtn: true,
+                    pickTime: false,
+                    minView: 2,
+                    viewSelect: 'month',
+                });
+
                 var form = $('form').validate({
                     rules: {
                         students: {
@@ -183,6 +191,14 @@
                     
                 })
 
+                setTimeout(function () {
+                    $(".glyphicon-arrow-right").addClass('glyphicon-chevron-right');
+                    $(".glyphicon-arrow-right").removeClass('glyphicon-arrow-right');
+
+                    $(".glyphicon-arrow-left").addClass('glyphicon-chevron-left');
+                    $(".glyphicon-arrow-left").removeClass('glyphicon-arrow-left');
+
+                }, 500);
             })
         </script>
     }

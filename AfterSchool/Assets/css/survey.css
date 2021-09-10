@@ -1,0 +1,108 @@
+﻿.datetimepicker .input-group-addon {
+    padding: 0 9px;
+    font-size: 24px;
+}
+
+.datetimepicker.dropdown-menu {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.1);
+    padding: 10px;
+}
+
+    .datetimepicker.dropdown-menu:before {
+        border-bottom-color: rgba(0, 0, 0, 0.08);
+    }
+
+    .datetimepicker.dropdown-menu table {
+        border-collapse: separate;
+        border-spacing: 7px 2px;
+    }
+
+        .datetimepicker.dropdown-menu table thead tr th.prev,
+        .datetimepicker.dropdown-menu table thead tr th.next {
+            padding: 0;
+        }
+
+            .datetimepicker.dropdown-menu table thead tr th.prev .s7-angle-right,
+            .datetimepicker.dropdown-menu table thead tr th.next .s7-angle-right,
+            .datetimepicker.dropdown-menu table thead tr th.prev .s7-angle-left,
+            .datetimepicker.dropdown-menu table thead tr th.next .s7-angle-left {
+                font-size: 28px;
+            }
+
+            .datetimepicker.dropdown-menu table thead tr th.prev:hover,
+            .datetimepicker.dropdown-menu table thead tr th.next:hover {
+                background-color: transparent;
+                color: #00c5a3;
+            }
+
+        .datetimepicker.dropdown-menu table thead tr th.switch {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+            .datetimepicker.dropdown-menu table thead tr th.switch:hover {
+                background-color: transparent;
+                color: #00c5a3;
+            }
+
+        .datetimepicker.dropdown-menu table thead tr th.dow {
+            font-weight: 400;
+            font-size: 14px;
+            padding-top: 10px;
+        }
+
+        .datetimepicker.dropdown-menu table tbody tr td {
+            line-height: 30px;
+            padding: 0 8px;
+        }
+
+            .datetimepicker.dropdown-menu table tbody tr td.day {
+                border-radius: 50%;
+                color: #888888;
+            }
+
+                .datetimepicker.dropdown-menu table tbody tr td.day.old,
+                .datetimepicker.dropdown-menu table tbody tr td.day.new {
+                    color: #c8c8c8;
+                }
+
+                .datetimepicker.dropdown-menu table tbody tr td.day.active {
+                    background: #00c5a3;
+                    color: #494949;
+                    text-shadow: none;
+                }
+
+            .datetimepicker.dropdown-menu table tbody tr td .year,
+            .datetimepicker.dropdown-menu table tbody tr td .month,
+            .datetimepicker.dropdown-menu table tbody tr td .hour,
+            .datetimepicker.dropdown-menu table tbody tr td .minute {
+                color: #888888;
+            }
+
+                .datetimepicker.dropdown-menu table tbody tr td .year.old,
+                .datetimepicker.dropdown-menu table tbody tr td .month.old,
+                .datetimepicker.dropdown-menu table tbody tr td .hour.old,
+                .datetimepicker.dropdown-menu table tbody tr td .minute.old,
+                .datetimepicker.dropdown-menu table tbody tr td .year.new,
+                .datetimepicker.dropdown-menu table tbody tr td .month.new,
+                .datetimepicker.dropdown-menu table tbody tr td .hour.new,
+                .datetimepicker.dropdown-menu table tbody tr td .minute.new {
+                    color: #c8c8c8;
+                }
+
+                .datetimepicker.dropdown-menu table tbody tr td .year.active,
+                .datetimepicker.dropdown-menu table tbody tr td .month.active,
+                .datetimepicker.dropdown-menu table tbody tr td .hour.active,
+                .datetimepicker.dropdown-menu table tbody tr td .minute.active {
+                    background: #00c5a3;
+                    color: #ffffff;
+                    text-shadow: none;
+                }
+
+            .datetimepicker.dropdown-menu table tbody tr td fieldset legend {
+                font-size: 17px;
+                font-weight: 400;
+                color: #6f6f6f;
+                margin-bottom: 5px;
+            }
