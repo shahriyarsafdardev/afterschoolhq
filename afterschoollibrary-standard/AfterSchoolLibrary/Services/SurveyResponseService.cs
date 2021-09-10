@@ -29,7 +29,8 @@ namespace AfterSchoolLibrary.Services
                        LastModifiedDate = DateTime.Now,
                        LastModifiedBy = userId,
                        Uid = Guid.NewGuid(),
-                       SurveyFeedbackStatusTypeId = surveyFeedbackStatus
+                       SurveyFeedbackStatusTypeId = surveyFeedbackStatus,
+                       LastAttendedFormQuestionAnswerUid = null
                    };
 
                    msgs.AddRange(surveyResponse.Save(dc));

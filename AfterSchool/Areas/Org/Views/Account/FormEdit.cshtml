@@ -9,7 +9,7 @@
     var questions = new List<FormQuestion>();
     var typesWithRating = new List<QuestionType>() { QuestionType.Rating };
     var typesWithOptions = new List<QuestionType>() { QuestionType.CheckboxList, QuestionType.DropDownList, QuestionType.RadioList, QuestionType.RadioMatrix, QuestionType.Emoji };
-    var typesUserCannotAdd = new List<QuestionType>() { QuestionType.TextBlock, QuestionType.NotSet, QuestionType.RadioMatrix };
+    var typesUserCannotAdd = Model.GetTypesUserCannotAdd();
 
     if (questionGroup.IsNotEmpty())
     {
@@ -602,7 +602,7 @@
         var rtn = `<select class="form-control" onChange="showEditButton(${getQuestionCount()})" id="questiontype-${getQuestionCount()}" name="new-questiontype-${getQuestionCount()}">`;
         @foreach (var type in Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>().Where(questionType => !typesUserCannotAdd.Contains(questionType)))
         {
-            @:rtn += '<option value="@((int)type)">@type.ToString().SplitByUpperCase()</option>';
+              @:rtn += '<option value="@((int)type)">@type.ToString().SplitByUpperCase()</option>';
         }
         rtn += '</select>';
         return rtn;
@@ -737,7 +737,11 @@
                 var optionRowArray = optionRow.split('=');
                 optionNo = i;
                 optionValue = optionRowArray[0];
-                optionDescriptionValue = optionRowArray[1];
+
+                var optionDescriptionValue = '';
+                if (optionRowArray[1]) {
+                    optionDescriptionValue = optionRowArray[1];
+                }
                 //create new row for option modal
                 addOptionRow(optionType, optionNo, optionValue, optionDescriptionValue)
             }
@@ -759,7 +763,17 @@
                     else {
                         $(this).find("input.option").removeClass("danger");
                     }
-                    var rowOption = $(this).find("input.option").val() + "=" + $(this).find("input.optionDescription").val() + ",";
+
+                    var optVal = $(this).find("input.option").val();
+                    var optDesc = $(this).find("input.optionDescription").val();
+                    var rowOption;
+
+                    if (optDesc) {
+                        rowOption = `${optVal}=${optDesc},`
+                    } else {
+                        rowOption = `${optVal},`
+                    }
+
                     optionString = optionString + rowOption;
                 }
             });
