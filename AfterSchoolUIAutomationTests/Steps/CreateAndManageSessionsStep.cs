@@ -1,6 +1,7 @@
 ﻿using AfterSchoolUIAutomationTests.Pages;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Firefox;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +23,8 @@ namespace AfterSchoolUIAutomationTests.Steps
         public CreateAndManageSessionsStep(ScenarioContext scenarioContext)
         {
             _scenarioContext = scenarioContext;
-            webDriver = new ChromeDriver(AppDomain.CurrentDomain.BaseDirectory);
+            //webDriver = new ChromeDriver(AppDomain.CurrentDomain.BaseDirectory);
+            webDriver = new FirefoxDriver(AppDomain.CurrentDomain.BaseDirectory);
             loginPage = new LoginPage(webDriver);
             createAndManageSessionsPage = new CreateAndManageSessionsPage(webDriver);
         }
@@ -30,11 +32,11 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Given(@"Login to the school account")]
         public void LoginToSchoolAccount()
         {
-            webDriver.Navigate().GoToUrl(Parameter.Get("Login", "LoginUrl"));
+            webDriver.Navigate().GoToUrl(Parameter.Get("CreateAndManageSessions", "LoginUrl"));
             webDriver.WaitInSeconds(3);
             webDriver.Manage().Window.Maximize();
-            loginPage.PopulateName(Parameter.Get("Login", "UserName"));
-            loginPage.PopulatePassword(Parameter.Get("Login", "Password"));
+            loginPage.PopulateName(Parameter.Get("CreateAndManageSessions", "UserName"));
+            loginPage.PopulatePassword(Parameter.Get("CreateAndManageSessions", "Password"));
             loginPage.ClickSubmit();
         }
 
@@ -85,7 +87,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         public void PopulateSchduleForm()
         {
             createAndManageSessionsPage.HasSchedule(Parameter.Get("CreateAndManageSessions", "HasSchedule"));
-            createAndManageSessionsPage.RepeatsWeekly(Parameter.Get("CreateAndManageSessions", "IsWeekly"));
+            //createAndManageSessionsPage.RepeatsWeekly(Parameter.Get("CreateAndManageSessions", "IsWeekly")); 
             createAndManageSessionsPage.WeekDays();
             createAndManageSessionsPage.SetScheduleStartDate();
             createAndManageSessionsPage.SetScheduleEndDate();
@@ -128,14 +130,21 @@ namespace AfterSchoolUIAutomationTests.Steps
             createAndManageSessionsPage.ClickPriceSaveAndNextBtn();
         }
 
-        //ToDo: Verify
-
-
-
+        [Then(@"Veriy the activity is published")]
+        public void VerifyCompleteRegistrationMessage()
+        {
+            string completed = createAndManageSessionsPage.ActivityPublished().Trim();
+            completed.Contains("Your Activity is published");
+            webDriver.WaitInSeconds(2);
+        }
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            if (webDriver != null)
+            {
+                webDriver.Dispose();
+                webDriver = null;
+            }
         }
     }
 }

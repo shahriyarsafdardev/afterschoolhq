@@ -16,13 +16,16 @@ namespace AfterSchoolUIAutomationTests.Pages
         }
 
         #region Navigate to Sessions
+        private IWebElement AccountBtnElement => webDriver.FindElement(By.XPath("(//div[@id='accounts']//button[@class='btn btn-primary btn-xl btn-space btn-block'])[1]"));
         private IWebElement ActivityCenterElement => webDriver.FindElement(By.XPath("//ul[@class='sidebar-elements']//li[3]"));
-        private IWebElement SessionLinkElement => webDriver.FindElement(By.XPath("(//div[@class='content nano-content'])[1]//li[3]//a"));
+        private IWebElement SessionLinkElement => webDriver.FindElement(By.XPath("(//div[@class='content nano-content'])[1]//li[5]//a"));
         private IWebElement AddSessionBtnElement => webDriver.FindElement(By.XPath("(//div[@class='pull-right'])[1]//a"));
 
         public CreateAndManageSessionsPage HoverActivityCenterAndClickSession()
         {
             webDriver.WaitInSeconds(1);
+            AccountBtnElement.Click();
+            webDriver.WaitInSeconds(4);
             Actions action = new Actions(webDriver);
             action.MoveToElement(ActivityCenterElement).Perform();
             webDriver.WaitInSeconds(2);
@@ -47,7 +50,7 @@ namespace AfterSchoolUIAutomationTests.Pages
 
         public CreateAndManageSessionsPage PopulateSessionName(string sessionName)
         {
-            SessionNameBtnElement.SendKeys(sessionName);
+            SessionNameBtnElement.SendKeys(sessionName + DateTime.Now.ToString("yyyyMMddHHmmss").Substring(8));
             webDriver.WaitInSeconds(1);
             return this;
         }
@@ -361,6 +364,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         private IWebElement RegistrationFeeElement => webDriver.FindElement(By.XPath("//div[@class='input-group input-group-lg xs-mb-15']//input"));
         private IWebElement PriceParentpayElement => webDriver.FindElement(By.XPath("//div[@class='am-checkbox']//label"));
         private IWebElement PriceSubmitBtnElement => webDriver.FindElement(By.XPath("//button[@type='submit'][text()='Save & Review »']"));
+        private IWebElement ActivityPublicationElement => webDriver.FindElement(By.XPath("//div[@class='widget-head']//p"));
 
         public CreateAndManageSessionsPage DoParentsPay()
         {
@@ -385,6 +389,11 @@ namespace AfterSchoolUIAutomationTests.Pages
             PriceSubmitBtnElement.Click();
             webDriver.WaitInSeconds(4);
             return this;
+        }
+        public string ActivityPublished()
+        {
+            webDriver.WaitInSeconds(1);
+            return ActivityPublicationElement.Text;
         }
         #endregion
 

@@ -14,4 +14,4 @@ Scenario: Create New Session, Session Activity And Manage Session
 	Given Populate activity contact form and click save
 	Given Populate activity location form and click save
 	Given Populate price and click save
-	#Then then veriy the session is published
+	Then  Veriy the activity is published

@@ -138,6 +138,9 @@
 
 
   <CreateAndManageSessions>
+    <LoginUrl>http://localhost:54849/login</LoginUrl>
+    <UserName>stephny@yopmail.com</UserName>
+    <Password>12345678</Password>
     <SessionName>Test Session 1</SessionName>
     <SessionDetails>Test Session 1 Details</SessionDetails>
     <SessionActivityName>Test Session 1 Activity 1</SessionActivityName>
