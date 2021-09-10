@@ -26,7 +26,7 @@ namespace AfterSchoolLibrary.Models
 		/// Required.
 		/// </summary>
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
-		public Guid LastAttendedFormQuestionAnswerUid { get { return (Guid)MDV["LastAttendedFormQuestionAnswerUid"].Value; } set { MDV["LastAttendedFormQuestionAnswerUid"].Value = value; } }
+		public Guid? LastAttendedFormQuestionAnswerUid { get { return (Guid?)MDV["LastAttendedFormQuestionAnswerUid"].Value; } set { MDV["LastAttendedFormQuestionAnswerUid"].Value = value; } }
 		
 
         public SurveyResponse()
@@ -36,7 +36,6 @@ namespace AfterSchoolLibrary.Models
 			this.SurveyFeedbackStatusTypeId = SurveyFeedbackStatus.NotSet;
 			this.IsDeleted = false;
 			this.Uid = Guid.NewGuid();
-			this.LastAttendedFormQuestionAnswerUid = Guid.NewGuid();
 			
         }
 
