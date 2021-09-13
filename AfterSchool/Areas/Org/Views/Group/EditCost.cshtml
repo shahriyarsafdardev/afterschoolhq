@@ -34,26 +34,22 @@
             <div class="col-md-8 col-lg-9">
                 <form id="form1" method="post" action="@Url.Action("editcost", "group", new { id = Model.Uid, isnew = Request["isnew"] })" class="form-horizontal">
 
-                    @if (canProcessPayments)
-                    {
-                        @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editcost", "next", true, true, Request))
-                        @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(true, false))
-                    }
+
+                    @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editcost", "next", true, true, Request))
+                    @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(true, false, !canProcessPayments))
 
                     @{Html.RenderPartial("_GroupPayment", Model);}
 
-                    @if (canProcessPayments)
-                    {
-                        <div class="form-group">
-                            <div class="col-sm-6 col-sm-offset-3">
-                                @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(false, false))
-                            </div>
-                            <div class="col-sm-3">
-                                @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editcost", "next", false, true, Request))
-                            </div>
 
+                    <div class="form-group">
+                        <div class="col-sm-6 col-sm-offset-3">
+                            <div>@Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(false, false, !canProcessPayments))</div>
                         </div>
-                    }
+                        <div class="col-sm-3">
+                            @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editcost", canProcessPayments ? "next" : "onlynext", false, true, Request))
+                        </div>
+                    </div>
+
                 </form>
             </div>
 
@@ -64,3 +60,31 @@
         </div>
     </div>
 </div>
+
+
+<div class="modal fade" id="processPayments" tabindex="-1" role="dialog" aria-labelledby="processPaymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center" style="padding-top: 5px;">
+                <p>Your account must be able to process payments in order to edit the cost</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            $(document).on('click', '.disabled', function (event) {
+                event.preventDefault();
+                $("#processPayments").modal('show');
+            })
+        })
+    </script>
+  
+}

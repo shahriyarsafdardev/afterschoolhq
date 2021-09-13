@@ -13,11 +13,11 @@ namespace AfterSchool.Helpers
     public static class ActivitySetupHelper
     {
 
-        public static string SaveButton(bool isTop, bool isPrimary)
+        public static string SaveButton(bool isTop, bool isPrimary, bool? isDisabled = false)
         {
-            return $"<button type=\"submit\" class=\"{ButtonStyle(isTop, isPrimary)}\"><i class=\"s7-diskette\"></i> Save</button>";
+            return $"<button type=\"submit\" class=\"{ButtonStyle(isTop, isPrimary)} {((bool)isDisabled ? "disabled" : "")}\"><i class=\"s7-diskette\"></i> Save</button>";
         }
-
+       
         public static string NavButton(Activity activity, string action, string cmd, bool isTop, bool isPrimary, HttpRequestBase request)
         {
             var canPublishActivity = SessionVariables.CurrentUser.CanPublishActivity(SessionVariables.CurrentAccount, activity);
@@ -52,6 +52,13 @@ namespace AfterSchool.Helpers
                     return "&raquo;";
 
                 return "Save &amp; Next &raquo;";
+            }
+            else if (cmd == "onlynext")
+            {
+                if (isTop)
+                    return "&raquo;";
+
+                return "Next &raquo;";
             }
             else if (cmd == "done")
             {
