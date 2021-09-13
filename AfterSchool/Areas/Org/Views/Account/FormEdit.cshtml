@@ -14,8 +14,9 @@
     if (questionGroup.IsNotEmpty())
     {
         qgId = questionGroup.ID;
-        questions = questionGroup.GetAllQuestions().Where(a => a.IsActive).ToList();
+        questions = questionGroup.GetActiveQuestions();
     }
+    var count = 1;
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -150,12 +151,12 @@
                                                 <tr class="questionRow">
                                                     <td>
                                                         <label class="lbl-display-order" id="displayOrderlabel-@question.ID">
-                                                            @question.DisplayOrder
+                                                            @count
                                                         </label>
                                                         <input type="hidden"
                                                                id="sortorder-@question.ID"
                                                                name="displayOrderId-@question.ID" class="displayOrderId"
-                                                               value=" @question.DisplayOrder" />
+                                                               value="@count" />
                                                         <input type="hidden"
                                                                id="questionid-@question.ID"
                                                                name="questionid-@question.ID"
@@ -298,6 +299,7 @@
                                                         <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteQuestion('@question.Text', '@Url.Action("delete","Account", new { id = @question.ID.ToString()})')"><span class="text-danger"><i class="s7-trash"></i></span></button>
                                                     </td>
                                                 </tr>
+                                                count++;
                                             }
 
                                             @if (questionGroup.IsNotEmpty())
