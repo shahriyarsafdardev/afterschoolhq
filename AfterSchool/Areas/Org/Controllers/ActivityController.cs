@@ -2587,7 +2587,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var assignmentTypes = new RegistrationAssignmentType[] { RegistrationAssignmentType.Applied, RegistrationAssignmentType.WaitingList, RegistrationAssignmentType.Reserved, RegistrationAssignmentType.ReservedPendingParentalConsent, RegistrationAssignmentType.ReservedPendingPayment, RegistrationAssignmentType.Invited };
 
-            ViewBag.Registrants = activity.GetRegistrantActivities(msgs)
+            ViewBag.Registrants = activity.GetRegistrantActivities(true, msgs)
                                     .Where(ra => ra.AssignmentTypeId.In(assignmentTypes))
                                     .Select(ra => ra.ToRegistrant())
                                     .OrderBy(x => x.FirstName)
