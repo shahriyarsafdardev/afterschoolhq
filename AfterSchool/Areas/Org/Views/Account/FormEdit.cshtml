@@ -14,7 +14,7 @@
     if (questionGroup.IsNotEmpty())
     {
         qgId = questionGroup.ID;
-        questions = questionGroup.GetAllQuestions();
+        questions = questionGroup.GetAllQuestions().Where(a => a.IsActive).ToList();
     }
 }
 
