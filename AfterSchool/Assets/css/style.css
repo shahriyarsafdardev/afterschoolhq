@@ -2751,6 +2751,15 @@ output {
   -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
   transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
 }
+
+.form-control.input-sm {
+   padding: 0px 12px;
+}
+
+label.rating-label {
+    line-height: 30px;
+    margin-bottom: 0px;
+}
 .form-control.input-sm{
     padding: 0px 12px;
 }

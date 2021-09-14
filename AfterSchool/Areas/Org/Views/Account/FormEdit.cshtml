@@ -14,8 +14,9 @@
     if (questionGroup.IsNotEmpty())
     {
         qgId = questionGroup.ID;
-        questions = questionGroup.GetAllQuestions();
+        questions = questionGroup.GetActiveQuestions();
     }
+    var count = 1;
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -47,7 +48,7 @@
                                         <button type="submit" class="btn btn-default btn-space" onclick="navigateForm('@Url.Action("formedit", "account", new { id = Model.ID, qg = qgId, cmd = "prev" })')">&laquo;</button>
                                     }
                                     <button type="submit" class="btn btn-default btn-space"><i class="s7-diskette"></i> Save</button>
-                                    @if (questionGroups.Last().ID != qgId)
+                                    @if (questionGroups.Count() > 0 ? questionGroups.Last().ID != qgId : false)
                                     {
                                         <button type="submit" class="btn btn-primary btn-space" onclick="navigateForm('@Url.Action("formedit", "account", new { id = Model.ID, qg = qgId, cmd = "next" })')">&raquo;</button>
                                     }
@@ -93,12 +94,12 @@
                             <div class="panel-heading">
                                 <div class="btn-group pull-right">
 
-                                    @if (questionGroups.First().ID != qgId)
+                                    @if (questionGroups.Count() > 0 ? questionGroups.First().ID != qgId : false)
                                     {
                                         <button type="submit" class="btn btn-default btn-space" onclick="navigateForm('@Url.Action("formedit", "account", new { id = Model.ID, qg = questionGroup.ID, cmd = "prev" })')">&laquo;</button>
                                     }
                                     <button type="submit" class="btn btn-default btn-space"><i class="s7-diskette"></i> Save</button>
-                                    @if (questionGroups.Last().ID != qgId)
+                                    @if (questionGroups.Count() > 0 ? questionGroups.Last().ID != qgId : false)
                                     {
                                         <button type="submit" class="btn btn-primary btn-space" onclick="navigateForm('@Url.Action("formedit", "account", new { id = Model.ID, qg = questionGroup.ID, cmd = "next" })')">&raquo;</button>
                                     }
@@ -107,21 +108,24 @@
 
                                 <p></p>
 
-                                @if (questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet || questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.Custom)
+                                @if (questionGroup.IsNotEmpty())
                                 {
-                                    <input type="text"
-                                           id="name-@questionGroup.ID"
-                                           name="name-@questionGroup.ID"
-                                           value="@questionGroup.Name"
-                                           required
-                                           class="form-control input-lg input-lg-font"
-                                           onfocus="this.select()"
-                                           data-tooltip-id="name-@questionGroup.ID"
-                                           placeholder="Enter your new section name" />
-                                }
-                                else
-                                {
-                                    <p class="text-medium">@questionGroup.Name</p>
+                                    if (questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet || questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.Custom)
+                                    {
+                                        <input type="text"
+                                               id="name-@questionGroup.ID"
+                                               name="name-@questionGroup.ID"
+                                               value="@questionGroup.Name"
+                                               required
+                                               class="form-control input-lg input-lg-font"
+                                               onfocus="this.select()"
+                                               data-tooltip-id="name-@questionGroup.ID"
+                                               placeholder="Enter your new section name" />
+                                    }
+                                    else
+                                    {
+                                        <p class="text-medium">@questionGroup.Name</p>
+                                    }
                                 }
 
 
@@ -147,12 +151,12 @@
                                                 <tr class="questionRow">
                                                     <td>
                                                         <label class="lbl-display-order" id="displayOrderlabel-@question.ID">
-                                                            @question.DisplayOrder
+                                                            @count
                                                         </label>
                                                         <input type="hidden"
                                                                id="sortorder-@question.ID"
                                                                name="displayOrderId-@question.ID" class="displayOrderId"
-                                                               value=" @question.DisplayOrder" />
+                                                               value="@count" />
                                                         <input type="hidden"
                                                                id="questionid-@question.ID"
                                                                name="questionid-@question.ID"
@@ -254,14 +258,14 @@
 
                                                     <td>
                                                         @{Html.RenderPartial(
-                                                                            "~/Views/Shared/_SwitchButton.cshtml",
-                                                                            question.IsActive,
-                                                                            new ViewDataDictionary()
-                                                                            {
-                                                                            { "checkboxname", "active-" + question.ID },
-                                                                            { "checkboxid", "active-" + question.ID },
-                                                                            { "disabled", question.IsLocked },
-                                                                            { "classname", "question-isactive" }
+                                                                              "~/Views/Shared/_SwitchButton.cshtml",
+                                                                              question.IsActive,
+                                                                              new ViewDataDictionary()
+                                                                              {
+                                                                                                                    { "checkboxname", "active-" + question.ID },
+                                                                                                                    { "checkboxid", "active-" + question.ID },
+                                                                                                                    { "disabled", question.IsLocked },
+                                                                                                                    { "classname", "question-isactive" }
 });}
                                                     </td>
                                                     <td>
@@ -272,43 +276,47 @@
                                                                    question.IsRequired,
                                                                    new ViewDataDictionary()
                                                                    {
-                                                                            { "checkboxname", "required-" + question.ID },
-                                                                            { "checkboxid", "required-" + question.ID },
-                                                                            { "disabled", question.IsLocked },
-                                                                            { "classname", "question-isrequired" }
+                                                                                                                { "checkboxname", "required-" + question.ID },
+                                                                                                                { "checkboxid", "required-" + question.ID },
+                                                                                                                { "disabled", question.IsLocked },
+                                                                                                                { "classname", "question-isrequired" }
 });
                                                         }
                                                     </td>
                                                     <td>
                                                         @{Html.RenderPartial(
-                                                                              "~/Views/Shared/_SwitchButton.cshtml",
-                                                                              question.IsAnswerDescriptionEnabled,
-                                                                              new ViewDataDictionary()
-                                                                              {
-                                                                            { "checkboxname", "answerDescription-" + question.ID },
-                                                                            { "checkboxid", "answerDescription-" + question.ID },
-                                                                            { "disabled", question.IsLocked },
-                                                                            { "classname", "question-IsAnswerDescriptionEnabled" }
+                                                                                "~/Views/Shared/_SwitchButton.cshtml",
+                                                                                question.IsAnswerDescriptionEnabled,
+                                                                                new ViewDataDictionary()
+                                                                                {
+                                                                                                                    { "checkboxname", "answerDescription-" + question.ID },
+                                                                                                                    { "checkboxid", "answerDescription-" + question.ID },
+                                                                                                                    { "disabled", question.IsLocked },
+                                                                                                                    { "classname", "question-IsAnswerDescriptionEnabled" }
 });}
                                                     </td>
                                                     <td>
                                                         <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteQuestion('@question.Text', '@Url.Action("delete","Account", new { id = @question.ID.ToString()})')"><span class="text-danger"><i class="s7-trash"></i></span></button>
                                                     </td>
                                                 </tr>
+                                                count++;
                                             }
 
-                                            @if (questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet || true)
+                                            @if (questionGroup.IsNotEmpty())
                                             {
-                                                <tr>
-                                                    <td colspan="5">
-                                                        <button type="button" class="btn btn-default" onclick="addQuestion()">
-                                                            <i class="s7-plus"></i> Add Question
-                                                        </button>
-                                                        <button type="button" class="btn btn-default" onclick="addTextBlock()">
-                                                            <i class="s7-plus"></i> Add Text Block
-                                                        </button>
-                                                    </td>
-                                                </tr>
+                                                if (questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet || true)
+                                                {
+                                                    <tr>
+                                                        <td colspan="5">
+                                                            <button type="button" class="btn btn-default" onclick="addQuestion()">
+                                                                <i class="s7-plus"></i> Add Question
+                                                            </button>
+                                                            <button type="button" class="btn btn-default" onclick="addTextBlock()">
+                                                                <i class="s7-plus"></i> Add Text Block
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                }
                                             }
                                         </tbody>
                                     </table>
@@ -330,7 +338,7 @@
                     <div class="col-sm-8">
                         <button type="submit" class="btn btn-default btn-lg btn-block"><i class="s7-diskette"></i> Save</button>
                     </div>
-                    @if (questionGroups.Last().ID != qgId && qgId != 0)
+                    @if (questionGroups.Count() > 0 ? questionGroups.Last().ID != qgId && qgId != 0 : false)
                     {
                         <div class="col-sm-2">
                             <button type="submit" class="btn btn-primary btn-lg btn-block" onclick="navigateForm('@Url.Action("formedit", "account", new { id = Model.ID, qg = qgId, cmd = "next" })')">Next &raquo;</button>
@@ -483,54 +491,22 @@
             </div>
             <div class="modal-body form">
 
-                <div class="form-group row d-flex">
-                    <div class="col">
-                        <input class="form-control input-sm rating" id="question-rating-min" name="question-rating-min" oninput="setOptionalLabelAndIncrement();"/>
-                    </div>
+                <p>Enter Min, Max and Increment values. Your options are not saved until you hit the save button on the screen</p>
 
-                    <div class="col">
-                        <label class="rating-label">
-                            to
-                        </label>
-                    </div>
-
-                    <div class="col">
-                        <input class="form-control input-sm rating" id="question-rating-max" name="question-rating-max" oninput="setOptionalLabelAndIncrement();"/>
-                    </div>
-
-                    <div class="col">
-                        <label class="rating-label">
-                            by increments of
-                        </label>
-                    </div>
-
-                    <div class="col">
-                        <select class="form-control input-sm rating" id="question-rating-increment" onchange="setRatingIncrement()">
-                            <option>1</option>
-                            <option>2</option>
-                            <option>5</option>
-                            <option>10</option>
-                            <option>25</option>
-                        </select>
-                    </div>
+                <div class="form-group">
+                    @*<label><span id="question-rating-label1"></span></label>*@
+                    <label><span id="question-rating-label1"></span></label>
+                    <input class="form-control" id="question-rating-min" name="question-rating-min" required placeholder="Enter the minimum value" />
                 </div>
 
-                <div class="form-group row">
-                    <div class="col-xs-1">
-                        <label class="rating-label"><span id="question-rating-label1">1</span></label>
-                    </div>
-                    <div class="col-xs-6">
-                        <input class="form-control input-sm" id="question-rating-label-min" required placeholder="Label (Optional)" />
-                    </div>
+                <div class="form-group">
+                    <label><span id="question-rating-label2"></span></label>
+                    <input class="form-control" id="question-rating-max" name="question-rating-max" required placeholder="Enter the maximum value" />
                 </div>
 
-                <div class="form-group row">
-                    <div class="col-xs-1">
-                        <label class="rating-label"><span id="question-rating-label2">5</span></label>
-                    </div>
-                    <div class="col-xs-6">
-                        <input class="form-control input-sm" id="question-rating-label-max" required placeholder="Label (Optional)" />
-                    </div>
+                <div class="form-group">
+                    <label><span id="question-rating-label3"></span></label>
+                    <input class="form-control" id="question-rating-increment" name="question-rating-increment" placeholder="Enter the increment value" />
                 </div>
 
             </div>
@@ -699,7 +675,7 @@
         $('#question-table')
             .find('tr')
             .last()
-            .before(`<tr><td colspan="3">${getDescription()}${getTextBlockQuestionType()}</td><td>${getShowCheckbox()}</td><td></td></tr>`);
+            .before(`<tr><td>${getSortOrder()}</td><td colspan="3">${getDescription()}${getTextBlockQuestionType()}</td><td>${getShowCheckbox()}</td><td></td><td></td><td>${getDeleteIcon()}</td></tr>`);
         incrementQuestionCount();
     }
 
@@ -829,64 +805,25 @@
     //called when rating modal is going to display
     function setRating(id) {
         selectedLinkQuestion = id;
-        var ratingString = $('#options-text-' + id).val();        
+        var ratingString = $('#options-text-' + id).val();
         var ratingValues = ratingString.split(",");
         $('#question-rating-label').html($('#text-' + id).val());
-
         //if question exist then read data from hidden field and populate text fields
         if (ratingValues.length > 1) {
-            $('#question-rating-min').val(ratingValues[0].substring(0, ratingValues[0].indexOf('=')));
-            $('#question-rating-max').val(ratingValues[1].substring(0, ratingValues[1].indexOf('=')));
-            setOptionalLabelAndIncrement();
-            $('#question-rating-increment').val(ratingValues[2]);
-            $('#question-rating-label-min').val(ratingValues[0].substring(ratingValues[0].indexOf("=") + 1));
-            $('#question-rating-label-max').val(ratingValues[1].substring(ratingValues[1].indexOf("=") + 1));
-            $('#question-rating-label1').empty();
-            $('#question-rating-label1').append(ratingValues[0].substring(0, ratingValues[0].indexOf('=')));
-            $('#question-rating-label2').empty();
-            $('#question-rating-label2').append(ratingValues[1].substring(0, ratingValues[1].indexOf('=')));
+            $('#question-rating-min').val(ratingValues[0]);
+            $('#question-rating-max').val(ratingValues[1])
+            ratingValues.length > 2 ? $('#question-rating-increment').val(ratingValues[2]) : $('#question-rating-increment').val('');
         }
+        //setting default values
         else {
             $('#question-rating-min').val('1');
             $('#question-rating-max').val('5');
-            $('#question-rating-increment').val('1').change();
-            $('#question-rating-label-min').val('');
-            $('#question-rating-label-max').val('');
-            $('#question-rating-label1').empty();
-            $('#question-rating-label1').append('1');
-            $('#question-rating-label2').empty();
-            $('#question-rating-label2').append('5');
-            setOptionalLabelAndIncrement();
-        }
-    }
-
-    function setRatingIncrement() {
-        $('#question-rating-increment').val($('#question-rating-increment').val());
-    }
-
-    function setOptionalLabelAndIncrement() {
-
-        var ratingMaxValue = $('#question-rating-max').val();
-
-        $('#question-rating-label1').empty();
-        $('#question-rating-label1').append($('#question-rating-min').val());
-        $('#question-rating-label2').empty();
-        $('#question-rating-label2').append($('#question-rating-max').val());
-
-        $('#question-rating-increment').empty();
-        //var incrementValues = [1,2,5,10,25];
-        var incrementValues = [];
-
-        for (var i = 0; i < ratingMaxValue; i++) {
-            if (ratingMaxValue % i == 0) {
-                var newOption = $('<option value="' + i + '">' + i + '</option>');
-                $('#question-rating-increment').append(newOption);
-            }
+            $('#question-rating-increment').val('1');
         }
     }
 
     function updateRating() {
-        $('#options-text-' + selectedLinkQuestion).val($('#question-rating-min').val() + "=" + $('#question-rating-label-min').val() + "," + $('#question-rating-max').val() + "=" + $('#question-rating-label-max').val() + "," + $('#question-rating-increment').val());
+            $('#options-text-' + selectedLinkQuestion).val($('#question-rating-min').val() + "," + $('#question-rating-max').val() + "," + $('#question-rating-increment').val());
     }
 
     function deleteQuestion(name, url) {
