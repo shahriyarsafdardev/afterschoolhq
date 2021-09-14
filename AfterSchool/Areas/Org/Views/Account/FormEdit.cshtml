@@ -483,25 +483,29 @@
             </div>
             <div class="modal-body form">
 
-                <div class="form-group row">
-                    <div class="col-xs-2">
-                        <input class="form-control input-sm" id="question-rating-min" name="question-rating-min" oninput="setOptionalLabelAndIncrement();"/>
+                <div class="form-group row d-flex">
+                    <div class="col">
+                        <input class="form-control input-sm rating" id="question-rating-min" name="question-rating-min" oninput="setOptionalLabelAndIncrement();"/>
                     </div>
 
-                    <div class="col-xs-2">
-                        to
+                    <div class="col">
+                        <label class="rating-label">
+                            to
+                        </label>
                     </div>
 
-                    <div class="col-xs-2">
-                        <input class="form-control input-sm" id="question-rating-max" name="question-rating-max" oninput="setOptionalLabelAndIncrement();"/>
+                    <div class="col">
+                        <input class="form-control input-sm rating" id="question-rating-max" name="question-rating-max" oninput="setOptionalLabelAndIncrement();"/>
                     </div>
 
-                    <div class="col-xs-3">
-                        by increments of
+                    <div class="col">
+                        <label class="rating-label">
+                            by increments of
+                        </label>
                     </div>
 
-                    <div class="col-xs-2">
-                        <select class="form-control input-md" id="question-rating-increment" onchange="setRatingIncrement()">
+                    <div class="col">
+                        <select class="form-control input-sm rating" id="question-rating-increment" onchange="setRatingIncrement()">
                             <option>1</option>
                             <option>2</option>
                             <option>5</option>
@@ -513,7 +517,7 @@
 
                 <div class="form-group row">
                     <div class="col-xs-1">
-                        <label><span id="question-rating-label1">1</span></label>
+                        <label class="rating-label"><span id="question-rating-label1">1</span></label>
                     </div>
                     <div class="col-xs-6">
                         <input class="form-control input-sm" id="question-rating-label-min" required placeholder="Label (Optional)" />
@@ -522,7 +526,7 @@
 
                 <div class="form-group row">
                     <div class="col-xs-1">
-                        <label><span id="question-rating-label2">5</span></label>
+                        <label class="rating-label"><span id="question-rating-label2">5</span></label>
                     </div>
                     <div class="col-xs-6">
                         <input class="form-control input-sm" id="question-rating-label-max" required placeholder="Label (Optional)" />
@@ -825,31 +829,34 @@
     //called when rating modal is going to display
     function setRating(id) {
         selectedLinkQuestion = id;
-        var ratingString = $('#options-text-' + id).val();
-        console.log("ratingString : " + ratingString + "Id : " + id);
+        var ratingString = $('#options-text-' + id).val();        
         var ratingValues = ratingString.split(",");
         $('#question-rating-label').html($('#text-' + id).val());
+
         //if question exist then read data from hidden field and populate text fields
         if (ratingValues.length > 1) {
             $('#question-rating-min').val(ratingValues[0].substring(0, ratingValues[0].indexOf('=')));
             $('#question-rating-max').val(ratingValues[1].substring(0, ratingValues[1].indexOf('=')));
-            ratingValues.length > 2 ? $('#question-rating-increment').val(ratingValues[2]) : $('#question-rating-increment').val('');
+            setOptionalLabelAndIncrement();
+            $('#question-rating-increment').val(ratingValues[2]);
             $('#question-rating-label-min').val(ratingValues[0].substring(ratingValues[0].indexOf("=") + 1));
             $('#question-rating-label-max').val(ratingValues[1].substring(ratingValues[1].indexOf("=") + 1));
-            $('#question-rating-label1').val(ratingValues[0].substring(0, ratingValues[0].indexOf('=')));
-            $('#question-rating-label2').val(ratingValues[1].substring(0, ratingValues[1].indexOf('=')));
+            $('#question-rating-label1').empty();
+            $('#question-rating-label1').append(ratingValues[0].substring(0, ratingValues[0].indexOf('=')));
+            $('#question-rating-label2').empty();
+            $('#question-rating-label2').append(ratingValues[1].substring(0, ratingValues[1].indexOf('=')));
         }
         else {
-            console.log("In Else");
             $('#question-rating-min').val('1');
             $('#question-rating-max').val('5');
-            $('#question-rating-increment').val('1');
+            $('#question-rating-increment').val('1').change();
             $('#question-rating-label-min').val('');
             $('#question-rating-label-max').val('');
             $('#question-rating-label1').empty();
             $('#question-rating-label1').append('1');
             $('#question-rating-label2').empty();
             $('#question-rating-label2').append('5');
+            setOptionalLabelAndIncrement();
         }
     }
 
@@ -867,11 +874,12 @@
         $('#question-rating-label2').append($('#question-rating-max').val());
 
         $('#question-rating-increment').empty();
-        var incrementValues = [1,2,5,10,25];
+        //var incrementValues = [1,2,5,10,25];
+        var incrementValues = [];
 
-        for (var i = 0; i < 5; i++) {
-            if (ratingMaxValue > incrementValues[i]) {
-                var newOption = $('<option value="' + i + '">' + incrementValues[i] + '</option>');
+        for (var i = 0; i < ratingMaxValue; i++) {
+            if (ratingMaxValue % i == 0) {
+                var newOption = $('<option value="' + i + '">' + i + '</option>');
                 $('#question-rating-increment').append(newOption);
             }
         }
