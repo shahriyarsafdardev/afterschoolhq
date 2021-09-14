@@ -2621,7 +2621,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var registrantIds = activity.GetRegistrants(msgs)
+                var registrantIds = activity.GetRegistrants(true, msgs)
                                         .Where(x => Request[$"registrant-{x.ID.ToString()}"].IsNotBlank())
                                         .Select(x => x.ID.Value)
                                         .ToList();
