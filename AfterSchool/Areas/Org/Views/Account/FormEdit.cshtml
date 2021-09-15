@@ -37,7 +37,6 @@
             <div class="col-md-8 col-lg-9">
 
                 <form id="form1" method="post" action="@Url.Action("formedit", "account", new { id = Model.ID.ToString(), qg = qgId })" class="form-horizontal">
-                    @*onsubmit="return Validate(event)"*@
 
                     @if (questionGroup.IsEmpty())
                     {
@@ -337,7 +336,7 @@
                         <div class="col-sm-2"></div>
                     }
                     <div class="col-sm-8">
-                        <button type="submit" class="btn btn-default btn-lg btn-block" onclick="Validate()"><i class="s7-diskette"></i> Save</button>
+                        <button type="submit" class="btn btn-default btn-lg btn-block"><i class="s7-diskette"></i> Save</button>
                     </div>
                     @if (questionGroups.Count() > 0 ? questionGroups.Last().ID != qgId && qgId != 0 : false)
                     {
@@ -563,7 +562,7 @@
     }
 
     function getDeleteIcon() {
-        return `<button class="btn btn-default btn-sm md-trigger" onclick="$(this).closest('tr').remove();"><span class="text-danger"><i class="s7-trash"></i></span></button>`;
+        return `<button class="btn btn-default btn-sm md-trigger remove" onclick="$(this).closest('tr').remove();"><span class="text-danger"><i class="s7-trash"></i></span></button>`;
     }
 
     function getShowCheckbox() {
@@ -662,6 +661,20 @@
             $(".twoOptionsValidation").addClass("hide")
         }
     }
+    function updateSorting() {
+        var inputs = $('input.currentposition');
+        var nbElems = inputs.length;
+        $('input.currentposition').each(function (idx) {
+            $(this).val(nbElems - idx);
+        });
+        var totalRows = $('#question-table tr').length - 2;
+        $("#question-table tbody tr").each(function (i) {
+            if (i < totalRows) {
+                $(this).find(".lbl-display-order").text(i + 1);
+                $(this).find(".displayOrderId").val(i + 1);
+            }
+        });
+    }
 
     function removeOption(id) {
         event.preventDefault();
@@ -675,7 +688,8 @@
                 $(this).find($('td:first-child')).text(optionType + " " + newid);
                 $(this).attr("id", optionType + "-" + newid);
             }
-        });
+        }).promise().done(function () { updateSorting(); });
+       
     }
 
     function addTextBlock() {
@@ -861,28 +875,6 @@
         $('input[id^="required-"][disabled!="disabled"]').prop('checked', false);
     }
 
-
-    function Validate() {
-        //console.log("Validate()");
-        //e.preventDefault(e);
-        //return false;
-    }
-
-    const element = document.querySelector('#form1');
-    element.addEventListener('submit', event => {
-
-    event.preventDefault();
-        $("#form1 tr").each(function (index) {
-            console.log(index);
-            if (($(this).find("td:nth-child(4)").find("input:first-of-type").val() === "undefined")) {
-                $(this).addClass("danger");
-                console.log(this);
-            }
-        });
-    console.log('Form submission cancelled.');
-        
-    });
-
 </script>
 
 
@@ -926,19 +918,11 @@
                 var rowCount = $('#question-table tr').length;
             },
             stop: function (e, ui) {
-                var inputs = $('input.currentposition');
-                var nbElems = inputs.length;
-                $('input.currentposition').each(function (idx) {
-                    $(this).val(nbElems - idx);
-                });
-                var totalRows = $('#question-table tr').length - 2;
-                $("#question-table tbody tr").each(function (i) {
-                    if (i < totalRows) {
-                        $(this).find(".lbl-display-order").text(i + 1);
-                        $(this).find(".displayOrderId").val(i + 1);
-                    }
-                });
+                updateSorting();
             }
         });
+        $(document).on('click', '.remove', function () {
+            updateSorting();
+        })
     });
 </script>
