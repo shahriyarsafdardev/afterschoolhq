@@ -562,7 +562,7 @@
     }
 
     function getDeleteIcon() {
-        return `<button class="btn btn-default btn-sm md-trigger" onclick="$(this).closest('tr').remove();"><span class="text-danger"><i class="s7-trash"></i></span></button>`;
+        return `<button class="btn btn-default btn-sm md-trigger remove" onclick="$(this).closest('tr').remove();"><span class="text-danger"><i class="s7-trash"></i></span></button>`;
     }
 
     function getShowCheckbox() {
@@ -661,6 +661,20 @@
             $(".twoOptionsValidation").addClass("hide")
         }
     }
+    function updateSorting() {
+        var inputs = $('input.currentposition');
+        var nbElems = inputs.length;
+        $('input.currentposition').each(function (idx) {
+            $(this).val(nbElems - idx);
+        });
+        var totalRows = $('#question-table tr').length - 2;
+        $("#question-table tbody tr").each(function (i) {
+            if (i < totalRows) {
+                $(this).find(".lbl-display-order").text(i + 1);
+                $(this).find(".displayOrderId").val(i + 1);
+            }
+        });
+    }
 
     function removeOption(id) {
         event.preventDefault();
@@ -674,7 +688,8 @@
                 $(this).find($('td:first-child')).text(optionType + " " + newid);
                 $(this).attr("id", optionType + "-" + newid);
             }
-        });
+        }).promise().done(function () { updateSorting(); });
+       
     }
 
     function addTextBlock() {
@@ -903,19 +918,11 @@
                 var rowCount = $('#question-table tr').length;
             },
             stop: function (e, ui) {
-                var inputs = $('input.currentposition');
-                var nbElems = inputs.length;
-                $('input.currentposition').each(function (idx) {
-                    $(this).val(nbElems - idx);
-                });
-                var totalRows = $('#question-table tr').length - 2;
-                $("#question-table tbody tr").each(function (i) {
-                    if (i < totalRows) {
-                        $(this).find(".lbl-display-order").text(i + 1);
-                        $(this).find(".displayOrderId").val(i + 1);
-                    }
-                });
+                updateSorting();
             }
         });
+        $(document).on('click', '.remove', function () {
+            updateSorting();
+        })
     });
 </script>
