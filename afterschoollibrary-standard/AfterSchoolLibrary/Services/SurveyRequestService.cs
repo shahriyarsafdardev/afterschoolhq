@@ -106,7 +106,8 @@ namespace AfterSchoolLibrary.Services
             row.Add("Last Name");
             formQuestions.OrderBy(a=>a.DisplayOrder).ToList().ForEach(formQuestion =>
             {
-                row.Add(formQuestion.Text);
+                if(formQuestion.QuestionTypeId != QuestionType.TextBox)
+                    row.Add(formQuestion.Text);
             });
 
             return row;
@@ -128,7 +129,7 @@ namespace AfterSchoolLibrary.Services
                     dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
                     row.Add(Convert.ToString(json.blocks[0].text));
                 }
-                else
+                else if (formQuestionAnswer.FormQuestionQuestionTypeId != QuestionType.TextBox)
                 {
                     row.Add(formQuestionAnswer.Text);
                 }
