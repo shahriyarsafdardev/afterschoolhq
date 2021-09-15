@@ -37,6 +37,7 @@
             <div class="col-md-8 col-lg-9">
 
                 <form id="form1" method="post" action="@Url.Action("formedit", "account", new { id = Model.ID.ToString(), qg = qgId })" class="form-horizontal">
+                    @*onsubmit="return Validate(event)"*@
 
                     @if (questionGroup.IsEmpty())
                     {
@@ -336,7 +337,7 @@
                         <div class="col-sm-2"></div>
                     }
                     <div class="col-sm-8">
-                        <button type="submit" class="btn btn-default btn-lg btn-block"><i class="s7-diskette"></i> Save</button>
+                        <button type="submit" class="btn btn-default btn-lg btn-block" onclick="Validate()"><i class="s7-diskette"></i> Save</button>
                     </div>
                     @if (questionGroups.Count() > 0 ? questionGroups.Last().ID != qgId && qgId != 0 : false)
                     {
@@ -859,6 +860,28 @@
     function uncheckAllRequired() {
         $('input[id^="required-"][disabled!="disabled"]').prop('checked', false);
     }
+
+
+    function Validate() {
+        //console.log("Validate()");
+        //e.preventDefault(e);
+        //return false;
+    }
+
+    const element = document.querySelector('#form1');
+    element.addEventListener('submit', event => {
+
+    event.preventDefault();
+        $("#form1 tr").each(function (index) {
+            console.log(index);
+            if (($(this).find("td:nth-child(4)").find("input:first-of-type").val() === "undefined")) {
+                $(this).addClass("danger");
+                console.log(this);
+            }
+        });
+    console.log('Form submission cancelled.');
+        
+    });
 
 </script>
 
