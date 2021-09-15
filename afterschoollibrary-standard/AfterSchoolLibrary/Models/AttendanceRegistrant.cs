@@ -284,8 +284,11 @@ namespace AfterSchoolLibrary.Models
             BasicLibrary.DataAccess.SelectParameter sp = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberPossible"]);
             sp.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
             dq.SelectParameters.Add(sp);
-            dq.Criterias.Add(ObjectMap["attendanceId"], attendanceId);
+            dq.Joins.Add(RegistrantActivity.ObjectMap["RegistrantId"], Registrant.ObjectMap["ID"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.InnerJoin, "RegistrantActivity");
+            dq.Criterias.Add(ObjectMap["AttendanceId"], attendanceId);
             dq.Criterias.Add(ObjectMap["AttendanceIsCompleted"], true);
+            dq.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)RegistrationAssignmentType.Interested, BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.NotEqualTo);
+            dq.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)RegistrationAssignmentType.Withdrawn, BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.NotEqualTo);
 
             var results = dq.Select(msgs);
             if (results.Rows.Any())
