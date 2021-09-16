@@ -256,6 +256,19 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
+        private static void AddCritieriasForAttendanceAssigmentTypes(DatabaseQuery dq)
+        {
+            var assignmentTypesForAttendance = new List<RegistrationAssignmentType>() { RegistrationAssignmentType.Reserved, RegistrationAssignmentType.ReservedPendingPayment, RegistrationAssignmentType.ReservedPendingParentalConsent }; 
+
+            foreach( RegistrationAssignmentType rat in Enum.GetValues(typeof(RegistrationAssignmentType)))
+            {
+                if (rat.NotIn(assignmentTypesForAttendance))
+                {
+                    dq.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)rat, BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.NotEqualTo);
+                }
+            }
+        }
+
         public static int GetPresentCount(int attendanceId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
@@ -265,8 +278,10 @@ namespace AfterSchoolLibrary.Models
             BasicLibrary.DataAccess.SelectParameter sp = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberPresent"]);
             sp.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
             dq.SelectParameters.Add(sp);
+            dq.Joins.Add(RegistrantActivity.ObjectMap["RegistrantId"], Registrant.ObjectMap["ID"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.InnerJoin, "RegistrantActivity");
             dq.Criterias.Add(ObjectMap["attendanceId"], attendanceId);
             dq.Criterias.Add(ObjectMap["AttendanceIsCompleted"], true);
+            AddCritieriasForAttendanceAssigmentTypes(dq);
 
             var results = dq.Select(msgs);
             if (results.Rows.Any())
@@ -287,8 +302,7 @@ namespace AfterSchoolLibrary.Models
             dq.Joins.Add(RegistrantActivity.ObjectMap["RegistrantId"], Registrant.ObjectMap["ID"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.InnerJoin, "RegistrantActivity");
             dq.Criterias.Add(ObjectMap["AttendanceId"], attendanceId);
             dq.Criterias.Add(ObjectMap["AttendanceIsCompleted"], true);
-            dq.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)RegistrationAssignmentType.Interested, BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.NotEqualTo);
-            dq.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)RegistrationAssignmentType.Withdrawn, BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.NotEqualTo);
+            AddCritieriasForAttendanceAssigmentTypes(dq);
 
             var results = dq.Select(msgs);
             if (results.Rows.Any())
@@ -306,8 +320,10 @@ namespace AfterSchoolLibrary.Models
             BasicLibrary.DataAccess.SelectParameter sp = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberPresent"]);
             sp.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
             dq.SelectParameters.Add(sp);
+            dq.Joins.Add(RegistrantActivity.ObjectMap["RegistrantId"], Registrant.ObjectMap["ID"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.InnerJoin, "RegistrantActivity");
             dq.Criterias.Add(ObjectMap["AttendanceActivityId"], activityId);
             dq.Criterias.Add(ObjectMap["AttendanceIsCompleted"], true);
+            AddCritieriasForAttendanceAssigmentTypes(dq);
 
             var results = dq.Select(msgs);
             if (results.Rows.Any())
@@ -325,8 +341,10 @@ namespace AfterSchoolLibrary.Models
             BasicLibrary.DataAccess.SelectParameter sp = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberPossible"]);
             sp.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
             dq.SelectParameters.Add(sp);
+            dq.Joins.Add(RegistrantActivity.ObjectMap["RegistrantId"], Registrant.ObjectMap["ID"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.InnerJoin, "RegistrantActivity");
             dq.Criterias.Add(ObjectMap["AttendanceActivityId"], activityId);
             dq.Criterias.Add(ObjectMap["AttendanceIsCompleted"], true);
+            AddCritieriasForAttendanceAssigmentTypes(dq);
 
             var results = dq.Select(msgs);
             if (results.Rows.Any())
@@ -344,8 +362,10 @@ namespace AfterSchoolLibrary.Models
             BasicLibrary.DataAccess.SelectParameter sp = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberPresent"]);
             sp.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
             dq.SelectParameters.Add(sp);
+            dq.Joins.Add(RegistrantActivity.ObjectMap["RegistrantId"], Registrant.ObjectMap["ID"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.InnerJoin, "RegistrantActivity");
             dq.Criterias.Add(ObjectMap["RegistrantAccountId"], accountId);
             dq.Criterias.Add(ObjectMap["AttendanceIsCompleted"], true);
+            AddCritieriasForAttendanceAssigmentTypes(dq);
 
             var results = dq.Select(msgs);
             if (results.Rows.Any())
@@ -363,8 +383,10 @@ namespace AfterSchoolLibrary.Models
             BasicLibrary.DataAccess.SelectParameter sp = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberPossible"]);
             sp.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
             dq.SelectParameters.Add(sp);
+            dq.Joins.Add(RegistrantActivity.ObjectMap["RegistrantId"], Registrant.ObjectMap["ID"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.InnerJoin, "RegistrantActivity");
             dq.Criterias.Add(ObjectMap["RegistrantAccountId"], accountId);
             dq.Criterias.Add(ObjectMap["AttendanceIsCompleted"], true);
+            AddCritieriasForAttendanceAssigmentTypes(dq);
 
             var results = dq.Select(msgs);
             if (results.Rows.Any())
