@@ -258,15 +258,9 @@ namespace AfterSchoolLibrary.Models
 
         private static void AddCritieriasForAttendanceAssigmentTypes(DatabaseQuery dq)
         {
-            var assignmentTypesForAttendance = new List<RegistrationAssignmentType>() { RegistrationAssignmentType.Reserved, RegistrationAssignmentType.ReservedPendingPayment, RegistrationAssignmentType.ReservedPendingParentalConsent }; 
+            var assignmentTypesForAttendance = new List<RegistrationAssignmentType>() { RegistrationAssignmentType.Reserved, RegistrationAssignmentType.ReservedPendingPayment, RegistrationAssignmentType.ReservedPendingParentalConsent };
 
-            foreach( RegistrationAssignmentType rat in Enum.GetValues(typeof(RegistrationAssignmentType)))
-            {
-                if (rat.NotIn(assignmentTypesForAttendance))
-                {
-                    dq.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)rat, BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.NotEqualTo);
-                }
-            }
+            dq.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], assignmentTypesForAttendance.Select(x => (int)x).ToList(), BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.In);
         }
 
         public static int GetPresentCount(int attendanceId, SystemMessages msgs = null, DatabaseConnection dc = null)
