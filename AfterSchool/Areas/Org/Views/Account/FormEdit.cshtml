@@ -18,7 +18,12 @@
     }
     var count = 1;
 }
-
+<style>
+    .tooltipclass {
+        background-color: #FFCC00;
+        color: white;
+    }
+</style>
 @{Html.RenderPartial("OrgAccountHeader");}
 
 <div class="main-content">
@@ -876,27 +881,59 @@
     }
 
     function Validate() {
-        //console.log("Validate()");
-        //e.preventDefault(e);
-        //return false;
+        $(".btn btn-default btn-lg btn-block").removeAttr("disabled");
+        var validated = true;
+        console.log(" Before If : " + validated);
+        $("#form1 tr").each(function (index) {
+            //console.log(index);
+            //console.log($(this).find("td:nth-child(4)").find("input:first-of-type").val());
+            if (($(this).find("td:nth-child(4)").find("input:first-of-type").val() === "")) {
+
+                $(this).find("td:nth-child(4)").find("button:first-of-type").css("border", "2px solid red").css('cursor', 'pointer').attr('title', 'Please sepcify values.').tooltip({
+                    tooltipClass: 'tooltipclass'
+                });
+                $(this).find("td:nth-child(4)").find("button:last-of-type").css("border", "2px solid red").css('cursor', 'pointer').attr('title', 'Please sepcify values.').tooltip({
+                    tooltipClass: 'tooltipclass'
+                });
+                console.log(this);
+                console.log($(this).find("td:nth-child(4)").find("input:first-of-type").val());
+                validated = false;
+                console.log(" Inside If : " + validated);
+            }
+        });
+        console.log(" After If : " + validated);
+        if (!validated) {
+            event.preventDefault();
+            return false;
+        }        
+        $('#form1').attr('action', '@Url.Action("formedit", "account", new { id = Model.ID.ToString(), qg = qgId })');
     }
 
-    const element = document.querySelector('#form1');
+    @*const element = document.querySelector('#form1');
     element.addEventListener('submit', event => {
-
-        event.preventDefault();
+        $(".btn btn-default btn-lg btn-block").removeAttr("disabled");
+        var validated = true;
         $("#form1 tr").each(function (index) {
             console.log(index);
             console.log($(this).find("td:nth-child(4)").find("input:first-of-type").val());
             if (($(this).find("td:nth-child(4)").find("input:first-of-type").val() === "")) {
-                $(this).css("background-color", "#FF7F7F");
+
+                $(this).find("td:nth-child(4)").find("button:first-of-type").css("border", "3px solid red").css('cursor', 'pointer').attr('title', 'Please sepcify values.').tooltip({
+                    tooltipClass: 'tooltipclass'
+                });
                 console.log(this);
                 console.log($(this).find("td:nth-child(4)").find("input:first-of-type").val());
+                validated = false;
             }
         });
-        console.log('Form submission cancelled.');
+        if (!validated) {
+            event.preventDefault();
+            return false;
+        }
+        $('#form1').attr('action', '@Url.Action("formedit", "account", new { id = Model.ID.ToString(), qg = qgId })');
+    });*@
 
-    });
+
 
 </script>
 
@@ -949,3 +986,4 @@
         })
     });
 </script>
+
