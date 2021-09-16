@@ -26,13 +26,26 @@
                 {
                     if (question.FormQuestionQuestionTypeId != QuestionType.Audio && question.FormQuestionQuestionTypeId != QuestionType.Video && question.FormQuestionQuestionTypeId != QuestionType.FileUpload)
                     {
-                        if (question.FormQuestionQuestionTypeId == QuestionType.TextArea)
+                        if (question.FormQuestionQuestionTypeId == QuestionType.TextArea || question.FormQuestionQuestionTypeId == QuestionType.TextBlock)
+                        {
+                            dynamic json = Newtonsoft.Json.JsonConvert.DeserializeObject(question.Text);
+                            <div class="col-lg-12">
+                                <div class="viewSurvey">
+                                    @if (question.QuestionText.IsNotEmpty())
+                                    {
+                                      <div class="viewSurveyHead">@question.QuestionText</div>
+                                    }
+                                    <div class="viewSurveyAnswer">@Html.Raw(json.blocks[0].text)</div>
+                                </div>
+                            </div>
+                        }
+                        else if (question.FormQuestionQuestionTypeId == QuestionType.DropDownList || question.FormQuestionQuestionTypeId == QuestionType.CheckboxList || question.FormQuestionQuestionTypeId == QuestionType.RadioList)
                         {
                             dynamic json = Newtonsoft.Json.JsonConvert.DeserializeObject(question.Text);
                             <div class="col-lg-12">
                                 <div class="viewSurvey">
                                     <div class="viewSurveyHead">@question.QuestionText</div>
-                                    <div class="viewSurveyAnswer">@Html.Raw(json.blocks[0].text)</div>
+                                    <div class="viewSurveyAnswer">@Html.Raw(json.value)</div>
                                 </div>
                             </div>
                         }

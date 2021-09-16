@@ -124,10 +124,15 @@ namespace AfterSchoolLibrary.Services
 
             formQuestionAnswers.OrderBy(a => a.FormQuestionDisplayOrder).ToList().ForEach(formQuestionAnswer =>
             {
-                if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.TextArea)
+                if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.TextArea || formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.TextBlock)
                 {
                     dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
                     row.Add(Convert.ToString(json.blocks[0].text));
+                }
+                else if(formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.DropDownList || formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.CheckboxList || formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.RadioList)
+                {
+                    dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
+                    row.Add(Convert.ToString(json.text));
                 }
                 else if (formQuestionAnswer.FormQuestionQuestionTypeId != QuestionType.TextBlock)
                 {
