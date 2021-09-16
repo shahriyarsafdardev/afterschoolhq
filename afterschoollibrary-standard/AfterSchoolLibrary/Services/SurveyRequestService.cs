@@ -129,10 +129,23 @@ namespace AfterSchoolLibrary.Services
                     dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
                     row.Add(Convert.ToString(json.blocks[0].text));
                 }
-                else if(formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.DropDownList || formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.CheckboxList || formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.RadioList)
+                else if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.DropDownList)
                 {
                     dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
-                    row.Add(Convert.ToString(json.text));
+                    row.Add(Convert.ToString(json[0].desc));
+                }
+                else if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.CheckboxList)
+                {
+                    var str = "";
+                    dynamic json =JsonConvert.DeserializeObject(formQuestionAnswer.Text);
+                    foreach (var item in json)
+                    {
+                        if(str.IsNotEmpty())
+                            str = str +", " + item.desc;
+                        else
+                            str = item.desc;
+                    }
+                    row.Add(Convert.ToString(str));
                 }
                 else if (formQuestionAnswer.FormQuestionQuestionTypeId != QuestionType.TextBlock)
                 {
