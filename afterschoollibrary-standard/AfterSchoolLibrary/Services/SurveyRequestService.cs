@@ -124,7 +124,7 @@ namespace AfterSchoolLibrary.Services
 
             formQuestionAnswers.OrderBy(a => a.FormQuestionDisplayOrder).ToList().ForEach(formQuestionAnswer =>
             {
-                if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.TextArea || formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.TextBlock)
+                if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.TextArea)
                 {
                     dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
                     row.Add(Convert.ToString(json.blocks[0].text));
