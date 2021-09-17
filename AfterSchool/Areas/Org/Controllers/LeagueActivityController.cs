@@ -261,7 +261,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (msgs.HasNoErrors() && !SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
                 {
                     var defaultForm = currentAccount.GetDefaultForm();
-                    var newForm = defaultForm.Copy(currentWebUser.ID.Value, currentAccount.ID.Value, FormType.Registration, (name + " form").MaxChars(100, "..."), msgs);
+                    var newForm = defaultForm.Copy(currentUser.ID.Value, currentAccount.ID.Value, FormType.Registration, (name + " form").MaxChars(100, "..."), msgs);
 
                     if (msgs.HasNoErrors())
                         values.Add("form", newForm.ID.Value.ToString());
