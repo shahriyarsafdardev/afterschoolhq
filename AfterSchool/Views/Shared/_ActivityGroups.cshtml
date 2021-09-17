@@ -8,7 +8,7 @@
     var isExternalGroupsView = ViewBag.isExternalGroupsView ?? false;
     var pendingInvites = (List<ActivityGroup>)ViewBag.pendingInvites;
     var recentlyDeclinedInvites = (List<ActivityGroup>)ViewBag.RecentlyDeclinedInvites;
-    var addAction = "edit";
+    var addAction = activityGroupType == ActivityGroupType.League ? "editsetup" : "edit";
 
     if (action == null)
     {

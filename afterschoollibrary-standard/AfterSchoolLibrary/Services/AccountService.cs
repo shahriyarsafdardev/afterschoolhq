@@ -4499,12 +4499,18 @@ namespace AfterSchoolLibrary.Services
 
         public static List<ActivityMessageRegistrant> GetActivityMessageRegistrantsForCurrentMessagePeriod(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            List<ActivityMessage> activityMessages = account.GetActivityMessages(msgs, dc);
-            List<ActivityMessageRegistrant> activityMessageRegistrants = new List<ActivityMessageRegistrant>();
-            List<ActivityMessageRegistrant> currentMessagePeriodActivivityRegistrants = new List<ActivityMessageRegistrant>();
-            DateTime packagePurchaseDate = account.GetActiveAccountPackage().CreateDate.Value;
-            DateTime thisMonthsMessageCountReset = new DateTime(DateTime.Now.Year, DateTime.Now.Month, packagePurchaseDate.Day);
-            DateTime mostRecentMessageCountReset = DateTime.Now.IsBefore(thisMonthsMessageCountReset) ? thisMonthsMessageCountReset.AddMonths(-1) : thisMonthsMessageCountReset;
+            var activityMessages = account.GetActivityMessages(msgs, dc);
+            var activityMessageRegistrants = new List<ActivityMessageRegistrant>();
+            var currentMessagePeriodActivivityRegistrants = new List<ActivityMessageRegistrant>();
+            var packagePurchaseDate = account.GetActiveAccountPackage(msgs, dc).CreateDate.Value;
+
+            var purchaseDayOfMonth = packagePurchaseDate.Day;
+
+            if (DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month) < purchaseDayOfMonth)
+                purchaseDayOfMonth = DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month);
+
+            var thisMonthsMessageCountReset = new DateTime(DateTime.Now.Year, DateTime.Now.Month, purchaseDayOfMonth);
+            var mostRecentMessageCountReset = DateTime.Now.IsBefore(thisMonthsMessageCountReset) ? thisMonthsMessageCountReset.AddMonths(-1) : thisMonthsMessageCountReset;
 
             activityMessages.ForEach(am => activityMessageRegistrants.AddRange(am.GetActivityMessageRegistrants(msgs, dc)));
 
@@ -4513,12 +4519,12 @@ namespace AfterSchoolLibrary.Services
 
         public static int GetTextMessageCountForCurrentMessagePeriod(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.GetActivityMessageRegistrantsForCurrentMessagePeriod().Where(amr => amr.SentText).ToList().Count();
+            return account.GetActivityMessageRegistrantsForCurrentMessagePeriod(msgs, dc).Where(amr => amr.SentText).ToList().Count();
         }
 
         public static int GetEmailCountForCurrentMessagePeriod(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.GetActivityMessageRegistrantsForCurrentMessagePeriod().Where(amr => amr.SentEmail).ToList().Count();
+            return account.GetActivityMessageRegistrantsForCurrentMessagePeriod(msgs, dc).Where(amr => amr.SentEmail).ToList().Count();
         }
 
         public static bool WillExceedEmailQuota(this Account account, AccountPackage accountPackage, int messageCount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
