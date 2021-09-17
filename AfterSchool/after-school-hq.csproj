@@ -668,6 +668,7 @@
     <Content Include="Assets\css\media_md.css" />
     <Content Include="Assets\css\media_sm.css" />
     <Content Include="Assets\css\media_xs.css" />
+    <Content Include="Assets\css\survey.css" />
     <Content Include="Assets\js\ahq-profiles.js" />
     <Content Include="Assets\js\underscore-min.js" />
     <Content Include="Assets\lib\customTableSorter.js" />

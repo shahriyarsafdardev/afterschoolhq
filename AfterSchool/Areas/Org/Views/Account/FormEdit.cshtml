@@ -9,13 +9,14 @@
     var questions = new List<FormQuestion>();
     var typesWithRating = new List<QuestionType>() { QuestionType.Rating };
     var typesWithOptions = new List<QuestionType>() { QuestionType.CheckboxList, QuestionType.DropDownList, QuestionType.RadioList, QuestionType.RadioMatrix, QuestionType.Emoji };
-    var typesUserCannotAdd = new List<QuestionType>() { QuestionType.TextBlock, QuestionType.NotSet, QuestionType.RadioMatrix };
+    var typesUserCannotAdd = Model.GetTypesUserCannotAdd();
 
     if (questionGroup.IsNotEmpty())
     {
         qgId = questionGroup.ID;
-        questions = questionGroup.GetAllQuestions();
+        questions = questionGroup.GetActiveQuestions();
     }
+    var count = 1;
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -47,7 +48,7 @@
                                         <button type="submit" class="btn btn-default btn-space" onclick="navigateForm('@Url.Action("formedit", "account", new { id = Model.ID, qg = qgId, cmd = "prev" })')">&laquo;</button>
                                     }
                                     <button type="submit" class="btn btn-default btn-space"><i class="s7-diskette"></i> Save</button>
-                                    @if (questionGroups.Last().ID != qgId)
+                                    @if (questionGroups.Count() > 0 ? questionGroups.Last().ID != qgId : false)
                                     {
                                         <button type="submit" class="btn btn-primary btn-space" onclick="navigateForm('@Url.Action("formedit", "account", new { id = Model.ID, qg = qgId, cmd = "next" })')">&raquo;</button>
                                     }
@@ -93,12 +94,12 @@
                             <div class="panel-heading">
                                 <div class="btn-group pull-right">
 
-                                    @if (questionGroups.First().ID != qgId)
+                                    @if (questionGroups.Count() > 0 ? questionGroups.First().ID != qgId : false)
                                     {
                                         <button type="submit" class="btn btn-default btn-space" onclick="navigateForm('@Url.Action("formedit", "account", new { id = Model.ID, qg = questionGroup.ID, cmd = "prev" })')">&laquo;</button>
                                     }
                                     <button type="submit" class="btn btn-default btn-space"><i class="s7-diskette"></i> Save</button>
-                                    @if (questionGroups.Last().ID != qgId)
+                                    @if (questionGroups.Count() > 0 ? questionGroups.Last().ID != qgId : false)
                                     {
                                         <button type="submit" class="btn btn-primary btn-space" onclick="navigateForm('@Url.Action("formedit", "account", new { id = Model.ID, qg = questionGroup.ID, cmd = "next" })')">&raquo;</button>
                                     }
@@ -107,21 +108,24 @@
 
                                 <p></p>
 
-                                @if (questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet || questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.Custom)
+                                @if (questionGroup.IsNotEmpty())
                                 {
-                                    <input type="text"
-                                           id="name-@questionGroup.ID"
-                                           name="name-@questionGroup.ID"
-                                           value="@questionGroup.Name"
-                                           required
-                                           class="form-control input-lg input-lg-font"
-                                           onfocus="this.select()"
-                                           data-tooltip-id="name-@questionGroup.ID"
-                                           placeholder="Enter your new section name" />
-                                }
-                                else
-                                {
-                                    <p class="text-medium">@questionGroup.Name</p>
+                                    if (questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet || questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.Custom)
+                                    {
+                                        <input type="text"
+                                               id="name-@questionGroup.ID"
+                                               name="name-@questionGroup.ID"
+                                               value="@questionGroup.Name"
+                                               required
+                                               class="form-control input-lg input-lg-font"
+                                               onfocus="this.select()"
+                                               data-tooltip-id="name-@questionGroup.ID"
+                                               placeholder="Enter your new section name" />
+                                    }
+                                    else
+                                    {
+                                        <p class="text-medium">@questionGroup.Name</p>
+                                    }
                                 }
 
 
@@ -147,12 +151,12 @@
                                                 <tr class="questionRow">
                                                     <td>
                                                         <label class="lbl-display-order" id="displayOrderlabel-@question.ID">
-                                                            @question.DisplayOrder
+                                                            @count
                                                         </label>
                                                         <input type="hidden"
                                                                id="sortorder-@question.ID"
                                                                name="displayOrderId-@question.ID" class="displayOrderId"
-                                                               value=" @question.DisplayOrder" />
+                                                               value="@count" />
                                                         <input type="hidden"
                                                                id="questionid-@question.ID"
                                                                name="questionid-@question.ID"
@@ -254,14 +258,14 @@
 
                                                     <td>
                                                         @{Html.RenderPartial(
-                                                                            "~/Views/Shared/_SwitchButton.cshtml",
-                                                                            question.IsActive,
-                                                                            new ViewDataDictionary()
-                                                                            {
-                                                                            { "checkboxname", "active-" + question.ID },
-                                                                            { "checkboxid", "active-" + question.ID },
-                                                                            { "disabled", question.IsLocked },
-                                                                            { "classname", "question-isactive" }
+                                                                              "~/Views/Shared/_SwitchButton.cshtml",
+                                                                              question.IsActive,
+                                                                              new ViewDataDictionary()
+                                                                              {
+                                                                                                                    { "checkboxname", "active-" + question.ID },
+                                                                                                                    { "checkboxid", "active-" + question.ID },
+                                                                                                                    { "disabled", question.IsLocked },
+                                                                                                                    { "classname", "question-isactive" }
 });}
                                                     </td>
                                                     <td>
@@ -272,43 +276,47 @@
                                                                    question.IsRequired,
                                                                    new ViewDataDictionary()
                                                                    {
-                                                                            { "checkboxname", "required-" + question.ID },
-                                                                            { "checkboxid", "required-" + question.ID },
-                                                                            { "disabled", question.IsLocked },
-                                                                            { "classname", "question-isrequired" }
+                                                                                                                { "checkboxname", "required-" + question.ID },
+                                                                                                                { "checkboxid", "required-" + question.ID },
+                                                                                                                { "disabled", question.IsLocked },
+                                                                                                                { "classname", "question-isrequired" }
 });
                                                         }
                                                     </td>
                                                     <td>
                                                         @{Html.RenderPartial(
-                                                                              "~/Views/Shared/_SwitchButton.cshtml",
-                                                                              question.IsAnswerDescriptionEnabled,
-                                                                              new ViewDataDictionary()
-                                                                              {
-                                                                            { "checkboxname", "answerDescription-" + question.ID },
-                                                                            { "checkboxid", "answerDescription-" + question.ID },
-                                                                            { "disabled", question.IsLocked },
-                                                                            { "classname", "question-IsAnswerDescriptionEnabled" }
+                                                                                "~/Views/Shared/_SwitchButton.cshtml",
+                                                                                question.IsAnswerDescriptionEnabled,
+                                                                                new ViewDataDictionary()
+                                                                                {
+                                                                                                                    { "checkboxname", "answerDescription-" + question.ID },
+                                                                                                                    { "checkboxid", "answerDescription-" + question.ID },
+                                                                                                                    { "disabled", question.IsLocked },
+                                                                                                                    { "classname", "question-IsAnswerDescriptionEnabled" }
 });}
                                                     </td>
                                                     <td>
                                                         <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteQuestion('@question.Text', '@Url.Action("delete","Account", new { id = @question.ID.ToString()})')"><span class="text-danger"><i class="s7-trash"></i></span></button>
                                                     </td>
                                                 </tr>
+                                                count++;
                                             }
 
-                                            @if (questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet || true)
+                                            @if (questionGroup.IsNotEmpty())
                                             {
-                                                <tr>
-                                                    <td colspan="5">
-                                                        <button type="button" class="btn btn-default" onclick="addQuestion()">
-                                                            <i class="s7-plus"></i> Add Question
-                                                        </button>
-                                                        <button type="button" class="btn btn-default" onclick="addTextBlock()">
-                                                            <i class="s7-plus"></i> Add Text Block
-                                                        </button>
-                                                    </td>
-                                                </tr>
+                                                if (questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet || true)
+                                                {
+                                                    <tr>
+                                                        <td colspan="5">
+                                                            <button type="button" class="btn btn-default" onclick="addQuestion()">
+                                                                <i class="s7-plus"></i> Add Question
+                                                            </button>
+                                                            <button type="button" class="btn btn-default" onclick="addTextBlock()">
+                                                                <i class="s7-plus"></i> Add Text Block
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                }
                                             }
                                         </tbody>
                                     </table>
@@ -330,7 +338,7 @@
                     <div class="col-sm-8">
                         <button type="submit" class="btn btn-default btn-lg btn-block"><i class="s7-diskette"></i> Save</button>
                     </div>
-                    @if (questionGroups.Last().ID != qgId && qgId != 0)
+                    @if (questionGroups.Count() > 0 ? questionGroups.Last().ID != qgId && qgId != 0 : false)
                     {
                         <div class="col-sm-2">
                             <button type="submit" class="btn btn-primary btn-lg btn-block" onclick="navigateForm('@Url.Action("formedit", "account", new { id = Model.ID, qg = qgId, cmd = "next" })')">Next &raquo;</button>
@@ -400,6 +408,7 @@
             <div class="modal-body form">
 
                 <p>Update your options here. Your options are not saved until you hit the save button on the screen</p>
+                <p class="twoOptionsValidation text-danger hide">Please add atleast two options.</p>
 
                 <div class="table-responsive">
                     <table class="table options-table emoji-option-table" id="options-table">
@@ -553,7 +562,7 @@
     }
 
     function getDeleteIcon() {
-        return `<button class="btn btn-default btn-sm md-trigger" onclick="$(this).closest('tr').remove();"><span class="text-danger"><i class="s7-trash"></i></span></button>`;
+        return `<button class="btn btn-default btn-sm md-trigger remove" onclick="$(this).closest('tr').remove();"><span class="text-danger"><i class="s7-trash"></i></span></button>`;
     }
 
     function getShowCheckbox() {
@@ -596,7 +605,7 @@
         var rtn = `<select class="form-control" onChange="showEditButton(${getQuestionCount()})" id="questiontype-${getQuestionCount()}" name="new-questiontype-${getQuestionCount()}">`;
         @foreach (var type in Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>().Where(questionType => !typesUserCannotAdd.Contains(questionType)))
         {
-            @:rtn += '<option value="@((int)type)">@type.ToString().SplitByUpperCase()</option>';
+              @:rtn += '<option value="@((int)type)">@type.ToString().SplitByUpperCase()</option>';
         }
         rtn += '</select>';
         return rtn;
@@ -646,6 +655,25 @@
             .find('tr')
             .last()
             .before(`<tr class="questionRow" id="${optionType}-${getOptionsRowCount()}"><td>${optionType} ${getOptionsRowCount()}</td><td><input type="text" value="" id="option- ${getOptionsRowCount()}" required class="form-control col-sm-3 option" onfocus="this.select()" /></td><td><input type="text" value="" id="optionDescription- ${getOptionsRowCount()}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" /></td><td><button type="button" class="btn btn-default btn-sm md-trigger" onclick="removeOption($(this).closest('tr').attr('id'))"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
+
+        var rowCount = $("#options-table tr").length - 1;
+        if (rowCount > 2) {
+            $(".twoOptionsValidation").addClass("hide")
+        }
+    }
+    function updateSorting() {
+        var inputs = $('input.currentposition');
+        var nbElems = inputs.length;
+        $('input.currentposition').each(function (idx) {
+            $(this).val(nbElems - idx);
+        });
+        var totalRows = $('#question-table tr').length - 2;
+        $("#question-table tbody tr").each(function (i) {
+            if (i < totalRows) {
+                $(this).find(".lbl-display-order").text(i + 1);
+                $(this).find(".displayOrderId").val(i + 1);
+            }
+        });
     }
 
     function removeOption(id) {
@@ -660,14 +688,15 @@
                 $(this).find($('td:first-child')).text(optionType + " " + newid);
                 $(this).attr("id", optionType + "-" + newid);
             }
-        });
+        }).promise().done(function () { updateSorting(); });
+       
     }
 
     function addTextBlock() {
         $('#question-table')
             .find('tr')
             .last()
-            .before(`<tr><td colspan="3">${getDescription()}${getTextBlockQuestionType()}</td><td>${getShowCheckbox()}</td><td></td></tr>`);
+            .before(`<tr><td>${getSortOrder()}</td><td colspan="3">${getDescription()}${getTextBlockQuestionType()}</td><td>${getShowCheckbox()}</td><td></td><td></td><td>${getDeleteIcon()}</td></tr>`);
         incrementQuestionCount();
     }
 
@@ -731,7 +760,11 @@
                 var optionRowArray = optionRow.split('=');
                 optionNo = i;
                 optionValue = optionRowArray[0];
-                optionDescriptionValue = optionRowArray[1];
+
+                var optionDescriptionValue = '';
+                if (optionRowArray[1]) {
+                    optionDescriptionValue = optionRowArray[1];
+                }
                 //create new row for option modal
                 addOptionRow(optionType, optionNo, optionValue, optionDescriptionValue)
             }
@@ -744,6 +777,10 @@
             var optionString = '';
             var rowCount = $("#options-table tr").length - 1;
             var validation = true;
+            if (rowCount < 3 && $('#modal-options-title').text() != 'Emojis') {
+                validation = false;
+                $(".twoOptionsValidation").removeClass("hide")
+            }
             $("#options-table tr").each(function (index) {
                 if (index != 0 && index != rowCount) {
                     if ($(this).find("input.option").val() == "") {
@@ -753,7 +790,17 @@
                     else {
                         $(this).find("input.option").removeClass("danger");
                     }
-                    var rowOption = $(this).find("input.option").val() + "=" + $(this).find("input.optionDescription").val() + ",";
+
+                    var optVal = $(this).find("input.option").val();
+                    var optDesc = $(this).find("input.optionDescription").val();
+                    var rowOption;
+
+                    if (optDesc) {
+                        rowOption = `${optVal}=${optDesc},`
+                    } else {
+                        rowOption = `${optVal},`
+                    }
+
                     optionString = optionString + rowOption;
                 }
             });
@@ -871,19 +918,11 @@
                 var rowCount = $('#question-table tr').length;
             },
             stop: function (e, ui) {
-                var inputs = $('input.currentposition');
-                var nbElems = inputs.length;
-                $('input.currentposition').each(function (idx) {
-                    $(this).val(nbElems - idx);
-                });
-                var totalRows = $('#question-table tr').length - 2;
-                $("#question-table tbody tr").each(function (i) {
-                    if (i < totalRows) {
-                        $(this).find(".lbl-display-order").text(i + 1);
-                        $(this).find(".displayOrderId").val(i + 1);
-                    }
-                });
+                updateSorting();
             }
         });
+        $(document).on('click', '.remove', function () {
+            updateSorting();
+        })
     });
 </script>

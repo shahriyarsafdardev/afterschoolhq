@@ -1900,7 +1900,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
 
         [HttpPost]
-        public ActionResult SaveSurvey(string id, string activityId, string formId, string name, string optionalText, string isEveryIndividualSelected, string isAllowMultiple)
+        public ActionResult SaveSurvey(string id, string activityId, string formId, string name, string optionalText, string dueDate, string isEveryIndividualSelected, string isAllowMultiple)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
@@ -1920,7 +1920,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var surveyRequest = SurveyRequestService.AddSurvey(formId.ToInteger(), activityId.ToInteger(), name, optionalText, isAllowMultiple.ToBoolean(), currentAccount.ID.Value, currentUser.ID.Value, msgs);
+                var surveyRequest = SurveyRequestService.AddSurvey(formId.ToInteger(), activityId.ToInteger(), name, dueDate, optionalText, isAllowMultiple.ToBoolean(), currentAccount.ID.Value, currentUser.ID.Value, msgs);
 
                 if (isEveryIndividualSelected.ToBoolean())
                     CreateSurveys(surveyRequest.ID.Value, studentList.Where(a => a.Selected).ToList(), currentUser.ID.Value, msgs);
