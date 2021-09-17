@@ -316,7 +316,7 @@
                                                             <button type="button" class="btn btn-default" onclick="addQuestion()">
                                                                 <i class="s7-plus"></i> Add Question
                                                             </button>
-                                                            <button type="button" class="btn btn-default" onclick="addTextBlock()">
+                                                            <button type="button" class="btn btn-default hide" onclick="addTextBlock()">
                                                                 <i class="s7-plus"></i> Add Text Block
                                                             </button>
                                                         </td>
@@ -617,7 +617,7 @@
     }
 
     function getOptionsLinks() {
-        return `<button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-options" onclick="setOptions(${getQuestionCount()})" id="btn-setoptions-${getQuestionCount()}">Edit Options</button><input type="hidden" class="options-input" id="options-text-${getQuestionCount()}" name="new-options-text-${getQuestionCount()}" value="" /><button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-link" onclick="setLink(${getQuestionCount()})" id="btn-setlink-${getQuestionCount()}">Add/Edit Link</button><input type="hidden" id="link-text-${getQuestionCount()}" name="new-link-text-${getQuestionCount()}" value="" /><button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-rating" onclick="setRating(${getQuestionCount()})" id="btn-setratings-${getQuestionCount()}">Set Rating</button><input type="hidden" class="rating-input" id="rating-text-${getQuestionCount()}" name="rating-text-${getQuestionCount()}" class="displayOrderId" value="" />`;
+        return `<button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-options" onclick="setOptions(${getQuestionCount()})" id="btn-setoptions-${getQuestionCount()}">Edit Options</button><input type="hidden" id="options-text-${getQuestionCount()}" name="new-options-text-${getQuestionCount()}" value="" /><button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-link" onclick="setLink(${getQuestionCount()})" id="btn-setlink-${getQuestionCount()}">Add/Edit Link</button><input type="hidden" id="link-text-${getQuestionCount()}" name="new-link-text-${getQuestionCount()}" value="" /><button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-rating" onclick="setRating(${getQuestionCount()})" id="btn-setratings-${getQuestionCount()}">Set Rating</button><input type="hidden" id="displayOrderId-${getQuestionCount()}" name="displayOrderId-${getQuestionCount()}" class="displayOrderId" value="" />`;
     }
 
     function getDescription() {
@@ -834,12 +834,11 @@
         }
     }
 
-    var selectedRatingQuestion = null
     //called when rating modal is going to display
+    //Also setiing rating range values in options hidden field.
     function setRating(id) {
-        selectedRatingQuestion = id;
-        var ratingString = $('#rating-text-' + id).val();
-        console.log("ratingString : " + ratingString);
+        selectedLinkQuestion = id;
+        var ratingString = $('#options-text-' + id).val();
         var ratingValues = ratingString.split(",");
         $('#question-rating-label').html($('#text-' + id).val());
         //if question exist then read data from hidden field and populate text fields
@@ -856,9 +855,10 @@
         }
     }
 
+    //Updating rating range values in options hidden input
     function updateRating() {
-        $('#rating-text-' + selectedRatingQuestion).val($('#question-rating-min').val() + "," + $('#question-rating-max').val() + "," + $('#question-rating-increment').val());
-        $("#btn-setratings-" + selectedRatingQuestion).css("border", "").tooltip("destroy");
+        $('#options-text-' + selectedLinkQuestion).val($('#question-rating-min').val() + "," + $('#question-rating-max').val() + "," + $('#question-rating-increment').val());
+        $("#btn-setratings-" + selectedLinkQuestion).css("border", "").tooltip("destroy");
     }
 
     function deleteQuestion(name, url) {
@@ -905,7 +905,7 @@
             }
             //td.find("button:first-of-type").css("border", "none")
 
-            if (ratingInput.val() === '' && !ratingButton.hasClass("hide") ) {
+            if (optionsInput.val() === '' && !ratingButton.hasClass("hide") ) {
                 console.log(" Inside rating If : " + validated);
                 td.find("button:last-of-type").css("border", "2px solid red").css('cursor', 'pointer').attr('title', 'Please sepcify range.').tooltip({ tooltipClass: 'tooltipclass' });
                 validated = false;
