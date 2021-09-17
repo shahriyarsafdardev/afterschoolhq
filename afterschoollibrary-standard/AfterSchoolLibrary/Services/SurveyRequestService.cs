@@ -132,7 +132,7 @@ namespace AfterSchoolLibrary.Services
                 else if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.DropDownList)
                 {
                     dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
-                    row.Add(Convert.ToString(json[0].desc));
+                    row.Add(Convert.ToString(json[0].value));
                 }
                 else if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.CheckboxList)
                 {
@@ -141,9 +141,9 @@ namespace AfterSchoolLibrary.Services
                     foreach (var item in json)
                     {
                         if(str.IsNotEmpty())
-                            str = str +", " + item.desc;
+                            str = str +", " + item.value;
                         else
-                            str = item.desc;
+                            str = item.value;
                     }
                     row.Add(Convert.ToString(str));
                 }
