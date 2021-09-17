@@ -762,7 +762,7 @@
             //---Check if numberofOptionRows has value
             for (var i = 0; i < numberofOptionRows; i++) {
                 var optionRow = indivdualOption[i];
-                var optionRowArray = optionRow.split('=');
+                var optionRowArray = optionRow.split('|');
                 optionNo = i;
                 optionValue = optionRowArray[0];
 
@@ -801,7 +801,7 @@
                     var rowOption;
 
                     if (optDesc) {
-                        rowOption = `${optVal}=${optDesc},`
+                        rowOption = `${optVal}|${optDesc},`
                     } else {
                         rowOption = `${optVal},`
                     }
