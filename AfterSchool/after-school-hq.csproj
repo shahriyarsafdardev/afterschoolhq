@@ -668,8 +668,10 @@
     <Content Include="Assets\css\media_md.css" />
     <Content Include="Assets\css\media_sm.css" />
     <Content Include="Assets\css\media_xs.css" />
+    <Content Include="Assets\css\survey.css" />
     <Content Include="Assets\js\ahq-profiles.js" />
     <Content Include="Assets\js\underscore-min.js" />
+    <Content Include="Assets\lib\customTableSorter.js" />
     <Content Include="case-study-cfi70.html" />
     <Content Include="contact.html" />
     <Content Include="Content\quill.bubble.css" />
@@ -1336,6 +1338,11 @@
     <Content Include="Areas\Org\Views\Accounting\EditCoupon.cshtml" />
     <Content Include="Areas\Org\Views\Onboarding\GettingStarted.cshtml" />
     <Content Include="Areas\Admin\Views\Package\Logs.cshtml" />
+    <Content Include="Areas\Org\Views\Activity\Surveys.cshtml" />
+    <Content Include="Areas\Org\Views\Activity\NewSurvey.cshtml" />
+    <Content Include="Areas\Org\Views\Activity\ViewSurvey.cshtml" />
+    <Content Include="Areas\Org\Views\Registration\Surveys.cshtml" />
+    <Content Include="Areas\Org\Views\Activity\ViewSurveyResults.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />
@@ -1841,6 +1848,7 @@
     <Folder Include="Areas\WebHooks\Views\Shared\" />
     <Folder Include="Areas\WebHooks\Views\Stripe\" />
     <Folder Include="Areas\WebHooks\Views\Twilio\" />
+    <Folder Include="Uploads\" />
     <Folder Include="Views\Indianapolis\" />
     <Folder Include="Views\Sitemap\" />
     <Folder Include="Views\User\" />

@@ -1681,5 +1681,10 @@ namespace AfterSchoolLibrary.Services
                     dc: dc);
             }
         }
+
+        public static List<SurveyResponse> GetSurveyRequest(this Registrant registrant)
+        {
+            return SurveyResponse.LoadByRegistrantId(registrant.ID.Value);
+        }
     }
 }
