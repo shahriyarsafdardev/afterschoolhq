@@ -35,6 +35,7 @@ namespace AfterSchool.Models
                     origin.StartsWith("https://directory.afterschoolhq.com") ||
                     origin.StartsWith("https://qa.afterschoolfoundation.us") ||
                     origin.StartsWith("https://afterschoolfoundation.us") ||
+                    origin.StartsWith("https://riseproject.afterschoolfoundation.us") ||
                     origin.StartsWith("http://localhost:54849") ||
                     Account.LoadAllSubdomains().Contains(origin)
                     )
