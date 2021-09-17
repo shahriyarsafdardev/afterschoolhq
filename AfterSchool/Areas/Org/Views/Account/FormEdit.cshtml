@@ -500,7 +500,6 @@
                 <p>Enter Min, Max and Increment values. Your options are not saved until you hit the save button on the screen</p>
 
                 <div class="form-group">
-                    @*<label><span id="question-rating-label1"></span></label>*@
                     <label><span id="question-rating-label1"></span></label>
                     <input class="form-control" id="question-rating-min" name="question-rating-min" required placeholder="Enter the minimum value" />
                 </div>
@@ -888,7 +887,6 @@
     function Validate() {
         $(".btn btn-default btn-lg btn-block").removeAttr("disabled");
         var validated = true;
-        console.log(" Before If : " + validated);
         $("#form1 tr").each(function (index) {
 
             //Checking for options empty values
@@ -899,20 +897,15 @@
             var ratingButton = td.find("button:last-of-type");
 
             if (optionsInput.val() === '' && !optionsButton.hasClass("hide") ) {
-                console.log(" Inside Option If : " + validated);
                 td.find("button:first-of-type").css("border", "2px solid red").css('cursor', 'pointer').attr('title', 'Please sepcify values.').tooltip({ tooltipClass: 'tooltipclass' });
                 validated = false;
             }
-            //td.find("button:first-of-type").css("border", "none")
 
             if (optionsInput.val() === '' && !ratingButton.hasClass("hide") ) {
-                console.log(" Inside rating If : " + validated);
                 td.find("button:last-of-type").css("border", "2px solid red").css('cursor', 'pointer').attr('title', 'Please sepcify range.').tooltip({ tooltipClass: 'tooltipclass' });
                 validated = false;
             }
         });
-
-        console.log(" After If : " + validated);
         if (!validated) {
             event.preventDefault();
             return false;
@@ -920,33 +913,6 @@
         
         $('#form1').attr('action', '@Url.Action("formedit", "account", new { id = Model.ID.ToString(), qg = qgId })');
     }
-
-    @*const element = document.querySelector('#form1');
-    element.addEventListener('submit', event => {
-        $(".btn btn-default btn-lg btn-block").removeAttr("disabled");
-        var validated = true;
-        $("#form1 tr").each(function (index) {
-            console.log(index);
-            console.log($(this).find("td:nth-child(4)").find("input:first-of-type").val());
-            if (($(this).find("td:nth-child(4)").find("input:first-of-type").val() === "")) {
-
-                $(this).find("td:nth-child(4)").find("button:first-of-type").css("border", "3px solid red").css('cursor', 'pointer').attr('title', 'Please sepcify values.').tooltip({
-                    tooltipClass: 'tooltipclass'
-                });
-                console.log(this);
-                console.log($(this).find("td:nth-child(4)").find("input:first-of-type").val());
-                validated = false;
-            }
-        });
-        if (!validated) {
-            event.preventDefault();
-            return false;
-        }
-        $('#form1').attr('action', '@Url.Action("formedit", "account", new { id = Model.ID.ToString(), qg = qgId })');
-    });*@
-
-
-
 </script>
 
 
