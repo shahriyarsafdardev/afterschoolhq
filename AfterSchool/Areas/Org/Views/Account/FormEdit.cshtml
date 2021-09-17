@@ -408,6 +408,7 @@
             <div class="modal-body form">
 
                 <p>Update your options here. Your options are not saved until you hit the save button on the screen</p>
+                <p class="twoOptionsValidation text-danger hide">Please add atleast two options.</p>
 
                 <div class="table-responsive">
                     <table class="table options-table emoji-option-table" id="options-table">
@@ -491,50 +492,22 @@
             </div>
             <div class="modal-body form">
 
-                <div class="form-group row d-flex">
-                    <div class="col">
-                        <input class="form-control input-sm rating" id="question-rating-min" name="question-rating-min" oninput="setOptionalLabelAndIncrement();" />
-                    </div>
+                <p>Enter Min, Max and Increment values. Your options are not saved until you hit the save button on the screen</p>
 
-                    <div class="col">
-                        <label class="rating-label">
-                            to
-                        </label>
-                    </div>
-
-                    <div class="col">
-                        <input class="form-control input-sm rating" id="question-rating-max" name="question-rating-max" oninput="setOptionalLabelAndIncrement();" />
-                    </div>
-
-                    <div class="col">
-                        <label class="rating-label">
-                            by increments of
-                        </label>
-                    </div>
-
-                    <div class="col-xs-2">
-                        <select class="form-control input-sm rating" id="question-rating-increment" onchange="setRatingIncrement()">
-                            <option>1</option>                           
-                        </select>
-                    </div>
+                <div class="form-group">
+                    @*<label><span id="question-rating-label1"></span></label>*@
+                    <label><span id="question-rating-label1"></span></label>
+                    <input class="form-control" id="question-rating-min" name="question-rating-min" required placeholder="Enter the minimum value" />
                 </div>
 
-                <div class="form-group row">
-                    <div class="col-xs-1">
-                        <label class="rating-label"><span id="question-rating-min-label">1</span></label>
-                    </div>
-                    <div class="col-xs-6">
-                        <input class="form-control input-sm" id="question-rating-label-min" required placeholder="Label (Optional)" />
-                    </div>
+                <div class="form-group">
+                    <label><span id="question-rating-label2"></span></label>
+                    <input class="form-control" id="question-rating-max" name="question-rating-max" required placeholder="Enter the maximum value" />
                 </div>
 
-                <div class="form-group row">
-                    <div class="col-xs-1">
-                        <label class="rating-label"><span id="question-rating-max-label">5</span></label>
-                    </div>
-                    <div class="col-xs-6">
-                        <input class="form-control input-sm" id="question-rating-label-max" required placeholder="Label (Optional)" />
-                    </div>
+                <div class="form-group">
+                    <label><span id="question-rating-label3"></span></label>
+                    <input class="form-control" id="question-rating-increment" name="question-rating-increment" placeholder="Enter the increment value" />
                 </div>
 
             </div>
@@ -589,7 +562,7 @@
     }
 
     function getDeleteIcon() {
-        return `<button class="btn btn-default btn-sm md-trigger" onclick="$(this).closest('tr').remove();"><span class="text-danger"><i class="s7-trash"></i></span></button>`;
+        return `<button class="btn btn-default btn-sm md-trigger remove" onclick="$(this).closest('tr').remove();"><span class="text-danger"><i class="s7-trash"></i></span></button>`;
     }
 
     function getShowCheckbox() {
@@ -682,6 +655,25 @@
             .find('tr')
             .last()
             .before(`<tr class="questionRow" id="${optionType}-${getOptionsRowCount()}"><td>${optionType} ${getOptionsRowCount()}</td><td><input type="text" value="" id="option- ${getOptionsRowCount()}" required class="form-control col-sm-3 option" onfocus="this.select()" /></td><td><input type="text" value="" id="optionDescription- ${getOptionsRowCount()}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" /></td><td><button type="button" class="btn btn-default btn-sm md-trigger" onclick="removeOption($(this).closest('tr').attr('id'))"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
+
+        var rowCount = $("#options-table tr").length - 1;
+        if (rowCount > 2) {
+            $(".twoOptionsValidation").addClass("hide")
+        }
+    }
+    function updateSorting() {
+        var inputs = $('input.currentposition');
+        var nbElems = inputs.length;
+        $('input.currentposition').each(function (idx) {
+            $(this).val(nbElems - idx);
+        });
+        var totalRows = $('#question-table tr').length - 2;
+        $("#question-table tbody tr").each(function (i) {
+            if (i < totalRows) {
+                $(this).find(".lbl-display-order").text(i + 1);
+                $(this).find(".displayOrderId").val(i + 1);
+            }
+        });
     }
 
     function removeOption(id) {
@@ -696,7 +688,8 @@
                 $(this).find($('td:first-child')).text(optionType + " " + newid);
                 $(this).attr("id", optionType + "-" + newid);
             }
-        });
+        }).promise().done(function () { updateSorting(); });
+       
     }
 
     function addTextBlock() {
@@ -784,6 +777,10 @@
             var optionString = '';
             var rowCount = $("#options-table tr").length - 1;
             var validation = true;
+            if (rowCount < 3 && $('#modal-options-title').text() != 'Emojis') {
+                validation = false;
+                $(".twoOptionsValidation").removeClass("hide")
+            }
             $("#options-table tr").each(function (index) {
                 if (index != 0 && index != rowCount) {
                     if ($(this).find("input.option").val() == "") {
@@ -838,57 +835,20 @@
         $('#question-rating-label').html($('#text-' + id).val());
         //if question exist then read data from hidden field and populate text fields
         if (ratingValues.length > 1) {
-            $('#question-rating-min').val(ratingValues[0].substring(0, ratingValues[0].indexOf('=')));
-            $('#question-rating-max').val(ratingValues[1].substring(0, ratingValues[1].indexOf('=')));
-            setOptionalLabelAndIncrement();
-            $('#question-rating-increment').val(ratingValues[2]);
-            $('#question-rating-label-min').val(ratingValues[0].substring(ratingValues[0].indexOf("=") + 1));
-            $('#question-rating-label-max').val(ratingValues[1].substring(ratingValues[1].indexOf("=") + 1));
-            $('#question-rating-min-label').empty();
-            $('#question-rating-min-label').append(ratingValues[0].substring(0, ratingValues[0].indexOf('=')));
-            $('#question-rating-max-label').empty();
-            $('#question-rating-max-label').append(ratingValues[1].substring(0, ratingValues[1].indexOf('=')));
+            $('#question-rating-min').val(ratingValues[0]);
+            $('#question-rating-max').val(ratingValues[1])
+            ratingValues.length > 2 ? $('#question-rating-increment').val(ratingValues[2]) : $('#question-rating-increment').val('');
         }
         //setting default values
         else {
             $('#question-rating-min').val('1');
             $('#question-rating-max').val('5');
-            $('#question-rating-increment').val('1').change();
-            $('#question-rating-label-min').val('');
-            $('#question-rating-label-max').val('');
-            $('#question-rating-min-label').empty();
-            $('#question-rating-min-label').append('1');
-            $('#question-rating-max-label').empty();
-            $('#question-rating-max-label').append('5');
-            setOptionalLabelAndIncrement();
-        }
-    }
-
-    function setRatingIncrement() {
-        $('#question-rating-increment').val($('#question-rating-increment').val());
-    }
-
-    function setOptionalLabelAndIncrement() {
-
-        var ratingMaxValue = $('#question-rating-max').val();
-
-        $('#question-rating-min-label').empty();
-        $('#question-rating-min-label').append($('#question-rating-min').val());
-        $('#question-rating-max-label').empty();
-        $('#question-rating-max-label').append($('#question-rating-max').val());
-
-        $('#question-rating-increment').empty();
-
-        for (var i = 0; i < ratingMaxValue; i++) {
-            if (ratingMaxValue % i == 0) {
-                var newOption = $('<option value="' + i + '">' + i + '</option>');
-                $('#question-rating-increment').append(newOption);
-            }
+            $('#question-rating-increment').val('1');
         }
     }
 
     function updateRating() {
-        $('#options-text-' + selectedLinkQuestion).val($('#question-rating-min').val() + "=" + $('#question-rating-label-min').val() + "," + $('#question-rating-max').val() + "=" + $('#question-rating-label-max').val() + "," + $('#question-rating-increment').val());
+            $('#options-text-' + selectedLinkQuestion).val($('#question-rating-min').val() + "," + $('#question-rating-max').val() + "," + $('#question-rating-increment').val());
     }
 
     function deleteQuestion(name, url) {
@@ -958,19 +918,11 @@
                 var rowCount = $('#question-table tr').length;
             },
             stop: function (e, ui) {
-                var inputs = $('input.currentposition');
-                var nbElems = inputs.length;
-                $('input.currentposition').each(function (idx) {
-                    $(this).val(nbElems - idx);
-                });
-                var totalRows = $('#question-table tr').length - 2;
-                $("#question-table tbody tr").each(function (i) {
-                    if (i < totalRows) {
-                        $(this).find(".lbl-display-order").text(i + 1);
-                        $(this).find(".displayOrderId").val(i + 1);
-                    }
-                });
+                updateSorting();
             }
         });
+        $(document).on('click', '.remove', function () {
+            updateSorting();
+        })
     });
 </script>
