@@ -1027,7 +1027,7 @@ property: Text, string, NVarChar "400"
 property: Description, string, NVarChar "4000"
 property: QuestionDataTypeId, QuestionDataType, Int
 property: QuestionText, string, NVarChar "400", , Used to keep the question text just in case the question text changes on the original
-property: Uid, Guid, UniqueIdentifier, required
+property: Uid, Guid?, UniqueIdentifier
 join: FormQuestion.ID, FormQuestionId, LeftOuterJoin
 join: Registration.ID, RegistrationId, LeftOuterJoin
 join: SurveyResponse.ID, SurveyResponseId, LeftOuterJoin
