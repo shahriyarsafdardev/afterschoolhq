@@ -1941,6 +1941,23 @@ loadmethod: Code
 [end]
 
 [begin]
+type: Class
+name: RefreshToken
+serializable: true
+description: Stores refresh tokens
+inherits: BasicIDObject
+property: Token, string, NVarChar "4000"
+property: Expires, DateTime?, DateTime
+property: Created, DateTime?, DateTime
+property: CreatedByIp, string, NVarChar "100"
+property: Revoked, DateTime?, DateTime
+property: RevokedByIp, string, NVarChar "100"
+property: ReplacedByToken, string, NVarChar "4000"
+property: IsActive, bool, Bit
+property: WebUserId, int?, Int
+[end]
+
+[begin]
 type: Enum
 name: SurveyFeedbackStatus
 values: NotSet, New, InProgress, Completed
