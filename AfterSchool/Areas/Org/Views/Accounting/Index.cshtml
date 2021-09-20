@@ -163,13 +163,25 @@
                 }
             </div>
 
+            
             <div class="row">
                 <div class="col-md-12">
-                    <button class="btn btn-primary md-trigger" id="request-payout" disabled="disabled" onclick="return requestPayout()" data-modal="modal-payout-request">
-                        Request Payouts
-                    </button>
+                    @if (account.AccountTypeId.In(AccountService.LocationProviderAccountTypes))
+                    {
+                        <button class="btn btn-primary md-trigger" id="request-payout" disabled="disabled" onclick="return requestPayout()" data-modal="modal-payout-request">
+                            Request Payouts
+                        </button>
+                    }
+                    @if (account.HasStripeConnectedAccount)
+                    {
+                        <button class="btn btn-default" id="stripe-login-link" onclick="getStripeLoginLink()">
+                            Login to Stripe Dashboard
+                        </button>
+                    }
+
                 </div>
             </div>
+
 
             <div class="table-responsive">
                 <table class="table table-hover table-condensed" id="transaction-table">
@@ -208,7 +220,7 @@
                                 var registrant = transaction.GetPurchase()?.GetRegistrant();
                                 var currentStatus = transaction.GetStatus();
                                 var disableChk = !transaction.CanRequestPayout() ? "disabled" : "";
-                                var enableTransfer = !transaction.UsedStripeConnect && !transaction.PayoutId.HasValue && useStripeConnect && account.StripePayoutsEnabled;
+                                var enableTransfer = !transaction.UsedStripeConnect && !transaction.PayoutId.HasValue && useStripeConnect && account.StripePayoutsEnabled && !transaction.HasRefundsAHQ() && transaction.TransactionTypeId == TransactionType.Charge;
 
                                 <tr id="@transaction.Uid">
                                     <td>
@@ -634,4 +646,18 @@
             );
         }
     }
+
+    function getStripeLoginLink() {
+        $.get(
+            '@Url.Action("getstripeloginlink", "accounting")',
+            function (data) {
+                if (data && data.status == 'ok') {
+                    location.href = data.link;
+                } else {
+                    Notifications.showErrors(data.messages);
+                }
+            }
+        );
+    }
+
 </script>
