@@ -80,7 +80,7 @@
                                                     {
                                                         <i class="s7-check-circle text-success text-bold"></i>
                                                     }
-                                                    @amr.RegistrantDisplayName
+                                                    @(amr.RegistrantDisplayName.HasValue() ? amr.RegistrantDisplayName : amr.RegistrantEmail)
                                                 </div>
                                             }
                                         </div>
