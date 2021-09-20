@@ -59,7 +59,7 @@
                 </div>
                 <div class="row margin-t-10">
                     <div class="col-lg-6 col-md-6 ">
-                        <input type="text" class="form-control newInput" id="dueDate" name="dueDate" value="@DateTime.Now.ToShortDateString()" placeholder="Due Date (Optional)" />
+                        <input type="text" class="form-control newInput" id="dueDate" name="dueDate" value="@DateTime.Now.ToString("MM/dd/yyyy")" placeholder="Due Date (Optional)" />
                     </div>
                 </div>
                 <div style="clear:both"></div>
@@ -151,13 +151,14 @@
                 });
 
                 $("#dueDate").datetimepicker({
-                    format: "dd/mm/yyyy",
+                    format: "mm/dd/yyyy",
                     autoclose: true,
                     todayBtn: true,
                     pickTime: false,
                     minView: 2,
                     viewSelect: 'month',
                 });
+                $('#dueDate').datetimepicker('setStartDate', new Date());
 
                 var form = $('form').validate({
                     rules: {
