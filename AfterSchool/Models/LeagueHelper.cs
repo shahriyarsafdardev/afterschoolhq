@@ -127,7 +127,7 @@ namespace AfterSchool.Models
 
             Messages = new SystemMessages();
             Activity = currentAccount.GetActivity(activityUid.ToGuid(), Messages);
-            ActivityGroup = currentAccount.GetActivityGroup(activityGroupUid.ToGuid(), Messages);
+            ActivityGroup = ActivityGroup.LoadByUid(activityGroupUid.ToGuid());
             AccountActivityGroup = ActivityGroup.GetAccountActivityGroup(currentAccount, Messages);
             Registrants = AccountActivityGroup.IsEmpty() ? ActivityGroup.GetRegistrants(msgs: Messages) : AccountActivityGroup.GetRegistrants(Messages);
         }
