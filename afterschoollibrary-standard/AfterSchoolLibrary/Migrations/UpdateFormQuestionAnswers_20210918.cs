@@ -2,6 +2,7 @@
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,7 +38,7 @@ namespace AfterSchoolLibrary.Migrations
                         foreach (var formQuestionAnswer in formQuestionAnswers)
                         {
                             if (formQuestionAnswer.Text.IsNotEmpty())
-                            {
+                            {                               
                                 var isJson = IsAlreadyJsonString(formQuestionAnswer.Text);
                                 if (isJson)
                                     continue;
@@ -78,7 +79,7 @@ namespace AfterSchoolLibrary.Migrations
 
                 return false;
             }
-            catch (JsonReaderException ex)
+            catch (Exception ex)
             {
                 return false;
             }
