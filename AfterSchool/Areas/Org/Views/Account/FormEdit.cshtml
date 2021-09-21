@@ -74,7 +74,7 @@
                                     <label class="col-sm-3 control-label">Form Type</label>
                                     <div class="col-sm-9">
                                         <select class="form-control formtype-select" id="formtype" name="formtype">
-                                            @foreach (var type in Enum.GetValues(typeof(FormType)).Cast<FormType>())
+                                            @foreach (var type in Enum.GetValues(typeof(FormType)).Cast<FormType>().Where(a => !a.Equals(FormType.NotSet)))
                                             {
                                                 <option value="@((int)type)" @(type == Model.FormTypeId ? "selected=\"selected\"" : "")>
                                                     @type.ToString().SplitByUpperCase()
