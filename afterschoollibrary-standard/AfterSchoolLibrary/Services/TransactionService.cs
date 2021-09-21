@@ -853,5 +853,56 @@ namespace AfterSchoolLibrary.Services
 
             return null;
         }
+
+        public static void MoveToAccount(this Transaction transaction, Account toAccount, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (transaction.IsEmpty() || toAccount.IsEmpty())
+                return;
+
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    // update transaction
+                    if (transaction.BillerAccountId == transaction.ConvenienceFeePayerAccountId)
+                        transaction.ConvenienceFeePayerAccountId = toAccount.ID;
+
+                    if (transaction.BillerAccountId == transaction.PaymentTypeFeePayerAccountId)
+                        transaction.PaymentTypeFeePayerAccountId = toAccount.ID;
+
+                    transaction.BillerAccountId = toAccount.ID;
+                    amsgs.AddRange(transaction.Save(adc));
+
+                    // update payments
+                    var payments = transaction.GetPayments(amsgs, adc);
+
+                    payments.ForEach(payment =>
+                    {
+                        payment.AccountId = toAccount.ID;
+                        amsgs.AddRange(payment.Save(adc));
+                    });
+
+                    // update registrant & registration
+                    var purchase = transaction.GetPurchase(amsgs, adc);
+
+                    if (purchase.IsNotEmpty())
+                    {
+                        var registrant = purchase.GetRegistrant(amsgs, adc);
+                        var registration = registrant.GetRegistrations(amsgs, adc).First();
+
+                        registrant.AccountId = toAccount.ID;
+                        amsgs.AddRange(registrant.Save(adc));
+
+                        registration.AccountId = toAccount.ID;
+                        amsgs.AddRange(registration.Save(adc));
+                    }
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+
+        }
     }
 }
