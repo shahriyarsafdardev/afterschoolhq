@@ -98,7 +98,7 @@ namespace AfterSchoolLibrary.Helpers
             var model = new NameValueCollection()
             {
                 { "Name", getRegistrant.Name },
-                { "Link", Utilities.SurveyBaseUrl+"/survey/"+surveyResponse.SurveyRequestId},
+                { "Link", Utilities.SurveyBaseUrl+"/survey/"+surveyResponse.ID},
                 { "SignUpLink", Utilities.SurveyBaseUrl+"/onboarding/signup"},
                 { "SurveyName", getSurvey.Name}
             };
