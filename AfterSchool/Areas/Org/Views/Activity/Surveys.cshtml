@@ -61,7 +61,7 @@
                                     @SurveyRequestService.GetCreatedBy(survey).DisplayName
                                 </td>
                                 <td>
-                                    @(survey.CreateDate.IsNotEmpty() ? survey.CreateDate.Value.ToString("dd/MM/yyyy") : "")
+                                    @(survey.CreateDate.IsNotEmpty() ? survey.CreateDate.Value.ToString("MM/dd/yyyy") : "")
                                 </td>
                             </tr>
                         }

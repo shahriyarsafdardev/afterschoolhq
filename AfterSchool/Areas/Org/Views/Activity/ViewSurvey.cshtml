@@ -78,7 +78,7 @@
                                     @surveyResponse.SurveyFeedbackStatusTypeId.ToString().SplitByUpperCase()
                                 </td>
                                 <td>
-                                    @(surveyResponse.LastModifiedDate.IsNotEmpty() ? survey.LastModifiedDate.Value.ToString("dd/MM/yyyy") : "")
+                                    @(surveyResponse.LastModifiedDate.IsNotEmpty() ? survey.LastModifiedDate.Value.ToString("MM/dd/yyyy") : "")
                                 </td>
                                 <td>
                                     @if (surveyResponse.SurveyFeedbackStatusTypeId != SurveyFeedbackStatus.Completed)

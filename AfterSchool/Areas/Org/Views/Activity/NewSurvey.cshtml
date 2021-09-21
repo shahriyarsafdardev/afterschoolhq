@@ -40,7 +40,7 @@
                 <div class="row margin-t-30">
                     <div class="col-md-6">
                         <select name="formId" id="formId" class="form-control newDropDown newInput" @(activeForm.IsNotEmpty() && forms.Any(m => m.ID == activeForm.FormId) ? "required" : "")>
-                            @foreach (var form in forms)
+                            @foreach (var form in forms.Where(a => a.FormTypeId == FormType.Survey))
                             {
                                 <option value="@form.ID" @(activeForm?.FormId == form.ID ? "selected=\"selected\"" : "")>@form.Name</option>
                             }
