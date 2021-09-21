@@ -40,7 +40,7 @@ namespace AfterSchoolLibrary.Helpers
             get
             {
                 if (IsQA)
-                    return "app-qa.afterschoolhq.com";
+                    return "app-dev.afterschoolhq.com";
                 else if (IsStaging)
                     return "app-dev.afterschoolhq.com";
                 else if (IsProduction)
