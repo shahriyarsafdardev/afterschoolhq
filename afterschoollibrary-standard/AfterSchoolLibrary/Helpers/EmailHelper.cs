@@ -99,6 +99,7 @@ namespace AfterSchoolLibrary.Helpers
             {
                 { "Name", getRegistrant.Name },
                 { "Link", Utilities.SurveyBaseUrl+"/survey/"+surveyResponse.SurveyRequestId},
+                { "SignUpLink", Utilities.SurveyBaseUrl+"/onboarding/signup"},
                 { "SurveyName", getSurvey.Name}
             };
 
