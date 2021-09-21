@@ -497,6 +497,7 @@
             </div>
             <div class="modal-body form">
                 <p class="minMaxValidation text-danger hide">Min rate value can't be greater than max rate value.</p>
+                <p id="invalidBarChar" class="text-danger hide">| sign is not allowed.</p>
                 <div class="form-group row d-flex">
                     <div class="col">
                         <input class="form-control input-sm rating" required id="question-rating-min" name="question-rating-min" oninput="setOptionalLabelAndIncrement();" onkeyup="if (/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" />
@@ -906,6 +907,11 @@
         var validation = true;
         var ratingMin = $('#question-rating-min');
         var ratingMax = $('#question-rating-max');
+        var ratingMax = $('#question-rating-max');
+        var invalidBarChar = $('#invalidBarChar');
+        var minMaxValidation = $('.minMaxValidation');
+        var ratingMinOptionalLabel = $('#question-rating-label-min');
+        var ratingMaxOptionalLabel = $('#question-rating-label-max');
         var ratingMinValIsInteger = $.isNumeric($('#question-rating-min').val());
         var ratingMaxValIsInteger = $.isNumeric($('#question-rating-max').val());
 
@@ -925,6 +931,38 @@
             ratingMax.removeClass("danger");
         }
 
+        if (ratingMinOptionalLabel.val().includes('|')) {
+            ratingMinOptionalLabel.addClass("danger");
+            invalidBarChar.removeClass("hide");
+            validation = false;
+        }
+        else {
+            ratingMinOptionalLabel.removeClass("danger");
+            invalidBarChar.addClass("hide");
+        }
+
+        if (ratingMaxOptionalLabel.val().includes('|')) {
+            ratingMaxOptionalLabel.addClass("danger");
+            invalidBarChar.removeClass("hide");
+            validation = false;
+        }
+        else {
+            ratingMaxOptionalLabel.removeClass("danger");
+            invalidBarChar.addClass("hide");
+        }
+
+        //if (ratingMin.val() > ratingMax.val()) {
+        //    ratingMax.addClass("danger");
+        //    ratingMin.addClass("danger");
+        //    minMaxValidation.removeClass("hide");
+        //    validation = false;
+        //}
+        //else {
+        //    ratingMax.removeClass("danger");
+        //    ratingMin.removeClass("danger");
+        //    minMaxValidation.addClass("hide");
+        //    validation = true;
+        //}
 
         if (validation == true) {
             $('#options-text-' + selectedLinkQuestion).val($('#question-rating-min').val() + "|" + $('#question-rating-label-min').val() + "," + $('#question-rating-max').val() + "|" + $('#question-rating-label-max').val() + "," + $('#question-rating-increment').val());
