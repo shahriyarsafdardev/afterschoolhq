@@ -839,7 +839,26 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
                 else if (activity.HasSchedule)
                 {
+                    var scheduleRemoved = activity.GetSchedule(msgs);
                     activity.RemoveActivitySchedule(currentUser, currentAccount, msgs);
+
+                    // Show Success Message
+                    msgs.Add($"Schedule removed from {activity.Name}", MessageType.Success);
+
+                    // LOG: Someone Removed Schedule From for Activity AccountName
+                    if (msgs.HasNoErrors())
+                        SessionVariables.WebSession.LogActivity(
+                            account: currentAccount,
+                            actor: currentUser,
+                            actionType: WebSessionActionType.Removed,
+                            objectType: ObjectType.ActivitySchedule,
+                            objectId: scheduleRemoved.ID.Value,
+                            objectText: scheduleRemoved.Name,
+                            indirectObjectType: ObjectType.Activity,
+                            indirectObjectId: activity.ID.Value,
+                            indirectObjectText: activity.Name
+                        );
+
                 }
             } 
 
@@ -1032,8 +1051,6 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var canProcessPayments = currentAccount.CanProcessPayments(msgs);
 
-            if (!canProcessPayments)
-                activity.AllowToPayLater = true;
 
             ViewBag.Account = currentAccount;
             ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
@@ -1497,6 +1514,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.AttendanceRegistrants = attendance.GetAttendanceRegistrants(msgs);
             ViewBag.Schedule = activity.GetSchedule(msgs);
             ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
+            ViewBag.RegistrantActivities = activity.GetRegistrantActivities(msgs);
             ViewBag.Messages = msgs;
             return View(attendance);
         }
@@ -1883,16 +1901,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             LoadEditSetupViewBag(activity, activityGroup, msgs);
 
-            ViewBag.Students = currentAccount.SearchRegistrations(
-              null,
-              null,
-              null,
-              ParticipationObjectType.Activity,
-              RegistrationStatus.NotSet,
-              null,
-              null,
-              null,
-              msgs);
+            ViewBag.Students = activity.GetRegistrantActivities(includeInvited: true, msgs).Where(a => a.AssignmentTypeId == RegistrationAssignmentType.Reserved || a.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingParentalConsent || a.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment).ToList();
 
             ViewBag.Messages = msgs;
             return View(activity);
@@ -2118,6 +2127,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
             ViewBag.Registrants = ras;
             ViewBag.AssignmentType = rat;
+            ViewBag.IsReadOnlySeatStatus = activity.GetParticipationObject(msgs).IsExternalToAccount(SessionVariables.CurrentAccount);
             ViewBag.Messages = msgs;
         }
 
@@ -2164,6 +2174,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 );
             }
 
+            RegistrantsViewBag(activity, assignmenttype, null, msgs);
             ViewBag.Messages = msgs;
             return RedirectToAction("registrants", new { id });
         }
@@ -2181,9 +2192,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             msgs.Add("Your report will be sent shortly", MessageType.Success);
 
-            ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
-            ViewBag.Registrants = activity.GetRegistrantActivities(msgs);
-            ViewBag.AssignmentType = RegistrationAssignmentType.NotSet;
+            RegistrantsViewBag(activity, null, null, msgs);
             ViewBag.Messages = msgs;
             return View("Registrants", activity);
         }
@@ -2245,7 +2254,7 @@ namespace AfterSchool.Areas.Org.Controllers
             Response.BinaryWrite(filebytes);
             Response.End();
 
-            ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
+            RegistrantsViewBag(activity, null, null, msgs);
             ViewBag.Messages = msgs;
 
             return View("Registrants", activity);
@@ -2790,7 +2799,12 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
-            ViewBag.Registrants = activity.GetRegistrants(msgs)
+
+            var assignmentTypes = new RegistrationAssignmentType[] { RegistrationAssignmentType.Applied, RegistrationAssignmentType.WaitingList, RegistrationAssignmentType.Reserved, RegistrationAssignmentType.ReservedPendingParentalConsent, RegistrationAssignmentType.ReservedPendingPayment, RegistrationAssignmentType.Invited };
+
+            ViewBag.Registrants = activity.GetRegistrantActivities(true, msgs)
+                                    .Where(ra => ra.AssignmentTypeId.In(assignmentTypes))
+                                    .Select(ra => ra.ToRegistrant())
                                     .OrderBy(x => x.FirstName)
                                     .ToList();
 
@@ -2842,11 +2856,13 @@ namespace AfterSchool.Areas.Org.Controllers
                             currentUser.ID.Value,
                             msgs);
 
-                        BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, msgs, null));
+                        BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, null, null));
 
                         msgs.Add("Your message will been sent to the selected registrants", MessageType.Success);
                         ViewBag.Registrants = am.GetActivityMessageRegistrants(msgs);
                         ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
+                        ViewBag.Messages = msgs;
+                        return View("messagedetail", am.Reload());
                     }
                 }
             }
