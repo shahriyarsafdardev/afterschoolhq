@@ -28,16 +28,23 @@
                     {
                         if (question.FormQuestionQuestionTypeId == QuestionType.TextArea || question.FormQuestionQuestionTypeId == QuestionType.TextBlock)
                         {
-                            dynamic json = Newtonsoft.Json.JsonConvert.DeserializeObject(question.Text);
+                           
+                                
                             <div class="col-lg-12">
                                 <div class="viewSurvey">
                                     @if (question.QuestionText.IsNotEmpty())
                                     {
                                         <div class="viewSurveyHead">@question.QuestionText</div>
                                     }
-                                    <div class="viewSurveyAnswer">@Html.Raw(json.blocks[0].text)</div>
+
+                                    @if (question.Text.IsNotEmpty())
+                                    {
+                                        dynamic json = Newtonsoft.Json.JsonConvert.DeserializeObject(question.Text);
+                                        <div class="viewSurveyAnswer">@Html.Raw(json.blocks[0].text)</div>
+                                    }
                                 </div>
                             </div>
+
                         }
                         else if (question.FormQuestionQuestionTypeId == QuestionType.Checkbox)
                         {
@@ -50,29 +57,37 @@
                         }
                         else if (question.FormQuestionQuestionTypeId == QuestionType.DropDownList || question.FormQuestionQuestionTypeId == QuestionType.RadioList)
                         {
-                            dynamic json = Newtonsoft.Json.JsonConvert.DeserializeObject(question.Text);
                             <div class="col-lg-12">
                                 <div class="viewSurvey">
                                     <div class="viewSurveyHead">@question.QuestionText</div>
-                                    <div class="viewSurveyAnswer">@Html.Raw(json[0].value)</div>
+                                    @if (question.Text.IsNotEmpty())
+                                    {
+                                        dynamic json = Newtonsoft.Json.JsonConvert.DeserializeObject(question.Text);
+                                        <div class="viewSurveyAnswer">@Html.Raw(json[0].value)</div>
+                                    }
                                 </div>
                             </div>
+                            
                         }
                         else if (question.FormQuestionQuestionTypeId == QuestionType.CheckboxList)
                         {
-                            dynamic json = Newtonsoft.Json.JsonConvert.DeserializeObject(question.Text);
                             var str = "";
-                            foreach (var item in json)
+                            if (question.Text.IsNotEmpty())
                             {
-                                if (str.IsNotEmpty())
-                                {
-                                    str = str + ", " + item.value;
-                                }
-                                else
-                                {
-                                    str = item.value;
-                                }
+                                dynamic json = Newtonsoft.Json.JsonConvert.DeserializeObject(question.Text);
 
+                                foreach (var item in json)
+                                {
+                                    if (str.IsNotEmpty())
+                                    {
+                                        str = str + ", " + item.value;
+                                    }
+                                    else
+                                    {
+                                        str = item.value;
+                                    }
+
+                                }
                             }
                             <div class="col-lg-12">
                                 <div class="viewSurvey">
