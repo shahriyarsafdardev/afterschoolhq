@@ -134,7 +134,11 @@ namespace AfterSchoolLibrary.Services
                     dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
                     row.Add(Convert.ToString(json.blocks[0].text));
                 }
-                else if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.DropDownList)
+                else if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.Checkbox)
+                {
+                    row.Add(formQuestionAnswer.Text == "1" ? "True" : "False");
+                }
+                else if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.DropDownList || formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.RadioList)
                 {
                     dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
                     row.Add(Convert.ToString(json[0].value));

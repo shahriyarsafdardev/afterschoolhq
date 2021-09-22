@@ -39,7 +39,16 @@
                                 </div>
                             </div>
                         }
-                        else if (question.FormQuestionQuestionTypeId == QuestionType.DropDownList)
+                        else if (question.FormQuestionQuestionTypeId == QuestionType.Checkbox)
+                        {
+                            <div class="col-lg-12">
+                                <div class="viewSurvey">
+                                    <div class="viewSurveyHead">@question.QuestionText</div>
+                                    <div class="viewSurveyAnswer">@(question.Text == "1" ? "True": "False")</div>
+                                </div>
+                            </div>
+                        }
+                        else if (question.FormQuestionQuestionTypeId == QuestionType.DropDownList || question.FormQuestionQuestionTypeId == QuestionType.RadioList)
                         {
                             dynamic json = Newtonsoft.Json.JsonConvert.DeserializeObject(question.Text);
                             <div class="col-lg-12">
