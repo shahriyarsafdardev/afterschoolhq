@@ -2138,6 +2138,11 @@ namespace AfterSchoolLibrary.Services
             return activity.GetRegistrantActivities(msgs, dc).Select(x => x.ToRegistrant()).ToList();
         }
 
+        public static List<Registrant> GetRegistrants(this Activity activity, bool includeInvited, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return activity.GetRegistrantActivities(includeInvited, msgs, dc).Select(x => x.ToRegistrant()).ToList();
+        }
+
         public static List<RegistrantActivity> GetRegistrantActivities(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return activity.GetRegistrantActivities(false, msgs, dc);
