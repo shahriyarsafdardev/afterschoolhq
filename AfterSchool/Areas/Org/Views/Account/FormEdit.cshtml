@@ -496,7 +496,8 @@
                 <h3 class="modal-title">Edit Rating</h3>
             </div>
             <div class="modal-body form">
-                <p class="minMaxValidation text-danger hide">Min rate value can't be greater than max rate value.</p>
+                <p id="valueRequired" class="text-danger hide">Value is required.</p>
+                <p class="minMaxValidation text-danger hide">Max value should be greater than min value.</p>
                 <p id="invalidBarChar" class="text-danger hide">| sign is not allowed.</p>
                 <div class="form-group row d-flex">
                     <div class="col">
@@ -908,6 +909,7 @@
         var ratingMin = $('#question-rating-min');
         var ratingMax = $('#question-rating-max');
         var ratingMax = $('#question-rating-max');
+        var valueRequired = $('#valueRequired');
         var invalidBarChar = $('#invalidBarChar');
         var minMaxValidation = $('.minMaxValidation');
         var ratingMinOptionalLabel = $('#question-rating-label-min');
@@ -917,19 +919,35 @@
 
         if (ratingMin.val() == "") {
             ratingMin.addClass("danger");
+            valueRequired.removeClass("hide");
             validation = false;
         }
         else {
             ratingMin.removeClass("danger");
+            valueRequired.addClass("hide");
+
+            if (parseInt(ratingMin.val()) >= parseInt(ratingMax.val())) {
+                ratingMax.addClass("danger");
+                ratingMin.addClass("danger");
+                minMaxValidation.removeClass("hide");
+                validation = false;
+            }
+            else {
+                ratingMax.removeClass("danger");
+                ratingMin.removeClass("danger");
+                minMaxValidation.addClass("hide");
+                validation = true;
+            }
         }
 
         if (ratingMax.val() == "") {
             ratingMax.addClass("danger");
+            valueRequired.removeClass("hide");
             validation = false;
         }
         else {
             ratingMax.removeClass("danger");
-        }
+        } 
 
         if (ratingMinOptionalLabel.val().includes('|')) {
             ratingMinOptionalLabel.addClass("danger");
@@ -948,25 +966,13 @@
         }
         else {
             ratingMaxOptionalLabel.removeClass("danger");
-            invalidBarChar.addClass("hide");
-        }
-
-        //if (ratingMin.val() > ratingMax.val()) {
-        //    ratingMax.addClass("danger");
-        //    ratingMin.addClass("danger");
-        //    minMaxValidation.removeClass("hide");
-        //    validation = false;
-        //}
-        //else {
-        //    ratingMax.removeClass("danger");
-        //    ratingMin.removeClass("danger");
-        //    minMaxValidation.addClass("hide");
-        //    validation = true;
-        //}
+        }       
 
         if (validation == true) {
             $('#options-text-' + selectedLinkQuestion).val($('#question-rating-min').val() + "|" + $('#question-rating-label-min').val() + "," + $('#question-rating-max').val() + "|" + $('#question-rating-label-max').val() + "," + $('#question-rating-increment').val());
             $("#btn-setratings-" + selectedLinkQuestion).css("border", "").tooltip("destroy");
+            invalidBarChar.addClass("hide");
+            valueRequired.addClass("hide");
             $("#modal-rating").removeClass("md-show");
         }
         else return false;
