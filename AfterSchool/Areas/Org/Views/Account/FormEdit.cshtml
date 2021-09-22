@@ -928,6 +928,9 @@
             $('#rating-min-label').append('1');
             $('#rating-max-label').empty();
             $('#rating-max-label').append('5');
+            $('#question-rating-min').removeClass("danger");
+            $('#question-rating-max').removeClass("danger");
+            $('#valueRequired').addClass("hide");
             setOptionalLabelAndIncrement();
         }
     }
@@ -936,7 +939,6 @@
     function updateRating() {
         var validation = true;
         var ratingMin = $('#question-rating-min');
-        var ratingMax = $('#question-rating-max');
         var ratingMax = $('#question-rating-max');
         var valueRequired = $('#valueRequired');
         var invalidBarChar = $('#invalidBarChar');
@@ -1013,7 +1015,7 @@
 
     function setOptionalLabelAndIncrement() {
 
-        var ratingMaxValue = $('#question-rating-max').val();
+        var ratingMaxValue = $('#question-rating-max').val().replace(/[^\d.-]/g, '');
 
         if ($.isNumeric($('#question-rating-min').val())) {
             $('#rating-min-label').empty();
