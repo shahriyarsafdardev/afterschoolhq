@@ -1027,7 +1027,7 @@ property: Text, string, NVarChar "400"
 property: Description, string, NVarChar "4000"
 property: QuestionDataTypeId, QuestionDataType, Int
 property: QuestionText, string, NVarChar "400", , Used to keep the question text just in case the question text changes on the original
-property: Uid, Guid, UniqueIdentifier, required
+property: Uid, Guid?, UniqueIdentifier
 join: FormQuestion.ID, FormQuestionId, LeftOuterJoin
 join: Registration.ID, RegistrationId, LeftOuterJoin
 join: SurveyResponse.ID, SurveyResponseId, LeftOuterJoin
@@ -1938,6 +1938,23 @@ loadmethod: Uid|SurveyResponseId
 loadmethod: Uid|RegistrantId
 loadmethod: IsDeleted|Code
 loadmethod: Code
+[end]
+
+[begin]
+type: Class
+name: RefreshToken
+serializable: true
+description: Stores refresh tokens
+inherits: BasicIDObject
+property: Token, string, NVarChar "4000"
+property: Expires, DateTime?, DateTime
+property: Created, DateTime?, DateTime
+property: CreatedByIp, string, NVarChar "100"
+property: Revoked, DateTime?, DateTime
+property: RevokedByIp, string, NVarChar "100"
+property: ReplacedByToken, string, NVarChar "4000"
+property: IsActive, bool, Bit
+property: WebUserId, int?, Int
 [end]
 
 [begin]
