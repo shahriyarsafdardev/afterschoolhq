@@ -74,7 +74,7 @@
                                     <label class="col-sm-3 control-label">Form Type</label>
                                     <div class="col-sm-9">
                                         <select class="form-control formtype-select" id="formtype" name="formtype">
-                                            @foreach (var type in Enum.GetValues(typeof(FormType)).Cast<FormType>())
+                                            @foreach (var type in Enum.GetValues(typeof(FormType)).Cast<FormType>().Where(a => !a.Equals(FormType.NotSet)))
                                             {
                                                 <option value="@((int)type)" @(type == Model.FormTypeId ? "selected=\"selected\"" : "")>
                                                     @type.ToString().SplitByUpperCase()
@@ -414,6 +414,7 @@
 
                 <p>Update your options here. Your options are not saved until you hit the save button on the screen</p>
                 <p class="twoOptionsValidation text-danger hide">Please add atleast two options.</p>
+                <p class="invalid-char text-danger hide">| sign is not allowed.</p>
 
                 <div class="table-responsive">
                     <table class="table options-table emoji-option-table" id="options-table">
@@ -816,22 +817,42 @@
             var optionString = '';
             var rowCount = $("#options-table tr").length - 1;
             var validation = true;
+            var validChars = true;
             if (rowCount < 3 && $('#modal-options-title').text() != 'Emojis') {
                 validation = false;
                 $(".twoOptionsValidation").removeClass("hide")
             }
             $("#options-table tr").each(function (index) {
                 if (index != 0 && index != rowCount) {
+                    var optVal = $(this).find("input.option").val();
+                    var optDesc = $(this).find("input.optionDescription").val();
+
                     if ($(this).find("input.option").val() == "") {
                         $(this).find("input.option").addClass("danger");
                         validation = false;
                     }
                     else {
-                        $(this).find("input.option").removeClass("danger");
+                        if (optVal.includes('|')) {
+                            $(this).find("input.option").addClass("danger");
+                            validChars = false;
+                            validation = false;
+                        }
+                        else {
+                            $(this).find("input.option").removeClass("danger");
+                            optVal.trim();
+                        }
+
+                        if (optDesc.includes('|')) {
+                            $(this).find("input.optionDescription").addClass("danger");
+                            validChars = false;
+                            validation = false;
+                        }
+                        else {
+                            $(this).find("input.optionDescription").removeClass("danger");
+                            optDesc.trim();
+                        }
                     }
 
-                    var optVal = $(this).find("input.option").val();
-                    var optDesc = $(this).find("input.optionDescription").val();
                     var rowOption;
 
                     if (optDesc) {
@@ -843,6 +864,14 @@
                     optionString = optionString + rowOption;
                 }
             });
+
+            if (!validChars) {
+                $(".invalid-char").removeClass("hide");
+            }
+            else {
+                $(".invalid-char").addClass("hide");
+            }
+
             if (validation == true) {
                 var commaIndex = optionString.lastIndexOf(",");
                 var optionWithoutLastComma = optionString.substring(0, commaIndex);
