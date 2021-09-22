@@ -403,6 +403,8 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.UpdateAccountRelationshipPublish_20210804.Do(amsgs, adc);
                     Migrations.ResetFreeAcctsToFreePackage_20210805.Do(amsgs, adc);
 
+                    Migrations.UpdateFormQuestionAnswers_20210918.Do(amsgs, adc);
+
 
 
 

@@ -10,7 +10,7 @@
     var showManageFormFields = forms.Count >= maxFormCount ? false : true;
 
     var studentList = new List<SelectListItem>(); 
-    foreach (var student in (List<Registration>)ViewBag.Students)
+    foreach (var student in (List<RegistrantActivity>)ViewBag.Students)
     {
         studentList.Add(new SelectListItem {
             Text = student.RegistrantName,
@@ -18,7 +18,8 @@
         });
     }
 }
-    @{Html.RenderPartial("OrgAccountHeader");}
+<link href="~/Assets/css/survey.css" rel="stylesheet" />
+@{Html.RenderPartial("OrgAccountHeader");}
 
 <div class="main-content">
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -31,7 +32,7 @@
                     <div style="font-size:14px; color:#B2B2B4">@Model.Name</div>
                 </div>
             </div>
-            @using (Html.BeginForm("SaveSurvey", "Activity", FormMethod.Post, new { id="surveyForm" }))
+            @using (Html.BeginForm("SaveSurvey", "Activity", FormMethod.Post, new { id = "surveyForm" }))
             {
                 <input type="hidden" name="id" value="@Model.Uid" />
                 <input type="hidden" name="activityId" value="@Model.ID" />
@@ -54,6 +55,11 @@
                 <div class="row margin-t-10">
                     <div class="col-lg-6 col-md-6  ">
                         <input type="text" class="form-control newInput name" name="name" placeholder="Add Title" required />
+                    </div>
+                </div>
+                <div class="row margin-t-10">
+                    <div class="col-lg-6 col-md-6 ">
+                        <input type="text" class="form-control newInput" id="dueDate" name="dueDate" value="@DateTime.Now.ToString("MM/dd/yyyy")" placeholder="Due Date (Optional)" />
                     </div>
                 </div>
                 <div style="clear:both"></div>
@@ -102,19 +108,19 @@
                 <div style="clear:both"></div>
                 <!--parents and staff checkbox code commented for now, will use later-->
                 @*<div class="row margin-t-10">
-                        <div class="col-lg-4">
-                            <input id="parents" name="parents" type="checkbox" class="newCheckbox" value="true" />
-                            <input type="hidden" value="false" name="parents" />
-                            <label for="parents" class="margin-h-10 mobile-padding">Parents</label>
-                        </div>
-                    </div>
-                    <div class="row margin-t-10">
-                        <div class="col-lg-4">
-                            <input id="staff" name="staff" type="checkbox" class="newCheckbox" value="true" />
-                            <input type="hidden" value="false" name="staff" />
-                            <label for="staff" class="margin-h-10 mobile-padding">Staff</label>
-                        </div>
-                    </div>*@
+                <div class="col-lg-4">
+                    <input id="parents" name="parents" type="checkbox" class="newCheckbox" value="true" />
+                    <input type="hidden" value="false" name="parents" />
+                    <label for="parents" class="margin-h-10 mobile-padding">Parents</label>
+                </div>
+            </div>
+            <div class="row margin-t-10">
+                <div class="col-lg-4">
+                    <input id="staff" name="staff" type="checkbox" class="newCheckbox" value="true" />
+                    <input type="hidden" value="false" name="staff" />
+                    <label for="staff" class="margin-h-10 mobile-padding">Staff</label>
+                </div>
+            </div>*@
                 <div class="row margin-t-30">
                     <div class="col-lg-8 col-md-8">
                         <textarea id="optional" name="optionalText" class="newInput" style="height:150px;width:100%;padding:10px" placeholder="Add special intructions (optional)"></textarea>
@@ -143,6 +149,16 @@
                         $(".selectedIndividuals").val("true")
                     }
                 });
+
+                $("#dueDate").datetimepicker({
+                    format: "mm/dd/yyyy",
+                    autoclose: true,
+                    todayBtn: true,
+                    pickTime: false,
+                    minView: 2,
+                    viewSelect: 'month',
+                });
+                $('#dueDate').datetimepicker('setStartDate', new Date());
 
                 var form = $('form').validate({
                     rules: {
@@ -176,6 +192,14 @@
                     
                 })
 
+                setTimeout(function () {
+                    $(".glyphicon-arrow-right").addClass('glyphicon-chevron-right');
+                    $(".glyphicon-arrow-right").removeClass('glyphicon-arrow-right');
+
+                    $(".glyphicon-arrow-left").addClass('glyphicon-chevron-left');
+                    $(".glyphicon-arrow-left").removeClass('glyphicon-arrow-left');
+
+                }, 500);
             })
         </script>
     }

@@ -18,7 +18,7 @@ namespace AfterSchoolLibrary.Models
 		public static DatabaseCredentials LocalCredentials { get { return new DatabaseCredentials("localhost", "AfterSchool", "AfterSchoolUser", "Nj8Ed$wpLfJ"); } }
 		public static DatabaseCredentials CICredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
 		public static DatabaseCredentials QACredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
-		public static DatabaseCredentials TestCredentials { get { return new DatabaseCredentials("afterschool-nonprod.cdyenngbc33v.us-east-2.rds.amazonaws.com", "AfterSchoolTest", "AfterSchoolTestUser", "jUp$dBh8D9o)3Rf"); } }
+		public static DatabaseCredentials TestCredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
 		public static DatabaseCredentials StagingCredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
 		public static DatabaseCredentials LocalTestCredentials { get { return new DatabaseCredentials("localhost", "AfterSchoolTest", "AfterSchoolUser", "Nj8Ed$wpLfJ"); } }
 		public static DatabaseCredentials Credentials { get { if(Helpers.Utilities.IsProduction){return ProductionCredentials;} else if(Helpers.Utilities.IsCI){return CICredentials;} else if(Helpers.Utilities.IsStaging){return StagingCredentials;} else if(Helpers.Utilities.IsQA){return QACredentials;} else{return LocalCredentials;} } }
@@ -105,6 +105,7 @@ namespace AfterSchoolLibrary.Models
 			SurveyRequest.Create(dc);
 			SurveyResponse.Create(dc);
 			RegistrantInviteCode.Create(dc);
+			RefreshToken.Create(dc);
 			
 
 			return msgs;
@@ -191,6 +192,7 @@ namespace AfterSchoolLibrary.Models
 			SurveyRequest.Alter(dc);
 			SurveyResponse.Alter(dc);
 			RegistrantInviteCode.Alter(dc);
+			RefreshToken.Alter(dc);
 			
 
 			return msgs;
@@ -377,6 +379,7 @@ namespace AfterSchoolLibrary.Models
 			SurveyResponse.Update(new Hashtable(){{"SurveyFeedbackStatusTypeId",0}}, new Hashtable(){{"SurveyFeedbackStatusTypeId", DBNull.Value}}, SurveyResponse.ObjectMap, dc);
 			SurveyResponse.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, SurveyResponse.ObjectMap, dc);
 			RegistrantInviteCode.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, RegistrantInviteCode.ObjectMap, dc);
+			RefreshToken.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, RefreshToken.ObjectMap, dc);
 			
 			//**ENDUPDATES**//
 

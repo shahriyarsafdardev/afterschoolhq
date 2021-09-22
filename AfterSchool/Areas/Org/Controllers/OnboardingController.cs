@@ -322,7 +322,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var location = profile.GetLocation(msgs);
 
             if (location.IsEmpty())
-                location = new Location() { GooglePlaceId = placeid, StreetNumber = streetnumber, StreetName = streetname, Address2 = address2, City = city, State = state, PostalCode = postalcode, Country = country, County = county, Neighborhood = neighborhood, Name = locationname };
+                location = new Location() { GooglePlaceId = placeid, StreetNumber = streetnumber, StreetName = streetname, Address2 = address2, City = city, State = state, PostalCode = postalcode, Country = country, County = county, Neighborhood = neighborhood, Name = locationname, Longitude = Convert.ToDecimal(longitude), Latitude = Convert.ToDecimal(latitude) };
 
             ViewBag.Location = location;
             ViewBag.Email = Request["email"] ?? currentUser.Email;
