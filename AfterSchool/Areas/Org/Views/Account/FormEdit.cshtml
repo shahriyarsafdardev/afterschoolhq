@@ -490,35 +490,70 @@
 <!------- End of Link Modal Pop-up------------->
 <!------- Rating Modal Pop-up------------->
 <div id="modal-rating" class="md-modal colored-header custom-width md-effect-9">
-    <form id="form-rating" action="#" method="post">
+    <form id="form-rating" name="form-rating" action="#" method="post">
         <div class="md-content">
             <div class="modal-header">
                 <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
                 <h3 class="modal-title">Edit Rating</h3>
             </div>
             <div class="modal-body form">
+                <p id="valueRequired" class="text-danger hide">Value is required.</p>
+                <p class="minMaxValidation text-danger hide">Max value should be greater than min value.</p>
+                <p id="invalidBarChar" class="text-danger hide">| sign is not allowed.</p>
+                <div class="form-group row d-flex">
+                    <div class="col">
+                        <input class="form-control input-sm rating" required id="question-rating-min" name="question-rating-min" oninput="setOptionalLabelAndIncrement();" onkeyup="if (/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" />
+                    </div>
 
-                <p>Enter Min, Max and Increment values. Your options are not saved until you hit the save button on the screen</p>
+                    <div class="col">
+                        <label class="rating-label">
+                            to
+                        </label>
+                    </div>
 
-                <div class="form-group">
-                    <label><span id="question-rating-label1"></span></label>
-                    <input class="form-control" id="question-rating-min" name="question-rating-min" required placeholder="Enter the minimum value" />
+                    <div class="col">
+                        <input class="form-control input-sm rating" required id="question-rating-max" name="question-rating-max" oninput="setOptionalLabelAndIncrement();" onkeyup="if (/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" />
+                    </div>
+
+                    <div class="col">
+                        <label class="rating-label">
+                            by increments of
+                        </label>
+                    </div>
+
+                    <div class="col">
+                        <select class="form-control input-sm rating" id="question-rating-increment" onchange="setRatingIncrement()">
+                            <option>1</option>
+                            <option>2</option>
+                            <option>5</option>
+                            <option>10</option>
+                            <option>25</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label><span id="question-rating-label2"></span></label>
-                    <input class="form-control" id="question-rating-max" name="question-rating-max" required placeholder="Enter the maximum value" />
+                <div class="form-group row">
+                    <div class="col-xs-1">
+                        <label class="rating-label"><span id="rating-min-label">1</span></label>
+                    </div>
+                    <div class="col-xs-6">
+                        <input class="form-control input-sm" id="question-rating-label-min" required placeholder="Label (Optional)" />
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label><span id="question-rating-label3"></span></label>
-                    <input class="form-control" id="question-rating-increment" name="question-rating-increment" placeholder="Enter the increment value" />
+                <div class="form-group row">
+                    <div class="col-xs-1">
+                        <label class="rating-label"><span id="rating-max-label">5</span></label>
+                    </div>
+                    <div class="col-xs-6">
+                        <input class="form-control input-sm" id="question-rating-label-max" required placeholder="Label (Optional)" />
+                    </div>
                 </div>
 
             </div>
             <div class="modal-footer">
                 <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-                <button type="button" data-dismiss="modal" class="btn btn-primary md-close" onclick="updateRating()">Done</button>
+                <button type="button" data-dismiss="modal" class="btn btn-primary" onclick="updateRating()">Done</button>
             </div>
         </div>
     </form>
@@ -865,30 +900,143 @@
     }
 
     //called when rating modal is going to display
-    //Also setiing rating range values in options hidden field.
+    //Also setting rating range values in options hidden field.
     function setRating(id) {
         selectedLinkQuestion = id;
         var ratingString = $('#options-text-' + id).val();
         var ratingValues = ratingString.split(",");
         $('#question-rating-label').html($('#text-' + id).val());
+
         //if question exist then read data from hidden field and populate text fields
         if (ratingValues.length > 1) {
-            $('#question-rating-min').val(ratingValues[0]);
-            $('#question-rating-max').val(ratingValues[1])
-            ratingValues.length > 2 ? $('#question-rating-increment').val(ratingValues[2]) : $('#question-rating-increment').val('');
+            $('#question-rating-min').val(ratingValues[0].substring(0, ratingValues[0].indexOf('|')));
+            $('#question-rating-max').val(ratingValues[1].substring(0, ratingValues[1].indexOf('|')));
+            setOptionalLabelAndIncrement();
+            $('#question-rating-increment').val(ratingValues[2]);
+            $('#question-rating-label-min').val(ratingValues[0].substring(ratingValues[0].indexOf("|") + 1));
+            $('#question-rating-label-max').val(ratingValues[1].substring(ratingValues[1].indexOf("|") + 1));
+            $('#rating-min-label').empty();
+            $('#rating-min-label').append(ratingValues[0].substring(0, ratingValues[0].indexOf('|')));
+            $('#rating-max-label').empty();
+            $('#rating-max-label').append(ratingValues[1].substring(0, ratingValues[1].indexOf('|')));
         }
-        //setting default values
         else {
             $('#question-rating-min').val('1');
             $('#question-rating-max').val('5');
-            $('#question-rating-increment').val('1');
+            $('#question-rating-increment').val('1').change();
+            $('#question-rating-label-min').val('');
+            $('#question-rating-label-max').val('');
+            $('#rating-min-label').empty();
+            $('#rating-min-label').append('1');
+            $('#rating-max-label').empty();
+            $('#rating-max-label').append('5');
+            $('#question-rating-min').removeClass("danger");
+            $('#question-rating-max').removeClass("danger");
+            $('#valueRequired').addClass("hide");
+            setOptionalLabelAndIncrement();
         }
     }
 
     //Updating rating range values in options hidden input
     function updateRating() {
-        $('#options-text-' + selectedLinkQuestion).val($('#question-rating-min').val() + "," + $('#question-rating-max').val() + "," + $('#question-rating-increment').val());
-        $("#btn-setratings-" + selectedLinkQuestion).css("border", "").tooltip("destroy");
+        var validation = true;
+        var ratingMin = $('#question-rating-min');
+        var ratingMax = $('#question-rating-max');
+        var valueRequired = $('#valueRequired');
+        var invalidBarChar = $('#invalidBarChar');
+        var minMaxValidation = $('.minMaxValidation');
+        var ratingMinOptionalLabel = $('#question-rating-label-min');
+        var ratingMaxOptionalLabel = $('#question-rating-label-max');
+        var ratingMinValIsInteger = $.isNumeric($('#question-rating-min').val());
+        var ratingMaxValIsInteger = $.isNumeric($('#question-rating-max').val());
+
+        if (ratingMin.val() == "") {
+            ratingMin.addClass("danger");
+            valueRequired.removeClass("hide");
+            validation = false;
+        }
+        else {
+            ratingMin.removeClass("danger");
+            valueRequired.addClass("hide");
+
+            if (parseInt(ratingMin.val()) >= parseInt(ratingMax.val())) {
+                ratingMax.addClass("danger");
+                ratingMin.addClass("danger");
+                minMaxValidation.removeClass("hide");
+                validation = false;
+            }
+            else {
+                ratingMax.removeClass("danger");
+                ratingMin.removeClass("danger");
+                minMaxValidation.addClass("hide");
+                validation = true;
+            }
+        }
+
+        if (ratingMax.val() == "") {
+            ratingMax.addClass("danger");
+            valueRequired.removeClass("hide");
+            validation = false;
+        }
+        else {
+            ratingMax.removeClass("danger");
+        } 
+
+        if (ratingMinOptionalLabel.val().includes('|')) {
+            ratingMinOptionalLabel.addClass("danger");
+            invalidBarChar.removeClass("hide");
+            validation = false;
+        }
+        else {
+            ratingMinOptionalLabel.removeClass("danger");
+            invalidBarChar.addClass("hide");
+        }
+
+        if (ratingMaxOptionalLabel.val().includes('|')) {
+            ratingMaxOptionalLabel.addClass("danger");
+            invalidBarChar.removeClass("hide");
+            validation = false;
+        }
+        else {
+            ratingMaxOptionalLabel.removeClass("danger");
+        }       
+
+        if (validation == true) {
+            $('#options-text-' + selectedLinkQuestion).val($('#question-rating-min').val() + "|" + $('#question-rating-label-min').val() + "," + $('#question-rating-max').val() + "|" + $('#question-rating-label-max').val() + "," + $('#question-rating-increment').val());
+            $("#btn-setratings-" + selectedLinkQuestion).css("border", "").tooltip("destroy");
+            invalidBarChar.addClass("hide");
+            valueRequired.addClass("hide");
+            $("#modal-rating").removeClass("md-show");
+        }
+        else return false;
+    }
+
+    function setRatingIncrement() {
+        $('#question-rating-increment').val($('#question-rating-increment').val());
+    }
+
+    function setOptionalLabelAndIncrement() {
+
+        var ratingMaxValue = $('#question-rating-max').val().replace(/[^\d.-]/g, '');
+
+        if ($.isNumeric($('#question-rating-min').val())) {
+            $('#rating-min-label').empty();
+            $('#rating-min-label').append($('#question-rating-min').val());
+        }
+
+        if ($.isNumeric($('#question-rating-max').val())) {
+            $('#rating-max-label').empty();
+            $('#rating-max-label').append($('#question-rating-max').val());
+        }
+
+        $('#question-rating-increment').empty();
+
+        for (var i = 0; i < ratingMaxValue; i++) {
+            if (ratingMaxValue % i == 0) {
+                var newOption = $('<option value="' + i + '">' + i + '</option>');
+                $('#question-rating-increment').append(newOption);
+            }
+        }
     }
 
     function deleteQuestion(name, url) {
