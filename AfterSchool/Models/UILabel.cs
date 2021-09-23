@@ -103,5 +103,13 @@ namespace AfterSchool.Models
             if (plural) key = name + "_plural";
             return ((Hashtable)System.Configuration.ConfigurationManager.GetSection("applabels"))[key].ToString();
         }
+
+        public static string GetGradeDescription(string gradeText)
+        {
+            if (AfterSchoolLibrary.Helpers.Utilities.IsAlreadyJsonString(gradeText))
+                return AfterSchoolLibrary.Helpers.Utilities.GetKeyValuePairs(gradeText).FirstOrDefault()?.value;
+
+            return gradeText;
+        }        
     }
 }

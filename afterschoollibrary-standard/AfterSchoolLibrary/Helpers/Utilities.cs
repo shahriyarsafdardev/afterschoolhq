@@ -9,6 +9,7 @@ using SendGrid.Helpers.Mail;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Services;
 using AfterSchoolLibrary.Models;
+using Newtonsoft.Json;
 
 namespace AfterSchoolLibrary.Helpers
 {
@@ -1992,6 +1993,26 @@ namespace AfterSchoolLibrary.Helpers
                 return ConfigurationManager.AppSettings["AmazonBucketName"];
             }
         }
+
+        public static bool IsAlreadyJsonString(string s)
+        {
+            try
+            {
+                var stringInput = s.Trim();
+                if ((stringInput.StartsWith("{") && stringInput.EndsWith("}")))
+                    return true; //For json object
+                else if (stringInput.StartsWith("[") && stringInput.EndsWith("]"))
+                    return true; //For json array
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        public static List<KeyValuePair> GetKeyValuePairs(string s) => JsonConvert.DeserializeObject<List<KeyValuePair>>(s);
     }
 
     public class Email
@@ -2089,6 +2110,9 @@ namespace AfterSchoolLibrary.Helpers
         public static string SenderHostName { get; set; }
     }
 
-
-
+    public class KeyValuePair
+    {
+        public string key { get; set; }
+        public string value { get; set; }
+    }
 }

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Collections;
 using Twilio.Rest.Api.V2010.Account;
 using System.Net;
+using Newtonsoft.Json.Linq;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -1190,15 +1191,20 @@ namespace AfterSchoolLibrary.Services
         public static FormQuestionAnswer AddOrUpdateAnswer(this Registrant registrant, string answerText, FormQuestion question, int? registrationId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (question.IsNotEmpty())
+            {
+                if (question.QuestionTypeId == QuestionType.CheckboxList)
+                    answerText = $"[" + answerText + "]";
+
                 return registrant.AddOrUpdateAnswer(
-                        answerText, 
-                        question.ID, 
-                        question.QuestionDataTypeId, 
-                        question.Text, 
-                        registrationId, 
-                        loggedInUser, 
-                        msgs, 
+                        answerText,
+                        question.ID,
+                        question.QuestionDataTypeId,
+                        question.Text,
+                        registrationId,
+                        loggedInUser,
+                        msgs,
                         dc);
+            }
 
             return null;
         }
