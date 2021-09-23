@@ -121,8 +121,8 @@ namespace AfterSchoolLibrary.Services
         {
             var row = new List<string>();
 
-            row.Add(createDate.IsNotEmpty() ? createDate.Value.ToString("dd/MM/yyyy") : "");
-            row.Add(lastModifiedDate.IsNotEmpty() ? lastModifiedDate.Value.ToString("dd/MM/yyyy") : "");
+            row.Add(createDate.IsNotEmpty() ? createDate.Value.ToString("MM/dd/yyyy") : "");
+            row.Add(lastModifiedDate.IsNotEmpty() ? lastModifiedDate.Value.ToString("MM/dd/yyyy") : "");
             row.Add(firstName);
             row.Add(lastName);
 
