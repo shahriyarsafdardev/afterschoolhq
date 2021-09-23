@@ -427,7 +427,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="questionRow">
+                            <tr class="questionRow" id="option-1">
                                 <td>
                                     Option 1
                                 </td>
@@ -753,6 +753,8 @@
             if (index != 0 && index != rowCount) {
                 $(this).remove();
             }
+        }).promise().done(function () {
+                addOption();
         });
 
         //---4--If options have value then parse string, create rows and populate with values.
