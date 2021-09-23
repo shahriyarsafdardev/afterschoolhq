@@ -7,9 +7,8 @@
     var showFormFields = currentFormCount >= maxFormCount ? false : true;
     var showFormFieldsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageForms);
 }
-
+<input type="hidden" id="isSurveyForm" name="isSurveyForm" value="@ViewBag.FromSurvey" />
 @{Html.RenderPartial("OrgAccountHeader");}
-
 <div class="main-content">
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -22,7 +21,7 @@
             <div class="pull-right">
                 @if (showFormFields)
                 {
-                    <button class="btn btn-primary btn-space md-trigger" data-modal="modal-newform">
+                    <button class="btn btn-primary btn-space md-trigger mdpopup" data-modal="modal-newform">
                         <i class="icon icon-left s7-plus"></i>
                         Add Form
                     </button>
@@ -134,7 +133,7 @@
                 <div class="form-group">
                     <label>Form Type</label>
                     <select class="form-control formtype-select" id="formtype" name="formtype">
-                        @foreach (var type in Enum.GetValues(typeof(FormType)).Cast<FormType>().Where(a=> !a.Equals(FormType.NotSet)))
+                        @foreach (var type in Enum.GetValues(typeof(FormType)).Cast<FormType>().Where(a => !a.Equals(FormType.NotSet)))
                         {
                             <option value="@((int)type)" @(type == FormType.Registration ? "selected=\"selected\"" : "")>
                                 @type.ToString().SplitByUpperCase()
@@ -151,11 +150,21 @@
     </form>
 </div>
 
-<script>
-    function copy(id, name) {
-        $('.modal-title').html('Copy Registration Form');
-        $('#form-new').attr('action', '/org/account/formedit/0?copyfrom=' + id);
-        $('#name').val(name + ' Copy');
-        $('#name').focus();
-    }
-</script>
+
+@section scripts{
+    <script>
+        function copy(id, name) {
+            $('.modal-title').html('Copy Registration Form');
+            $('#form-new').attr('action', '/org/account/formedit/0?copyfrom=' + id);
+            $('#name').val(name + ' Copy');
+            $('#name').focus();
+        }
+
+        $(document).ready(function () {
+            if ($("#isSurveyForm").val() == "true") {
+                $("#formtype").val("2");
+                $(".mdpopup").trigger('click');
+            }
+        })
+    </script>
+}
