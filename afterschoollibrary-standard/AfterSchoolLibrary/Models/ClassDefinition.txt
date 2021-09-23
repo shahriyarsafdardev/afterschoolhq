@@ -1020,7 +1020,7 @@ property: FormQuestionId, int?, Int, required
 property: RegistrantId, int?, Int
 property: ActivityId, int?, Int
 property: RegistrationId, int?, Int
-property: Text, string, NVarChar "400"
+property: Text, string, NVarChar "2000"
 property: QuestionDataTypeId, QuestionDataType, Int
 property: QuestionText, string, NVarChar "400", , Used to keep the question text just in case the question text changes on the original
 join: FormQuestion.ID, FormQuestionId, LeftOuterJoin
