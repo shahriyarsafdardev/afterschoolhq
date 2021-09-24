@@ -1998,6 +1998,9 @@ namespace AfterSchoolLibrary.Helpers
         {
             try
             {
+                if (s.IsEmpty())
+                    return false;
+
                 var stringInput = s.Trim();
                 if ((stringInput.StartsWith("{") && stringInput.EndsWith("}")))
                     return true; //For json object
@@ -2012,7 +2015,13 @@ namespace AfterSchoolLibrary.Helpers
             }
         }
 
-        public static List<KeyValuePair> GetKeyValuePairs(string s) => JsonConvert.DeserializeObject<List<KeyValuePair>>(s);
+        public static List<KeyValuePair> GetKeyValuePairs(string s)
+        {
+            if (s.IsEmpty())
+                return new List<KeyValuePair>();
+
+            return JsonConvert.DeserializeObject<List<KeyValuePair>>(s);
+        }
     }
 
     public class Email

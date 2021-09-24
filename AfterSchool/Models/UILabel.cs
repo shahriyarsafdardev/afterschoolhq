@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Linq;
 using System.Collections;
-using AfterSchoolLibrary;
+using BasicLibrary;
 
 namespace AfterSchool.Models
 {
@@ -106,7 +103,7 @@ namespace AfterSchool.Models
 
         public static string GetGradeDescription(string gradeText)
         {
-            if (AfterSchoolLibrary.Helpers.Utilities.IsAlreadyJsonString(gradeText))
+            if (gradeText.IsNotEmpty() && AfterSchoolLibrary.Helpers.Utilities.IsAlreadyJsonString(gradeText))
                 return AfterSchoolLibrary.Helpers.Utilities.GetKeyValuePairs(gradeText).FirstOrDefault()?.value;
 
             return gradeText;

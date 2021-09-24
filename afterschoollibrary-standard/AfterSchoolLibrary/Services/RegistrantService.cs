@@ -1192,8 +1192,8 @@ namespace AfterSchoolLibrary.Services
         {
             if (question.IsNotEmpty())
             {
-                if (question.QuestionTypeId == QuestionType.CheckboxList)
-                    answerText = $"[" + answerText + "]";
+                if (question.QuestionTypeId == QuestionType.CheckboxList && answerText.IsNotEmpty())
+                    answerText = GetFormattedAnswerForCheckboxList(answerText);
 
                 return registrant.AddOrUpdateAnswer(
                         answerText,
@@ -1207,7 +1207,7 @@ namespace AfterSchoolLibrary.Services
             }
 
             return null;
-        }
+        }        
 
         public static FormQuestionAnswer AddOrUpdateAnswer(this Registrant registrant, string answerText, int? questionId, QuestionDataType questionDataType, string questionText, int? registrationId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
@@ -1692,5 +1692,7 @@ namespace AfterSchoolLibrary.Services
         {
             return SurveyResponse.LoadByRegistrantId(registrant.ID.Value);
         }
+
+        private static string GetFormattedAnswerForCheckboxList(string s) => $"[" + s + "]";
     }
 }
