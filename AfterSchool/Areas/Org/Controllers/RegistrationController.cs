@@ -117,6 +117,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (registration.IsEmpty())
                 return new HttpStatusCodeResult(System.Net.HttpStatusCode.NotFound);
 
+            ViewBag.ReturnURl = returnUrl;
             return View(registration);
         }
 
@@ -160,7 +161,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Update(string id)
+        public ActionResult Update(string id, string returnUrl)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             
@@ -172,11 +173,13 @@ namespace AfterSchool.Areas.Org.Controllers
 
             UpdateLoadQuestions(registration, null, msgs);
 
+            ViewBag.ReturnURl = returnUrl;
+
             return View(registration);
         }
 
         [HttpPost]
-        public ActionResult Update(string id, string nothing)
+        public ActionResult Update(string id, string nothing, string returnUrl)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -260,9 +263,10 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("edit", new { id = registration.Uid });
+                return RedirectToAction("edit", new { id = registration.Uid, returnUrl });
 
             ViewBag.Messages = msgs;
+            ViewBag.ReturnURl = returnUrl;
 
             return View(registration);
         }
