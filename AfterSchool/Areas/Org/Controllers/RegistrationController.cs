@@ -886,5 +886,24 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             return View("messagedetail", am);
         }
+
+        [HttpGet]
+        public ActionResult Surveys(string id, string r)
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var registration = currentAccount.GetRegistration(id.ToGuid(), msgs);
+            var registrant = Registrant.Load(registration.RegistrantId.Value);
+
+            LoadRegistrationViewBag(registration, r, msgs);
+
+            if (registration.IsEmpty())
+                return new HttpStatusCodeResult(System.Net.HttpStatusCode.NotFound);
+
+            ViewBag.SurveyResponses = SurveyResponse.LoadByRegistrantId(registrant.ID.Value, msgs).OrderByDescending(a => a.CreateDate).ToList(); ;
+
+            ViewBag.Messages = msgs;
+            return View(registration);
+        }
     }
 }

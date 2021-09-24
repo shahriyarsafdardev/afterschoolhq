@@ -9,6 +9,7 @@ using SendGrid.Helpers.Mail;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Services;
 using AfterSchoolLibrary.Models;
+using Newtonsoft.Json;
 
 namespace AfterSchoolLibrary.Helpers
 {
@@ -33,6 +34,21 @@ namespace AfterSchoolLibrary.Helpers
         public static string PayPalPaymentNotificationUrl(bool isAfterSchool)
         {
             return BaseUrl() + "/paypal/notification/";
+        }
+
+        public static string SurveyBaseUrl
+        {
+            get
+            {
+                if (IsQA)
+                    return "app-dev.afterschoolhq.com";
+                else if (IsStaging)
+                    return "app-dev.afterschoolhq.com";
+                else if (IsProduction)
+                    return "app.afterschoolhq.com";
+                else
+                    return "http://localhost:54849";
+            }
         }
 
         public static string Environment
@@ -387,6 +403,8 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.UpdateLocationLatLongColumn_20210725.Do(amsgs, adc);
                     Migrations.UpdateAccountRelationshipPublish_20210804.Do(amsgs, adc);
                     Migrations.ResetFreeAcctsToFreePackage_20210805.Do(amsgs, adc);
+
+                    Migrations.UpdateFormQuestionAnswers_20210918.Do(amsgs, adc);
 
 
 
@@ -1975,6 +1993,35 @@ namespace AfterSchoolLibrary.Helpers
                 return ConfigurationManager.AppSettings["AmazonBucketName"];
             }
         }
+
+        public static bool IsAlreadyJsonString(string s)
+        {
+            try
+            {
+                if (s.IsEmpty())
+                    return false;
+
+                var stringInput = s.Trim();
+                if ((stringInput.StartsWith("{") && stringInput.EndsWith("}")))
+                    return true; //For json object
+                else if (stringInput.StartsWith("[") && stringInput.EndsWith("]"))
+                    return true; //For json array
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        public static List<KeyValuePair> GetKeyValuePairs(string s)
+        {
+            if (s.IsEmpty())
+                return new List<KeyValuePair>();
+
+            return JsonConvert.DeserializeObject<List<KeyValuePair>>(s);
+        }
     }
 
     public class Email
@@ -2072,6 +2119,9 @@ namespace AfterSchoolLibrary.Helpers
         public static string SenderHostName { get; set; }
     }
 
-
-
+    public class KeyValuePair
+    {
+        public string key { get; set; }
+        public string value { get; set; }
+    }
 }

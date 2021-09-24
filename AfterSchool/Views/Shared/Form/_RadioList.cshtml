@@ -3,11 +3,30 @@
 <div @Html.Raw(Model.ToolTip) @Html.Raw(Model.ToolTipId)>
     @foreach (var option in Model.Question.Options.Split(','))
     {
-        var optionNoSpaces = option.ToLower().Replace(" ", "");
-        var selected = Model.Value.IfBlank("").Trim() == option.Trim() ? " checked=\"checked\" " : "";
-        <div class="am-radio inline">
-            <input type="radio" id="@Model.Id-@optionNoSpaces" name="@Model.Name" class="form-control" @Model.RequiredProperty value="@option.Trim()" @selected />
-            <label for="@Model.Id-@optionNoSpaces">@option.Trim()</label>
-        </div>
+        if (option.Contains("|"))
+        {
+            var splitedOptions =  option.Split('|');
+            var key = splitedOptions[0].Trim();
+            var desc = splitedOptions[1].Trim();
+            var value = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>(key, desc) };
+            var selected = Model.Value.IfBlank("").Trim() == value.ToJSON() ? " checked=\"checked\" " : "";
+
+            <div class="am-radio inline">
+                <input type="radio" id="@Model.Id-@key" name="@Model.Name" class="form-control" @Model.RequiredProperty value="@value.ToJSON()" @selected />
+                <label for="@Model.Id-@key">@desc</label>
+            </div>
+        }
+        else
+        {
+            var optionNoSpaces = option.ToLower().Replace(" ", "");
+            var desc = option.Trim();
+            var value = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>(desc, desc) };
+            var selected = Model.Value.IfBlank("").Trim() == value.ToJSON() ? " checked=\"checked\" " : "";
+
+            <div class="am-radio inline">
+                <input type="radio" id="@Model.Id-@optionNoSpaces" name="@Model.Name" class="form-control" @Model.RequiredProperty value="@value.ToJSON()" @selected />
+                <label for="@Model.Id-@optionNoSpaces">@desc</label>
+            </div>
+        }
     }
 </div>

@@ -553,16 +553,29 @@ namespace AfterSchoolLibrary.Models
 
             var gradeLevels = GradeLevel.Load(msgs: msgs, dc: dc).OrderBy(gradeLevel => gradeLevel.ID).ToList();
             var registrantGradeLevelAnswer = registrant.GetAnswer(QuestionDataType.RegistrantGrade, msgs, dc);
-            var registrantGradeLevel = gradeLevels.FirstOrDefault(gradeLevel => gradeLevel.Abbreviation.IsSameAs(registrantGradeLevelAnswer.Text) || (registrantGradeLevelAnswer.Text.MaxChars(gradeLevel.Abbreviation.Length) == gradeLevel.Abbreviation));
+            
+            if (registrantGradeLevelAnswer.Text.IsNotEmpty())
+            {
+                if (!MinGradeId.HasValue)
+                    MinGradeId = gradeLevels.First().ID;
 
-            if (!MinGradeId.HasValue)
-                MinGradeId = gradeLevels.First().ID;
+                if (!MaxGradeId.HasValue)
+                    MaxGradeId = gradeLevels.Last().ID;
 
-            if (!MaxGradeId.HasValue)
-                MaxGradeId = gradeLevels.Last().ID;
+                GradeLevel registrantGradeLevel = null;
+                if (Helpers.Utilities.IsAlreadyJsonString(registrantGradeLevelAnswer.Text))
+                {
+                    var data = Helpers.Utilities.GetKeyValuePairs(registrantGradeLevelAnswer.Text);
+                    registrantGradeLevel = gradeLevels.Where(m => m.Name.ToLower() == data.First().key.ToLower().Trim()).FirstOrDefault();
+                }
+                else if (registrantGradeLevelAnswer.IsNotEmpty())
+                    registrantGradeLevel = gradeLevels.FirstOrDefault(gradeLevel => gradeLevel.Abbreviation.IsSameAs(registrantGradeLevelAnswer.Text) || (registrantGradeLevelAnswer.Text.MaxChars(gradeLevel.Abbreviation.Length) == gradeLevel.Abbreviation));
 
-            if (registrantGradeLevel.ID.Value.IsInRange(MinGradeId.Value, MaxGradeId.Value))
-                return true;
+                if (registrantGradeLevel.IsNotEmpty() && 
+                    registrantGradeLevel.ID.IsNotEmpty() && 
+                    registrantGradeLevel.ID.Value.IsInRange(MinGradeId.Value, MaxGradeId.Value))
+                    return true;
+            }
 
             return false;
         }
