@@ -757,12 +757,13 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Forms()
+        public ActionResult Forms(string fromSurvey)
         {
             var msgs = new SystemMessages();
             var forms = SessionVariables.CurrentAccount.GetForms(msgs);
 
             ViewBag.Messages = msgs;
+            ViewBag.FromSurvey = fromSurvey;
             return View(forms);
         }
 
