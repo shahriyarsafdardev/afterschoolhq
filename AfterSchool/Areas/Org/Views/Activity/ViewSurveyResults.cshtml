@@ -192,6 +192,12 @@
                 }
                 wavesurfer.playPause();
             })
+
+            wavesurfer.on('finish', function () {
+                wavesurfer.seekTo(0);
+                $('.playbtn').removeClass('glyphicon-pause');
+                $('.playbtn').addClass('glyphicon-play');
+            });
         })
     </script>
 }
