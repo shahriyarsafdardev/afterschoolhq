@@ -1882,7 +1882,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
-            ViewBag.Surveys = SurveyRequest.LoadByActivityId(activity.ID.Value, msgs);
+            ViewBag.Surveys = SurveyRequest.LoadByActivityId(activity.ID.Value, msgs).OrderByDescending(a => a.CreateDate).ToList();
             ViewBag.Messages = msgs;
             return View(activity);
         }
@@ -2026,7 +2026,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var activity = currentAccount.GetActivity(activityId.ToGuid(), msgs);
 
-            ViewBag.GetSurveyFeedback = SurveyResponse.LoadBySurveyRequestId(id, msgs);
+            ViewBag.GetSurveyFeedback = SurveyResponse.LoadBySurveyRequestId(id, msgs).OrderByDescending(a => a.CreateDate).ToList();
             ViewBag.Survey = SurveyRequest.Load(id);
             ViewBag.Messages = msgs;
 
