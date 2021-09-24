@@ -914,7 +914,8 @@
 
         if ($('#questiontype-' + id).val() == 16) {
         	emojiOption.removeClass("hide");
-        	 textAreaOption.addClass("hide");
+            textAreaOption.addClass("hide");
+            $('#linkMessage').addClass("hide");
         	 
             // get value from hidden field
             var emojiValue = $('#options-text-' + selectedQuestion).val().replaceAll(":,:", "::");            
