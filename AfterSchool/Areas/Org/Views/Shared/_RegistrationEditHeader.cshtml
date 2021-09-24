@@ -14,7 +14,7 @@
                 <i class="s7-gleam"></i>
                 Add @UILabel.ActivityLabel(ActivityType.Activity)
             </button>
-            <a href="@Url.Action("update", "registration", new { id = Model.Uid.ToString() })" class="btn btn-alt6">
+            <a href="@Url.Action("update", "registration", new { id = Model.Uid.ToString(), returnUrl = ViewBag.returnUrl })" class="btn btn-alt6">
                 <i class="s7-edit"></i> Edit Registration
             </a>
             <button class="btn btn-alt6 md-trigger hide" data-modal="modal-confirmation" onclick="notify()" id="sendreg">
