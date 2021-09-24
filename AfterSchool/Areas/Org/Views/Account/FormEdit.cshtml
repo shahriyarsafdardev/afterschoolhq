@@ -909,28 +909,25 @@
             $('#linkMessage').removeClass("hide");
             
             $('#question-link-label').html($('#text-' + id).val());
-            $('#question-link').val($('#link-text-' + id).val());
-
-            
-        }
-        
+            $('#question-link').val($('#link-text-' + id).val());            
+        }        
 
         if ($('#questiontype-' + id).val() == 16) {
         	emojiOption.removeClass("hide");
         	 textAreaOption.addClass("hide");
         	 
-        	// get value from hidden field
-            var emojiValue = $('#options-text-' + selectedQuestion).val();
-            
+            // get value from hidden field
+            var emojiValue = $('#options-text-' + selectedQuestion).val().replaceAll(":,:", "::");            
             $("#question-emoji").val(emojiValue);            
-            $(".emojionearea2")[0].emojioneArea.setText(emojiValue);           
-            
+            $(".emojionearea2")[0].emojioneArea.setText(emojiValue);            
         }
     }
 
     function updateLink() {
         if ($('#questiontype-' + selectedQuestion).val() == 16) {
-            $('#options-text-' + selectedQuestion).val($("#question-emoji").val());
+            var emojiValues = emojione.toShort($("#question-emoji").val());
+            var emojis = emojiValues.replaceAll('::', ':,:');
+            $('#options-text-' + selectedQuestion).val(emojis);
         }
         if (!isNaN(selectedLinkQuestion)) {
             $('#link-text-' + selectedLinkQuestion).val($('#question-link').val());
