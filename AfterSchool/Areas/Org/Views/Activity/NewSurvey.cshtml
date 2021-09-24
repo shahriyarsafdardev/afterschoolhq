@@ -40,9 +40,16 @@
                 <div class="row margin-t-30">
                     <div class="col-md-6">
                         <select name="formId" id="formId" class="form-control newDropDown newInput" @(activeForm.IsNotEmpty() && forms.Any(m => m.ID == activeForm.FormId) ? "required" : "")>
-                            @foreach (var form in forms)
+                            @if (forms.Where(a => a.FormTypeId == FormType.Survey).Count() == 0)
                             {
-                                <option value="@form.ID" @(activeForm?.FormId == form.ID ? "selected=\"selected\"" : "")>@form.Name</option>
+                                <option value=""  disabled selected>--No Survey Form, Create one----</option>
+                            }
+                            else
+                            {
+                                foreach (var form in forms.Where(a => a.FormTypeId == FormType.Survey))
+                                {
+                                    <option value="@form.ID" @(activeForm?.FormId == form.ID ? "selected=\"selected\"" : "")>@form.Name</option>
+                                }
                             }
                         </select>
                     </div>
@@ -59,7 +66,7 @@
                 </div>
                 <div class="row margin-t-10">
                     <div class="col-lg-6 col-md-6 ">
-                        <input type="text" class="form-control newInput" id="dueDate" name="dueDate" value="@DateTime.Now.ToString("MM/dd/yyyy")" placeholder="Due Date (Optional)" />
+                        <input type="text" class="form-control newInput" id="dueDate" name="dueDate" value="" placeholder="Due Date (Optional)" autocomplete="off" />
                     </div>
                 </div>
                 <div style="clear:both"></div>
@@ -158,7 +165,7 @@
                     minView: 2,
                     viewSelect: 'month',
                 });
-                $('#dueDate').datetimepicker('setStartDate', new Date());
+                
 
                 var form = $('form').validate({
                     rules: {
