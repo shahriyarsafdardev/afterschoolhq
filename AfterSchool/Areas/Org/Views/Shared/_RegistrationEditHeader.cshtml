@@ -5,6 +5,7 @@
     var selectedRegistration = (Registration)ViewBag.SelectedRegistration;
     var canMergeWithRegistrations = (List<Registration>)ViewBag.CanMergeWith;
     var account = (Account)ViewBag.Account;
+    var actionName = ViewContext.RouteData.Values["action"].ToString().ToLower();
 }
 @if (Model.IsNotEmpty() && Model.ID.HasValue && Model.ID.Value > 0)
 {
@@ -16,6 +17,9 @@
             </button>
             <a href="@Url.Action("update", "registration", new { id = Model.Uid.ToString() })" class="btn btn-alt6">
                 <i class="s7-edit"></i> Edit Registration
+            </a>
+            <a href="@Url.Action("surveys", "registration", new { id = Model.Uid.ToString() })" class="btn btn-alt6@(actionName == "surveys" ? "-active" : "")">
+                <i class="s7-cloud"></i>  Surveys
             </a>
             <button class="btn btn-alt6 md-trigger hide" data-modal="modal-confirmation" onclick="notify()" id="sendreg">
                 <i class="s7-paper-plane"></i> <span>Send Reg Info</span>

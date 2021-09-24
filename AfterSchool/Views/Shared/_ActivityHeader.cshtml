@@ -67,7 +67,7 @@
                 }
                 else
                 {
-                    <a href="#" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")"  onclick="return showUpgradeMyPlan('@(messagingPackage.Name)', @(messagingPackage.ID))"><i class="s7-mail"></i> Messaging</a>
+                    <a href="#" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")" onclick="return showUpgradeMyPlan('@(messagingPackage.Name)', @(messagingPackage.ID))"><i class="s7-mail"></i> Messaging</a>
                 }
             }
 
@@ -80,6 +80,10 @@
                     </a>
                 }
             }
+
+
+            <a href="@Url.Action("surveys", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "surveys" || actionName == "newsurvey" ? "-active" : "")"><i class="s7-cloud"></i> Surveys</a>
+
 
             @if (Model.ActivityTypeId != ActivityType.Team && (isActivityLeader || SessionVariables.CurrentUser.CanPublishActivity(SessionVariables.CurrentAccount, Model)))
             {

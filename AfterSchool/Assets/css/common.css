@@ -807,11 +807,232 @@
     margin-bottom: 30px;
 }
 
+.form-control.danger {
+    border: 1px solid #dc3545;
+}
 
 .FontSizeTextdecoration {
     text-decoration: underline;
     font-size: 16px;
 }
+
+.surveybtn {
+    border-radius: 10px;
+    padding: 10px 40px;
+}
+.surveypanelpadding {
+    padding: 49px 35px 20px;
+}
+.surveyTable tr th {
+    font-weight: bold !important;
+}
+
+.btnNewSurvey {
+    border-radius: 10px;
+    color: #00AE85;
+    border: 1px solid #00AE85;
+    padding: 10px 20px
+}
+
+.newInput {
+    border: 2px solid #D1D1D1;
+    box-sizing: border-box;
+    border-radius: 10px;
+    color: #494949;
+}
+
+.newDropDown {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: transparent;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='black' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+    background-repeat: no-repeat;
+    background-position-x: 98%;
+    background-position-y: 8px;
+}
+
+
+.newCheckbox {
+    position: relative;
+    width: 1.5em;
+    height: 1.5em;
+    color: #363839;
+    border: 1px solid #bdc1c6;
+    border-radius: 4px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    outline: 0;
+    cursor: pointer;
+    top: 5px;
+    left: 5px;
+    border: 1px solid #00AE85;
+    transition: background 175ms cubic-bezier(0.1, 0.1, 0.25, 1);
+}
+
+.newCheckbox::before {
+     position: absolute;
+     content: "";
+     display: block;
+     top: 0px;
+     left: 6px;
+     width: 7px;
+     height: 13px;
+     border-style: solid;
+     border-color: #fff;
+     border-width: 0 2px 2px 0;
+     transform: rotate(45deg);
+     opacity: 0;
+ }
+
+.newCheckbox:checked {
+    color: #fff;
+    border-color: #00C5A3;
+    background: #00C5A3;
+}
+
+.newCheckbox:checked::before {
+     opacity: 1;
+}
+.newCheckbox:checked ~ label::before {
+     -webkit-clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+.mainStudentDiv {
+    padding: 10px;
+    border: 2px solid #D1D1D1;
+    border-radius: 5px;
+    height: 200px;
+    overflow-y: auto;
+    font-size: 14px;
+    color: #494949
+}
+
+.mainStudentDiv div:nth-child(even) {
+    background: #F2F2F5;
+}
+
+.selectStudents {
+    padding: 10px 50px;
+    border-radius: 10px;    
+}
+
+.selectStudents[data-toggle="off"]:after {
+    content: url("data:image/svg+xml;utf8,<svg fill='black' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>"); /*here you can add any image url / sign you want for arrow down*/
+    position: absolute;
+    top:8px;
+}
+
+.selectStudents[data-toggle="on"]:after {
+    content: url("data:image/svg+xml;utf8,<svg fill='black' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>"); /*here you can add any image url / sign you want for arrow down*/
+    position: absolute;
+    top: 4px;
+    transform: rotate(180deg);
+}
+
+.btnNewColorSurvey {
+    background-color: #00AE85;
+    border-radius: 10px;
+    color: white;
+    padding: 14px 42px;
+    font-size: 18px;
+}
+
+.surveyCheck {
+    padding: 12px 83px 12px 19px;
+    border: solid 1px #b2b2b4;
+    background-color: #ffffff;
+    font-family: Montserrat;
+    font-size: 18px;
+    font-weight: 300;
+    color: #282828;
+}
+#resendModal{
+    top:200px
+}
+.linkGreen, .linkGreen:active, .linkGreen:focus, .linkGreen:visited {
+    color: #00ae85;
+    font-size: 14px;
+}
+
+.viewSurvey {
+    background-color: #f6f6f6;
+    padding: 15px 20px;
+    margin: 11px 0 15px 1px;
+}
+.viewSurveyHead {
+    color: #282828;
+    font-size: 16px;
+}
+.viewSurveyAnswer {
+    color: #494949;
+    font-size: 16px;
+    font-weight: 300;
+}
+
+.iconsViewResults {
+    top: 22px;
+    position: relative;
+    right: -13px;
+}
+
+.arrowBtns {
+    font-size: 28px;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 4px 13px 0 #dadada;
+}
+.noCursor{
+    cursor:not-allowed;
+}
+
+.filterIcon {
+    font-size: 24px;
+    color: #494949;
+    transform: rotate(90deg);
+    display: inline-block;
+    position: relative;
+    top: 5px;
+    font-weight: bold;
+}
+
+.sortFilterAnchor {
+    color: #282828 !important;
+    font-size: 15px;
+    padding: 3px 20px !important;
+}
+.selectedFilter {
+    color: #00ae85 !important;
+}
+.DDLMain .dropdown-menu > li:hover{
+    background-color:transparent !important;
+}
+.DDLMain .dropdown-menu > li > a:hover {
+    background-color: transparent !important;
+}
+.titleName {
+    float: left;
+    font-size: 22px;
+    margin-right: 15px;
+}
+
+.playPauseBtn {
+    width: 50px;
+    height: 50px;
+    background-color: #494949;
+    border-radius: 25px;
+    padding: 14px 19px;
+}
+
+.playPauseBtn .glyphicon{
+    color:#f0f0f0;
+    cursor:pointer
+}
+
+.position-fixed{
+    position:fixed !important;
+}
+
 
 .border-none{
     border:none !important;
