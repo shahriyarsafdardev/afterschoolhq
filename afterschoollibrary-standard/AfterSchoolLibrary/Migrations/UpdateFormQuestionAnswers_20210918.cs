@@ -1,8 +1,7 @@
-﻿using AfterSchoolLibrary.Models;
+﻿using AfterSchoolLibrary.Helpers;
+using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using Newtonsoft.Json;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,7 +38,7 @@ namespace AfterSchoolLibrary.Migrations
                         {
                             if (formQuestionAnswer.Text.IsNotEmpty())
                             {                               
-                                var isJson = IsAlreadyJsonString(formQuestionAnswer.Text);
+                                var isJson = AfterSchoolLibrary.Helpers.Utilities.IsAlreadyJsonString(formQuestionAnswer.Text);
                                 if (isJson)
                                     continue;
 
@@ -66,29 +65,5 @@ namespace AfterSchoolLibrary.Migrations
                 dc: dc
             );
         }
-
-        public static bool IsAlreadyJsonString(string s)
-        {
-            try
-            {
-                var stringInput = s.Trim();
-                if ((stringInput.StartsWith("{") && stringInput.EndsWith("}")))
-                    return true; //For json object
-                else if (stringInput.StartsWith("[") && stringInput.EndsWith("]"))
-                    return true; //For json array
-
-                return false;
-            }
-            catch (Exception ex)
-            {
-                return false;
-            }
-        }
-    }
-
-    public class KeyValuePair
-    {
-        public string key { get; set; }
-        public string value { get; set; }
     }
 }
