@@ -761,6 +761,7 @@
     <Content Include="privacy.html" />
     <Content Include="provider-faq.html" />
     <Content Include="providers.html" />
+    <Content Include="Scripts\emojionearea.min.js" />
     <Content Include="Scripts\quill.min.js" />
     <Content Include="sitemap-home.xml" />
     <Content Include="style.css" />

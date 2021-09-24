@@ -18,12 +18,7 @@
     }
     var count = 1;
 }
-<style>
-    .tooltipclass {
-        background-color: #FFCC00;
-        color: white;
-    }
-</style>
+
 @{Html.RenderPartial("OrgAccountHeader");}
 
 <div class="main-content">
@@ -469,15 +464,19 @@
         <div class="md-content">
             <div class="modal-header">
                 <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
-                <h3 class="modal-title">Edit Link</h3>
+                <h3 class="modal-title modalLinkTitle">Edit Link</h3>
             </div>
             <div class="modal-body form">
 
-                <p>Enter the url below. This will make your question label clickable and it will open a new window to your link. Note: Your link is not saved until you hit the <strong>Save</strong> button after you click <strong>Done</strong></p>
+                <p id="linkMessage">Enter the url below. This will make your question label clickable and it will open a new window to your link. Note: Your link is not saved until you hit the <strong>Save</strong> button after you click <strong>Done</strong></p>
 
-                <div class="form-group">
+                <div class="form-group textAreaOption">
                     <label><span id="question-link-label"></span></label>
                     <textarea class="form-control" id="question-link" name="question-link" rows="6" placeholder="ex: http://yourdomain.com/go-here"></textarea>
+                </div>
+                <div class="form-group emojiOption">
+                    <label><span id="question-link-label"></span></label>
+                    <textarea class="form-control emojionearea2" id="question-emoji" name="question-emoji" rows="6" placeholder="Emojis go here"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -578,6 +577,10 @@
     </div>
 </div>
 <!-------End of Delete Modal Pop-up------------->
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/themes/smoothness/jquery-ui.css" />
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js"></script>
 
 <script>
     var selectedQuestion = null;
@@ -694,7 +697,7 @@
         $('#options-table')
             .find('tr')
             .last()
-            .before(`<tr class="questionRow" id="${optionType}-${getOptionsRowCount()}"><td>${optionType} ${getOptionsRowCount()}</td><td><input type="text" value="" id="option- ${getOptionsRowCount()}" required class="form-control col-sm-3 option" onfocus="this.select()" /></td><td><input type="text" value="" id="optionDescription- ${getOptionsRowCount()}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" /></td><td><button type="button" class="btn btn-default btn-sm md-trigger" onclick="removeOption($(this).closest('tr').attr('id'))"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
+            .before(`<tr class="questionRow" id="${optionType}-${getOptionsRowCount()}"><td>${optionType} ${getOptionsRowCount()}</td><td><input type="text" value="" id="option- ${getOptionsRowCount()}" required class="form-control col-sm-3 option emojionearea2" onfocus="this.select()" /></td><td><input type="text" value="" id="optionDescription- ${getOptionsRowCount()}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" /></td><td><button type="button" class="btn btn-default btn-sm md-trigger" onclick="removeOption($(this).closest('tr').attr('id'))"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
 
         var rowCount = $("#options-table tr").length - 1;
         if (rowCount > 2) {
@@ -764,6 +767,14 @@
             $(`#btn-setoptions-${id}`).addClass('hide');
             $(`#btn-setlink-${id}`).addClass('hide');
             $(`#btn-setratings-${id}`).addClass('hide');
+        }
+
+        if (select.val() == '@((int)QuestionType.Emoji)') {
+            $(`#btn-setoptions-${id}`).addClass('hide');
+            $(`#btn-setlink-${id}`).removeClass('hide');
+            $(`#btn-setratings-${id}`).addClass('hide');
+            $(".modalLinkTitle").html("Edit Emoji");
+            $(`#btn-setlink-${id}`).text('Edit Emoji');
         }
     }
 
@@ -888,12 +899,37 @@
 
     var selectedLinkQuestion = null;
     function setLink(id) {
-        selectedLinkQuestion = id;
-        $('#question-link-label').html($('#text-' + id).val());
-        $('#question-link').val($('#link-text-' + id).val());
+        selectedQuestion = id;
+        var textAreaOption = $(".textAreaOption");
+        var emojiOption = $(".emojiOption");
+
+        if ($('#questiontype-' + id).val() == 5) {
+        	textAreaOption.removeClass("hide");
+            emojiOption.addClass("hide");
+            $('#linkMessage').removeClass("hide");
+            
+            $('#question-link-label').html($('#text-' + id).val());
+            $('#question-link').val($('#link-text-' + id).val());            
+        }        
+
+        if ($('#questiontype-' + id).val() == 16) {
+        	emojiOption.removeClass("hide");
+            textAreaOption.addClass("hide");
+            $('#linkMessage').addClass("hide");
+        	 
+            // get value from hidden field
+            var emojiValue = $('#options-text-' + selectedQuestion).val().replaceAll(":,:", "::");            
+            $("#question-emoji").val(emojiValue);            
+            $(".emojionearea2")[0].emojioneArea.setText(emojiValue);            
+        }
     }
 
     function updateLink() {
+        if ($('#questiontype-' + selectedQuestion).val() == 16) {
+            var emojiValues = emojione.toShort($("#question-emoji").val());
+            var emojis = emojiValues.replaceAll('::', ':,:');
+            $('#options-text-' + selectedQuestion).val(emojis);
+        }
         if (!isNaN(selectedLinkQuestion)) {
             $('#link-text-' + selectedLinkQuestion).val($('#question-link').val());
         }
@@ -1092,6 +1128,18 @@
         
         $('#form1').attr('action', '@Url.Action("formedit", "account", new { id = Model.ID.ToString(), qg = qgId })');
     }
+
+    function AddEmojiOne() {
+        $(".emojionearea2").emojioneArea({
+            pickerPosition: "bottom",
+            tonesStyle: "radio",
+            shortnames: true,  
+            search: false,
+            events: {
+                
+            }
+        });
+    }    
 </script>
 
 
@@ -1115,11 +1163,11 @@
             var id = $(this).attr('id').split('-')[1];
             showEditButton(id);
         });
+
+        AddEmojiOne();
     });
 </script>
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
-<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/themes/smoothness/jquery-ui.css" />
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js"></script>
+
 <script type="text/javascript">
     $(function () {
         var selectQuestionId, oldPosition, newPosition;
@@ -1143,4 +1191,3 @@
         })
     });
 </script>
-
