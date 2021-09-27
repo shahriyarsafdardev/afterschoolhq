@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Collections;
 using Twilio.Rest.Api.V2010.Account;
 using System.Net;
+using Newtonsoft.Json.Linq;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -1190,18 +1191,23 @@ namespace AfterSchoolLibrary.Services
         public static FormQuestionAnswer AddOrUpdateAnswer(this Registrant registrant, string answerText, FormQuestion question, int? registrationId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (question.IsNotEmpty())
+            {
+                if (question.QuestionTypeId == QuestionType.CheckboxList && answerText.IsNotEmpty())
+                    answerText = GetFormattedAnswerForCheckboxList(answerText);
+
                 return registrant.AddOrUpdateAnswer(
-                        answerText, 
-                        question.ID, 
-                        question.QuestionDataTypeId, 
-                        question.Text, 
-                        registrationId, 
-                        loggedInUser, 
-                        msgs, 
+                        answerText,
+                        question.ID,
+                        question.QuestionDataTypeId,
+                        question.Text,
+                        registrationId,
+                        loggedInUser,
+                        msgs,
                         dc);
+            }
 
             return null;
-        }
+        }        
 
         public static FormQuestionAnswer AddOrUpdateAnswer(this Registrant registrant, string answerText, int? questionId, QuestionDataType questionDataType, string questionText, int? registrationId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
@@ -1686,5 +1692,7 @@ namespace AfterSchoolLibrary.Services
         {
             return SurveyResponse.LoadByRegistrantId(registrant.ID.Value);
         }
+
+        private static string GetFormattedAnswerForCheckboxList(string s) => $"[" + s + "]";
     }
 }

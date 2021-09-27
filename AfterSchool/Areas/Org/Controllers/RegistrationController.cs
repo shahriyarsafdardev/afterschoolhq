@@ -896,7 +896,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (registration.IsEmpty())
                 return new HttpStatusCodeResult(System.Net.HttpStatusCode.NotFound);
 
-            ViewBag.SurveyResponses = SurveyResponse.LoadByRegistrantId(registrant.ID.Value, msgs);
+            ViewBag.SurveyResponses = SurveyResponse.LoadByRegistrantId(registrant.ID.Value, msgs).OrderByDescending(a => a.CreateDate).ToList(); ;
 
             ViewBag.Messages = msgs;
             return View(registration);

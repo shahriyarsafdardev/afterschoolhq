@@ -111,7 +111,8 @@ namespace AfterSchoolLibrary.Services
             row.Add("Last Name");
             formQuestions.OrderBy(a=>a.DisplayOrder).ToList().ForEach(formQuestion =>
             {
-                row.Add(formQuestion.Text);
+                if(formQuestion.QuestionTypeId != QuestionType.TextBlock)
+                    row.Add(formQuestion.Text);
             });
 
             return row;
@@ -121,8 +122,8 @@ namespace AfterSchoolLibrary.Services
         {
             var row = new List<string>();
 
-            row.Add(createDate.IsNotEmpty() ? createDate.Value.ToString("dd/MM/yyyy") : "");
-            row.Add(lastModifiedDate.IsNotEmpty() ? lastModifiedDate.Value.ToString("dd/MM/yyyy") : "");
+            row.Add(createDate.IsNotEmpty() ? createDate.Value.ToString("MM/dd/yyyy") : "");
+            row.Add(lastModifiedDate.IsNotEmpty() ? lastModifiedDate.Value.ToString("MM/dd/yyyy") : "");
             row.Add(firstName);
             row.Add(lastName);
 
@@ -133,7 +134,29 @@ namespace AfterSchoolLibrary.Services
                     dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
                     row.Add(Convert.ToString(json.blocks[0].text));
                 }
-                else
+                else if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.Checkbox)
+                {
+                    row.Add(formQuestionAnswer.Text == "1" ? "True" : "False");
+                }
+                else if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.DropDownList || formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.RadioList)
+                {
+                    dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
+                    row.Add(Convert.ToString(json[0].value));
+                }
+                else if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.CheckboxList)
+                {
+                    var str = "";
+                    dynamic json =JsonConvert.DeserializeObject(formQuestionAnswer.Text);
+                    foreach (var item in json)
+                    {
+                        if(str.IsNotEmpty())
+                            str = str +", " + item.value;
+                        else
+                            str = item.value;
+                    }
+                    row.Add(Convert.ToString(str));
+                }
+                else if (formQuestionAnswer.FormQuestionQuestionTypeId != QuestionType.TextBlock)
                 {
                     row.Add(formQuestionAnswer.Text);
                 }
