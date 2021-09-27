@@ -219,8 +219,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentUser = SessionVariables.CurrentUser;
 
             if (group.IsGuid())
-            {
-                activityGroup = currentAccount.GetActivityGroup(group.ToGuid(), msgs);
+            {               
+                activityGroup = ActivityGroup.LoadByUid(group.ToGuid());
                 accountActivityGroup = activityGroup.GetAccountActivityGroup(currentAccount).ID.Value.ToString();
             }
 
