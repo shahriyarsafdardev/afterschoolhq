@@ -410,6 +410,7 @@
                 <p>Update your options here. Your options are not saved until you hit the save button on the screen</p>
                 <p class="twoOptionsValidation text-danger hide">Please add atleast two options.</p>
                 <p class="invalid-char text-danger hide">| sign is not allowed.</p>
+                <p class="requiredData text-danger hide">Please select emojis.</p>
 
                 <div class="table-responsive">
                     <table class="table options-table emoji-option-table" id="options-table">
@@ -656,7 +657,12 @@
     }
 
     function getOptionsLinks() {
-        return `<button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-options" onclick="setOptions(${getQuestionCount()})" id="btn-setoptions-${getQuestionCount()}">Edit Options</button><input type="hidden" id="options-text-${getQuestionCount()}" name="new-options-text-${getQuestionCount()}" value="" /><button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-link" onclick="setLink(${getQuestionCount()})" id="btn-setlink-${getQuestionCount()}">Add/Edit Link</button><input type="hidden" id="link-text-${getQuestionCount()}" name="new-link-text-${getQuestionCount()}" value="" /><button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-rating" onclick="setRating(${getQuestionCount()})" id="btn-setratings-${getQuestionCount()}">Set Rating</button><input type="hidden" id="displayOrderId-${getQuestionCount()}" name="displayOrderId-${getQuestionCount()}" class="displayOrderId" value="" />`;
+        return `<button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-options" onclick="setOptions(${getQuestionCount()})" id="btn-setoptions-${getQuestionCount()}">Edit Options</button>
+                <input type="hidden" id="options-text-${getQuestionCount()}" name="new-options-text-${getQuestionCount()}" value="" />
+                <button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-link" onclick="setLink(${getQuestionCount()})" id="btn-setlink-${getQuestionCount()}">Add/Edit Link</button>
+                <input type="hidden" id="link-text-${getQuestionCount()}" name="new-link-text-${getQuestionCount()}" value="" />
+                <button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-rating" onclick="setRating(${getQuestionCount()})" id="btn-setratings-${getQuestionCount()}">Set Rating</button>
+                <input type="hidden" id="displayOrderId-${getQuestionCount()}" name="displayOrderId-${getQuestionCount()}" class="displayOrderId" value="" />`;
     }
 
     function getDescription() {
@@ -687,7 +693,7 @@
         $('#options-table')
             .find('tr')
             .last()
-            .before(`<tr class="questionRow" id="${optionType}-${optionNo+1}"><td>${optionType} ${optionNo+1}</td><td><input type="text" value="${optionValue}" required class="form-control col-sm-3 option" onfocus="this.select()" /></td><td><input type="text" value="${optionDescriptionValue}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" /></td><td><button class="btn btn-default btn-sm md-trigger" onclick="removeOption($(this).closest('tr').attr('id'))"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
+            .before(`<tr class="questionRow" id="${optionType}-${optionNo+1}"><td>${optionType} ${optionNo+1}</td><td><input type="text" value="${optionValue}" required class="form-control col-sm-3 option emojionearea2" onfocus="this.select()" /></td><td><input type="text" value="${optionDescriptionValue}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" /></td><td><button class="btn btn-default btn-sm md-trigger" onclick="removeOption($(this).closest('tr').attr('id'))"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
     }
 
     function addOption() {
@@ -698,13 +704,40 @@
         $('#options-table')
             .find('tr')
             .last()
-            .before(`<tr class="questionRow" id="${optionType}-${getOptionsRowCount()}"><td>${optionType} ${getOptionsRowCount()}</td><td><input type="text" value="" id="option- ${getOptionsRowCount()}" required class="form-control col-sm-3 option emojionearea2" onfocus="this.select()" /></td><td><input type="text" value="" id="optionDescription- ${getOptionsRowCount()}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" /></td><td><button type="button" class="btn btn-default btn-sm md-trigger" onclick="removeOption($(this).closest('tr').attr('id'))"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
+            .before(`<tr class="questionRow" id="${optionType}-${getOptionsRowCount()}"><td>${optionType} ${getOptionsRowCount()}</td><td><input type="text" value="" id="option-${getOptionsRowCount()}" required class="form-control col-sm-3 option emojionearea2" onfocus="this.select()" /></td><td><input type="text" value="" id="optionDescription- ${getOptionsRowCount()}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" /></td><td><button type="button" class="btn btn-default btn-sm md-trigger" onclick="removeOption($(this).closest('tr').attr('id'))"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
 
         var rowCount = $("#options-table tr").length - 1;
         if (rowCount > 2) {
             $(".twoOptionsValidation").addClass("hide")
         }
+
+        if (optionType === "Emoji") {
+            $("#options-table tr").each(function (index) {
+                if (index == rowCount - 1) {
+                    $(this).find(".emojionearea2").emojioneArea({
+                        pickerPosition: "right",
+                        filtersPosition: "bottom",
+                        tonesStyle: "square",
+                        events: {
+                            keyup: (a, e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                            },
+                            keypress: (a, e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                            },
+                            emojibtn_click: (a, e) => {
+                                $(`.emojionearea2#option-${index}`).text("");
+                                $(`.emojionearea2#option-${index}`)[0].emojioneArea.setText(a[0].dataset.name);  
+                            }
+                        }
+                    });
+                }
+            });
+        }
     }
+
     function updateSorting() {
         var inputs = $('input.currentposition');
         var nbElems = inputs.length;
@@ -769,14 +802,6 @@
             $(`#btn-setlink-${id}`).addClass('hide');
             $(`#btn-setratings-${id}`).addClass('hide');
         }
-
-        if (select.val() == '@((int)QuestionType.Emoji)') {
-            $(`#btn-setoptions-${id}`).addClass('hide');
-            $(`#btn-setlink-${id}`).removeClass('hide');
-            $(`#btn-setratings-${id}`).addClass('hide');
-            $(".modalLinkTitle").html("Edit Emoji");
-            $(`#btn-setlink-${id}`).text('Edit Emoji');
-        }
     }
 
     //--Set options type based on emoji/option question type and their labels
@@ -789,6 +814,7 @@
         if ($('#questiontype-' + id).val() == 16) {
             $('#modal-options-title').text("Emojis");
             optionType = "Emoji";
+            $(".requiredData").addClass("hide");
         }
 
         //---2---Get option values from hidden field
@@ -800,9 +826,9 @@
             if (index != 0 && index != rowCount) {
                 $(this).remove();
             }
-        }).promise().done(function () {
-                addOption();
-        });
+        });//.promise().done(function () {
+        //        addOption();
+        //});
 
         //---4--If options have value then parse string, create rows and populate with values.
         if (options != '') {
@@ -824,6 +850,29 @@
             }
             indivdualOption = null;
         }
+        if (optionType === "Emoji") {
+            $("#options-table tr").each(function (index) {
+                if (index != 0 && index != rowCount) {
+                    $(this).find(".emojionearea2").emojioneArea({
+                        pickerPosition: "right",
+                        filtersPosition: "bottom",
+                        tonesStyle: "square",
+                        keyup: (a, e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                        },
+                        keypress: (a, e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                        },
+                        emojibtn_click: (a, e) => {
+                            $(`.emojionearea2#option-${index}`).text("");
+                            $(`.emojionearea2#option-${index}`)[0].emojioneArea.setText(a[0].dataset.name);
+                        }
+                    });
+                }
+            });
+        }
     }
 
     function updateOptions() {
@@ -832,7 +881,7 @@
             var rowCount = $("#options-table tr").length - 1;
             var validation = true;
             var validChars = true;
-            if (rowCount < 3 && $('#modal-options-title').text() != 'Emojis') {
+            if (rowCount < 3) {
                 validation = false;
                 $(".twoOptionsValidation").removeClass("hide")
             }
@@ -840,6 +889,11 @@
                 if (index != 0 && index != rowCount) {
                     var optVal = $(this).find("input.option").val();
                     var optDesc = $(this).find("input.optionDescription").val();
+
+                    if ($(this).find("input.emojionearea2").val() == "") {
+                        $(".requiredData").removeClass("hide")
+                        validation = false;
+                    }
 
                     if ($(this).find("input.option").val() == "") {
                         $(this).find("input.option").addClass("danger");
@@ -874,8 +928,13 @@
                     } else {
                         rowOption = `${optVal},`
                     }
-
-                    optionString = optionString + rowOption;
+                    
+                    if ($('#modal-options-title').text() == 'Emojis') {
+                        optionString = emojione.toShort(optionString) + rowOption;
+                    }
+                    else {
+                        optionString = optionString + rowOption;
+                    }
                 }
             });
 
