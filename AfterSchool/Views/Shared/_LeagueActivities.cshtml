@@ -171,19 +171,19 @@ else
                                     {
 
                                         <button class="md-trigger btn btn-default btn-sm" data-modal="modal-submit-to-district"
-                                                onclick="submitToDistrict(`@activity.Name`, '@Url.Action("submitToDistrict", "league", new { id = activity.Uid.ToString() , pn = paging.PageNumber.ToString(), rpp = paging.RecordsPerPage.ToString(), archive = "0" })')" )>
+                                                onclick="submitToDistrict('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("submitToDistrict", "league", new { id = activity.Uid.ToString() , pn = paging.PageNumber.ToString(), rpp = paging.RecordsPerPage.ToString(), archive = "0" })')" )>
                                             <i class="s7-copy-file"></i> Submit to District
                                         </button>
                                     }
                                     else if (activity.HasNoTeamMatches())
                                     {
                                         <button class="md-trigger btn btn-default btn-sm" data-modal="modal-withdraw-from-district"
-                                                onclick="withdrawFromDistrict(`@activity.Name`, '@Url.Action("withdrawFromDistrict", "league", new { id = activity.Uid.ToString() , pn = paging.PageNumber.ToString(), rpp = paging.RecordsPerPage.ToString(), archive = "0" })')" )>
+                                                onclick="withdrawFromDistrict('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("withdrawFromDistrict", "league", new { id = activity.Uid.ToString() , pn = paging.PageNumber.ToString(), rpp = paging.RecordsPerPage.ToString(), archive = "0" })')" )>
                                             <i class="s7-junk"></i> Withdraw From District
                                         </button>
                                     }
 
-                                    <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteActivity('@activity.Name', '@Url.Action("delete", "leagueactivity", new { id = activity.Uid.ToString() })')">
+                                    <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("delete", "leagueactivity", new { id = activity.Uid.ToString() })')">
                                         <span class="text-danger"><i class="s7-trash"></i></span>
                                     </button>
                                 </div>
