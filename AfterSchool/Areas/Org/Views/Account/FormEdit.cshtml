@@ -587,7 +587,42 @@
 <script>
     var selectedQuestion = null;
     var newQuestionNumber = 0;
+    var emojiDictionary = [
+        { key: "grinning", value:"Happy"},
+        { key: "grimacing", value:"grimacing"},
+        { key: "grin", value:"Laughing"},
+        { key: "joy", value: "Goofy" },
+        { key: "smiley", value: "Smiley" },
+        { key: "sweat_smile", value:"Sweat Smile"},
+        { key: "laughing", value:"Laughing"},
+        { key: "innocent", value:"Innocent"},
+        { key: "wink", value:"Wink"},
+        { key: "blush", value:"Blush"},
+        { key: "slight_smile", value:"Slight Smile"},
+        { key: "upside_down", value:"Upside Down"},
+        { key: "relaxed", value:"Relaxed"}
+    ];
 
+    //var emojiDictionary = [
+    //    { key: "grinning_face_with_big_eyes", value: "Happy" },
+    //    { key: "smiling_face_with_heart_eyes", value: "Love" },
+    //    { key: "winking_face_with_tongue", value: "Goofy" },
+    //    { key: "thinking_face", value: "Unsure" },
+    //    { key: "neutral_face", value: "Neutral" },
+    //    { key: "sleeping_face", value: "Tired" },
+    //    { key: "face_with_medical_mask", value: "Sick" },
+    //    { key: "frowning_face", value: "Sad" },
+    //    { key: "anxious_face_with_sweat", value: "Anxious" },
+    //    { key: "angry_face", value: "Angry" }
+    //];	
+   
+    function getEmojis() {
+        var emojiCollection = "";
+        emojiDictionary.forEach(function (obj) {
+            emojiCollection += " " + obj.key;
+        });
+        return emojiCollection;
+    }
     function incrementQuestionCount() {
         $('#newquestioncount').val(getQuestionCount() + 1);
     }
@@ -693,50 +728,10 @@
         $('#options-table')
             .find('tr')
             .last()
-            .before(`<tr class="questionRow" id="${optionType}-${optionNo+1}"><td>${optionType} ${optionNo+1}</td><td><input type="text" value="${optionValue}" required class="form-control col-sm-3 option emojionearea2" onfocus="this.select()" /></td><td><input type="text" value="${optionDescriptionValue}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" /></td><td><button class="btn btn-default btn-sm md-trigger" onclick="removeOption($(this).closest('tr').attr('id'))"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
+            .before(`<tr class="questionRow" id="${optionType}-${optionNo + 1}"><td>${optionType} ${optionNo + 1}</td><td><input type="text" value="${optionValue}" id="option-${optionNo + 1}" required class="form-control col-sm-3 option emojionearea2" onfocus="this.select()" /></td><td><input type="text" value="${optionDescriptionValue}" id="optionDescription-${optionNo + 1}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" disabled /></td><td><button class="btn btn-default btn-sm md-trigger" onclick="removeOption($(this).closest('tr').attr('id'))"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
     }
 
-    function addOption() {
-        var optionType = "Option";
-        if ($('#modal-options-title').text() == 'Emojis') {
-            optionType = "Emoji";
-        }
-        $('#options-table')
-            .find('tr')
-            .last()
-            .before(`<tr class="questionRow" id="${optionType}-${getOptionsRowCount()}"><td>${optionType} ${getOptionsRowCount()}</td><td><input type="text" value="" id="option-${getOptionsRowCount()}" required class="form-control col-sm-3 option emojionearea2" onfocus="this.select()" /></td><td><input type="text" value="" id="optionDescription- ${getOptionsRowCount()}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" /></td><td><button type="button" class="btn btn-default btn-sm md-trigger" onclick="removeOption($(this).closest('tr').attr('id'))"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
-
-        var rowCount = $("#options-table tr").length - 1;
-        if (rowCount > 2) {
-            $(".twoOptionsValidation").addClass("hide")
-        }
-
-        if (optionType === "Emoji") {
-            $("#options-table tr").each(function (index) {
-                if (index == rowCount - 1) {
-                    $(this).find(".emojionearea2").emojioneArea({
-                        pickerPosition: "right",
-                        filtersPosition: "bottom",
-                        tonesStyle: "square",
-                        events: {
-                            keyup: (a, e) => {
-                                e.stopPropagation();
-                                e.preventDefault();
-                            },
-                            keypress: (a, e) => {
-                                e.stopPropagation();
-                                e.preventDefault();
-                            },
-                            emojibtn_click: (a, e) => {
-                                $(`.emojionearea2#option-${index}`).text("");
-                                $(`.emojionearea2#option-${index}`)[0].emojioneArea.setText(a[0].dataset.name);  
-                            }
-                        }
-                    });
-                }
-            });
-        }
-    }
+    
 
     function updateSorting() {
         var inputs = $('input.currentposition');
@@ -803,10 +798,76 @@
             $(`#btn-setratings-${id}`).addClass('hide');
         }
     }
+    function addOption() {
+        var optionType = "Option";
+        if ($('#modal-options-title').text() == 'Emojis') {
+            optionType = "Emoji";
+        }
+        $('#options-table')
+            .find('tr')
+            .last()
+            .before(`<tr class="questionRow" id="${optionType}-${getOptionsRowCount()}"><td>${optionType} ${getOptionsRowCount()}</td><td><input type="text" value="" id="option-${getOptionsRowCount()}" required class="form-control col-sm-3 option emojionearea2" onfocus="this.select()" /></td><td><input type="text" value="" id="optionDescription-${getOptionsRowCount()}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" disabled /></td><td><button type="button" class="btn btn-default btn-sm md-trigger" onclick="removeOption($(this).closest('tr').attr('id'))"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
 
+        var rowCount = $("#options-table tr").length - 1;
+        var emojiCollection = getEmojis();
+        if (rowCount > 2) {
+            $(".twoOptionsValidation").addClass("hide")
+        }
+
+        if (optionType === "Emoji") {
+            $("#options-table tr").each(function (index) {
+                if (index == rowCount - 1) {
+                    $(this).find(".emojionearea2").emojioneArea({
+                        pickerPosition: "right",
+                        filtersPosition: "bottom",
+                        tonesStyle: "square",
+                        shortnames: true,
+                        search: false,
+                        events: {
+                            keyup: (a, e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                            },
+                            keypress: (a, e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                            },
+                            emojibtn_click: (a, e) => {
+                                $(`.emojionearea2#option-${index}`).text("");
+                                $(`.emojionearea2#option-${index}`)[0].emojioneArea.setText(a[0].dataset.name);
+                                var emojiKey = a[0].dataset.name;
+                                var emojiKeyWithoutColons = emojiKey.replaceAll(":", "");
+                                var emojiKeyDescription = emojiDictionary.find(({ key }) => key === emojiKeyWithoutColons);
+                                $(`#optionDescription-${index}`).val(emojiKeyDescription.value);
+                            }
+                        },
+                        filters: {
+                            recent: false, // disable recent
+                            objects: false, // disable objects filter
+                            symbols: false, // disable symbols filter
+                            flags: false, // disable flags filter
+                            animals_nature: false,
+                            activity: true,
+                            travel_places: true,
+                            objects: true,
+                            symbols: true,
+                            flags: true,
+                            food_drink: true,
+                            smileys_people: {
+                                icon: "yum",
+                                title: "Smileys & People",
+                                emoji: emojiCollection
+                            }
+                        }
+                    });
+                }
+            });
+        }
+    }
     //--Set options type based on emoji/option question type and their labels
     function setOptions(id) {
         selectedQuestion = id;
+       
         var optionType = "Option";
         $('#modal-options-title').text("Options");
 
@@ -851,12 +912,22 @@
             indivdualOption = null;
         }
         if (optionType === "Emoji") {
-            $("#options-table tr").each(function (index) {
-                if (index != 0 && index != rowCount) {
-                    $(this).find(".emojionearea2").emojioneArea({
-                        pickerPosition: "right",
-                        filtersPosition: "bottom",
-                        tonesStyle: "square",
+            setTimeout(addEmoji(), 10);            
+        }
+    }
+
+    function addEmoji() {
+        var rowCount = $("#options-table tr").length - 1;
+        var emojiCollection = getEmojis();
+        $("#options-table tr").each(function (index) {
+            if (index != 0 && index != rowCount) {
+                $(this).find(".emojionearea2").emojioneArea({
+                    pickerPosition: "right",
+                    filtersPosition: "bottom",
+                    tonesStyle: "square",
+                    shortnames: true,
+                    search: false,
+                    events: {
                         keyup: (a, e) => {
                             e.stopPropagation();
                             e.preventDefault();
@@ -868,11 +939,33 @@
                         emojibtn_click: (a, e) => {
                             $(`.emojionearea2#option-${index}`).text("");
                             $(`.emojionearea2#option-${index}`)[0].emojioneArea.setText(a[0].dataset.name);
+                            var emojiKey = a[0].dataset.name;
+                            var emojiKeyWithoutColons = emojiKey.replaceAll(":", "");
+                            var emojiKeyDescription = emojiDictionary.find(({ key }) => key === emojiKeyWithoutColons);
+                            $(`#optionDescription-${index}`).val(emojiKeyDescription.value);
                         }
-                    });
-                }
-            });
-        }
+                    },
+                    filters: {
+                        recent: false, // disable recent
+                        objects: false, // disable objects filter
+                        symbols: false, // disable symbols filter
+                        flags: false, // disable flags filter
+                        animals_nature: false,
+                        activity: true,
+                        travel_places: true,
+                        objects: true,
+                        symbols: true,
+                        flags: true,
+                        food_drink:true,
+                        smileys_people: {
+                            icon: "yum",
+                            title: "Smileys & People",
+                            emoji: emojiCollection
+                        }
+                    }
+                });               
+            }
+        });
     }
 
     function updateOptions() {
@@ -1018,19 +1111,25 @@
         var ratingString = $('#options-text-' + id).val();
         var ratingValues = ratingString.split(",");
         $('#question-rating-label').html($('#text-' + id).val());
+        var ratingValuesCount = ratingValues.length;
+        var minValue = ratingValues[0].split("|")[0];
+        var minLabel = ratingValues[0].split("|")[1]; 
+        var maxLabel = ratingValues[ratingValuesCount - 2].split("|")[1];
+        var maxValue = ratingValues[ratingValuesCount - 2].split("|")[0];
+        var increment = ratingValues[ratingValuesCount - 1];
 
         //if question exist then read data from hidden field and populate text fields
         if (ratingValues.length > 1) {
-            $('#question-rating-min').val(ratingValues[0].substring(0, ratingValues[0].indexOf('|')));
-            $('#question-rating-max').val(ratingValues[1].substring(0, ratingValues[1].indexOf('|')));
+            $('#question-rating-min').val(minValue);
+            $('#question-rating-max').val(maxValue);
             setOptionalLabelAndIncrement();
-            $('#question-rating-increment').val(ratingValues[2]);
-            $('#question-rating-label-min').val(ratingValues[0].substring(ratingValues[0].indexOf("|") + 1));
-            $('#question-rating-label-max').val(ratingValues[1].substring(ratingValues[1].indexOf("|") + 1));
+            $('#question-rating-increment').val(increment);
+            $('#question-rating-label-min').val(minLabel);
+            $('#question-rating-label-max').val(maxLabel);
             $('#rating-min-label').empty();
-            $('#rating-min-label').append(ratingValues[0].substring(0, ratingValues[0].indexOf('|')));
+            $('#rating-min-label').append(minValue);
             $('#rating-max-label').empty();
-            $('#rating-max-label').append(ratingValues[1].substring(0, ratingValues[1].indexOf('|')));
+            $('#rating-max-label').append(maxValue);
         }
         else {
             $('#question-rating-min').val('1');
@@ -1114,7 +1213,17 @@
         }       
 
         if (validation == true) {
-            $('#options-text-' + selectedLinkQuestion).val($('#question-rating-min').val() + "|" + $('#question-rating-label-min').val() + "," + $('#question-rating-max').val() + "|" + $('#question-rating-label-max').val() + "," + $('#question-rating-increment').val());
+            var min = $('#question-rating-min').val();
+            var max = $('#question-rating-max').val();
+            var increment = $('#question-rating-increment').val();
+            
+            var incrementList = "1,";
+            var incrementListNumbers = max / increment;
+            for (var i = 1; i < incrementListNumbers; i++) {
+                incrementList = incrementList + increment * i + ",";
+            }
+            incrementList = incrementList + max;
+            $('#options-text-' + selectedLinkQuestion).val($('#question-rating-min').val() + "|" + $('#question-rating-label-min').val() + "," + incrementList + "|" + $('#question-rating-label-max').val() + "," + $('#question-rating-increment').val());
             $("#btn-setratings-" + selectedLinkQuestion).css("border", "").tooltip("destroy");
             invalidBarChar.addClass("hide");
             valueRequired.addClass("hide");
