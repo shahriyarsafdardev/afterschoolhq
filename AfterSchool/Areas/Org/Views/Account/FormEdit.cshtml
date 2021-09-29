@@ -14,7 +14,7 @@
     if (questionGroup.IsNotEmpty())
     {
         qgId = questionGroup.ID;
-        questions = questionGroup.GetActiveQuestions();
+        questions = questionGroup.GetAllQuestions().Where(a => a.Text.IsNotEmpty()).ToList();
     }
     var count = 1;
 }
