@@ -1070,3 +1070,8 @@
     text-overflow: ellipsis;
     display: inline-block;
 }
+
+.fixed-height-modal-options {
+    max-height: 575px;
+    overflow-x: auto;
+}
