@@ -43,7 +43,7 @@ namespace AfterSchoolLibrary.Helpers
                 if (IsQA)
                     return "app-dev.afterschoolhq.com";
                 else if (IsStaging)
-                    return "app-dev.afterschoolhq.com";
+                    return "app-staging.afterschoolhq.com";
                 else if (IsProduction)
                     return "app.afterschoolhq.com";
                 else
