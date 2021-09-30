@@ -131,9 +131,11 @@
                     }
                     else
                     {
-                        <option  packagename="@(emailPackage.Name)" packageid="@(emailPackage.ID)" value="#">Messaging</option>
+                        <option packagename="@(emailPackage.Name)" packageid="@(emailPackage.ID)" value="#">Messaging</option>
                     }
                 }
+                <option value="@Url.Action("surveys", "activity", new { id = Model.Uid })">Surveys</option>
+
                 @if (isActivityLeader)
                 {
                     if (SessionVariables.AccountPackage.GetFeature(FeatureType.TeamAccounts).Max.Value > 1)
