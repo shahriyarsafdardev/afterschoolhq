@@ -500,7 +500,7 @@
                 <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
                 <h3 class="modal-title">Edit Rating</h3>
             </div>
-            <div class="modal-body form">
+            <div class="modal-body form">                
                 <p id="valueRequired" class="text-danger hide">Value is required.</p>
                 <p class="minMaxValidation text-danger hide">Max value should be greater than min value.</p>
                 <p id="invalidBarChar" class="text-danger hide">| sign is not allowed.</p>
@@ -534,7 +534,7 @@
                             <option>25</option>
                         </select>
                     </div>
-                </div>
+                </div>                
 
                 <div class="form-group row">
                     <div class="col-xs-1">
@@ -1109,46 +1109,71 @@
 
     //called when rating modal is going to display
     //Also setting rating range values in options hidden field.
+    var selectedRatingQuestion = null;
     function setRating(id) {
-        selectedLinkQuestion = id;
-        var ratingString = $('#options-text-' + id).val();
-        var ratingValues = ratingString.split(",");
-        $('#question-rating-label').html($('#text-' + id).val());
-        var ratingValuesCount = ratingValues.length;
-        var minValue = ratingValues[0].split("|")[0];
-        var minLabel = ratingValues[0].split("|")[1]; 
-        var maxLabel = ratingValues[ratingValuesCount - 2].split("|")[1];
-        var maxValue = ratingValues[ratingValuesCount - 2].split("|")[0];
-        var increment = ratingValues[ratingValuesCount - 1];
 
-        //if question exist then read data from hidden field and populate text fields
-        if (ratingValues.length > 1) {
-            $('#question-rating-min').val(minValue);
-            $('#question-rating-max').val(maxValue);
-            setOptionalLabelAndIncrement();
-            $('#question-rating-increment').val(increment);
-            $('#question-rating-label-min').val(minLabel);
-            $('#question-rating-label-max').val(maxLabel);
-            $('#rating-min-label').empty();
-            $('#rating-min-label').append(minValue);
-            $('#rating-max-label').empty();
-            $('#rating-max-label').append(maxValue);
+        selectedRatingQuestion = id;
+
+        //set default ratings
+        setDefaultRatings();
+
+        //ideal rating stored in db = 1|Start,50|End,5
+        var rating = $(`#link-text-${id}`).val();
+        var splitedRating = rating.split(',');
+
+        var startString = splitedRating[0];
+        if (startString) {
+            var start = startString.split("|");
+            if (start) {
+                var min = start[0];
+                var minLabel = start[1];
+                
+                $('#question-rating-min').val(min);
+                $('#rating-min-label').val(min);
+
+                if (minLabel)
+                    $('#question-rating-label-min').val(minLabel);
+            }
         }
-        else {
-            $('#question-rating-min').val('1');
-            $('#question-rating-max').val('5');
-            $('#question-rating-increment').val('1').change();
-            $('#question-rating-label-min').val('');
-            $('#question-rating-label-max').val('');
-            $('#rating-min-label').empty();
-            $('#rating-min-label').append('1');
-            $('#rating-max-label').empty();
-            $('#rating-max-label').append('5');
-            $('#question-rating-min').removeClass("danger");
-            $('#question-rating-max').removeClass("danger");
-            $('#valueRequired').addClass("hide");
-            setOptionalLabelAndIncrement();
+
+        var endString = splitedRating[1];
+        if (endString) {
+            var end = endString.split("|");
+            if (end) {
+                var max = end[0];
+                var maxLabel = end[1];
+
+                $('#question-rating-max').val(max);
+                $('#rating-max-label').val(max);
+
+                if (maxLabel)
+                    $('#question-rating-label-max').val(maxLabel);
+            }
         }
+
+        var increment = splitedRating[2];
+        if (increment)
+            $('#question-rating-increment').val(parseInt(increment));
+    }
+
+    function setDefaultRatings() {
+        var min = $('#question-rating-min').val();
+        if (min == '') 
+            $('#question-rating-min').val(0);
+
+        $('#question-rating-label-min').val('');
+        $('#rating-min-label').val(0);
+
+        var max = $('#question-rating-max').val();
+        if (max == '')
+            $('#question-rating-max').val(5);        
+        
+        $('#question-rating-label-max').val('');
+        $('#rating-max-label').val('5');
+
+        var increment = $('#question-rating-increment').val();
+        if (increment == '')
+            $('#question-rating-increment').val(1);
     }
 
     //Updating rating range values in options hidden input
@@ -1215,24 +1240,53 @@
             ratingMaxOptionalLabel.removeClass("danger");
         }       
 
-        if (validation == true) {
-            var min = $('#question-rating-min').val();
-            var max = $('#question-rating-max').val();
+        if (validation == true) {            
+            var start = $('#question-rating-min').val();
+            var startLabel = $('#question-rating-label-min').val();
+
+            var end = $('#question-rating-max').val();
+            var endLabel = $('#question-rating-label-max').val();
+
             var increment = $('#question-rating-increment').val();
-            
-            var incrementList = "1,";
-            var incrementListNumbers = max / increment;
-            for (var i = 1; i < incrementListNumbers; i++) {
-                incrementList = incrementList + increment * i + ",";
-            }
-            incrementList = incrementList + max;
-            $('#options-text-' + selectedLinkQuestion).val($('#question-rating-min').val() + "|" + $('#question-rating-label-min').val() + "," + incrementList + "|" + $('#question-rating-label-max').val() + "," + $('#question-rating-increment').val());
-            $("#btn-setratings-" + selectedLinkQuestion).css("border", "").tooltip("destroy");
+
+            var options = getOptionsTextForRating(parseInt(start), startLabel, parseInt(end), endLabel, parseInt(increment));
+            $('#options-text-' + selectedRatingQuestion).val(options);
+
+            //lets store other configuration info in link field for now
+            $('#link-text-' + selectedRatingQuestion).val(`${start}|${startLabel},${end}|${endLabel},${increment}`);
+
+            $("#btn-setratings-" + selectedRatingQuestion).css("border", "").tooltip("destroy");
             invalidBarChar.addClass("hide");
             valueRequired.addClass("hide");
             $("#modal-rating").removeClass("md-show");
         }
         else return false;
+    }
+
+    function getOptionsTextForRating(start, startLabel, end, endLabel, increment) {       
+        // example of good option chain 1|Start,5,10,15,20,25,30,35,40,45,50|End
+        var options = '';
+
+        if (startLabel)
+            options = `${start}|${startLabel},`;
+        else
+            options = `${start},`;
+
+        var loopStart = start;
+        if (start % 2)
+            loopStart = start - 1;
+        
+        for (var i = loopStart; i <= end; i += increment) {
+            if (i > start && i < end)
+                options += `${i},`;
+        }
+
+        if (endLabel)
+            options += `${end}|${endLabel}`;
+        else
+            options += `${end}`;        
+        
+        return options;
     }
 
     function setRatingIncrement() {
