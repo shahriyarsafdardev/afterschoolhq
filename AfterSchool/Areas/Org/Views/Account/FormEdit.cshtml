@@ -802,9 +802,7 @@
             if (index != 0 && index != rowCount) {
                 $(this).remove();
             }
-        }).promise().done(function () {
-                addOption();
-        });
+        })
 
         //---4--If options have value then parse string, create rows and populate with values.
         if (options != '') {
@@ -825,6 +823,9 @@
                 addOptionRow(optionType, optionNo, optionValue, optionDescriptionValue)
             }
             indivdualOption = null;
+        }
+        else {
+            addOption();
         }
     }
 
@@ -925,6 +926,7 @@
             $("#question-emoji").val(emojiValue);            
             $(".emojionearea2")[0].emojioneArea.setText(emojiValue);            
         }
+        selectedLinkQuestion = id;
     }
 
     function updateLink() {
