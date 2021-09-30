@@ -820,49 +820,7 @@
         if (optionType === "Emoji") {
             $("#options-table tr").each(function (index) {
                 if (index == rowCount - 1) {
-                    $(this).find(".emojionearea2").emojioneArea({
-                        pickerPosition: "right",
-                        filtersPosition: "bottom",
-                        tonesStyle: "square",
-                        shortnames: true,
-                        search: false,
-                        events: {
-                            keyup: (a, e) => {
-                                e.stopPropagation();
-                                e.preventDefault();
-                            },
-                            keypress: (a, e) => {
-                                e.stopPropagation();
-                                e.preventDefault();
-                            },
-                            emojibtn_click: (a, e) => {
-                                $(`.emojionearea2#option-${index}`).text("");
-                                $(`.emojionearea2#option-${index}`)[0].emojioneArea.setText(a[0].dataset.name);
-                                var emojiKey = a[0].dataset.name;
-                                var emojiKeyWithoutColons = emojiKey.replaceAll(":", "");
-                                var emojiKeyDescription = emojiDictionary.find(({ key }) => key === emojiKeyWithoutColons);
-                                $(`#optionDescription-${index}`).val(emojiKeyDescription.value);
-                            }
-                        },
-                        filters: {
-                            recent: false, // disable recent
-                            objects: false, // disable objects filter
-                            symbols: false, // disable symbols filter
-                            flags: false, // disable flags filter
-                            animals_nature: false,
-                            activity: true,
-                            travel_places: true,
-                            objects: true,
-                            symbols: true,
-                            flags: true,
-                            food_drink: true,
-                            smileys_people: {
-                                icon: "yum",
-                                title: "Smileys & People",
-                                emoji: emojiCollection
-                            }
-                        }
-                    });
+                    addEmoji(this, index);                   
                 }
             });
         }
@@ -890,9 +848,7 @@
             if (index != 0 && index != rowCount) {
                 $(this).remove();
             }
-        });//.promise().done(function () {
-        //        addOption();
-        //});
+        });
 
         //---4--If options have value then parse string, create rows and populate with values.
         if (options != '') {
@@ -913,62 +869,66 @@
                 addOptionRow(optionType, optionNo, optionValue, optionDescriptionValue)
             }
             indivdualOption = null;
+            if (optionType === "Emoji") {
+                setTimeout(() =>
+                    $("#options-table tr").each(function (index) {
+                        if (index != 0 && index != rowCount) {                         
+                            addEmoji(this, index);
+                        }
+                    }), 100);
+            }
         }
-        if (optionType === "Emoji") {
-            setTimeout(addEmoji(), 10);            
-        }
+        
     }
 
-    function addEmoji() {
+    function addEmoji(row,index) {
         var rowCount = $("#options-table tr").length - 1;
-        var emojiCollection = getEmojis();
-        $("#options-table tr").each(function (index) {
-            if (index != 0 && index != rowCount) {
-                $(this).find(".emojionearea2").emojioneArea({
-                    pickerPosition: "right",
-                    filtersPosition: "bottom",
-                    tonesStyle: "square",
-                    shortnames: true,
-                    search: false,
-                    events: {
-                        keyup: (a, e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                        },
-                        keypress: (a, e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                        },
-                        emojibtn_click: (a, e) => {
-                            $(`.emojionearea2#option-${index}`).text("");
-                            $(`.emojionearea2#option-${index}`)[0].emojioneArea.setText(a[0].dataset.name);
-                            var emojiKey = a[0].dataset.name;
-                            var emojiKeyWithoutColons = emojiKey.replaceAll(":", "");
-                            var emojiKeyDescription = emojiDictionary.find(({ key }) => key === emojiKeyWithoutColons);
-                            $(`#optionDescription-${index}`).val(emojiKeyDescription.value);
-                        }
+        var emojiCollection = getEmojis(); 
+        
+            $(row).find(".emojionearea2").emojioneArea({
+                pickerPosition: "right",
+                filtersPosition: "bottom",
+                tonesStyle: "square",
+                shortnames: true,
+                search: false,
+                events: {
+                    keyup: (a, e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
                     },
-                    filters: {
-                        recent: false, // disable recent
-                        objects: false, // disable objects filter
-                        symbols: false, // disable symbols filter
-                        flags: false, // disable flags filter
-                        animals_nature: false,
-                        activity: true,
-                        travel_places: true,
-                        objects: true,
-                        symbols: true,
-                        flags: true,
-                        food_drink:true,
-                        smileys_people: {
-                            icon: "yum",
-                            title: "Smileys & People",
-                            emoji: emojiCollection
-                        }
+                    keypress: (a, e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                    },
+                    emojibtn_click: (a, e) => {
+                        $(`.emojionearea2#option-${index}`).text("");
+                        $(`.emojionearea2#option-${index}`)[0].emojioneArea.setText(a[0].dataset.name);
+                        var emojiKey = a[0].dataset.name;
+                        var emojiKeyWithoutColons = emojiKey.replaceAll(":", "");
+                        var emojiKeyDescription = emojiDictionary.find(({ key }) => key === emojiKeyWithoutColons);
+                        $(`#optionDescription-${index}`).val(emojiKeyDescription.value);
                     }
-                });               
-            }
-        });
+                },
+                filters: {
+                    recent: false, // disable recent
+                    tones: true, // disable recent
+                    objects: false, // disable objects filter
+                    symbols: false, // disable symbols filter
+                    flags: false, // disable flags filter
+                    animals_nature: false,
+                    activity: true,
+                    travel_places: true,
+                    objects: true,
+                    symbols: true,
+                    flags: true,
+                    food_drink:true,
+                    smileys_people: {
+                        icon: "yum",
+                        title: "Smileys & People",
+                        emoji: emojiCollection
+                    }
+                }
+            });   
     }
 
     function updateOptions() {
@@ -985,6 +945,10 @@
                 if (index != 0 && index != rowCount) {
                     var optVal = $(this).find("input.option").val();
                     var optDesc = $(this).find("input.optionDescription").val();
+
+                    if ($('#modal-options-title').text() == 'Emojis') {
+                        optVal = emojione.toShort($(this).find("input.option").val());
+                    }
 
                     if ($(this).find("input.emojionearea2").val() == "") {
                         $(".requiredData").removeClass("hide")
@@ -1025,12 +989,8 @@
                         rowOption = `${optVal},`
                     }
                     
-                    if ($('#modal-options-title').text() == 'Emojis') {
-                        optionString = emojione.toShort(optionString) + rowOption;
-                    }
-                    else {
-                        optionString = optionString + rowOption;
-                    }
+                    optionString = optionString + rowOption;
+                   
                 }
             });
 
