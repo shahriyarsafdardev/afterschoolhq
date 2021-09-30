@@ -19395,3 +19395,16 @@ div.dataTables_wrapper div.dataTables_length label select {
 .emoji-option-table tr th, .emoji-option-table tr td {
     border: 0 !important;
 }
+.emojionearea.emojionearea-inline{
+    height: 44px;
+    padding-right: 20px
+}
+.emojionearea.emojionearea-inline > .emojionearea-editor {
+    position: relative;
+    height: 44px;
+    display: flex;
+    align-items: center;
+}
+.emojionearea .emojionearea-button > div{
+    top: 5px;
+}
