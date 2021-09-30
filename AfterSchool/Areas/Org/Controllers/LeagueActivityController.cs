@@ -1671,6 +1671,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.Users = users;
+            LoadTeamViewBag(activity);
             return View("Team", activity);
         }
 
