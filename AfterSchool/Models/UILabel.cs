@@ -107,6 +107,22 @@ namespace AfterSchool.Models
                 return AfterSchoolLibrary.Helpers.Utilities.GetKeyValuePairs(gradeText).FirstOrDefault()?.value;
 
             return gradeText;
-        }        
+        }
+
+        public static string GetFormattedAnswer(string text)
+        {
+            if (text.IsNotEmpty() && AfterSchoolLibrary.Helpers.Utilities.IsAlreadyJsonString(text))
+                return AfterSchoolLibrary.Helpers.Utilities.GetKeyValuePairs(text).FirstOrDefault()?.value;
+
+            return text;
+        }
+
+        public static string GetFormattedAnswerForArray(string text)
+        {
+            if (text.IsNotEmpty() && AfterSchoolLibrary.Helpers.Utilities.IsAlreadyJsonString(text))
+              return AfterSchoolLibrary.Helpers.Utilities.GetKeyValuePairs(text)?.Select(m => m.value)?.ToStringList(separator: ", ");
+
+            return text;
+        }
     }
 }
