@@ -405,11 +405,14 @@
                 <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
                 <h3 class="modal-title">Edit <span id="modal-options-title">Options</span></h3>
             </div>
-            <div class="modal-body form">
+            <div class="clearfix"></div>
+
+            <div class="modal-body form fixed-height-modal-options">
 
                 <p>Update your options here. Your options are not saved until you hit the save button on the screen</p>
                 <p class="twoOptionsValidation text-danger hide">Please add atleast two options.</p>
                 <p class="invalid-char text-danger hide">| sign is not allowed.</p>
+                <p class="requiredData text-danger hide">Please select emojis.</p>
 
                 <div class="table-responsive">
                     <table class="table options-table emoji-option-table" id="options-table">
@@ -447,13 +450,14 @@
                         </tbody>
                     </table>
                 </div>
-
-
             </div>
+            <div class="clearfix"></div>
+
             <div class="modal-footer">
                 <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
                 <button type="button" data-dismiss="modal" class="btn btn-primary" onclick="updateOptions()">Done</button>
             </div>
+            <div class="clearfix"></div>
         </div>
     </form>
 </div>
@@ -474,14 +478,15 @@
                     <label><span id="question-link-label"></span></label>
                     <textarea class="form-control" id="question-link" name="question-link" rows="6" placeholder="ex: http://yourdomain.com/go-here"></textarea>
                 </div>
+                <p class="emojiRequired text-danger hide">Please select Emoji.</p>
                 <div class="form-group emojiOption">
                     <label><span id="question-link-label"></span></label>
-                    <textarea class="form-control emojionearea2" id="question-emoji" name="question-emoji" rows="6" placeholder="Emojis go here"></textarea>
+                    <textarea class="form-control emojionearea2" id="question-emoji" name="question-emoji" required rows="6" placeholder="Emojis go here"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-                <button type="button" data-dismiss="modal" class="btn btn-primary md-close" onclick="updateLink()">Done</button>
+                <button type="button" data-dismiss="modal" class="btn btn-primary" onclick="updateLink()">Done</button>
             </div>
         </div>
     </form>
@@ -495,7 +500,7 @@
                 <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
                 <h3 class="modal-title">Edit Rating</h3>
             </div>
-            <div class="modal-body form">
+            <div class="modal-body form">                
                 <p id="valueRequired" class="text-danger hide">Value is required.</p>
                 <p class="minMaxValidation text-danger hide">Max value should be greater than min value.</p>
                 <p id="invalidBarChar" class="text-danger hide">| sign is not allowed.</p>
@@ -529,7 +534,7 @@
                             <option>25</option>
                         </select>
                     </div>
-                </div>
+                </div>                
 
                 <div class="form-group row">
                     <div class="col-xs-1">
@@ -585,7 +590,29 @@
 <script>
     var selectedQuestion = null;
     var newQuestionNumber = 0;
-
+    var emojiDictionary = [
+        { key: "grinning", value:"Happy"},
+        { key: "grimacing", value:"grimacing"},
+        { key: "grin", value:"Laughing"},
+        { key: "joy", value: "Goofy" },
+        { key: "smiley", value: "Smiley" },
+        { key: "sweat_smile", value:"Sweat Smile"},
+        { key: "laughing", value:"Laughing"},
+        { key: "innocent", value:"Innocent"},
+        { key: "wink", value:"Wink"},
+        { key: "blush", value:"Blush"},
+        { key: "slight_smile", value:"Slight Smile"},
+        { key: "upside_down", value:"Upside Down"},
+        { key: "relaxed", value:"Relaxed"}
+    ];
+   
+    function getEmojis() {
+        var emojiCollection = "";
+        emojiDictionary.forEach(function (obj) {
+            emojiCollection += " " + obj.key;
+        });
+        return emojiCollection;
+    }
     function incrementQuestionCount() {
         $('#newquestioncount').val(getQuestionCount() + 1);
     }
@@ -655,7 +682,12 @@
     }
 
     function getOptionsLinks() {
-        return `<button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-options" onclick="setOptions(${getQuestionCount()})" id="btn-setoptions-${getQuestionCount()}">Edit Options</button><input type="hidden" id="options-text-${getQuestionCount()}" name="new-options-text-${getQuestionCount()}" value="" /><button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-link" onclick="setLink(${getQuestionCount()})" id="btn-setlink-${getQuestionCount()}">Add/Edit Link</button><input type="hidden" id="link-text-${getQuestionCount()}" name="new-link-text-${getQuestionCount()}" value="" /><button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-rating" onclick="setRating(${getQuestionCount()})" id="btn-setratings-${getQuestionCount()}">Set Rating</button><input type="hidden" id="displayOrderId-${getQuestionCount()}" name="displayOrderId-${getQuestionCount()}" class="displayOrderId" value="" />`;
+        return `<button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-options" onclick="setOptions(${getQuestionCount()})" id="btn-setoptions-${getQuestionCount()}">Edit Options</button>
+                <input type="hidden" id="options-text-${getQuestionCount()}" name="new-options-text-${getQuestionCount()}" value="" />
+                <button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-link" onclick="setLink(${getQuestionCount()})" id="btn-setlink-${getQuestionCount()}">Add/Edit Link</button>
+                <input type="hidden" id="link-text-${getQuestionCount()}" name="new-link-text-${getQuestionCount()}" value="" />
+                <button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-rating" onclick="setRating(${getQuestionCount()})" id="btn-setratings-${getQuestionCount()}">Set Rating</button>
+                <input type="hidden" id="displayOrderId-${getQuestionCount()}" name="displayOrderId-${getQuestionCount()}" class="displayOrderId" value="" />`;
     }
 
     function getDescription() {
@@ -686,24 +718,11 @@
         $('#options-table')
             .find('tr')
             .last()
-            .before(`<tr class="questionRow" id="${optionType}-${optionNo+1}"><td>${optionType} ${optionNo+1}</td><td><input type="text" value="${optionValue}" required class="form-control col-sm-3 option" onfocus="this.select()" /></td><td><input type="text" value="${optionDescriptionValue}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" /></td><td><button class="btn btn-default btn-sm md-trigger" onclick="removeOption($(this).closest('tr').attr('id'))"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
+            .before(`<tr class="questionRow" id="${optionType}-${optionNo + 1}"><td>${optionType} ${optionNo + 1}</td><td><input type="text" value="${optionValue}" id="option-${optionNo + 1}" required class="form-control col-sm-3 option emojionearea2" onfocus="this.select()" /></td><td><input type="text" value="${optionDescriptionValue}" id="optionDescription-${optionNo + 1}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" disabled /></td><td><button class="btn btn-default btn-sm md-trigger" onclick="removeOption($(this).closest('tr').attr('id'))"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
     }
 
-    function addOption() {
-        var optionType = "Option";
-        if ($('#modal-options-title').text() == 'Emojis') {
-            optionType = "Emoji";
-        }
-        $('#options-table')
-            .find('tr')
-            .last()
-            .before(`<tr class="questionRow" id="${optionType}-${getOptionsRowCount()}"><td>${optionType} ${getOptionsRowCount()}</td><td><input type="text" value="" id="option- ${getOptionsRowCount()}" required class="form-control col-sm-3 option emojionearea2" onfocus="this.select()" /></td><td><input type="text" value="" id="optionDescription- ${getOptionsRowCount()}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" /></td><td><button type="button" class="btn btn-default btn-sm md-trigger" onclick="removeOption($(this).closest('tr').attr('id'))"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
+    
 
-        var rowCount = $("#options-table tr").length - 1;
-        if (rowCount > 2) {
-            $(".twoOptionsValidation").addClass("hide")
-        }
-    }
     function updateSorting() {
         var inputs = $('input.currentposition');
         var nbElems = inputs.length;
@@ -768,19 +787,35 @@
             $(`#btn-setlink-${id}`).addClass('hide');
             $(`#btn-setratings-${id}`).addClass('hide');
         }
+    }
+    function addOption() {
+        var optionType = "Option";
+        if ($('#modal-options-title').text() == 'Emojis') {
+            optionType = "Emoji";
+        }
+        $('#options-table')
+            .find('tr')
+            .last()
+            .before(`<tr class="questionRow" id="${optionType}-${getOptionsRowCount()}"><td>${optionType} ${getOptionsRowCount()}</td><td><input type="text" value="" id="option-${getOptionsRowCount()}" required class="form-control col-sm-3 option emojionearea2" onfocus="this.select()" /></td><td><input type="text" value="" id="optionDescription-${getOptionsRowCount()}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" disabled /></td><td><button type="button" class="btn btn-default btn-sm md-trigger" onclick="removeOption($(this).closest('tr').attr('id'))"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
 
-        if (select.val() == '@((int)QuestionType.Emoji)') {
-            $(`#btn-setoptions-${id}`).addClass('hide');
-            $(`#btn-setlink-${id}`).removeClass('hide');
-            $(`#btn-setratings-${id}`).addClass('hide');
-            $(".modalLinkTitle").html("Edit Emoji");
-            $(`#btn-setlink-${id}`).text('Edit Emoji');
+        var rowCount = $("#options-table tr").length - 1;
+        var emojiCollection = getEmojis();
+        if (rowCount > 2) {
+            $(".twoOptionsValidation").addClass("hide")
+        }
+
+        if (optionType === "Emoji") {
+            $("#options-table tr").each(function (index) {
+                if (index == rowCount - 1) {
+                    addEmoji(this, index);                   
+                }
+            });
         }
     }
-
     //--Set options type based on emoji/option question type and their labels
     function setOptions(id) {
         selectedQuestion = id;
+       
         var optionType = "Option";
         $('#modal-options-title').text("Options");
 
@@ -788,6 +823,7 @@
         if ($('#questiontype-' + id).val() == 16) {
             $('#modal-options-title').text("Emojis");
             optionType = "Emoji";
+            $(".requiredData").addClass("hide");
         }
 
         //---2---Get option values from hidden field
@@ -799,8 +835,6 @@
             if (index != 0 && index != rowCount) {
                 $(this).remove();
             }
-        }).promise().done(function () {
-                addOption();
         });
 
         //---4--If options have value then parse string, create rows and populate with values.
@@ -822,7 +856,66 @@
                 addOptionRow(optionType, optionNo, optionValue, optionDescriptionValue)
             }
             indivdualOption = null;
+            if (optionType === "Emoji") {
+                setTimeout(() =>
+                    $("#options-table tr").each(function (index) {
+                        if (index != 0 && index != rowCount) {                         
+                            addEmoji(this, index);
+                        }
+                    }), 100);
+            }
         }
+        
+    }
+
+    function addEmoji(row,index) {
+        var rowCount = $("#options-table tr").length - 1;
+        var emojiCollection = getEmojis(); 
+        
+            $(row).find(".emojionearea2").emojioneArea({
+                pickerPosition: "right",
+                filtersPosition: "bottom",
+                tonesStyle: "square",
+                shortnames: true,
+                search: false,
+                events: {
+                    keyup: (a, e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                    },
+                    keypress: (a, e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                    },
+                    emojibtn_click: (a, e) => {
+                        $(`.emojionearea2#option-${index}`).text("");
+                        $(`.emojionearea2#option-${index}`)[0].emojioneArea.setText(a[0].dataset.name);
+                        var emojiKey = a[0].dataset.name;
+                        var emojiKeyWithoutColons = emojiKey.replaceAll(":", "");
+                        var emojiKeyDescription = emojiDictionary.find(({ key }) => key === emojiKeyWithoutColons);
+                        $(`#optionDescription-${index}`).val(emojiKeyDescription.value);
+                    }
+                },
+                filters: {
+                    recent: false, // disable recent
+                    tones: true, // disable recent
+                    objects: false, // disable objects filter
+                    symbols: false, // disable symbols filter
+                    flags: false, // disable flags filter
+                    animals_nature: false,
+                    activity: true,
+                    travel_places: true,
+                    objects: true,
+                    symbols: true,
+                    flags: true,
+                    food_drink:true,
+                    smileys_people: {
+                        icon: "yum",
+                        title: "Smileys & People",
+                        emoji: emojiCollection
+                    }
+                }
+            });   
     }
 
     function updateOptions() {
@@ -831,7 +924,7 @@
             var rowCount = $("#options-table tr").length - 1;
             var validation = true;
             var validChars = true;
-            if (rowCount < 3 && $('#modal-options-title').text() != 'Emojis') {
+            if (rowCount < 3) {
                 validation = false;
                 $(".twoOptionsValidation").removeClass("hide")
             }
@@ -839,6 +932,15 @@
                 if (index != 0 && index != rowCount) {
                     var optVal = $(this).find("input.option").val();
                     var optDesc = $(this).find("input.optionDescription").val();
+
+                    if ($('#modal-options-title').text() == 'Emojis') {
+                        optVal = emojione.toShort($(this).find("input.option").val());
+                    }
+
+                    if ($(this).find("input.emojionearea2").val() == "") {
+                        $(".requiredData").removeClass("hide")
+                        validation = false;
+                    }
 
                     if ($(this).find("input.option").val() == "") {
                         $(this).find("input.option").addClass("danger");
@@ -873,8 +975,9 @@
                     } else {
                         rowOption = `${optVal},`
                     }
-
+                    
                     optionString = optionString + rowOption;
+                   
                 }
             });
 
@@ -920,57 +1023,105 @@
             // get value from hidden field
             var emojiValue = $('#options-text-' + selectedQuestion).val().replaceAll(":,:", "::");            
             $("#question-emoji").val(emojiValue);            
-            $(".emojionearea2")[0].emojioneArea.setText(emojiValue);            
+            $(".emojionearea2")[0].emojioneArea.setText(emojiValue);       
+                
         }
+        selectedLinkQuestion = id;
     }
 
     function updateLink() {
-        if ($('#questiontype-' + selectedQuestion).val() == 16) {
-            var emojiValues = emojione.toShort($("#question-emoji").val());
-            var emojis = emojiValues.replaceAll('::', ':,:');
-            $('#options-text-' + selectedQuestion).val(emojis);
-        }
+        var validation = true;
+        var emojiTextArea = $("#question-emoji");
+
         if (!isNaN(selectedLinkQuestion)) {
             $('#link-text-' + selectedLinkQuestion).val($('#question-link').val());
         }
+        
+        if (emojiTextArea.val() == "") {
+            emojiTextArea.addClass("danger");
+            $(".emojiRequired").removeClass("hide");
+            validation = false;
+        }
+            
+        if (validation == true && $('#questiontype-' + selectedQuestion).val() == 16) {
+            emojiTextArea.removeClass("danger");
+            $(".emojiRequired").addClass("hide");
+            validation = true;
+            var emojiValues = emojione.toShort($("#question-emoji").val());
+            var emojis = emojiValues.replaceAll('::', ':,:');
+            $('#options-text-' + selectedQuestion).val(emojis);
+            $("#modal-link").removeClass("md-show");
+        }
+        else return false;        
     }
 
     //called when rating modal is going to display
     //Also setting rating range values in options hidden field.
+    var selectedRatingQuestion = null;
     function setRating(id) {
-        selectedLinkQuestion = id;
-        var ratingString = $('#options-text-' + id).val();
-        var ratingValues = ratingString.split(",");
-        $('#question-rating-label').html($('#text-' + id).val());
 
-        //if question exist then read data from hidden field and populate text fields
-        if (ratingValues.length > 1) {
-            $('#question-rating-min').val(ratingValues[0].substring(0, ratingValues[0].indexOf('|')));
-            $('#question-rating-max').val(ratingValues[1].substring(0, ratingValues[1].indexOf('|')));
-            setOptionalLabelAndIncrement();
-            $('#question-rating-increment').val(ratingValues[2]);
-            $('#question-rating-label-min').val(ratingValues[0].substring(ratingValues[0].indexOf("|") + 1));
-            $('#question-rating-label-max').val(ratingValues[1].substring(ratingValues[1].indexOf("|") + 1));
-            $('#rating-min-label').empty();
-            $('#rating-min-label').append(ratingValues[0].substring(0, ratingValues[0].indexOf('|')));
-            $('#rating-max-label').empty();
-            $('#rating-max-label').append(ratingValues[1].substring(0, ratingValues[1].indexOf('|')));
+        selectedRatingQuestion = id;
+
+        //set default ratings
+        setDefaultRatings();
+
+        //ideal rating stored in db = 1|Start,50|End,5
+        var rating = $(`#link-text-${id}`).val();
+        var splitedRating = rating.split(',');
+
+        var startString = splitedRating[0];
+        if (startString) {
+            var start = startString.split("|");
+            if (start) {
+                var min = start[0];
+                var minLabel = start[1];
+                
+                $('#question-rating-min').val(min);
+                $('#rating-min-label').val(min);
+
+                if (minLabel)
+                    $('#question-rating-label-min').val(minLabel);
+            }
         }
-        else {
-            $('#question-rating-min').val('1');
-            $('#question-rating-max').val('5');
-            $('#question-rating-increment').val('1').change();
-            $('#question-rating-label-min').val('');
-            $('#question-rating-label-max').val('');
-            $('#rating-min-label').empty();
-            $('#rating-min-label').append('1');
-            $('#rating-max-label').empty();
-            $('#rating-max-label').append('5');
-            $('#question-rating-min').removeClass("danger");
-            $('#question-rating-max').removeClass("danger");
-            $('#valueRequired').addClass("hide");
-            setOptionalLabelAndIncrement();
+
+        var endString = splitedRating[1];
+        if (endString) {
+            var end = endString.split("|");
+            if (end) {
+                var max = end[0];
+                var maxLabel = end[1];
+
+                $('#question-rating-max').val(max);
+                $('#rating-max-label').val(max);
+
+                if (maxLabel)
+                    $('#question-rating-label-max').val(maxLabel);
+            }
         }
+
+        var increment = splitedRating[2];
+        if (increment)
+            $('#question-rating-increment').val(parseInt(increment));
+    }
+
+    function setDefaultRatings() {
+        var min = $('#question-rating-min').val();
+        if (min == '') 
+            $('#question-rating-min').val(1);
+
+        $('#question-rating-label-min').val('');
+        $('#rating-min-label').val(1);
+
+        var max = $('#question-rating-max').val();
+        if (max == '')
+            $('#question-rating-max').val(5);        
+        
+        $('#question-rating-label-max').val('');
+        $('#rating-max-label').val('5');
+
+        var increment = $('#question-rating-increment').val();
+        if (increment == '')
+            $('#question-rating-increment').val(1);
     }
 
     //Updating rating range values in options hidden input
@@ -1037,14 +1188,53 @@
             ratingMaxOptionalLabel.removeClass("danger");
         }       
 
-        if (validation == true) {
-            $('#options-text-' + selectedLinkQuestion).val($('#question-rating-min').val() + "|" + $('#question-rating-label-min').val() + "," + $('#question-rating-max').val() + "|" + $('#question-rating-label-max').val() + "," + $('#question-rating-increment').val());
-            $("#btn-setratings-" + selectedLinkQuestion).css("border", "").tooltip("destroy");
+        if (validation == true) {            
+            var start = $('#question-rating-min').val();
+            var startLabel = $('#question-rating-label-min').val();
+
+            var end = $('#question-rating-max').val();
+            var endLabel = $('#question-rating-label-max').val();
+
+            var increment = $('#question-rating-increment').val();
+
+            var options = getOptionsTextForRating(parseInt(start), startLabel, parseInt(end), endLabel, parseInt(increment));
+            $('#options-text-' + selectedRatingQuestion).val(options);
+
+            //lets store other configuration info in link field for now
+            $('#link-text-' + selectedRatingQuestion).val(`${start}|${startLabel},${end}|${endLabel},${increment}`);
+
+            $("#btn-setratings-" + selectedRatingQuestion).css("border", "").tooltip("destroy");
             invalidBarChar.addClass("hide");
             valueRequired.addClass("hide");
             $("#modal-rating").removeClass("md-show");
         }
         else return false;
+    }
+
+    function getOptionsTextForRating(start, startLabel, end, endLabel, increment) {       
+        // example of good option chain 1|Start,5,10,15,20,25,30,35,40,45,50|End
+        var options = '';
+
+        if (startLabel)
+            options = `${start}|${startLabel},`;
+        else
+            options = `${start},`;
+
+        var loopStart = start;
+        if (start % 2)
+            loopStart = start - 1;
+        
+        for (var i = loopStart; i <= end; i += increment) {
+            if (i > start && i < end)
+                options += `${i},`;
+        }
+
+        if (endLabel)
+            options += `${end}|${endLabel}`;
+        else
+            options += `${end}`;        
+        
+        return options;
     }
 
     function setRatingIncrement() {
@@ -1110,6 +1300,7 @@
             var ratingInput = td.find("input:last-of-type");
             var optionsButton = td.find("button:first-of-type");
             var ratingButton = td.find("button:last-of-type");
+            var linkEmojiButton = td.children('button').eq(1);
 
             if (optionsInput.val() === '' && !optionsButton.hasClass("hide") ) {
                 td.find("button:first-of-type").css("border", "2px solid red").css('cursor', 'pointer').attr('title', 'Please sepcify values.').tooltip({ tooltipClass: 'tooltipclass' });
@@ -1119,6 +1310,11 @@
             if (optionsInput.val() === '' && !ratingButton.hasClass("hide") ) {
                 td.find("button:last-of-type").css("border", "2px solid red").css('cursor', 'pointer').attr('title', 'Please sepcify range.').tooltip({ tooltipClass: 'tooltipclass' });
                 validated = false;
+            }
+
+            if (optionsInput.val() === '' && !linkEmojiButton.hasClass("hide")) {
+                linkEmojiButton.css("border", "2px solid red").css('cursor', 'pointer').attr('title', 'Please select emoji.').tooltip({ tooltipClass: 'tooltipclass' });
+                validated = false;                
             }
         });
         if (!validated) {
@@ -1136,7 +1332,14 @@
             shortnames: true,  
             search: false,
             events: {
-                
+                keyup: (a, e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                },
+                keypress: (a, e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                }
             }
         });
     }    
