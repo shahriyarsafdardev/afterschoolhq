@@ -1075,3 +1075,7 @@
     max-height: 575px;
     overflow-x: auto;
 }
+
+.emojionearea-tones-square {
+    display: none;
+}
