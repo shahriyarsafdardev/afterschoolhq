@@ -714,12 +714,18 @@
         var rowCount = $('#question-table tr').length;
     }
 
-    function addOptionRow(optionType, optionNo, optionValue, optionDescriptionValue) {
+    function addOptionRow(optionType, optionNo, optionValue, optionDescriptionValue, callback) {
+       
         $('#options-table')
             .find('tr')
             .last()
             .before(`<tr class="questionRow" id="${optionType}-${optionNo + 1}"><td>${optionType} ${optionNo + 1}</td><td><input type="text" value="${optionValue}" id="option-${optionNo + 1}" required class="form-control col-sm-3 option emojionearea2" onfocus="this.select()" /></td><td><input type="text" value="${optionDescriptionValue}" id="optionDescription-${optionNo + 1}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" disabled /></td><td><button class="btn btn-default btn-sm md-trigger" onclick="removeOption($(this).closest('tr').attr('id'))"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
-    }
+
+       var Index = optionNo + 1;
+     
+       callback(Index);
+
+   }
 
     
 
@@ -744,14 +750,31 @@
         var optionType = id.split("-")[0];
         $("#" + id).remove();
         var totalRows = $('#options-table tr').length - 2;
-        $("#options-table tbody tr").each(function (i) {
-            var newid = i + 1;
-            if (i < totalRows) {
-                $(this).find($('td:first-child')).text(optionType + " " + newid);
-                $(this).attr("id", optionType + "-" + newid);
+        
+        var optionString = '';
+        var rowCount = $("#options-table tr").length - 1;
+        ////// Get Values of inputs in a string
+        $("#options-table tr").each(function (index) {
+            if (index != 0 && index != rowCount) {
+                var optVal = $(this).find("input.option").val();
+                var optDesc = $(this).find("input.optionDescription").val();
+
+                if (optionType == 'Emoji') {
+                    optVal = emojione.toShort($(this).find("input.option").val());                   
+                }
+                var rowOption;
+                if (optDesc) {
+                    rowOption = `${optVal}|${optDesc},`
+                } else {
+                    rowOption = `${optVal},`
+                }
+                optionString = optionString + rowOption;
             }
-        }).promise().done(function () { updateSorting(); });
-       
+        });
+        var commaIndex = optionString.lastIndexOf(",");
+        var optionWithoutLastComma = optionString.substring(0, commaIndex);
+        setOptions(selectedQuestion, optionWithoutLastComma, optionType);
+        
     }
 
     function addTextBlock() {
@@ -807,15 +830,21 @@
         if (optionType === "Emoji") {
             $("#options-table tr").each(function (index) {
                 if (index == rowCount - 1) {
-                    addEmoji(this, index);                   
+                    addEmoji(index);                   
                 }
             });
         }
+
+        if (optionType != "Emoji") {
+            //descriptions would be disabled only for emojis
+            $(".optionDescription").prop('disabled', false);
+        }
     }
     //--Set options type based on emoji/option question type and their labels
-    function setOptions(id) {
+    // triggers when pop-up opens
+    function setOptions(id,optionString,questionType) {
         selectedQuestion = id;
-       
+        var options = '';
         var optionType = "Option";
         $('#modal-options-title').text("Options");
 
@@ -826,8 +855,18 @@
             $(".requiredData").addClass("hide");
         }
 
-        //---2---Get option values from hidden field
-        var options = $('#options-text-' + selectedQuestion).val();
+        //---2---Get option values from hidden field        
+        if (optionString) {
+            options = optionString;
+            optionType = questionType;
+            if (questionType == "Emoji")
+                $('#modal-options-title').text("Emojis");
+            else
+                $('#modal-options-title').text("Options");
+        }
+        else {
+            options = $('#options-text-' + selectedQuestion).val();
+        }        
         var rowCount = $("#options-table tr").length - 1;
 
         //---3---Initialize Modal table, so that for other questions, old question data get removed. we will keep the header and footer rows
@@ -836,7 +875,7 @@
                 $(this).remove();
             }
         });
-
+        
         //---4--If options have value then parse string, create rows and populate with values.
         if (options != '') {
             var numberofOptionRows = (options.split(",").length);
@@ -853,31 +892,34 @@
                     optionDescriptionValue = optionRowArray[1];
                 }
                 //create new row for option modal
-                addOptionRow(optionType, optionNo, optionValue, optionDescriptionValue)
+
+                addOptionRow(optionType, optionNo, optionValue, optionDescriptionValue, function () {
+                    addEmoji(optionNo + 1);
+                });
+
             }
             indivdualOption = null;
-            if (optionType === "Emoji") {
-                setTimeout(() =>
-                    $("#options-table tr").each(function (index) {
-                        if (index != 0 && index != rowCount) {                         
-                            addEmoji(this, index);
-                        }
-                    }), 100);
+            if (optionType != "Emoji") {
+                //descriptions would be disabled only for emojis
+                $(".optionDescription").prop('disabled', false);
             }
         }
         
     }
 
-    function addEmoji(row,index) {
+    function addEmoji(index) {
         var rowCount = $("#options-table tr").length - 1;
-        var emojiCollection = getEmojis(); 
-        
-            $(row).find(".emojionearea2").emojioneArea({
+        var row = $("#options-table").find(`#Emoji-${index}`);
+        var emojiCollection = getEmojis();
+        var emojiInput = $(row).find(".emojionearea2");
+        //console.log("Inside addEmoji", emojiInput);
+         emojiInput.emojioneArea({
                 pickerPosition: "right",
                 filtersPosition: "bottom",
                 tonesStyle: "square",
                 shortnames: true,
-                search: false,
+             search: false,
+                
                 events: {
                     keyup: (a, e) => {
                         e.stopPropagation();
@@ -886,7 +928,7 @@
                     keypress: (a, e) => {
                         e.stopPropagation();
                         e.preventDefault();
-                    },
+                 }, 
                     emojibtn_click: (a, e) => {
                         $(`.emojionearea2#option-${index}`).text("");
                         $(`.emojionearea2#option-${index}`)[0].emojioneArea.setText(a[0].dataset.name);
@@ -931,15 +973,13 @@
             $("#options-table tr").each(function (index) {
                 if (index != 0 && index != rowCount) {
                     var optVal = $(this).find("input.option").val();
-                    var optDesc = $(this).find("input.optionDescription").val();
-
+                    var optDesc = $(this).find("input.optionDescription").val();                    
                     if ($('#modal-options-title').text() == 'Emojis') {
                         optVal = emojione.toShort($(this).find("input.option").val());
-                    }
-
-                    if ($(this).find("input.emojionearea2").val() == "") {
-                        $(".requiredData").removeClass("hide")
-                        validation = false;
+                        if ($(this).find("input.emojionearea2").val() == "") {
+                            $(".requiredData").removeClass("hide")
+                            validation = false;
+                        }
                     }
 
                     if ($(this).find("input.option").val() == "") {
