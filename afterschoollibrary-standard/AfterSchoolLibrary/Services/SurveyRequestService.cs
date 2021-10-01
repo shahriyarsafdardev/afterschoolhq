@@ -138,10 +138,17 @@ namespace AfterSchoolLibrary.Services
                 {
                     row.Add(formQuestionAnswer.Text == "1" ? "True" : "False");
                 }
-                else if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.DropDownList || formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.RadioList)
+                else if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.DropDownList || formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.RadioList || formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.Rating || formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.Emoji)
                 {
-                    dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
-                    row.Add(Convert.ToString(json[0].value));
+                    dynamic json = Newtonsoft.Json.JsonConvert.DeserializeObject(formQuestionAnswer.Text);
+                    if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.Rating || formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.Emoji)
+                    {
+                        row.Add(Convert.ToString(json[0].key));
+                    }
+                    else
+                    {
+                        row.Add(Convert.ToString(json[0].value));
+                    }
                 }
                 else if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.CheckboxList)
                 {
