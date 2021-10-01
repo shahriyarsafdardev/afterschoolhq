@@ -109,7 +109,7 @@ namespace AfterSchoolLibrary.Services
             row.Add("Submit Date");
             row.Add("First Name");
             row.Add("Last Name");
-            formQuestions.OrderBy(a=>a.DisplayOrder).ToList().ForEach(formQuestion =>
+            formQuestions.OrderBy(a => a.FormQuestionGroupDisplayOrder).ThenBy(a=>a.DisplayOrder).ToList().ForEach(formQuestion =>
             {
                 if(formQuestion.QuestionTypeId != QuestionType.TextBlock)
                     row.Add(formQuestion.Text);
@@ -127,7 +127,7 @@ namespace AfterSchoolLibrary.Services
             row.Add(firstName);
             row.Add(lastName);
 
-            formQuestionAnswers.OrderBy(a => a.FormQuestionDisplayOrder).ToList().ForEach(formQuestionAnswer =>
+            formQuestionAnswers.OrderBy(a=>a.FormQuestionGroupDisplayOrder).ThenBy(a => a.FormQuestionDisplayOrder).ToList().ForEach(formQuestionAnswer =>
             {
                 if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.TextArea)
                 {
