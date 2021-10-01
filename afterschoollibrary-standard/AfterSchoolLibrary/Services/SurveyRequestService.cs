@@ -141,7 +141,7 @@ namespace AfterSchoolLibrary.Services
                 else if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.DropDownList || formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.RadioList || formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.Rating || formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.Emoji)
                 {
                     dynamic json = Newtonsoft.Json.JsonConvert.DeserializeObject(formQuestionAnswer.Text);
-                    if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.Rating || formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.Emoji)
+                    if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.Rating)
                     {
                         row.Add(Convert.ToString(json[0].key));
                     }
