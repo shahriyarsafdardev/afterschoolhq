@@ -1027,8 +1027,11 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             if (currentAccount.IsEmpty())
                 return HttpNotFound();
+
             var questionToDelete = FormQuestion.Load(id.ToInteger(), msgs);
-            questionToDelete.Delete();
+            questionToDelete.IsActive = false;
+            msgs.AddRange(questionToDelete.Save());
+            
             // Show Success Message
             // LOG: Someone has Deleted Question.
             if (msgs.HasNoErrors())

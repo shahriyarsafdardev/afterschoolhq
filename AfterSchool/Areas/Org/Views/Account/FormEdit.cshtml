@@ -14,7 +14,7 @@
     if (questionGroup.IsNotEmpty())
     {
         qgId = questionGroup.ID;
-        questions = questionGroup.GetAllQuestions().Where(a => a.Text.IsNotEmpty()).ToList();
+        questions = questionGroup.GetActiveQuestions().Where(a => a.Text.IsNotEmpty()).ToList();
     }
     var count = 1;
 }
@@ -296,7 +296,7 @@
 });}
                                                     </td>
                                                     <td>
-                                                        <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteQuestion('@question.Text', '@Url.Action("delete","Account", new { id = @question.ID.ToString()})')"><span class="text-danger"><i class="s7-trash"></i></span></button>
+                                                        <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteQuestion('@question.Text', '@Url.Action("delete","Account", new { id = question.ID.ToString()})')"><span class="text-danger"><i class="s7-trash"></i></span></button>
                                                     </td>
                                                 </tr>
                                                 count++;
@@ -613,9 +613,15 @@
         });
         return emojiCollection;
     }
+
     function incrementQuestionCount() {
         $('#newquestioncount').val(getQuestionCount() + 1);
     }
+
+    function decrementQuestionCount() {
+        $('#newquestioncount').val(getQuestionCount() - 1);
+    }
+
     function getQuestionCount() {
         return parseInt($('#newquestioncount').val());
     }
@@ -632,7 +638,12 @@
     }
 
     function getDeleteIcon() {
-        return `<button class="btn btn-default btn-sm md-trigger remove" onclick="$(this).closest('tr').remove();"><span class="text-danger"><i class="s7-trash"></i></span></button>`;
+        return `<button class="btn btn-default btn-sm md-trigger remove" onclick="return deleteNonSavedQuestion(this)"><span class="text-danger"><i class="s7-trash"></i></span></button>`;
+    }
+
+    function deleteNonSavedQuestion(elem) {
+        decrementQuestionCount();
+        $(elem).closest('tr').remove();
     }
 
     function getShowCheckbox() {

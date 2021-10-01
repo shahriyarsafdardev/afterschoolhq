@@ -13,9 +13,9 @@
     </li>
     for (var i = 0; i < questionGroups.Count; i++)
     {
-        if (questionGroups[i].GetQuestionCount() == 0)
+        if (questionGroups[i].GetActiveQuestionCount() == 0)
         {
-            // continue;
+            continue;
         }
         var active = "";
         if (questionGroupId == questionGroups[i].ID)
