@@ -221,6 +221,11 @@ namespace AfterSchoolLibrary.Models
             return FormQuestionGroup.LoadByFormId(this.ID.Value, msgs, dc).OrderBy(x => x.DisplayOrder).ToList();
         }
 
+        public List<FormQuestionGroup> GetActiveQuestionGroups(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return FormQuestionGroup.LoadActiveFormQuestionGroupByFormId(this.ID.Value, msgs, dc).OrderBy(x => x.DisplayOrder).ToList();
+        }
+
         public int GetQuestionGroupCount(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return FormQuestionGroup.GetCount(new Hashtable() { { "FormId", this.ID.Value } }, msgs, dc);

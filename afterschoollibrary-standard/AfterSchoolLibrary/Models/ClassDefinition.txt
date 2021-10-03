@@ -1009,6 +1009,7 @@ property: FormId, int?, Int, required
 property: DisplayOrder, int?, Int
 property: RegistrantTypeId, RegistrantType, Int
 property: QuestionGroupDataTypeId, QuestionGroupDataType, Int
+property: IsActive, bool, Bit
 loadmethod: FormId, List<>
 loadmethod: FormId|RegistrantTypeId, List<>
 [end]

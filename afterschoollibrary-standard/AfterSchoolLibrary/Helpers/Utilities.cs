@@ -405,7 +405,7 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.ResetFreeAcctsToFreePackage_20210805.Do(amsgs, adc);
 
                     Migrations.UpdateFormQuestionAnswers_20210918.Do(amsgs, adc);
-
+                    Migrations.UpdateFormQuestionGroup_20211003.Do(amsgs, adc);
 
 
 

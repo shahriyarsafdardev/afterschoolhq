@@ -775,9 +775,12 @@ namespace AfterSchool.Areas.Org.Controllers
             if (id.IsEmpty())
                 return HttpNotFound();
 
-            var msgs = new SystemMessages();
+            var msgs = TempData["Messages"] as SystemMessages;
+            if (msgs.IsEmpty())
+                msgs = new SystemMessages();
+
             var form = currentAccount.GetForm(id.ToInteger(), msgs);
-            var questionGroups = form.GetQuestionGroups(msgs);
+            var questionGroups = form.GetActiveQuestionGroups(msgs);
             var individualGroups = questionGroups
                 .Where(x => x.RegistrantTypeId == RegistrantType.Individual)
                 .OrderBy(x => x.DisplayOrder).ToList();
@@ -1049,8 +1052,49 @@ namespace AfterSchool.Areas.Org.Controllers
                    indirectObjectText: currentAccount.Name
                );
             }
+
             ViewBag.Messages = msgs;
-            return Redirect(Request.UrlReferrer.ToString());
+            TempData["Messages"] = msgs;
+
+            return RedirectToAction("FormEdit", new { id = questionToDelete.FormId, qg = "" });
+        }
+
+        [HttpGet]
+        public ActionResult DeleteSection(string id)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+
+            var sectionToDelete = FormQuestionGroup.Load(id.ToInteger(), msgs);
+            sectionToDelete.IsActive = false;
+            msgs.AddRange(sectionToDelete.Save());
+
+            // Show Success Message
+            // LOG: Someone has Deleted Question.
+            if (msgs.HasNoErrors())
+            {
+                msgs.Add(string.Format("{0} has been deleted.", sectionToDelete.Name), MessageType.Success);
+                SessionVariables.WebSession.LogActivity(
+                   account: currentAccount,
+                   actor: currentUser,
+                   actionType: WebSessionActionType.Deleted,
+                   objectType: ObjectType.FormQuestionGroup,
+                   objectId: id.ToInteger(),
+                   objectText: sectionToDelete.Name,
+                   indirectObjectType: ObjectType.FormQuestionGroup,
+                   indirectObjectId: currentAccount.ID.Value,
+                   indirectObjectText: currentAccount.Name
+               );
+            }           
+
+            ViewBag.Messages = msgs;
+            TempData["Messages"] = msgs;
+
+            return RedirectToAction("FormEdit", new { id = sectionToDelete.FormId, qg = ""});
         }
 
         private AccountProfile StyleViewBag(SystemMessages msgs)
