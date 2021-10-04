@@ -889,7 +889,8 @@ namespace AfterSchool.Areas.Org.Controllers
                                     FormId = form.ID,
                                     QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
                                     RegistrantTypeId = RegistrantType.Individual,
-                                    Name = Request.Params["name-0"]
+                                    Name = Request.Params["name-0"],
+                                    IsActive = true
                                 };
                                 amsgs.AddRange(questionGroup.Save(adc));
                                 questions = new List<FormQuestion>();
@@ -981,7 +982,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if ((FormType)formtype.ToInteger() != FormType.Survey)
             {
-                questionGroups = form.GetQuestionGroups(msgs);
+                questionGroups = form.GetActiveQuestionGroups(msgs);
                 individualGroups = questionGroups
                     .Where(x => x.RegistrantTypeId == RegistrantType.Individual)
                     .OrderBy(x => x.DisplayOrder)
