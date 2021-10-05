@@ -16,24 +16,14 @@ namespace AfterSchoolLibrary.Migrations
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    // update packages, set survey feature to zero
-                    var packages = Package.LoadByIsActive(true, amsgs, adc);
-                    packages.ForEach(package =>
-                   {
-                       var packageFeature = new PackageFeature()
-                       {
-                           PackageId = package.ID.Value,
-                           FeatureTypeId = FeatureType.Survey,
-                           Max = 0,
-                       };
+                    var webUser = WebUser.Load(1, amsgs, adc);
 
-                       amsgs.AddRange(packageFeature.Save(adc));
-                   });
+                    // update packages, set survey feature to zero
+                    Package.LoadByIsActive(true, amsgs, adc).ForEach(package => package.AddFeature(FeatureType.Survey, 0, webUser, amsgs, adc));
 
 
                     // get all accounts with packages
                     var accounts = Account.LoadByAccountTypeIds(AccountService.ProviderAccountTypes.ToList(), false, null, null, amsgs, adc);
-                    var webUser = WebUser.Load(1, amsgs, adc);
                     accounts.ForEach(account =>
                     {
                         var accountPackage = account.GetActiveAccountPackage(amsgs, adc);
