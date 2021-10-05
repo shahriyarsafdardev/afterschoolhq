@@ -1805,6 +1805,7 @@ namespace AfterSchoolLibrary.Services
                             activityGroupId: groupId,
                             periodId: period?.ID,
                             amountCharged: activityParticipationObject.Cost,
+                            registeredDates: null,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
                             dc: adc);

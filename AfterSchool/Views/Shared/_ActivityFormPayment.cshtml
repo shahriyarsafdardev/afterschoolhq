@@ -89,8 +89,25 @@
             </div>
 
             <div class="form-group">
+                <label class="col-sm-3 control-label">Listed Price is Per</label>
+                <div class="col-sm-9">
+
+                    <div class="am-radio inline">
+                        <input type="radio" class="form-control" name="costfrequencytype" id="costfrequencytype-@((int)ActivityCostFrequencyType.PerActivity)" required @(Model.CostFrequencyTypeId == ActivityCostFrequencyType.PerActivity ? "checked=\"checked\"" : "") value="@((int)ActivityCostFrequencyType.PerActivity)" />
+                        <label for="costfrequencytype-@((int)ActivityCostFrequencyType.PerActivity)">Entire Activity</label>
+                    </div>
+
+                    <div class="am-radio inline">
+                        <input type="radio" class="form-control" name="costfrequencytype" id="costfrequencytype-@((int)ActivityCostFrequencyType.PerClass)" required @(Model.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass ? "checked=\"checked\"" : "") value="@((int)ActivityCostFrequencyType.PerClass)" />
+                        <label for="costfrequencytype-@((int)ActivityCostFrequencyType.PerClass)">Individual Class</label>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="form-group">
                 <label class="col-sm-3 control-label">Allow to Pay Later</label>
-                <div class="col-sm-9" @if (!showAllowPayLater) { <text> onclick="return showUpgradeMyPlan('@(showAllPayLaterPackage.Name)','@(showAllPayLaterPackage.ID)')"</text> }>
+                <div class="col-sm-9" @if (!showAllowPayLater) { <text> onclick="return showUpgradeMyPlan('@(showAllPayLaterPackage.Name)','@(showAllPayLaterPackage.ID)')" </text> }>
                     @{
                         Html.RenderPartial(
                         "~/Views/Shared/_SwitchButton.cshtml",
@@ -100,7 +117,7 @@
                             { "checkboxname", "allowtopaylater" },
                             { "checkboxid", "allowtopaylater" },
                             { "disabled", !showAllowPayLater }
-                        });
+            });
                     }
                     <p class="text-muted">
                         <em>
@@ -321,7 +338,7 @@
                     <div class="clearfix"></div>
 
                     <div class="col-md-3">
-                        <label class="control-label">How do you want to charge attendance?</label>
+                        <label class="control-label">How do you want to charge for attendance?</label>
                     </div>
                     <div class="col-sm-6 col-md-9">
                         <div class="input-group input-group-lg xs-mb-15">

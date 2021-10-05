@@ -781,7 +781,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditSchedule(string id, string cmd, string schedule, string scheduledetails, string requiresalldays, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string isongoing, string hasschedule)
         {
             var msgs = new SystemMessages();
-            var inSessionDates = new List<DateRange>();
+            var inSessionDates = new List<ActivityInstance>();
             var currentUser = SessionVariables.CurrentUser;
             var currentAccount = SessionVariables.CurrentAccount;
             var currentAccountPackage = SessionVariables.AccountPackage;
@@ -801,12 +801,14 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     if (msgs.HasNoErrors())
                     {
-                        inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
+                        if (!isongoing.IsBoolean())
+                            inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
+
                         outOfSessionDates = ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
 
-                        inSessionDates.ForEach(dateRange =>
+                        inSessionDates.ForEach(instance =>
                         {
-                            if (dateRange.StartDate > dateRange.EndDate)
+                            if (instance.StartDateTime > instance.EndDateTime)
                                 msgs.Add("Please ensure start dates and end times are earlier than the corresponding end date and end times", MessageType.UserError);
                         });
                     }
@@ -887,7 +889,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
                 sched = activity.GetSchedule(msgs: msgs);
             else
-                sched = ActivitySchedule.GetNewDefaultSchedule(inSessionDates);
+                sched = ActivitySchedule.GetNewDefaultSchedule(inSessionDates.Select(item => item.ToDateRange()).ToList());
 
             ViewBag.Account = currentAccount;
             ViewBag.AccountPackage = currentAccountPackage;
@@ -920,7 +922,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (ViewBag.Schedule == null)
-                ViewBag.Schedule = ActivitySchedule.GetNewDefaultSchedule(inSessionDates);
+                ViewBag.Schedule = ActivitySchedule.GetNewDefaultSchedule(inSessionDates.Select(item => item.ToDateRange()).ToList());
 
             ViewBag.Messages = msgs;
             ViewBag.ActiveMenu = "EditSchedule";
@@ -1079,7 +1081,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd,
             string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string isongoingsubscription, string subscriptionPlanPeriodNumber, string subscriptionPaymentStartType, string subscriptionStartDate, string subscriptionEndDate,
             string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype, string splitcostevenly, string regfeedownpayment,
-            string haspostpayplan, string postpaycost, string isparentpricepostpay, string isparentpricecost, string isparentpricepaymentplan, string isparentpricesubscription, string prepaidperiodspostpay, string postpayplanperiod)
+            string haspostpayplan, string postpaycost, string isparentpricepostpay, string isparentpricecost, string isparentpricepaymentplan, string isparentpricesubscription, string prepaidperiodspostpay, string postpayplanperiod, string costfrequencytype)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -1127,6 +1129,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "isparentpricesubscription", isparentpricesubscription },
                     { "prepaidperiodspostpay", prepaidperiodspostpay },
                     { "postpayplanperiod", postpayplanperiod },
+                    { "costfrequencytype", costfrequencytype },
                 };
 
                 activity = ActivityService.EditExisting(

@@ -683,7 +683,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
-            var inSessionDates = new List<DateRange>();
+            var inSessionDates = new List<ActivityInstance>();
             var outOfSessionDates = new List<DateTime>();
 
             if (activity.IsNotEmpty())
@@ -726,7 +726,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
                 sched = activity.GetSchedule();
             else
-                sched = ActivitySchedule.GetNewDefaultSchedule(inSessionDates);
+                sched = ActivitySchedule.GetNewDefaultSchedule(inSessionDates.Select(item => item.ToDateRange()).ToList());
 
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;

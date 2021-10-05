@@ -1,0 +1,103 @@
+﻿@model ParticipationObject
+@{
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+    ViewBag.Title = Model.Name;
+
+    var account = (Account)ViewBag.Account;
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var accountProfile = (AccountProfile)ViewBag.AccountProfile;
+    var currentAccount = SessionVariables.CurrentAccount;
+    var currentUser = SessionVariables.CurrentUser;
+
+    var isAccountAndLoggedInUserIsOwner = Model.IsNotEmpty() &&
+        Model.OwnerAccount.IsNotEmpty() &&
+        currentAccount.IsNotEmpty() &&
+        currentUser.IsNotEmpty() &&
+        (currentAccount.ID == Model.OwnerAccount.ID) &&
+        (currentUser.HasAccessTo(Model.OwnerAccount));
+
+}
+<style>
+    .disabled {
+        cursor: not-allowed !important;
+        pointer-events: unset !important;
+    }
+</style>
+@{
+    Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", account, new ViewDataDictionary() {
+        { "LoginReturnUrl", Model.GetHomePageUrl() },
+        { "CanPublishActivity", ViewBag.CanPublishActivity },
+        { "ParticipationObject", Model },
+    });
+}
+
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, accountProfile)); }
+
+<div>
+    <div class="col-lg-10 col-lg-offset-1 col-md-12 participation-object participation-object-detail">
+
+        <div class="panel panel-alt6">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12">
+                        <h3 class="text-center">
+                            Select Dates &amp; Sign Up
+                        </h3>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+
+                <div class="row">
+                    <div class="col-lg-6 col-md-12 col-lg-offset-3">
+
+                        <div class="activity-detail-block">
+                            <p><strong>Select one or more classes you would like to register for</strong></p>
+
+                            <form action="@Model.GetActivityDateSelectionUrl()" method="post" class="form">
+
+                                <div>
+                                    @foreach (var date in Model.Schedule.GetNextInstances(8))
+                                    {
+                                        <div class="am-checkbox">
+                                            <input type="checkbox" class="form-control" name="date-@date" id="date-@date" value="@date" />
+                                            <label for="date-@date">
+                                                @date.ToLongDateTimeString()
+                                                (@Model.GetActivity().GetSeatsRemainingByDate(date) Spots Left)
+                                            </label>
+                                        </div>
+                                    }
+                                </div>
+
+                                <div>
+                                    <br />
+                                    <button type="submit" class="btn btn-register">Register for selected dates &raquo;</button>
+                                    <p class="text-muted">
+                                        <br />
+                                        <a href="javascript:history.go(-1)">&laquo; Back</a>
+                                    </p>
+                                </div>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section header
+{
+    @{ Html.RenderPartial("~/Views/Shared/Registration/_ShareMetaTags.cshtml", new RegistrationHeaderViewModel(Model, accountProfile)); }
+}
+
+<script type="text/javascript">
+    function hideActivityRibbon() {
+        $('#footer-activity').fadeOut();
+    };
+</script>

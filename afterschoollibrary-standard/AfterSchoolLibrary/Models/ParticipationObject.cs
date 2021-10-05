@@ -333,6 +333,11 @@ namespace AfterSchoolLibrary.Models
             return $"{GetHomePageUrl(isAfterSchool)}/register";
         }
 
+        public string GetActivityDateSelectionUrl(bool isAfterSchool = true)
+        {
+            return $"{GetHomePageUrl(isAfterSchool)}/selectdates";
+        }
+
         public string GetInterestedPageUrl(bool isAfterSchool = true)
         {
             return $"{GetHomePageUrl(isAfterSchool)}/interested";
@@ -1079,6 +1084,12 @@ namespace AfterSchoolLibrary.Models
 
             return 0;
         }
+
+        #endregion
+
+        #region CartRelated
+
+        public List<DateTime> DatesSelected { get; set; }
 
         #endregion
 

@@ -25,7 +25,9 @@ namespace AfterSchoolLibrary.Models
         public List<Product> Products { get; set; }
         public bool SavePaymentInfo { get; set; }
         public PaymentType PaymentType { get; set; }
-        
+        public List<DateTime> RegisteredDates { get; set; }
+
+
         /// <summary>
         /// override will sometimes be the manual payment or the subscription payment
         /// </summary>
@@ -64,6 +66,7 @@ namespace AfterSchoolLibrary.Models
         {
             Products = new List<Product>();
             Date = DateTime.UtcNow;
+            RegisteredDates = new List<DateTime>();
         }
 
         private string _description;
