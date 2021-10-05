@@ -478,15 +478,10 @@
                     <label><span id="question-link-label"></span></label>
                     <textarea class="form-control" id="question-link" name="question-link" rows="6" placeholder="ex: http://yourdomain.com/go-here"></textarea>
                 </div>
-                <p class="emojiRequired text-danger hide">Please select Emoji.</p>
-                <div class="form-group emojiOption">
-                    <label><span id="question-link-label"></span></label>
-                    <textarea class="form-control emojionearea2" id="question-emoji" name="question-emoji" required rows="6" placeholder="Emojis go here"></textarea>
-                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-                <button type="button" data-dismiss="modal" class="btn btn-primary" onclick="updateLink()">Done</button>
+                <button type="button" data-dismiss="modal" class="btn btn-primary md-close" onclick="updateLink()">Done</button>
             </div>
         </div>
     </form>
@@ -929,7 +924,6 @@
         var row = $("#options-table").find(`#Emoji-${index}`);
         var emojiCollection = getEmojis();
         var emojiInput = $(row).find(".emojionearea2");
-        //console.log("Inside addEmoji", emojiInput);
          emojiInput.emojioneArea({
                 pickerPosition: "right",
                 filtersPosition: "bottom",
@@ -1059,31 +1053,9 @@
 
     var selectedLinkQuestion = null;
     function setLink(id) {
-        selectedQuestion = id;
-        var textAreaOption = $(".textAreaOption");
-        var emojiOption = $(".emojiOption");
-
-        if ($('#questiontype-' + id).val() == 5) {
-        	textAreaOption.removeClass("hide");
-            emojiOption.addClass("hide");
-            $('#linkMessage').removeClass("hide");
-
-            $('#question-link-label').html($('#text-' + id).val());
-            $('#question-link').val($('#link-text-' + id).val());
-        }
-
-        if ($('#questiontype-' + id).val() == 16) {
-        	emojiOption.removeClass("hide");
-            textAreaOption.addClass("hide");
-            $('#linkMessage').addClass("hide");
-
-            // get value from hidden field
-            var emojiValue = $('#options-text-' + selectedQuestion).val().replaceAll(":,:", "::");
-            $("#question-emoji").val(emojiValue);
-            $(".emojionearea2")[0].emojioneArea.setText(emojiValue);
-
-        }
         selectedLinkQuestion = id;
+        $('#question-link-label').html($('#text-' + id).val());
+        $('#question-link').val($('#link-text-' + id).val());
     }
 
     function removeValidations() {
@@ -1093,30 +1065,10 @@
     }
 
 
-    function updateLink() {
-        var validation = true;
-        var emojiTextArea = $("#question-emoji");
-
+    function updateLink() {   
         if (!isNaN(selectedLinkQuestion)) {
             $('#link-text-' + selectedLinkQuestion).val($('#question-link').val());
         }
-
-        if (emojiTextArea.val() == "") {
-            emojiTextArea.addClass("danger");
-            $(".emojiRequired").removeClass("hide");
-            validation = false;
-        }
-
-        if (validation == true && $('#questiontype-' + selectedQuestion).val() == 16) {
-            emojiTextArea.removeClass("danger");
-            $(".emojiRequired").addClass("hide");
-            validation = true;
-            var emojiValues = emojione.toShort($("#question-emoji").val());
-            var emojis = emojiValues.replaceAll('::', ':,:');
-            $('#options-text-' + selectedQuestion).val(emojis);
-            $("#modal-link").removeClass("md-show");
-        }
-        else return false;
     }
 
     //called when rating modal is going to display
