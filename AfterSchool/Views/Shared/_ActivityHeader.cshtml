@@ -81,9 +81,10 @@
                 }
             }
 
-
-            <a href="@Url.Action("surveys", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "surveys" || actionName == "newsurvey" ? "-active" : "")"><i class="s7-cloud"></i> Surveys</a>
-
+            @if (SessionVariables.AccountPackage.HasFeature(FeatureType.Survey))
+            {
+                <a href="@Url.Action("surveys", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "surveys" || actionName == "newsurvey" ? "-active" : "")"><i class="s7-cloud"></i> Surveys</a>
+            }
 
             @if (Model.ActivityTypeId != ActivityType.Team && (isActivityLeader || SessionVariables.CurrentUser.CanPublishActivity(SessionVariables.CurrentAccount, Model)))
             {
