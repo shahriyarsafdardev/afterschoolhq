@@ -19408,3 +19408,6 @@ div.dataTables_wrapper div.dataTables_length label select {
 .emojionearea .emojionearea-button > div{
     top: 5px;
 }
+.emojionearea.emojionearea-inline > .emojionearea-editor {
+    font-family: Segoe UI Emoji !important;
+}
