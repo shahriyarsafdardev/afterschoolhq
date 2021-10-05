@@ -103,7 +103,24 @@
                     }
 
                     <div class="">
-                        @if (participationObject.PaymentPlans.Any())
+
+                        @if (participationObject.IsActivity() && participationObject.GetActivity().CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
+                        {
+                            <table class="table">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Cost</th>
+                                </tr>
+                                @foreach(var date in participationObject.DatesSelected)
+                                {
+                                    <tr>
+                                        <td>@date.ToLongDateTimeString()</td>
+                                        <td>@participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()</td>
+                                    </tr>
+                                }
+                            </table>
+                        }
+                        else if (participationObject.PaymentPlans.Any())
                         {
                             <div class="row margin-t-20">
                                 <div class="col-md-6 col-md-offset-3 col-sm-12 ">
