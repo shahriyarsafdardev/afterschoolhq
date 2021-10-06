@@ -168,20 +168,22 @@ else
         }
         else if (Model.IsActivity() && Model.GetActivity().CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
         {
+            var anotherChildString = anotherChild ? $" for New Child" : "";
+
             <a href="@(IsPublished? Model.GetActivityDateSelectionUrl() : "javascript:void(0)")"
                class="@(IsPublished?"":"disabled") btn btn-register btn-block"
                @IsPublished>
-                <span>Select Dates &raquo;</span>
+                <span>Select Dates @anotherChildString &raquo;</span>
             </a>
         }
         else
         {
-            var anotherChildString = anotherChild ? $"Again for New Child" : "";
+            var anotherChildString = anotherChild ? $" for New Child" : "";
 
             <a href="@(IsPublished? Model.GetRegistrationPageUrl().ToString(): "javascript:void(0)")" 
                class="@(IsPublished?"":"disabled") btn btn-register btn-block" 
                @IsPublished>
-                @Model.RegistrationMode.ToString() @anotherChildString Now &raquo;
+                @Model.RegistrationMode.ToString() @anotherChildString &raquo;
             </a>
         }
     }
