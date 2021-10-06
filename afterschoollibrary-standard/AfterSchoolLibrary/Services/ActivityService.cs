@@ -185,6 +185,16 @@ namespace AfterSchoolLibrary.Services
             return Math.Max(0, rtn);
         }
 
+        public static int GetSeatsRemainingForNextDate(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dates = activity.GetSchedule(msgs, dc).GetNextInstances(1, msgs, dc);
+
+            if (dates.Any())
+                return activity.GetSeatsRemainingByDate(dates.First(), msgs, dc);
+
+            return 0;
+        }
+
         public static int GetSeatsRemainingByDate(this Activity activity, DateTime activityDate, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (activity.CostFrequencyTypeId == ActivityCostFrequencyType.PerActivity)

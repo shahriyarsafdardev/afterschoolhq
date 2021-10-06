@@ -148,7 +148,12 @@ namespace AfterSchoolLibrary.Models
                 SeatsTaken = activity.GetSeatsTaken(msgs, dc);
                 Schedule = activity.GetSchedule(msgs, dc);
                 Location = activity.GetLocation(msgs, dc);
-                SeatsRemaining = activity.GetSeatsRemaining(msgs, dc);
+
+                if (CanRegisterPerClass)
+                    SeatsRemaining = activity.GetSeatsRemainingForNextDate(msgs, dc);
+                else
+                    SeatsRemaining = activity.GetSeatsRemaining(msgs, dc);
+
                 WaitingListSeatsRemaining = activity.GetWaitingListSeatsRemaining(msgs, dc);
                 RegistrationPeriod = activity.GetActiveRegistrationPeriod(msgs, dc);
                 Form = activity.GetActiveActivityForm(msgs, dc)?.GetForm(msgs, dc);

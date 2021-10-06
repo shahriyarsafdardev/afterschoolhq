@@ -1460,6 +1460,7 @@ namespace AfterSchool.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.ParticipationObject = GetParticipationObjectFromCart();
+            ViewBag.SelectedDates = GetSelectedDatesFromCart();
 
             return View(students);
         }
@@ -1523,6 +1524,7 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var participationObject = GetParticipationObjectFromCart();
+            var selectedDates = GetSelectedDatesFromCart();
             var currentRegistrant = SessionVariables.CurrentRegistrant;
             var parentOrGuardian = currentRegistrant.GetParentOrGuardian(msgs);
             var (submittedRecord, registration) = currentRegistrant.GetSubmittedRecord(participationObject, msgs);
@@ -1543,7 +1545,7 @@ namespace AfterSchool.Controllers
             if (!participationObject.IsStudentGradeInRange(currentRegistrant, msgs))
                 return RedirectToAction("select");
 
-            var needsToRegister = submittedRecord.NeedsToRegister(registration, participationObject, msgs);
+            var needsToRegister = submittedRecord.NeedsToRegister(registration, participationObject, selectedDates, msgs);
 
             // current registrant is already registered
             if (!needsToRegister && !participationObject.IsSession())
@@ -1717,6 +1719,7 @@ namespace AfterSchool.Controllers
             ViewBag.ParticipationObject = participationObject;
             ViewBag.Messages = msgs;
             ViewBag.AccountCanAcceptPayments = participationObject.PaymentAccount.CanProcessPayments(msgs);
+            ViewBag.SelectedDates = GetSelectedDatesFromCart();
 
             return registration;
         }
@@ -1729,14 +1732,28 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var participationObject = GetParticipationObjectFromCart();
+            var selectedDates = GetSelectedDatesFromCart();
             var currentRegistrant = SessionVariables.CurrentRegistrant;
 
             PaymentViewBag(id, participationObject, msgs);
 
-            // current registrant is already registered or already using a payment plan
-            if (currentRegistrant.IsReservedAndPaidFor(participationObject, true, msgs) || currentRegistrant.MasterRegistrantHasPlan(participationObject, msgs))
-                return RedirectToAction("select");
+            if (participationObject.CanRegisterPerClass)
+            {
+                var registeredForAllClasses = currentRegistrant.IsReservedForAllDates(participationObject, selectedDates, null, msgs);
 
+                if (registeredForAllClasses)
+                    return RedirectToAction("select");
+            }
+            else
+            {
+                var masterRegistrantHasPlan = currentRegistrant.MasterRegistrantHasPlan(participationObject, msgs);
+                var isReservedAndPaidFor = currentRegistrant.IsReservedAndPaidFor(participationObject, true, msgs);
+
+                // current registrant is already registered or already using a payment plan
+                if (isReservedAndPaidFor || masterRegistrantHasPlan)
+                    return RedirectToAction("select");
+            }
+                      
             return View();
         }
 
@@ -1812,6 +1829,15 @@ namespace AfterSchool.Controllers
                     paymentType = PaymentType.ACH;
                 else if (creditCardPurchaseObject.IsNotEmpty())
                     paymentType = PaymentType.CreditCard;
+
+                var datesToRemove = new List<DateTime>();
+
+                selectedDates.ForEach(date => { 
+                    if (currentRegistrant.IsReservedForDate(participationObject, date, null))
+                        datesToRemove.Add(date);
+                });
+
+                datesToRemove.ForEach(date => selectedDates.Remove(date));
 
                 checkoutObject = AccountService.ProcessRegistrationWithPayment(
                     checkoutObject: new CheckoutObject()
@@ -2834,7 +2860,7 @@ namespace AfterSchool.Controllers
 
         private List<DateTime> GetSelectedDatesFromCart()
         {
-            return SessionVariables.Cart?.GetCartItems().FirstOrDefault().SelectedDates.Split(',').Select(x => x.ToDateTime()).ToList();
+            return SessionVariables.Cart?.GetCartItems().FirstOrDefault()?.SelectedDates.Split(',').Select(x => x.ToDateTime()).ToList();
         }
 
         private void ResetRegistrationSession()

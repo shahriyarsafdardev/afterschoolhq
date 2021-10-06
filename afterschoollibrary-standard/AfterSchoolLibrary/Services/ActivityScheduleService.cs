@@ -130,6 +130,7 @@ namespace AfterSchoolLibrary.Services
             if (schedule.IsOngoing)
             {
                 var referenceDate = now;
+                var outOfSession = schedule.GetOutSessionInstances(msgs, dc).Where(instance => instance.StartDateTime.Value.IsAfter(referenceDate));
 
                 if (schedule.StartDate.HasValue && schedule.StartDate.Value.IsAfter(referenceDate))
                     referenceDate = schedule.StartDate.Value;
@@ -152,12 +153,16 @@ namespace AfterSchoolLibrary.Services
                     var nextDayAsInt = (int)nextDay;
 
                     if (nextDayAsInt < (int)currentDayOfTheWeek)
-                        nextDayAsInt += 7;
+                        nextDayAsInt += 7; // add a week
 
                     var daysToAdd = nextDayAsInt - (int)currentDayOfTheWeek;
 
                     var dateToAdd = referenceDate.AddDays(daysToAdd);
-                    dates.Add($"{dateToAdd.ToShortDateString()} {schedule.DailyStartTime.ToShortTimeString()}".ToDateTime());
+
+                    if (!dateToAdd.Date.In(outOfSession.Select(x => x.StartDateTime.Value.Date)))
+                        dates.Add($"{dateToAdd.ToShortDateString()} {schedule.DailyStartTime.ToShortTimeString()}".ToDateTime());
+                    else
+                        i--; // don't increment
 
                     if (daysOfTheWeek.IndexOf(nextDay) < daysOfTheWeek.Count - 1)
                         nextDay = daysOfTheWeek[daysOfTheWeek.IndexOf(nextDay) + 1];

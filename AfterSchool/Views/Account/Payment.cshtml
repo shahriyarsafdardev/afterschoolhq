@@ -6,6 +6,7 @@
     var sources = (List<Stripe.Source>)ViewBag.Sources;
     var bankAccounts = (List<Stripe.BankAccount>)ViewBag.BankAccounts;
     var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
+    var selectedDates = (List<DateTime>)ViewBag.SelectedDates;
     var registration = (Registration)ViewBag.Registration;
     var checkoutObject = (CheckoutObject)ViewBag.CheckoutObject;
     var accountCanAcceptPayments = (bool)ViewBag.AccountCanAcceptPayments;
@@ -15,14 +16,23 @@
     var registrant = registration.GetRegistrant();
     var readyToAcceptPayment = subscriptionPlan.IsEmpty() || !subscriptionPlan.SplitCostEvenly || participationObject.RegistrationFinalized;
     var quantity = 1;
-    var selectedDates = new List<DateTime>();
-    var perClassSignUp = false;
 
-    if (participationObject.IsActivity() && participationObject.GetActivity().CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
+    if (participationObject.CanRegisterPerClass)
     {
         selectedDates = cart.GetCartItems().First().SelectedDates.Split(',').Select(x => x.ToDateTime()).ToList();
+        var datesToRemove = new List<DateTime>();
+
+        selectedDates.ForEach(date =>
+        {
+            if (registrant.IsReservedForDate(participationObject, date, null))
+            {
+                datesToRemove.Add(date);
+            }
+        });
+
+        datesToRemove.ForEach(date => selectedDates.Remove(date));
+
         quantity = selectedDates.Count;
-        perClassSignUp = true;
     }
 }
 
@@ -114,7 +124,7 @@
 
                     <div class="">
 
-                        @if (participationObject.IsActivity() && participationObject.GetActivity().CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
+                        @if (participationObject.CanRegisterPerClass)
                         {
                             <div class="col-md-6 col-md-offset-3 col-sm-12 margin-b-20">
                                 <table class="table table-responsive text-medium-small">

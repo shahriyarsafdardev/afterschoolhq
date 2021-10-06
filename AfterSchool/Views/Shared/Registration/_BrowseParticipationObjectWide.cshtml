@@ -141,7 +141,13 @@
                             <em>
                                 @if (!Model.RegistrationPeriod.IsClosed(Model.OwnerAccount))
                                 {
-                                    @:@Model.SeatsRemaining.ToString() Seats @(Model.RegistrationMode == RegistrationMode.Register ? "Left" : "")
+                                    <span>@Model.SeatsRemaining.ToString() seats</span>
+                                    @(Model.RegistrationMode == RegistrationMode.Register ? "left" : "")
+
+                                    if (Model.CanRegisterPerClass)
+                                    {
+                                        <span>for next class</span>
+                                    }
                                 }
                                 else if (!Model.RegistrationPeriod.WillOpen(Model.OwnerAccount))
                                 {
