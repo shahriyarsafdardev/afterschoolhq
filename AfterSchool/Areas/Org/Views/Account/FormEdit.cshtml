@@ -1338,11 +1338,6 @@
                 td.find("button:last-of-type").css("border", "2px solid red").css('cursor', 'pointer').attr('title', 'Please sepcify range.').tooltip({ tooltipClass: 'tooltipclass' });
                 validated = false;
             }
-
-            if (optionsInput.val() === '' && !linkEmojiButton.hasClass("hide")) {
-                linkEmojiButton.css("border", "2px solid red").css('cursor', 'pointer').attr('title', 'Please select emoji.').tooltip({ tooltipClass: 'tooltipclass' });
-                validated = false;
-            }
         });
         if (!validated) {
             event.preventDefault();
