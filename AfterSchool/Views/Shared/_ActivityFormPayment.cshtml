@@ -93,12 +93,12 @@
                 <div class="col-sm-9">
 
                     <div class="am-radio inline">
-                        <input type="radio" class="form-control" name="costfrequencytype" id="costfrequencytype-@((int)ActivityCostFrequencyType.PerActivity)" required @(Model.CostFrequencyTypeId == ActivityCostFrequencyType.PerActivity ? "checked=\"checked\"" : "") value="@((int)ActivityCostFrequencyType.PerActivity)" />
+                        <input type="radio" class="form-control costfrequencytype" name="costfrequencytype" id="costfrequencytype-@((int)ActivityCostFrequencyType.PerActivity)" required @(Model.CostFrequencyTypeId == ActivityCostFrequencyType.PerActivity ? "checked=\"checked\"" : "") value="@((int)ActivityCostFrequencyType.PerActivity)" />
                         <label for="costfrequencytype-@((int)ActivityCostFrequencyType.PerActivity)">Entire Activity</label>
                     </div>
 
                     <div class="am-radio inline">
-                        <input type="radio" class="form-control" name="costfrequencytype" id="costfrequencytype-@((int)ActivityCostFrequencyType.PerClass)" required @(Model.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass ? "checked=\"checked\"" : "") value="@((int)ActivityCostFrequencyType.PerClass)" />
+                        <input type="radio" class="form-control costfrequencytype" name="costfrequencytype" id="costfrequencytype-@((int)ActivityCostFrequencyType.PerClass)" required @(Model.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass ? "checked=\"checked\"" : "") value="@((int)ActivityCostFrequencyType.PerClass)" />
                         <label for="costfrequencytype-@((int)ActivityCostFrequencyType.PerClass)">Individual Class</label>
                     </div>
 
@@ -400,6 +400,12 @@
             setPaymentPlanSection();
         });
 
+        $('.costfrequencytype').click(function () {
+            toggleCostFrequencyType($(this));
+        });
+
+        toggleCostFrequencyType($('#costfrequencytype-@((int)ActivityCostFrequencyType.PerClass)'));
+
         $('#haspostpayplan').change(function (cb) {
            @if (!allowAttendance)
            {
@@ -417,7 +423,7 @@
               </text>
            }
 
-           
+
         });
 
         $('#do-parents-pay-yes').click(function () {
@@ -511,6 +517,15 @@
             toggleSubscriptionPeriodWeek();
         });
     });
+
+    function toggleCostFrequencyType(obj) {
+        if (obj.val() == '@((int)ActivityCostFrequencyType.PerClass)' && obj.is(':checked')) {
+            $('#allowtopaylater').prop('disabled', true);
+            $('#allowtopaylater').prop('checked', false);
+        } else {
+            $('#allowtopaylater').prop('disabled', false);
+        }
+    }
 
     function toggleSubscriptionPeriodWeek() {
         //.. if payment start == onPeriodStart and billing type is every month or week
