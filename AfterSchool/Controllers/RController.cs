@@ -478,9 +478,9 @@ namespace AfterSchool.Controllers
             var participationObject = activity.GetParticipationObject(msgs);
             var dateFields = Request.Params.Filter("date-");
 
-            participationObject.DatesSelected = dateFields.Cast<string>().Select(x => dateFields[x]).Select(x => x.ToDateTime()).ToList();
+            var selectedDates = dateFields.Cast<string>().Select(x => dateFields[x]).Select(x => x.ToDateTime()).ToList();
 
-            return RedirectToRegistration(account, participationObject, reg, msgs);
+            return RedirectToRegistration(account, participationObject, reg, selectedDates, msgs);
         }
 
         [HttpGet]
@@ -617,7 +617,7 @@ namespace AfterSchool.Controllers
 
             var participationObject = activity.GetParticipationObject(msgs);
 
-            return RedirectToRegistration(account, participationObject, reg, msgs);
+            return RedirectToRegistration(account, participationObject, reg, null, msgs);
         }
 
         [HttpGet]
@@ -661,7 +661,7 @@ namespace AfterSchool.Controllers
 
             var participationObject = session.GetParticipationObject(msgs);
 
-            return RedirectToRegistration(account, participationObject, reg, msgs);
+            return RedirectToRegistration(account, participationObject, reg, null, msgs);
         }
 
         [HttpGet]
@@ -763,10 +763,10 @@ namespace AfterSchool.Controllers
                 participationObject = activityGroup.GetParticipationObject(msgs);
             }
 
-            return RedirectToRegistration(account, participationObject, reg, msgs);
+            return RedirectToRegistration(account, participationObject, reg, null, msgs);
         }
 
-        private ActionResult RedirectToRegistration(Account account, ParticipationObject participationObject, string reg, SystemMessages msgs)
+        private ActionResult RedirectToRegistration(Account account, ParticipationObject participationObject, string reg, List<DateTime> selectedDates, SystemMessages msgs)
         {
             SetRegistrationStartPage(account);
 
@@ -779,7 +779,7 @@ namespace AfterSchool.Controllers
             if (SessionVariables.Cart.IsEmpty())
                 return Redirect(participationObject.GetHomePageUrl());
 
-            SessionVariables.Cart.AddCartItem(participationObject, msgs);
+            SessionVariables.Cart.AddCartItem(participationObject, selectedDates, msgs);
 
             if (reg.IsGuid())
                 SessionVariables.CurrentRegistrant = Registrant.LoadByUid(reg.ToGuid(), msgs);
@@ -823,7 +823,7 @@ namespace AfterSchool.Controllers
             if (SessionVariables.Cart.IsEmpty())
                 return Redirect(participationObject.GetHomePageUrl());
 
-            SessionVariables.Cart.AddCartItem(participationObject, msgs);
+            SessionVariables.Cart.AddCartItem(participationObject, null, msgs);
 
             return RedirectToAction("interested", "account", new { area = "", regaccount = account.Uid });
         }

@@ -204,7 +204,7 @@ namespace AfterSchool.Controllers
 
             var participationObject = Activity.LoadByUid(uid.ToGuid(), msgs).GetParticipationObject(msgs);
 
-            SessionVariables.Cart.AddCartItem(participationObject, msgs);
+            SessionVariables.Cart.AddCartItem(participationObject, null, msgs);
 
             if (msgs.HasNoErrors())
                 return Json(new {

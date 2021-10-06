@@ -294,8 +294,15 @@ namespace AfterSchoolLibrary.Models
             get
             {
                 return Provider ?? OwnerAccount;
+            }            
+        }
+
+        public bool CanRegisterPerClass
+        {
+            get
+            {
+                return this.IsActivity() && this.GetActivity().CostFrequencyTypeId == ActivityCostFrequencyType.PerClass;
             }
-            
         }
 
         public string GetHomePageUrl(bool isAfterSchool = true)
@@ -967,7 +974,7 @@ namespace AfterSchoolLibrary.Models
 
         #endregion
 
-        public decimal GetCheckoutCostWithConvenienceFee()
+        public decimal GetCheckoutCostWithConvenienceFee(int quantity = 1)
         {
             if (this.PostPayPlans.IsNotEmpty() && this.PostPayPlans.Any())
                 return GetPostPayCheckoutCostWithConvenienceFee();
@@ -979,43 +986,43 @@ namespace AfterSchoolLibrary.Models
                     var activity = this.GetActivity();
                 
                     if (activity.IsNotEmpty())
-                        return Cost.Value
-                            + (activity.IsConvenienceFeeTakenOutOfCost ? 0 : GetConvenienceFee());
+                        return (Cost.Value
+                            + (activity.IsConvenienceFeeTakenOutOfCost ? 0 : GetConvenienceFee())) * quantity;
                 }
-                return Cost.Value + GetConvenienceFee();
+                return (Cost.Value + GetConvenienceFee()) * quantity;
             }
 
             return 0;
         }
 
-        public decimal GetCheckoutTotalCost()
+        public decimal GetCheckoutTotalCost(int quantity = 1)
         {
             if (this.Cost.HasValue)
-                return this.GetCheckoutCostWithConvenienceFee() + GetCreditCardFee();
+                return this.GetCheckoutCostWithConvenienceFee(quantity) + GetCreditCardFee(quantity);
 
             return 0;
         }
 
-        public decimal GetCreditCardFee()
+        public decimal GetCreditCardFee(int quantity = 1)
         {
             if (Cost.HasValue)
                 return new FeeCalculationObject(
                                 Cost.Value,
                                 PaymentAccount,
                                 this)
-                            .GetCreditCardFee();
+                            .GetCreditCardFee() * quantity;
 
             return 0;
         }
 
-        public decimal GetConvenienceFee()
+        public decimal GetConvenienceFee(int quantity = 1)
         {
             if (Cost.HasValue)
                 return new FeeCalculationObject(
                                 Cost.Value,
                                 OwnerAccount,
                                 this)
-                            .GetConvenienceFee();
+                            .GetConvenienceFee() * quantity;
 
             return 0;
         }
@@ -1084,12 +1091,6 @@ namespace AfterSchoolLibrary.Models
 
             return 0;
         }
-
-        #endregion
-
-        #region CartRelated
-
-        public List<DateTime> DatesSelected { get; set; }
 
         #endregion
 

@@ -25,7 +25,7 @@ namespace AfterSchoolLibrary.Models
         public List<Product> Products { get; set; }
         public bool SavePaymentInfo { get; set; }
         public PaymentType PaymentType { get; set; }
-        public List<DateTime> RegisteredDates { get; set; }
+        public List<DateTime> SelectedDates { get; set; }
 
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace AfterSchoolLibrary.Models
         {
             Products = new List<Product>();
             Date = DateTime.UtcNow;
-            RegisteredDates = new List<DateTime>();
+            SelectedDates = new List<DateTime>();
         }
 
         private string _description;
@@ -141,6 +141,17 @@ namespace AfterSchoolLibrary.Models
             get
             {
                 return ParticipationObject.IsRegistrationFree;
+            }
+        }
+
+        public int ClassQuantity
+        {
+            get
+            {
+                if (SelectedDates.Any())
+                    return SelectedDates.Count;
+
+                return 1;
             }
         }
 
@@ -227,6 +238,9 @@ namespace AfterSchoolLibrary.Models
         {
             get
             {
+                //if (ParticipationObject.IsNotEmpty() && ParticipationObject.CanRegisterPerClass && SelectedDates.Any())
+                //    return ParticipationObject.Cost.Value * SelectedDates.Count;
+
                 if (ParticipationObject.IsNotEmpty() && ParticipationObject.Cost.HasValue)
                     return ParticipationObject.Cost.Value * NumberOfSeats;
 
@@ -303,7 +317,7 @@ namespace AfterSchoolLibrary.Models
                                 ParticipationObject,
                                 msgs,
                                 dc)
-                            .GetCreditCardFee();
+                            .GetCreditCardFee(); // * (SelectedDates.Any() ? SelectedDates.Count : 1);
 
             return 0;
         }
@@ -317,7 +331,7 @@ namespace AfterSchoolLibrary.Models
                                 ParticipationObject,
                                 msgs,
                                 dc)
-                            .GetConvenienceFee();
+                            .GetConvenienceFee(); // * (SelectedDates.Any() ? SelectedDates.Count : 1);
 
             return 0;
         }
@@ -331,7 +345,7 @@ namespace AfterSchoolLibrary.Models
                                 ParticipationObject,
                                 msgs,
                                 dc)
-                            .GetCreditCardFee();
+                            .GetCreditCardFee(); // * (SelectedDates.Any() ? SelectedDates.Count : 1);
 
             return 0;
         }
@@ -345,7 +359,7 @@ namespace AfterSchoolLibrary.Models
                                 ParticipationObject,
                                 msgs,
                                 dc)
-                            .GetConvenienceFee();
+                            .GetConvenienceFee(); // * (SelectedDates.Any() ? SelectedDates.Count : 1);
 
             return 0;
         }

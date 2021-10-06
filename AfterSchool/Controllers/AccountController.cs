@@ -1691,7 +1691,7 @@ namespace AfterSchool.Controllers
 
             SessionVariables.CurrentRegistrant = registration.GetMasterRegistrant(msgs);
             SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.CurrentUser, msgs: msgs);
-            SessionVariables.Cart.AddCartItem(registration.GetFirstParticipationObject(msgs), msgs);
+            SessionVariables.Cart.AddCartItem(registration.GetFirstParticipationObject(msgs), null, msgs);
             SessionVariables.RegistrationStartPageAccount = registration.GetAccount(msgs);
 
             return RedirectToAction("Register");
@@ -1752,6 +1752,7 @@ namespace AfterSchool.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var participationObject = GetParticipationObjectFromCart();
+            var selectedDates = GetSelectedDatesFromCart();
             var coupon = new Coupon();
             var currentRegistrant = SessionVariables.CurrentRegistrant;
             CheckoutObject checkoutObject = null;
@@ -1833,6 +1834,7 @@ namespace AfterSchool.Controllers
                         PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
                         ConvenienceFeePayer = convenienceFeePayer,
                         CreditCardFeePayer = creditCardFeePayer,
+                        SelectedDates =  selectedDates,
                     },
                     loggedInUser: currentUser,
                     msgs: msgs);
@@ -1901,7 +1903,7 @@ namespace AfterSchool.Controllers
                     return Logout(Request.Url.ToString());
 
                 SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.CurrentUser, msgs: msgs);
-                SessionVariables.Cart.AddCartItem(participationObject, msgs);
+                SessionVariables.Cart.AddCartItem(participationObject, null, msgs);
                 SessionVariables.CurrentRegistrant = currentRegistrant;
                 SessionVariables.RegistrationStartPageAccount = participationObject.OwnerAccount;
 
@@ -2828,6 +2830,11 @@ namespace AfterSchool.Controllers
             });
 
             return participationObject ?? participationObjects?.FirstOrDefault();
+        }
+
+        private List<DateTime> GetSelectedDatesFromCart()
+        {
+            return SessionVariables.Cart?.GetCartItems().FirstOrDefault().SelectedDates.Split(',').Select(x => x.ToDateTime()).ToList();
         }
 
         private void ResetRegistrationSession()

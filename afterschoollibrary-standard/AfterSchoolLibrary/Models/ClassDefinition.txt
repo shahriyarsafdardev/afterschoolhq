@@ -1415,6 +1415,7 @@ property: ParticipationObjectTypeId, ParticipationObjectType, Int, required
 property: ParticipationObjectId, int?, Int, required
 property: Day, DayOfWeekASL, Int
 property: RegistrantActivityId, int?, Int
+property: SelectedDates, string, NVarChar "400", , store dates selected for a per class purchase
 loadmethod: Uid
 loadmethod: CartId, List<>
 [end]
