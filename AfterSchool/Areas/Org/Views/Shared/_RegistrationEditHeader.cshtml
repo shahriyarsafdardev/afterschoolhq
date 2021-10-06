@@ -1,26 +1,31 @@
 ﻿@model Registration
-@{ 
+@{
     var listUrl = ViewBag.ListUrl;
     var activities = (List<Activity>)ViewBag.Activities;
     var selectedRegistration = (Registration)ViewBag.SelectedRegistration;
     var canMergeWithRegistrations = (List<Registration>)ViewBag.CanMergeWith;
     var account = (Account)ViewBag.Account;
+    var actionName = ViewContext.RouteData.Values["action"].ToString().ToLower();
 }
 @if (Model.IsNotEmpty() && Model.ID.HasValue && Model.ID.Value > 0)
 {
     <div class="btn-toolbar">
-        <div class="btn-group hidden-xs">
-            <button type="button" class="btn btn-alt6 md-trigger" data-modal="modal-activity-add" id="activityadd">
-                <i class="s7-gleam"></i>
-                Add @UILabel.ActivityLabel(ActivityType.Activity)
-            </button>
-            <a href="@Url.Action("update", "registration", new { id = Model.Uid.ToString() })" class="btn btn-alt6">
-                <i class="s7-edit"></i> Edit Registration
-            </a>
-            <button class="btn btn-alt6 md-trigger hide" data-modal="modal-confirmation" onclick="notify()" id="sendreg">
-                <i class="s7-paper-plane"></i> <span>Send Reg Info</span>
-            </button>
-            @if (canMergeWithRegistrations.Any())
+    <div class="btn-group hidden-xs">
+        <button type="button" class="btn btn-alt6 md-trigger" data-modal="modal-activity-add" id="activityadd">
+            <i class="s7-gleam"></i>
+            Add @UILabel.ActivityLabel(ActivityType.Activity)
+        </button>
+        <a href="@Url.Action("update", "registration", new { id = Model.Uid.ToString() })" class="btn btn-alt6">
+            <i class="s7-edit"></i> Edit Registration
+        </a>
+        <a href="@Url.Action("surveys", "registration", new { id = Model.Uid.ToString() })"
+            class="btn btn-alt6@(actionName == "surveys" ? "-active" : "")">
+            <i class="s7-cloud"></i> Surveys
+        </a>
+        <button class="btn btn-alt6 md-trigger hide" data-modal="modal-confirmation" onclick="notify()" id="sendreg">
+            <i class="s7-paper-plane"></i> <span>Send Reg Info</span>
+        </button>
+        @if (canMergeWithRegistrations.Any())
             {
                 <button type="button" class="btn btn-alt6 md-trigger hide" data-modal="modal-regmerge" id="regmerge">
                     <i class="s7-bottom-arrow text-danger"></i> <span class="text-danger">Merge</span>
@@ -35,76 +40,82 @@
             <select class="form-control" onchange="handleNav(this.value)">
                 <option value="">Navigation</option>
                 <!--
-                <option value="modal-activity-add">Add Activity</option>
-                -->
-                <option value="@Url.Action("update", "registration", new { id = Model.Uid.ToString() })">Edit Registration</option>
+                    <option value="modal-activity-add">Add Activity</option>
+                    -->
+            <option value="@Url.Action("update", "registration", new { id = Model.Uid.ToString() })">Edit Registration
+                </option>
                 <!--
-                <option value="modal-confirmation">Send Reg Info</option>
+                    <option value="modal-confirmation">Send Reg Info</option>
                 @if (canMergeWithRegistrations.Any())
                 {
-                    <option value="modal-regmerge">Merge</option>
+                            <option value="modal-regmerge">Merge</option>
                 }
-                <option value="modal-deletereg">Delete</option>
-                
-                -->
-                <option value="@listUrl">&laquo; Back to List</option>
+                    <option value="modal-deletereg">Delete</option>
+
+                    -->
+            <option value="@listUrl">&laquo; Back to List</option>
             </select>
         </div>
     </div>
 
     <div id="modal-confirmation" class="md-modal colored-header custom-width md-effect-9">
-        <form id="form-offer" action="" method="post">
-            <div class="md-content">
-                <div class="modal-header">
-                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
-                    <h3 class="modal-title"><i class="s7-attention"></i> Confirmation</h3>
-                </div>
-                <div class="modal-body form">
-
-                    <p>Are you sure you want to <span id="confirmation-action"></span>?</p>
-                    <p id="confirmation-additional-text"></p>
-
-                </div>
-                <div class="modal-footer">
-                    <button type="button" data-dismiss="modal" class="btn btn-default md-close">No</button>
-                    <a href="#" class="btn btn-primary" id="btnconfirm">Yes</a>
-                </div>
+    <form id="form-offer" action="" method="post">
+        <div class="md-content">
+            <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i
+                        class="icon s7-close"></i></button>
+                <h3 class="modal-title"><i class="s7-attention"></i> Confirmation</h3>
             </div>
-        </form>
-    </div>
+            <div class="modal-body form">
+
+                <p>Are you sure you want to <span id="confirmation-action"></span>?</p>
+                <p id="confirmation-additional-text"></p>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-default md-close">No</button>
+                <a href="#" class="btn btn-primary" id="btnconfirm">Yes</a>
+            </div>
+        </div>
+    </form>
+</div>
 
     <div id="modal-regmerge" class="md-modal colored-header custom-width md-effect-9">
-        <form id="form-regmerge" action="@Url.Action("merge", "registration", new { id = Model.Uid, r = selectedRegistration.Uid, returnUrl = Request["returnurl"] })" method="post">
-            <div class="md-content">
-                <div class="modal-header">
-                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
-                    <h3 class="modal-title"><i class="s7-attention"></i> Merge Registration</h3>
+    <form id="form-regmerge"
+        action="@Url.Action("merge", "registration", new { id = Model.Uid, r = selectedRegistration.Uid, returnUrl = Request["returnurl"] })"
+        method="post">
+        <div class="md-content">
+            <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i
+                        class="icon s7-close"></i></button>
+                <h3 class="modal-title"><i class="s7-attention"></i> Merge Registration</h3>
+            </div>
+            <div class="modal-body form">
+
+                <div class="form-group">
+                    <p>
+                        <span class="text-danger text-bold">IMPORTANT:</span>
+                        <span class="text-bold">
+                            The current registration will be <em>merged into</em> the selected registration below.
+                        </span>
+                        <br /><br />
+                        This means:
+                    <ul>
+                        <li>All activities will be moved to the registration you select in the dropdown below</li>
+                        <li>The personal data from the registration selected in the dropdown below will be retained</li>
+                        <li>The current registration you are viewing will be deleted.</li>
+                    </ul>
+                    </p>
                 </div>
-                <div class="modal-body form">
-                    
-                    <div class="form-group">
-                        <p>
-                            <span class="text-danger text-bold">IMPORTANT:</span> 
-                            <span class="text-bold">
-                                The current registration will be <em>merged into</em> the selected registration below.
-                            </span>
-                            <br /><br />
-                            This means:
-                            <ul>
-                                <li>All activities will be moved to the registration you select in the dropdown below</li>
-                                <li>The personal data from the registration selected in the dropdown below will be retained</li>
-                                <li>The current registration you are viewing will be deleted.</li>
-                            </ul>
-                        </p>
-                    </div>
-                    
-                    <div class="form-group">
-                        <select name="mergeintoreg" id="mergeintoreg" class="form-control" required>
-                            <option value="">Select Registration...</option>
-                            @foreach (var registration in canMergeWithRegistrations)
+
+                <div class="form-group">
+                    <select name="mergeintoreg" id="mergeintoreg" class="form-control" required>
+                        <option value="">Select Registration...</option>
+                        @foreach (var registration in canMergeWithRegistrations)
                             {
                                 <option value="@registration.Uid">
-                                    Registration - @account.ConvertToAccountTimeZone(registration.CreateDate.Value).ToShortDateTimeString()
+                                    Registration -
+                                    @account.ConvertToAccountTimeZone(registration.CreateDate.Value).ToShortDateTimeString()
                                 </option>
                             }
                         </select>
@@ -122,24 +133,24 @@
     Html.RenderPartial("_ModalRegistrationAddActivity");
 
     <script>
-        function handleNav(value) {
-            if (value.split('-')[0] == 'modal') {
-                var id = value.split('-')[1];
-                $('#' + id).trigger('click');
-            } else {
-                location.href = value;
-            }
+    function handleNav(value) {
+        if (value.split('-')[0] == 'modal') {
+            var id = value.split('-')[1];
+            $('#' + id).trigger('click');
+        } else {
+            location.href = value;
         }
+    }
 
-        function notify() {
-            $('#confirmation-action').html('send an email to <strong>@Model.ToRegistrant().Name - @Model.ToRegistrant().Email</strong>');
-            $('#btnconfirm').attr('href', '@Url.Action("notify", "registration", new { id = Model.Uid.ToString(), r = selectedRegistration.Uid })&returnUrl=@listUrl');
-        }
+    function notify() {
+        $('#confirmation-action').html('send an email to <strong>@Model.ToRegistrant().Name - @Model.ToRegistrant().Email</strong>');
+        $('#btnconfirm').attr('href', '@Url.Action("notify", "registration", new { id = Model.Uid.ToString(), r = selectedRegistration.Uid })&returnUrl=@listUrl');
+    }
 
-        function deleteReg() {
-            $('#confirmation-action').html('<strong>delete</strong> the registration for <strong>@Model.ToRegistrant().Name</strong>');
-            $('#confirmation-additional-text').html('This cannot be undone');
-            $('#btnconfirm').attr('href', '@Url.Action("delete", "registration", new { id = Model.Uid.ToString(), r = selectedRegistration.Uid })&returnUrl=@listUrl');
-        }
-    </script>
+    function deleteReg() {
+        $('#confirmation-action').html('<strong>delete</strong> the registration for <strong>@Model.ToRegistrant().Name</strong>');
+        $('#confirmation-additional-text').html('This cannot be undone');
+        $('#btnconfirm').attr('href', '@Url.Action("delete", "registration", new { id = Model.Uid.ToString(), r = selectedRegistration.Uid })&returnUrl=@listUrl');
+    }
+</script>
 }

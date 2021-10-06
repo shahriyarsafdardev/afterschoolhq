@@ -8,7 +8,7 @@ using AfterSchoolLibrary.Models;
 
 namespace AfterSchoolLibrary.Services
 {
-    public class FormService
+    public static class FormService
     {
         /// <summary>
         /// get template from default afterschool account with ID = 1
@@ -116,6 +116,24 @@ namespace AfterSchoolLibrary.Services
             return f;
         }
 
+        private static List<QuestionType> SurveyOnlyQuestionTypes
+        {
+            get
+            {
+                return new List<QuestionType> { QuestionType.Audio, QuestionType.Video, QuestionType.Photo, QuestionType.Emoji, QuestionType.Rating };
+            }
+        }
+
+        public static List<QuestionType> GetTypesUserCannotAdd(this Form form)
+        {
+            var typesUserCannotAdd = new List<QuestionType>() { QuestionType.TextBlock, QuestionType.NotSet, QuestionType.RadioMatrix };
+
+            if (form.FormTypeId != FormType.Survey)
+                 typesUserCannotAdd.AddRange(SurveyOnlyQuestionTypes);
+
+            return typesUserCannotAdd;
+        }
+
         /// <summary>
         /// get template from default afterschool account with ID = 1
         /// </summary>
@@ -130,6 +148,41 @@ namespace AfterSchoolLibrary.Services
                 return Form.Load(afterSchoolAccount.InterestFormId.Value, msgs, dc);
                                         
             return AddNewAfterSchoolInterestForm(msgs, dc);
+        }
+
+        public static Form CreateBlankForm(Form form, int userId, int id, string name, string description, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+               Database.ExecuteTransaction(
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        form = new Form
+                        {
+                            Name = name,
+                            Description = description,
+                            LastModifiedDate = DateTime.UtcNow,
+                            CreateDate = DateTime.UtcNow,
+                            FormTypeId = FormType.Survey,
+                            LastModifiedBy = userId,
+                            CreatedBy = userId,
+                            AccountId = id,
+                            IsActive = true,
+                            Uid = Guid.NewGuid()
+                        };
+                        msgs.AddRange(form.Save(dc: dc));
+
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+                        msgs.Add("Form Saved", MessageType.Success);
+                    },
+                    onFailure: (SystemMessages fmsgs) =>
+                    {
+                        msgs.AddRange(fmsgs);
+                    }
+                );
+
+            return form;
         }
 
         public static Form AddNewAfterSchoolInterestForm(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -490,7 +543,7 @@ namespace AfterSchoolLibrary.Services
             return qhs;
         }
 
-        private void CreateOrganizationQuestionGroup()
+        private static void CreateOrganizationQuestionGroup()
         {
             var questions = new List<QuestionHolder>()
                 {   

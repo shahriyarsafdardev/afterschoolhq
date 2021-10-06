@@ -1,0 +1,155 @@
+﻿@model Activity
+
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var surveyResponses = (List<SurveyResponse>)ViewBag.GetSurveyFeedback;
+    var survey = (SurveyRequest)ViewBag.Survey;
+}
+@{Html.RenderPartial("OrgAccountHeader");}
+<div class="main-content">
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model); }
+    <div class="panel panel-default">
+        <div class="panel-body surveypanelpadding">
+            <div class="row">
+                <div class="col-lg-3">
+                    <div style="" class="DDLMain">
+                        <span  class="titleName">@survey.Name</span>
+                        <div class="dropdown">
+                            <i class="s7-edit filterIcon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"></i>
+
+                            <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
+                                <li><a href="javascript:void(0)" class="sortFilterAnchor" style="font-weight: bold;">Sort By:</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li class="sort" data-index="3" data-order="desc"><a href="javascript:void(0)" class="sortFilterAnchor">Newest to oldest</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li class="sort" data-index="3" data-order="asc"><a href="javascript:void(0)" class="sortFilterAnchor">Oldest to newest</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li class="sort" data-index="1" data-order="asc"><a href="javascript:void(0)" class="sortFilterAnchor">Alphabetically</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li class="sort" data-index="2" data-order="asc"><a href="javascript:void(0)" class="sortFilterAnchor">Status</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div style="font-size:14px; color:#B2B2B4; clear:both">@Model.Name | @(survey.CreateDate.IsNotEmpty() ? survey.CreateDate.Value.ToString("MMMM dd, yyyy") : "")</div>
+                    <a href="@Url.Action("ExportCSV", "activity", new { id = survey.ID })" class="exportBtn" style="font-size:14px; color:#00ae85" download>Export Survey Results</a>
+                </div>
+                <div class="col-lg-3">
+                    <div class="surveyCheck">@surveyResponses.Count() Survey Sent</div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="surveyCheck">@surveyResponses.Where(a => a.SurveyFeedbackStatusTypeId == SurveyFeedbackStatus.Completed).Count() Completed</div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="pull-right">
+                        @if (@surveyResponses.Where(a => a.SurveyFeedbackStatusTypeId == SurveyFeedbackStatus.Completed).Count() != @surveyResponses.Count())
+                        {
+                          <a href="javascript:void(0)" class="btn btn-success surveybtn reminder" data-count="@surveyResponses.Where(a => a.SurveyFeedbackStatusTypeId != SurveyFeedbackStatus.Completed).Count()">Remind To All Incomplete</a>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div style="clear:both"></div>
+            <div class="margin-t-35 mainTableDiv" id="exportable">
+                <table class="table surveyTable sortTable">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Last Modified</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var surveyResponse in surveyResponses)
+                        {
+                            <tr>
+                                <td>
+                                    @if (surveyResponse.SurveyFeedbackStatusTypeId == SurveyFeedbackStatus.Completed)
+                                    {
+                                       <a href="@Url.Action("viewsurveyresults", "activity", new { id = surveyResponse.ID, activityId = Model.Uid })" class="linkGreen">View</a>
+                                    }
+                                </td>
+                                <td>
+                                    @surveyResponse.GetRegistrantName().DisplayName
+                                </td>
+                                <td>
+                                    @surveyResponse.SurveyFeedbackStatusTypeId.ToString().SplitByUpperCase()
+                                </td>
+                                <td>
+                                    @(surveyResponse.LastModifiedDate.IsNotEmpty() ? survey.LastModifiedDate.Value.ToString("MM/dd/yyyy") : "")
+                                </td>
+                                <td>
+                                    @if (surveyResponse.SurveyFeedbackStatusTypeId != SurveyFeedbackStatus.Completed)
+                                    {
+                                       <a href="javascript:void(0)" class="linkGreen reminder" data-count="1" data-id="@surveyResponse.ID">Send Reminder</a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="resendModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="border-radius: 10px;">
+
+            <div class="modal-body">
+                <div class="text-center" style="font-size: 22px;  font-weight: bold;color: #282828; margin-bottom:17px;">Resend to <span id="CountStudent">0</span> Student<span id="addS"></span></div>
+                <div class="text-center"><input type="button" class="btn btnNewColorSurvey sendReminderBtn" value="Send Survey" style="padding: 12px 72px;" data-id="0" /></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/Assets/lib/customTableSorter.js"></script>
+    <script>
+        $(document).ready(function () {
+            $(".exportBtn").on('click', function () {
+                setTimeout(function () { $("#modal-saving").addClass("hide"); }, 500);
+            });
+
+            $(".reminder").on('click', function () {
+                $('#resendModal').modal('show');
+                $("#CountStudent").html($(this).attr("data-count"));
+                if ($(this).attr("data-count") == 1) {
+                    $(".sendReminderBtn").attr("data-id", $(this).attr("data-id"));
+                    $("#addS").html("");
+                }
+                else {
+                    $(".sendReminderBtn").attr("data-id", 0);
+                    $("#addS").html("s");
+                }
+            });
+
+            $(".sendReminderBtn").on('click', function () {
+                $('#resendModal').modal('hide');
+                var id = $(this).attr('data-id');
+                $.get('/Org/activity/ResendNotification/' + id + "?surveyId=@survey.ID", function (data) {
+                    if (data.success) {
+                        Notifications.showBar({
+                            title: "",
+                            message: "Reminder sent",
+                            success: true
+                        });
+                    }
+                    else {
+                        Notifications.showBar({
+                            title: "",
+                            message: "Something went wrong",
+                            success: false
+                        });
+                    }
+                });
+            });
+        })
+    </script>
+}

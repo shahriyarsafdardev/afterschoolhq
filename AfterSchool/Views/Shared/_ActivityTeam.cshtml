@@ -3,7 +3,7 @@
     var members = (List<WebUser>)ViewBag.Users;
 }
 
-<form action="@Url.Action("teamsave", "activity", new { id = Model.Uid.ToString() })" method="post">
+<form action="@Url.Action("teamsave", HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString(), new { id = Model.Uid.ToString() })" method="post">
 
     <div class="row">
         <button type="submit" class="btn btn-primary btn-space pull-right">Update Team Settings</button>

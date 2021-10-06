@@ -256,8 +256,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var group = ActivityGroup.LoadByUid(id.ToGuid());
             LoadLeagueActivityViewBag(group, id, "", "", "", msgs);
-
-            return View("LeagueActivities", group);
+            return RedirectToAction("LeagueActivities", new { id = group.Uid });
+            //return View("LeagueActivities", group);
         }
 
         /// <summary>
@@ -467,6 +467,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             var newForm = defaultForm.Copy(
                                 currentWebUser.ID.Value,
                                 currentAccount.ID.Value,
+                                FormType.Registration,
                                 (league.Name + " Form").MaxChars(100, "..."),
                                 amsgs,
                                 adc);
