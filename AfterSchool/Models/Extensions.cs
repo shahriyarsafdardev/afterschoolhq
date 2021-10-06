@@ -225,6 +225,14 @@ namespace AfterSchool.Models
             if (activity.IsGroupArchived)
                 archiveMsgs.Add($"<a href=\"/org/group/restore/{activity.GetActivityGroup().Uid}\">Restore {activity.GetActivityGroup().Name}</a>. It is currently archived", MessageType.Error);
 
+            if(activity.GetParticipationObject().IsRegistrationFree && activity.CostPerRegistrant > 0)
+            {
+                var addPayment = new SystemMessages();
+                addPayment.Add($"<a href=\"Org/account/paymentsoptions\">Add Payment Method</a>. To accept payments", MessageType.Error);
+                msgs.AddRange(addPayment);
+            }
+
+
             if (archiveMsgs.HasErrors())
             {
                 archiveMsgs.Insert(0, new SystemMessage($"<span class=\"publish-error-title\">Archive Errors<span>", MessageType.UserError));
