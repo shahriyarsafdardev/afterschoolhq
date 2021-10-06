@@ -99,7 +99,7 @@
                                         <button type="submit" class="btn btn-default btn-space" onclick="navigateForm('@Url.Action("formedit", "account", new { id = Model.ID, qg = questionGroup.ID, cmd = "prev" })')">&laquo;</button>
                                     }
                                     <button type="submit" class="btn btn-default btn-space"><i class="s7-diskette"></i> Save</button>
-                                    @if (questionGroups.Count() > 0 ? questionGroups.Last().ID != qgId : false)
+                                    @if (questionGroups.Count() > 0 ? questionGroups.Last().ID != qgId && qgId != 0 : false)
                                     {
                                         <button type="submit" class="btn btn-primary btn-space" onclick="navigateForm('@Url.Action("formedit", "account", new { id = Model.ID, qg = questionGroup.ID, cmd = "next" })')">&raquo;</button>
                                     }
