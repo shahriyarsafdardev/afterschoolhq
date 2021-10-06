@@ -196,7 +196,7 @@ namespace AfterSchoolLibrary.Services
                 var instance = schedule?.GetInSessionInstanceByDate(activityDate, msgs, dc);
 
                 if (instance.IsNotEmpty())
-                    return instance.GetSeatsRemaining(msgs, dc);
+                    return instance.GetSeatsRemaining(activity, msgs, dc);
             }
 
             return activity.SeatsAvailable.Value;

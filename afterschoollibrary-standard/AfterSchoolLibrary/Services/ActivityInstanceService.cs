@@ -38,10 +38,13 @@ namespace AfterSchoolLibrary.Services
             return ActivityInstanceSeats.LoadByRegistrantActivityIdByActivityInstanceId (ra.ID.Value, instance.ID.Value, msgs, dc);
         }
 
-        public static int GetSeatsRemaining(this ActivityInstance instance, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetSeatsRemaining(this ActivityInstance instance, Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (instance.SeatsAvailable.HasValue)
-                return instance.SeatsAvailable.Value - ActivityInstanceSeats.GetSeatsTakenByActivityInstanceId(instance.ID.Value, msgs, dc);
+                return instance.SeatsAvailable.Value - ActivityInstanceSeats.GetSeatsTakenByActivityInstanceId(instance.ID.Value, msgs, dc);           
+
+            if (activity.IsNotEmpty())
+                return activity.SeatsAvailable.Value - ActivityInstanceSeats.GetSeatsTakenByActivityInstanceId(instance.ID.Value, msgs, dc);
 
             return 0;
         }

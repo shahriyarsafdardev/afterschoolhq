@@ -75,7 +75,12 @@ namespace AfterSchoolLibrary.Models
             get
             {
                 if (ParticipationObject.IsNotEmpty())
+                {
+                    if (ParticipationObject.CanRegisterPerClass)
+                        return $"{this.ParticipationObject.Name} Registration - {ClassQuantity} Classes";
+
                     return $"{this.ParticipationObject.Name} Registration";
+                }
 
                 return _description;
             }
