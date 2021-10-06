@@ -553,16 +553,26 @@ namespace AfterSchoolLibrary.Models
 
             var gradeLevels = GradeLevel.Load(msgs: msgs, dc: dc).OrderBy(gradeLevel => gradeLevel.ID).ToList();
             var registrantGradeLevelAnswer = registrant.GetAnswer(QuestionDataType.RegistrantGrade, msgs, dc);
-            var registrantGradeLevel = gradeLevels.FirstOrDefault(gradeLevel => gradeLevel.Abbreviation.IsSameAs(registrantGradeLevelAnswer.Text) || (registrantGradeLevelAnswer.Text.MaxChars(gradeLevel.Abbreviation.Length) == gradeLevel.Abbreviation));
 
-            if (!MinGradeId.HasValue)
-                MinGradeId = gradeLevels.First().ID;
+            //this changes are only for testing of 1kag54g/coupon and refund error
+            //this should be replaced with the changes of FHC
+            if (registrantGradeLevelAnswer.Text.IsNotEmpty())
+            {
+                if (!MinGradeId.HasValue)
+                    MinGradeId = gradeLevels.First().ID;
 
-            if (!MaxGradeId.HasValue)
-                MaxGradeId = gradeLevels.Last().ID;
+                if (!MaxGradeId.HasValue)
+                    MaxGradeId = gradeLevels.Last().ID;
 
-            if (registrantGradeLevel.ID.Value.IsInRange(MinGradeId.Value, MaxGradeId.Value))
-                return true;
+                GradeLevel registrantGradeLevel = null;
+                if (registrantGradeLevelAnswer.IsNotEmpty())
+                    registrantGradeLevel = gradeLevels.FirstOrDefault(gradeLevel => gradeLevel.Abbreviation.IsSameAs(registrantGradeLevelAnswer.Text) || (registrantGradeLevelAnswer.Text.MaxChars(gradeLevel.Abbreviation.Length) == gradeLevel.Abbreviation));
+
+                if (registrantGradeLevel.IsNotEmpty() &&
+                    registrantGradeLevel.ID.IsNotEmpty() &&
+                    registrantGradeLevel.ID.Value.IsInRange(MinGradeId.Value, MaxGradeId.Value))
+                    return true;
+            }
 
             return false;
         }
