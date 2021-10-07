@@ -1832,7 +1832,7 @@ namespace AfterSchool.Controllers
 
                 var datesToRemove = new List<DateTime>();
 
-                selectedDates.ForEach(date => { 
+                selectedDates?.ForEach(date => { 
                     if (currentRegistrant.IsReservedForDate(participationObject, date, null))
                         datesToRemove.Add(date);
                 });
@@ -2860,7 +2860,7 @@ namespace AfterSchool.Controllers
 
         private List<DateTime> GetSelectedDatesFromCart()
         {
-            return SessionVariables.Cart?.GetCartItems().FirstOrDefault()?.SelectedDates.Split(',').Select(x => x.ToDateTime()).ToList();
+            return SessionVariables.Cart?.GetCartItems().FirstOrDefault()?.SelectedDates?.Split(',').Select(x => x.ToDateTime()).ToList();
         }
 
         private void ResetRegistrationSession()

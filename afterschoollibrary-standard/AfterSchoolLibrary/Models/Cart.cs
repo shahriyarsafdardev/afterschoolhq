@@ -227,7 +227,7 @@ namespace AfterSchoolLibrary.Models
                     ParticipationObjectId = participationObjectId,
                     ParticipationObjectTypeId = participationObjectType,
                     RegistrantActivityId = registrantActivityId,
-                    SelectedDates = selectedDates.Select(x => x.ToShortDateTimeString()).ToStringList(","),
+                    SelectedDates = selectedDates?.Select(x => x.ToShortDateTimeString()).ToStringList(","),
                     CreateDate = DateTime.UtcNow,
                     LastModifiedDate = DateTime.UtcNow,
                     CreatedBy = 0,
