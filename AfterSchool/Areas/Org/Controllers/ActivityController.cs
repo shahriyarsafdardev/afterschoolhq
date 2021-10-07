@@ -1505,17 +1505,34 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult TrackAttendance(string id, string att, string actinst)
         {
             var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
             var attendanceId = att.IsNumber() ? att.ToInteger() : new int?();
             var activityInstanceId = actinst.IsNumber() ? actinst.ToInteger() : new int?();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
-            var attendance = activity.GetOrCreateNewAttendance(attendanceId, activityInstanceId, SessionVariables.CurrentUser, msgs);
+            var attendance = activity.GetOrCreateNewAttendance(attendanceId, activityInstanceId, currentUser, msgs);
+            var activitySchedule = activity.GetSchedule(msgs);
 
             if (attendance.IsEmpty())
                 return RedirectToAction("Attendance", new { id, msg = "Error: No classes have taken place yet" });
 
-            ViewBag.AttendanceRegistrants = attendance.GetAttendanceRegistrants(msgs);
-            ViewBag.Schedule = activity.GetSchedule(msgs);
+            var attendanceRegistrants = attendance.GetAttendanceRegistrants(msgs);
+
+            if (activity.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
+            {
+                var arsToRemove = new List<AttendanceRegistrant>();
+                attendanceRegistrants.ForEach(ar => {
+                    var ra = activity.GetRegistrantActivity(ar.RegistrantId.Value, msgs);
+                    var instance = activitySchedule.GetInSessionInstanceByDate(attendance.Date.Value, msgs);
+                    if (ra.GetInstanceSeats(instance, msgs).IsEmpty())
+                        arsToRemove.Add(ar);
+                });
+
+                arsToRemove.ForEach(ar => attendanceRegistrants.Remove(ar));
+            }
+
+            ViewBag.AttendanceRegistrants = attendanceRegistrants;
+            ViewBag.Schedule = activitySchedule;
             ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
             ViewBag.RegistrantActivities = activity.GetRegistrantActivities(msgs);
             ViewBag.Messages = msgs;

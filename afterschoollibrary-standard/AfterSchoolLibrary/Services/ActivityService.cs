@@ -2198,6 +2198,16 @@ namespace AfterSchoolLibrary.Services
             return ras;
         }
 
+        public static RegistrantActivity GetRegistrantActivity(this Activity activity, Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantActivity.LoadByParticipationObjectByRegistrant(activity.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value, msgs, dc);
+        }
+
+        public static RegistrantActivity GetRegistrantActivity(this Activity activity, int registrantId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantActivity.LoadByParticipationObjectByRegistrant(activity.ID.Value, ParticipationObjectType.Activity, registrantId, msgs, dc);
+        }
+
         public static RegistrationPeriod AddNewRegistrationPeriod(this Activity activity, string name, DateTime startDateTime, DateTime endDateTime, int accountId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var period = new RegistrationPeriod();

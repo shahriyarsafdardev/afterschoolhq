@@ -166,6 +166,11 @@ namespace AfterSchoolLibrary.Services
             return ActivityInstanceSeats.LoadByRegistrantActivityId(registrantActivity.ID.Value, msgs, dc);
         }
 
+        public static ActivityInstanceSeats GetInstanceSeats(this RegistrantActivity registrantActivity, ActivityInstance instance, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityInstanceSeats.LoadByRegistrantActivityIdByActivityInstanceId(registrantActivity.ID.Value, instance.ID.Value, msgs, dc);
+        }
+
         public static Registrant GetRegistrant(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Registrant.Load(registrantActivity.RegistrantId.Value, msgs, dc);
