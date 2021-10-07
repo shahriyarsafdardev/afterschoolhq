@@ -178,6 +178,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 activity = currentAccount.GetDefaultNewActivity();
                 activity.RegistrationModeId = RegistrationMode.Register;
+                activity.CostFrequencyTypeId = ActivityCostFrequencyType.PerActivity;
 
                 if (type.IsNotEmpty() && type.IsNumber())
                     activity.ActivityTypeId = type.ToInteger().ToEnum<ActivityType>();
