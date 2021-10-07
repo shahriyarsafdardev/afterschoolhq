@@ -760,7 +760,7 @@
 
     function removeOption(id) {
         event.preventDefault();
-        var index = id.split("-")[1];
+        var mainIndex = id.split("-")[1];
         var optionType = id.split("-")[0];
         $("#" + id).remove();
         var totalRows = $('#options-table tr').length - 2;
@@ -787,8 +787,12 @@
         });
         var commaIndex = optionString.lastIndexOf(",");
         var optionWithoutLastComma = optionString.substring(0, commaIndex);
-        setOptions(selectedQuestion, optionWithoutLastComma, optionType);
-
+        if (mainIndex == 1 && optionType != 'Emoji') {
+            $(this).closest('tr').remove();
+        }
+        else {
+            setOptions(selectedQuestion, optionWithoutLastComma, optionType);
+        }
     }
 
     function addTextBlock() {
@@ -926,6 +930,9 @@
                 //descriptions would be disabled only for emojis
                 $(".optionDescription").prop('disabled', false);
             }
+        }
+        else {
+            addOption();
         }
 
     }
