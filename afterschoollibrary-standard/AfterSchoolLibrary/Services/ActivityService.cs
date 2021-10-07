@@ -187,10 +187,14 @@ namespace AfterSchoolLibrary.Services
 
         public static int GetSeatsRemainingForNextDate(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var dates = activity.GetSchedule(msgs, dc).GetNextInstances(1, msgs, dc);
+            var schedule = activity.GetSchedule(msgs, dc);
+            if (schedule.IsNotEmpty())
+            {
+                var dates = schedule.GetNextInstances(1, msgs, dc);
 
-            if (dates.Any())
-                return activity.GetSeatsRemainingByDate(dates.First(), msgs, dc);
+                if (dates.Any())
+                    return activity.GetSeatsRemainingByDate(dates.First(), msgs, dc);
+            }            
 
             return 0;
         }
