@@ -1516,20 +1516,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (attendance.IsEmpty())
                 return RedirectToAction("Attendance", new { id, msg = "Error: No classes have taken place yet" });
 
-            var attendanceRegistrants = attendance.GetAttendanceRegistrants(msgs);
-
-            if (activity.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
-            {
-                var arsToRemove = new List<AttendanceRegistrant>();
-                attendanceRegistrants.ForEach(ar => {
-                    var ra = activity.GetRegistrantActivity(ar.RegistrantId.Value, msgs);
-                    var instance = activitySchedule.GetInSessionInstanceByDate(attendance.Date.Value, msgs);
-                    if (ra.GetInstanceSeats(instance, msgs).IsEmpty())
-                        arsToRemove.Add(ar);
-                });
-
-                arsToRemove.ForEach(ar => attendanceRegistrants.Remove(ar));
-            }
+            var attendanceRegistrants = GetAttendanceRegistrants(attendance, activity, activitySchedule, msgs);
 
             ViewBag.AttendanceRegistrants = attendanceRegistrants;
             ViewBag.Schedule = activitySchedule;
@@ -1537,6 +1524,26 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.RegistrantActivities = activity.GetRegistrantActivities(msgs);
             ViewBag.Messages = msgs;
             return View(attendance);
+        }
+
+        private List<AttendanceRegistrant> GetAttendanceRegistrants(Attendance attendance, Activity activity, ActivitySchedule schedule, SystemMessages msgs)
+        {
+            var attendanceRegistrants = attendance.GetAttendanceRegistrants(msgs);
+
+            if (activity.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
+            {
+                var arsToRemove = new List<AttendanceRegistrant>();
+                attendanceRegistrants.ForEach(ar => {
+                    var ra = activity.GetRegistrantActivity(ar.RegistrantId.Value, msgs);
+                    var instance = schedule.GetInSessionInstanceByDate(attendance.Date.Value, msgs);
+                    if (ra.GetInstanceSeats(instance, msgs).IsEmpty())
+                        arsToRemove.Add(ar);
+                });
+
+                arsToRemove.ForEach(ar => attendanceRegistrants.Remove(ar));
+            }
+
+            return attendanceRegistrants;
         }
 
         [HttpPost]
@@ -1547,6 +1554,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var presentStudents = new List<int>();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var attendance = AfterSchoolLibrary.Models.Attendance.Load(att.ToInteger(), msgs);
+            var activitySchedule = activity.GetSchedule(msgs);
 
             attendance.GetAttendanceRegistrants(msgs).ForEach(attendanceRegistrant =>
             {
@@ -1557,8 +1565,8 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
                 attendance.UpdateAttendance(attendance.ActivityInstanceId.Value, presentStudents, SessionVariables.CurrentUser, msgs);
 
-            ViewBag.AttendanceRegistrants = attendance.GetAttendanceRegistrants(msgs);
-            ViewBag.Schedule = activity.GetSchedule(msgs);
+            ViewBag.AttendanceRegistrants = GetAttendanceRegistrants(attendance, activity, activitySchedule, msgs);
+            ViewBag.Schedule = activitySchedule;
             ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
             ViewBag.RegistrantActivities = activity.GetRegistrantActivities(msgs);
             ViewBag.Messages = msgs;
