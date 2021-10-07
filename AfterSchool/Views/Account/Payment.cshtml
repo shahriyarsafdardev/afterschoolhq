@@ -16,11 +16,11 @@
     var registrant = registration.GetRegistrant();
     var readyToAcceptPayment = subscriptionPlan.IsEmpty() || !subscriptionPlan.SplitCostEvenly || participationObject.RegistrationFinalized;
     var quantity = 1;
+    var datesToRemove = new List<DateTime>();
 
     if (participationObject.CanRegisterPerClass)
     {
         selectedDates = cart.GetCartItems().First().SelectedDates.Split(',').Select(x => x.ToDateTime()).ToList();
-        var datesToRemove = new List<DateTime>();
 
         selectedDates.ForEach(date =>
         {
@@ -140,6 +140,14 @@
                                             <tr>
                                                 <td>@date.ToLongDateTimeString()</td>
                                                 <td>@participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()</td>
+                                            </tr>
+                                        }
+
+                                        @foreach (var date in datesToRemove)
+                                        {
+                                            <tr>
+                                                <td><span style="text-decoration: line-through">@date.ToLongDateTimeString()</span></td>
+                                                <td>Already registered</td>
                                             </tr>
                                         }
                                     </tbody>

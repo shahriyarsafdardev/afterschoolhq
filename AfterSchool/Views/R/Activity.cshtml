@@ -182,7 +182,7 @@
                                         </p>
                                     }
 
-                                    @if (Model.IsActivity() && Model.GetActivity().CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
+                                    @if (Model.IsPublished && Model.CanRegisterPerClass)
                                     {
                                         <p>
                                             <a href="@Model.GetActivityDateSelectionUrl()">Select Dates &raquo;</a>
