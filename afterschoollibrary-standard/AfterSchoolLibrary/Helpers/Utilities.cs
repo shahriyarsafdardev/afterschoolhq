@@ -43,7 +43,7 @@ namespace AfterSchoolLibrary.Helpers
                 if (IsQA)
                     return "app-dev.afterschoolhq.com";
                 else if (IsStaging)
-                    return "app-dev.afterschoolhq.com";
+                    return "app-staging.afterschoolhq.com";
                 else if (IsProduction)
                     return "app.afterschoolhq.com";
                 else
@@ -405,6 +405,7 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.ResetFreeAcctsToFreePackage_20210805.Do(amsgs, adc);
 
                     Migrations.UpdateFormQuestionAnswers_20210918.Do(amsgs, adc);
+                    Migrations.AddFeatureTypeSurvey_20211004.Do(amsgs, adc);
 
 
 
