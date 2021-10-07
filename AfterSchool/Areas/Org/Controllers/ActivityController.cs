@@ -200,7 +200,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type, string inviteonly, string minseatsrequired, string isAdvanceSettingEnabled)
+        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type, string inviteonly, string minseatsrequired, string isAdvanceSettingEnabled, string costfrequencytype)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -265,7 +265,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "gradeend", activity.IsNotEmpty() ? activity.GradeLevelEnd :defaultActivity.GradeLevelEnd },
                     { "genderrestrictions", activity.IsNotEmpty() && activity.GenderRestriction.IsNotEmpty() ? (int)activity.GenderRestriction :(int)defaultActivity.GenderRestriction },
                     { "agestart", activity.IsNotEmpty() ? activity.AgeStart : defaultActivity.AgeStart },
-                    { "ageend",activity.IsNotEmpty() ? activity.AgeEnd : defaultActivity.AgeEnd }
+                    { "ageend",activity.IsNotEmpty() ? activity.AgeEnd : defaultActivity.AgeEnd },
+                    { "costfrequencytype", costfrequencytype },
                 };
 
                 if (activity.IsNotEmpty())
@@ -791,6 +792,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             if (activity.IsNotEmpty())
             {
+                if (activity.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass && (!hasschedule.IsBoolean() || !hasschedule.ToBoolean()))
+                    msgs.Add("Schedule is required", MessageType.UserError);
+
                 if (hasschedule.IsBoolean() && hasschedule.ToBoolean())
                 {
                     var filteredParams = Request.Params.Filter("schedulerepeat-");
@@ -1081,7 +1085,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd,
             string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string isongoingsubscription, string subscriptionPlanPeriodNumber, string subscriptionPaymentStartType, string subscriptionStartDate, string subscriptionEndDate,
             string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype, string splitcostevenly, string regfeedownpayment,
-            string haspostpayplan, string postpaycost, string isparentpricepostpay, string isparentpricecost, string isparentpricepaymentplan, string isparentpricesubscription, string prepaidperiodspostpay, string postpayplanperiod, string costfrequencytype)
+            string haspostpayplan, string postpaycost, string isparentpricepostpay, string isparentpricecost, string isparentpricepaymentplan, string isparentpricesubscription, string prepaidperiodspostpay, string postpayplanperiod)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -1129,7 +1133,6 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "isparentpricesubscription", isparentpricesubscription },
                     { "prepaidperiodspostpay", prepaidperiodspostpay },
                     { "postpayplanperiod", postpayplanperiod },
-                    { "costfrequencytype", costfrequencytype },
                 };
 
                 activity = ActivityService.EditExisting(
