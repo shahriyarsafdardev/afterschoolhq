@@ -316,18 +316,21 @@
                         <span class="total-due-today"></span>
                     </div>
 
-                    if ((participationObject.Cost > 0 || postPayPlan.IsNotEmpty()) &&
-                        participationObject.SubscriptionPlans.Count <= 0 &&
-                        participationObject.PaymentPlans.Count <= 0)
+                    if (!participationObject.CanRegisterPerClass)
                     {
-                        <div class="row text-center padding-v-20">       
-                            <div class="input-group col-md-4 col-md-offset-4 col-sm-12">
-                                <input id="txt-coupon-code" type="text" class="form-control" placeholder="COUPON CODE" aria-describedby="coupon-code">
-                                <span class="input-group-addon btn btn-primary" id="coupon-code" onclick="applyCoupon()">Apply</span>                                
-                            </div>                           
-                            <div class="clearfix"></div>
-                            <p id="txt-coupon-applied" class="text-small" style="display: none;"></p>
-                        </div>
+                        if ((participationObject.Cost > 0 || postPayPlan.IsNotEmpty()) &&
+                            participationObject.SubscriptionPlans.Count <= 0 &&
+                            participationObject.PaymentPlans.Count <= 0)
+                        {
+                            <div class="row text-center padding-v-20">       
+                                <div class="input-group col-md-4 col-md-offset-4 col-sm-12">
+                                    <input id="txt-coupon-code" type="text" class="form-control" placeholder="COUPON CODE" aria-describedby="coupon-code">
+                                    <span class="input-group-addon btn btn-primary" id="coupon-code" onclick="applyCoupon()">Apply</span>                                
+                                </div>                           
+                                <div class="clearfix"></div>
+                                <p id="txt-coupon-applied" class="text-small" style="display: none;"></p>
+                            </div>
+                        }
                     }
 
                     <hr />
