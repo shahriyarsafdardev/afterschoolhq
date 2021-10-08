@@ -99,7 +99,7 @@
                                         <button type="submit" class="btn btn-default btn-space" onclick="navigateForm('@Url.Action("formedit", "account", new { id = Model.ID, qg = questionGroup.ID, cmd = "prev" })')">&laquo;</button>
                                     }
                                     <button type="submit" class="btn btn-default btn-space"><i class="s7-diskette"></i> Save</button>
-                                    @if (questionGroups.Count() > 0 ? questionGroups.Last().ID != qgId : false)
+                                    @if (questionGroups.Count() > 0 ? questionGroups.Last().ID != qgId && qgId != 0 : false)
                                     {
                                         <button type="submit" class="btn btn-primary btn-space" onclick="navigateForm('@Url.Action("formedit", "account", new { id = Model.ID, qg = questionGroup.ID, cmd = "next" })')">&raquo;</button>
                                     }
@@ -296,7 +296,7 @@
 });}
                                                     </td>
                                                     <td>
-                                                        <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteQuestion('@question.Text', '@Url.Action("delete","Account", new { id = @question.ID.ToString()})')"><span class="text-danger"><i class="s7-trash"></i></span></button>
+                                                        <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteQuestion('@question.Text', '@Url.Action("delete","Account", new { id = question.ID.ToString()})')"><span class="text-danger"><i class="s7-trash"></i></span></button>
                                                     </td>
                                                 </tr>
                                                 count++;
@@ -454,7 +454,7 @@
             <div class="clearfix"></div>
 
             <div class="modal-footer">
-                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+                <button type="button" data-dismiss="modal" class="btn btn-default md-close" onclick="removeValidations()">Cancel</button>
                 <button type="button" data-dismiss="modal" class="btn btn-primary" onclick="updateOptions()">Done</button>
             </div>
             <div class="clearfix"></div>
@@ -470,7 +470,7 @@
                 <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
                 <h3 class="modal-title modalLinkTitle">Edit Link</h3>
             </div>
-            <div class="modal-body form">
+            <div class="modal-body form fixed-height-modal-options">
 
                 <p id="linkMessage">Enter the url below. This will make your question label clickable and it will open a new window to your link. Note: Your link is not saved until you hit the <strong>Save</strong> button after you click <strong>Done</strong></p>
 
@@ -478,15 +478,10 @@
                     <label><span id="question-link-label"></span></label>
                     <textarea class="form-control" id="question-link" name="question-link" rows="6" placeholder="ex: http://yourdomain.com/go-here"></textarea>
                 </div>
-                <p class="emojiRequired text-danger hide">Please select Emoji.</p>
-                <div class="form-group emojiOption">
-                    <label><span id="question-link-label"></span></label>
-                    <textarea class="form-control emojionearea2" id="question-emoji" name="question-emoji" required rows="6" placeholder="Emojis go here"></textarea>
-                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-                <button type="button" data-dismiss="modal" class="btn btn-primary" onclick="updateLink()">Done</button>
+                <button type="button" data-dismiss="modal" class="btn btn-primary md-close" onclick="updateLink()">Done</button>
             </div>
         </div>
     </form>
@@ -500,7 +495,7 @@
                 <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
                 <h3 class="modal-title">Edit Rating</h3>
             </div>
-            <div class="modal-body form">                
+            <div class="modal-body form fixed-height-modal-options">                
                 <p id="valueRequired" class="text-danger hide">Value is required.</p>
                 <p class="minMaxValidation text-danger hide">Max value should be greater than min value.</p>
                 <p id="invalidBarChar" class="text-danger hide">| sign is not allowed.</p>
@@ -570,7 +565,7 @@
             <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
             <h3 class="modal-title">Delete Question</h3>
         </div>
-        <div class="modal-body form">
+        <div class="modal-body form fixed-height-modal-options">
 
             <p>Are you sure you want to delete <strong><span id="delete-question-name"></span></strong>? </p><p>This action cannot be undone.</p>
 
@@ -590,22 +585,30 @@
 <script>
     var selectedQuestion = null;
     var newQuestionNumber = 0;
+    var optionQuestionType = 0;
     var emojiDictionary = [
-        { key: "grinning", value:"Happy"},
-        { key: "grimacing", value:"Yikes"},
-        { key: "grin", value:"Thrilled"},
+        { key: "grinning", value: "Happy" },
+        { key: "grin", value: "Thrilled" },
+        { key: "blush", value: "Pleased" },
+        { key: "laughing", value: "Laughing" },
+        { key: "sweat_smile", value: "Relieved" },
         { key: "joy", value: "Funny" },
-        { key: "smiley", value: "Smiley" },
-        { key: "sweat_smile", value:"Relieved"},
-        { key: "laughing", value:"Laughing"},
-        { key: "innocent", value:"Innocent"},
-        { key: "wink", value:"Playful"},
-        { key: "blush", value:"Pleased"},
-        { key: "slight_smile", value:"Content"},
-        { key: "upside_down", value:"Upside Down"},
-        { key: "relaxed", value:"Relaxed"}
+        { key: "wink", value: "Playful" },
+        { key: "slight_smile", value: "Content" },
+        { key: "upside_down", value: "Upside Down" },
+        { key: "heart_eyes", value: "Love" },
+        { key: "innocent", value: "Innocent" },
+        { key: "stuck_out_tongue", value: "Goofy" },
+        { key: "thinking", value: "Unsure" },
+        { key: "neutral_face", value: "Neutral" },
+        { key: "sleeping", value: "Tired" },
+        { key: "mask", value: "Sick" },
+        { key: "slight_frown", value: "Sad" },
+        { key: "cold_sweat", value: "Anxious" },
+        { key: "angry", value: "Angry" },
+        { key: "grimacing", value: "Yikes" }
     ];
-   
+
     function getEmojis() {
         var emojiCollection = "";
         emojiDictionary.forEach(function (obj) {
@@ -613,9 +616,15 @@
         });
         return emojiCollection;
     }
+
     function incrementQuestionCount() {
         $('#newquestioncount').val(getQuestionCount() + 1);
     }
+
+    function decrementQuestionCount() {
+        $('#newquestioncount').val(getQuestionCount() - 1);
+    }
+
     function getQuestionCount() {
         return parseInt($('#newquestioncount').val());
     }
@@ -632,7 +641,12 @@
     }
 
     function getDeleteIcon() {
-        return `<button class="btn btn-default btn-sm md-trigger remove" onclick="$(this).closest('tr').remove();"><span class="text-danger"><i class="s7-trash"></i></span></button>`;
+        return `<button class="btn btn-default btn-sm md-trigger remove" onclick="return deleteNonSavedQuestion(this)"><span class="text-danger"><i class="s7-trash"></i></span></button>`;
+    }
+
+    function deleteNonSavedQuestion(elem) {
+        decrementQuestionCount();
+        $(elem).closest('tr').remove();
     }
 
     function getShowCheckbox() {
@@ -714,14 +728,20 @@
         var rowCount = $('#question-table tr').length;
     }
 
-    function addOptionRow(optionType, optionNo, optionValue, optionDescriptionValue) {
+    function addOptionRow(optionType, optionNo, optionValue, optionDescriptionValue, callback) {
+
         $('#options-table')
             .find('tr')
             .last()
             .before(`<tr class="questionRow" id="${optionType}-${optionNo + 1}"><td>${optionType} ${optionNo + 1}</td><td><input type="text" value="${optionValue}" id="option-${optionNo + 1}" required class="form-control col-sm-3 option emojionearea2" onfocus="this.select()" /></td><td><input type="text" value="${optionDescriptionValue}" id="optionDescription-${optionNo + 1}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" disabled /></td><td><button class="btn btn-default btn-sm md-trigger" onclick="removeOption($(this).closest('tr').attr('id'))"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
-    }
 
-    
+       var Index = optionNo + 1;
+
+       callback(Index);
+
+   }
+
+
 
     function updateSorting() {
         var inputs = $('input.currentposition');
@@ -744,14 +764,31 @@
         var optionType = id.split("-")[0];
         $("#" + id).remove();
         var totalRows = $('#options-table tr').length - 2;
-        $("#options-table tbody tr").each(function (i) {
-            var newid = i + 1;
-            if (i < totalRows) {
-                $(this).find($('td:first-child')).text(optionType + " " + newid);
-                $(this).attr("id", optionType + "-" + newid);
+
+        var optionString = '';
+        var rowCount = $("#options-table tr").length - 1;
+        ////// Get Values of inputs in a string
+        $("#options-table tr").each(function (index) {
+            if (index != 0 && index != rowCount) {
+                var optVal = $(this).find("input.option").val();
+                var optDesc = $(this).find("input.optionDescription").val();
+
+                if (optionType == 'Emoji') {
+                    optVal = emojione.toShort($(this).find("input.option").val());
+                }
+                var rowOption;
+                if (optDesc) {
+                    rowOption = `${optVal}|${optDesc},`
+                } else {
+                    rowOption = `${optVal},`
+                }
+                optionString = optionString + rowOption;
             }
-        }).promise().done(function () { updateSorting(); });
-       
+        });
+        var commaIndex = optionString.lastIndexOf(",");
+        var optionWithoutLastComma = optionString.substring(0, commaIndex);
+        setOptions(selectedQuestion, optionWithoutLastComma, optionType);
+
     }
 
     function addTextBlock() {
@@ -766,6 +803,12 @@
         var arr = [@Html.Raw(typesWithOptions.Select(x=> "'" + ((int)x) + "'").ToStringList())];
         var arrRating = [@Html.Raw(typesWithRating.Select(x=> "'" + ((int)x) + "'").ToStringList())];
         var select = $(`#questiontype-${id}`);
+        if ($('#questiontype-' + id).val() === '@((int)QuestionType.Emoji)') {
+            optionQuestionType = '@((int)QuestionType.Emoji)';
+        }
+        else {
+            optionQuestionType = 0;
+        }
 
         if (arr.indexOf(select.val()) > -1) {
             $(`#btn-setoptions-${id}`).removeClass('hide');
@@ -790,9 +833,10 @@
     }
     function addOption() {
         var optionType = "Option";
-        if ($('#modal-options-title').text() == 'Emojis') {
+        if (optionQuestionType === '@((int)QuestionType.Emoji)') {
             optionType = "Emoji";
         }
+
         $('#options-table')
             .find('tr')
             .last()
@@ -807,27 +851,45 @@
         if (optionType === "Emoji") {
             $("#options-table tr").each(function (index) {
                 if (index == rowCount - 1) {
-                    addEmoji(this, index);                   
+                    addEmoji(index);
                 }
             });
         }
+
+        if (optionType != "Emoji") {
+            //descriptions would be disabled only for emojis
+            $(".optionDescription").prop('disabled', false);
+        }
     }
     //--Set options type based on emoji/option question type and their labels
-    function setOptions(id) {
+    // triggers when pop-up opens
+    function setOptions(id,optionString,questionType) {
         selectedQuestion = id;
-       
+        var options = '';
         var optionType = "Option";
         $('#modal-options-title').text("Options");
+        optionQuestionType = 0;
 
         //---1---If options type is emoji, then set emoji option and labels
-        if ($('#questiontype-' + id).val() == 16) {
+        if ($('#questiontype-' + id).val() == '@((int)QuestionType.Emoji)') {
             $('#modal-options-title').text("Emojis");
             optionType = "Emoji";
             $(".requiredData").addClass("hide");
+            optionQuestionType = '@((int)QuestionType.Emoji)';
         }
 
         //---2---Get option values from hidden field
-        var options = $('#options-text-' + selectedQuestion).val();
+        if (optionString) {
+            options = optionString;
+            optionType = questionType;
+            if (questionType == "Emoji")
+                $('#modal-options-title').text("Emojis");
+            else
+                $('#modal-options-title').text("Options");
+        }
+        else {
+            options = $('#options-text-' + selectedQuestion).val();
+        }
         var rowCount = $("#options-table tr").length - 1;
 
         //---3---Initialize Modal table, so that for other questions, old question data get removed. we will keep the header and footer rows
@@ -853,16 +915,16 @@
                     optionDescriptionValue = optionRowArray[1];
                 }
                 //create new row for option modal
-                addOptionRow(optionType, optionNo, optionValue, optionDescriptionValue)
+
+                addOptionRow(optionType, optionNo, optionValue, optionDescriptionValue, function () {
+                    addEmoji(optionNo + 1);
+                });
+
             }
             indivdualOption = null;
-            if (optionType === "Emoji") {
-                setTimeout(() =>
-                    $("#options-table tr").each(function (index) {
-                        if (index != 0 && index != rowCount) {                         
-                            addEmoji(this, index);
-                        }
-                    }), 100);
+            if (optionType != "Emoji") {
+                //descriptions would be disabled only for emojis
+                $(".optionDescription").prop('disabled', false);
             }
         }
         else {
@@ -871,16 +933,18 @@
         
     }
 
-    function addEmoji(row,index) {
+    function addEmoji(index) {
         var rowCount = $("#options-table tr").length - 1;
-        var emojiCollection = getEmojis(); 
-        
-            $(row).find(".emojionearea2").emojioneArea({
+        var row = $("#options-table").find(`#Emoji-${index}`);
+        var emojiCollection = getEmojis();
+        var emojiInput = $(row).find(".emojionearea2");
+         emojiInput.emojioneArea({
                 pickerPosition: "right",
                 filtersPosition: "bottom",
                 tonesStyle: "square",
                 shortnames: true,
-                search: false,
+             search: false,
+
                 events: {
                     keyup: (a, e) => {
                         e.stopPropagation();
@@ -889,7 +953,7 @@
                     keypress: (a, e) => {
                         e.stopPropagation();
                         e.preventDefault();
-                    },
+                 },
                     emojibtn_click: (a, e) => {
                         $(`.emojionearea2#option-${index}`).text("");
                         $(`.emojionearea2#option-${index}`)[0].emojioneArea.setText(a[0].dataset.name);
@@ -918,7 +982,7 @@
                         emoji: emojiCollection
                     }
                 }
-            });   
+            });
     }
 
     function updateOptions() {
@@ -935,14 +999,12 @@
                 if (index != 0 && index != rowCount) {
                     var optVal = $(this).find("input.option").val();
                     var optDesc = $(this).find("input.optionDescription").val();
-
                     if ($('#modal-options-title').text() == 'Emojis') {
                         optVal = emojione.toShort($(this).find("input.option").val());
-                    }
-
-                    if ($(this).find("input.emojionearea2").val() == "") {
-                        $(".requiredData").removeClass("hide")
-                        validation = false;
+                        if ($(this).find("input.emojionearea2").val() == "") {
+                            $(".requiredData").removeClass("hide")
+                            validation = false;
+                        }
                     }
 
                     if ($(this).find("input.option").val() == "") {
@@ -978,9 +1040,9 @@
                     } else {
                         rowOption = `${optVal},`
                     }
-                    
+
                     optionString = optionString + rowOption;
-                   
+
                 }
             });
 
@@ -1005,57 +1067,22 @@
 
     var selectedLinkQuestion = null;
     function setLink(id) {
-        selectedQuestion = id;
-        var textAreaOption = $(".textAreaOption");
-        var emojiOption = $(".emojiOption");
-
-        if ($('#questiontype-' + id).val() == 5) {
-        	textAreaOption.removeClass("hide");
-            emojiOption.addClass("hide");
-            $('#linkMessage').removeClass("hide");
-            
-            $('#question-link-label').html($('#text-' + id).val());
-            $('#question-link').val($('#link-text-' + id).val());            
-        }        
-
-        if ($('#questiontype-' + id).val() == 16) {
-        	emojiOption.removeClass("hide");
-            textAreaOption.addClass("hide");
-            $('#linkMessage').addClass("hide");
-        	 
-            // get value from hidden field
-            var emojiValue = $('#options-text-' + selectedQuestion).val().replaceAll(":,:", "::");            
-            $("#question-emoji").val(emojiValue);            
-            $(".emojionearea2")[0].emojioneArea.setText(emojiValue);       
-                
-        }
         selectedLinkQuestion = id;
+        $('#question-link-label').html($('#text-' + id).val());
+        $('#question-link').val($('#link-text-' + id).val());
     }
 
-    function updateLink() {
-        var validation = true;
-        var emojiTextArea = $("#question-emoji");
+    function removeValidations() {
+        $(".invalid-char").addClass("hide");
+        $(".requiredData").addClass("hide");
+        $(".twoOptionsValidation").addClass("hide");
+    }
 
+
+    function updateLink() {   
         if (!isNaN(selectedLinkQuestion)) {
             $('#link-text-' + selectedLinkQuestion).val($('#question-link').val());
         }
-        
-        if (emojiTextArea.val() == "") {
-            emojiTextArea.addClass("danger");
-            $(".emojiRequired").removeClass("hide");
-            validation = false;
-        }
-            
-        if (validation == true && $('#questiontype-' + selectedQuestion).val() == 16) {
-            emojiTextArea.removeClass("danger");
-            $(".emojiRequired").addClass("hide");
-            validation = true;
-            var emojiValues = emojione.toShort($("#question-emoji").val());
-            var emojis = emojiValues.replaceAll('::', ':,:');
-            $('#options-text-' + selectedQuestion).val(emojis);
-            $("#modal-link").removeClass("md-show");
-        }
-        else return false;        
     }
 
     //called when rating modal is going to display
@@ -1078,7 +1105,7 @@
             if (start) {
                 var min = start[0];
                 var minLabel = start[1];
-                
+
                 $('#question-rating-min').val(min);
                 $('#rating-min-label').val(min);
 
@@ -1109,7 +1136,7 @@
 
     function setDefaultRatings() {
         var min = $('#question-rating-min').val();
-        if (min == '') 
+        if (min == '')
             $('#question-rating-min').val(1);
 
         $('#question-rating-label-min').val('');
@@ -1117,8 +1144,8 @@
 
         var max = $('#question-rating-max').val();
         if (max == '')
-            $('#question-rating-max').val(5);        
-        
+            $('#question-rating-max').val(5);
+
         $('#question-rating-label-max').val('');
         $('#rating-max-label').val('5');
 
@@ -1170,7 +1197,7 @@
         }
         else {
             ratingMax.removeClass("danger");
-        } 
+        }
 
         if (ratingMinOptionalLabel.val().includes('|')) {
             ratingMinOptionalLabel.addClass("danger");
@@ -1189,9 +1216,9 @@
         }
         else {
             ratingMaxOptionalLabel.removeClass("danger");
-        }       
+        }
 
-        if (validation == true) {            
+        if (validation == true) {
             var start = $('#question-rating-min').val();
             var startLabel = $('#question-rating-label-min').val();
 
@@ -1214,7 +1241,7 @@
         else return false;
     }
 
-    function getOptionsTextForRating(start, startLabel, end, endLabel, increment) {       
+    function getOptionsTextForRating(start, startLabel, end, endLabel, increment) {
         // example of good option chain 1|Start,5,10,15,20,25,30,35,40,45,50|End
         var options = '';
 
@@ -1226,7 +1253,7 @@
         var loopStart = start;
         if (start % 2)
             loopStart = start - 1;
-        
+
         for (var i = loopStart; i <= end; i += increment) {
             if (i > start && i < end)
                 options += `${i},`;
@@ -1235,8 +1262,8 @@
         if (endLabel)
             options += `${end}|${endLabel}`;
         else
-            options += `${end}`;        
-        
+            options += `${end}`;
+
         return options;
     }
 
@@ -1314,17 +1341,12 @@
                 td.find("button:last-of-type").css("border", "2px solid red").css('cursor', 'pointer').attr('title', 'Please sepcify range.').tooltip({ tooltipClass: 'tooltipclass' });
                 validated = false;
             }
-
-            if (optionsInput.val() === '' && !linkEmojiButton.hasClass("hide")) {
-                linkEmojiButton.css("border", "2px solid red").css('cursor', 'pointer').attr('title', 'Please select emoji.').tooltip({ tooltipClass: 'tooltipclass' });
-                validated = false;                
-            }
         });
         if (!validated) {
             event.preventDefault();
             return false;
-        }       
-        
+        }
+
         $('#form1').attr('action', '@Url.Action("formedit", "account", new { id = Model.ID.ToString(), qg = qgId })');
     }
 
@@ -1332,7 +1354,7 @@
         $(".emojionearea2").emojioneArea({
             pickerPosition: "bottom",
             tonesStyle: "radio",
-            shortnames: true,  
+            shortnames: true,
             search: false,
             events: {
                 keyup: (a, e) => {
@@ -1345,7 +1367,7 @@
                 }
             }
         });
-    }    
+    }
 </script>
 
 
