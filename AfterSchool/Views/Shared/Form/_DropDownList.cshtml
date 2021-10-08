@@ -11,7 +11,7 @@
                 var key = splitedOptions[0].Trim();
                 var desc = splitedOptions[1].Trim();
                 var value = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>(key, desc) };
-                var selected = Model.Value.IfEmpty("").Trim().ToLower() == value.ToJSON().ToLower() ? " selected=\"selected\" " : "";
+                var selected = Model.Value.IfEmpty("").Trim().ToLower() == value.ToJSON().Trim().ToLower() ? " selected=\"selected\" " : "";
 
                 <option value="@value.ToJSON()" @selected>@desc</option>
             }
