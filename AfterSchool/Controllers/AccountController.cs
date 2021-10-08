@@ -2860,7 +2860,7 @@ namespace AfterSchool.Controllers
 
         private List<DateTime> GetSelectedDatesFromCart()
         {
-            return SessionVariables.Cart?.GetCartItems().FirstOrDefault()?.SelectedDates.Split(',').Select(x => x.ToDateTime()).ToList();
+            return SessionVariables.Cart?.GetCartItems().FirstOrDefault()?.SelectedDates?.Split(',').Select(x => x.ToDateTime()).ToList();
         }
 
         private void ResetRegistrationSession()
