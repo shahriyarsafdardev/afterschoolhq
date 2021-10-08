@@ -6,6 +6,7 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using AfterSchoolLibraryTests.Factories;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -201,22 +202,31 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors());
         }
 
-        //public void IsStudentGradeInRangeTest()
-        //{
-        //    // [{"key":"K","value":"K"}]
-        //    var participationObject = Activity.GetParticipationObject(msgs, dc);
-        //    var registrant = RegistrantFactory.Create(msgs, dc);
-        //    var form = FormFactory.Create(Activity.GetAccount(msgs, dc), msgs, dc);
-        //    var formgroup = FormQuestionGroupFactory.Create(form.ID.Value, msgs, dc);
-        //    var question = FormQuestionFactory.Create(form.ID.Value, formgroup.ID.Value, "Question", QuestionDataType.RegistrantGrade, QuestionType.TextArea, msgs, dc);
-        //    var answerText = "[{\"key\":\"K\",\"value\":\"K\"}]";
-        //    var answer = FormQuestionAnswerFactory.Create(question.ID.Value, question.Text, answerText, QuestionDataType.RegistrantGrade, msgs, dc);
+        [Fact]
+        public void IsStudentGradeInRangeTest()
+        {
+            // [{"key":"K","value":"K"}]
+            var grades = GradeLevel.Load(null, null, null, msgs, dc);
 
-        //    registrant.AddOrUpdateAnswer(answerText, question, LoggedInUser, msgs, dc);
+            Activity.GradeLevelStart = grades.First().ID.Value;
+            Activity.GradeLevelStart = grades.Last().ID.Value;
 
-        //    participationObject.IsStudentGradeInRange(registrant, msgs, dc);
+            var participationObject = Activity.GetParticipationObject(msgs, dc);
+            var registrant = RegistrantFactory.Create(msgs, dc);
+            var form = FormFactory.Create(Activity.GetAccount(msgs, dc), msgs, dc);
+            var formgroup = FormQuestionGroupFactory.Create(form.ID.Value, msgs, dc);
+            var question = FormQuestionFactory.Create(form.ID.Value, formgroup.ID.Value, "Question", QuestionDataType.RegistrantGrade, QuestionType.TextArea, msgs, dc);
+            var answerText = "[{\"key\":\"K\",\"value\":\"K\"}]";
+            var answer = FormQuestionAnswerFactory.Create(question.ID.Value, question.Text, answerText, QuestionDataType.RegistrantGrade, msgs, dc);
 
-        //}
+            registrant.AddOrUpdateAnswer(answerText, question, LoggedInUser, msgs, dc);
+
+            var isinrange = participationObject.IsStudentGradeInRange(registrant, msgs, dc);
+
+            Assert.True(msgs.HasNoErrors());
+            Assert.True(isinrange);
+
+        }
     }
 }
 
