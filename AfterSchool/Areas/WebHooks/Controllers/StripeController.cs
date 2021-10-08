@@ -262,6 +262,10 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
             //we will need this logic to ensure we are adding pro-rated amount in ActivityPayment and RegistrantSubscriptionPlan
             var amountPaidByParent = stripeInvoice.AmountPaid > 0 ? (decimal)stripeInvoice.AmountPaid / 100 : 0m;
+            if (stripeInvoice.TransferData.IsEmpty())
+            {
+                transaction.CreateStripeTransfer(WebUser.Load(1, msgs), msgs);
+            }
             var amountReceivedByProvider = stripeInvoice.TransferData.Amount > 0 ? (decimal)stripeInvoice.TransferData.Amount / 100 : 0m;
             var isAmountProRated = amountReceivedByProvider < plan.CostPerPeriod;
 
