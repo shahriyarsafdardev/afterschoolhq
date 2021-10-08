@@ -507,8 +507,10 @@
     function checkHasSchedule() {
         if ($('#hasschedule').is(':checked')) {
             $('.has-schedule-switch').removeClass('hide');
+            $('#ongoing-div').removeClass('hide');
         } else {
             $('.has-schedule-switch').addClass('hide');
+            $('#ongoing-div').addClass('hide');
         }
     }
 
