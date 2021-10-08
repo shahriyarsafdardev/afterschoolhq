@@ -566,7 +566,11 @@ namespace AfterSchoolLibrary.Models
                 if (Helpers.Utilities.IsAlreadyJsonString(registrantGradeLevelAnswer.Text))
                 {
                     var data = Helpers.Utilities.GetKeyValuePairs(registrantGradeLevelAnswer.Text);
-                    registrantGradeLevel = gradeLevels.Where(m => m.Name.ToLower() == data.First().key.ToLower().Trim()).FirstOrDefault();
+                    var registrantGradeLevelAnswerText = data.First().key.ToLower().Trim();
+                    registrantGradeLevel = gradeLevels.FirstOrDefault(gradeLevel => gradeLevel.Abbreviation.IsSameAs(registrantGradeLevelAnswerText) || (registrantGradeLevelAnswerText.MaxChars(gradeLevel.Abbreviation.Length) == gradeLevel.Abbreviation));
+
+
+                        //gradeLevels.Where(m => m.Name.ToLower() == data.First().key.ToLower().Trim()).FirstOrDefault();
                 }
                 else if (registrantGradeLevelAnswer.IsNotEmpty())
                     registrantGradeLevel = gradeLevels.FirstOrDefault(gradeLevel => gradeLevel.Abbreviation.IsSameAs(registrantGradeLevelAnswer.Text) || (registrantGradeLevelAnswer.Text.MaxChars(gradeLevel.Abbreviation.Length) == gradeLevel.Abbreviation));

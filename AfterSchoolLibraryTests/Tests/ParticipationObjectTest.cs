@@ -200,6 +200,23 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(AccountActivityGroup.ID, aag.ID);
             Assert.True(msgs.HasNoErrors());
         }
+
+        //public void IsStudentGradeInRangeTest()
+        //{
+        //    // [{"key":"K","value":"K"}]
+        //    var participationObject = Activity.GetParticipationObject(msgs, dc);
+        //    var registrant = RegistrantFactory.Create(msgs, dc);
+        //    var form = FormFactory.Create(Activity.GetAccount(msgs, dc), msgs, dc);
+        //    var formgroup = FormQuestionGroupFactory.Create(form.ID.Value, msgs, dc);
+        //    var question = FormQuestionFactory.Create(form.ID.Value, formgroup.ID.Value, "Question", QuestionDataType.RegistrantGrade, QuestionType.TextArea, msgs, dc);
+        //    var answerText = "[{\"key\":\"K\",\"value\":\"K\"}]";
+        //    var answer = FormQuestionAnswerFactory.Create(question.ID.Value, question.Text, answerText, QuestionDataType.RegistrantGrade, msgs, dc);
+
+        //    registrant.AddOrUpdateAnswer(answerText, question, LoggedInUser, msgs, dc);
+
+        //    participationObject.IsStudentGradeInRange(registrant, msgs, dc);
+
+        //}
     }
 }
 
