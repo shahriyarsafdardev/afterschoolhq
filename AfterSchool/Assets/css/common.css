@@ -1070,3 +1070,12 @@
     text-overflow: ellipsis;
     display: inline-block;
 }
+
+.fixed-height-modal-options {
+    max-height: 500px;
+    overflow-x: auto;
+}
+
+.emojionearea-tones-square {
+    display: none;
+}

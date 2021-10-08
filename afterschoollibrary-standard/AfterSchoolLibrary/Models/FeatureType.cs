@@ -34,5 +34,6 @@ public enum FeatureType
 	AllowPayLater,
 	StudentCRM,
 	ManageCoupons,
-	Teacher1099
+	Teacher1099,
+	Survey
 }

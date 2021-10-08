@@ -109,7 +109,7 @@ namespace AfterSchoolLibrary.Services
             row.Add("Submit Date");
             row.Add("First Name");
             row.Add("Last Name");
-            formQuestions.OrderBy(a=>a.DisplayOrder).ToList().ForEach(formQuestion =>
+            formQuestions.OrderBy(a => a.FormQuestionGroupDisplayOrder).ThenBy(a=>a.DisplayOrder).ToList().ForEach(formQuestion =>
             {
                 if(formQuestion.QuestionTypeId != QuestionType.TextBlock)
                     row.Add(formQuestion.Text);
@@ -127,7 +127,7 @@ namespace AfterSchoolLibrary.Services
             row.Add(firstName);
             row.Add(lastName);
 
-            formQuestionAnswers.OrderBy(a => a.FormQuestionDisplayOrder).ToList().ForEach(formQuestionAnswer =>
+            formQuestionAnswers.OrderBy(a=>a.FormQuestionGroupDisplayOrder).ThenBy(a => a.FormQuestionDisplayOrder).ToList().ForEach(formQuestionAnswer =>
             {
                 if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.TextArea)
                 {
@@ -138,10 +138,17 @@ namespace AfterSchoolLibrary.Services
                 {
                     row.Add(formQuestionAnswer.Text == "1" ? "True" : "False");
                 }
-                else if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.DropDownList || formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.RadioList)
+                else if (FormQuestionAnswerService.IsMultiOptionOrEmoji(formQuestionAnswer.FormQuestionQuestionTypeId))
                 {
-                    dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
-                    row.Add(Convert.ToString(json[0].value));
+                    dynamic json = Newtonsoft.Json.JsonConvert.DeserializeObject(formQuestionAnswer.Text);
+                    if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.Rating)
+                    {
+                        row.Add(Convert.ToString(json[0].key));
+                    }
+                    else
+                    {
+                        row.Add(Convert.ToString(json[0].value));
+                    }
                 }
                 else if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.CheckboxList)
                 {
