@@ -219,8 +219,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentUser = SessionVariables.CurrentUser;
 
             if (group.IsGuid())
-            {
-                activityGroup = currentAccount.GetActivityGroup(group.ToGuid(), msgs);
+            {               
+                activityGroup = ActivityGroup.LoadByUid(group.ToGuid());
                 accountActivityGroup = activityGroup.GetAccountActivityGroup(currentAccount).ID.Value.ToString();
             }
 
@@ -1671,6 +1671,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.Users = users;
+            LoadTeamViewBag(activity);
             return View("Team", activity);
         }
 
