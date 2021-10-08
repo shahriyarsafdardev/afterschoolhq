@@ -486,11 +486,33 @@ namespace AfterSchoolLibrary.Models
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
+        public static Registrant LoadByEmail(string email, DatabaseConnection dc = null)
+        {
+            DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+
+            dq.Criterias.Add(ObjectMap["email"], email);
+
+            var dcs1 = new DatabaseCriterias(LogicalOperatorType.Or);
+            dcs1.Add(ObjectMap["firstname"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
+            dcs1.Add(ObjectMap["firstname"], "");
+            dq.Criterias.Add(dcs1);
+
+            var dcs2 = new DatabaseCriterias(LogicalOperatorType.Or);
+            dcs2.Add(ObjectMap["lastname"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
+            dcs2.Add(ObjectMap["lastname"], "");
+            dq.Criterias.Add(dcs2);
+
+            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
+
         //public List<Activity> GetActivitiesByDay(DayOfWeekASL day, DatabaseConnection dc = null)
         //{
         //    return Activity.GetActivitiesByRegistrantByDay(this.ID.Value, day, DateTime.UtcNow, dc: dc);
         //}
-        
+
         public static List<Registrant> LoadFirstRegistrants(int accountId, int? start, int? length, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
