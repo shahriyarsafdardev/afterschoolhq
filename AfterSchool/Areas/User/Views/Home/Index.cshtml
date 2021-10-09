@@ -1,18 +1,19 @@
 ﻿@model List<Registrant>
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
+    var selectedDates = (List<DateTime>)ViewBag.SelectedDates;
     var activityInstances = (List<(
             ActivityInstance ActivityInstance,
             Registrant Registrant,
             int? ParticipationObjectId,
-            ParticipationObjectType ParticipationObjectType)>)ViewBag.ActivityInstances;
+            ParticipationObjectType ParticipationObjectType)>)ViewBag.ActivityInstances;    
     var providers = (List<Account>)ViewBag.Providers;
     var activitiesRequiringAttention = (List<RegistrantActivity>)ViewBag.ActivitiesRequiringAttention;
     var showToDos = activitiesRequiringAttention.Any() || Model.Any(registrant => registrant.ProfileStatusId != RegistrantProfileStatus.Completed);
     var showProviders = providers.Any();
     var showRightColumn = showToDos || showProviders;
     var showLeftColumn = activityInstances.Any();
-    var upcomingDivClass = "col-md-12 col-lg-6";
+    var upcomingDivClass = "col-md-12 col-lg-6";    
 
     if (!showRightColumn || !showLeftColumn)
     {

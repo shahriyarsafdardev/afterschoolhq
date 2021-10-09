@@ -84,8 +84,14 @@ namespace AfterSchool.Areas.User.Controllers
 
             ViewBag.Providers = providers;
             ViewBag.Messages = msgs;
+            ViewBag.SelectedDates = GetSelectedDatesFromCart();
 
             return View(registrants);
+        }
+
+        private List<DateTime> GetSelectedDatesFromCart()
+        {
+            return SessionVariables.Cart?.GetCartItems().FirstOrDefault()?.SelectedDates?.Split(',').Select(x => x.ToDateTime()).ToList();
         }
     }
 }

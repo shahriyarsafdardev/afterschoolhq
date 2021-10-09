@@ -225,6 +225,14 @@ namespace AfterSchoolLibrary.Models
             return _Activity;
         }
 
-        #endregion
-    }
+		public static CartItem LoadByParticipationObjectId(int ParticipationObjectId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ParticipationObjectId"], ParticipationObjectId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
+		#endregion
+	}
 }
