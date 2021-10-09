@@ -54,12 +54,21 @@ namespace AfterSchool.Areas.User.Controllers
 
                     ras.ForEach(ra => {
                         var instances = ra.GetSchedule(msgs)?.GetInstances(msgs: msgs);
+
+                        var participantObject = new ParticipationObject(ra.ParticipationObjectId.Value, ra.ParticipationObjectTypeId, msgs);
+
                         if (instances.IsNotEmpty())
+                        {
+                            var activityInstanceSeats = ActivityInstanceSeats.LoadByRegistrantActivityId(ra.ID.Value, msgs);
+                            if (participantObject.CanRegisterPerClass)
+                                instances.RemoveAll(instance => instance.ID.NotIn(activityInstanceSeats.Select(activityInstanceSeat => activityInstanceSeat.ActivityInstanceId)));
+
                             activityInstances.AddRange(instances.Select(instance => (
-                                instance, 
-                                registrant, 
-                                ra.ParticipationObjectId, 
+                                instance,
+                                registrant,
+                                ra.ParticipationObjectId,
                                 ra.ParticipationObjectTypeId)));
+                        }
                     });
 
                     if (masterRegistrant.IsParentOrGuardian)
@@ -83,15 +92,9 @@ namespace AfterSchool.Areas.User.Controllers
                 ).ToList();
 
             ViewBag.Providers = providers;
-            ViewBag.Messages = msgs;
-            ViewBag.SelectedDates = GetSelectedDatesFromCart();
+            ViewBag.Messages = msgs;            
 
             return View(registrants);
-        }
-
-        private List<DateTime> GetSelectedDatesFromCart()
-        {
-            return SessionVariables.Cart?.GetCartItems().FirstOrDefault()?.SelectedDates?.Split(',').Select(x => x.ToDateTime()).ToList();
         }
     }
 }

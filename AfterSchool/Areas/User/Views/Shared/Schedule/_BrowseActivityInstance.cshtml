@@ -5,9 +5,6 @@
     var account = participationObject.OwnerAccount;
     var registrant = Model.Registrant;
     var activityInstance = Model.ActivityInstance;
-    var canRegisterPerClass = participationObject.CanRegisterPerClass;
-    var cartItems = CartItem.LoadByParticipationObjectId(participationObject.ObjectID.Value);
-    var selectedDates = cartItems.SelectedDates.Split(',').Select(x => x.ToDateTime()).ToList();
 }
 
 <div class="">

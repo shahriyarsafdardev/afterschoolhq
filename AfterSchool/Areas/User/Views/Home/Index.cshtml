@@ -1,7 +1,6 @@
 ﻿@model List<Registrant>
 @{
-    var msgs = (SystemMessages)ViewBag.Messages;
-    var selectedDates = (List<DateTime>)ViewBag.SelectedDates;
+    var msgs = (SystemMessages)ViewBag.Messages;    
     var activityInstances = (List<(
             ActivityInstance ActivityInstance,
             Registrant Registrant,
