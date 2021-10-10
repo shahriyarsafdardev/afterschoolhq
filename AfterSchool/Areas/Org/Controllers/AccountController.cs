@@ -1070,15 +1070,23 @@ namespace AfterSchool.Areas.Org.Controllers
             if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
-            var sectionToDelete = FormQuestionGroup.Load(id.ToInteger(), msgs);
+            var sectionToDelete = FormQuestionGroup.Load(id: id.ToInteger(), msgs: msgs);
             sectionToDelete.IsActive = false;
             msgs.AddRange(sectionToDelete.Save());
+
+            //lets inactive all the questions for this section, so later when retrieving questions, we don't have to check for removed sections
+            var questionsInThisSection = FormQuestion.LoadByFormQuestionGroupId(FormQuestionGroupId: sectionToDelete.ID.Value, msgs: msgs);
+            foreach (var item in questionsInThisSection)
+            {
+                item.IsActive = false;
+                msgs.AddRange(item.Save());
+            }
 
             // Show Success Message
             // LOG: Someone has Deleted Question.
             if (msgs.HasNoErrors())
             {
-                msgs.Add(string.Format("{0} has been deleted.", sectionToDelete.Name), MessageType.Success);
+                msgs.Add(string.Format("{0} has been deleted with all it's questions.", sectionToDelete.Name), MessageType.Success);
                 SessionVariables.WebSession.LogActivity(
                    account: currentAccount,
                    actor: currentUser,

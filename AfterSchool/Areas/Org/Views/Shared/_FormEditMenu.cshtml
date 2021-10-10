@@ -30,7 +30,10 @@
                     @questionGroups[i].Name.IfBlank("-")
                 </a>
 
-                <a href="" class="btn btn-default btn-xs md-trigger pull-right" data-modal="modal-delete-formQuestionGroup" onclick="deleteSection('@Url.Action("DeleteSection","Account", new { id = questionGroups[i].ID.ToString()})')"><span class="text-danger"><i class="s7-trash"></i></span></a>
+                @if (questionGroups[i].QuestionGroupDataTypeId.In(new List<QuestionGroupDataType> { QuestionGroupDataType.Custom, QuestionGroupDataType.NotSet }))
+                {
+                    <a href="" class="btn btn-default btn-xs md-trigger pull-right" data-modal="modal-delete-formQuestionGroup" onclick="deleteSection('@Url.Action("DeleteSection","Account", new { id = questionGroups[i].ID.ToString()})')"><span class="text-danger"><i class="s7-trash"></i></span></a>
+                }
             </div>
         </li>
     }
