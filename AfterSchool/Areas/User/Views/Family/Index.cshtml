@@ -8,7 +8,10 @@
 <div class="main-content">
     @foreach (var registrant in Model)
     {
-        Html.RenderPartial("Registrants/_BrowseRegistrant", registrant);
+        if (!registrant.IsDeleted)
+        {
+            Html.RenderPartial("Registrants/_BrowseRegistrant", registrant);
+        }
     }
 </div>
 
