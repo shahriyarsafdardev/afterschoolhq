@@ -1309,9 +1309,11 @@
     }
     function uncheckAllActive() {
         $('input[id^="active-"][disabled!="disabled"]').prop('checked', false);
+        uncheckAllRequired();
     }
     function checkAllRequired() {
         $('input[id^="required-"][disabled!="disabled"]').prop('checked', true);
+        checkAllActive();
     }
     function uncheckAllRequired() {
         $('input[id^="required-"][disabled!="disabled"]').prop('checked', false);
