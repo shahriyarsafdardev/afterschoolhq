@@ -59,7 +59,7 @@
                             </div>
                             <div class="panel-body">
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label"><span id="form-type-label">Registration</span> Form Name</label>
+                                    <label class="col-sm-3 control-label">Form Name</label>
                                     <div class="col-sm-9">
                                         <input type="text" class="form-control" id="name" name="name" value="@Model.Name.IfBlank(Model.Name + " Registration Form")" onfocus="this.select()" required />
                                     </div>
@@ -141,7 +141,7 @@
                                                 <th></th>
                                                 <th>Ask? (<a href="javascript:checkAllActive()">All</a> / <a href="javascript:uncheckAllActive()">None</a>)</th>
                                                 <th>Required? (<a href="javascript:checkAllRequired()">All</a> / <a href="javascript:uncheckAllRequired()">None</a>)</th>
-                                                <th>Answer Description? (<a href="javascript:checkAllRequired()">All</a> / <a href="javascript:uncheckAllRequired()">None</a>)</th>
+                                                <th>Answer Description? (<a href="javascript:checkAllAnswerDescription()">All</a> / <a href="javascript:uncheckAllAnswerDescription()">None</a>)</th>
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
@@ -1309,15 +1309,21 @@
     }
     function uncheckAllActive() {
         $('input[id^="active-"][disabled!="disabled"]').prop('checked', false);
-        uncheckAllRequired();
     }
     function checkAllRequired() {
         $('input[id^="required-"][disabled!="disabled"]').prop('checked', true);
-        checkAllActive();
     }
     function uncheckAllRequired() {
         $('input[id^="required-"][disabled!="disabled"]').prop('checked', false);
     }
+
+    function checkAllAnswerDescription() {
+        $('input[id^="answerDescription-"][disabled!="disabled"]').prop('checked', true);
+    }
+    function uncheckAllAnswerDescription() {
+        $('input[id^="answerDescription-"][disabled!="disabled"]').prop('checked', false);
+    }
+
 
     function Validate() {
         $(".btn btn-default btn-lg btn-block").removeAttr("disabled");
@@ -1369,13 +1375,6 @@
         });
     }
 
-    $(document).ready(function () {
-        var formType = $("#formtype").val();
-        if (formType === '2') {
-            $('#form-type-label').text('Survey');
-        }
-    });
-
 </script>
 
 
@@ -1392,6 +1391,13 @@
             if ($(this).is(':checked')) {
                 var id = $(this).attr('id').split('-')[1];
                 $('#active-' + id).prop('checked', true);
+            }
+        });
+
+        $('.question-IsAnswerDescriptionEnabled').click(function () {
+            if ($(this).is(':checked')) {
+                var id = $(this).attr('id').split('-')[1];
+                $('#answerDescription-' + id).prop('checked', true);
             }
         });
 
