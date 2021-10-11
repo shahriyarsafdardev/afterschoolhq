@@ -59,7 +59,7 @@
                             </div>
                             <div class="panel-body">
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label">Registration Form Name</label>
+                                    <label class="col-sm-3 control-label"><span id="form-type-label">Registration</span> Form Name</label>
                                     <div class="col-sm-9">
                                         <input type="text" class="form-control" id="name" name="name" value="@Model.Name.IfBlank(Model.Name + " Registration Form")" onfocus="this.select()" required />
                                     </div>
@@ -1368,6 +1368,14 @@
             }
         });
     }
+
+    $(document).ready(function () {
+        var formType = $("#formtype").val();
+        if (formType === '2') {
+            $('#form-type-label').text('Survey');
+        }
+    });
+
 </script>
 
 
