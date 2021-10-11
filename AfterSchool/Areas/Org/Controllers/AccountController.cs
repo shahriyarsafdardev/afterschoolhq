@@ -959,7 +959,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                         Options = Request.Params[string.Format("new-options-text-{0}", i)],
                                         Link = Request.Params[string.Format("new-link-text-{0}", i)],
                                         Description = Request.Params[string.Format("new-description-{0}", i)],
-                                        IsActive = Request.Params[string.Format("new-active-{0}", i)].IsBoolean(),
+                                        IsActive = true,
                                         IsRequired = Request.Params[string.Format("new-required-{0}", i)].IsBoolean(),
                                         IsAnswerDescriptionEnabled = Request.Params[string.Format("new-description-enabled-{0}", i)].IsBoolean()
                                     };

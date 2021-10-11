@@ -259,6 +259,7 @@ namespace AfterSchoolLibrary.Models
                 newGroup.CreateDate = DateTime.UtcNow;
                 newGroup.LastModifiedBy = newGroup.CreatedBy = loggedInUserId;
                 newGroup.FormId = form.ID;
+                newGroup.IsActive = true;
                 msgs.AddRange(newGroup.Save(dc: dc));
 
                 questions.ForEach(question => {
