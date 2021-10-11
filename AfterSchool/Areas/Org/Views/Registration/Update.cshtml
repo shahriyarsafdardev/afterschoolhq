@@ -18,7 +18,7 @@
         <div class="panel-body">
 
             <form id="form-add-reg" action="@Url.Action("update", "registration", new { id = Model.Uid })" class="form-horizontal" method="post" enctype="multipart/form-data">
-
+                <input type="hidden" name="returnUrl" value="@ViewBag.ReturnURl">
                 @foreach (var group in qvms.Select(qvm => qvm.Question.GetFormQuestionGroup()).DistinctBy(group => group.ID).OrderBy(group => group.DisplayOrder))
                 {
                     <div class="panel panel-default">
@@ -38,7 +38,7 @@
                     <div class="col-md-3"></div>
                     <div class="col-md-6">
                         <div class="pull-left">
-                            <a href="@Url.Action("edit", "registration", new { id = Model.Uid })" class="text-muted">&laquo; Back</a>
+                            <a href="@Url.Action("edit", "registration", new { id = Model.Uid, returnUrl = ViewBag.ReturnURl })" class="text-muted">&laquo; Back</a>
                         </div>
                         <div class="btn-group pull-right">
                             <button type="submit" class="btn btn-primary btn-lg">Update @UILabel.RegistrantLabel() &raquo;</button>

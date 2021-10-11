@@ -1,6 +1,7 @@
 ﻿using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -349,7 +350,7 @@ namespace AfterSchoolLibrary.Services
             );
         }
 
-        private static string UploadCSV(Account account, string filename, string csv, SystemMessages msgs)
+        public static string UploadCSV(Account account, string filename, string csv, SystemMessages msgs)
         {
             var ms = new System.IO.MemoryStream(Encoding.UTF8.GetBytes(csv));
             var ah = new AmazonHelper(
@@ -687,7 +688,7 @@ namespace AfterSchoolLibrary.Services
                         var answer = registration.GetAnswer(question);
 
                         if (answer.IsNotEmpty())
-                            row.Add(answer.Text);
+                            ConvertJSONAnswersIntoText(answer, row);
                         else
                             row.Add("");
                         break;
@@ -699,9 +700,39 @@ namespace AfterSchoolLibrary.Services
                 var answer = registration.GetAnswer(question);
 
                 if (answer.IsNotEmpty())
-                    row.Add(answer.Text);
+                    ConvertJSONAnswersIntoText(answer, row);
                 else
                     row.Add("");
+            }
+        }
+
+        private static void ConvertJSONAnswersIntoText(FormQuestionAnswer answer, List<string> row)
+        {
+            if (answer.FormQuestionQuestionTypeId != QuestionType.RadioList && answer.FormQuestionQuestionTypeId != QuestionType.DropDownList && answer.FormQuestionQuestionTypeId != QuestionType.CheckboxList)
+            {
+                row.Add(answer.Text);
+            }
+            else if (answer.FormQuestionQuestionTypeId == QuestionType.Checkbox)
+            {
+                row.Add(answer.Text == "1" ? "True" : "False");
+            }
+            else if (answer.FormQuestionQuestionTypeId == QuestionType.DropDownList || answer.FormQuestionQuestionTypeId == QuestionType.RadioList)
+            {
+                dynamic json = JsonConvert.DeserializeObject(answer.Text);
+                row.Add(Convert.ToString(json[0].Value));
+            }
+            else if (answer.FormQuestionQuestionTypeId == QuestionType.CheckboxList)
+            {
+                var str = "";
+                dynamic json = JsonConvert.DeserializeObject(answer.Text);
+                foreach (var item in json)
+                {
+                    if (str.IsNotEmpty())
+                        str = str + ", " + item.Value;
+                    else
+                        str = item.Value;
+                }
+                row.Add(Convert.ToString(str));
             }
         }
 

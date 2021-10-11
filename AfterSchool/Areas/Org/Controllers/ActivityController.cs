@@ -11,6 +11,7 @@ using Hangfire;
 using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary;
 using AfterSchoolLibrary.Helpers;
+using System.IO;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -304,7 +305,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     if (msgs.HasNoErrors() && !SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms, msgs))
                     {
                         var defaultForm = currentAccount.GetDefaultForm(msgs);
-                        var newForm = defaultForm.Copy(currentUser.ID.Value, currentAccount.ID.Value, (name + " form").MaxChars(100, "..."), msgs);
+                        var newForm = defaultForm.Copy(currentUser.ID.Value, currentAccount.ID.Value, FormType.Registration, (name + " form").MaxChars(100, "..."), msgs);
                         if (msgs.HasNoErrors())
                         {
                             if (values.Any(m => m.Key == "form"))
@@ -1867,6 +1868,220 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             return RedirectToAction("attendance", new { id = activityId, msg = msg });
         }
+        #endregion
+
+        #region Surveys
+        [HttpGet]
+        public ActionResult Surveys(string id)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = TempData["msgs"].IsNotEmpty() ? (SystemMessages)TempData["msgs"] : new SystemMessages();
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+
+            ViewBag.Surveys = SurveyRequest.LoadByActivityId(activity.ID.Value, msgs).OrderByDescending(a => a.CreateDate).ToList();
+            ViewBag.Messages = msgs;
+            return View(activity);
+        }
+
+
+        [HttpGet]
+        public ActionResult NewSurvey(string id)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = TempData["msgs"].IsNotEmpty() ? (SystemMessages)TempData["msgs"] : new SystemMessages();
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+            var activityGroup = activity.GetActivityGroup(currentAccount.ID.Value, msgs);
+
+            LoadEditSetupViewBag(activity, activityGroup, msgs);
+
+            ViewBag.Students = activity.GetRegistrantActivities(includeInvited: true, msgs).Where(a => a.AssignmentTypeId == RegistrationAssignmentType.Reserved || a.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingParentalConsent || a.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment).ToList();
+
+            ViewBag.Messages = msgs;
+            return View(activity);
+        }
+
+
+        [HttpPost]
+        public ActionResult SaveSurvey(string id, string activityId, string formId, string name, string optionalText, string dueDate, string isEveryIndividualSelected, string isAllowMultiple)
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+
+            var students = ToDictionary(Request.Form.Filter("studentList"));
+            var studentList = ConvertToStudentsList(students);
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+
+            if (name.IsEmpty())
+                msgs.Add("Survey title is required", MessageType.Error);
+
+            if (!studentList.Any(a => a.Selected) && Request.Form["students"].ToString() == "false")
+                msgs.Add("Select Students", MessageType.Error);
+
+            if (msgs.HasNoErrors())
+            {
+                var surveyRequest = SurveyRequestService.AddSurvey(formId.ToInteger(), activityId.ToInteger(), name, dueDate, optionalText, isAllowMultiple.ToBoolean(), currentAccount.ID.Value, currentUser.ID.Value, msgs);
+
+                if (isEveryIndividualSelected.ToBoolean())
+                    CreateSurveys(surveyRequest.ID.Value, studentList.Where(a => a.Selected).ToList(), currentUser.ID.Value, msgs);
+                else
+                    CreateSurveys(surveyRequest.ID.Value, studentList, currentUser.ID.Value, msgs);
+
+                if (msgs.HasNoErrors())
+                {
+                    msgs.Add("Survey notifications sent successfully<br/>", MessageType.Success);
+
+                    TempData["msgs"] = msgs;
+                    return RedirectToAction("Surveys", new { id, msgs });
+                }
+                else
+                {
+                    TempData["msgs"] = msgs;
+                    return RedirectToAction("NewSurvey", new { id, msgs });
+                }
+            }
+            else
+            {
+                TempData["msgs"] = msgs;
+                return RedirectToAction("NewSurvey", new { id,  msgs });
+            }
+        }
+
+        private static IDictionary<string, string> ToDictionary(System.Collections.Specialized.NameValueCollection source)
+        {
+            return source.Cast<string>().Select(s => new { Key = s, Value = source[s] }).ToDictionary(p => p.Key, p => p.Value);
+        }
+
+        private static List<SelectListItem> ConvertToStudentsList(IDictionary<string, string> students)
+        {
+            var studentsList = new List<SelectListItem>();
+            for (var i = 0; i < students.Count(); )
+            {
+                studentsList.Add(new SelectListItem { Text = students.ElementAt(i+2).Value, Value = students.ElementAt(i+1).Value, Selected = students.ElementAt(i).Value.Contains("true")});
+                i = i + 3;
+            }
+            return studentsList;
+        }
+
+        private static void CreateSurveys(int surveyRequestId, List<SelectListItem> studentList, int currentUserId, SystemMessages msgs)
+        {
+              studentList.ForEach(student => {
+                  var surveyResponse = SurveyResponseService.CreateSurveyFeedback(surveyRequestId, student.Value.ToInteger(), SurveyFeedbackStatus.New, currentUserId, msgs);
+                  var getRegistrant = Registrant.Load(student.Value.ToInteger());
+                  if (getRegistrant.WebUserId.IsEmpty())
+                  {
+                      var createInviteCode = RegistrantInviteCodeService.Create(surveyResponse.ID.Value, getRegistrant.ID.Value, currentUserId, msgs, null);
+                      BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, createInviteCode.Code, null));
+                  }
+                  else
+                  {
+                      BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, null, null));
+                  }
+              });
+        }
+        [HttpGet]
+        public ActionResult ResendNotification(int id, int surveyId)
+        {
+            if(id == 0){
+                var surveyResponses = SurveyResponse.LoadBySurveyRequestId(surveyId).Where(a => a.SurveyFeedbackStatusTypeId != SurveyFeedbackStatus.Completed).ToList();
+                surveyResponses.ForEach(surveyResponse => {
+                    CheckRegistrantInviteCodeAndSendEmail(surveyResponse);
+                });
+            }
+            else{
+                var surveyResponse = SurveyResponse.Load(id);
+                CheckRegistrantInviteCodeAndSendEmail(surveyResponse);
+            }
+
+            return Json(new { msg = "Reminder sent", success = true}, JsonRequestBehavior.AllowGet);
+        }
+
+        private void CheckRegistrantInviteCodeAndSendEmail(SurveyResponse surveyResponse)
+        {
+            var checkIfInviteCodeExists = RegistrantInviteCode.CheckBySurveyResponseIdExpiryDate(surveyResponse.ID.Value, DateTime.Now);
+            if (checkIfInviteCodeExists.IsNotEmpty())
+                BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, checkIfInviteCodeExists.Code, null));
+            else
+                BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, null, null));
+        }
+
+        [HttpGet]
+        public ActionResult ViewSurvey(int id, string activityId)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+
+            var activity = currentAccount.GetActivity(activityId.ToGuid(), msgs);
+
+            ViewBag.GetSurveyFeedback = SurveyResponse.LoadBySurveyRequestId(id, msgs).OrderByDescending(a => a.CreateDate).ToList();
+            ViewBag.Survey = SurveyRequest.Load(id);
+            ViewBag.Messages = msgs;
+
+            return View(activity);
+        }
+
+        public FileResult ExportCSV(int id)
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+
+            var fileLink = SurveyRequestService.ExportSurveyRequestToCSV(id, currentAccount.ID.Value, "ExportCSV", msgs);
+
+            if (!Directory.Exists(Server.MapPath("~/Uploads")))
+                Directory.CreateDirectory(Server.MapPath("~/Uploads"));
+
+            var filePath = Server.MapPath("~/Uploads/" + Guid.NewGuid()+"ExportSurvey.csv");
+
+            var client = new System.Net.WebClient();
+            client.DownloadFile(fileLink, filePath);          
+            byte[] filedata = System.IO.File.ReadAllBytes(filePath);
+            client.Dispose();
+
+            BackgroundJob.Enqueue(() => SurveyRequestService.DeleteCSVFile(filePath));
+            return File(filedata, "application/octet-stream", "ExportSurvey.csv");
+        }
+        [HttpGet]
+        public ActionResult ViewSurveyResults(int id, string activityId)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+
+            var getSurveyResponse = SurveyResponse.Load(id, msgs);            
+            var activity = currentAccount.GetActivity(activityId.ToGuid(), msgs);
+
+            var getSurveyResponses = SurveyResponse.LoadBySurveyRequestId(getSurveyResponse.SurveyRequestId.Value).Where(a => a.SurveyFeedbackStatusTypeId == SurveyFeedbackStatus.Completed).ToList();
+        
+            var findIndex = getSurveyResponses.FindIndex(a => a.ID == getSurveyResponse.ID);
+
+            if (findIndex >= 0  && (findIndex + 1) < getSurveyResponses.Count)
+                ViewBag.NextExists = getSurveyResponses[findIndex + 1].ID;
+            
+            if((findIndex - 1) >= 0)
+                ViewBag.PrevExists = getSurveyResponses[findIndex - 1].ID;
+
+
+            ViewBag.FormQuestionAnswers = FormQuestionAnswer.LoadBySurveyResponseId(getSurveyResponse.ID.Value, msgs).OrderBy(a => a.FormQuestionGroupDisplayOrder).ThenBy(a => a.FormQuestionDisplayOrder).ToList();
+            ViewBag.SurveyName = SurveyRequest.Load(getSurveyResponse.SurveyRequestId.Value).Name;
+            ViewBag.RegistrantName = Registrant.Load(getSurveyResponse.RegistrantId.Value).Name;
+            ViewBag.SurveyFeedback = getSurveyResponse;
+            ViewBag.Messages = msgs;
+
+            return View(activity);
+        }
+
         #endregion
 
         [HttpGet]

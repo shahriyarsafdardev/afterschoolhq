@@ -553,9 +553,7 @@ namespace AfterSchoolLibrary.Models
 
             var gradeLevels = GradeLevel.Load(msgs: msgs, dc: dc).OrderBy(gradeLevel => gradeLevel.ID).ToList();
             var registrantGradeLevelAnswer = registrant.GetAnswer(QuestionDataType.RegistrantGrade, msgs, dc);
-
-            //this changes are only for testing of 1kag54g/coupon and refund error
-            //this should be replaced with the changes of FHC
+            
             if (registrantGradeLevelAnswer.Text.IsNotEmpty())
             {
                 if (!MinGradeId.HasValue)
@@ -565,11 +563,20 @@ namespace AfterSchoolLibrary.Models
                     MaxGradeId = gradeLevels.Last().ID;
 
                 GradeLevel registrantGradeLevel = null;
-                if (registrantGradeLevelAnswer.IsNotEmpty())
+                if (Helpers.Utilities.IsAlreadyJsonString(registrantGradeLevelAnswer.Text))
+                {
+                    var data = Helpers.Utilities.GetKeyValuePairs(registrantGradeLevelAnswer.Text);
+                    var registrantGradeLevelAnswerText = data.First().key.ToLower().Trim();
+                    registrantGradeLevel = gradeLevels.FirstOrDefault(gradeLevel => gradeLevel.Abbreviation.IsSameAs(registrantGradeLevelAnswerText) || (registrantGradeLevelAnswerText.MaxChars(gradeLevel.Abbreviation.Length) == gradeLevel.Abbreviation));
+
+
+                        //gradeLevels.Where(m => m.Name.ToLower() == data.First().key.ToLower().Trim()).FirstOrDefault();
+                }
+                else if (registrantGradeLevelAnswer.IsNotEmpty())
                     registrantGradeLevel = gradeLevels.FirstOrDefault(gradeLevel => gradeLevel.Abbreviation.IsSameAs(registrantGradeLevelAnswer.Text) || (registrantGradeLevelAnswer.Text.MaxChars(gradeLevel.Abbreviation.Length) == gradeLevel.Abbreviation));
 
-                if (registrantGradeLevel.IsNotEmpty() &&
-                    registrantGradeLevel.ID.IsNotEmpty() &&
+                if (registrantGradeLevel.IsNotEmpty() && 
+                    registrantGradeLevel.ID.IsNotEmpty() && 
                     registrantGradeLevel.ID.Value.IsInRange(MinGradeId.Value, MaxGradeId.Value))
                     return true;
             }

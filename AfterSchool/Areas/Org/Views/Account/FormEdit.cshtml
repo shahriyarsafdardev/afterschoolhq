@@ -7,14 +7,16 @@
     var questionGroup = (FormQuestionGroup)ViewBag.QuestionGroup;
     var qgId = new int?();
     var questions = new List<FormQuestion>();
-    var typesWithOptions = new List<QuestionType>() { QuestionType.CheckboxList, QuestionType.DropDownList, QuestionType.RadioList, QuestionType.RadioMatrix };
-    var typesUserCannotAdd = new List<QuestionType>() { QuestionType.TextBlock, QuestionType.NotSet, QuestionType.RadioMatrix };
+    var typesWithRating = new List<QuestionType>() { QuestionType.Rating };
+    var typesWithOptions = new List<QuestionType>() { QuestionType.CheckboxList, QuestionType.DropDownList, QuestionType.RadioList, QuestionType.RadioMatrix, QuestionType.Emoji };
+    var typesUserCannotAdd = Model.GetTypesUserCannotAdd();
 
     if (questionGroup.IsNotEmpty())
     {
         qgId = questionGroup.ID;
-        questions = questionGroup.GetAllQuestions();
+        questions = questionGroup.GetAllQuestions().Where(a => a.Text.IsNotEmpty() || a.QuestionTypeId == QuestionType.TextBlock).ToList();
     }
+    var count = 1;
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -46,7 +48,7 @@
                                         <button type="submit" class="btn btn-default btn-space" onclick="navigateForm('@Url.Action("formedit", "account", new { id = Model.ID, qg = qgId, cmd = "prev" })')">&laquo;</button>
                                     }
                                     <button type="submit" class="btn btn-default btn-space"><i class="s7-diskette"></i> Save</button>
-                                    @if (questionGroups.Last().ID != qgId)
+                                    @if (questionGroups.Count() > 0 ? questionGroups.Last().ID != qgId : false)
                                     {
                                         <button type="submit" class="btn btn-primary btn-space" onclick="navigateForm('@Url.Action("formedit", "account", new { id = Model.ID, qg = qgId, cmd = "next" })')">&raquo;</button>
                                     }
@@ -60,6 +62,20 @@
                                     <label class="col-sm-3 control-label">Registration Form Name</label>
                                     <div class="col-sm-9">
                                         <input type="text" class="form-control" id="name" name="name" value="@Model.Name.IfBlank(Model.Name + " Registration Form")" onfocus="this.select()" required />
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">Form Type</label>
+                                    <div class="col-sm-9">
+                                        <select class="form-control formtype-select" id="formtype" name="formtype">
+                                            @foreach (var type in Enum.GetValues(typeof(FormType)).Cast<FormType>().Where(a => !a.Equals(FormType.NotSet)))
+                                            {
+                                                <option value="@((int)type)" @(type == Model.FormTypeId ? "selected=\"selected\"" : "")>
+                                                    @type.ToString().SplitByUpperCase()
+                                                </option>
+                                            }
+                                        </select>
                                     </div>
                                 </div>
 
@@ -78,12 +94,12 @@
                             <div class="panel-heading">
                                 <div class="btn-group pull-right">
 
-                                    @if (questionGroups.First().ID != qgId)
+                                    @if (questionGroups.Count() > 0 ? questionGroups.First().ID != qgId : false)
                                     {
                                         <button type="submit" class="btn btn-default btn-space" onclick="navigateForm('@Url.Action("formedit", "account", new { id = Model.ID, qg = questionGroup.ID, cmd = "prev" })')">&laquo;</button>
                                     }
                                     <button type="submit" class="btn btn-default btn-space"><i class="s7-diskette"></i> Save</button>
-                                    @if (questionGroups.Last().ID != qgId)
+                                    @if (questionGroups.Count() > 0 ? questionGroups.Last().ID != qgId && qgId != 0 : false)
                                     {
                                         <button type="submit" class="btn btn-primary btn-space" onclick="navigateForm('@Url.Action("formedit", "account", new { id = Model.ID, qg = questionGroup.ID, cmd = "next" })')">&raquo;</button>
                                     }
@@ -92,41 +108,61 @@
 
                                 <p></p>
 
-                                @if (questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet || questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.Custom)
+                                @if (questionGroup.IsNotEmpty())
                                 {
-                                    <input type="text"
-                                           id="name-@questionGroup.ID"
-                                           name="name-@questionGroup.ID"
-                                           value="@questionGroup.Name"
-                                           required
-                                           class="form-control input-lg input-lg-font"
-                                           onfocus="this.select()"
-                                           data-tooltip-id="name-@questionGroup.ID"
-                                           placeholder="Enter your new section name" />
-                                }
-                                else
-                                {
-                                    <p class="text-medium">@questionGroup.Name</p>
+                                    if (questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet || questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.Custom)
+                                    {
+                                        <input type="text"
+                                               id="name-@questionGroup.ID"
+                                               name="name-@questionGroup.ID"
+                                               value="@questionGroup.Name"
+                                               required
+                                               class="form-control input-lg input-lg-font"
+                                               onfocus="this.select()"
+                                               data-tooltip-id="name-@questionGroup.ID"
+                                               placeholder="Enter your new section name" />
+                                    }
+                                    else
+                                    {
+                                        <p class="text-medium">@questionGroup.Name</p>
+                                    }
                                 }
 
 
                             </div>
                             <div class="panel-body">
                                 <div class="table-responsive">
-                                    <table class="table table-striped" id="question-table">
+                                    <table class="table table-striped question-table" id="question-table">
                                         <thead>
                                             <tr>
+                                                <th>Order</th>
                                                 <th>Question Label</th>
                                                 <th></th>
                                                 <th></th>
                                                 <th>Ask? (<a href="javascript:checkAllActive()">All</a> / <a href="javascript:uncheckAllActive()">None</a>)</th>
                                                 <th>Required? (<a href="javascript:checkAllRequired()">All</a> / <a href="javascript:uncheckAllRequired()">None</a>)</th>
+                                                <th>Answer Description? (<a href="javascript:checkAllRequired()">All</a> / <a href="javascript:uncheckAllRequired()">None</a>)</th>
+                                                <th>Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach (var question in questions)
                                             {
-                                                <tr>
+                                                <tr class="questionRow">
+                                                    <td>
+                                                        <label class="lbl-display-order" id="displayOrderlabel-@question.ID">
+                                                            @count
+                                                        </label>
+                                                        <input type="hidden"
+                                                               id="sortorder-@question.ID"
+                                                               name="displayOrderId-@question.ID" class="displayOrderId"
+                                                               value="@count" />
+                                                        <input type="hidden"
+                                                               id="questionid-@question.ID"
+                                                               name="questionid-@question.ID"
+                                                               class="questionId"
+                                                               value=" @question.ID" />
+                                                    </td>
                                                     <td>
                                                         @if (question.QuestionTypeId != QuestionType.TextBlock)
                                                         {
@@ -191,7 +227,7 @@
                                                                 id="btn-setoptions-@question.ID">
                                                             Edit Options
                                                         </button>
-                                                        <input type="hidden"
+                                                        <input type="hidden" class="options-input"
                                                                id="options-text-@question.ID"
                                                                name="options-text-@question.ID"
                                                                value="@question.Options" />
@@ -207,19 +243,30 @@
                                                                id="link-text-@question.ID"
                                                                name="link-text-@question.ID"
                                                                value="@question.Link" />
+                                                        <button type="button"
+                                                                class="btn btn-default md-trigger btn-space hide"
+                                                                data-modal="modal-rating"
+                                                                onclick="setRating(@question.ID)"
+                                                                id="btn-setratings-@question.ID">
+                                                            Edit Ratings
+                                                        </button>
+                                                        <input type="hidden" class="rating-input"
+                                                               id="rating-text-@question.ID"
+                                                               name="rating-text-@question.ID"
+                                                               value="@question.Options" />
                                                     </td>
 
                                                     <td>
                                                         @{Html.RenderPartial(
-                                                                    "~/Views/Shared/_SwitchButton.cshtml",
-                                                                    question.IsActive,
-                                                                    new ViewDataDictionary()
-                                                                    {
-                                                                            { "checkboxname", "active-" + question.ID },
-                                                                            { "checkboxid", "active-" + question.ID },
-                                                                            { "disabled", question.IsLocked },
-                                                                            { "classname", "question-isactive" }
-                          });}
+                                                                              "~/Views/Shared/_SwitchButton.cshtml",
+                                                                              question.IsActive,
+                                                                              new ViewDataDictionary()
+                                                                              {
+                                                                                                                    { "checkboxname", "active-" + question.ID },
+                                                                                                                    { "checkboxid", "active-" + question.ID },
+                                                                                                                    { "disabled", question.IsLocked },
+                                                                                                                    { "classname", "question-isactive" }
+});}
                                                     </td>
                                                     <td>
                                                         @if (question.QuestionTypeId != QuestionType.TextBlock)
@@ -229,28 +276,47 @@
                                                                    question.IsRequired,
                                                                    new ViewDataDictionary()
                                                                    {
-                                                                            { "checkboxname", "required-" + question.ID },
-                                                                            { "checkboxid", "required-" + question.ID },
-                                                                            { "disabled", question.IsLocked },
-                                                                            { "classname", "question-isrequired" }
-                           });
+                                                                                                                { "checkboxname", "required-" + question.ID },
+                                                                                                                { "checkboxid", "required-" + question.ID },
+                                                                                                                { "disabled", question.IsLocked },
+                                                                                                                { "classname", "question-isrequired" }
+});
                                                         }
                                                     </td>
-                                                </tr>
-                                            }
-
-                                            @if (questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet || true)
-                                            {
-                                                <tr>
-                                                    <td colspan="5">
-                                                        <button type="button" class="btn btn-default" onclick="addQuestion()">
-                                                            <i class="s7-plus"></i> Add Question
-                                                        </button>
-                                                        <button type="button" class="btn btn-default" onclick="addTextBlock()">
-                                                            <i class="s7-plus"></i> Add Text Block
-                                                        </button>
+                                                    <td>
+                                                        @{Html.RenderPartial(
+                                                                                "~/Views/Shared/_SwitchButton.cshtml",
+                                                                                question.IsAnswerDescriptionEnabled,
+                                                                                new ViewDataDictionary()
+                                                                                {
+                                                                                                                    { "checkboxname", "answerDescription-" + question.ID },
+                                                                                                                    { "checkboxid", "answerDescription-" + question.ID },
+                                                                                                                    { "disabled", question.IsLocked },
+                                                                                                                    { "classname", "question-IsAnswerDescriptionEnabled" }
+});}
+                                                    </td>
+                                                    <td>
+                                                        <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteQuestion('@question.Text', '@Url.Action("delete","Account", new { id = question.ID.ToString()})')"><span class="text-danger"><i class="s7-trash"></i></span></button>
                                                     </td>
                                                 </tr>
+                                                count++;
+                                            }
+
+                                            @if (questionGroup.IsNotEmpty())
+                                            {
+                                                if (questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet || true)
+                                                {
+                                                    <tr>
+                                                        <td colspan="5">
+                                                            <button type="button" class="btn btn-default" onclick="addQuestion()">
+                                                                <i class="s7-plus"></i> Add Question
+                                                            </button>
+                                                            <button type="button" class="btn btn-default" onclick="addTextBlock()">
+                                                                <i class="s7-plus"></i> Add Text Block
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                }
                                             }
                                         </tbody>
                                     </table>
@@ -270,9 +336,9 @@
                         <div class="col-sm-2"></div>
                     }
                     <div class="col-sm-8">
-                        <button type="submit" class="btn btn-default btn-lg btn-block"><i class="s7-diskette"></i> Save</button>
+                        <button type="submit" class="btn btn-default btn-lg btn-block" onclick="Validate()"><i class="s7-diskette"></i> Save</button>
                     </div>
-                    @if (questionGroups.Last().ID != qgId && qgId != 0)
+                    @if (questionGroups.Count() > 0 ? questionGroups.Last().ID != qgId && qgId != 0 : false)
                     {
                         <div class="col-sm-2">
                             <button type="submit" class="btn btn-primary btn-lg btn-block" onclick="navigateForm('@Url.Action("formedit", "account", new { id = Model.ID, qg = qgId, cmd = "next" })')">Next &raquo;</button>
@@ -294,12 +360,12 @@
                         </li>
 
                         @{ Html.RenderPartial("_FormEditMenu",
-                                 Model,
-                                 new ViewDataDictionary() {
+                                          Model,
+                                          new ViewDataDictionary() {
                                         { "RegistrantType", RegistrantType.Individual },
                                         { "QuestionGroups", individualGroups },
                                         { "QuestionGroupId", qgId }
-                 });
+});
                         }
 
                         <li class="dd-item">
@@ -312,12 +378,12 @@
                         </li>
 
                         @{ Html.RenderPartial("_FormEditMenu",
-                                 Model,
-                                 new ViewDataDictionary() {
+                                          Model,
+                                          new ViewDataDictionary() {
                                         { "RegistrantType", RegistrantType.Organization },
                                         { "QuestionGroups", organizationGroups },
                                         { "QuestionGroupId", qgId }
-                 });
+});
                         }
 
                     </ol>
@@ -331,43 +397,84 @@
 
 </div>
 
-
+<!------- Options and Emoji Modal Pop-up------------->
 <div id="modal-options" class="md-modal colored-header custom-width md-effect-9">
-    <form id="form-options" action="#" method="post">
+    <form id="form-options" name="form-options" action="#" method="post">
         <div class="md-content">
             <div class="modal-header">
                 <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
-                <h3 class="modal-title">Edit Options</h3>
+                <h3 class="modal-title">Edit <span id="modal-options-title">Options</span></h3>
             </div>
-            <div class="modal-body form">
+            <div class="clearfix"></div>
+
+            <div class="modal-body form fixed-height-modal-options">
 
                 <p>Update your options here. Your options are not saved until you hit the save button on the screen</p>
+                <p class="twoOptionsValidation text-danger hide">Please add atleast two options.</p>
+                <p class="invalid-char text-danger hide">| sign is not allowed.</p>
+                <p class="requiredData text-danger hide">Please select emojis.</p>
 
-                <div class="form-group">
-                    <label><span id="question-options-label"></span> (options must be separated by commas)</label>
-                    <textarea class="form-control" id="question-options" name="question-options" rows="6" placeholder="ex: option 1, option 2, option 3"></textarea>
+                <div class="table-responsive">
+                    <table class="table options-table emoji-option-table" id="options-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Value <span style="color:red">*</span></th>
+                                <th>Description (optional)</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="questionRow" id="option-1">
+                                <td>
+                                    Option 1
+                                </td>
+                                <td>
+                                    <input type="text" value="" id="option-1" required class="form-control col-sm-3 option" onfocus="this.select()" />
+                                </td>
+                                <td>
+                                    <input type="text" value="" id="optionDescription-1" class="form-control col-sm-3 optionDescription" onfocus="this.select()" />
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-default btn-sm md-trigger" onclick="removeOption($(this).closest('tr').attr('id'))"><span class="text-danger"><i class="s7-trash"></i></span></button>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="4">
+                                    <button type="button" class="btn btn-default" onclick="addOption()">
+                                        <i class="s7-plus"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
+            <div class="clearfix"></div>
+
             <div class="modal-footer">
-                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-                <button type="button" data-dismiss="modal" class="btn btn-primary md-close" onclick="updateOptions()">Done</button>
+                <button type="button" data-dismiss="modal" class="btn btn-default md-close" onclick="removeValidations()">Cancel</button>
+                <button type="button" data-dismiss="modal" class="btn btn-primary" onclick="updateOptions()">Done</button>
             </div>
+            <div class="clearfix"></div>
         </div>
     </form>
 </div>
-
+<!------- Enf of Options and Emoji Modal Pop-up------------->
+<!------- Link Modal Pop-up------------->
 <div id="modal-link" class="md-modal colored-header custom-width md-effect-9">
     <form id="form-link" action="#" method="post">
         <div class="md-content">
             <div class="modal-header">
                 <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
-                <h3 class="modal-title">Edit Link</h3>
+                <h3 class="modal-title modalLinkTitle">Edit Link</h3>
             </div>
-            <div class="modal-body form">
+            <div class="modal-body form fixed-height-modal-options">
 
-                <p>Enter the url below. This will make your question label clickable and it will open a new window to your link. Note: Your link is not saved until you hit the <strong>Save</strong> button after you click <strong>Done</strong></p>
+                <p id="linkMessage">Enter the url below. This will make your question label clickable and it will open a new window to your link. Note: Your link is not saved until you hit the <strong>Save</strong> button after you click <strong>Done</strong></p>
 
-                <div class="form-group">
+                <div class="form-group textAreaOption">
                     <label><span id="question-link-label"></span></label>
                     <textarea class="form-control" id="question-link" name="question-link" rows="6" placeholder="ex: http://yourdomain.com/go-here"></textarea>
                 </div>
@@ -379,20 +486,167 @@
         </div>
     </form>
 </div>
+<!------- End of Link Modal Pop-up------------->
+<!------- Rating Modal Pop-up------------->
+<div id="modal-rating" class="md-modal colored-header custom-width md-effect-9">
+    <form id="form-rating" name="form-rating" action="#" method="post">
+        <div class="md-content">
+            <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                <h3 class="modal-title">Edit Rating</h3>
+            </div>
+            <div class="modal-body form fixed-height-modal-options">                
+                <p id="valueRequired" class="text-danger hide">Value is required.</p>
+                <p class="minMaxValidation text-danger hide">Max value should be greater than min value.</p>
+                <p id="invalidBarChar" class="text-danger hide">| sign is not allowed.</p>
+                <div class="form-group row d-flex">
+                    <div class="col">
+                        <input class="form-control input-sm rating" required id="question-rating-min" name="question-rating-min" oninput="setOptionalLabelAndIncrement();" onkeyup="if (/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" />
+                    </div>
+
+                    <div class="col">
+                        <label class="rating-label">
+                            to
+                        </label>
+                    </div>
+
+                    <div class="col">
+                        <input class="form-control input-sm rating" required id="question-rating-max" name="question-rating-max" oninput="setOptionalLabelAndIncrement();" onkeyup="if (/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" />
+                    </div>
+
+                    <div class="col">
+                        <label class="rating-label">
+                            by increments of
+                        </label>
+                    </div>
+
+                    <div class="col">
+                        <select class="form-control input-sm rating" id="question-rating-increment" onchange="setRatingIncrement()">
+                            <option>1</option>
+                            <option>2</option>
+                            <option>5</option>
+                            <option>10</option>
+                            <option>25</option>
+                        </select>
+                    </div>
+                </div>                
+
+                <div class="form-group row">
+                    <div class="col-xs-1">
+                        <label class="rating-label"><span id="rating-min-label">1</span></label>
+                    </div>
+                    <div class="col-xs-6">
+                        <input class="form-control input-sm" id="question-rating-label-min" required placeholder="Label (Optional)" />
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <div class="col-xs-1">
+                        <label class="rating-label"><span id="rating-max-label">5</span></label>
+                    </div>
+                    <div class="col-xs-6">
+                        <input class="form-control input-sm" id="question-rating-label-max" required placeholder="Label (Optional)" />
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+                <button type="button" data-dismiss="modal" class="btn btn-primary" onclick="updateRating()">Done</button>
+            </div>
+        </div>
+    </form>
+</div>
+<!-------End of Rating Modal Pop-up------------->
+<!------- Delete Modal Pop-up------------->
+<div id="modal-delete" class="md-modal colored-header custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <h3 class="modal-title">Delete Question</h3>
+        </div>
+        <div class="modal-body form fixed-height-modal-options">
+
+            <p>Are you sure you want to delete <strong><span id="delete-question-name"></span></strong>? </p><p>This action cannot be undone.</p>
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            <a class="btn btn-danger" href="#" id="delete-question-button">Delete &raquo;</a>
+        </div>
+    </div>
+</div>
+<!-------End of Delete Modal Pop-up------------->
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/themes/smoothness/jquery-ui.css" />
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js"></script>
 
 <script>
     var selectedQuestion = null;
     var newQuestionNumber = 0;
+    var optionQuestionType = 0;
+    var emojiDictionary = [
+        { key: "grinning", value: "Happy" },
+        { key: "grin", value: "Thrilled" },
+        { key: "blush", value: "Pleased" },
+        { key: "laughing", value: "Laughing" },
+        { key: "sweat_smile", value: "Relieved" },
+        { key: "joy", value: "Funny" },
+        { key: "wink", value: "Playful" },
+        { key: "slight_smile", value: "Content" },
+        { key: "upside_down", value: "Upside Down" },
+        { key: "heart_eyes", value: "Love" },
+        { key: "innocent", value: "Innocent" },
+        { key: "stuck_out_tongue", value: "Goofy" },
+        { key: "thinking", value: "Unsure" },
+        { key: "neutral_face", value: "Neutral" },
+        { key: "sleeping", value: "Tired" },
+        { key: "mask", value: "Sick" },
+        { key: "slight_frown", value: "Sad" },
+        { key: "cold_sweat", value: "Anxious" },
+        { key: "angry", value: "Angry" },
+        { key: "grimacing", value: "Yikes" }
+    ];
+
+    function getEmojis() {
+        var emojiCollection = "";
+        emojiDictionary.forEach(function (obj) {
+            emojiCollection += " " + obj.key;
+        });
+        return emojiCollection;
+    }
 
     function incrementQuestionCount() {
         $('#newquestioncount').val(getQuestionCount() + 1);
     }
+
+    function decrementQuestionCount() {
+        $('#newquestioncount').val(getQuestionCount() - 1);
+    }
+
     function getQuestionCount() {
         return parseInt($('#newquestioncount').val());
     }
 
     function getLabelTextbox() {
         return `<input type="text" id="text-${getQuestionCount()}" name="new-text-${getQuestionCount()}" value="" required class="form-control col-sm-3" onfocus="this.select()" data-tooltip-id="text-${getQuestionCount()}" placeholder="Enter your question" />`;
+    }
+    function getSortOrder() {
+
+        var rowCount = $('#question-table tr').length;
+        return `<label class="lbl-display-order" id="displayOrderlabel-${getQuestionCount()}">${--rowCount}</label>
+                 <input type="hidden" id="questionid-${getQuestionCount()}" name="questionid-${getQuestionCount()}" class="questionId" value="${getQuestionCount()}" />
+                <input type="hidden" id="sortorder-${getQuestionCount()}" name="new-sort-${getQuestionCount()}" class="displayOrderId" value="${rowCount} " />`;
+    }
+
+    function getDeleteIcon() {
+        return `<button class="btn btn-default btn-sm md-trigger remove" onclick="return deleteNonSavedQuestion(this)"><span class="text-danger"><i class="s7-trash"></i></span></button>`;
+    }
+
+    function deleteNonSavedQuestion(elem) {
+        decrementQuestionCount();
+        $(elem).closest('tr').remove();
     }
 
     function getShowCheckbox() {
@@ -419,18 +673,35 @@
             });}`.replace(/::number::/g, getQuestionCount());
     }
 
+    function getDescriptionCheckbox() {
+        return `@{Html.RenderPartial(
+            "~/Views/Shared/_SwitchButton.cshtml",
+            false,
+            new ViewDataDictionary()
+            {
+                { "checkboxname", "new-description-enabled-::number::" },
+                { "checkboxid", "description-::number::" },
+                { "disabled", false }
+            });}`.replace(/::number::/g, getQuestionCount());
+    }
+
     function getQuestionTypeList() {
         var rtn = `<select class="form-control" onChange="showEditButton(${getQuestionCount()})" id="questiontype-${getQuestionCount()}" name="new-questiontype-${getQuestionCount()}">`;
         @foreach (var type in Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>().Where(questionType => !typesUserCannotAdd.Contains(questionType)))
         {
-            @:rtn += '<option value="@((int)type)">@type.ToString().SplitByUpperCase()</option>';
+              @:rtn += '<option value="@((int)type)">@type.ToString().SplitByUpperCase()</option>';
         }
         rtn += '</select>';
         return rtn;
     }
 
     function getOptionsLinks() {
-        return `<button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-options" onclick="setOptions(${getQuestionCount()})" id="btn-setoptions-${getQuestionCount()}">Edit Options</button><input type="hidden" id="options-text-${getQuestionCount()}" name="new-options-text-${getQuestionCount()}" value="" /><button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-link" onclick="setLink(${getQuestionCount()})" id="btn-setlink-${getQuestionCount()}">Add/Edit Link</button><input type="hidden" id="link-text-${getQuestionCount()}" name="new-link-text-${getQuestionCount()}" value="" />`;
+        return `<button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-options" onclick="setOptions(${getQuestionCount()})" id="btn-setoptions-${getQuestionCount()}">Edit Options</button>
+                <input type="hidden" id="options-text-${getQuestionCount()}" name="new-options-text-${getQuestionCount()}" value="" />
+                <button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-link" onclick="setLink(${getQuestionCount()})" id="btn-setlink-${getQuestionCount()}">Add/Edit Link</button>
+                <input type="hidden" id="link-text-${getQuestionCount()}" name="new-link-text-${getQuestionCount()}" value="" />
+                <button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-rating" onclick="setRating(${getQuestionCount()})" id="btn-setratings-${getQuestionCount()}">Set Rating</button>
+                <input type="hidden" id="displayOrderId-${getQuestionCount()}" name="displayOrderId-${getQuestionCount()}" class="displayOrderId" value="" />`;
     }
 
     function getDescription() {
@@ -441,51 +712,356 @@
         return `<input type="hidden" id="questiontype-${getQuestionCount()}" name="new-questiontype-${getQuestionCount()}"" value="@((int)QuestionType.TextBlock)" />`
     }
 
+    function getOptionsRowCount() {
+        var rowCount = $('#options-table tr').length;
+        return rowCount - 1;
+    }
+
     function addQuestion() {
         $('#question-table')
             .find('tr')
             .last()
-            .before(`<tr><td>${getLabelTextbox()}</td><td>${getQuestionTypeList()}</td><td>${getOptionsLinks()}</td><td>${getShowCheckbox()}</td><td>${getRequiredCheckbox()}</td></tr>`);
+            .before(`<tr><td>${getSortOrder()}</td><td>${getLabelTextbox()}</td><td>${getQuestionTypeList()}</td><td>${getOptionsLinks()}</td><td>${getShowCheckbox()}</td><td>${getRequiredCheckbox()}</td><td>${getDescriptionCheckbox()}</td><td>${getDeleteIcon()}</td></tr>`);
 
         incrementQuestionCount();
         $('.md-trigger').modalEffects();
+        var rowCount = $('#question-table tr').length;
+    }
+
+    function addOptionRow(optionType, optionNo, optionValue, optionDescriptionValue, callback) {
+
+        $('#options-table')
+            .find('tr')
+            .last()
+            .before(`<tr class="questionRow" id="${optionType}-${optionNo + 1}"><td>${optionType} ${optionNo + 1}</td><td><input type="text" value="${optionValue}" id="option-${optionNo + 1}" required class="form-control col-sm-3 option emojionearea2" onfocus="this.select()" /></td><td><input type="text" value="${optionDescriptionValue}" id="optionDescription-${optionNo + 1}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" disabled /></td><td><button class="btn btn-default btn-sm md-trigger" onclick="removeOption($(this).closest('tr').attr('id'))"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
+
+       var Index = optionNo + 1;
+
+       callback(Index);
+
+   }
+
+
+
+    function updateSorting() {
+        var inputs = $('input.currentposition');
+        var nbElems = inputs.length;
+        $('input.currentposition').each(function (idx) {
+            $(this).val(nbElems - idx);
+        });
+        var totalRows = $('#question-table tr').length - 2;
+        $("#question-table tbody tr").each(function (i) {
+            if (i < totalRows) {
+                $(this).find(".lbl-display-order").text(i + 1);
+                $(this).find(".displayOrderId").val(i + 1);
+            }
+        });
+    }
+
+    function removeOption(id) {
+        event.preventDefault();
+        var index = id.split("-")[1];
+        var optionType = id.split("-")[0];
+        $("#" + id).remove();
+        var totalRows = $('#options-table tr').length - 2;
+
+        var optionString = '';
+        var rowCount = $("#options-table tr").length - 1;
+        ////// Get Values of inputs in a string
+        $("#options-table tr").each(function (index) {
+            if (index != 0 && index != rowCount) {
+                var optVal = $(this).find("input.option").val();
+                var optDesc = $(this).find("input.optionDescription").val();
+
+                if (optionType == 'Emoji') {
+                    optVal = emojione.toShort($(this).find("input.option").val());
+                }
+                var rowOption;
+                if (optDesc) {
+                    rowOption = `${optVal}|${optDesc},`
+                } else {
+                    rowOption = `${optVal},`
+                }
+                optionString = optionString + rowOption;
+            }
+        });
+        var commaIndex = optionString.lastIndexOf(",");
+        var optionWithoutLastComma = optionString.substring(0, commaIndex);
+        setOptions(selectedQuestion, optionWithoutLastComma, optionType);
+
     }
 
     function addTextBlock() {
         $('#question-table')
             .find('tr')
             .last()
-            .before(`<tr><td colspan="3">${getDescription()}${getTextBlockQuestionType()}</td><td>${getShowCheckbox()}</td><td></td></tr>`);
-
+            .before(`<tr><td>${getSortOrder()}</td><td colspan="3">${getDescription()}${getTextBlockQuestionType()}</td><td>${getShowCheckbox()}</td><td></td><td></td><td>${getDeleteIcon()}</td></tr>`);
         incrementQuestionCount();
     }
 
-
-
     function showEditButton(id) {
         var arr = [@Html.Raw(typesWithOptions.Select(x=> "'" + ((int)x) + "'").ToStringList())];
+        var arrRating = [@Html.Raw(typesWithRating.Select(x=> "'" + ((int)x) + "'").ToStringList())];
         var select = $(`#questiontype-${id}`);
+        if ($('#questiontype-' + id).val() === '@((int)QuestionType.Emoji)') {
+            optionQuestionType = '@((int)QuestionType.Emoji)';
+        }
+        else {
+            optionQuestionType = 0;
+        }
+
         if (arr.indexOf(select.val()) > -1) {
             $(`#btn-setoptions-${id}`).removeClass('hide');
             $(`#btn-setlink-${id}`).addClass('hide');
-        } else if (select.val() == '@((int)QuestionType.Checkbox)') {
-            $(`#btn-setoptions-${id}`).addClass('hide');
-            $(`#btn-setlink-${id}`).removeClass('hide');
-        } else {
+            $(`#btn-setratings-${id}`).addClass('hide');
+        }
+        else if (arrRating.indexOf(select.val()) > -1) {
             $(`#btn-setoptions-${id}`).addClass('hide');
             $(`#btn-setlink-${id}`).addClass('hide');
+            $(`#btn-setratings-${id}`).removeClass('hide');
+        }
+        else if (select.val() == '@((int)QuestionType.Checkbox)') {
+            $(`#btn-setoptions-${id}`).addClass('hide');
+            $(`#btn-setlink-${id}`).removeClass('hide');
+            $(`#btn-setratings-${id}`).addClass('hide');
+        }
+        else {
+            $(`#btn-setoptions-${id}`).addClass('hide');
+            $(`#btn-setlink-${id}`).addClass('hide');
+            $(`#btn-setratings-${id}`).addClass('hide');
         }
     }
+    function addOption() {
+        var optionType = "Option";
+        if (optionQuestionType === '@((int)QuestionType.Emoji)') {
+            optionType = "Emoji";
+        }
 
-    function setOptions(id) {
+        $('#options-table')
+            .find('tr')
+            .last()
+            .before(`<tr class="questionRow" id="${optionType}-${getOptionsRowCount()}"><td>${optionType} ${getOptionsRowCount()}</td><td><input type="text" value="" id="option-${getOptionsRowCount()}" required class="form-control col-sm-3 option emojionearea2" onfocus="this.select()" /></td><td><input type="text" value="" id="optionDescription-${getOptionsRowCount()}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" disabled /></td><td><button type="button" class="btn btn-default btn-sm md-trigger" onclick="removeOption($(this).closest('tr').attr('id'))"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
+
+        var rowCount = $("#options-table tr").length - 1;
+        var emojiCollection = getEmojis();
+        if (rowCount > 2) {
+            $(".twoOptionsValidation").addClass("hide")
+        }
+
+        if (optionType === "Emoji") {
+            $("#options-table tr").each(function (index) {
+                if (index == rowCount - 1) {
+                    addEmoji(index);
+                }
+            });
+        }
+
+        if (optionType != "Emoji") {
+            //descriptions would be disabled only for emojis
+            $(".optionDescription").prop('disabled', false);
+        }
+    }
+    //--Set options type based on emoji/option question type and their labels
+    // triggers when pop-up opens
+    function setOptions(id,optionString,questionType) {
         selectedQuestion = id;
-        $('#question-options-label').html($('#text-' + id).val());
-        $('#question-options').val($('#options-text-' + id).val());
+        var options = '';
+        var optionType = "Option";
+        $('#modal-options-title').text("Options");
+        optionQuestionType = 0;
+
+        //---1---If options type is emoji, then set emoji option and labels
+        if ($('#questiontype-' + id).val() == '@((int)QuestionType.Emoji)') {
+            $('#modal-options-title').text("Emojis");
+            optionType = "Emoji";
+            $(".requiredData").addClass("hide");
+            optionQuestionType = '@((int)QuestionType.Emoji)';
+        }
+
+        //---2---Get option values from hidden field
+        if (optionString) {
+            options = optionString;
+            optionType = questionType;
+            if (questionType == "Emoji")
+                $('#modal-options-title').text("Emojis");
+            else
+                $('#modal-options-title').text("Options");
+        }
+        else {
+            options = $('#options-text-' + selectedQuestion).val();
+        }
+        var rowCount = $("#options-table tr").length - 1;
+
+        //---3---Initialize Modal table, so that for other questions, old question data get removed. we will keep the header and footer rows
+        $("#options-table tr").each(function (index) {
+            if (index != 0 && index != rowCount) {
+                $(this).remove();
+            }
+        });
+
+        //---4--If options have value then parse string, create rows and populate with values.
+        if (options != '') {
+            var numberofOptionRows = (options.split(",").length);
+            indivdualOption = options.split(',');
+            //---Check if numberofOptionRows has value
+            for (var i = 0; i < numberofOptionRows; i++) {
+                var optionRow = indivdualOption[i];
+                var optionRowArray = optionRow.split('|');
+                optionNo = i;
+                optionValue = optionRowArray[0];
+
+                var optionDescriptionValue = '';
+                if (optionRowArray[1]) {
+                    optionDescriptionValue = optionRowArray[1];
+                }
+                //create new row for option modal
+
+                addOptionRow(optionType, optionNo, optionValue, optionDescriptionValue, function () {
+                    addEmoji(optionNo + 1);
+                });
+
+            }
+            indivdualOption = null;
+            if (optionType != "Emoji") {
+                //descriptions would be disabled only for emojis
+                $(".optionDescription").prop('disabled', false);
+            }
+        }
+        else {
+            addOption();
+        }
+        
+    }
+
+    function addEmoji(index) {
+        var rowCount = $("#options-table tr").length - 1;
+        var row = $("#options-table").find(`#Emoji-${index}`);
+        var emojiCollection = getEmojis();
+        var emojiInput = $(row).find(".emojionearea2");
+         emojiInput.emojioneArea({
+                pickerPosition: "right",
+                filtersPosition: "bottom",
+                tonesStyle: "square",
+                shortnames: true,
+             search: false,
+
+                events: {
+                    keyup: (a, e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                    },
+                    keypress: (a, e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                 },
+                    emojibtn_click: (a, e) => {
+                        $(`.emojionearea2#option-${index}`).text("");
+                        $(`.emojionearea2#option-${index}`)[0].emojioneArea.setText(a[0].dataset.name);
+                        var emojiKey = a[0].dataset.name;
+                        var emojiKeyWithoutColons = emojiKey.replaceAll(":", "");
+                        var emojiKeyDescription = emojiDictionary.find(({ key }) => key === emojiKeyWithoutColons);
+                        $(`#optionDescription-${index}`).val(emojiKeyDescription.value);
+                    }
+                },
+                filters: {
+                    recent: false, // disable recent
+                    tones: true, // disable recent
+                    objects: false, // disable objects filter
+                    symbols: false, // disable symbols filter
+                    flags: false, // disable flags filter
+                    animals_nature: false,
+                    activity: true,
+                    travel_places: true,
+                    objects: true,
+                    symbols: true,
+                    flags: true,
+                    food_drink:true,
+                    smileys_people: {
+                        icon: "yum",
+                        title: "Smileys & People",
+                        emoji: emojiCollection
+                    }
+                }
+            });
     }
 
     function updateOptions() {
         if (!isNaN(selectedQuestion)) {
-            $('#options-text-' + selectedQuestion).val($('#question-options').val());
+            var optionString = '';
+            var rowCount = $("#options-table tr").length - 1;
+            var validation = true;
+            var validChars = true;
+            if (rowCount < 3) {
+                validation = false;
+                $(".twoOptionsValidation").removeClass("hide")
+            }
+            $("#options-table tr").each(function (index) {
+                if (index != 0 && index != rowCount) {
+                    var optVal = $(this).find("input.option").val();
+                    var optDesc = $(this).find("input.optionDescription").val();
+                    if ($('#modal-options-title').text() == 'Emojis') {
+                        optVal = emojione.toShort($(this).find("input.option").val());
+                        if ($(this).find("input.emojionearea2").val() == "") {
+                            $(".requiredData").removeClass("hide")
+                            validation = false;
+                        }
+                    }
+
+                    if ($(this).find("input.option").val() == "") {
+                        $(this).find("input.option").addClass("danger");
+                        validation = false;
+                    }
+                    else {
+                        if (optVal.includes('|')) {
+                            $(this).find("input.option").addClass("danger");
+                            validChars = false;
+                            validation = false;
+                        }
+                        else {
+                            $(this).find("input.option").removeClass("danger");
+                            optVal.trim();
+                        }
+
+                        if (optDesc.includes('|')) {
+                            $(this).find("input.optionDescription").addClass("danger");
+                            validChars = false;
+                            validation = false;
+                        }
+                        else {
+                            $(this).find("input.optionDescription").removeClass("danger");
+                            optDesc.trim();
+                        }
+                    }
+
+                    var rowOption;
+
+                    if (optDesc) {
+                        rowOption = `${optVal}|${optDesc},`
+                    } else {
+                        rowOption = `${optVal},`
+                    }
+
+                    optionString = optionString + rowOption;
+
+                }
+            });
+
+            if (!validChars) {
+                $(".invalid-char").removeClass("hide");
+            }
+            else {
+                $(".invalid-char").addClass("hide");
+            }
+
+            if (validation == true) {
+                var commaIndex = optionString.lastIndexOf(",");
+                var optionWithoutLastComma = optionString.substring(0, commaIndex);
+                $('#options-text-' + selectedQuestion).val(optionWithoutLastComma);
+                $("#btn-setoptions-" + selectedQuestion).css("border", "").tooltip("destroy");
+
+                $("#modal-options").removeClass("md-show");
+            }
+            else return false;
         }
     }
 
@@ -496,10 +1072,233 @@
         $('#question-link').val($('#link-text-' + id).val());
     }
 
-    function updateLink() {
+    function removeValidations() {
+        $(".invalid-char").addClass("hide");
+        $(".requiredData").addClass("hide");
+        $(".twoOptionsValidation").addClass("hide");
+    }
+
+
+    function updateLink() {   
         if (!isNaN(selectedLinkQuestion)) {
             $('#link-text-' + selectedLinkQuestion).val($('#question-link').val());
         }
+    }
+
+    //called when rating modal is going to display
+    //Also setting rating range values in options hidden field.
+    var selectedRatingQuestion = null;
+    function setRating(id) {
+
+        selectedRatingQuestion = id;
+
+        //set default ratings
+        setDefaultRatings();
+
+        //ideal rating stored in db = 1|Start,50|End,5
+        var rating = $(`#link-text-${id}`).val();
+        var splitedRating = rating.split(',');
+
+        var startString = splitedRating[0];
+        if (startString) {
+            var start = startString.split("|");
+            if (start) {
+                var min = start[0];
+                var minLabel = start[1];
+
+                $('#question-rating-min').val(min);
+                $('#rating-min-label').val(min);
+
+                if (minLabel)
+                    $('#question-rating-label-min').val(minLabel);
+            }
+        }
+
+        var endString = splitedRating[1];
+        if (endString) {
+            var end = endString.split("|");
+            if (end) {
+                var max = end[0];
+                var maxLabel = end[1];
+
+                $('#question-rating-max').val(max);
+                $('#rating-max-label').val(max);
+
+                if (maxLabel)
+                    $('#question-rating-label-max').val(maxLabel);
+            }
+        }
+
+        var increment = splitedRating[2];
+        if (increment)
+            $('#question-rating-increment').val(parseInt(increment));
+    }
+
+    function setDefaultRatings() {
+        var min = $('#question-rating-min').val();
+        if (min == '')
+            $('#question-rating-min').val(1);
+
+        $('#question-rating-label-min').val('');
+        $('#rating-min-label').val(1);
+
+        var max = $('#question-rating-max').val();
+        if (max == '')
+            $('#question-rating-max').val(5);
+
+        $('#question-rating-label-max').val('');
+        $('#rating-max-label').val('5');
+
+        var increment = $('#question-rating-increment').val();
+        if (increment == '')
+            $('#question-rating-increment').val(1);
+    }
+
+    //Updating rating range values in options hidden input
+    function updateRating() {
+        var validation = true;
+        var ratingMin = $('#question-rating-min');
+        var ratingMax = $('#question-rating-max');
+        var valueRequired = $('#valueRequired');
+        var invalidBarChar = $('#invalidBarChar');
+        var minMaxValidation = $('.minMaxValidation');
+        var ratingMinOptionalLabel = $('#question-rating-label-min');
+        var ratingMaxOptionalLabel = $('#question-rating-label-max');
+        var ratingMinValIsInteger = $.isNumeric($('#question-rating-min').val());
+        var ratingMaxValIsInteger = $.isNumeric($('#question-rating-max').val());
+
+        if (ratingMin.val() == "") {
+            ratingMin.addClass("danger");
+            valueRequired.removeClass("hide");
+            validation = false;
+        }
+        else {
+            ratingMin.removeClass("danger");
+            valueRequired.addClass("hide");
+
+            if (parseInt(ratingMin.val()) >= parseInt(ratingMax.val())) {
+                ratingMax.addClass("danger");
+                ratingMin.addClass("danger");
+                minMaxValidation.removeClass("hide");
+                validation = false;
+            }
+            else {
+                ratingMax.removeClass("danger");
+                ratingMin.removeClass("danger");
+                minMaxValidation.addClass("hide");
+                validation = true;
+            }
+        }
+
+        if (ratingMax.val() == "") {
+            ratingMax.addClass("danger");
+            valueRequired.removeClass("hide");
+            validation = false;
+        }
+        else {
+            ratingMax.removeClass("danger");
+        }
+
+        if (ratingMinOptionalLabel.val().includes('|')) {
+            ratingMinOptionalLabel.addClass("danger");
+            invalidBarChar.removeClass("hide");
+            validation = false;
+        }
+        else {
+            ratingMinOptionalLabel.removeClass("danger");
+            invalidBarChar.addClass("hide");
+        }
+
+        if (ratingMaxOptionalLabel.val().includes('|')) {
+            ratingMaxOptionalLabel.addClass("danger");
+            invalidBarChar.removeClass("hide");
+            validation = false;
+        }
+        else {
+            ratingMaxOptionalLabel.removeClass("danger");
+        }
+
+        if (validation == true) {
+            var start = $('#question-rating-min').val();
+            var startLabel = $('#question-rating-label-min').val();
+
+            var end = $('#question-rating-max').val();
+            var endLabel = $('#question-rating-label-max').val();
+
+            var increment = $('#question-rating-increment').val();
+
+            var options = getOptionsTextForRating(parseInt(start), startLabel, parseInt(end), endLabel, parseInt(increment));
+            $('#options-text-' + selectedRatingQuestion).val(options);
+
+            //lets store other configuration info in link field for now
+            $('#link-text-' + selectedRatingQuestion).val(`${start}|${startLabel},${end}|${endLabel},${increment}`);
+
+            $("#btn-setratings-" + selectedRatingQuestion).css("border", "").tooltip("destroy");
+            invalidBarChar.addClass("hide");
+            valueRequired.addClass("hide");
+            $("#modal-rating").removeClass("md-show");
+        }
+        else return false;
+    }
+
+    function getOptionsTextForRating(start, startLabel, end, endLabel, increment) {
+        // example of good option chain 1|Start,5,10,15,20,25,30,35,40,45,50|End
+        var options = '';
+
+        if (startLabel)
+            options = `${start}|${startLabel},`;
+        else
+            options = `${start},`;
+
+        var loopStart = start;
+        if (start % 2)
+            loopStart = start - 1;
+
+        for (var i = loopStart; i <= end; i += increment) {
+            if (i > start && i < end)
+                options += `${i},`;
+        }
+
+        if (endLabel)
+            options += `${end}|${endLabel}`;
+        else
+            options += `${end}`;
+
+        return options;
+    }
+
+    function setRatingIncrement() {
+        $('#question-rating-increment').val($('#question-rating-increment').val());
+    }
+
+    function setOptionalLabelAndIncrement() {
+
+        var ratingMaxValue = $('#question-rating-max').val().replace(/[^\d.-]/g, '');
+
+        if ($.isNumeric($('#question-rating-min').val())) {
+            $('#rating-min-label').empty();
+            $('#rating-min-label').append($('#question-rating-min').val());
+        }
+
+        if ($.isNumeric($('#question-rating-max').val())) {
+            $('#rating-max-label').empty();
+            $('#rating-max-label').append($('#question-rating-max').val());
+        }
+
+        $('#question-rating-increment').empty();
+
+        for (var i = 0; i < ratingMaxValue; i++) {
+            if (ratingMaxValue % i == 0) {
+                var newOption = $('<option value="' + i + '">' + i + '</option>');
+                $('#question-rating-increment').append(newOption);
+            }
+        }
+    }
+
+    function deleteQuestion(name, url) {
+        event.preventDefault();
+        $('#delete-question-name').html(name);
+        $('#delete-question-button').attr('href', url);
     }
 
     function navigateForm(url) {
@@ -520,6 +1319,55 @@
         $('input[id^="required-"][disabled!="disabled"]').prop('checked', false);
     }
 
+    function Validate() {
+        $(".btn btn-default btn-lg btn-block").removeAttr("disabled");
+        var validated = true;
+        $("#form1 tr").each(function (index) {
+
+            //Checking for options empty values
+            var td = $(this).find("td:nth-child(4)");
+            var optionsInput = td.find("input:first-of-type");
+            var ratingInput = td.find("input:last-of-type");
+            var optionsButton = td.find("button:first-of-type");
+            var ratingButton = td.find("button:last-of-type");
+            var linkEmojiButton = td.children('button').eq(1);
+
+            if (optionsInput.val() === '' && !optionsButton.hasClass("hide") ) {
+                td.find("button:first-of-type").css("border", "2px solid red").css('cursor', 'pointer').attr('title', 'Please sepcify values.').tooltip({ tooltipClass: 'tooltipclass' });
+                validated = false;
+            }
+
+            if (optionsInput.val() === '' && !ratingButton.hasClass("hide") ) {
+                td.find("button:last-of-type").css("border", "2px solid red").css('cursor', 'pointer').attr('title', 'Please sepcify range.').tooltip({ tooltipClass: 'tooltipclass' });
+                validated = false;
+            }
+        });
+        if (!validated) {
+            event.preventDefault();
+            return false;
+        }
+
+        $('#form1').attr('action', '@Url.Action("formedit", "account", new { id = Model.ID.ToString(), qg = qgId })');
+    }
+
+    function AddEmojiOne() {
+        $(".emojionearea2").emojioneArea({
+            pickerPosition: "bottom",
+            tonesStyle: "radio",
+            shortnames: true,
+            search: false,
+            events: {
+                keyup: (a, e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                },
+                keypress: (a, e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                }
+            }
+        });
+    }
 </script>
 
 
@@ -543,5 +1391,31 @@
             var id = $(this).attr('id').split('-')[1];
             showEditButton(id);
         });
+
+        AddEmojiOne();
+    });
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        var selectQuestionId, oldPosition, newPosition;
+        $("#question-table").sortable({
+            items: 'tr',
+            cursor: 'pointer',
+            axis: 'y',
+            dropOnEmpty: false,
+            start: function (e, ui) {
+                ui.item.addClass("selected");
+                var questionId = $(ui.item).find(".questionId").val();
+                oldPosition = ui.item.index();
+                var rowCount = $('#question-table tr').length;
+            },
+            stop: function (e, ui) {
+                updateSorting();
+            }
+        });
+        $(document).on('click', '.remove', function () {
+            updateSorting();
+        })
     });
 </script>

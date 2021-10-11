@@ -23,6 +23,10 @@ if "%DEPLOYMENT_GROUP_NAME%"=="" (
 	  set target="C:\websites\afterschoolhq\afterschoolhq-production\afterschool"
 	)
 
+	if "%DEPLOYMENT_GROUP_NAME%"=="AfterSchool-RiseProject-Group" (
+	  set target="C:\websites\afterschoolhq\afterschoolhq-riseproject\afterschool"
+	)
+
 	
 	if exist !target! rmdir /s /q !target!
 

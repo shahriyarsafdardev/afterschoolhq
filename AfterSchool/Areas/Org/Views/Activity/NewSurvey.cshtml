@@ -1,0 +1,213 @@
+﻿@model Activity
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var accountPackage = (AccountPackage)ViewData["AccountPackage"];
+    var forms = (List<Form>)ViewBag.Forms;
+    var manageFormsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageForms);
+    var maxFormCount = accountPackage.IsNotEmpty() ? (int)accountPackage.GetFeature(FeatureType.ManageForms).Max.Value : 0;
+    var activeForm = (ActivityForm)ViewBag.ActiveForm;
+    var showManageForms = accountPackage.HasFeature(FeatureType.ManageForms);
+    var showManageFormFields = forms.Count >= maxFormCount ? false : true;
+
+    var studentList = new List<SelectListItem>(); 
+    foreach (var student in (List<RegistrantActivity>)ViewBag.Students)
+    {
+        studentList.Add(new SelectListItem {
+            Text = student.RegistrantName,
+            Value = student.RegistrantId.ToString()
+        });
+    }
+}
+<link href="~/Assets/css/survey.css" rel="stylesheet" />
+@{Html.RenderPartial("OrgAccountHeader");}
+
+<div class="main-content">
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model); }
+    <div class="panel panel-default">
+        <div class="panel-body surveypanelpadding">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div style="font-size:22px">New Survey</div>
+                    <div style="font-size:14px; color:#B2B2B4">@Model.Name</div>
+                </div>
+            </div>
+            @using (Html.BeginForm("SaveSurvey", "Activity", FormMethod.Post, new { id = "surveyForm" }))
+            {
+                <input type="hidden" name="id" value="@Model.Uid" />
+                <input type="hidden" name="activityId" value="@Model.ID" />
+                <div style="clear:both"></div>
+                <div class="row margin-t-30">
+                    <div class="col-md-6">
+                        <select name="formId" id="formId" class="form-control newDropDown newInput" @(activeForm.IsNotEmpty() && forms.Any(m => m.ID == activeForm.FormId) ? "required" : "")>
+                            @if (forms.Where(a => a.FormTypeId == FormType.Survey).Count() == 0)
+                            {
+                                <option value=""  disabled selected>--No Survey Form, Create one----</option>
+                            }
+                            else
+                            {
+                                foreach (var form in forms.Where(a => a.FormTypeId == FormType.Survey))
+                                {
+                                    <option value="@form.ID" @(activeForm?.FormId == form.ID ? "selected=\"selected\"" : "")>@form.Name</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="@Url.Action("forms", "account", new { area = "org", fromSurvey = "true"})" class="btn btnNewSurvey">Add New Survey</a>
+                    </div>
+                </div>
+                <div style="clear:both"></div>
+
+                <div class="row margin-t-10">
+                    <div class="col-lg-6 col-md-6  ">
+                        <input type="text" class="form-control newInput name" name="name" placeholder="Add Title" required />
+                    </div>
+                </div>
+                <div class="row margin-t-10">
+                    <div class="col-lg-6 col-md-6 ">
+                        <input type="text" class="form-control newInput" id="dueDate" name="dueDate" value="" placeholder="Due Date (Optional)" autocomplete="off" />
+                    </div>
+                </div>
+                <div style="clear:both"></div>
+
+                <div class="row margin-t-30">
+                    <div class="col-lg-6">
+                        <input id="isAllowMultiple" name="isAllowMultiple" type="checkbox" class="newCheckbox" value="true" />
+                        <input type="hidden" value="false" name="isAllowMultiple" />
+                        <label for="isAllowMultiple" class="margin-h-10 mobile-padding">Allow multiple submissions per person?</label>
+                    </div>
+                </div>
+                <div style="clear:both"></div>
+
+                <div class="row margin-t-30 ">
+                    <div class="col-lg-4">
+                        <input id="students" name="students" type="checkbox" class="newCheckbox" value="" data-forerror="true" />
+                        <input type="hidden" value="false" name="students" />
+                        <label for="students" class="margin-h-10 mobile-padding">Students</label>
+                        <div class="studenterror"></div>
+                    </div>
+                    <div class="col-lg-4">
+                        <input type="hidden" name="isEveryIndividualSelected" class="selectedIndividuals" value="false" />
+                        <div class="" style="position:relative">
+                            <button class="btn selectStudents" id="selectStudents" data-toggle="off" type="button">Select Individual Students</button>
+                        </div>
+                    </div>
+                </div>
+                <div style="clear:both"></div>
+
+                <div class=" studentDiv hide margin-t-10" style="margin-left: -10px;">
+                    <div class="col-lg-8 col-md-8">
+                        <div class="mainStudentDiv">
+                            @for (int i = 0; i < studentList.Count(); i++)
+                            {
+                                <div>
+                                    @Html.CheckBoxFor(m => studentList[i].Selected, new { @class = "newCheckbox" })
+
+                                    <span class="margin-h-10 mobile-padding">@Html.DisplayFor(m => studentList[i].Text)</span>
+                                    @Html.HiddenFor(m => studentList[i].Value)
+                                    @Html.HiddenFor(m => studentList[i].Text)
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div style="clear:both"></div>
+                <!--parents and staff checkbox code commented for now, will use later-->
+                @*<div class="row margin-t-10">
+                <div class="col-lg-4">
+                    <input id="parents" name="parents" type="checkbox" class="newCheckbox" value="true" />
+                    <input type="hidden" value="false" name="parents" />
+                    <label for="parents" class="margin-h-10 mobile-padding">Parents</label>
+                </div>
+            </div>
+            <div class="row margin-t-10">
+                <div class="col-lg-4">
+                    <input id="staff" name="staff" type="checkbox" class="newCheckbox" value="true" />
+                    <input type="hidden" value="false" name="staff" />
+                    <label for="staff" class="margin-h-10 mobile-padding">Staff</label>
+                </div>
+            </div>*@
+                <div class="row margin-t-30">
+                    <div class="col-lg-8 col-md-8">
+                        <textarea id="optional" name="optionalText" class="newInput" style="height:150px;width:100%;padding:10px" placeholder="Add special intructions (optional)"></textarea>
+                    </div>
+                </div>
+
+                <div class=" margin-t-30 text-center">
+                    <input type="submit" class="btn btnNewColorSurvey" value="Send & Notify" id="send" />
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+    @section scripts{
+        <script src="~/Scripts/jquery.validate.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                $("#selectStudents").on('click', function () {
+                    $('.studentDiv').toggleClass('hide');
+                    if ($(this).attr('data-toggle') == 'on') {
+                        $(this).attr('data-toggle', 'off');
+                        $(".selectedIndividuals").val("false")
+                    } else {
+                        $(this).attr('data-toggle', 'on');
+                        $(".selectedIndividuals").val("true")
+                    }
+                });
+
+                $("#dueDate").datetimepicker({
+                    format: "mm/dd/yyyy",
+                    autoclose: true,
+                    todayBtn: true,
+                    pickTime: false,
+                    minView: 2,
+                    viewSelect: 'month',
+                });
+                $('#dueDate').datetimepicker('setStartDate', new Date());
+
+                var form = $('form').validate({
+                    rules: {
+                        students: {
+                            required: true
+                        },
+                        name: {
+                            required: true
+                        }
+                    },
+                    errorPlacement: function (error, element) {
+                        if (element.attr("data-forerror") == "true") {
+                            $(".error", $("#students")).remove();
+                            $(".studenterror").html(error);
+                        }
+                        else {
+                            error.insertAfter(element);
+                        }
+                    }
+                });
+
+                $("#send").on('click', function (e) {
+                    $("#modal-saving").addClass('hide');
+                    e.preventDefault();
+
+                    if ($("#surveyForm").valid()) {
+                        $("#surveyForm").submit();
+                        $("#modal-saving").addClass('position-fixed');
+                        $("#modal-saving").show();
+                    }
+                    
+                })
+
+                setTimeout(function () {
+                    $(".glyphicon-arrow-right").addClass('glyphicon-chevron-right');
+                    $(".glyphicon-arrow-right").removeClass('glyphicon-arrow-right');
+
+                    $(".glyphicon-arrow-left").addClass('glyphicon-chevron-left');
+                    $(".glyphicon-arrow-left").removeClass('glyphicon-arrow-left');
+
+                }, 500);
+            })
+        </script>
+    }
+
