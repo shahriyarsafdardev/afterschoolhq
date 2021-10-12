@@ -1978,8 +1978,8 @@ namespace AfterSchool.Areas.Org.Controllers
               studentList.ForEach(student => {
                   var surveyResponse = SurveyResponseService.CreateSurveyFeedback(surveyRequestId, student.Value.ToInteger(), SurveyFeedbackStatus.New, currentUserId, msgs);
                   var getRegistrant = Registrant.Load(student.Value.ToInteger());
-                  var checkEmail = Registrant.LoadByEmail(getRegistrant.Email);
-                  if (getRegistrant.WebUserId.IsEmpty() && (checkEmail.IsEmpty() || checkEmail.WebUserId.IsEmpty()))
+                  var checkEmail = WebUser.LoadByEmail(getRegistrant.Email,msgs);
+                  if (getRegistrant.WebUserId.IsEmpty() && checkEmail.IsEmpty())
                   {
                       var createInviteCode = RegistrantInviteCodeService.Create(surveyResponse.ID.Value, getRegistrant.ID.Value, currentUserId, msgs, null);
                       BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, createInviteCode.Code, null));
