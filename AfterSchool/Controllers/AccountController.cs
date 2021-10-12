@@ -1832,7 +1832,7 @@ namespace AfterSchool.Controllers
 
                 var datesToRemove = new List<DateTime>();
 
-                selectedDates.ForEach(date => { 
+                selectedDates?.ForEach(date => { 
                     if (currentRegistrant.IsReservedForDate(participationObject, date, null))
                         datesToRemove.Add(date);
                 });

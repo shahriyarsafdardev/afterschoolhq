@@ -159,12 +159,13 @@
                                 <div class="activity-detail-block">
                                     <h3>Schedule</h3>
 
-                                    @if (Model.Schedule.RepeatsWeekly)
+                                    @if (Model.Schedule.RepeatsWeekly && !Model.Schedule.IsOngoing)
                                     { 
                                         if (Model.StartDate.HasValue && (!Model.EndDate.HasValue || Model.StartDate.Value.Date != Model.EndDate.Value.Date))
                                         {
                                             <p>
                                                 Starts: <strong>@Model.StartDate.Value.ToLongDateString()</strong><br />
+
                                                 @if (Model.EndDate.HasValue)
                                                 {
                                                     <span>
@@ -182,10 +183,10 @@
                                         </p>
                                     }
 
-                                    @if (Model.IsActivity() && Model.GetActivity().CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
+                                    @if (Model.IsPublished && Model.CanRegisterPerClass)
                                     {
                                         <p>
-                                            <a href="@Model.GetActivityDateSelectionUrl()">Select Dates &raquo;</a>
+                                            <a href="@Model.GetActivityDateSelectionUrl()">Select Dates to Register &raquo;</a>
                                         </p>
                                     }
                                 </div>

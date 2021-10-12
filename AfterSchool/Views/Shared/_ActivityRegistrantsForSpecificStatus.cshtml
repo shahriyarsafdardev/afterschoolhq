@@ -53,7 +53,7 @@
                                 </a>
                             }
                         </td>
-                        <td>@(!isTechSupport ? ra.RegistrantName.IfBlank(ra.RegistrantEmail) : ra.RegistrantEmail.ToMaskedData())</td>
+                        <td>@(!isTechSupport ? ra.RegistrantName.IfBlank(ra.RegistrantEmail) : ra.RegistrantName.IfBlank(ra.RegistrantEmail).MaskString(3, 3))</td>
                         @if (!participationObject.CanRegisterPerClass)
                         {
                             <td class="text-center">@ra.SeatIndex</td>

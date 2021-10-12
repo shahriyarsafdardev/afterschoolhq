@@ -153,7 +153,7 @@ namespace AfterSchoolLibrary.Models
         {
             get
             {
-                if (SelectedDates.Any())
+                if (SelectedDates.IsNotEmpty() && SelectedDates.Any())
                     return SelectedDates.Count;
 
                 return 1;
