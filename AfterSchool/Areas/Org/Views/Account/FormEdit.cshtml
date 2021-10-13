@@ -657,7 +657,8 @@
             {
                 { "checkboxname", "new-active-::number::" },
                 { "checkboxid", "active-::number::" },
-                { "disabled", false }
+                { "disabled", false },
+                { "className", "question-isactive"}
         });}`.replace(/::number::/g, getQuestionCount());
     }
 
@@ -669,7 +670,8 @@
             {
                 { "checkboxname", "new-required-::number::" },
                 { "checkboxid", "required-::number::" },
-                { "disabled", false }
+                { "disabled", false },
+                { "className", "question-isrequired" }
             });}`.replace(/::number::/g, getQuestionCount());
     }
 
@@ -680,8 +682,9 @@
             new ViewDataDictionary()
             {
                 { "checkboxname", "new-description-enabled-::number::" },
-                { "checkboxid", "description-::number::" },
-                { "disabled", false }
+                { "checkboxid", "answerDescription-::number::" },
+                { "disabled", false },
+                { "className", "question-IsAnswerDescriptionEnabled" }
             });}`.replace(/::number::/g, getQuestionCount());
     }
 
@@ -1383,7 +1386,7 @@
 
 <script>
     PageEvent.add(PageEvent.AFTER_INIT, function () {
-        $('.question-isactive').click(function () {
+        $(document).on('click', '.question-isactive', function () {
             if (!$(this).is(':checked')) {
                 var id = $(this).attr('id').split('-')[1];
                 $('#required-' + id).prop('checked', false);
@@ -1391,14 +1394,14 @@
             }
         });
 
-        $('.question-isrequired').click(function () {
+        $(document).on('click', '.question-isrequired', function () {
             if ($(this).is(':checked')) {
                 var id = $(this).attr('id').split('-')[1];
                 $('#active-' + id).prop('checked', true);
             }
         });
 
-        $('.question-IsAnswerDescriptionEnabled').click(function () {
+        $(document).on('click', '.question-IsAnswerDescriptionEnabled', function () {
             if ($(this).is(':checked')) {
                 var id = $(this).attr('id').split('-')[1];
                 $('#answerDescription-' + id).prop('checked', true);
