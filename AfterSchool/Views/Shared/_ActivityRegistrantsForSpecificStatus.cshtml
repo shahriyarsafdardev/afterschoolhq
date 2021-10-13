@@ -109,14 +109,17 @@
 
                                     @foreach (var assignmenttype in Enum.GetValues(typeof(RegistrationAssignmentType)).Cast<RegistrationAssignmentType>())
                                     {
-                                        switch (assignmenttype)
+                                        if (assignmenttype != RegistrationAssignmentType.Withdrawn)
                                         {
-                                            case RegistrationAssignmentType.NotSet:
-                                                continue;
+                                            switch (assignmenttype)
+                                            {
+                                                case RegistrationAssignmentType.NotSet:
+                                                    continue;
+                                            }
+                                            <option value="@((int)assignmenttype)" @(assignmenttype == ra.AssignmentTypeId ? "selected=\"selected\"" : "")>
+                                                @assignmenttype.ToString().SplitByUpperCase()
+                                            </option>
                                         }
-                                        <option value="@((int)assignmenttype)" @(assignmenttype == ra.AssignmentTypeId ? "selected=\"selected\"" : "")>
-                                            @assignmenttype.ToString().SplitByUpperCase()
-                                        </option>
                                     }
 
                                 </select>
