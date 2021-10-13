@@ -1310,6 +1310,7 @@
     function uncheckAllActive() {
         $('input[id^="active-"][disabled!="disabled"]').prop('checked', false);
         uncheckAllRequired();
+        uncheckAllAnswerDescription();
     }
     function checkAllRequired() {
         $('input[id^="required-"][disabled!="disabled"]').prop('checked', true);
@@ -1386,6 +1387,7 @@
             if (!$(this).is(':checked')) {
                 var id = $(this).attr('id').split('-')[1];
                 $('#required-' + id).prop('checked', false);
+                $('#answerDescription-' + id).prop('checked', false);
             }
         });
 
