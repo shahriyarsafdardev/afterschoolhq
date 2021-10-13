@@ -687,8 +687,8 @@ namespace AfterSchool.Controllers
 
             var cartItem = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault();
             var participationObject = cartItem?.GetParticipationObject(msgs);
-            // var selectedDates = cartItem?.SelectedDates;
-            // var quantity = participationObject.CanRegisterPerClass ? selectedDates.Split(',').Length : 1;
+            var selectedDates = cartItem?.SelectedDates;
+            var quantity = participationObject.CanRegisterPerClass ? selectedDates.Split(',').Length : 1;
 
             if (paymentoption.IsNotEmpty() && paymentoption.IsNumber())
                 paymentPlan = SubscriptionPlan.Load(paymentoption.ToInteger(), msgs);
@@ -699,13 +699,13 @@ namespace AfterSchool.Controllers
             var coupon = currentAccount.ValidateCoupon(participationObject, couponcode, msgs);
             var isPostPayPlan = postPayPlan.IsNotEmpty();
             var amount = isPostPayPlan ? participationObject.GetCheckoutCostWithConvenienceFee() :  participationObject.Cost.Value;
-            
+
             var feeCalcObject = new FeeCalculationObject(amount, participationObject.OwnerAccount, msgs);
 
             // These amounts will either be the regular price or the discounted price, but we always return a value to update the UI
-            var calculatedAmountACH = isPostPayPlan ? amount : feeCalcObject.GetFinalTotalCost(PaymentType.ACH);
-            var calculatedAmountCC = isPostPayPlan ? amount + participationObject.GetCheckoutPostPayCreditCardFee() : feeCalcObject.GetFinalTotalCost(PaymentType.CreditCard);
-            var calculatedCCFee = isPostPayPlan ? participationObject.GetCheckoutPostPayCreditCardFee() : feeCalcObject.GetCreditCardFee();           
+            var calculatedAmountACH = (isPostPayPlan ? amount : feeCalcObject.GetFinalTotalCost(PaymentType.ACH)) * quantity;
+            var calculatedAmountCC = (isPostPayPlan ? amount + participationObject.GetCheckoutPostPayCreditCardFee() : feeCalcObject.GetFinalTotalCost(PaymentType.CreditCard)) * quantity;
+            var calculatedCCFee = (isPostPayPlan ? participationObject.GetCheckoutPostPayCreditCardFee() : feeCalcObject.GetCreditCardFee()) * quantity;           
 
             int numberInMonths = 0;
             decimal subscriptionPlanAmount = 0;
@@ -716,7 +716,9 @@ namespace AfterSchool.Controllers
             if (coupon.IsNotEmpty() && coupon.ID.IsNotEmpty() && coupon.DoesApplyToRegistrationFee())
             {
                 var couponValue = coupon.GetValue(amount);
-                var discountedFeeCalcObject = new FeeCalculationObject(amount - couponValue, participationObject.OwnerAccount, msgs);
+
+                //if parent opted for individual class, coupon should be applied on main total instead of each class, so (amount * quantity)
+                var discountedFeeCalcObject = new FeeCalculationObject((amount * quantity) - couponValue, participationObject.OwnerAccount, msgs);
 
                 //.. if post pay pre payment, we'll have already applied all the charges upfornt when adding activity. so final cost will be row cost only.               
                 calculatedAmountACH = isPostPayPlan ? discountedFeeCalcObject.GetFinalTotalCostForPostPay(PaymentType.ACH) : discountedFeeCalcObject.GetFinalTotalCost(PaymentType.ACH);
