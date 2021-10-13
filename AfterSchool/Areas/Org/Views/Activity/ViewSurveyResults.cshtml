@@ -177,46 +177,52 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/3.3.1/wavesurfer.min.js"></script>
     <script>
         $(document).ready(function () {
-            var wavesurfer = WaveSurfer.create({
-                container: '.waveform',
-                waveColor: '#494949',
-                progressColor: '#494949',
-                cursorColor: '#ffad49',
-                hideScrollbar: true,
-                responsive: true,
-                barWidth: 2,
-                barRadius: 2,
-                cursorWidth: 1,
-                height: 60,
-                barGap: null
-            });
+            if ($('.waveform').length) {
+                var wavesurfer = WaveSurfer.create({
+                    container: '.waveform',
+                    waveColor: '#494949',
+                    progressColor: '#494949',
+                    cursorColor: '#ffad49',
+                    hideScrollbar: true,
+                    responsive: true,
+                    barWidth: 2,
+                    barRadius: 2,
+                    cursorWidth: 1,
+                    height: 60,
+                    barGap: null
+                });
 
 
-            wavesurfer.load($(".waveValue").val());
-            $(".playbtn").on('click', function () {
-                if ($(this).hasClass('glyphicon-play')) {
-                    $(this).removeClass('glyphicon-play');
-                    $(this).addClass('glyphicon-pause');
-                }
-                else if ($(this).hasClass('glyphicon-pause')) {
-                    $(this).removeClass('glyphicon-pause');
-                    $(this).addClass('glyphicon-play');
-                }
-                wavesurfer.playPause();
-            })
+                wavesurfer.load($(".waveValue").val());
+                $(".playbtn").on('click', function () {
+                    if ($(this).hasClass('glyphicon-play')) {
+                        $(this).removeClass('glyphicon-play');
+                        $(this).addClass('glyphicon-pause');
+                    }
+                    else if ($(this).hasClass('glyphicon-pause')) {
+                        $(this).removeClass('glyphicon-pause');
+                        $(this).addClass('glyphicon-play');
+                    }
+                    wavesurfer.playPause();
+                })
 
-            wavesurfer.on('finish', function () {
-                wavesurfer.seekTo(0);
-                $('.playbtn').removeClass('glyphicon-pause');
-                $('.playbtn').addClass('glyphicon-play');
-            });
-            function convert() {
-                var input = $(".emoji").html();
-                var output = emojione.shortnameToImage(input);
-                $(".emoji").html(output);
-                $(".emojione").attr('style', "height: 30px;");
+                wavesurfer.on('finish', function () {
+                    wavesurfer.seekTo(0);
+                    $('.playbtn').removeClass('glyphicon-pause');
+                    $('.playbtn').addClass('glyphicon-play');
+                });
             }
-            convert();
+
+
+            if ($('.emoji').length) {
+                function convert() {
+                    var input = $(".emoji").html();
+                    var output = emojione.shortnameToImage(input);
+                    $(".emoji").html(output);
+                    $(".emojione").attr('style', "height: 30px;");
+                }
+                convert();
+            }
         })
     </script>
 }
