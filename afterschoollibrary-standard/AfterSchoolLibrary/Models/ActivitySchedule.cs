@@ -587,7 +587,7 @@ namespace AfterSchoolLibrary.Models
             if (occupiedSeats <= 0)
                 msgs.AddRange(instance.Delete(dc));
             else
-                msgs.Add(message: $"Schdule instance for {instance.StartDateTime.ToShortDateString()} To {instance.EndDateTime.ToShortDateString()} cannot be removed as students already registered in this interval.", messageType: MessageType.UserError);
+                msgs.Add(message: $"Schedule instance for {instance.StartDateTime.ToShortDateString()} To {instance.EndDateTime.ToShortDateString()} cannot be removed as students already registered in this interval.", messageType: MessageType.UserError);
 
             return msgs;
         }
