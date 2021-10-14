@@ -3254,8 +3254,8 @@ namespace AfterSchoolLibrary.Services
 
             // if can charge fees we bill it directly from our AHQ account
             var useStripeConnectedAccount = billingAccount.UseStripeConnectDuringCheckout(msgs, dc);
-            var platformFeeAmount = checkoutObject.CalculatePlatformFeeAmount(msgs, dc) * checkoutObject.ClassQuantity;
-            var amount = checkoutObject.GetStripeAmount(msgs, dc) * checkoutObject.ClassQuantity;
+            var platformFeeAmount = checkoutObject.CalculatePlatformFeeAmount(msgs, dc);
+            var amount = checkoutObject.GetStripeAmount(msgs, dc);
 
             // only charge tuition during checkout, because subscriptions are billed through stripe
             var charge = StripeHelper.CreateCharge(
