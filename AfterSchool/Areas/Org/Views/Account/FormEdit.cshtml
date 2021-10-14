@@ -1324,6 +1324,7 @@
     }
 
     function checkAllAnswerDescription() {
+        $('input[id^="active-"][disabled!="disabled"]').prop('checked', true);
         $('input[id^="answerDescription-"][disabled!="disabled"]').prop('checked', true);
     }
     function uncheckAllAnswerDescription() {
@@ -1404,6 +1405,7 @@
         $(document).on('click', '.question-IsAnswerDescriptionEnabled', function () {
             if ($(this).is(':checked')) {
                 var id = $(this).attr('id').split('-')[1];
+                $('#active-' + id).prop('checked', true);
                 $('#answerDescription-' + id).prop('checked', true);
             }
         });
