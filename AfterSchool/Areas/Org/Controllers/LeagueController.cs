@@ -256,8 +256,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var group = ActivityGroup.LoadByUid(id.ToGuid());
             LoadLeagueActivityViewBag(group, id, "", "", "", msgs);
-
-            return View("LeagueActivities", group);
+            return RedirectToAction("LeagueActivities", new { id = group.Uid });
+            //return View("LeagueActivities", group);
         }
 
         /// <summary>

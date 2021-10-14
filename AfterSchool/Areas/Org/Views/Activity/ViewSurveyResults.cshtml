@@ -51,7 +51,7 @@
                                 </div>
                             </div>
                         }
-                        else if (question.FormQuestionQuestionTypeId == QuestionType.DropDownList || question.FormQuestionQuestionTypeId == QuestionType.RadioList)
+                        else if (question.FormQuestionQuestionTypeId == QuestionType.DropDownList || question.FormQuestionQuestionTypeId == QuestionType.RadioList || question.FormQuestionQuestionTypeId == QuestionType.Rating || question.FormQuestionQuestionTypeId == QuestionType.Emoji)
                         {
                             <div class="col-lg-12">
                                 <div class="viewSurvey">
@@ -59,7 +59,18 @@
                                     @if (question.Text.IsNotEmpty())
                                     {
                                         dynamic json = Newtonsoft.Json.JsonConvert.DeserializeObject(question.Text);
-                                        <div class="viewSurveyAnswer">@Html.Raw(json[0].value)</div>
+                                        if (question.FormQuestionQuestionTypeId == QuestionType.Rating)
+                                        {
+                                            <div class="viewSurveyAnswer">@Html.Raw(json[0].key)</div>
+                                        }
+                                        else if (question.FormQuestionQuestionTypeId == QuestionType.Emoji)
+                                        {
+                                            <div class="viewSurveyAnswer emoji">@Html.Raw(json[0].key)</div>
+                                        }
+                                        else
+                                        {
+                                            <div class="viewSurveyAnswer">@Html.Raw(json[0].value)</div>
+                                        }
                                     }
                                 </div>
                             </div>
@@ -100,7 +111,7 @@
                                     <div class="viewSurveyAnswer">
                                         @if (question.Text.IsNotEmpty())
                                         {
-                                            <img src="@question.Text" style="width:100%" />
+                                            <img src="@question.Text" style="max-height:350px;max-width: 100%;" />
                                         }
                                     </div>
                                 </div>
@@ -125,7 +136,7 @@
                                     <div class="playPauseBtn" style="float:left; margin-right:10px">
                                         <i class="glyphicon glyphicon-play playbtn"></i>
                                     </div>
-                                    <div class="waveformMain" style="width:400px;height: 30px;overflow: hidden;">
+                                    <div class="waveformMain" style="max-width: 350px;height: 30px;overflow: hidden;">
                                         <div class="waveform"></div>
                                     </div>
                                     <input type="hidden" value="@question.Text" class="waveValue">
@@ -139,7 +150,7 @@
                             <div class="viewSurvey">
                                 <div class="viewSurveyHead">@question.QuestionText</div>
                                 <div class="viewSurveyAnswer">
-                                    <iframe width="420" height="315" src="@question.Text"></iframe>
+                                    <iframe width="420" height="315" src="@question.Text" style="max-width: 100%;"></iframe>
                                 </div>
                             </div>
                         </div>
@@ -162,42 +173,56 @@
 </div>
 
 @section scripts{
+    <script src="https://cdn.jsdelivr.net/emojione/2.0.0/lib/js/emojione.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/3.3.1/wavesurfer.min.js"></script>
     <script>
         $(document).ready(function () {
-            var wavesurfer = WaveSurfer.create({
-                container: '.waveform',
-                waveColor: '#494949',
-                progressColor: '#494949',
-                cursorColor: '#ffad49',
-                hideScrollbar: true,
-                responsive: true,
-                barWidth: 2,
-                barRadius: 2,
-                cursorWidth: 1,
-                height: 60,
-                barGap: null
-            });
-           
-          
-            wavesurfer.load($(".waveValue").val());
-            $(".playbtn").on('click', function () {
-                if ($(this).hasClass('glyphicon-play')) {
-                    $(this).removeClass('glyphicon-play');
-                    $(this).addClass('glyphicon-pause');
-                }
-                else if ($(this).hasClass('glyphicon-pause')) {
-                    $(this).removeClass('glyphicon-pause');
-                    $(this).addClass('glyphicon-play');
-                }
-                wavesurfer.playPause();
-            })
+            if ($('.waveform').length) {
+                var wavesurfer = WaveSurfer.create({
+                    container: '.waveform',
+                    waveColor: '#494949',
+                    progressColor: '#494949',
+                    cursorColor: '#ffad49',
+                    hideScrollbar: true,
+                    responsive: true,
+                    barWidth: 2,
+                    barRadius: 2,
+                    cursorWidth: 1,
+                    height: 60,
+                    barGap: null
+                });
 
-            wavesurfer.on('finish', function () {
-                wavesurfer.seekTo(0);
-                $('.playbtn').removeClass('glyphicon-pause');
-                $('.playbtn').addClass('glyphicon-play');
-            });
+
+                wavesurfer.load($(".waveValue").val());
+                $(".playbtn").on('click', function () {
+                    if ($(this).hasClass('glyphicon-play')) {
+                        $(this).removeClass('glyphicon-play');
+                        $(this).addClass('glyphicon-pause');
+                    }
+                    else if ($(this).hasClass('glyphicon-pause')) {
+                        $(this).removeClass('glyphicon-pause');
+                        $(this).addClass('glyphicon-play');
+                    }
+                    wavesurfer.playPause();
+                })
+
+                wavesurfer.on('finish', function () {
+                    wavesurfer.seekTo(0);
+                    $('.playbtn').removeClass('glyphicon-pause');
+                    $('.playbtn').addClass('glyphicon-play');
+                });
+            }
+
+
+            if ($('.emoji').length) {
+                function convert() {
+                    var input = $(".emoji").html();
+                    var output = emojione.shortnameToImage(input);
+                    $(".emoji").html(output);
+                    $(".emojione").attr('style', "height: 30px;");
+                }
+                convert();
+            }
         })
     </script>
 }
