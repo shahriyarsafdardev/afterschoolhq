@@ -2073,7 +2073,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 ViewBag.PrevExists = getSurveyResponses[findIndex - 1].ID;
 
 
-            ViewBag.FormQuestionAnswers = FormQuestionAnswer.LoadBySurveyResponseId(getSurveyResponse.ID.Value, msgs);
+            ViewBag.FormQuestionAnswers = FormQuestionAnswer.LoadBySurveyResponseId(getSurveyResponse.ID.Value, msgs).OrderBy(a => a.FormQuestionGroupDisplayOrder).ThenBy(a => a.FormQuestionDisplayOrder).ToList();
             ViewBag.SurveyName = SurveyRequest.Load(getSurveyResponse.SurveyRequestId.Value).Name;
             ViewBag.RegistrantName = Registrant.Load(getSurveyResponse.RegistrantId.Value).Name;
             ViewBag.SurveyFeedback = getSurveyResponse;
