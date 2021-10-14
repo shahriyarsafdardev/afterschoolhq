@@ -816,9 +816,10 @@ namespace AfterSchoolLibrary.Services
         public static Stripe.Transfer CreateStripeTransfer(this Transaction transaction, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var billerAccount = transaction.GetBillerAccount(msgs, dc);
-            // cant createa transfer if the billerAccount doesnt have stripe connected
+            var useStripeConnectDuringCheckout = billerAccount.UseStripeConnectDuringCheckout(msgs, dc);
+            // cant create a transfer if the billerAccount doesnt have stripe connected
             // there could be cases where the transaction occured before the biller setup stripe and we want to create a transfer afterwards
-            if (transaction.UsedStripeConnect && !billerAccount.UseStripeConnectDuringCheckout(msgs, dc))
+            if (transaction.UsedStripeConnect && !useStripeConnectDuringCheckout))
                 return null;
 
             if (transaction.HasStripeTransfer(msgs))
@@ -831,7 +832,7 @@ namespace AfterSchoolLibrary.Services
             var hasStripeUserId = billerAccount.StripeUserId.IsNotEmpty();
             var useStripeConnectedAccount = billerAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
 
-            if (hasStripeUserId && useStripeConnectedAccount && !transaction.PayoutId.HasValue && billerAccount.StripePayoutsEnabled)
+            if (hasStripeUserId && useStripeConnectDuringCheckout && !transaction.PayoutId.HasValue)
             {
                 var transfer = StripeHelper.CreateTransfer(
                                 billerAmount,

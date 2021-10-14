@@ -262,11 +262,11 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
             //we will need this logic to ensure we are adding pro-rated amount in ActivityPayment and RegistrantSubscriptionPlan
             var amountPaidByParent = stripeInvoice.AmountPaid > 0 ? (decimal)stripeInvoice.AmountPaid / 100 : 0m;
-            if (stripeInvoice.TransferData.IsEmpty())
-            {
-                transaction.CreateStripeTransfer(WebUser.Load(1, msgs), msgs);
-            }
-            var amountReceivedByProvider = stripeInvoice.TransferData.Amount > 0 ? (decimal)stripeInvoice.TransferData.Amount / 100 : 0m;
+            var amountReceivedByProvider = 0m;
+            var isStripeInvoiceTransferData = stripeInvoice.TransferData.IsNotEmpty();
+            if (isStripeInvoiceTransferData)
+                amountReceivedByProvider = (decimal)stripeInvoice.TransferData.Amount / 100;
+
             var isAmountProRated = amountReceivedByProvider < plan.CostPerPeriod;
 
             // save transaction info and track payment to the activity as well.
@@ -295,6 +295,10 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             };
 
             billingAccount.ProcessSubscriptionPlanPayment(checkoutObject, plan, rsp, msgs);
+
+            // need to create transfer if there wasnt one originally, use webuser
+            if (!isStripeInvoiceTransferData)
+                checkoutObject.Transaction.CreateStripeTransfer(WebUser.Load(1, msgs), msgs);
 
             if (msgs.HasErrors())
                 return Return500(msgs);
