@@ -819,7 +819,7 @@ namespace AfterSchoolLibrary.Services
             var useStripeConnectDuringCheckout = billerAccount.UseStripeConnectDuringCheckout(msgs, dc);
             // cant create a transfer if the billerAccount doesnt have stripe connected
             // there could be cases where the transaction occured before the biller setup stripe and we want to create a transfer afterwards
-            if (transaction.UsedStripeConnect && !useStripeConnectDuringCheckout))
+            if (transaction.UsedStripeConnect && !useStripeConnectDuringCheckout)
                 return null;
 
             if (transaction.HasStripeTransfer(msgs))

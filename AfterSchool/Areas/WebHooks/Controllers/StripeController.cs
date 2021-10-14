@@ -245,7 +245,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             }
 
             // send payment succeeded email
-           // purchasingAccount.SendSubscriptionPaymentSucceeded(rsp, plan);
+             purchasingAccount.SendSubscriptionPaymentSucceeded(rsp, plan);
 
             AfterSchoolLibrary.Models.Account convenienceFeePayer;
             AfterSchoolLibrary.Models.Account transactionFeePayer;
