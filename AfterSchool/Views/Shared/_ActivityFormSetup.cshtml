@@ -376,7 +376,7 @@
     function checkFormVal() {
         if ($('#form').val().length > 0 && $('#form').val() != "0") {
             $('#editForm').removeClass('hide');
-            $('#editForm').attr('href', '@Url.Action("edit", "form")/' + $('#form').val());
+            $('#editForm').attr('href', '@Url.Action("formedit", "account")/' + $('#form').val());
         } else {
             $('#editForm').addClass('hide');
         }
