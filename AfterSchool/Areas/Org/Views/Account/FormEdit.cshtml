@@ -258,10 +258,10 @@
 
                                                     <td>
                                                         @{Html.RenderPartial(
-                                                                              "~/Views/Shared/_SwitchButton.cshtml",
-                                                                              question.IsActive,
-                                                                              new ViewDataDictionary()
-                                                                              {
+                                                                                "~/Views/Shared/_SwitchButton.cshtml",
+                                                                                question.IsActive,
+                                                                                new ViewDataDictionary()
+                                                                                {
                                                                                                                     { "checkboxname", "active-" + question.ID },
                                                                                                                     { "checkboxid", "active-" + question.ID },
                                                                                                                     { "disabled", question.IsLocked },
@@ -285,10 +285,10 @@
                                                     </td>
                                                     <td>
                                                         @{Html.RenderPartial(
-                                                                                "~/Views/Shared/_SwitchButton.cshtml",
-                                                                                question.IsAnswerDescriptionEnabled,
-                                                                                new ViewDataDictionary()
-                                                                                {
+                                                                                  "~/Views/Shared/_SwitchButton.cshtml",
+                                                                                  question.IsAnswerDescriptionEnabled,
+                                                                                  new ViewDataDictionary()
+                                                                                  {
                                                                                                                     { "checkboxname", "answerDescription-" + question.ID },
                                                                                                                     { "checkboxid", "answerDescription-" + question.ID },
                                                                                                                     { "disabled", question.IsLocked },
@@ -346,6 +346,7 @@
                     }
 
                     <input type="hidden" name="newquestioncount" id="newquestioncount" value="0" />
+                    <input type="hidden" name="newquestionsIds" id="newquestionsIds" value="" />
 
                 </form>
             </div>
@@ -586,6 +587,7 @@
     var selectedQuestion = null;
     var newQuestionNumber = 0;
     var optionQuestionType = 0;
+    var newQuestionsIds = [];
     var emojiDictionary = [
         { key: "grinning", value: "Happy" },
         { key: "grin", value: "Thrilled" },
@@ -618,11 +620,17 @@
     }
 
     function incrementQuestionCount() {
+        newQuestionsIds.push(getQuestionCount());
         $('#newquestioncount').val(getQuestionCount() + 1);
+        $('#newquestionsIds').val(newQuestionsIds.join(","));
     }
 
-    function decrementQuestionCount() {
+    function decrementQuestionCount(questionId) {
         $('#newquestioncount').val(getQuestionCount() - 1);
+        const index = newQuestionsIds.indexOf(Number(questionId));
+        if (index > -1)
+            newQuestionsIds.splice(index, 1);
+        $('#newquestionsIds').val(newQuestionsIds.join(","));
     }
 
     function getQuestionCount() {
@@ -645,8 +653,10 @@
     }
 
     function deleteNonSavedQuestion(elem) {
-        decrementQuestionCount();
+        var selectedRow = $(elem).closest("tr");
+        var questionId = $(selectedRow).find(".questionId").val();
         $(elem).closest('tr').remove();
+        decrementQuestionCount(questionId);
     }
 
     function getShowCheckbox() {

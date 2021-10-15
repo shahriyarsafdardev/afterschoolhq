@@ -935,8 +935,9 @@ namespace AfterSchool.Areas.Org.Controllers
                             if (Request.Form["newquestioncount"].IsNumber() && Request.Form["newquestioncount"].ToInteger() > 0)
                             {
                                 var questionCount = Request.Form["newquestioncount"].ToInteger();
-
-                                for (var i = 0; i < questionCount; i++)
+                                var questionIds = Request.Form["newquestionsIds"];
+                                var questionsList = questionIds.Split(',');
+                                foreach (var i in questionsList)
                                 {
                                     var question = new FormQuestion
                                     {
