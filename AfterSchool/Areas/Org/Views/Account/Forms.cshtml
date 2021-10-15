@@ -169,6 +169,11 @@
             $('.modal-title').html('Copy Registration Form');
             $('#form-new').attr('action', '/org/account/formedit/0?copyfrom=' + id);
             $('#name').val(name + ' Copy');
+            if (formtype == "Survey")
+                $('#formtype').val('2');
+            else
+                $('#formtype').val('1');
+           
             $('.formTypeRow').addClass("hide");
             $('#name').focus();
         }
