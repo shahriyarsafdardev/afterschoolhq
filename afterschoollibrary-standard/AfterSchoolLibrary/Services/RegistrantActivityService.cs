@@ -177,7 +177,8 @@ namespace AfterSchoolLibrary.Services
                 {
                     registrantActivity.AdjustPreferencesDuringRemoval(null, amsgs, adc);
                     registrantActivity.AdjustSeatIndexesDuringRemoval(amsgs, adc);
-                    amsgs.AddRange(registrantActivity.Delete(adc));
+                    registrantActivity.IsDeleted = true;
+                    amsgs.AddRange(registrantActivity.Save(adc));
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),

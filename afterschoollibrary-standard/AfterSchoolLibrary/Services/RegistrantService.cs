@@ -1119,7 +1119,8 @@ namespace AfterSchoolLibrary.Services
                     ActivityGroupId = activityGroupId,
                     RegistrationPeriodId = registrationPeriodId,
                     CreateDate = DateTime.UtcNow,
-                    CreatedBy = loggedInUserId
+                    CreatedBy = loggedInUserId,
+                    IsDeleted = false
                 };
 
             ra.LastModifiedDate = DateTime.UtcNow;
@@ -1525,7 +1526,8 @@ namespace AfterSchoolLibrary.Services
                 {
                     registrant.DeleteSessionActions(amsgs, adc);
                     registrant.DeleteRegistrantActivities(amsgs, adc);
-                    amsgs.AddRange(registrant.Delete(adc));
+                    registrant.IsDeleted = true;
+                    amsgs.AddRange(registrant.Save(adc));
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
