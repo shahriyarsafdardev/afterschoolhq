@@ -314,6 +314,7 @@ namespace AfterSchoolLibrary.Models
 			FormQuestion.Update(new Hashtable(){{"IsAnswerDescriptionEnabled",false}}, new Hashtable(){{"IsAnswerDescriptionEnabled", DBNull.Value}}, FormQuestion.ObjectMap, dc);
 			FormQuestionGroup.Update(new Hashtable(){{"RegistrantTypeId",0}}, new Hashtable(){{"RegistrantTypeId", DBNull.Value}}, FormQuestionGroup.ObjectMap, dc);
 			FormQuestionGroup.Update(new Hashtable(){{"QuestionGroupDataTypeId",0}}, new Hashtable(){{"QuestionGroupDataTypeId", DBNull.Value}}, FormQuestionGroup.ObjectMap, dc);
+			FormQuestionGroup.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, FormQuestionGroup.ObjectMap, dc);
 			FormQuestionAnswer.Update(new Hashtable(){{"QuestionDataTypeId",0}}, new Hashtable(){{"QuestionDataTypeId", DBNull.Value}}, FormQuestionAnswer.ObjectMap, dc);
 			Registration.Update(new Hashtable(){{"PaymentTypeId",0}}, new Hashtable(){{"PaymentTypeId", DBNull.Value}}, Registration.ObjectMap, dc);
 			Registration.Update(new Hashtable(){{"CompletionStatusId",0}}, new Hashtable(){{"CompletionStatusId", DBNull.Value}}, Registration.ObjectMap, dc);

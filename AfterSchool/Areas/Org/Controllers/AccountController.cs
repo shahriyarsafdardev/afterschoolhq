@@ -775,9 +775,12 @@ namespace AfterSchool.Areas.Org.Controllers
             if (id.IsEmpty())
                 return HttpNotFound();
 
-            var msgs = new SystemMessages();
+            var msgs = TempData["Messages"] as SystemMessages;
+            if (msgs.IsEmpty())
+                msgs = new SystemMessages();
+
             var form = currentAccount.GetForm(id.ToInteger(), msgs);
-            var questionGroups = form.GetQuestionGroups(msgs);
+            var questionGroups = form.GetActiveQuestionGroups(msgs);
             var individualGroups = questionGroups
                 .Where(x => x.RegistrantTypeId == RegistrantType.Individual)
                 .OrderBy(x => x.DisplayOrder).ToList();
@@ -886,7 +889,8 @@ namespace AfterSchool.Areas.Org.Controllers
                                     FormId = form.ID,
                                     QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
                                     RegistrantTypeId = RegistrantType.Individual,
-                                    Name = Request.Params["name-0"]
+                                    Name = Request.Params["name-0"],
+                                    IsActive = true
                                 };
                                 amsgs.AddRange(questionGroup.Save(adc));
                                 questions = new List<FormQuestion>();
@@ -955,7 +959,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                         Options = Request.Params[string.Format("new-options-text-{0}", i)],
                                         Link = Request.Params[string.Format("new-link-text-{0}", i)],
                                         Description = Request.Params[string.Format("new-description-{0}", i)],
-                                        IsActive = Request.Params[string.Format("new-active-{0}", i)].IsBoolean(),
+                                        IsActive = true,
                                         IsRequired = Request.Params[string.Format("new-required-{0}", i)].IsBoolean(),
                                         IsAnswerDescriptionEnabled = Request.Params[string.Format("new-description-enabled-{0}", i)].IsBoolean()
                                     };
@@ -978,7 +982,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if ((FormType)formtype.ToInteger() != FormType.Survey)
             {
-                questionGroups = form.GetQuestionGroups(msgs);
+                questionGroups = form.GetActiveQuestionGroups(msgs);
                 individualGroups = questionGroups
                     .Where(x => x.RegistrantTypeId == RegistrantType.Individual)
                     .OrderBy(x => x.DisplayOrder)
@@ -1027,8 +1031,11 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             if (currentAccount.IsEmpty())
                 return HttpNotFound();
+
             var questionToDelete = FormQuestion.Load(id.ToInteger(), msgs);
-            questionToDelete.Delete();
+            questionToDelete.IsActive = false;
+            msgs.AddRange(questionToDelete.Save());
+            
             // Show Success Message
             // LOG: Someone has Deleted Question.
             if (msgs.HasNoErrors())
@@ -1046,8 +1053,57 @@ namespace AfterSchool.Areas.Org.Controllers
                    indirectObjectText: currentAccount.Name
                );
             }
+
             ViewBag.Messages = msgs;
-            return Redirect(Request.UrlReferrer.ToString());
+            TempData["Messages"] = msgs;
+
+            return RedirectToAction("FormEdit", new { id = questionToDelete.FormId, qg = "" });
+        }
+
+        [HttpGet]
+        public ActionResult DeleteSection(string id)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+
+            var sectionToDelete = FormQuestionGroup.Load(id: id.ToInteger(), msgs: msgs);
+            sectionToDelete.IsActive = false;
+            msgs.AddRange(sectionToDelete.Save());
+
+            //lets inactive all the questions for this section, so later when retrieving questions, we don't have to check for removed sections
+            var questionsInThisSection = FormQuestion.LoadByFormQuestionGroupId(FormQuestionGroupId: sectionToDelete.ID.Value, msgs: msgs);
+            foreach (var item in questionsInThisSection)
+            {
+                item.IsActive = false;
+                msgs.AddRange(item.Save());
+            }
+
+            // Show Success Message
+            // LOG: Someone has Deleted Question.
+            if (msgs.HasNoErrors())
+            {
+                msgs.Add(string.Format("{0} has been deleted with all it's questions.", sectionToDelete.Name), MessageType.Success);
+                SessionVariables.WebSession.LogActivity(
+                   account: currentAccount,
+                   actor: currentUser,
+                   actionType: WebSessionActionType.Deleted,
+                   objectType: ObjectType.FormQuestionGroup,
+                   objectId: id.ToInteger(),
+                   objectText: sectionToDelete.Name,
+                   indirectObjectType: ObjectType.FormQuestionGroup,
+                   indirectObjectId: currentAccount.ID.Value,
+                   indirectObjectText: currentAccount.Name
+               );
+            }           
+
+            ViewBag.Messages = msgs;
+            TempData["Messages"] = msgs;
+
+            return RedirectToAction("FormEdit", new { id = sectionToDelete.FormId, qg = ""});
         }
 
         private AccountProfile StyleViewBag(SystemMessages msgs)
