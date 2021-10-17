@@ -728,6 +728,7 @@ namespace AfterSchoolLibrary.Services
                 HidePreciseLocation = activity.HidePreciseLocation,
                 InterestFormId = activity.InterestFormId,
                 IsConvenienceFeeTakenOutOfCost = activity.IsConvenienceFeeTakenOutOfCost,
+                CostFrequencyTypeId = activity.CostFrequencyTypeId,
             };
         }
 

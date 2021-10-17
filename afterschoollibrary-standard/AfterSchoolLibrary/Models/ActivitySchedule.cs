@@ -653,22 +653,24 @@ namespace AfterSchoolLibrary.Models
                         CreatedBy = loggedInUserId,
                         LastModifiedDate = DateTime.UtcNow,
                         LastModifiedBy = loggedInUserId,
-                        ActivityGroupId = this.ActivityGroupId
+                        ActivityGroupId = this.ActivityGroupId,
+                        DaysOfTheWeek = this.DaysOfTheWeek,
                     };
                     amsgs.AddRange(copy.Save(adc));
 
-                    // add instances
-                    this.GetInstances(false, amsgs, adc)
-                        .ToList()
-                        .ForEach(instance => 
-                            copy.AddInstance(
-                                instance.StartDateTime.Value, 
-                                instance.EndDateTime.Value, 
-                                instance.InstanceTypeId,
-                                loggedInUserId, 
-                                amsgs, 
-                                adc)
-                        );
+                    if (!this.IsOngoing)
+                        // add instances
+                        this.GetInstances(false, amsgs, adc)
+                            .ToList()
+                            .ForEach(instance => 
+                                copy.AddInstance(
+                                    instance.StartDateTime.Value, 
+                                    instance.EndDateTime.Value, 
+                                    instance.InstanceTypeId,
+                                    loggedInUserId, 
+                                    amsgs, 
+                                    adc)
+                            );
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
