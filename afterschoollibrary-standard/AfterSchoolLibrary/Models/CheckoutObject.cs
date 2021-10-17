@@ -160,11 +160,13 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
+        public bool ShouldApplyCoupon { get; set; } = true;
+
         public bool IsCouponApplied
         {
             get
             {
-                return Coupon.IsNotEmpty() && Coupon.ID.IsNotEmpty() && Coupon.DoesApplyToRegistrationFee();
+                return Coupon.IsNotEmpty() && Coupon.ID.IsNotEmpty() && Coupon.DoesApplyToRegistrationFee() && ShouldApplyCoupon;
             }
         }
 
@@ -213,6 +215,19 @@ namespace AfterSchoolLibrary.Models
                 return GetPaymentPlanCostTodayWithFees(msgs, dc) + GetSubscriptionCostTodayWithFees(msgs, dc);
 
             return GetRegistrationCostWithFees(msgs, dc) + GetSubscriptionCostTodayWithFees(msgs, dc) + GetPostPayPlanCostTodayWithFees();
+        }
+
+        public decimal GetTotalCostToPurchaseTodayWithFees(bool applyCoupon = true, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (!applyCoupon)
+                ShouldApplyCoupon = false;
+
+            if (PaymentPlan.IsNotEmpty())
+                return GetPaymentPlanCostTodayWithFees(msgs, dc) + GetSubscriptionCostTodayWithFees(msgs, dc);
+
+            var cost = GetRegistrationCostWithFees(msgs, dc) + GetSubscriptionCostTodayWithFees(msgs, dc) + GetPostPayPlanCostTodayWithFees();
+            ShouldApplyCoupon = true; //reset the flag
+            return cost;
         }
 
         public decimal GetTotalCostToPurchaseTodayWithConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)

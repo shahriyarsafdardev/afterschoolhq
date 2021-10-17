@@ -758,7 +758,8 @@ namespace AfterSchoolLibrary.Helpers
                         checkoutObject.Coupon.ID.IsNotEmpty() && 
                         checkoutObject.Coupon.DoesApplyToRegistrationFee())
                     {
-                        var amountCC = checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc);
+                        //for now lets not apply coupon and just get the value of total cost. (to show proper cost per item in email)
+                        var amountCC = checkoutObject.GetTotalCostToPurchaseTodayWithFees(applyCoupon: false, msgs: msgs, dc: dc);                        
                         var couponValueCC = checkoutObject.CouponValue(msgs,dc);
                         
                         cost = amountCC.ToCurrency();
