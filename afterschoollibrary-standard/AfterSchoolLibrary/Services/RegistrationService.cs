@@ -237,7 +237,7 @@ namespace AfterSchoolLibrary.Services
                     loggedInUserId: loggedInUser.ID.Value,
                     msgs: msgs,
                     dc: dc);
-
+            
             if (registeredDates.IsNotEmpty() && registeredDates.Any())
             {
                 registeredDates.ForEach(date =>

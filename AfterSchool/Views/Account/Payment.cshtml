@@ -13,7 +13,7 @@
     var paymentAccount = participationObject.PaymentAccount;
     var subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
     var postPayPlan = participationObject.PostPayPlans?.FirstOrDefault();
-    var paymentPlan = participationObject.PaymentPlans;
+    var paymentPlans = participationObject.PaymentPlans;
     var registrant = registration.GetRegistrant();
     var readyToAcceptPayment = subscriptionPlan.IsEmpty() || !subscriptionPlan.SplitCostEvenly || participationObject.RegistrationFinalized;
     var quantity = 1;
@@ -161,7 +161,7 @@
                             </div>
 
                         }
-                        else if (paymentPlan.Any())
+                        else if (paymentPlans.Any())
                         {
                             <div class="row margin-t-20">
                                 <div class="col-md-6 col-md-offset-3 col-sm-12 ">
@@ -180,7 +180,7 @@
                                         </label>
                                     </div>
 
-                                    @foreach (var plan in paymentPlan)
+                                    @foreach (var plan in paymentPlans)
                                     {
                                         var today = participationObject.OwnerAccount.ConvertToAccountTimeZone(DateTime.UtcNow).Date;
                                         DateTime planStartDate = today;
@@ -401,7 +401,7 @@
         })
 
         function loadCouponContainers() {
-            var isPaymentPlan = '@Html.Raw(Json.Encode(paymentPlan.Count > 0))';
+            var isPaymentPlan = '@Html.Raw(Json.Encode(paymentPlans.Count > 0))';
             var isPaidActivity = '@Html.Raw(Json.Encode(participationObject.Cost > 0 && !participationObject.IsFree))';
             var ispostPayPlan = '@Html.Raw(Json.Encode(postPayPlan.IsNotEmpty()))';
             var issubscriptionPlan = '@Html.Raw(Json.Encode(subscriptionPlan.IsNotEmpty()))';
