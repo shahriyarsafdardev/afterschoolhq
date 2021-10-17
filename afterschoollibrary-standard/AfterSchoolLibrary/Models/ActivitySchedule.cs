@@ -658,7 +658,20 @@ namespace AfterSchoolLibrary.Models
                     };
                     amsgs.AddRange(copy.Save(adc));
 
-                    if (!this.IsOngoing)
+                    // only copy out of session instances for ongoing activities
+                    if (this.IsOngoing)
+                        this.GetOutSessionInstances(amsgs, adc)
+                               .ToList()
+                               .ForEach(instance =>
+                                   copy.AddInstance(
+                                       instance.StartDateTime.Value,
+                                       instance.EndDateTime.Value,
+                                       instance.InstanceTypeId,
+                                       loggedInUserId,
+                                       amsgs,
+                                       adc)
+                               );
+                    else
                         // add instances
                         this.GetInstances(false, amsgs, adc)
                             .ToList()
