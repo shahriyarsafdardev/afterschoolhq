@@ -187,7 +187,7 @@ namespace AfterSchoolLibrary.Services
 
         public static int GetSeatsRemainingForNextDate(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var dates = activity.GetSchedule(msgs, dc).GetNextInstances(1, msgs, dc);
+            var dates = activity.GetSchedule(msgs, dc).GetNextInstances(1, activity, msgs, dc);
 
             if (dates.Any())
                 return activity.GetSeatsRemainingByDate(dates.First(), msgs, dc);
@@ -2495,7 +2495,7 @@ namespace AfterSchoolLibrary.Services
         /// <returns></returns>
         public static DateTime? GetFirstDate(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return activity.GetSchedule(msgs, dc)?.GetInstances(msgs: msgs, dc: dc).FirstOrDefault()?.StartDateTime;
+            return activity.GetSchedule(msgs, dc)?.GetNextInstances(1, activity, msgs, dc).FirstOrDefault();
         }
 
         /// <summary>

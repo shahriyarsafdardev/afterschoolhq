@@ -123,6 +123,14 @@ namespace AfterSchoolLibrary.Services
 
         public static List<DateTime> GetNextInstances(this ActivitySchedule schedule, int numberOfInstances, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (participationObject.IsActivity())
+                return schedule.GetNextInstances(numberOfInstances, participationObject.GetActivity(), msgs, dc);
+
+            return new List<DateTime>();
+        }
+
+        public static List<DateTime> GetNextInstances(this ActivitySchedule schedule, int numberOfInstances, Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
             var dates = new List<DateTime>();
             var account = schedule.GetAccount(msgs, dc);            
             var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
@@ -130,11 +138,11 @@ namespace AfterSchoolLibrary.Services
             if (schedule.IsOngoing)
             {
                 var referenceDate = now;
-
-                if (participationObject.RegistrationCutoffHours.HasValue)
-                    referenceDate = referenceDate.AddHours(participationObject.RegistrationCutoffHours.Value);
-
                 var outOfSession = schedule.GetOutSessionInstances(msgs, dc).Where(instance => instance.StartDateTime.Value.IsAfter(referenceDate));
+                var cutoffHours = 0;
+
+                if (activity.RegistrationCutoffHours.HasValue)
+                    cutoffHours = activity.RegistrationCutoffHours.Value;
 
                 if (schedule.StartDate.HasValue && schedule.StartDate.Value.IsAfter(referenceDate))
                     referenceDate = schedule.StartDate.Value;
@@ -163,7 +171,7 @@ namespace AfterSchoolLibrary.Services
 
                     var dateToAdd = referenceDate.AddDays(daysToAdd);
 
-                    if (!dateToAdd.Date.In(outOfSession.Select(x => x.StartDateTime.Value.Date)))
+                    if (!dateToAdd.Date.In(outOfSession.Select(x => x.StartDateTime.Value.Date)) && dateToAdd.AddHours(cutoffHours * -1).IsAfter(now))
                         dates.Add($"{dateToAdd.ToShortDateString()} {schedule.DailyStartTime.ToShortTimeString()}".ToDateTime());
                     else
                         i--; // don't increment
