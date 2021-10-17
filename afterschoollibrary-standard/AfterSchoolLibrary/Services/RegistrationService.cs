@@ -201,7 +201,7 @@ namespace AfterSchoolLibrary.Services
                 dc);
         }
 
-        public static void ProcessRegistrationAssignment(this Registration registration, ParticipationObject participationObject, Registrant masterRegistrant, Registrant registrant, int seatsRequested, int preferenceNumber, int? activityGroupId, int? periodId, decimal? amountCharged, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void ProcessRegistrationAssignment(this Registration registration, ParticipationObject participationObject, Registrant masterRegistrant, Registrant registrant, int seatsRequested, int preferenceNumber, int? activityGroupId, int? periodId, decimal? amountCharged, List<DateTime> registeredDates, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // NOTE: getting only one activity per registration at the moment, 
             // but could be problem in the future
