@@ -51,7 +51,17 @@
             
             @if (!Model.SubscriptionPlans.Any())
             {
-                <span>per registration</span>
+                <span>
+                    per                     
+                    @if (Model.IsActivity() && Model.GetActivity().CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
+                    {
+                        <span>class</span>
+                    }
+                    else
+                    {
+                        <span>registration</span>
+                    }
+                </span>
             }
 
         </span>

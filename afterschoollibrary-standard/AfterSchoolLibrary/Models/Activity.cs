@@ -115,6 +115,10 @@ namespace AfterSchoolLibrary.Models
 		/// Used to allow a provider to set the final fee a parent sees
 		/// </summary>
 		public bool IsConvenienceFeeTakenOutOfCost { get { return (bool)MDV["IsConvenienceFeeTakenOutOfCost"].Value; } set { MDV["IsConvenienceFeeTakenOutOfCost"].Value = value; } }
+		/// <summary>
+		/// Use to determine if registration fee applies to the whole activity or each class
+		/// </summary>
+		public ActivityCostFrequencyType CostFrequencyTypeId { get { return (ActivityCostFrequencyType)MDV["CostFrequencyTypeId"].Value; } set { MDV["CostFrequencyTypeId"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		public string AccountTimeZone { get { return (string)MDV["AccountTimeZone"].Value; } }
 		public bool? ActivityGroupIsArchived { get { return (bool?)MDV["ActivityGroupIsArchived"].Value; } }
@@ -141,6 +145,7 @@ namespace AfterSchoolLibrary.Models
 			this.HidePreciseLocation = false;
 			this.RegistrationFinalized = false;
 			this.IsConvenienceFeeTakenOutOfCost = false;
+			this.CostFrequencyTypeId = ActivityCostFrequencyType.NotSet;
 			
         }
 
@@ -194,6 +199,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "RegistrationFinalized", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "InterestFormId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IsConvenienceFeeTakenOutOfCost", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "CostFrequencyTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountTimeZone", typeof(Account).Name, "TimeZone", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "ActivityGroupIsArchived", typeof(ActivityGroup).Name, "IsArchived", System.Data.SqlDbType.Bit, "ActivityGroup");
@@ -452,6 +458,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["IsConvenienceFeeTakenOutOfCost"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["CostFrequencyTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

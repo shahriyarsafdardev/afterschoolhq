@@ -35,12 +35,18 @@
                                 {
                                     if (instance.StartDateTime.HasValue)
                                     {
+                                        <option value="@instance.ID" @(Model.ActivityInstanceId == instance.ID ? " selected=\"selected\" " : "")>
+                                                @instance.StartDateTime.ToShortTimeString(), @instance.StartDateTime.Value.ToLongDateString()
+                                            </option>
+
+                                        @*
                                         if (DateTime.UtcNow >= account.ConvertFromAccountTimeZone(instance.StartDateTime.Value).AddDays(-FUTURE_INSTANCES_TO_SHOW))
                                         {
                                             <option value="@instance.ID" @(Model.ActivityInstanceId == instance.ID ? " selected=\"selected\" " : "")>
                                                 @instance.StartDateTime.ToShortTimeString(), @instance.StartDateTime.Value.ToLongDateString()
                                             </option>
                                         }
+                                            *@
                                     }
                                 }
                             }
@@ -62,7 +68,7 @@
                             if (registrantActivities.Any(registrantActivity => registrantActivity.RegistrantId == attendanceRegistrant.RegistrantId && registrantActivity.IsReservedRegistrationAssignmentType()))
                             { 
                             <tr>
-                                <td>@(isTechSupport ? attendanceRegistrant.RegistrantId.ToString() : attendanceRegistrant.RegistrantName)</td>
+                                <td>@(isTechSupport ? $"{attendanceRegistrant.RegistrantId.ToString()} - {attendanceRegistrant.RegistrantName.MaskString(3, 3)}" : attendanceRegistrant.RegistrantName)</td>
                                 <td>
                                     @if (attendanceRegistrant.RegistrantRegistrantTypeId == RegistrantType.Individual)
                                     {

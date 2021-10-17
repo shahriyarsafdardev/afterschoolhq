@@ -712,6 +712,10 @@ namespace AfterSchoolLibrary.Helpers
                 description += $"<br />&nbsp;&bull;&nbsp;{ra.GetParticipationObject(msgs, dc).Name} - {ra.AssignmentTypeId.ToString().SplitByUpperCase()}";
             });
 
+            if (participationObject.CanRegisterPerClass)
+                checkoutObject.SelectedDates.ForEach(date => description += $"<br />&nbsp;&bull;&nbsp;{date.ToLongDateTimeString()}");
+
+
             var isCompletelyFree = checkoutObject.IsFree;
             var isRegFree = participationObject.IsRegistrationFree;
             var hasPaymentPlan = paymentPlan.IsNotEmpty();
@@ -720,7 +724,7 @@ namespace AfterSchoolLibrary.Helpers
             var splitCostEvenly = subscription?.SplitCostEvenly ?? false;
             var regFinalized = participationObject.RegistrationFinalized;
             string registrationTable = "";
-            var totalCost = checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc);
+            var totalCost = checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc) * checkoutObject.ClassQuantity;
             var showTable = false;
 
             if (splitCostEvenly && regFinalized)
@@ -753,8 +757,8 @@ namespace AfterSchoolLibrary.Helpers
                     if (checkoutObject.Coupon.IsNotEmpty() &&
                         checkoutObject.Coupon.ID.IsNotEmpty() && 
                         checkoutObject.Coupon.DoesApplyToRegistrationFee())
-                    {                 
-                        var amountCC =  checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs,dc);
+                    {
+                        var amountCC = checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc) * checkoutObject.ClassQuantity;
                         var couponValueCC = checkoutObject.CouponValue(msgs,dc);
                         
                         cost = amountCC.ToCurrency();
@@ -764,7 +768,7 @@ namespace AfterSchoolLibrary.Helpers
                         var registrationFeeModel = new NameValueCollection()
                                             {
                                                 { "Description", description },
-                                                { "Quantity",  "1"},
+                                                { "Quantity",  checkoutObject.ClassQuantity.ToString() },
                                                 { "Cost", cost },
                                                 { "AdditionalDetails", additionalDetails }
                                             };
@@ -792,14 +796,14 @@ namespace AfterSchoolLibrary.Helpers
                     }
                     else
                     {
-                        cost = checkoutObject.GetTotalCostToPurchaseTodayWithConvenienceFee(msgs, dc).ToCurrency();                        
+                        cost = (checkoutObject.GetTotalCostToPurchaseTodayWithConvenienceFee(msgs, dc) * checkoutObject.ClassQuantity).ToCurrency();                        
                         additionalDetails = "registration fee";
 
                         // add registration fee row
                         var registrationFeeModel = new NameValueCollection()
                                             {
                                                 { "Description", description },
-                                                { "Quantity",  "1"},
+                                                { "Quantity",  checkoutObject.ClassQuantity.ToString() },
                                                 { "Cost", cost },
                                                 { "AdditionalDetails", additionalDetails }
                                             };
@@ -811,7 +815,7 @@ namespace AfterSchoolLibrary.Helpers
                                         msgs);                        
                     }
 
-                    ccFee = checkoutObject.GetTotalCreditCardFeesToday(msgs, dc).ToCurrency();
+                    ccFee = (checkoutObject.GetTotalCreditCardFeesToday(msgs, dc) * checkoutObject.ClassQuantity).ToCurrency();
                     showTable = true;
                 }
             }

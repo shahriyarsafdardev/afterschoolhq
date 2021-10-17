@@ -36,6 +36,7 @@ namespace AfterSchoolLibrary.Models
 			ObjectTag.Create(dc);
 			ActivitySchedule.Create(dc);
 			ActivityInstance.Create(dc);
+			ActivityInstanceSeats.Create(dc);
 			Match.Create(dc);
 			ActivitySection.Create(dc);
 			ActivityGradeLevel.Create(dc);
@@ -123,6 +124,7 @@ namespace AfterSchoolLibrary.Models
 			ObjectTag.Alter(dc);
 			ActivitySchedule.Alter(dc);
 			ActivityInstance.Alter(dc);
+			ActivityInstanceSeats.Alter(dc);
 			Match.Alter(dc);
 			ActivitySection.Alter(dc);
 			ActivityGradeLevel.Alter(dc);
@@ -221,6 +223,7 @@ namespace AfterSchoolLibrary.Models
 			Activity.Update(new Hashtable(){{"HidePreciseLocation",false}}, new Hashtable(){{"HidePreciseLocation", DBNull.Value}}, Activity.ObjectMap, dc);
 			Activity.Update(new Hashtable(){{"RegistrationFinalized",false}}, new Hashtable(){{"RegistrationFinalized", DBNull.Value}}, Activity.ObjectMap, dc);
 			Activity.Update(new Hashtable(){{"IsConvenienceFeeTakenOutOfCost",false}}, new Hashtable(){{"IsConvenienceFeeTakenOutOfCost", DBNull.Value}}, Activity.ObjectMap, dc);
+			Activity.Update(new Hashtable(){{"CostFrequencyTypeId",0}}, new Hashtable(){{"CostFrequencyTypeId", DBNull.Value}}, Activity.ObjectMap, dc);
 			Location.Update(new Hashtable(){{"IsDefault",false}}, new Hashtable(){{"IsDefault", DBNull.Value}}, Location.ObjectMap, dc);
 			Location.Update(new Hashtable(){{"LocationTypeId",0}}, new Hashtable(){{"LocationTypeId", DBNull.Value}}, Location.ObjectMap, dc);
 			Location.Update(new Hashtable(){{"IsTest",false}}, new Hashtable(){{"IsTest", DBNull.Value}}, Location.ObjectMap, dc);
@@ -435,6 +438,9 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityInstance_ActivityGroupId ON [ActivityInstance] (ActivityGroupId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityInstance_ActivityScheduleId ON [ActivityInstance] (ActivityScheduleId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityInstance_ActivityScheduleId_InstanceTypeId ON [ActivityInstance] (ActivityScheduleId,InstanceTypeId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityInstanceSeats_RegistrantActivityId ON [ActivityInstanceSeats] (RegistrantActivityId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityInstanceSeats_ActivityInstanceId ON [ActivityInstanceSeats] (ActivityInstanceId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityInstanceSeats_ActivityInstanceId_RegistrantActivityId ON [ActivityInstanceSeats] (RegistrantActivityId,ActivityInstanceId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Match_TeamId ON [Match] (TeamId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Match_ActivityInstanceId ON [Match] (ActivityInstanceId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Match_ActivityInstanceId_TeamId ON [Match] (TeamId,ActivityInstanceId)"));
