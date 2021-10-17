@@ -40,10 +40,12 @@
             <div class="form-group">
                 <label class="col-sm-3 control-label">
                     Total Available Seats <span class="text-danger">*</span>
-                    <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Must be a number between 1 and @accountPackage.GetFeature(FeatureType.Participants).Max.Value" data-placement="top"></i>
                 </label>
                 <div class="col-sm-9">
                     <input type="number" class="form-control" id="seatsavailable" name="seatsavailable" value="@Model.SeatsAvailable" onfocus="this.select()" required step="1" min="1" max="@accountPackage.GetFeature(FeatureType.Participants).Max.Value" />
+                    <p class="text-muted">
+                        Must be a number between 1 and @accountPackage.GetFeature(FeatureType.Participants).Max.Value.ToString("#")
+                    </p>
                 </div>
             </div>
 
@@ -80,7 +82,7 @@
                               { "checkboxname", "inviteonly" },
                               { "checkboxid", "inviteonly" },
                               { "disabled", !showInviteOnly }
-                  });
+          });
                     }
                 </div>
             </div>
@@ -120,12 +122,32 @@
                 </div>
             </div>
 
+            <div class="form-group hide" id="cutoffhours-container">
+                <label class="col-sm-3 control-label">Registration cut-off time</label>
+                <div class="col-sm-9">
+                    <div class="input-group input-group-lg xs-mb-15 col-sm-3">
+                        <input type="number"
+                               class="form-control"
+                               id="cutoffhours"
+                               name="cutoffhours"
+                               onfocus="this.select()"
+                               value="@(Model.RegistrationCutoffHours.HasValue ? Model.RegistrationCutoffHours.Value.ToString() : "2")"
+                               required
+                               min="0"
+                               step="1" />
+                        <span class="input-group-addon">Hours</span>
+                    </div>
+                    <p class="text-muted">
+                        Registration cut-off time will prevent parents from registering a preset number of hours before the class start time.
+                    </p>
+                </div>
+            </div>
+
             if (showRegistrationPeriodList)
             {
                 <div class="form-group">
                     <label class="col-sm-3 control-label">
                         @UILabel.RegistrationPeriodLabel() <span class="text-danger">*</span>
-                        <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="The date range @UILabel.RegistrantLabel(true).ToLower() are able to register for your @UILabel.ActivityLabel(Model.ActivityTypeId).ToLower()" data-placement="top"></i>
                     </label>
                     <div class="col-sm-9">
                         <select name="registrationperiod" id="registrationperiod" class="form-control" required>
@@ -138,6 +160,9 @@
                                 </option>
                             }
                         </select>
+                        <p class="text-muted">
+                            The date range @UILabel.RegistrantLabel(true).ToLower() are able to register for your @UILabel.ActivityLabel(Model.ActivityTypeId).ToLower()
+                        </p>
                     </div>
                     <div class="col-sm-3 hide">
                         <a class="btn btn-block btn-link" href="@Url.Action("edit", "period", new { id = activePeriod?.ID })" id="editPeriod" target="_blank">
@@ -177,7 +202,7 @@
                                 { "name", "registrationopentime" },
                                 { "id", "registrationopentime" },
                                 { "required", true }
-                    }
+            }
                         );
                     }
 
@@ -210,7 +235,7 @@
                                 { "name", "registrationclosetime" },
                                 { "id", "registrationclosetime" },
                                 { "required", true }
-                    }
+            }
                         );
                     }
 
@@ -351,8 +376,10 @@
         if (obj.val() == '@((int)ActivityCostFrequencyType.PerClass)' && obj.is(':checked')) {
             $('.regmode').prop('disabled', true);
             $('#regmode-@RegistrationMode.Register.ToString()').prop('checked', true);
+            $('#cutoffhours-container').removeClass('hide');
         } else {
             $('.regmode').prop('disabled', false);
+            $('#cutoffhours-container').addClass('hide');
         }
     }
 
