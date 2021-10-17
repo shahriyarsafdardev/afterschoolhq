@@ -48,7 +48,7 @@
             </div>
 
             if (Model.ActivityTypeId == ActivityType.LearningPod)
-            { 
+            {
                 <div class="form-group">
                     <label class="col-sm-3 control-label">
                         Minimum Students Required
@@ -71,16 +71,16 @@
                 <label class="col-sm-3 control-label">
                     Invite Only?
                 </label>
-                <div class="col-md-9" @if (!showInviteOnly) { <text> onclick="return showUpgradeMyPlan('@(allowInvitesPackage.Name)',@(allowInvitesPackage.ID))"</text> }>
+                <div class="col-md-9" @if (!showInviteOnly) { <text> onclick="return showUpgradeMyPlan('@(allowInvitesPackage.Name)',@(allowInvitesPackage.ID))" </text> }>
                     @{
                         Html.RenderPartial(
-                          "~/Views/Shared/_SwitchButton.cshtml", 
-                          Model.IsInviteOnly, 
-                          new ViewDataDictionary() { 
+                          "~/Views/Shared/_SwitchButton.cshtml",
+                          Model.IsInviteOnly,
+                          new ViewDataDictionary() {
                               { "checkboxname", "inviteonly" },
                               { "checkboxid", "inviteonly" },
-                              { "disabled", !showInviteOnly } 
-                          });
+                              { "disabled", !showInviteOnly }
+                  });
                     }
                 </div>
             </div>
@@ -98,6 +98,24 @@
 
         @if (group.IsEmpty())
         {
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label">Students can register for:</label>
+                <div class="col-sm-9">
+
+                    <div class="am-radio inline">
+                        <input type="radio" class="form-control costfrequencytype" name="costfrequencytype" id="costfrequencytype-@((int)ActivityCostFrequencyType.PerActivity)" required @(Model.CostFrequencyTypeId == ActivityCostFrequencyType.PerActivity ? "checked=\"checked\"" : "") value="@((int)ActivityCostFrequencyType.PerActivity)" />
+                        <label for="costfrequencytype-@((int)ActivityCostFrequencyType.PerActivity)">The Entire Activity</label>
+                    </div>
+
+                    <div class="am-radio inline">
+                        <input type="radio" class="form-control costfrequencytype" name="costfrequencytype" id="costfrequencytype-@((int)ActivityCostFrequencyType.PerClass)" required @(Model.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass ? "checked=\"checked\"" : "") value="@((int)ActivityCostFrequencyType.PerClass)" />
+                        <label for="costfrequencytype-@((int)ActivityCostFrequencyType.PerClass)">Individual Classes</label>
+                    </div>
+
+                </div>
+            </div>
+
             if (showRegistrationPeriodList)
             {
                 <div class="form-group">
@@ -155,7 +173,7 @@
                                 { "name", "registrationopentime" },
                                 { "id", "registrationopentime" },
                                 { "required", true }
-                            }
+                    }
                         );
                     }
 
@@ -188,7 +206,7 @@
                                 { "name", "registrationclosetime" },
                                 { "id", "registrationclosetime" },
                                 { "required", true }
-                            }
+                    }
                         );
                     }
 
@@ -216,7 +234,7 @@
                                    @if (!showWaitingList) { <text> disabled="disabled" </text> } />
                             @if (!showWaitingList)
                             {<div style="position:absolute; left:0; right:0; top:0; bottom:0; " id="waitingListDiv"></div>}
-                            </div>
+                        </div>
                     </div>
                 }
 
@@ -224,8 +242,8 @@
                     <label class="col-md-3 control-label">
                         Registration Form <span class="text-danger">*</span>
                     </label>
-                    <div class="col-md-6" @if (!showManageForms) { <text> onclick="return showUpgradeMyPlan()"</text> }>
-                        <select name="form" id="form" class="form-control" @(activeForm.IsNotEmpty() && forms.Any(m => m.ID == activeForm.FormId)  ? "required" : "") @if (!showManageForms) { <text> disabled="disabled" </text> }>
+                    <div class="col-md-6" @if (!showManageForms) { <text> onclick="return showUpgradeMyPlan()" </text> }>
+                        <select name="form" id="form" class="form-control" @(activeForm.IsNotEmpty() && forms.Any(m => m.ID == activeForm.FormId) ? "required" : "") @if (!showManageForms) { <text> disabled="disabled" </text> }>
                             @*<option value="">Select Form...</option>*@
                             @if (showManageFormFields)
                             {
@@ -241,14 +259,14 @@
                     <div class="col-md-3">
                         @if (showManageForms)
                         {
-                            <a id="editForm"  class="btn btn-block btn-link" href="@Url.Action("formedit","account", new { id = activeForm?.ID })" target="_blank">Edit Form</a>
+                            <a id="editForm" class="btn btn-block btn-link" href="@Url.Action("editform","account", new { id = activeForm?.ID })" target="_blank">Edit Form</a>
                         }
                         else
                         {
                             <a class="btn btn-block btn-link" href="#" onclick="return showUpgradeMyPlan('@(manageFormsPackage.Name)',@(manageFormsPackage.ID))">Edit Form</a>
                         }
                     </div>
-                </div>                
+                </div>
 
                 @if (Model.ActivityTypeId == ActivityType.Activity)
                 {
@@ -257,12 +275,12 @@
                             Registration Mode <span class="text-danger">*</span>
                         </label>
                         <div class="col-sm-9">
-                            <div class="am-radio inline" @if (!showAllowApplications) { <text> onclick="return showUpgradeMyPlan('@(allowAppilicationsPackage.Name)',@(allowAppilicationsPackage.ID))"</text> }>
+                            <div class="am-radio inline" @if (!showAllowApplications) { <text> onclick="return showUpgradeMyPlan('@(allowAppilicationsPackage.Name)',@(allowAppilicationsPackage.ID))" </text> }>
                                 @foreach (var item in Enum.GetValues(typeof(RegistrationMode)).Cast<RegistrationMode>().Where(x => x != RegistrationMode.NotSet))
                                 {
-                                    <input type="radio" name="regmode" id="regmode-@item.ToString()" value="@((int)item)" 
+                                    <input type="radio" name="regmode" id="regmode-@item.ToString()" value="@((int)item)" class="regmode"
                                            @(item == Model.RegistrationModeId ? "checked=\"checked\"" : "")
-                                           @if (!showAllowApplications) { <text> disabled="disabled"</text> }/>
+                                           @if (!showAllowApplications) { <text> disabled="disabled" </text> } />
                                     <label for="regmode-@item.ToString()" class="margin-h-10">@item.ToString()</label>
                                 }
                             </div>
@@ -312,12 +330,27 @@
             @if(!showWaitingList)
             {
                  <text>
-                     showUpgradeMyPlan('@(waitingListPackage.Name)',@(waitingListPackage.ID))
+            showUpgradeMyPlan('@(waitingListPackage.Name)',@(waitingListPackage.ID))
                  </text>
             }
-           
-        })
+
+        });
+
+        $('.costfrequencytype').click(function () {
+            toggleCostFrequencyType($(this));
+        });
+
+        toggleCostFrequencyType($('#costfrequencytype-@((int)ActivityCostFrequencyType.PerClass)'));
     });
+
+    function toggleCostFrequencyType(obj) {
+        if (obj.val() == '@((int)ActivityCostFrequencyType.PerClass)' && obj.is(':checked')) {
+            $('.regmode').prop('disabled', true);
+            $('#regmode-@RegistrationMode.Register.ToString()').prop('checked', true);
+        } else {
+            $('.regmode').prop('disabled', false);
+        }
+    }
 
     function checkPeriodVal() {
         if ($('#registrationperiod').val().length > 0) {
