@@ -396,7 +396,7 @@ namespace AfterSchool.Areas.District.Controllers
         public ActionResult Edit(string id, string name, string description, string regmode, string form, string isinviteonly, string genderrestrictions, string mingrade, string maxgrade, string schedule, string scheduledetails, string requiresalldays, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string isongoing)
         {
             var msgs = new SystemMessages();
-            var inSessionDates = new List<DateRange>();
+            var inSessionDates = new List<ActivityInstance>();
             var outOfSessionDates = new List<DateTime>();
             var currentWebUser = SessionVariables.CurrentUser;
             var currentAccount = SessionVariables.CurrentAccount;
@@ -415,7 +415,10 @@ namespace AfterSchool.Areas.District.Controllers
 
             var filteredParams = Request.Params.Filter("schedulerepeat-");
             var days = Models.ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
-            inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
+
+            if (!isongoing.IsBoolean())
+                inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
+
             outOfSessionDates = ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
 
             values.Add("scheduledetails", scheduledetails);

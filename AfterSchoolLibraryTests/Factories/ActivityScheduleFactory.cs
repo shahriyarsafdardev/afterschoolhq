@@ -84,7 +84,7 @@ namespace AfterSchoolLibraryTests.Factories
 
         }
 
-        public static void Create(Account account, Activity activity, ActivitySchedule schedule, List<DateRange> startDates, List<DateTime> endDates, WebUser user, SystemMessages msgs, DatabaseConnection dc)
+        public static void Create(Account account, Activity activity, ActivitySchedule schedule, List<DateRange> scheduleDates, List<DateTime> scheduleDatesClosed, WebUser user, SystemMessages msgs, DatabaseConnection dc)
         {
             ActivityScheduleService.SetupSchedule(
                 activity.AccountId.Value,
@@ -97,8 +97,9 @@ namespace AfterSchoolLibraryTests.Factories
                 schedule.EndDate.ToString(),
                 schedule.DailyStartTime.ToString(),
                 schedule.DailyEndTime.ToString(),
-                startDates,
-                endDates,
+                scheduleDates.Select(x => new ActivityInstance(x.StartDate, x.EndDate)).ToList(),
+                scheduleDatesClosed,
+                "",
                 account,
                 activity.ActivityGroupId,
                 user.ID.Value,

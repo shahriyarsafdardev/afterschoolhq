@@ -35,6 +35,10 @@ namespace AfterSchoolLibrary.Models
 		public int? ParticipationObjectId { get { return (int?)MDV["ParticipationObjectId"].Value; } set { MDV["ParticipationObjectId"].Value = value; } }
 		public DayOfWeekASL Day { get { return (DayOfWeekASL)MDV["Day"].Value; } set { MDV["Day"].Value = value; } }
 		public int? RegistrantActivityId { get { return (int?)MDV["RegistrantActivityId"].Value; } set { MDV["RegistrantActivityId"].Value = value; } }
+		/// <summary>
+		/// store dates selected for a per class purchase
+		/// </summary>
+		public string SelectedDates { get { return (string)MDV["SelectedDates"].Value; } set { MDV["SelectedDates"].Value = value; } }
 		
 
         public CartItem()
@@ -63,6 +67,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "ParticipationObjectId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Day", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrantActivityId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "SelectedDates", System.Data.SqlDbType.NVarChar , "400");
 				
                 return _dp;
             }
@@ -172,6 +177,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["RegistrantActivityId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["SelectedDates"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

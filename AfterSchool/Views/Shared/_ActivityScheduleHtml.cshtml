@@ -1,6 +1,7 @@
 ﻿@model ActivitySchedule
 @{ 
     var instances = Model.GetInstances();
+    var now = Model.GetAccount().ConvertToAccountTimeZone(DateTime.UtcNow);
 }
 @if (Model.RepeatsWeekly)
 {
@@ -21,8 +22,9 @@
 
     <br />
 
-    @if (instances.Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession).Any())
-    {<br />
+    @if (instances.Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession && instance.StartDateTime.Value.Date.IsAfter(now)).Any())
+    {
+        <br />
         <span>
             We will <strong><em>not</em></strong> meet on the following dates: @instances.Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession).Select(range => range.StartDateTime.ToShortDateString()).ToStringList(", ")
         </span>

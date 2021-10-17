@@ -3,8 +3,10 @@
 @{ 
     var schedules = (List<ActivitySchedule>)ViewData["Schedules"];
     var showScheduleList = false; // (bool)ViewBag.ShowScheduleList;
-    var openInstances = Model.GetInstances().Where(instance => instance.InstanceTypeId == InstanceType.InSession).ToList();
-    var closedInstances = Model.GetInstances().Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession).ToList();
+    var daysOfTheWeek = Model.GetDaysOfTheWeek();
+    var instances = Model.GetInstances();
+    var openInstances = instances.Where(instance => instance.InstanceTypeId == InstanceType.InSession).ToList();
+    var closedInstances = instances.Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession).ToList();
 
     var activityGroupType = new ActivityGroupType?();
     var activityType = new ActivityType?();
@@ -119,7 +121,7 @@
                         @{
                             Html.RenderPartial(
                               "~/Views/Shared/_SwitchButton.cshtml",
-                              openInstances.Any(),
+                              daysOfTheWeek.Any(),
                               new ViewDataDictionary()
                               {
                                     { "checkboxname", "hasschedule" },
