@@ -102,13 +102,28 @@
                                 { "checkboxname", "allowtopaylater" },
                                 { "checkboxid", "allowtopaylater" },
                                 { "disabled", !showAllowPayLater }
-                });
+                        });
                         }
                         <p class="text-muted">
                             <em>
                                 Allowing a @UILabel.RegistrantLabel().ToLower() to pay later means a @UILabel.RegistrantLabel().ToLower() can register and occupy a seat for your @Model.ActivityTypeId.ToString().ToLower() without paying. <br />
                                 <strong>NOTE: This could cause an unpaid @UILabel.RegistrantLabel().ToLower() to take a reserved seat another @UILabel.RegistrantLabel().ToLower() may have paid for, and therefore is discouraged.</strong>
                             </em>
+                        </p>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Registration cut-off time</label>
+                    <div class="col-sm-9">
+                        <div class="input-group input-group-lg xs-mb-15">
+                            <input type="number" class="form-control" id="cutoffhours" name="cutoffhours" onfocus="this.select()" value="@(Model.RegistrationCutoffHours.HasValue ? Model.RegistrationCutoffHours.Value.ToString() : "2")" required min="0" step="1" />
+                            <span class="input-group-append">Hours</span>
+                        </div>
+                        <p class="text-muted">
+                            Registration cut-off time restricts parents from registering too late.
                         </p>
                     </div>
                 </div>

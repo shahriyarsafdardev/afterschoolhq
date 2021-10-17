@@ -729,6 +729,7 @@ namespace AfterSchoolLibrary.Services
                 InterestFormId = activity.InterestFormId,
                 IsConvenienceFeeTakenOutOfCost = activity.IsConvenienceFeeTakenOutOfCost,
                 CostFrequencyTypeId = activity.CostFrequencyTypeId,
+                RegistrationCutoffHours = activity.RegistrationCutoffHours,
             };
         }
 
@@ -901,6 +902,7 @@ namespace AfterSchoolLibrary.Services
             var prepaidperiodspostpay = values.GetValueOrDefault("prepaidperiodspostpay");
             var postpayplanperiod = values.GetValueOrDefault("postpayplanperiod");
             var costfrequencytype = values.GetValueOrDefault("costfrequencytype");
+            var cutoffhours = values.GetValueOrDefault("cutoffhours");
 
             var activityType = ActivityType.NotSet;
 
@@ -1105,6 +1107,9 @@ namespace AfterSchoolLibrary.Services
 
             if (isparentpricecost.IsNotEmpty() && isparentpricecost.ToString().IsBoolean())
                 activity.IsConvenienceFeeTakenOutOfCost = isparentpricecost.ToString().ToBoolean();
+
+            if (cutoffhours.IsNotEmpty() && cutoffhours.IsNumber())
+                activity.RegistrationCutoffHours = cutoffhours.ToString().ToInteger();
 
             if (msgs.HasNoErrors())
             {

@@ -59,7 +59,7 @@
                             <form action="@Model.GetActivityDateSelectionUrl()" method="post" class="form">
 
                                 <div>
-                                    @foreach (var date in Model.Schedule.GetNextInstances(10))
+                                    @foreach (var date in Model.Schedule.GetNextInstances(10, Model))
                                     {
                                         <div class="am-checkbox">
                                             <input type="checkbox" class="form-control" name="date-@date" id="date-@date" value="@date" />

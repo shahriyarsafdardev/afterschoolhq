@@ -98,6 +98,7 @@ property: RegistrationFinalized, bool, Bit, , Used to close registration and sen
 property: InterestFormId, int?, Int, , Used to set the interest form used on the activity page
 property: IsConvenienceFeeTakenOutOfCost, bool, Bit, , Used to allow a provider to set the final fee a parent sees
 property: CostFrequencyTypeId, ActivityCostFrequencyType, Int, , Use to determine if registration fee applies to the whole activity or each class
+property: RegistrationCutoffHours, int?, Int, , the number of hours before the activity time that a parent can register
 -property: AllowPreRegistration, bool, Bit
 -property: RegistrationTimeZone, string, NVarChar "30"
 -property: AcceptPayPal, bool, Bit

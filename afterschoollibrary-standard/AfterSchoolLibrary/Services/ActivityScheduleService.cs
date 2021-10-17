@@ -121,15 +121,19 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
-        public static List<DateTime> GetNextInstances(this ActivitySchedule schedule, int numberOfInstances, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<DateTime> GetNextInstances(this ActivitySchedule schedule, int numberOfInstances, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dates = new List<DateTime>();
-            var account = schedule.GetAccount(msgs, dc);
+            var account = schedule.GetAccount(msgs, dc);            
             var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
 
             if (schedule.IsOngoing)
             {
                 var referenceDate = now;
+
+                if (participationObject.RegistrationCutoffHours.HasValue)
+                    referenceDate = referenceDate.AddHours(participationObject.RegistrationCutoffHours.Value);
+
                 var outOfSession = schedule.GetOutSessionInstances(msgs, dc).Where(instance => instance.StartDateTime.Value.IsAfter(referenceDate));
 
                 if (schedule.StartDate.HasValue && schedule.StartDate.Value.IsAfter(referenceDate))
