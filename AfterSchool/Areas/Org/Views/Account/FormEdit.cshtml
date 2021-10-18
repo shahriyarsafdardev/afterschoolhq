@@ -258,43 +258,46 @@
 
                                                     <td>
                                                         @{Html.RenderPartial(
-                                                                              "~/Views/Shared/_SwitchButton.cshtml",
-                                                                              question.IsActive,
-                                                                              new ViewDataDictionary()
-                                                                              {
-                                                                                                                    { "checkboxname", "active-" + question.ID },
-                                                                                                                    { "checkboxid", "active-" + question.ID },
-                                                                                                                    { "disabled", question.IsLocked },
-                                                                                                                    { "classname", "question-isactive" }
-});}
+                                                            "~/Views/Shared/_SwitchButton.cshtml",
+                                                            question.IsActive,
+                                                            new ViewDataDictionary()
+                                                            {
+                                                                { "checkboxname", "active-" + question.ID },
+                                                                { "checkboxid", "active-" + question.ID },
+                                                                { "disabled", question.IsLocked },
+                                                                { "classname", "question-isactive" }
+                                                            });}
                                                     </td>
                                                     <td>
                                                         @if (question.QuestionTypeId != QuestionType.TextBlock)
                                                         {
                                                             Html.RenderPartial(
-                                                                   "~/Views/Shared/_SwitchButton.cshtml",
-                                                                   question.IsRequired,
-                                                                   new ViewDataDictionary()
-                                                                   {
-                                                                                                                { "checkboxname", "required-" + question.ID },
-                                                                                                                { "checkboxid", "required-" + question.ID },
-                                                                                                                { "disabled", question.IsLocked },
-                                                                                                                { "classname", "question-isrequired" }
-});
+                                                                "~/Views/Shared/_SwitchButton.cshtml",
+                                                                question.IsRequired,
+                                                                new ViewDataDictionary()
+                                                                {
+                                                                    { "checkboxname", "required-" + question.ID },
+                                                                    { "checkboxid", "required-" + question.ID },
+                                                                    { "disabled", question.IsLocked },
+                                                                    { "classname", "question-isrequired" }
+                                                            });
                                                         }
                                                     </td>
-                                                    <td>
-                                                        @{Html.RenderPartial(
-                                                                                "~/Views/Shared/_SwitchButton.cshtml",
-                                                                                question.IsAnswerDescriptionEnabled,
-                                                                                new ViewDataDictionary()
-                                                                                {
-                                                                                                                    { "checkboxname", "answerDescription-" + question.ID },
-                                                                                                                    { "checkboxid", "answerDescription-" + question.ID },
-                                                                                                                    { "disabled", question.IsLocked },
-                                                                                                                    { "classname", "question-IsAnswerDescriptionEnabled" }
-});}
-                                                    </td>
+                                                    @if (Model.FormTypeId == FormType.Survey)
+                                                    {
+                                                        <td>
+                                                            @{Html.RenderPartial(
+                                                                "~/Views/Shared/_SwitchButton.cshtml",
+                                                                question.IsAnswerDescriptionEnabled,
+                                                                new ViewDataDictionary()
+                                                                {
+                                                                    { "checkboxname", "answerDescription-" + question.ID },
+                                                                    { "checkboxid", "answerDescription-" + question.ID },
+                                                                    { "disabled", question.IsLocked },
+                                                                    { "classname", "question-IsAnswerDescriptionEnabled" }
+                                                                });}
+                                                        </td>
+                                                    }
                                                     <td>
                                                         <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteQuestion('@question.Text', '@Url.Action("delete","Account", new { id = question.ID.ToString()})')"><span class="text-danger"><i class="s7-trash"></i></span></button>
                                                     </td>

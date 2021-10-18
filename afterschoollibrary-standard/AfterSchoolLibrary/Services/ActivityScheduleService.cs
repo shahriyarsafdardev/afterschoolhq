@@ -9,7 +9,7 @@ namespace AfterSchoolLibrary.Services
 {
     public static class ActivityScheduleService
     {
-        public static ActivitySchedule SetupSchedule(int accountId, int scheduleId, string scheduleName, string details, string repeatsweekly, string isongoing, string startdate, string enddate, string dailystarttime, string dailyendtime, List<DateRange> scheduledates, List<DateTime> scheduledatesclosed, Account account, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public static ActivitySchedule SetupSchedule(int accountId, int scheduleId, string scheduleName, string details, string repeatsweekly, string isongoing, string startdate, string enddate, string dailystarttime, string dailyendtime, List<ActivityInstance> scheduledates, List<DateTime> scheduledatesclosed, string daysOfTheWeek, Account account, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             ActivitySchedule schedule = null;
@@ -30,6 +30,7 @@ namespace AfterSchoolLibrary.Services
                     dailyendtime.ToDateTime(),
                     scheduledates,
                     scheduledatesclosed,
+                    daysOfTheWeek,
                     account.ID.Value,
                     activityGroupId,
                     loggedInUserId,
@@ -55,6 +56,7 @@ namespace AfterSchoolLibrary.Services
                         dailyendtime.ToDateTime(),
                         scheduledates,
                         scheduledatesclosed,
+                        daysOfTheWeek,
                         loggedInUserId,
                         dc));
                 //}
@@ -63,7 +65,7 @@ namespace AfterSchoolLibrary.Services
             return schedule;
         }
 
-        public static ActivitySchedule CreateNew(string scheduleName, string details, bool repeatsWeekly, bool isongoing, DateTime? startDate, DateTime? endDate, DateTime? dailyStartTime, DateTime? dailyEndTime, List<DateRange> scheduleDates, List<DateTime> scheduleDatesClosed, int accountId, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public static ActivitySchedule CreateNew(string scheduleName, string details, bool repeatsWeekly, bool isongoing, DateTime? startDate, DateTime? endDate, DateTime? dailyStartTime, DateTime? dailyEndTime, List<ActivityInstance> scheduleDates, List<DateTime> scheduleDatesClosed, string daysOfTheWeek, int accountId, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -83,6 +85,7 @@ namespace AfterSchoolLibrary.Services
                        EndDate = endDate,
                        DailyStartTime = dailyStartTime,
                        DailyEndTime = dailyEndTime,
+                       DaysOfTheWeek = daysOfTheWeek,
                        CreateDate = DateTime.UtcNow,
                        LastModifiedDate = DateTime.UtcNow,
                        CreatedBy = loggedInUserId,
@@ -116,6 +119,103 @@ namespace AfterSchoolLibrary.Services
             }
 
             return false;
+        }
+
+        public static List<DateTime> GetNextInstances(this ActivitySchedule schedule, int numberOfInstances, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (participationObject.IsActivity())
+                return schedule.GetNextInstances(numberOfInstances, participationObject.GetActivity(), msgs, dc);
+
+            return new List<DateTime>();
+        }
+
+        public static List<DateTime> GetNextInstances(this ActivitySchedule schedule, int numberOfInstances, Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dates = new List<DateTime>();
+            var account = schedule.GetAccount(msgs, dc);            
+            var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
+
+            if (schedule.IsOngoing)
+            {
+                var referenceDate = now;
+                var outOfSession = schedule.GetOutSessionInstances(msgs, dc).Where(instance => instance.StartDateTime.Value.IsAfter(referenceDate));
+                var cutoffHours = 0;
+
+                if (activity.RegistrationCutoffHours.HasValue)
+                    cutoffHours = activity.RegistrationCutoffHours.Value;
+
+                if (schedule.StartDate.HasValue && schedule.StartDate.Value.IsAfter(referenceDate))
+                    referenceDate = schedule.StartDate.Value;
+
+                var daysOfTheWeek = schedule.GetDaysOfTheWeek(msgs, dc).Select(x => x.ToDayOfWeek()).ToList();
+                var currentDayOfTheWeek = referenceDate.DayOfWeek;
+                var nextDay = DayOfWeek.Sunday;
+
+                foreach (var day in daysOfTheWeek)
+                {
+                    if (day >= currentDayOfTheWeek)
+                    {
+                        nextDay = day;
+                        break;
+                    }
+                };
+
+                for (var i = 0; i < numberOfInstances; i++)
+                {
+                    var nextDayAsInt = (int)nextDay;
+
+                    if (nextDayAsInt < (int)currentDayOfTheWeek)
+                        nextDayAsInt += 7; // add a week
+
+                    var daysToAdd = nextDayAsInt - (int)currentDayOfTheWeek;
+
+                    var dateToAdd = referenceDate.AddDays(daysToAdd);
+
+                    if (!dateToAdd.Date.In(outOfSession.Select(x => x.StartDateTime.Value.Date)) && dateToAdd.AddHours(cutoffHours * -1).IsAfter(now))
+                        dates.Add($"{dateToAdd.ToShortDateString()} {schedule.DailyStartTime.ToShortTimeString()}".ToDateTime());
+                    else
+                        i--; // don't increment
+
+                    if (daysOfTheWeek.IndexOf(nextDay) < daysOfTheWeek.Count - 1)
+                        nextDay = daysOfTheWeek[daysOfTheWeek.IndexOf(nextDay) + 1];
+                    else
+                        nextDay = daysOfTheWeek[0];
+
+                    referenceDate = dateToAdd.AddDays(1);
+                    currentDayOfTheWeek = referenceDate.DayOfWeek;
+                }
+
+            }
+            else
+            {
+                dates.AddRange(schedule.GetInSessionInstances(msgs, dc)
+                                .Where(x => x.StartDateTime.Value.Date.IsOnOrAfter(now.Date))
+                                .Take(numberOfInstances)
+                                .Select(x => x.StartDateTime.Value));
+
+            }
+
+            return dates;
+        }
+
+        public static ActivityInstance AddInstance(this ActivitySchedule schedule, DateTime startDate, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var instance = new ActivityInstance()
+            {
+                ActivityScheduleId = schedule.ID,
+                StartDateTime = $"{startDate.Date.ToShortDateString()} {schedule.DailyStartTime.ToShortTimeString()}".ToDateTime(),
+                EndDateTime = $"{startDate.Date.ToShortDateString()} {schedule.DailyEndTime.ToShortTimeString()}".ToDateTime(),
+                InstanceTypeId = InstanceType.InSession,
+                CreateDate = DateTime.UtcNow,
+                CreatedBy = loggedInUser.ID.IfEmpty(0),
+                LastModifiedDate = DateTime.UtcNow,
+                LastModifiedBy = loggedInUser.ID.IfEmpty(0),
+                Day = startDate.DayOfWeek.ToDayOfWeekASL(),
+            };
+
+            msgs.AddRange(instance.Save(dc));
+
+            return instance;
         }
     }
 }

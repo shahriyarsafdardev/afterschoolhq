@@ -149,6 +149,28 @@ namespace AfterSchoolLibrary.Services
             return registrantActivity.GetRegistration(msgs, dc).GetAnswers(msgs, dc);
         }
 
+        public static bool IsRegisteredForInstance(this RegistrantActivity registrantActivity, ActivityInstance instance, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return registrantActivity.IsRegisteredForInstance(instance.ID.Value, msgs, dc);
+        }
+
+        public static bool IsRegisteredForInstance(this RegistrantActivity registrantActivity, int instanceId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var aiseats = ActivityInstanceSeats.LoadByRegistrantActivityIdByActivityInstanceId(registrantActivity.ID.Value, instanceId, msgs, dc);
+
+            return aiseats.IsNotEmpty() && aiseats.NumberOfSeats.HasValue && aiseats.NumberOfSeats.Value > 0;
+        }
+
+        public static List<ActivityInstanceSeats> GetInstanceSeats(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityInstanceSeats.LoadByRegistrantActivityId(registrantActivity.ID.Value, msgs, dc);
+        }
+
+        public static ActivityInstanceSeats GetInstanceSeats(this RegistrantActivity registrantActivity, ActivityInstance instance, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityInstanceSeats.LoadByRegistrantActivityIdByActivityInstanceId(registrantActivity.ID.Value, instance.ID.Value, msgs, dc);
+        }
+
         public static Registrant GetRegistrant(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Registrant.Load(registrantActivity.RegistrantId.Value, msgs, dc);

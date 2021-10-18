@@ -5,10 +5,11 @@ using System.Linq;
 using System.Web;
 using BasicLibrary;
 using AfterSchoolLibrary;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchool.Models
 {
-    public class ActivityScheduleUI
+    public static class ActivityScheduleUI
     {
         public static List<DayOfWeekASL> PrepDaysOfWeek(NameValueCollection daylist)
         {
@@ -46,9 +47,9 @@ namespace AfterSchool.Models
             return scheduleDates;
         }
 
-        public static List<DateRange> PrepScheduleDates(string repeatsweekly, List<DayOfWeekASL> days, string startdate, string enddate, string dailystarttime, string dailyendtime, NameValueCollection meetingDates)
+        public static List<ActivityInstance> PrepScheduleDates(string repeatsweekly, List<DayOfWeekASL> days, string startdate, string enddate, string dailystarttime, string dailyendtime, NameValueCollection meetingDates)
         {
-            var scheduleDates = new List<DateRange>();
+            var scheduleDates = new List<ActivityInstance>();
 
             if (repeatsweekly.IsNotEmpty())
             {
@@ -60,7 +61,7 @@ namespace AfterSchool.Models
                         var meetingStartDate = String.Concat(currentDate.ToShortDateString(), " ", dailystarttime).ToDateTime();
                         var meetingEndDate = String.Concat(currentDate.ToShortDateString(), " ", dailyendtime).ToDateTime();
 
-                        scheduleDates.Add(new DateRange(meetingStartDate, meetingEndDate));
+                        scheduleDates.Add(new ActivityInstance(meetingStartDate, meetingEndDate));
 
                         currentDate = currentDate.AddWeeks(1);
                     }
@@ -75,24 +76,27 @@ namespace AfterSchool.Models
                     var meetingStartTime = meetingDates["meeting-open-starttime-" + i];
                     var meetingEndTime = meetingDates["meeting-open-endtime-" + i];
                     var meetingInUse = meetingDates["meeting-open-inuse-" + i];
+                    var meetingSeatsAvailable = meetingDates["meeting-open-seatsavailable-" + i].IsNumber() ?
+                                                            meetingDates["meeting-open-seatsavailable-" + i].ToInteger() :
+                                                            new int?();
 
                     if (meetingInUse.IsBoolean() && meetingInUse.ToBoolean() && meetingStartDate.IsDateTime())
                     {
                         var meetingStart = $"{meetingStartDate} {meetingStartTime}".ToDateTime();
                         var meetingEnd = $"{meetingEndDate} {meetingEndTime}".ToDateTime();
 
-                        var dateAlreadyExists = scheduleDates.Where(dateRange => 
-                                dateRange.StartDate == meetingStart && 
-                                dateRange.EndDate == meetingEnd
-                            )
-                            .Any();
+                        var dateAlreadyExists = scheduleDates.Any(instance =>
+                                                    instance.StartDateTime == meetingStart &&
+                                                    instance.EndDateTime == meetingEnd
+                                                );
 
                         if (!dateAlreadyExists)
                         {
-                            scheduleDates.Add(new DateRange()
+                            scheduleDates.Add(new ActivityInstance()
                             {
-                                StartDate = meetingStart,
-                                EndDate = meetingEnd
+                                StartDateTime = meetingStart,
+                                EndDateTime = meetingEnd,
+                                SeatsAvailable = meetingSeatsAvailable,
                             });
                         }
                     }
