@@ -1655,19 +1655,32 @@ namespace AfterSchool.Controllers
 
             // current registrant has already submitted, then select a different student
             if (registration.CompletionStatusId == RegistrationCompletionStatus.Completed)
-                return RedirectToAction("select");            
+                return RedirectToAction("select");
+
+            var currentRegistrant = SessionVariables.CurrentRegistrant;
+            var currentAccount = SessionVariables.CurrentAccount;
+            var selectedDates = GetSelectedDatesFromCart();
+            var datesToRemove = new List<DateTime>();
+
+            selectedDates?.ForEach(date => {
+                if (currentRegistrant.IsReservedForDate(participationObject, date, null))
+                    datesToRemove.Add(date);
+            });
+
+            datesToRemove.ForEach(date => selectedDates.Remove(date));
 
             if (msgs.HasNoErrors())
                 AccountService.ProcessRegistrationWithoutPayment(
                     checkoutObject: new CheckoutObject()
                     {
                         BillingAccount = participationObject.OwnerAccount,
-                        PayingAccount = SessionVariables.CurrentAccount,
+                        PayingAccount = currentAccount,
                         NumberOfSeats = 1,
                         ParticipationObject = participationObject,
                         Registration = registration,
-                        MasterRegistrant = SessionVariables.CurrentRegistrant,
+                        MasterRegistrant = currentRegistrant,
                         SubscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault(),
+                        SelectedDates = selectedDates,
                     },
                     sendConfirmationEmail: true,
                     loggedInUser: SessionVariables.CurrentUser,

@@ -266,7 +266,6 @@ namespace AfterSchoolLibrary.Models
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
-            dq.Timeout = 0;
 			dq.Criterias.Add(ObjectMap["SurveyResponseId"], SurveyResponseId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
