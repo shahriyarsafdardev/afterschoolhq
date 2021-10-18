@@ -403,15 +403,26 @@ namespace AfterSchoolLibrary.Models
             return schedule;
         }
 
-        public static ActivitySchedule GetNewDefaultSchedule(RegistrationPeriod period)
+        public static ActivitySchedule GetNewDefaultSchedule(Activity activity, SystemMessages msgs)
         {
+            var period = AfterSchoolLibrary.Services.ActivityService.GetActiveRegistrationPeriod(activity, msgs);
+
             if (period.IsEmpty())
                 return GetNewDefaultSchedule();
 
+            var startDate = period.EndDateTime.Value.Date.FirstDateOfWeek().AddWeeks(1);
+            var endDate = period.EndDateTime.Value.Date.FirstDateOfWeek().AddWeeks(9);
+
+            if (activity.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
+            {
+                startDate = DateTime.UtcNow.Date.AddDays(1);
+                endDate = startDate.AddWeeks(9);
+            }
+
             return new ActivitySchedule
             {
-                StartDate = period.EndDateTime.Value.Date.FirstDateOfWeek().AddWeeks(1),
-                EndDate = period.EndDateTime.Value.Date.FirstDateOfWeek().AddWeeks(9),
+                StartDate = startDate,
+                EndDate = endDate,
                 DailyStartTime = DateTime.UtcNow.Date.AddHours(15),
                 DailyEndTime = DateTime.UtcNow.Date.AddHours(17),
                 RepeatsWeekly = true

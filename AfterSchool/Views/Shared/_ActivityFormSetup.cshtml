@@ -143,103 +143,107 @@
                 </div>
             </div>
 
-            if (showRegistrationPeriodList)
-            {
-                <div class="form-group">
-                    <label class="col-sm-3 control-label">
-                        @UILabel.RegistrationPeriodLabel() <span class="text-danger">*</span>
-                    </label>
-                    <div class="col-sm-9">
-                        <select name="registrationperiod" id="registrationperiod" class="form-control" required>
-                            <option value="">Select @UILabel.RegistrationPeriodLabel()...</option>
-                            <option value="0"> + New @UILabel.RegistrationPeriodLabel()</option>
-                            @foreach (var period in periods)
-                            {
-                                <option value="@period.ID" @(activePeriod?.ID == period.ID ? " selected=\"selected\" " : "")>
-                                    @period.StartDateTime.ToShortDateTimeString() - @period.EndDateTime.ToShortDateTimeString()
-                                </option>
-                            }
-                        </select>
-                        <p class="text-muted">
-                            The date range @UILabel.RegistrantLabel(true).ToLower() are able to register for your @UILabel.ActivityLabel(Model.ActivityTypeId).ToLower()
-                        </p>
-                    </div>
-                    <div class="col-sm-3 hide">
-                        <a class="btn btn-block btn-link" href="@Url.Action("edit", "period", new { id = activePeriod?.ID })" id="editPeriod" target="_blank">
-                            Edit @UILabel.RegistrationPeriodLabel()
-                        </a>
-                    </div>
-                </div>
-            }
-            else
-            {
-                <input type="hidden" name="registrationperiod" id="registrationperiod" value="@activePeriod.ID" />
-            }
+            <div class="registrationperiod-container">
 
-            <div class="form-group reg-period hide">
-                <label class="col-sm-3 control-label">@UILabel.RegistrationPeriodLabel() Open <span class="text-danger">*</span></label>
-                <div class="col-sm-5">
-                    @{
-                        Html.RenderPartial(
-                            "~/Views/Shared/Components/_Date.cshtml",
-                            new FormInputViewModel()
-                            {
-                                Id = "registrationopendate",
-                                Name = "registrationopendate",
-                                Value = activePeriod.StartDateTime.ToShortDateString()
-                            }
-                        );
-                    }
-                </div>
-                <div class="col-sm-4">
+                @if (showRegistrationPeriodList)
+                {
+                    <div class="form-group registrationperiod-container">
+                        <label class="col-sm-3 control-label">
+                            @UILabel.RegistrationPeriodLabel() <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-9">
+                            <select name="registrationperiod" id="registrationperiod" class="form-control" required>
+                                <option value="">Select @UILabel.RegistrationPeriodLabel()...</option>
+                                <option value="0"> + New @UILabel.RegistrationPeriodLabel()</option>
+                                @foreach (var period in periods)
+                                {
+                                    <option value="@period.ID" @(activePeriod?.ID == period.ID ? " selected=\"selected\" " : "")>
+                                        @period.StartDateTime.ToShortDateTimeString() - @period.EndDateTime.ToShortDateTimeString()
+                                    </option>
+                                }
+                            </select>
+                            <p class="text-muted">
+                                The date range @UILabel.RegistrantLabel(true).ToLower() are able to register for your @UILabel.ActivityLabel(Model.ActivityTypeId).ToLower()
+                            </p>
+                        </div>
+                        <div class="col-sm-3 hide">
+                            <a class="btn btn-block btn-link" href="@Url.Action("edit", "period", new { id = activePeriod?.ID })" id="editPeriod" target="_blank">
+                                Edit @UILabel.RegistrationPeriodLabel()
+                            </a>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <input type="hidden" name="registrationperiod" id="registrationperiod" value="@activePeriod.ID" />
+                }
 
-                    @{
-                        Html.RenderPartial(
-                            "~/Views/Shared/_TimeSelect.cshtml",
-                            activePeriod.StartDateTime.Value,
-                            new ViewDataDictionary()
-                            {
+                <div class="form-group reg-period hide">
+                    <label class="col-sm-3 control-label">@UILabel.RegistrationPeriodLabel() Open <span class="text-danger">*</span></label>
+                    <div class="col-sm-5">
+                        @{
+                            Html.RenderPartial(
+                                "~/Views/Shared/Components/_Date.cshtml",
+                                new FormInputViewModel()
+                                {
+                                    Id = "registrationopendate",
+                                    Name = "registrationopendate",
+                                    Value = activePeriod.StartDateTime.ToShortDateString()
+                                }
+                            );
+                        }
+                    </div>
+                    <div class="col-sm-4">
+
+                        @{
+                            Html.RenderPartial(
+                                "~/Views/Shared/_TimeSelect.cshtml",
+                                activePeriod.StartDateTime.Value,
+                                new ViewDataDictionary()
+                                {
                                 { "name", "registrationopentime" },
                                 { "id", "registrationopentime" },
                                 { "required", true }
-            }
-                        );
-                    }
+    }
+                            );
+                        }
 
+                    </div>
                 </div>
-            </div>
 
-            <div class="form-group reg-period hide">
-                <label class="col-sm-3 control-label">@UILabel.RegistrationPeriodLabel() Close <span class="text-danger">*</span></label>
-                <div class="col-sm-5">
-                    @{
-                        Html.RenderPartial(
-                            "~/Views/Shared/Components/_Date.cshtml",
-                            new FormInputViewModel()
-                            {
-                                Id = "registrationclosedate",
-                                Name = "registrationclosedate",
-                                Value = activePeriod.EndDateTime.ToShortDateString()
-                            }
-                        );
-                    }
-                </div>
-                <div class="col-sm-4">
+                <div class="form-group reg-period hide">
+                    <label class="col-sm-3 control-label">@UILabel.RegistrationPeriodLabel() Close <span class="text-danger">*</span></label>
+                    <div class="col-sm-5">
+                        @{
+                            Html.RenderPartial(
+                                "~/Views/Shared/Components/_Date.cshtml",
+                                new FormInputViewModel()
+                                {
+                                    Id = "registrationclosedate",
+                                    Name = "registrationclosedate",
+                                    Value = activePeriod.EndDateTime.ToShortDateString()
+                                }
+                            );
+                        }
+                    </div>
+                    <div class="col-sm-4">
 
-                    @{
-                        Html.RenderPartial(
-                            "~/Views/Shared/_TimeSelect.cshtml",
-                            activePeriod.EndDateTime.Value,
-                            new ViewDataDictionary()
-                            {
+                        @{
+                            Html.RenderPartial(
+                                "~/Views/Shared/_TimeSelect.cshtml",
+                                activePeriod.EndDateTime.Value,
+                                new ViewDataDictionary()
+                                {
                                 { "name", "registrationclosetime" },
                                 { "id", "registrationclosetime" },
                                 { "required", true }
-            }
-                        );
-                    }
+    }
+                            );
+                        }
 
+                    </div>
                 </div>
+
             </div>
 
             <div class="col-md-offset-3 col-md-9 padding-v-20">
@@ -359,7 +363,7 @@
             @if(!showWaitingList)
             {
                  <text>
-            showUpgradeMyPlan('@(waitingListPackage.Name)',@(waitingListPackage.ID))
+                    showUpgradeMyPlan('@(waitingListPackage.Name)',@(waitingListPackage.ID))
                  </text>
             }
 
@@ -377,9 +381,11 @@
             $('.regmode').prop('disabled', true);
             $('#regmode-@RegistrationMode.Register.ToString()').prop('checked', true);
             $('#cutoffhours-container').removeClass('hide');
+            // $('.registrationperiod-container').addClass('hide');
         } else {
             $('.regmode').prop('disabled', false);
             $('#cutoffhours-container').addClass('hide');
+            // $('.registrationperiod-container').removeClass('hide');
         }
     }
 

@@ -761,7 +761,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 schedule = activity.GetSchedule();
 
             if (schedule.IsEmpty())
-                schedule = ActivitySchedule.GetNewDefaultSchedule(activity.GetActiveRegistrationPeriod(msgs));
+                schedule = ActivitySchedule.GetNewDefaultSchedule(activity, msgs);
 
             ViewBag.Schedule = schedule;
             ViewBag.ShowScheduleList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups, msgs);

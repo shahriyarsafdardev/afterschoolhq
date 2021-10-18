@@ -1792,11 +1792,16 @@ namespace AfterSchoolLibrary.Services
             if (registrationperiod.ToInteger() == 0)
             {
                 var periodname = RegistrationPeriod.GenerateUniqueName(account.ID.Value, $"{activity.Name} - Reg Window", dc: dc).MaxChars(50);
+                var openDate = $"{registrationopendate} {registrationopentime}".ToDateTime();
+                var closeDate = $"{registrationclosedate} {registrationclosetime}".ToDateTime();
+
+                if (activity.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
+                    closeDate = openDate.AddYears(10);
 
                 activity.AddNewRegistrationPeriod(
                     periodname,
-                    $"{registrationopendate} {registrationopentime}".ToDateTime(),
-                    $"{registrationclosedate} {registrationclosetime}".ToDateTime(),
+                    openDate,
+                    closeDate,
                     account.ID.Value,
                     loggedInUserId,
                     msgs,
