@@ -7,7 +7,7 @@ namespace AfterSchoolLibraryTests.Factories
 {
     public class FormQuestionGroupFactory
     {
-        public static FormQuestionGroup Create(int formId, SystemMessages msgs, DatabaseConnection dc)
+        public static FormQuestionGroup Create(int formId, bool isActive = true, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var obj = new FormQuestionGroup()
             {
@@ -19,7 +19,8 @@ namespace AfterSchoolLibraryTests.Factories
                 FormId = formId,
                 RegistrantTypeId = RegistrantType.Individual,
                 QuestionGroupDataTypeId = QuestionGroupDataType.ContactInformation,
-                DisplayOrder = 1
+                DisplayOrder = 1,
+                IsActive = isActive
             };
 
             msgs.AddRange(obj.Save(dc: dc));

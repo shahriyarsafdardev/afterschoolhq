@@ -13,10 +13,6 @@
     </li>
     for (var i = 0; i < questionGroups.Count; i++)
     {
-        if (questionGroups[i].GetQuestionCount() == 0)
-        {
-            // continue;
-        }
         var active = "";
         if (questionGroupId == questionGroups[i].ID)
         {
@@ -29,7 +25,38 @@
                 <a href="@Url.Action("formedit", "account", new { id = Model.ID.ToString(), qg = questionGroups[i].ID.ToString() })">
                     @questionGroups[i].Name.IfBlank("-")
                 </a>
+
+                @if (questionGroups[i].QuestionGroupDataTypeId.In(new List<QuestionGroupDataType> { QuestionGroupDataType.Custom, QuestionGroupDataType.NotSet }))
+                {
+                    <a href="" class="btn btn-default btn-xs md-trigger pull-right" data-modal="modal-delete-formQuestionGroup" onclick="deleteSection('@Url.Action("DeleteSection","Account", new { id = questionGroups[i].ID.ToString()})')"><span class="text-danger"><i class="s7-trash"></i></span></a>
+                }
             </div>
         </li>
     }
 }
+
+<!------- Delete Modal Pop-up------------->
+<div id="modal-delete-formQuestionGroup" class="md-modal colored-header custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <h3 class="modal-title">Delete Section</h3>
+        </div>
+        <div class="modal-body form">
+            <p>Are you sure you want to delete this section?</p>
+            <p>This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            <a class="btn btn-danger" href="#" id="delete-section-button">Delete &raquo;</a>
+        </div>
+    </div>
+</div>
+<!-------End of Delete Modal Pop-up------------->
+
+<script type="text/javascript">
+    function deleteSection(url) {
+        event.preventDefault();
+        $('#delete-section-button').attr('href', url);
+    }
+</script>
