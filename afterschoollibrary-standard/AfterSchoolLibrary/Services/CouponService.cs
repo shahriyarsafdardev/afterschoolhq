@@ -181,6 +181,15 @@ namespace AfterSchoolLibrary.Services
             return 0;
         }
 
+        public static decimal GetDiscountedValue(this Coupon coupon, decimal amount)
+        {
+            var couponValue = coupon.GetValue(amount);
+            if (amount >= couponValue)
+                return amount - couponValue;
+
+            return amount;
+        }
+
         public static string GetDiscountString(this Coupon coupon)
         {
             if (coupon.AmountTypeId == CouponAmountType.FlatAmount)

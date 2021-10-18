@@ -3551,7 +3551,7 @@ namespace AfterSchoolLibrary.Services
 
         public static void ProcessRegistrationFee(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            if (checkoutObject.RegistrationCostWithCoupon(msgs, dc) > 0)
+            if (checkoutObject.RegistrationCost(msgs, dc) > 0)
                 AccountService.ProcessPaymentWithStripe(checkoutObject, msgs, dc);
 
             // must wait until after charges happen to know what card id is charged for sure
