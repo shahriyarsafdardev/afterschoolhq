@@ -61,6 +61,7 @@ namespace AfterSchoolLibrary.Models
         public int? SeatsTaken { get; set; }
         public bool HidePreciseLocation { get; set; }
         public bool IsPublished { get; set; }
+        public int? RegistrationCutoffHours { get; set; }
 
         public ParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -131,6 +132,7 @@ namespace AfterSchoolLibrary.Models
             AgeStart = activity.AgeStart;
             AgeEnd = activity.AgeEnd;
             IsPublished = activity.IsPublished;
+            RegistrationCutoffHours = activity.RegistrationCutoffHours;
 
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {

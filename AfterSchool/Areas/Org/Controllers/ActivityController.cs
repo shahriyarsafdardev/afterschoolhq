@@ -201,7 +201,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type, string inviteonly, string minseatsrequired, string isAdvanceSettingEnabled, string costfrequencytype)
+        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type, string inviteonly, string minseatsrequired, string isAdvanceSettingEnabled, string costfrequencytype, string cutoffhours)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -268,6 +268,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "agestart", activity.IsNotEmpty() ? activity.AgeStart : defaultActivity.AgeStart },
                     { "ageend",activity.IsNotEmpty() ? activity.AgeEnd : defaultActivity.AgeEnd },
                     { "costfrequencytype", costfrequencytype },
+                    { "cutoffhours", cutoffhours },
                 };
 
                 if (activity.IsNotEmpty())
@@ -760,7 +761,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 schedule = activity.GetSchedule();
 
             if (schedule.IsEmpty())
-                schedule = ActivitySchedule.GetNewDefaultSchedule(activity.GetActiveRegistrationPeriod(msgs));
+                schedule = ActivitySchedule.GetNewDefaultSchedule(activity, msgs);
 
             ViewBag.Schedule = schedule;
             ViewBag.ShowScheduleList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups, msgs);
@@ -1086,7 +1087,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd,
             string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string isongoingsubscription, string subscriptionPlanPeriodNumber, string subscriptionPaymentStartType, string subscriptionStartDate, string subscriptionEndDate,
             string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype, string splitcostevenly, string regfeedownpayment,
-            string haspostpayplan, string postpaycost, string isparentpricepostpay, string isparentpricecost, string isparentpricepaymentplan, string isparentpricesubscription, string prepaidperiodspostpay, string postpayplanperiod)
+            string haspostpayplan, string postpaycost, string isparentpricepostpay, string isparentpricecost, string isparentpricepaymentplan, string isparentpricesubscription, string prepaidperiodspostpay, string postpayplanperiod, string cutoffhours)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;

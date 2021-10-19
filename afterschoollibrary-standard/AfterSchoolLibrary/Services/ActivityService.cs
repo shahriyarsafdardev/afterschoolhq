@@ -190,7 +190,7 @@ namespace AfterSchoolLibrary.Services
             var schedule = activity.GetSchedule(msgs, dc);
             if (schedule.IsNotEmpty())
             {
-                var dates = schedule.GetNextInstances(1, msgs, dc);
+                var dates = schedule.GetNextInstances(1, activity, msgs, dc);
 
                 if (dates.Any())
                     return activity.GetSeatsRemainingByDate(dates.First(), msgs, dc);
@@ -732,6 +732,8 @@ namespace AfterSchoolLibrary.Services
                 HidePreciseLocation = activity.HidePreciseLocation,
                 InterestFormId = activity.InterestFormId,
                 IsConvenienceFeeTakenOutOfCost = activity.IsConvenienceFeeTakenOutOfCost,
+                CostFrequencyTypeId = activity.CostFrequencyTypeId,
+                RegistrationCutoffHours = activity.RegistrationCutoffHours,
             };
         }
 
@@ -904,6 +906,7 @@ namespace AfterSchoolLibrary.Services
             var prepaidperiodspostpay = values.GetValueOrDefault("prepaidperiodspostpay");
             var postpayplanperiod = values.GetValueOrDefault("postpayplanperiod");
             var costfrequencytype = values.GetValueOrDefault("costfrequencytype");
+            var cutoffhours = values.GetValueOrDefault("cutoffhours");
 
             var activityType = ActivityType.NotSet;
 
@@ -1108,6 +1111,9 @@ namespace AfterSchoolLibrary.Services
 
             if (isparentpricecost.IsNotEmpty() && isparentpricecost.ToString().IsBoolean())
                 activity.IsConvenienceFeeTakenOutOfCost = isparentpricecost.ToString().ToBoolean();
+
+            if (cutoffhours.IsNotEmpty() && cutoffhours.IsNumber())
+                activity.RegistrationCutoffHours = cutoffhours.ToString().ToInteger();
 
             if (msgs.HasNoErrors())
             {
@@ -1790,11 +1796,16 @@ namespace AfterSchoolLibrary.Services
             if (registrationperiod.ToInteger() == 0)
             {
                 var periodname = RegistrationPeriod.GenerateUniqueName(account.ID.Value, $"{activity.Name} - Reg Window", dc: dc).MaxChars(50);
+                var openDate = $"{registrationopendate} {registrationopentime}".ToDateTime();
+                var closeDate = $"{registrationclosedate} {registrationclosetime}".ToDateTime();
+
+                if (activity.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
+                    closeDate = openDate.AddYears(10);
 
                 activity.AddNewRegistrationPeriod(
                     periodname,
-                    $"{registrationopendate} {registrationopentime}".ToDateTime(),
-                    $"{registrationclosedate} {registrationclosetime}".ToDateTime(),
+                    openDate,
+                    closeDate,
                     account.ID.Value,
                     loggedInUserId,
                     msgs,
@@ -2493,7 +2504,7 @@ namespace AfterSchoolLibrary.Services
         /// <returns></returns>
         public static DateTime? GetFirstDate(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return activity.GetSchedule(msgs, dc)?.GetInstances(msgs: msgs, dc: dc).FirstOrDefault()?.StartDateTime;
+            return activity.GetSchedule(msgs, dc)?.GetNextInstances(1, activity, msgs, dc).FirstOrDefault();
         }
 
         /// <summary>
