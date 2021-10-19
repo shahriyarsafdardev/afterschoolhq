@@ -138,7 +138,7 @@ namespace AfterSchool.Controllers
                        objectType: ObjectType.Account
                     );
 
-                if (profile.IsEmpty())
+                if (profile.IsEmpty() || account.ID == 7)
                     return Redirect(account.BrowseUrl);
 
                 var photos = profile.GetPhotos(msgs);
