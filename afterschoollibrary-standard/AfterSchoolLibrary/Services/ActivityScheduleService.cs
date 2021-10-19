@@ -135,7 +135,7 @@ namespace AfterSchoolLibrary.Services
             var account = schedule.GetAccount(msgs, dc);            
             var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
 
-            if (schedule.IsOngoing && activity.AccountId != 7)
+            if (schedule.IsOngoing && schedule.GetDaysOfTheWeek(msgs, dc).Any())
             {
                 var referenceDate = now;
                 var outOfSession = schedule.GetOutSessionInstances(msgs, dc).Where(instance => instance.StartDateTime.Value.IsAfter(referenceDate));
