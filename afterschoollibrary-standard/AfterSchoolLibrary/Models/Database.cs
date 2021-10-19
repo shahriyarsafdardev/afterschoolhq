@@ -15,7 +15,8 @@ namespace AfterSchoolLibrary.Models
     {
 		#region "ClassGenerator"
 		public static DatabaseCredentials ProductionCredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
-		public static DatabaseCredentials LocalCredentials { get { return new DatabaseCredentials("localhost", "AfterSchool", "AfterSchoolUser", "Nj8Ed$wpLfJ"); } }
+		public static DatabaseCredentials LocalCredentials { get { return new DatabaseCredentials("afterschool-production.cdyenngbc33v.us-east-2.rds.amazonaws.com", "AfterSchool", "AfterSchoolProd", "uOp*4BcdyEr3NiHHfb$s"); } }
+		//public static DatabaseCredentials LocalCredentials { get { return new DatabaseCredentials("localhost", "AfterSchool", "AfterSchoolUser", "Nj8Ed$wpLfJ"); } }
 		public static DatabaseCredentials CICredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
 		public static DatabaseCredentials QACredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
 		public static DatabaseCredentials TestCredentials { get { return new DatabaseCredentials("afterschool-nonprod.cdyenngbc33v.us-east-2.rds.amazonaws.com", "AfterSchoolTest", "AfterSchoolTestUser", "jUp$dBh8D9o)3Rf"); } }
