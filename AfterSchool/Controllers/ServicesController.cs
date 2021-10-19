@@ -718,18 +718,9 @@ namespace AfterSchool.Controllers
                 var discountedFeeCalcObject = new FeeCalculationObject(discountedValue, participationObject.OwnerAccount, msgs);
 
                 calculatedAmountACH = discountedFeeCalcObject.GetFinalTotalCostForPostPay(PaymentType.ACH);
-                discountString = coupon.GetDiscountString();
-                if (quantity > 1)
-                {
-                    // for per class registration, we should go with origional ccFee per class.
-                    calculatedAmountCC = calculatedAmountACH + ccFee;
-                    calculatedCCFee = ccFee;
-                } 
-                else
-                {
-                    calculatedAmountCC = discountedFeeCalcObject.GetFinalTotalCostForPostPay(PaymentType.CreditCard);
-                    calculatedCCFee = discountedFeeCalcObject.GetCreditCardFee();
-                }                
+                discountString = coupon.GetDiscountString();                
+                calculatedAmountCC = discountedFeeCalcObject.GetFinalTotalCostForPostPay(PaymentType.CreditCard);
+                calculatedCCFee = discountedFeeCalcObject.GetCreditCardFee();
             }
 
             if (paymentPlan.IsNotEmpty())
