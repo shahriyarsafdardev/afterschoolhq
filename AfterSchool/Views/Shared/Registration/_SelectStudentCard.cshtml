@@ -106,6 +106,8 @@
         }
     }
     var gradeValue = registrantGradeText.IsNotEmpty() ? @UILabel.GetGradeDescription(registrantGradeText) : "";
+    if (gradeValue == "K")
+        gradeValue = "Kindergarten";
 }
 <div class="col-sm-12 col-md-6 col-lg-4">
     <div class="panel border-none">
@@ -117,7 +119,7 @@
         </div>
         <div class="panel-body p-15-25">
             <p class="text-center text-small padding-v-10 text-muted font-size-16 p-b-0">
-                @(gradeValue != "Pre-K" && gradeValue != "K" ? gradeValue + " Grade": gradeValue)
+                @(gradeValue != "Pre-K" && gradeValue != "Kindergarten" ? gradeValue + " Grade": gradeValue)
             </p>
             <p>
                 <a href="@btnUrl"
