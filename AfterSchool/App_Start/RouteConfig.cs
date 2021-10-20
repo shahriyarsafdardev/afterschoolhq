@@ -195,6 +195,18 @@ namespace AfterSchool
                 });
 
             routes.MapRoute(
+                "ActivitySelectDates",
+                "{accountname}/activity/{activityname}/selectdates",
+                new
+                {
+                    controller = "r",
+                    action = "selectdates",
+                    accountname = UrlParameter.Optional,
+                    activitytype = UrlParameter.Optional,
+                    activityname = UrlParameter.Optional
+                });
+
+            routes.MapRoute(
                 "FieldTripRegister",
                 "{accountname}/fieldtrip/{activityname}/register",
                 new

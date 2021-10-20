@@ -33,7 +33,7 @@
             {
                 <span>                        
                     <strong>@Model.GetPostPayCostWithConvenienceFee().ToCurrency()</strong>
-                    per @billingPeriod attended per student
+                    per @billingPeriod attended per @UILabel.RegistrantLabel().ToLower()
                 </span>
                 if (Model.PostPayPlans.First().NumberOfPeriodsPrePaid.HasValue)
                 { 
@@ -55,7 +55,7 @@
                     }
                     and @youOrProvider will receive
                     <strong>@Model.GetPostPayProviderAmount().ToCurrency()</strong>
-                    per class attended per student
+                    per @billingPeriod attended per @UILabel.RegistrantLabel().ToLower()
                 </span>
                     
             }

@@ -25,6 +25,7 @@ namespace AfterSchoolLibrary.Models
 		public int? DisplayOrder { get { return (int?)MDV["DisplayOrder"].Value; } set { MDV["DisplayOrder"].Value = value; } }
 		public RegistrantType RegistrantTypeId { get { return (RegistrantType)MDV["RegistrantTypeId"].Value; } set { MDV["RegistrantTypeId"].Value = value; } }
 		public QuestionGroupDataType QuestionGroupDataTypeId { get { return (QuestionGroupDataType)MDV["QuestionGroupDataTypeId"].Value; } set { MDV["QuestionGroupDataTypeId"].Value = value; } }
+		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
 		
 
         public FormQuestionGroup()
@@ -33,6 +34,7 @@ namespace AfterSchoolLibrary.Models
             this.LoadObjectValues(ObjectMap);
 			this.RegistrantTypeId = RegistrantType.NotSet;
 			this.QuestionGroupDataTypeId = QuestionGroupDataType.NotSet;
+			this.IsActive = false;
 			
         }
 
@@ -47,6 +49,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "DisplayOrder", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrantTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "QuestionGroupDataTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "IsActive", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -138,6 +141,10 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["QuestionGroupDataTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsActive"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -225,6 +232,15 @@ namespace AfterSchoolLibrary.Models
         public int GetQuestionCount(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return FormQuestion.GetCount(new Hashtable() { { "FormQuestionGroupId", this.ID.Value } }, msgs, dc);
+        }
+
+        public static List<FormQuestionGroup> LoadActiveFormQuestionGroupByFormId(int FormId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["FormId"], FormId);
+            dq.Criterias.Add(ObjectMap["IsActive"], true);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
         public FormQuestionGroup Copy()

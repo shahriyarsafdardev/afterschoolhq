@@ -164,6 +164,7 @@ namespace AfterSchoolLibrary.Services
             var maxgradeid = values.GetValueOrDefault("maxgrade");
             var mingradeid = values.GetValueOrDefault("mingrade");
             var genderrestrictions = values.GetValueOrDefault("genderrestrictions");
+            var days = values.GetValueOrDefault("days");
             var daysoftheweek = values.GetValueOrDefault("daysoftheweek");
             var repeatsweekly = values.GetValueOrDefault("repeatsweekly");
             var startdate = values.GetValueOrDefault("startdate");
@@ -360,7 +361,7 @@ namespace AfterSchoolLibrary.Services
                             amsgs.AddRange(group.SetupSchedule(
                                 account,
                                 schedule.IfEmpty(""),
-                                (List<DateRange>)scheduledates,
+                                (List<ActivityInstance>)scheduledates,
                                 (List<DateTime>)scheduledatesClosed,
                                 scheduledetails.IfEmpty(""),
                                 repeatsweekly.IfEmpty(""),
@@ -369,6 +370,7 @@ namespace AfterSchoolLibrary.Services
                                 dailystarttime.IfEmpty(""),
                                 dailyendtime.IfEmpty(""),
                                 isongoing.IfEmpty(""),
+                                days.IfEmpty(""),
                                 loggedInUser.ID.Value,
                                 adc));
                         }
@@ -432,7 +434,7 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        private static SystemMessages SetupSchedule(this ActivityGroup activityGroup, Account account, string schedule, List<DateRange> scheduledates, List<DateTime> scheduledatesclosed, string scheduledetails, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string isongoing, int loggedInUserId, DatabaseConnection dc = null)
+        private static SystemMessages SetupSchedule(this ActivityGroup activityGroup, Account account, string schedule, List<ActivityInstance> scheduledates, List<DateTime> scheduledatesclosed, string scheduledetails, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string isongoing, string daysoftheweek, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
@@ -451,6 +453,7 @@ namespace AfterSchoolLibrary.Services
                  dailyendtime.ToString(),
                  scheduledates,
                  scheduledatesclosed,
+                 daysoftheweek,
                  account,
                  activityGroup.ID,
                  loggedInUserId,

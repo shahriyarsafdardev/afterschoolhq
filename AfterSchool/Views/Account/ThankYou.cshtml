@@ -100,14 +100,20 @@
                 else
                 {
                     <hr />
-                     Html.RenderPartial(
-                            "~/Views/Shared/Registration/_RegisterButton.cshtml",
-                            participationObject,
-                            new ViewDataDictionary()
-                            {
-                                { "anotherChild", true }
-                            }); 
-                    <div class="margin-v-20">
+
+                    if (true)
+                    {
+                        Html.RenderPartial(
+                               "~/Views/Shared/Registration/_RegisterButton.cshtml",
+                               participationObject,
+                               new ViewDataDictionary()
+                               {
+                                { "anotherChild", true },
+                                { "condensed", true }
+                               });
+                    }
+
+                    <div class="margin-v-10">
                         <p>
                             <a href="@account.HomePageUrl" class="@(assignmentType != RegistrationAssignmentType.Interested ? "btn btn-xl btn-register-primary btn-register-xl" : "")">Find another activity</a>
                         </p>

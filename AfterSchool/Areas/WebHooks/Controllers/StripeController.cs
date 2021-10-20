@@ -199,7 +199,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             var stripeSubscriptionId = stripeInvoice.SubscriptionId;
             var chargeId = stripeInvoice.ChargeId;
             var rsp = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(stripeSubscriptionId, msgs);
-
+            
             if (rsp.IsEmpty())
             {
                 msgs.Add($"Ignoring - Registrant Subscription Plan not found - Stripe Sub ID {stripeSubscriptionId}", MessageType.Notice);
@@ -245,7 +245,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             }
 
             // send payment succeeded email
-            purchasingAccount.SendSubscriptionPaymentSucceeded(rsp, plan);
+             purchasingAccount.SendSubscriptionPaymentSucceeded(rsp, plan);
 
             AfterSchoolLibrary.Models.Account convenienceFeePayer;
             AfterSchoolLibrary.Models.Account transactionFeePayer;
@@ -262,7 +262,12 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
             //we will need this logic to ensure we are adding pro-rated amount in ActivityPayment and RegistrantSubscriptionPlan
             var amountPaidByParent = stripeInvoice.AmountPaid > 0 ? (decimal)stripeInvoice.AmountPaid / 100 : 0m;
-            var amountReceivedByProvider = stripeInvoice.TransferData.Amount > 0 ? (decimal)stripeInvoice.TransferData.Amount / 100 : 0m;
+            // NOTE: need to do a check if our data is different than stripe. What if stripe.InvoiceAmount != rsp.Amount ?
+            var amountReceivedByProvider = amountPaidByParent - (rsp.ConvenienceFee + rsp.PaymentTypeFee);
+            var isStripeInvoiceTransferData = stripeInvoice.TransferData.IsNotEmpty();
+            if (isStripeInvoiceTransferData)
+                amountReceivedByProvider = (decimal)stripeInvoice.TransferData.Amount / 100;
+
             var isAmountProRated = amountReceivedByProvider < plan.CostPerPeriod;
 
             // save transaction info and track payment to the activity as well.
@@ -291,6 +296,10 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             };
 
             billingAccount.ProcessSubscriptionPlanPayment(checkoutObject, plan, rsp, msgs);
+
+            // need to create transfer if there wasnt one originally, use webuser
+            if (!isStripeInvoiceTransferData && msgs.HasNoErrors())
+                checkoutObject.Transaction.CreateStripeTransfer(WebUser.Load(1, msgs), msgs);
 
             if (msgs.HasErrors())
                 return Return500(msgs);

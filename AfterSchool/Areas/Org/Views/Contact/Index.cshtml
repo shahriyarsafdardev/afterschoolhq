@@ -163,7 +163,7 @@
                     new ViewDataDictionary()
                     {
                         { "id", "" },
-                        { "querystring", string.Format("list={0}&query={1}", Request["list"], Request["query"]) },
+                        { "querystring", string.Format("list={0}&q={1}", Request["list"], query) },
                         { "action", "index" },
                         { "controller", "contact" }
                 }
