@@ -997,38 +997,14 @@ namespace AfterSchool.Areas.Org.Controllers
 
             switch (cmd)
             {
-                questionGroups = form.GetActiveQuestionGroups(msgs);
-                individualGroups = questionGroups
-                    .Where(x => x.RegistrantTypeId == RegistrantType.Individual)
-                    .OrderBy(x => x.DisplayOrder)
-                    .ToList();
-                organizationGroups = questionGroups
-                    .Where(x => x.RegistrantTypeId == RegistrantType.Organization)
-                    .OrderBy(x => x.DisplayOrder)
-                    .ToList();
-
-                //temporarily disable organization groups
-                organizationGroups = new List<FormQuestionGroup>();
-
-                //make sure only question groups with a setting of individual or organization are added to the final count
-                questionGroups.Clear();
-                questionGroups.AddRange(individualGroups);
-                questionGroups.AddRange(organizationGroups);
-
-                var currentIndex = -1;
-
-                if (questionGroup.IsNotEmpty())
-                    currentIndex = questionGroups.FindIndex(x => x.ID.Value == questionGroup.ID.Value);
-
-                switch (cmd)
-                {
+                
                     case "prev":
                         if (currentIndex > 0) questionGroup = questionGroups[currentIndex - 1];
                         break;
                     case "next":
                         if (currentIndex < questionGroups.Count - 1) questionGroup = questionGroups[currentIndex + 1];
                         break;
-                }
+                
             }
 
             ViewBag.QuestionGroups = questionGroups;
