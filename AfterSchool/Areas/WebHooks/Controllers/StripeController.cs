@@ -245,7 +245,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             }
 
             // send payment succeeded email, unless payment was made before today (for previously failed webhooks)
-            var wasPaidToday = (bool)stripeInvoice.StatusTransitions?.PaidAt.IsNotEmpty() && stripeInvoice.StatusTransitions.PaidAt.Value.Date => DateTime.Today.Date;
+            var wasPaidToday = (bool)stripeInvoice.StatusTransitions?.PaidAt.IsNotEmpty() && stripeInvoice.StatusTransitions.PaidAt.Value.Date >= DateTime.Today.Date;
             if (wasPaidToday)
                 purchasingAccount.SendSubscriptionPaymentSucceeded(rsp, plan);
 
