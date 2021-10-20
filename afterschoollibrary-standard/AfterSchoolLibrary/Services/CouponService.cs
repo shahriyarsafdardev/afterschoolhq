@@ -176,7 +176,7 @@ namespace AfterSchoolLibrary.Services
                 return Math.Min(coupon.Amount.Value, amount);
 
             if (coupon.AmountTypeId == CouponAmountType.Percentage && coupon.Amount.HasValue)
-                return Math.Min(amount * (coupon.Amount.Value / 100),amount);
+                return Math.Round(amount * (coupon.Amount.Value / 100));
 
             return 0;
         }

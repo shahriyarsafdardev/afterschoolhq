@@ -714,13 +714,18 @@ namespace AfterSchool.Controllers
             // If coupon is valid we update the amount shown to the user here
             if (coupon.IsNotEmpty() && coupon.ID.IsNotEmpty() && coupon.DoesApplyToRegistrationFee())
             {
-                var discountedValue = coupon.GetDiscountedValue(amount);
-                var discountedFeeCalcObject = new FeeCalculationObject(discountedValue, participationObject.OwnerAccount, msgs);
+                calculatedAmountACH = coupon.GetDiscountedValue(amount);
+                calculatedAmountCC = calculatedAmountACH + ccFee;
+                calculatedCCFee = ccFee;
+                discountString = coupon.GetDiscountString();
 
-                calculatedAmountACH = discountedFeeCalcObject.GetFinalTotalCostForPostPay(PaymentType.ACH);
-                discountString = coupon.GetDiscountString();                
-                calculatedAmountCC = discountedFeeCalcObject.GetFinalTotalCostForPostPay(PaymentType.CreditCard);
-                calculatedCCFee = discountedFeeCalcObject.GetCreditCardFee();
+                //var discountedValue = coupon.GetDiscountedValue(amount);
+                //var discountedFeeCalcObject = new FeeCalculationObject(discountedValue, participationObject.OwnerAccount, msgs);
+
+                //calculatedAmountACH = discountedFeeCalcObject.GetFinalTotalCostForPostPay(PaymentType.ACH);
+                //discountString = coupon.GetDiscountString();                
+                //calculatedAmountCC = discountedFeeCalcObject.GetFinalTotalCostForPostPay(PaymentType.CreditCard);
+                //calculatedCCFee = discountedFeeCalcObject.GetCreditCardFee();
             }
 
             if (paymentPlan.IsNotEmpty())

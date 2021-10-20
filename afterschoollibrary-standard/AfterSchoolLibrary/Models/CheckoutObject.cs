@@ -335,7 +335,10 @@ namespace AfterSchoolLibrary.Models
                     return Registration.CouponValue.Value;
                 }
                 else
-                    return Coupon.GetValue(GetAmountToApplyToCoupon(msgs, dc));
+                {
+                    var value = Coupon.GetValue(GetAmountToApplyToCoupon(msgs, dc));
+                    return Coupon.AmountTypeId == CouponAmountType.Percentage && Coupon.Amount.HasValue ? Math.Round(value) : value;
+                }
             }
 
             return 0;
@@ -373,12 +376,12 @@ namespace AfterSchoolLibrary.Models
             var activity = ParticipationObject.GetActivity();
 
             if (activity.IsConvenienceFeeTakenOutOfCost)
-                return RegistrationCostNoFees;
+                return GetTotalCost(msgs, dc);
 
             if (PostPayPlan.IsNotEmpty())
                 return ParticipationObject.GetPostPayCheckoutCostWithoutConvenienceFee();
 
-            return RegistrationCostNoFees + GetRegistrationConvenienceFee(msgs, dc);
+            return GetTotalCost(msgs, dc) + GetRegistrationConvenienceFee(msgs, dc);
         }
 
         public decimal GetRegistrationCostWithConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
