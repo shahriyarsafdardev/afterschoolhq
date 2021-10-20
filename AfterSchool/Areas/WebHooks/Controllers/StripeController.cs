@@ -244,8 +244,10 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 return ReturnOK(msgs);
             }
 
-            // send payment succeeded email
-             purchasingAccount.SendSubscriptionPaymentSucceeded(rsp, plan);
+            // send payment succeeded email, unless payment was made before today (for previously failed webhooks)
+            var isStripeInvoicePaidBeforeToday = (bool)stripeInvoice.StatusTransitions?.PaidAt.IsNotEmpty() && stripeInvoice.StatusTransitions.PaidAt < DateTime.Today;
+            if (!isStripeInvoicePaidBeforeToday)
+                purchasingAccount.SendSubscriptionPaymentSucceeded(rsp, plan);
 
             AfterSchoolLibrary.Models.Account convenienceFeePayer;
             AfterSchoolLibrary.Models.Account transactionFeePayer;
