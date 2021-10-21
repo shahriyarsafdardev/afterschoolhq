@@ -563,6 +563,38 @@ namespace AfterSchoolLibrary.Services
                     return null;
             }
 
+            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && plan.EndDate.HasValue)
+                return plan.EndDate.Value;
+            else if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && !plan.EndDate.HasValue)
+            {
+                var endDate = plan.StartDate.HasValue ? plan.StartDate.Value : DateTime.UtcNow;
+                var periodsToAdd = plan.TotalPeriods.Value - plan.NumberOfPeriodsPrePaid.IfEmpty(0);
+                switch (plan.BillingPeriodTypeId)
+                {
+                    case BillingPeriodType.Day:
+                        endDate = endDate.AddDays(periodsToAdd);
+                        break;
+                    case BillingPeriodType.Week:
+                        endDate = endDate.AddWeeks(periodsToAdd);
+                        break;
+                    case BillingPeriodType.TwoWeeks:
+                        endDate = endDate.AddWeeks(periodsToAdd * 2);
+                        break;
+                    case BillingPeriodType.Month:
+                        endDate = endDate.AddMonths(periodsToAdd);
+                        break;
+                    case BillingPeriodType.Year:
+                        endDate = endDate.AddYears(periodsToAdd);
+                        break;
+                    default:
+                        msgs.Add("unable to create end date for payment plan", MessageType.ApiError);
+                        break;
+                }
+
+                return endDate.AddDays(-1);
+
+            }
+
             return null;
         }
 

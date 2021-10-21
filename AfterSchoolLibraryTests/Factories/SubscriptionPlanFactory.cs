@@ -53,6 +53,23 @@ namespace AfterSchoolLibraryTests.Factories
             msgs.AddRange(obj.SaveWithStripe(dc));
             return obj;
         }
+
+        public static SubscriptionPlan CreatePaymentPlan(Account planOwnerAccount, Activity activity, decimal costPerPeriod, int totalPeriods, BillingPeriodType billingPeriodType, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var obj = new SubscriptionPlan()
+            {
+                ParticipationObjectId = activity.ID,
+                ParticipationObjectTypeId = ParticipationObjectType.Activity,
+                CostPerPeriod = costPerPeriod,
+                PlanOwnerAccountId = planOwnerAccount.ID,
+                PlanTypeId = SubscriptionPlanType.PaymentPlan,
+                IsActive = true,
+                TotalPeriods = totalPeriods,
+                BillingPeriodTypeId = billingPeriodType
+            };
+            msgs.AddRange(obj.SaveWithStripe(dc));
+            return obj;
+        }
         public static SubscriptionPlan Create(Account planOwnerAccount, ActivityGroup activityGroup, SubscriptionPlanType planType, SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new SubscriptionPlan()

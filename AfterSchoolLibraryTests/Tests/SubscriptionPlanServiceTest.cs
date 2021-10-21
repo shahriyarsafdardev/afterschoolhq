@@ -1,5 +1,6 @@
 ﻿using Xunit;
 using Xunit.Abstractions;
+using System;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
@@ -121,5 +122,99 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors());
         }
 
+
+        [Fact(DisplayName = "GetPlanEndDateNotSetPostPayTest")]
+        public void GetPlanEndDateNotSetPostPayTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(PlanOwner, msgs, dc);
+            var planTypeNotSet = SubscriptionPlanFactory.Create(PlanOwner, activity, SubscriptionPlanType.NotSet, msgs, dc);
+            var planTypePostPay = SubscriptionPlanFactory.Create(PlanOwner, activity, SubscriptionPlanType.PostPayPlan, msgs, dc);
+
+            // Act
+            var endDatePlanTypeNotSet = planTypeNotSet.GetPlanEndDate(activity.GetParticipationObject(msgs, dc), msgs);
+            var endDatePlanTypePostPay = planTypeNotSet.GetPlanEndDate(activity.GetParticipationObject(msgs, dc), msgs);
+
+            // Assert
+            Assert.False(endDatePlanTypeNotSet.HasValue);
+            Assert.False(endDatePlanTypePostPay.HasValue);
+        }
+
+        [Fact(DisplayName ="GetPlanEndDateSubscriptionTest")]
+        public void GetPlanEndDateSubscriptionTest()
+        {
+            // Arrange
+            var schedule = ActivityScheduleFactory.Create(PlanOwner, msgs, dc);
+            var activityWithSchedule = ActivityFactory.Create(PlanOwner, schedule, msgs, dc);
+            var onGoingActivity = ActivityFactory.Create(PlanOwner, msgs, dc);
+            var planScheduleSubscription = SubscriptionPlanFactory.Create(PlanOwner, activityWithSchedule, SubscriptionPlanType.Subscription, msgs, dc);
+            var planOnGoingSubscription = SubscriptionPlanFactory.Create(PlanOwner, onGoingActivity, SubscriptionPlanType.Subscription, msgs, dc);
+
+            // Act
+            var endDateSchedule = planScheduleSubscription.GetPlanEndDate(activityWithSchedule.GetParticipationObject(msgs, dc), msgs);
+            var endDateOnGoing = planOnGoingSubscription.GetPlanEndDate(onGoingActivity.GetParticipationObject(msgs, dc), msgs);
+
+
+            // Assert
+            Assert.True(endDateSchedule.HasValue);
+            Assert.Equal(expected: schedule.EndDate?.AddDays(1), actual: endDateSchedule);
+            Assert.False(endDateOnGoing.HasValue);
+
+        }
+
+
+        [Fact(DisplayName = "GetPlanEndDatePaymentPlanBillingPeriodDayTest")]
+        public void GetPlanEndDatePaymentPlanBillingPeriodDayTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(PlanOwner, msgs, dc);
+            var totalPeriods = 2;
+            var planPaymentPlan = SubscriptionPlanFactory.CreatePaymentPlan(PlanOwner, activity, 10, totalPeriods, BillingPeriodType.Day, msgs, dc);
+
+            // Act
+            var endDate = planPaymentPlan.GetPlanEndDate(activity.GetParticipationObject(msgs, dc), msgs);
+            
+
+            // Assert
+            Assert.True(endDate.HasValue);
+            Assert.True(msgs.HasNoErrors());
+            Assert.Equal(expected: DateTime.UtcNow.AddDays(totalPeriods).AddDays(1).Date, actual: endDate.Value.Date);
+        }
+
+        [Fact(DisplayName = "GetPlanEndDatePaymentPlanBillingPeriodWeekTest")]
+        public void GetPlanEndDatePaymentPlanBillingPeriodWeekTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(PlanOwner, msgs, dc);
+            var totalPeriods = 2;
+            var planPaymentPlan = SubscriptionPlanFactory.CreatePaymentPlan(PlanOwner, activity, 10, totalPeriods, BillingPeriodType.Week, msgs, dc);
+
+            // Act
+            var endDate = planPaymentPlan.GetPlanEndDate(activity.GetParticipationObject(msgs, dc), msgs);
+
+
+            // Assert
+            Assert.True(endDate.HasValue);
+            Assert.True(msgs.HasNoErrors());
+            Assert.Equal(expected: DateTime.UtcNow.AddWeeks(totalPeriods).AddDays(1).Date, actual: endDate.Value.Date);
+        }
+
+        [Fact(DisplayName = "GetPlanEndDatePaymentPlanBillingPeriodTwoWeekTest")]
+        public void GetPlanEndDatePaymentPlanBillingPeriodTwoWeekTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(PlanOwner, msgs, dc);
+            var totalPeriods = 2;
+            var planPaymentPlan = SubscriptionPlanFactory.CreatePaymentPlan(PlanOwner, activity, 10, totalPeriods, BillingPeriodType.Week, msgs, dc);
+
+            // Act
+            var endDate = planPaymentPlan.GetPlanEndDate(activity.GetParticipationObject(msgs, dc), msgs);
+
+
+            // Assert
+            Assert.True(endDate.HasValue);
+            Assert.True(msgs.HasNoErrors());
+            Assert.Equal(expected: DateTime.UtcNow.AddWeeks(2 * totalPeriods).AddDays(1).Date, actual: endDate.Value.Date);
+        }
     }
 }

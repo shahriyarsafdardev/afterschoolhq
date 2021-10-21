@@ -572,5 +572,66 @@ namespace AfterSchoolLibrary.Services
 
             return true;
         }
+
+        public static DateTime? GetPlanEndDate(this SubscriptionPlan plan, ParticipationObject participationObject, SystemMessages msgs = null)
+        {
+            if (msgs.IsEmpty())
+                msgs = new SystemMessages();
+
+            if (plan.PlanTypeId == SubscriptionPlanType.PostPayPlan || plan.PlanTypeId == SubscriptionPlanType.NotSet)
+                return null;
+
+            return plan.PlanTypeId == SubscriptionPlanType.Subscription ?
+                plan.GetSubscriptionEndDate(participationObject, msgs)
+                : plan.GetPaymenPlanEndDate(msgs);
+        }
+
+        private static DateTime? GetSubscriptionEndDate(this SubscriptionPlan plan, ParticipationObject participationObject, SystemMessages msgs = null)
+        {
+            if (plan.EndDate.HasValue)
+                return plan.EndDate.Value.AddDays(1);
+            else if (participationObject.Schedule.IsNotEmpty() && participationObject.Schedule.EndDate.HasValue)
+                return participationObject.Schedule.EndDate.Value.AddDays(1);
+
+            return null;
+        }
+
+        private static DateTime? GetPaymenPlanEndDate(this SubscriptionPlan plan,  SystemMessages msgs = null)
+        {
+            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && plan.EndDate.HasValue)
+                return plan.EndDate.Value;
+            else if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && !plan.EndDate.HasValue)
+            {
+                var endDate = plan.StartDate.HasValue ? plan.StartDate.Value : DateTime.UtcNow;
+                var periodsToAdd = plan.TotalPeriods.Value - plan.NumberOfPeriodsPrePaid.IfEmpty(0);
+                switch (plan.BillingPeriodTypeId)
+                {
+                    case BillingPeriodType.Day:
+                        endDate = endDate.AddDays(periodsToAdd);
+                        break;
+                    case BillingPeriodType.Week:
+                        endDate = endDate.AddWeeks(periodsToAdd);
+                        break;
+                    case BillingPeriodType.TwoWeeks:
+                        endDate = endDate.AddWeeks(periodsToAdd * 2);
+                        break;
+                    case BillingPeriodType.Month:
+                        endDate = endDate.AddMonths(periodsToAdd);
+                        break;
+                    case BillingPeriodType.Year:
+                        endDate = endDate.AddYears(periodsToAdd);
+                        break;
+                    default:
+                        msgs.Add("Payment plan missing billing period type", MessageType.ApiError);
+                        break;
+                }
+                // subtract one day so the payment plan doesnt charge an extra time
+                return endDate.AddDays(-1);
+            }
+
+            msgs.Add("Unable to set end date for payment plan", MessageType.ApiError);
+
+            return null;
+        }
     }
 }
