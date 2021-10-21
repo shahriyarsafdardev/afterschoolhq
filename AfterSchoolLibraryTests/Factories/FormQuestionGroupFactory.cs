@@ -7,6 +7,11 @@ namespace AfterSchoolLibraryTests.Factories
 {
     public class FormQuestionGroupFactory
     {
+        public static FormQuestionGroup Create(int formId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Create(formId, true, msgs, dc);
+        }
+
         public static FormQuestionGroup Create(int formId, bool isActive = true, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var obj = new FormQuestionGroup()
