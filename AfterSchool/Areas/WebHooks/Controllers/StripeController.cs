@@ -297,7 +297,10 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 CreditCardFeePayer = transactionFeePayer,
             };
 
-            billingAccount.ProcessSubscriptionPlanPayment(checkoutObject, plan, rsp, msgs);
+            var charge = AfterSchoolLibrary.Billing.StripeHelper.GetCharge(stripeInvoice.ChargeId, msgs);
+            if (charge.AmountRefunded == 0)
+                billingAccount.ProcessSubscriptionPlanPayment(checkoutObject, plan, rsp, msgs);
+
 
             // need to create transfer if there wasnt one originally, use webuser
             if (!isStripeInvoiceTransferData && msgs.HasNoErrors())
