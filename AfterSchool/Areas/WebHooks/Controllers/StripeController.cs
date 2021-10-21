@@ -264,7 +264,12 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
             //we will need this logic to ensure we are adding pro-rated amount in ActivityPayment and RegistrantSubscriptionPlan
             var amountPaidByParent = stripeInvoice.AmountPaid > 0 ? (decimal)stripeInvoice.AmountPaid / 100 : 0m;
-            var amountReceivedByProvider = stripeInvoice.TransferData.Amount > 0 ? (decimal)stripeInvoice.TransferData.Amount / 100 : 0m;
+            // NOTE: need to do a check if our data is different than stripe. What if stripe.InvoiceAmount != rsp.Amount ?
+            var amountReceivedByProvider = amountPaidByParent - (rsp.ConvenienceFee + rsp.PaymentTypeFee);
+            var isStripeInvoiceTransferData = stripeInvoice.TransferData.IsNotEmpty();
+            if (isStripeInvoiceTransferData)
+                amountReceivedByProvider = (decimal)stripeInvoice.TransferData.Amount / 100;
+
             var isAmountProRated = amountReceivedByProvider < plan.CostPerPeriod;
 
             // save transaction info and track payment to the activity as well.
@@ -292,7 +297,10 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 CreditCardFeePayer = transactionFeePayer,
             };
 
-            billingAccount.ProcessSubscriptionPlanPayment(checkoutObject, plan, rsp, msgs);
+            var charge = AfterSchoolLibrary.Billing.StripeHelper.GetCharge(stripeInvoice.ChargeId, msgs);
+            if (charge.AmountRefunded == 0)
+                billingAccount.ProcessSubscriptionPlanPayment(checkoutObject, plan, rsp, msgs);
+
 
             if (msgs.HasErrors())
                 return Return500(msgs);
