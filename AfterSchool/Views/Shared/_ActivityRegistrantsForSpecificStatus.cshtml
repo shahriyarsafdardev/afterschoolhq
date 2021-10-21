@@ -123,10 +123,17 @@
 
                                     @foreach (var assignmenttype in Enum.GetValues(typeof(RegistrationAssignmentType)).Cast<RegistrationAssignmentType>())
                                     {
+
                                         switch (assignmenttype)
                                         {
                                             case RegistrationAssignmentType.NotSet:
                                                 continue;
+                                            case RegistrationAssignmentType.WaitingList: case RegistrationAssignmentType.Applied: 
+                                                if (activity.ActivityTypeId == ActivityType.PermissionSlip)
+                                                {
+                                                    continue;
+                                                }
+                                                break;
                                         }
                                         <option value="@((int)assignmenttype)" @(assignmenttype == ra.AssignmentTypeId ? "selected=\"selected\"" : "")>
                                             @assignmenttype.ToString().SplitByUpperCase()
