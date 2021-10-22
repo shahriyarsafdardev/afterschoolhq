@@ -2203,7 +2203,8 @@ namespace AfterSchoolLibrary.Services
                 ras = RegistrantActivity.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc)
                     .Where(x =>
                         x.AssignmentTypeId != RegistrationAssignmentType.Invited &&
-                        x.AssignmentTypeId != RegistrationAssignmentType.Declined
+                        x.AssignmentTypeId != RegistrationAssignmentType.Declined &&
+                        x.AssignmentTypeId != RegistrationAssignmentType.Interested
                     ).ToList();
 
             return ras;
