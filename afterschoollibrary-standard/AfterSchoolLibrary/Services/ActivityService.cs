@@ -2504,7 +2504,17 @@ namespace AfterSchoolLibrary.Services
         /// <returns></returns>
         public static DateTime? GetFirstDate(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return activity.GetSchedule(msgs, dc)?.GetNextInstances(1, activity, msgs, dc).FirstOrDefault();
+            var schedule = activity.GetSchedule(msgs, dc);
+
+            if (schedule.IsNotEmpty())
+            {
+                if (schedule.IsOngoing)
+                    return schedule.GetNextInstances(1, activity, msgs, dc).FirstOrDefault(); 
+
+                return schedule.GetInstances(msgs: msgs, dc: dc).FirstOrDefault()?.StartDateTime;
+            }
+
+            return null;
         }
 
         /// <summary>
