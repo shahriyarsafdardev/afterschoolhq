@@ -759,7 +759,7 @@ namespace AfterSchoolLibrary.Helpers
                         checkoutObject.Coupon.DoesApplyToRegistrationFee())
                     {
                         //for now lets not apply coupon and just get the value of total cost. (to show proper cost per item in email)
-                        var amountCC = checkoutObject.GetTotalCostToPurchaseTodayWithFees(applyCoupon: false, msgs: msgs, dc: dc);                        
+                        var amountCC = checkoutObject.GetRegistrationCostWithFeeAndCoupon(applyCoupon: false, msgs: msgs, dc: dc);                        
                         var couponValueCC = checkoutObject.CouponValue(msgs,dc);
                         
                         cost = amountCC.ToCurrency();
@@ -797,7 +797,7 @@ namespace AfterSchoolLibrary.Helpers
                     }
                     else
                     {
-                        cost = (checkoutObject.GetTotalCostToPurchaseTodayWithConvenienceFeeAndQuantity(msgs, dc)).ToCurrency();                        
+                        cost = (checkoutObject.GetTotalCostToPurchaseTodayWithConvenienceFee(msgs, dc)).ToCurrency();                        
                         additionalDetails = "registration fee";
 
                         // add registration fee row
@@ -816,7 +816,7 @@ namespace AfterSchoolLibrary.Helpers
                                         msgs);                        
                     }
 
-                    ccFee = (checkoutObject.GetTotalCreditCardFeesTodayWithClassQuantity(msgs, dc)).ToCurrency();
+                    ccFee = (checkoutObject.GetTotalCreditCardFeesToday(msgs, dc)).ToCurrency();
                     showTable = true;
                 }
             }
