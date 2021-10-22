@@ -14,7 +14,7 @@ namespace AfterSchoolLibrary.Models
     public class Database
     {
 		#region "ClassGenerator"
-		public static DatabaseCredentials ProductionCredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
+		public static DatabaseCredentials ProductionCredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }		
 		public static DatabaseCredentials LocalCredentials { get { return new DatabaseCredentials("localhost", "AfterSchool", "AfterSchoolUser", "Nj8Ed$wpLfJ"); } }
 		public static DatabaseCredentials CICredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
 		public static DatabaseCredentials QACredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
@@ -36,6 +36,7 @@ namespace AfterSchoolLibrary.Models
 			ObjectTag.Create(dc);
 			ActivitySchedule.Create(dc);
 			ActivityInstance.Create(dc);
+			ActivityInstanceSeats.Create(dc);
 			Match.Create(dc);
 			ActivitySection.Create(dc);
 			ActivityGradeLevel.Create(dc);
@@ -123,6 +124,7 @@ namespace AfterSchoolLibrary.Models
 			ObjectTag.Alter(dc);
 			ActivitySchedule.Alter(dc);
 			ActivityInstance.Alter(dc);
+			ActivityInstanceSeats.Alter(dc);
 			Match.Alter(dc);
 			ActivitySection.Alter(dc);
 			ActivityGradeLevel.Alter(dc);
@@ -221,6 +223,7 @@ namespace AfterSchoolLibrary.Models
 			Activity.Update(new Hashtable(){{"HidePreciseLocation",false}}, new Hashtable(){{"HidePreciseLocation", DBNull.Value}}, Activity.ObjectMap, dc);
 			Activity.Update(new Hashtable(){{"RegistrationFinalized",false}}, new Hashtable(){{"RegistrationFinalized", DBNull.Value}}, Activity.ObjectMap, dc);
 			Activity.Update(new Hashtable(){{"IsConvenienceFeeTakenOutOfCost",false}}, new Hashtable(){{"IsConvenienceFeeTakenOutOfCost", DBNull.Value}}, Activity.ObjectMap, dc);
+			Activity.Update(new Hashtable(){{"CostFrequencyTypeId",0}}, new Hashtable(){{"CostFrequencyTypeId", DBNull.Value}}, Activity.ObjectMap, dc);
 			Location.Update(new Hashtable(){{"IsDefault",false}}, new Hashtable(){{"IsDefault", DBNull.Value}}, Location.ObjectMap, dc);
 			Location.Update(new Hashtable(){{"LocationTypeId",0}}, new Hashtable(){{"LocationTypeId", DBNull.Value}}, Location.ObjectMap, dc);
 			Location.Update(new Hashtable(){{"IsTest",false}}, new Hashtable(){{"IsTest", DBNull.Value}}, Location.ObjectMap, dc);
@@ -314,6 +317,7 @@ namespace AfterSchoolLibrary.Models
 			FormQuestion.Update(new Hashtable(){{"IsAnswerDescriptionEnabled",false}}, new Hashtable(){{"IsAnswerDescriptionEnabled", DBNull.Value}}, FormQuestion.ObjectMap, dc);
 			FormQuestionGroup.Update(new Hashtable(){{"RegistrantTypeId",0}}, new Hashtable(){{"RegistrantTypeId", DBNull.Value}}, FormQuestionGroup.ObjectMap, dc);
 			FormQuestionGroup.Update(new Hashtable(){{"QuestionGroupDataTypeId",0}}, new Hashtable(){{"QuestionGroupDataTypeId", DBNull.Value}}, FormQuestionGroup.ObjectMap, dc);
+			FormQuestionGroup.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, FormQuestionGroup.ObjectMap, dc);
 			FormQuestionAnswer.Update(new Hashtable(){{"QuestionDataTypeId",0}}, new Hashtable(){{"QuestionDataTypeId", DBNull.Value}}, FormQuestionAnswer.ObjectMap, dc);
 			Registration.Update(new Hashtable(){{"PaymentTypeId",0}}, new Hashtable(){{"PaymentTypeId", DBNull.Value}}, Registration.ObjectMap, dc);
 			Registration.Update(new Hashtable(){{"CompletionStatusId",0}}, new Hashtable(){{"CompletionStatusId", DBNull.Value}}, Registration.ObjectMap, dc);
@@ -434,6 +438,9 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityInstance_ActivityGroupId ON [ActivityInstance] (ActivityGroupId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityInstance_ActivityScheduleId ON [ActivityInstance] (ActivityScheduleId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityInstance_ActivityScheduleId_InstanceTypeId ON [ActivityInstance] (ActivityScheduleId,InstanceTypeId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityInstanceSeats_RegistrantActivityId ON [ActivityInstanceSeats] (RegistrantActivityId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityInstanceSeats_ActivityInstanceId ON [ActivityInstanceSeats] (ActivityInstanceId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityInstanceSeats_ActivityInstanceId_RegistrantActivityId ON [ActivityInstanceSeats] (RegistrantActivityId,ActivityInstanceId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Match_TeamId ON [Match] (TeamId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Match_ActivityInstanceId ON [Match] (ActivityInstanceId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Match_ActivityInstanceId_TeamId ON [Match] (TeamId,ActivityInstanceId)"));

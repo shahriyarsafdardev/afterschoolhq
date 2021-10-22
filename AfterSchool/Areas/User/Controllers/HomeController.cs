@@ -53,7 +53,7 @@ namespace AfterSchool.Areas.User.Controllers
                     var account = submittedRecord.GetAccount(msgs);
 
                     ras.ForEach(ra => {
-                        var instances = ra.GetSchedule(msgs)?.GetInstances(msgs: msgs);
+                        var instances = ra.GetSchedule(msgs)?.GetInSessionInstances(msgs: msgs);
                         if (instances.IsNotEmpty())
                             activityInstances.AddRange(instances.Select(instance => (
                                 instance, 

@@ -61,6 +61,7 @@ namespace AfterSchoolLibrary.Models
         public int? SeatsTaken { get; set; }
         public bool HidePreciseLocation { get; set; }
         public bool IsPublished { get; set; }
+        public int? RegistrationCutoffHours { get; set; }
 
         public ParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -131,6 +132,7 @@ namespace AfterSchoolLibrary.Models
             AgeStart = activity.AgeStart;
             AgeEnd = activity.AgeEnd;
             IsPublished = activity.IsPublished;
+            RegistrationCutoffHours = activity.RegistrationCutoffHours;
 
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {
@@ -148,7 +150,12 @@ namespace AfterSchoolLibrary.Models
                 SeatsTaken = activity.GetSeatsTaken(msgs, dc);
                 Schedule = activity.GetSchedule(msgs, dc);
                 Location = activity.GetLocation(msgs, dc);
-                SeatsRemaining = activity.GetSeatsRemaining(msgs, dc);
+
+                if (CanRegisterPerClass)
+                    SeatsRemaining = activity.GetSeatsRemainingForNextDate(msgs, dc);
+                else
+                    SeatsRemaining = activity.GetSeatsRemaining(msgs, dc);
+
                 WaitingListSeatsRemaining = activity.GetWaitingListSeatsRemaining(msgs, dc);
                 RegistrationPeriod = activity.GetActiveRegistrationPeriod(msgs, dc);
                 Form = activity.GetActiveActivityForm(msgs, dc)?.GetForm(msgs, dc);
@@ -294,8 +301,15 @@ namespace AfterSchoolLibrary.Models
             get
             {
                 return Provider ?? OwnerAccount;
+            }            
+        }
+
+        public bool CanRegisterPerClass
+        {
+            get
+            {
+                return this.IsActivity() && this.GetActivity().CostFrequencyTypeId == ActivityCostFrequencyType.PerClass;
             }
-            
         }
 
         public string GetHomePageUrl(bool isAfterSchool = true)
@@ -331,6 +345,11 @@ namespace AfterSchoolLibrary.Models
         public string GetRegistrationPageUrl(bool isAfterSchool = true)
         {
             return $"{GetHomePageUrl(isAfterSchool)}/register";
+        }
+
+        public string GetActivityDateSelectionUrl(bool isAfterSchool = true)
+        {
+            return $"{GetHomePageUrl(isAfterSchool)}/selectdates";
         }
 
         public string GetInterestedPageUrl(bool isAfterSchool = true)
@@ -563,11 +582,12 @@ namespace AfterSchoolLibrary.Models
                     MaxGradeId = gradeLevels.Last().ID;
 
                 GradeLevel registrantGradeLevel = null;
+
                 if (Helpers.Utilities.IsAlreadyJsonString(registrantGradeLevelAnswer.Text))
                 {
                     var data = Helpers.Utilities.GetKeyValuePairs(registrantGradeLevelAnswer.Text);
-                    var registrantGradeLevelAnswerText = data.First().key.ToLower().Trim();
-                    registrantGradeLevel = gradeLevels.Where(m => m.Name.ToLower() == data.First().key.ToLower().Trim()).FirstOrDefault();
+                    var registrantGradeLevelAnswerText = data.First().value.ToLower().Trim();
+                    registrantGradeLevel = gradeLevels.FirstOrDefault(gradeLevel => gradeLevel.Abbreviation.IsSameAs(registrantGradeLevelAnswerText) || (registrantGradeLevelAnswerText.MaxChars(gradeLevel.Abbreviation.Length) == gradeLevel.Abbreviation));
                 }
                 else if (registrantGradeLevelAnswer.IsNotEmpty())
                     registrantGradeLevel = gradeLevels.FirstOrDefault(gradeLevel => gradeLevel.Abbreviation.IsSameAs(registrantGradeLevelAnswer.Text) || (registrantGradeLevelAnswer.Text.MaxChars(gradeLevel.Abbreviation.Length) == gradeLevel.Abbreviation));
@@ -963,7 +983,7 @@ namespace AfterSchoolLibrary.Models
 
         #endregion
 
-        public decimal GetCheckoutCostWithConvenienceFee()
+        public decimal GetCheckoutCostWithConvenienceFee(int quantity = 1)
         {
             if (this.PostPayPlans.IsNotEmpty() && this.PostPayPlans.Any())
                 return GetPostPayCheckoutCostWithConvenienceFee();
@@ -975,43 +995,43 @@ namespace AfterSchoolLibrary.Models
                     var activity = this.GetActivity();
                 
                     if (activity.IsNotEmpty())
-                        return Cost.Value
-                            + (activity.IsConvenienceFeeTakenOutOfCost ? 0 : GetConvenienceFee());
+                        return (Cost.Value
+                            + (activity.IsConvenienceFeeTakenOutOfCost ? 0 : GetConvenienceFee())) * quantity;
                 }
-                return Cost.Value + GetConvenienceFee();
+                return (Cost.Value + GetConvenienceFee()) * quantity;
             }
 
             return 0;
         }
 
-        public decimal GetCheckoutTotalCost()
+        public decimal GetCheckoutTotalCost(int quantity = 1)
         {
             if (this.Cost.HasValue)
-                return this.GetCheckoutCostWithConvenienceFee() + GetCreditCardFee();
+                return this.GetCheckoutCostWithConvenienceFee(quantity) + GetCreditCardFee(quantity);
 
             return 0;
         }
 
-        public decimal GetCreditCardFee()
+        public decimal GetCreditCardFee(int quantity = 1)
         {
             if (Cost.HasValue)
                 return new FeeCalculationObject(
                                 Cost.Value,
                                 PaymentAccount,
                                 this)
-                            .GetCreditCardFee();
+                            .GetCreditCardFee() * quantity;
 
             return 0;
         }
 
-        public decimal GetConvenienceFee()
+        public decimal GetConvenienceFee(int quantity = 1)
         {
             if (Cost.HasValue)
                 return new FeeCalculationObject(
                                 Cost.Value,
                                 OwnerAccount,
                                 this)
-                            .GetConvenienceFee();
+                            .GetConvenienceFee() * quantity;
 
             return 0;
         }
