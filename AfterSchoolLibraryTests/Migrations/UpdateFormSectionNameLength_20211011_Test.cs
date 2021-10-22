@@ -38,7 +38,7 @@ namespace AfterSchoolLibraryTests.Migrations
                 AfterSchoolLibrary.Helpers.Utilities.AdditionalData(dc);
 
                 // Act                   
-                var formQuestionGroup = FormQuestionGroupFactory.Create(ProviderForm.ID.Value, true, msgs, dc);
+                var formQuestionGroup = FormQuestionGroupFactory.Create(ProviderForm.ID.Value, msgs, dc);
                 formQuestionGroup.Name = "This is a really long Name for a Form Question Group Name it has so many characters we dont know what to do with all of them anymore please help";
                 msgs.AddRange(formQuestionGroup.Save(dc));
                 
@@ -65,7 +65,7 @@ namespace AfterSchoolLibraryTests.Migrations
 
                 // Act
                 AfterSchoolLibrary.Migrations.UpdateFormSectionNameLength_20211011.Do(msgs, dc);
-                var formQuestionGroup = FormQuestionGroupFactory.Create(ProviderForm.ID.Value, true, msgs, dc);
+                var formQuestionGroup = FormQuestionGroupFactory.Create(ProviderForm.ID.Value, msgs, dc);
                 formQuestionGroup.Name = "This is a really long Name for a Form Question Group Name it has so many characters we dont know what to do with all of them anymore please help";
                 msgs.AddRange(formQuestionGroup.Save(dc));
             
