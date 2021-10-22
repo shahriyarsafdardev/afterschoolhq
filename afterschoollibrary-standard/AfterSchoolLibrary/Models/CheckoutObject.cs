@@ -160,13 +160,11 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        public bool ShouldApplyCoupon { get; set; } = true;
-
         public bool IsCouponApplied
         {
             get
             {
-                return Coupon.IsNotEmpty() && Coupon.ID.IsNotEmpty() && Coupon.DoesApplyToRegistrationFee() && ShouldApplyCoupon;
+                return Coupon.IsNotEmpty() && Coupon.ID.IsNotEmpty() && Coupon.DoesApplyToRegistrationFee();
             }
         }
 
@@ -616,9 +614,6 @@ namespace AfterSchoolLibrary.Models
                 totalAHQFees += PaymentTypeFeeOverrideAmount.Value;
             else
                 totalAHQFees += GetTotalCreditCardFeesToday(msgs, dc);
-            
-            if (IsCouponApplied)
-                return totalAHQFees;
 
             return totalAHQFees;
         }
