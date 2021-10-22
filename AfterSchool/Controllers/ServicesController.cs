@@ -701,7 +701,7 @@ namespace AfterSchool.Controllers
             var amount = participationObject.GetCheckoutCostWithConvenienceFee(quantity);
             var ccFee = participationObject.GetCreditCardFee(quantity);
 
-            // These amounts are for preparing UI when coupon is not applied or invalid
+            // this amounts are for preparing UI when coupon is not applied or invalid
             var calculatedAmountACH = amount;            
             var calculatedAmountCC = amount + ccFee;
             var calculatedCCFee = ccFee;
@@ -718,14 +718,6 @@ namespace AfterSchool.Controllers
                 calculatedAmountCC = calculatedAmountACH + ccFee;
                 calculatedCCFee = ccFee;
                 discountString = coupon.GetDiscountString();
-
-                //var discountedValue = coupon.GetDiscountedValue(amount);
-                //var discountedFeeCalcObject = new FeeCalculationObject(discountedValue, participationObject.OwnerAccount, msgs);
-
-                //calculatedAmountACH = discountedFeeCalcObject.GetFinalTotalCostForPostPay(PaymentType.ACH);
-                //discountString = coupon.GetDiscountString();                
-                //calculatedAmountCC = discountedFeeCalcObject.GetFinalTotalCostForPostPay(PaymentType.CreditCard);
-                //calculatedCCFee = discountedFeeCalcObject.GetCreditCardFee();
             }
 
             if (paymentPlan.IsNotEmpty())
