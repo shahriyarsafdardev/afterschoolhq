@@ -310,18 +310,39 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 if (!isStripeInvoiceTransferData && msgs.HasNoErrors())
                     checkoutObject.Transaction.CreateStripeTransfer(WebUser.Load(1, msgs), msgs);
 
-                if (amountRefunded > 0)
+                if (amountRefunded > 0 && msgs.HasNoErrors())
                 {
                     msgs.Add($"Partial Refund: {amountRefunded}", MessageType.Notice);
-                    //var refunds = StripeHelper.GetRefunds(chargeId, msgs);
-                    //refunds.ForEach(refund =>
-                    //{
-                    //    check if transaction exists for refund
-                    //   var transaction = Transaction.LoadByStripeChargeOrRefundId(refund.Id, msgs);
+                    
+                    var stripeRefunds = StripeHelper.GetRefunds(chargeId, msgs);
+                    stripeRefunds.ForEach(stripeRefund =>
+                    {
+                        if (stripeRefund.TransferReversal.IsEmpty())
+                        {
+                            // NOTE: check if refund has a transfer, not sure how/if to handle
+                        }
+                        // check if transaction exists for refund
+                        var transaction = Transaction.LoadByStripeChargeOrRefundId(stripeRefund.Id, msgs);
 
-                    //    if (transaction.IsEmpty())
-                    //            transaction.ManualRefund
-                    //});
+                        // if no refund record exists in our db, create it from the transaction added to the checkoutObject
+                        // NOTE: not sure how to handle fees on partial refunds??
+                        if (transaction.IsEmpty())
+                        {
+                            transaction = checkoutObject.Transaction;
+                            transaction.CreateNewRefund(
+                                stripeRefund.Amount,
+                                0,
+                                0,
+                                stripeRefund.Id,
+                                TransactionType.Refund,
+                                transaction.PaymentTypeId,
+                                transaction.PaymentSourceTypeId,
+                                WebUser.Load(1, msgs),
+                                msgs
+                                );
+                        }
+
+                    });
                 }
             } else
             {
