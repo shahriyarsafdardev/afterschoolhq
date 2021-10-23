@@ -199,7 +199,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             var stripeSubscriptionId = stripeInvoice.SubscriptionId;
             var chargeId = stripeInvoice.ChargeId;
             var rsp = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(stripeSubscriptionId, msgs);
-
+            
             if (rsp.IsEmpty())
             {
                 msgs.Add($"Ignoring - Registrant Subscription Plan not found - Stripe Sub ID {stripeSubscriptionId}", MessageType.Notice);
@@ -301,6 +301,10 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             if (charge.AmountRefunded == 0)
                 billingAccount.ProcessSubscriptionPlanPayment(checkoutObject, plan, rsp, msgs);
 
+
+            // need to create transfer if there wasnt one originally, use webuser
+            if (!isStripeInvoiceTransferData && msgs.HasNoErrors())
+                checkoutObject.Transaction.CreateStripeTransfer(WebUser.Load(1, msgs), msgs);
 
             if (msgs.HasErrors())
                 return Return500(msgs);
