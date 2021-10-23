@@ -244,8 +244,10 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 return ReturnOK(msgs);
             }
 
-            // send payment succeeded email
-             purchasingAccount.SendSubscriptionPaymentSucceeded(rsp, plan);
+            // send payment succeeded email, unless payment was made before today (for previously failed webhooks)
+            var wasPaidToday = (bool)stripeInvoice.StatusTransitions?.PaidAt.IsNotEmpty() && stripeInvoice.StatusTransitions.PaidAt.Value.Date >= DateTime.Today.Date;
+            if (wasPaidToday)
+                purchasingAccount.SendSubscriptionPaymentSucceeded(rsp, plan);
 
             AfterSchoolLibrary.Models.Account convenienceFeePayer;
             AfterSchoolLibrary.Models.Account transactionFeePayer;
@@ -295,7 +297,10 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 CreditCardFeePayer = transactionFeePayer,
             };
 
-            billingAccount.ProcessSubscriptionPlanPayment(checkoutObject, plan, rsp, msgs);
+            var charge = AfterSchoolLibrary.Billing.StripeHelper.GetCharge(stripeInvoice.ChargeId, msgs);
+            if (charge.AmountRefunded == 0)
+                billingAccount.ProcessSubscriptionPlanPayment(checkoutObject, plan, rsp, msgs);
+
 
             // need to create transfer if there wasnt one originally, use webuser
             if (!isStripeInvoiceTransferData && msgs.HasNoErrors())
