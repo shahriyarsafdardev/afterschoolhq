@@ -9,12 +9,12 @@
 
 <script type="text/javascript">
     var featureId;
-    function showUpgradeMyPlan(name, id, preventClose = false) {
+    function showUpgradeMyPlan(name, id, message='', preventClose = false) {
         $('#app-body').addClass('overlay')
         $('#upgrade-my-plan').fadeIn();
 
         if (name)
-            $('.gain-access').html('Upgrade to ' + `${name}` +' to access this feature. <a href="#" class="btn btn-default btn-upgrade-plan btn-lg" style="font-family: Montserrat, sans-serif" onclick="return loadUpgradePage()">Upgrade My Plan</a>');
+            $('.gain-access').html(message + 'Upgrade to ' + `${name}` +' to access this feature. <a href="#" class="btn btn-default btn-upgrade-plan btn-lg" style="font-family: Montserrat, sans-serif" onclick="return loadUpgradePage()">Upgrade My Plan</a>');
   
         if(id)
             featureId = id;
