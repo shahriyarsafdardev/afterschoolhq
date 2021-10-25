@@ -322,25 +322,24 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                             // NOTE: check if refund has a transfer, not sure how/if to handle
                         }
                         // check if transaction exists for refund
-                        var transaction = Transaction.LoadByStripeChargeOrRefundId(stripeRefund.Id, msgs);
+                        var refundOriginalTransaction = Transaction.LoadByStripeChargeOrRefundId(stripeRefund.Id, msgs);
 
                         // if no refund record exists in our db, create it from the transaction added to the checkoutObject
                         // NOTE: not sure how to handle fees on partial refunds??
-                        if (transaction.IsEmpty())
-                        {
-                            transaction = checkoutObject.Transaction;
-                            transaction.CreateNewRefund(
-                                stripeRefund.Amount,
-                                0,
-                                0,
-                                stripeRefund.Id,
-                                TransactionType.Refund,
-                                transaction.PaymentTypeId,
-                                transaction.PaymentSourceTypeId,
-                                WebUser.Load(1, msgs),
-                                msgs
-                                );
-                        }
+                        if (refundOriginalTransaction.IsEmpty())
+                            refundOriginalTransaction = checkoutObject.Transaction;
+                        
+                        refundOriginalTransaction.CreateNewRefund(
+                            stripeRefund.Amount,
+                            0,
+                            0,
+                            stripeRefund.Id,
+                            TransactionType.Refund,
+                            refundOriginalTransaction.PaymentTypeId,
+                            refundOriginalTransaction.PaymentSourceTypeId,
+                            WebUser.Load(1, msgs),
+                            msgs
+                            );
 
                     });
                 }
