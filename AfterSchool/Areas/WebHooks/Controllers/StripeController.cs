@@ -322,21 +322,21 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                             // NOTE: check if refund has a transfer, not sure how/if to handle
                         }
                         // check if transaction exists for refund
-                        var transaction = Transaction.LoadByStripeChargeOrRefundId(stripeRefund.Id, msgs);
+                        var refundTransaction = Transaction.LoadByStripeChargeOrRefundId(stripeRefund.Id, msgs);
 
                         // if no refund record exists in our db, create it from the transaction added to the checkoutObject
                         // NOTE: not sure how to handle fees on partial refunds??
-                        if (transaction.IsEmpty())
+                        if (refundTransaction.IsEmpty())
                         {
-                            transaction = checkoutObject.Transaction;
-                            transaction.CreateNewRefund(
+                            refundTransaction = checkoutObject.Transaction;
+                            refundTransaction.CreateNewRefund(
                                 stripeRefund.Amount,
                                 0,
                                 0,
                                 stripeRefund.Id,
                                 TransactionType.Refund,
-                                transaction.PaymentTypeId,
-                                transaction.PaymentSourceTypeId,
+                                refundTransaction.PaymentTypeId,
+                                refundTransaction.PaymentSourceTypeId,
                                 WebUser.Load(1, msgs),
                                 msgs
                                 );
