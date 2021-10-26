@@ -1902,9 +1902,11 @@ namespace AfterSchool.Areas.Org.Controllers
 
             LoadEditSetupViewBag(activity, activityGroup, msgs);
 
-            ViewBag.Students = activity.GetRegistrantActivities(includeInvited: true, msgs).Where(a => a.AssignmentTypeId == RegistrationAssignmentType.Reserved || a.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingParentalConsent || a.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment).ToList();
-
+            var activityRegistrants = activity.GetRegistrantActivitiesForSurvey(msgs);            
+            
+            ViewBag.Students = activityRegistrants;
             ViewBag.Messages = msgs;
+
             return View(activity);
         }
 

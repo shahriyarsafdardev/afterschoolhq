@@ -569,8 +569,10 @@ namespace AfterSchoolLibrary.Models
                     var registrantGradeLevelAnswerText = data.First().key.ToLower().Trim();
                     registrantGradeLevel = gradeLevels.FirstOrDefault(gradeLevel => gradeLevel.Abbreviation.IsSameAs(registrantGradeLevelAnswerText) || (registrantGradeLevelAnswerText.MaxChars(gradeLevel.Abbreviation.Length) == gradeLevel.Abbreviation));
 
-
-                        //gradeLevels.Where(m => m.Name.ToLower() == data.First().key.ToLower().Trim()).FirstOrDefault();
+                    //in some cases like Pre-K, we have Abbreviation = P, above conditions will not work in that case.
+                    //so adding this one clause extra.
+                    if (registrantGradeLevel.IsEmpty())
+                        registrantGradeLevel = gradeLevels.Where(m => m.Name.IsSameAs(registrantGradeLevelAnswerText)).FirstOrDefault();
                 }
                 else if (registrantGradeLevelAnswer.IsNotEmpty())
                     registrantGradeLevel = gradeLevels.FirstOrDefault(gradeLevel => gradeLevel.Abbreviation.IsSameAs(registrantGradeLevelAnswer.Text) || (registrantGradeLevelAnswer.Text.MaxChars(gradeLevel.Abbreviation.Length) == gradeLevel.Abbreviation));
