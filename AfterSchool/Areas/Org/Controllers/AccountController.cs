@@ -912,7 +912,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             // save existing questions
                             questions.ForEach(question =>
                             {
-                                if (!question.IsLocked)
+                                if (!question.IsLocked && question.IsActive)
                                 {
                                     question.IsActive = Request.Params[$"active-{question.ID}"].IsBoolean();
                                     question.IsRequired = Request.Params[$"required-{question.ID}"].IsBoolean();
