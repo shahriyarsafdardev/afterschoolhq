@@ -936,7 +936,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             });
 
                             // save new questions
-                            if (Request.Form["newquestionsIds"].IsNumber() && Request.Form["newquestionsIds"].ToInteger() > 0)
+                            if ( Request.Form["newquestionsIds"].Length > 0)
                             {
                                 var questionIds = Request.Form["newquestionsIds"];
                                 var questionsList = questionIds.Split(',');
