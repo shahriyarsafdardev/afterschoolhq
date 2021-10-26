@@ -35,6 +35,7 @@ namespace AfterSchoolLibrary.Models
 		public DateTime? EndDateTime { get { return (DateTime?)MDV["EndDateTime"].Value; } set { MDV["EndDateTime"].Value = value; } }
 		public InstanceType InstanceTypeId { get { return (InstanceType)MDV["InstanceTypeId"].Value; } set { MDV["InstanceTypeId"].Value = value; } }
 		public int? LocationId { get { return (int?)MDV["LocationId"].Value; } set { MDV["LocationId"].Value = value; } }
+		public int? SeatsAvailable { get { return (int?)MDV["SeatsAvailable"].Value; } set { MDV["SeatsAvailable"].Value = value; } }
 		
 
         public ActivityInstance()
@@ -61,6 +62,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "EndDateTime", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "InstanceTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "LocationId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "SeatsAvailable", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -172,6 +174,10 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["LocationId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["SeatsAvailable"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -221,7 +227,18 @@ namespace AfterSchoolLibrary.Models
 
 		#region "UserDefined"
 
-        public DateRange GetDateRange()
+		public ActivityInstance(DateTime startDateTime, DateTime endDateTime)
+		{
+			this.Config(ObjectMap, DatabaseQuery, typeof(ActivityInstance).Name, "ID");
+			this.LoadObjectValues(ObjectMap);
+			this.Day = DayOfWeekASL.NotSet;
+			this.InstanceTypeId = InstanceType.NotSet;
+			this.StartDateTime = startDateTime;
+			this.EndDateTime = endDateTime;
+
+		}
+
+		public DateRange GetDateRange()
         {
             if (StartDateTime.HasValue && this.EndDateTime.HasValue)
                 return new DateRange(this.StartDateTime.Value, this.EndDateTime.Value);
@@ -269,18 +286,30 @@ namespace AfterSchoolLibrary.Models
             return this.GetMatches(msgs, dc)
                 .Select(match => Activity.Load(match.TeamId.Value, msgs, dc))
                 .ToList();
-        }
+		}
 
 		public static List<ActivityInstance> LoadByActivityScheduleIdByDateRange(int ActivityScheduleId, DateTime StartDateTime, DateTime EndDateTime, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ActivityScheduleId"], ActivityScheduleId);
+			dq.Criterias.Add(ObjectMap["StartDateTime"], StartDateTime, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+			dq.Criterias.Add(ObjectMap["EndDateTime"], EndDateTime, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
 
-			var sql = $@"
-				SELECT * FROM ActivityInstance WHERE ActivityScheduleId = {ActivityScheduleId} AND StartDateTime >= '{StartDateTime}' AND EndDateTime <= '{EndDateTime}'
-			";
+		public static ActivityInstance LoadByActivityScheduleIdByStartDate(int ActivityScheduleId, DateTime startDateTime, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ActivityScheduleId"], ActivityScheduleId);
+			dq.Criterias.Add(ObjectMap["StartDateTime"], startDateTime);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
 
-			return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		public static int GetCountByActivityScheduleId(int activityScheduleId, SystemMessages msgs = null, DatabaseConnection dc = null)
+		{
+			return ActivityInstance.GetCount(new Hashtable() { { "activityScheduleId", activityScheduleId } }, msgs, dc);
 		}
 
 

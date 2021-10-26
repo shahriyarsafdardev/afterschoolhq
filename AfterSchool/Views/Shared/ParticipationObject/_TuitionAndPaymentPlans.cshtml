@@ -14,12 +14,13 @@
     <ul>
         @if (!Model.IsRegistrationFree)
         {
-            <li>
-                1 payment of
-                @ParticipationObjectUI.PrintRegistrationFee(Model, displayCheckoutPrice)@(Model.PaymentPlans.Any() ? ", or " : "")
-            </li>
+        <li>
+            1 payment of
+             @ParticipationObjectUI.PrintRegistrationFee(Model, displayCheckoutPrice)
+            @* @ParticipationObjectUI.PrintRegistrationFee(Model, displayCheckoutPrice)@(Model.PaymentPlans.Any() ? ", or " : "")*@
+        </li>
         }
-        @foreach (var plan in Model.PaymentPlans)
+        @*@foreach (var plan in Model.PaymentPlans)
         {
             <li>
                 @plan.TotalPeriods payments of
@@ -27,7 +28,7 @@
                 each
                 @plan.BillingPeriodTypeId.ToString().ToLower()@(plan.ID != Model.PaymentPlans.Last().ID ? ", or " : "")
             </li>
-        }
+        }*@
     </ul>
 </p>
 

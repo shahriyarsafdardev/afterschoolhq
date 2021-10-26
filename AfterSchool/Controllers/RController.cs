@@ -416,6 +416,74 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
+        public ActionResult SelectDates(string accountname, string activitytype, string activityname, string reg)
+        {
+            if (isUnsupportedBrowser())
+                return RedirectUnsupportedBrowser();
+
+            var msgs = new SystemMessages();
+            var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
+            var canPublishActivity = false;
+            var accountProfile = account?.GetAccountProfile(msgs);
+
+            if (account.IsEmpty() || account.IsDeleted)
+                return HttpNotFound();
+
+            var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
+
+            if (activity.IsEmpty())
+                return HttpNotFound();
+
+            var participationObject = activity.GetParticipationObject(msgs);
+
+            ViewBag.Messages = msgs;
+            ViewBag.Account = account;
+            ViewBag.CanPublishActivity = canPublishActivity;
+            ViewBag.CanRegisterFor = true;
+            ViewBag.AccountProfile = accountProfile;
+
+            // LOG: Someone Viewed ParticipationObjectType ParticipationObjectName by Account AccountName
+            //SessionVariables.WebSession.LogActivity(
+            //    account: account,
+            //    actor: SessionVariables.CurrentUser,
+            //    actionType: WebSessionActionType.Viewed,
+            //    objectType: participationObject.GetWebSessionObjectType(),
+            //    objectId: participationObject.ObjectID.Value,
+            //    objectText: participationObject.Name,
+            //    indirectObjectType: ObjectType.Account,
+            //    indirectObjectId: participationObject.OwnerAccount.ID.Value,
+            //    indirectObjectText: participationObject.OwnerAccount.Name
+            //);
+
+            return View("ActivitySelectDates", participationObject);
+        }
+
+        [HttpPost]
+        public ActionResult SelectDates(string accountname, string activitytype, string activityname, string reg, string post)
+        {
+            if (isUnsupportedBrowser())
+                return RedirectUnsupportedBrowser();
+
+            var msgs = new SystemMessages();
+            var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
+
+            if (account.IsEmpty() || account.IsDeleted)
+                return HttpNotFound();
+
+            var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
+
+            if (activity.IsEmpty())
+                return HttpNotFound();
+
+            var participationObject = activity.GetParticipationObject(msgs);
+            var dateFields = Request.Params.Filter("date-");
+
+            var selectedDates = dateFields.Cast<string>().Select(x => dateFields[x]).Select(x => x.ToDateTime()).ToList();
+
+            return RedirectToRegistration(account, participationObject, reg, selectedDates, msgs);
+        }
+
+        [HttpGet]
         public ActionResult ActivitySession(string accountname, string sessionname, string invite, string decline)
         {
             if (isUnsupportedBrowser())
@@ -549,7 +617,7 @@ namespace AfterSchool.Controllers
 
             var participationObject = activity.GetParticipationObject(msgs);
 
-            return RedirectToRegistration(account, participationObject, reg, msgs);
+            return RedirectToRegistration(account, participationObject, reg, null, msgs);
         }
 
         [HttpGet]
@@ -593,7 +661,7 @@ namespace AfterSchool.Controllers
 
             var participationObject = session.GetParticipationObject(msgs);
 
-            return RedirectToRegistration(account, participationObject, reg, msgs);
+            return RedirectToRegistration(account, participationObject, reg, null, msgs);
         }
 
         [HttpGet]
@@ -695,10 +763,10 @@ namespace AfterSchool.Controllers
                 participationObject = activityGroup.GetParticipationObject(msgs);
             }
 
-            return RedirectToRegistration(account, participationObject, reg, msgs);
+            return RedirectToRegistration(account, participationObject, reg, null, msgs);
         }
 
-        private ActionResult RedirectToRegistration(Account account, ParticipationObject participationObject, string reg, SystemMessages msgs)
+        private ActionResult RedirectToRegistration(Account account, ParticipationObject participationObject, string reg, List<DateTime> selectedDates, SystemMessages msgs)
         {
             SetRegistrationStartPage(account);
 
@@ -711,7 +779,7 @@ namespace AfterSchool.Controllers
             if (SessionVariables.Cart.IsEmpty())
                 return Redirect(participationObject.GetHomePageUrl());
 
-            SessionVariables.Cart.AddCartItem(participationObject, msgs);
+            SessionVariables.Cart.AddCartItem(participationObject, selectedDates, msgs);
 
             if (reg.IsGuid())
                 SessionVariables.CurrentRegistrant = Registrant.LoadByUid(reg.ToGuid(), msgs);
@@ -755,7 +823,7 @@ namespace AfterSchool.Controllers
             if (SessionVariables.Cart.IsEmpty())
                 return Redirect(participationObject.GetHomePageUrl());
 
-            SessionVariables.Cart.AddCartItem(participationObject, msgs);
+            SessionVariables.Cart.AddCartItem(participationObject, null, msgs);
 
             return RedirectToAction("interested", "account", new { area = "", regaccount = account.Uid });
         }

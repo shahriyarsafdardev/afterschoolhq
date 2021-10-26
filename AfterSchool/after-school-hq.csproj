@@ -1835,6 +1835,7 @@
     <Content Include="Views\Shared\Registration\_BrowseParticipationObjectList.cshtml" />
     <Content Include="Views\Shared\Modals\_TransferModal.cshtml" />
     <Content Include="Views\Shared\Modals\_TransferModal-TransferButton.cshtml" />
+    <Content Include="Views\R\ActivitySelectDates.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
