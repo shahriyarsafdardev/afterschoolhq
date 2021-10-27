@@ -243,15 +243,6 @@ namespace AfterSchoolLibrary.Models
             return FormQuestion.GetCount(new Hashtable() { { "FormQuestionGroupId", this.ID.Value } }, msgs, dc);
         }
 
-        public static List<FormQuestionGroup> LoadActiveFormQuestionGroupByFormId(int FormId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-        {
-            var dq = DatabaseQuery;
-            dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["FormId"], FormId);
-            dq.Criterias.Add(ObjectMap["IsActive"], true);
-            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-        }
-
         public FormQuestionGroup Copy()
         {
             FormQuestionGroup newGroup = new FormQuestionGroup();

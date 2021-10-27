@@ -782,12 +782,13 @@ namespace AfterSchool.Areas.Org.Controllers
             var individualGroups = questionGroups
                 .Where(x => x.RegistrantTypeId == RegistrantType.Individual)
                 .OrderBy(x => x.DisplayOrder).ToList();
-            var organizationGroups = questionGroups
-                .Where(x => x.RegistrantTypeId == RegistrantType.Organization)
-                .OrderBy(x => x.DisplayOrder).ToList();
+            // NOTE: temporarily disable organization groups
+            //var organizationGroups = questionGroups
+            //    .Where(x => x.RegistrantTypeId == RegistrantType.Organization)
+            //    .OrderBy(x => x.DisplayOrder).ToList();
 
-            //temporarily disable organization groups
-            organizationGroups = new List<FormQuestionGroup>();
+            
+            var organizationGroups = new List<FormQuestionGroup>();
 
             //make sure only question groups with a setting of individual or organization are added to the final count
             questionGroups.Clear();
@@ -985,13 +986,12 @@ namespace AfterSchool.Areas.Org.Controllers
                     .Where(x => x.RegistrantTypeId == RegistrantType.Individual)
                     .OrderBy(x => x.DisplayOrder)
                     .ToList();
-                organizationGroups = questionGroups
-                    .Where(x => x.RegistrantTypeId == RegistrantType.Organization)
-                    .OrderBy(x => x.DisplayOrder)
-                    .ToList();
-
                 //temporarily disable organization groups
-                organizationGroups = new List<FormQuestionGroup>();
+                //organizationGroups = questionGroups
+                //    .Where(x => x.RegistrantTypeId == RegistrantType.Organization)
+                //    .OrderBy(x => x.DisplayOrder)
+                //    .ToList();
+
 
                 //make sure only question groups with a setting of individual or organization are added to the final count
                 questionGroups.Clear();
