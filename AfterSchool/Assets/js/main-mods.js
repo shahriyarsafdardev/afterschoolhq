@@ -291,6 +291,14 @@ var WebPage = {
     }
 }
 
+function ShowNotification(title, alertIcon, className, text) {
+    $.gritter.add({
+        title: '<i class="' + alertIcon + '"></i> ' + title,
+        class_name: "color " + className,
+        text: text
+    });
+}
+
 var Notifications = {
     showBar: function (options) {
 

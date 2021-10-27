@@ -343,29 +343,30 @@ else
                                     }
 
                                     @if (activity.AccountId == currentAccount.ID)
-                                    { 
+                                    {
                                         if (activityType == ActivityType.PermissionSlip)
                                         {
-	                                        if (managePermissionSlips && showPermissionSlipFields)
-	                                        {
-		                                        <button class="md-trigger btn btn-default btn-sm" data-modal="modal-copy-activity"
-				                                        onclick="ActivitySetup.setCopyActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("copy", "activity", new { id = activity.Uid.ToString(), isnew = 1 })')" @(needToUpgrade ? "disabled=\"disabled\"" : "")>
-			                                        <i class="s7-copy-file"></i> Copy
-		                                        </button>
-	                                        }
-	                                        else
-	                                        {
-		                                        <button class="md-trigger btn btn-default btn-sm" onclick="return showUpgradeMyPlan('@(managePermissionSlipsPackage.Name)',@(managePermissionSlipsPackage.ID), 'Your package limit has been reached. ')">
-			                                        <i class="s7-copy-file"></i> Copy
-		                                        </button>
-	                                        }
+                                            if (managePermissionSlips && showPermissionSlipFields)
+                                            {
+                                                <button class="md-trigger btn btn-default btn-sm" data-modal="modal-copy-activity"
+                                                        onclick="ActivitySetup.setCopyActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("copy", "activity", new { id = activity.Uid.ToString(), isnew = 1 })')" @(needToUpgrade ? "disabled=\"disabled\"" : "")>
+                                                    <i class="s7-copy-file"></i> Copy
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button class="md-trigger btn btn-default btn-sm showNotification" onclick="return showUpgradeMyPlan('@(managePermissionSlipsPackage.Name)',@(managePermissionSlipsPackage.ID))">
+                                                    <i class="s7-copy-file"></i> Copy
+                                                </button>
+                                                 
+                                            }
                                         }
                                         else
                                         {
-	                                        <button class="md-trigger btn btn-default btn-sm" data-modal="modal-copy-activity"
-		                                        onclick="ActivitySetup.setCopyActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("copy", "activity", new { id = activity.Uid.ToString(), isnew = 1 })')" @(needToUpgrade ? "disabled=\"disabled\"" : "")>
-		                                        <i class="s7-copy-file"></i> Copy
-	                                        </button>
+                                            <button class="md-trigger btn btn-default btn-sm" data-modal="modal-copy-activity"
+                                                    onclick="ActivitySetup.setCopyActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("copy", "activity", new { id = activity.Uid.ToString(), isnew = 1 })')" @(needToUpgrade ? "disabled=\"disabled\"" : "")>
+                                                <i class="s7-copy-file"></i> Copy
+                                            </button>
                                         }
                                     }
 
@@ -582,6 +583,11 @@ else
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         $('#registration-group').change(function () {
             location.href = '@Url.Action("index", "activity")?group=' + $(this).val();
+        });
+
+        $(document).on('click', '.showNotification', function () {
+
+            ShowNotification('Warning', 's7-close-circle', 'danger', 'Allowed numbers of slips has been fulfilled.');
         });
     });
 </script>
