@@ -771,25 +771,24 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult FormEdit(string id, string qg)
         {
             var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+            HandleTempMessages(msgs);
 
             if (id.IsEmpty())
                 return HttpNotFound();
 
-            var msgs = TempData["Messages"] as SystemMessages;
-            if (msgs.IsEmpty())
-                msgs = new SystemMessages();
-
             var form = currentAccount.GetForm(id.ToInteger(), msgs);
-            var questionGroups = form.GetActiveQuestionGroups(msgs);
+            var questionGroups = form.GetQuestionGroups(msgs);
             var individualGroups = questionGroups
                 .Where(x => x.RegistrantTypeId == RegistrantType.Individual)
                 .OrderBy(x => x.DisplayOrder).ToList();
-            var organizationGroups = questionGroups
-                .Where(x => x.RegistrantTypeId == RegistrantType.Organization)
-                .OrderBy(x => x.DisplayOrder).ToList();
+            // NOTE: temporarily disable organization groups
+            //var organizationGroups = questionGroups
+            //    .Where(x => x.RegistrantTypeId == RegistrantType.Organization)
+            //    .OrderBy(x => x.DisplayOrder).ToList();
 
-            //temporarily disable organization groups
-            organizationGroups = new List<FormQuestionGroup>();
+            
+            var organizationGroups = new List<FormQuestionGroup>();
 
             //make sure only question groups with a setting of individual or organization are added to the final count
             questionGroups.Clear();
@@ -890,7 +889,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                     QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
                                     RegistrantTypeId = RegistrantType.Individual,
                                     Name = Request.Params["name-0"],
-                                    IsActive = true
+                                    IsDeleted = false
                                 };
                                 amsgs.AddRange(questionGroup.Save(adc));
                                 questions = new List<FormQuestion>();
@@ -982,18 +981,17 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if ((FormType)formtype.ToInteger() != FormType.Survey)
             {
-                questionGroups = form.GetActiveQuestionGroups(msgs);
+                questionGroups = form.GetQuestionGroups(msgs);
                 individualGroups = questionGroups
                     .Where(x => x.RegistrantTypeId == RegistrantType.Individual)
                     .OrderBy(x => x.DisplayOrder)
                     .ToList();
-                organizationGroups = questionGroups
-                    .Where(x => x.RegistrantTypeId == RegistrantType.Organization)
-                    .OrderBy(x => x.DisplayOrder)
-                    .ToList();
-
                 //temporarily disable organization groups
-                organizationGroups = new List<FormQuestionGroup>();
+                //organizationGroups = questionGroups
+                //    .Where(x => x.RegistrantTypeId == RegistrantType.Organization)
+                //    .OrderBy(x => x.DisplayOrder)
+                //    .ToList();
+
 
                 //make sure only question groups with a setting of individual or organization are added to the final count
                 questionGroups.Clear();
@@ -1071,7 +1069,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 return HttpNotFound();
 
             var sectionToDelete = FormQuestionGroup.Load(id: id.ToInteger(), msgs: msgs);
-            sectionToDelete.IsActive = false;
+            sectionToDelete.IsDeleted = true;
             msgs.AddRange(sectionToDelete.Save());
 
             //lets inactive all the questions for this section, so later when retrieving questions, we don't have to check for removed sections

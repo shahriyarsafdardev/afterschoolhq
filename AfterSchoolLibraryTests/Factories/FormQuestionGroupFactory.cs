@@ -7,7 +7,7 @@ namespace AfterSchoolLibraryTests.Factories
 {
     public class FormQuestionGroupFactory
     {
-        public static FormQuestionGroup Create(int formId, bool isActive = true, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static FormQuestionGroup Create(int formId, bool isDeleted = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var obj = new FormQuestionGroup()
             {
@@ -20,7 +20,7 @@ namespace AfterSchoolLibraryTests.Factories
                 RegistrantTypeId = RegistrantType.Individual,
                 QuestionGroupDataTypeId = QuestionGroupDataType.ContactInformation,
                 DisplayOrder = 1,
-                IsActive = isActive
+                IsDeleted = isDeleted
             };
 
             msgs.AddRange(obj.Save(dc: dc));
@@ -40,7 +40,7 @@ namespace AfterSchoolLibraryTests.Factories
                 RegistrantTypeId = RegistrantType.Individual,
                 QuestionGroupDataTypeId = QuestionGroupDataType.ContactInformation,
                 DisplayOrder = 1,
-                IsActive = true
+                IsDeleted = false
             };
 
             msgs.AddRange(obj.Save(dc: dc));
