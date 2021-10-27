@@ -778,7 +778,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 return HttpNotFound();
 
             var form = currentAccount.GetForm(id.ToInteger(), msgs);
-            var questionGroups = form.GetQuestionGroups(form.ID.Value, msgs);
+            var questionGroups = form.GetQuestionGroups(msgs);
             var individualGroups = questionGroups
                 .Where(x => x.RegistrantTypeId == RegistrantType.Individual)
                 .OrderBy(x => x.DisplayOrder).ToList();
