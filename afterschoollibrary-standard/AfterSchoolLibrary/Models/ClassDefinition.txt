@@ -1977,6 +1977,16 @@ property: WebUserId, int?, Int
 [end]
 
 [begin]
+type: Class
+name: SurveyResponseRegistrant
+serializable: true
+description: Stores survey response id and registrant id
+inherits: BasicObjectWithModified
+property: SurveyResponseId, int?, Int
+property: MasterRegistrantId, int?, Int
+[end]
+
+[begin]
 type: Enum
 name: SurveyFeedbackStatus
 values: NotSet, New, InProgress, Completed

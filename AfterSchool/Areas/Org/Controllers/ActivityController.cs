@@ -2023,6 +2023,7 @@ namespace AfterSchool.Areas.Org.Controllers
                   {
                       BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, null, null));
                   }
+                  SurveyResponseRegistrantService.CreateSurveyResponseRegistrant(surveyResponse.ID.Value, getRegistrant.ID.Value, currentUserId, msgs);
               });
         }
         [HttpGet]
