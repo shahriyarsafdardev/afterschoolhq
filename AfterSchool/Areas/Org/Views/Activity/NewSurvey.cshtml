@@ -9,13 +9,18 @@
     var showManageForms = accountPackage.HasFeature(FeatureType.ManageForms);
     var showManageFormFields = forms.Count >= maxFormCount ? false : true;
 
-    var studentList = new List<SelectListItem>(); 
+    var studentList = new List<SelectListItem>();
     foreach (var student in (List<RegistrantActivity>)ViewBag.Students)
     {
-        studentList.Add(new SelectListItem {
-            Text = student.RegistrantName,
-            Value = student.RegistrantId.ToString()
-        });
+        var registrant = Registrant.Load(student.RegistrantId.Value);
+        if (registrant.IsMaster)
+        {
+            studentList.Add(new SelectListItem
+            {
+                Text = student.RegistrantName,
+                Value = registrant.ParentRegistrantId.ToString()
+            });
+        }
     }
 }
 <link href="~/Assets/css/survey.css" rel="stylesheet" />
