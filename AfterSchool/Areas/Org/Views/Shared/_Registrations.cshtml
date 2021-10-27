@@ -47,19 +47,22 @@
                 {
                     var editLink = Url.Action(editAction, editController, new { id = registration.Uid.ToString(), returnUrl });
                     var registrant = registration.ToRegistrant();
+                        <tr>
+                            <td>
+                                <a href="@editLink" class="btn btn-default btn-sm"><i class="icon icon-left s7-user"></i> View Details</a>
+                            </td>
+                            <td class="text-nowrap">
+                                @if (registrant.Name.IsNotEmpty())
+                                {
+                                <a href="@editLink">@(isTechSupport ? registrant.GetFirstNameLastInitial() : registrant.Name)</a>
+                                }
+                            </td>
+                            <td class="text-nowrap">
+                                <a href="mailto:@registration.RegistrantEmail">@registration.RegistrantEmail</a>
+                            </td>
+                            <td class="text-nowrap">@account.ConvertToAccountTimeZone(registration.CreateDate.Value).ToShortDateTimeString()</td>
+                        </tr>
 
-                    <tr>
-                        <td>
-                            <a href="@editLink" class="btn btn-default btn-sm"><i class="icon icon-left s7-user"></i> View Details</a>
-                        </td>
-                        <td class="text-nowrap">
-                            <a href="@editLink">@(isTechSupport ? registrant.GetFirstNameLastInitial() : registrant.Name)</a>
-                        </td>
-                        <td class="text-nowrap">
-                            <a href="mailto:@registration.RegistrantEmail">@registration.RegistrantEmail</a>
-                        </td>
-                        <td class="text-nowrap">@account.ConvertToAccountTimeZone(registration.CreateDate.Value).ToShortDateTimeString()</td>
-                    </tr>
                 }
             }
             else

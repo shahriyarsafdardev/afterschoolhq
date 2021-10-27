@@ -178,6 +178,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 activity = currentAccount.GetDefaultNewActivity();
                 activity.RegistrationModeId = RegistrationMode.Register;
+                activity.CostFrequencyTypeId = ActivityCostFrequencyType.PerActivity;
 
                 if (type.IsNotEmpty() && type.IsNumber())
                     activity.ActivityTypeId = type.ToInteger().ToEnum<ActivityType>();
@@ -200,7 +201,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type, string inviteonly, string minseatsrequired, string isAdvanceSettingEnabled)
+        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type, string inviteonly, string minseatsrequired, string isAdvanceSettingEnabled, string costfrequencytype, string cutoffhours)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -265,7 +266,9 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "gradeend", activity.IsNotEmpty() ? activity.GradeLevelEnd :defaultActivity.GradeLevelEnd },
                     { "genderrestrictions", activity.IsNotEmpty() && activity.GenderRestriction.IsNotEmpty() ? (int)activity.GenderRestriction :(int)defaultActivity.GenderRestriction },
                     { "agestart", activity.IsNotEmpty() ? activity.AgeStart : defaultActivity.AgeStart },
-                    { "ageend",activity.IsNotEmpty() ? activity.AgeEnd : defaultActivity.AgeEnd }
+                    { "ageend",activity.IsNotEmpty() ? activity.AgeEnd : defaultActivity.AgeEnd },
+                    { "costfrequencytype", costfrequencytype },
+                    { "cutoffhours", cutoffhours },
                 };
 
                 if (activity.IsNotEmpty())
@@ -758,7 +761,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 schedule = activity.GetSchedule();
 
             if (schedule.IsEmpty())
-                schedule = ActivitySchedule.GetNewDefaultSchedule(activity.GetActiveRegistrationPeriod(msgs));
+                schedule = ActivitySchedule.GetNewDefaultSchedule(activity, msgs);
 
             ViewBag.Schedule = schedule;
             ViewBag.ShowScheduleList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups, msgs);
@@ -781,7 +784,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditSchedule(string id, string cmd, string schedule, string scheduledetails, string requiresalldays, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string isongoing, string hasschedule)
         {
             var msgs = new SystemMessages();
-            var inSessionDates = new List<DateRange>();
+            var inSessionDates = new List<ActivityInstance>();
             var currentUser = SessionVariables.CurrentUser;
             var currentAccount = SessionVariables.CurrentAccount;
             var currentAccountPackage = SessionVariables.AccountPackage;
@@ -791,6 +794,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             if (activity.IsNotEmpty())
             {
+                if (activity.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass && (!hasschedule.IsBoolean() || !hasschedule.ToBoolean()))
+                    msgs.Add("Schedule is required", MessageType.UserError);
+
                 if (hasschedule.IsBoolean() && hasschedule.ToBoolean())
                 {
                     var filteredParams = Request.Params.Filter("schedulerepeat-");
@@ -801,12 +807,14 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     if (msgs.HasNoErrors())
                     {
-                        inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
+                        if (!isongoing.IsBoolean())
+                            inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
+
                         outOfSessionDates = ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
 
-                        inSessionDates.ForEach(dateRange =>
+                        inSessionDates.ForEach(instance =>
                         {
-                            if (dateRange.StartDate > dateRange.EndDate)
+                            if (instance.StartDateTime > instance.EndDateTime)
                                 msgs.Add("Please ensure start dates and end times are earlier than the corresponding end date and end times", MessageType.UserError);
                         });
                     }
@@ -887,7 +895,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
                 sched = activity.GetSchedule(msgs: msgs);
             else
-                sched = ActivitySchedule.GetNewDefaultSchedule(inSessionDates);
+                sched = ActivitySchedule.GetNewDefaultSchedule(inSessionDates.Select(item => item.ToDateRange()).ToList());
 
             ViewBag.Account = currentAccount;
             ViewBag.AccountPackage = currentAccountPackage;
@@ -920,7 +928,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (ViewBag.Schedule == null)
-                ViewBag.Schedule = ActivitySchedule.GetNewDefaultSchedule(inSessionDates);
+                ViewBag.Schedule = ActivitySchedule.GetNewDefaultSchedule(inSessionDates.Select(item => item.ToDateRange()).ToList());
 
             ViewBag.Messages = msgs;
             ViewBag.ActiveMenu = "EditSchedule";
@@ -1079,7 +1087,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd,
             string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string isongoingsubscription, string subscriptionPlanPeriodNumber, string subscriptionPaymentStartType, string subscriptionStartDate, string subscriptionEndDate,
             string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype, string splitcostevenly, string regfeedownpayment,
-            string haspostpayplan, string postpaycost, string isparentpricepostpay, string isparentpricecost, string isparentpricepaymentplan, string isparentpricesubscription, string prepaidperiodspostpay, string postpayplanperiod)
+            string haspostpayplan, string postpaycost, string isparentpricepostpay, string isparentpricecost, string isparentpricepaymentplan, string isparentpricesubscription, string prepaidperiodspostpay, string postpayplanperiod, string cutoffhours)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -1502,21 +1510,45 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult TrackAttendance(string id, string att, string actinst)
         {
             var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
             var attendanceId = att.IsNumber() ? att.ToInteger() : new int?();
             var activityInstanceId = actinst.IsNumber() ? actinst.ToInteger() : new int?();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
-            var attendance = activity.GetOrCreateNewAttendance(attendanceId, activityInstanceId, SessionVariables.CurrentUser, msgs);
+            var attendance = activity.GetOrCreateNewAttendance(attendanceId, activityInstanceId, currentUser, msgs);
+            var activitySchedule = activity.GetSchedule(msgs);
 
             if (attendance.IsEmpty())
                 return RedirectToAction("Attendance", new { id, msg = "Error: No classes have taken place yet" });
 
-            ViewBag.AttendanceRegistrants = attendance.GetAttendanceRegistrants(msgs);
-            ViewBag.Schedule = activity.GetSchedule(msgs);
+            var attendanceRegistrants = GetAttendanceRegistrants(attendance, activity, activitySchedule, msgs);
+
+            ViewBag.AttendanceRegistrants = attendanceRegistrants;
+            ViewBag.Schedule = activitySchedule;
             ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
             ViewBag.RegistrantActivities = activity.GetRegistrantActivities(msgs);
             ViewBag.Messages = msgs;
             return View(attendance);
+        }
+
+        private List<AttendanceRegistrant> GetAttendanceRegistrants(Attendance attendance, Activity activity, ActivitySchedule schedule, SystemMessages msgs)
+        {
+            var attendanceRegistrants = attendance.GetAttendanceRegistrants(msgs);
+
+            if (activity.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
+            {
+                var arsToRemove = new List<AttendanceRegistrant>();
+                attendanceRegistrants.ForEach(ar => {
+                    var ra = activity.GetRegistrantActivity(ar.RegistrantId.Value, msgs);
+                    var instance = schedule.GetInSessionInstanceByDate(attendance.Date.Value, msgs);
+                    if (ra.GetInstanceSeats(instance, msgs).IsEmpty())
+                        arsToRemove.Add(ar);
+                });
+
+                arsToRemove.ForEach(ar => attendanceRegistrants.Remove(ar));
+            }
+
+            return attendanceRegistrants;
         }
 
         [HttpPost]
@@ -1527,6 +1559,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var presentStudents = new List<int>();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var attendance = AfterSchoolLibrary.Models.Attendance.Load(att.ToInteger(), msgs);
+            var activitySchedule = activity.GetSchedule(msgs);
 
             attendance.GetAttendanceRegistrants(msgs).ForEach(attendanceRegistrant =>
             {
@@ -1537,8 +1570,8 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
                 attendance.UpdateAttendance(attendance.ActivityInstanceId.Value, presentStudents, SessionVariables.CurrentUser, msgs);
 
-            ViewBag.AttendanceRegistrants = attendance.GetAttendanceRegistrants(msgs);
-            ViewBag.Schedule = activity.GetSchedule(msgs);
+            ViewBag.AttendanceRegistrants = GetAttendanceRegistrants(attendance, activity, activitySchedule, msgs);
+            ViewBag.Schedule = activitySchedule;
             ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
             ViewBag.RegistrantActivities = activity.GetRegistrantActivities(msgs);
             ViewBag.Messages = msgs;
@@ -2073,7 +2106,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 ViewBag.PrevExists = getSurveyResponses[findIndex - 1].ID;
 
 
-            ViewBag.FormQuestionAnswers = FormQuestionAnswer.LoadBySurveyResponseId(getSurveyResponse.ID.Value, msgs);
+            ViewBag.FormQuestionAnswers = FormQuestionAnswer.LoadBySurveyResponseId(getSurveyResponse.ID.Value, msgs).OrderBy(a => a.FormQuestionGroupDisplayOrder).ThenBy(a => a.FormQuestionDisplayOrder).ToList();
             ViewBag.SurveyName = SurveyRequest.Load(getSurveyResponse.SurveyRequestId.Value).Name;
             ViewBag.RegistrantName = Registrant.Load(getSurveyResponse.RegistrantId.Value).Name;
             ViewBag.SurveyFeedback = getSurveyResponse;

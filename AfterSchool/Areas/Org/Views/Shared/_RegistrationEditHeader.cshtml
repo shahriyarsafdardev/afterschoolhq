@@ -18,10 +18,13 @@
         <a href="@Url.Action("update", "registration", new { id = Model.Uid.ToString() })" class="btn btn-alt6">
             <i class="s7-edit"></i> Edit Registration
         </a>
-        <a href="@Url.Action("surveys", "registration", new { id = Model.Uid.ToString() })"
-            class="btn btn-alt6@(actionName == "surveys" ? "-active" : "")">
-            <i class="s7-cloud"></i> Surveys
-        </a>
+        @if (SessionVariables.CurrentAccount.HasFeature(FeatureType.Survey))
+        {
+            <a href="@Url.Action("surveys", "registration", new { id = Model.Uid.ToString() })"
+                class="btn btn-alt6@(actionName == "surveys" ? "-active" : "")">
+                <i class="s7-cloud"></i> Surveys
+            </a>
+        }
         <button class="btn btn-alt6 md-trigger hide" data-modal="modal-confirmation" onclick="notify()" id="sendreg">
             <i class="s7-paper-plane"></i> <span>Send Reg Info</span>
         </button>

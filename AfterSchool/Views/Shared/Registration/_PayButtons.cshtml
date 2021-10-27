@@ -4,6 +4,7 @@
     var acceptACH = (bool)ViewData["acceptACH"];
     var formActionUrl = (string)ViewData["formActionUrl"];
     var participationObject = (ParticipationObject)ViewData["participationObject"];
+    var quantity = (int)ViewData["quantity"];
     var postPayPlan = participationObject?.GetPostPayPlan();
     var subscriptionPlan = participationObject?.GetSubscriptionPlan();
     var savePaymentInfoOnly = false;

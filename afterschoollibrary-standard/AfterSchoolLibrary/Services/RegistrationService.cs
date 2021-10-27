@@ -1,6 +1,7 @@
 ﻿using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -173,9 +174,11 @@ namespace AfterSchoolLibrary.Services
                 checkoutObject.MasterRegistrant,
                 checkoutObject.Registration.GetRegistrant(msgs, dc),
                 checkoutObject.NumberOfSeats,
+                1,
                 checkoutObject.ParticipationObject.IsActivity() ? checkoutObject.ParticipationObject.GetAnyRelatedActivityGroupId() : new int?(),
                 checkoutObject.ParticipationObject.GetCurrentRegistrationPeriod(msgs, dc)?.ID,
                 checkoutObject.GetTotalCost(),
+                checkoutObject.SelectedDates,
                 loggedInUser,
                 msgs,
                 dc);
@@ -192,12 +195,13 @@ namespace AfterSchoolLibrary.Services
                 activityGroupId,
                 periodId,
                 amountCharged,
+                null,
                 loggedInUser,
                 msgs,
                 dc);
         }
 
-        public static void ProcessRegistrationAssignment(this Registration registration, ParticipationObject participationObject, Registrant masterRegistrant, Registrant registrant, int seatsRequested, int preferenceNumber, int? activityGroupId, int? periodId, decimal? amountCharged, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void ProcessRegistrationAssignment(this Registration registration, ParticipationObject participationObject, Registrant masterRegistrant, Registrant registrant, int seatsRequested, int preferenceNumber, int? activityGroupId, int? periodId, decimal? amountCharged, List<DateTime> registeredDates, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // NOTE: getting only one activity per registration at the moment, 
             // but could be problem in the future
@@ -233,6 +237,23 @@ namespace AfterSchoolLibrary.Services
                     loggedInUserId: loggedInUser.ID.Value,
                     msgs: msgs,
                     dc: dc);
+            
+            if (registeredDates.IsNotEmpty() && registeredDates.Any())
+            {
+                registeredDates.ForEach(date =>
+                {
+                    var instance = participationObject.Schedule.GetInSessionInstanceByDate(date, msgs, dc);
+
+                    if (instance.IsEmpty())
+                        instance = participationObject.Schedule.AddInstance(date, loggedInUser, msgs, dc);
+
+                    var instanceSeats = instance.GetSeatsByRegistrantActivity(ra, msgs, dc);
+
+                    if (instanceSeats.IsEmpty())
+                        instanceSeats = instance.AddInstanceSeats(ra, loggedInUser, msgs, dc);
+
+                });
+            }
         }
 
         public static void AddESignature(this Registration registration, string esignature, string userAgent, string ipAddress, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
@@ -687,7 +708,7 @@ namespace AfterSchoolLibrary.Services
                         var answer = registration.GetAnswer(question);
 
                         if (answer.IsNotEmpty())
-                            row.Add(answer.Text);
+                            ConvertJSONAnswersIntoText(answer, row);
                         else
                             row.Add("");
                         break;
@@ -699,9 +720,39 @@ namespace AfterSchoolLibrary.Services
                 var answer = registration.GetAnswer(question);
 
                 if (answer.IsNotEmpty())
-                    row.Add(answer.Text);
+                    ConvertJSONAnswersIntoText(answer, row);
                 else
                     row.Add("");
+            }
+        }
+
+        private static void ConvertJSONAnswersIntoText(FormQuestionAnswer answer, List<string> row)
+        {
+            if (answer.FormQuestionQuestionTypeId != QuestionType.RadioList && answer.FormQuestionQuestionTypeId != QuestionType.DropDownList && answer.FormQuestionQuestionTypeId != QuestionType.CheckboxList)
+            {
+                row.Add(answer.Text);
+            }
+            else if (answer.FormQuestionQuestionTypeId == QuestionType.Checkbox)
+            {
+                row.Add(answer.Text == "1" ? "True" : "False");
+            }
+            else if (answer.FormQuestionQuestionTypeId == QuestionType.DropDownList || answer.FormQuestionQuestionTypeId == QuestionType.RadioList)
+            {
+                dynamic json = JsonConvert.DeserializeObject(answer.Text);
+                row.Add(Convert.ToString(json[0].Value));
+            }
+            else if (answer.FormQuestionQuestionTypeId == QuestionType.CheckboxList)
+            {
+                var str = "";
+                dynamic json = JsonConvert.DeserializeObject(answer.Text);
+                foreach (var item in json)
+                {
+                    if (str.IsNotEmpty())
+                        str = str + ", " + item.Value;
+                    else
+                        str = item.Value;
+                }
+                row.Add(Convert.ToString(str));
             }
         }
 

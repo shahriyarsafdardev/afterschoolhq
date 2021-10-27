@@ -1805,6 +1805,7 @@ namespace AfterSchoolLibrary.Services
                             activityGroupId: groupId,
                             periodId: period?.ID,
                             amountCharged: activityParticipationObject.Cost,
+                            registeredDates: null,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
                             dc: adc);
@@ -3253,8 +3254,8 @@ namespace AfterSchoolLibrary.Services
 
             // if can charge fees we bill it directly from our AHQ account
             var useStripeConnectedAccount = billingAccount.UseStripeConnectDuringCheckout(msgs, dc);
-            var platformFeeAmount = checkoutObject.CalculatePlatformFeeAmount(msgs, dc);
-            var amount = checkoutObject.GetStripeAmount(msgs, dc);
+            var platformFeeAmount = checkoutObject.CalculatePlatformFeeAmount(msgs, dc) * checkoutObject.ClassQuantity;
+            var amount = checkoutObject.GetStripeAmount(msgs, dc) * checkoutObject.ClassQuantity;
 
             // only charge tuition during checkout, because subscriptions are billed through stripe
             var charge = StripeHelper.CreateCharge(
@@ -3514,11 +3515,11 @@ namespace AfterSchoolLibrary.Services
                 if (msgs.HasNoErrors())
                 {
                     var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
-                        checkoutObject.ParticipationObject.ObjectID.Value,
-                        checkoutObject.ParticipationObject.ObjectType,
-                        registrant.ID.Value,
-                        msgs,
-                        dc);
+                                checkoutObject.ParticipationObject.ObjectID.Value,
+                                checkoutObject.ParticipationObject.ObjectType,
+                                registrant.ID.Value,
+                                msgs,
+                                dc);
                     
                     if (ra.IsNotEmpty() && !ra.IsAssigned(RegistrationAssignmentType.Reserved))                    
                         ra.ChangeSeatAssignment(RegistrationAssignmentType.Reserved, loggedInUser, msgs, dc);

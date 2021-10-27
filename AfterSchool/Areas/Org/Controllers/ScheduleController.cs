@@ -98,11 +98,41 @@ namespace AfterSchool.Areas.Org.Controllers
             var scheduleDatesClosed = ActivityScheduleUI.PrepScheduleDatesClosed(meetingClosedInfo);
 
             if (id.ToInteger() > 0)
-                activitySchedule = ActivitySchedule.EditExisting(id, name, scheduledetails, repeatsweekly.IsBoolean() && repeatsweekly.ToBoolean(), isongoing.IsBoolean() && isongoing.ToBoolean(), startdate.ToDateTime(), enddate.ToDateTime(), dailystarttime.ToDateTime(), dailyendtime.ToDateTime(), scheduleDates, scheduleDatesClosed, currentUser.ID.Value, msgs);
+                activitySchedule = ActivitySchedule.EditExisting(
+                                    id, 
+                                    name, 
+                                    scheduledetails, 
+                                    repeatsweekly.IsBoolean() && repeatsweekly.ToBoolean(), 
+                                    isongoing.IsBoolean() && isongoing.ToBoolean(), 
+                                    startdate.ToDateTime(), 
+                                    enddate.ToDateTime(), 
+                                    dailystarttime.ToDateTime(), 
+                                    dailyendtime.ToDateTime(), 
+                                    scheduleDates, 
+                                    scheduleDatesClosed,
+                                    days.Select(x => (int)x).ToStrings().ToStringList(),
+                                    currentUser.ID.Value, 
+                                    msgs);
             else
             {
                 var groupId = group.IsGuid() ? currentAccount.GetActivityGroup(group.ToGuid(), msgs).ID : null;
-                activitySchedule = ActivityScheduleService.CreateNew(name, scheduledetails, repeatsweekly.IsBoolean() && repeatsweekly.ToBoolean(), isongoing.IsBoolean() && isongoing.ToBoolean(), startdate.ToDateTime(), enddate.ToDateTime(), dailystarttime.ToDateTime(), dailyendtime.ToDateTime(), scheduleDates, scheduleDatesClosed, currentAccount.ID.Value, groupId, currentUser.ID.Value, msgs);
+
+                activitySchedule = ActivityScheduleService.CreateNew(
+                                        name, 
+                                        scheduledetails, 
+                                        repeatsweekly.IsBoolean() && repeatsweekly.ToBoolean(), 
+                                        isongoing.IsBoolean() && isongoing.ToBoolean(), 
+                                        startdate.ToDateTime(), 
+                                        enddate.ToDateTime(), 
+                                        dailystarttime.ToDateTime(), 
+                                        dailyendtime.ToDateTime(), 
+                                        scheduleDates, 
+                                        scheduleDatesClosed,
+                                        days.Select(x => (int)x).ToStrings().ToStringList(),
+                                        currentAccount.ID.Value, 
+                                        groupId, 
+                                        currentUser.ID.Value, 
+                                        msgs);
             }
 
             if (msgs.HasNoErrors())

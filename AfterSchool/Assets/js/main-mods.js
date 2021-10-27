@@ -367,13 +367,17 @@ var ActivitySetup = {
 var AccountSetup = {
       
     sendVerificationEmail: function (redirectUrl) {
+
+        if (redirectUrl)
+            redirectUrl = encodeURIComponent(redirectUrl);
+
         Notifications.showBar({
             title: 'Success',
             message: 'Sending verification email...'
         });
 
         $.get(
-            '/org/services/sendverificationemail/?redirectUrl=' + encodeURIComponent(redirectUrl),
+            '/org/services/sendverificationemail/?redirectUrl=' + redirectUrl,
             function (data) {
                 if (data && data.status == 'ok') {
                     Notifications.showBar({

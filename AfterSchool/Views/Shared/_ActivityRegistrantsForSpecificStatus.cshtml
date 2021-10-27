@@ -21,13 +21,16 @@
             <tr>
                 <th></th>
                 <th>Name</th>
-                <th class="text-center">Seat Index</th>
+                @if (!participationObject.CanRegisterPerClass)
+                {
+                    <th class="text-center">Seat Index</th>
+                }
                 <th>Date Registered</th>
                 @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && headerTitle != RegistrationAssignmentType.Interested)
                 {
-                 <th>Amount Paid</th>
+                    <th>Amount Paid</th>
                 }
-                @if (headerTitle != RegistrationAssignmentType.Interested)
+                @if (headerTitle != RegistrationAssignmentType.Interested && !participationObject.CanRegisterPerClass)
                 {
                     <th>Status</th>
                     <th></th>
@@ -39,7 +42,9 @@
             {
                 foreach (var ra in Model)
                 {
-                    <tr>
+                    var instanceSeats = ra.GetInstanceSeats();
+
+                    <tr class="instance @instanceSeats.Select(x => $"instance-{x.ActivityInstanceId.ToString()}").ToStringList(" ")">
                         <td>
                             @if (ra.RegistrationId.HasValue && ra.AssignmentTypeId != RegistrationAssignmentType.Invited)
                             {
@@ -48,9 +53,14 @@
                                 </a>
                             }
                         </td>
-                        <td>@(!isTechSupport ? ra.RegistrantName.IfBlank(ra.RegistrantEmail) : ra.RegistrantEmail.ToMaskedData())</td>
-                        <td class="text-center">@ra.SeatIndex</td>
+                        <td>@(!isTechSupport ? ra.RegistrantName.IfBlank(ra.RegistrantEmail) : ra.RegistrantName.IfBlank(ra.RegistrantEmail).MaskString(3, 3))</td>
+                        @if (!participationObject.CanRegisterPerClass)
+                        {
+                            <td class="text-center">@ra.SeatIndex</td>
+                        }
+
                         <td>@account.ConvertToAccountTimeZone(ra.CreateDate.Value).ToLongDateTimeString()</td>
+                        
                         @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && headerTitle != RegistrationAssignmentType.Interested)
                         {
                             var amount = ra.GetAmountPaid();
@@ -67,9 +77,13 @@
 
                                     if (isProRated)
                                     {
-                                         <i class="s7-info icon-small" data-toggle="popover" data-trigger="hover" data-html="true" data-placement="top"
-                                               data-content="Amount paid for this student is pro-rated by AHQ system and Stripe.">
-                                            </i>
+                                         <i class="s7-info icon-small" 
+                                            data-toggle="popover" 
+                                            data-trigger="hover" 
+                                            data-html="true" 
+                                            data-placement="top"
+                                            data-content="Amount paid for this student is pro-rated by AHQ system and Stripe.">
+                                        </i>
                                     }
 
                                     if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && participationObject.IsNotFreeAndCanAcceptPayments && ra.GetAmountPaid() == 0 && ra.GetRegistrant().ParentRegistrantId.HasValue)
@@ -96,7 +110,7 @@
                                 }
                             </td>
                         }
-                        @if (headerTitle != RegistrationAssignmentType.Interested)
+                        @if (headerTitle != RegistrationAssignmentType.Interested && !participationObject.CanRegisterPerClass)
                         {
                         <td>
                             @if (ra.IsRegistrantActivityStatusAccessible())

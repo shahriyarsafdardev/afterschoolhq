@@ -204,7 +204,7 @@ namespace AfterSchool.Controllers
 
             var participationObject = Activity.LoadByUid(uid.ToGuid(), msgs).GetParticipationObject(msgs);
 
-            SessionVariables.Cart.AddCartItem(participationObject, msgs);
+            SessionVariables.Cart.AddCartItem(participationObject, null, msgs);
 
             if (msgs.HasNoErrors())
                 return Json(new {
@@ -685,9 +685,10 @@ namespace AfterSchool.Controllers
 
             SubscriptionPlan paymentPlan = null;
 
-            var participationObject = SessionVariables.Cart.GetCartItems(msgs)
-                .FirstOrDefault()?
-                .GetParticipationObject(msgs);
+            var cartItem = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault();
+            var participationObject = cartItem?.GetParticipationObject(msgs);
+            // var selectedDates = cartItem?.SelectedDates;
+            // var quantity = participationObject.CanRegisterPerClass ? selectedDates.Split(',').Length : 1;
 
             if (paymentoption.IsNotEmpty() && paymentoption.IsNumber())
                 paymentPlan = SubscriptionPlan.Load(paymentoption.ToInteger(), msgs);

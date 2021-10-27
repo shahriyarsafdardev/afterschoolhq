@@ -66,7 +66,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "ActivityId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "SurveyResponseId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrationId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "Text", System.Data.SqlDbType.NVarChar , "400");
+				_dp.Add(className, "Text", System.Data.SqlDbType.NVarChar , "2000");
 				_dp.Add(className, "Description", System.Data.SqlDbType.NVarChar , "4000");
 				_dp.Add(className, "QuestionDataTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "QuestionText", System.Data.SqlDbType.NVarChar , "400");
