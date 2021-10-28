@@ -131,8 +131,8 @@
                                         <div class="am-checkbox text-center">
                                             <input type="checkbox" id="textnotifications" name="textnotifications" value="1" @(Request["textnotifications"] == "1" || System.Web.HttpContext.Current.Request.HttpMethod.ToString() == "GET" ? " checked=\"checked\" " : "") />
                                             <label for="textnotifications">
-                                                I would like to receive text messages about my student&#39;s activities&#46;
-                                                Notifications may include information about attendance&#44; reminders&#44; and important information&#46;
+                                                I would like to receive text messages about @(UILabel.ActivityLabel(ActivityType.Activity, true).ToLower())
+                                                Notifications may include information about attendance, reminders, and other important information.
                                             </label>
                                         </div>
                                     </div>

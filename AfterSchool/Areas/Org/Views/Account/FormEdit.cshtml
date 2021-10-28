@@ -14,7 +14,7 @@
     if (questionGroup.IsNotEmpty())
     {
         qgId = questionGroup.ID;
-        questions = questionGroup.GetAllQuestions().Where(a => a.Text.IsNotEmpty() || a.QuestionTypeId == QuestionType.TextBlock).ToList();
+        questions = questionGroup.GetActiveQuestions().Where(a => a.Text.IsNotEmpty() || a.QuestionTypeId == QuestionType.TextBlock).ToList();
     }
     var count = 1;
 }
@@ -23,7 +23,7 @@
 
 <div class="main-content">
 
-    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+    @{Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs);}
 
     @{Html.RenderPartial("~/Views/Shared/_AccountDetailsHeader.cshtml", SessionVariables.CurrentAccount);}
 
@@ -59,7 +59,7 @@
                             </div>
                             <div class="panel-body">
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label">Registration Form Name</label>
+                                    <label class="col-sm-3 control-label">Form Name</label>
                                     <div class="col-sm-9">
                                         <input type="text" class="form-control" id="name" name="name" value="@Model.Name.IfBlank(Model.Name + " Registration Form")" onfocus="this.select()" required />
                                     </div>
@@ -141,7 +141,10 @@
                                                 <th></th>
                                                 <th>Ask? (<a href="javascript:checkAllActive()">All</a> / <a href="javascript:uncheckAllActive()">None</a>)</th>
                                                 <th>Required? (<a href="javascript:checkAllRequired()">All</a> / <a href="javascript:uncheckAllRequired()">None</a>)</th>
-                                                <th>Answer Description? (<a href="javascript:checkAllRequired()">All</a> / <a href="javascript:uncheckAllRequired()">None</a>)</th>
+                                                @if (Model.FormTypeId == FormType.Survey)
+                                                {
+                                                    <th>Answer Description? (<a href="javascript:checkAllAnswerDescription()">All</a> / <a href="javascript:uncheckAllAnswerDescription()">None</a>)</th>
+                                                }
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
@@ -258,43 +261,46 @@
 
                                                     <td>
                                                         @{Html.RenderPartial(
-                                                                              "~/Views/Shared/_SwitchButton.cshtml",
-                                                                              question.IsActive,
-                                                                              new ViewDataDictionary()
-                                                                              {
-                                                                                                                    { "checkboxname", "active-" + question.ID },
-                                                                                                                    { "checkboxid", "active-" + question.ID },
-                                                                                                                    { "disabled", question.IsLocked },
-                                                                                                                    { "classname", "question-isactive" }
-});}
+                                                            "~/Views/Shared/_SwitchButton.cshtml",
+                                                            question.IsActive,
+                                                            new ViewDataDictionary()
+                                                            {
+                                                                { "checkboxname", "active-" + question.ID },
+                                                                { "checkboxid", "active-" + question.ID },
+                                                                { "disabled", question.IsLocked },
+                                                                { "classname", "question-isactive" }
+                                                            });}
                                                     </td>
                                                     <td>
                                                         @if (question.QuestionTypeId != QuestionType.TextBlock)
                                                         {
                                                             Html.RenderPartial(
-                                                                   "~/Views/Shared/_SwitchButton.cshtml",
-                                                                   question.IsRequired,
-                                                                   new ViewDataDictionary()
-                                                                   {
-                                                                                                                { "checkboxname", "required-" + question.ID },
-                                                                                                                { "checkboxid", "required-" + question.ID },
-                                                                                                                { "disabled", question.IsLocked },
-                                                                                                                { "classname", "question-isrequired" }
-});
+                                                                "~/Views/Shared/_SwitchButton.cshtml",
+                                                                question.IsRequired,
+                                                                new ViewDataDictionary()
+                                                                {
+                                                                    { "checkboxname", "required-" + question.ID },
+                                                                    { "checkboxid", "required-" + question.ID },
+                                                                    { "disabled", question.IsLocked },
+                                                                    { "classname", "question-isrequired" }
+                                                            });
                                                         }
                                                     </td>
-                                                    <td>
-                                                        @{Html.RenderPartial(
-                                                                                "~/Views/Shared/_SwitchButton.cshtml",
-                                                                                question.IsAnswerDescriptionEnabled,
-                                                                                new ViewDataDictionary()
-                                                                                {
-                                                                                                                    { "checkboxname", "answerDescription-" + question.ID },
-                                                                                                                    { "checkboxid", "answerDescription-" + question.ID },
-                                                                                                                    { "disabled", question.IsLocked },
-                                                                                                                    { "classname", "question-IsAnswerDescriptionEnabled" }
-});}
-                                                    </td>
+                                                    @if (Model.FormTypeId == FormType.Survey)
+                                                    {
+                                                        <td>
+                                                            @{Html.RenderPartial(
+                                                                "~/Views/Shared/_SwitchButton.cshtml",
+                                                                question.IsAnswerDescriptionEnabled,
+                                                                new ViewDataDictionary()
+                                                                {
+                                                                    { "checkboxname", "answerDescription-" + question.ID },
+                                                                    { "checkboxid", "answerDescription-" + question.ID },
+                                                                    { "disabled", question.IsLocked },
+                                                                    { "classname", "question-IsAnswerDescriptionEnabled" }
+                                                                });}
+                                                        </td>
+                                                    }
                                                     <td>
                                                         <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteQuestion('@question.Text', '@Url.Action("delete","Account", new { id = question.ID.ToString()})')"><span class="text-danger"><i class="s7-trash"></i></span></button>
                                                     </td>
@@ -657,7 +663,8 @@
             {
                 { "checkboxname", "new-active-::number::" },
                 { "checkboxid", "active-::number::" },
-                { "disabled", false }
+                { "disabled", false },
+                { "className", "question-isactive"}
         });}`.replace(/::number::/g, getQuestionCount());
     }
 
@@ -669,7 +676,8 @@
             {
                 { "checkboxname", "new-required-::number::" },
                 { "checkboxid", "required-::number::" },
-                { "disabled", false }
+                { "disabled", false },
+                { "className", "question-isrequired" }
             });}`.replace(/::number::/g, getQuestionCount());
     }
 
@@ -680,8 +688,9 @@
             new ViewDataDictionary()
             {
                 { "checkboxname", "new-description-enabled-::number::" },
-                { "checkboxid", "description-::number::" },
-                { "disabled", false }
+                { "checkboxid", "answerDescription-::number::" },
+                { "disabled", false },
+                { "className", "question-IsAnswerDescriptionEnabled" }
             });}`.replace(/::number::/g, getQuestionCount());
     }
 
@@ -760,7 +769,7 @@
 
     function removeOption(id) {
         event.preventDefault();
-        var index = id.split("-")[1];
+        var mainIndex = id.split("-")[1];
         var optionType = id.split("-")[0];
         $("#" + id).remove();
         var totalRows = $('#options-table tr').length - 2;
@@ -787,8 +796,12 @@
         });
         var commaIndex = optionString.lastIndexOf(",");
         var optionWithoutLastComma = optionString.substring(0, commaIndex);
-        setOptions(selectedQuestion, optionWithoutLastComma, optionType);
-
+        if (mainIndex == 1 && optionType != 'Emoji') {
+            $(this).closest('tr').remove();
+        }
+        else {
+            setOptions(selectedQuestion, optionWithoutLastComma, optionType);
+        }
     }
 
     function addTextBlock() {
@@ -927,7 +940,10 @@
                 $(".optionDescription").prop('disabled', false);
             }
         }
-
+        else {
+            addOption();
+        }
+        
     }
 
     function addEmoji(index) {
@@ -1307,6 +1323,7 @@
     function uncheckAllActive() {
         $('input[id^="active-"][disabled!="disabled"]').prop('checked', false);
         uncheckAllRequired();
+        uncheckAllAnswerDescription();
     }
     function checkAllRequired() {
         $('input[id^="required-"][disabled!="disabled"]').prop('checked', true);
@@ -1315,6 +1332,15 @@
     function uncheckAllRequired() {
         $('input[id^="required-"][disabled!="disabled"]').prop('checked', false);
     }
+
+    function checkAllAnswerDescription() {
+        $('input[id^="active-"][disabled!="disabled"]').prop('checked', true);
+        $('input[id^="answerDescription-"][disabled!="disabled"]').prop('checked', true);
+    }
+    function uncheckAllAnswerDescription() {
+        $('input[id^="answerDescription-"][disabled!="disabled"]').prop('checked', false);
+    }
+
 
     function Validate() {
         $(".btn btn-default btn-lg btn-block").removeAttr("disabled");
@@ -1365,22 +1391,32 @@
             }
         });
     }
+
 </script>
 
 
 <script>
     PageEvent.add(PageEvent.AFTER_INIT, function () {
-        $('.question-isactive').click(function () {
+        $(document).on('click', '.question-isactive', function () {
             if (!$(this).is(':checked')) {
                 var id = $(this).attr('id').split('-')[1];
                 $('#required-' + id).prop('checked', false);
+                $('#answerDescription-' + id).prop('checked', false);
             }
         });
 
-        $('.question-isrequired').click(function () {
+        $(document).on('click', '.question-isrequired', function () {
             if ($(this).is(':checked')) {
                 var id = $(this).attr('id').split('-')[1];
                 $('#active-' + id).prop('checked', true);
+            }
+        });
+
+        $(document).on('click', '.question-IsAnswerDescriptionEnabled', function () {
+            if ($(this).is(':checked')) {
+                var id = $(this).attr('id').split('-')[1];
+                $('#active-' + id).prop('checked', true);
+                $('#answerDescription-' + id).prop('checked', true);
             }
         });
 

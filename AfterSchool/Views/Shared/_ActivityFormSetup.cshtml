@@ -40,15 +40,17 @@
             <div class="form-group">
                 <label class="col-sm-3 control-label">
                     Total Available Seats <span class="text-danger">*</span>
-                    <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Must be a number between 1 and @accountPackage.GetFeature(FeatureType.Participants).Max.Value" data-placement="top"></i>
                 </label>
                 <div class="col-sm-9">
                     <input type="number" class="form-control" id="seatsavailable" name="seatsavailable" value="@Model.SeatsAvailable" onfocus="this.select()" required step="1" min="1" max="@accountPackage.GetFeature(FeatureType.Participants).Max.Value" />
+                    <p class="text-muted">
+                        Must be a number between 1 and @accountPackage.GetFeature(FeatureType.Participants).Max.Value.ToString("#")
+                    </p>
                 </div>
             </div>
 
             if (Model.ActivityTypeId == ActivityType.LearningPod)
-            { 
+            {
                 <div class="form-group">
                     <label class="col-sm-3 control-label">
                         Minimum Students Required
@@ -71,16 +73,16 @@
                 <label class="col-sm-3 control-label">
                     Invite Only?
                 </label>
-                <div class="col-md-9" @if (!showInviteOnly) { <text> onclick="return showUpgradeMyPlan('@(allowInvitesPackage.Name)',@(allowInvitesPackage.ID))"</text> }>
+                <div class="col-md-9" @if (!showInviteOnly) { <text> onclick="return showUpgradeMyPlan('@(allowInvitesPackage.Name)',@(allowInvitesPackage.ID))" </text> }>
                     @{
                         Html.RenderPartial(
-                          "~/Views/Shared/_SwitchButton.cshtml", 
-                          Model.IsInviteOnly, 
-                          new ViewDataDictionary() { 
+                          "~/Views/Shared/_SwitchButton.cshtml",
+                          Model.IsInviteOnly,
+                          new ViewDataDictionary() {
                               { "checkboxname", "inviteonly" },
                               { "checkboxid", "inviteonly" },
-                              { "disabled", !showInviteOnly } 
-                          });
+                              { "disabled", !showInviteOnly }
+          });
                     }
                 </div>
             </div>
@@ -98,101 +100,150 @@
 
         @if (group.IsEmpty())
         {
-            if (showRegistrationPeriodList)
-            {
-                <div class="form-group">
-                    <label class="col-sm-3 control-label">
-                        @UILabel.RegistrationPeriodLabel() <span class="text-danger">*</span>
-                        <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="The date range @UILabel.RegistrantLabel(true).ToLower() are able to register for your @UILabel.ActivityLabel(Model.ActivityTypeId).ToLower()" data-placement="top"></i>
-                    </label>
-                    <div class="col-sm-9">
-                        <select name="registrationperiod" id="registrationperiod" class="form-control" required>
-                            <option value="">Select @UILabel.RegistrationPeriodLabel()...</option>
-                            <option value="0"> + New @UILabel.RegistrationPeriodLabel()</option>
-                            @foreach (var period in periods)
-                            {
-                                <option value="@period.ID" @(activePeriod?.ID == period.ID ? " selected=\"selected\" " : "")>
-                                    @period.StartDateTime.ToShortDateTimeString() - @period.EndDateTime.ToShortDateTimeString()
-                                </option>
-                            }
-                        </select>
-                    </div>
-                    <div class="col-sm-3 hide">
-                        <a class="btn btn-block btn-link" href="@Url.Action("edit", "period", new { id = activePeriod?.ID })" id="editPeriod" target="_blank">
-                            Edit @UILabel.RegistrationPeriodLabel()
-                        </a>
-                    </div>
-                </div>
-            }
-            else
-            {
-                <input type="hidden" name="registrationperiod" id="registrationperiod" value="@activePeriod.ID" />
-            }
 
-            <div class="form-group reg-period hide">
-                <label class="col-sm-3 control-label">@UILabel.RegistrationPeriodLabel() Open <span class="text-danger">*</span></label>
-                <div class="col-sm-5">
-                    @{
-                        Html.RenderPartial(
-                            "~/Views/Shared/Components/_Date.cshtml",
-                            new FormInputViewModel()
-                            {
-                                Id = "registrationopendate",
-                                Name = "registrationopendate",
-                                Value = activePeriod.StartDateTime.ToShortDateString()
-                            }
-                        );
-                    }
-                </div>
-                <div class="col-sm-4">
+            <div class="form-group">
+                <label class="col-sm-3 control-label">Students can register for:</label>
+                <div class="col-sm-9">
 
-                    @{
-                        Html.RenderPartial(
-                            "~/Views/Shared/_TimeSelect.cshtml",
-                            activePeriod.StartDateTime.Value,
-                            new ViewDataDictionary()
-                            {
-                                { "name", "registrationopentime" },
-                                { "id", "registrationopentime" },
-                                { "required", true }
-                            }
-                        );
-                    }
+                    <div class="am-radio inline">
+                        <input type="radio" class="form-control costfrequencytype" name="costfrequencytype" id="costfrequencytype-@((int)ActivityCostFrequencyType.PerActivity)" required @(Model.CostFrequencyTypeId == ActivityCostFrequencyType.PerActivity ? "checked=\"checked\"" : "") value="@((int)ActivityCostFrequencyType.PerActivity)" />
+                        <label for="costfrequencytype-@((int)ActivityCostFrequencyType.PerActivity)">The Entire Activity</label>
+                    </div>
+
+                    <div class="am-radio inline">
+                        <input type="radio" class="form-control costfrequencytype" name="costfrequencytype" id="costfrequencytype-@((int)ActivityCostFrequencyType.PerClass)" required @(Model.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass ? "checked=\"checked\"" : "") value="@((int)ActivityCostFrequencyType.PerClass)" />
+                        <label for="costfrequencytype-@((int)ActivityCostFrequencyType.PerClass)">Individual Classes</label>
+                    </div>
+
+                    <p class="text-muted">
+                        This is used if you allow students to be registered for all classes in the activity or for each individual class.
+                    </p>
 
                 </div>
             </div>
 
-            <div class="form-group reg-period hide">
-                <label class="col-sm-3 control-label">@UILabel.RegistrationPeriodLabel() Close <span class="text-danger">*</span></label>
-                <div class="col-sm-5">
-                    @{
-                        Html.RenderPartial(
-                            "~/Views/Shared/Components/_Date.cshtml",
-                            new FormInputViewModel()
-                            {
-                                Id = "registrationclosedate",
-                                Name = "registrationclosedate",
-                                Value = activePeriod.EndDateTime.ToShortDateString()
-                            }
-                        );
-                    }
+            <div class="form-group hide" id="cutoffhours-container">
+                <label class="col-sm-3 control-label">Registration cut-off time</label>
+                <div class="col-sm-9">
+                    <div class="input-group input-group-lg xs-mb-15 col-sm-3">
+                        <input type="number"
+                               class="form-control"
+                               id="cutoffhours"
+                               name="cutoffhours"
+                               onfocus="this.select()"
+                               value="@(Model.RegistrationCutoffHours.HasValue ? Model.RegistrationCutoffHours.Value.ToString() : "2")"
+                               required
+                               min="0"
+                               step="1" />
+                        <span class="input-group-addon">Hours</span>
+                    </div>
+                    <p class="text-muted">
+                        Registration cut-off time will prevent parents from registering a preset number of hours before the class start time.
+                    </p>
                 </div>
-                <div class="col-sm-4">
+            </div>
 
-                    @{
-                        Html.RenderPartial(
-                            "~/Views/Shared/_TimeSelect.cshtml",
-                            activePeriod.EndDateTime.Value,
-                            new ViewDataDictionary()
-                            {
+            <div class="registrationperiod-container">
+
+                @if (showRegistrationPeriodList)
+                {
+                    <div class="form-group registrationperiod-container">
+                        <label class="col-sm-3 control-label">
+                            @UILabel.RegistrationPeriodLabel() <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-9">
+                            <select name="registrationperiod" id="registrationperiod" class="form-control" required>
+                                <option value="">Select @UILabel.RegistrationPeriodLabel()...</option>
+                                <option value="0"> + New @UILabel.RegistrationPeriodLabel()</option>
+                                @foreach (var period in periods)
+                                {
+                                    <option value="@period.ID" @(activePeriod?.ID == period.ID ? " selected=\"selected\" " : "")>
+                                        @period.StartDateTime.ToShortDateTimeString() - @period.EndDateTime.ToShortDateTimeString()
+                                    </option>
+                                }
+                            </select>
+                            <p class="text-muted">
+                                The date range @UILabel.RegistrantLabel(true).ToLower() are able to register for your @UILabel.ActivityLabel(Model.ActivityTypeId).ToLower()
+                            </p>
+                        </div>
+                        <div class="col-sm-3 hide">
+                            <a class="btn btn-block btn-link" href="@Url.Action("edit", "period", new { id = activePeriod?.ID })" id="editPeriod" target="_blank">
+                                Edit @UILabel.RegistrationPeriodLabel()
+                            </a>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <input type="hidden" name="registrationperiod" id="registrationperiod" value="@activePeriod.ID" />
+                }
+
+                <div class="form-group reg-period hide">
+                    <label class="col-sm-3 control-label">@UILabel.RegistrationPeriodLabel() Open <span class="text-danger">*</span></label>
+                    <div class="col-sm-5">
+                        @{
+                            Html.RenderPartial(
+                                "~/Views/Shared/Components/_Date.cshtml",
+                                new FormInputViewModel()
+                                {
+                                    Id = "registrationopendate",
+                                    Name = "registrationopendate",
+                                    Value = activePeriod.StartDateTime.ToShortDateString()
+                                }
+                            );
+                        }
+                    </div>
+                    <div class="col-sm-4">
+
+                        @{
+                            Html.RenderPartial(
+                                "~/Views/Shared/_TimeSelect.cshtml",
+                                activePeriod.StartDateTime.Value,
+                                new ViewDataDictionary()
+                                {
+                                { "name", "registrationopentime" },
+                                { "id", "registrationopentime" },
+                                { "required", true }
+    }
+                            );
+                        }
+
+                    </div>
+                </div>
+
+                <div class="form-group reg-period hide">
+                    <label class="col-sm-3 control-label">@UILabel.RegistrationPeriodLabel() Close <span class="text-danger">*</span></label>
+                    <div class="col-sm-5">
+                        @{
+                            Html.RenderPartial(
+                                "~/Views/Shared/Components/_Date.cshtml",
+                                new FormInputViewModel()
+                                {
+                                    Id = "registrationclosedate",
+                                    Name = "registrationclosedate",
+                                    Value = activePeriod.EndDateTime.ToShortDateString()
+                                }
+                            );
+                        }
+                    </div>
+                    <div class="col-sm-4">
+
+                        @{
+                            Html.RenderPartial(
+                                "~/Views/Shared/_TimeSelect.cshtml",
+                                activePeriod.EndDateTime.Value,
+                                new ViewDataDictionary()
+                                {
                                 { "name", "registrationclosetime" },
                                 { "id", "registrationclosetime" },
                                 { "required", true }
-                            }
-                        );
-                    }
+    }
+                            );
+                        }
 
+                    </div>
                 </div>
+
             </div>
 
             <div class="col-md-offset-3 col-md-9 padding-v-20">
@@ -216,7 +267,7 @@
                                    @if (!showWaitingList) { <text> disabled="disabled" </text> } />
                             @if (!showWaitingList)
                             {<div style="position:absolute; left:0; right:0; top:0; bottom:0; " id="waitingListDiv"></div>}
-                            </div>
+                        </div>
                     </div>
                 }
 
@@ -224,8 +275,8 @@
                     <label class="col-md-3 control-label">
                         Registration Form <span class="text-danger">*</span>
                     </label>
-                    <div class="col-md-6" @if (!showManageForms) { <text> onclick="return showUpgradeMyPlan()"</text> }>
-                        <select name="form" id="form" class="form-control" @(activeForm.IsNotEmpty() && forms.Any(m => m.ID == activeForm.FormId)  ? "required" : "") @if (!showManageForms) { <text> disabled="disabled" </text> }>
+                    <div class="col-md-6" @if (!showManageForms) { <text> onclick="return showUpgradeMyPlan()" </text> }>
+                        <select name="form" id="form" class="form-control" @(activeForm.IsNotEmpty() && forms.Any(m => m.ID == activeForm.FormId) ? "required" : "") @if (!showManageForms) { <text> disabled="disabled" </text> }>
                             @*<option value="">Select Form...</option>*@
                             @if (showManageFormFields)
                             {
@@ -241,14 +292,14 @@
                     <div class="col-md-3">
                         @if (showManageForms)
                         {
-                            <a id="editForm"  class="btn btn-block btn-link" href="@Url.Action("formedit","account", new { id = activeForm?.ID })" target="_blank">Edit Form</a>
+                            <a id="editForm" class="btn btn-block btn-link" href="@Url.Action("editform","account", new { id = activeForm?.ID })" target="_blank">Edit Form</a>
                         }
                         else
                         {
                             <a class="btn btn-block btn-link" href="#" onclick="return showUpgradeMyPlan('@(manageFormsPackage.Name)',@(manageFormsPackage.ID))">Edit Form</a>
                         }
                     </div>
-                </div>                
+                </div>
 
                 @if (Model.ActivityTypeId == ActivityType.Activity)
                 {
@@ -257,12 +308,12 @@
                             Registration Mode <span class="text-danger">*</span>
                         </label>
                         <div class="col-sm-9">
-                            <div class="am-radio inline" @if (!showAllowApplications) { <text> onclick="return showUpgradeMyPlan('@(allowAppilicationsPackage.Name)',@(allowAppilicationsPackage.ID))"</text> }>
+                            <div class="am-radio inline" @if (!showAllowApplications) { <text> onclick="return showUpgradeMyPlan('@(allowAppilicationsPackage.Name)',@(allowAppilicationsPackage.ID))" </text> }>
                                 @foreach (var item in Enum.GetValues(typeof(RegistrationMode)).Cast<RegistrationMode>().Where(x => x != RegistrationMode.NotSet))
                                 {
-                                    <input type="radio" name="regmode" id="regmode-@item.ToString()" value="@((int)item)" 
+                                    <input type="radio" name="regmode" id="regmode-@item.ToString()" value="@((int)item)" class="regmode"
                                            @(item == Model.RegistrationModeId ? "checked=\"checked\"" : "")
-                                           @if (!showAllowApplications) { <text> disabled="disabled"</text> }/>
+                                           @if (!showAllowApplications) { <text> disabled="disabled" </text> } />
                                     <label for="regmode-@item.ToString()" class="margin-h-10">@item.ToString()</label>
                                 }
                             </div>
@@ -312,12 +363,31 @@
             @if(!showWaitingList)
             {
                  <text>
-                     showUpgradeMyPlan('@(waitingListPackage.Name)',@(waitingListPackage.ID))
+                    showUpgradeMyPlan('@(waitingListPackage.Name)',@(waitingListPackage.ID))
                  </text>
             }
-           
-        })
+
+        });
+
+        $('.costfrequencytype').click(function () {
+            toggleCostFrequencyType($(this));
+        });
+
+        toggleCostFrequencyType($('#costfrequencytype-@((int)ActivityCostFrequencyType.PerClass)'));
     });
+
+    function toggleCostFrequencyType(obj) {
+        if (obj.val() == '@((int)ActivityCostFrequencyType.PerClass)' && obj.is(':checked')) {
+            $('.regmode').prop('disabled', true);
+            $('#regmode-@RegistrationMode.Register.ToString()').prop('checked', true);
+            $('#cutoffhours-container').removeClass('hide');
+            // $('.registrationperiod-container').addClass('hide');
+        } else {
+            $('.regmode').prop('disabled', false);
+            $('#cutoffhours-container').addClass('hide');
+            // $('.registrationperiod-container').removeClass('hide');
+        }
+    }
 
     function checkPeriodVal() {
         if ($('#registrationperiod').val().length > 0) {
