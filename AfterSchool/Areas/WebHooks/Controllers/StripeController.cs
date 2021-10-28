@@ -200,7 +200,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             var stripeSubscriptionId = stripeInvoice.SubscriptionId;
             var chargeId = stripeInvoice.ChargeId;
             var rsp = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(stripeSubscriptionId, msgs);
-
+            
             if (rsp.IsEmpty())
             {
                 msgs.Add($"Ignoring - Registrant Subscription Plan not found - Stripe Sub ID {stripeSubscriptionId}", MessageType.Notice);
@@ -321,6 +321,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                         {
                             // NOTE: check if refund has a transfer, not sure how/if to handle
                         }
+
                         // check if transaction exists for refund
                         var refundTransaction = Transaction.LoadByStripeChargeOrRefundId(stripeRefund.Id, msgs);
 
@@ -348,12 +349,6 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             {
                 msgs.Add("Full refund already Made", MessageType.Notice);
             }
-
-
-
-                
-
-            
 
             if (msgs.HasErrors())
                 return Return500(msgs);
