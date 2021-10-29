@@ -161,7 +161,7 @@ namespace AfterSchoolLibrary.Services
                 var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, msgs);
                 // var stripeCouponId = plan.DoesCouponApply(checkoutObject.Coupon) ? checkoutObject.Coupon.StripeCouponId : null;
                 var startDateTime = submittedRecord.GetPlanStartDate(plan, checkoutObject.ParticipationObject, msgs, dc);
-                var endDateTime = submittedRecord.GetPlanEndDate(plan, checkoutObject.ParticipationObject, msgs, dc);
+                var endDateTime = plan.GetPlanEndDate(checkoutObject.ParticipationObject, msgs);
                 var platformFeePercent = new decimal?();
                 string stripeAccountId = null;
                 string stripeCouponId = null;
@@ -549,53 +549,6 @@ namespace AfterSchoolLibrary.Services
             }
 
             return initialDate;
-        }
-
-        public static DateTime? GetPlanEndDate(this Registrant registrant, SubscriptionPlan plan, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
-            {
-                if (plan.EndDate.HasValue)
-                    return plan.EndDate.Value.AddDays(1);
-                else if (participationObject.Schedule.IsNotEmpty() && participationObject.Schedule.EndDate.HasValue)
-                    return participationObject.Schedule.EndDate.Value.AddDays(1);
-                else
-                    return null;
-            }
-
-            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && plan.EndDate.HasValue)
-                return plan.EndDate.Value;
-            else if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && !plan.EndDate.HasValue)
-            {
-                var endDate = plan.StartDate.HasValue ? plan.StartDate.Value : DateTime.UtcNow;
-                var periodsToAdd = plan.TotalPeriods.Value - plan.NumberOfPeriodsPrePaid.IfEmpty(0);
-                switch (plan.BillingPeriodTypeId)
-                {
-                    case BillingPeriodType.Day:
-                        endDate = endDate.AddDays(periodsToAdd);
-                        break;
-                    case BillingPeriodType.Week:
-                        endDate = endDate.AddWeeks(periodsToAdd);
-                        break;
-                    case BillingPeriodType.TwoWeeks:
-                        endDate = endDate.AddWeeks(periodsToAdd * 2);
-                        break;
-                    case BillingPeriodType.Month:
-                        endDate = endDate.AddMonths(periodsToAdd);
-                        break;
-                    case BillingPeriodType.Year:
-                        endDate = endDate.AddYears(periodsToAdd);
-                        break;
-                    default:
-                        msgs.Add("unable to create end date for payment plan", MessageType.ApiError);
-                        break;
-                }
-
-                return endDate.AddDays(-1);
-
-            }
-
-            return null;
         }
 
         private static PlanFeeObject GetFeeObject(CheckoutObject checkoutObject, Account billingAccount, SubscriptionPlan plan, SystemMessages msgs, DatabaseConnection dc = null)

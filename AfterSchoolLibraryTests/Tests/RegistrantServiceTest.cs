@@ -101,7 +101,7 @@ namespace AfterSchoolLibraryTests.Tests
                 Assert.Equal(registration?.AccountId, billingAccount.ID.Value);
 
                 var startDateTime = masterRegistrant.GetPlanStartDate(subscriptionPlan, participationObject, msgs, dc);
-                var endDateTime = masterRegistrant.GetPlanEndDate(subscriptionPlan, participationObject, msgs, dc);
+                var endDateTime = subscriptionPlan.GetPlanEndDate(participationObject, msgs);
                 var isSubscriptionRequired = true;
                 
                 if (startDateTime.IsNotEmpty() && endDateTime.IsNotEmpty())
@@ -233,7 +233,7 @@ namespace AfterSchoolLibraryTests.Tests
                 Assert.Equal(registration?.AccountId, billingAccount.ID.Value);
 
                 var startDateTime = masterRegistrant.GetPlanStartDate(paymentPlan, participationObject, msgs, dc);
-                var endDateTime = masterRegistrant.GetPlanEndDate(paymentPlan, participationObject, msgs, dc);
+                var endDateTime = paymentPlan.GetPlanEndDate(participationObject, msgs);
                 var isSubscriptionRequired = true;
 
                 if (startDateTime.IsNotEmpty() && endDateTime.IsNotEmpty())
