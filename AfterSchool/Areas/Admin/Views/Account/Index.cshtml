@@ -53,6 +53,7 @@
                         <th>Is Test</th>
                         <th>Is Claimed</th>
                         <th>Is Active</th>
+                        <th>Payments Connected</th>
                         <th>Member Since</th>
                         <th></th>
                     </tr>
@@ -73,6 +74,7 @@
                                 <td>@account.IsTest.ToYesNo()</td>
                                 <td>@account.IsClaimed.ToYesNo()</td>
                                 <td>@account.IsActive.ToYesNo()</td>
+                                <td>@account.CanProcessPayments().ToYesNo()</td>
                                 <td>@account.CreateDate.Value.ToLongDateString()</td>
                                 <td>
                                     @if (account.GetMemberCount() == 0)
