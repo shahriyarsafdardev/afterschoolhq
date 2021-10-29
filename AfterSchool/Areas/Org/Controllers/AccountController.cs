@@ -904,7 +904,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             // save existing questions
                             questions.ForEach(question =>
                             {
-                                if (!question.IsLocked)
+                                if (!question.IsLocked && question.IsActive)
                                 {
                                     question.IsActive = Request.Params[$"active-{question.ID}"].IsBoolean();
                                     question.IsRequired = Request.Params[$"required-{question.ID}"].IsBoolean();
@@ -928,11 +928,11 @@ namespace AfterSchool.Areas.Org.Controllers
                             });
 
                             // save new questions
-                            if (Request.Form["newquestioncount"].IsNumber() && Request.Form["newquestioncount"].ToInteger() > 0)
+                            if ( Request.Form["newquestionsIds"].Length > 0)
                             {
-                                var questionCount = Request.Form["newquestioncount"].ToInteger();
-
-                                for (var i = 0; i < questionCount; i++)
+                                var questionIds = Request.Form["newquestionsIds"];
+                                var questionsList = questionIds.Split(',');
+                                foreach (var i in questionsList)
                                 {
                                     var question = new FormQuestion
                                     {
