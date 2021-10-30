@@ -214,7 +214,7 @@ namespace AfterSchoolLibraryTests.Tests
             var participationObject = Activity.GetParticipationObject(msgs, dc);
             var registrant = RegistrantFactory.Create(msgs, dc);
             var form = FormFactory.Create(Activity.GetAccount(msgs, dc), msgs, dc);
-            var formgroup = FormQuestionGroupFactory.Create(form.ID.Value,true, msgs, dc);
+            var formgroup = FormQuestionGroupFactory.Create(form.ID.Value, true, msgs, dc);
             var question = FormQuestionFactory.Create(form.ID.Value, formgroup.ID.Value, "Question", QuestionDataType.RegistrantGrade, QuestionType.TextArea, msgs, dc);
             var answerText = "[{\"key\":\"K\",\"value\":\"K\"}]";
             var answer = FormQuestionAnswerFactory.Create(question.ID.Value, question.Text, answerText, QuestionDataType.RegistrantGrade, msgs, dc);
@@ -226,6 +226,49 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors());
             Assert.True(isinrange);
 
+        }
+
+        [Theory]
+        [InlineData("Kindergarten", "K", "[{\"key\":\"K\",\"value\":\"K\"}]")]
+        [InlineData("3rd", "3", "3")]
+        public void VerifySameGradeLevelTest(string gradeName, string gradeAbbr, string answerText)
+        {
+            //var grades = GradeLevel.Load(null, null, null, msgs, dc);
+            var grade = new GradeLevel
+            {
+                Name = gradeName, Abbreviation = gradeAbbr 
+            };
+
+            var form = FormFactory.Create(Activity.GetAccount(msgs, dc), msgs, dc);
+            var formgroup = FormQuestionGroupFactory.Create(form.ID.Value, true, msgs, dc);
+            var question = FormQuestionFactory.Create(form.ID.Value, formgroup.ID.Value, "Question", QuestionDataType.RegistrantGrade, QuestionType.TextArea, msgs, dc);
+            var answer = FormQuestionAnswerFactory.Create(question.ID.Value, question.Text, answerText, QuestionDataType.RegistrantGrade, msgs, dc);
+
+            bool sameGradeLevel = GradeLevel.VerifyGradeLevel(answer, grade);
+
+            Assert.True(sameGradeLevel);
+        }
+
+        [Theory]
+        [InlineData("Kindergarten", "K", "[{\"key\":\"P\",\"value\":\"P\"}]")]
+        [InlineData("6th", "6", "4")]
+        public void VerifyDifferentGradeLevelTest(string gradeName, string gradeAbbr, string answerText)
+        {
+            //var grades = GradeLevel.Load(null, null, null, msgs, dc);
+            var grade = new GradeLevel
+            {
+                Name = gradeName,
+                Abbreviation = gradeAbbr
+            };
+
+            var form = FormFactory.Create(Activity.GetAccount(msgs, dc), msgs, dc);
+            var formgroup = FormQuestionGroupFactory.Create(form.ID.Value, true, msgs, dc);
+            var question = FormQuestionFactory.Create(form.ID.Value, formgroup.ID.Value, "Question", QuestionDataType.RegistrantGrade, QuestionType.TextArea, msgs, dc);
+            var answer = FormQuestionAnswerFactory.Create(question.ID.Value, question.Text, answerText, QuestionDataType.RegistrantGrade, msgs, dc);
+
+            bool sameGradeLevel = GradeLevel.VerifyGradeLevel(answer, grade);
+
+            Assert.False(sameGradeLevel);
         }
     }
 }
