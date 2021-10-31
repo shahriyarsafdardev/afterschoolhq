@@ -2016,13 +2016,16 @@ namespace AfterSchool.Areas.Org.Controllers
                   var checkEmail = WebUser.LoadByEmail(getRegistrant.Email,msgs);
                   if (getRegistrant.WebUserId.IsEmpty() && checkEmail.IsEmpty())
                   {
-                      var createInviteCode = RegistrantInviteCodeService.Create(surveyResponse.ID.Value, getRegistrant.ID.Value, currentUserId, msgs, null);
-                      BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, createInviteCode.Code, null));
+                      //check if code is already sent to student but student havn't registered yet.
+                      var inviteCode = RegistrantInviteCodeService.GetActiveInviteCode(student.Value.ToInteger(), msgs);
+                      if (inviteCode.IsEmpty())
+                          inviteCode = RegistrantInviteCodeService.Create(surveyResponse.ID.Value, getRegistrant.ID.Value, currentUserId, msgs, null);                        
+
+                      BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, inviteCode.Code, null));
                   }
                   else
-                  {
                       BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, null, null));
-                  }
+
                   SurveyResponseRegistrantService.CreateSurveyResponseRegistrant(surveyResponse.ID.Value, getRegistrant.ID.Value, currentUserId, msgs);
               });
         }

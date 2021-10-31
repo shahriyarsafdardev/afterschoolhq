@@ -3,6 +3,7 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace AfterSchoolLibrary.Services
@@ -43,6 +44,9 @@ namespace AfterSchoolLibrary.Services
 
             return registrantInviteCode;
         }
+
+        public static RegistrantInviteCode GetActiveInviteCode(int registrantId, SystemMessages msgs, DatabaseConnection dc = null) =>
+            RegistrantInviteCode.LoadByRegistrantId(registrantId, msgs, dc).FirstOrDefault(m => !m.IsDeleted);
 
         private static string GenerateRandomCode()
         {
