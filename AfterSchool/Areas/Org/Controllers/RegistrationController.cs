@@ -539,18 +539,6 @@ namespace AfterSchool.Areas.Org.Controllers
             var registration = currentAccount.GetRegistration(id.ToGuid(), msgs);
             var selectedRegistration = currentAccount.GetRegistration(r.ToGuid(), msgs);
 
-            if (returnurl.IsNotEmpty())
-            {
-                var ra = selectedRegistration.GetRegistrantActivities(msgs).FirstOrDefault();
-                if (ra.IsNotEmpty())
-                {
-                    var activity = ra.GetActivity(msgs);
-
-                    if (activity.IsNotEmpty())
-                        returnurl = Url.Action("registrants", "activity", new { id = activity.Uid });
-                }
-            }
-
             selectedRegistration.CancelAll(msgs);
 
             if (msgs.HasNoErrors())

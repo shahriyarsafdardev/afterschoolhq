@@ -19411,3 +19411,11 @@ div.dataTables_wrapper div.dataTables_length label select {
 .emojionearea.emojionearea-inline > .emojionearea-editor {
     font-family: Segoe UI Emoji !important;
 }
+a.text-limit span {
+    display: block;
+    text-align: center;
+    width: 100%;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
