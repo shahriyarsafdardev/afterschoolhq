@@ -1136,8 +1136,8 @@ namespace AfterSchoolLibrary.Services
                         if (activityGroup.IsNotEmpty())
                         {
                             activity.ActivityGroupId = activityGroup.ID.Value;
-                            activity.GradeLevelStart = activityGroup.MinGradeLevelId;
-                            activity.GradeLevelEnd = activityGroup.MaxGradeLevelId;
+                            activity.GradeLevelStart = activity.GradeLevelStart.IsNotEmpty() ? activity.GradeLevelStart : activityGroup.MinGradeLevelId;                            
+                            activity.GradeLevelEnd = activity.GradeLevelEnd.IsNotEmpty() ? activity.GradeLevelEnd : activityGroup.MaxGradeLevelId;
                             activity.GenderRestriction = activityGroup.GenderRestriction;
                         }
 
@@ -2203,7 +2203,8 @@ namespace AfterSchoolLibrary.Services
                 ras = RegistrantActivity.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc)
                     .Where(x =>
                         x.AssignmentTypeId != RegistrationAssignmentType.Invited &&
-                        x.AssignmentTypeId != RegistrationAssignmentType.Declined
+                        x.AssignmentTypeId != RegistrationAssignmentType.Declined &&
+                        x.AssignmentTypeId != RegistrationAssignmentType.Interested
                     ).ToList();
 
             return ras;
@@ -2500,7 +2501,17 @@ namespace AfterSchoolLibrary.Services
         /// <returns></returns>
         public static DateTime? GetFirstDate(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return activity.GetSchedule(msgs, dc)?.GetNextInstances(1, activity, msgs, dc).FirstOrDefault();
+            var schedule = activity.GetSchedule(msgs, dc);
+
+            if (schedule.IsNotEmpty())
+            {
+                if (schedule.IsOngoing)
+                    return schedule.GetNextInstances(1, activity, msgs, dc).FirstOrDefault(); 
+
+                return schedule.GetInstances(msgs: msgs, dc: dc).FirstOrDefault()?.StartDateTime;
+            }
+
+            return null;
         }
 
         /// <summary>

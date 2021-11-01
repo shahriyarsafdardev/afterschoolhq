@@ -581,15 +581,7 @@ namespace AfterSchoolLibrary.Models
                 if (!MaxGradeId.HasValue)
                     MaxGradeId = gradeLevels.Last().ID;
 
-                GradeLevel registrantGradeLevel = null;
-                if (Helpers.Utilities.IsAlreadyJsonString(registrantGradeLevelAnswer.Text))
-                {
-                    var data = Helpers.Utilities.GetKeyValuePairs(registrantGradeLevelAnswer.Text);
-                    var registrantGradeLevelAnswerText = data.First().key.ToLower().Trim();
-                    registrantGradeLevel = gradeLevels.Where(m => m.Name.ToLower() == data.First().key.ToLower().Trim()).FirstOrDefault();
-                }
-                else if (registrantGradeLevelAnswer.IsNotEmpty())
-                    registrantGradeLevel = gradeLevels.FirstOrDefault(gradeLevel => gradeLevel.Abbreviation.IsSameAs(registrantGradeLevelAnswer.Text) || (registrantGradeLevelAnswer.Text.MaxChars(gradeLevel.Abbreviation.Length) == gradeLevel.Abbreviation));
+                GradeLevel registrantGradeLevel = gradeLevels.FirstOrDefault(gradeLevel => GradeLevel.VerifyGradeLevel(registrantGradeLevelAnswer, gradeLevel));
 
                 if (registrantGradeLevel.IsNotEmpty() && 
                     registrantGradeLevel.ID.IsNotEmpty() && 

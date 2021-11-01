@@ -1,4 +1,5 @@
-﻿using AfterSchoolLibrary.Models;
+﻿using AfterSchoolLibrary.Billing;
+using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using Newtonsoft.Json;
@@ -237,15 +238,18 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
             // check if this same charge has been posted already and tracked.
             var transaction = Transaction.LoadByStripeChargeOrRefundId(chargeId, msgs);
-
+            var isStripeInvoiceTransferData = stripeInvoice.TransferData.IsNotEmpty();
             if (transaction.IsNotEmpty())
             {
                 msgs.Add($"Ignoring - Transaction has already been processed - Stripe Sub ID {stripeSubscriptionId}", MessageType.Notice);
+                msgs.Add($"TransactionID {transaction.ID.Value}", MessageType.Notice);
                 return ReturnOK(msgs);
             }
 
-            // send payment succeeded email
-             purchasingAccount.SendSubscriptionPaymentSucceeded(rsp, plan);
+            // send payment succeeded email, unless payment was made before today (for previously failed webhooks)
+            var wasPaidToday = (bool)stripeInvoice.StatusTransitions?.PaidAt.IsNotEmpty() && stripeInvoice.StatusTransitions.PaidAt.Value.Date >= DateTime.Today.Date;
+            if (wasPaidToday)
+                purchasingAccount.SendSubscriptionPaymentSucceeded(rsp, plan);
 
             AfterSchoolLibrary.Models.Account convenienceFeePayer;
             AfterSchoolLibrary.Models.Account transactionFeePayer;
@@ -260,11 +264,13 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             else
                 transactionFeePayer = billingAccount;
 
+            var charge = AfterSchoolLibrary.Billing.StripeHelper.GetCharge(stripeInvoice.ChargeId, msgs);
+            var amountRefunded = charge.IsNotEmpty() && charge.AmountRefunded.IsNotEmpty() ? charge.AmountRefunded : 0m;
             //we will need this logic to ensure we are adding pro-rated amount in ActivityPayment and RegistrantSubscriptionPlan
-            var amountPaidByParent = stripeInvoice.AmountPaid > 0 ? (decimal)stripeInvoice.AmountPaid / 100 : 0m;
+            var amountPaidByParent = stripeInvoice.AmountPaid > 0 ? ((decimal)stripeInvoice.AmountPaid / 100 ) : 0m;
             // NOTE: need to do a check if our data is different than stripe. What if stripe.InvoiceAmount != rsp.Amount ?
             var amountReceivedByProvider = amountPaidByParent - (rsp.ConvenienceFee + rsp.PaymentTypeFee);
-            var isStripeInvoiceTransferData = stripeInvoice.TransferData.IsNotEmpty();
+            
             if (isStripeInvoiceTransferData)
                 amountReceivedByProvider = (decimal)stripeInvoice.TransferData.Amount / 100;
 
@@ -295,11 +301,54 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 CreditCardFeePayer = transactionFeePayer,
             };
 
-            billingAccount.ProcessSubscriptionPlanPayment(checkoutObject, plan, rsp, msgs);
+            // dont process if we made a full refund, otherwise create a transaction with amount - amount refunded
+            if (amountRefunded != charge.Amount)
+            {
+                billingAccount.ProcessSubscriptionPlanPayment(checkoutObject, plan, rsp, msgs);
+                msgs.Add($"New Transaction Created {checkoutObject.Transaction.ID.Value}", MessageType.Notice);
+               // only want to create a transfer if there isnt an existing one from stripe
+                if (!isStripeInvoiceTransferData && msgs.HasNoErrors())
+                    checkoutObject.Transaction.CreateStripeTransfer(WebUser.Load(1, msgs), msgs);
 
-            // need to create transfer if there wasnt one originally, use webuser
-            if (!isStripeInvoiceTransferData && msgs.HasNoErrors())
-                checkoutObject.Transaction.CreateStripeTransfer(WebUser.Load(1, msgs), msgs);
+                if (amountRefunded > 0 && msgs.HasNoErrors())
+                {
+                    msgs.Add($"Partial Refund: {amountRefunded}", MessageType.Notice);
+                    
+                    var stripeRefunds = StripeHelper.GetRefunds(chargeId, msgs);
+                    stripeRefunds.ForEach(stripeRefund =>
+                    {
+                        if (stripeRefund.TransferReversal.IsEmpty())
+                        {
+                            // NOTE: check if refund has a transfer, not sure how/if to handle
+                        }
+
+                        // check if transaction exists for refund
+                        var refundTransaction = Transaction.LoadByStripeChargeOrRefundId(stripeRefund.Id, msgs);
+
+                        // if no refund record exists in our db, create it from the transaction added to the checkoutObject
+                        // NOTE: not sure how to handle fees on partial refunds??
+                        if (refundTransaction.IsEmpty())
+                        {
+                            refundTransaction = checkoutObject.Transaction;
+                            refundTransaction.CreateNewRefund(
+                                stripeRefund.Amount,
+                                0,
+                                0,
+                                stripeRefund.Id,
+                                TransactionType.Refund,
+                                refundTransaction.PaymentTypeId,
+                                refundTransaction.PaymentSourceTypeId,
+                                WebUser.Load(1, msgs),
+                                msgs
+                                );
+                        }
+
+                    });
+                }
+            } else
+            {
+                msgs.Add("Full refund already Made", MessageType.Notice);
+            }
 
             if (msgs.HasErrors())
                 return Return500(msgs);
