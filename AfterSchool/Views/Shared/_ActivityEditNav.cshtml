@@ -13,8 +13,8 @@
     var editcostactive = activeMenu == "editcost" ? "active" : "";
     var editconfirmationactive = activeMenu == "editconfirmation" ? "active" : "";
 
-    var isRestrictionsSaved = isActive && activeMenu != "editrestrictions" && activeMenu != "editsetup";
-    var isBeforeRestrictions = isScheduleActive && activeMenu != "editrestrictions" && activeMenu != "editsetup";
+    var isRestrictionsSaved = (isActive && activeMenu != "editrestrictions" && activeMenu != "editsetup") || ViewBag.SaveOnly != null;
+    var isBeforeRestrictions = (isScheduleActive && activeMenu != "editrestrictions" && activeMenu != "editsetup") || ViewBag.SaveOnly != null;
 }
 <div id="list1" class="dd">
     <ol class="dd-list">
@@ -32,7 +32,7 @@
                                 new ViewDataDictionary {
                                 { "Url", Url.Action("editrestrictions", "activity", new { id = Model.Uid.ToString(), isnew = Request["isnew"] }) },
                                 { "Text", "Restrictions" },
-                                { "IsActive", isScheduleActive && activeMenu != "editsetup" },
+                                { "IsActive", (isScheduleActive && activeMenu != "editsetup") },
                 }
                             );
                     }
@@ -48,7 +48,7 @@
                                 new ViewDataDictionary {
                                 { "Url", Url.Action("editschedule", "activity", new { id = Model.Uid.ToString(), isnew = Request["isnew"] }) },
                                 { "Text", "Schedule" },
-                                { "IsActive", isBeforeRestrictions },
+                                { "IsActive", isBeforeRestrictions},
                 }
                             );
                     }
