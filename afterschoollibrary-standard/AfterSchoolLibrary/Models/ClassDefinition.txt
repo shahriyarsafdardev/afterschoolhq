@@ -995,6 +995,7 @@ property: Description, string, NVarChar "4000"
 property: QuestionTypeId, QuestionType, Int
 property: QuestionDataTypeId, QuestionDataType, Int
 property: IsActive, bool, Bit
+property: IsDeleted, bool, Bit
 property: IsRequired, bool, Bit
 property: IsLocked, bool, Bit
 property: IsAnswerDescriptionEnabled, bool, Bit
@@ -1026,6 +1027,7 @@ property: FormId, int?, Int, required
 property: DisplayOrder, int?, Int
 property: RegistrantTypeId, RegistrantType, Int
 property: QuestionGroupDataTypeId, QuestionGroupDataType, Int
+property: IsActive, bool, Bit
 property: IsDeleted, bool, Bit
 loadmethod: FormId, List<>
 loadmethod: FormId|RegistrantTypeId, List<>

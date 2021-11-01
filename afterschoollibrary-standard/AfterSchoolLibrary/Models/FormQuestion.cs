@@ -32,6 +32,7 @@ namespace AfterSchoolLibrary.Models
 		public QuestionType QuestionTypeId { get { return (QuestionType)MDV["QuestionTypeId"].Value; } set { MDV["QuestionTypeId"].Value = value; } }
 		public QuestionDataType QuestionDataTypeId { get { return (QuestionDataType)MDV["QuestionDataTypeId"].Value; } set { MDV["QuestionDataTypeId"].Value = value; } }
 		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
+		public bool IsDeleted { get { return (bool)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
 		public bool IsRequired { get { return (bool)MDV["IsRequired"].Value; } set { MDV["IsRequired"].Value = value; } }
 		public bool IsLocked { get { return (bool)MDV["IsLocked"].Value; } set { MDV["IsLocked"].Value = value; } }
 		public bool IsAnswerDescriptionEnabled { get { return (bool)MDV["IsAnswerDescriptionEnabled"].Value; } set { MDV["IsAnswerDescriptionEnabled"].Value = value; } }
@@ -54,6 +55,7 @@ namespace AfterSchoolLibrary.Models
 			this.QuestionTypeId = QuestionType.NotSet;
 			this.QuestionDataTypeId = QuestionDataType.NotSet;
 			this.IsActive = false;
+			this.IsDeleted = false;
 			this.IsRequired = false;
 			this.IsLocked = false;
 			this.IsAnswerDescriptionEnabled = false;
@@ -75,6 +77,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "QuestionTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "QuestionDataTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IsActive", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsRequired", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsLocked", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsAnswerDescriptionEnabled", System.Data.SqlDbType.Bit);
@@ -195,6 +198,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["IsActive"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsDeleted"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
