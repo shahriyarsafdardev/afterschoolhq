@@ -348,7 +348,16 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public FormQuestionGroup GetFormQuestionGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
+		public static List<FormQuestion> LoadByFormQuestionGroupIdAndNotDeleted(int FormQuestionGroupId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["FormQuestionGroupId"], FormQuestionGroupId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], false);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public FormQuestionGroup GetFormQuestionGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return FormQuestionGroup.Load(this.FormQuestionGroupId.Value, msgs, dc);
         }

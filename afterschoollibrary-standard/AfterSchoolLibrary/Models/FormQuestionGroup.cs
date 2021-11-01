@@ -233,7 +233,7 @@ namespace AfterSchoolLibrary.Models
         public List<FormQuestion> GetAllQuestions(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (this.ID.HasValue)
-                return FormQuestion.LoadByFormQuestionGroupId(this.ID.Value, msgs, dc).OrderBy(x => x.DisplayOrder).ToList();
+                return FormQuestion.LoadByFormQuestionGroupIdAndNotDeleted(this.ID.Value, msgs, dc).OrderBy(x => x.DisplayOrder).ToList();
 
             return new List<FormQuestion>();
         }

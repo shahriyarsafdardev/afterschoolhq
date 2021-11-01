@@ -889,7 +889,8 @@ namespace AfterSchool.Areas.Org.Controllers
                                     QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
                                     RegistrantTypeId = RegistrantType.Individual,
                                     Name = Request.Params["name-0"],
-                                    IsDeleted = false
+                                    IsDeleted = false,
+                                    IsActive = true
                                 };
                                 amsgs.AddRange(questionGroup.Save(adc));
                                 questions = new List<FormQuestion>();
@@ -959,6 +960,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                         Link = Request.Params[string.Format("new-link-text-{0}", i)],
                                         Description = Request.Params[string.Format("new-description-{0}", i)],
                                         IsActive = true,
+                                        IsDeleted = false,
                                         IsRequired = Request.Params[string.Format("new-required-{0}", i)].IsBoolean(),
                                         IsAnswerDescriptionEnabled = Request.Params[string.Format("new-description-enabled-{0}", i)].IsBoolean()
                                     };
@@ -1031,7 +1033,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 return HttpNotFound();
 
             var questionToDelete = FormQuestion.Load(id.ToInteger(), msgs);
-            questionToDelete.IsActive = false;
+            questionToDelete.IsDeleted = true;
             msgs.AddRange(questionToDelete.Save());
             
             // Show Success Message
@@ -1076,7 +1078,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var questionsInThisSection = FormQuestion.LoadByFormQuestionGroupId(FormQuestionGroupId: sectionToDelete.ID.Value, msgs: msgs);
             foreach (var item in questionsInThisSection)
             {
-                item.IsActive = false;
+                item.IsDeleted = true;
                 msgs.AddRange(item.Save());
             }
 
