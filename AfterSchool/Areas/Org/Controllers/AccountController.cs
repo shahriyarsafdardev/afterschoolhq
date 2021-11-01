@@ -55,8 +55,8 @@ namespace AfterSchool.Areas.Org.Controllers
       Database.ExecuteTransaction(
          action: (SystemMessages amsgs, DatabaseConnection adc) =>
          {
-                 // ..update profile title if account name has been changed 
-                 if (name.IsNotEmpty() && a.Name != name)
+           // ..update profile title if account name has been changed 
+           if (name.IsNotEmpty() && a.Name != name)
            {
              var profile = a.GetAccountProfile(amsgs, adc);
 
@@ -867,8 +867,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
               if (qg.IsNumber())
               {
-                        // create or update question groups
-                        if (qg.ToInteger() == 0)
+                // create or update question groups
+                if (qg.ToInteger() == 0)
                 {
                   questionGroup = new FormQuestionGroup()
                   {
@@ -900,34 +900,34 @@ namespace AfterSchool.Areas.Org.Controllers
                   }
                 }
 
-                        // save existing questions
-                        questions.ForEach(question =>
-                        {
-                      if (!question.IsLocked && question.IsActive)
-                      {
-                        question.IsActive = Request.Params[$"active-{question.ID}"].IsBoolean();
-                        question.IsRequired = Request.Params[$"required-{question.ID}"].IsBoolean();
-                        question.IsAnswerDescriptionEnabled = Request.Params[$"answerDescription-{question.ID}"].IsBoolean();
+                // save existing questions
+                questions.ForEach(question =>
+                {
+                  if (!question.IsLocked && question.IsActive)
+                  {
+                    question.IsActive = Request.Params[$"active-{question.ID}"].IsBoolean();
+                    question.IsRequired = Request.Params[$"required-{question.ID}"].IsBoolean();
+                    question.IsAnswerDescriptionEnabled = Request.Params[$"answerDescription-{question.ID}"].IsBoolean();
 
-                        if (question.QuestionDataTypeId == QuestionDataType.NotSet)
-                        {
-                          question.Text = Request.Params[$"text-{question.ID}"];
-                                  // for Text Block
-                                  question.Description = Request.Params[$"description-{question.ID}"];
-                          question.Options = Request.Params[$"options-text-{question.ID}"];
-                          question.Link = Request.Params[$"link-text-{question.ID}"];
-                          question.DisplayOrder = Request.Params[$"displayOrderId-{question.ID}"].ToInteger();
-                          question.QuestionTypeId = (QuestionType)Request.Params[$"questiontype-{question.ID}"].ToInteger();
-                        }
+                    if (question.QuestionDataTypeId == QuestionDataType.NotSet)
+                    {
+                      question.Text = Request.Params[$"text-{question.ID}"];
+                              // for Text Block
+                              question.Description = Request.Params[$"description-{question.ID}"];
+                      question.Options = Request.Params[$"options-text-{question.ID}"];
+                      question.Link = Request.Params[$"link-text-{question.ID}"];
+                      question.DisplayOrder = Request.Params[$"displayOrderId-{question.ID}"].ToInteger();
+                      question.QuestionTypeId = (QuestionType)Request.Params[$"questiontype-{question.ID}"].ToInteger();
+                    }
 
-                        question.LastModifiedBy = currentUser.ID;
-                        question.LastModifiedDate = DateTime.UtcNow;
-                        amsgs.AddRange(question.Save(adc));
-                      }
-                    });
+                    question.LastModifiedBy = currentUser.ID;
+                    question.LastModifiedDate = DateTime.UtcNow;
+                    amsgs.AddRange(question.Save(adc));
+                  }
+                });
 
-                        // save new questions
-                        if (Request.Form["newquestionsIds"].Length > 0)
+                // save new questions
+                if (Request.Form["newquestionsIds"].Length > 0)
                 {
                   var questionIds = Request.Form["newquestionsIds"];
                   var questionsList = questionIds.Split(',');
@@ -941,8 +941,8 @@ namespace AfterSchool.Areas.Org.Controllers
                       CreatedBy = currentUser.ID,
                       LastModifiedBy = currentUser.ID,
                       DisplayOrder = Request.Params[string.Format("new-sort-{0}", i)].ToInteger(),
-                              //questionGroup.GetQuestionCount(amsgs, adc) + 1,
-                              FormQuestionGroupId = questionGroup.ID,
+                      //questionGroup.GetQuestionCount(amsgs, adc) + 1,
+                      FormQuestionGroupId = questionGroup.ID,
                       IsTemplate = false,
                       QuestionDataTypeId = QuestionDataType.NotSet,
                       QuestionTypeId = (QuestionType)Request.Params[string.Format("new-questiontype-{0}", i)].ToInteger(),
@@ -983,30 +983,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
       //temporarily disable organization groups
       organizationGroups = new List<FormQuestionGroup>();
-
-      //make sure only question groups with a setting of individual or organization are added to the final count
-      questionGroups.Clear();
-      questionGroups.AddRange(individualGroups);
-      questionGroups.AddRange(organizationGroups);
-
-      var currentIndex = -1;
-
-      if (questionGroup.IsNotEmpty())
-        currentIndex = questionGroups.FindIndex(x => x.ID.Value == questionGroup.ID.Value);
-
-      switch (cmd)
-      {
-                questionGroups = form.GetQuestionGroups(msgs);
-      individualGroups = questionGroups
-          .Where(x => x.RegistrantTypeId == RegistrantType.Individual)
-          .OrderBy(x => x.DisplayOrder)
-          .ToList();
-      //temporarily disable organization groups
-      //organizationGroups = questionGroups
-      //    .Where(x => x.RegistrantTypeId == RegistrantType.Organization)
-      //    .OrderBy(x => x.DisplayOrder)
-      //    .ToList();
-
 
       //make sure only question groups with a setting of individual or organization are added to the final count
       questionGroups.Clear();
