@@ -800,12 +800,7 @@
         });
         var commaIndex = optionString.lastIndexOf(",");
         var optionWithoutLastComma = optionString.substring(0, commaIndex);
-        if (mainIndex == 1 && optionType != 'Emoji') {
-            $(this).closest('tr').remove();
-        }
-        else {
-            setOptions(selectedQuestion, optionWithoutLastComma, optionType);
-        }
+        setOptions(selectedQuestion, optionWithoutLastComma, optionType);
     }
 
     function addTextBlock() {
