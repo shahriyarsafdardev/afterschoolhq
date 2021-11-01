@@ -200,7 +200,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             var stripeSubscriptionId = stripeInvoice.SubscriptionId;
             var chargeId = stripeInvoice.ChargeId;
             var rsp = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(stripeSubscriptionId, msgs);
-
+            
             if (rsp.IsEmpty())
             {
                 msgs.Add($"Ignoring - Registrant Subscription Plan not found - Stripe Sub ID {stripeSubscriptionId}", MessageType.Notice);
@@ -322,25 +322,24 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                             // NOTE: check if refund has a transfer, not sure how/if to handle
                         }
                         // check if transaction exists for refund
-                        var refundTransaction = Transaction.LoadByStripeChargeOrRefundId(stripeRefund.Id, msgs);
+                        var refundOriginalTransaction = Transaction.LoadByStripeChargeOrRefundId(stripeRefund.Id, msgs);
 
                         // if no refund record exists in our db, create it from the transaction added to the checkoutObject
                         // NOTE: not sure how to handle fees on partial refunds??
-                        if (refundTransaction.IsEmpty())
-                        {
-                            refundTransaction = checkoutObject.Transaction;
-                            refundTransaction.CreateNewRefund(
-                                stripeRefund.Amount,
-                                0,
-                                0,
-                                stripeRefund.Id,
-                                TransactionType.Refund,
-                                refundTransaction.PaymentTypeId,
-                                refundTransaction.PaymentSourceTypeId,
-                                WebUser.Load(1, msgs),
-                                msgs
-                                );
-                        }
+                        if (refundOriginalTransaction.IsEmpty())
+                            refundOriginalTransaction = checkoutObject.Transaction;
+                        
+                        refundOriginalTransaction.CreateNewRefund(
+                            stripeRefund.Amount,
+                            0,
+                            0,
+                            stripeRefund.Id,
+                            TransactionType.Refund,
+                            refundOriginalTransaction.PaymentTypeId,
+                            refundOriginalTransaction.PaymentSourceTypeId,
+                            WebUser.Load(1, msgs),
+                            msgs
+                            );
 
                     });
                 }

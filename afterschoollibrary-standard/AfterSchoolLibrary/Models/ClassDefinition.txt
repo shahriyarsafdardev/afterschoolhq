@@ -1026,8 +1026,10 @@ property: FormId, int?, Int, required
 property: DisplayOrder, int?, Int
 property: RegistrantTypeId, RegistrantType, Int
 property: QuestionGroupDataTypeId, QuestionGroupDataType, Int
+property: IsDeleted, bool, Bit
 loadmethod: FormId, List<>
 loadmethod: FormId|RegistrantTypeId, List<>
+loadmethod: FormId|IsDeleted,  List<>
 [end]
 
 [begin]

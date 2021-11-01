@@ -409,6 +409,10 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.AddFeatureTypeSurvey_20211004.Do(amsgs, adc);
                     // Migrations.UpdateScheduleDaysOfTheWeek_20211016.Do(amsgs, adc);
 
+                    Migrations.UpdateFormQuestionGroup_20211003.Do(amsgs, adc);
+
+
+
 
                     // Migrations.AddProfilesToAllAccounts_20200727.Do(amsgs, adc);
 
