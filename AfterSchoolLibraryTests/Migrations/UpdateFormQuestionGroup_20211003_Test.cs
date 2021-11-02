@@ -26,7 +26,7 @@ namespace AfterSchoolLibraryTests.Migrations
         {
             // Arrange
             if (msgs.IsEmpty()) msgs = new SystemMessages();
-            FormQuestionGroup = FormQuestionGroupFactory.Create(formId: Form.ID.Value, isActive: false, msgs: msgs, dc: dc);
+            FormQuestionGroup = FormQuestionGroupFactory.Create(formId: Form.ID.Value, isDeleted: false, msgs: msgs, dc: dc);
 
             // Act
             AfterSchoolLibrary.Migrations.UpdateFormQuestionGroup_20211003.Do(msgs, dc);
@@ -36,8 +36,8 @@ namespace AfterSchoolLibraryTests.Migrations
             // Assert
             Assert.True(msgs.HasNoErrors());
             Assert.NotNull(expected);
-            Assert.False(FormQuestionGroup.IsActive);
-            Assert.True(expected.IsActive);
+            Assert.False(FormQuestionGroup.IsDeleted);
+            Assert.True(expected.IsDeleted);
         }
 
         [Fact(DisplayName = "No change on existing active group")]
@@ -45,7 +45,7 @@ namespace AfterSchoolLibraryTests.Migrations
         {
             // Arrange
             if (msgs.IsEmpty()) msgs = new SystemMessages();
-            FormQuestionGroup = FormQuestionGroupFactory.Create(formId: Form.ID.Value, isActive: true, msgs: msgs, dc: dc);
+            FormQuestionGroup = FormQuestionGroupFactory.Create(formId: Form.ID.Value, isDeleted: false, msgs: msgs, dc: dc);
 
             // Act
             AfterSchoolLibrary.Migrations.UpdateFormQuestionGroup_20211003.Do(msgs, dc);
@@ -55,8 +55,8 @@ namespace AfterSchoolLibraryTests.Migrations
             // Assert
             Assert.True(msgs.HasNoErrors());
             Assert.NotNull(expected);
-            Assert.True(FormQuestionGroup.IsActive);
-            Assert.True(expected.IsActive);
+            Assert.True(FormQuestionGroup.IsDeleted);
+            Assert.True(expected.IsDeleted);
         }
     }
 }
