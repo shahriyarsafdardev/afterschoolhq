@@ -765,7 +765,6 @@
     <Content Include="sitemap-home.xml" />
     <Content Include="style.css" />
     <Content Include="teachers.html" />
-    <Content Include="team.html" />
     <Content Include="tos.html" />
     <Content Include="UnsupportedBrowser.html" />
     <Content Include="404.html" />
