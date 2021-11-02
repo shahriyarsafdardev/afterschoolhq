@@ -2489,7 +2489,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
             ViewBag.IsFullScreen = isNewActivity;
             ViewBag.Messages = msgs;
-            TempData["Messages"] = msgs;
+            SetTempMessage(msgs);
 
             if (isFromActivityHome)
                 return Redirect(activity.ShortHomePageUrl);
