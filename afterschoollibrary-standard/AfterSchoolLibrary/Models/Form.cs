@@ -244,7 +244,7 @@ namespace AfterSchoolLibrary.Models
             };
             msgs.AddRange(form.Save(dc: dc));
 
-            var groups = FormQuestionGroup.LoadByFormId(this.ID.Value, dc: dc);
+            var groups = this.FormTypeId == formType || formType == FormType.Registration ? FormQuestionGroup.LoadByFormId(FormId:this.ID.Value, dc:dc): new List<FormQuestionGroup>();
             foreach (var group in groups)
             {
                 var questions = FormQuestion.LoadByFormQuestionGroupId(group.ID.Value, dc: dc);

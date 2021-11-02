@@ -21,7 +21,7 @@
             <div class="pull-right">
                 @if (showFormFields)
                 {
-                    <button class="btn btn-primary btn-space md-trigger mdpopup" data-modal="modal-newform">
+                    <button class="btn btn-primary btn-space md-trigger mdpopup" data-modal="modal-newform" onclick="showFormType()">
                         <i class="icon icon-left s7-plus"></i>
                         Add Form
                     </button>
@@ -86,7 +86,7 @@
                                     <td>
                                         @if (showFormFields)
                                         {
-                                            <button class="btn btn-default btn-sm md-trigger" data-modal="modal-newform" onclick="copy(@form.ID, '@form.Name')">
+                                            <button class="btn btn-default btn-sm md-trigger" data-modal="modal-newform" onclick="copy(@form.ID, '@form.Name' , '@form.FormTypeId')">
                                                 <i class="icon icon-left s7-copy-file"></i> Copy
                                             </button>
                                         }
@@ -131,7 +131,7 @@
                 </div>
                 @if (accountPackage.HasFeature(FeatureType.Survey))
                 {
-                    <div class="form-group">
+                    <div class="form-group formTypeRow">
                         <label>Form Type</label>
                         <select class="form-control formtype-select" id="formtype" name="formtype">
                             @foreach (var type in Enum.GetValues(typeof(FormType)).Cast<FormType>().Where(a => !a.Equals(FormType.NotSet)))
@@ -165,11 +165,21 @@
 
 @section scripts{
     <script>
-        function copy(id, name) {
+        function copy(id, name, formtype) {
             $('.modal-title').html('Copy Registration Form');
             $('#form-new').attr('action', '/org/account/formedit/0?copyfrom=' + id);
             $('#name').val(name + ' Copy');
+            if (formtype == "Survey")
+                $('#formtype').val('2');
+            else
+                $('#formtype').val('1');
+           
+            $('.formTypeRow').addClass("hide");
             $('#name').focus();
+        }
+
+        function showFormType() {
+            $('.formTypeRow').removeClass("hide");
         }
 
         $(document).ready(function () {
