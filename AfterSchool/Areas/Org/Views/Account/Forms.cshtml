@@ -19,6 +19,10 @@
 
         <div class="panel-heading">
             <div class="pull-right">
+                <input type="text" id="search" class="form-control searchFormInput" placeholder="Search Forms" />
+                <button class="btn btn-primary searchFormBtn" id="searchBtn">
+                    Search
+                </button>
                 @if (showFormFields)
                 {
                     <button class="btn btn-primary btn-space md-trigger mdpopup" data-modal="modal-newform" onclick="showFormType()">
@@ -187,6 +191,26 @@
                 $("#formtype").val("2");
                 $(".mdpopup").trigger('click');
             }
+
+
+            $("#searchBtn").on("click", function () {
+                var value = $("#search").val().toLowerCase();
+                $("table tr").each(function (index) {
+                    if (index != 0) {
+
+                        $row = $(this);
+
+                        var id = $row.find("td:eq(1)").text().toLowerCase();
+
+                        if (id.indexOf(value) != 0) {
+                            $(this).hide();
+                        }
+                        else {
+                            $(this).show();
+                        }
+                    }
+                });
+            });
         })
     </script>
 }

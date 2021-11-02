@@ -1079,3 +1079,18 @@
 .emojionearea-tones-square {
     display: none;
 }
+
+.searchFormBtn {
+    height: 39px;
+    margin-top: -4px;
+    background-color: white;
+    color: #00b492;
+    width: 100px;
+}
+.searchFormInput {
+    float: left;
+    width: 250px;
+    height: 38px;
+    margin-right: 10px;
+    margin-bottom:10px
+}
