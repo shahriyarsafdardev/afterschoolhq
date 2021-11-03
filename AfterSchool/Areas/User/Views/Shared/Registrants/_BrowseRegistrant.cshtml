@@ -4,9 +4,7 @@
     var grade = Model.GetAnswer(QuestionDataType.RegistrantGrade)?.Text;
     var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
     var regName = !isTechSupport ? Model.Name : Model.GetFirstNameLastInitial();
-    var gradeValue = grade.IsNotEmpty() ? @UILabel.GetGradeDescription(grade) : "";
-    if (gradeValue == "K")
-        gradeValue = "Kindergarten";
+    var gradeValue = @UILabel.GetGradeDescription(grade);
 }
 
 <div class="col-sm-12 col-md-6 col-lg-4">
