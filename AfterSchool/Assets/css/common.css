@@ -1080,6 +1080,11 @@
     display: none;
 }
 
+.selectedBtn {
+    background-color: #00AE83 !important;
+    color: white !important;
+}
+
 .searchFormBtn {
     height: 39px;
     margin-top: -4px;
