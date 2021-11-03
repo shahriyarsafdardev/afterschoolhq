@@ -581,6 +581,9 @@ namespace AfterSchoolLibrary.Services
             if (plan.PlanTypeId == SubscriptionPlanType.PostPayPlan || plan.PlanTypeId == SubscriptionPlanType.NotSet)
                 return null;
 
+            if (plan.EndDate.HasValue)
+                return plan.EndDate.Value.AddDays(1);
+
             return plan.PlanTypeId == SubscriptionPlanType.Subscription ?
                 plan.GetSubscriptionEndDate(participationObject, msgs)
                 : plan.GetPaymenPlanEndDate(msgs);
@@ -588,9 +591,7 @@ namespace AfterSchoolLibrary.Services
 
         private static DateTime? GetSubscriptionEndDate(this SubscriptionPlan plan, ParticipationObject participationObject, SystemMessages msgs = null)
         {
-            if (plan.EndDate.HasValue)
-                return plan.EndDate.Value.AddDays(1);
-            else if (participationObject.Schedule.IsNotEmpty() && participationObject.Schedule.EndDate.HasValue)
+            if (participationObject.Schedule.IsNotEmpty() && participationObject.Schedule.EndDate.HasValue)
                 return participationObject.Schedule.EndDate.Value.AddDays(1);
 
             return null;
@@ -598,11 +599,9 @@ namespace AfterSchoolLibrary.Services
 
         private static DateTime? GetPaymenPlanEndDate(this SubscriptionPlan plan,  SystemMessages msgs = null)
         {
-            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && plan.EndDate.HasValue)
-                return plan.EndDate.Value;
-            else if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && !plan.EndDate.HasValue)
+            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && !plan.EndDate.HasValue)
             {
-                var endDate = plan.StartDate.HasValue ? plan.StartDate.Value : DateTime.UtcNow;
+                var endDate = plan.StartDate ?? DateTime.UtcNow;
                 var periodsToAdd = plan.TotalPeriods.Value - plan.NumberOfPeriodsPrePaid.IfEmpty(0);
                 switch (plan.BillingPeriodTypeId)
                 {
