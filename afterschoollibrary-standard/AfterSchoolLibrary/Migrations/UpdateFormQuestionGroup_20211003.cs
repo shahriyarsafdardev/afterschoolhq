@@ -16,7 +16,7 @@ namespace AfterSchoolLibrary.Migrations
 
                     foreach (var item in formGroups)
                     {
-                        item.IsActive = true;
+                        item.IsDeleted = false;
                         amsgs.AddRange(item.Save(dc: adc));
                     }
                 },

@@ -131,24 +131,34 @@
         });
 
         $('#search-allactivities').click(function () {
+            $('.selectedBtn').removeClass('selectedBtn');
             searchableActivityType = '';
             search();
+            $("#search-allactivities").addClass('selectedBtn');
         });
 
         $('#search-physical').click(function () {
+            $('.selectedBtn').removeClass('selectedBtn');
             searchableActivityType = 'physical';
             search();
+            $("#search-physical").addClass('selectedBtn');
         });
 
         $('#search-sport').click(function () {
+            $('.selectedBtn').removeClass('selectedBtn');
             searchableActivityType = 'sport';
             search();
+            $("#search-sport").addClass('selectedBtn');
         });
 
         $('#search-virtual').click(function () {
+            $('.selectedBtn').removeClass('selectedBtn');
             searchableActivityType = 'virtual';
             search();
+            $("#search-virtual").addClass('selectedBtn');
         });
+
+        $('#search-physical').trigger('click');
     });
 
     function search() {
