@@ -227,9 +227,9 @@ namespace AfterSchool.Models
 
             if(!activity.GetParticipationObject().IsRegistrationFree && activity.CostPerRegistrant > 0 && !SessionVariables.CurrentAccount.CanReceivePaymentDeposits() && !activity.GetParticipationObject().IsExternalToAccount(SessionVariables.CurrentAccount))
             {
-                var addPayment = new SystemMessages();
-                addPayment.Add($"<a href=\"/org/account/paymentsoptions\">Add Payment Method</a>. To accept payments", MessageType.Error);
-                msgs.AddRange(addPayment);
+                var addPaymentMsgs = new SystemMessages();
+                addPaymentMsgs.Add($"<a href=\"/org/account/paymentsoptions\">Add Payment Method</a>. To accept payments", MessageType.Error);
+                msgs.AddRange(addPaymentMsgs);
             }
 
 
