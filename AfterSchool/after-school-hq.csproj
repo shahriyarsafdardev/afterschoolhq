@@ -691,7 +691,6 @@
     <Content Include="img\BCALogo.jpg" />
     <Content Include="img\billy2.png" />
     <Content Include="img\darye.png" />
-    <Content Include="img\david.png" />
     <Content Include="img\fee.png" />
     <Content Include="img\frank-mckenna-LhOjrOlcLx4-unsplash.jpg" />
     <Content Include="img\gabriel-baranski-vGICUyYW2CE-unsplash.jpg" />
@@ -766,7 +765,6 @@
     <Content Include="sitemap-home.xml" />
     <Content Include="style.css" />
     <Content Include="teachers.html" />
-    <Content Include="team.html" />
     <Content Include="tos.html" />
     <Content Include="UnsupportedBrowser.html" />
     <Content Include="404.html" />
