@@ -1277,7 +1277,7 @@ namespace AfterSchoolLibrary.Billing
             if (startDate.Value.Date.AddDays(-1).IsAfter(DateTime.UtcNow.Date))
                 options.TrialEnd = startDate.Value.AddDays(-1); // if start date is at least one day in the future, start a day before start date
             else if (startDate.Value < DateTime.UtcNow)
-                options.BillingCycleAnchor = DateTime.UtcNow.AddSeconds(300); // if start date already happended, start billing immediately (+300 seconds)
+                options.BillingCycleAnchor = null; // if start date already happended, start billing immediately (stripe defaults to now + trial days)
             else if (billingCycleAnchor.HasValue)
             {
                 //.. If registrant joins mid-period then we can set the billing cycle anchor as the last date of current cycle. for example if monthly and month is of 30th. set 30th.
