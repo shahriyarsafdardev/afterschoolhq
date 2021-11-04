@@ -2011,25 +2011,23 @@ namespace AfterSchool.Areas.Org.Controllers
             return studentsList;
         }
 
-        private static void CreateSurveys(int surveyRequestId, List<SelectListItem> studentList, int currentUserId, SystemMessages msgs)
+        private static void CreateSurveys(int surveyRequestId, List<SelectListItem> studentList, int currentUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
               studentList.ForEach(student => {
                   var surveyResponse = SurveyResponseService.CreateSurveyFeedback(surveyRequestId, student.Value.ToInteger(), SurveyFeedbackStatus.New, currentUserId, msgs);
-                  var getRegistrant = Registrant.Load(student.Value.ToInteger());
-                  var checkEmail = WebUser.LoadByEmail(getRegistrant.Email,msgs);
-                  if (getRegistrant.WebUserId.IsEmpty() && checkEmail.IsEmpty())
-                  {
-                      //check if code is already sent to student but student havn't registered yet.
-                      var inviteCode = RegistrantInviteCodeService.GetActiveInviteCode(student.Value.ToInteger(), msgs);
-                      if (inviteCode.IsEmpty())
-                          inviteCode = RegistrantInviteCodeService.Create(surveyResponse.ID.Value, getRegistrant.ID.Value, currentUserId, msgs, null);                        
+                  var masterRegistrant = Registrant.Load(student.Value.ToInteger());
 
-                      BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, inviteCode.Code, null));
+                  if (masterRegistrant.WebUserId.IsEmpty())
+                  {
+                      var inviteCode = RegistrantInviteCodeService.GetInviteCode(surveyResponseId: surveyResponse.ID.Value, 
+                          registrantId: masterRegistrant.ID.Value, 
+                          currentUserId: currentUserId,
+                          msgs: msgs,
+                          dc: dc);
+                      BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, inviteCode.Code, msgs));
                   }
                   else
-                      BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, null, null));
-
-                  SurveyResponseRegistrantService.CreateSurveyResponseRegistrant(surveyResponse.ID.Value, getRegistrant.ID.Value, currentUserId, msgs);
+                      BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, null, msgs));
               });
         }
         [HttpGet]

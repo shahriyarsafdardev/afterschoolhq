@@ -107,7 +107,6 @@ namespace AfterSchoolLibrary.Models
 			SurveyResponse.Create(dc);
 			RegistrantInviteCode.Create(dc);
 			RefreshToken.Create(dc);
-			SurveyResponseRegistrant.Create(dc);
 			
 
 			return msgs;
@@ -195,8 +194,7 @@ namespace AfterSchoolLibrary.Models
 			SurveyRequest.Alter(dc);
 			SurveyResponse.Alter(dc);
 			RegistrantInviteCode.Alter(dc);
-			RefreshToken.Alter(dc);
-			SurveyResponseRegistrant.Alter(dc);
+			RefreshToken.Alter(dc);			
 			
 
 			return msgs;
