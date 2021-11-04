@@ -18,6 +18,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Features\EmailConfirmation.feature.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <SpecFlowFeatureFiles Remove="Features\EmailConfirmation.feature" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="DotNetSeleniumExtras.WaitHelpers" Version="3.11.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
     <PackageReference Include="Selenium.Support" Version="3.141.0" />
