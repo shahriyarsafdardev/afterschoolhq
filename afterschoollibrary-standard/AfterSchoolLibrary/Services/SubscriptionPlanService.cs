@@ -573,7 +573,7 @@ namespace AfterSchoolLibrary.Services
             return true;
         }
 
-        public static DateTime? GetPlanEndDate(this SubscriptionPlan plan, ParticipationObject participationObject, SystemMessages msgs = null)
+        public static DateTime? GetPlanEndDateForRegistrantSubscription(this SubscriptionPlan plan, DateTime startDateTime, ParticipationObject participationObject, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty())
                 msgs = new SystemMessages();
@@ -581,12 +581,25 @@ namespace AfterSchoolLibrary.Services
             if (plan.PlanTypeId == SubscriptionPlanType.PostPayPlan || plan.PlanTypeId == SubscriptionPlanType.NotSet)
                 return null;
 
-            if (plan.EndDate.HasValue)
-                return plan.EndDate.Value.AddDays(1);
+            DateTime? endDate = null;
 
-            return plan.PlanTypeId == SubscriptionPlanType.Subscription ?
-                plan.GetSubscriptionEndDate(participationObject, msgs)
-                : plan.GetPaymenPlanEndDate(msgs);
+            if (plan.EndDate.HasValue)
+                endDate = plan.EndDate.Value;
+
+            if (endDate.IsEmpty())
+            {
+                if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
+                    endDate = plan.GetSubscriptionEndDate(participationObject, msgs);
+
+                if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
+                    endDate = plan.GetPaymenPlanEndDate(startDateTime, msgs);
+            }
+
+            // make sure endDate > startDate for stripe
+            if (startDateTime >= endDate)
+                endDate = startDateTime.AddDays(1);
+
+            return endDate;
         }
 
         private static DateTime? GetSubscriptionEndDate(this SubscriptionPlan plan, ParticipationObject participationObject, SystemMessages msgs = null)
@@ -597,12 +610,12 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        private static DateTime? GetPaymenPlanEndDate(this SubscriptionPlan plan,  SystemMessages msgs = null)
+        private static DateTime? GetPaymenPlanEndDate(this SubscriptionPlan plan, DateTime startDateTime,  SystemMessages msgs = null)
         {
-            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && !plan.EndDate.HasValue)
+            var endDate = startDateTime;
+            var periodsToAdd = plan.TotalPeriods.Value - plan.NumberOfPeriodsPrePaid.IfEmpty(0);
+            if(periodsToAdd > 0)
             {
-                var endDate = plan.StartDate ?? DateTime.UtcNow;
-                var periodsToAdd = plan.TotalPeriods.Value - plan.NumberOfPeriodsPrePaid.IfEmpty(0);
                 switch (plan.BillingPeriodTypeId)
                 {
                     case BillingPeriodType.Day:
@@ -624,13 +637,9 @@ namespace AfterSchoolLibrary.Services
                         msgs.Add("Payment plan missing billing period type", MessageType.ApiError);
                         break;
                 }
-                // subtract one day so the payment plan doesnt charge an extra time
-                return endDate.AddDays(-1);
             }
-
-            msgs.Add("Unable to set end date for payment plan", MessageType.ApiError);
-
-            return null;
+                    
+            return endDate;
         }
     }
 }

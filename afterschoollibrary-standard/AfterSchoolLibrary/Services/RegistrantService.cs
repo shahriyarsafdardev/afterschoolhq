@@ -161,7 +161,7 @@ namespace AfterSchoolLibrary.Services
                 var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, msgs);
                 // var stripeCouponId = plan.DoesCouponApply(checkoutObject.Coupon) ? checkoutObject.Coupon.StripeCouponId : null;
                 var startDateTime = submittedRecord.GetPlanStartDate(plan, checkoutObject.ParticipationObject, msgs, dc);
-                var endDateTime = plan.GetPlanEndDate(checkoutObject.ParticipationObject, msgs);
+                var endDateTime = plan.GetPlanEndDateForRegistrantSubscription(startDateTime, checkoutObject.ParticipationObject, msgs);
                 var platformFeePercent = new decimal?();
                 string stripeAccountId = null;
                 string stripeCouponId = null;
