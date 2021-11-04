@@ -2019,15 +2019,15 @@ namespace AfterSchool.Areas.Org.Controllers
 
                   if (masterRegistrant.WebUserId.IsEmpty())
                   {
-                      var inviteCode = RegistrantInviteCodeService.GetInviteCode(surveyResponseId: surveyResponse.ID.Value, 
-                          registrantId: masterRegistrant.ID.Value, 
+                      var inviteCode = RegistrantInviteCodeService.GetInviteCode(surveyResponseId: surveyResponse.ID.Value,
+                          registrantId: masterRegistrant.ID.Value,
                           currentUserId: currentUserId,
                           msgs: msgs,
                           dc: dc);
-                      BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, inviteCode.Code, msgs));
+                      BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, inviteCode.Code, null));
                   }
                   else
-                      BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, null, msgs));
+                      BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, null, null));
               });
         }
         [HttpGet]
