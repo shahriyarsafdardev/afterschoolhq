@@ -8,6 +8,8 @@ using System.Text;
 using TechTalk.SpecFlow;
 using AfterSchoolUIAutomationTests.Helpers.Extensions;
 using AfterSchoolUIAutomationTests.Parameters;
+using System.IO;
+using System.Reflection;
 
 namespace AfterSchoolUIAutomationTests.Steps
 {
@@ -23,7 +25,9 @@ namespace AfterSchoolUIAutomationTests.Steps
         public LoginStep(ScenarioContext scenarioContext)
         {
             _scenarioContext = scenarioContext;
-            webDriver = new ChromeDriver(AppDomain.CurrentDomain.BaseDirectory);
+            var chromeOptions = new ChromeOptions();
+            chromeOptions.AddArguments("headless");
+            webDriver = new ChromeDriver(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), chromeOptions);
             loginPage = new LoginPage(webDriver);
         }
 

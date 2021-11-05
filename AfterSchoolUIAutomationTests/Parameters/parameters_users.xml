@@ -2,9 +2,9 @@
 <PARAMETERS>
   <!--User Login Info-->
   <Login>
-    <LoginUrl>http://localhost:54849/login</LoginUrl>
-    <UserName>jimcarey2@yopmail.com</UserName>
-    <Password>123456</Password>
+    <LoginUrl>https://qa.afterschoolhq.com/login</LoginUrl>
+    <UserName>stephny@yopmail.com</UserName>
+    <Password>12345678</Password>
   </Login>
   <!-- Individual Account Signup Info -->
   <AccountSigUp>
