@@ -79,9 +79,9 @@
                           "~/Views/Shared/_SwitchButton.cshtml",
                           Model.IsInviteOnly,
                           new ViewDataDictionary() {
-                              { "checkboxname", "inviteonly" },
-                              { "checkboxid", "inviteonly" },
-                              { "disabled", !showInviteOnly }
+                                              { "checkboxname", "inviteonly" },
+                                              { "checkboxid", "inviteonly" },
+                                              { "disabled", !showInviteOnly }
           });
                     }
                 </div>
@@ -97,6 +97,25 @@
         }
 
         <input type="hidden" name="type" value="@((int)Model.ActivityTypeId)" />
+        <div class="form-group">
+            <label class="col-sm-3 control-label">
+                Continuous Enrollment? <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="With continuous enrollment, the sign up period stays open. This can be updated via settings." data-placement="top"></i>
+
+            </label>
+            <div class="col-sm-9">
+                @{
+                    Html.RenderPartial(
+                      "~/Views/Shared/_SwitchButton.cshtml",
+                      Model.IsContinuousEnrollment,
+                      new ViewDataDictionary() {
+                                                      { "checkboxname", "isContinuousEnrollmentEnabled" },
+                                                      { "checkboxid", "isContinuousEnrollmentEnabled" },
+                                                      { "disabled", false }
+                      });
+                }
+
+            </div>
+        </div>
 
         @if (group.IsEmpty())
         {
@@ -201,17 +220,17 @@
                                 activePeriod.StartDateTime.Value,
                                 new ViewDataDictionary()
                                 {
-                                { "name", "registrationopentime" },
-                                { "id", "registrationopentime" },
-                                { "required", true }
-    }
+                                                        { "name", "registrationopentime" },
+                                                        { "id", "registrationopentime" },
+                                                        { "required", true }
+}
                             );
                         }
 
                     </div>
                 </div>
 
-                <div class="form-group reg-period hide">
+                <div class="form-group reg-period hide" id="signUpCloseDate">
                     <label class="col-sm-3 control-label">@UILabel.RegistrationPeriodLabel() Close <span class="text-danger">*</span></label>
                     <div class="col-sm-5">
                         @{
@@ -234,10 +253,10 @@
                                 activePeriod.EndDateTime.Value,
                                 new ViewDataDictionary()
                                 {
-                                { "name", "registrationclosetime" },
-                                { "id", "registrationclosetime" },
-                                { "required", true }
-    }
+                                                        { "name", "registrationclosetime" },
+                                                        { "id", "registrationclosetime" },
+                                                        { "required", true }
+}
                             );
                         }
 
@@ -374,6 +393,21 @@
         });
 
         toggleCostFrequencyType($('#costfrequencytype-@((int)ActivityCostFrequencyType.PerClass)'));
+
+        $("#IsContinuousEnrollment").on('change', function () {
+            if ($("#IsContinuousEnrollment").is(':checked')) {
+                $("#signUpCloseDate").hide();
+                var myDate = new Date();
+                myDate.setFullYear(myDate.getFullYear() + 10);
+                $('#registrationclosedate').val(myDate.toJSON().slice(0, 10).split('-').reverse().join('/'));
+            }
+            else {
+                $("#signUpCloseDate").show();
+                var myDate = new Date();
+                myDate.setDate(date.getDate() + 7);
+                $('#registrationclosedate').val(myDate.toJSON().slice(0, 10).split('-').reverse().join('/'));
+            }
+        })
     });
 
     function toggleCostFrequencyType(obj) {

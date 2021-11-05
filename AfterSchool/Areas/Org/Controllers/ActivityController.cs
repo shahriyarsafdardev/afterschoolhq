@@ -201,7 +201,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type, string inviteonly, string minseatsrequired, string isAdvanceSettingEnabled, string costfrequencytype, string cutoffhours)
+        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type, string inviteonly, string minseatsrequired, string isAdvanceSettingEnabled, string costfrequencytype, string cutoffhours, string isContinuousEnrollmentEnabled)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -269,6 +269,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "ageend",activity.IsNotEmpty() ? activity.AgeEnd : defaultActivity.AgeEnd },
                     { "costfrequencytype", costfrequencytype },
                     { "cutoffhours", cutoffhours },
+                    { "isContinuousEnrollmentEnabled", isContinuousEnrollmentEnabled.ToBoolean() },
                 };
 
                 if (activity.IsNotEmpty())

@@ -903,6 +903,7 @@ namespace AfterSchoolLibrary.Services
             var postpayplanperiod = values.GetValueOrDefault("postpayplanperiod");
             var costfrequencytype = values.GetValueOrDefault("costfrequencytype");
             var cutoffhours = values.GetValueOrDefault("cutoffhours");
+            var iscontinousenrollmentenabled = values.GetValueOrDefault("isContinuousEnrollmentEnabled");
 
             var activityType = ActivityType.NotSet;
 
@@ -1006,6 +1007,8 @@ namespace AfterSchoolLibrary.Services
                     activity.GradeLevelStart = null;
                 }
             }
+            if (iscontinousenrollmentenabled.IsNotEmpty())
+                activity.IsContinuousEnrollment = iscontinousenrollmentenabled.ToString().ToBoolean();
 
             if (ageend.IsNumber())
             {
