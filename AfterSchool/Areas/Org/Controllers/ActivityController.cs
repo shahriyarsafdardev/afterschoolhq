@@ -196,6 +196,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             LoadEditSetupViewBag(activity, activityGroup, msgs);
             ViewBag.ActiveMenu = "EditSetup";
+            if (id.IsEmpty())
+                activity.IsContinuousEnrollment = true;
 
             return View(activity);
         }

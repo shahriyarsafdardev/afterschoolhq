@@ -20,6 +20,7 @@
     var waitingListPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.WaitingList);
     var manageFormsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageForms);
     var allowAppilicationsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowApplications);
+
 }
 
 <input id="hdnAdvanceSettingToggle" type="hidden" name="isAdvanceSettingEnabled" />
@@ -177,7 +178,7 @@
                                 @foreach (var period in periods)
                                 {
                                     <option value="@period.ID" @(activePeriod?.ID == period.ID ? " selected=\"selected\" " : "")>
-                                        @period.StartDateTime.ToShortDateTimeString() - @period.EndDateTime.ToShortDateTimeString()
+                                        @period.StartDateTime.ToShortDateTimeString() - @(Model.IsContinuousEnrollment ? "" : period.EndDateTime.ToShortDateTimeString())
                                     </option>
                                 }
                             </select>
@@ -394,8 +395,8 @@
 
         toggleCostFrequencyType($('#costfrequencytype-@((int)ActivityCostFrequencyType.PerClass)'));
 
-        $("#IsContinuousEnrollment").on('change', function () {
-            if ($("#IsContinuousEnrollment").is(':checked')) {
+        $("#isContinuousEnrollmentEnabled").on('change', function () {
+            if ($("#isContinuousEnrollmentEnabled").is(':checked')) {
                 $("#signUpCloseDate").hide();
                 var myDate = new Date();
                 myDate.setFullYear(myDate.getFullYear() + 10);
@@ -404,7 +405,7 @@
             else {
                 $("#signUpCloseDate").show();
                 var myDate = new Date();
-                myDate.setDate(date.getDate() + 7);
+                myDate.setDate(myDate.getDate() + 7);
                 $('#registrationclosedate').val(myDate.toJSON().slice(0, 10).split('-').reverse().join('/'));
             }
         })
@@ -433,6 +434,12 @@
             } else {
                 $('.reg-period').removeClass('hide');
                 $('#editPeriod').addClass('hide');
+                if ($("#isContinuousEnrollmentEnabled").is(':checked')) {
+                    $("#signUpCloseDate").hide();
+                }
+                else {
+                    $("#signUpCloseDate").show();
+                }
             }
 
         } else {
