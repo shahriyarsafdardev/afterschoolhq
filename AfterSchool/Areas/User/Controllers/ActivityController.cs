@@ -65,6 +65,7 @@ namespace AfterSchool.Areas.User.Controllers
                 participationObjectType: (ParticipationObjectType)type.ToInteger(), 
                 loggedInUser: SessionVariables.CurrentUser,
                 account: SessionVariables.CurrentAccount,
+                isCancelPayment: true,
                 msgs: msgs);
 
             if (returnurl.IsNotBlank())

@@ -203,12 +203,28 @@
                 </div>
 
                 <div class="modal-body">
-                    Are you sure you want to withdraw <strong><%= registrantName %></strong> from <strong><%= activityName %></strong> ?
+                    <p class="text-center">Are you sure you want to withdraw <strong><%= registrantName %></strong> from <strong><%= activityName %></strong> ? </p>
+                    <p class="text-center">
+                        <%= registrantName %> is on payment plan. Do you want to cancel the remaining <%= count %> payments?
+                    </p>
+                    <div class="" style="margin: 0 25%;">
+                                <div class="am-radio">
+                                    <input type="radio" class="form-control yesno" name="yesno" id="yes" value="yes" />
+                                    <label for="yes">Yes, cancel remaining payment.</label>
+                                </div>
+                                <div class="am-radio">
+                                    <input type="radio" class="form-control yesno" name="yesno" id="no" value="no" />
+                                    <label for="no">No, do not cancel remaining payment.</label>
+                                </div>
+                    </div>
+                    <p class="text-center">
+                        Note: Refunds cen be handed through the Accounting Dashboard
+                    </p>
                 </div>
 
                 <div class="modal-footer">
                     <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-                    <button type="button" id="btn-manual-withdraw" class="btn btn-danger padding-h-20" onclick="return withdraw('<%= participationObjectId %>', '<%= registrantId %>', '<%= type %>', '<%= registrantActivityUId %>', '<%= registrantActivityId %>')">Withdraw &amp; Cancel Payments &raquo;</button>
+                    <button type="button" id="btn-manual-withdraw" class="btn btn-danger padding-h-20" onclick="return withdraw('<%= participationObjectId %>', '<%= registrantId %>', '<%= type %>', '<%= registrantActivityUId %>', '<%= registrantActivityId %>', 'true')">Withdraw &amp; Cancel Payments &raquo;</button>
                 </div>
             </div>
         </div>
@@ -217,6 +233,7 @@
 </script>
 
 <script>
+
 
     function moveRegistrantAssignment(registrant, registrantName, selectBox) {
         let newAssignment = selectBox.value;
@@ -274,7 +291,7 @@
         );
     }
 
-    function processWithdraw(registrantActivityUId, registrantActivityId, registrantId, participationObjectId, type, registrantName) {
+    function processWithdraw(registrantActivityUId, registrantActivityId, registrantId, participationObjectId, type, registrantName, count) {
         //.. prepare source and template
         var source = $("#script-withdraw-template").html();
         var compiled = _.template(source);
@@ -288,6 +305,7 @@
             registrantName: registrantName,
             type: type,
             activityName: '@activity.Name',
+            count: count
         });
 
         //.. update html to dom
@@ -297,7 +315,7 @@
         return false;
     }
 
-    function withdraw(participationObjectId, registrantId, type, registrantActivityUId, registrantActivityId) {
+    function withdraw(participationObjectId, registrantId, type, registrantActivityUId, registrantActivityId, isYes) {
         if (participationObjectId && registrantId) {
             showLoader();
 
@@ -305,7 +323,7 @@
             $.ajax({
                 type: "POST",
                 url: url,
-                data: { participationObjectId: participationObjectId, registrantUId: registrantId, type },
+                data: { participationObjectId: participationObjectId, registrantUId: registrantId, type, isYes },
                 success: function (data) {
                     if (data && data.success == true) {
 

@@ -338,6 +338,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         participationObjectId: po.ToInteger(),
                         participationObjectType: (ParticipationObjectType)type.ToInteger(),
                         loggedInUser: SessionVariables.CurrentUser,
+                        isCancelPayment : true,
                         account: currentAccount,
                         msgs: msgs);
                 }

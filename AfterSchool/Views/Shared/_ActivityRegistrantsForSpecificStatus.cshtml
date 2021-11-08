@@ -142,8 +142,11 @@
                         <td>
                             @if (ra.IsWithdrawEnabled() && !isReadOnly)
                             { 
+                                var registrant = ra.GetRegistrant();
+                                var getSubsriptionCount = registrant.GetAllActiveSubscriptionCount(ra.GetParticipationObject());
+
                                 <button id="btn-withdraw-@ra.Uid" class="btn btn-danger btn-sm" 
-                                        onclick="return processWithdraw('@ra.Uid', '@ra.ID', '@ra.RegistrantUid', '@ra.ParticipationObjectId', '@ra.ParticipationObjectTypeId', '@ra.RegistrantFirstName');">
+                                        onclick="return processWithdraw('@ra.Uid', '@ra.ID', '@ra.RegistrantUid', '@ra.ParticipationObjectId', '@ra.ParticipationObjectTypeId', '@ra.RegistrantFirstName','@getSubsriptionCount');">
                                     Withdraw
                                 </button>
                             }

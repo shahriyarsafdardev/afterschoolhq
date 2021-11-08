@@ -114,7 +114,7 @@
                 <div class="col-md-3">
                     <select id="assignmentType" onchange="changeAssignment()" class="form-control">
                         <option value="">View All Assignments</option>
-                        
+
                         @foreach (var x in Enum.GetValues(typeof(RegistrationAssignmentType)).Cast<RegistrationAssignmentType>().Where(x => x != RegistrationAssignmentType.NotSet))
                         {
                             if (account.HasFeature(FeatureType.AllowApplications) || x != RegistrationAssignmentType.Applied)
@@ -135,7 +135,7 @@
                     {
                         <select id="classes" onchange="changeClass()" class="form-control">
                             <option value="">All Dates</option>
-                            @foreach(var instance in Model.GetSchedule().GetInSessionInstances())
+                            @foreach (var instance in Model.GetSchedule().GetInSessionInstances())
                             {
                                 <option value="@instance.ID">@instance.StartDateTime.ToShortDateTimeString()</option>
                             }
@@ -217,22 +217,22 @@
                     </a>
                 </div>
             </div>
-            
+
             <div class="clearfix"></div>
             <br />
             @{Html.RenderPartial(
-                "~/Views/Shared/_ActivityRegistrantsWithAllStatus.cshtml",
-                ras,
-                new ViewDataDictionary()
-                {
-                    { "Activity", Model },
-                    { "Account", account },
-                    { "EditAction", "registrantdetail" },
-                    { "EditController", "activity" },
-                    { "AssignmentType", assignmentType },
-                    { "IsReadOnlySeatStatus", isReadOnlySeatStatus }
-                }
-            );}
+                  "~/Views/Shared/_ActivityRegistrantsWithAllStatus.cshtml",
+                  ras,
+                  new ViewDataDictionary()
+                  {
+                        { "Activity", Model },
+                        { "Account", account },
+                        { "EditAction", "registrantdetail" },
+                        { "EditController", "activity" },
+                        { "AssignmentType", assignmentType },
+                        { "IsReadOnlySeatStatus", isReadOnlySeatStatus }
+                  }
+              );}
 
         </div>
     </div>
@@ -252,3 +252,23 @@
         }
     }
 </script>
+
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            $(document).on("change", ".yesno", function () {
+                if ($(this).val() == "yes") {
+                    $("#btn-manual-withdraw").text('Withdraw & Cancel Payments »').button("refresh");
+                    var value = $("#btn-manual-withdraw").attr('onclick');
+                    $("#btn-manual-withdraw").attr('onclick', value.replace('false', 'true'));
+                }
+                else {
+                    $("#btn-manual-withdraw").text('Withdraw »').button("refresh");
+                    var value = $("#btn-manual-withdraw").attr('onclick');
+                    $("#btn-manual-withdraw").attr('onclick', value.replace('true', 'false'));
+                }
+
+            })
+        })
+    </script>
+}

@@ -468,6 +468,13 @@ namespace AfterSchoolLibrary.Services
                     .ToList()
                     .FirstOrDefault();
         }
+        public static int GetAllActiveSubscriptionCount(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return registrant
+                    .GetRegistrantSubscriptionPlans(msgs, dc)
+                    .Where(rsp => !rsp.DateCancelled.HasValue && rsp.IsForParticipationObject(participationObject, msgs, dc))
+                    .Count();
+        }
 
         public static bool HasCancelledSubscription(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -1450,7 +1457,7 @@ namespace AfterSchoolLibrary.Services
             );
         }
 
-        public static void WithdrawRegistration(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType, WebUser loggedInUser, Account account, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void WithdrawRegistration(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType, WebUser loggedInUser, Account account, bool isCancelPayment, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var masterRegistrant = registrant.GetMasterRegistrant(msgs, dc);
             var ras = registrant.GetRegistrantActivities(msgs, dc);
@@ -1480,7 +1487,7 @@ namespace AfterSchoolLibrary.Services
                     ra.ChangeSeatAssignment(RegistrationAssignmentType.Withdrawn, loggedInUser, amsgs, adc);
 
                     // cancel subscription if it has one
-                    if (msgs.HasNoErrors())
+                    if (msgs.HasNoErrors() && isCancelPayment)
                         registrant.CancelSubcriptionIfExists(participationObjectId, participationObjectType, loggedInUser, amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) =>
