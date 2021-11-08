@@ -3,8 +3,7 @@
 
 @Login
 Scenario: Try To Login
-	Given  Open the browser and navigate to the Login Page
-	Given  Manage the browser window size
+	Given  Open the browser and navigate to the AfterSchool App
 	Given  Enter username
 	Given  Enter Password
     When   Click on login

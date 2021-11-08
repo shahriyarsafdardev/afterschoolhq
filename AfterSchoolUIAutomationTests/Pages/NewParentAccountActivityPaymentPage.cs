@@ -1,19 +1,11 @@
-﻿using AfterSchoolUIAutomationTests.Pages;
+﻿using AfterSchoolUIAutomationTests.Helpers.Extensions;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using TechTalk.SpecFlow;
-using AfterSchoolUIAutomationTests.Helpers.Extensions;
-using AfterSchoolUIAutomationTests.Parameters;
 
 namespace AfterSchoolUIAutomationTests.Pages
 {
-    public class NewParentAccountActivityPaymentPage : IDisposable
+    public class NewParentAccountActivityPaymentPage
     {
-        private IWebDriver webDriver;
+        private readonly IWebDriver webDriver;
         public NewParentAccountActivityPaymentPage(IWebDriver WebDriver)
         {
             webDriver = WebDriver;
@@ -31,67 +23,66 @@ namespace AfterSchoolUIAutomationTests.Pages
 
 
         #region Parennt E-Sign
+
         public NewParentAccountActivityPaymentPage PopulateParentESign(string esign)
         {
             ParentESignElement.SendKeys(esign);
             webDriver.WaitInSeconds(1);
             return this;
         }
+
         public NewParentAccountActivityPaymentPage ClickESignNextBtn()
         {
             EsignContinueBtnElement.Click();
             webDriver.WaitInSeconds(4);
             return this;
         }
+
         #endregion
 
         #region Stripe Payment
+
         public NewParentAccountActivityPaymentPage PopulateCreditCardNumber(string cardNumber)
         {
             CreditCardElement.SendKeys(cardNumber);
             webDriver.WaitInSeconds(1);
             return this;
         }
+
         public NewParentAccountActivityPaymentPage PopulateCreditCardExpiry(string expireDate)
         {
             CreditCardMonthYearElement.SendKeys(expireDate);
             webDriver.WaitInSeconds(1);
             return this;
         }
+
         public NewParentAccountActivityPaymentPage PopulateCreditCardCVC(string cvc)
         {
             CreditCardCVCElement.SendKeys(cvc);
             webDriver.WaitInSeconds(1);
             return this;
         }
+
         public NewParentAccountActivityPaymentPage PopulateCreditCardZIP(string zip)
         {
             CreditCardZIPElement.SendKeys(zip);
             webDriver.WaitInSeconds(1);
             return this;
         }
+
         public NewParentAccountActivityPaymentPage ClickPayViaCreditBtn()
         {
             PayViaCreditBtnElement.Click();
             webDriver.WaitInSeconds(14);
             return this;
         }
+
         public string RegistrationComplete()
         {
             webDriver.WaitInSeconds(1);
             return CompleteRegistrationElement.Text;
         }
+
         #endregion
-
-
-
-        public void Dispose()
-        {
-            if (webDriver != null)
-            {
-                webDriver.Dispose();
-                webDriver = null;
-            }
-        }
     }
 }

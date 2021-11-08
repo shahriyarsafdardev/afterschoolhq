@@ -3,6 +3,7 @@
 
 @EditAccountProfile
 Scenario: Login And Edit Profile
+	Given Open the browser and navigate to the AfterSchool App
 	Given  Login to the website
 	Given  Navigate to the profile edit page
 	Given  Enter user first name

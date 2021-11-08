@@ -1,42 +1,36 @@
-﻿using AfterSchoolUIAutomationTests.Helpers.Extensions;
+﻿using AfterSchoolUIAutomationTests.Drivers;
+using AfterSchoolUIAutomationTests.Helpers.Extensions;
 using AfterSchoolUIAutomationTests.Pages;
 using AfterSchoolUIAutomationTests.Parameters;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
+using FluentAssertions;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using TechTalk.SpecFlow;
 
 namespace AfterSchoolUIAutomationTests.Steps
 {
     [Binding]
-    public sealed class NewProviderSignUpFlowStep : IDisposable
+    public sealed class NewProviderSignUpFlowStep
     {
         private readonly ScenarioContext _scenarioContext;
-        private IWebDriver webDriver;
-        private NewProviderSignUpFlowPage newProviderSignUpFlowPage;
+        private readonly NewProviderSignUpFlowPage newProviderSignUpFlowPage;
 
         public NewProviderSignUpFlowStep(ScenarioContext scenarioContext)
         {
             _scenarioContext = scenarioContext;
-            webDriver = new ChromeDriver(AppDomain.CurrentDomain.BaseDirectory);
-            newProviderSignUpFlowPage = new NewProviderSignUpFlowPage(webDriver);
+            newProviderSignUpFlowPage = new NewProviderSignUpFlowPage(UIDriver.WebDriver);
         }
 
         [Given(@"Navigate to Signup Page")]
         public void NavigateToSignup()
         {
-            webDriver.Navigate().GoToUrl(Parameter.Get("AccountSigUp", "SignUpUrl"));
-            webDriver.WaitInSeconds(2);
+            UIDriver.WebDriver.Navigate().GoToUrl(Parameter.Get("SignUpUrl", "urls"));
+            UIDriver.WebDriver.WaitInSeconds(2);
         }
 
         [Given(@"Manage the browser window size for Signup")]
         public void NavigateAccountAndPrograms()
         {
-            webDriver.Manage().Window.Maximize();
+            UIDriver.WebDriver.Manage().Window.Maximize();
         }
 
         [Given(@"Click Get started button")]
@@ -61,18 +55,18 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Given(@"Enter Program Name and click continue")]
         public void PopulateProgramName()
         {
-            newProviderSignUpFlowPage.PopulateProgramName(Parameter.Get("AccountSigUp", "ProgramName"));
+            newProviderSignUpFlowPage.PopulateProgramName(Parameter.Get("ProgramName", "users", "AccountSigUp"));
             newProviderSignUpFlowPage.ClickProgramSubmit();
         }
 
         [Given(@"Enter firstname, lastname, email, password and click continue")]
         public void PopulateBasicInfo()
         {
-            newProviderSignUpFlowPage.PopulateFirstName(Parameter.Get("AccountSigUp", "FirstName"));
-            newProviderSignUpFlowPage.PopulateLasttName(Parameter.Get("AccountSigUp", "LasttName"));
+            newProviderSignUpFlowPage.PopulateFirstName(Parameter.Get("FirstName", "users", "AccountSigUp"));
+            newProviderSignUpFlowPage.PopulateLasttName(Parameter.Get("LasttName", "users", "AccountSigUp"));
             newProviderSignUpFlowPage.PopulateEmail("testemail" + DateTime.Now.ToString("yyyyMMddHHmmss") + "@yopmail.com");
-            newProviderSignUpFlowPage.PopulateUserPassword(Parameter.Get("AccountSigUp", "UserPassword"));
-            newProviderSignUpFlowPage.PopulateUserPassword2(Parameter.Get("AccountSigUp", "UserPassword2"));
+            newProviderSignUpFlowPage.PopulateUserPassword(Parameter.Get("UserPassword", "users", "AccountSigUp"));
+            newProviderSignUpFlowPage.PopulateUserPassword2(Parameter.Get("UserPassword2", "users", "AccountSigUp"));
             //newProviderSignUpFlowPage.CheckCaptcha();
             newProviderSignUpFlowPage.ClickBasicInfoSubmit();
         }
@@ -80,19 +74,9 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Then("Match window current url with the expected url")]
         public void ThenTheResultShouldBe()
         {
-            String curentUrl = webDriver.Url;
+            string curentUrl = UIDriver.WebDriver.Url;
             string expectedUrl = "/Org/onboarding/GettingStarted";
-            curentUrl.Contains(expectedUrl);
-        }
-
-        public void Dispose()
-        {
-            if (webDriver != null)
-            {
-                webDriver.Dispose();
-                webDriver = null;
-            }
-
+            curentUrl.Should().Contain(expectedUrl);
         }
     }
 }

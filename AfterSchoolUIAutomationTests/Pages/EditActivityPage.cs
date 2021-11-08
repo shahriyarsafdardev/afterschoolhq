@@ -1,14 +1,14 @@
-﻿using System;
-using System.Threading;
-using AfterSchoolUIAutomationTests.Helpers.Extensions;
+﻿using AfterSchoolUIAutomationTests.Helpers.Extensions;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
+using System;
+using System.Threading;
 
 namespace AfterSchoolUIAutomationTests.Pages
 {
     public class EditActivityPage
     {
-        private IWebDriver webDriver;
+        private readonly IWebDriver webDriver;
 
         public EditActivityPage(IWebDriver WebDriver)
         {
@@ -18,6 +18,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         //------------Finding Create Activity WebElements-----------//
 
         //------------Settings Section Web Elements-----------//
+
         private IWebElement AccountButtonElement => webDriver.FindElement(By.XPath("(//div[@id='accounts']//button)[1]"));
         private IWebElement ActivitiesElement => webDriver.FindElement(By.XPath("//ul[@class='sidebar-elements']//li[3]"));
         private IWebElement ManageActivityElement => webDriver.FindElement(By.XPath("//div[@class='table-responsive']//table/tbody/tr[6]/td[1]"));
@@ -36,6 +37,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         private IWebElement SaveAndNextElement => webDriver.FindElement(By.XPath("//div[@class='col-sm-3']//button[text()='Save & Next »']"));
 
         //------------Restrictions Section Web Elements-----------//
+
         private IWebElement RestrictionHeadingElement => webDriver.FindElement(By.XPath("//div[@class='panel-heading activity-heading']"));
         private IWebElement GenderElement => webDriver.FindElement(By.XPath("//div[@class='am-radio inline']//label[2]"));
         private IWebElement RestrictedAgeElement => webDriver.FindElement(By.XPath("//div[@class='col-lg-9 margin-left-sm']//div[@class='am-radio inline'][2]//label"));
@@ -44,6 +46,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         private IWebElement MaxGradeDropDownElement => webDriver.FindElement(By.Id("maxgrade"));
 
         //------------Schedule Section Web Elements-----------//
+
         private IWebElement HasScheduleElement => webDriver.FindElement(By.XPath("(//div[@class='switch-button switch-button-yesno ']//label)[1]"));
         private IWebElement RepeatsWeeklyElement => webDriver.FindElement(By.XPath("(//div[@class='switch-button switch-button-yesno ']//label)[2]"));
         private IWebElement DaysofWeekTuesdayElement => webDriver.FindElement(By.XPath("(//div[@class='am-checkbox display-days']//label)[3]"));
@@ -57,24 +60,29 @@ namespace AfterSchoolUIAutomationTests.Pages
         private IWebElement ScheduleEndTimeElement => webDriver.FindElement(By.Id("dailyendtime"));
 
         //------------About Your Activity Section Web Elements-----------
+
         private IWebElement AboutYourActivityEmptyElement => webDriver.FindElement(By.XPath("//div[@class='ql-editor ql-blank']"));
         private IWebElement AboutYourActivityElement => webDriver.FindElement(By.XPath("//div[@class='ql-editor']"));
 
         //------------Contact Section Web Elements-----------
+
         private IWebElement ActivityLedByElement => webDriver.FindElement(By.Id("leadertype"));
         private IWebElement ContactNameElement => webDriver.FindElement(By.Id("contactname"));
         private IWebElement ContactPhoneElement => webDriver.FindElement(By.Id("contactphone"));
         private IWebElement ContactEmailElement => webDriver.FindElement(By.Id("contactemail"));
 
         //------------Location Section Web Elements-----------
+
         private IWebElement PhysicalLocationElement => webDriver.FindElement(By.XPath("//div[@class='am-radio']//span[2]//label"));
         private IWebElement ActivityLocationElement => webDriver.FindElement(By.Id("location"));
 
         //------------Price & Payment Section Web Elements-----------
+
         private IWebElement DoParentsPayElement => webDriver.FindElement(By.XPath("//div[@class='col-sm-9']//div[@class='am-radio inline'][2]//label"));
         private IWebElement RegistrationFeeElement => webDriver.FindElement(By.XPath("//div[@class='input-group input-group-lg xs-mb-15']//input"));
         private IWebElement PriceParentpayElement => webDriver.FindElement(By.XPath("//div[@class='am-checkbox']//label"));
         //------------Email Section Web Elements-----------
+
         private IWebElement ShowAdvanceSettingElement => webDriver.FindElement(By.Id("btn-advanced-settings"));
         private IWebElement SaveButtonElement => webDriver.FindElement(By.XPath("//div[@class='col-sm-6 col-sm-offset-3']//button[text()=' Save']"));
 
@@ -82,12 +90,14 @@ namespace AfterSchoolUIAutomationTests.Pages
         //------------Edit Account Profile Helper Methods-----------//
 
         //------------Settings Section-----------//
+
         public EditActivityPage ClickAccountButton()
         {
             AccountButtonElement.Click();
             webDriver.WaitInSeconds(5);
             return this;
         }
+
         public EditActivityPage ClickActivitiesLink()
         {
             webDriver.WaitInSeconds(1);
@@ -95,18 +105,21 @@ namespace AfterSchoolUIAutomationTests.Pages
             webDriver.WaitInSeconds(3);
             return this;
         }
+
         public EditActivityPage ClickManageButton()
         {
             ManageActivityElement.Click();
             webDriver.WaitInSeconds(3);
             return this;
         }
+
         public EditActivityPage ClickEditActivityLink()
         {
             EditActivityElement.Click();
             webDriver.WaitInSeconds(3);
             return this;
         }
+
         public EditActivityPage PopulateActivityName(string activityName)
         {
             webDriver.WaitInSeconds(1);
@@ -115,6 +128,7 @@ namespace AfterSchoolUIAutomationTests.Pages
             ActivityName.SendKeys(activityName);
             return this;
         }
+
         public EditActivityPage PopulateTotalAvailableSeats(string availableSeats)
         {
             webDriver.WaitInSeconds(2);
@@ -141,6 +155,7 @@ namespace AfterSchoolUIAutomationTests.Pages
             }
             return this;
         }
+
         public EditActivityPage SetSignUpPeriodOpen()
         {
             webDriver.WaitInSeconds(2);
@@ -153,6 +168,7 @@ namespace AfterSchoolUIAutomationTests.Pages
             selectElement.SelectByValue("10:30 am");
             return this;
         }
+
         public EditActivityPage SetSignUpPeriodClose()
         {
             webDriver.WaitInSeconds(3);
@@ -165,6 +181,7 @@ namespace AfterSchoolUIAutomationTests.Pages
             selectElement.SelectByValue("12:30 pm");
             return this;
         }
+
         public EditActivityPage ClickSaveAndNext()
         {
             webDriver.WaitInSeconds(2);
@@ -174,18 +191,21 @@ namespace AfterSchoolUIAutomationTests.Pages
         }
 
         //------------Restrictions Section-----------//
+
         public EditActivityPage ParentalConsent()
         {
             webDriver.WaitInSeconds(1);
             ParentalConsentElement.Click();
             return this;
         }
+
         public EditActivityPage SelectGender()
         {
             webDriver.WaitInSeconds(1);
             GenderElement.Click();
             return this;
         }
+
         public EditActivityPage RestrictedBy()
         {
             webDriver.WaitInSeconds(1);
@@ -194,6 +214,7 @@ namespace AfterSchoolUIAutomationTests.Pages
             RestrictedGradeElement.Click();
             return this;
         }
+
         public EditActivityPage MinimumGrade()
         {
             webDriver.WaitInSeconds(2);
@@ -204,6 +225,7 @@ namespace AfterSchoolUIAutomationTests.Pages
             RestrictionHeadingElement.Click();
             return this;
         }
+
         public EditActivityPage MaximumGrade()
         {
             webDriver.WaitInSeconds(2);
@@ -216,6 +238,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         }
 
         //------------Schedule Section-----------
+
         public EditActivityPage HasSchedule(string hasSchedule)
         {
             if (hasSchedule.Equals("Yes"))
@@ -226,6 +249,7 @@ namespace AfterSchoolUIAutomationTests.Pages
             }
             return this;
         }
+
         public EditActivityPage RepeatsWeekly(string isWeekly)
         {
             if (isWeekly.Equals("Yes"))
@@ -236,6 +260,7 @@ namespace AfterSchoolUIAutomationTests.Pages
             }
             return this;
         }
+
         public EditActivityPage WeekDays()
         {
             webDriver.WaitInSeconds(2);
@@ -247,6 +272,7 @@ namespace AfterSchoolUIAutomationTests.Pages
             webDriver.WaitInSeconds(1);
             return this;
         }
+
         public EditActivityPage SetScheduleStartDate()
         {
             webDriver.WaitInSeconds(2);
@@ -256,6 +282,7 @@ namespace AfterSchoolUIAutomationTests.Pages
             webDriver.WaitInSeconds(2);
             return this;
         }
+
         public EditActivityPage SetScheduleEndDate()
         {
             webDriver.WaitInSeconds(3);
@@ -265,6 +292,7 @@ namespace AfterSchoolUIAutomationTests.Pages
             webDriver.WaitInSeconds(2);
             return this;
         }
+
         public EditActivityPage SetScheduleStartTime()
         {
             webDriver.WaitInSeconds(2);
@@ -273,6 +301,7 @@ namespace AfterSchoolUIAutomationTests.Pages
             selectElement.SelectByValue("4:30 pm");
             return this;
         }
+
         public EditActivityPage SetScheduleEndTime()
         {
             webDriver.WaitInSeconds(2);
@@ -283,6 +312,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         }
 
         //------------About Your Activity Section-----------//
+
         public EditActivityPage ActivityDetails(string aboutActivity)
         {
             webDriver.WaitInSeconds(2);
@@ -301,6 +331,7 @@ namespace AfterSchoolUIAutomationTests.Pages
             selectElement.SelectByValue("1");
             return this;
         }
+
         public EditActivityPage ContactName(string contactName)
         {
             webDriver.WaitInSeconds(2);
@@ -309,6 +340,7 @@ namespace AfterSchoolUIAutomationTests.Pages
             ContactNameElement.SendKeys(contactName);
             return this;
         }
+
         public EditActivityPage ContactPhone(string contactPhone)
         {
             webDriver.WaitInSeconds(2);
@@ -317,6 +349,7 @@ namespace AfterSchoolUIAutomationTests.Pages
             ContactPhoneElement.SendKeys(contactPhone);
             return this;
         }
+
         public EditActivityPage ContactEmail(string contactEmail)
         {
             webDriver.WaitInSeconds(2);
@@ -327,12 +360,14 @@ namespace AfterSchoolUIAutomationTests.Pages
         }
 
         //------------Location Section-----------
+
         public EditActivityPage PhysicalLocation()
         {
             webDriver.WaitInSeconds(2);
             PhysicalLocationElement.Click();
             return this;
         }
+
         public EditActivityPage SelectAutoComplete(string location)
         {
             webDriver.WaitInSeconds(2);
@@ -344,12 +379,14 @@ namespace AfterSchoolUIAutomationTests.Pages
         }
 
         //------------Price & Payment Section-----------
+
         public EditActivityPage DoParentsPay()
         {
             webDriver.WaitInSeconds(2);
             DoParentsPayElement.Click();
             return this;
         }
+
         public EditActivityPage RegistrationFee(string fee)
         {
             webDriver.WaitInSeconds(2);
@@ -358,6 +395,7 @@ namespace AfterSchoolUIAutomationTests.Pages
             RegistrationFeeElement.SendKeys(fee);
             return this;
         }
+
         public EditActivityPage DoPriceParentpay()
         {
             webDriver.WaitInSeconds(2);
@@ -368,29 +406,20 @@ namespace AfterSchoolUIAutomationTests.Pages
         }
 
         //------------Email Section-----------
+
         public EditActivityPage ShowAdvanceSettings()
         {
             webDriver.WaitInSeconds(2);
             ShowAdvanceSettingElement.Click();
             return this;
         }
+
         public EditActivityPage SaveActivity()
         {
             webDriver.WaitInSeconds(2);
             SaveButtonElement.Click();
             webDriver.WaitInSeconds(5);
             return this;
-        }
-
-
-
-        public void Dispose()
-        {
-            if (webDriver != null)
-            {
-                webDriver.Dispose();
-                webDriver = null;
-            }
         }
     }
 }

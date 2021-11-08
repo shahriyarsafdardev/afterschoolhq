@@ -3,6 +3,7 @@
 
 @EditActivity
 Scenario: Login And Edit an Activity
+	Given Open the browser and navigate to the AfterSchool App
 	Given  Login to Edit Activity
 	Given  Click on Activities Link
 	Given  Click on Manage Activity Button

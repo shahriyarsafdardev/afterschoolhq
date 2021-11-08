@@ -1,40 +1,29 @@
-﻿using AfterSchoolUIAutomationTests.Pages;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using TechTalk.SpecFlow;
-using AfterSchoolUIAutomationTests.Helpers.Extensions;
+﻿using AfterSchoolUIAutomationTests.Drivers;
+using AfterSchoolUIAutomationTests.Pages;
 using AfterSchoolUIAutomationTests.Parameters;
+using TechTalk.SpecFlow;
 
 namespace AfterSchoolUIAutomationTests.Steps
 {
     [Binding]
-    public sealed class EditActivityStep : IDisposable
+    public sealed class EditActivityStep
     {
         private readonly ScenarioContext _scenarioContext;
-        private IWebDriver webDriver;
-        private LoginPage loginPage;
-        private EditActivityPage editActivityPage;
+        private readonly LoginPage loginPage;
+        private readonly EditActivityPage editActivityPage;
 
         public EditActivityStep(ScenarioContext scenarioContext)
         {
             _scenarioContext = scenarioContext;
-            webDriver = new ChromeDriver(AppDomain.CurrentDomain.BaseDirectory);
-            loginPage = new LoginPage(webDriver);
-            editActivityPage = new EditActivityPage(webDriver);
+            loginPage = new LoginPage(UIDriver.WebDriver);
+            editActivityPage = new EditActivityPage(UIDriver.WebDriver);
         }
 
         [Given(@"Login to Edit Activity")]
         public void GetLogIn()
         {
-            webDriver.Navigate().GoToUrl(Parameter.Get("Login", "LoginUrl"));
-            webDriver.WaitInSeconds(2);
-            webDriver.Manage().Window.Maximize();
-            loginPage.PopulateName(Parameter.Get("Login", "UserName"));
-            loginPage.PopulatePassword(Parameter.Get("Login", "Password"));
+            loginPage.PopulateName(Parameter.Get("UserName", "users", "Login"));
+            loginPage.PopulatePassword(Parameter.Get("Password", "users", "Login"));
             loginPage.ClickSubmit();
             editActivityPage.ClickAccountButton();
         }
@@ -60,9 +49,9 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Given(@"Update settings section and save")]
         public void PopulateSettings()
         {
-            editActivityPage.PopulateActivityName(Parameter.Get("CreateNewActivity", "ActivityName"));
-            editActivityPage.PopulateTotalAvailableSeats(Parameter.Get("CreateNewActivity", "TotalAvailableSeats"));
-            editActivityPage.ToggleInviteOnly(Parameter.Get("CreateNewActivity", "InviteOnly"));
+            editActivityPage.PopulateActivityName(Parameter.Get("ActivityName", "users", "CreateNewActivity"));
+            editActivityPage.PopulateTotalAvailableSeats(Parameter.Get("TotalAvailableSeats", "users", "CreateNewActivity"));
+            editActivityPage.ToggleInviteOnly(Parameter.Get("InviteOnly", "users", "CreateNewActivity"));
             editActivityPage.SelectNewDates();
             editActivityPage.SetSignUpPeriodOpen();
             editActivityPage.SetSignUpPeriodClose();
@@ -96,7 +85,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Given(@"Update about your activity section and save")]
         public void PopulateAbout()
         {
-            editActivityPage.ActivityDetails(Parameter.Get("CreateNewActivity", "AboutActivity"));
+            editActivityPage.ActivityDetails(Parameter.Get("AboutActivity", "users", "CreateNewActivity"));
             editActivityPage.ClickSaveAndNext();
         }
 
@@ -104,9 +93,9 @@ namespace AfterSchoolUIAutomationTests.Steps
         public void PopulateContact()
         {
             //editActivityPage.ActivityLedBy();
-            editActivityPage.ContactName(Parameter.Get("CreateNewActivity", "ContactName"));
-            editActivityPage.ContactPhone(Parameter.Get("CreateNewActivity", "ContactPhone"));
-            editActivityPage.ContactEmail(Parameter.Get("CreateNewActivity", "ContactEmail"));
+            editActivityPage.ContactName(Parameter.Get("ContactName", "users", "CreateNewActivity"));
+            editActivityPage.ContactPhone(Parameter.Get("ContactPhone", "users", "CreateNewActivity"));
+            editActivityPage.ContactEmail(Parameter.Get("ContactEmail", "users", "CreateNewActivity"));
             editActivityPage.ClickSaveAndNext();
         }
 
@@ -114,7 +103,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         public void PopulateLocation()
         {
             editActivityPage.PhysicalLocation();
-            editActivityPage.SelectAutoComplete(Parameter.Get("CreateNewActivity", "ActivityLocation"));
+            editActivityPage.SelectAutoComplete(Parameter.Get("ActivityLocation", "users", "CreateNewActivity"));
             editActivityPage.ClickSaveAndNext();
         }
 
@@ -122,7 +111,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         public void PopulatePriceAndPayment()
         {
             //editActivityPage.DoParentsPay();
-            editActivityPage.RegistrationFee(Parameter.Get("CreateNewActivity", "RegistrationFee"));
+            editActivityPage.RegistrationFee(Parameter.Get("RegistrationFee", "users", "CreateNewActivity"));
             editActivityPage.DoPriceParentpay();
             editActivityPage.ClickSaveAndNext();
         }
@@ -138,17 +127,6 @@ namespace AfterSchoolUIAutomationTests.Steps
         {
             string create = "Created";
             create.Equals("Created");
-            webDriver.Quit();
-            webDriver.Dispose();
-        }
-
-        public void Dispose()
-        {
-            if (webDriver != null)
-            {
-                webDriver.Dispose();
-                webDriver = null;
-            }
         }
     }
 }

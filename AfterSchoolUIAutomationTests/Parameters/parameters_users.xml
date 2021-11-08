@@ -2,13 +2,11 @@
 <PARAMETERS>
   <!--User Login Info-->
   <Login>
-    <LoginUrl>https://qa.afterschoolhq.com/login</LoginUrl>
     <UserName>stephny@yopmail.com</UserName>
     <Password>12345678</Password>
   </Login>
   <!-- Individual Account Signup Info -->
   <AccountSigUp>
-    <SignUpUrl>http://localhost:54849/signup/Welcome</SignUpUrl>
     <ProgramName>Rock Climbing</ProgramName>
     <FirstName>Alex</FirstName>
     <LasttName>Stuart</LasttName>
@@ -22,7 +20,6 @@
   </AccountSigUp>
   <!-- Account Update -->
   <EditAccountProfile>
-    <EditAccountProfileUrl>http://localhost:54849/Org/user/edit</EditAccountProfileUrl>
     <UserFirstName>Jim2</UserFirstName>
     <UserLastName>Carrey2</UserLastName>
     <UserEmail>jimcarey2@yopmail.com</UserEmail>
@@ -31,7 +28,6 @@
   </EditAccountProfile>
   <!-- Create New Activity -->
   <CreateNewActivity>
-    <AddActivityUrl>http://localhost:54849/Org/activity/editsetup?isnew=1&amp;type=1</AddActivityUrl>
     <ActivityName>Rock Climbing</ActivityName>
     <TotalAvailableSeats>25</TotalAvailableSeats>
     <InviteOnly>No</InviteOnly>
@@ -61,7 +57,6 @@
   </StripeAccountPayments>
   <!-- New Parent Account Activity Registration -->
   <NewParentAccountActivityRegistration>
-    <ActivityPublishedURL>http://localhost:54849/CookingSchool/activity/brotbrötchencookingclass</ActivityPublishedURL>
     <ParentEmailAddress>parent8_hq@yopmail.com</ParentEmailAddress>
     <FirstName>Stephny</FirstName>
     <LastName>Macmahon</LastName>
@@ -91,7 +86,6 @@
   </NewParentAccountActivityRegistration>
 
   <ActivityPayLaterRegistration>
-    <PayLaterActivityPublishedURL>http://localhost:54849/CookingSchool/activity/paylateractivity</PayLaterActivityPublishedURL>
     <ParentEmailAddress>testparent1@yopmail.com</ParentEmailAddress>
     <ParentEmailPassword>12345678</ParentEmailPassword>
     <StudentFirstName>Child 1</StudentFirstName>
@@ -102,7 +96,6 @@
   </ActivityPayLaterRegistration>
 
   <NewParentAccountActivityPayment>
-    <ActivityPublishedURL>http://localhost:54849/CookingSchool/activity/brotbrötchencookingclass</ActivityPublishedURL>
     <ParentEmailAddress>parent8_hq@yopmail.com</ParentEmailAddress>
     <FirstName>Stephny</FirstName>
     <LastName>Macmahon</LastName>
@@ -138,7 +131,6 @@
 
 
   <CreateAndManageSessions>
-    <LoginUrl>http://localhost:54849/login</LoginUrl>
     <UserName>stephny@yopmail.com</UserName>
     <Password>12345678</Password>
     <SessionName>Test Session 1</SessionName>

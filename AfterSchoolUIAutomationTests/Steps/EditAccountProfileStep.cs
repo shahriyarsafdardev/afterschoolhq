@@ -1,41 +1,30 @@
-﻿using AfterSchoolUIAutomationTests.Pages;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using TechTalk.SpecFlow;
+﻿using AfterSchoolUIAutomationTests.Drivers;
 using AfterSchoolUIAutomationTests.Helpers.Extensions;
+using AfterSchoolUIAutomationTests.Pages;
 using AfterSchoolUIAutomationTests.Parameters;
+using TechTalk.SpecFlow;
 
 namespace AfterSchoolUIAutomationTests.Steps
 {
     [Binding]
-    public sealed class EditAccountProfileStep : IDisposable
+    public sealed class EditAccountProfileStep
     {
         private readonly ScenarioContext _scenarioContext;
-        private IWebDriver webDriver;
-        private LoginPage loginPage;
-        private EditAccountProfilePage editAccountProfilePage;
-        private string CurrentURL = "http://localhost:54849/login/select";
+        private readonly LoginPage loginPage;
+        private readonly EditAccountProfilePage editAccountProfilePage;
 
         public EditAccountProfileStep(ScenarioContext scenarioContext)
         {
             _scenarioContext = scenarioContext;
-            webDriver = new ChromeDriver(AppDomain.CurrentDomain.BaseDirectory);
-            loginPage = new LoginPage(webDriver);
-            editAccountProfilePage = new EditAccountProfilePage(webDriver);
+            loginPage = new LoginPage(UIDriver.WebDriver);
+            editAccountProfilePage = new EditAccountProfilePage(UIDriver.WebDriver);
         }
 
         [Given(@"Login to the website")]
         public void GetLogIn()
         {
-            webDriver.Navigate().GoToUrl(Parameter.Get("Login", "LoginUrl"));
-            webDriver.WaitInSeconds(3);
-            webDriver.Manage().Window.Maximize();
-            loginPage.PopulateName(Parameter.Get("Login", "UserName"));
-            loginPage.PopulatePassword(Parameter.Get("Login", "Password"));
+            loginPage.PopulateName(Parameter.Get("UserName", "users", "Login"));
+            loginPage.PopulatePassword(Parameter.Get("Password", "users", "Login"));
             loginPage.ClickSubmit();
             editAccountProfilePage.ClickAccountButton();
         }
@@ -43,38 +32,38 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Given(@"Navigate to the profile edit page")]
         public void NavigateToProfileEdit()
         {
-            webDriver.Navigate().GoToUrl(Parameter.Get("EditAccountProfile", "EditAccountProfileUrl"));
-            webDriver.WaitInSeconds(2);
+            UIDriver.WebDriver.Navigate().GoToUrl(Parameter.Get("EditAccountProfileUrl", "users", "EditAccountProfile"));
+            UIDriver.WebDriver.WaitInSeconds(2);
         }
 
         [Given(@"Enter user first name")]
         public void EnterUserFirstName()
         {
-            editAccountProfilePage.PopulateFirstName(Parameter.Get("EditAccountProfile", "UserFirstName"));
+            editAccountProfilePage.PopulateFirstName(Parameter.Get("UserFirstName", "users", "EditAccountProfile"));
         }
 
         [Given(@"Enter user last name")]
         public void EnterUserLastName()
         {
-            editAccountProfilePage.PopulateLastName(Parameter.Get("EditAccountProfile", "UserLastName"));
+            editAccountProfilePage.PopulateLastName(Parameter.Get("UserLastName", "users", "EditAccountProfile"));
         }
 
         [Given(@"Enter user email")]
         public void EnterUserEmail()
         {
-            editAccountProfilePage.PopulateUserEmail(Parameter.Get("EditAccountProfile", "UserEmail"));
+            editAccountProfilePage.PopulateUserEmail(Parameter.Get("UserEmail", "users", "EditAccountProfile"));
         }
 
         [Given(@"Enter user password")]
         public void EnterUserPassword()
         {
-            editAccountProfilePage.PopulateUserPassword(Parameter.Get("EditAccountProfile", "UserPassword"));
+            editAccountProfilePage.PopulateUserPassword(Parameter.Get("UserPassword", "users", "EditAccountProfile"));
         }
 
         [Given(@"Enter user confirm password")]
         public void EnterUserConfirmPassword()
         {
-            editAccountProfilePage.PopulateConfirmPassword(Parameter.Get("EditAccountProfile", "UserConfirmPassword"));
+            editAccountProfilePage.PopulateConfirmPassword(Parameter.Get("UserConfirmPassword", "users", "EditAccountProfile"));
         }
 
         [When(@"Click on Update")]
@@ -87,20 +76,8 @@ namespace AfterSchoolUIAutomationTests.Steps
         public void VerifyNavigatedURL()
         {
             //String successMessage = editAccountProfilePage.ToastMessage();
-            String successMessage = "Success";
+            string successMessage = "Success";
             successMessage.Equals("Success");
-            loginPage = null;
-            webDriver.Quit();
-            webDriver.Dispose();
-        }
-
-        public void Dispose()
-        {
-            if (webDriver != null)
-            {
-                webDriver.Dispose();
-                webDriver = null;
-            }
         }
     }
 }

@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Xml;
+﻿using System.Xml;
 
 namespace AfterSchoolUIAutomationTests.Parameters
 {
     public static class Parameter
     {
-        public static string Get(string feature, string element)
+        public static string Get(string element, string parameterType, string feature = null)
         {
             string value = "";
 
@@ -18,12 +15,12 @@ namespace AfterSchoolUIAutomationTests.Parameters
             var url = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase);
 
             //correction in path to point it in Root directory
-            var mainpath = url.Replace("\\bin\\Debug\\netcoreapp3.1", "") + "\\Parameters\\parameters_users.xml";
+            var mainpath = url.Replace("\\bin\\Debug\\netcoreapp2.1", "") + "\\Parameters\\parameters_" + parameterType + ".xml";
             //load xml file
             xmlDoc.Load(mainpath);
 
             //save all nodes in XMLnodelist
-            XmlNodeList nodeList = xmlDoc.DocumentElement.SelectNodes("/PARAMETERS/" + feature);
+            XmlNodeList nodeList = parameterType.Equals("urls") && feature is null ? xmlDoc.DocumentElement.SelectNodes("/PARAMETERS") : xmlDoc.DocumentElement.SelectNodes("/PARAMETERS/" + feature);
 
             //loop through each node and save it in value
 

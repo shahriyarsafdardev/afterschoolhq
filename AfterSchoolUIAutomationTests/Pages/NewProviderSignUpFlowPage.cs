@@ -1,16 +1,11 @@
 ﻿using AfterSchoolUIAutomationTests.Helpers.Extensions;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Support.UI;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
 
 namespace AfterSchoolUIAutomationTests.Pages
 {
-    public class NewProviderSignUpFlowPage : IDisposable
+    public class NewProviderSignUpFlowPage
     {
-        private IWebDriver webDriver;
+        private readonly IWebDriver webDriver;
 
         public NewProviderSignUpFlowPage(IWebDriver WebDriver)
         {
@@ -40,18 +35,21 @@ namespace AfterSchoolUIAutomationTests.Pages
             webDriver.WaitInSeconds(2);
             return this;
         }
+
         public NewProviderSignUpFlowPage ClickIndividualAccount()
         {
             CreateIndividualAccountElement.Click();
             webDriver.WaitInSeconds(2);
             return this;
         }
+
         public NewProviderSignUpFlowPage ProvideProgramsForStudents()
         {
             ProvideProgramsForStudentsElement.Click();
             webDriver.WaitInSeconds(2);
             return this;
         }
+
         public NewProviderSignUpFlowPage PopulateProgramName(string name)
         {
             SignUpAccountSearchElement.SendKeys(name);
@@ -65,6 +63,7 @@ namespace AfterSchoolUIAutomationTests.Pages
             webDriver.WaitInSeconds(3);
             return this;
         }
+
         public NewProviderSignUpFlowPage PopulateFirstName(string name)
         {
             FirstNameElement.SendKeys(name);
@@ -112,15 +111,6 @@ namespace AfterSchoolUIAutomationTests.Pages
             BasicInfoSubmitElement.Click();
             webDriver.WaitInSeconds(2);
             return this;
-        }
-
-        public void Dispose()
-        {
-            if (webDriver != null)
-            {
-                webDriver.Dispose();
-                webDriver = null;
-            }
         }
     }
 }

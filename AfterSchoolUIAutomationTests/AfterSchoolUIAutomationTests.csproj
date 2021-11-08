@@ -6,74 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Drivers\**" />
-    <Compile Remove="Hooks\**" />
-    <EmbeddedResource Remove="Drivers\**" />
-    <EmbeddedResource Remove="Hooks\**" />
-    <None Remove="Drivers\**" />
-    <None Remove="Hooks\**" />
-    <SpecFlowFeatureFiles Remove="Drivers\**" />
-    <SpecFlowFeatureFiles Remove="Hooks\**" />
-    <SpecFlowObsoleteCodeBehindFiles Remove="Drivers\**" />
-    <SpecFlowObsoleteCodeBehindFiles Remove="Hooks\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="Features\AcceptPayments.feature.cs" />
-    <Compile Remove="Features\AccountSignUp.feature.cs" />
-    <Compile Remove="Features\ActivityPayLaterRegistration.feature.cs" />
-    <Compile Remove="Features\CreateActivity.feature.cs" />
-    <Compile Remove="Features\CreateAndManageSessions.feature.cs" />
-    <Compile Remove="Features\CreateProfile.feature.cs" />
-    <Compile Remove="Features\EditAccountProfile.feature.cs" />
-    <Compile Remove="Features\EditActivity.feature.cs" />
     <Compile Remove="Features\EmailConfirmation.feature.cs" />
-    <Compile Remove="Features\NewParentAccountActivityPayment.feature.cs" />
-    <Compile Remove="Features\NewParentAccountActivityRegistration.feature.cs" />
-    <Compile Remove="Features\NewProviderSignUpFlow.feature.cs" />
-    <Compile Remove="Features\TransactionMatchesPriceOnPaymentScreen.feature.cs" />
-    <Compile Remove="Pages\AcceptPaymentsPage.cs" />
-    <Compile Remove="Pages\AccountSignUpPage.cs" />
-    <Compile Remove="Pages\ActivityPayLaterRegistrationPage.cs" />
-    <Compile Remove="Pages\CreateActivityPage.cs" />
-    <Compile Remove="Pages\CreateAndManageSessionsPage.cs" />
-    <Compile Remove="Pages\CreateProfilePage.cs" />
-    <Compile Remove="Pages\EditAccountProfilePage.cs" />
-    <Compile Remove="Pages\EditActivityPage.cs" />
-    <Compile Remove="Pages\EmailConfirmationPage.cs" />
-    <Compile Remove="Pages\NewParentAccountActivityPaymentPage.cs" />
-    <Compile Remove="Pages\NewParentAccountActivityRegistrationPage.cs" />
-    <Compile Remove="Pages\NewProviderSignUpFlowPage.cs" />
-    <Compile Remove="Pages\TransactionMatchesPriceOnPaymentScreenPage.cs" />
-    <Compile Remove="Steps\AcceptPaymentsStep.cs" />
-    <Compile Remove="Steps\AccountSignUpStep.cs" />
-    <Compile Remove="Steps\ActivityPayLaterRegistrationStep.cs" />
-    <Compile Remove="Steps\CreateActivityStep.cs" />
-    <Compile Remove="Steps\CreateAndManageSessionsStep.cs" />
-    <Compile Remove="Steps\CreateProfileStep.cs" />
-    <Compile Remove="Steps\EditAccountProfileStep.cs" />
-    <Compile Remove="Steps\EditActivityStep.cs" />
-    <Compile Remove="Steps\EmailConfirmationStep.cs" />
-    <Compile Remove="Steps\NewParentAccountActivityPaymentStep.cs" />
-    <Compile Remove="Steps\NewParentAccountActivityRegistrationStep.cs" />
-    <Compile Remove="Steps\NewProviderSignUpFlowStep.cs" />
-    <Compile Remove="Steps\TransactionMatchesPriceOnPaymentScreenStep.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <SpecFlowFeatureFiles Remove="Features\AcceptPayments.feature" />
-    <SpecFlowFeatureFiles Remove="Features\AccountSignUp.feature" />
-    <SpecFlowFeatureFiles Remove="Features\ActivityPayLaterRegistration.feature" />
-    <SpecFlowFeatureFiles Remove="Features\CreateActivity.feature" />
-    <SpecFlowFeatureFiles Remove="Features\CreateAndManageSessions.feature" />
-    <SpecFlowFeatureFiles Remove="Features\CreateProfile.feature" />
-    <SpecFlowFeatureFiles Remove="Features\EditAccountProfile.feature" />
-    <SpecFlowFeatureFiles Remove="Features\EditActivity.feature" />
     <SpecFlowFeatureFiles Remove="Features\EmailConfirmation.feature" />
-    <SpecFlowFeatureFiles Remove="Features\NewParentAccountActivityPayment.feature" />
-    <SpecFlowFeatureFiles Remove="Features\NewParentAccountActivityRegistration.feature" />
-    <SpecFlowFeatureFiles Remove="Features\NewProviderSignUpFlow.feature" />
-    <SpecFlowFeatureFiles Remove="Features\TransactionMatchesPriceOnPaymentScreen.feature" />
   </ItemGroup>
 
   <ItemGroup>
@@ -109,6 +46,9 @@
 
   <ItemGroup>
     <None Update="Parameters\parameters_users.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Parameters\parameters_urls.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

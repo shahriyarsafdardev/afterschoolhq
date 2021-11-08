@@ -1,14 +1,11 @@
-﻿using System;
-using System.Threading;
-using AfterSchoolUIAutomationTests.Helpers.Extensions;
+﻿using AfterSchoolUIAutomationTests.Helpers.Extensions;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Support.UI;
 
 namespace AfterSchoolUIAutomationTests.Pages
 {
-    public class TransactionMatchesPriceOnPaymentScreenPage : IDisposable
+    public class TransactionMatchesPriceOnPaymentScreenPage
     {
-        private IWebDriver webDriver;
+        private readonly IWebDriver webDriver;
         public TransactionMatchesPriceOnPaymentScreenPage(IWebDriver WebDriver)
         {
             webDriver = WebDriver;
@@ -30,15 +27,6 @@ namespace AfterSchoolUIAutomationTests.Pages
         {
             webDriver.WaitInSeconds(1);
             return PayViaBankElement.Text.Trim();
-        }
-
-        public void Dispose()
-        {
-            if (webDriver != null)
-            {
-                webDriver.Dispose();
-                webDriver = null;
-            }
         }
     }
 }

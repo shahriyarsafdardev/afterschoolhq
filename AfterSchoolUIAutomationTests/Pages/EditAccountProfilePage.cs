@@ -1,14 +1,11 @@
-﻿using System;
-using System.Threading;
-using AfterSchoolUIAutomationTests.Helpers.Extensions;
+﻿using AfterSchoolUIAutomationTests.Helpers.Extensions;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Support.UI;
 
 namespace AfterSchoolUIAutomationTests.Pages
 {
-    public class EditAccountProfilePage : IDisposable
+    public class EditAccountProfilePage
     {
-        private IWebDriver webDriver;
+        private readonly IWebDriver webDriver;
 
         public const int DefaultWaitInSeconds = 5;
         public EditAccountProfilePage(IWebDriver WebDriver)
@@ -92,15 +89,6 @@ namespace AfterSchoolUIAutomationTests.Pages
             string message = ToastElement.Text;
             webDriver.WaitInSeconds(2);
             return message;
-        }
-
-        public void Dispose()
-        {
-            if (webDriver != null)
-            {
-                webDriver.Dispose();
-                webDriver = null;
-            }
         }
     }
 }
