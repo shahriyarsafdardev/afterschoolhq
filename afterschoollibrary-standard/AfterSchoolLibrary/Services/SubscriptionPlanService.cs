@@ -604,7 +604,7 @@ namespace AfterSchoolLibrary.Services
 
         private static DateTime? GetSubscriptionEndDate(this SubscriptionPlan plan, ParticipationObject participationObject, SystemMessages msgs = null)
         {
-            if (participationObject.Schedule.IsNotEmpty() && participationObject.Schedule.EndDate.HasValue)
+            if (plan.PlanTypeId == SubscriptionPlanType.Subscription && participationObject.Schedule.IsNotEmpty() && participationObject.Schedule.EndDate.HasValue)
                 return participationObject.Schedule.EndDate.Value.AddDays(1);
 
             return null;
@@ -612,6 +612,9 @@ namespace AfterSchoolLibrary.Services
 
         private static DateTime? GetPaymenPlanEndDate(this SubscriptionPlan plan, DateTime startDateTime,  SystemMessages msgs = null)
         {
+            if (plan.PlanTypeId != SubscriptionPlanType.PaymentPlan)
+                return null;
+
             var endDate = startDateTime;
             var periodsToAdd = plan.TotalPeriods.Value - plan.NumberOfPeriodsPrePaid.IfEmpty(0);
             if(periodsToAdd > 0)
