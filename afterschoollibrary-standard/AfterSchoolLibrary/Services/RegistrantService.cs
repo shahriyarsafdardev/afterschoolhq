@@ -1457,7 +1457,7 @@ namespace AfterSchoolLibrary.Services
             );
         }
 
-        public static void WithdrawRegistration(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType, WebUser loggedInUser, Account account, bool isCancelPayment, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void WithdrawRegistration(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType, WebUser loggedInUser, Account account, bool isCancelPayment, bool isParent = false, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var masterRegistrant = registrant.GetMasterRegistrant(msgs, dc);
             var ras = registrant.GetRegistrantActivities(msgs, dc);
@@ -1496,7 +1496,7 @@ namespace AfterSchoolLibrary.Services
 
                     // Notify Provider
                     var participationObject = ra.GetParticipationObject(msgs, dc);
-                    Helpers.EmailHelper.SendRegistrationWithdrawal(registrant, participationObject, loggedInUser, msgs);
+                    Helpers.EmailHelper.SendRegistrationWithdrawal(registrant, participationObject, loggedInUser, isParent, msgs);
                 },
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                 onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),

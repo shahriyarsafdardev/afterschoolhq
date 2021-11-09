@@ -2322,6 +2322,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     participationObjectType: (ParticipationObjectType)Enum.Parse(typeof(ParticipationObjectType), type),
                     loggedInUser: SessionVariables.CurrentUser,
                     isCancelPayment: isCancelPayment,
+                    isParent: false,
                     account: currentAccount,
                     msgs: msgs);
             }

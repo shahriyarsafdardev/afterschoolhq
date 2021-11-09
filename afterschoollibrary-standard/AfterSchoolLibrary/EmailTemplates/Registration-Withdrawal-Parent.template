@@ -1,0 +1,11 @@
+﻿<div>
+  <p>Hey @Model.ActivityContactName,</p>
+
+  <p>
+    This is an automated email leeting you know that @Model.CurrentUserName has withdrawn @Model.RegistrantName from @Model.ActivityName. If refund is necessary, please visit the accounting page of your AfterSchool HQ Dashboard.
+  </p>
+
+  <p>
+      Your @Model.ProductName Team
+  </p>
+</div>

@@ -188,7 +188,7 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        public static void SendRegistrationWithdrawal(Registrant registrant, ParticipationObject participationObject, WebUser loggedInUser, SystemMessages msgs)
+        public static void SendRegistrationWithdrawal(Registrant registrant, ParticipationObject participationObject, WebUser loggedInUser, bool isParent, SystemMessages msgs)
         {
             var model = new NameValueCollection()
             {

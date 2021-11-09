@@ -339,6 +339,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         participationObjectType: (ParticipationObjectType)type.ToInteger(),
                         loggedInUser: SessionVariables.CurrentUser,
                         isCancelPayment : true,
+                        isParent: false,
                         account: currentAccount,
                         msgs: msgs);
                 }
