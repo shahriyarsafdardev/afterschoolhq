@@ -207,6 +207,19 @@ namespace AfterSchoolLibrary.Helpers
                 "Registration_Withdrawal",
                 msgs);
 
+            if(isParent)
+                ProcessTemplate(
+                EmailTemplates.Registration_Withdrawal_Parent,
+                model,
+                "Registration_Withdrawal_Parent",
+                msgs);
+            else
+                ProcessTemplate(
+                EmailTemplates.Registration_Withdrawal,
+                model,
+                "Registration_Withdrawal",
+                msgs);
+
             // SEND EMAILS
             var mailMsgs = new SystemMessages();
 

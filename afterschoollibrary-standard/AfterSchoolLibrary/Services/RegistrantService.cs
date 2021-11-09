@@ -1457,7 +1457,7 @@ namespace AfterSchoolLibrary.Services
             );
         }
 
-        public static void WithdrawRegistration(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType, WebUser loggedInUser, Account account, bool isCancelPayment, bool isParent = false, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void WithdrawRegistration(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType, WebUser loggedInUser, Account account, bool isCancelPayment,  SystemMessages msgs, bool isParent = false, DatabaseConnection dc = null)
         {
             var masterRegistrant = registrant.GetMasterRegistrant(msgs, dc);
             var ras = registrant.GetRegistrantActivities(msgs, dc);
