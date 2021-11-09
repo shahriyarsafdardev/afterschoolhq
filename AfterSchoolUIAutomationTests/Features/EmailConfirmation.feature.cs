@@ -19,8 +19,8 @@ namespace AfterSchoolUIAutomationTests.Features
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("TechTalk.SpecFlow", "3.8.0.0")]
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [TechTalk.SpecRun.FeatureAttribute("AcceptPayments", Description="\tAccept payments for the account", SourceFile="Features\\EmailConfirmation.feature", SourceLine=0)]
-    public partial class AcceptPaymentsFeature
+    [TechTalk.SpecRun.FeatureAttribute("EmailConfirmation", Description="\tEmail Confirmation For Account Registartion", SourceFile="Features\\EmailConfirmation.feature", SourceLine=0)]
+    public partial class EmailConfirmationFeature
     {
         
         private TechTalk.SpecFlow.ITestRunner testRunner;
@@ -34,7 +34,7 @@ namespace AfterSchoolUIAutomationTests.Features
         public virtual void FeatureSetup()
         {
             testRunner = TechTalk.SpecFlow.TestRunnerManager.GetTestRunner();
-            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "AcceptPayments", "\tAccept payments for the account", ProgrammingLanguage.CSharp, ((string[])(null)));
+            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "EmailConfirmation", "\tEmail Confirmation For Account Registartion", ProgrammingLanguage.CSharp, ((string[])(null)));
             testRunner.OnFeatureStart(featureInfo);
         }
         
@@ -70,14 +70,14 @@ namespace AfterSchoolUIAutomationTests.Features
             testRunner.CollectScenarioErrors();
         }
         
-        [TechTalk.SpecRun.ScenarioAttribute("Accept payments for the account", new string[] {
-                "AcceptPayments"}, SourceLine=4)]
-        public virtual void AcceptPaymentsForTheAccount()
+        [TechTalk.SpecRun.ScenarioAttribute("Email Confirmation For Account Registartion", new string[] {
+                "EmailConfirmation"}, SourceLine=4)]
+        public virtual void EmailConfirmationForAccountRegistartion()
         {
             string[] tagsOfScenario = new string[] {
-                    "AcceptPayments"};
+                    "EmailConfirmation"};
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Accept payments for the account", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Email Confirmation For Account Registartion", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
 #line 5
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
@@ -99,46 +99,31 @@ this.ScenarioInitialize(scenarioInfo);
             {
                 this.ScenarioStart();
 #line 6
- testRunner.Given("Go through login flow for accept payments", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+ testRunner.Given("Open the browser and navigate to the AfterSchool App", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
 #line 7
- testRunner.Given("Navigate to the finish setup page", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+ testRunner.Given("Go through new provider signup flow for email confirmation", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
 #line 8
- testRunner.Given("Click close button of modal", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+ testRunner.Given("Go through create profile flow for email confirmation", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
 #line 9
- testRunner.Given("Click the got it button", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+ testRunner.Given("Go through create activity flow for email confirmation", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
 #line 10
- testRunner.Given("Click more dropdown option button", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+ testRunner.Given("Close the email confirmation modal by clicking close button", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
 #line 11
- testRunner.Given("Click enable payments button", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+ testRunner.Given("Open yopmail and populate email input box", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
 #line 12
- testRunner.Given("Click choose direct deposits button", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+ testRunner.Given("Click yopmail text input button", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
 #line 13
- testRunner.Given("Populate get paid by after school hq form details and click next", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+ testRunner.Given("Click confirmation email and link", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
 #line 14
- testRunner.Given("Click use test code button", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line hidden
-#line 15
- testRunner.Given("Populate personal form details and click next", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line hidden
-#line 16
- testRunner.Given("Populate bussiness details form and click next", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line hidden
-#line 17
- testRunner.Given("Populate select an account for payouts and click next", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line hidden
-#line 18
- testRunner.Given("Review your details and click save", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line hidden
-#line 19
- testRunner.Then("Verify account success message", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+ testRunner.Then("Verify the email verification message", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
             this.ScenarioCleanup();

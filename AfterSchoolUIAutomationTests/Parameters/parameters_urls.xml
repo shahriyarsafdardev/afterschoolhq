@@ -2,9 +2,11 @@
 <PARAMETERS>
   <LoginUrl>https://qa.afterschoolhq.com/login</LoginUrl>
   <LoginRedirectUrl>https://qa.afterschoolhq.com/login/select</LoginRedirectUrl>
+  <HomePageUrl>https://qa.afterschoolhq.com</HomePageUrl>
   <SignUpUrl>https://qa.afterschoolhq.com/signup/Welcome</SignUpUrl>
   <EditAccountProfileUrl>https://qa.afterschoolhq.com/Org/user/edit</EditAccountProfileUrl>
   <AddActivityUrl>https://qa.afterschoolhq.com/Org/activity/editsetup?isnew=1&amp;type=1</AddActivityUrl>
+  <ActivitiesUrl>https://qa.afterschoolhq.com/Org/activity?type=1</ActivitiesUrl>
   <ActivityPublishedURL>https://qa.afterschoolhq.com/CookingSchool/activity/brotbrötchencookingclass</ActivityPublishedURL>
   <PayLaterActivityPublishedURL>https://qa.afterschoolhq.com/CookingSchool/activity/paylateractivity</PayLaterActivityPublishedURL>
 </PARAMETERS>

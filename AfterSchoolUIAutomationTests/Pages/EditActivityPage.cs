@@ -21,7 +21,7 @@ namespace AfterSchoolUIAutomationTests.Pages
 
         private IWebElement AccountButtonElement => webDriver.FindElement(By.XPath("(//div[@id='accounts']//button)[1]"));
         private IWebElement ActivitiesElement => webDriver.FindElement(By.XPath("//ul[@class='sidebar-elements']//li[3]"));
-        private IWebElement ManageActivityElement => webDriver.FindElement(By.XPath("//div[@class='table-responsive']//table/tbody/tr[6]/td[1]"));
+        private IWebElement ManageActivityElement => webDriver.FindElement(By.XPath("//div[@class='table-responsive']//table/tbody/tr[1]/td[1]"));
         private IWebElement EditActivityElement => webDriver.FindElement(By.XPath("//div[@class='pull-right visible-lg visible-md']"));
         private IWebElement ActivityName => webDriver.FindElement(By.Id("name"));
         private IWebElement TotalAvailableSeats => webDriver.FindElement(By.Id("seatsavailable"));

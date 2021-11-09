@@ -8,11 +8,13 @@ using System.Text;
 using TechTalk.SpecFlow;
 using AfterSchoolUIAutomationTests.Helpers.Extensions;
 using AfterSchoolUIAutomationTests.Parameters;
+using FluentAssertions;
+using AfterSchoolUIAutomationTests.Drivers;
 
 namespace AfterSchoolUIAutomationTests.Steps
 {
     [Binding]
-    public sealed class ActivityPayLaterRegistrationStep : IDisposable
+    public sealed class ActivityPayLaterRegistrationStep
     {
         private readonly ScenarioContext _scenarioContext;
         private IWebDriver webDriver;
@@ -21,14 +23,14 @@ namespace AfterSchoolUIAutomationTests.Steps
         public ActivityPayLaterRegistrationStep(ScenarioContext scenarioContext)
         {
             _scenarioContext = scenarioContext;
-            webDriver = new ChromeDriver(AppDomain.CurrentDomain.BaseDirectory);
+            webDriver = UIDriver.WebDriver;
             activityPayLaterRegistrationPage = new ActivityPayLaterRegistrationPage(webDriver);
         }
 
         [Given(@"Navigate to the Pay later activity registration URL")]
         public void NavigateToActivityUrlAndClickRegister()
         {
-            webDriver.Navigate().GoToUrl(Parameter.Get("ActivityPayLaterRegistration", "PayLaterActivityPublishedURL"));
+            webDriver.Navigate().GoToUrl(Parameter.Get("PayLaterActivityPublishedURL", "users", "ActivityPayLaterRegistration"));
             webDriver.WaitInSeconds(5);
             webDriver.Manage().Window.Maximize();
             webDriver.WaitInSeconds(2);
@@ -43,14 +45,14 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Given(@"Enter already registered parent email and click Next")]
         public void ParentLogin()
         {
-            activityPayLaterRegistrationPage.PopulateEmail(Parameter.Get("ActivityPayLaterRegistration", "ParentEmailAddress"));
+            activityPayLaterRegistrationPage.PopulateEmail(Parameter.Get("ParentEmailAddress", "users", "ActivityPayLaterRegistration"));
             activityPayLaterRegistrationPage.ClickNextBtn();
         }
 
         [Given(@"Enter password and click Log me in")]
         public void VerifyLoginPassword()
         {
-            activityPayLaterRegistrationPage.PopulatePassword(Parameter.Get("ActivityPayLaterRegistration", "ParentEmailPassword"));
+            activityPayLaterRegistrationPage.PopulatePassword(Parameter.Get("ParentEmailPassword", "users", "ActivityPayLaterRegistration"));
             activityPayLaterRegistrationPage.ClickLoginBtn();
         }
 
@@ -63,19 +65,19 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Given(@"Fill in the student information form and click save & continue button")]
         public void PopulateStudentInformationFormAndClickNext()
         {
-            activityPayLaterRegistrationPage.PopulateStudentFirstname(Parameter.Get("ActivityPayLaterRegistration", "StudentFirstName"));
+            activityPayLaterRegistrationPage.PopulateStudentFirstname(Parameter.Get("StudentFirstName", "users", "ActivityPayLaterRegistration"));
             activityPayLaterRegistrationPage.PopulateStudentDOB("dob");
             activityPayLaterRegistrationPage.SetStudentGrade("5th");
             activityPayLaterRegistrationPage.SetStudentGender();
-            activityPayLaterRegistrationPage.SelectAutoCompleteSchool(Parameter.Get("ActivityPayLaterRegistration", "StudentLocation"));
+            activityPayLaterRegistrationPage.SelectAutoCompleteSchool(Parameter.Get("StudentLocation", "users", "ActivityPayLaterRegistration"));
             activityPayLaterRegistrationPage.ClickStudentInfoBtn();
         }
 
         [Given(@"Fill in the health information form and click save & continue button")]
         public void PopulateHealthInformationFormAndClickNext()
         {
-            activityPayLaterRegistrationPage.PopulateDoctorName(Parameter.Get("ActivityPayLaterRegistration", "DoctorName"));
-            activityPayLaterRegistrationPage.PopulateDoctorPhone(Parameter.Get("ActivityPayLaterRegistration", "DoctorPhone"));
+            activityPayLaterRegistrationPage.PopulateDoctorName(Parameter.Get("DoctorName", "users", "ActivityPayLaterRegistration"));
+            activityPayLaterRegistrationPage.PopulateDoctorPhone(Parameter.Get("DoctorPhone", "users", "ActivityPayLaterRegistration"));
             activityPayLaterRegistrationPage.SetStudentImmunization();
             activityPayLaterRegistrationPage.ClickStudentHealthNextBtn();
         }
@@ -83,7 +85,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Given(@"Enter parent e-signature and click e-sign and continue to payment button")]
         public void EnterParentESignature()
         {
-            activityPayLaterRegistrationPage.PopulateParentESign(Parameter.Get("ActivityPayLaterRegistration", "ParentESign"));
+            activityPayLaterRegistrationPage.PopulateParentESign(Parameter.Get("ParentESign", "users", "ActivityPayLaterRegistration"));
             activityPayLaterRegistrationPage.ClickESignNextBtn();
         }
 
@@ -97,17 +99,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         public void VerifyThankyouMessage()
         {
             string completed = "Thank You";
-            completed.Equals(activityPayLaterRegistrationPage.RegistrationComplete().Trim());
-            webDriver.WaitInSeconds(2);
-        }
-
-        public void Dispose()
-        {
-            if (webDriver != null)
-            {
-                webDriver.Dispose();
-                webDriver = null;
-            }
+            completed.Should().Be(activityPayLaterRegistrationPage.RegistrationComplete().Trim());
         }
     }
 }

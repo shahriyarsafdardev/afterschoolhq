@@ -3,6 +3,7 @@
 
 @AcceptPayments
 Scenario: Accept payments for the account
+	Given  Open the browser and navigate to the AfterSchool App
 	Given  Go through login flow for accept payments
 	Given  Navigate to the finish setup page
 	Given  Click close button of modal

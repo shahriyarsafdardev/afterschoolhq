@@ -6,7 +6,7 @@ using OpenQA.Selenium.Support.UI;
 
 namespace AfterSchoolUIAutomationTests.Pages
 {
-    public class CreateActivityPage : IDisposable
+    public class CreateActivityPage
     {
         private IWebDriver webDriver;
 
@@ -18,6 +18,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         //------------Finding Create Activity WebElements-----------//
 
         //------------Settings Section Web Elements-----------//
+        private IWebElement SigUpButtonElement => webDriver.FindElement(By.XPath("//ul[@class='site-navigation nav navbar-nav ml-auto']//li[7]"));
         private IWebElement AccountButtonElement => webDriver.FindElement(By.XPath("(//div[@id='accounts']//button)[1]"));
         private IWebElement AddActivityElement => webDriver.FindElement(By.XPath("//div[@class='pull-right']"));
         private IWebElement ModalGettingStartedCloseBtnElement => webDriver.FindElement(By.XPath("(//div[@class='close-icon'])[1]//a[@class='close close-icon-postion-2']//span"));
@@ -84,12 +85,20 @@ namespace AfterSchoolUIAutomationTests.Pages
         //------------Create Activity Helper Methods-----------//
 
         //------------Settings Section-----------//
+        public CreateActivityPage ClickSigUpButton()
+        {
+            SigUpButtonElement.Click();
+            webDriver.WaitInSeconds(4);
+            return this;
+        }
+
         public CreateActivityPage ClickAccountButton()
         {
             AccountButtonElement.Click();
             webDriver.WaitInSeconds(5);
             return this;
         }
+        
         public CreateActivityPage ClickAddActivity()
         {
             AddActivityElement.Click();
@@ -372,17 +381,6 @@ namespace AfterSchoolUIAutomationTests.Pages
             SaveAndReviewButtonElement.Click();
             webDriver.WaitInSeconds(5);
             return this;
-        }
-
-
-
-        public void Dispose()
-        {
-            if (webDriver != null)
-            {
-                webDriver.Dispose();
-                webDriver = null;
-            }
         }
     }
 }

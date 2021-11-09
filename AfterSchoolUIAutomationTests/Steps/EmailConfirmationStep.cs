@@ -8,11 +8,12 @@ using System.Text;
 using TechTalk.SpecFlow;
 using AfterSchoolUIAutomationTests.Helpers.Extensions;
 using AfterSchoolUIAutomationTests.Parameters;
+using AfterSchoolUIAutomationTests.Drivers;
 
 namespace AfterSchoolUIAutomationTests2.Steps
 {
     [Binding]
-    public sealed class EmailConfirmationStep : IDisposable
+    public sealed class EmailConfirmationStep
     {
         private readonly ScenarioContext _scenarioContext;
         private IWebDriver webDriver;
@@ -25,7 +26,7 @@ namespace AfterSchoolUIAutomationTests2.Steps
         public EmailConfirmationStep(ScenarioContext scenarioContext)
         {
             _scenarioContext = scenarioContext;
-            webDriver = new ChromeDriver(AppDomain.CurrentDomain.BaseDirectory);
+            webDriver = UIDriver.WebDriver;
             //loginPage = new LoginPage(webDriver);
             newProviderSignUpFlowPage = new NewProviderSignUpFlowPage(webDriver);
             createProfilePage = new CreateProfilePage(webDriver);
@@ -36,19 +37,16 @@ namespace AfterSchoolUIAutomationTests2.Steps
         [Given(@"Go through new provider signup flow for email confirmation")]
         public void GoThroughNewProviderSignupFlow()
         {
-            webDriver.Navigate().GoToUrl(Parameter.Get("AccountSigUp", "SignUpUrl"));
-            webDriver.WaitInSeconds(2);
-            webDriver.Manage().Window.Maximize();
             newProviderSignUpFlowPage.ClickSignUp();
             newProviderSignUpFlowPage.ClickIndividualAccount();
             newProviderSignUpFlowPage.ProvideProgramsForStudents();
-            newProviderSignUpFlowPage.PopulateProgramName(Parameter.Get("AccountSigUp", "ProgramName"));
+            newProviderSignUpFlowPage.PopulateProgramName(Parameter.Get("ProgramName", "users", "AccountSigUp"));
             newProviderSignUpFlowPage.ClickProgramSubmit();
-            newProviderSignUpFlowPage.PopulateFirstName(Parameter.Get("AccountSigUp", "FirstName"));
-            newProviderSignUpFlowPage.PopulateLasttName(Parameter.Get("AccountSigUp", "LasttName"));
+            newProviderSignUpFlowPage.PopulateFirstName(Parameter.Get("FirstName", "users", "AccountSigUp"));
+            newProviderSignUpFlowPage.PopulateLasttName(Parameter.Get("LasttName", "users", "AccountSigUp"));
             newProviderSignUpFlowPage.PopulateEmail("testemail" + DateTime.Now.ToString("yyyyMMddHHmmss") + "@yopmail.com");
-            newProviderSignUpFlowPage.PopulateUserPassword(Parameter.Get("AccountSigUp", "UserPassword"));
-            newProviderSignUpFlowPage.PopulateUserPassword2(Parameter.Get("AccountSigUp", "UserPassword2"));
+            newProviderSignUpFlowPage.PopulateUserPassword(Parameter.Get("UserPassword", "users", "AccountSigUp"));
+            newProviderSignUpFlowPage.PopulateUserPassword2(Parameter.Get("UserPassword2", "users", "AccountSigUp"));
             //newProviderSignUpFlowPage.CheckCaptcha();
             newProviderSignUpFlowPage.ClickBasicInfoSubmit();
         }
@@ -57,7 +55,7 @@ namespace AfterSchoolUIAutomationTests2.Steps
         public void GoThroughCreateProfileFlow()
         {
             createProfilePage.CreateYourFreeProfile();
-            createProfilePage.PopulateShortDescription(Parameter.Get("AccountSigUp", "ShortDescription"));
+            createProfilePage.PopulateShortDescription(Parameter.Get("ShortDescription", "users" , "AccountSigUp"));
             createProfilePage.SelectGender();
             createProfilePage.SelectTimeZone();
             createProfilePage.SaveAndContinueSubmit();
@@ -65,8 +63,8 @@ namespace AfterSchoolUIAutomationTests2.Steps
             createProfilePage.SelectMinGrade();
             createProfilePage.SelectMaxAge();
             createProfilePage.ShareInfoWithParentsSubmit();
-            createProfilePage.PopulatePhone(Parameter.Get("AccountSigUp", "Phone"));
-            createProfilePage.SelectAutoComplete(Parameter.Get("AccountSigUp", "AutoComplete"));
+            createProfilePage.PopulatePhone(Parameter.Get("Phone", "users", "AccountSigUp"));
+            createProfilePage.SelectAutoComplete(Parameter.Get("AutoComplete", "users" , "AccountSigUp"));
             createProfilePage.ContactInfoSubmit();
             string fileName = "musical-instruments-english.jpg";
             //returns url of main directory which contains "/bin/Debug"
@@ -77,7 +75,7 @@ namespace AfterSchoolUIAutomationTests2.Steps
             createProfilePage.UploadProfileImage(imagepath);
             createProfilePage.HeaderImageImage(imagepath);
             createProfilePage.CustomizeProfileSubmit();
-            createProfilePage.PopulateProgramCategories(Parameter.Get("AccountSigUp", "ProgramCategories"));
+            createProfilePage.PopulateProgramCategories(Parameter.Get("ProgramCategories", "users", "AccountSigUp"));
             createProfilePage.EasyActivitySubmit();
             createProfilePage.EnterLinksSubmit();
             createProfilePage.ClickGoToProfile();
@@ -89,9 +87,9 @@ namespace AfterSchoolUIAutomationTests2.Steps
             createActivityPage.CloseGettingStartedModal();
             createActivityPage.ClickGotItButton();
             createActivityPage.ClickCreateFirstActivity();
-            createActivityPage.PopulateActivityName(Parameter.Get("CreateNewActivity", "ActivityName"));
-            createActivityPage.PopulateTotalAvailableSeats(Parameter.Get("CreateNewActivity", "TotalAvailableSeats"));
-            createActivityPage.ToggleInviteOnly(Parameter.Get("CreateNewActivity", "InviteOnly"));
+            createActivityPage.PopulateActivityName(Parameter.Get("ActivityName", "users", "CreateNewActivity"));
+            createActivityPage.PopulateTotalAvailableSeats(Parameter.Get("TotalAvailableSeats", "users", "CreateNewActivity"));
+            createActivityPage.ToggleInviteOnly(Parameter.Get("InviteOnly", "users", "CreateNewActivity"));
             createActivityPage.SetSignUpPeriodOpen();
             createActivityPage.SetSignUpPeriodClose();
             createActivityPage.ClickSaveAndNext();
@@ -100,7 +98,7 @@ namespace AfterSchoolUIAutomationTests2.Steps
             createActivityPage.MinimumGrade();
             createActivityPage.MaximumGrade();
             createActivityPage.ClickSaveAndNext();
-            createActivityPage.HasSchedule(Parameter.Get("CreateNewActivity", "HasSchedule"));
+            createActivityPage.HasSchedule(Parameter.Get("HasSchedule", "users", "CreateNewActivity"));
             //createActivityPage.RepeatsWeekly(Parameter.Get("CreateNewActivity", "IsWeekly"));
             createActivityPage.WeekDays();
             createActivityPage.SetScheduleStartDate();
@@ -108,18 +106,18 @@ namespace AfterSchoolUIAutomationTests2.Steps
             createActivityPage.SetScheduleStartTime();
             createActivityPage.SetScheduleEndTime();
             createActivityPage.ClickSaveAndNext();
-            createActivityPage.ActivityDetails(Parameter.Get("CreateNewActivity", "AboutActivity"));
+            createActivityPage.ActivityDetails(Parameter.Get("AboutActivity", "users", "CreateNewActivity"));
             createActivityPage.ClickSaveAndNext();
             //createActivityPage.ActivityLedBy();
-            createActivityPage.ContactName(Parameter.Get("CreateNewActivity", "ContactName"));
-            createActivityPage.ContactPhone(Parameter.Get("CreateNewActivity", "ContactPhone"));
+            createActivityPage.ContactName(Parameter.Get("ContactName","users", "CreateNewActivity"));
+            createActivityPage.ContactPhone(Parameter.Get("ContactPhone","users" ,"CreateNewActivity"));
             //createActivityPage.ContactEmail(Parameter.Get("CreateNewActivity", "ContactEmail"));
             createActivityPage.ClickSaveAndNext();
             createActivityPage.PhysicalLocation();
-            createActivityPage.SelectAutoComplete(Parameter.Get("CreateNewActivity", "ActivityLocation"));
+            createActivityPage.SelectAutoComplete(Parameter.Get("ActivityLocation", "users", "CreateNewActivity"));
             createActivityPage.ClickSaveAndNext();
             createActivityPage.DoParentsPay();
-            createActivityPage.RegistrationFee(Parameter.Get("CreateNewActivity", "RegistrationFee"));
+            createActivityPage.RegistrationFee(Parameter.Get("RegistrationFee", "users" ,"CreateNewActivity"));
             createActivityPage.DoPriceParentpay();
             createActivityPage.ClickSaveAndNext();
             createActivityPage.SaveAndReviewButton();
@@ -154,15 +152,6 @@ namespace AfterSchoolUIAutomationTests2.Steps
         {
             string create = "Thank you! Your email has been verified.";
             create.Contains(emailConfirmationPage.EmailConfirmationComplete());
-        }
-
-        public void Dispose()
-        {
-            if (webDriver != null)
-            {
-                webDriver.Dispose();
-                webDriver = null;
-            }
         }
     }
 }

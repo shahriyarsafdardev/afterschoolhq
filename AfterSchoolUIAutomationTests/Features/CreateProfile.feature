@@ -3,6 +3,7 @@
 
 @CreateProfile
 Scenario: Create Account Profile
+	Given Open the browser and navigate to the AfterSchool App
 	Given Go through new provider signup flow
 	Given Click create your free profile button
 	Given Populate about your organization fields and click continue

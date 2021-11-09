@@ -3,6 +3,7 @@
 
 @mytag
 Scenario: Create New Session, Session Activity And Manage Session
+	Given Open the browser and navigate to the AfterSchool App
 	Given Login to the school account
 	Given Navigate to the sessions section and click on add session
 	Given Populate new session form and click save

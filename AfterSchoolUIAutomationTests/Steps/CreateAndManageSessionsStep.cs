@@ -9,22 +9,23 @@ using System.Text;
 using TechTalk.SpecFlow;
 using AfterSchoolUIAutomationTests.Helpers.Extensions;
 using AfterSchoolUIAutomationTests.Parameters;
+using AfterSchoolUIAutomationTests.Drivers;
+using FluentAssertions;
 
 namespace AfterSchoolUIAutomationTests.Steps
 {
     [Binding]
-    public sealed class CreateAndManageSessionsStep : IDisposable
+    public sealed class CreateAndManageSessionsStep
     {
         private readonly ScenarioContext _scenarioContext;
-        private IWebDriver webDriver;
-        private LoginPage loginPage;
-        private CreateAndManageSessionsPage createAndManageSessionsPage;
+        private readonly IWebDriver webDriver;
+        private readonly LoginPage loginPage;
+        private readonly CreateAndManageSessionsPage createAndManageSessionsPage;
 
         public CreateAndManageSessionsStep(ScenarioContext scenarioContext)
         {
             _scenarioContext = scenarioContext;
-            //webDriver = new ChromeDriver(AppDomain.CurrentDomain.BaseDirectory);
-            webDriver = new FirefoxDriver(AppDomain.CurrentDomain.BaseDirectory);
+            webDriver = UIDriver.WebDriver;
             loginPage = new LoginPage(webDriver);
             createAndManageSessionsPage = new CreateAndManageSessionsPage(webDriver);
         }
@@ -32,11 +33,8 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Given(@"Login to the school account")]
         public void LoginToSchoolAccount()
         {
-            webDriver.Navigate().GoToUrl(Parameter.Get("CreateAndManageSessions", "LoginUrl"));
-            webDriver.WaitInSeconds(3);
-            webDriver.Manage().Window.Maximize();
-            loginPage.PopulateName(Parameter.Get("CreateAndManageSessions", "UserName"));
-            loginPage.PopulatePassword(Parameter.Get("CreateAndManageSessions", "Password"));
+            loginPage.PopulateName(Parameter.Get("UserName", "users", "CreateAndManageSessions"));
+            loginPage.PopulatePassword(Parameter.Get("Password","users", "CreateAndManageSessions"));
             loginPage.ClickSubmit();
         }
 
@@ -50,8 +48,8 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Given(@"Populate new session form and click save")]
         public void PopulateNewSessionForm()
         {
-            createAndManageSessionsPage.PopulateSessionName(Parameter.Get("CreateAndManageSessions", "SessionName"));
-            createAndManageSessionsPage.PopulateSessionDetails(Parameter.Get("CreateAndManageSessions", "SessionDetails"));
+            createAndManageSessionsPage.PopulateSessionName(Parameter.Get("SessionName", "users", "CreateAndManageSessions"));
+            createAndManageSessionsPage.PopulateSessionDetails(Parameter.Get("SessionDetails", "users", "CreateAndManageSessions"));
             createAndManageSessionsPage.SelectRegistrationForm();
             createAndManageSessionsPage.SubmitForm();
         }
@@ -69,7 +67,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         {
             createAndManageSessionsPage.NavigateToActivtiesTab();
             createAndManageSessionsPage.BringActivitySectionsForms();
-            createAndManageSessionsPage.PopulateActivityName(Parameter.Get("CreateAndManageSessions", "SessionActivityName"));
+            createAndManageSessionsPage.PopulateActivityName(Parameter.Get("SessionActivityName" , "users" , "CreateAndManageSessions"));
             createAndManageSessionsPage.ClickSettingsSaveAndNextBtn();
         }
 
@@ -86,7 +84,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Given(@"Populate schedule form and click save")]
         public void PopulateSchduleForm()
         {
-            createAndManageSessionsPage.HasSchedule(Parameter.Get("CreateAndManageSessions", "HasSchedule"));
+            createAndManageSessionsPage.HasSchedule(Parameter.Get("HasSchedule", "users" , "CreateAndManageSessions"));
             //createAndManageSessionsPage.RepeatsWeekly(Parameter.Get("CreateAndManageSessions", "IsWeekly")); 
             createAndManageSessionsPage.WeekDays();
             createAndManageSessionsPage.SetScheduleStartDate();
@@ -99,7 +97,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Given(@"Populate about activity form and click save")]
         public void PopulateAboutActivity()
         {
-            createAndManageSessionsPage.ActivityDetails(Parameter.Get("CreateAndManageSessions", "AboutActivity"));
+            createAndManageSessionsPage.ActivityDetails(Parameter.Get("AboutActivity", "users", "CreateAndManageSessions"));
             createAndManageSessionsPage.ClickAboutSaveAndNextBtn();
         }
 
@@ -107,9 +105,9 @@ namespace AfterSchoolUIAutomationTests.Steps
         public void PopulateActivityContact()
         {
             createAndManageSessionsPage.ActivityLedBy();
-            createAndManageSessionsPage.ContactName(Parameter.Get("CreateAndManageSessions", "ContactName"));
-            createAndManageSessionsPage.ContactPhone(Parameter.Get("CreateAndManageSessions", "ContactPhone"));
-            createAndManageSessionsPage.ContactEmail(Parameter.Get("CreateAndManageSessions", "ContactEmail"));
+            createAndManageSessionsPage.ContactName(Parameter.Get("ContactName", "users", "CreateAndManageSessions"));
+            createAndManageSessionsPage.ContactPhone(Parameter.Get("ContactPhone" , "users" , "CreateAndManageSessions"));
+            createAndManageSessionsPage.ContactEmail(Parameter.Get("ContactEmail" , "users" , "CreateAndManageSessions"));
             createAndManageSessionsPage.ClickContactSaveAndNextBtn();
         }
 
@@ -117,7 +115,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         public void PopulateLocation()
         {
             createAndManageSessionsPage.PhysicalLocation();
-            createAndManageSessionsPage.SelectAutoComplete(Parameter.Get("CreateAndManageSessions", "Location"));
+            createAndManageSessionsPage.SelectAutoComplete(Parameter.Get("Location", "users" , "CreateAndManageSessions"));
             createAndManageSessionsPage.ClickLocationSaveAndNextBtn();
         }
 
@@ -125,7 +123,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         public void PopulatePrice()
         {
             createAndManageSessionsPage.DoParentsPay();
-            createAndManageSessionsPage.RegistrationFee(Parameter.Get("CreateAndManageSessions", "Fee"));
+            createAndManageSessionsPage.RegistrationFee(Parameter.Get("Fee" , "users", "CreateAndManageSessions"));
             createAndManageSessionsPage.DoPriceParentpay();
             createAndManageSessionsPage.ClickPriceSaveAndNextBtn();
         }
@@ -134,17 +132,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         public void VerifyCompleteRegistrationMessage()
         {
             string completed = createAndManageSessionsPage.ActivityPublished().Trim();
-            completed.Contains("Your Activity is published");
-            webDriver.WaitInSeconds(2);
-        }
-
-        public void Dispose()
-        {
-            if (webDriver != null)
-            {
-                webDriver.Dispose();
-                webDriver = null;
-            }
+            completed.Should().Be("Your Activity is published");
         }
     }
 }

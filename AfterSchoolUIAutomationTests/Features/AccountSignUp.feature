@@ -3,8 +3,8 @@
 
 @CreateIndividualAccount
 Scenario:  Try to create new individual account
-	Given  Open the browser and navigate to the Signup Page
-	Given  Manage the browser window size for Signup and click Get started
+	Given  Open the browser and navigate to the AfterSchool App
+	Given  Click the sigup button
 	Given  Click individual Account and provide programs for student 
 	Given  Poulate Program Name and click continue
 	Given  Poulate firstname, lastname, email, password and click continue

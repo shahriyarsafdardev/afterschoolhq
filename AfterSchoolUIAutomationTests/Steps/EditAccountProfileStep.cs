@@ -75,8 +75,8 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Then(@"Verify Success Message")]
         public void VerifyNavigatedURL()
         {
-            //String successMessage = editAccountProfilePage.ToastMessage();
-            string successMessage = "Success";
+            string successMessage = editAccountProfilePage.ToastMessage();
+            //string successMessage = "Success";
             successMessage.Equals("Success");
         }
     }

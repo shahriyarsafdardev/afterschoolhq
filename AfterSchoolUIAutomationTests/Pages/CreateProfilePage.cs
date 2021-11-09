@@ -154,14 +154,14 @@ namespace AfterSchoolUIAutomationTests.Pages
 
         public CreateProfilePage UploadProfileImage(string name)
         {
-            UploadProfileElement.SendKeys(name);
+            //UploadProfileElement.SendKeys(name);
             return this;
         }
 
         public CreateProfilePage HeaderImageImage(string name)
         {
             webDriver.WaitInSeconds(2);
-            HeaderImageElement.SendKeys(name);
+            //HeaderImageElement.SendKeys(name);
             return this;
         }
 

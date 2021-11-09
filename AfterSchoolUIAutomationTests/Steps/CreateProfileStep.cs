@@ -1,4 +1,5 @@
-﻿using AfterSchoolUIAutomationTests.Helpers.Extensions;
+﻿using AfterSchoolUIAutomationTests.Drivers;
+using AfterSchoolUIAutomationTests.Helpers.Extensions;
 using AfterSchoolUIAutomationTests.Pages;
 using AfterSchoolUIAutomationTests.Parameters;
 using OpenQA.Selenium;
@@ -14,7 +15,7 @@ using TechTalk.SpecFlow;
 namespace AfterSchoolUIAutomationTests.Steps
 {
     [Binding]
-    public sealed class CreateProfileStep : IDisposable
+    public sealed class CreateProfileStep
     {
         private readonly ScenarioContext _scenarioContext;
         private IWebDriver webDriver;
@@ -24,7 +25,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         public CreateProfileStep(ScenarioContext scenarioContext)
         {
             _scenarioContext = scenarioContext;
-            webDriver = new ChromeDriver(AppDomain.CurrentDomain.BaseDirectory);
+            webDriver = UIDriver.WebDriver;
             createProfilePage = new CreateProfilePage(webDriver);
             newProviderSignUpFlowPage = new NewProviderSignUpFlowPage(webDriver);
         }
@@ -32,19 +33,16 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Given(@"Go through new provider signup flow")]
         public void NewProviderSignUpFlow()
         {
-            webDriver.Navigate().GoToUrl(Parameter.Get("AccountSigUp", "SignUpUrl"));
-            webDriver.WaitInSeconds(2);
-            webDriver.Manage().Window.Maximize();
             newProviderSignUpFlowPage.ClickSignUp();
             newProviderSignUpFlowPage.ClickIndividualAccount();
             newProviderSignUpFlowPage.ProvideProgramsForStudents();
-            newProviderSignUpFlowPage.PopulateProgramName(Parameter.Get("AccountSigUp", "ProgramName"));
+            newProviderSignUpFlowPage.PopulateProgramName(Parameter.Get("ProgramName", "users" , "AccountSigUp"));
             newProviderSignUpFlowPage.ClickProgramSubmit();
-            newProviderSignUpFlowPage.PopulateFirstName(Parameter.Get("AccountSigUp", "FirstName"));
-            newProviderSignUpFlowPage.PopulateLasttName(Parameter.Get("AccountSigUp", "LasttName"));
+            newProviderSignUpFlowPage.PopulateFirstName(Parameter.Get("FirstName", "users", "AccountSigUp"));
+            newProviderSignUpFlowPage.PopulateLasttName(Parameter.Get("LasttName", "users" , "AccountSigUp"));
             newProviderSignUpFlowPage.PopulateEmail("testemail" + DateTime.Now.ToString("yyyyMMddHHmmss") + "@yopmail.com");
-            newProviderSignUpFlowPage.PopulateUserPassword(Parameter.Get("AccountSigUp", "UserPassword"));
-            newProviderSignUpFlowPage.PopulateUserPassword2(Parameter.Get("AccountSigUp", "UserPassword2"));
+            newProviderSignUpFlowPage.PopulateUserPassword(Parameter.Get("UserPassword", "users", "AccountSigUp"));
+            newProviderSignUpFlowPage.PopulateUserPassword2(Parameter.Get("UserPassword2", "users", "AccountSigUp"));
             //newProviderSignUpFlowPage.CheckCaptcha();
             newProviderSignUpFlowPage.ClickBasicInfoSubmit();
         }
@@ -58,7 +56,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Given(@"Populate about your organization fields and click continue")]
         public void PoulateOrganizationInfo()
         {
-            createProfilePage.PopulateShortDescription(Parameter.Get("AccountSigUp", "ShortDescription"));
+            createProfilePage.PopulateShortDescription(Parameter.Get("ShortDescription", "users", "AccountSigUp"));
             createProfilePage.SelectGender();
             createProfilePage.SelectTimeZone();
             createProfilePage.SaveAndContinueSubmit();
@@ -76,8 +74,8 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Given(@"Populate your contact info fields and click continue")]
         public void PopulateComtactInfoAndClickContinue()
         {
-            createProfilePage.PopulatePhone(Parameter.Get("AccountSigUp", "Phone"));
-            createProfilePage.SelectAutoComplete(Parameter.Get("AccountSigUp", "AutoComplete"));
+            createProfilePage.PopulatePhone(Parameter.Get("Phone", "users" , "AccountSigUp"));
+            createProfilePage.SelectAutoComplete(Parameter.Get("AutoComplete", "users", "AccountSigUp"));
             createProfilePage.ContactInfoSubmit();
         }
 
@@ -98,7 +96,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Given(@"Populate finding your activities fields and click continue")]
         public void PopulateParentsFindYourActivityAndClickContinue()
         {
-            createProfilePage.PopulateProgramCategories(Parameter.Get("AccountSigUp", "ProgramCategories"));
+            createProfilePage.PopulateProgramCategories(Parameter.Get("ProgramCategories", "users", "AccountSigUp"));
             createProfilePage.EasyActivitySubmit();
         }
 
@@ -118,18 +116,8 @@ namespace AfterSchoolUIAutomationTests.Steps
         public void ThenTheResultShouldBe()
         {
             String curentUrl = webDriver.Url;
-            string expectedUrl = Parameter.Get("AccountSigUp", "ProgramName");
+            string expectedUrl = Parameter.Get("ProgramName", "users", "AccountSigUp");
             curentUrl.Contains(Regex.Replace(expectedUrl, @"\s+", ""));
-        }
-
-        public void Dispose()
-        {
-            if (webDriver != null)
-            {
-                webDriver.Dispose();
-                webDriver = null;
-            }
-
         }
     }
 }

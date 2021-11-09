@@ -119,7 +119,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Given(@"Update email content and save")]
         public void PopulateEmailContent()
         {
-
+            editActivityPage.ShowAdvanceSettings();
         }
 
         [Then(@"Verify Update Test")]

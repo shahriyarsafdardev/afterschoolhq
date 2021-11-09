@@ -3,6 +3,7 @@
 
 @CreateActivity
 Scenario: Login And Create New Activity
+	Given  Open the browser and navigate to AfterSchool home page
 	Given  Go through new provider signup flow for activity creation
 	Given  Go through create profile flow for activity creation
 	Given  Close getting started modal
