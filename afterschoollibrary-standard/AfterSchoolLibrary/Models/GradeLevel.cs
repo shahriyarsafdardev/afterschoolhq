@@ -164,6 +164,10 @@ namespace AfterSchoolLibrary.Models
                 var data = Helpers.Utilities.GetKeyValuePairs(formQuestionAnswer.Text);
                 var registrantGradeLevelAnswerText = data.First().value.ToLower().Trim();
                 sameGradeLevel = gradeLevel.Abbreviation.IsSameAs(registrantGradeLevelAnswerText) || (registrantGradeLevelAnswerText.MaxChars(gradeLevel.Abbreviation.Length) == gradeLevel.Abbreviation);
+
+                //in some cases like Pre-K or Kindergarten, we have Abbreviation = P, above conditions will not work in that case.
+                if (sameGradeLevel == false && gradeLevel.Name.IsSameAs(registrantGradeLevelAnswerText))
+                    sameGradeLevel = true;
             }
             else if (formQuestionAnswer.IsNotEmpty())
             {

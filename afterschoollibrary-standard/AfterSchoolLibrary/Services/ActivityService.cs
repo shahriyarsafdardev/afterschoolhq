@@ -2210,6 +2210,16 @@ namespace AfterSchoolLibrary.Services
             return ras;
         }
 
+        public static List<RegistrantActivity> GetRegistrantActivitiesForSurvey(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantActivity.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc)
+                .Where(a => a.HasParentRegistrantId(msgs, dc) && a.AssignmentTypeId.In(new List<RegistrationAssignmentType> {
+                    RegistrationAssignmentType.Reserved,
+                    RegistrationAssignmentType.ReservedPendingParentalConsent,
+                    RegistrationAssignmentType.ReservedPendingPayment
+                })).ToList();           
+        }
+
         public static RegistrantActivity GetRegistrantActivity(this Activity activity, Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RegistrantActivity.LoadByParticipationObjectByRegistrant(activity.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value, msgs, dc);

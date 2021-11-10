@@ -194,7 +194,7 @@ namespace AfterSchoolLibrary.Models
 			SurveyRequest.Alter(dc);
 			SurveyResponse.Alter(dc);
 			RegistrantInviteCode.Alter(dc);
-			RefreshToken.Alter(dc);
+			RefreshToken.Alter(dc);			
 			
 
 			return msgs;

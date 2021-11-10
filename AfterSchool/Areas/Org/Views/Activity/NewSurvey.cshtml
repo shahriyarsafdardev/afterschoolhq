@@ -9,12 +9,14 @@
     var showManageForms = accountPackage.HasFeature(FeatureType.ManageForms);
     var showManageFormFields = forms.Count >= maxFormCount ? false : true;
 
-    var studentList = new List<SelectListItem>(); 
+    var studentList = new List<SelectListItem>();
     foreach (var student in (List<RegistrantActivity>)ViewBag.Students)
     {
-        studentList.Add(new SelectListItem {
+        var registrant = Registrant.Load(student.RegistrantId.Value);
+        studentList.Add(new SelectListItem
+        {
             Text = student.RegistrantName,
-            Value = student.RegistrantId.ToString()
+            Value = student.GetParentRegistrantId()?.ToString()
         });
     }
 }
