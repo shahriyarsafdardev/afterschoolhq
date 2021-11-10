@@ -1084,3 +1084,7 @@
     background-color: #00AE83 !important;
     color: white !important;
 }
+
+.textCenterImportant{
+    text-align:center !important;
+}
