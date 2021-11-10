@@ -1496,7 +1496,7 @@ namespace AfterSchoolLibrary.Services
 
                     // Notify Provider
                     var participationObject = ra.GetParticipationObject(msgs, dc);
-                    Helpers.EmailHelper.SendRegistrationWithdrawal(registrant, participationObject, loggedInUser, isParent, msgs);
+                    Helpers.EmailHelper.SendRegistrationWithdrawal(registrant, participationObject, loggedInUser, isParent, isCancelPayment,  msgs);
                 },
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                 onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
