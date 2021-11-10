@@ -71,11 +71,11 @@ namespace AfterSchoolUIAutomationTests.Features
         }
         
         [TechTalk.SpecRun.ScenarioAttribute("Create New Session, Session Activity And Manage Session", new string[] {
-                "mytag"}, SourceLine=4)]
+                "CreateAndManageSessions"}, SourceLine=4)]
         public virtual void CreateNewSessionSessionActivityAndManageSession()
         {
             string[] tagsOfScenario = new string[] {
-                    "mytag"};
+                    "CreateAndManageSessions"};
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Create New Session, Session Activity And Manage Session", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
 #line 5

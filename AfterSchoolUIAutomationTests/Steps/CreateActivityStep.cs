@@ -37,13 +37,13 @@ namespace AfterSchoolUIAutomationTests.Steps
             webDriver.Navigate().GoToUrl(Parameter.Get("HomePageUrl", "urls"));
             webDriver.WaitInSeconds(3);
             webDriver.Manage().Window.Maximize();
-            webDriver.Navigate().GoToUrl(Parameter.Get("SignUpUrl", "urls"));
-            webDriver.WaitInSeconds(3);
         }
 
         [Given(@"Go through new provider signup flow for activity creation")]
         public void GoThroughNewProviderSignupFlow()
         {
+            webDriver.Navigate().GoToUrl(Parameter.Get("SignUpUrl", "urls"));
+            webDriver.WaitInSeconds(3);
             newProviderSignUpFlowPage.ClickSignUp();
             newProviderSignUpFlowPage.ClickIndividualAccount();
             newProviderSignUpFlowPage.ProvideProgramsForStudents();

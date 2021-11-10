@@ -1,7 +1,7 @@
 ﻿Feature: CreateAndManageSessions
 	Create New Session, Session Activity And Manage Session.
 
-@mytag
+@CreateAndManageSessions
 Scenario: Create New Session, Session Activity And Manage Session
 	Given Open the browser and navigate to the AfterSchool App
 	Given Login to the school account

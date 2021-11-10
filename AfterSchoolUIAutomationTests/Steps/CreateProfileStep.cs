@@ -33,6 +33,8 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Given(@"Go through new provider signup flow")]
         public void NewProviderSignUpFlow()
         {
+            webDriver.Navigate().GoToUrl(Parameter.Get("SignUpUrl", "urls"));
+            webDriver.WaitInSeconds(3);
             newProviderSignUpFlowPage.ClickSignUp();
             newProviderSignUpFlowPage.ClickIndividualAccount();
             newProviderSignUpFlowPage.ProvideProgramsForStudents();

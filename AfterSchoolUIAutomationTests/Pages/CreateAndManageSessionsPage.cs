@@ -345,6 +345,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         {
             webDriver.WaitInSeconds(2);
             ActivityLocationElement.Clear();
+            ((IJavaScriptExecutor)webDriver).ExecuteScript("document.getElementById('location').setAttribute('value', '')");
             ActivityLocationElement.SendKeys(location);
             Thread.Sleep(5000);
             WebDriverWait wait = new WebDriverWait(webDriver, new TimeSpan(0, 0, 5));
