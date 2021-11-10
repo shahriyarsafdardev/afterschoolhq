@@ -18,8 +18,8 @@
     var showEmail = accountPackage.HasFeature(FeatureType.EmailMessaging);
     var showText = accountPackage.HasFeature(FeatureType.TextMessaging);
     var maxMessageCount = accountPackage.HasFeature(FeatureType.TextMessaging) ? (int)accountPackage.GetFeature(FeatureType.TextMessaging).Max.Value : 0;
-    var currentMessageCount = paging.TotalCount;
-    var showFormFields = currentMessageCount >= maxMessageCount ? false : true;
+
+    var showFormFields = (paging.IsEmpty() ? 0 : paging?.TotalCount ?? 0) >= maxMessageCount ? false : true;
     var messagingPackage = PackageService.GetPackageWithAnyFeaturesLowestPrice(new List<FeatureType>() { FeatureType.EmailMessaging, FeatureType.TextMessaging });
 }
 
@@ -30,7 +30,8 @@
             @if (showEmail || showText)
             {
                 <a href="@sendNewLink" class="btn btn-primary btn-space"><i class="icon icon-left s7-paper-plane"></i> Send New Message</a>
-            } else
+            }
+            else
             {
                 <a href="#" class="btn btn-primary btn-space" onclick="return showUpgradeMyPlan('@(messagingPackage.Name)',@(messagingPackage.ID))"><i class="icon icon-left s7-paper-plane"></i> Send New Message</a>
             }

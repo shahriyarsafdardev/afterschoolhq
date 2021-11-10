@@ -161,5 +161,38 @@ namespace AfterSchoolLibraryTests.Tests
             }
 
         }
+
+        [Fact(DisplayName = "IsReservedRegistrationAssignmentTypeTest")]
+        public void IsReservedRegistrationAssignmentTypeTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var registrant = RegistrantFactory.Create(msgs, dc);
+            var reservedRegistrantActivity = RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
+            var reservedPendingParentalConsentRegistrantActivity = RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
+            var reservedPendingPaymentRegistrantActivity = RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
+            var notReservedRegistrantActivity = RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
+
+
+            // Act
+            reservedRegistrantActivity.AssignmentTypeId = RegistrationAssignmentType.Reserved;
+            reservedPendingParentalConsentRegistrantActivity.AssignmentTypeId = RegistrationAssignmentType.ReservedPendingParentalConsent;
+            reservedPendingPaymentRegistrantActivity.AssignmentTypeId = RegistrationAssignmentType.ReservedPendingPayment;
+            notReservedRegistrantActivity.AssignmentTypeId = RegistrationAssignmentType.NotSet;
+
+            msgs.AddRange(reservedRegistrantActivity.Save(dc));
+            msgs.AddRange(reservedPendingParentalConsentRegistrantActivity.Save(dc));
+            msgs.AddRange(reservedPendingPaymentRegistrantActivity.Save(dc));
+            msgs.AddRange(notReservedRegistrantActivity.Save(dc));
+
+            // Assert
+            Assert.True(msgs.HasNoErrors());
+            Assert.True(reservedRegistrantActivity.IsReservedRegistrationAssignmentType());
+            Assert.True(reservedPendingParentalConsentRegistrantActivity.IsReservedRegistrationAssignmentType());
+            Assert.True(reservedPendingPaymentRegistrantActivity.IsReservedRegistrationAssignmentType());
+            Assert.False(notReservedRegistrantActivity.IsReservedRegistrationAssignmentType());
+
+
+        }
     }
 }

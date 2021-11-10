@@ -97,6 +97,8 @@ property: MinSeatsRequired, int?, Int, , Minimum seats required to have the acti
 property: RegistrationFinalized, bool, Bit, , Used to close registration and send notifications
 property: InterestFormId, int?, Int, , Used to set the interest form used on the activity page
 property: IsConvenienceFeeTakenOutOfCost, bool, Bit, , Used to allow a provider to set the final fee a parent sees
+property: CostFrequencyTypeId, ActivityCostFrequencyType, Int, , Use to determine if registration fee applies to the whole activity or each class
+property: RegistrationCutoffHours, int?, Int, , the number of hours before the activity time that a parent can register
 -property: AllowPreRegistration, bool, Bit
 -property: RegistrationTimeZone, string, NVarChar "30"
 -property: AcceptPayPal, bool, Bit
@@ -216,6 +218,7 @@ property: StartDate, DateTime?, DateTime, required
 property: EndDate, DateTime?, DateTime, required
 property: DailyStartTime, DateTime?, DateTime, required
 property: DailyEndTime, DateTime?, DateTime, required
+property: DaysOfTheWeek, String, NVarChar "50"
 loadmethod: AccountId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: AccountId|IsOngoing, List<>
@@ -235,10 +238,24 @@ property: StartDateTime, DateTime?, DateTime, required
 property: EndDateTime, DateTime?, DateTime, required
 property: InstanceTypeId, InstanceType, Int
 property: LocationId, int?, Int
+property: SeatsAvailable, int?, Int
 loadmethod: ActivityId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: ActivityScheduleId, List<>
 loadmethod: ActivityScheduleId|InstanceTypeId, List<>
+[end]
+
+[begin]
+type: Class
+name: ActivityInstanceSeats
+description: Store number of seats per actual date of an activity useful for events and tutoring
+inherits: BasicObjectWithModified
+property: RegistrantActivityId, int?, Int, required
+property: ActivityInstanceId, int?, Int, required
+property: NumberOfSeats, int?, Int, required
+loadmethod: RegistrantActivityId, List<>
+loadmethod: ActivityInstanceId, List<>
+loadmethod: RegistrantActivityId|ActivityInstanceId
 [end]
 
 [begin]
@@ -958,6 +975,7 @@ inherits: BasicLookUpObject
 property: AccountId, int?, Int, required
 property: Uid, Guid, UniqueIdentifier, required
 property: IsActive, bool, Bit
+property: FormTypeId, FormType, Int, required
 join: Account.ID, AccountId, InnerJoin
 joinproperty: Account.Name, string, NVarChar
 loadmethod: AccountId, List<>
@@ -979,6 +997,7 @@ property: QuestionDataTypeId, QuestionDataType, Int
 property: IsActive, bool, Bit
 property: IsRequired, bool, Bit
 property: IsLocked, bool, Bit
+property: IsAnswerDescriptionEnabled, bool, Bit
 property: Options, string, NVarChar "1000"
 property: Link, string, NVarChar "1000"
 property: DependsOnQuestionId, int?, Int
@@ -1007,8 +1026,10 @@ property: FormId, int?, Int, required
 property: DisplayOrder, int?, Int
 property: RegistrantTypeId, RegistrantType, Int
 property: QuestionGroupDataTypeId, QuestionGroupDataType, Int
+property: IsDeleted, bool, Bit
 loadmethod: FormId, List<>
 loadmethod: FormId|RegistrantTypeId, List<>
+loadmethod: FormId|IsDeleted,  List<>
 [end]
 
 [begin]
@@ -1019,12 +1040,16 @@ inherits: BasicObjectWithModified
 property: FormQuestionId, int?, Int, required
 property: RegistrantId, int?, Int
 property: ActivityId, int?, Int
+property: SurveyResponseId, int?, Int
 property: RegistrationId, int?, Int
-property: Text, string, NVarChar "400"
+property: Text, string, NVarChar "2000"
+property: Description, string, NVarChar "4000"
 property: QuestionDataTypeId, QuestionDataType, Int
 property: QuestionText, string, NVarChar "400", , Used to keep the question text just in case the question text changes on the original
+property: Uid, Guid?, UniqueIdentifier
 join: FormQuestion.ID, FormQuestionId, LeftOuterJoin
 join: Registration.ID, RegistrationId, LeftOuterJoin
+join: SurveyResponse.ID, SurveyResponseId, LeftOuterJoin
 join: FormQuestionGroup.ID, FormQuestion.FormQuestionGroupId, LeftOuterJoin
 joinproperty: FormQuestion.QuestionDataTypeId, QuestionDataType, Int
 joinproperty: FormQuestion.QuestionTypeId, QuestionType, Int
@@ -1042,6 +1067,7 @@ loadmethod: RegistrantId|ActivityId, List<>
 loadmethod: FormQuestionId, List<>
 loadmethod: FormQuestionId|RegistrantId
 loadmethod: RegistrationId, List<>
+loadmethod: SurveyResponseId, List<>
 [end]
 
 [begin]
@@ -1392,6 +1418,7 @@ property: ParticipationObjectTypeId, ParticipationObjectType, Int, required
 property: ParticipationObjectId, int?, Int, required
 property: Day, DayOfWeekASL, Int
 property: RegistrantActivityId, int?, Int
+property: SelectedDates, string, NVarChar "400", , store dates selected for a per class purchase
 loadmethod: Uid
 loadmethod: CartId, List<>
 [end]
@@ -1863,6 +1890,100 @@ loadmethod: AccountId, List<>
 [end]
 
 [begin]
+type: Class
+name: SurveyRequest
+serializable: true
+description: table to save details of all suvrye request created by providers.
+inherits: BasicObjectWithModified
+property: Name, string, NVarChar "400"
+property: Description, string, NVarChar "400"
+property: AccountId, int, Int, required
+property: ActivityId, int, Int, required
+property: FormId, int, Int, required
+property: DueDate, DateTime?, DateTime
+property: MultipleResponsesEnabled, bool, Bit, required
+property: IsDeleted, bool, Bit
+property: Uid, Guid, UniqueIdentifier, required
+join: Account.ID, AccountId, LeftOuterJoin
+join: Form.ID, FormId, LeftOuterJoin
+join: Activity.ID, ActivityId, LeftOuterJoin
+loadmethod: AccountId, List<>
+loadmethod: ActivityId, List<>
+loadmethod: FormId, List<>
+loadmethod: Uid
+loadmethod: Uid|AccountId
+loadmethod: Uid|ActivityId
+loadmethod: Uid|FormId
+[end]
+
+[begin]
+type: Class
+name: SurveyResponse
+serializable: true
+description: Saves Survey responses.
+inherits: BasicObjectWithModified
+property: SurveyRequestId, int?, Int
+property: RegistrantId, int?, Int
+property: SurveyFeedbackStatusTypeId, SurveyFeedbackStatus, Int
+property: IsDeleted, bool, Bit
+property: Uid, Guid, UniqueIdentifier, required
+property: LastAttendedFormQuestionAnswerUid, Guid?, UniqueIdentifier
+join: Registrant.ID, RegistrantId, LeftOuterJoin
+join: SurveyRequest.ID, SurveyRequestId, LeftOuterJoin
+loadmethod: RegistrantId, List<>
+loadmethod: SurveyRequestId, List<>
+loadmethod: Uid
+loadmethod: Uid|SurveyRequestId
+loadmethod: Uid|RegistrantId
+[end]
+
+[begin]
+type: Class
+name: RegistrantInviteCode
+serializable: true
+description: Saves Registrant Invite Code, related to Survey.
+inherits: BasicObjectWithModified
+property: SurveyResponseId, int?, Int
+property: RegistrantId, int?, Int
+property: Code, string, NVarChar "400"
+property: ExpiryDate, DateTime?, DateTime
+property: IsDeleted, bool, Bit
+property: Uid, Guid, UniqueIdentifier, required
+join: Registrant.ID, RegistrantId, LeftOuterJoin
+join: SurveyResponse.ID, SurveyResponseId, LeftOuterJoin
+loadmethod: RegistrantId, List<>
+loadmethod: SurveyResponseId
+loadmethod: Uid
+loadmethod: Uid|SurveyResponseId
+loadmethod: Uid|RegistrantId
+loadmethod: IsDeleted|Code
+loadmethod: Code
+[end]
+
+[begin]
+type: Class
+name: RefreshToken
+serializable: true
+description: Stores refresh tokens
+inherits: BasicIDObject
+property: Token, string, NVarChar "4000"
+property: Expires, DateTime?, DateTime
+property: Created, DateTime?, DateTime
+property: CreatedByIp, string, NVarChar "100"
+property: Revoked, DateTime?, DateTime
+property: RevokedByIp, string, NVarChar "100"
+property: ReplacedByToken, string, NVarChar "4000"
+property: IsActive, bool, Bit
+property: WebUserId, int?, Int
+[end]
+
+[begin]
+type: Enum
+name: SurveyFeedbackStatus
+values: NotSet, New, InProgress, Completed
+[end]
+
+[begin]
 type: Enum
 name: WebSessionActionType
 values: NotSet, Created, Updated, Published, Unpublished, Sent, BeganRegistration, Registered, Paid, Refunded, Requested, Invited, Archived, Deleted, ManuallyRegistered, ManuallyPaid, ManuallyRefunded, Approved, Verified, Viewed, Moved, Navigated, Searched, Paged, Connected, SignedUp, LoggedIn, LoggedOut, Copied, Restored, Browsed, Followed, Unfollowed, Shared, Contacted, Interested, BrowsedAllActivities, Added, Removed
@@ -1880,6 +2001,11 @@ name: AHQObjectType
 values: NotSet, Account, Activity, ActivityGroup, AccountActivityGroup
 [end]
 
+[begin]
+type: Enum
+name: FormType
+values: NotSet, Registration, Survey
+[end]
 
 [begin]
 type: Enum
@@ -1962,7 +2088,7 @@ values: NotSet, Individual, Organization
 [begin]
 type: Enum
 name: FeatureType
-values: NotSet, Attendance, AcceptPayments, EmailMessaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageExternalLeagues, UseStripeConnectedAccount, AcceptACH, ManageLeagues, ManageFieldTrips, ManagePermissionSlips, ManageLearningPods,	TextMessaging, AllowInvites, AllowStudentRegistration, AllowPaymentPlans, AllowSubscriptionPlans, AllowPayLater, StudentCRM, ManageCoupons, Teacher1099
+values: NotSet, Attendance, AcceptPayments, EmailMessaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageExternalLeagues, UseStripeConnectedAccount, AcceptACH, ManageLeagues, ManageFieldTrips, ManagePermissionSlips, ManageLearningPods,	TextMessaging, AllowInvites, AllowStudentRegistration, AllowPaymentPlans, AllowSubscriptionPlans, AllowPayLater, StudentCRM, ManageCoupons, Teacher1099, Survey
 [end]
 
 [begin]
@@ -2198,4 +2324,10 @@ values: NotSet, CreateProfile, CreateFirstActivity, PublishActivity, ValidateEma
 type: Enum
 name: SignUpType
 values: NotSet, NewAccountSignUp, TrialSignUp, ConvertingFromTrial, ChangePackage, ChangePackageDuringTrial, ChangeBillingPeriodType, Teacher1099
+[end]
+
+[begin]
+type: Enum
+name: ActivityCostFrequencyType
+values: NotSet, PerActivity, PerClass
 [end]

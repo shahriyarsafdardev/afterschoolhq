@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Collections;
 using Twilio.Rest.Api.V2010.Account;
 using System.Net;
+using Newtonsoft.Json.Linq;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -818,6 +819,9 @@ namespace AfterSchoolLibrary.Services
 
         private static bool HasParticipationAssignment(this Registrant masterRegistrant, ParticipationObject participationObject, List<RegistrationAssignmentType> assignmentTypes, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (!masterRegistrant.IsMaster)
+                return masterRegistrant.GetMasterRegistrant(msgs, dc).HasParticipationAssignment(participationObject, assignmentTypes, hasParentalConsent, msgs, dc);
+
             var submittedRecords = masterRegistrant.GetSubmittedRecords(participationObject.OwnerAccount.ID.Value, msgs, dc);
 
             return submittedRecords.Any() && RegistrantActivity.ExistsByParticipationObjectByRegistrants(
@@ -832,6 +836,9 @@ namespace AfterSchoolLibrary.Services
 
         public static bool MasterRegistrantHasPlan(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (!masterRegistrant.IsMaster)
+                return masterRegistrant.GetMasterRegistrant(msgs, dc).MasterRegistrantHasPlan(participationObject, msgs, dc);
+
             return masterRegistrant.MasterRegistrantHasPlan(
                 participationObject.OwnerAccount.ID.Value, 
                 participationObject.ObjectID.Value, 
@@ -842,6 +849,9 @@ namespace AfterSchoolLibrary.Services
 
         public static bool MasterRegistrantHasPlan(this Registrant masterRegistrant, int billingAccountId, int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (!masterRegistrant.IsMaster)
+                return masterRegistrant.GetMasterRegistrant(msgs, dc).MasterRegistrantHasPlan(billingAccountId, participationObjectId, participationObjectType, msgs, dc);
+
             var submittedRecords = masterRegistrant.GetSubmittedRecords(billingAccountId, msgs, dc);
 
             return submittedRecords.Any() && RegistrantSubscriptionPlan.ExistsByParticipationObjectByRegistrants(
@@ -914,16 +924,25 @@ namespace AfterSchoolLibrary.Services
 
         public static bool IsAppliedFor(this Registrant masterRegistrant, ParticipationObject participationObject, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (!masterRegistrant.IsMaster)
+                return masterRegistrant.GetMasterRegistrant(msgs, dc).IsAppliedFor(participationObject, hasParentalConsent, msgs, dc);
+
             return HasParticipationAssignment(masterRegistrant, participationObject, RegistrationAssignmentType.Applied.AsList(), hasParentalConsent, msgs, dc);
         }
 
         public static bool HasConsentFor(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (!masterRegistrant.IsMaster)
+                return masterRegistrant.GetMasterRegistrant(msgs, dc).HasConsentFor(participationObject, msgs, dc);
+
             return HasParticipationAssignment(masterRegistrant, participationObject, null, true, msgs, dc);
         }
 
         public static bool OnWaitingListFor(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (!masterRegistrant.IsMaster)
+                return masterRegistrant.GetMasterRegistrant(msgs, dc).OnWaitingListFor(participationObject, msgs, dc);
+
             return HasParticipationAssignment(
                 masterRegistrant, 
                 participationObject, 
@@ -935,6 +954,9 @@ namespace AfterSchoolLibrary.Services
 
         public static bool IsReservedFor(this Registrant masterRegistrant, ParticipationObject participationObject, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (!masterRegistrant.IsMaster)
+                return masterRegistrant.GetMasterRegistrant(msgs, dc).IsReservedFor(participationObject, hasParentalConsent, msgs, dc);
+
             var assignmentTypes = new List<RegistrationAssignmentType>()
                 {
                     RegistrationAssignmentType.Reserved,
@@ -945,8 +967,86 @@ namespace AfterSchoolLibrary.Services
             return HasParticipationAssignment(masterRegistrant, participationObject, assignmentTypes, hasParentalConsent, msgs, dc);
         }
 
+        public static bool IsReservedForAllDates(this Registrant masterRegistrant, ParticipationObject participationObject, List<DateTime> dates, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (!masterRegistrant.IsMaster)
+                return masterRegistrant.GetMasterRegistrant(msgs, dc).IsReservedForAllDates(participationObject, dates, hasParentalConsent, msgs, dc);
+
+            var assignmentTypes = new List<RegistrationAssignmentType>()
+                {
+                    RegistrationAssignmentType.Reserved,
+                    RegistrationAssignmentType.ReservedPendingPayment,
+                    RegistrationAssignmentType.ReservedPendingParentalConsent,
+                };
+
+            var hasAssignment = HasParticipationAssignment(masterRegistrant, participationObject, assignmentTypes, hasParentalConsent, msgs, dc);
+
+            var submittedRecords = masterRegistrant.GetSubmittedRecords(participationObject.OwnerAccount.ID.Value, msgs, dc);
+            var counter = 0;
+
+            submittedRecords.ForEach(submittedRecord => {
+
+                var ra = submittedRecord.GetRegistrantActivity(participationObject, msgs, dc);
+
+                if (ra.IsNotEmpty())
+                    dates.ForEach(date => {
+
+                        var instance = participationObject.Schedule.GetInSessionInstanceByDate(date, msgs, dc);
+
+                        if (instance.IsNotEmpty())
+                        {
+                            var ais = ActivityInstanceSeats.LoadByRegistrantActivityIdByActivityInstanceId(ra.ID.Value, instance.ID.Value, msgs, dc);
+                            if (ais.IsNotEmpty())
+                                counter++;
+                        }
+                    });
+            });
+
+            return hasAssignment && counter == dates.Count;
+        }
+
+        public static bool IsReservedForDate(this Registrant masterRegistrant, ParticipationObject participationObject, DateTime date, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (!masterRegistrant.IsMaster)
+                return masterRegistrant.GetMasterRegistrant(msgs, dc).IsReservedForDate(participationObject, date, hasParentalConsent, msgs, dc);
+
+            var assignmentTypes = new List<RegistrationAssignmentType>()
+                {
+                    RegistrationAssignmentType.Reserved,
+                    RegistrationAssignmentType.ReservedPendingPayment,
+                    RegistrationAssignmentType.ReservedPendingParentalConsent,
+                };
+
+            var hasAssignment = HasParticipationAssignment(masterRegistrant, participationObject, assignmentTypes, hasParentalConsent, msgs, dc);
+
+            var submittedRecords = masterRegistrant.GetSubmittedRecords(participationObject.OwnerAccount.ID.Value, msgs, dc);
+            var counter = 0;
+
+            submittedRecords.ForEach(submittedRecord => {
+
+                var ra = submittedRecord.GetRegistrantActivity(participationObject, msgs, dc);
+
+                if (ra.IsNotEmpty())
+                {
+                    var instance = participationObject.Schedule.GetInSessionInstanceByDate(date, msgs, dc);
+
+                    if (instance.IsNotEmpty())
+                    {
+                        var ais = ActivityInstanceSeats.LoadByRegistrantActivityIdByActivityInstanceId(ra.ID.Value, instance.ID.Value, msgs, dc);
+                        if (ais.IsNotEmpty())
+                            counter++;
+                    }
+                }
+            });
+
+            return hasAssignment && counter == 1;
+        }
+
         public static bool IsReservedAndPaidFor(this Registrant masterRegistrant, ParticipationObject participationObject, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (!masterRegistrant.IsMaster)
+                return masterRegistrant.GetMasterRegistrant(msgs, dc).IsReservedAndPaidFor(participationObject, hasParentalConsent, msgs, dc);
+
             return HasParticipationAssignment(masterRegistrant, participationObject, RegistrationAssignmentType.Reserved.AsList(), hasParentalConsent, msgs, dc);
         }
 
@@ -965,6 +1065,9 @@ namespace AfterSchoolLibrary.Services
 
         public static bool HasSubmittedFor(this Registrant masterRegistrant, ParticipationObject participationObject, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (!masterRegistrant.IsMaster)
+                return masterRegistrant.GetMasterRegistrant(msgs, dc).HasSubmittedFor(participationObject, hasParentalConsent, msgs, dc);
+
             var assignmentTypes= new List<RegistrationAssignmentType>()
                 {
                     RegistrationAssignmentType.Reserved,
@@ -1027,7 +1130,7 @@ namespace AfterSchoolLibrary.Services
             return copy;
         }
 
-        public static bool NeedsToRegister(this Registrant submittedRecord, Registration registration, ParticipationObject participationObject, SystemMessages msgs, DatabaseConnection dc = null)
+        public static bool NeedsToRegister(this Registrant submittedRecord, Registration registration, ParticipationObject participationObject, List<DateTime> selectedDates, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (submittedRecord.IsEmpty())
                 return true;
@@ -1042,6 +1145,9 @@ namespace AfterSchoolLibrary.Services
                 return true;
 
             if (participationObject.ShouldParentPay() && !submittedRecord.IsReservedAndPaidFor(participationObject, null, msgs, dc))
+                return true;
+
+            if (participationObject.CanRegisterPerClass && !submittedRecord.IsReservedForAllDates(participationObject, selectedDates, null, msgs, dc))
                 return true;
 
             return false;
@@ -1190,18 +1296,23 @@ namespace AfterSchoolLibrary.Services
         public static FormQuestionAnswer AddOrUpdateAnswer(this Registrant registrant, string answerText, FormQuestion question, int? registrationId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (question.IsNotEmpty())
+            {
+                if (question.QuestionTypeId == QuestionType.CheckboxList && answerText.IsNotEmpty())
+                    answerText = GetFormattedAnswerForCheckboxList(answerText);
+
                 return registrant.AddOrUpdateAnswer(
-                        answerText, 
-                        question.ID, 
-                        question.QuestionDataTypeId, 
-                        question.Text, 
-                        registrationId, 
-                        loggedInUser, 
-                        msgs, 
+                        answerText,
+                        question.ID,
+                        question.QuestionDataTypeId,
+                        question.Text,
+                        registrationId,
+                        loggedInUser,
+                        msgs,
                         dc);
+            }
 
             return null;
-        }
+        }        
 
         public static FormQuestionAnswer AddOrUpdateAnswer(this Registrant registrant, string answerText, int? questionId, QuestionDataType questionDataType, string questionText, int? registrationId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
@@ -1342,20 +1453,23 @@ namespace AfterSchoolLibrary.Services
         public static void WithdrawRegistration(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType, WebUser loggedInUser, Account account, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var masterRegistrant = registrant.GetMasterRegistrant(msgs, dc);
-
-            if (!loggedInUser.IsTechSupportOrOwner(account, msgs, dc) && 
-                !loggedInUser.HasAccessToRegistrant(masterRegistrant, msgs, dc))
-            {
-                msgs.Add("You don't have permission to modify this registration", MessageType.UserError);
-                return;
-            }
-
             var ras = registrant.GetRegistrantActivities(msgs, dc);
             var ra = ras.Find(item => item.ParticipationObjectId == participationObjectId && item.ParticipationObjectTypeId == participationObjectType);
 
             if (ra.IsEmpty())
             {
                 msgs.Add("Registration not found", MessageType.Notice);
+                return;
+            }
+
+            var activity = ra.GetActivity(msgs, dc);
+            var hasAccessToActivity = activity.IsNotEmpty() ? ActivityWebUser.LoadByActivityIdByWebUserId(activity.ID.Value, loggedInUser.ID.Value, msgs, dc).IsNotEmpty() : false;
+
+            if (!loggedInUser.IsTechSupportOwnerOrAdmin(account, msgs, dc)
+                && !loggedInUser.HasAccessToRegistrant(masterRegistrant, msgs, dc)
+                && !hasAccessToActivity)
+            {
+                msgs.Add("You don't have permission to modify this registration", MessageType.UserError);
                 return;
             }
 
@@ -1641,7 +1755,7 @@ namespace AfterSchoolLibrary.Services
             // Bharat: response to above question, (hypothetically) becuase in provider's student panel
             // you(darye) wanted to show amount paid by parent without fees, and not the amount that we charged.
             // I have updated this logic to add both AmountReceivedByProvider and AmountPaidByParent with flag IsAmountProRated
-            var amountPaid = checkoutObject.GetTotalCostToPurchaseTodayNoFees(msgs, dc);
+            var amountPaid = checkoutObject.GetTotalCostToPurchaseTodayNoFees(msgs, dc) * checkoutObject.ClassQuantity;
 
             if (checkoutObject.PostPayPlan.IsNotEmpty())
                 amountPaid = checkoutObject.GetPostPayPlanCostTodayWithFees();
@@ -1678,5 +1792,12 @@ namespace AfterSchoolLibrary.Services
                     dc: dc);
             }
         }
+
+        public static List<SurveyResponse> GetSurveyRequest(this Registrant registrant)
+        {
+            return SurveyResponse.LoadByRegistrantId(registrant.ID.Value);
+        }
+
+        private static string GetFormattedAnswerForCheckboxList(string s) => $"[" + s + "]";
     }
 }

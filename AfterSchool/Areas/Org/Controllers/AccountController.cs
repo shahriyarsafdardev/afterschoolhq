@@ -203,7 +203,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Account = currentAccount;
             ViewBag.IsFullScreen = GetIsFullScreen();
-            ViewBag.Messages = msgs;            
+            ViewBag.Messages = msgs;
 
             return View(model);
         }
@@ -757,12 +757,13 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Forms()
+        public ActionResult Forms(string fromSurvey)
         {
             var msgs = new SystemMessages();
             var forms = SessionVariables.CurrentAccount.GetForms(msgs);
 
             ViewBag.Messages = msgs;
+            ViewBag.FromSurvey = fromSurvey;
             return View(forms);
         }
 
@@ -770,22 +771,24 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult FormEdit(string id, string qg)
         {
             var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+            HandleTempMessages(msgs);
 
             if (id.IsEmpty())
                 return HttpNotFound();
 
-            var msgs = new SystemMessages();
             var form = currentAccount.GetForm(id.ToInteger(), msgs);
             var questionGroups = form.GetQuestionGroups(msgs);
             var individualGroups = questionGroups
                 .Where(x => x.RegistrantTypeId == RegistrantType.Individual)
                 .OrderBy(x => x.DisplayOrder).ToList();
-            var organizationGroups = questionGroups
-                .Where(x => x.RegistrantTypeId == RegistrantType.Organization)
-                .OrderBy(x => x.DisplayOrder).ToList();
+            // NOTE: temporarily disable organization groups
+            //var organizationGroups = questionGroups
+            //    .Where(x => x.RegistrantTypeId == RegistrantType.Organization)
+            //    .OrderBy(x => x.DisplayOrder).ToList();
 
-            //temporarily disable organization groups
-            organizationGroups = new List<FormQuestionGroup>();
+
+            var organizationGroups = new List<FormQuestionGroup>();
 
             //make sure only question groups with a setting of individual or organization are added to the final count
             questionGroups.Clear();
@@ -819,7 +822,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult FormEdit(string id, string copyfrom, string qg, string name, string description, string cmd)
+        public ActionResult FormEdit(string id, string copyfrom, string qg, string name, string description, string cmd, string formtype)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -838,13 +841,18 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 if (copyfrom.IsNumber())
                     form = currentAccount.GetForm(copyfrom.ToInteger(), msgs)?
-                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, null, msgs);
+                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, (FormType)formtype.ToInteger(), null, msgs, null);
                 else
                     form = currentAccount.GetDefaultForm(msgs)?
-                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, null, msgs);
+                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, (FormType)formtype.ToInteger(), null, msgs, null);
             }
             else
                 form = currentAccount.GetForm(id.ToInteger(), msgs);
+
+            var questions = new List<FormQuestion>();
+            var questionGroups = new List<FormQuestionGroup>();
+            var individualGroups = new List<FormQuestionGroup>();
+            var organizationGroups = new List<FormQuestionGroup>();
 
             if (msgs.HasNoErrors())
             {
@@ -852,11 +860,10 @@ namespace AfterSchool.Areas.Org.Controllers
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
                         if (name.IsNotBlank()) form.Name = name;
-                        if (description.IsNotBlank()) form.Description = description;
+                        form.Description = description;
+                        if (formtype.IsNotBlank()) form.FormTypeId = (FormType)formtype.ToInteger();
 
                         amsgs.AddRange(form.Save(adc));
-
-                        var questions = new List<FormQuestion>();
 
                         if (qg.IsNumber())
                         {
@@ -873,7 +880,8 @@ namespace AfterSchool.Areas.Org.Controllers
                                     FormId = form.ID,
                                     QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
                                     RegistrantTypeId = RegistrantType.Individual,
-                                    Name = Request.Params["name-0"]
+                                    Name = Request.Params["name-0"],
+                                    IsDeleted = false
                                 };
                                 amsgs.AddRange(questionGroup.Save(adc));
                                 questions = new List<FormQuestion>();
@@ -895,10 +903,11 @@ namespace AfterSchool.Areas.Org.Controllers
                             // save existing questions
                             questions.ForEach(question =>
                             {
-                                if (!question.IsLocked)
+                                if (!question.IsLocked && question.IsActive)
                                 {
                                     question.IsActive = Request.Params[$"active-{question.ID}"].IsBoolean();
                                     question.IsRequired = Request.Params[$"required-{question.ID}"].IsBoolean();
+                                    question.IsAnswerDescriptionEnabled = Request.Params[$"answerDescription-{question.ID}"].IsBoolean();
 
                                     if (question.QuestionDataTypeId == QuestionDataType.NotSet)
                                     {
@@ -907,6 +916,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                         question.Description = Request.Params[$"description-{question.ID}"];
                                         question.Options = Request.Params[$"options-text-{question.ID}"];
                                         question.Link = Request.Params[$"link-text-{question.ID}"];
+                                        question.DisplayOrder = Request.Params[$"displayOrderId-{question.ID}"].ToInteger();
                                         question.QuestionTypeId = (QuestionType)Request.Params[$"questiontype-{question.ID}"].ToInteger();
                                     }
 
@@ -917,11 +927,11 @@ namespace AfterSchool.Areas.Org.Controllers
                             });
 
                             // save new questions
-                            if (Request.Form["newquestioncount"].IsNumber() && Request.Form["newquestioncount"].ToInteger() > 0)
+                            if (Request.Form["newquestionsIds"].Length > 0)
                             {
-                                var questionCount = Request.Form["newquestioncount"].ToInteger();
-
-                                for (var i = 0; i < questionCount; i++)
+                                var questionIds = Request.Form["newquestionsIds"];
+                                var questionsList = questionIds.Split(',');
+                                foreach (var i in questionsList)
                                 {
                                     var question = new FormQuestion
                                     {
@@ -930,7 +940,8 @@ namespace AfterSchool.Areas.Org.Controllers
                                         LastModifiedDate = DateTime.UtcNow,
                                         CreatedBy = currentUser.ID,
                                         LastModifiedBy = currentUser.ID,
-                                        DisplayOrder = questionGroup.GetQuestionCount(amsgs, adc) + 1,
+                                        DisplayOrder = Request.Params[string.Format("new-sort-{0}", i)].ToInteger(),
+                                        //questionGroup.GetQuestionCount(amsgs, adc) + 1,
                                         FormQuestionGroupId = questionGroup.ID,
                                         IsTemplate = false,
                                         QuestionDataTypeId = QuestionDataType.NotSet,
@@ -939,8 +950,9 @@ namespace AfterSchool.Areas.Org.Controllers
                                         Options = Request.Params[string.Format("new-options-text-{0}", i)],
                                         Link = Request.Params[string.Format("new-link-text-{0}", i)],
                                         Description = Request.Params[string.Format("new-description-{0}", i)],
-                                        IsActive = Request.Params[string.Format("new-active-{0}", i)].IsBoolean(),
-                                        IsRequired = Request.Params[string.Format("new-required-{0}", i)].IsBoolean()
+                                        IsActive = true,
+                                        IsRequired = Request.Params[string.Format("new-required-{0}", i)].IsBoolean(),
+                                        IsAnswerDescriptionEnabled = Request.Params[string.Format("new-description-enabled-{0}", i)].IsBoolean()
                                     };
                                     amsgs.AddRange(question.Save(adc));
                                 }
@@ -959,12 +971,12 @@ namespace AfterSchool.Areas.Org.Controllers
                 );
             }
 
-            var questionGroups = form.GetQuestionGroups(msgs);
-            var individualGroups = questionGroups
+            questionGroups = form.GetQuestionGroups(msgs);
+            individualGroups = questionGroups
                 .Where(x => x.RegistrantTypeId == RegistrantType.Individual)
                 .OrderBy(x => x.DisplayOrder)
                 .ToList();
-            var organizationGroups = questionGroups
+            organizationGroups = questionGroups
                 .Where(x => x.RegistrantTypeId == RegistrantType.Organization)
                 .OrderBy(x => x.DisplayOrder)
                 .ToList();
@@ -990,14 +1002,98 @@ namespace AfterSchool.Areas.Org.Controllers
                 case "next":
                     if (currentIndex < questionGroups.Count - 1) questionGroup = questionGroups[currentIndex + 1];
                     break;
+
             }
 
-            ViewBag.Messages = msgs;
             ViewBag.QuestionGroups = questionGroups;
             ViewBag.IndividualGroups = individualGroups;
             ViewBag.OrganizationGroups = organizationGroups;
             ViewBag.QuestionGroup = questionGroup;
+            ViewBag.Messages = msgs;
             return View(form);
+        }
+
+        [HttpGet]
+        public ActionResult Delete(string id)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+
+            var questionToDelete = FormQuestion.Load(id.ToInteger(), msgs);
+            questionToDelete.IsActive = false;
+            msgs.AddRange(questionToDelete.Save());
+
+            // Show Success Message
+            // LOG: Someone has Deleted Question.
+            if (msgs.HasNoErrors())
+            {
+                msgs.Add(string.Format("{0} has been deleted", questionToDelete.Text), MessageType.Success);
+                SessionVariables.WebSession.LogActivity(
+                   account: currentAccount,
+                   actor: currentUser,
+                   actionType: WebSessionActionType.Deleted,
+                   objectType: ObjectType.FormQuestion,
+                   objectId: id.ToInteger(),
+                   objectText: questionToDelete.Text,
+                   indirectObjectType: ObjectType.FormQuestion,  // Need to know about indirectObjectType
+                   indirectObjectId: currentAccount.ID.Value,
+                   indirectObjectText: currentAccount.Name
+               );
+            }
+
+            ViewBag.Messages = msgs;
+            TempData["Messages"] = msgs;
+
+            return RedirectToAction("FormEdit", new { id = questionToDelete.FormId, qg = "" });
+        }
+
+        [HttpGet]
+        public ActionResult DeleteSection(string id)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+
+            var sectionToDelete = FormQuestionGroup.Load(id: id.ToInteger(), msgs: msgs);
+            sectionToDelete.IsDeleted = true;
+            msgs.AddRange(sectionToDelete.Save());
+
+            //lets inactive all the questions for this section, so later when retrieving questions, we don't have to check for removed sections
+            var questionsInThisSection = FormQuestion.LoadByFormQuestionGroupId(FormQuestionGroupId: sectionToDelete.ID.Value, msgs: msgs);
+            foreach (var item in questionsInThisSection)
+            {
+                item.IsActive = false;
+                msgs.AddRange(item.Save());
+            }
+
+            // Show Success Message
+            // LOG: Someone has Deleted Question.
+            if (msgs.HasNoErrors())
+            {
+                msgs.Add(string.Format("{0} has been deleted with all it's questions.", sectionToDelete.Name), MessageType.Success);
+                SessionVariables.WebSession.LogActivity(
+                   account: currentAccount,
+                   actor: currentUser,
+                   actionType: WebSessionActionType.Deleted,
+                   objectType: ObjectType.FormQuestionGroup,
+                   objectId: id.ToInteger(),
+                   objectText: sectionToDelete.Name,
+                   indirectObjectType: ObjectType.FormQuestionGroup,
+                   indirectObjectId: currentAccount.ID.Value,
+                   indirectObjectText: currentAccount.Name
+               );
+            }
+
+            ViewBag.Messages = msgs;
+            TempData["Messages"] = msgs;
+
+            return RedirectToAction("FormEdit", new { id = sectionToDelete.FormId, qg = "" });
         }
 
         private AccountProfile StyleViewBag(SystemMessages msgs)

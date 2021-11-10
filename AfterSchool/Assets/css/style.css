@@ -271,6 +271,13 @@ td,
 th {
   padding: 0;
 }
+.d-flex{
+    display: flex;
+}
+.col {
+    padding-left: 5px;
+    padding-right: 5px;
+}
 /*! Source: https://github.com/h5bp/html5-boilerplate/blob/master/src/css/main.css */
 @media print {
   *,
@@ -2743,6 +2750,25 @@ output {
   -webkit-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
   -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
   transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+}
+
+.form-control.input-sm {
+   padding: 0px 12px;
+}
+
+label.rating-label {
+    line-height: 30px;
+    margin-bottom: 0px;
+}
+.form-control.input-sm{
+    padding: 0px 12px;
+}
+.rating{
+    width: 100px;
+}
+label.rating-label {
+    line-height: 30px;
+    margin-bottom: 0px;
 }
 .form-control:focus {
   border-color: #ef6262;
@@ -16445,7 +16471,6 @@ fieldset[disabled] .btn-social.btn-tumblr.active {
 .md-modal .md-content {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
   border-radius: 3px;
-  overflow: hidden;
   background-color: #ffffff;
   color: #555555;
 }
@@ -19366,4 +19391,31 @@ div.dataTables_wrapper div.dataTables_length label select {
 }
 .emoji-option-table tr th, .emoji-option-table tr td {
     border: 0 !important;
+}
+.emoji-option-table tr th, .emoji-option-table tr td {
+    border: 0 !important;
+}
+.emojionearea.emojionearea-inline{
+    height: 44px;
+    padding-right: 20px
+}
+.emojionearea.emojionearea-inline > .emojionearea-editor {
+    position: relative;
+    height: 44px;
+    display: flex;
+    align-items: center;
+}
+.emojionearea .emojionearea-button > div{
+    top: 5px;
+}
+.emojionearea.emojionearea-inline > .emojionearea-editor {
+    font-family: Segoe UI Emoji !important;
+}
+a.text-limit span {
+    display: block;
+    text-align: center;
+    width: 100%;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }

@@ -12,6 +12,9 @@
     var editlocationactive = activeMenu == "editlocation" ? "active" : "";
     var editcostactive = activeMenu == "editcost" ? "active" : "";
     var editconfirmationactive = activeMenu == "editconfirmation" ? "active" : "";
+
+    var isRestrictionsSaved = (isActive && activeMenu != "editrestrictions" && activeMenu != "editsetup") || ViewBag.SaveOnly != null;
+    var isBeforeRestrictions = (isScheduleActive && activeMenu != "editrestrictions" && activeMenu != "editsetup") || ViewBag.SaveOnly != null;
 }
 <div id="list1" class="dd">
     <ol class="dd-list">
@@ -29,7 +32,7 @@
                                 new ViewDataDictionary {
                                 { "Url", Url.Action("editrestrictions", "activity", new { id = Model.Uid.ToString(), isnew = Request["isnew"] }) },
                                 { "Text", "Restrictions" },
-                                { "IsActive", isScheduleActive },
+                                { "IsActive", (isScheduleActive && activeMenu != "editsetup") },
                 }
                             );
                     }
@@ -45,7 +48,7 @@
                                 new ViewDataDictionary {
                                 { "Url", Url.Action("editschedule", "activity", new { id = Model.Uid.ToString(), isnew = Request["isnew"] }) },
                                 { "Text", "Schedule" },
-                                { "IsActive", isScheduleActive },
+                                { "IsActive", isBeforeRestrictions},
                 }
                             );
                     }
@@ -61,7 +64,7 @@
                                 new ViewDataDictionary {
                                 { "Url", Url.Action("editdetails", "activity", new { id = Model.Uid.ToString(), isnew = Request["isnew"] }) },
                                 { "Text", "About Your " + UILabel.ActivityLabel(Model.ActivityTypeId) },
-                                { "IsActive", isActive },
+                                { "IsActive", isRestrictionsSaved },
                 }
                             );
                     }
@@ -75,7 +78,7 @@
                             new ViewDataDictionary {
                             { "Url", Url.Action("editcontact", "activity", new { id = Model.Uid.ToString(), isnew = Request["isnew"] }) },
                             { "Text", "Contact" },
-                            { "IsActive", isActive },
+                            { "IsActive", isRestrictionsSaved },
             }
                         );
                 }
@@ -91,7 +94,7 @@
                                 new ViewDataDictionary {
                             { "Url", Url.Action("editlocation", "activity", new { id = Model.Uid.ToString(), isnew = Request["isnew"] }) },
                             { "Text", "Location" },
-                            { "IsActive", isActive },
+                            { "IsActive", isRestrictionsSaved },
                 }
                             );
                     }
@@ -108,7 +111,7 @@
                                 new ViewDataDictionary {
                                 { "Url", Url.Action("editcost", "activity", new { id = Model.Uid.ToString(), isnew = Request["isnew"] }) },
                                 { "Text", "Pricing & Payment" },
-                                { "IsActive", isActive },
+                                { "IsActive", isRestrictionsSaved },
                 }
                             );
                     }
@@ -125,7 +128,7 @@
                                 new ViewDataDictionary {
                                 { "Url", Url.Action("editconfirmation", "activity", new { id = Model.Uid.ToString(), isnew = Request["isnew"] }) },
                                 { "Text", "Email Content" },
-                                { "IsActive", isActive },
+                                { "IsActive", isRestrictionsSaved },
                 }
                             );
                     }
@@ -142,7 +145,7 @@
                                 new ViewDataDictionary {
                                 { "Url", Url.Action("connectprovider", "activity", new { id = Model.Uid.ToString(), isnew = Request["isnew"] }) },
                                 { "Text", "Provider Details" },
-                                { "IsActive", isActive },
+                                { "IsActive", isRestrictionsSaved },
                 }
                             );
                     }

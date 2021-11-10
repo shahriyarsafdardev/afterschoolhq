@@ -117,6 +117,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (registration.IsEmpty())
                 return new HttpStatusCodeResult(System.Net.HttpStatusCode.NotFound);
 
+            ViewBag.ReturnURl = returnUrl;
             return View(registration);
         }
 
@@ -160,7 +161,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Update(string id)
+        public ActionResult Update(string id, string returnUrl)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             
@@ -172,11 +173,13 @@ namespace AfterSchool.Areas.Org.Controllers
 
             UpdateLoadQuestions(registration, null, msgs);
 
+            ViewBag.ReturnURl = returnUrl;
+
             return View(registration);
         }
 
         [HttpPost]
-        public ActionResult Update(string id, string nothing)
+        public ActionResult Update(string id, string nothing, string returnUrl)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -260,9 +263,10 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("edit", new { id = registration.Uid });
+                return RedirectToAction("edit", new { id = registration.Uid, returnUrl });
 
             ViewBag.Messages = msgs;
+            ViewBag.ReturnURl = returnUrl;
 
             return View(registration);
         }
@@ -534,18 +538,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var registration = currentAccount.GetRegistration(id.ToGuid(), msgs);
             var selectedRegistration = currentAccount.GetRegistration(r.ToGuid(), msgs);
-
-            if (returnurl.IsNotEmpty())
-            {
-                var ra = selectedRegistration.GetRegistrantActivities(msgs).FirstOrDefault();
-                if (ra.IsNotEmpty())
-                {
-                    var activity = ra.GetActivity(msgs);
-
-                    if (activity.IsNotEmpty())
-                        returnurl = Url.Action("registrants", "activity", new { id = activity.Uid });
-                }
-            }
 
             selectedRegistration.CancelAll(msgs);
 
@@ -881,6 +873,25 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = msgs;
             return View("messagedetail", am);
+        }
+
+        [HttpGet]
+        public ActionResult Surveys(string id, string r)
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var registration = currentAccount.GetRegistration(id.ToGuid(), msgs);
+            var registrant = Registrant.Load(registration.RegistrantId.Value);
+
+            LoadRegistrationViewBag(registration, r, msgs);
+
+            if (registration.IsEmpty())
+                return new HttpStatusCodeResult(System.Net.HttpStatusCode.NotFound);
+
+            ViewBag.SurveyResponses = SurveyResponse.LoadByRegistrantId(registrant.ID.Value, msgs).OrderByDescending(a => a.CreateDate).ToList(); ;
+
+            ViewBag.Messages = msgs;
+            return View(registration);
         }
     }
 }

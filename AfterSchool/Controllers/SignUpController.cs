@@ -423,7 +423,7 @@ namespace AfterSchool.Controllers
         {
             var msgs = new SystemMessages();
 
-            if (!id.IsGuid())
+            if (id.IsEmpty() || !id.IsGuid())
                 msgs.Add("Invalid verification code", MessageType.UserError);
             else if (!WebUser.ExistsByUid(id.ToGuid(), msgs))
                 msgs.Add("Invalid verification code", MessageType.UserError);

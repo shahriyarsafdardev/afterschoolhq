@@ -8,6 +8,8 @@ using AfterSchool.Models;
 using BasicLibrary;
 using System.Linq;
 using System.Net;
+using AfterSchoolLibrary.Billing;
+using AfterSchoolLibrary.Helpers;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -694,6 +696,20 @@ namespace AfterSchool.Areas.Org.Controllers
                         return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
                 }
             }
+
+            return Json(new { status = "error", messages = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public ActionResult GetStripeLoginLink(string id)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+
+            var loginLink = StripeHelper.CreateLoginLink(currentAccount.StripeUserId, $"{AfterSchoolLibrary.Helpers.Utilities.BaseUrl()}/org/accounting/", msgs);
+
+            if (loginLink.IsNotEmpty())
+                return Json(new { status = "ok", link = loginLink.Url }, JsonRequestBehavior.AllowGet);
 
             return Json(new { status = "error", messages = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
         }

@@ -2,6 +2,7 @@
 
 @{
     var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
+    var selectedDates = (List<DateTime>)ViewBag.SelectedDates;
 
     var registered = "Enrolled";
     var register = "Enroll";
@@ -16,8 +17,16 @@
     var btnText = "";
     var registerUrl = Url.Action("setstudent", "account", new { id = Model.Uid });
     var btnUrl = $"javascript:checkEligibility('{Model.Uid}', '{registerUrl}', 'btn-register-{Model.Uid}')";
+    var registrantGradeText = Model.GetAnswer(QuestionDataType.RegistrantGrade).Text;
+    var canStillRegister = false;
 
-    if (Model.HasSubmittedFor(participationObject, null))
+    if (participationObject.CanRegisterPerClass)
+    {
+        canStillRegister = !Model.IsReservedForAllDates(participationObject, selectedDates, null);
+    }
+
+
+    if (Model.HasSubmittedFor(participationObject, null) && !canStillRegister)
     {
         if (Model.HasWithdrawn(participationObject))
         {
@@ -107,7 +116,7 @@
         </div>
         <div class="panel-body p-15-25">
             <p class="text-center text-small padding-v-10 text-muted font-size-16 p-b-0">
-                @Model.GetAnswer(QuestionDataType.RegistrantGrade).Text Grade
+                @UILabel.GetGradeDescription(registrantGradeText) Grade
             </p>
             <p>
                 <a href="@btnUrl"

@@ -6,14 +6,35 @@
     var sources = (List<Stripe.Source>)ViewBag.Sources;
     var bankAccounts = (List<Stripe.BankAccount>)ViewBag.BankAccounts;
     var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
+    var selectedDates = (List<DateTime>)ViewBag.SelectedDates;
     var registration = (Registration)ViewBag.Registration;
     var checkoutObject = (CheckoutObject)ViewBag.CheckoutObject;
     var accountCanAcceptPayments = (bool)ViewBag.AccountCanAcceptPayments;
     var paymentAccount = participationObject.PaymentAccount;
     var subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
     var postPayPlan = participationObject.PostPayPlans?.FirstOrDefault();
+    var paymentPlans = participationObject.PaymentPlans;
     var registrant = registration.GetRegistrant();
     var readyToAcceptPayment = subscriptionPlan.IsEmpty() || !subscriptionPlan.SplitCostEvenly || participationObject.RegistrationFinalized;
+    var quantity = 1;
+    var datesToRemove = new List<DateTime>();
+
+    if (participationObject.CanRegisterPerClass)
+    {
+        selectedDates = cart.GetCartItems().First().SelectedDates.Split(',').Select(x => x.ToDateTime()).ToList();
+
+        selectedDates.ForEach(date =>
+        {
+            if (registrant.IsReservedForDate(participationObject, date, null))
+            {
+                datesToRemove.Add(date);
+            }
+        });
+
+        datesToRemove.ForEach(date => selectedDates.Remove(date));
+
+        quantity = selectedDates.Count;
+    }
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -32,7 +53,7 @@
             if (planStartDate.Date != DateTime.UtcNow.Date)
             {
                 startDateText = planStartDate.ToLongDateString();
-            } 
+            }
 
             <span>
                 @(includePlus ? "plus a" : "") subscription of <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> every <strong>@plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong> starting <strong>@startDateText</strong>
@@ -53,7 +74,7 @@
         new ViewDataDictionary()
         {
             { "hidebuttons", true }
-        }
+                }
     );
 }
 
@@ -77,7 +98,7 @@
                 }
                 else
                 {
-                    <span id="payment-plan-cost-0" class="hide">@participationObject.GetCheckoutTotalCost()</span>
+                    <span id="payment-plan-cost-0" class="hide">@participationObject.GetCheckoutTotalCost(quantity)</span>
                     <span id="payment-plan-asf-0" class="hide">0</span>
                     if (subscriptionPlan.IsEmpty() || !subscriptionPlan.SplitCostEvenly || !participationObject.RegistrationFinalized)
                     {
@@ -94,7 +115,7 @@
                         }
                         else
                         {
-                            <span id="payment-plan-ccf-0" class="hide">@participationObject.GetCreditCardFee()</span>
+                            <span id="payment-plan-ccf-0" class="hide">@participationObject.GetCreditCardFee(quantity)</span>
                         }
                     }
                     else
@@ -103,22 +124,63 @@
                     }
 
                     <div class="">
-                        @if (participationObject.PaymentPlans.Any())
+
+                        @if (participationObject.CanRegisterPerClass)
+                        {
+                            <div class="col-md-6 col-md-offset-3 col-sm-12 margin-b-20">
+                                <table class="table table-responsive text-medium-small">
+                                    <thead>
+                                        <tr>
+                                            <td>Date</td>
+                                            <td>Cost</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var date in selectedDates)
+                                        {
+                                            <tr>
+                                                <td>@date.ToLongDateTimeString()</td>
+                                                <td>@participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()</td>
+                                            </tr>
+                                        }
+
+                                        @foreach (var date in datesToRemove)
+                                        {
+                                            <tr>
+                                                <td><span style="text-decoration: line-through">@date.ToLongDateTimeString()</span></td>
+                                                <td>Already registered</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+
+                                    <tr>
+                                        <td><strong>Total</strong></td>
+                                        <td><strong>@((participationObject.GetCheckoutCostWithConvenienceFee() * selectedDates.Count()).ToCurrency())</strong></td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                        }
+                        else if (paymentPlans.Any())
                         {
                             <div class="row margin-t-20">
                                 <div class="col-md-6 col-md-offset-3 col-sm-12 ">
                                     <p class="text-medium">
                                         Choose a payment option:
                                     </p>
+
                                     <div class="am-radio">
-                                        <input type="radio" name="paymentoption" id="paymentoption-0" class="payment-option-radio" value="" checked="checked" />
+                                        <input type="radio" name="paymentoption" id="paymentoption-0" class="payment-option-radio" value="" checked="checked" onclick="return loadCouponContainers()" />
                                         <label for="paymentoption-0">
-                                            Pay <strong>@participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()</strong> today
+                                            @{ 
+                                                var registrationFee = participationObject.GetCheckoutCostWithConvenienceFee();
+                                            } 
+                                            Pay <strong id="registration-fee" value="@registrationFee">@registrationFee.ToCurrency()</strong> today
                                             @PrintSubscriptionCost(subscriptionPlan, participationObject)
                                         </label>
                                     </div>
 
-                                    @foreach (var plan in participationObject.PaymentPlans)
+                                    @foreach (var plan in paymentPlans)
                                     {
                                         var today = participationObject.OwnerAccount.ConvertToAccountTimeZone(DateTime.UtcNow).Date;
                                         DateTime planStartDate = today;
@@ -132,7 +194,7 @@
                                         var startToday = plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout || planStartDate.IsOnOrBefore(today);
 
                                         <div class="am-radio">
-                                            <input type="radio" name="paymentoption" id="paymentoption-@plan.ID" class="payment-option-radio" value="@plan.ID" />
+                                            <input type="radio" name="paymentoption" id="paymentoption-@plan.ID" class="payment-option-radio" value="@plan.ID" onclick="return loadCouponContainers()" />
                                             <label for="paymentoption-@plan.ID">
                                                 Pay <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong>
 
@@ -225,7 +287,7 @@
 
                         @if (!participationObject.IsRegistrationFree)
                         {
-                            var regFeeToday = participationObject.GetCheckoutCostWithConvenienceFee().ToString("0.00");
+                            var regFeeToday = participationObject.GetCheckoutCostWithConvenienceFee(quantity).ToString("0.00");
 
                             if (subscriptionPlan.IsNotEmpty() && subscriptionPlan.SplitCostEvenly && participationObject.RegistrationFinalized)
                             {
@@ -267,18 +329,30 @@
                         <span class="total-due-today"></span>
                     </div>
 
-                    if ((participationObject.Cost > 0 || postPayPlan.IsNotEmpty()) &&
-                        participationObject.SubscriptionPlans.Count <= 0 &&
-                        participationObject.PaymentPlans.Count <= 0)
+                    if (!participationObject.CanRegisterPerClass)
                     {
-                        <div class="row text-center padding-v-20">       
+                        if ((participationObject.Cost > 0 || postPayPlan.IsNotEmpty()) ||
+                            participationObject.SubscriptionPlans.Any() ||
+                            participationObject.PaymentPlans.Any())
+                        {
+                            <div id="disabled-coupon-container" class="row text-center padding-v-20 hide">
+                            <div class="input-group col-md-4 col-md-offset-4 col-sm-12">
+                                <input type="text" class="form-control" disabled="disabled" placeholder="COUPON CODE" aria-describedby="coupon-code">
+                                <span class="input-group-addon btn btn-primary disabled">Apply</span>
+                            </div>
+                            <div class="clearfix"></div>
+                            <p class="text-small text-danger" style="">Coupons currently not valid for payment plans</p>
+                        </div>
+
+                        <div id="enabled-coupon-container" class="row text-center padding-v-20 hide">
                             <div class="input-group col-md-4 col-md-offset-4 col-sm-12">
                                 <input id="txt-coupon-code" type="text" class="form-control" placeholder="COUPON CODE" aria-describedby="coupon-code">
-                                <span class="input-group-addon btn btn-primary" id="coupon-code" onclick="applyCoupon()">Apply</span>                                
-                            </div>                           
+                                <span class="input-group-addon btn btn-primary" id="coupon-code" onclick="applyCoupon()">Apply</span>
+                            </div>
                             <div class="clearfix"></div>
                             <p id="txt-coupon-applied" class="text-small" style="display: none;"></p>
-                        </div>
+                        </div>    
+                        }
                     }
 
                     <hr />
@@ -291,7 +365,8 @@
                             { "bankAccounts", bankAccounts },
                             { "formActionUrl", Url.Action("payment", "account", new { id = registration.Uid }) },
                             { "acceptACH", true },
-                            { "participationObject", participationObject }
+                            { "participationObject", participationObject },
+                            { "quantity", quantity }
                 }
                     );
 
@@ -320,4 +395,56 @@
     </div>
 </div>
 
+@section scripts
+{
+    <script type="text/javascript">
 
+        $(document).ready(function () {
+            loadCouponContainers();
+        })
+
+        function loadCouponContainers() {
+            var isPaymentPlan = '@Html.Raw(Json.Encode(paymentPlans.Count > 0))';
+            var isPaidActivity = '@Html.Raw(Json.Encode(participationObject.Cost > 0 && !participationObject.IsFree))';
+            var ispostPayPlan = '@Html.Raw(Json.Encode(postPayPlan.IsNotEmpty()))';
+            var issubscriptionPlan = '@Html.Raw(Json.Encode(subscriptionPlan.IsNotEmpty()))';
+            var isRegistrationFeeSelectedAsPaymentOption = $('#paymentoption-0').prop('checked');
+            var registrationFee = $('#registration-fee').attr('value');
+                        
+            if ((isPaidActivity && isPaymentPlan.toLowerCase() === 'false')) {
+                //only registration fees
+                showEnabledCoupon();                
+            }
+            else if (isRegistrationFeeSelectedAsPaymentOption == true && isPaymentPlan.toLowerCase() === 'true') {
+                //payment plan with/without registration fees
+                if (registrationFee > 0) {
+                    showEnabledCoupon();
+                } else {
+                    hideDisabledCouponOnly();
+                }
+            }
+            else {
+                showDisabledCoupon();
+            }
+        }
+
+        function showEnabledCoupon() {
+            $('#enabled-coupon-container').removeClass('hide');
+            hideDisabledCouponOnly();
+        }
+
+        function showDisabledCoupon() {
+            $('#disabled-coupon-container').removeClass('hide');
+            hideEnabledCouponOnly();
+        }
+
+        function hideEnabledCouponOnly() {
+            $('#enabled-coupon-container').addClass('hide');
+        }
+
+        function hideDisabledCouponOnly() {
+            $('#disabled-coupon-container').addClass('hide');
+        }
+
+    </script>
+}

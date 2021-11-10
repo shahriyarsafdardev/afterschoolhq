@@ -86,6 +86,64 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
+
+        public static SystemMessages SendSurveyEmail(SurveyResponse surveyResponse, string code, SystemMessages msgs)
+        {
+            msgs = msgs ?? new SystemMessages();
+            var getRegistrant = Registrant.Load(surveyResponse.RegistrantId.Value);
+            var getSurvey = SurveyRequest.Load(surveyResponse.SurveyRequestId.Value);
+            var getRegistrantParent = getRegistrant.GetParentOrGuardian(msgs);
+            var IsEmailSame = false;
+
+            var model = new NameValueCollection()
+            {
+                { "Name", getRegistrant.Name },
+                { "Link", Utilities.SurveyBaseUrl+"/survey/"+surveyResponse.ID},
+                { "SignUpLink", Utilities.SurveyBaseUrl+"/onboarding/signup"},
+                { "SurveyName", getSurvey.Name}
+            };
+
+            if (code.IsNotEmpty())
+                model.Add(new NameValueCollection() { { "InviteCode", code } });
+
+
+            if (getRegistrant.Email == (getRegistrantParent.IsNotEmpty() ? getRegistrantParent.Email : ""))
+                IsEmailSame = true;
+
+
+            var subject = $"You have received a survey request";
+            var body = ProcessTemplate(
+                        code.IsNotEmpty() ? EmailTemplates.Survey_Code : EmailTemplates.Survey,
+                        model,
+                        code.IsNotEmpty() ? "survey_code_email" : "survey_code",
+                        msgs);
+
+            if (IsEmailSame) {
+                SendSurveyEmailLastStep(subject, getRegistrant.Email, body, msgs);
+            }
+            else{
+                //send both
+                SendSurveyEmailLastStep(subject, getRegistrant.Email, body, msgs);
+                if(getRegistrantParent.IsNotEmpty())
+                    SendSurveyEmailLastStep(subject, getRegistrantParent.Email, body, msgs);
+            }
+
+            return msgs;
+        }
+
+        public static void SendSurveyEmailLastStep(string subject, string email, string body, SystemMessages msgs)
+        {
+            var mailMsgs = SendGridHelper.SendMail(
+                         fromEmail: Email.SendGridNoReplyEmailAddress(),
+                         toEmail: new SendGrid.Helpers.Mail.EmailAddress(email),
+                         subject: subject,
+                         body: body,
+                         emailTemplateId: SendGridHelper.GetGenericTemplateId());
+
+            msgs.AddRange(mailMsgs);
+        }
+
+
         public static SystemMessages SendAccountConfirmationEmail(ParticipationObject participationObject, Registration registration)
         {
             var msgs = new SystemMessages();
@@ -654,6 +712,10 @@ namespace AfterSchoolLibrary.Helpers
                 description += $"<br />&nbsp;&bull;&nbsp;{ra.GetParticipationObject(msgs, dc).Name} - {ra.AssignmentTypeId.ToString().SplitByUpperCase()}";
             });
 
+            if (participationObject.CanRegisterPerClass)
+                checkoutObject.SelectedDates.ForEach(date => description += $"<br />&nbsp;&bull;&nbsp;{date.ToLongDateTimeString()}");
+
+
             var isCompletelyFree = checkoutObject.IsFree;
             var isRegFree = participationObject.IsRegistrationFree;
             var hasPaymentPlan = paymentPlan.IsNotEmpty();
@@ -662,7 +724,7 @@ namespace AfterSchoolLibrary.Helpers
             var splitCostEvenly = subscription?.SplitCostEvenly ?? false;
             var regFinalized = participationObject.RegistrationFinalized;
             string registrationTable = "";
-            var totalCost = checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc);
+            var totalCost = checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc) * checkoutObject.ClassQuantity;
             var showTable = false;
 
             if (splitCostEvenly && regFinalized)
@@ -695,8 +757,8 @@ namespace AfterSchoolLibrary.Helpers
                     if (checkoutObject.Coupon.IsNotEmpty() &&
                         checkoutObject.Coupon.ID.IsNotEmpty() && 
                         checkoutObject.Coupon.DoesApplyToRegistrationFee())
-                    {                 
-                        var amountCC =  checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs,dc);
+                    {
+                        var amountCC = checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc) * checkoutObject.ClassQuantity;
                         var couponValueCC = checkoutObject.CouponValue(msgs,dc);
                         
                         cost = amountCC.ToCurrency();
@@ -706,7 +768,7 @@ namespace AfterSchoolLibrary.Helpers
                         var registrationFeeModel = new NameValueCollection()
                                             {
                                                 { "Description", description },
-                                                { "Quantity",  "1"},
+                                                { "Quantity",  checkoutObject.ClassQuantity.ToString() },
                                                 { "Cost", cost },
                                                 { "AdditionalDetails", additionalDetails }
                                             };
@@ -734,14 +796,14 @@ namespace AfterSchoolLibrary.Helpers
                     }
                     else
                     {
-                        cost = checkoutObject.GetTotalCostToPurchaseTodayWithConvenienceFee(msgs, dc).ToCurrency();                        
+                        cost = (checkoutObject.GetTotalCostToPurchaseTodayWithConvenienceFee(msgs, dc) * checkoutObject.ClassQuantity).ToCurrency();                        
                         additionalDetails = "registration fee";
 
                         // add registration fee row
                         var registrationFeeModel = new NameValueCollection()
                                             {
                                                 { "Description", description },
-                                                { "Quantity",  "1"},
+                                                { "Quantity",  checkoutObject.ClassQuantity.ToString() },
                                                 { "Cost", cost },
                                                 { "AdditionalDetails", additionalDetails }
                                             };
@@ -753,7 +815,7 @@ namespace AfterSchoolLibrary.Helpers
                                         msgs);                        
                     }
 
-                    ccFee = checkoutObject.GetTotalCreditCardFeesToday(msgs, dc).ToCurrency();
+                    ccFee = (checkoutObject.GetTotalCreditCardFeesToday(msgs, dc) * checkoutObject.ClassQuantity).ToCurrency();
                     showTable = true;
                 }
             }

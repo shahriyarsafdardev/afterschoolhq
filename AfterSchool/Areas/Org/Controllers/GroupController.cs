@@ -1421,45 +1421,53 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditCost(string id, string cost, string costdescription, string allowtopaylater, string cmd, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype)
         {
             var msgs = new SystemMessages();
-            var values = new Dictionary<string, object>()
-            {
-                { "cost", cost},
-                { "costdescription", costdescription},
-                { "allowtopaylater", allowtopaylater.IfBlank("0")},
-                { "haspaymentplan", haspaymentplan.IfBlank("0") },
-                { "paymentplancost", paymentplancost },
-                { "paymentplanperiod", paymentplanperiod },
-                { "paymentplanperiodnumber", paymentplanperiodnumber },
-                { "paymentplanpaymentstarttype", paymentplanpaymentstarttype }
-            };
 
             if (id.IsEmpty())
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            var league = SaveLeague(id, values, msgs);
-
-            ViewBag.Messages = msgs;
-            ViewBag.Account = SessionVariables.CurrentAccount;
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.IsFullScreen = GetIsFullScreen(league);
-
-            if (msgs.HasNoErrors())
+            if (cmd != "onlynext")
             {
-                switch (cmd)
+                var values = new Dictionary<string, object>()
                 {
-                    case "prev":
-                        return RedirectToAction("editcontact", new { id = league.Uid, isnew = Request["isnew"], saved = 1 });
-                    case "next":
-                        return RedirectToAction("editconfirmation", new { id = league.Uid, isnew = Request["isnew"], saved = 1 });
-                    case "publish":
-                        return RedirectToAction("publish", new { id = league.Uid, isnew = Request["isnew"], saved = 1 });
+                    { "cost", cost},
+                    { "costdescription", costdescription},
+                    { "allowtopaylater", allowtopaylater.IfBlank("0")},
+                    { "haspaymentplan", haspaymentplan.IfBlank("0") },
+                    { "paymentplancost", paymentplancost },
+                    { "paymentplanperiod", paymentplanperiod },
+                    { "paymentplanperiodnumber", paymentplanperiodnumber },
+                    { "paymentplanpaymentstarttype", paymentplanpaymentstarttype }
+                };
+
+                var league = SaveLeague(id, values, msgs);
+
+                ViewBag.Messages = msgs;
+                ViewBag.Account = SessionVariables.CurrentAccount;
+                ViewBag.AccountPackage = SessionVariables.AccountPackage;
+                ViewBag.IsFullScreen = GetIsFullScreen(league);
+
+                if (msgs.HasNoErrors())
+                {
+                    switch (cmd)
+                    {
+                        case "prev":
+                            return RedirectToAction("editcontact", new { id = league.Uid, isnew = Request["isnew"], saved = 1 });
+                        case "next":
+                            return RedirectToAction("editconfirmation", new { id = league.Uid, isnew = Request["isnew"], saved = 1 });
+                        case "publish":
+                            return RedirectToAction("publish", new { id = league.Uid, isnew = Request["isnew"], saved = 1 });
+                    }
                 }
+
+                LoadEditCostViewBag(league, msgs);
+                ViewBag.Messages = msgs;
+
+                return View(league);
             }
-
-            LoadEditCostViewBag(league, msgs);
-            ViewBag.Messages = msgs;
-
-            return View(league);
+            else
+            {
+                return RedirectToAction("editconfirmation", new { id = id, isnew = Request["isnew"], saved = 0 });
+            }
         }
 
         [HttpGet]

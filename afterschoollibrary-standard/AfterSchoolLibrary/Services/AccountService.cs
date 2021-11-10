@@ -1805,6 +1805,7 @@ namespace AfterSchoolLibrary.Services
                             activityGroupId: groupId,
                             periodId: period?.ID,
                             amountCharged: activityParticipationObject.Cost,
+                            registeredDates: null,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
                             dc: adc);
@@ -1839,7 +1840,7 @@ namespace AfterSchoolLibrary.Services
             var form = FormService.GetOrCreateAfterSchoolAccountTemplateForm(msgs, dc);
 
             if (form.AccountId != formOwner.ID)
-                form = form.Copy(loggedInUser.ID.Value, formOwner.ID.Value, "Standard Reg Form", msgs, dc);
+                form = form.Copy(loggedInUser.ID.Value, formOwner.ID.Value, FormType.Registration, "Standard Reg Form", msgs, dc);
 
             msgs.AddRange(formOwner.SetDefaultForm(form, loggedInUser, dc));
 
@@ -1877,7 +1878,7 @@ namespace AfterSchoolLibrary.Services
             var form = FormService.GetOrCreateAfterSchoolAccountInterestForm(msgs, dc);
 
             if (form.AccountId != formOwner.ID)
-                form = form.Copy(loggedInUser.ID.Value, formOwner.ID.Value, "Interest Form", msgs, dc);
+                form = form.Copy(loggedInUser.ID.Value, formOwner.ID.Value, FormType.Registration, "Interest Form", msgs, dc);
 
             msgs.AddRange(formOwner.SetInterestForm(form, loggedInUser, dc));
 
@@ -3253,8 +3254,8 @@ namespace AfterSchoolLibrary.Services
 
             // if can charge fees we bill it directly from our AHQ account
             var useStripeConnectedAccount = billingAccount.UseStripeConnectDuringCheckout(msgs, dc);
-            var platformFeeAmount = checkoutObject.CalculatePlatformFeeAmount(msgs, dc);
-            var amount = checkoutObject.GetStripeAmount(msgs, dc);
+            var platformFeeAmount = checkoutObject.CalculatePlatformFeeAmount(msgs, dc) * checkoutObject.ClassQuantity;
+            var amount = checkoutObject.GetStripeAmount(msgs, dc) * checkoutObject.ClassQuantity;
 
             // only charge tuition during checkout, because subscriptions are billed through stripe
             var charge = StripeHelper.CreateCharge(
@@ -3514,11 +3515,11 @@ namespace AfterSchoolLibrary.Services
                 if (msgs.HasNoErrors())
                 {
                     var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
-                        checkoutObject.ParticipationObject.ObjectID.Value,
-                        checkoutObject.ParticipationObject.ObjectType,
-                        registrant.ID.Value,
-                        msgs,
-                        dc);
+                                checkoutObject.ParticipationObject.ObjectID.Value,
+                                checkoutObject.ParticipationObject.ObjectType,
+                                registrant.ID.Value,
+                                msgs,
+                                dc);
                     
                     if (ra.IsNotEmpty() && !ra.IsAssigned(RegistrationAssignmentType.Reserved))                    
                         ra.ChangeSeatAssignment(RegistrationAssignmentType.Reserved, loggedInUser, msgs, dc);
@@ -4499,12 +4500,18 @@ namespace AfterSchoolLibrary.Services
 
         public static List<ActivityMessageRegistrant> GetActivityMessageRegistrantsForCurrentMessagePeriod(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            List<ActivityMessage> activityMessages = account.GetActivityMessages(msgs, dc);
-            List<ActivityMessageRegistrant> activityMessageRegistrants = new List<ActivityMessageRegistrant>();
-            List<ActivityMessageRegistrant> currentMessagePeriodActivivityRegistrants = new List<ActivityMessageRegistrant>();
-            DateTime packagePurchaseDate = account.GetActiveAccountPackage().CreateDate.Value;
-            DateTime thisMonthsMessageCountReset = new DateTime(DateTime.Now.Year, DateTime.Now.Month, packagePurchaseDate.Day);
-            DateTime mostRecentMessageCountReset = DateTime.Now.IsBefore(thisMonthsMessageCountReset) ? thisMonthsMessageCountReset.AddMonths(-1) : thisMonthsMessageCountReset;
+            var activityMessages = account.GetActivityMessages(msgs, dc);
+            var activityMessageRegistrants = new List<ActivityMessageRegistrant>();
+            var currentMessagePeriodActivivityRegistrants = new List<ActivityMessageRegistrant>();
+            var packagePurchaseDate = account.GetActiveAccountPackage(msgs, dc).CreateDate.Value;
+
+            var purchaseDayOfMonth = packagePurchaseDate.Day;
+
+            if (DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month) < purchaseDayOfMonth)
+                purchaseDayOfMonth = DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month);
+
+            var thisMonthsMessageCountReset = new DateTime(DateTime.Now.Year, DateTime.Now.Month, purchaseDayOfMonth);
+            var mostRecentMessageCountReset = DateTime.Now.IsBefore(thisMonthsMessageCountReset) ? thisMonthsMessageCountReset.AddMonths(-1) : thisMonthsMessageCountReset;
 
             activityMessages.ForEach(am => activityMessageRegistrants.AddRange(am.GetActivityMessageRegistrants(msgs, dc)));
 
@@ -4513,12 +4520,12 @@ namespace AfterSchoolLibrary.Services
 
         public static int GetTextMessageCountForCurrentMessagePeriod(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.GetActivityMessageRegistrantsForCurrentMessagePeriod().Where(amr => amr.SentText).ToList().Count();
+            return account.GetActivityMessageRegistrantsForCurrentMessagePeriod(msgs, dc).Where(amr => amr.SentText).ToList().Count();
         }
 
         public static int GetEmailCountForCurrentMessagePeriod(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.GetActivityMessageRegistrantsForCurrentMessagePeriod().Where(amr => amr.SentEmail).ToList().Count();
+            return account.GetActivityMessageRegistrantsForCurrentMessagePeriod(msgs, dc).Where(amr => amr.SentEmail).ToList().Count();
         }
 
         public static bool WillExceedEmailQuota(this Account account, AccountPackage accountPackage, int messageCount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
