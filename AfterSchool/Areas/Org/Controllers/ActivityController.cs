@@ -271,7 +271,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "ageend",activity.IsNotEmpty() ? activity.AgeEnd : defaultActivity.AgeEnd },
                     { "costfrequencytype", costfrequencytype },
                     { "cutoffhours", cutoffhours },
-                    { "isContinuousEnrollmentEnabled", isContinuousEnrollmentEnabled.ToBoolean() },
+                    { "isContinuousEnrollmentEnabled", isContinuousEnrollmentEnabled.IsNotEmpty() && isContinuousEnrollmentEnabled.ToBoolean() },
                 };
 
                 if (activity.IsNotEmpty())
