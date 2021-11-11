@@ -161,7 +161,7 @@
                             </div>
 
                         }
-                        else if (paymentPlans.Any() && false)
+                        else if (paymentPlans.Any())
                         {
                             <div class="row margin-t-20">
                                 <div class="col-md-6 col-md-offset-3 col-sm-12 ">
@@ -331,8 +331,8 @@
 
                     if (!participationObject.CanRegisterPerClass)
                     {
-                        if ((participationObject.Cost > 0 || postPayPlan.IsNotEmpty()) &&
-                            participationObject.SubscriptionPlans.Any() &&
+                        if ((participationObject.Cost > 0 || postPayPlan.IsNotEmpty()) ||
+                            participationObject.SubscriptionPlans.Any() ||
                             participationObject.PaymentPlans.Any())
                         {
                             <div id="disabled-coupon-container" class="row text-center padding-v-20 hide">

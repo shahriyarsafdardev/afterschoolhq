@@ -141,10 +141,7 @@
                                                 <th></th>
                                                 <th>Ask? (<a href="javascript:checkAllActive()">All</a> / <a href="javascript:uncheckAllActive()">None</a>)</th>
                                                 <th>Required? (<a href="javascript:checkAllRequired()">All</a> / <a href="javascript:uncheckAllRequired()">None</a>)</th>
-                                                @if (Model.FormTypeId == FormType.Survey)
-                                                {
-                                                    <th>Answer Description? (<a href="javascript:checkAllAnswerDescription()">All</a> / <a href="javascript:uncheckAllAnswerDescription()">None</a>)</th>
-                                                }
+                                                <th>Answer Description? (<a href="javascript:checkAllAnswerDescription()">All</a> / <a href="javascript:uncheckAllAnswerDescription()">None</a>)</th>
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
@@ -286,8 +283,6 @@
                                                             });
                                                         }
                                                     </td>
-                                                    @if (Model.FormTypeId == FormType.Survey)
-                                                    {
                                                         <td>
                                                             @{Html.RenderPartial(
                                                                 "~/Views/Shared/_SwitchButton.cshtml",
@@ -300,7 +295,6 @@
                                                                     { "classname", "question-IsAnswerDescriptionEnabled" }
                                                                 });}
                                                         </td>
-                                                    }
                                                     <td>
                                                         <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteQuestion('@question.Text', '@Url.Action("delete","Account", new { id = question.ID.ToString()})')"><span class="text-danger"><i class="s7-trash"></i></span></button>
                                                     </td>
@@ -352,6 +346,7 @@
                     }
 
                     <input type="hidden" name="newquestioncount" id="newquestioncount" value="0" />
+                    <input type="hidden" name="newquestionsIds" id="newquestionsIds" value="" />
 
                 </form>
             </div>
@@ -592,6 +587,7 @@
     var selectedQuestion = null;
     var newQuestionNumber = 0;
     var optionQuestionType = 0;
+    var newQuestionsIds = [];
     var emojiDictionary = [
         { key: "grinning", value: "Happy" },
         { key: "grin", value: "Thrilled" },
@@ -624,11 +620,17 @@
     }
 
     function incrementQuestionCount() {
+        newQuestionsIds.push(getQuestionCount());
         $('#newquestioncount').val(getQuestionCount() + 1);
+        $('#newquestionsIds').val(newQuestionsIds.join(","));
     }
 
-    function decrementQuestionCount() {
+    function decrementQuestionCount(questionId) {
         $('#newquestioncount').val(getQuestionCount() - 1);
+        const index = newQuestionsIds.indexOf(Number(questionId));
+        if (index > -1)
+            newQuestionsIds.splice(index, 1);
+        $('#newquestionsIds').val(newQuestionsIds.join(","));
     }
 
     function getQuestionCount() {
@@ -651,8 +653,10 @@
     }
 
     function deleteNonSavedQuestion(elem) {
-        decrementQuestionCount();
+        var selectedRow = $(elem).closest("tr");
+        var questionId = $(selectedRow).find(".questionId").val();
         $(elem).closest('tr').remove();
+        decrementQuestionCount(questionId);
     }
 
     function getShowCheckbox() {
@@ -796,12 +800,7 @@
         });
         var commaIndex = optionString.lastIndexOf(",");
         var optionWithoutLastComma = optionString.substring(0, commaIndex);
-        if (mainIndex == 1 && optionType != 'Emoji') {
-            $(this).closest('tr').remove();
-        }
-        else {
-            setOptions(selectedQuestion, optionWithoutLastComma, optionType);
-        }
+        setOptions(selectedQuestion, optionWithoutLastComma, optionType);
     }
 
     function addTextBlock() {
