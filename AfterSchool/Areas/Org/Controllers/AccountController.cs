@@ -915,7 +915,13 @@ namespace AfterSchool.Areas.Org.Controllers
                             // save existing questions
                             questions.ForEach(question =>
                             {
-                                if (!question.IsLocked)
+                                var text = Request.Params[$"text-{question.ID}"];
+                                var desc = Request.Params[$"description-{question.ID}"];
+                                var options = Request.Params[$"options-text-{question.ID}"];
+                                var link = Request.Params[$"link-text-{question.ID}"];
+
+                                // this extra conditions are to prevent null entry in db from refresh-post calls
+                                if (!question.IsLocked && (text.IsNotEmpty() || desc.IsNotEmpty() || options.IsNotEmpty() || link.IsNotEmpty()))
                                 {
                                     question.IsActive = Request.Params[$"active-{question.ID}"].IsBoolean();
                                     question.IsRequired = Request.Params[$"required-{question.ID}"].IsBoolean();
@@ -923,11 +929,12 @@ namespace AfterSchool.Areas.Org.Controllers
 
                                     if (question.QuestionDataTypeId == QuestionDataType.NotSet)
                                     {
-                                        question.Text = Request.Params[$"text-{question.ID}"];
+                                        question.Text = text;
                                         // for Text Block
-                                        question.Description = Request.Params[$"description-{question.ID}"];
-                                        question.Options = Request.Params[$"options-text-{question.ID}"];
-                                        question.Link = Request.Params[$"link-text-{question.ID}"];
+                                        question.Description = desc;
+                                        question.Options = options;
+                                        question.Link = link;
+
                                         question.DisplayOrder = Request.Params[$"displayOrderId-{question.ID}"].ToInteger();
                                         question.QuestionTypeId = (QuestionType)Request.Params[$"questiontype-{question.ID}"].ToInteger();
                                     }
