@@ -2341,6 +2341,11 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
             var registrantActivity = RegistrantActivityService.GetRegistrantActivity(id.ToGuid(), msgs);
+
+            // cant get activity, if registrantActivity doesnt exist in this context
+            if (registrantActivity.IsEmpty())
+                return RedirectToAction("index", "activity", new { type = "1" });
+
             var activity = currentAccount.GetActivity(registrantActivity.ParticipationObjectId.Value, msgs);
 
             ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
