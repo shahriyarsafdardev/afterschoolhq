@@ -11,6 +11,7 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Billing;
 using System.Web;
 using AfterSchoolLibrary.Helpers;
+using System.Collections;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -870,22 +871,32 @@ namespace AfterSchool.Areas.Org.Controllers
                             // create or update question groups
                             if (qg.ToInteger() == 0)
                             {
-                                questionGroup = new FormQuestionGroup()
+                                var sectionName = Request.Params["name-0"];
+                                var questionGroupExists = FormQuestionGroup.Load(criterias: new Hashtable() { { "Name", sectionName }, { "FormId", form.ID }, { "IsDeleted" , false } }, msgs: amsgs, dc: adc);
+
+                                if (!questionGroupExists.Any())
                                 {
-                                    CreateDate = DateTime.UtcNow,
-                                    CreatedBy = currentUser.ID,
-                                    LastModifiedDate = DateTime.UtcNow,
-                                    LastModifiedBy = currentUser.ID,
-                                    DisplayOrder = form.GetQuestionGroupCount(amsgs, adc) + 1,
-                                    FormId = form.ID,
-                                    QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
-                                    RegistrantTypeId = RegistrantType.Individual,
-                                    Name = Request.Params["name-0"],
-                                    IsDeleted = false,
-                                    IsActive = true
-                                };
-                                amsgs.AddRange(questionGroup.Save(adc));
-                                questions = new List<FormQuestion>();
+                                    questionGroup = new FormQuestionGroup()
+                                    {
+                                        CreateDate = DateTime.UtcNow,
+                                        CreatedBy = currentUser.ID,
+                                        LastModifiedDate = DateTime.UtcNow,
+                                        LastModifiedBy = currentUser.ID,
+                                        DisplayOrder = form.GetQuestionGroupCount(amsgs, adc) + 1,
+                                        FormId = form.ID,
+                                        QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
+                                        RegistrantTypeId = RegistrantType.Individual,
+                                        Name = sectionName,
+                                        IsDeleted = false,
+                                        IsActive = true
+                                    };
+                                    amsgs.AddRange(questionGroup.Save(adc));
+                                    questions = new List<FormQuestion>();
+                                } 
+                                else
+                                {
+                                    questionGroup = questionGroupExists.FirstOrDefault();
+                                }                                
                             }
                             else
                             {
@@ -934,29 +945,35 @@ namespace AfterSchool.Areas.Org.Controllers
                                 var questionsList = questionIds.Split(',');
                                 foreach (var i in questionsList)
                                 {
-                                    var question = new FormQuestion
+                                    var text = Request.Params[string.Format("new-text-{0}", i)];
+                                    var questionExists = FormQuestion.Load(criterias: new Hashtable() { { "Text", text }, { "FormId", form.ID }, { "FormQuestionGroupId", questionGroup.ID }, { "IsDeleted", false } }, msgs: amsgs, dc: adc);
+
+                                    if (!questionExists.Any())
                                     {
-                                        FormId = form.ID,
-                                        CreateDate = DateTime.UtcNow,
-                                        LastModifiedDate = DateTime.UtcNow,
-                                        CreatedBy = currentUser.ID,
-                                        LastModifiedBy = currentUser.ID,
-                                        DisplayOrder = Request.Params[string.Format("new-sort-{0}", i)].ToInteger(),
-                                        //questionGroup.GetQuestionCount(amsgs, adc) + 1,
-                                        FormQuestionGroupId = questionGroup.ID,
-                                        IsTemplate = false,
-                                        QuestionDataTypeId = QuestionDataType.NotSet,
-                                        QuestionTypeId = (QuestionType)Request.Params[string.Format("new-questiontype-{0}", i)].ToInteger(),
-                                        Text = Request.Params[string.Format("new-text-{0}", i)],
-                                        Options = Request.Params[string.Format("new-options-text-{0}", i)],
-                                        Link = Request.Params[string.Format("new-link-text-{0}", i)],
-                                        Description = Request.Params[string.Format("new-description-{0}", i)],
-                                        IsActive = true,
-                                        IsDeleted = false,
-                                        IsRequired = Request.Params[string.Format("new-required-{0}", i)].IsBoolean(),
-                                        IsAnswerDescriptionEnabled = Request.Params[string.Format("new-description-enabled-{0}", i)].IsBoolean()
-                                    };
-                                    amsgs.AddRange(question.Save(adc));
+                                        var question = new FormQuestion
+                                        {
+                                            FormId = form.ID,
+                                            CreateDate = DateTime.UtcNow,
+                                            LastModifiedDate = DateTime.UtcNow,
+                                            CreatedBy = currentUser.ID,
+                                            LastModifiedBy = currentUser.ID,
+                                            DisplayOrder = Request.Params[string.Format("new-sort-{0}", i)].ToInteger(),
+                                            //questionGroup.GetQuestionCount(amsgs, adc) + 1,
+                                            FormQuestionGroupId = questionGroup.ID,
+                                            IsTemplate = false,
+                                            QuestionDataTypeId = QuestionDataType.NotSet,
+                                            QuestionTypeId = (QuestionType)Request.Params[string.Format("new-questiontype-{0}", i)].ToInteger(),
+                                            Text = text,
+                                            Options = Request.Params[string.Format("new-options-text-{0}", i)],
+                                            Link = Request.Params[string.Format("new-link-text-{0}", i)],
+                                            Description = Request.Params[string.Format("new-description-{0}", i)],
+                                            IsActive = true,
+                                            IsDeleted = false,
+                                            IsRequired = Request.Params[string.Format("new-required-{0}", i)].IsBoolean(),
+                                            IsAnswerDescriptionEnabled = Request.Params[string.Format("new-description-enabled-{0}", i)].IsBoolean()
+                                        };
+                                        amsgs.AddRange(question.Save(adc));
+                                    }                                    
                                 }
                             }
                         }
