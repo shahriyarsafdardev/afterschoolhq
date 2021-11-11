@@ -581,7 +581,7 @@ namespace AfterSchoolLibrary.Models
                 if (!MaxGradeId.HasValue)
                     MaxGradeId = gradeLevels.Last().ID;
 
-                GradeLevel registrantGradeLevel = gradeLevels.FirstOrDefault(gradeLevel => GradeLevel.VerifyGradeLevel(registrantGradeLevelAnswer, gradeLevel));
+                var registrantGradeLevel = gradeLevels.FirstOrDefault(gradeLevel => GradeLevel.VerifyGradeLevel(registrantGradeLevelAnswer, gradeLevel));
 
                 if (registrantGradeLevel.IsNotEmpty() && 
                     registrantGradeLevel.ID.IsNotEmpty() && 

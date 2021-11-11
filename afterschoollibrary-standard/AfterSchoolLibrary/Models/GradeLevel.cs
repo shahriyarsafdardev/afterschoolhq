@@ -7,7 +7,6 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
-using AfterSchoolLibrary.Services;
 
 namespace AfterSchoolLibrary.Models
 {
@@ -154,23 +153,6 @@ namespace AfterSchoolLibrary.Models
                 msgs.AddRange(new GradeLevel() { Name = "12th", Abbreviation = "12" }.Save(dc: dc));
             }
             return msgs;
-        }
-
-        public static bool VerifyGradeLevel(FormQuestionAnswer formQuestionAnswer, GradeLevel gradeLevel)
-        {
-            bool sameGradeLevel = false;
-            if (Helpers.Utilities.IsAlreadyJsonString(formQuestionAnswer.Text)) 
-            {
-                var data = Helpers.Utilities.GetKeyValuePairs(formQuestionAnswer.Text);
-                var registrantGradeLevelAnswerText = data.First().value.ToLower().Trim();
-                sameGradeLevel = gradeLevel.Abbreviation.IsSameAs(registrantGradeLevelAnswerText) || (registrantGradeLevelAnswerText.MaxChars(gradeLevel.Abbreviation.Length) == gradeLevel.Abbreviation);
-            }
-            else if (formQuestionAnswer.IsNotEmpty())
-            {
-                sameGradeLevel = gradeLevel.Abbreviation.IsSameAs(formQuestionAnswer.Text) || (formQuestionAnswer.Text.MaxChars(gradeLevel.Abbreviation.Length) == gradeLevel.Abbreviation);
-            }
-
-            return sameGradeLevel;
         }
 
         #endregion
