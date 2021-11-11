@@ -258,15 +258,15 @@
 
                                                     <td>
                                                         @{Html.RenderPartial(
-                                                            "~/Views/Shared/_SwitchButton.cshtml",
-                                                            question.IsActive,
-                                                            new ViewDataDictionary()
-                                                            {
-                                                                { "checkboxname", "active-" + question.ID },
-                                                                { "checkboxid", "active-" + question.ID },
-                                                                { "disabled", question.IsLocked },
-                                                                { "classname", "question-isactive" }
-                                                            });}
+                                                              "~/Views/Shared/_SwitchButton.cshtml",
+                                                              question.IsActive,
+                                                              new ViewDataDictionary()
+                                                              {
+                                                                                                        { "checkboxname", "active-" + question.ID },
+                                                                                                        { "checkboxid", "active-" + question.ID },
+                                                                                                        { "disabled", question.IsLocked },
+                                                                                                        { "classname", "question-isactive" }
+                                                              });}
                                                     </td>
                                                     <td>
                                                         @if (question.QuestionTypeId != QuestionType.TextBlock)
@@ -276,25 +276,25 @@
                                                                 question.IsRequired,
                                                                 new ViewDataDictionary()
                                                                 {
-                                                                    { "checkboxname", "required-" + question.ID },
-                                                                    { "checkboxid", "required-" + question.ID },
-                                                                    { "disabled", question.IsLocked },
-                                                                    { "classname", "question-isrequired" }
+                                                                                                        { "checkboxname", "required-" + question.ID },
+                                                                                                        { "checkboxid", "required-" + question.ID },
+                                                                                                        { "disabled", question.IsLocked },
+                                                                                                        { "classname", "question-isrequired" }
                                                             });
                                                         }
                                                     </td>
-                                                        <td>
-                                                            @{Html.RenderPartial(
-                                                                "~/Views/Shared/_SwitchButton.cshtml",
-                                                                question.IsAnswerDescriptionEnabled,
-                                                                new ViewDataDictionary()
-                                                                {
-                                                                    { "checkboxname", "answerDescription-" + question.ID },
-                                                                    { "checkboxid", "answerDescription-" + question.ID },
-                                                                    { "disabled", question.IsLocked },
-                                                                    { "classname", "question-IsAnswerDescriptionEnabled" }
-                                                                });}
-                                                        </td>
+                                                    <td>
+                                                        @{Html.RenderPartial(
+                                                              "~/Views/Shared/_SwitchButton.cshtml",
+                                                              question.IsAnswerDescriptionEnabled,
+                                                              new ViewDataDictionary()
+                                                              {
+                                                                                                            { "checkboxname", "answerDescription-" + question.ID },
+                                                                                                            { "checkboxid", "answerDescription-" + question.ID },
+                                                                                                            { "disabled", question.IsLocked },
+                                                                                                            { "classname", "question-IsAnswerDescriptionEnabled" }
+                                                              });}
+                                                    </td>
                                                     <td>
                                                         <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteQuestion('@question.Text', '@Url.Action("delete","Account", new { id = question.ID.ToString()})')"><span class="text-danger"><i class="s7-trash"></i></span></button>
                                                     </td>
@@ -335,13 +335,19 @@
                     {
                         <div class="col-sm-2"></div>
                     }
-                    <div class="col-sm-8">
+                    <div class="@(qgId.IsEmpty() && Model.FormTypeId == FormType.Survey ? "col-sm-5" : "col-sm-8")">
                         <button type="submit" class="btn btn-default btn-lg btn-block" onclick="Validate()"><i class="s7-diskette"></i> Save</button>
                     </div>
                     @if (questionGroups.Count() > 0 ? questionGroups.Last().ID != qgId && qgId != 0 : false)
                     {
                         <div class="col-sm-2">
                             <button type="submit" class="btn btn-primary btn-lg btn-block" onclick="navigateForm('@Url.Action("formedit", "account", new { id = Model.ID, qg = qgId, cmd = "next" })')">Next &raquo;</button>
+                        </div>
+                    }
+                    else if (qgId.IsEmpty() && Model.FormTypeId == FormType.Survey)
+                    {
+                        <div class="col-sm-5">
+                            <a href="@Url.Action("formedit", "account", new { id = Model.ID.ToString(), qg = 0 })"  class="btn btn-primary btn-lg btn-block">Get Started</a>
                         </div>
                     }
 
