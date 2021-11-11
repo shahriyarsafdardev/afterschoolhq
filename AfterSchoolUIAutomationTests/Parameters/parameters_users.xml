@@ -2,19 +2,19 @@
 <PARAMETERS>
   <!--User Login Info-->
   <Login>
-    <UserName>stephny@yopmail.com</UserName>
+    <UserName>damienmartin@yopmail.com</UserName>
     <Password>12345678</Password>
   </Login>
   <!-- Individual Account Signup Info -->
   <AccountSigUp>
-    <ProgramName>Rock Climbing</ProgramName>
-    <FirstName>Alex</FirstName>
-    <LasttName>Stuart</LasttName>
-    <Email></Email>
+    <ProgramName>Football Academy</ProgramName>
+    <FirstName>Damien</FirstName>
+    <LasttName>Martin</LasttName>
+    <Email>damienmartin@yopmail.com</Email>
     <UserPassword>12345678</UserPassword>
     <UserPassword2>12345678</UserPassword2>
-    <ShortDescription>Rock Climbing Short Description</ShortDescription>
-    <Phone>(202) 555 0155</Phone>
+    <ShortDescription>Football Academy Short Description</ShortDescription>
+    <Phone>(202) 555 0156</Phone>
     <AutoComplete>New York, New York, USA</AutoComplete>
     <ProgramCategories>Karate, Sports, Leadership</ProgramCategories>
   </AccountSigUp>

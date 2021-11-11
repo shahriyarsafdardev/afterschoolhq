@@ -1,5 +1,6 @@
 ﻿using AfterSchoolUIAutomationTests.Helpers.Extensions;
 using OpenQA.Selenium;
+using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Support.UI;
 using System;
 using System.Threading;
@@ -21,8 +22,10 @@ namespace AfterSchoolUIAutomationTests.Pages
 
         private IWebElement AccountButtonElement => webDriver.FindElement(By.XPath("(//div[@id='accounts']//button)[1]"));
         private IWebElement ActivitiesElement => webDriver.FindElement(By.XPath("//ul[@class='sidebar-elements']//li[3]"));
-        private IWebElement ManageActivityElement => webDriver.FindElement(By.XPath("//div[@class='table-responsive']//table/tbody/tr[1]/td[1]"));
+        private IWebElement ActivitiesLinkElement => webDriver.FindElement(By.XPath("//div[@class='content nano-content']//ul//li[1]//a"));
+        private IWebElement ManageActivityElement => webDriver.FindElement(By.XPath("//div[@class='table-responsive']//table/tbody/tr[1]/td[1]//a"));
         private IWebElement EditActivityElement => webDriver.FindElement(By.XPath("//div[@class='pull-right visible-lg visible-md']"));
+        private IWebElement ActivityCenterElement => webDriver.FindElement(By.XPath("//ul[@class='sidebar-elements']//li[3]"));
         private IWebElement ActivityName => webDriver.FindElement(By.Id("name"));
         private IWebElement TotalAvailableSeats => webDriver.FindElement(By.Id("seatsavailable"));
         private IWebElement InviteOnly => webDriver.FindElement(By.Id("inviteonly"));
@@ -94,15 +97,17 @@ namespace AfterSchoolUIAutomationTests.Pages
         public EditActivityPage ClickAccountButton()
         {
             AccountButtonElement.Click();
-            webDriver.WaitInSeconds(5);
+            webDriver.WaitInSeconds(2);
             return this;
         }
 
-        public EditActivityPage ClickActivitiesLink()
+        public EditActivityPage HoverActivityCenterAndClickActivities()
         {
-            webDriver.WaitInSeconds(1);
             ActivitiesElement.Click();
-            webDriver.WaitInSeconds(3);
+            Actions action = new Actions(webDriver);
+            action.MoveToElement(ActivityCenterElement).Perform();
+            webDriver.WaitInSeconds(2);
+            ActivitiesLinkElement.Click();
             return this;
         }
 
@@ -371,6 +376,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         public EditActivityPage SelectAutoComplete(string location)
         {
             webDriver.WaitInSeconds(2);
+            ActivityLocationElement.Clear();
             ActivityLocationElement.SendKeys(location);
             Thread.Sleep(5000);
             WebDriverWait wait = new WebDriverWait(webDriver, new TimeSpan(0, 0, 5));
@@ -390,7 +396,8 @@ namespace AfterSchoolUIAutomationTests.Pages
         public EditActivityPage RegistrationFee(string fee)
         {
             webDriver.WaitInSeconds(2);
-            RegistrationFeeElement.Clear();
+            ((IJavaScriptExecutor)webDriver).ExecuteScript("document.getElementById('cost').removeAttribute('disabled')");
+            ((IJavaScriptExecutor)webDriver).ExecuteScript("document.getElementById('cost').setAttribute('value', '0.00')");
             webDriver.WaitInSeconds(2);
             RegistrationFeeElement.SendKeys(fee);
             return this;

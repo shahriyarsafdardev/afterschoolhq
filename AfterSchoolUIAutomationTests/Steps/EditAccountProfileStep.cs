@@ -32,7 +32,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Given(@"Navigate to the profile edit page")]
         public void NavigateToProfileEdit()
         {
-            UIDriver.WebDriver.Navigate().GoToUrl(Parameter.Get("EditAccountProfileUrl", "users", "EditAccountProfile"));
+            UIDriver.WebDriver.Navigate().GoToUrl(Parameter.Get("EditAccountProfileUrl", "urls"));
             UIDriver.WebDriver.WaitInSeconds(2);
         }
 
@@ -77,6 +77,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         {
             string successMessage = editAccountProfilePage.ToastMessage();
             //string successMessage = "Success";
+            UIDriver.WebDriver.WaitInSeconds(2);
             successMessage.Equals("Success");
         }
     }

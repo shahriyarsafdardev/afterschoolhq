@@ -31,7 +31,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Given(@"Click on Activities Link")]
         public void ManageActivityButton()
         {
-            editActivityPage.ClickActivitiesLink();
+            editActivityPage.HoverActivityCenterAndClickActivities();
         }
 
         [Given(@"Click on Manage Activity Button")]
