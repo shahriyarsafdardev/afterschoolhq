@@ -632,7 +632,6 @@ namespace AfterSchoolLibrary.Services
 
             if (msgs.HasNoErrors())
             {
-                string stripeRefundId = null;
 
                 if (paymentSourceType == PaymentSourceType.AfterSchoolPlatform)
                 {                    
@@ -684,7 +683,7 @@ namespace AfterSchoolLibrary.Services
                         fullAmount: refundAmount,
                         convenienceFeeAmount: convenienceFeeAmount,
                         paymentTypeFeeAmount: paymentTypeFeeAmount,
-                        refundId: stripeRefundId,
+                        refundId: transaction.StripeChargeOrRefundId,
                         transactionType: TransactionType.Refund,
                         paymentType: paymentType,
                         paymentSourceType: paymentSourceType,
