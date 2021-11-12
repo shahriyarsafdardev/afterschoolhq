@@ -3,6 +3,7 @@ using AfterSchoolUIAutomationTests.Helpers.Extensions;
 using AfterSchoolUIAutomationTests.Pages;
 using AfterSchoolUIAutomationTests.Parameters;
 using FluentAssertions;
+using OpenQA.Selenium;
 using System;
 using TechTalk.SpecFlow;
 
@@ -12,33 +13,15 @@ namespace AfterSchoolUIAutomationTests.Steps
     public sealed class NewProviderSignUpFlowStep
     {
         private readonly ScenarioContext _scenarioContext;
+        private IWebDriver webDriver;
         private readonly NewProviderSignUpFlowPage newProviderSignUpFlowPage;
 
         public NewProviderSignUpFlowStep(ScenarioContext scenarioContext)
         {
             _scenarioContext = scenarioContext;
-            newProviderSignUpFlowPage = new NewProviderSignUpFlowPage(UIDriver.WebDriver);
+            webDriver = UIDriver.WebDriver;
+            newProviderSignUpFlowPage = new NewProviderSignUpFlowPage(webDriver);
         }
-
-        [Given(@"Navigate to Signup Page")]
-        public void NavigateToSignup()
-        {
-            UIDriver.WebDriver.Navigate().GoToUrl(Parameter.Get("SignUpUrl", "urls"));
-            UIDriver.WebDriver.WaitInSeconds(2);
-        }
-
-        [Given(@"Manage the browser window size for Signup")]
-        public void NavigateAccountAndPrograms()
-        {
-            UIDriver.WebDriver.Manage().Window.Maximize();
-        }
-
-        [Given(@"Click Get started button")]
-        public void ClickGetStartedButton()
-        {
-            newProviderSignUpFlowPage.ClickSignUp();
-        }
-
 
         [Given(@"Click create individual account button")]
         public void ClickIndividualAccountButton()
@@ -74,8 +57,9 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Then("Match window current url with the expected url")]
         public void ThenTheResultShouldBe()
         {
-            string curentUrl = UIDriver.WebDriver.Url;
+            string curentUrl = webDriver.Url;
             string expectedUrl = "/Org/onboarding/GettingStarted";
+            //curentUrl.Should().Contain(expectedUrl);
             curentUrl.Should().Contain(expectedUrl);
         }
     }

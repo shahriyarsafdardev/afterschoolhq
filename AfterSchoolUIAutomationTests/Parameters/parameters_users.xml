@@ -7,28 +7,28 @@
   </Login>
   <!-- Individual Account Signup Info -->
   <AccountSigUp>
-    <ProgramName>Football Academy</ProgramName>
+    <ProgramName>AutomationTest</ProgramName>
     <FirstName>Damien</FirstName>
     <LasttName>Martin</LasttName>
     <Email>damienmartin@yopmail.com</Email>
     <UserPassword>12345678</UserPassword>
     <UserPassword2>12345678</UserPassword2>
-    <ShortDescription>Football Academy Short Description</ShortDescription>
+    <ShortDescription>Automation Test Short Description</ShortDescription>
     <Phone>(202) 555 0156</Phone>
     <AutoComplete>New York, New York, USA</AutoComplete>
     <ProgramCategories>Karate, Sports, Leadership</ProgramCategories>
   </AccountSigUp>
   <!-- Account Update -->
   <EditAccountProfile>
-    <UserFirstName>Jim2</UserFirstName>
-    <UserLastName>Carrey2</UserLastName>
-    <UserEmail>jimcarey2@yopmail.com</UserEmail>
-    <UserPassword>123456</UserPassword>
-    <UserConfirmPassword>123456</UserConfirmPassword>
+    <UserFirstName>Damien</UserFirstName>
+    <UserLastName>Martin</UserLastName>
+    <UserEmail>damienmartin2@yopmail.com</UserEmail>
+    <UserPassword>12345678</UserPassword>
+    <UserConfirmPassword>12345678</UserConfirmPassword>
   </EditAccountProfile>
   <!-- Create New Activity -->
   <CreateNewActivity>
-    <ActivityName>Rock Climbing</ActivityName>
+    <ActivityName>Football Kicking</ActivityName>
     <TotalAvailableSeats>25</TotalAvailableSeats>
     <InviteOnly>No</InviteOnly>
     <HasSchedule>Yes</HasSchedule>

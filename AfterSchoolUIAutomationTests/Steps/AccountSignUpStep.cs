@@ -29,12 +29,6 @@ namespace AfterSchoolUIAutomationTests.Steps
             accountSignUpPage = new AccountSignUpPage(webDriver);
         }
 
-        [Given(@"Click the sigup button")]
-        public void NavigateAccountAndPrograms()
-        {
-            accountSignUpPage.ClickSignUp();
-        }
-
         [Given(@"Click individual Account and provide programs for student")]
         public void GivenTheSecondNumberIs()
         {   
@@ -95,7 +89,7 @@ namespace AfterSchoolUIAutomationTests.Steps
             //returns url of main directory which contains "/bin/Debug"
             var url = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase);
             //correction in path to point it in Root directory
-            var mainpath = url.Replace("\\bin\\Debug\\netcoreapp3.1", "") + "\\img\\" + fileName;
+            var mainpath = url.Replace("\\bin\\Debug\\netcoreapp2.1", "") + "\\img\\" + fileName;
             var imagepath = mainpath.Replace("file:\\", "");
             accountSignUpPage.UploadProfileImage(imagepath);
             accountSignUpPage.HeaderImageImage(imagepath);

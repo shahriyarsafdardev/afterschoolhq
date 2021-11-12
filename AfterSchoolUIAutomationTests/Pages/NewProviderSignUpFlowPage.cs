@@ -1,4 +1,5 @@
 ﻿using AfterSchoolUIAutomationTests.Helpers.Extensions;
+using AfterSchoolUIAutomationTests.Parameters;
 using OpenQA.Selenium;
 
 namespace AfterSchoolUIAutomationTests.Pages
@@ -28,6 +29,13 @@ namespace AfterSchoolUIAutomationTests.Pages
         private IWebElement BasicInfoSubmitElement => webDriver.FindElement(By.XPath("(//div[@class='visible-md visible-lg margin-v-30']//button[text()='Continue'])[1]"));
 
         //------------Individual Account Helper Methods-----------
+        public NewProviderSignUpFlowPage NavigateToSignUp(string signupurl)
+        {
+            webDriver.WaitInSeconds(1);
+            webDriver.Navigate().GoToUrl(Parameter.Get("SignUpUrl", "urls"));
+            return this;
+        }
+
         public NewProviderSignUpFlowPage ClickSignUp()
         {
             webDriver.WaitInSeconds(1);

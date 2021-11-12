@@ -21,11 +21,16 @@ namespace AfterSchoolUIAutomationTests.Pages
         private IWebElement RegisterNowElement => webDriver.FindElement(By.XPath("//div[@class='col-lg-4 col-md-12']//a[@class=' btn btn-register btn-block']"));
         private IWebElement ParentEmailElement => webDriver.FindElement(By.Id("email-check"));
         private IWebElement EmailClickNextElement => webDriver.FindElement(By.Id("btn-check-email"));
-        private IWebElement FirstNnameElement => webDriver.FindElement(By.Id("question-9487"));
-        private IWebElement LastNameElement => webDriver.FindElement(By.Id("question-9488"));
-        private IWebElement PhoneElement => webDriver.FindElement(By.Id("question-9490"));
-        private IWebElement Password1Element => webDriver.FindElement(By.Id("password1"));
-        private IWebElement Password2Element => webDriver.FindElement(By.Id("password2"));
+        //private IWebElement FirstNnameElement => webDriver.FindElement(By.Id("question-9487"));
+        private IWebElement FirstNnameElement => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div[2]/form/div[2]/div[2]/div[2]/input"));
+        //private IWebElement LastNameElement => webDriver.FindElement(By.Id("question-9488"));
+        private IWebElement LastNameElement => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div[2]/form/div[2]/div[3]/div[2]/input"));
+        //private IWebElement PhoneElement => webDriver.FindElement(By.Id("question-9490"));
+        private IWebElement PhoneElement => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div[2]/form/div[2]/div[5]/div[2]/input"));
+        //private IWebElement Password1Element => webDriver.FindElement(By.Id("password1"));
+        private IWebElement Password1Element => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div[2]/form/div[2]/div[9]/div/input"));
+        //private IWebElement Password2Element => webDriver.FindElement(By.Id("password2"));
+        private IWebElement Password2Element => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div[2]/form/div[2]/div[10]/div/input"));
         private IWebElement IAgreeElement => webDriver.FindElement(By.XPath("(//div[@class='am-checkbox text-center'])[2]//label/text()[1]"));
         //private IWebElement IAgreeElement => webDriver.FindElement(By.XPath("//input[@name='agree' and @id='agree']"));
         private IWebElement SaveAndContParentSignUpElement => webDriver.FindElement(By.XPath("//button[@id='btn-create-account']"));
@@ -34,20 +39,28 @@ namespace AfterSchoolUIAutomationTests.Pages
 
         #region Step 2 Home Address WebElements
 
-        private IWebElement StreetAddressElement => webDriver.FindElement(By.Id("question-9499"));
-        private IWebElement CityElement => webDriver.FindElement(By.Id("question-9501"));
-        private IWebElement StateSelectElement => webDriver.FindElement(By.Id("question-9502"));
-        private IWebElement ZipCodeElement => webDriver.FindElement(By.Id("question-9503"));
+        //private IWebElement StreetAddressElement => webDriver.FindElement(By.Id("question-9499"));
+        private IWebElement StreetAddressElement => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div[2]/form/div[1]/div[2]/input"));
+        //private IWebElement CityElement => webDriver.FindElement(By.Id("question-9501"));
+        private IWebElement CityElement => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div[2]/form/div[3]/div[2]/input"));
+        //private IWebElement StateSelectElement => webDriver.FindElement(By.Id("question-9502"));
+        private IWebElement StateSelectElement => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div[2]/form/div[4]/div[2]/div[1]/select"));
+        //private IWebElement ZipCodeElement => webDriver.FindElement(By.Id("question-9503"));
+        private IWebElement ZipCodeElement => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div[2]/form/div[5]/div[2]/input"));
         private IWebElement SaveAndContHomeAddressElement => webDriver.FindElement(By.XPath("//button[@id='btn-add-home-address']"));
 
         #endregion
 
         #region Step 3 Additional Parent, Guardian WebElements
 
-        private IWebElement GuardianFirstNameElement => webDriver.FindElement(By.Id("question-9487"));
-        private IWebElement GuardianLastNameElement => webDriver.FindElement(By.Id("question-9488"));
-        private IWebElement GuardianEmailElement => webDriver.FindElement(By.Id("question-9489"));
-        private IWebElement GuardianMobileElement => webDriver.FindElement(By.Id("question-9490"));
+        //private IWebElement GuardianFirstNameElement => webDriver.FindElement(By.Id("question-9487"));
+        private IWebElement GuardianFirstNameElement => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div/form/div[1]/div[2]/input"));
+        //private IWebElement GuardianLastNameElement => webDriver.FindElement(By.Id("question-9488"));
+        private IWebElement GuardianLastNameElement => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div/form/div[2]/div[2]/input"));
+        //private IWebElement GuardianEmailElement => webDriver.FindElement(By.Id("question-9489"));
+        private IWebElement GuardianEmailElement => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div/form/div[3]/div[2]/input"));
+        //private IWebElement GuardianMobileElement => webDriver.FindElement(By.Id("question-9490"));
+        private IWebElement GuardianMobileElement => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div/form/div[4]/div[2]/input"));
         private IWebElement SaveAndContParentGuardianElement => webDriver.FindElement(By.XPath("//button[@id='btn-add-parent']"));
 
         #endregion

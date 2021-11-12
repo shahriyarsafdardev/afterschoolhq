@@ -4,8 +4,7 @@
 @NewProviderSignUpFlow
 Scenario: New Provider Sign Up Flow
 	Given  Navigate to Signup Page
-	Given  Manage the browser window size for Signup
-	Given  Click Get started button
+	Given  Navigate to signup welcome and click Get started button
 	Given  Click create individual account button
 	Given  Click provide programs for student button
 	Given  Enter Program Name and click continue
