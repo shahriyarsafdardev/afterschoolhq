@@ -1052,8 +1052,6 @@ namespace AfterSchool.Areas.Org.Controllers
             questionToDelete.IsDeleted = true;
             msgs.AddRange(questionToDelete.Save());
 
-            // Show Success Message
-            // LOG: Someone has Deleted Question.
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} has been deleted", questionToDelete.Text), MessageType.Success);
@@ -1064,7 +1062,7 @@ namespace AfterSchool.Areas.Org.Controllers
                    objectType: ObjectType.FormQuestion,
                    objectId: id.ToInteger(),
                    objectText: questionToDelete.Text,
-                   indirectObjectType: ObjectType.FormQuestion,  // Need to know about indirectObjectType
+                   indirectObjectType: ObjectType.FormQuestion,
                    indirectObjectId: currentAccount.ID.Value,
                    indirectObjectText: currentAccount.Name
                );
@@ -1073,7 +1071,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             TempData["Messages"] = msgs;
 
-            return RedirectToAction("FormEdit", new { id = questionToDelete.FormId, qg = "" });
+            return RedirectToAction("FormEdit", new { id = questionToDelete.FormId, qg = questionToDelete.FormQuestionGroupId });
         }
 
         [HttpGet]
@@ -1098,8 +1096,6 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.AddRange(item.Save());
             }
 
-            // Show Success Message
-            // LOG: Someone has Deleted Question.
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} has been deleted with all it's questions.", sectionToDelete.Name), MessageType.Success);
