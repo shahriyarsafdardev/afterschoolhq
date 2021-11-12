@@ -91,8 +91,8 @@ namespace AfterSchoolUIAutomationTests.Steps
             //correction in path to point it in Root directory
             var mainpath = url.Replace("\\bin\\Debug\\netcoreapp2.1", "") + "\\img\\" + fileName;
             var imagepath = mainpath.Replace("file:\\", "");
-            accountSignUpPage.UploadProfileImage(imagepath);
-            accountSignUpPage.HeaderImageImage(imagepath);
+            //accountSignUpPage.UploadProfileImage(imagepath);
+            //accountSignUpPage.HeaderImageImage(imagepath);
             accountSignUpPage.CustomizeProfileSubmit();
         }
 

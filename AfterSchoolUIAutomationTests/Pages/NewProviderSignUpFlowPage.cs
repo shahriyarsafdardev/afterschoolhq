@@ -67,6 +67,7 @@ namespace AfterSchoolUIAutomationTests.Pages
 
         public NewProviderSignUpFlowPage ClickProgramSubmit()
         {
+
             ProgramNameSubmitElement.Click();
             webDriver.WaitInSeconds(3);
             return this;

@@ -19,8 +19,8 @@ namespace AfterSchoolUIAutomationTests.Hooks
         [BeforeScenario]
         public static void RunDriver()
         {
-            //var chromeOptions = new ChromeOptions();
-            //chromeOptions.AddArguments("headless");
+            var chromeOptions = new ChromeOptions();
+            chromeOptions.AddArguments("headless");
             UIDriver.WebDriver = new ChromeDriver(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
         }
 

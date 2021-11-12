@@ -44,7 +44,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         //private IWebElement CityElement => webDriver.FindElement(By.Id("question-9501"));
         private IWebElement CityElement => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div[2]/form/div[3]/div[2]/input"));
         //private IWebElement StateSelectElement => webDriver.FindElement(By.Id("question-9502"));
-        private IWebElement StateSelectElement => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div[2]/form/div[4]/div[2]/div[1]/select"));
+        private IWebElement StateSelectElement => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div[2]/form/div[4]/div[2]/div/select"));
         //private IWebElement ZipCodeElement => webDriver.FindElement(By.Id("question-9503"));
         private IWebElement ZipCodeElement => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div[2]/form/div[5]/div[2]/input"));
         private IWebElement SaveAndContHomeAddressElement => webDriver.FindElement(By.XPath("//button[@id='btn-add-home-address']"));
@@ -67,21 +67,28 @@ namespace AfterSchoolUIAutomationTests.Pages
 
         #region Step 4 Emergency WebElements
 
-        private IWebElement EmergencyContactFirstNameElement => webDriver.FindElement(By.Id("question-9526"));
-        private IWebElement EmergencyContactLastNameElement => webDriver.FindElement(By.Id("question-9527"));
-        private IWebElement EmergencyContactPhoneElement => webDriver.FindElement(By.Id("question-9528"));
+        //private IWebElement EmergencyContactFirstNameElement => webDriver.FindElement(By.Id("question-9526"));
+        private IWebElement EmergencyContactFirstNameElement => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div/form/div[1]/div[2]/input"));
+        //private IWebElement EmergencyContactLastNameElement => webDriver.FindElement(By.Id("question-9527"));
+        private IWebElement EmergencyContactLastNameElement => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div/form/div[2]/div[2]/input"));
+        //private IWebElement EmergencyContactPhoneElement => webDriver.FindElement(By.Id("question-9528"));
+        private IWebElement EmergencyContactPhoneElement => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div/form/div[3]/div[2]/input"));
         private IWebElement SaveAndContEmergencyElement => webDriver.FindElement(By.XPath("//button[@id='btn-emergency-contact']"));
 
         #endregion
 
         #region Step 5 Student Information WebElements
 
-        private IWebElement StudentFirstNameElement => webDriver.FindElement(By.Id("question-9487"));
-        private IWebElement StudentLastNameElement => webDriver.FindElement(By.Id("question-9488"));
-        private IWebElement StudentPhoneElement => webDriver.FindElement(By.Id("question-9490"));
-        private IWebElement StudentDOBElement => webDriver.FindElement(By.Id("question-9493"));
+        //private IWebElement StudentFirstNameElement => webDriver.FindElement(By.Id("question-9487"));
+        private IWebElement StudentFirstNameElement => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div/form/div[1]/div[2]/input"));
+        private IWebElement StudentLastNameElement => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div/form/div[2]/div[2]/input"));
+        //private IWebElement StudentPhoneElement => webDriver.FindElement(By.Id("question-9490"));
+        private IWebElement StudentPhoneElement => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div/form/div[5]/div[2]/input"));
+        //private IWebElement StudentDOBElement => webDriver.FindElement(By.Id("question-9493"));
+        private IWebElement StudentDOBElement => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div/form/div[7]/div[2]/div/div/input"));
         private IWebElement StudentDOBDateElement => webDriver.FindElement(By.XPath("//div[@class='datetimepicker-days']//table/tbody/tr[3]/td[3]"));
-        private IWebElement StudentGradeElement => webDriver.FindElement(By.Id("question-9494"));
+        //private IWebElement StudentGradeElement => webDriver.FindElement(By.Id("question-9494"));
+        private IWebElement StudentGradeElement => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div/form/div[8]/div[2]/div/select"));
         private IWebElement StudentGenderElement => webDriver.FindElement(By.XPath("(//div[@class='am-radio inline'])[1]//label"));
         private IWebElement StudentSchoolElement => webDriver.FindElement(By.Id("location"));
         private IWebElement SaveAndContStudentInfoElement => webDriver.FindElement(By.XPath("//button[@id='btn-add-student']"));
@@ -90,8 +97,10 @@ namespace AfterSchoolUIAutomationTests.Pages
 
         #region Step 6 Student Health Information WebElements
 
-        private IWebElement StudentDoctorNameElemnt => webDriver.FindElement(By.Id("question-9532"));
-        private IWebElement StudentDoctorPhone => webDriver.FindElement(By.Id("question-9533"));
+        //private IWebElement StudentDoctorNameElemnt => webDriver.FindElement(By.Id("question-9532"));
+        private IWebElement StudentDoctorNameElemnt => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div/form/div[1]/div[2]/input"));
+        //private IWebElement StudentDoctorPhone => webDriver.FindElement(By.Id("question-9533"));
+        private IWebElement StudentDoctorPhone => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div/form/div[2]/div[2]/input"));
         private IWebElement StudentImmunizationElement => webDriver.FindElement(By.XPath("(//div[@class='am-radio inline'])[1]//label"));
         private IWebElement SaveAndContStudentHealthElement => webDriver.FindElement(By.XPath("//button[@id='btn-add-health']"));
         private IWebElement CompleteRegistrationElement => webDriver.FindElement(By.XPath("//h1[@class='activity-title']//span"));
@@ -195,7 +204,8 @@ namespace AfterSchoolUIAutomationTests.Pages
             StateSelectElement.Click();
             webDriver.WaitInSeconds(2);
             var selectElement = new SelectElement(StateSelectElement);
-            selectElement.SelectByValue(state);
+            //selectElement.SelectByValue(state);
+            selectElement.SelectByText(state);
             return this;
         }
 
@@ -327,7 +337,8 @@ namespace AfterSchoolUIAutomationTests.Pages
         {
             StudentGradeElement.Click();
             var selectElement = new SelectElement(StudentGradeElement);
-            selectElement.SelectByValue(grade);
+            //selectElement.SelectByValue(grade);
+            selectElement.SelectByText(grade);
             webDriver.WaitInSeconds(2);
             return this;
         }
