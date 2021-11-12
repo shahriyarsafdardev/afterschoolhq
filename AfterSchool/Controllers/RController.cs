@@ -371,7 +371,7 @@ namespace AfterSchool.Controllers
 
                 var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
 
-                if (!activity.IsPublished)
+                if (!activity.IsPublished && currentUser.IsEmpty())
                     return Redirect(account.HomePageUrl);
 
                 if (activity.IsEmpty())
