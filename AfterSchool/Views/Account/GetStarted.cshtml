@@ -162,7 +162,7 @@
                         }
 
 
-                        @if (currentUser.IsEmpty())
+                        @if (currentUser.IsEmpty() && AfterSchoolLibrary.Helpers.Utilities.IsProduction && AfterSchoolLibrary.Helpers.Utilities.IsStaging)
                         {
                             <div class="row padding-v-20">
                                 <div class="form-group text-center">

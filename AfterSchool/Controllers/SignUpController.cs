@@ -59,7 +59,7 @@ namespace AfterSchool.Controllers
                 msgs.Add("Passwords are required and must match", MessageType.UserError);
             else if (model.Password1.Length < 8)
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);
-            if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+            if (AfterSchoolLibrary.Helpers.Utilities.IsProduction && AfterSchoolLibrary.Helpers.Utilities.IsStaging)
             {
                 msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
             }
@@ -159,7 +159,7 @@ namespace AfterSchool.Controllers
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);
 
 
-            if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+            if (AfterSchoolLibrary.Helpers.Utilities.IsProduction && AfterSchoolLibrary.Helpers.Utilities.IsStaging)
             {
                 msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
             }
