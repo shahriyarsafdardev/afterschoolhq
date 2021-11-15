@@ -64,7 +64,7 @@ namespace AfterSchool.Controllers
                 msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
             }
 
-                if (model.InviteCodeToShare.IsNotEmpty())
+            if (model.InviteCodeToShare.IsNotEmpty())
             {
                 if (!model.InviteCodeToShare.IsGuid())
                     msgs.Add("Invalid invitation code", MessageType.UserError);
@@ -160,9 +160,7 @@ namespace AfterSchool.Controllers
 
 
             if (AfterSchoolLibrary.Helpers.Utilities.IsProduction && AfterSchoolLibrary.Helpers.Utilities.IsStaging)
-            {
                 msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
-            }
 
             if (model.InviteCodeToShare.IsNotEmpty())
             {

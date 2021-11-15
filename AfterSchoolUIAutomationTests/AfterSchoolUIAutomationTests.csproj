@@ -20,17 +20,8 @@
     <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="95.0.4638.5401" />
     <PackageReference Include="SpecFlow.Plus.LivingDocPlugin" Version="3.8.35" />
     <PackageReference Include="SpecFlow.Tools.MsBuild.Generation" Version="3.8.7" />
-
     
     <PackageReference Include="SpecRun.SpecFlow" Version="3.8.12" />
-    
-
-    
-
-    
-
-    
-
     
     <PackageReference Include="FluentAssertions" Version="5.10.3" />
     
