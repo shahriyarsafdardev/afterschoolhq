@@ -100,7 +100,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Then(@"Verify price on payment page with activity price")]
         public void VerifyCompleteRegistrationMessage()
         {
-            activityPrice.Should().Be(transactionMatchesPriceOnPaymentScreenPage.PriceInPayViaBankButton().Trim());
+            activityPrice.Should().Equals(transactionMatchesPriceOnPaymentScreenPage.PriceInPayViaBankButton() + 4);
             UIDriver.WebDriver.WaitInSeconds(2);
         }
     }

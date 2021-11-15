@@ -51,6 +51,7 @@ namespace AfterSchoolUIAutomationTests.Steps
             newProviderSignUpFlowPage.PopulateUserPassword(Parameter.Get("UserPassword", "users", "AccountSigUp"));
             newProviderSignUpFlowPage.PopulateUserPassword2(Parameter.Get("UserPassword2", "users", "AccountSigUp"));
             //newProviderSignUpFlowPage.CheckCaptcha();
+            webDriver.WaitInSeconds(5);
             newProviderSignUpFlowPage.ClickBasicInfoSubmit();
         }
 

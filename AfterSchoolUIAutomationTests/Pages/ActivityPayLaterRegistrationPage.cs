@@ -23,19 +23,19 @@ namespace AfterSchoolUIAutomationTests.Pages
         private IWebElement ParentEmailPasswordElement => webDriver.FindElement(By.Id("lm-login-password"));
         private IWebElement LoginButtonElement => webDriver.FindElement(By.XPath("//button[@id='btn-login']"));
         private IWebElement AddNewChildButtonElement => webDriver.FindElement(By.XPath("//div[@class='panel-body']//p//a"));
-        private IWebElement FirstNameElement => webDriver.FindElement(By.Id("question-14505"));
-        private IWebElement StudentDOBElement => webDriver.FindElement(By.Id("question-14511"));
+        private IWebElement FirstNameElement => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div/form/div[1]/div[2]/input"));
+        private IWebElement StudentDOBElement => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div/form/div[7]/div[2]/div[1]/div/input"));
         private IWebElement StudentDOBYearSelectionElement => webDriver.FindElement(By.XPath("(//div[@class='datetimepicker-days']//table//thead//tr)[1]//th[2]"));
         private IWebElement StudentDOBYearBackElement => webDriver.FindElement(By.XPath("(//div[@class='datetimepicker-months']//table//thead//tr)[1]//th[1]"));
         private IWebElement StudentDOBMonthElement => webDriver.FindElement(By.XPath("(//div[@class='datetimepicker-months']//table//tbody//tr)[1]//td[1]//span[6]"));
         private IWebElement StudentDOBDateElement => webDriver.FindElement(By.XPath("//div[@class='datetimepicker-days']//table/tbody/tr[3]/td[3]"));
-        private IWebElement StudentGradeElement => webDriver.FindElement(By.Id("question-14512"));
+        private IWebElement StudentGradeElement => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div/form/div[8]/div[2]/div/select"));
         private IWebElement StudentGenderElement => webDriver.FindElement(By.XPath("(//div[@class='am-radio inline'])[1]//label"));
-        private IWebElement StudentSchoolElement => webDriver.FindElement(By.Id("location"));
+        private IWebElement StudentSchoolElement => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div/form/div[12]/div[2]/input[1]"));
         private IWebElement SaveAndContStudentInfoElement => webDriver.FindElement(By.XPath("//button[@id='btn-add-student']"));
 
-        private IWebElement StudentDoctorNameElemnt => webDriver.FindElement(By.Id("question-14550"));
-        private IWebElement StudentDoctorPhone => webDriver.FindElement(By.Id("question-14551"));
+        private IWebElement StudentDoctorNameElemnt => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div/form/div[1]/div[2]/input"));
+        private IWebElement StudentDoctorPhone => webDriver.FindElement(By.XPath("/html/body/div[1]/div/div[8]/div/div/div/div/form/div[2]/div[2]/input"));
         private IWebElement StudentImmunizationElement => webDriver.FindElement(By.XPath("(//div[@class='am-radio inline'])[1]//label"));
         private IWebElement SaveAndContStudentHealthElement => webDriver.FindElement(By.XPath("//button[@id='btn-add-health']"));
         private IWebElement CompleteRegistrationElement => webDriver.FindElement(By.XPath("//h1[@class='activity-title']//span"));
@@ -120,7 +120,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         {
             StudentGradeElement.Click();
             var selectElement = new SelectElement(StudentGradeElement);
-            selectElement.SelectByValue(grade);
+            selectElement.SelectByText(grade);
             webDriver.WaitInSeconds(2);
             return this;
         }

@@ -19,6 +19,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         private IWebElement CreateIndividualAccountElement => webDriver.FindElement(By.XPath("(//div[@class='row margin-t-35']//button[text()='Create an Individual Account'])[1]"));
         private IWebElement ProvideProgramsForStudentsElement => webDriver.FindElement(By.XPath("(//div[@class='row margin-t-35']//button[text()='Provide programs for students'])[1]"));
         private IWebElement SignUpAccountSearchElement => webDriver.FindElement(By.Id("signup-account-search"));
+        private IWebElement ProgramNameAutoCompleteElement => webDriver.FindElement(By.Id("signup-account-search-list"));
         private IWebElement ProgramNameSubmitElement => webDriver.FindElement(By.XPath("(//div[@class='visible-md visible-lg']//button[text()='Continue'])[1]"));
         private IWebElement FirstNameElement => webDriver.FindElement(By.Name("firstname"));
         private IWebElement LasttNameElement => webDriver.FindElement(By.Name("lastname"));
@@ -68,6 +69,8 @@ namespace AfterSchoolUIAutomationTests.Pages
         public NewProviderSignUpFlowPage ClickProgramSubmit()
         {
 
+            ProgramNameAutoCompleteElement.Click();
+            webDriver.WaitInSeconds(1);
             ProgramNameSubmitElement.Click();
             webDriver.WaitInSeconds(3);
             return this;

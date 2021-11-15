@@ -30,7 +30,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Given(@"Navigate to the Pay later activity registration URL")]
         public void NavigateToActivityUrlAndClickRegister()
         {
-            webDriver.Navigate().GoToUrl(Parameter.Get("PayLaterActivityPublishedURL", "users", "ActivityPayLaterRegistration"));
+            webDriver.Navigate().GoToUrl(Parameter.Get("PayLaterActivityPublishedURL", "urls"));
             webDriver.WaitInSeconds(5);
             webDriver.Manage().Window.Maximize();
             webDriver.WaitInSeconds(2);

@@ -14,6 +14,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         //------------Finding NewParentAccountActivityPaymentPage WebElements-----------//
         private IWebElement ParentESignElement => webDriver.FindElement(By.Id("signature"));
         private IWebElement EsignContinueBtnElement => webDriver.FindElement(By.Id("btn-register"));
+        private IWebElement CreditCardImageElement => webDriver.FindElement(By.Id("card-number"));
         private IWebElement CreditCardElement => webDriver.FindElement(By.XPath("//div[@class='CardNumberField-input-wrapper']//span[@class='InputContainer']//input"));
         private IWebElement CreditCardMonthYearElement => webDriver.FindElement(By.XPath("//div[@class='CardNumberField-input-wrapper']//span[@class='InputContainer']"));
         private IWebElement CreditCardCVCElement => webDriver.FindElement(By.XPath("//span[@class='CardField-cvc CardField-child']//input"));
@@ -44,7 +45,9 @@ namespace AfterSchoolUIAutomationTests.Pages
 
         public NewParentAccountActivityPaymentPage PopulateCreditCardNumber(string cardNumber)
         {
-            CreditCardElement.SendKeys(cardNumber);
+            CreditCardImageElement.Click();
+            //CreditCardElement.SendKeys(cardNumber);
+            CreditCardImageElement.SendKeys(cardNumber);
             webDriver.WaitInSeconds(1);
             return this;
         }

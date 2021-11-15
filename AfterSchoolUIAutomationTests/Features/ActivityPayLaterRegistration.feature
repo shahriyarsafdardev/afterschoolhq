@@ -1,7 +1,7 @@
 ﻿Feature: ActivityPayLaterRegistration
 	Parent registers a student for pay later activity. 
 
-@mytag
+@ActivityPayLaterRegistration
 Scenario: Parent registers a student for pay later activity.
 	Given Navigate to the Pay later activity registration URL
 	Given Click on Register Now

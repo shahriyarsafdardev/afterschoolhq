@@ -25,7 +25,7 @@ namespace AfterSchoolUIAutomationTests.Steps
             loginPage.PopulateName(Parameter.Get("UserName", "users", "Login"));
             loginPage.PopulatePassword(Parameter.Get("Password", "users", "Login"));
             loginPage.ClickSubmit();
-            editActivityPage.ClickAccountButton();
+            //editActivityPage.ClickAccountButton();
         }
 
         [Given(@"Click on Activities Link")]

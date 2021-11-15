@@ -1,5 +1,6 @@
 ﻿using AfterSchoolUIAutomationTests.Helpers.Extensions;
 using OpenQA.Selenium;
+using System;
 
 namespace AfterSchoolUIAutomationTests.Pages
 {
@@ -14,7 +15,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         //------------Finding NewParentAccountActivityRegistrationPage WebElements-----------//
 
         private IWebElement ActivityPriceElement => webDriver.FindElement(By.XPath("(((//div[@class='col-lg-4 col-md-12'])[2]//div[@class='activity-detail-block'])[2]//strong)[1]"));
-        private IWebElement PayViaBankElement => webDriver.FindElement(By.XPath("//button[@id='plaid-button']"));
+        private IWebElement PayViaBankElement => webDriver.FindElement(By.XPath("//span[@class='total-due-today-cc']"));
 
 
         public string ActivityPrice()
@@ -23,10 +24,10 @@ namespace AfterSchoolUIAutomationTests.Pages
             return ActivityPriceElement.Text.Trim();
         }
 
-        public string PriceInPayViaBankButton()
+        public int PriceInPayViaBankButton()
         {
             webDriver.WaitInSeconds(1);
-            return PayViaBankElement.Text.Trim();
+            return Convert.ToInt32(PayViaBankElement.Text.Trim());
         }
     }
 }

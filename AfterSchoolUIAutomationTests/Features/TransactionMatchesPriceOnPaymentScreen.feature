@@ -1,7 +1,7 @@
 ﻿Feature: TransactionMatchesPriceOnPaymentScreen
 	Match Activity Price On Payment Screen Transaction
 
-@mytag
+@TransactionMatchesPriceOnPaymentScreen
 Scenario: Match Activity Price On Payment Screen Transaction
 	Given Navigate to the session publish url, read activity cost and click register now
 	Given Go through parent login and activity registration steps

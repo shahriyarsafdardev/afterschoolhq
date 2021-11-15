@@ -16,7 +16,7 @@ namespace AfterSchoolUIAutomationTests.Drivers
                 WebDriver = null;
             }
 
-            var processess = new List<string> { "chromedriver" };
+            var processess = new List<string> { "chromedriver", "geckodriver" };
             foreach (var process in processess)
             {
                 Process[] driverProcesses = Process.GetProcessesByName(process);

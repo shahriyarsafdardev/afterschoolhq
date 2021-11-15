@@ -71,11 +71,11 @@ namespace AfterSchoolUIAutomationTests.Features
         }
         
         [TechTalk.SpecRun.ScenarioAttribute("Match Activity Price On Payment Screen Transaction", new string[] {
-                "mytag"}, SourceLine=4)]
+                "TransactionMatchesPriceOnPaymentScreen"}, SourceLine=4)]
         public virtual void MatchActivityPriceOnPaymentScreenTransaction()
         {
             string[] tagsOfScenario = new string[] {
-                    "mytag"};
+                    "TransactionMatchesPriceOnPaymentScreen"};
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Match Activity Price On Payment Screen Transaction", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
 #line 5

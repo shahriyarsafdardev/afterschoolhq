@@ -1,7 +1,7 @@
 ﻿Feature: NewParentAccountActivityPayment
 	New Parent, Student Account Registration And Payment For Registering Activity
 
-@mytag
+@NewParentAccountActivityPayment
 Scenario: New Parent, Student Account Registration And Payment For Registering Activity
 	Given Navigate to the session publish url for registration and click register now
 	Given Enter parent email address for registration and click next

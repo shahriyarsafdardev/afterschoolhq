@@ -45,6 +45,7 @@ namespace AfterSchoolUIAutomationTests.Steps
             newProviderSignUpFlowPage.PopulateEmail("testemail" + DateTime.Now.ToString("yyyyMMddHHmmss") + "@yopmail.com");
             newProviderSignUpFlowPage.PopulateUserPassword(Parameter.Get("UserPassword", "users", "AccountSigUp"));
             newProviderSignUpFlowPage.PopulateUserPassword2(Parameter.Get("UserPassword2", "users", "AccountSigUp"));
+            webDriver.WaitInSeconds(10);
             //newProviderSignUpFlowPage.CheckCaptcha();
             newProviderSignUpFlowPage.ClickBasicInfoSubmit();
         }

@@ -71,11 +71,11 @@ namespace AfterSchoolUIAutomationTests.Features
         }
         
         [TechTalk.SpecRun.ScenarioAttribute("Parent registers a student for pay later activity.", new string[] {
-                "mytag"}, SourceLine=4)]
+                "ActivityPayLaterRegistration"}, SourceLine=4)]
         public virtual void ParentRegistersAStudentForPayLaterActivity_()
         {
             string[] tagsOfScenario = new string[] {
-                    "mytag"};
+                    "ActivityPayLaterRegistration"};
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Parent registers a student for pay later activity.", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
 #line 5
