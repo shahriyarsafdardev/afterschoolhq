@@ -2024,10 +2024,11 @@ namespace AfterSchool.Areas.Org.Controllers
                           currentUserId: currentUserId,
                           msgs: msgs,
                           dc: dc);
-                      BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, inviteCode.Code, null));
+
+                      BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse.ID.Value, surveyResponse.RegistrantId.Value, surveyResponse.SurveyRequestId.Value, inviteCode.Code,  null));
                   }
                   else
-                      BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, null, null));
+                      BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse.ID.Value, surveyResponse.RegistrantId.Value, surveyResponse.SurveyRequestId.Value, null, null));
               });
         }
         [HttpGet]
@@ -2051,9 +2052,9 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var checkIfInviteCodeExists = RegistrantInviteCode.CheckBySurveyResponseIdExpiryDate(surveyResponse.ID.Value, DateTime.Now);
             if (checkIfInviteCodeExists.IsNotEmpty())
-                BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, checkIfInviteCodeExists.Code, null));
+                BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse.ID.Value, surveyResponse.RegistrantId.Value, surveyResponse.SurveyRequestId.Value, checkIfInviteCodeExists.Code, null));
             else
-                BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, null, null));
+                BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse.ID.Value, surveyResponse.RegistrantId.Value, surveyResponse.SurveyRequestId.Value, null, null));
         }
 
         [HttpGet]

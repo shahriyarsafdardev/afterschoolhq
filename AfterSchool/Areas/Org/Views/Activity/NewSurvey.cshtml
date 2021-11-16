@@ -11,8 +11,8 @@
 
     var studentList = new List<SelectListItem>();
     foreach (var student in (List<RegistrantActivity>)ViewBag.Students)
-    {
-        var registrant = Registrant.Load(student.RegistrantId.Value);
+    {        
+        var registrant = student.GetRegistrant(msgs);
         studentList.Add(new SelectListItem
         {
             Text = student.RegistrantName,

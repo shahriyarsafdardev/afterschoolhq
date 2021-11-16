@@ -1018,10 +1018,7 @@ namespace AfterSchoolLibrary.Services
 
             if (firstName == null || lastName == null || email == null)
             {
-                //darye, billy: either we can get master registrant here or in 
-                // Account.PaymentViewBag registrant retrieval.
-                // I've updated here because error was specific for only null firstname, email so
-                var registrant = registration.GetMasterRegistrant(msgs, dc);
+                var registrant = registration.GetRegistrant(msgs, dc);
                 firstName = registrant.FirstName;
                 lastName = registrant.LastName;
                 email = registrant.Email;
