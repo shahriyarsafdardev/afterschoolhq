@@ -353,8 +353,7 @@ namespace AfterSchool.Controllers
                 return RedirectUnsupportedBrowser();
 
             var msgs = new SystemMessages();
-            if (TempData["Messages"] != null && ((SystemMessages)TempData["Messages"]).IsNotEmpty())
-                msgs.AddRange((SystemMessages)TempData["Messages"]);
+            HandleTempMessages(msgs);
 
             ParticipationObject participationObject = null;            
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
