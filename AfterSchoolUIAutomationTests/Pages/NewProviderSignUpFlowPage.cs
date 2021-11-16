@@ -33,7 +33,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         public NewProviderSignUpFlowPage NavigateToSignUp(string signupurl)
         {
             webDriver.WaitInSeconds(1);
-            webDriver.Navigate().GoToUrl(Parameter.Get("SignUpUrl", "urls"));
+            webDriver.Navigate().GoToUrl(signupurl);
             return this;
         }
 

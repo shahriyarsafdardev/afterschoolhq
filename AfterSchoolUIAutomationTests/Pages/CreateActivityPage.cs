@@ -21,7 +21,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         private IWebElement SigUpButtonElement => webDriver.FindElement(By.XPath("//ul[@class='site-navigation nav navbar-nav ml-auto']//li[7]"));
         private IWebElement AccountButtonElement => webDriver.FindElement(By.XPath("(//div[@id='accounts']//button)[1]"));
         private IWebElement AddActivityElement => webDriver.FindElement(By.XPath("//div[@class='pull-right']"));
-        private IWebElement ModalGettingStartedCloseBtnElement => webDriver.FindElement(By.XPath("(//div[@class='close-icon'])[1]//a[@class='close close-icon-postion-2']//span"));
+        private IWebElement ModalGettingStartedCloseBtnElement => webDriver.FindElement(By.XPath("(//div[@class='close-icon'])[1]//a[@class='close close-icon-postion-2']"));
         private IWebElement GotItButtonElement => webDriver.FindElement(By.XPath("//button[@class='btn btn-success btn-xs']"));
         private IWebElement FinishSetupElement => webDriver.FindElement(By.Id("popover-container"));
         private IWebElement CreateYourFirstActivityElement => webDriver.FindElement(By.XPath("(//div[@class='am-checkbox checkbox-override'])[2]//label"));

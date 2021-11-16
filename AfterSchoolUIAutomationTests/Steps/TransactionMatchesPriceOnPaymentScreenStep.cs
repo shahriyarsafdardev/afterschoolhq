@@ -17,8 +17,8 @@ namespace AfterSchoolUIAutomationTests.Steps
         private readonly TransactionMatchesPriceOnPaymentScreenPage transactionMatchesPriceOnPaymentScreenPage;
         private readonly NewParentAccountActivityPaymentPage newParentAccountActivityPaymentPage;
 
-        private string activityPrice;
-        public string ActivityPrice
+        private double activityPrice;
+        public double ActivityPrice
         {
             get { return activityPrice; }
             set { activityPrice = value; }
@@ -100,7 +100,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Then(@"Verify price on payment page with activity price")]
         public void VerifyCompleteRegistrationMessage()
         {
-            activityPrice.Should().Equals(transactionMatchesPriceOnPaymentScreenPage.PriceInPayViaBankButton() + 4);
+            activityPrice.Should().Equals(transactionMatchesPriceOnPaymentScreenPage.PriceInPayViaBankButton());
             UIDriver.WebDriver.WaitInSeconds(2);
         }
     }

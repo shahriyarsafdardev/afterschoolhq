@@ -23,6 +23,13 @@ namespace AfterSchoolUIAutomationTests2.Steps
         private CreateActivityPage createActivityPage;
         private EmailConfirmationPage emailConfirmationPage;
 
+        private string email;
+        public string AccountEmail
+        {
+            get { return email; }
+            set { email = value; }
+        }
+
         public EmailConfirmationStep(ScenarioContext scenarioContext)
         {
             _scenarioContext = scenarioContext;
@@ -37,6 +44,7 @@ namespace AfterSchoolUIAutomationTests2.Steps
         [Given(@"Go through new provider signup flow for email confirmation")]
         public void GoThroughNewProviderSignupFlow()
         {
+            newProviderSignUpFlowPage.NavigateToSignUp(Parameter.Get("SignUpUrl", "urls"));
             newProviderSignUpFlowPage.ClickSignUp();
             newProviderSignUpFlowPage.ClickIndividualAccount();
             newProviderSignUpFlowPage.ProvideProgramsForStudents();
@@ -44,7 +52,8 @@ namespace AfterSchoolUIAutomationTests2.Steps
             newProviderSignUpFlowPage.ClickProgramSubmit();
             newProviderSignUpFlowPage.PopulateFirstName(Parameter.Get("FirstName", "users", "AccountSigUp"));
             newProviderSignUpFlowPage.PopulateLasttName(Parameter.Get("LasttName", "users", "AccountSigUp"));
-            newProviderSignUpFlowPage.PopulateEmail("testemail" + DateTime.Now.ToString("yyyyMMddHHmmss") + "@yopmail.com");
+            AccountEmail = "testemail" + DateTime.Now.ToString("yyyyMMddHHmmss") + "@yopmail.com";
+            newProviderSignUpFlowPage.PopulateEmail(AccountEmail);
             newProviderSignUpFlowPage.PopulateUserPassword(Parameter.Get("UserPassword", "users", "AccountSigUp"));
             newProviderSignUpFlowPage.PopulateUserPassword2(Parameter.Get("UserPassword2", "users", "AccountSigUp"));
             //newProviderSignUpFlowPage.CheckCaptcha();
@@ -70,10 +79,10 @@ namespace AfterSchoolUIAutomationTests2.Steps
             //returns url of main directory which contains "/bin/Debug"
             var url = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase);
             //correction in path to point it in Root directory
-            var mainpath = url.Replace("\\bin\\Debug\\netcoreapp3.1", "") + "\\img\\" + fileName;
+            var mainpath = url.Replace("\\bin\\Debug\\netcoreapp2.1", "") + "\\img\\" + fileName;
             var imagepath = mainpath.Replace("file:\\", "");
-            createProfilePage.UploadProfileImage(imagepath);
-            createProfilePage.HeaderImageImage(imagepath);
+            //createProfilePage.UploadProfileImage(imagepath);
+            //createProfilePage.HeaderImageImage(imagepath);
             createProfilePage.CustomizeProfileSubmit();
             createProfilePage.PopulateProgramCategories(Parameter.Get("ProgramCategories", "users", "AccountSigUp"));
             createProfilePage.EasyActivitySubmit();

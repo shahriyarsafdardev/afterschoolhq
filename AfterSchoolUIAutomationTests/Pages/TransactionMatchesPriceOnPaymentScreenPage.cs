@@ -15,19 +15,25 @@ namespace AfterSchoolUIAutomationTests.Pages
         //------------Finding NewParentAccountActivityRegistrationPage WebElements-----------//
 
         private IWebElement ActivityPriceElement => webDriver.FindElement(By.XPath("(((//div[@class='col-lg-4 col-md-12'])[2]//div[@class='activity-detail-block'])[2]//strong)[1]"));
-        private IWebElement PayViaBankElement => webDriver.FindElement(By.XPath("//span[@class='total-due-today-cc']"));
+        private IWebElement PayViaBankElement => webDriver.FindElement(By.XPath("//span[@class='total-due-today-ach']"));
 
 
-        public string ActivityPrice()
+        public double ActivityPrice()
         {
             webDriver.WaitInSeconds(1);
-            return ActivityPriceElement.Text.Trim();
+            double activityFee = 0;
+            string numberStr = string.Format("{0:C2}", ActivityPriceElement.Text.Trim());
+            activityFee = Double.Parse(numberStr.Remove(0, 1)); // Remove the "$" from the number
+            return activityFee;
         }
 
-        public int PriceInPayViaBankButton()
+        public double PriceInPayViaBankButton()
         {
             webDriver.WaitInSeconds(1);
-            return Convert.ToInt32(PayViaBankElement.Text.Trim());
+            double transactionFee = 0;
+            string numberStr = string.Format("{0:C2}", PayViaBankElement.Text.Trim());
+            transactionFee = Double.Parse(numberStr);
+            return transactionFee;
         }
     }
 }

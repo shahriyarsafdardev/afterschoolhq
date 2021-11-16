@@ -21,9 +21,9 @@ namespace AfterSchoolUIAutomationTests.Pages
         private IWebElement ActivityProviderEmailElement => webDriver.FindElement(By.XPath("(//div[@class='activity-detail-block'])[3]//a"));
         private IWebElement YopEmailTextInputElement => webDriver.FindElement(By.XPath("//div[@class='tooltip click']//input"));
         private IWebElement YopEmailRefreshBtnElement => webDriver.FindElement(By.Id("refreshbut"));
-        private IWebElement Email1Element => webDriver.FindElement(By.XPath("(//div[@class='mctn']//div[@class='m'])[1]//button//span[@class='lmf']"));
-        private IWebElement Email2Element => webDriver.FindElement(By.XPath("(//div[@class='mctn']//div[@class='m'])[2]//button//span[@class='lmf']"));
-        private IWebElement VerificationLinkInEmailElement => webDriver.FindElement(By.XPath("(//table[2]//a)[2]"));
+        private IWebElement Email1Element => webDriver.FindElement(By.XPath("(//div[@class='lmfd'])[1]"));
+        private IWebElement Email2Element => webDriver.FindElement(By.XPath("(//div[@class='lmfd'])[2]"));
+        private IWebElement VerificationLinkInEmailElement => webDriver.FindElement(By.XPath("/html/body/main/div/div/div/center/div/table/tbody/tr/td/table/tbody/tr/td/table/tbody/tr/td/table/tbody/tr/td/table[2]/tbody/tr/td/div[4]/table/tbody/tr/td/div/div/p[3]/a"));
         private IWebElement SuccessMessageElement => webDriver.FindElement(By.XPath("//div[@class='panel-body']//p[@class='text-white']"));
 
         //------------Finding Email Confirmation Helper Methods-----------//
