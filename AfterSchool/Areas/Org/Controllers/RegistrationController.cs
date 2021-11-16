@@ -528,7 +528,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Delete(string id, string r, string returnurl)
+        public ActionResult Delete(string id, string r)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
@@ -538,13 +538,15 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var registration = currentAccount.GetRegistration(id.ToGuid(), msgs);
             var selectedRegistration = currentAccount.GetRegistration(r.ToGuid(), msgs);
+            // Get the uid of the activity before deleting the registration
+            var activityUid = registration.GetFirstParticipationObject(msgs).Uid;
 
             selectedRegistration.CancelAll(msgs);
 
             if (msgs.HasNoErrors())
             {
-                if (returnurl.IsNotEmpty())
-                    return Redirect(returnurl);
+                if (activityUid.IsNotEmpty())
+                    return RedirectToAction("registrants", "activity", new { id = activityUid, atype = "", msg = "Registration Deleted" });
 
                 return RedirectToAction("index");
             }
