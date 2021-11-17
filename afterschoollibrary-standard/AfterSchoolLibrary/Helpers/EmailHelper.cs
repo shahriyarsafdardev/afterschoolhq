@@ -87,18 +87,18 @@ namespace AfterSchoolLibrary.Helpers
         }
 
 
-        public static SystemMessages SendSurveyEmail(SurveyResponse surveyResponse, string code, SystemMessages msgs)
+        public static SystemMessages SendSurveyEmail(int surveyResponseId, int registrantId, int surveyRequestId, string code, SystemMessages msgs)
         {
             msgs = msgs ?? new SystemMessages();
-            var getRegistrant = Registrant.Load(surveyResponse.RegistrantId.Value);
-            var getSurvey = SurveyRequest.Load(surveyResponse.SurveyRequestId.Value);
+            var getRegistrant = Registrant.Load(registrantId);
+            var getSurvey = SurveyRequest.Load(surveyRequestId);
             var getRegistrantParent = getRegistrant.GetParentOrGuardian(msgs);
             var IsEmailSame = false;
 
             var model = new NameValueCollection()
             {
                 { "Name", getRegistrant.Name },
-                { "Link", Utilities.SurveyBaseUrl+"/survey/"+surveyResponse.ID},
+                { "Link", Utilities.SurveyBaseUrl+"/survey/"+ surveyResponseId},
                 { "SignUpLink", Utilities.SurveyBaseUrl+"/onboarding/signup"},
                 { "SurveyName", getSurvey.Name}
             };

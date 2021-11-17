@@ -67,9 +67,13 @@ namespace AfterSchoolLibrary.Services
 
      
 
-        public static void NotifyStudents(SurveyResponse surveyResponse, string code, SystemMessages msgs)
+        public static void NotifyStudents(int surveyResponseId, int registrantId, int surveyRequestId, string code, SystemMessages msgs)
         {
-            EmailHelper.SendSurveyEmail(surveyResponse, code, msgs);
+            EmailHelper.SendSurveyEmail(surveyResponseId: surveyResponseId,
+                registrantId: registrantId, 
+                surveyRequestId: surveyRequestId, 
+                code: code, 
+                msgs: msgs);
         }
 
         public static List<SurveyResponse> GetSurveyFeedbackBySurveyId(this SurveyResponse survey, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)

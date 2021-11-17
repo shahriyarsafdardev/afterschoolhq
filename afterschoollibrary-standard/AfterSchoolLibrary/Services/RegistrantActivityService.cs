@@ -183,20 +183,12 @@ namespace AfterSchoolLibrary.Services
 
         public static bool HasParentRegistrantId(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var registrant = registrantActivity.GetRegistrant(msgs, dc);
-            if (registrant.IsEmpty())
-                return false;
-
-            return registrant.ParentRegistrantId.HasValue;
+            return registrantActivity.GetMasterRegistrant(msgs, dc).IsNotEmpty();
         }
 
         public static int? GetParentRegistrantId(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var registrant = registrantActivity.GetRegistrant(msgs, dc);
-            if (registrant.IsEmpty())
-                return null;
-
-            return registrant.ParentRegistrantId.HasValue ? registrant.ParentRegistrantId.Value : (int?)null;
+            return registrantActivity.GetMasterRegistrant(msgs, dc)?.ID;            
         }
 
         public static Registration GetRegistration(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
