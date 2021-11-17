@@ -188,7 +188,7 @@ namespace AfterSchoolLibrary.Services
 
         public static int? GetParentRegistrantId(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return registrantActivity.GetMasterRegistrant(msgs, dc).ID;            
+            return registrantActivity.GetMasterRegistrant(msgs, dc)?.ID;            
         }
 
         public static Registration GetRegistration(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
