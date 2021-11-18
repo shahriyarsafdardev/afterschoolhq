@@ -41,7 +41,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         public void VerifyNavigatedURL()
         {
             string currentURL = UIDriver.WebDriver.Url;
-            currentURL.Should().Be(Parameter.Get("LoginRedirectUrl", "urls"));
+            currentURL.Should().Be(Parameter.Get("SuccessLoginUrl", "urls"));
         }
     }
 }

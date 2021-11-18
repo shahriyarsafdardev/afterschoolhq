@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <PARAMETERS>
   <LoginUrl>https://qa.afterschoolhq.com/login</LoginUrl>
+  <SuccessLoginUrl>https://qa.afterschoolhq.com/Org/home</SuccessLoginUrl>
   <LoginRedirectUrl>https://qa.afterschoolhq.com/login/select</LoginRedirectUrl>
   <HomePageUrl>https://qa.afterschoolhq.com</HomePageUrl>
   <SignUpUrl>https://qa.afterschoolhq.com/signup/Welcome</SignUpUrl>

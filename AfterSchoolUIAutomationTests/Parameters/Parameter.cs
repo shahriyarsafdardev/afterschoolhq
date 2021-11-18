@@ -1,4 +1,6 @@
-﻿using System.Xml;
+﻿using System.IO;
+using System.Reflection;
+using System.Xml;
 
 namespace AfterSchoolUIAutomationTests.Parameters
 {
@@ -12,10 +14,11 @@ namespace AfterSchoolUIAutomationTests.Parameters
             XmlDocument xmlDoc = new XmlDocument();
 
             //returns url of main directory which contains "/bin/Debug"
-            var url = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase);
+            var url = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location.Substring(0, Assembly.GetEntryAssembly().Location.IndexOf("bin\\")));
 
             //correction in path to point it in Root directory
-            var mainpath = url.Replace("\\bin\\Debug\\netcoreapp2.1", "") + "\\Parameters\\parameters_" + parameterType + ".xml";
+            var mainpath = url + $@"\Parameters\parameters_{parameterType}.xml";
+
             //load xml file
             xmlDoc.Load(mainpath);
 
