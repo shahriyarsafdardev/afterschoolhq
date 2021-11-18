@@ -145,6 +145,9 @@ namespace AfterSchoolLibraryTests.Factories
                     case FeatureType.PaymentsPercentageFlatFee:
                         maxValue = .99.ToDecimal();
                         break;
+                    case FeatureType.ManagePermissionSlips:
+                        maxValue = 3;
+                        break;
                 }
 
                 AddFeature(package, item, maxValue, loggedInUser, msgs, dc);

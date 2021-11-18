@@ -105,6 +105,16 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
+        private static Package GetFirstPackageWithFeatureFromPackages(FeatureType feature, List<Package> packages, int featureCount)
+        {
+            foreach (var package in packages)
+            {
+                if (package.HasFeature(feature) && package.GetFeature(feature).GetMaxValue() > featureCount)
+                    return package;
+            }
+            return null;
+        }
+
         public static Package GetPackageWithFeatureLowestPrice(FeatureType feature, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var features = ((FeatureType[])Enum.GetValues(typeof(FeatureType))).ToList();
@@ -124,7 +134,26 @@ namespace AfterSchoolLibrary.Services
 
             return null;
         }
-        
+        public static Package GetPackageWithFeatureMaximumAvailability(FeatureType feature, int featureCount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var features = ((FeatureType[])Enum.GetValues(typeof(FeatureType))).ToList();
+            var packages = Package.LoadByIsActive(true, msgs, dc);
+            var paidPackages = packages.Where(m => m.Price > 0 && m.PricePerYear > 0).OrderBy(p => p.Price).ToList();
+
+            if (!feature.In(features))
+            {
+                msgs.Add("feature type does not exist", MessageType.Error);
+                return null;
+            }
+
+            var packageWithFeature = GetFirstPackageWithFeatureFromPackages(feature, paidPackages,featureCount);
+
+            if (packageWithFeature.IsNotEmpty())
+                return packageWithFeature;
+
+            return null;
+        }
+
         public static Package GetPackageWithAnyFeaturesLowestPrice(List<FeatureType> features, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var allFeatures = ((FeatureType[])Enum.GetValues(typeof(FeatureType))).ToList();
