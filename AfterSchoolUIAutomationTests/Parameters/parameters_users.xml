@@ -20,15 +20,15 @@
   </AccountSigUp>
   <!-- Account Update -->
   <EditAccountProfile>
-    <UserFirstName>Damien</UserFirstName>
+    <UserFirstName>Damien2</UserFirstName>
     <UserLastName>Martin</UserLastName>
-    <UserEmail>damienmartin2@yopmail.com</UserEmail>
+    <UserEmail>damienmartin@yopmail.com</UserEmail>
     <UserPassword>12345678</UserPassword>
     <UserConfirmPassword>12345678</UserConfirmPassword>
   </EditAccountProfile>
   <!-- Create New Activity -->
   <CreateNewActivity>
-    <ActivityName>Football Kicking</ActivityName>
+    <ActivityName>Automation Football Kicking</ActivityName>
     <TotalAvailableSeats>25</TotalAvailableSeats>
     <InviteOnly>No</InviteOnly>
     <HasSchedule>Yes</HasSchedule>
@@ -57,7 +57,7 @@
   </StripeAccountPayments>
   <!-- New Parent Account Activity Registration -->
   <NewParentAccountActivityRegistration>
-    <ParentEmailAddress>parent8_hq@yopmail.com</ParentEmailAddress>
+    <ParentEmailAddress>parent8_automation@yopmail.com</ParentEmailAddress>
     <FirstName>Stephny</FirstName>
     <LastName>Macmahon</LastName>
     <Phone>(202) 555-0155</Phone>
@@ -133,7 +133,7 @@
   <CreateAndManageSessions>
     <UserName>stephny@yopmail.com</UserName>
     <Password>12345678</Password>
-    <SessionName>Test Session 1</SessionName>
+    <SessionName>Automation Test Session 1</SessionName>
     <SessionDetails>Test Session 1 Details</SessionDetails>
     <SessionActivityName>Test Session 1 Activity 1</SessionActivityName>
     <HasSchedule>Yes</HasSchedule>
