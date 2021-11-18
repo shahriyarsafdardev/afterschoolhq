@@ -549,7 +549,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 TempData["msgs"] = msgs;
 
                 if (returnurl.IsNotEmpty() && returnurl.Contains("registrants") && activityUid.IsNotEmpty())
-                    return RedirectToAction("registrants", "activity", new { id = activityUid, atype = "");
+                    return RedirectToAction("registrants", "activity", new { id = activityUid, atype = "" });
 
                 if (returnurl.IsNotEmpty())
                     return Redirect(returnurl);
