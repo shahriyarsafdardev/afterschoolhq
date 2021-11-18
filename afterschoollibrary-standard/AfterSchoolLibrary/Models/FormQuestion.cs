@@ -280,6 +280,15 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
+		public static List<FormQuestion> LoadByFormQuestionGroupIdByIsDeleted(int FormQuestionGroupId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["FormQuestionGroupId"], FormQuestionGroupId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
 		public static List<FormQuestion> LoadByDependsOnQuestionId(int DependsOnQuestionId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
@@ -348,15 +357,6 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-		public static List<FormQuestion> LoadByFormQuestionGroupIdAndNotDeleted(int FormQuestionGroupId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-		{
-			var dq = DatabaseQuery;
-			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["FormQuestionGroupId"], FormQuestionGroupId);
-			dq.Criterias.Add(ObjectMap["IsDeleted"], false);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-		}
-
 		public FormQuestionGroup GetFormQuestionGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return FormQuestionGroup.Load(this.FormQuestionGroupId.Value, msgs, dc);
@@ -387,8 +387,16 @@ namespace AfterSchoolLibrary.Models
             };
 
             return newQuestion;
-        }        
+        }
 
-        #endregion
+		public static bool Exists(Hashtable criterias = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+		{
+			return GetCount(
+				criterias: criterias,
+				msgs: msgs,
+				dc: dc) > 0;
+		}
+
+		#endregion
     }
 }

@@ -194,7 +194,7 @@ namespace AfterSchoolLibrary.Models
 			SurveyRequest.Alter(dc);
 			SurveyResponse.Alter(dc);
 			RegistrantInviteCode.Alter(dc);
-			RefreshToken.Alter(dc);			
+			RefreshToken.Alter(dc);
 			
 
 			return msgs;
@@ -572,6 +572,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestion_FormId_IsActive ON [FormQuestion] (FormId,IsActive)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestion_FormQuestionGroupId ON [FormQuestion] (FormQuestionGroupId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestion_FormQuestionGroupId_IsActive ON [FormQuestion] (FormQuestionGroupId,IsActive)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestion_FormQuestionGroupId_IsDeleted ON [FormQuestion] (FormQuestionGroupId,IsDeleted)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestion_DependsOnQuestionId ON [FormQuestion] (DependsOnQuestionId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestion_FormId_QuestionDataTypeId ON [FormQuestion] (FormId,QuestionDataTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestion_FormQuestionGroupId_QuestionDataTypeId ON [FormQuestion] (FormQuestionGroupId,QuestionDataTypeId)"));

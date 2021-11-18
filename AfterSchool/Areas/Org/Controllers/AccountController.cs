@@ -872,9 +872,9 @@ namespace AfterSchool.Areas.Org.Controllers
                             if (qg.ToInteger() == 0)
                             {
                                 var sectionName = Request.Params["name-0"];
-                                var questionGroupExists = FormQuestionGroup.Load(criterias: new Hashtable() { { "Name", sectionName }, { "FormId", form.ID }, { "IsDeleted" , false } }, msgs: amsgs, dc: adc);
+                                var questionGroupExists = FormQuestionGroup.Exists(criterias: new Hashtable() { { "Name", sectionName }, { "FormId", form.ID }, { "IsDeleted" , false } }, msgs: amsgs, dc: adc);
 
-                                if (!questionGroupExists.Any())
+                                if (!questionGroupExists)
                                 {
                                     questionGroup = new FormQuestionGroup()
                                     {
@@ -895,7 +895,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                 } 
                                 else
                                 {
-                                    questionGroup = questionGroupExists.FirstOrDefault();
+                                    questionGroup = FormQuestionGroup.Load(criterias: new Hashtable() { { "Name", sectionName }, { "FormId", form.ID }, { "IsDeleted", false } }, msgs: amsgs, dc: adc)?.FirstOrDefault();
                                 }                                
                             }
                             else
@@ -953,9 +953,10 @@ namespace AfterSchool.Areas.Org.Controllers
                                 foreach (var i in questionsList)
                                 {
                                     var text = Request.Params[string.Format("new-text-{0}", i)];
-                                    var questionExists = FormQuestion.Load(criterias: new Hashtable() { { "Text", text }, { "FormId", form.ID }, { "FormQuestionGroupId", questionGroup.ID }, { "IsDeleted", false } }, msgs: amsgs, dc: adc);
 
-                                    if (!questionExists.Any())
+                                    var questionExists = FormQuestion.Exists(criterias: new Hashtable() { { "Text", text }, { "FormId", form.ID }, { "FormQuestionGroupId", questionGroup.ID }, { "IsDeleted", false } }, msgs: amsgs, dc: adc);
+
+                                    if (!questionExists)
                                     {
                                         var question = new FormQuestion
                                         {

@@ -1013,6 +1013,7 @@ loadmethod: FormId, List<>
 loadmethod: FormId|IsActive, List<>
 loadmethod: FormQuestionGroupId, List<>
 loadmethod: FormQuestionGroupId|IsActive, List<>
+loadmethod: FormQuestionGroupId|IsDeleted, List<>
 loadmethod: DependsOnQuestionId, List<>
 loadmethod: FormId|QuestionDataTypeId
 loadmethod: FormQuestionGroupId|QuestionDataTypeId

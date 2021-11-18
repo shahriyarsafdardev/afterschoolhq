@@ -233,7 +233,7 @@ namespace AfterSchoolLibrary.Models
         public List<FormQuestion> GetAllQuestions(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (this.ID.HasValue)
-                return FormQuestion.LoadByFormQuestionGroupIdAndNotDeleted(this.ID.Value, msgs, dc).OrderBy(x => x.DisplayOrder).ToList();
+                return FormQuestion.LoadByFormQuestionGroupIdByIsDeleted(this.ID.Value, false, msgs, dc).OrderBy(x => x.DisplayOrder).ToList();
 
             return new List<FormQuestion>();
         }
@@ -259,6 +259,14 @@ namespace AfterSchoolLibrary.Models
             newGroup.RegistrantTypeId = this.RegistrantTypeId;
             newGroup.QuestionGroupDataTypeId = this.QuestionGroupDataTypeId;
             return newGroup;
+        }
+
+        public static bool Exists(Hashtable criterias = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return GetCount(
+                criterias: criterias,
+                msgs: msgs,
+                dc: dc) > 0;
         }
 
         #endregion
