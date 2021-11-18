@@ -5,7 +5,7 @@
     This is an automated email letting you know that @Model.CurrentUserName has withdrawn @Model.RegistrantName from @Model.ActivityName. If refund is necessary, please visit the accounting page of your AfterSchool HQ Dashboard.
   </p>
     <p>
-      This student has completed @Model.Payment payments on their payment plan. To cancel the remaining payments, please click here @Model.PaymentPlanLink
+      This student has completed @Model.Payment payments on their payment plan. To cancel the remaining payments, please <a href="@Model.PlanURL" target="_blank">click here</a> 
     </p>
   <p>
       Your @Model.ProductName Team

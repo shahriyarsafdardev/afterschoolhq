@@ -204,19 +204,19 @@ namespace AfterSchoolLibrary.Helpers
             var body = "";
 
             var plan = registrant.GetRegistrantSubscriptionPlans(msgs).Where(rsp => !rsp.DateCancelled.HasValue && rsp.IsForParticipationObject(participationObject, msgs))?.FirstOrDefault();
-            var payments = plan.GetPayments();
+            var payments = plan?.GetPayments();
 
             if (isParent)
             {
-                if (plan.TotalPeriods.HasValue)
+                if (plan.IsNotEmpty() && plan.TotalPeriods.HasValue)
                     model.Add(new NameValueCollection() {
-                    { "Payment",  payments.Count().ToString() +" out of " +plan.TotalPeriods.Value.ToString()},
-                    { "PaymentPlanLink", Utilities.BaseUrl() +"/Org/accounting" }
+                    { "Payment",  payments?.Count().ToString() +" out of " +plan?.TotalPeriods.Value.ToString()},
+                    { "PlanURL", $"{Utilities.BaseUrl()}/Org/accounting/" }
                 });
                 else
                     model.Add(new NameValueCollection() {
-                    { "Payment",  payments.Count().ToString()},
-                    { "PaymentPlanLink", Utilities.BaseUrl() +"/Org/accounting" }
+                    { "Payment",  payments?.Count().ToString()},
+                    { "PlanURL", $"{Utilities.BaseUrl()}/Org/accounting/" }
                 });
                 body = ProcessTemplate(
                 EmailTemplates.Registration_Withdrawal_Parent,
