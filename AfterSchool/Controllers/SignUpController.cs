@@ -40,7 +40,7 @@ namespace AfterSchool.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Index(SignUpIndexViewModel model)
-        {            
+        {
             var msgs = new SystemMessages();
             Account invitingAccount = null;
 
@@ -60,9 +60,7 @@ namespace AfterSchool.Controllers
             else if (model.Password1.Length < 8)
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);
             if (AfterSchoolLibrary.Helpers.Utilities.IsProduction && AfterSchoolLibrary.Helpers.Utilities.IsStaging)
-            {
                 msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
-            }
 
             if (model.InviteCodeToShare.IsNotEmpty())
             {
