@@ -90,26 +90,20 @@ namespace AfterSchoolLibrary.Helpers
         public static SystemMessages SendSurveyEmail(int surveyResponseId, int registrantId, int surveyRequestId, string code, SystemMessages msgs)
         {
             msgs = msgs ?? new SystemMessages();
-            var getRegistrant = Registrant.Load(registrantId);
-            var getSurvey = SurveyRequest.Load(surveyRequestId);
-            var getRegistrantParent = getRegistrant.GetParentOrGuardian(msgs);
-            var IsEmailSame = false;
 
+            var registrant = Registrant.Load(registrantId);
+            var survey = SurveyRequest.Load(surveyRequestId);
+            var registrantParent = registrant.GetParentOrGuardian(msgs);
             var model = new NameValueCollection()
             {
-                { "Name", getRegistrant.Name },
+                { "Name", registrant.Name },
                 { "Link", Utilities.SurveyBaseUrl+"/survey/"+ surveyResponseId},
                 { "SignUpLink", Utilities.SurveyBaseUrl+"/onboarding/signup"},
-                { "SurveyName", getSurvey.Name}
+                { "SurveyName", survey.Name}
             };
 
             if (code.IsNotEmpty())
                 model.Add(new NameValueCollection() { { "InviteCode", code } });
-
-
-            if (getRegistrant.Email == (getRegistrantParent.IsNotEmpty() ? getRegistrantParent.Email : ""))
-                IsEmailSame = true;
-
 
             var subject = $"You have received a survey request";
             var body = ProcessTemplate(
@@ -118,14 +112,17 @@ namespace AfterSchoolLibrary.Helpers
                         code.IsNotEmpty() ? "survey_code_email" : "survey_code",
                         msgs);
 
-            if (IsEmailSame) {
-                SendSurveyEmailLastStep(subject, getRegistrant.Email, body, msgs);
+            // check if child and parent has same email
+            if (registrant.Email == (registrantParent.IsNotEmpty() ? registrantParent.Email : ""))
+            {
+                SendSurveyEmailLastStep(subject, registrant.Email, body, msgs);
             }
-            else{
+            else
+            {
                 //send both
-                SendSurveyEmailLastStep(subject, getRegistrant.Email, body, msgs);
-                if(getRegistrantParent.IsNotEmpty())
-                    SendSurveyEmailLastStep(subject, getRegistrantParent.Email, body, msgs);
+                SendSurveyEmailLastStep(subject, registrant.Email, body, msgs);
+                if (registrantParent.IsNotEmpty())
+                    SendSurveyEmailLastStep(subject, registrantParent.Email, body, msgs);
             }
 
             return msgs;

@@ -158,23 +158,15 @@ namespace AfterSchoolLibrary.Models
 
         public static bool VerifyGradeLevel(FormQuestionAnswer formQuestionAnswer, GradeLevel gradeLevel)
         {
-            bool sameGradeLevel = false;
-            if (Helpers.Utilities.IsAlreadyJsonString(formQuestionAnswer.Text)) 
-            {
-                var data = Helpers.Utilities.GetKeyValuePairs(formQuestionAnswer.Text);
-                var registrantGradeLevelAnswerText = data.First().value.ToLower().Trim();
-                sameGradeLevel = gradeLevel.Abbreviation.IsSameAs(registrantGradeLevelAnswerText) || (registrantGradeLevelAnswerText.MaxChars(gradeLevel.Abbreviation.Length) == gradeLevel.Abbreviation);
+            var answerText = formQuestionAnswer.Text;
 
-                //in some cases like Pre-K or Kindergarten, we have Abbreviation = P, above conditions will not work in that case.
-                if (sameGradeLevel == false && gradeLevel.Name.IsSameAs(registrantGradeLevelAnswerText))
-                    sameGradeLevel = true;
-            }
-            else if (formQuestionAnswer.IsNotEmpty())
+            if (Helpers.Utilities.IsAlreadyJsonString(answerText))
             {
-                sameGradeLevel = gradeLevel.Abbreviation.IsSameAs(formQuestionAnswer.Text) || (formQuestionAnswer.Text.MaxChars(gradeLevel.Abbreviation.Length) == gradeLevel.Abbreviation);
+                var data = Helpers.Utilities.GetKeyValuePairs(answerText);
+                answerText = data.First().value.ToLower().Trim();
             }
 
-            return sameGradeLevel;
+            return gradeLevel.Abbreviation.IsSameAs(answerText);
         }
 
         #endregion
