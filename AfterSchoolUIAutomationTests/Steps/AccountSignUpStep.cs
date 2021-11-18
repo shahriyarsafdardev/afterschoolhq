@@ -85,12 +85,12 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Given(@"Populate customize your profile images and click continue")]
         public void PopulateCustomizeYourProfleAndClickContinue()
         {
-            string fileName = "musical-instruments-english.jpg";
+            //string fileName = "musical-instruments-english.jpg";
             //returns url of main directory which contains "/bin/Debug"
-            var url = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase);
+            //var url = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase);
             //correction in path to point it in Root directory
-            var mainpath = url.Replace("\\bin\\Debug\\netcoreapp2.1", "") + "\\img\\" + fileName;
-            var imagepath = mainpath.Replace("file:\\", "");
+            //var mainpath = url.Replace("\\bin\\Debug\\netcoreapp2.1", "") + "\\img\\" + fileName;
+            //var imagepath = mainpath.Replace("file:\\", "");
             //accountSignUpPage.UploadProfileImage(imagepath);
             //accountSignUpPage.HeaderImageImage(imagepath);
             accountSignUpPage.CustomizeProfileSubmit();

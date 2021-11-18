@@ -345,11 +345,9 @@
                             <input id="claim-phone" type="text" autocomplete="off" class="form-control" required>
                         </div>
                         <div class="form-group">
-                            @{
-                                if (AfterSchoolLibrary.Helpers.Utilities.IsProduction && AfterSchoolLibrary.Helpers.Utilities.IsStaging)
-                                {
-                                    Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "");
-                                }
+                            @if (AfterSchoolLibrary.Helpers.Utilities.IsProduction && AfterSchoolLibrary.Helpers.Utilities.IsStaging)
+                            {
+                                Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "");
                             }
                         </div>
                         <div class="form-group claim-profile-submit text-center">
@@ -402,11 +400,9 @@
                             <input id="contact-phone" type="text" autocomplete="off" class="form-control">
                         </div>
                         <div class="form-group">
-                            @{
-                                if (AfterSchoolLibrary.Helpers.Utilities.IsProduction && AfterSchoolLibrary.Helpers.Utilities.IsStaging)
-                                {
-                                    Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "");
-                                }
+                            @if (AfterSchoolLibrary.Helpers.Utilities.IsProduction && AfterSchoolLibrary.Helpers.Utilities.IsStaging)
+                            {
+                                Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "");
                             }
                         </div>
                         <div class="form-group contact-provider-submit text-center">

@@ -560,7 +560,7 @@ namespace AfterSchool.Controllers
                 if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)  
                     msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
             }
-            if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+            if (AfterSchoolLibrary.Helpers.Utilities.IsProduction && AfterSchoolLibrary.Helpers.Utilities.IsStaging)
             {
                 if (!agree.IsBoolean())
                     msgs.Add("You must agree to the terms of service", MessageType.UserError);
