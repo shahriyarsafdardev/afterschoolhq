@@ -168,9 +168,8 @@
 
                 <div class="registrationperiod-container">
 
-                    @if (showRegistrationPeriodList)
-                    {
-                        <div class="form-group registrationperiod-container">
+
+                        @*<div class="form-group registrationperiod-container">
                             <label class="col-sm-3 control-label">
                                 @UILabel.RegistrationPeriodLabel() <span class="text-danger">*</span>
                             </label>
@@ -194,14 +193,12 @@
                                     Edit @UILabel.RegistrationPeriodLabel()
                                 </a>
                             </div>
-                        </div>
-                    }
-                    else
-                    {
+                        </div>*@
+                  
                         <input type="hidden" name="registrationperiod" id="registrationperiod" value="@activePeriod.ID" />
-                    }
 
-                    <div class="form-group reg-period hide">
+
+                    <div class="form-group reg-period">
                         <label class="col-sm-3 control-label">@UILabel.RegistrationPeriodLabel() Open <span class="text-danger">*</span></label>
                         <div class="col-sm-5">
                             @{
@@ -234,7 +231,7 @@
                         </div>
                     </div>
 
-                    <div class="form-group reg-period hide" id="signUpCloseDate">
+                    <div class="form-group reg-period" id="signUpCloseDate" style="@(Model.IsContinuousEnrollment ? "display:none" : "")">
                         <label class="col-sm-3 control-label">@UILabel.RegistrationPeriodLabel() Close <span class="text-danger">*</span></label>
                         <div class="col-sm-5">
                             @{
@@ -369,13 +366,13 @@
     PageEvent.add(PageEvent.AFTER_INIT, function () {
 
         $('#registrationperiod').change(function () {
-            checkPeriodVal();
+     //       checkPeriodVal();
         });
         $('#form').change(function () {
             checkFormVal();
         });
 
-        checkPeriodVal();
+      //  checkPeriodVal();
         checkFormVal();
 
         $('input[name=registrationclosedate],input[name=registrationopendate],#registrationopentime,#registrationclosetime').on('change', function () {
