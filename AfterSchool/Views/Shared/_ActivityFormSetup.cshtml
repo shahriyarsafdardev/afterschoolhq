@@ -80,10 +80,10 @@
                           "~/Views/Shared/_SwitchButton.cshtml",
                           Model.IsInviteOnly,
                           new ViewDataDictionary() {
-                                                      { "checkboxname", "inviteonly" },
-                                                      { "checkboxid", "inviteonly" },
-                                                      { "disabled", !showInviteOnly }
-          });
+                                { "checkboxname", "inviteonly" },
+                                { "checkboxid", "inviteonly" },
+                                { "disabled", !showInviteOnly }
+                          });
                     }
                 </div>
             </div>
@@ -103,7 +103,6 @@
             <div class="form-group">
                 <label class="col-sm-3 control-label">
                     Continuous Enrollment? <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="With continuous enrollment, the sign up period stays open. This can be updated via settings." data-placement="top"></i>
-
                 </label>
                 <div class="col-sm-9">
                     @{
@@ -117,7 +116,6 @@
                                { "disabled", false }
                           });
                     }
-
                 </div>
             </div>
         }
