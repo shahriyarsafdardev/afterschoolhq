@@ -1,4 +1,4 @@
-﻿@model List<FormQuestionViewModel>
+@model List<FormQuestionViewModel>
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = "Get Started";
@@ -13,7 +13,7 @@
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-@{ 
+@{
     Html.RenderPartial(
         "~/Views/Shared/Registration/_AccountTopBar.cshtml",
         SessionVariables.RegistrationStartPageAccount ?? registrationAccount,
@@ -52,7 +52,7 @@
                         @if (showStep1)
                         {
                             <div class="row" id="email-check-container">
-                                
+
                                 <div>
                                     <p class="text-center reg-login new-account">
                                         Please enter your email to get started.
@@ -96,9 +96,9 @@
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="clearfix"></div>
-                            </div>                            
+                            </div>
                         }
 
                     <div id="account-registration" class="@(showStep1 ? "hide" : "")">
@@ -159,16 +159,14 @@
                                     <input type="password" class="form-control" id="password2" name="password2" />
                                 </div>
                             </div>
-                        }
-
-
-                        @if (currentUser.IsEmpty())
-                        {
-                            <div class="row padding-v-20">
-                                <div class="form-group text-center">
-                                    @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", ""); }
+                            if (AfterSchoolLibrary.Helpers.Utilities.IsProduction && AfterSchoolLibrary.Helpers.Utilities.IsStaging)
+                            {
+                                <div class="row padding-v-20">
+                                    <div class="form-group text-center">
+                                        @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", ""); }
+                                    </div>
                                 </div>
-                            </div>
+                            }
                         }
 
                         <div class="row padding-v-20">
@@ -286,10 +284,10 @@
         });
     });
 
-    function checkAndPostSignupForm(event, isFirstStep) {        
+    function checkAndPostSignupForm(event, isFirstStep) {
         if (isFirstStep && event.keyCode == 13) {
-            event.preventDefault();            
-            $('#btn-check-email').click();            
+            event.preventDefault();
+            $('#btn-check-email').click();
             return false;
         }
     }
