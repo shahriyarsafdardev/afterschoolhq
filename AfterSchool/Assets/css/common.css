@@ -1084,3 +1084,13 @@
     background-color: #00AE83 !important;
     color: white !important;
 }
+
+.fontSize12{
+    font-size:12px;
+}
+.clearBoth{
+    clear:both;
+}
+.fr{
+    float:right !important;
+}

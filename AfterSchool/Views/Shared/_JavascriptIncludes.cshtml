@@ -130,7 +130,7 @@
             var countElement = $(item).closest("div").find("span.countLeft");
 
             if (currentLength == maxlength) {
-                Notifications.showMessage('Error', 'You cannot enter more than 400 characters', false);
+                Notifications.showMessage('Error', 'You cannot enter more than ' + maxlength + ' characters', false);
                 countElement.html(currentLength);
             } else {
                 countElement.html(currentLength);

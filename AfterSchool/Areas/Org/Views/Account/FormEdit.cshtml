@@ -112,15 +112,22 @@
                                 {
                                     if (questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet || questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.Custom)
                                     {
+                                        <div>
                                         <input type="text"
                                                id="name-@questionGroup.ID"
                                                name="name-@questionGroup.ID"
                                                value="@questionGroup.Name"
                                                required
-                                               class="form-control input-lg input-lg-font"
+                                               class="form-control input-lg input-lg-font countWords"
                                                onfocus="this.select()"
                                                data-tooltip-id="name-@questionGroup.ID"
-                                               placeholder="Enter your new section name" />
+                                               placeholder="Enter your new section name" maxlength='75' />
+                                            <div class="fr">
+                                         <span class="countLeft fontSize12">0</span>
+                                         <span class="countMax fontSize12">/ 75</span>
+                                                </div>
+                                            <div class="clearBoth"></div>
+                                        </div>
                                     }
                                     else
                                     {
