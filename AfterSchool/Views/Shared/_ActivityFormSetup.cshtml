@@ -168,34 +168,7 @@
 
                 <div class="registrationperiod-container">
 
-
-                        @*<div class="form-group registrationperiod-container">
-                            <label class="col-sm-3 control-label">
-                                @UILabel.RegistrationPeriodLabel() <span class="text-danger">*</span>
-                            </label>
-                            <div class="col-sm-9">
-                                <select name="registrationperiod" id="registrationperiod" class="form-control" required>
-                                    <option value="">Select @UILabel.RegistrationPeriodLabel()...</option>
-                                    <option value="0"> + New @UILabel.RegistrationPeriodLabel()</option>
-                                    @foreach (var period in periods)
-                                    {
-                                        <option value="@period.ID" @(activePeriod?.ID == period.ID ? " selected=\"selected\" " : "")>
-                                            @period.StartDateTime.ToShortDateTimeString() - @(Model.IsContinuousEnrollment ? "" : period.EndDateTime.ToShortDateTimeString())
-                                        </option>
-                                    }
-                                </select>
-                                <p class="text-muted">
-                                    The date range @UILabel.RegistrantLabel(true).ToLower() are able to register for your @UILabel.ActivityLabel(Model.ActivityTypeId).ToLower()
-                                </p>
-                            </div>
-                            <div class="col-sm-3 hide">
-                                <a class="btn btn-block btn-link" href="@Url.Action("edit", "period", new { id = activePeriod?.ID })" id="editPeriod" target="_blank">
-                                    Edit @UILabel.RegistrationPeriodLabel()
-                                </a>
-                            </div>
-                        </div>*@
-                  
-                        <input type="hidden" name="registrationperiod" id="registrationperiod" value="@activePeriod.ID" />
+                    <input type="hidden" name="registrationperiod" id="registrationperiod" value="@activePeriod.ID" />
 
 
                     <div class="form-group reg-period">
@@ -224,7 +197,7 @@
                                                                     { "name", "registrationopentime" },
                                                                     { "id", "registrationopentime" },
                                                                     { "required", true }
-}
+                                    }
                                 );
                             }
 
@@ -365,14 +338,10 @@
 
     PageEvent.add(PageEvent.AFTER_INIT, function () {
 
-        $('#registrationperiod').change(function () {
-     //       checkPeriodVal();
-        });
         $('#form').change(function () {
             checkFormVal();
         });
 
-      //  checkPeriodVal();
         checkFormVal();
 
         $('input[name=registrationclosedate],input[name=registrationopendate],#registrationopentime,#registrationclosetime').on('change', function () {
@@ -392,25 +361,37 @@
         $('.costfrequencytype').click(function () {
             toggleCostFrequencyType($(this));
         });
-
+        isContinousEnabled();
         toggleCostFrequencyType($('#costfrequencytype-@((int)ActivityCostFrequencyType.PerClass)'));
 
         $("#isContinuousEnrollmentEnabled").on('change', function () {
-            if ($("#isContinuousEnrollmentEnabled").is(':checked')) {
-                $("#signUpCloseDate").hide();
-                var myDate = new Date();
-                myDate.setFullYear(myDate.getFullYear() + 10);
-                $('#registrationclosedate').val(myDate.toJSON().slice(0, 10).split('-').reverse().join('/'));
-            }
-            else {
-                $("#signUpCloseDate").show();
-                var myDate = new Date();
-                myDate.setDate(myDate.getDate() + 7);
-                $('#registrationclosedate').val(myDate.toJSON().slice(0, 10).split('-').reverse().join('/'));
-            }
+            isContinousEnabled();
         })
     });
 
+    function isContinousEnabled() {
+        if ($("#isContinuousEnrollmentEnabled").is(':checked')) {
+            $("#signUpCloseDate").hide();
+            var myDate = new Date();
+            myDate.setFullYear(myDate.getFullYear() + 10);
+            $('#registrationclosedate').val(getFormattedDate(myDate));
+        }
+        else {
+            $("#signUpCloseDate").show();
+            var myDate = new Date();
+            myDate.setDate(myDate.getDate() + 7);
+            $('#registrationclosedate').val(getFormattedDate(myDate));
+        }
+    }
+
+    function getFormattedDate(date) {
+        console.log(date);
+        let year = date.getFullYear();
+        let month = (1 + date.getMonth()).toString().padStart(2, '0');
+        let day = date.getDate().toString().padStart(2, '0');
+
+        return month + '/' + day + '/' + year;
+    }
     function toggleCostFrequencyType(obj) {
         if (obj.val() == '@((int)ActivityCostFrequencyType.PerClass)' && obj.is(':checked')) {
             $('.regmode').prop('disabled', true);
@@ -424,32 +405,6 @@
         }
     }
 
-    function checkPeriodVal() {
-        if ($('#registrationperiod').val().length > 0) {
-
-            if ($('#registrationperiod').val() != "0") {
-                $('.reg-period').addClass('hide');
-                $('#editPeriod').removeClass('hide');
-                $('#editPeriod').attr('href', '@Url.Action("edit", "period")/' + $('#registrationperiod').val());
-            } else {
-                $('.reg-period').removeClass('hide');
-                $('#editPeriod').addClass('hide');
-                if ($("#isContinuousEnrollmentEnabled").is(':checked')) {
-                    $("#signUpCloseDate").hide();
-                }
-                else {
-                    $("#signUpCloseDate").show();
-                }
-            }
-
-        } else {
-            $('#editPeriod').addClass('hide');
-        }
-
-        if ('@showRegistrationPeriodList'.toLowerCase() == 'false') {
-            $('.reg-period').removeClass('hide');
-        }
-    }
 
     function checkFormVal() {
         if ($('#form').val().length > 0 && $('#form').val() != "0") {
