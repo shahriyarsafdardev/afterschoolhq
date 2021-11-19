@@ -110,10 +110,11 @@
                         Html.RenderPartial(
                           "~/Views/Shared/_SwitchButton.cshtml",
                           Model.IsContinuousEnrollment,
-                          new ViewDataDictionary() {
-                                                              { "checkboxname", "isContinuousEnrollmentEnabled" },
-                                                              { "checkboxid", "isContinuousEnrollmentEnabled" },
-                                                              { "disabled", false }
+                          new ViewDataDictionary()
+                          {
+                               { "checkboxname", "isContinuousEnrollmentEnabled" },
+                               { "checkboxid", "isContinuousEnrollmentEnabled" },
+                               { "disabled", false }
                           });
                     }
 
@@ -194,9 +195,9 @@
                                     activePeriod.StartDateTime.Value,
                                     new ViewDataDictionary()
                                     {
-                                                                    { "name", "registrationopentime" },
-                                                                    { "id", "registrationopentime" },
-                                                                    { "required", true }
+                                          { "name", "registrationopentime" },
+                                          { "id", "registrationopentime" },
+                                          { "required", true }
                                     }
                                 );
                             }
@@ -227,10 +228,10 @@
                                     activePeriod.EndDateTime.Value,
                                     new ViewDataDictionary()
                                     {
-                                                                    { "name", "registrationclosetime" },
-                                                                    { "id", "registrationclosetime" },
-                                                                    { "required", true }
-}
+                                         { "name", "registrationclosetime" },
+                                         { "id", "registrationclosetime" },
+                                         { "required", true }
+                                    }
                                 );
                             }
 
