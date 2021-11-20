@@ -60,7 +60,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Index(string group, string pn, string rpp, string archive, string copyerror, string type)
+        public ActionResult Index(string group, string pn, string rpp, string archive, string copyerror, string type, string q)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
