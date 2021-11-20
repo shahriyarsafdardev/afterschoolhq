@@ -13,10 +13,11 @@ namespace AfterSchoolLibrary.Migrations
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    var sql = "alter table FormQuestionGroup alter column Name nvarchar(250)";
+                    var sql1 = "alter table FormQuestionGroup alter column Name NVarchar(400)";
 
-                    var dq = Location.get_DatabaseQuery(Location.ObjectMap);
-                    amsgs.AddRange(dq.ExecuteSql(sql));
+                    var dq = FormQuestionGroup.get_DatabaseQuery(FormQuestionGroup.ObjectMap);
+                    dq.Connection = adc;
+                    amsgs.AddRange(dq.ExecuteSql(sql1));
                 },
                 uniqueIdenfier: "UpdateNameColumnFormQuestionGroup_20211119",
                 msgs: msgs,

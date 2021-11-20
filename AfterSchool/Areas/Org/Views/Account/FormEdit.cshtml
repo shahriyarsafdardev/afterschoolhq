@@ -121,10 +121,10 @@
                                                class="form-control input-lg input-lg-font countWords"
                                                onfocus="this.select()"
                                                data-tooltip-id="name-@questionGroup.ID"
-                                               placeholder="Enter your new section name" maxlength='75' />
+                                               placeholder="Enter your new section name" maxlength='400' />
                                             <div class="fr">
-                                         <span class="countLeft fontSize12">0</span>
-                                         <span class="countMax fontSize12">/ 75</span>
+                                         <span class="countLeft fontSize12">@(questionGroup.Name.IsNotEmpty() ? questionGroup.Name.Length : 0)</span>
+                                         <span class="countMax fontSize12">/ 400</span>
                                                 </div>
                                             <div class="clearBoth"></div>
                                         </div>

@@ -410,68 +410,68 @@ namespace AfterSchoolLibrary.Helpers
                   // Migrations.UpdateScheduleDaysOfTheWeek_20211016.Do(amsgs, adc);
 
                   Migrations.UpdateFormQuestionGroup_20211003.Do(amsgs, adc);
-                  // Migrations.UpdateScheduleDaysOfTheWeek_20211016.Do(amsgs, adc);
+              // Migrations.UpdateScheduleDaysOfTheWeek_20211016.Do(amsgs, adc);
+              Migrations.UpdateNameColumnFormQuestionGroup_20211119.Do(amsgs, adc);
 
 
 
+              // Migrations.AddProfilesToAllAccounts_20200727.Do(amsgs, adc);
 
-                  // Migrations.AddProfilesToAllAccounts_20200727.Do(amsgs, adc);
+              // amsgs.Add("rollback please", MessageType.Error);
 
-                  // amsgs.Add("rollback please", MessageType.Error);
+              // amsgs.AddRange(MigrateToBCrypt(adc));
 
-                  // amsgs.AddRange(MigrateToBCrypt(adc));
+              // amsgs.AddRange(MigrateChargesAndPayoutsEnabled(adc));
 
-                  // amsgs.AddRange(MigrateChargesAndPayoutsEnabled(adc));
+              // amsgs.AddRange(UpdateAccountPaidByTypes(adc));
+              // amsgs.AddRange(AddUseStripeConnectedAccountFeatureType(adc));
 
-                  // amsgs.AddRange(UpdateAccountPaidByTypes(adc));
-                  // amsgs.AddRange(AddUseStripeConnectedAccountFeatureType(adc));
+              // amsgs.AddRange(AddManageLeaguesFeatureType(adc));
 
-                  // amsgs.AddRange(AddManageLeaguesFeatureType(adc));
+              // amsgs.AddRange(UpdateActivityPaymentWithTransactionIds(adc));
+              // amsgs.AddRange(UpdateSeatIndexes(adc));
+              // amsgs.AddRange(UpdatePaymentSourceType(adc));
 
-                  // amsgs.AddRange(UpdateActivityPaymentWithTransactionIds(adc));
-                  // amsgs.AddRange(UpdateSeatIndexes(adc));
-                  // amsgs.AddRange(UpdatePaymentSourceType(adc));
+              // amsgs.AddRange(FixRegistrationAccountActivityGroup(adc));
 
-                  // amsgs.AddRange(FixRegistrationAccountActivityGroup(adc));
+              // amsgs.AddRange(DefaultTransactionTypes(adc));
 
-                  // amsgs.AddRange(DefaultTransactionTypes(adc));
+              //amsgs.AddRange(UpdateActivityPayment(adc));
+              //amsgs.AddRange(UpdateInviteCodes(adc));
+              //amsgs.AddRange(UpdateTransactions(adc));
+              //amsgs.AddRange(UpdateRegistrantActivityParticipationObjects(adc));
+              //amsgs.AddRange(UpdateAssignmentType(adc));
 
-                  //amsgs.AddRange(UpdateActivityPayment(adc));
-                  //amsgs.AddRange(UpdateInviteCodes(adc));
-                  //amsgs.AddRange(UpdateTransactions(adc));
-                  //amsgs.AddRange(UpdateRegistrantActivityParticipationObjects(adc));
-                  //amsgs.AddRange(UpdateAssignmentType(adc));
+              // amsgs.AddRange(SetDefaultLocations(adc));
 
-                  // amsgs.AddRange(SetDefaultLocations(adc));
+              // LocationService.CleanUpDuplicateLocations(amsgs, adc);
 
-                  // LocationService.CleanUpDuplicateLocations(amsgs, adc);
-
-                  //msgs.AddRange(UpdateRegistrations2(dc));
-                  //msgs.AddRange(UpdateAccountFeatures(dc: dc));
-                  //msgs.AddRange(UpdateLocations(dc: dc));
-                  //msgs.AddRange(UpdateQuestionGroups(dc: dc));
-                  //msgs.AddRange(UpdateRegistrationModes(dc: dc));
-                  //msgs.AddRange(UpdateRegistrations(dc: dc));
-                  //msgs.AddRange(UpdateRegistrants(dc: dc));
-                  //msgs.AddRange(UpdateAccountProperties(dc: dc));
-                  //msgs.AddRange(UpdateAnswers(dc: dc));
-                  //msgs.AddRange(UpdateGradeLevels(dc: dc));
-                  //// msgs.AddRange(AddBellecChasseCustomQuestions(dc: dc));
-                  //// msgs.AddRange(UpdateApplicationSeatIndexesRunOnce(dc: dc));
-                  //msgs.AddRange(UpdateSessionActions(dc: dc));
-                  //// msgs.AddRange(UpdateActivityGroupsRunOnce(dc: dc));
-                  //// msgs.AddRange(UpdateActivities(dc: dc));
-                  //msgs.AddRange(UpdateAccountPackages(dc: dc));
-                  // msgs.AddRange(UpdateActivitySchedules(dc: dc));
-                  //msgs.AddRange(UpdateRegistrantActivities(dc: dc));
-                  //// msgs.AddRange(HandleDuplicateRegistrations(dc: dc));
-                  //msgs.AddRange(FixMissingMasterRecords(dc: dc));
-                  //// msgs.AddRange(FixMessedUpPreferences(dc: dc));
-                  // msgs.AddRange(UpdateRegistrantEmailQuestionGroup(dc: dc));
-                  // msgs.AddRange(CreateMasterRecord(dc: dc));
-                  // msgs.AddRange(CreateSessionsLeagues(dc: dc));
-                  // msgs.AddRange(CreateActivitiesTeams(dc: dc));
-                },
+              //msgs.AddRange(UpdateRegistrations2(dc));
+              //msgs.AddRange(UpdateAccountFeatures(dc: dc));
+              //msgs.AddRange(UpdateLocations(dc: dc));
+              //msgs.AddRange(UpdateQuestionGroups(dc: dc));
+              //msgs.AddRange(UpdateRegistrationModes(dc: dc));
+              //msgs.AddRange(UpdateRegistrations(dc: dc));
+              //msgs.AddRange(UpdateRegistrants(dc: dc));
+              //msgs.AddRange(UpdateAccountProperties(dc: dc));
+              //msgs.AddRange(UpdateAnswers(dc: dc));
+              //msgs.AddRange(UpdateGradeLevels(dc: dc));
+              //// msgs.AddRange(AddBellecChasseCustomQuestions(dc: dc));
+              //// msgs.AddRange(UpdateApplicationSeatIndexesRunOnce(dc: dc));
+              //msgs.AddRange(UpdateSessionActions(dc: dc));
+              //// msgs.AddRange(UpdateActivityGroupsRunOnce(dc: dc));
+              //// msgs.AddRange(UpdateActivities(dc: dc));
+              //msgs.AddRange(UpdateAccountPackages(dc: dc));
+              // msgs.AddRange(UpdateActivitySchedules(dc: dc));
+              //msgs.AddRange(UpdateRegistrantActivities(dc: dc));
+              //// msgs.AddRange(HandleDuplicateRegistrations(dc: dc));
+              //msgs.AddRange(FixMissingMasterRecords(dc: dc));
+              //// msgs.AddRange(FixMessedUpPreferences(dc: dc));
+              // msgs.AddRange(UpdateRegistrantEmailQuestionGroup(dc: dc));
+              // msgs.AddRange(CreateMasterRecord(dc: dc));
+              // msgs.AddRange(CreateSessionsLeagues(dc: dc));
+              // msgs.AddRange(CreateActivitiesTeams(dc: dc));
+          },
           onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
           onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs)
       );
