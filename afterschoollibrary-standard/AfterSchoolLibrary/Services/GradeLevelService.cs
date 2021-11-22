@@ -16,10 +16,10 @@ namespace AfterSchoolLibrary.Services
             if (Helpers.Utilities.IsAlreadyJsonString(formQuestionAnswer.Text))
             {
                 var data = Helpers.Utilities.GetKeyValuePairs(formQuestionAnswer.Text);
-                registrantGradeLevel = data.First().value.ToLower().Trim(); 
+                registrantGradeLevel = data.First().value;
             }
 
-            return gradeLevel.Name.IsSameAs(registrantGradeLevel) ||gradeLevel.Abbreviation.IsSameAs(registrantGradeLevel);
+            return gradeLevel.Name.ToLower() == registrantGradeLevel.ToLower().Trim() || gradeLevel.Abbreviation.ToLower() == registrantGradeLevel.ToLower().Trim();
         }
     }
 }

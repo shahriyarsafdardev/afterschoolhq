@@ -35,58 +35,37 @@ namespace AfterSchoolLibraryTests.Tests
         public void VerifyGradeLevelTest()
         {
             // Arrange
+            var verifiedTextformQuestionAnswerPreK = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "Pre-K", QuestionDataType.RegistrantGrade, msgs, dc);
+            var verifiedJsonFormQuestionAnswerPreK = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "[{ \"key\":\"Pre-K\",\"value\":\"Pre-K\"}]", QuestionDataType.RegistrantGrade, msgs, dc);
             var verifiedTextformQuestionAnswerKindergarten = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "K", QuestionDataType.RegistrantGrade, msgs, dc );
             var verifiedJsonFormQuestionAnswerKindergarten = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "[{ \"key\":\"Kindergarten\",\"value\":\"K\"}]", QuestionDataType.RegistrantGrade, msgs, dc);
-            var verifiedTextformQuestionAnswer9th = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "9", QuestionDataType.RegistrantGrade, msgs, dc);
-            var verifiedJsonFormQuestionAnswer9th = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "[{ \"key\":\"9th\",\"value\":\"9\"}]", QuestionDataType.RegistrantGrade, msgs, dc);
-            var verifiedTextformQuestionAnswer10th = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "10", QuestionDataType.RegistrantGrade, msgs, dc);
-            var verifiedJsonFormQuestionAnswer10th = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "[{ \"key\":\"10th\",\"value\":\"10\"}]", QuestionDataType.RegistrantGrade, msgs, dc);
+            var verifiedTextformQuestionAnswer9th = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "9th", QuestionDataType.RegistrantGrade, msgs, dc);
+            var verifiedJsonFormQuestionAnswer9th = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "[{ \"key\":\"9th\",\"value\":\"9th\"}]", QuestionDataType.RegistrantGrade, msgs, dc);
+            var verifiedTextformQuestionAnswer10th = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "10th", QuestionDataType.RegistrantGrade, msgs, dc);
+            var verifiedJsonFormQuestionAnswer10th = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "[{ \"key\":\"10th\",\"value\":\"10th\"}]", QuestionDataType.RegistrantGrade, msgs, dc);
             var verifiedTextformQuestionAnswer11th = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "11th", QuestionDataType.RegistrantGrade, msgs, dc);
-            var verifiedJsonFormQuestionAnswer11th = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "[{ \"key\":\"11th\",\"value\":\"11\"}]", QuestionDataType.RegistrantGrade, msgs, dc);
-            var verifiedTextformQuestionAnswer12th = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "12", QuestionDataType.RegistrantGrade, msgs, dc);
-            var verifiedJsonFormQuestionAnswer12th = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "[{ \"key\":\"12th\",\"value\":\"12\"}]", QuestionDataType.RegistrantGrade, msgs, dc);
+            var verifiedJsonFormQuestionAnswer11th = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "[{ \"key\":\"11th\",\"value\":\"11th\"}]", QuestionDataType.RegistrantGrade, msgs, dc);
+            var verifiedTextformQuestionAnswer12th = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "12th", QuestionDataType.RegistrantGrade, msgs, dc);
+            var verifiedJsonFormQuestionAnswer12th = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "[{ \"key\":\"12th\",\"value\":\"12th\"}]", QuestionDataType.RegistrantGrade, msgs, dc);
 
             var nonVerifiedTextFormQuestionAnswerKindergarten = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "Q", QuestionDataType.RegistrantGrade, msgs, dc);
             var nonVerifiedJsonFormQuestionAnswerKindergarten = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "[{ \"key\":\"Smindergarten\",\"value\":\"S\"}]", QuestionDataType.RegistrantGrade, msgs, dc);
-            var nonVerifiedTextFormQuestionAnswer13th = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "13", QuestionDataType.RegistrantGrade, msgs, dc);
-            var nonVerifiedJsonFormQuestionAnswer13th = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "[{ \"key\":\"13th\",\"value\":\"13\"}]", QuestionDataType.RegistrantGrade, msgs, dc);
-            var nonVerifiedTextFormQuestionAnswer99th = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "99", QuestionDataType.RegistrantGrade, msgs, dc);
-            var nonVerifiedJsonFormQuestionAnswer99th = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "[{ \"key\":\"99th\",\"value\":\"99\"}]", QuestionDataType.RegistrantGrade, msgs, dc);
+            var nonVerifiedTextFormQuestionAnswer13th = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "13th", QuestionDataType.RegistrantGrade, msgs, dc);
+            var nonVerifiedJsonFormQuestionAnswer13th = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "[{ \"key\":\"13th\",\"value\":\"13th\"}]", QuestionDataType.RegistrantGrade, msgs, dc);
+            var nonVerifiedTextFormQuestionAnswer99th = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "99th", QuestionDataType.RegistrantGrade, msgs, dc);
+            var nonVerifiedJsonFormQuestionAnswer99th = FormQuestionAnswerFactory.Create(DefaultFormQuestion.ID.Value, "test grade question", "[{ \"key\":\"99th\",\"value\":\"99th\"}]", QuestionDataType.RegistrantGrade, msgs, dc);
 
 
-
-            var gradeLevelKindergarten = GradeLevel.Load(new Hashtable() {
-                    { "Name", "Kindergarten" } },
-                    null,
-                    null,
-                    msgs,
-                    dc ).First();
-            var gradeLevel9th = GradeLevel.Load(new Hashtable() {
-                    { "Name", "9th" } },
-                    null,
-                    null,
-                    msgs,
-                    dc).First();
-            var gradeLevel10th = GradeLevel.Load(new Hashtable() {
-                    { "Name", "10th" } },
-                    null,
-                    null,
-                    msgs,
-                    dc).First();
-            var gradeLevel11th = GradeLevel.Load(new Hashtable() {
-                    { "Name", "11th" } },
-                    null,
-                    null,
-                    msgs,
-                    dc).First();
-            var gradeLevel12th = GradeLevel.Load(new Hashtable() {
-                    { "Name", "12th" } },
-                    null,
-                    null,
-                    msgs,
-                    dc).First();
+            var gradeLevelPreK = DefaultGradeLevels.Where(g => g.Name == "Pre-K").FirstOrDefault();
+            var gradeLevelKindergarten = DefaultGradeLevels.Where(g => g.Name == "Kindergarten").FirstOrDefault();
+            var gradeLevel9th = DefaultGradeLevels.Where(g => g.Name == "9th").FirstOrDefault();
+            var gradeLevel10th = DefaultGradeLevels.Where(g => g.Name == "10th").FirstOrDefault();
+            var gradeLevel11th = DefaultGradeLevels.Where(g => g.Name == "11th").FirstOrDefault();
+            var gradeLevel12th = DefaultGradeLevels.Where(g => g.Name == "12th").FirstOrDefault();
 
             // Act
+            var verifiedTextGradeLevelPreK = gradeLevelPreK.VerifyGradeLevel(verifiedTextformQuestionAnswerPreK);
+            var verifiedJsonGradeLevelPreK = gradeLevelPreK.VerifyGradeLevel(verifiedJsonFormQuestionAnswerPreK);
             var verifiedTextGradeLevelKindergarten = gradeLevelKindergarten.VerifyGradeLevel(verifiedTextformQuestionAnswerKindergarten);
             var verifiedJsonGradeLevelKindergarten = gradeLevelKindergarten.VerifyGradeLevel(verifiedJsonFormQuestionAnswerKindergarten);
             var verifiedTextGradeLevel9th = gradeLevel9th.VerifyGradeLevel(verifiedTextformQuestionAnswer9th);
@@ -106,6 +85,8 @@ namespace AfterSchoolLibraryTests.Tests
             var nonVerifiedJsonGradeLevel99th = gradeLevel9th.VerifyGradeLevel(nonVerifiedJsonFormQuestionAnswer99th);
 
             // Assert
+            Assert.True(verifiedTextGradeLevelPreK);
+            Assert.True(verifiedJsonGradeLevelPreK);
             Assert.True(verifiedTextGradeLevelKindergarten);
             Assert.True(verifiedJsonGradeLevelKindergarten);
             Assert.True(verifiedTextGradeLevel9th);

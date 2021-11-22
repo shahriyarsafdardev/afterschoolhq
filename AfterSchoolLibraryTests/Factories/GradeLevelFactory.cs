@@ -29,21 +29,20 @@ namespace AfterSchoolLibraryTests.Factories
         {
             List<GradeLevel> gradeLevels = new List<GradeLevel>();
 
-            gradeLevels.Add(Create("Pre - K", "P", msgs, dc));
+            gradeLevels.Add(Create("Pre-K", "Pre-K", msgs, dc));
             gradeLevels.Add(Create("Kindergarten", "K", msgs, dc));
-            gradeLevels.Add(Create("1st", "1", msgs, dc));
-            gradeLevels.Add(Create("2nd", "2", msgs, dc));
-            gradeLevels.Add(Create("3rd", "3", msgs, dc));
-            gradeLevels.Add(Create("4th", "4", msgs, dc));
-            gradeLevels.Add(Create("4th", "4", msgs, dc));
-            gradeLevels.Add(Create("5th", "5", msgs, dc));
-            gradeLevels.Add(Create("6th", "6", msgs, dc));
-            gradeLevels.Add(Create("7th", "7", msgs, dc));
-            gradeLevels.Add(Create("8th", "8", msgs, dc));
-            gradeLevels.Add(Create("9th", "9", msgs, dc));
-            gradeLevels.Add(Create("10th", "10", msgs, dc));
-            gradeLevels.Add(Create("11th", "11", msgs, dc));
-            gradeLevels.Add(Create("12th", "12", msgs, dc));
+            gradeLevels.Add(Create("1st", "1st", msgs, dc));
+            gradeLevels.Add(Create("2nd", "2nd", msgs, dc));
+            gradeLevels.Add(Create("3rd", "3rd", msgs, dc));
+            gradeLevels.Add(Create("4th", "4th", msgs, dc));
+            gradeLevels.Add(Create("5th", "5th", msgs, dc));
+            gradeLevels.Add(Create("6th", "6th", msgs, dc));
+            gradeLevels.Add(Create("7th", "7th", msgs, dc));
+            gradeLevels.Add(Create("8th", "8th", msgs, dc));
+            gradeLevels.Add(Create("9th", "9th", msgs, dc));
+            gradeLevels.Add(Create("10th", "10th", msgs, dc));
+            gradeLevels.Add(Create("11th", "11th", msgs, dc));
+            gradeLevels.Add(Create("12th", "12th", msgs, dc));
 
             return gradeLevels;
         }
