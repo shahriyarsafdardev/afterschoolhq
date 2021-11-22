@@ -19,7 +19,7 @@ namespace AfterSchoolLibrary.Services
                 registrantGradeLevel = data.First().value.ToLower().Trim(); 
             }
 
-            return gradeLevel.Abbreviation.IsSameAs(registrantGradeLevel) || (registrantGradeLevel.MaxChars(gradeLevel.Abbreviation.Length) == gradeLevel.Abbreviation);
+            return gradeLevel.Name.IsSameAs(registrantGradeLevel) ||gradeLevel.Abbreviation.IsSameAs(registrantGradeLevel);
         }
     }
 }
