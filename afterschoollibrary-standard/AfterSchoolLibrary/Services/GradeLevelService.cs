@@ -10,21 +10,16 @@ namespace AfterSchoolLibrary.Services
 {
     public static class GradeLevelService
     {
-        public static bool VerifyGradeLevel(FormQuestionAnswer formQuestionAnswer, GradeLevel gradeLevel)
+        public static bool VerifyGradeLevel(this GradeLevel gradeLevel, FormQuestionAnswer formQuestionAnswer)
         {
-            bool sameGradeLevel = false;
+            var registrantGradeLevel = formQuestionAnswer.Text;
             if (Helpers.Utilities.IsAlreadyJsonString(formQuestionAnswer.Text))
             {
                 var data = Helpers.Utilities.GetKeyValuePairs(formQuestionAnswer.Text);
-                var registrantGradeLevelAnswerText = data.First().value.ToLower().Trim();
-                sameGradeLevel = gradeLevel.Abbreviation.IsSameAs(registrantGradeLevelAnswerText) || (registrantGradeLevelAnswerText.MaxChars(gradeLevel.Abbreviation.Length) == gradeLevel.Abbreviation);
-            }
-            else if (formQuestionAnswer.IsNotEmpty())
-            {
-                sameGradeLevel = gradeLevel.Abbreviation.IsSameAs(formQuestionAnswer.Text) || (formQuestionAnswer.Text.MaxChars(gradeLevel.Abbreviation.Length) == gradeLevel.Abbreviation);
+                registrantGradeLevel = data.First().value.ToLower().Trim(); 
             }
 
-            return sameGradeLevel;
+            return gradeLevel.Abbreviation.IsSameAs(registrantGradeLevel) || (registrantGradeLevel.MaxChars(gradeLevel.Abbreviation.Length) == gradeLevel.Abbreviation);
         }
     }
 }
