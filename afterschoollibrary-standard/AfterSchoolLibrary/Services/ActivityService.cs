@@ -1814,15 +1814,13 @@ namespace AfterSchoolLibrary.Services
             {
                 var period = RegistrationPeriod.Load(registrationperiod.ToInteger(), dc: dc);
 
-                //if user doesn't have feature then we're updaing the period in the background
-                if (!account.HasFeature(FeatureType.ManageActivityGroups, dc: dc))
-                {
+
                     period.StartDateTime = $"{registrationopendate} {registrationopentime}".ToDateTime();
                     period.EndDateTime = $"{registrationclosedate} {registrationclosetime}".ToDateTime();
                     period.LastModifiedDate = DateTime.UtcNow;
                     period.LastModifiedBy = loggedInUserId;
                     msgs.AddRange(period.Save(dc: dc));
-                }
+                
                 msgs.AddRange(period.AddActivity(activity, true, loggedInUserId, dc: dc));
             }
 
