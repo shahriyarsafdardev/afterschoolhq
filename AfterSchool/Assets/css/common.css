@@ -1079,3 +1079,8 @@
 .emojionearea-tones-square {
     display: none;
 }
+
+.selectedBtn {
+    background-color: #00AE83 !important;
+    color: white !important;
+}

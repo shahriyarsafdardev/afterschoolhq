@@ -203,7 +203,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Account = currentAccount;
             ViewBag.IsFullScreen = GetIsFullScreen();
-            ViewBag.Messages = msgs;            
+            ViewBag.Messages = msgs;
 
             return View(model);
         }
@@ -787,7 +787,7 @@ namespace AfterSchool.Areas.Org.Controllers
             //    .Where(x => x.RegistrantTypeId == RegistrantType.Organization)
             //    .OrderBy(x => x.DisplayOrder).ToList();
 
-            
+
             var organizationGroups = new List<FormQuestionGroup>();
 
             //make sure only question groups with a setting of individual or organization are added to the final count
@@ -834,41 +834,33 @@ namespace AfterSchool.Areas.Org.Controllers
             Form form = null;
             FormQuestionGroup questionGroup = null;
 
-                if (name.IsEmpty() && qg.IsBlank())
-                    msgs.Add("Name is required", MessageType.UserError);
+            if (name.IsEmpty() && qg.IsBlank())
+                msgs.Add("Name is required", MessageType.UserError);
 
-                if (id.ToInteger() == 0)
-                {
-                    if ((FormType)formtype.ToInteger() != FormType.Survey)
-                    {
-                        if (copyfrom.IsNumber())
-                            form = currentAccount.GetForm(copyfrom.ToInteger(), msgs)?
-                                .Copy(currentUser.ID.Value, currentAccount.ID.Value, (FormType)formtype.ToInteger(), null, msgs, null);
-                        else
-                            form = currentAccount.GetDefaultForm(msgs)?
-                                .Copy(currentUser.ID.Value, currentAccount.ID.Value, (FormType)formtype.ToInteger(), null, msgs, null);
-                    }
-                    else
-                    {
-                        form = FormService.CreateBlankForm(form, currentUser.ID.Value, currentAccount.ID.Value, name, description, msgs);
-                        ViewBag.QuestionGroups = new List<FormQuestionGroup>(); // to avoid errors
-                    }
-                }
+            if (id.ToInteger() == 0)
+            {
+                if (copyfrom.IsNumber())
+                    form = currentAccount.GetForm(copyfrom.ToInteger(), msgs)?
+                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, (FormType)formtype.ToInteger(), null, msgs, null);
                 else
-                    form = currentAccount.GetForm(id.ToInteger(), msgs);
+                    form = currentAccount.GetDefaultForm(msgs)?
+                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, (FormType)formtype.ToInteger(), null, msgs, null);
+            }
+            else
+                form = currentAccount.GetForm(id.ToInteger(), msgs);
 
             var questions = new List<FormQuestion>();
             var questionGroups = new List<FormQuestionGroup>();
             var individualGroups = new List<FormQuestionGroup>();
             var organizationGroups = new List<FormQuestionGroup>();
 
-            if (msgs.HasNoErrors() && ((FormType)formtype.ToInteger() != FormType.Survey))
+            if (msgs.HasNoErrors())
             {
                 Database.ExecuteTransaction(
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
                         if (name.IsNotBlank()) form.Name = name;
-                        if (description.IsNotBlank()) form.Description = description;
+                        form.Description = description;
                         if (formtype.IsNotBlank()) form.FormTypeId = (FormType)formtype.ToInteger();
 
                         amsgs.AddRange(form.Save(adc));
@@ -935,11 +927,11 @@ namespace AfterSchool.Areas.Org.Controllers
                             });
 
                             // save new questions
-                            if (Request.Form["newquestioncount"].IsNumber() && Request.Form["newquestioncount"].ToInteger() > 0)
+                            if (Request.Form["newquestionsIds"].Length > 0)
                             {
-                                var questionCount = Request.Form["newquestioncount"].ToInteger();
-
-                                for (var i = 0; i < questionCount; i++)
+                                var questionIds = Request.Form["newquestionsIds"];
+                                var questionsList = questionIds.Split(',');
+                                foreach (var i in questionsList)
                                 {
                                     var question = new FormQuestion
                                     {
@@ -972,47 +964,45 @@ namespace AfterSchool.Areas.Org.Controllers
                         msgs.AddRange(smsgs);
                         msgs.Add("Form Saved", MessageType.Success);
                     },
-                    onFailure: (SystemMessages fmsgs) =>
-                    {
-                        msgs.AddRange(fmsgs);
-                    }
+                    onFailure: (SystemMessages fmsgs) =>msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
                 );
             }
 
-            if ((FormType)formtype.ToInteger() != FormType.Survey)
+            questionGroups = form.GetQuestionGroups(msgs);
+            individualGroups = questionGroups
+                .Where(x => x.RegistrantTypeId == RegistrantType.Individual)
+                .OrderBy(x => x.DisplayOrder)
+                .ToList();
+            organizationGroups = questionGroups
+                .Where(x => x.RegistrantTypeId == RegistrantType.Organization)
+                .OrderBy(x => x.DisplayOrder)
+                .ToList();
+
+            //temporarily disable organization groups
+            organizationGroups = new List<FormQuestionGroup>();
+
+            //make sure only question groups with a setting of individual or organization are added to the final count
+            questionGroups.Clear();
+            questionGroups.AddRange(individualGroups);
+            questionGroups.AddRange(organizationGroups);
+
+            var currentIndex = -1;
+
+            if (questionGroup.IsNotEmpty())
+                currentIndex = questionGroups.FindIndex(x => x.ID.Value == questionGroup.ID.Value);
+
+            switch (cmd)
             {
-                questionGroups = form.GetQuestionGroups(msgs);
-                individualGroups = questionGroups
-                    .Where(x => x.RegistrantTypeId == RegistrantType.Individual)
-                    .OrderBy(x => x.DisplayOrder)
-                    .ToList();
-                //temporarily disable organization groups
-                //organizationGroups = questionGroups
-                //    .Where(x => x.RegistrantTypeId == RegistrantType.Organization)
-                //    .OrderBy(x => x.DisplayOrder)
-                //    .ToList();
+                case "prev":
+                    if (currentIndex > 0) questionGroup = questionGroups[currentIndex - 1];
+                    break;
+                case "next":
+                    if (currentIndex < questionGroups.Count - 1) questionGroup = questionGroups[currentIndex + 1];
+                    break;
 
-
-                //make sure only question groups with a setting of individual or organization are added to the final count
-                questionGroups.Clear();
-                questionGroups.AddRange(individualGroups);
-                questionGroups.AddRange(organizationGroups);
-
-                var currentIndex = -1;
-
-                if (questionGroup.IsNotEmpty())
-                    currentIndex = questionGroups.FindIndex(x => x.ID.Value == questionGroup.ID.Value);
-
-                switch (cmd)
-                {
-                    case "prev":
-                        if (currentIndex > 0) questionGroup = questionGroups[currentIndex - 1];
-                        break;
-                    case "next":
-                        if (currentIndex < questionGroups.Count - 1) questionGroup = questionGroups[currentIndex + 1];
-                        break;
-                }
             }
+
             ViewBag.QuestionGroups = questionGroups;
             ViewBag.IndividualGroups = individualGroups;
             ViewBag.OrganizationGroups = organizationGroups;
@@ -1033,7 +1023,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var questionToDelete = FormQuestion.Load(id.ToInteger(), msgs);
             questionToDelete.IsActive = false;
             msgs.AddRange(questionToDelete.Save());
-            
+
             // Show Success Message
             // LOG: Someone has Deleted Question.
             if (msgs.HasNoErrors())
@@ -1096,12 +1086,12 @@ namespace AfterSchool.Areas.Org.Controllers
                    indirectObjectId: currentAccount.ID.Value,
                    indirectObjectText: currentAccount.Name
                );
-            }           
+            }
 
             ViewBag.Messages = msgs;
             TempData["Messages"] = msgs;
 
-            return RedirectToAction("FormEdit", new { id = sectionToDelete.FormId, qg = ""});
+            return RedirectToAction("FormEdit", new { id = sectionToDelete.FormId, qg = "" });
         }
 
         private AccountProfile StyleViewBag(SystemMessages msgs)
