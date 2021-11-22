@@ -391,12 +391,12 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static List<Activity> GetActivities(this Account account, UserType userType, WebUser user, ActivityType? activityType, bool? isArchived, bool? isDeleted, bool? ungroupedOnly, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Activity> GetActivities(this Account account, UserType userType, WebUser user, string q, ActivityType? activityType, bool? isArchived, bool? isDeleted, bool? ungroupedOnly, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (user.IsEmpty() || userType.In(AccountService.AdminUserTypes))
-                return Activity.LoadByAccountId(account.ID.Value, null, null, activityType, isArchived, isDeleted, ungroupedOnly, start, length, msgs, dc).ToList();
+                return Activity.LoadByAccountId(account.ID.Value, null, null, activityType, isArchived, isDeleted, ungroupedOnly, start, length,q, msgs, dc).ToList();
 
-            return Activity.LoadByAccountId(account.ID.Value, null, null, activityType, isArchived, isDeleted, ungroupedOnly, start, length, msgs, dc)
+            return Activity.LoadByAccountId(account.ID.Value, null, null, activityType, isArchived, isDeleted, ungroupedOnly, start, length, q, msgs, dc)
                     .Where(activity => user.HasAccessToActivity(activity, msgs, dc))
                     .ToList();
         }
@@ -406,12 +406,12 @@ namespace AfterSchoolLibrary.Services
             return Activity.LoadByAccountId(account.ID.Value, msgs, dc);  
         }
 
-        public static int GetActivityCount(this Account account, UserType userType, WebUser user, ActivityType? activityType, bool? isArchived, bool? isDeleted, bool? ungroupedOnly, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetActivityCount(this Account account, UserType userType, WebUser user, string q, ActivityType? activityType, bool? isArchived, bool? isDeleted, bool? ungroupedOnly, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (user.IsEmpty() || userType.In(AccountService.AdminUserTypes))
-                return Activity.GetCountByAccountId(account.ID.Value, null, activityType, isArchived, isDeleted, ungroupedOnly, msgs, dc);
+                return Activity.GetCountByAccountId(account.ID.Value, q, null, activityType, isArchived, isDeleted, ungroupedOnly, msgs, dc);
 
-            return account.GetActivities(userType, user, activityType, isArchived, isDeleted, ungroupedOnly, null, null, msgs, dc).Count();
+            return account.GetActivities(userType, user,q, activityType, isArchived, isDeleted, ungroupedOnly, null, null, msgs, dc).Count();
         }
 
         public static int GetActivityCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)

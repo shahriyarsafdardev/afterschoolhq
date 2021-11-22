@@ -103,6 +103,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 totalActivityCount = currentAccount.GetActivityCount(
                     SessionVariables.AccountUserType,
                     SessionVariables.CurrentUser,
+                    q,
                     activityType,
                     isArchived,
                     false,
@@ -112,6 +113,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 activities = currentAccount.GetActivities(
                     SessionVariables.AccountUserType,
                     SessionVariables.CurrentUser,
+                    q,
                     activityType,
                     isArchived,
                     false,
@@ -123,6 +125,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 hasArchivedActivities = currentAccount.GetActivityCount(
                     SessionVariables.AccountUserType,
                     SessionVariables.CurrentUser,
+                    q,
                     activityType,
                     true,
                     false,
