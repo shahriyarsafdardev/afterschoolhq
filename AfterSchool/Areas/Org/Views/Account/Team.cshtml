@@ -105,3 +105,35 @@
         </div>
     </div>
 </div>
+
+<script>
+
+    function updateAssignment(user, userName, selectBox) {
+        let newAssignment = selectBox.value;
+        let newAssignmentText = selectBox.options[selectBox.selectedIndex].text;
+        console.log(newAssignment, selectBox.selectedIndex, newAssignmentText);
+        console.log(user);
+        updateAssignment2(user, userName, newAssignment, newAssignmentText);
+    }
+
+    function updateAssignment2(user, userName, newAssignment, newAssignmentText) {
+        $.get(
+            `@Url.Action("updateusertype", "account", new { })?userid=${user}&newusertypeid=${newAssignment}`,
+            function (data) {
+                if (data && data.status == 'ok') {
+                    Notifications.showBar({
+                        title: 'Success',
+                        message: `${userName}'s type has been updated to ${newAssignmentText}.`
+                    });
+                } else {
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: `Error updating the user type for ${userName}. Please <a href="mailto:@AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress" class="white">contact support</a>.`
+                    });
+                }
+            }
+        );
+    }
+
+
+</script>

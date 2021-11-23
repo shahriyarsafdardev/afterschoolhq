@@ -705,6 +705,25 @@ namespace AfterSchool.Areas.Org.Controllers
             return View("Team", account);
         }
 
+        public ActionResult UpdateUserType(string userid, string newusertypeid)
+        {
+            var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            int id = 0;
+            if (userid.IsNotEmpty())
+                id = userid.ToInteger();
+
+            var user = WebUser.Load(id, msgs);
+            var awu = AccountWebUser.LoadByWebUserIdByIsDeleted(user.ID.Value, false , msgs).FirstOrDefault();
+
+            if (awu.IsNotEmpty())
+            {
+                awu.UpdateUserType(currentUser, newusertypeid, msgs);
+            }
+
+            return Json(true,JsonRequestBehavior.AllowGet);
+        }
+
         public ActionResult TeamRemoveMember(string id)
         {
             var msgs = new SystemMessages();
