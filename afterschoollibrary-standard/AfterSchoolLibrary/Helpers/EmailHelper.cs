@@ -113,10 +113,9 @@ namespace AfterSchoolLibrary.Helpers
                         msgs);
 
             // check if child and parent has same email
-            if (registrant.Email == (registrantParent.IsNotEmpty() ? registrantParent.Email : ""))
-            {
+            var isRegistrantEmailSameAsParent = (registrant.Email == registrantParent?.Email);
+            if (isRegistrantEmailSameAsParent)
                 SendSurveyEmailLastStep(subject, registrant.Email, body, msgs);
-            }
             else
             {
                 //send both
