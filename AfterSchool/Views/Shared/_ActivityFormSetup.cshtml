@@ -377,9 +377,11 @@
         }
         else {
             $("#signUpCloseDate").show();
-            var myDate = new Date();
-            myDate.setDate(myDate.getDate() + 7);
-            $('#registrationclosedate').val(getFormattedDate(myDate));
+            if ($('#name').val() == "") {
+                var myDate = new Date();
+                myDate.setDate(myDate.getDate() + 7);
+                $('#registrationclosedate').val(getFormattedDate(myDate));
+            }
         }
     }
 
