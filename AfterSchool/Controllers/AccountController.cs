@@ -556,12 +556,14 @@ namespace AfterSchool.Controllers
                     msgs.Add("Password 2 is required", MessageType.UserError);
                 if (password1 != password2)
                     msgs.Add("Passwords must match", MessageType.UserError);
-
-                msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
+                if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+                    msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
             }
-
-            if (!agree.IsBoolean())
-                msgs.Add("You must agree to the terms of service", MessageType.UserError);
+            if (AfterSchoolLibrary.Helpers.Utilities.IsProduction && AfterSchoolLibrary.Helpers.Utilities.IsStaging)
+            {
+                if (!agree.IsBoolean())
+                    msgs.Add("You must agree to the terms of service", MessageType.UserError);
+            }            
 
             if (msgs.HasNoErrors())
             {

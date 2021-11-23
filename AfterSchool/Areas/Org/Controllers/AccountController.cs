@@ -903,7 +903,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             // save existing questions
                             questions.ForEach(question =>
                             {
-                                if (!question.IsLocked && question.IsActive)
+                                if (!question.IsLocked)
                                 {
                                     question.IsActive = Request.Params[$"active-{question.ID}"].IsBoolean();
                                     question.IsRequired = Request.Params[$"required-{question.ID}"].IsBoolean();
@@ -964,10 +964,8 @@ namespace AfterSchool.Areas.Org.Controllers
                         msgs.AddRange(smsgs);
                         msgs.Add("Form Saved", MessageType.Success);
                     },
-                    onFailure: (SystemMessages fmsgs) =>
-                    {
-                        msgs.AddRange(fmsgs);
-                    }
+                    onFailure: (SystemMessages fmsgs) =>msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
                 );
             }
 
