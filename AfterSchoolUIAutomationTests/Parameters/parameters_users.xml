@@ -1,0 +1,149 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<PARAMETERS>
+  <!--User Login Info-->
+  <Login>
+    <UserName>damienmartin@yopmail.com</UserName>
+    <Password>12345678</Password>
+  </Login>
+  <!-- Individual Account Signup Info -->
+  <AccountSigUp>
+    <ProgramName>AutomationTest</ProgramName>
+    <FirstName>Damien</FirstName>
+    <LasttName>Martin</LasttName>
+    <Email>damienmartin@yopmail.com</Email>
+    <UserPassword>12345678</UserPassword>
+    <UserPassword2>12345678</UserPassword2>
+    <ShortDescription>Automation Test Short Description</ShortDescription>
+    <Phone>(202) 555 0156</Phone>
+    <AutoComplete>New York, New York, USA</AutoComplete>
+    <ProgramCategories>Karate, Sports, Leadership</ProgramCategories>
+  </AccountSigUp>
+  <!-- Account Update -->
+  <EditAccountProfile>
+    <UserFirstName>Damien2</UserFirstName>
+    <UserLastName>Martin</UserLastName>
+    <UserEmail>damienmartin@yopmail.com</UserEmail>
+    <UserPassword>12345678</UserPassword>
+    <UserConfirmPassword>12345678</UserConfirmPassword>
+  </EditAccountProfile>
+  <!-- Create New Activity -->
+  <CreateNewActivity>
+    <ActivityName>Automation Football Kicking</ActivityName>
+    <TotalAvailableSeats>25</TotalAvailableSeats>
+    <InviteOnly>No</InviteOnly>
+    <HasSchedule>Yes</HasSchedule>
+    <IsWeekly>Yes</IsWeekly>
+    <AboutActivity>This is about Acivty.</AboutActivity>
+    <ContactName>Steve Auston</ContactName>
+    <ContactPhone>2025550155</ContactPhone>
+    <ContactEmail>steveauston@yopmail.com</ContactEmail>
+    <ActivityLocation>New York, New York, USA</ActivityLocation>
+    <RegistrationFee>100</RegistrationFee>
+  </CreateNewActivity>
+  <!-- Stripe Account Payments -->
+  <StripeAccountPayments>
+    <FirstName>user_good</FirstName>
+    <LastName>pass_good</LastName>
+    <DD>12</DD>
+    <MM>12</MM>
+    <YYYY>1992</YYYY>
+    <AddressLine1>12175 ,</AddressLine1>
+    <AddressLine2>Visionary Way</AddressLine2>
+    <City>Fishers</City>
+    <State>IN</State>
+    <ZIP>46038</ZIP>
+    <PhoneNumber>(202) 555-0155</PhoneNumber>
+    <SSN>000-00-0000</SSN>
+  </StripeAccountPayments>
+  <!-- New Parent Account Activity Registration -->
+  <NewParentAccountActivityRegistration>
+    <ParentEmailAddress>parent8_automation@yopmail.com</ParentEmailAddress>
+    <FirstName>Stephny</FirstName>
+    <LastName>Macmahon</LastName>
+    <Phone>(202) 555-0155</Phone>
+    <Password1>12345678</Password1>
+    <Password2>12345678</Password2>
+    <StreetAddress>Street Address</StreetAddress>
+    <City>New York</City>
+    <State>Indiana</State>
+    <Zipcode>420333</Zipcode>
+    <GuardianFirstName>George</GuardianFirstName>
+    <GuardianLastName>Fernendous</GuardianLastName>
+    <GuardianEmail>george@yopmail.com</GuardianEmail>
+    <GuardianMobile>(202) 555-2121</GuardianMobile>
+    <EmergencyContactFirstName>Michael</EmergencyContactFirstName>
+    <EmergencyContactLastName>Johnson</EmergencyContactLastName>
+    <EmergencyContactPhone>(202) 555-2121</EmergencyContactPhone>
+    <StudentFirstName>Andrew</StudentFirstName>
+    <StudentLastName>Strauss</StudentLastName>
+    <StudentPhone>(202) 555-2121</StudentPhone>
+    <StudentDOB>05/05/2014</StudentDOB>
+    <StudentGrade>3rd</StudentGrade>
+    <StudentGender>Male</StudentGender>
+    <StudentSchool>New York, New York, USA</StudentSchool>
+    <DoctorName>Dr. Steve Waugh</DoctorName>
+    <DoctorPhone>(202) 555-2121</DoctorPhone>
+  </NewParentAccountActivityRegistration>
+
+  <ActivityPayLaterRegistration>
+    <ParentEmailAddress>testparent1@yopmail.com</ParentEmailAddress>
+    <ParentEmailPassword>12345678</ParentEmailPassword>
+    <StudentFirstName>Child 1</StudentFirstName>
+    <StudentLocation>New York, New York, USA</StudentLocation>
+    <DoctorName>Dr. Steve Waugh</DoctorName>
+    <DoctorPhone>(202) 555-2121</DoctorPhone>
+    <ParentESign>Test Parent ESign</ParentESign>
+  </ActivityPayLaterRegistration>
+
+  <NewParentAccountActivityPayment>
+    <ParentEmailAddress>parent8_hq@yopmail.com</ParentEmailAddress>
+    <FirstName>Stephny</FirstName>
+    <LastName>Macmahon</LastName>
+    <Phone>(202) 555-0155</Phone>
+    <Password1>12345678</Password1>
+    <Password2>12345678</Password2>
+    <StreetAddress>Street Address</StreetAddress>
+    <City>New York</City>
+    <State>Indiana</State>
+    <Zipcode>420333</Zipcode>
+    <GuardianFirstName>George</GuardianFirstName>
+    <GuardianLastName>Fernendous</GuardianLastName>
+    <GuardianEmail>george@yopmail.com</GuardianEmail>
+    <GuardianMobile>(202) 555-2121</GuardianMobile>
+    <EmergencyContactFirstName>Michael</EmergencyContactFirstName>
+    <EmergencyContactLastName>Johnson</EmergencyContactLastName>
+    <EmergencyContactPhone>(202) 555-2121</EmergencyContactPhone>
+    <StudentFirstName>Andrew</StudentFirstName>
+    <StudentLastName>Strauss</StudentLastName>
+    <StudentPhone>(202) 555-2121</StudentPhone>
+    <StudentDOB>05/05/2014</StudentDOB>
+    <StudentGrade>3rd</StudentGrade>
+    <StudentGender>Male</StudentGender>
+    <StudentSchool>New York, New York, USA</StudentSchool>
+    <DoctorName>Dr. Steve Waugh</DoctorName>
+    <DoctorPhone>(202) 555-2121</DoctorPhone>
+    <ParentESign>Test Parent Esign</ParentESign>
+    <CreditCard>4111 1111 1111 1111</CreditCard>
+    <CreditCardExpireDate>09/26</CreditCardExpireDate>
+    <CreditCardCVC>212</CreditCardCVC>
+    <CreditCardZIP>12345</CreditCardZIP>
+  </NewParentAccountActivityPayment>
+
+
+  <CreateAndManageSessions>
+    <UserName>stephny@yopmail.com</UserName>
+    <Password>12345678</Password>
+    <SessionName>Automation Test Session 1</SessionName>
+    <SessionDetails>Test Session 1 Details</SessionDetails>
+    <SessionActivityName>Test Session 1 Activity 1</SessionActivityName>
+    <HasSchedule>Yes</HasSchedule>
+    <IsWeekly>Yes</IsWeekly>
+    <AboutActivity>This is About Activity. Lorem ipsum dolor sit amet, consectetur adipiscing elit.</AboutActivity>
+    <ContactName>Contact Name</ContactName>
+    <ContactPhone>(202) 555-2121</ContactPhone>
+    <ContactEmail>george@yopmail.com</ContactEmail>
+    <Location>New York, New York, USA</Location>
+    <Fee>100</Fee>
+  </CreateAndManageSessions>
+
+</PARAMETERS>
