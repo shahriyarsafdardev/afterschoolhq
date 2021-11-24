@@ -10,6 +10,8 @@
     var canDelete = SessionVariables.OriginalLoggedInUser.IsNotEmpty();
     string inviteUrl = Url.Action("invite", "user");
 
+    var currentUserType = currentUser.GetUserType(currentAccount);
+
     if (!ViewData["AccountId"].IsEmpty())
     {
         accountId = ViewData["AccountId"].ToString();
@@ -78,27 +80,46 @@
                 <td>@user.IsActive.ToYesNo()</td>
                 @if (!isAfterSchoolAdmin)
                 {
-                    @*<td>@user.GetUserType(currentAccount).ToString().SplitByUpperCase()</td>*@
-                    <td>
-                        <select name="newassignmenttype"
-                            id="newassignmenttype-@user.ID"
-                            class="form-control"
-                            onchange="updateAssignment(@user.ID, '@UI.JavascriptSafeString(user.FullName)', this)"
-                                >
-
-                        @foreach (var assignmenttype in Enum.GetValues(typeof(UserType)).Cast<UserType>())
+                <td>
+                    @if (currentUserType == UserType.Administrator || currentUserType == UserType.Owner)
+                    {
+                        if ((user.GetUserType(currentAccount) == UserType.Administrator || user.GetUserType(currentAccount) == UserType.Owner) && currentUserType == UserType.Administrator)
                         {
-                            switch (assignmenttype)
-                            {
-                                case UserType.NotSet:
-                                    continue;
-                            }
-                            <option value="@((int)assignmenttype)" @(assignmenttype == user.GetUserType(currentAccount) ? "selected=\"selected\"" : "")>
-                                @assignmenttype.ToString().SplitByUpperCase()
-                            </option>
+                            @user.GetUserType(currentAccount).ToString().SplitByUpperCase()
                         }
-                    </select>
-                   </td>
+                        else if (user.GetUserType(currentAccount) == UserType.Owner && currentUserType == UserType.Owner)
+                        {
+                            @user.GetUserType(currentAccount).ToString().SplitByUpperCase()
+                        }
+                        else
+                        {
+                            <select name="newassignmenttype"
+                                    id="newassignmenttype-@user.ID"
+                                    class="form-control"
+                                    onchange="updateAssignment(@user.ID, '@UI.JavascriptSafeString(user.FullName)', this)">
+
+                                @foreach (var assignmenttype in Enum.GetValues(typeof(UserType)).Cast<UserType>())
+                                {
+                                    switch (assignmenttype)
+                                    {
+                                        case UserType.NotSet:
+                                        case UserType.Parent:
+                                        case UserType.Student:
+                                        case UserType.SuperAdmin:
+                                            continue;
+                                    }
+                                    <option value="@((int)assignmenttype)" @(assignmenttype == user.GetUserType(currentAccount) ? "selected=\"selected\"" : "")>
+                                        @assignmenttype.ToString().SplitByUpperCase()
+                                    </option>
+                                }
+                            </select>
+                        }
+                    }
+                    else
+                    {
+                        @user.GetUserType(currentAccount).ToString().SplitByUpperCase()
+                    }
+                </td>
                 }
                 <td>@user.CreateDate.Value.ToLongDateString()</td>
                 <td>

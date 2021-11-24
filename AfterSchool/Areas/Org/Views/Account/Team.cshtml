@@ -106,14 +106,32 @@
     </div>
 </div>
 
+<div id="modalConfirm"  class="modal fade" role="dialog">
+     <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                <h3 class="modal-title">Are you sure you want to change <span id="userName"></span> type to <span id="newUserType"></span>?</h3>
+            </div>
+     
+            <div class="modal-footer">
+                <button class="btn btn-primary md-close" id="ConfirmUpdate" onclick="confirmUserTypeUpdate()">Confirm</button>
+                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 
     function updateAssignment(user, userName, selectBox) {
+        userName = userName.replace(/,/g, '');
         let newAssignment = selectBox.value;
         let newAssignmentText = selectBox.options[selectBox.selectedIndex].text;
-        console.log(newAssignment, selectBox.selectedIndex, newAssignmentText);
-        console.log(user);
-        updateAssignment2(user, userName, newAssignment, newAssignmentText);
+        $("#userName").html(userName);
+        $("#newUserType").html(newAssignmentText);
+        $("#modalConfirm").modal('show');
+        $("#ConfirmUpdate").attr('onclick', "updateAssignment2('" + user + "','" + userName + "','" + newAssignment + "','" + newAssignmentText + "')");
     }
 
     function updateAssignment2(user, userName, newAssignment, newAssignmentText) {
@@ -133,6 +151,7 @@
                 }
             }
         );
+        $("#modalConfirm").modal('hide');
     }
 
 

@@ -721,7 +721,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 awu.UpdateUserType(currentUser, newusertypeid, msgs);
             }
 
-            return Json(true,JsonRequestBehavior.AllowGet);
+            return Json(new { status = (msgs.Count == 0 ? "ok" : "error") },JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult TeamRemoveMember(string id)
