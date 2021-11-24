@@ -1956,6 +1956,7 @@ join: Registrant.ID, RegistrantId, LeftOuterJoin
 join: SurveyResponse.ID, SurveyResponseId, LeftOuterJoin
 loadmethod: RegistrantId, List<>
 loadmethod: SurveyResponseId
+loadmethod: RegistrantId|SurveyResponseId|IsDeleted, List<>
 loadmethod: Uid
 loadmethod: Uid|SurveyResponseId
 loadmethod: Uid|RegistrantId

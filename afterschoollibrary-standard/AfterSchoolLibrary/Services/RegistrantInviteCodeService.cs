@@ -45,13 +45,13 @@ namespace AfterSchoolLibrary.Services
             return registrantInviteCode;
         }
 
-        public static RegistrantInviteCode GetActiveInviteCode(int registrantId, SystemMessages msgs, DatabaseConnection dc = null) =>
-            RegistrantInviteCode.LoadByRegistrantId(registrantId, msgs, dc).FirstOrDefault(m => !m.IsDeleted);
+        public static RegistrantInviteCode GetActiveInviteCode(int registrantId, int surveyResponseId, SystemMessages msgs, DatabaseConnection dc = null) =>
+            RegistrantInviteCode.LoadByRegistrantIdBySurveyResponseIdByIsDeleted(registrantId, surveyResponseId, false, msgs, dc).FirstOrDefault(m => !m.IsDeleted);
 
         public static RegistrantInviteCode GetInviteCode(int surveyResponseId, int registrantId, int currentUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             //check if code is already sent to student but student havn't registered yet.
-            var inviteCode = GetActiveInviteCode(registrantId, msgs);
+            var inviteCode = GetActiveInviteCode(registrantId, surveyResponseId, msgs);
             if (inviteCode.IsEmpty())
                 inviteCode = Create(surveyResponseId, registrantId, currentUserId, msgs, dc);
 

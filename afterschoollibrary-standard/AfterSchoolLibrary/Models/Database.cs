@@ -750,6 +750,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SurveyResponse_RegistrantId_Uid ON [SurveyResponse] (Uid,RegistrantId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantInviteCode_RegistrantId ON [RegistrantInviteCode] (RegistrantId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantInviteCode_SurveyResponseId ON [RegistrantInviteCode] (SurveyResponseId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantInviteCode_IsDeleted_RegistrantId_SurveyResponseId ON [RegistrantInviteCode] (RegistrantId,SurveyResponseId,IsDeleted)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantInviteCode_Uid ON [RegistrantInviteCode] (Uid)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantInviteCode_SurveyResponseId_Uid ON [RegistrantInviteCode] (Uid,SurveyResponseId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantInviteCode_RegistrantId_Uid ON [RegistrantInviteCode] (Uid,RegistrantId)"));
