@@ -114,7 +114,7 @@
                 <div class="col-md-3">
                     <select id="assignmentType" onchange="changeAssignment()" class="form-control">
                         <option value="">View All Assignments</option>
-                        
+
                         @foreach (var x in Enum.GetValues(typeof(RegistrationAssignmentType)).Cast<RegistrationAssignmentType>().Where(x => x != RegistrationAssignmentType.NotSet))
                         {
                             if (account.HasFeature(FeatureType.AllowApplications) || x != RegistrationAssignmentType.Applied)
@@ -135,7 +135,7 @@
                     {
                         <select id="classes" onchange="changeClass()" class="form-control">
                             <option value="">All Dates</option>
-                            @foreach(var instance in Model.GetSchedule().GetInSessionInstances())
+                            @foreach (var instance in Model.GetSchedule().GetInSessionInstances())
                             {
                                 <option value="@instance.ID">@instance.StartDateTime.ToShortDateTimeString()</option>
                             }
@@ -217,22 +217,28 @@
                     </a>
                 </div>
             </div>
-            
+
             <div class="clearfix"></div>
             <br />
-            @{Html.RenderPartial(
-                "~/Views/Shared/_ActivityRegistrantsWithAllStatus.cshtml",
-                ras,
-                new ViewDataDictionary()
-                {
-                    { "Activity", Model },
-                    { "Account", account },
-                    { "EditAction", "registrantdetail" },
-                    { "EditController", "activity" },
-                    { "AssignmentType", assignmentType },
-                    { "IsReadOnlySeatStatus", isReadOnlySeatStatus }
-                }
-            );}
+            @if(ras.Count() == 0)
+            {
+              <hr style="width:100%" />
+              <div class="text-center text-bold">No students have registered yet</div>
+            }
+            else
+            {Html.RenderPartial(
+                  "~/Views/Shared/_ActivityRegistrantsWithAllStatus.cshtml",
+                  ras,
+                  new ViewDataDictionary()
+                  {
+                        { "Activity", Model },
+                        { "Account", account },
+                        { "EditAction", "registrantdetail" },
+                        { "EditController", "activity" },
+                        { "AssignmentType", assignmentType },
+                        { "IsReadOnlySeatStatus", isReadOnlySeatStatus }
+                  }
+              );}
 
         </div>
     </div>
