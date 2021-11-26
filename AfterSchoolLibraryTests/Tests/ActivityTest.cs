@@ -214,7 +214,7 @@ namespace AfterSchoolLibraryTests.Tests
             var activityGroup = Factories.ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc: dc);
             activity.ActivityGroupId = activityGroup.ID.Value;
             msgs.AddRange(activity.Save(dc));
-            Assert.Equal(1, Activity.GetCountByAccountId(account.ID.Value, activity.ActivityGroupId.Value, null, null, null, null, msgs, dc));
+            Assert.Equal(1, Activity.GetCountByAccountId(account.ID.Value, "", activity.ActivityGroupId.Value, null, null, null, null, msgs, dc));
         }
 
         /// <summary>
@@ -226,7 +226,7 @@ namespace AfterSchoolLibraryTests.Tests
             var user = Factories.WebUserFactory.Create(msgs, dc);
             var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
-            Assert.Single(Activity.LoadByAccountId(account.ID.Value, null, null, null, false, false, null, 0, 100, msgs, dc));
+            Assert.Single(Activity.LoadByAccountId(account.ID.Value, null, null, null, false, false, null, 0, 100, "", msgs, dc));
         }
 
         [Fact]
