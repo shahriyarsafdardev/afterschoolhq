@@ -54,6 +54,8 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                         return PaymentIntentProcessing(stripeEvent, msgs);
                     case "customer.subscription.deleted":
                         return SubscriptionCompleted(stripeEvent, msgs);
+                    case "payout.created":
+                        return PayoutCreated(stripeEvent, msgs);
                     default:
                         return ReturnOK(msgs);
                 }
@@ -345,6 +347,18 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                 dbSubscription.IsActive = false;
                 dbSubscription.Save();
             }            
+
+            return ReturnOK(msgs);
+        }
+
+        private IHttpActionResult PayoutCreated(Stripe.Event stripeEvent, SystemMessages msgs)
+        {
+            var payout = (Stripe.Payout)stripeEvent.Data.Object;
+
+            if (payout.IsNotEmpty() && payout.Id.IsNotEmpty())
+            {
+                //logic to update current payout with 
+            }
 
             return ReturnOK(msgs);
         }
