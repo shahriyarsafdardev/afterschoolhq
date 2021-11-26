@@ -59,8 +59,8 @@ namespace AfterSchool.Controllers
                 msgs.Add("Passwords are required and must match", MessageType.UserError);
             else if (model.Password1.Length < 8)
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);
-
-            msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
+            if (AfterSchoolLibrary.Helpers.Utilities.IsProduction && AfterSchoolLibrary.Helpers.Utilities.IsStaging)
+                msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
 
             if (model.InviteCodeToShare.IsNotEmpty())
             {
@@ -156,7 +156,9 @@ namespace AfterSchool.Controllers
             else if (model.Password1.Length < 8)
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);
 
-            msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
+
+            if (AfterSchoolLibrary.Helpers.Utilities.IsProduction && AfterSchoolLibrary.Helpers.Utilities.IsStaging)
+                msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
 
             if (model.InviteCodeToShare.IsNotEmpty())
             {
