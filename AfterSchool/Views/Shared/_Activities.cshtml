@@ -22,6 +22,7 @@
     var currentListUrl = Url.Action("index", "activity", new { archive = 0 });
     var archivedListUrl = Url.Action("index", "activity", new { archive = 1 });
     var hasArchivedActivities = (bool)ViewData["HasArchivedActivities"];
+    var isSearchEmpty = Request["q"].IsNotEmpty();
 
     if (group.IsNotEmpty())
     {
@@ -56,7 +57,7 @@
     var managePermissionSlipsPackage = PackageService.GetPackageWithFeatureMaximumAvailability(FeatureType.ManagePermissionSlips, maxPermissionSlipCount);
 }
 
-@if (Model.Count == 0 && group.IsEmpty() && !hasArchivedActivities)
+@if (Model.Count == 0 && group.IsEmpty() && !hasArchivedActivities && !isSearchEmpty)
 {
     if (activityType == ActivityType.PermissionSlip)
     {
@@ -151,7 +152,7 @@ else
             @if (activityType == ActivityType.Activity)
             {
                 <div class="pull-right">
-                    <input type="text" id="search" class="form-control searchFormInput" placeholder="Search Forms" style="float: left;width: 300px;height: 38px;margin-right: 10px;" value="@Request["q"]" />
+                    <input type="text" id="search" class="form-control searchFormInput" placeholder="Search for activity" style="float: left;width: 300px;height: 38px;margin-right: 10px;" value="@Request["q"]" />
                     <button class="btn btn-primary searchFormBtn" id="searchBtn" onclick="doSearch()">
                         Search
                     </button>
@@ -180,11 +181,11 @@ else
                     @if (Model.Count > 0)
                     {
                         var assignmentTypes = new List<RegistrationAssignmentType>()
-                        {
-                            RegistrationAssignmentType.Reserved,
-                            RegistrationAssignmentType.ReservedPendingParentalConsent,
-                            RegistrationAssignmentType.ReservedPendingPayment
-                        };
+                            {
+                                RegistrationAssignmentType.Reserved,
+                                RegistrationAssignmentType.ReservedPendingParentalConsent,
+                                RegistrationAssignmentType.ReservedPendingPayment
+                            };
 
                         foreach (Activity activity in Model)
                         {
@@ -403,6 +404,12 @@ else
                                 </td>
                             </tr>
                         }
+                    }
+                    else if (Model.Count() == 0 && isSearchEmpty)
+                    {
+                        <tr class="text-center">
+                            <td colspan="9">No activity found with search terms '@Request["q"]'</td>
+                        </tr>
                     }
                     else
                     {
