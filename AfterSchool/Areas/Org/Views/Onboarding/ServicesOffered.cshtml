@@ -19,10 +19,10 @@
                 <form class="form form-horizontal" method="post" action="@Url.Action("servicesoffered", "onboarding")">
 
                     @{ Html.RenderPartial("~/Views/Shared/_Loaders.cshtml",
-                             new ViewDataDictionary() {
-                               { "count", 6 },
-                               { "activeDotNumber", 5 }
-                             });
+                               new ViewDataDictionary() {
+                                                       { "count", 6 },
+                                                       { "activeDotNumber", 5 }
+                               });
                     }
 
                     <div class="col-md-12 onboarding-form-group">
@@ -30,7 +30,19 @@
                     </div>
 
                     <div class="clearfix"></div>
-                    <div class="col-md-12 onboarding-form-group">
+                    <div style="">
+                        <img src="~/img/client_success_manager_color.jpeg" class="manger-comment pull-left">
+                        <div class="dialogbox pull-left">
+                            <div class="dialogbox-body dialogBodyMArgin">
+                                <span class="tip tip-left tipTop"></span>
+                                <div class="message text-center">
+                                    <span>By adding categories, you enable parents to easily find the types of activities their children are interested in joining!</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="col-md-12 onboarding-form-group" style="margin-top:20px">
                         <label class="onboarding-lable"> PROGRAM CATEGORIES (UP TO 3)</label>
 
                         <input type="text" class="form-control onboarding-input" name="programCategories" id="txtProgramCategories" data-role="tagsinput" value="@programCategories.Select(x => x.Value).ToStringList(",")" />
@@ -225,18 +237,6 @@
                         <a href="@Url.Action("Links", "onboarding")" class="text-muted" style="font-size: 16px; font-weight: normal; font-stretch: normal; font-style: normal; line-height: normal; letter-spacing: normal; color: #979797; text-align: center; text-decoration: underline;">I'll do this later</a>
                     </div>
 
-                    <div class="clearfix"></div>
-                    <div style="margin-top: 20px;">
-                        <img src="~/img/client_success_manager_color.jpeg" class="manger-comment pull-left">
-                        <div class="dialogbox pull-left">
-                            <div class="dialogbox-body">
-                                <span class="tip tip-left"></span>
-                                <div class="message text-center">
-                                    <span>By adding categories, you enable parents to easily find the types of activities their children are interested in joining!</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                     <div class="clearfix"></div>
                 </form>

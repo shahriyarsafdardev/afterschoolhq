@@ -1084,3 +1084,11 @@
     background-color: #00AE83 !important;
     color: white !important;
 }
+
+.dialogBodyMArgin {
+    margin: 30px 20px 10px !important
+}
+.tipTop {
+    position: absolute;
+    top: 30px;
+}
