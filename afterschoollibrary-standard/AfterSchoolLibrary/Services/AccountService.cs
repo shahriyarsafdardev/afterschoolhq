@@ -1320,6 +1320,25 @@ namespace AfterSchoolLibrary.Services
             return stripeAccount;
         }
 
+        public static Stripe.Account DisableStripePayoutForCustomAccount(this Account account, Stripe.AccountUpdateOptions options, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (options.IsNotEmpty())
+                options.Settings.Payouts.Schedule.Interval = "manual";
+
+            var stripeAccount = StripeHelper.UpdateCustomAccount(account.StripeUserId, options, msgs);
+
+            if (stripeAccount.IsNotEmpty())
+            {
+                // need to test this
+                account.StripeChargesEnabled = stripeAccount.ChargesEnabled;
+                account.StripePayoutsEnabled = stripeAccount.PayoutsEnabled;
+
+                msgs.AddRange(account.Save(dc));
+            }
+
+            return stripeAccount;
+        }
+
         public static Stripe.Account CreateStripeCustomAccount(this Account account, Stripe.AccountCreateOptions options, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var stripeAccount = StripeHelper.CreateCustomAccount(options, msgs);

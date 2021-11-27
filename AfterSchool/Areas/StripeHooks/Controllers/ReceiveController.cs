@@ -1,4 +1,5 @@
-﻿using AfterSchoolLibrary.Models;
+﻿using AfterSchoolLibrary.Billing;
+using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
@@ -54,8 +55,8 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                         return PaymentIntentProcessing(stripeEvent, msgs);
                     case "customer.subscription.deleted":
                         return SubscriptionCompleted(stripeEvent, msgs);
-                    case "payout.created":
-                        return PayoutCreated(stripeEvent, msgs);
+                    //case "payout.created":
+                    //    return PayoutCreated(stripeEvent, msgs);
                     default:
                         return ReturnOK(msgs);
                 }
@@ -351,16 +352,25 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             return ReturnOK(msgs);
         }
 
-        private IHttpActionResult PayoutCreated(Stripe.Event stripeEvent, SystemMessages msgs)
-        {
-            var payout = (Stripe.Payout)stripeEvent.Data.Object;
+        //private IHttpActionResult PayoutCreated(Stripe.Event stripeEvent, SystemMessages msgs)
+        //{
+        //    var payout = (Stripe.Payout)stripeEvent.Data.Object;
 
-            if (payout.IsNotEmpty() && payout.Id.IsNotEmpty())
-            {
-                //logic to update current payout with 
-            }
+        //    if (payout.IsNotEmpty() && payout.Id.IsNotEmpty())
+        //    {
+        //        //logic to update current payout with 
 
-            return ReturnOK(msgs);
-        }
+        //        payout.StatementDescriptor = "Updated payout";
+                
+        //        StripeHelper.UpdatePayout(
+        //            amount: payout.Amount,
+        //            externalAccountId: stripeAccount.ExternalAccounts.First().Id,
+        //            connectedAccountId: account.StripeUserId,
+        //            metaData: metaData,
+        //            msgs: msgs);
+        //    }
+
+        //    return ReturnOK(msgs);
+        //}
     }
 }

@@ -37,6 +37,8 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Edit(string id)
         {
+            DisableAutomaticStripePayouts();
+
             ViewBag.Messages = new SystemMessages();
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.IsFullScreen = GetIsFullScreen();
@@ -1709,6 +1711,32 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
 
             return View("Billing", currentAccount);
+        }
+
+        public void DisableAutomaticStripePayouts()
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+            //var account = currentAccount.GetStripeCustomAccount(msgs);
+
+            //var paymentsEntityVM = PaymentsEntityViewModel.LoadFromStripeAccount(account);
+
+            //var vm = paymentsEntityVM.GetStripeAccountUpdateOptions(currentAccount);
+
+            var vm = new Stripe.AccountUpdateOptions() {                
+                Settings = new Stripe.AccountSettingsOptions()
+                {
+                    Payouts = new Stripe.AccountSettingsPayoutsOptions()
+                    {
+                        Schedule = new Stripe.AccountSettingsPayoutsScheduleOptions()
+                        {
+                            Interval = "manual"
+                        }
+                    }
+                }
+            };
+
+            currentAccount.DisableStripePayoutForCustomAccount(vm, msgs);
         }
     }
 }

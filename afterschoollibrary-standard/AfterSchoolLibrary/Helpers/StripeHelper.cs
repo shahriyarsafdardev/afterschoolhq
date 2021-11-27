@@ -139,6 +139,24 @@ namespace AfterSchoolLibrary.Billing
             return account;
         }
 
+        public static Stripe.Account DisableAutomaticPayoutForAccount(string stripeAccountId, AccountUpdateOptions options, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            var account = GetCustomAccount(stripeAccountId, msgs);
+
+            try
+            {
+                account = GetAccountService().Update(stripeAccountId, options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add("Error updating payment account", MessageType.UserError);
+            }
+
+            return account;
+        }
+
         [Obsolete]
         public static Stripe.Account CreateCustomAccount(string businessName, string email, LegalEntityType entityType, SystemMessages msgs)
         {
@@ -248,7 +266,7 @@ namespace AfterSchoolLibrary.Billing
                 {
                     Date = tosAcceptanceDate,
                     Ip = tosIPAddress
-                },
+                }                
             };
 
             if (entityType == LegalEntityType.Company)
@@ -454,6 +472,35 @@ namespace AfterSchoolLibrary.Billing
 
             return stripePayout;
         }
+
+        //public static Payout UpdatePayout(Payout payout, Dictionary<string, string> metaData, SystemMessages msgs)
+        //{
+        //    if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+        //    var options = new PayoutUpdateOptions()
+        //    {                
+        //        Expand = 
+        //    };
+
+        //    var requestOptions = new RequestOptions()
+        //    {
+        //        StripeAccount = connectedAccountId
+        //    };
+
+        //    Payout stripePayout = null;
+
+        //    try
+        //    {
+        //        stripePayout = GetPayoutService().Update(payoutId: payout.Id, options: options, requestOptions: requestOptions);
+        //    }
+        //    catch (StripeException ex)
+        //    {
+        //        msgs.Add(ex.Message, MessageType.UserError, ex);
+        //        msgs.Add($"Payout was not created", MessageType.UserError);
+        //    }
+
+        //    return stripePayout;
+        //}
 
         #endregion
 
