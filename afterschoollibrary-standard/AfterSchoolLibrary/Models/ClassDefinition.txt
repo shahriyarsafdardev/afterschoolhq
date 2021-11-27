@@ -393,6 +393,7 @@ property: CreditCardFeesPaidBy, FeesPaidByType, Int
 property: ConvenienceFeesPaidBy, FeesPaidByType, Int
 property: StripeChargesEnabled, bool, Bit
 property: StripePayoutsEnabled, bool, Bit
+property: StripePayoutsIntervalType, PayoutIntervalType, Int
 property: IsTest, bool, Bit
 property: IsDeleted, bool, Bit
 property: IsClaimed, bool, Bit
@@ -410,6 +411,7 @@ loadmethod: StripeUserId
 loadmethod: StripeCustomerId
 loadmethod: InviteCodeToShare
 loadmethod: Subdomain
+loadmethod: StripePayoutsIntervalType|IsActive|IsDeleted, List<>
 [end]
 
 [begin]

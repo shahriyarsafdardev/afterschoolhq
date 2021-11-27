@@ -1320,18 +1320,28 @@ namespace AfterSchoolLibrary.Services
             return stripeAccount;
         }
 
-        public static Stripe.Account DisableStripePayoutForCustomAccount(this Account account, Stripe.AccountUpdateOptions options, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Stripe.Account DisableStripePayoutForCustomAccount(this Account account, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            if (options.IsNotEmpty())
-                options.Settings.Payouts.Schedule.Interval = "manual";
+            var options = new Stripe.AccountUpdateOptions()
+            {
+                Settings = new Stripe.AccountSettingsOptions()
+                {
+                    Payouts = new Stripe.AccountSettingsPayoutsOptions()
+                    {
+                        Schedule = new Stripe.AccountSettingsPayoutsScheduleOptions()
+                        {
+                            Interval = nameof(PayoutIntervalType.manual)
+                        }
+                    }
+                }
+            };
 
             var stripeAccount = StripeHelper.UpdateCustomAccount(account.StripeUserId, options, msgs);
 
             if (stripeAccount.IsNotEmpty())
             {
                 // need to test this
-                account.StripeChargesEnabled = stripeAccount.ChargesEnabled;
-                account.StripePayoutsEnabled = stripeAccount.PayoutsEnabled;
+                account.StripePayoutsIntervalType = PayoutIntervalType.manual;
 
                 msgs.AddRange(account.Save(dc));
             }
@@ -2492,6 +2502,37 @@ namespace AfterSchoolLibrary.Services
                 .ToList();
         }
 
+        //Get the accounts that has Automatic Payouts disabled 
+        public static List<Account> GetPayoutAccounts(SystemMessages msgs = null, DatabaseConnection dc = null) =>
+            Account.LoadByStripePayoutsIntervalTypeByIsActiveByIsDeleted(StripePayoutsIntervalType: PayoutIntervalType.manual, IsActive: true, IsDeleted: false, msgs: msgs, dc: dc);           
+
+        //prepare payouts
+        public static void PrepareManualPayouts(this List<Account> accounts, WebUser loggedInUser,  SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            foreach (var account in accounts)
+            {
+                //darye check this logic, here I'm checking that account are not getting paid via check and we can use them in manual payouts
+                if (account.CanReceiveACHDeposits(msgs: msgs, dc: dc) && !account.CanReceiveCheckPayouts(msgs: msgs, dc: dc))
+                {
+                    //prepare payouts
+                    //var activities = account.GetPublishedActivities(msgs, dc);
+
+                    //foreach (var activity in activities)
+                    //{
+                    //    var paymentPlans = activity.GetActivePaymentPlans(msgs, dc);
+
+                    //    foreach (var paymentPlan in paymentPlans)
+                    //    {
+                    //        //paymentPlan.cost
+                    //    }
+                    //}
+                    
+                    var transactions = account.GetTransactions(msgs: msgs, dc: dc);
+                    account.RequestNewPayout(transactions: transactions, loggedInUser: loggedInUser, msgs: msgs, dc: dc);
+                }
+            }
+        }
+
         public static List<Location> GetVisitorLocations(this Account visitorAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var arls = AccountRelationshipLocation.LoadByVisitorAccountId(visitorAccount.ID.Value, msgs, dc);
@@ -3144,6 +3185,11 @@ namespace AfterSchoolLibrary.Services
         public static List<Transaction> GetTransactions(this Account account, string search, DateTime? startDate, DateTime? endDate, bool isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Transaction.LoadByAccountId(account.ID.Value, search, startDate, endDate, null, isDeleted, start, length, msgs, dc);
+        }
+
+        public static List<Transaction> GetTransactions(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.LoadTransactionReadyToPayoutForBillerAccount(BillerAccountId: account.ID.Value, msgs: msgs, dc: dc);
         }
 
         public static List<Transaction> GetTransactions(this Account account, string search, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)

@@ -37,12 +37,24 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Edit(string id)
         {
+            // just added this methods here for now to test
+            // will be used later on demand as needed
             DisableAutomaticStripePayouts();
+            PreparePayouts();
 
             ViewBag.Messages = new SystemMessages();
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.IsFullScreen = GetIsFullScreen();
             return View(SessionVariables.CurrentAccount);
+        }
+
+        public void PreparePayouts()
+        {
+            var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+
+            //get accounts
+            AccountService.GetPayoutAccounts(msgs).PrepareManualPayouts(currentUser, msgs);
         }
 
         [HttpPost]
@@ -1723,20 +1735,20 @@ namespace AfterSchool.Areas.Org.Controllers
 
             //var vm = paymentsEntityVM.GetStripeAccountUpdateOptions(currentAccount);
 
-            var vm = new Stripe.AccountUpdateOptions() {                
-                Settings = new Stripe.AccountSettingsOptions()
-                {
-                    Payouts = new Stripe.AccountSettingsPayoutsOptions()
-                    {
-                        Schedule = new Stripe.AccountSettingsPayoutsScheduleOptions()
-                        {
-                            Interval = "manual"
-                        }
-                    }
-                }
-            };
+            //var vm = new Stripe.AccountUpdateOptions() {                
+            //    Settings = new Stripe.AccountSettingsOptions()
+            //    {
+            //        Payouts = new Stripe.AccountSettingsPayoutsOptions()
+            //        {
+            //            Schedule = new Stripe.AccountSettingsPayoutsScheduleOptions()
+            //            {
+            //                Interval = "manual"
+            //            }
+            //        }
+            //    }
+            //};
 
-            currentAccount.DisableStripePayoutForCustomAccount(vm, msgs);
+            currentAccount.DisableStripePayoutForCustomAccount(msgs);
         }
     }
 }

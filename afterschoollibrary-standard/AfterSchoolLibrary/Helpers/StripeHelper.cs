@@ -139,23 +139,23 @@ namespace AfterSchoolLibrary.Billing
             return account;
         }
 
-        public static Stripe.Account DisableAutomaticPayoutForAccount(string stripeAccountId, AccountUpdateOptions options, SystemMessages msgs)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-            var account = GetCustomAccount(stripeAccountId, msgs);
+        //public static Stripe.Account DisableAutomaticPayoutForAccount(string stripeAccountId, AccountUpdateOptions options, SystemMessages msgs)
+        //{
+        //    if (msgs.IsEmpty()) msgs = new SystemMessages();
+        //    var account = GetCustomAccount(stripeAccountId, msgs);
 
-            try
-            {
-                account = GetAccountService().Update(stripeAccountId, options);
-            }
-            catch (StripeException ex)
-            {
-                msgs.Add(ex.Message, MessageType.UserError, ex);
-                msgs.Add("Error updating payment account", MessageType.UserError);
-            }
+        //    try
+        //    {
+        //        account = GetAccountService().Update(stripeAccountId, options);
+        //    }
+        //    catch (StripeException ex)
+        //    {
+        //        msgs.Add(ex.Message, MessageType.UserError, ex);
+        //        msgs.Add("Error updating payment account", MessageType.UserError);
+        //    }
 
-            return account;
-        }
+        //    return account;
+        //}
 
         [Obsolete]
         public static Stripe.Account CreateCustomAccount(string businessName, string email, LegalEntityType entityType, SystemMessages msgs)

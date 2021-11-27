@@ -50,6 +50,7 @@ namespace AfterSchoolLibrary.Models
 		public FeesPaidByType ConvenienceFeesPaidBy { get { return (FeesPaidByType)MDV["ConvenienceFeesPaidBy"].Value; } set { MDV["ConvenienceFeesPaidBy"].Value = value; } }
 		public bool StripeChargesEnabled { get { return (bool)MDV["StripeChargesEnabled"].Value; } set { MDV["StripeChargesEnabled"].Value = value; } }
 		public bool StripePayoutsEnabled { get { return (bool)MDV["StripePayoutsEnabled"].Value; } set { MDV["StripePayoutsEnabled"].Value = value; } }
+		public PayoutIntervalType StripePayoutsIntervalType { get { return (PayoutIntervalType)MDV["StripePayoutsIntervalType"].Value; } set { MDV["StripePayoutsIntervalType"].Value = value; } }
 		public bool IsTest { get { return (bool)MDV["IsTest"].Value; } set { MDV["IsTest"].Value = value; } }
 		public bool IsDeleted { get { return (bool)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
 		public bool IsClaimed { get { return (bool)MDV["IsClaimed"].Value; } set { MDV["IsClaimed"].Value = value; } }
@@ -122,6 +123,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "ConvenienceFeesPaidBy", System.Data.SqlDbType.Int);
 				_dp.Add(className, "StripeChargesEnabled", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "StripePayoutsEnabled", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "StripePayoutsIntervalType", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IsTest", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsClaimed", System.Data.SqlDbType.Bit);
@@ -311,6 +313,10 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["StripePayoutsIntervalType"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["IsTest"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
@@ -418,6 +424,16 @@ namespace AfterSchoolLibrary.Models
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["Subdomain"], Subdomain);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
+		public static List<Account> LoadByStripePayoutsIntervalTypeByIsActiveByIsDeleted(PayoutIntervalType StripePayoutsIntervalType, bool IsActive, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["StripePayoutsIntervalType"], StripePayoutsIntervalType);
+			dq.Criterias.Add(ObjectMap["IsActive"], IsActive);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
 		
