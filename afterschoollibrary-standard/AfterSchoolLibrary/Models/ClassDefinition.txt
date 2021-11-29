@@ -33,7 +33,8 @@ property: LastActivity, DateTime?, DateTime
 property: VerifiedAccount, bool, Bit
 property: IsRegistered, bool, Bit
 property: DefaultAccountId, int?, Int
-property: AllowTextMessages, bool, Bit
+property: AllowTextMessages, bool, Bit,
+property: HowHearAboutUs, string, NVarChar "500"
 loadmethod: Uid
 loadmethod: Uid|IsActive
 loadmethod: IsActive, List<>

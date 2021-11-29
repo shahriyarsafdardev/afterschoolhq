@@ -10,17 +10,17 @@
     <input id="hidden-isrequestaccessonly" type="hidden" name="isrequestonlyaccess" value="@Model.IsRequestOnlyAccess.ToString()" />
     <input id="hidden-signup-type" type="hidden" name="signuptype" value="@Model.SignupType" />
 
-    <div class="col-md-12 onboarding-form-group">        
+    <div class="col-md-12 onboarding-form-group">
         <label class="onboarding-lable">FIRST NAME</label>
         <input type="text" name="firstname" required="required" autocomplete="off" class="form-control onboarding-input" value="@Model.FirstName" />
     </div>
 
-    <div class="col-md-12 onboarding-form-group">        
+    <div class="col-md-12 onboarding-form-group">
         <label class="onboarding-lable">LAST NAME</label>
-        <input type="text" name="lastname" required="required" autocomplete="off" class="form-control onboarding-input" value="@Model.LastName">        
+        <input type="text" name="lastname" required="required" autocomplete="off" class="form-control onboarding-input" value="@Model.LastName">
     </div>
 
-    <div class="col-md-12 onboarding-form-group">        
+    <div class="col-md-12 onboarding-form-group">
         <label class="onboarding-lable">EMAIL ADDRESS</label>
         <input type="email" name="email" required="required" autocomplete="off" class="form-control onboarding-input" value="@Model.Email" />
     </div>
@@ -33,6 +33,10 @@
     <div class="col-md-12 onboarding-form-group">
         <label class="onboarding-lable">CONFIRM PASSWORD</label>
         <input type="password" name="password2" required="required" class="form-control onboarding-input">
+    </div>
+    <div class="col-md-12 onboarding-form-group">
+        <label class="onboarding-lable">HOW'D YOU HEAR ABOUT US?</label>
+        <input type="text" name="HowHearAboutUs" required="required" class="form-control onboarding-input" value="@Model.HowHearAboutUs">
     </div>
 
     <div class="clearfix"></div>

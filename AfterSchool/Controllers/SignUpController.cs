@@ -90,6 +90,7 @@ namespace AfterSchool.Controllers
                             isRegistered: true,
                             isVerified: false,
                             loggedInUser: null,
+                            howHearAboutUs: model.HowHearAboutUs,
                             msgs: amsgs,
                             dc: adc);
 
@@ -188,6 +189,7 @@ namespace AfterSchool.Controllers
                             isRegistered: true,
                             isVerified: false,
                             loggedInUser: null,
+                            howHearAboutUs: model.HowHearAboutUs,
                             msgs: amsgs,
                             dc: adc);
 
@@ -949,6 +951,7 @@ namespace AfterSchool.Controllers
                             isRegistered: true,
                             isVerified: false,
                             loggedInUser: new WebUser { ID = 0 },
+                            howHearAboutUs: model.HowHearAboutUs,
                             msgs: amsgs,
                             dc: adc);
 
@@ -983,7 +986,7 @@ namespace AfterSchool.Controllers
 
         /* APIS */
         [HttpPost]
-        public ActionResult Personal(string firstname, string lastname, string email, string password, string remember)
+        public ActionResult Personal(string firstname, string lastname, string email, string password, string remember, string howhearaboutus)
         {
             if (!IsRequestFromApp())
                 return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
@@ -1022,6 +1025,7 @@ namespace AfterSchool.Controllers
                             isRegistered: true,
                             isVerified: false,
                             loggedInUser: null,
+                            howHearAboutUs: howhearaboutus,
                             msgs: amsgs,
                             dc: adc);
 
