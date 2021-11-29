@@ -59,16 +59,16 @@
 
 @helper PrintGraphicSmall(string clientSuccessManagerName)
 {
-<div class="row">
-    <div class="pull-left margin-l-20">
-        <img src="~/img/client_success_manager_color.jpeg" alt="@clientSuccessManagerName" class="img-client-success-manager" style="max-height: 150px;">
+    <div class="row">
+        <div class="pull-left margin-l-20">
+            <img src="~/img/client_success_manager_color.jpeg" alt="@clientSuccessManagerName" class="img-client-success-manager" style="max-height: 150px;">
+        </div>
+        <div class="pull-left margin-l-20">
+            <p class="manager-name">@clientSuccessManagerName</p>
+            <p class="manager-position">Client Success Manager</p>
+        </div>
+        <div class="clearfix"></div>
     </div>
-    <div class="pull-left margin-l-20">
-        <p class="manager-name">@clientSuccessManagerName</p>
-        <p class="manager-position">Client Success Manager</p>
-    </div>
-    <div class="clearfix"></div>
-</div>
 }
 
 <div class="row main-content main-content-welcome-pages">
@@ -489,6 +489,43 @@
 @section Scripts
 {
     <script src="~/Scripts/jquery.validate.js"></script>
+    <script>
+        $(document).ready(function () {
+            $(".emailMain").on('blur', function () {
+                var dataToSend = JSON.stringify({ emailId: $(".emailMain").val() });
+                $.ajax({
+                    url: '/Signup/IsEmailAlreadyExists',
+                    type: 'post',
+                    dataType: 'json',
+                    data: dataToSend,
+                    contentType: 'application/json',
+                    success: function (data) {
+                        if (!data) {
+                            Notifications.showBar({
+                                title: 'Error',
+                                message: 'Email id already exists.',
+                                success: false
+                            });
+                            $(".register-continue").attr('disabled', 'disabled');
+                            $(".emailMain").attr('style', 'border: 1px solid red;');
+                        }
+                        else {
+                            $(".register-continue").removeAttr('disabled');
+                            $(".emailMain").removeAttr('style');
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        Notifications.showBar({
+                            title: 'Error',
+                            message: 'Something went wrong. Please contact customer support.',
+                            success: false
+                        });
+                        return;
+                    }
+                });
+            })
+        })
+    </script>
     <script type="text/javascript">
 
         var searchTimeout = null;
@@ -594,7 +631,7 @@
                     doAccountSearch(signupAccountSearch, signupAccountSearchList)
                 }, 250);
 
-              
+
             });
 
               @if(showInviteWelcome && Model.InvitingAccount.IsEmpty())
@@ -956,4 +993,5 @@
     // #endregion: phone number validation
 
     </script>
+
 }

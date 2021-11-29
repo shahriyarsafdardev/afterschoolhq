@@ -604,6 +604,16 @@ namespace AfterSchool.Controllers
             return View();
         }
 
+        [HttpPost]
+        public JsonResult IsEmailAlreadyExists(string emailId)
+        {
+            WebUser wu = WebUser.LoadByEmail(emailId, null);
+            if (wu.IsNotEmpty())
+                return Json(false);
+            else
+                return Json(true);
+        }
+
         [HttpGet]
         public ActionResult Confirm(string id)
         {
