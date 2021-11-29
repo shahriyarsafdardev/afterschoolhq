@@ -434,7 +434,6 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.ActiveMenu = "EditRestrictions";
             ViewBag.IsFullScreen = GetIsFullScreen(activity);
-            ViewBag.SaveOnly = null;
             return View(activity);
         }
 
@@ -511,7 +510,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                ViewBag.SaveOnly = true;
                 switch (cmd)
                 {
                     case "prev":
@@ -524,7 +522,6 @@ namespace AfterSchool.Areas.Org.Controllers
                         LoadEditScheduleViewBag(activity, scheduleId, msgs);
                         return View("EditSchedule", activity);
                 }
-
             }
 
             ViewBag.IsFullScreen = GetIsFullScreen(activity);
