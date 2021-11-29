@@ -10,7 +10,7 @@ namespace AfterSchoolLibrary.Services
 {
     public static class PayoutService
     {
-        public static Payout CreateNew(Account account, List<Transaction> transactions, PayoutStatus payoutStatus, PaymentType paymentType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Payout CreateNew(Account account, string statementDescriptor, List<Transaction> transactions, PayoutStatus payoutStatus, PaymentType paymentType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             Payout payout = null;
 
@@ -31,7 +31,8 @@ namespace AfterSchoolLibrary.Services
                         PaymentTypeId = paymentType,
                         PayoutStatusId = payoutStatus,
                         DateRequested = DateTime.UtcNow,
-                        RequestedBy = loggedInUser?.ID.IfEmpty(0)
+                        RequestedBy = loggedInUser?.ID.IfEmpty(0),
+                        StatementDescriptor = statementDescriptor
                     };
 
                     amsgs.AddRange(payout.Save(adc));

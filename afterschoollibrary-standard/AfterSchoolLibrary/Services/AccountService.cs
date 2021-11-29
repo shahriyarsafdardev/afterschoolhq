@@ -2515,20 +2515,46 @@ namespace AfterSchoolLibrary.Services
                 if (account.CanReceiveACHDeposits(msgs: msgs, dc: dc) && !account.CanReceiveCheckPayouts(msgs: msgs, dc: dc))
                 {
                     //prepare payouts
-                    //var activities = account.GetPublishedActivities(msgs, dc);
 
-                    //foreach (var activity in activities)
-                    //{
-                    //    var paymentPlans = activity.GetActivePaymentPlans(msgs, dc);
+                    //this way system will get all the transactions and will create single payout, no matter how much activities are invlolved
+                    //var transactions = account.GetTransactions(msgs: msgs, dc: dc);
 
-                    //    foreach (var paymentPlan in paymentPlans)
-                    //    {
-                    //        //paymentPlan.cost
-                    //    }
-                    //}
-                    
-                    var transactions = account.GetTransactions(msgs: msgs, dc: dc);
-                    account.RequestNewPayout(transactions: transactions, loggedInUser: loggedInUser, msgs: msgs, dc: dc);
+                    //if (transactions.Any())
+                    //    account.RequestNewPayout(transactions: transactions, loggedInUser: loggedInUser, msgs: msgs, dc: dc);
+
+                    var activities = account.GetPublishedActivities(msgs, dc);                   
+
+                    foreach (var activity in activities)
+                    {
+                        //var paymentPlans = activity.GetActivePaymentPlans(msgs, dc);
+                        //var transactiondIds = new List<int>();
+
+                        //foreach (var paymentPlan in paymentPlans)
+                        //    if (paymentPlan.IsActive)
+                        //    {
+
+                        //    }
+
+                        var transactions = new List<Transaction>();
+                        var activityPayments = ActivityPayment.LoadByParticipationObject(ParticipationObjectId: activity.ID.Value, 
+                            ParticipationObjectTypeId: ParticipationObjectType.Activity, 
+                            IsDeleted: false, 
+                            msgs: msgs, 
+                            dc: dc);
+
+                        foreach (var activityPayment in activityPayments)
+                            transactions.Add(activityPayment.GetTransaction(msgs: msgs, dc: dc));
+
+                        var statementDescriptor = $"AHQ {account.Name.MaxChars(10)} {activity.Name.MaxChars(7)}";
+
+                        if (transactions.Any())
+                        {
+                            var payout = account.RequestNewPayout(transactions: transactions, statementDescriptor: statementDescriptor, loggedInUser: loggedInUser, msgs: msgs, dc: dc);
+
+                            if (payout.IsNotEmpty() && msgs.HasNoErrors())
+                                payout.Approve(loggedInUser: loggedInUser, msgs: msgs, dc: dc);
+                        }
+                    }
                 }
             }
         }
@@ -3028,28 +3054,18 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
-        public static Payout RequestNewPayout(this Account account, List<Transaction> transactions, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Payout RequestNewPayout(this Account account, string statementDescriptor, List<Transaction> transactions, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var paymentType = PaymentType.NotSet;
 
             if (account.CanReceiveACHDeposits(msgs, dc))
                 paymentType = PaymentType.ACH;
             else
-            {
                 paymentType = PaymentType.Check;
-                //var checkAccount = account.GetCheckPaymentAccount(msgs, dc);
-                //if (checkAccount.IsNotEmpty())
-                //{
-                //    if (!checkAccount.IsVerified)
-                //        msgs.Add("Your payment address is not verified. Please correct in Settings > Accept Payments", MessageType.UserError);
-                //    else
-                //        paymentType = PaymentType.Check;
-                //}
-            }
 
             if (paymentType != PaymentType.NotSet)
             {
-                var payout = PayoutService.CreateNew(account, transactions, PayoutStatus.Requested, paymentType, loggedInUser, msgs, dc);
+                var payout = PayoutService.CreateNew(account, statementDescriptor, transactions, PayoutStatus.Requested, paymentType, loggedInUser, msgs, dc);
 
                 if (payout.IsNotEmpty())
                     payout.SendPayoutRequestNotification(account, msgs);

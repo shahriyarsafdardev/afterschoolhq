@@ -1607,6 +1607,7 @@ property: PaymentTypeId, PaymentType, Int, required
 property: DateRequested, DateTime?, DateTime, required
 property: RequestedBy, int?, Int, required
 property: ExternalPayoutId, string, NVarChar "100", , a place to store the check id or stripe payout id
+property: StatementDescriptor, string, NVarChar "22", , a place to store statements that will be used by stripe payout
 loadmethod: AccountId, List<>
 loadmethod: AccountId|PayoutStatusId, List<>
 loadmethod: PayoutStatusId, List<>
