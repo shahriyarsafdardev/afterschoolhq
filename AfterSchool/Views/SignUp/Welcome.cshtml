@@ -404,7 +404,7 @@
                         <div class="clearfix"></div>
 
                         <div class="col-md-12 onboarding-form-group text-center" style="margin-top: 20px;">
-                            @if (AfterSchoolLibrary.Helpers.Utilities.IsProduction && AfterSchoolLibrary.Helpers.Utilities.IsStaging)
+                            @if (AfterSchoolLibrary.Helpers.Utilities.IsProduction || AfterSchoolLibrary.Helpers.Utilities.IsStaging)
                             {
                                 Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "");
                             }
