@@ -691,7 +691,6 @@
     <Content Include="img\BCALogo.jpg" />
     <Content Include="img\billy2.png" />
     <Content Include="img\darye.png" />
-    <Content Include="img\david.png" />
     <Content Include="img\fee.png" />
     <Content Include="img\frank-mckenna-LhOjrOlcLx4-unsplash.jpg" />
     <Content Include="img\gabriel-baranski-vGICUyYW2CE-unsplash.jpg" />
@@ -728,6 +727,7 @@
     <Content Include="img\lazyload-ph.png" />
     <Content Include="img\logo-white.png" />
     <Content Include="img\logo.png" />
+    <Content Include="img\musical-instruments-english.jpg" />
     <Content Include="img\parent-icon.png" />
     <Content Include="img\pencil-banner.jpg" />
     <Content Include="img\provider-icon.png" />
@@ -766,7 +766,6 @@
     <Content Include="sitemap-home.xml" />
     <Content Include="style.css" />
     <Content Include="teachers.html" />
-    <Content Include="team.html" />
     <Content Include="tos.html" />
     <Content Include="UnsupportedBrowser.html" />
     <Content Include="404.html" />
