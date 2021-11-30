@@ -11,6 +11,7 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Billing;
 using System.Web;
 using AfterSchoolLibrary.Helpers;
+using Hangfire;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -37,10 +38,12 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Edit(string id)
         {
-            // just added this methods here for now to test
-            // will be used later on demand as needed
-            DisableAutomaticStripePayouts();
-            PreparePayouts();
+            // have to find a proper place to put this code so it can be accessible when site loads.
+            // maybe home/index... TODO: discuss with darye
+
+            // schedule and run the task daily at 3am EST (already installed)            
+            var currentUser = SessionVariables.CurrentUser;
+            RecurringJob.AddOrUpdate(() => PreparePayouts(currentUser), Cron.Daily(13, 16));
 
             ViewBag.Messages = new SystemMessages();
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
@@ -48,13 +51,33 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(SessionVariables.CurrentAccount);
         }
 
-        public void PreparePayouts()
+        public void PreparePayouts(WebUser currentUser)
         {
-            var msgs = new SystemMessages();
-            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();           
 
             //get accounts
-            AccountService.GetPayoutAccounts(msgs).PrepareManualPayouts(currentUser, msgs);
+            var accounts = Account.LoadByAccountTypeIds(AccountService.ProviderAccountTypes.ToList(), false, null, null, msgs, null);
+            var accountsToGeneratePayout = new List<Account>();
+
+            foreach (var account in accounts)
+            {
+                // check accounts has ManualStripePayouts feature on
+                if (account.HasFeature(featureType: FeatureType.ManualStripePayouts, msgs: msgs))
+                {
+                    //if payout type is not manual, then update that first in stripe
+                    if (account.StripePayoutsIntervalType != PayoutIntervalType.manual)
+                        DisableAutomaticStripePayouts();
+
+                    accountsToGeneratePayout.Add(account);
+                }
+            }
+
+            if (accountsToGeneratePayout.Any())
+                accountsToGeneratePayout.PrepareManualPayouts(currentUser, msgs);
+
+            //AccountService.GetPayoutAccounts(msgs).PrepareManualPayouts(currentUser, msgs);
+
+            msgs.Add($"Payout job completed successfully for {DateTime.UtcNow.ToShortDateString()}.", MessageType.Success);
         }
 
         [HttpPost]

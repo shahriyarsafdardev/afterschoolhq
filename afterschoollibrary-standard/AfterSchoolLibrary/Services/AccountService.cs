@@ -2504,9 +2504,8 @@ namespace AfterSchoolLibrary.Services
 
         //Get the accounts that has Automatic Payouts disabled 
         public static List<Account> GetPayoutAccounts(SystemMessages msgs = null, DatabaseConnection dc = null) =>
-            Account.LoadByStripePayoutsIntervalTypeByIsActiveByIsDeleted(StripePayoutsIntervalType: PayoutIntervalType.manual, IsActive: true, IsDeleted: false, msgs: msgs, dc: dc);           
-
-        //prepare payouts
+            Account.LoadByStripePayoutsIntervalTypeByIsActiveByIsDeleted(StripePayoutsIntervalType: PayoutIntervalType.manual, IsActive: true, IsDeleted: false, msgs: msgs, dc: dc);
+        
         public static void PrepareManualPayouts(this List<Account> accounts, WebUser loggedInUser,  SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             foreach (var account in accounts)
@@ -2515,26 +2514,10 @@ namespace AfterSchoolLibrary.Services
                 if (account.CanReceiveACHDeposits(msgs: msgs, dc: dc) && !account.CanReceiveCheckPayouts(msgs: msgs, dc: dc))
                 {
                     //prepare payouts
-
-                    //this way system will get all the transactions and will create single payout, no matter how much activities are invlolved
-                    //var transactions = account.GetTransactions(msgs: msgs, dc: dc);
-
-                    //if (transactions.Any())
-                    //    account.RequestNewPayout(transactions: transactions, loggedInUser: loggedInUser, msgs: msgs, dc: dc);
-
                     var activities = account.GetPublishedActivities(msgs, dc);                   
 
                     foreach (var activity in activities)
                     {
-                        //var paymentPlans = activity.GetActivePaymentPlans(msgs, dc);
-                        //var transactiondIds = new List<int>();
-
-                        //foreach (var paymentPlan in paymentPlans)
-                        //    if (paymentPlan.IsActive)
-                        //    {
-
-                        //    }
-
                         var transactions = new List<Transaction>();
                         var activityPayments = ActivityPayment.LoadByParticipationObject(ParticipationObjectId: activity.ID.Value, 
                             ParticipationObjectTypeId: ParticipationObjectType.Activity, 
@@ -2542,13 +2525,17 @@ namespace AfterSchoolLibrary.Services
                             msgs: msgs, 
                             dc: dc);
 
+                        // load only those transactions which aren't payed out yet
                         foreach (var activityPayment in activityPayments)
-                            transactions.Add(activityPayment.GetTransaction(msgs: msgs, dc: dc));
-
-                        var statementDescriptor = $"AHQ {account.Name.MaxChars(10)} {activity.Name.MaxChars(7)}";
+                        {
+                            var transaction = activityPayment.GetTransactionForPayout(msgs: msgs, dc: dc);
+                            if (transaction.IsNotEmpty())
+                                transactions.Add(transaction);
+                        }
 
                         if (transactions.Any())
                         {
+                            var statementDescriptor = $"AHQ {account.Name.MaxChars(10)} {activity.Name.MaxChars(7)}";
                             var payout = account.RequestNewPayout(transactions: transactions, statementDescriptor: statementDescriptor, loggedInUser: loggedInUser, msgs: msgs, dc: dc);
 
                             if (payout.IsNotEmpty() && msgs.HasNoErrors())

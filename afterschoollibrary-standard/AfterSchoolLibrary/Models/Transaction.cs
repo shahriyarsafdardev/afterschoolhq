@@ -1481,6 +1481,39 @@ namespace AfterSchoolLibrary.Models
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
+        /// <summary>
+        /// This method is created to get transaction for activity payment
+        /// it will be used to create manual payouts
+        /// </summary>
+        /// <param name="TransactionId"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns>Transaction</returns>
+        public static Transaction LoadTransactionReadyPayout(int TransactionId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var sql = $@"
+                            SELECT TOP 1 *
+                            FROM [Transaction] 
+                            WHERE 
+                                Id = {TransactionId} AND 
+                                PayoutId IS NULL AND 
+                                IsDeleted = 0 AND 
+                                (
+                                    (PaymentTypeId = 1 and GETDATE() >= DATEADD(day, 2, CreateDate)) OR  -- cc 2 days
+                                    (PaymentTypeId = 5 and GETDATE() >= DATEADD(day, 5, CreateDate))     -- ach 5 days
+								)";
+
+            var dt = dq.ExecuteSelect(sql, msgs);
+
+            if (dt.Rows.Any())
+                return LoadObject(dt.Rows[0]);
+
+            return null;
+        }
+
         #endregion
     }
 }
