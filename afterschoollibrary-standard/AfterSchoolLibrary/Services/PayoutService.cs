@@ -212,6 +212,7 @@ namespace AfterSchoolLibrary.Services
                 amount: payout.Amount.Value,
                 externalAccountId: null,
                 connectedAccountId: null,
+                statementDescriptor: payout.StatementDescriptor.IsNotEmpty() ? payout.StatementDescriptor : "AHQ Payout",
                 metaData: new Dictionary<string, string>()
                 {
                     { "AccountUid", payoutAccount.Uid.ToString() },

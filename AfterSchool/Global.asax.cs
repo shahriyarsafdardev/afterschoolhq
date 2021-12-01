@@ -23,7 +23,7 @@ namespace AfterSchool
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
             DBConfig.RegisterDatabase();
-            AppConfig.Init();            
-        }        
+            AppConfig.Init();
+        }
     }
 }

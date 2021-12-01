@@ -2501,51 +2501,7 @@ namespace AfterSchoolLibrary.Services
             return AccountRelationship.LoadByDenied(hostAccount.ID.Value, accountType, msgs, dc)
                 .Select(accountRelationship => accountRelationship.GetVisitorAccount(msgs, dc))
                 .ToList();
-        }
-
-        //Get the accounts that has Automatic Payouts disabled 
-        public static List<Account> GetPayoutAccounts(SystemMessages msgs = null, DatabaseConnection dc = null) =>
-            Account.LoadByStripePayoutsIntervalTypeByIsActiveByIsDeleted(StripePayoutsIntervalType: PayoutIntervalType.manual, IsActive: true, IsDeleted: false, msgs: msgs, dc: dc);
-        
-        public static void PrepareManualPayouts(this List<Account> accounts, WebUser loggedInUser,  SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            foreach (var account in accounts)
-            {
-                //darye check this logic, here I'm checking that account are not getting paid via check and we can use them in manual payouts
-                if (account.CanReceiveACHDeposits(msgs: msgs, dc: dc) && !account.CanReceiveCheckPayouts(msgs: msgs, dc: dc))
-                {
-                    //prepare payouts
-                    var activities = account.GetPublishedActivities(msgs, dc);                   
-
-                    foreach (var activity in activities)
-                    {
-                        var transactions = new List<Transaction>();
-                        var activityPayments = ActivityPayment.LoadByParticipationObject(ParticipationObjectId: activity.ID.Value, 
-                            ParticipationObjectTypeId: ParticipationObjectType.Activity, 
-                            IsDeleted: false, 
-                            msgs: msgs, 
-                            dc: dc);
-
-                        // load only those transactions which aren't payed out yet
-                        foreach (var activityPayment in activityPayments)
-                        {
-                            var transaction = activityPayment.GetTransactionForPayout(msgs: msgs, dc: dc);
-                            if (transaction.IsNotEmpty())
-                                transactions.Add(transaction);
-                        }
-
-                        if (transactions.Any())
-                        {
-                            var statementDescriptor = $"AHQ {account.Name.MaxChars(10)} {activity.Name.MaxChars(7)}";
-                            var payout = account.RequestNewPayout(transactions: transactions, statementDescriptor: statementDescriptor, loggedInUser: loggedInUser, msgs: msgs, dc: dc);
-
-                            if (payout.IsNotEmpty() && msgs.HasNoErrors())
-                                payout.Approve(loggedInUser: loggedInUser, msgs: msgs, dc: dc);
-                        }
-                    }
-                }
-            }
-        }
+        }        
 
         public static List<Location> GetVisitorLocations(this Account visitorAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -3189,11 +3145,6 @@ namespace AfterSchoolLibrary.Services
         public static List<Transaction> GetTransactions(this Account account, string search, DateTime? startDate, DateTime? endDate, bool isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Transaction.LoadByAccountId(account.ID.Value, search, startDate, endDate, null, isDeleted, start, length, msgs, dc);
-        }
-
-        public static List<Transaction> GetTransactions(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return Transaction.LoadTransactionReadyToPayoutForBillerAccount(BillerAccountId: account.ID.Value, msgs: msgs, dc: dc);
         }
 
         public static List<Transaction> GetTransactions(this Account account, string search, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -4173,6 +4124,7 @@ namespace AfterSchoolLibrary.Services
                 StripeHelper.CreatePayout(
                     amount: payout.Amount.Value,
                     externalAccountId: stripeAccount.ExternalAccounts.First().Id,
+                    statementDescriptor: payout.StatementDescriptor.IsNotEmpty() ? payout.StatementDescriptor : "AHQ Payout",
                     connectedAccountId: account.StripeUserId,
                     metaData: metaData,
                     msgs: msgs);
@@ -4683,6 +4635,46 @@ namespace AfterSchoolLibrary.Services
            
             msgs.Add($"Payout job completed successfully on {DateTime.UtcNow.ToShortDateString()}.", MessageType.Success);
             Helpers.Utilities.SystemLog(msgs);
+        }
+
+        public static void PrepareManualPayouts(this List<Account> accounts, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            foreach (var account in accounts)
+            {
+                //darye check this logic, here I'm checking that account are not getting paid via check and we can use them in manual payouts
+                if (account.CanReceiveACHDeposits(msgs: msgs, dc: dc) && !account.CanReceiveCheckPayouts(msgs: msgs, dc: dc))
+                {
+                    //prepare payouts
+                    var activities = account.GetPublishedActivities(msgs, dc);
+
+                    foreach (var activity in activities)
+                    {
+                        var transactions = new List<Transaction>();
+                        var activityPayments = ActivityPayment.LoadByParticipationObject(ParticipationObjectId: activity.ID.Value,
+                            ParticipationObjectTypeId: ParticipationObjectType.Activity,
+                            IsDeleted: false,
+                            msgs: msgs,
+                            dc: dc);
+
+                        // load only those transactions which aren't payed out yet
+                        foreach (var activityPayment in activityPayments)
+                        {
+                            var transaction = activityPayment.GetTransactionForPayout(msgs: msgs, dc: dc);
+                            if (transaction.IsNotEmpty())
+                                transactions.Add(transaction);
+                        }
+
+                        if (transactions.Any())
+                        {
+                            var statementDescriptor = $"AHQ {account.Name.MaxChars(10)} {activity.Name.MaxChars(7)}";
+                            var payout = account.RequestNewPayout(transactions: transactions, statementDescriptor: statementDescriptor, loggedInUser: loggedInUser, msgs: msgs, dc: dc);
+
+                            if (payout.IsNotEmpty() && msgs.HasNoErrors())
+                                payout.Approve(loggedInUser: loggedInUser, msgs: msgs, dc: dc);
+                        }
+                    }
+                }
+            }
         }
 
         #endregion

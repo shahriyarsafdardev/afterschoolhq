@@ -421,7 +421,7 @@ namespace AfterSchoolLibrary.Billing
             return new PayoutService(StripeClient);
         }
 
-        public static Payout CreatePayout(decimal amount, string externalAccountId, string connectedAccountId, Dictionary<string, string> metaData, SystemMessages msgs)
+        public static Payout CreatePayout(decimal amount, string externalAccountId, string connectedAccountId, string statementDescriptor, Dictionary<string, string> metaData, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -432,7 +432,7 @@ namespace AfterSchoolLibrary.Billing
                 Destination = externalAccountId,
                 Metadata = metaData,
                 Method = "standard",
-                StatementDescriptor = "AHQ Payout"
+                StatementDescriptor = statementDescriptor
             };
 
             var requestOptions = new RequestOptions()
