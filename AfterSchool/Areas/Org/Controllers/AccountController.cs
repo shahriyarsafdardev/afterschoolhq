@@ -11,7 +11,6 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Billing;
 using System.Web;
 using AfterSchoolLibrary.Helpers;
-using Hangfire;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
