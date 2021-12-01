@@ -332,7 +332,11 @@
 
                     if (participationObject.Cost > 0 || paymentPlans.Any())
                     {
-                        <div id="disabled-coupon-container" class="row text-center padding-v-20 hide">
+                        if ((participationObject.Cost > 0 || postPayPlan.IsNotEmpty()) ||
+                            participationObject.SubscriptionPlans.Any() ||
+                            participationObject.PaymentPlans.Any())
+                        {
+                            <div id="disabled-coupon-container" class="row text-center padding-v-20 hide">
                             <div class="input-group col-md-4 col-md-offset-4 col-sm-12">
                                 <input type="text" class="form-control" disabled="disabled" placeholder="COUPON CODE" aria-describedby="coupon-code">
                                 <span class="input-group-addon btn btn-primary disabled">Apply</span>

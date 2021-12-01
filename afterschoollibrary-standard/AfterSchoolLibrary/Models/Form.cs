@@ -218,12 +218,7 @@ namespace AfterSchoolLibrary.Models
 
         public List<FormQuestionGroup> GetQuestionGroups(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return FormQuestionGroup.LoadByFormId(this.ID.Value, msgs, dc).OrderBy(x => x.DisplayOrder).ToList();
-        }
-
-        public List<FormQuestionGroup> GetActiveQuestionGroups(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return FormQuestionGroup.LoadActiveFormQuestionGroupByFormId(this.ID.Value, msgs, dc).OrderBy(x => x.DisplayOrder).ToList();
+            return FormQuestionGroup.LoadByFormIdByIsDeleted(this.ID.Value, false, msgs, dc).OrderBy(x => x.DisplayOrder).ToList();
         }
 
         public int GetQuestionGroupCount(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -249,7 +244,7 @@ namespace AfterSchoolLibrary.Models
             };
             msgs.AddRange(form.Save(dc: dc));
 
-            var groups = FormQuestionGroup.LoadByFormId(this.ID.Value, dc: dc);
+            var groups = this.FormTypeId == formType || formType == FormType.Registration ? FormQuestionGroup.LoadByFormId(FormId:this.ID.Value, dc:dc): new List<FormQuestionGroup>();
             foreach (var group in groups)
             {
                 var questions = FormQuestion.LoadByFormQuestionGroupId(group.ID.Value, dc: dc);
@@ -259,7 +254,7 @@ namespace AfterSchoolLibrary.Models
                 newGroup.CreateDate = DateTime.UtcNow;
                 newGroup.LastModifiedBy = newGroup.CreatedBy = loggedInUserId;
                 newGroup.FormId = form.ID;
-                newGroup.IsActive = true;
+                newGroup.IsDeleted = false;
                 msgs.AddRange(newGroup.Save(dc: dc));
 
                 questions.ForEach(question => {

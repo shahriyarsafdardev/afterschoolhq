@@ -2170,6 +2170,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
+            HandleTempMessages(msgs);
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             RegistrantsViewBag(activity, atype, msg, msgs);
             return View(activity);
@@ -2335,9 +2336,17 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult RegistrantDetail(string id)
         {
+            if (id.IsEmpty() || id.IsNotGuid())
+                return HttpNotFound();
+
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
             var registrantActivity = RegistrantActivityService.GetRegistrantActivity(id.ToGuid(), msgs);
+
+            // cant get activity, if registrantActivity doesnt exist in this context
+            if (registrantActivity.IsEmpty())
+                return HttpNotFound();
+
             var activity = currentAccount.GetActivity(registrantActivity.ParticipationObjectId.Value, msgs);
 
             ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
@@ -2489,7 +2498,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
             ViewBag.IsFullScreen = isNewActivity;
             ViewBag.Messages = msgs;
-            TempData["Messages"] = msgs;
+            SetTempMessage(msgs);
 
             if (isFromActivityHome)
                 return Redirect(activity.ShortHomePageUrl);

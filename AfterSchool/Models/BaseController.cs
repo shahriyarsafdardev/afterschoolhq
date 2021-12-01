@@ -310,6 +310,8 @@ namespace AfterSchool.Models
                 msgs.AddRange((SystemMessages)TempData["msgs"]);
         }
 
+        internal void SetTempMessage(SystemMessages msgs) => TempData["msgs"] = msgs;
+
         internal ActionResult HandleRedirectAfterLogin(string returnUrl, SystemMessages msgs = null)
         {
             ActionResult actionResult = LoginRedirect(msgs: msgs);

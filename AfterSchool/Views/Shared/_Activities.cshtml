@@ -53,7 +53,7 @@
     var managePermissionSlips = accountPackage.HasFeature(FeatureType.ManagePermissionSlips);
     var maxPermissionSlipCount = accountPackage.IsNotEmpty() ? (int)accountPackage.GetFeature(FeatureType.ManagePermissionSlips).Max.Value : 0;
     var showPermissionSlipFields = ViewBag.PagingModel?.TotalCount >= maxPermissionSlipCount ? false : true;
-    var managePermissionSlipsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManagePermissionSlips);
+    var managePermissionSlipsPackage = PackageService.GetPackageWithFeatureMaximumAvailability(FeatureType.ManagePermissionSlips, maxPermissionSlipCount);
 }
 
 @if (Model.Count == 0 && group.IsEmpty() && !hasArchivedActivities)
@@ -161,6 +161,7 @@ else
                     @if (activityType.NotIn(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
                     {
                         <th class="text-center">Grades</th>
+                        <th class="text-center">Ages</th>
                     }
                     <th class="text-center">Students</th>
                     <th></th>
@@ -343,29 +344,30 @@ else
                                     }
 
                                     @if (activity.AccountId == currentAccount.ID)
-                                    { 
+                                    {
                                         if (activityType == ActivityType.PermissionSlip)
                                         {
-	                                        if (managePermissionSlips && showPermissionSlipFields)
-	                                        {
-		                                        <button class="md-trigger btn btn-default btn-sm" data-modal="modal-copy-activity"
-				                                        onclick="ActivitySetup.setCopyActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("copy", "activity", new { id = activity.Uid.ToString(), isnew = 1 })')" @(needToUpgrade ? "disabled=\"disabled\"" : "")>
-			                                        <i class="s7-copy-file"></i> Copy
-		                                        </button>
-	                                        }
-	                                        else
-	                                        {
-		                                        <button class="md-trigger btn btn-default btn-sm" onclick="return showUpgradeMyPlan('@(managePermissionSlipsPackage.Name)',@(managePermissionSlipsPackage.ID))">
-			                                        <i class="s7-copy-file"></i> Copy
-		                                        </button>
-	                                        }
+                                            if (managePermissionSlips && showPermissionSlipFields)
+                                            {
+                                                <button class="md-trigger btn btn-default btn-sm" data-modal="modal-copy-activity"
+                                                        onclick="ActivitySetup.setCopyActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("copy", "activity", new { id = activity.Uid.ToString(), isnew = 1 })')" @(needToUpgrade ? "disabled=\"disabled\"" : "")>
+                                                    <i class="s7-copy-file"></i> Copy
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button class="md-trigger btn btn-default btn-sm showNotification" onclick="return HandleNotification('@(managePermissionSlipsPackage != null ? managePermissionSlipsPackage.Name: "")',@(managePermissionSlipsPackage != null ? managePermissionSlipsPackage.ID: 0))">
+                                                    <i class="s7-copy-file"></i> Copy
+                                                </button>
+                                                 
+                                            }
                                         }
                                         else
                                         {
-	                                        <button class="md-trigger btn btn-default btn-sm" data-modal="modal-copy-activity"
-		                                        onclick="ActivitySetup.setCopyActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("copy", "activity", new { id = activity.Uid.ToString(), isnew = 1 })')" @(needToUpgrade ? "disabled=\"disabled\"" : "")>
-		                                        <i class="s7-copy-file"></i> Copy
-	                                        </button>
+                                            <button class="md-trigger btn btn-default btn-sm" data-modal="modal-copy-activity"
+                                                    onclick="ActivitySetup.setCopyActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("copy", "activity", new { id = activity.Uid.ToString(), isnew = 1 })')" @(needToUpgrade ? "disabled=\"disabled\"" : "")>
+                                                <i class="s7-copy-file"></i> Copy
+                                            </button>
                                         }
                                     }
 
@@ -584,4 +586,15 @@ else
             location.href = '@Url.Action("index", "activity")?group=' + $(this).val();
         });
     });
+
+    function HandleNotification(packageName, packageID) {
+        if(packageID > 0 && packageName != ""){
+        //show package banner
+        showUpgradeMyPlan(packageName, packageID);
+    }
+    else {
+        //show error message
+        ShowNotification('Warning', 's7-close-circle', 'danger', 'Allowed numbers of slips has been fulfilled.');
+    }
+    }
 </script>

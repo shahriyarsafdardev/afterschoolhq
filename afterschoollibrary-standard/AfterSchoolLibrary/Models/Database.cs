@@ -14,7 +14,7 @@ namespace AfterSchoolLibrary.Models
     public class Database
     {
 		#region "ClassGenerator"
-		public static DatabaseCredentials ProductionCredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }		
+		public static DatabaseCredentials ProductionCredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
 		public static DatabaseCredentials LocalCredentials { get { return new DatabaseCredentials("localhost", "AfterSchool", "AfterSchoolUser", "Nj8Ed$wpLfJ"); } }
 		public static DatabaseCredentials CICredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
 		public static DatabaseCredentials QACredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
@@ -317,7 +317,7 @@ namespace AfterSchoolLibrary.Models
 			FormQuestion.Update(new Hashtable(){{"IsAnswerDescriptionEnabled",false}}, new Hashtable(){{"IsAnswerDescriptionEnabled", DBNull.Value}}, FormQuestion.ObjectMap, dc);
 			FormQuestionGroup.Update(new Hashtable(){{"RegistrantTypeId",0}}, new Hashtable(){{"RegistrantTypeId", DBNull.Value}}, FormQuestionGroup.ObjectMap, dc);
 			FormQuestionGroup.Update(new Hashtable(){{"QuestionGroupDataTypeId",0}}, new Hashtable(){{"QuestionGroupDataTypeId", DBNull.Value}}, FormQuestionGroup.ObjectMap, dc);
-			FormQuestionGroup.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, FormQuestionGroup.ObjectMap, dc);
+			FormQuestionGroup.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, FormQuestionGroup.ObjectMap, dc);
 			FormQuestionAnswer.Update(new Hashtable(){{"QuestionDataTypeId",0}}, new Hashtable(){{"QuestionDataTypeId", DBNull.Value}}, FormQuestionAnswer.ObjectMap, dc);
 			Registration.Update(new Hashtable(){{"PaymentTypeId",0}}, new Hashtable(){{"PaymentTypeId", DBNull.Value}}, Registration.ObjectMap, dc);
 			Registration.Update(new Hashtable(){{"CompletionStatusId",0}}, new Hashtable(){{"CompletionStatusId", DBNull.Value}}, Registration.ObjectMap, dc);
@@ -575,6 +575,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestion_FormQuestionGroupId_QuestionDataTypeId ON [FormQuestion] (FormQuestionGroupId,QuestionDataTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestionGroup_FormId ON [FormQuestionGroup] (FormId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestionGroup_FormId_RegistrantTypeId ON [FormQuestionGroup] (FormId,RegistrantTypeId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestionGroup_FormId_IsDeleted ON [FormQuestionGroup] (FormId,IsDeleted)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestionAnswer_RegistrantId ON [FormQuestionAnswer] (RegistrantId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestionAnswer_FormQuestionId_RegistrantId_RegistrationId ON [FormQuestionAnswer] (RegistrantId,FormQuestionId,RegistrationId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestionAnswer_ActivityId_RegistrantId ON [FormQuestionAnswer] (RegistrantId,ActivityId)"));
