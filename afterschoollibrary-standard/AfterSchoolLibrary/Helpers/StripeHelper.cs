@@ -248,7 +248,7 @@ namespace AfterSchoolLibrary.Billing
                 {
                     Date = tosAcceptanceDate,
                     Ip = tosIPAddress
-                }                
+                }
             };
 
             if (entityType == LegalEntityType.Company)
