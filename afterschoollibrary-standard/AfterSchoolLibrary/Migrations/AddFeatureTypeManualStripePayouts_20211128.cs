@@ -18,7 +18,7 @@ namespace AfterSchoolLibrary.Migrations
                 {
                     var webUser = WebUser.Load(1, amsgs, adc);
 
-                    // update packages, set survey feature to zero
+                    // update packages, set ManualStripePayouts feature to zero
                     Package.LoadByIsActive(true, amsgs, adc).ForEach(package => package.AddFeature(FeatureType.ManualStripePayouts, 0, webUser, amsgs, adc));
 
 
@@ -33,6 +33,12 @@ namespace AfterSchoolLibrary.Migrations
                         else
                             amsgs.Add($"{account.Name} missing package??", MessageType.Notice);
                     });
+
+                    //update accounts StripePayoutsIntervalType flag with default value i.e. daily
+                    Account.Update(updateValues: new Hashtable() { { "StripePayoutsIntervalType", (int)PayoutIntervalType.daily } },
+                       criterias: new Hashtable() { },
+                       ObjectMap: Account.ObjectMap,
+                       dc: adc);
                 },
                 uniqueIdenfier: "AddFeatureTypeManualStripePayouts_20211128",
                 msgs: msgs,

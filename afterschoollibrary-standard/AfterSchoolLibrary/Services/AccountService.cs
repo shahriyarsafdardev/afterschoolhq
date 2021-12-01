@@ -4681,7 +4681,7 @@ namespace AfterSchoolLibrary.Services
             if (accountsToGeneratePayout.Any())                
                 accountsToGeneratePayout.PrepareManualPayouts(webUser, msgs);
            
-            msgs.Add($"Payout job completed successfully for {DateTime.UtcNow.ToShortDateString()}.", MessageType.Success);
+            msgs.Add($"Payout job completed successfully on {DateTime.UtcNow.ToShortDateString()}.", MessageType.Success);
             Helpers.Utilities.SystemLog(msgs);
         }
 
