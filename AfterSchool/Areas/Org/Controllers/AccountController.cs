@@ -41,7 +41,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.IsFullScreen = GetIsFullScreen();
             return View(SessionVariables.CurrentAccount);
-        }        
+        }
 
         [HttpPost]
         public ActionResult Edit(string id, string name, string email, string phone, string uniquename, string isactive, string timezone)
