@@ -1,4 +1,6 @@
-﻿using System;
+﻿using AfterSchoolLibrary.Services;
+using Hangfire;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -14,6 +16,9 @@ namespace AfterSchool
             RollbarSharp.Configuration.DefaultEnvironment = AfterSchoolLibrary.Helpers.Utilities.GetRollbarEnvironment();
 
             AfterSchoolLibrary.Helpers.Utilities.InitializeApp();
+
+            // schedule and run the task daily at 3am EST (already installed)
+            RecurringJob.AddOrUpdate(() => AccountService.PreparePayouts(), Cron.Daily(hour: 3, minute: 0));
         }
     }
 }

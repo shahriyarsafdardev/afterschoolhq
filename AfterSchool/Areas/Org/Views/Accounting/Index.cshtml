@@ -541,7 +541,7 @@
     function requestPayout() {
         var useStripeConnectedAccount = @Json.Encode(useStripeConnectedAccount);
         var isSchoolAccount = @Json.Encode(isSchoolAccount);
-        if (useStripeConnectedAccount && isSchoolAccount) {
+        if (!useStripeConnectedAccount && isSchoolAccount) {
             $("#TransactionIds").val(this.selectedTransactions.join());
             $("#requestPayoutForm").submit();
         } else {

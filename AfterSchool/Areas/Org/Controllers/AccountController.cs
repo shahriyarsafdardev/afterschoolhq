@@ -38,47 +38,11 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Edit(string id)
         {
-            // have to find a proper place to put this code so it can be accessible when site loads.
-            // maybe home/index... TODO: discuss with darye
-
-            // schedule and run the task daily at 3am EST (already installed)            
-            var currentUser = SessionVariables.CurrentUser;
-            RecurringJob.AddOrUpdate(() => PreparePayouts(currentUser), Cron.Daily(13, 16));
-
             ViewBag.Messages = new SystemMessages();
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.IsFullScreen = GetIsFullScreen();
             return View(SessionVariables.CurrentAccount);
-        }
-
-        public void PreparePayouts(WebUser currentUser)
-        {
-            var msgs = new SystemMessages();           
-
-            //get accounts
-            var accounts = Account.LoadByAccountTypeIds(AccountService.ProviderAccountTypes.ToList(), false, null, null, msgs, null);
-            var accountsToGeneratePayout = new List<Account>();
-
-            foreach (var account in accounts)
-            {
-                // check accounts has ManualStripePayouts feature on
-                if (account.HasFeature(featureType: FeatureType.ManualStripePayouts, msgs: msgs))
-                {
-                    //if payout type is not manual, then update that first in stripe
-                    if (account.StripePayoutsIntervalType != PayoutIntervalType.manual)
-                        DisableAutomaticStripePayouts();
-
-                    accountsToGeneratePayout.Add(account);
-                }
-            }
-
-            if (accountsToGeneratePayout.Any())
-                accountsToGeneratePayout.PrepareManualPayouts(currentUser, msgs);
-
-            //AccountService.GetPayoutAccounts(msgs).PrepareManualPayouts(currentUser, msgs);
-
-            msgs.Add($"Payout job completed successfully for {DateTime.UtcNow.ToShortDateString()}.", MessageType.Success);
-        }
+        }        
 
         [HttpPost]
         public ActionResult Edit(string id, string name, string email, string phone, string uniquename, string isactive, string timezone)
@@ -1746,32 +1710,6 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
 
             return View("Billing", currentAccount);
-        }
-
-        public void DisableAutomaticStripePayouts()
-        {
-            var currentAccount = SessionVariables.CurrentAccount;
-            var msgs = new SystemMessages();
-            //var account = currentAccount.GetStripeCustomAccount(msgs);
-
-            //var paymentsEntityVM = PaymentsEntityViewModel.LoadFromStripeAccount(account);
-
-            //var vm = paymentsEntityVM.GetStripeAccountUpdateOptions(currentAccount);
-
-            //var vm = new Stripe.AccountUpdateOptions() {                
-            //    Settings = new Stripe.AccountSettingsOptions()
-            //    {
-            //        Payouts = new Stripe.AccountSettingsPayoutsOptions()
-            //        {
-            //            Schedule = new Stripe.AccountSettingsPayoutsScheduleOptions()
-            //            {
-            //                Interval = "manual"
-            //            }
-            //        }
-            //    }
-            //};
-
-            currentAccount.DisableStripePayoutForCustomAccount(msgs);
         }
     }
 }

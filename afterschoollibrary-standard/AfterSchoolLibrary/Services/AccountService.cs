@@ -1343,6 +1343,7 @@ namespace AfterSchoolLibrary.Services
                 // need to test this
                 account.StripePayoutsIntervalType = PayoutIntervalType.manual;
 
+                msgs.Add($" {account.ID}-{account.Name} updated with manual AHQ payout.", MessageType.Success);
                 msgs.AddRange(account.Save(dc));
             }
 
@@ -4653,5 +4654,37 @@ namespace AfterSchoolLibrary.Services
 
         #endregion
 
+        #region Stripe Manaul Payout
+
+        public static void PreparePayouts()
+        {
+            var msgs = new SystemMessages();
+            var webUser = WebUser.Load(1, msgs);
+
+            //get accounts
+            var accounts = Account.LoadByAccountTypeIds(AccountService.ProviderAccountTypes.ToList(), false, null, null, msgs, null);
+            var accountsToGeneratePayout = new List<Account>();
+
+            foreach (var account in accounts)
+            {
+                // check accounts has ManualStripePayouts feature on
+                if (account.HasFeature(featureType: FeatureType.ManualStripePayouts, msgs: msgs))
+                {
+                    //if payout type is not manual, then update that first in stripe
+                    if (account.StripePayoutsIntervalType != PayoutIntervalType.manual)
+                        account.DisableStripePayoutForCustomAccount(msgs);
+
+                    accountsToGeneratePayout.Add(account);
+                }
+            }
+
+            if (accountsToGeneratePayout.Any())                
+                accountsToGeneratePayout.PrepareManualPayouts(webUser, msgs);
+           
+            msgs.Add($"Payout job completed successfully for {DateTime.UtcNow.ToShortDateString()}.", MessageType.Success);
+            Helpers.Utilities.SystemLog(msgs);
+        }
+
+        #endregion
     }
 }
