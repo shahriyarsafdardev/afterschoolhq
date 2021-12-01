@@ -143,6 +143,9 @@
                         title: 'Success',
                         message: `${userName}'s type has been updated to ${newAssignmentText}.`
                     });
+                    if (newAssignmentText == "Owner") {
+                        window.location.reload();
+                    }
                 } else {
                     Notifications.showBar({
                         title: 'Error',

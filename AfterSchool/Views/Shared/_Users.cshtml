@@ -81,7 +81,7 @@
                 @if (!isAfterSchoolAdmin)
                 {
                 <td>
-                    @if (currentUserType == UserType.Administrator || currentUserType == UserType.Owner)
+                    @if (currentUserType == UserType.Administrator || currentUserType == UserType.Owner || currentUserType == UserType.TechSupport)
                     {
                         if ((user.GetUserType(currentAccount) == UserType.Administrator || user.GetUserType(currentAccount) == UserType.Owner) && currentUserType == UserType.Administrator)
                         {
