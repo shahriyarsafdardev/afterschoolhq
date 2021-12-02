@@ -4612,10 +4612,9 @@ namespace AfterSchoolLibrary.Services
         {
             foreach (var account in accounts)
             {
-                //darye check this logic, here I'm checking that account are not getting paid via check and we can use them in manual payouts
+                //check for account whether it's getting paid via check or not and based on that we can use them in manual payouts
                 if (account.CanReceiveACHDeposits(msgs: msgs, dc: dc) && !account.CanReceiveCheckPayouts(msgs: msgs, dc: dc))
                 {
-                    //prepare payouts
                     var activities = account.GetPublishedActivities(msgs, dc);
 
                     foreach (var activity in activities)
@@ -4673,7 +4672,7 @@ namespace AfterSchoolLibrary.Services
             {                
                 account.StripePayoutsIntervalType = (int)PayoutIntervalType.Manual;
 
-                msgs.Add($" {account.ID}-{account.Name} updated with manual AHQ payout.", MessageType.Success);
+                msgs.Add($"{account.ID}-{account.Name} updated with manual AHQ payout.", MessageType.Success);
                 msgs.AddRange(account.Save(dc));
             }
 
