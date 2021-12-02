@@ -87,7 +87,7 @@ namespace AfterSchoolLibrary.Helpers
         }
 
 
-        public static SystemMessages SendSurveyEmail(int surveyResponseId, int registrantId, int surveyRequestId, string code, SystemMessages msgs)
+        public static SystemMessages SendSurveyEmail(int surveyResponseId, int registrantId, int surveyRequestId, string code, int codeId, SystemMessages msgs)
         {
             msgs = msgs ?? new SystemMessages();
 
@@ -98,12 +98,15 @@ namespace AfterSchoolLibrary.Helpers
             {
                 { "Name", registrant.Name },
                 { "Link", Utilities.SurveyBaseUrl+"/survey/"+ surveyResponseId},
-                { "SignUpLink", Utilities.SurveyBaseUrl+"/onboarding/signup"},
+                { "SignUpLink", Utilities.SurveyBaseUrl+"/onboarding/signup"},                
                 { "SurveyName", survey.Name}
             };
 
             if (code.IsNotEmpty())
+            {
                 model.Add(new NameValueCollection() { { "InviteCode", code } });
+                model.Add(new NameValueCollection() { { "AutoSignUpLink", Utilities.SurveyBaseUrl + "/onboarding/signup/" + codeId } });
+            }
 
             var subject = $"You have received a survey request";
             var body = ProcessTemplate(
