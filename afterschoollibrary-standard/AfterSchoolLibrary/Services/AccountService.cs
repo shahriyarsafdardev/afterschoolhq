@@ -1320,36 +1320,6 @@ namespace AfterSchoolLibrary.Services
             return stripeAccount;
         }
 
-        public static Stripe.Account DisableStripePayoutForCustomAccount(this Account account, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            var options = new Stripe.AccountUpdateOptions()
-            {
-                Settings = new Stripe.AccountSettingsOptions()
-                {
-                    Payouts = new Stripe.AccountSettingsPayoutsOptions()
-                    {
-                        Schedule = new Stripe.AccountSettingsPayoutsScheduleOptions()
-                        {
-                            Interval = nameof(PayoutIntervalType.manual)
-                        }
-                    }
-                }
-            };
-
-            var stripeAccount = StripeHelper.UpdateCustomAccount(account.StripeUserId, options, msgs);
-
-            if (stripeAccount.IsNotEmpty())
-            {
-                // need to test this
-                account.StripePayoutsIntervalType = PayoutIntervalType.manual;
-
-                msgs.Add($" {account.ID}-{account.Name} updated with manual AHQ payout.", MessageType.Success);
-                msgs.AddRange(account.Save(dc));
-            }
-
-            return stripeAccount;
-        }
-
         public static Stripe.Account CreateStripeCustomAccount(this Account account, Stripe.AccountCreateOptions options, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var stripeAccount = StripeHelper.CreateCustomAccount(options, msgs);
@@ -2501,7 +2471,7 @@ namespace AfterSchoolLibrary.Services
             return AccountRelationship.LoadByDenied(hostAccount.ID.Value, accountType, msgs, dc)
                 .Select(accountRelationship => accountRelationship.GetVisitorAccount(msgs, dc))
                 .ToList();
-        }        
+        }
 
         public static List<Location> GetVisitorLocations(this Account visitorAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -4675,6 +4645,36 @@ namespace AfterSchoolLibrary.Services
                     }
                 }
             }
+        }
+
+        public static Stripe.Account DisableStripePayoutForCustomAccount(this Account account, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var options = new Stripe.AccountUpdateOptions()
+            {
+                Settings = new Stripe.AccountSettingsOptions()
+                {
+                    Payouts = new Stripe.AccountSettingsPayoutsOptions()
+                    {
+                        Schedule = new Stripe.AccountSettingsPayoutsScheduleOptions()
+                        {
+                            Interval = nameof(PayoutIntervalType.manual)
+                        }
+                    }
+                }
+            };
+
+            var stripeAccount = StripeHelper.UpdateCustomAccount(account.StripeUserId, options, msgs);
+
+            if (stripeAccount.IsNotEmpty())
+            {
+                // need to test this
+                account.StripePayoutsIntervalType = PayoutIntervalType.manual;
+
+                msgs.Add($" {account.ID}-{account.Name} updated with manual AHQ payout.", MessageType.Success);
+                msgs.AddRange(account.Save(dc));
+            }
+
+            return stripeAccount;
         }
 
         #endregion
