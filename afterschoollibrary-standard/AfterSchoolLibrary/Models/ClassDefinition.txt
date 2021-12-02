@@ -34,6 +34,8 @@ property: VerifiedAccount, bool, Bit
 property: IsRegistered, bool, Bit
 property: DefaultAccountId, int?, Int
 property: AllowTextMessages, bool, Bit
+property: LanguagePreference, string, NVarChar "100"
+property: isLanguagePreferenceDefault, bool, Bit
 loadmethod: Uid
 loadmethod: Uid|IsActive
 loadmethod: IsActive, List<>
@@ -1825,6 +1827,7 @@ property: UrlReferrer, string, NVarChar "400"
 property: PreviousId, int?, Int
 property: WebUserId, int?, Int
 property: AccountId, int?, Int
+property: LanguageDisplayed, string, NVarChar "100"
 join: WebUser.ID, WebUserId, LeftOuterJoin
 join: WebUser.ID, CreatedBy, LeftOuterJoin, CreatedBy
 loadmethod: WebUserId, List<>
