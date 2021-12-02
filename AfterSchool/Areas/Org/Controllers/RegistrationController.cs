@@ -538,11 +538,19 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var registration = currentAccount.GetRegistration(id.ToGuid(), msgs);
             var selectedRegistration = currentAccount.GetRegistration(r.ToGuid(), msgs);
+            // Get the uid of the activity before deleting the registration
+            var activityUid = registration.GetFirstParticipationObject(msgs).Uid;
 
             selectedRegistration.CancelAll(msgs);
 
             if (msgs.HasNoErrors())
             {
+                msgs.Add("Registration Deleted", MessageType.Success);
+                TempData["msgs"] = msgs;
+
+                if (returnurl.IsNotEmpty() && returnurl.Contains("registrants") && activityUid.IsNotEmpty())
+                    return RedirectToAction("registrants", "activity", new { id = activityUid, atype = "" });
+
                 if (returnurl.IsNotEmpty())
                     return Redirect(returnurl);
 

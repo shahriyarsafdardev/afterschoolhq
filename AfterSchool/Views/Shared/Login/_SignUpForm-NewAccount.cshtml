@@ -45,7 +45,10 @@
     </div>
 
     <div class="form-group text-center">
-        @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", ""); }
+        @if (AfterSchoolLibrary.Helpers.Utilities.IsProduction || AfterSchoolLibrary.Helpers.Utilities.IsStaging)
+        {
+            Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "");
+        }
     </div>
 
 </div>
