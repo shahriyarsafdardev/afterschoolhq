@@ -24,6 +24,7 @@ namespace AfterSchool
             BundleConfig.RegisterBundles(BundleTable.Bundles);
             DBConfig.RegisterDatabase();
             AppConfig.Init();
+
         }
     }
 }

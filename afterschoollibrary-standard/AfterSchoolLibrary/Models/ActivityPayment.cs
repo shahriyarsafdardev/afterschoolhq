@@ -402,10 +402,8 @@ namespace AfterSchoolLibrary.Models
 			return Transaction.Load(this.TransactionId.Value, msgs, dc);
 		}
 
-		public Transaction GetTransactionForPayout(SystemMessages msgs = null, DatabaseConnection dc = null)
-		{
-			return Transaction.LoadTransactionReadyPayout(this.TransactionId.Value, msgs, dc);
-		}
+		public Transaction GetTransactionForPayout(SystemMessages msgs = null, DatabaseConnection dc = null) => 
+			Transaction.LoadTransactionReadyPayout(this.TransactionId.Value, msgs, dc);
 
 		#endregion
 	}
