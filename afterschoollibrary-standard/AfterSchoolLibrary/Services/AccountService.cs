@@ -4593,10 +4593,11 @@ namespace AfterSchoolLibrary.Services
                 if (account.HasFeature(featureType: FeatureType.ManualStripePayouts, msgs: msgs))
                 {
                     //if payout type is not manual, then update that first in stripe
-                    if (account.StripePayoutsIntervalType != PayoutIntervalType.manual)
+                    if (account.StripePayoutsIntervalType != (int)PayoutIntervalType.Manual)
                         account.DisableStripePayoutForCustomAccount(msgs);
-
-                    accountsToGeneratePayout.Add(account);
+                    
+                    if (msgs.HasNoErrors())
+                        accountsToGeneratePayout.Add(account);
                 }
             }
 
@@ -4657,7 +4658,7 @@ namespace AfterSchoolLibrary.Services
                     {
                         Schedule = new Stripe.AccountSettingsPayoutsScheduleOptions()
                         {
-                            Interval = nameof(PayoutIntervalType.manual)
+                            Interval = nameof(PayoutIntervalType.Manual).ToLower()
                         }
                     }
                 }
@@ -4665,10 +4666,12 @@ namespace AfterSchoolLibrary.Services
 
             var stripeAccount = StripeHelper.UpdateCustomAccount(account.StripeUserId, options, msgs);
 
-            if (stripeAccount.IsNotEmpty())
-            {
-                // need to test this
-                account.StripePayoutsIntervalType = PayoutIntervalType.manual;
+            if (msgs.HasErrors()) 
+                return null;
+            
+            if(stripeAccount.IsNotEmpty())
+            {                
+                account.StripePayoutsIntervalType = (int)PayoutIntervalType.Manual;
 
                 msgs.Add($" {account.ID}-{account.Name} updated with manual AHQ payout.", MessageType.Success);
                 msgs.AddRange(account.Save(dc));

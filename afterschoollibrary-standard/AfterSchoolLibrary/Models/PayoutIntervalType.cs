@@ -1,7 +1,7 @@
 public enum PayoutIntervalType
 {
-	daily = 0,
-	weekly,
-	monthly,
-	manual
+	Daily = 0,
+	Weekly,
+	Monthly,
+	Manual
 }

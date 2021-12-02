@@ -393,7 +393,7 @@ property: CreditCardFeesPaidBy, FeesPaidByType, Int
 property: ConvenienceFeesPaidBy, FeesPaidByType, Int
 property: StripeChargesEnabled, bool, Bit
 property: StripePayoutsEnabled, bool, Bit
-property: StripePayoutsIntervalType, PayoutIntervalType, Int
+property: StripePayoutsIntervalType, int?, Int, , StripePayoutsIntervalType represents type of PayoutIntervalType.daily
 property: IsTest, bool, Bit
 property: IsDeleted, bool, Bit
 property: IsClaimed, bool, Bit

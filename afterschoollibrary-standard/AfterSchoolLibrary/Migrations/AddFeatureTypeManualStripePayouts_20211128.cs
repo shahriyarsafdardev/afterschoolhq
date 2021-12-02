@@ -33,12 +33,6 @@ namespace AfterSchoolLibrary.Migrations
                         else
                             amsgs.Add($"{account.Name} missing package??", MessageType.Notice);
                     });
-
-                    //update accounts StripePayoutsIntervalType flag with default value i.e. daily
-                    Account.Update(updateValues: new Hashtable() { { "StripePayoutsIntervalType", (int)PayoutIntervalType.daily } },
-                       criterias: new Hashtable() { },
-                       ObjectMap: Account.ObjectMap,
-                       dc: adc);
                 },
                 uniqueIdenfier: "AddFeatureTypeManualStripePayouts_20211128",
                 msgs: msgs,

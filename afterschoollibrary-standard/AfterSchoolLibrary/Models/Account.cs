@@ -50,7 +50,10 @@ namespace AfterSchoolLibrary.Models
 		public FeesPaidByType ConvenienceFeesPaidBy { get { return (FeesPaidByType)MDV["ConvenienceFeesPaidBy"].Value; } set { MDV["ConvenienceFeesPaidBy"].Value = value; } }
 		public bool StripeChargesEnabled { get { return (bool)MDV["StripeChargesEnabled"].Value; } set { MDV["StripeChargesEnabled"].Value = value; } }
 		public bool StripePayoutsEnabled { get { return (bool)MDV["StripePayoutsEnabled"].Value; } set { MDV["StripePayoutsEnabled"].Value = value; } }
-		public PayoutIntervalType StripePayoutsIntervalType { get { return (PayoutIntervalType)MDV["StripePayoutsIntervalType"].Value; } set { MDV["StripePayoutsIntervalType"].Value = value; } }
+		/// <summary>
+		/// StripePayoutsIntervalType represents type of PayoutIntervalType.daily
+		/// </summary>
+		public int? StripePayoutsIntervalType { get { return (int?)MDV["StripePayoutsIntervalType"].Value; } set { MDV["StripePayoutsIntervalType"].Value = value; } }
 		public bool IsTest { get { return (bool)MDV["IsTest"].Value; } set { MDV["IsTest"].Value = value; } }
 		public bool IsDeleted { get { return (bool)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
 		public bool IsClaimed { get { return (bool)MDV["IsClaimed"].Value; } set { MDV["IsClaimed"].Value = value; } }
@@ -426,7 +429,7 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static List<Account> LoadByStripePayoutsIntervalTypeByIsActiveByIsDeleted(PayoutIntervalType StripePayoutsIntervalType, bool IsActive, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Account> LoadByStripePayoutsIntervalTypeByIsActiveByIsDeleted(int StripePayoutsIntervalType, bool IsActive, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
