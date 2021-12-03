@@ -397,7 +397,6 @@ namespace AfterSchool.Controllers
             ViewBag.CanRegisterFor = true;
             ViewBag.Session = session;
             ViewBag.AccountProfile = accountProfile;
-            ViewBag.InsideActDetails = activityname;
 
             // LOG: Someone Viewed ParticipationObjectType ParticipationObjectName by Account AccountName
             SessionVariables.WebSession.LogActivity(
