@@ -177,23 +177,22 @@ namespace AfterSchoolLibrary.Services
         {
             var useConnectedAccount = checkoutObject.BillingAccount.UseStripeConnectDuringCheckout(msgs, dc);
             var usePlatformFees = useConnectedAccount && !checkoutObject.OverrideAmount.HasValue;
-            var quantity = checkoutObject.ClassQuantity;
 
             return CreateNew(
                 checkoutObject.PayingAccount,
                 checkoutObject.BillingAccount,
                 checkoutObject.ConvenienceFeePayer,
                 checkoutObject.CreditCardFeePayer,
-                checkoutObject.OverrideAmount ?? checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc) * quantity,
+                checkoutObject.OverrideAmount ?? checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc),
                 checkoutObject.ParticipationObject?.Name,
                 checkoutObject.Purchase?.ID,
                 transactionType,
                 checkoutObject.PaymentType,
                 checkoutObject.PaymentSourceType,
-                usePlatformFees ? checkoutObject.GetPlatformFlatFeeWithCoupon(msgs, dc) * quantity : new decimal?(), 
-                usePlatformFees ? checkoutObject.GetPlatformPercentFeeWithCoupon(msgs, dc) * quantity : new decimal?(),
-                checkoutObject.ConvenienceFeeOverrideAmount ?? checkoutObject.GetTotalConvenienceFeesToday(msgs, dc) * quantity,
-                checkoutObject.PaymentTypeFeeOverrideAmount ?? checkoutObject.GetTotalCreditCardFeesToday(msgs, dc) * quantity,
+                usePlatformFees ? checkoutObject.GetPlatformFlatFeeWithCoupon(msgs, dc) : new decimal?(), 
+                usePlatformFees ? checkoutObject.GetPlatformPercentFeeWithCoupon(msgs, dc) : new decimal?(),
+                checkoutObject.ConvenienceFeeOverrideAmount ?? checkoutObject.GetTotalConvenienceFeesToday(msgs, dc),
+                checkoutObject.PaymentTypeFeeOverrideAmount ?? checkoutObject.GetTotalCreditCardFeesToday(msgs, dc),
                 checkoutObject.StripeChargeId,
                 checkoutObject.Description,
                 checkoutObject.Date,
