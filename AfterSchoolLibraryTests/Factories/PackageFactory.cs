@@ -88,6 +88,7 @@ namespace AfterSchoolLibraryTests.Factories
             PackageFeatureFactory.Create(obj, FeatureType.UseStripeConnectedAccount, 1.ToDecimal(), msgs, dc);
             PackageFeatureFactory.Create(obj, FeatureType.ViewInsights, 1.ToDecimal(), msgs, dc);
             PackageFeatureFactory.Create(obj, FeatureType.WaitingList, 1.ToDecimal(), msgs, dc);
+            PackageFeatureFactory.Create(obj, FeatureType.ManualStripePayouts, 1.ToDecimal(), msgs, dc);
 
             return obj;
         }

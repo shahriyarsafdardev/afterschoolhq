@@ -2705,5 +2705,57 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(expected: (int)PayoutIntervalType.Manual, actual: billerAccount.StripePayoutsIntervalType);
             Assert.True(msgs.HasMessageContainingText($"{billerAccount.ID}-{billerAccount.Name} updated with manual AHQ payout."));
         }
+
+        [Theory(DisplayName = "Basic Test for PrepareManualPayouts")]
+        [InlineData(100)]
+        public void PrepareManualPayoutsTest(decimal amount)
+        {
+            // Arrange
+            var billingAccountOwner = WebUserFactory.Create("billingUser", "A", "billingUserA@test.com", true, msgs, dc);
+            var billingAccount = AccountFactory.CreateAccountWithFreePackage(accountName: "billingAccount-A", accountEmail: billingAccountOwner.Email, user: billingAccountOwner, accountType: AccountType.School,
+                stripePayoutsEnabled: true, stripeChargesEnabled: true, payoutIntervalType: PayoutIntervalType.Daily, msgs: msgs, dc: dc);
+
+            var purchasingAccountOwner = WebUserFactory.Create("purchasingUser", "A", "purchasingUserA@test.com", true, msgs, dc);
+            var purchasingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", purchasingAccountOwner, AccountType.Registrant, msgs, dc);
+
+            var period = RegistrationPeriodFactory.Create(billingAccount, msgs, dc);
+            var activity = ActivityFactory.Create(account: billingAccount, costPerRegistrant: amount, msgs: msgs, dc: dc);
+            msgs.AddRange(period.AddActivity(activity, true, billingAccountOwner.ID.Value, dc));
+            activity.Publish(billingAccountOwner, msgs, dc);
+
+            var registrant = RegistrantFactory.Create(billingAccount, isMaster: false, msgs, dc: dc);
+            var transaction = TransactionFactory.CreateTransactionOfPastDate(billerAccount: billingAccount, payerAccount: purchasingAccount, amount: amount, paymentType: PaymentType.CreditCard, msgs: msgs, dc: dc);
+            var activityPayment = ActivityPaymentFactory.Create(account: billingAccount, amount: amount, activity: activity, registrant: registrant, transaction: transaction, msgs: msgs, dc: dc);
+
+            // Update stripe account and customer to billerAccount
+            AccountFactory.CreateStripeAccountAndCustomer(account: billingAccount, msgs: msgs, dc: dc);
+
+            // Act
+            AccountService.PreparePayouts(msgs: msgs, dc: dc);
+
+            // Assert
+            Assert.True(msgs.HasNoErrors());
+            Assert.True(msgs.HasMessageContainingText($"Account {billingAccount.Name}({billingAccount.ID}) updated with manual AHQ payout."));
+            Assert.True(msgs.HasMessageContainingText($"Payout job completed successfully on {DateTime.UtcNow.ToShortDateString()}."));
+
+            // check payout
+            var payout = billingAccount.GetLastPayout(msgs, dc);
+            Assert.NotNull(payout);
+            Assert.Equal(billingAccount.ID.Value, payout.AccountId);
+            Assert.Equal(amount, payout.Amount);
+            Assert.Equal(PayoutStatus.Completed, payout.PayoutStatusId);
+            Assert.Equal(PaymentType.ACH, payout.PaymentTypeId);
+            Assert.Equal($"AHQ {billingAccount.Name.MaxChars(10)} {activity.Name.MaxChars(7)}", payout.StatementDescriptor);
+
+            // verify status of stripe account
+            var stripeAccount = StripeHelper.GetCustomAccount(stripeAccountId: billingAccount.StripeUserId, msgs: msgs);
+            Assert.NotNull(stripeAccount);
+            Assert.Equal(stripeAccount.Settings.Payouts.Schedule.Interval, nameof(PayoutIntervalType.Manual).ToLower());
+
+            // verify payout amount of stripe
+            var stripePayout = StripeHelper.GetPayout(payoutId: payout.ExternalPayoutId, stripeAccountId: stripeAccount.Id, msgs: msgs);
+            Assert.NotNull(stripePayout);
+            Assert.Equal(payout.Amount, stripePayout.Amount / 100);
+        }
     }
 }

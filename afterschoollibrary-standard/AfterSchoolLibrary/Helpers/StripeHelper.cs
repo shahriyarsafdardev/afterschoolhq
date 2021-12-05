@@ -455,6 +455,28 @@ namespace AfterSchoolLibrary.Billing
             return stripePayout;
         }
 
+        public static Stripe.Payout GetPayout(string payoutId, string stripeAccountId, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var requestOptions = new RequestOptions();
+            if (stripeAccountId.IsNotEmpty())
+                requestOptions.StripeAccount = stripeAccountId;
+
+            Payout stripePayout = null;
+
+            try
+            {
+                stripePayout = GetPayoutService().Get(payoutId, null, requestOptions);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add($"No Stripe Payout found with ID: {payoutId}", MessageType.Notice, ex);
+            }
+
+            return stripePayout;
+        }
+
         #endregion
 
         #region StripeFiles

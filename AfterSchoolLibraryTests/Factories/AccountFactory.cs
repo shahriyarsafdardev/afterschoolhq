@@ -36,6 +36,19 @@ namespace AfterSchoolLibraryTests.Factories
             return obj;
         }
 
+        public static Account CreateAccountWithFreePackage(string accountName, string accountEmail, WebUser user, AccountType accountType, bool stripeChargesEnabled, bool stripePayoutsEnabled, PayoutIntervalType payoutIntervalType, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var obj = new Account() { OwnerId = user.ID, Name = accountName, Email = accountEmail, IsDeleted = false,
+                AccountTypeId = accountType, StripeChargesEnabled = stripeChargesEnabled, StripePayoutsEnabled = stripePayoutsEnabled, StripePayoutsIntervalType = (int)payoutIntervalType
+            };
+            msgs.AddRange(obj.Save(dc: dc));
+
+            var package = PackageFactory.CreateFreePackage(msgs, dc);
+            var accountPackage = AccountPackageFactory.Create(obj, package, msgs, dc);
+
+            return obj;
+        }
+
         public static Account CreateAccount(WebUser user, AccountType accountType, bool stripeChargesEnabled, bool stripePayoutsEnabled, string stripeUserId, SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new Account() { OwnerId = user.ID, Name = "Test Account", Email = "test@test.com", AccountTypeId = accountType, 

@@ -4066,6 +4066,7 @@ namespace AfterSchoolLibrary.Services
 
             return Math.Round(feeAmount / totalCost, 4);
         }
+
         public static void SendStripePayout(this Account account, Payout payout, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var requestor = payout.GetRequestor(msgs, dc);
@@ -4091,13 +4092,16 @@ namespace AfterSchoolLibrary.Services
 
                 var stripeAccount = account.GetStripeCustomAccount(msgs);
 
-                StripeHelper.CreatePayout(
+                var stripePayout = StripeHelper.CreatePayout(
                     amount: payout.Amount.Value,
                     externalAccountId: stripeAccount.ExternalAccounts.First().Id,
                     statementDescriptor: payout.StatementDescriptor.IsNotEmpty() ? payout.StatementDescriptor : "AHQ Payout",
                     connectedAccountId: account.StripeUserId,
                     metaData: metaData,
                     msgs: msgs);
+
+                if (msgs.HasNoErrors() && stripePayout.IsNotEmpty())
+                    payout.SetExternalPayoutId(externalPayoutId: stripePayout.Id, loggedInUser: loggedInUser, msgs: msgs, dc: dc);
             }
         }
 
@@ -4578,34 +4582,44 @@ namespace AfterSchoolLibrary.Services
 
         #region Stripe Manaul Payout
 
-        public static void PreparePayouts()
+        public static SystemMessages PreparePayouts(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
-            var webUser = WebUser.Load(1, msgs);
+            if (msgs.IsEmpty())
+                msgs = new SystemMessages();
+
+            msgs.Add($"Payout job started on at {DateTime.UtcNow.ToShortDateTimeString()}.", MessageType.Success);
+
+            var webUser = WebUser.Load(id: 1, msgs: msgs, dc: dc); //load admin first            
 
             //get accounts
-            var accounts = Account.LoadByAccountTypeIds(AccountService.ProviderAccountTypes.ToList(), false, null, null, msgs, null);
+            var accounts = Account.LoadByAccountTypeIds(accountTypes: AccountService.ProviderAccountTypes.ToList(), isDeleted: false, start: null, length: null, msgs: msgs, dc: dc);
             var accountsToGeneratePayout = new List<Account>();
 
             foreach (var account in accounts)
-            {
+            {                
                 // check accounts has ManualStripePayouts feature on
-                if (account.HasFeature(featureType: FeatureType.ManualStripePayouts, msgs: msgs))
+                if (account.HasFeature(featureType: FeatureType.ManualStripePayouts, msgs: msgs, dc: dc))
                 {
                     //if payout type is not manual, then update that first in stripe
                     if (account.StripePayoutsIntervalType != (int)PayoutIntervalType.Manual)
-                        account.DisableStripePayoutForCustomAccount(msgs);
+                        account.DisableStripePayoutForCustomAccount(msgs: msgs, dc: dc);
                     
                     if (msgs.HasNoErrors())
                         accountsToGeneratePayout.Add(account);
+
+                    // if there is no user for Id = 1 (we have this admin user in all environment)
+                    if (webUser.IsEmpty())
+                        webUser = account.GetAccountOwner(msgs, dc);
                 }
             }
 
-            if (accountsToGeneratePayout.Any())                
-                accountsToGeneratePayout.PrepareManualPayouts(webUser, msgs);
-           
-            msgs.Add($"Payout job completed successfully on {DateTime.UtcNow.ToShortDateString()}.", MessageType.Success);
-            Helpers.Utilities.SystemLog(msgs);
+            if (accountsToGeneratePayout.Any())
+                accountsToGeneratePayout.PrepareManualPayouts(loggedInUser: webUser, msgs: msgs, dc: dc);
+
+            if (msgs.HasNoErrors())
+                msgs.Add($"Payout job completed at {DateTime.UtcNow.ToShortDateTimeString()}.", MessageType.Success);
+
+            return msgs;
         }
 
         public static void PrepareManualPayouts(this List<Account> accounts, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -4615,7 +4629,7 @@ namespace AfterSchoolLibrary.Services
                 //check for account whether it's getting paid via check or not and based on that we can use them in manual payouts
                 if (account.CanReceiveACHDeposits(msgs: msgs, dc: dc) && !account.CanReceiveCheckPayouts(msgs: msgs, dc: dc))
                 {
-                    var activities = account.GetPublishedActivities(msgs, dc);
+                    var activities = account.GetPublishedActivities(msgs: msgs, dc: dc);
 
                     foreach (var activity in activities)
                     {
@@ -4672,7 +4686,7 @@ namespace AfterSchoolLibrary.Services
             {                
                 account.StripePayoutsIntervalType = (int)PayoutIntervalType.Manual;
 
-                msgs.Add($"{account.ID}-{account.Name} updated with manual AHQ payout.", MessageType.Success);
+                msgs.Add($"Account {account.Name}({account.ID}) updated with manual AHQ payout.", MessageType.Success);
                 msgs.AddRange(account.Save(dc));
             }
 

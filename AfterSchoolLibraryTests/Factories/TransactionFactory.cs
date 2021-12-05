@@ -1,6 +1,7 @@
 ﻿using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
+using System;
 
 namespace AfterSchoolLibraryTests.Factories
 {
@@ -11,6 +12,22 @@ namespace AfterSchoolLibraryTests.Factories
             var obj = new Transaction()
             {
                 Amount = 13.95.ToDecimal(),
+                BillerAccountId = billerAccount.ID,
+                PayerAccountId = payerAccount.ID,
+                PaymentTypeId = paymentType,
+                Description = "User purchase",
+                TransactionTypeId = TransactionType.Charge
+            };
+            msgs.AddRange(obj.Save(dc));
+            return obj;
+        }
+
+        public static Transaction CreateTransactionOfPastDate(Account billerAccount, Account payerAccount, decimal amount, PaymentType paymentType, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var obj = new Transaction()
+            {
+                CreateDate = paymentType == PaymentType.ACH ? DateTime.Now.AddDays(-6) : DateTime.Now.AddDays(-3), // 5 days for ACH and 2 days for CC
+                Amount = amount,
                 BillerAccountId = billerAccount.ID,
                 PayerAccountId = payerAccount.ID,
                 PaymentTypeId = paymentType,

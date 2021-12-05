@@ -20,7 +20,7 @@ namespace AfterSchool
             app.UseHangfireServer();
 
             // schedule and run the task daily at 3am EST
-            RecurringJob.AddOrUpdate(() => AccountService.PreparePayouts(), Cron.Daily(hour: 3, minute: 00));
+            RecurringJob.AddOrUpdate(() => AccountService.PreparePayouts(null, null), Cron.Daily(hour: 3, minute: 00));
         }
     }
 }
