@@ -714,9 +714,16 @@ namespace AfterSchool.Controllers
             // If coupon is valid we update the amount shown to the user here
             if (coupon.IsNotEmpty() && coupon.ID.IsNotEmpty() && coupon.DoesApplyToRegistrationFee())
             {
-                calculatedAmountACH = coupon.GetDiscountedValue(amount);
-                calculatedAmountCC = calculatedAmountACH + ccFee;
+                var discountedAmount = coupon.GetDiscountedValue(amount);
+
+                // ACH amount, since we don't have any transaction fees on ACH, we can directly pass discounted amount
+                calculatedAmountACH = discountedAmount;
+
+                // CC amount with ccFee. we had to kept ccFee out of discounted value because of per class registration
+                // if student opted for 2 classes, fees should be calculated per class
+                calculatedAmountCC = discountedAmount + ccFee;
                 calculatedCCFee = ccFee;
+
                 discountString = coupon.GetDiscountString();
             }
 
