@@ -67,18 +67,19 @@
             width: 100%;
             height: 100%;
         }
+
     .goog-te-banner-frame {
         display: none;
-        height:0 !important;
-        visibility:hidden
+        height: 0 !important;
+        visibility: hidden
     }
 </style>
 
 @{
     Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", Model, new ViewDataDictionary() {
-        { "LoginReturnUrl", Model.HomePageUrl },
-        { "IsAccount", true }
-    });
+{ "LoginReturnUrl", Model.HomePageUrl },
+{ "IsAccount", true }
+});
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -409,8 +410,7 @@
                                     frameborder="0"
                                     style="border:0"
                                     src="https://www.google.com/maps/embed/v1/place?q=@Url.Encode(location.FormatAddressWithoutName())&key=@AfterSchoolLibrary.Helpers.GoogleHelper.Maps.ApiKey"
-                                    allowfullscreen>
-                            </iframe>
+                                    allowfullscreen></iframe>
                         </div>
                     </div>
                 }
@@ -698,4 +698,57 @@
 {
     @{ Html.RenderPartial("~/Views/Shared/Registration/_ShareMetaTags.cshtml", new RegistrationHeaderViewModel(Model, accountProfile)); }
 
+}
+
+@section scripts{
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({ pageLanguage: 'en', includedLanguages: 'en,es,fr,pt', layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL }, 'google_translate_element');
+        }
+
+        function triggerHtmlEvent(element, eventName) {
+            var event;
+            if (document.createEvent) {
+                event = document.createEvent('HTMLEvents');
+                event.initEvent(eventName, true, true);
+                element.dispatchEvent(event);
+            } else {
+                event = document.createEventObject();
+                event.eventType = eventName;
+                element.fireEvent('on' + event.eventType, event);
+            }
+        }
+
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <script>
+        $(document).ready(function () {
+            $(document).on('click', '.languageOption', function () {
+                var value = $(this).attr("data-lang");
+                $("#dropdownMenuButton").html($(this).attr("data-text"));
+
+                var selectIndex = 0;
+                var a = document.querySelector("#google_translate_element select");
+                switch (value) {
+                    case "en":
+                        selectIndex = 0;
+                        break;
+                    case "es":
+                        selectIndex = 1;
+                        break;
+                    case "fr":
+                        selectIndex = 2;
+                        break;
+                    case "pt":
+                        selectIndex = 3;
+                        break;
+
+                }
+                a.selectedIndex = selectIndex;
+                a.dispatchEvent(new Event('change'));
+
+            })
+
+        })
+    </script>
 }
