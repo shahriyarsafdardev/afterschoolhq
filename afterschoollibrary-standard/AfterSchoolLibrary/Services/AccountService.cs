@@ -3921,7 +3921,7 @@ namespace AfterSchoolLibrary.Services
 
         public static bool CanProcessPayments(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (!account.GetAccountOwner(msgs, dc).VerifiedAccount)
+            if (!account.HasAccountOwner || !account.GetAccountOwner(msgs, dc).VerifiedAccount)
                 return false;
 
             var paymentFeatures = new List<FeatureType>() { FeatureType.UseStripeConnectedAccount, FeatureType.AcceptPayments };
