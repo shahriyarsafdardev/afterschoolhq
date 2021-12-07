@@ -54,12 +54,21 @@ namespace AfterSchool.Areas.User.Controllers
 
                     ras.ForEach(ra => {
                         var instances = ra.GetSchedule(msgs)?.GetInSessionInstances(msgs: msgs);
+
+                        var participantObject = new ParticipationObject(ra.ParticipationObjectId.Value, ra.ParticipationObjectTypeId, msgs);
+
                         if (instances.IsNotEmpty())
+                        {
+                            var activityInstanceSeats = ActivityInstanceSeats.LoadByRegistrantActivityId(ra.ID.Value, msgs);
+                            if (participantObject.CanRegisterPerClass)
+                                instances.RemoveAll(instance => instance.ID.NotIn(activityInstanceSeats.Select(activityInstanceSeat => activityInstanceSeat.ActivityInstanceId)));
+
                             activityInstances.AddRange(instances.Select(instance => (
-                                instance, 
-                                registrant, 
-                                ra.ParticipationObjectId, 
+                                instance,
+                                registrant,
+                                ra.ParticipationObjectId,
                                 ra.ParticipationObjectTypeId)));
+                        }
                     });
 
                     if (masterRegistrant.IsParentOrGuardian)
