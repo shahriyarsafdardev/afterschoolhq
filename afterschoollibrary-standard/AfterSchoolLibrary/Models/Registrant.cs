@@ -486,11 +486,12 @@ namespace AfterSchoolLibrary.Models
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
+
         //public List<Activity> GetActivitiesByDay(DayOfWeekASL day, DatabaseConnection dc = null)
         //{
         //    return Activity.GetActivitiesByRegistrantByDay(this.ID.Value, day, DateTime.UtcNow, dc: dc);
         //}
-        
+
         public static List<Registrant> LoadFirstRegistrants(int accountId, int? start, int? length, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
