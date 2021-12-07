@@ -2026,10 +2026,10 @@ namespace AfterSchool.Areas.Org.Controllers
                           msgs: msgs,
                           dc: dc);
 
-                      BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse.ID.Value, surveyResponse.RegistrantId.Value, surveyResponse.SurveyRequestId.Value, inviteCode.Code,  null));
+                      BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse.ID.Value, surveyResponse.RegistrantId.Value, surveyResponse.SurveyRequestId.Value, inviteCode.Code, inviteCode.ID.Value,  null));
                   }
                   else
-                      BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse.ID.Value, surveyResponse.RegistrantId.Value, surveyResponse.SurveyRequestId.Value, null, null));
+                      BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse.ID.Value, surveyResponse.RegistrantId.Value, surveyResponse.SurveyRequestId.Value, null, 0, null));
               });
         }
         [HttpGet]
@@ -2053,9 +2053,9 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var checkIfInviteCodeExists = RegistrantInviteCode.CheckBySurveyResponseIdExpiryDate(surveyResponse.ID.Value, DateTime.Now);
             if (checkIfInviteCodeExists.IsNotEmpty())
-                BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse.ID.Value, surveyResponse.RegistrantId.Value, surveyResponse.SurveyRequestId.Value, checkIfInviteCodeExists.Code, null));
+                BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse.ID.Value, surveyResponse.RegistrantId.Value, surveyResponse.SurveyRequestId.Value, checkIfInviteCodeExists.Code, checkIfInviteCodeExists.ID.Value, null));
             else
-                BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse.ID.Value, surveyResponse.RegistrantId.Value, surveyResponse.SurveyRequestId.Value, null, null));
+                BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse.ID.Value, surveyResponse.RegistrantId.Value, surveyResponse.SurveyRequestId.Value, null, 0, null));
         }
 
         [HttpGet]
