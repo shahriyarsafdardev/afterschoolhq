@@ -723,7 +723,7 @@ namespace AfterSchoolLibrary.Helpers
             var splitCostEvenly = subscription?.SplitCostEvenly ?? false;
             var regFinalized = participationObject.RegistrationFinalized;
             string registrationTable = "";
-            var totalCost = checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc) * checkoutObject.ClassQuantity;
+            var totalCost = checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc);
             var showTable = false;
 
             if (splitCostEvenly && regFinalized)
@@ -757,7 +757,8 @@ namespace AfterSchoolLibrary.Helpers
                         checkoutObject.Coupon.ID.IsNotEmpty() && 
                         checkoutObject.Coupon.DoesApplyToRegistrationFee())
                     {
-                        var amountCC = checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc) * checkoutObject.ClassQuantity;
+                        //for now lets not apply coupon and just get the value of total cost. (to show proper cost per item in email)
+                        var amountCC = checkoutObject.GetRegistrationCostWithFeeAndCoupon(applyCoupon: false, msgs: msgs, dc: dc);                        
                         var couponValueCC = checkoutObject.CouponValue(msgs,dc);
                         
                         cost = amountCC.ToCurrency();
@@ -795,7 +796,7 @@ namespace AfterSchoolLibrary.Helpers
                     }
                     else
                     {
-                        cost = (checkoutObject.GetTotalCostToPurchaseTodayWithConvenienceFee(msgs, dc) * checkoutObject.ClassQuantity).ToCurrency();                        
+                        cost = (checkoutObject.GetTotalCostToPurchaseTodayWithConvenienceFee(msgs, dc)).ToCurrency();                        
                         additionalDetails = "registration fee";
 
                         // add registration fee row
@@ -814,7 +815,7 @@ namespace AfterSchoolLibrary.Helpers
                                         msgs);                        
                     }
 
-                    ccFee = (checkoutObject.GetTotalCreditCardFeesToday(msgs, dc) * checkoutObject.ClassQuantity).ToCurrency();
+                    ccFee = (checkoutObject.GetTotalCreditCardFeesToday(msgs, dc)).ToCurrency();
                     showTable = true;
                 }
             }

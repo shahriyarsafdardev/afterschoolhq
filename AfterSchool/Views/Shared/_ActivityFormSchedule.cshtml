@@ -508,8 +508,10 @@
     function checkHasSchedule() {
         if ($('#hasschedule').is(':checked')) {
             $('.has-schedule-switch').removeClass('hide');
+            $('#ongoing-div').removeClass('hide');
         } else {
             $('.has-schedule-switch').addClass('hide');
+            $('#ongoing-div').addClass('hide');
         }
     }
 
@@ -589,12 +591,14 @@
             $('#requiresalldays-group').removeClass('hide');
             $('#schedule-dates').addClass('hide');
             $('#ongoing-div').removeClass('hide');
+            $('#btn-advanced-settings').removeClass('hide');
         } else {
             $('#dailyrepeat').addClass('hide');
             $('#requiresalldays-group').addClass('hide');
             $('#repeating-schedule').addClass('hide');
             $('#schedule-dates').removeClass('hide');
             $('#ongoing-div').addClass('hide');
+            $('#btn-advanced-settings').addClass('hide');
 
             if ($('.schedule-date').length == $('.schedule-date.hide').length) {
                 showDates();
