@@ -674,6 +674,9 @@
     <Content Include="Assets\lib\customTableSorter.js" />
     <Content Include="case-study-cfi70.html" />
     <Content Include="contact.html" />
+    <Content Include="Content\Flags\spain.png" />
+    <Content Include="Content\Flags\france.png" />
+    <Content Include="Content\Flags\US.png" />
     <Content Include="Content\quill.bubble.css" />
     <Content Include="Content\quill.snow.css" />
     <Content Include="copyright.html" />

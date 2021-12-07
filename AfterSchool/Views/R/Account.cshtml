@@ -68,11 +68,6 @@
             height: 100%;
         }
 
-    .goog-te-banner-frame {
-        display: none;
-        height: 0 !important;
-        visibility: hidden
-    }
 </style>
 
 @{
@@ -700,7 +695,7 @@
 
 }
 
-@section scripts{
+@*@section scripts{
     <script type="text/javascript">
         function googleTranslateElementInit() {
             new google.translate.TranslateElement({ pageLanguage: 'en', includedLanguages: 'en,es,fr,pt', layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL }, 'google_translate_element');
@@ -725,8 +720,40 @@
         $(document).ready(function () {
             $(document).on('click', '.languageOption', function () {
                 var value = $(this).attr("data-lang");
-                $("#dropdownMenuButton").html($(this).attr("data-text"));
+                setFlagHTML(value);
 
+                localStorage.setItem('languageSelected', value);
+
+                updateLanguage(value);
+            })
+
+            checkLocalStorage();
+
+            function checkLocalStorage() {
+                var checkLocalStorage = localStorage.getItem('languageSelected');
+                if (checkLocalStorage) {
+                    setTimeout(function () { updateLanguage(checkLocalStorage); }, 500);
+                    setFlagHTML(checkLocalStorage);
+                }
+            }
+
+            function setFlagHTML(value) {
+
+                var flagHTML = '<img src="/Content/Flags/US.png" class="flagLang"/> English';
+                if (value == "es") {
+                    flagHTML = '<img src="/Content/Flags/spain.png" class="flagLang"/> Espanol';
+                }
+                else if (value == "fr") {
+                    flagHTML = '<img src="/Content/Flags/france.png" class="flagLang"/> French';
+                }
+
+                $("#dropdownMenuButton").html(flagHTML);
+                $(".selectedLang").removeClass('selectedLang');
+                $(".languageOption").addClass('notSelectedLang');
+                $('*[data-lang="'+value+'"]').removeClass('notSelectedLang').addClass('selectedLang');
+            }
+
+            function updateLanguage(value) {
                 var selectIndex = 0;
                 var a = document.querySelector("#google_translate_element select");
                 switch (value) {
@@ -746,9 +773,7 @@
                 }
                 a.selectedIndex = selectIndex;
                 a.dispatchEvent(new Event('change'));
-
-            })
-
+            }
         })
     </script>
-}
+}*@
