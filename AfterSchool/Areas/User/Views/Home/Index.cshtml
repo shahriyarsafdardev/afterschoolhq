@@ -1,11 +1,7 @@
 ﻿@model List<Registrant>
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
-    var activityInstances = (List<(
-            ActivityInstance ActivityInstance,
-            Registrant Registrant,
-            int? ParticipationObjectId,
-            ParticipationObjectType ParticipationObjectType)>)ViewBag.ActivityInstances;
+    var activityInstances = (List<(ActivityInstance ActivityInstance, Registrant Registrant, int? ParticipationObjectId, ParticipationObjectType ParticipationObjectType)>)ViewBag.ActivityInstances;
     var providers = (List<Account>)ViewBag.Providers;
     var activitiesRequiringAttention = (List<RegistrantActivity>)ViewBag.ActivitiesRequiringAttention;
     var showToDos = activitiesRequiringAttention.Any() || Model.Any(registrant => registrant.ProfileStatusId != RegistrantProfileStatus.Completed);
@@ -66,72 +62,6 @@
 
         </div>
     }
-
-
-    @*
-        @foreach (var registrant in Model)
-        {
-            var answers = registrant.GetAnswers(msgs).Where(x => x.QuestionDataTypeId != QuestionDataType.NotSet).ToList();
-            var children = registrant.GetChildren();
-
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    @registrant.Name.ToProperCase()
-                </div>
-                <div class="panel-body">
-                    <div class="col-md-6">
-                        <table class="table-condensed">
-                            @foreach (var group in answers.DistinctBy(x => x.FormQuestionFormQuestionGroupId).Select(answer => answer.ToFormQuestionGroup()).Where(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation))
-                            {
-                                <tr>
-                                    <td colspan="2" class="text-medium">
-                                        @group.Name
-                                    </td>
-                                </tr>
-
-                                foreach (var answer in answers.Where(answer => answer.FormQuestionFormQuestionGroupId == group.ID).OrderBy(answer => answer.FormQuestionDisplayOrder))
-                                {
-                                    <tr>
-                                        <td>@answer.QuestionText</td>
-                                        <td>@answer.Text</td>
-                                    </tr>
-                                }
-                            }
-
-                        </table>
-                    </div>
-                    <div class="col-md-6">
-
-                        @if (ras.Any())
-                        {
-                            Html.RenderPartial(
-                                 "_ScheduledActivities",
-                                 ras.Where(x => x.IsInSession()).ToList(),
-                                 new ViewDataDictionary()
-                                 {
-                                    { "registrant", registrant },
-                                    { "title", string.Format("Current {0}", UILabel.ActivityLabel(ActivityType.Activity, true)) }
-                                 }
-                            );
-
-                            Html.RenderPartial(
-                                 "_ScheduledActivities",
-                                 ras.Where(x => x.WillBeInSession()).ToList(),
-                                 new ViewDataDictionary()
-                                 {
-                                    { "registrant", registrant },
-                                    { "title", string.Format("Upcoming {0}", UILabel.ActivityLabel(ActivityType.Activity, true)) }
-                                 }
-                            );
-                        }
-                        else
-                        {
-                            <p>@registrant.FirstName.ToProperCase() is not registered for any @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()</p>
-                        }
-                    </div>
-                </div>
-            </div>
-        }*@
 </div>
 
 @section header
