@@ -6,8 +6,11 @@ using System.IO;
 using System.Web.Script.Serialization;
 using BasicLibrary;
 using AfterSchool.Models;
-using AfterSchoolLibrary.Services;
 using System.Linq;
+using RestSharp;
+using System.Text;
+using Newtonsoft.Json;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchool.Controllers
 {
@@ -83,6 +86,77 @@ namespace AfterSchool.Controllers
 
             return View();
         }
-        
+
+        [HttpGet]
+        public ActionResult Clever(string code, string scope)
+        {
+            var client = new RestSharp.RestClient("https://clever.com/oauth/tokens");
+            client.Timeout = -1;
+
+            var request = new RestRequest(Method.POST);
+            var auth = EncodeBase64("6909bfddb2f7cc535ed2:2e6c28be090b924a893a00763d6d38ffab77de19"); //client_id + ":" client_secret
+            request.AddHeader("Authorization", $"Basic " + auth);
+            request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
+            request.AddParameter("code", code);
+            request.AddParameter("redirect_uri", "http://localhost:54849/oauth/clever");
+            request.AddParameter("grant_type", "authorization_code");
+
+            var response = client.Execute(request);
+            var tokenDto = JsonConvert.DeserializeObject<CleverTokenDto>(response.Content);
+            GetCleverUserDetails(token: tokenDto.access_token);
+
+            return View();
+        }
+
+        public void GetCleverUserDetails(string token)
+        {
+            var client = new RestSharp.RestClient("https://api.clever.com/me");
+            client.Timeout = -1;
+            var request = new RestRequest(Method.GET);
+            request.AddHeader("Authorization", "Bearer " + token);
+            var response = client.Execute(request);
+            Console.WriteLine(response.Content);
+
+            var cleverUser = JsonConvert.DeserializeObject<CleverUserDto>(response.Content);
+        }
+
+        public static string EncodeBase64(string value)
+        {
+            var valueBytes = Encoding.UTF8.GetBytes(value);
+            return Convert.ToBase64String(valueBytes);
+        }
+
+        public static string DecodeBase64(string value)
+        {
+            var valueBytes = System.Convert.FromBase64String(value);
+            return Encoding.UTF8.GetString(valueBytes);
+        }
+
+        public class CleverTokenDto
+        {
+            public string access_token { get; set; }
+            public string token_type { get; set; }
+        }
+
+        public class CleverUser
+        {
+            public string first { get; set; }
+            public string last { get; set; }
+        }
+
+        public class CleverUserData
+        {
+            public string id { get; set; }
+            public string type { get; set; }
+            public string email { get; set; }
+            public CleverUser name { get; set; }
+            public List<string> sections { get; set; }
+        }
+
+        public class CleverUserDto
+        {
+            public string type { get; set; }
+            public CleverUserData data { get; set; }
+        }
     }
 }

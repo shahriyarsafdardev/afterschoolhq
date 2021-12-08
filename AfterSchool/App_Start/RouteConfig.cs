@@ -48,6 +48,11 @@ namespace AfterSchool
                 new { controller = "login", action = "index", id = UrlParameter.Optional });
 
             routes.MapRoute(
+                "OAuth",
+                "oauth/clever",
+                new { controller = "OAuth", action = "Clever" });
+
+            routes.MapRoute(
                 "Indianapolis",
                 "indianapolis/{action}/{id}",
                 new { controller = "indianapolis", action = "index", id = UrlParameter.Optional });

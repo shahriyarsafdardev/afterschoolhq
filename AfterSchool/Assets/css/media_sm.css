@@ -120,4 +120,17 @@
         width: auto !important;
         margin: 30px 15px;
     }
+
+    .login-form-forgot-password-container {
+        text-align: center;
+        clear: both;
+    }
+
+    .btn-login-updated {
+        margin: 0 auto;
+    }
+
+    .clever-login-img {
+        margin-top: 20px;
+    }
 }

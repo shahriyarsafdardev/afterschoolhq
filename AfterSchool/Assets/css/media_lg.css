@@ -96,4 +96,17 @@
         border-radius: 7px;
         margin-left: 20px;
     }
+
+    .login-form-forgot-password-container {
+        float: right;
+    }
+
+    .btn-login-updated {
+        margin: 45px 10px 0 -60px;
+    }
+
+    .btn-clever-login {
+        margin: -50px -60px 0px 0px;
+        float: right;
+    }
 }
