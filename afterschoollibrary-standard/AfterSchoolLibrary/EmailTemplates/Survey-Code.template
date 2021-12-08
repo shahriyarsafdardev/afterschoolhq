@@ -1,6 +1,13 @@
 ﻿<div>
-  <p>Hello @Model.Name,</p>
-  <p>You have got a survey request for survey: <b>@Model.SurveyName</b>.</p>
-  <p>Here is your invite code <b>@Model.InviteCode</b> (Sign up here @Model.SignUpLink)</p>
- <p>Thanks</p>
+  <p>Hello <b>@Model.Name</b>,</p>
+  <br/>
+  <p>You have got a survey request for survey: <b>@Model.SurveyName</b></p>
+  <br/>
+  <p>Here is your invite code <b>@Model.InviteCode</b>. Sign up using this link <a href="@Model.SignUpLink" target="_blank">@Model.SignUpLink</a> </p>
+  <br/>
+  <p>
+    Or you can start auto signup process using this link <a href="@Model.AutoSignUpLink" target="_blank">@Model.AutoSignUpLink</a>
+  </p>
+  <br/>
+  <p>Thanks</p>
 </div>

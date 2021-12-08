@@ -47,12 +47,12 @@ namespace AfterSchoolLibraryTests.Factories
             return obj;
         }
 
-        public static Account CreateWithFreePackage(string name, string email, WebUser user, AccountType accountType, SystemMessages msgs, DatabaseConnection dc)
+        public static Account CreateWithFreePackage(string name, string email, WebUser user, AccountType accountType,SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new Account() { OwnerId = user.ID, Name = name, Email = email, AccountTypeId = accountType };
             msgs.AddRange(obj.Save(dc: dc));
 
-            var package = PackageFactory.CreateFreePackage(msgs, dc);
+            var package = PackageFactory.CreateFreePackageWithFlatFee(msgs, dc);
             var accountPackage = AccountPackageFactory.Create(obj, package, msgs, dc);
 
             return obj;
