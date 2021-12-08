@@ -266,7 +266,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                 msgs.Add($"Account {(account.IsActive ? "activated" : "deactivated")} successfully.", MessageType.Success);
             }
 
-            TempData["Messages"] = msgs;
+            SetTempMessage(msgs);
             return View("index", IndexViewBag(pn, rpp, search, type, msgs));
         }
 
@@ -286,7 +286,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                 msgs.Add("Account claims changed successfully.", MessageType.Success);
             }
 
-            TempData["Messages"] = msgs;
+            SetTempMessage(msgs);
             return View("index", IndexViewBag(pn, rpp, search, type, msgs));
         }
 
@@ -306,7 +306,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                 msgs.Add("Account removed successfully.", MessageType.Success);
             }
 
-            TempData["Messages"] = msgs;
+            SetTempMessage(msgs);
             return View("index", IndexViewBag(pn, rpp, search, type, msgs));
         }
 
@@ -326,7 +326,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                 msgs.Add($"Account is {(account.IsTest ? "in" : "not in")} test mode  {(account.IsTest ? "now" : "anymore")}.", MessageType.Success);
             }
 
-            TempData["Messages"] = msgs;
+            SetTempMessage(msgs);
             return View("index", IndexViewBag(pn, rpp, search, type, msgs));
         }
     }

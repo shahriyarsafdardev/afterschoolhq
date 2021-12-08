@@ -1935,9 +1935,15 @@ namespace AfterSchool.Areas.Org.Controllers
 
             LoadEditSetupViewBag(activity, activityGroup, msgs);
 
-            ViewBag.Students = activity.GetRegistrantActivities(includeInvited: true, msgs).Where(a => a.AssignmentTypeId == RegistrationAssignmentType.Reserved || a.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingParentalConsent || a.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment).ToList();
+            var activityRegistrants = activity.GetRegistrantActivitiesForSurvey(msgs);
+            var studentList = activityRegistrants.Select(m => new SelectListItem() {
+                Text = m.RegistrantName,
+                Value = m.RegistrantId.Value.ToString()
+            });
 
+            ViewBag.Students = studentList.ToList();
             ViewBag.Messages = msgs;
+
             return View(activity);
         }
 
@@ -2006,20 +2012,24 @@ namespace AfterSchool.Areas.Org.Controllers
             return studentsList;
         }
 
-        private static void CreateSurveys(int surveyRequestId, List<SelectListItem> studentList, int currentUserId, SystemMessages msgs)
+        private static void CreateSurveys(int surveyRequestId, List<SelectListItem> studentList, int currentUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
               studentList.ForEach(student => {
                   var surveyResponse = SurveyResponseService.CreateSurveyFeedback(surveyRequestId, student.Value.ToInteger(), SurveyFeedbackStatus.New, currentUserId, msgs);
-                  var getRegistrant = Registrant.Load(student.Value.ToInteger());
-                  if (getRegistrant.WebUserId.IsEmpty())
+                  var masterRegistrant = Registrant.Load(student.Value.ToInteger())?.GetMasterRegistrant(msgs, dc);
+
+                  if (masterRegistrant.IsNotEmpty() && masterRegistrant.WebUserId.IsEmpty())
                   {
-                      var createInviteCode = RegistrantInviteCodeService.Create(surveyResponse.ID.Value, getRegistrant.ID.Value, currentUserId, msgs, null);
-                      BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, createInviteCode.Code, null));
+                      var inviteCode = RegistrantInviteCodeService.GetInviteCode(surveyResponseId: surveyResponse.ID.Value,
+                          registrantId: surveyResponse.RegistrantId.Value,
+                          currentUserId: currentUserId,
+                          msgs: msgs,
+                          dc: dc);
+
+                      BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse.ID.Value, surveyResponse.RegistrantId.Value, surveyResponse.SurveyRequestId.Value, inviteCode.Code, inviteCode.ID.Value,  null));
                   }
                   else
-                  {
-                      BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, null, null));
-                  }
+                      BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse.ID.Value, surveyResponse.RegistrantId.Value, surveyResponse.SurveyRequestId.Value, null, 0, null));
               });
         }
         [HttpGet]
@@ -2043,9 +2053,9 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var checkIfInviteCodeExists = RegistrantInviteCode.CheckBySurveyResponseIdExpiryDate(surveyResponse.ID.Value, DateTime.Now);
             if (checkIfInviteCodeExists.IsNotEmpty())
-                BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, checkIfInviteCodeExists.Code, null));
+                BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse.ID.Value, surveyResponse.RegistrantId.Value, surveyResponse.SurveyRequestId.Value, checkIfInviteCodeExists.Code, checkIfInviteCodeExists.ID.Value, null));
             else
-                BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse, null, null));
+                BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse.ID.Value, surveyResponse.RegistrantId.Value, surveyResponse.SurveyRequestId.Value, null, 0, null));
         }
 
         [HttpGet]
@@ -2170,6 +2180,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
+            HandleTempMessages(msgs);
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             RegistrantsViewBag(activity, atype, msg, msgs);
             return View(activity);
@@ -2335,9 +2346,17 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult RegistrantDetail(string id)
         {
+            if (id.IsEmpty() || id.IsNotGuid())
+                return HttpNotFound();
+
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
             var registrantActivity = RegistrantActivityService.GetRegistrantActivity(id.ToGuid(), msgs);
+
+            // cant get activity, if registrantActivity doesnt exist in this context
+            if (registrantActivity.IsEmpty())
+                return HttpNotFound();
+
             var activity = currentAccount.GetActivity(registrantActivity.ParticipationObjectId.Value, msgs);
 
             ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
@@ -2489,7 +2508,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
             ViewBag.IsFullScreen = isNewActivity;
             ViewBag.Messages = msgs;
-            TempData["Messages"] = msgs;
+            SetTempMessage(msgs);
 
             if (isFromActivityHome)
                 return Redirect(activity.ShortHomePageUrl);

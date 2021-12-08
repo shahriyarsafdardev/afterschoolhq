@@ -187,10 +187,14 @@ namespace AfterSchoolLibrary.Services
 
         public static int GetSeatsRemainingForNextDate(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var dates = activity.GetSchedule(msgs, dc).GetNextInstances(1, activity, msgs, dc);
+            var schedule = activity.GetSchedule(msgs, dc);
+            if (schedule.IsNotEmpty())
+            {
+                var dates = schedule.GetNextInstances(1, activity, msgs, dc);
 
-            if (dates.Any())
-                return activity.GetSeatsRemainingByDate(dates.First(), msgs, dc);
+                if (dates.Any())
+                    return activity.GetSeatsRemainingByDate(dates.First(), msgs, dc);
+            }            
 
             return 0;
         }
@@ -1136,8 +1140,8 @@ namespace AfterSchoolLibrary.Services
                         if (activityGroup.IsNotEmpty())
                         {
                             activity.ActivityGroupId = activityGroup.ID.Value;
-                            activity.GradeLevelStart = activityGroup.MinGradeLevelId;
-                            activity.GradeLevelEnd = activityGroup.MaxGradeLevelId;
+                            activity.GradeLevelStart = activity.GradeLevelStart.IsNotEmpty() ? activity.GradeLevelStart : activityGroup.MinGradeLevelId;                            
+                            activity.GradeLevelEnd = activity.GradeLevelEnd.IsNotEmpty() ? activity.GradeLevelEnd : activityGroup.MaxGradeLevelId;
                             activity.GenderRestriction = activityGroup.GenderRestriction;
                         }
 
@@ -2203,10 +2207,21 @@ namespace AfterSchoolLibrary.Services
                 ras = RegistrantActivity.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc)
                     .Where(x =>
                         x.AssignmentTypeId != RegistrationAssignmentType.Invited &&
-                        x.AssignmentTypeId != RegistrationAssignmentType.Declined
+                        x.AssignmentTypeId != RegistrationAssignmentType.Declined &&
+                        x.AssignmentTypeId != RegistrationAssignmentType.Interested
                     ).ToList();
 
             return ras;
+        }
+
+        public static List<RegistrantActivity> GetRegistrantActivitiesForSurvey(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantActivity.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc)
+                .Where(a => a.HasParentRegistrantId(msgs, dc) && a.AssignmentTypeId.In(new List<RegistrationAssignmentType> {
+                    RegistrationAssignmentType.Reserved,
+                    RegistrationAssignmentType.ReservedPendingParentalConsent,
+                    RegistrationAssignmentType.ReservedPendingPayment
+                })).ToList();           
         }
 
         public static RegistrantActivity GetRegistrantActivity(this Activity activity, Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
