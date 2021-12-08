@@ -7,6 +7,10 @@
     {
         showPhone = ViewData["showphone"].ToString().ToBoolean();
     }
+
+    var redirectUrl = AfterSchoolLibrary.Helpers.CleverHelper.RedirectUrl;
+    var cleverClientId = AfterSchoolLibrary.Helpers.CleverHelper.ClientId;
+    var ssoLink = $"https://clever.com/oauth/authorize?response_type=code&redirect_uri={redirectUrl}&client_id={cleverClientId}";
 }
 
 <div class="sign-up-form">
@@ -54,4 +58,9 @@
     </div>
 </div>
 <p class="conditions">By creating an account, you agree with the <a href="/tos" target="_blank">Terms and Conditions</a>.</p>
-<button type="submit" class="btn btn-block btn-primary btn-lg">Sign Up &raquo;</button>
+<button type="submit" class="btn btn-block btn-primary btn-lg" style="margin-bottom: 10px;">Sign Up &raquo;</button>
+<div style="text-align:center">
+    <a href="@ssoLink" class="btn-clever-login">
+        <img src="~/img/CleverSSO.png" style="width: 225px; height: 50px;" class="clever-login-img" />
+    </a>
+</div>

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Web.Mvc;
 using System.Net;
 using System.IO;
@@ -8,20 +7,19 @@ using BasicLibrary;
 using AfterSchool.Models;
 using System.Linq;
 using RestSharp;
-using System.Text;
 using Newtonsoft.Json;
-using AfterSchoolLibrary.Services;
+using AfterSchoolLibrary.Helpers;
+using Clever.Models;
 
 namespace AfterSchool.Controllers
 {
-    public class OAuthController : BaseLoggedInController
+    public class OAuthController : BaseController
     {
-        public OAuthController() : base(AccountService.CustomerAccountTypes.ToList())
+        public OAuthController()
         {
 
         }
 
-        //
         // GET: /Stripe/
         public ActionResult Stripe(string id)
         {
@@ -90,15 +88,14 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult Clever(string code, string scope)
         {
-            var client = new RestSharp.RestClient("https://clever.com/oauth/tokens");
+            var client = new RestSharp.RestClient(CleverHelper.TokenRetrieveUrl);
             client.Timeout = -1;
 
-            var request = new RestRequest(Method.POST);
-            var auth = EncodeBase64("6909bfddb2f7cc535ed2:2e6c28be090b924a893a00763d6d38ffab77de19"); //client_id + ":" client_secret
-            request.AddHeader("Authorization", $"Basic " + auth);
+            var request = new RestRequest(Method.POST);            
+            request.AddHeader("Authorization", $"Basic " + CleverHelper.BasicAuthorizationToken);
             request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
             request.AddParameter("code", code);
-            request.AddParameter("redirect_uri", "http://localhost:54849/oauth/clever");
+            request.AddParameter("redirect_uri", CleverHelper.RedirectUrl);
             request.AddParameter("grant_type", "authorization_code");
 
             var response = client.Execute(request);
@@ -110,53 +107,14 @@ namespace AfterSchool.Controllers
 
         public void GetCleverUserDetails(string token)
         {
-            var client = new RestSharp.RestClient("https://api.clever.com/me");
+            var client = new RestSharp.RestClient(CleverHelper.UserDetailUrl);
             client.Timeout = -1;
             var request = new RestRequest(Method.GET);
             request.AddHeader("Authorization", "Bearer " + token);
             var response = client.Execute(request);
             Console.WriteLine(response.Content);
 
-            var cleverUser = JsonConvert.DeserializeObject<CleverUserDto>(response.Content);
-        }
-
-        public static string EncodeBase64(string value)
-        {
-            var valueBytes = Encoding.UTF8.GetBytes(value);
-            return Convert.ToBase64String(valueBytes);
-        }
-
-        public static string DecodeBase64(string value)
-        {
-            var valueBytes = System.Convert.FromBase64String(value);
-            return Encoding.UTF8.GetString(valueBytes);
-        }
-
-        public class CleverTokenDto
-        {
-            public string access_token { get; set; }
-            public string token_type { get; set; }
-        }
-
-        public class CleverUser
-        {
-            public string first { get; set; }
-            public string last { get; set; }
-        }
-
-        public class CleverUserData
-        {
-            public string id { get; set; }
-            public string type { get; set; }
-            public string email { get; set; }
-            public CleverUser name { get; set; }
-            public List<string> sections { get; set; }
-        }
-
-        public class CleverUserDto
-        {
-            public string type { get; set; }
-            public CleverUserData data { get; set; }
+            var cleverUser = JsonConvert.DeserializeObject<CleverUserDto>(response.Content);            
         }
     }
 }
