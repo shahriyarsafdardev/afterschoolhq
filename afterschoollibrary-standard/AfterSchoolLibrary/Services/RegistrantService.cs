@@ -213,6 +213,7 @@ namespace AfterSchoolLibrary.Services
                     var subscription = Billing.StripeHelper.CreateRegistrantSubscription(
                                     customerId: customer.Id,
                                     planId: plan.StripePlanId,
+                                    isProrated: subscriptionPlanType == SubscriptionPlanType.Subscription,
                                     sourceId: sourceId,
                                     platformFeePercent: platformFeePercent,
                                     stripeAccountId: stripeAccountId,

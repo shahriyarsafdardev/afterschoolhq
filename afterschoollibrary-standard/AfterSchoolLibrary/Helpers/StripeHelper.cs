@@ -1256,7 +1256,7 @@ namespace AfterSchoolLibrary.Billing
             return new Stripe.SubscriptionService(StripeClient);
         }
 
-        public static Stripe.Subscription CreateRegistrantSubscription(string customerId, string planId, string sourceId, decimal? platformFeePercent, 
+        public static Stripe.Subscription CreateRegistrantSubscription(string customerId, string planId, bool isProrated, string sourceId, decimal? platformFeePercent, 
             DateTime? startDate, DateTime? endDate, DateTime? billingCycleAnchor, string stripeAccountId, string stripeCouponId, Dictionary<string, string> metaData, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -1271,7 +1271,7 @@ namespace AfterSchoolLibrary.Billing
                 Coupon = stripeCouponId,
                 Items = new List<SubscriptionItemOptions>() { new SubscriptionItemOptions() { Plan = planId, Quantity = 1 } },
                 Metadata = metaData,
-                Prorate = billingCycleAnchor.HasValue, //prorate only if ongoing activity, else we will handle this manually
+                Prorate = billingCycleAnchor.HasValue && isProrated, //prorate only if ongoing activity and not paymentplan, else we will handle this manually
             };
 
             if (startDate.Value.Date.AddDays(-1).IsAfter(DateTime.UtcNow.Date))
@@ -1408,9 +1408,9 @@ namespace AfterSchoolLibrary.Billing
         /// <param name="plan"></param>
         /// <param name="msgs"></param>
         /// <returns></returns>
-        public static Stripe.Subscription CreateSubscription(Stripe.Customer customer, Stripe.Plan plan, string sourceId, decimal? platformFeePercent, DateTime? startDate, string stripeAccountId, string stripeCouponId, Dictionary<string, string> metaData, SystemMessages msgs)
+        public static Stripe.Subscription CreateSubscription(Stripe.Customer customer, Stripe.Plan plan, bool isProrated, string sourceId, decimal? platformFeePercent, DateTime? startDate, string stripeAccountId, string stripeCouponId, Dictionary<string, string> metaData, SystemMessages msgs)
         {
-            return CreateRegistrantSubscription(customer.Id, plan.Id, sourceId, platformFeePercent, startDate, null, null, stripeAccountId, stripeCouponId, metaData, msgs);
+            return CreateRegistrantSubscription(customer.Id, plan.Id, isProrated, sourceId, platformFeePercent, startDate, null, null, stripeAccountId, stripeCouponId, metaData, msgs);
         }
 
         public static Stripe.Subscription UpdateSubscription(string subscriptionId, string priceId, bool? billingCycleAnchorNow, bool? billingCycleAnchorUnchanged, bool? endTrialNow, bool? prorate, string stripeAccountId, SystemMessages msgs)
