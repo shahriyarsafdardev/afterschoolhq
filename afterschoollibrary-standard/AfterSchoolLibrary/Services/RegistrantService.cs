@@ -214,6 +214,7 @@ namespace AfterSchoolLibrary.Services
                                     customerId: customer.Id,
                                     planId: plan.StripePlanId,
                                     isProrated: subscriptionPlanType == SubscriptionPlanType.Subscription,
+                                    isPaymentPlan: subscriptionPlanType == SubscriptionPlanType.PaymentPlan,
                                     sourceId: sourceId,
                                     platformFeePercent: platformFeePercent,
                                     stripeAccountId: stripeAccountId,

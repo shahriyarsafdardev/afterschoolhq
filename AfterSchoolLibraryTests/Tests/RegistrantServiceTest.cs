@@ -664,7 +664,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(paymentPlan.StripePlanId.IsNotEmpty());
             // was payment made
             Assert.True(stripeInvoice.IsNotEmpty() && stripeInvoice.Paid);
-            // is payment amount correct
+            // is payment amount correct (this is how we assume the payment plan was not prorated)
             Assert.Equal(expected: checkoutObject.GetPaymentPlanCostTodayWithFees(msgs, dc) * 100, actual: stripeInvoice.AmountPaid);
             // payment plan billing type should match stripe subscription interval 
             Assert.Equal(expected: paymentPlan.BillingPeriodTypeId.ToString().ToLower(), actual: stripeSubscription.Plan.Interval);
@@ -672,9 +672,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(paymentPlan.EndDate.IsNotEmpty());
             // payment plan end date should match the stripe subscription end date
             Assert.Equal(expected: paymentPlan.EndDate.Value.Date, actual: stripeSubscription.CancelAt.Value.Date);
-            // payment plan should not be prorated
-            Assert.True(stripeInvoice.SubscriptionProrationDate.IsEmpty());
-
         }
     }
 }
