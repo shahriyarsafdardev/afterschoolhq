@@ -6,6 +6,7 @@
     var editaction = ViewData["EditAction"].ToString();
     var editcontroller = ViewData["EditController"].ToString();
     var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
+    var isReadOnlySeatStatus = (bool)ViewData["IsReadOnlySeatStatus"].IsNotEmpty() && (bool)ViewData["IsReadOnlySeatStatus"];
 
     var reservedButPendingPayment = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment).ToList();
     var reservedPendingParentalConsent = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingParentalConsent).ToList();
@@ -28,7 +29,8 @@
           { "Account", account },
           { "EditAction", editaction },
           { "EditController", editcontroller },
-          { "HeaderTitle", RegistrationAssignmentType.ReservedPendingPayment }
+          { "HeaderTitle", RegistrationAssignmentType.ReservedPendingPayment },
+          { "IsReadOnly", isReadOnlySeatStatus }
       }
     );
 }
@@ -43,7 +45,8 @@
           { "Account", account },
           { "EditAction", editaction },
           { "EditController", editcontroller },
-          { "HeaderTitle", RegistrationAssignmentType.ReservedPendingParentalConsent }
+          { "HeaderTitle", RegistrationAssignmentType.ReservedPendingParentalConsent },
+          { "IsReadOnly", isReadOnlySeatStatus }
       }
     );
 }
@@ -58,7 +61,8 @@
           { "Account", account },
           { "EditAction", editaction },
           { "EditController", editcontroller },
-          { "HeaderTitle", RegistrationAssignmentType.Reserved }
+          { "HeaderTitle", RegistrationAssignmentType.Reserved },
+          { "IsReadOnly", isReadOnlySeatStatus }
       }
     );
 }
@@ -73,7 +77,8 @@
           { "Account", account },
           { "EditAction", editaction },
           { "EditController", editcontroller },
-          { "HeaderTitle", RegistrationAssignmentType.WaitingList }
+          { "HeaderTitle", RegistrationAssignmentType.WaitingList },
+          { "IsReadOnly", isReadOnlySeatStatus }
       }
     );
 }
@@ -88,7 +93,8 @@
           { "Account", account },
           { "EditAction", editaction },
           { "EditController", editcontroller },
-          { "HeaderTitle", RegistrationAssignmentType.Invited }
+          { "HeaderTitle", RegistrationAssignmentType.Invited },
+          { "IsReadOnly", isReadOnlySeatStatus }
       }
     );
 }
@@ -103,7 +109,8 @@
           { "Account", account },
           { "EditAction", editaction },
           { "EditController", editcontroller },
-          { "HeaderTitle", RegistrationAssignmentType.Applied }
+          { "HeaderTitle", RegistrationAssignmentType.Applied },
+          { "IsReadOnly", isReadOnlySeatStatus }
       }
     );
 }
@@ -118,7 +125,8 @@
           { "Account", account },
           { "EditAction", editaction },
           { "EditController", editcontroller },
-          { "HeaderTitle", RegistrationAssignmentType.Interested }
+          { "HeaderTitle", RegistrationAssignmentType.Interested },
+          { "IsReadOnly", isReadOnlySeatStatus }
       }
     );
 }
@@ -133,7 +141,8 @@
           { "Account", account },
           { "EditAction", editaction },
           { "EditController", editcontroller },
-          { "HeaderTitle", RegistrationAssignmentType.Withdrawn }
+          { "HeaderTitle", RegistrationAssignmentType.Withdrawn },
+          { "IsReadOnly", isReadOnlySeatStatus }
       }
     );
 }
@@ -148,7 +157,8 @@
           { "Account", account },
           { "EditAction", editaction },
           { "EditController", editcontroller },
-          { "HeaderTitle", RegistrationAssignmentType.Declined }
+          { "HeaderTitle", RegistrationAssignmentType.Declined },
+          { "IsReadOnly", isReadOnlySeatStatus }
       }
     );
 }

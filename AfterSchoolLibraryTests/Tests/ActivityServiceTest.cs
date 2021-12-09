@@ -604,6 +604,31 @@ namespace AfterSchoolLibraryTests.Tests
 
         #endregion
 
+        #region Remove Activity Schedule Test
 
+        [Fact(DisplayName="RemoveActivityTest")]
+        public void RemoveActivityTest()
+        {
+            // Arrange
+            var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
+            var activityWithSchedule = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
+            var activityWithoutSchedule = ActivityFactory.Create(ActivityOwnerAccount, schedule, msgs, dc);
+            var differentAccount = AccountFactory.Create(LoggedInUser, msgs, dc);
+            var scheduleForActivityWithDifferentAccount = ActivityScheduleFactory.Create(differentAccount, msgs, dc);
+            var activityWithDifferentAccount = ActivityFactory.Create(differentAccount,scheduleForActivityWithDifferentAccount, msgs, dc);
+
+            // Act
+            activityWithSchedule.RemoveActivitySchedule(LoggedInUser, ActivityOwnerAccount, msgs, dc);
+            activityWithoutSchedule.RemoveActivitySchedule(LoggedInUser, ActivityOwnerAccount, msgs, dc);
+            activityWithDifferentAccount.RemoveActivitySchedule(LoggedInUser, ActivityOwnerAccount, msgs, dc);
+
+            // Assert
+            Assert.False(activityWithSchedule.HasSchedule);
+            Assert.True(msgs.HasErrors());
+            Assert.Equal(expected: "Error Removing Schedule", actual: msgs[0].Text);
+            Assert.True(activityWithDifferentAccount.HasSchedule);
+        }
+
+        #endregion
     }
 }

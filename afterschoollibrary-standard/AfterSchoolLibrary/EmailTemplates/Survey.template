@@ -1,0 +1,11 @@
+﻿<div>
+  <p>Hello <b>@Model.Name</b>,</p>
+  <br/>
+  <p>
+    You have got a survey request for survey: <b>@Model.SurveyName</b>
+  </p>
+  <br/>
+  <p>You can <a href="@Model.Link" target="_blank">take survey here</a>, it should not take more than 5 minutes.</p>
+  <br/>
+ <p>Thanks</p>
+</div>

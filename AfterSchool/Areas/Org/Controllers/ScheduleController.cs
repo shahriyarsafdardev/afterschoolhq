@@ -11,7 +11,6 @@ namespace AfterSchool.Areas.Org.Controllers
     {
         public ScheduleController() : base(AccountService.ProviderAccountTypes.ToList())
         {
-
         }
 
         [HttpGet]
@@ -19,8 +18,8 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
-            
-            if (currentAccount.IsEmpty() ||!id.IsInteger())
+
+            if (!id.IsInteger())
                 return new HttpStatusCodeResult(System.Net.HttpStatusCode.BadRequest);
 
             var schedule = currentAccount.GetActivitySchedule(id.ToInteger(), msgs);
@@ -38,7 +37,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
 
-            if (currentAccount.IsEmpty() || !id.IsInteger())
+            if (!id.IsInteger())
                 return new HttpStatusCodeResult(System.Net.HttpStatusCode.BadRequest);
 
             var schedule = new ActivitySchedule();
@@ -60,7 +59,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
 
-            if (currentAccount.IsEmpty() || !id.IsInteger() || activity.IsNotGuid())
+            if (!id.IsInteger() || activity.IsNotGuid())
                 return new HttpStatusCodeResult(System.Net.HttpStatusCode.BadRequest);
 
             var schedule = new ActivitySchedule();
@@ -71,7 +70,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Schedules = currentAccount.GetActivitySchedules(msgs);
             ViewBag.Messages = msgs;
-            ViewBag.ShowScheduleList = true;            
+            ViewBag.ShowScheduleList = true;
             ViewBag.ActivityId = activity;
             return View(schedule);
         }
@@ -87,7 +86,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (schedule.IsNotEmpty())
                 id = schedule;
 
-            if (currentAccount.IsEmpty() || !id.IsInteger())
+            if (!id.IsInteger())
                 return new HttpStatusCodeResult(System.Net.HttpStatusCode.BadRequest);
 
             var activitySchedule = new ActivitySchedule();
@@ -98,14 +97,42 @@ namespace AfterSchool.Areas.Org.Controllers
             var scheduleDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, meetingOpenInfo);
             var scheduleDatesClosed = ActivityScheduleUI.PrepScheduleDatesClosed(meetingClosedInfo);
 
-
-
             if (id.ToInteger() > 0)
-                activitySchedule = ActivitySchedule.EditExisting(id, name, scheduledetails, repeatsweekly.IsBoolean() && repeatsweekly.ToBoolean(), isongoing.IsBoolean() && isongoing.ToBoolean(), startdate.ToDateTime(), enddate.ToDateTime(), dailystarttime.ToDateTime(), dailyendtime.ToDateTime(), scheduleDates, scheduleDatesClosed, currentUser.ID.Value, msgs);
+                activitySchedule = ActivitySchedule.EditExisting(
+                                    id, 
+                                    name, 
+                                    scheduledetails, 
+                                    repeatsweekly.IsBoolean() && repeatsweekly.ToBoolean(), 
+                                    isongoing.IsBoolean() && isongoing.ToBoolean(), 
+                                    startdate.ToDateTime(), 
+                                    enddate.ToDateTime(), 
+                                    dailystarttime.ToDateTime(), 
+                                    dailyendtime.ToDateTime(), 
+                                    scheduleDates, 
+                                    scheduleDatesClosed,
+                                    days.Select(x => (int)x).ToStrings().ToStringList(),
+                                    currentUser.ID.Value, 
+                                    msgs);
             else
             {
                 var groupId = group.IsGuid() ? currentAccount.GetActivityGroup(group.ToGuid(), msgs).ID : null;
-                activitySchedule = ActivityScheduleService.CreateNew(name, scheduledetails, repeatsweekly.IsBoolean() && repeatsweekly.ToBoolean(), isongoing.IsBoolean() && isongoing.ToBoolean(), startdate.ToDateTime(), enddate.ToDateTime(), dailystarttime.ToDateTime(), dailyendtime.ToDateTime(), scheduleDates, scheduleDatesClosed, currentAccount.ID.Value, groupId, currentUser.ID.Value, msgs);
+
+                activitySchedule = ActivityScheduleService.CreateNew(
+                                        name, 
+                                        scheduledetails, 
+                                        repeatsweekly.IsBoolean() && repeatsweekly.ToBoolean(), 
+                                        isongoing.IsBoolean() && isongoing.ToBoolean(), 
+                                        startdate.ToDateTime(), 
+                                        enddate.ToDateTime(), 
+                                        dailystarttime.ToDateTime(), 
+                                        dailyendtime.ToDateTime(), 
+                                        scheduleDates, 
+                                        scheduleDatesClosed,
+                                        days.Select(x => (int)x).ToStrings().ToStringList(),
+                                        currentAccount.ID.Value, 
+                                        groupId, 
+                                        currentUser.ID.Value, 
+                                        msgs);
             }
 
             if (msgs.HasNoErrors())

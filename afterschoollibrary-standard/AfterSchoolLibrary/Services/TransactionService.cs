@@ -813,9 +813,13 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
-        public static Stripe.Transfer CreateStripeTransfer(this Transaction transaction, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Stripe.Transfer CreateStripeTransfer(this Transaction transaction, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            if (transaction.UsedStripeConnect)
+            var billerAccount = transaction.GetBillerAccount(msgs, dc);
+            var canCreateStripeTransfer = billerAccount.HasStripeConnectedAccount && billerAccount.StripePayoutsEnabled;
+            // cant create a transfer if the billerAccount doesnt have stripe connected
+            // there could be cases where the transaction occured before the biller setup stripe and we want to create a transfer afterwards
+            if (transaction.UsedStripeConnect && !canCreateStripeTransfer)
                 return null;
 
             if (transaction.HasStripeTransfer(msgs))
@@ -825,11 +829,9 @@ namespace AfterSchoolLibrary.Services
             }
 
             var billerAmount = transaction.GetBillerAmount(msgs, dc);
-            var billerAccount = transaction.GetBillerAccount(msgs, dc);
             var hasStripeUserId = billerAccount.StripeUserId.IsNotEmpty();
-            var useStripeConnectedAccount = billerAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
 
-            if (hasStripeUserId && useStripeConnectedAccount && !transaction.PayoutId.HasValue && billerAccount.StripePayoutsEnabled)
+            if (hasStripeUserId && !transaction.PayoutId.HasValue)
             {
                 var transfer = StripeHelper.CreateTransfer(
                                 billerAmount,
@@ -841,6 +843,7 @@ namespace AfterSchoolLibrary.Services
                                 {
                                     { "TransactionUid", transaction.Uid.ToString() },
                                     { "StripeCharge", transaction.StripeChargeOrRefundId },
+                                    { "LoggedInUser", loggedInUser.Uid.ToString() },
                                 },
                                 msgs);
 
@@ -851,6 +854,57 @@ namespace AfterSchoolLibrary.Services
             }
 
             return null;
+        }
+
+        public static void MoveToAccount(this Transaction transaction, Account toAccount, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (transaction.IsEmpty() || toAccount.IsEmpty())
+                return;
+
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    // update transaction
+                    if (transaction.BillerAccountId == transaction.ConvenienceFeePayerAccountId)
+                        transaction.ConvenienceFeePayerAccountId = toAccount.ID;
+
+                    if (transaction.BillerAccountId == transaction.PaymentTypeFeePayerAccountId)
+                        transaction.PaymentTypeFeePayerAccountId = toAccount.ID;
+
+                    transaction.BillerAccountId = toAccount.ID;
+                    amsgs.AddRange(transaction.Save(adc));
+
+                    // update payments
+                    var payments = transaction.GetPayments(amsgs, adc);
+
+                    payments.ForEach(payment =>
+                    {
+                        payment.AccountId = toAccount.ID;
+                        amsgs.AddRange(payment.Save(adc));
+                    });
+
+                    // update registrant & registration
+                    var purchase = transaction.GetPurchase(amsgs, adc);
+
+                    if (purchase.IsNotEmpty())
+                    {
+                        var registrant = purchase.GetRegistrant(amsgs, adc);
+                        var registration = registrant.GetRegistrations(amsgs, adc).First();
+
+                        registrant.AccountId = toAccount.ID;
+                        amsgs.AddRange(registrant.Save(adc));
+
+                        registration.AccountId = toAccount.ID;
+                        amsgs.AddRange(registration.Save(adc));
+                    }
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+
         }
     }
 }

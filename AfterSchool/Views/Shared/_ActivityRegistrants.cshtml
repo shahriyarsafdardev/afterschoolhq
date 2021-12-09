@@ -54,7 +54,7 @@
                                 </a>
                             }
                         </td>
-                        <td>@(!isTechSupport ? ra.RegistrantName.IfBlank(ra.RegistrantEmail) : ra.RegistrantEmail.ToMaskedData())</td>
+                        <td>@(!isTechSupport ? ra.RegistrantName.IfBlank(ra.RegistrantEmail) : ra.RegistrantName.IfBlank(ra.RegistrantEmail).ToMaskedData())</td>
                         <td class="text-center">@ra.SeatIndex</td>
                         <td>@account.ConvertToAccountTimeZone(ra.CreateDate.Value).ToLongDateTimeString()</td>
                         @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView))

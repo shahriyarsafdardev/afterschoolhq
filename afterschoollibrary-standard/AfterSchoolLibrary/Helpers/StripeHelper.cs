@@ -2302,6 +2302,35 @@ namespace AfterSchoolLibrary.Billing
 
 
         #endregion
+
+        #region StripeLoginLink
+
+        private static Stripe.LoginLinkService GetLoginLinkService()
+        {
+            return new Stripe.LoginLinkService(StripeClient);
+        }
+
+        public static Stripe.LoginLink CreateLoginLink(string stripeAccountId, string redirectUrl, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Stripe.LoginLink loginLink = null;
+            var options = new Stripe.LoginLinkCreateOptions() { RedirectUrl = redirectUrl };
+
+            try
+            {
+                loginLink = GetLoginLinkService().Create(stripeAccountId, options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.Error, ex);
+                msgs.Add($"Error creating login link", MessageType.UserError);
+            }
+
+            return loginLink;
+        }
+
+        #endregion
     }
 
     public enum StripeTestCardType

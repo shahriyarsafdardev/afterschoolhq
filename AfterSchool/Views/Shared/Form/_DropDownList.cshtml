@@ -5,8 +5,24 @@
         <option value="">Select...</option>
         @foreach (var option in Model.Question.Options.Split(','))
         {
-            var selected = Model.Value.IfEmpty("").Trim() == option.Trim() ? " selected=\"selected\" " : "";
-            <option value="@option.Trim()" @selected>@option.Trim()</option>
+            if (option.Contains("|"))
+            {
+                var splitedOptions = option.Split('|');
+                var key = splitedOptions[0].Trim();
+                var desc = splitedOptions[1].Trim();
+                var value = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>(key, desc) };
+                var selected = Model.Value.IfEmpty("").Trim().ToLower() == value.ToJSON().Trim().ToLower() ? " selected=\"selected\" " : "";
+
+                <option value="@value.ToJSON()" @selected>@desc</option>
+            }
+            else
+            {
+                var desc = option.Trim();
+                var value = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>(desc, desc) };
+                var selected = Model.Value.IfEmpty("").Trim().ToLower() == value.ToJSON().Trim().ToLower() ? " selected=\"selected\" " : "";
+
+                <option value="@value.ToJSON()" @selected>@desc</option>
+            }
         }
     </select>
 </div>

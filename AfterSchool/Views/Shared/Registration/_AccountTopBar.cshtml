@@ -11,6 +11,8 @@
     var returnUrl = SessionVariables.RegistrationStartPageAccount?.HomePageUrl;
     var registrationStartPage = SessionVariables.RegistrationStartPageAccount;
     var isAccount = ViewData["IsAccount"] != null ? (bool)ViewData["IsAccount"] : false;
+    var isOnboardingStepsAcknowledged = CookieVariables.OnboardingStepsAcknowledged;
+    var isInEditMode = Request["edit"] == "1";
 
     var enableApproveButton = canPublishActivity && 
         !participationObject.IsPublished && 
@@ -90,7 +92,7 @@
         <div class="row">
             <div class="col-md-6 col-sm-6 col-xs-12">
 
-                @if (isAccount && isAccountAndLoggedInUserIsOwner && Model.OnboardingCompletionStatus() != GettingStartedOptions.ProcessCompleted)
+                @if (isAccount && isAccountAndLoggedInUserIsOwner && Model.OnboardingCompletionStatus() != GettingStartedOptions.ProcessCompleted && isOnboardingStepsAcknowledged != "True" && !isInEditMode)
                 {
                     <div id="popover-container" class="dropdown popover-dropdown">
                         <a id="ddl-finish-setup" class="dropdown-toggle dropdown-label" onclick="return toggleList();">
@@ -259,7 +261,7 @@
                                 if (Model.HasAccountProfile() && currentUser.HasAccessTo(Model))
                                 {
                                     var editModeUrl = Model.HomePageUrl;
-                                    var isInEditMode = Request["edit"] == "1";
+                                   
 
                                     if (!isInEditMode)
                                     {

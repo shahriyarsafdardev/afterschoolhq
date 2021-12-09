@@ -142,11 +142,12 @@ namespace AfterSchool.Areas.Admin.Controllers
 
             if (id.IsGuid())
             {
+                var currentUser = SessionVariables.CurrentUser;
                 var transaction = Transaction.LoadByUid(id.ToGuid(), msgs);
 
                 if (transaction.IsNotEmpty())
                 {
-                    var transfer = transaction.CreateStripeTransfer(msgs);
+                    var transfer = transaction.CreateStripeTransfer(currentUser, msgs);
 
                     if (msgs.HasNoErrors() && transfer.IsNotEmpty())
                         return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
@@ -259,6 +260,32 @@ namespace AfterSchool.Areas.Admin.Controllers
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
 
             }
+
+            return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+        }
+
+        [HttpGet]
+        public ActionResult MoveTransaction(string id, string toaccount)
+        {
+            var msgs = new SystemMessages();
+
+            if (!id.IsGuid() || !toaccount.IsGuid())
+                msgs.Add("Invalid data", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                var transaction = Transaction.LoadByUid(id.ToGuid(), msgs);
+                var toAccount = Account.LoadByUid(toaccount.ToGuid(), msgs);
+
+                if (transaction.IsNotEmpty() && toaccount.IsNotEmpty())
+                    transaction.MoveToAccount(toAccount, msgs);
+                else
+                    msgs.Add("Invalid data", MessageType.UserError);
+
+                if (msgs.HasNoErrors())
+                    return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+            }
+
 
             return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
         }

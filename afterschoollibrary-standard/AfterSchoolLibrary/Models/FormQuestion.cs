@@ -32,8 +32,10 @@ namespace AfterSchoolLibrary.Models
 		public QuestionType QuestionTypeId { get { return (QuestionType)MDV["QuestionTypeId"].Value; } set { MDV["QuestionTypeId"].Value = value; } }
 		public QuestionDataType QuestionDataTypeId { get { return (QuestionDataType)MDV["QuestionDataTypeId"].Value; } set { MDV["QuestionDataTypeId"].Value = value; } }
 		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
+		public bool IsDeleted { get { return (bool)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
 		public bool IsRequired { get { return (bool)MDV["IsRequired"].Value; } set { MDV["IsRequired"].Value = value; } }
 		public bool IsLocked { get { return (bool)MDV["IsLocked"].Value; } set { MDV["IsLocked"].Value = value; } }
+		public bool IsAnswerDescriptionEnabled { get { return (bool)MDV["IsAnswerDescriptionEnabled"].Value; } set { MDV["IsAnswerDescriptionEnabled"].Value = value; } }
 		public string Options { get { return (string)MDV["Options"].Value; } set { MDV["Options"].Value = value; } }
 		public string Link { get { return (string)MDV["Link"].Value; } set { MDV["Link"].Value = value; } }
 		public int? DependsOnQuestionId { get { return (int?)MDV["DependsOnQuestionId"].Value; } set { MDV["DependsOnQuestionId"].Value = value; } }
@@ -53,8 +55,10 @@ namespace AfterSchoolLibrary.Models
 			this.QuestionTypeId = QuestionType.NotSet;
 			this.QuestionDataTypeId = QuestionDataType.NotSet;
 			this.IsActive = false;
+			this.IsDeleted = false;
 			this.IsRequired = false;
 			this.IsLocked = false;
+			this.IsAnswerDescriptionEnabled = false;
 			
         }
 
@@ -73,8 +77,10 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "QuestionTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "QuestionDataTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IsActive", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsRequired", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsLocked", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "IsAnswerDescriptionEnabled", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "Options", System.Data.SqlDbType.NVarChar , "1000");
 				_dp.Add(className, "Link", System.Data.SqlDbType.NVarChar , "1000");
 				_dp.Add(className, "DependsOnQuestionId", System.Data.SqlDbType.Int);
@@ -195,11 +201,19 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsDeleted"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["IsRequired"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["IsLocked"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsAnswerDescriptionEnabled"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -263,6 +277,15 @@ namespace AfterSchoolLibrary.Models
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["FormQuestionGroupId"], FormQuestionGroupId);
 			dq.Criterias.Add(ObjectMap["IsActive"], IsActive);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<FormQuestion> LoadByFormQuestionGroupIdByIsDeleted(int FormQuestionGroupId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["FormQuestionGroupId"], FormQuestionGroupId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
@@ -334,7 +357,7 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public FormQuestionGroup GetFormQuestionGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
+		public FormQuestionGroup GetFormQuestionGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return FormQuestionGroup.Load(this.FormQuestionGroupId.Value, msgs, dc);
         }
@@ -364,8 +387,16 @@ namespace AfterSchoolLibrary.Models
             };
 
             return newQuestion;
-        }        
+        }
 
-        #endregion
+		public static bool Exists(Hashtable criterias = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+		{
+			return GetCount(
+				criterias: criterias,
+				msgs: msgs,
+				dc: dc) > 0;
+		}
+
+		#endregion
     }
 }

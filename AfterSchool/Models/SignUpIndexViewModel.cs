@@ -22,5 +22,6 @@ namespace AfterSchool.Models
         public Account Account { get; set; }
         public bool IsRequestOnlyAccess { get; set; }
         public SignUpType SignupType { get; set; }
+        public Account InvitingAccount { get; set; }
     }
 }

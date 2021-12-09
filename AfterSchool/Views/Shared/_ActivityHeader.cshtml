@@ -67,7 +67,7 @@
                 }
                 else
                 {
-                    <a href="#" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")"  onclick="return showUpgradeMyPlan('@(messagingPackage.Name)', @(messagingPackage.ID))"><i class="s7-mail"></i> Messaging</a>
+                    <a href="#" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")" onclick="return showUpgradeMyPlan('@(messagingPackage.Name)', @(messagingPackage.ID))"><i class="s7-mail"></i> Messaging</a>
                 }
             }
 
@@ -79,6 +79,11 @@
                         <i class="s7-users"></i> Staff
                     </a>
                 }
+            }
+
+            @if (SessionVariables.AccountPackage.HasFeature(FeatureType.Survey))
+            {
+                <a href="@Url.Action("surveys", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "surveys" || actionName == "newsurvey" ? "-active" : "")"><i class="s7-cloud"></i> Surveys</a>
             }
 
             @if (Model.ActivityTypeId != ActivityType.Team && (isActivityLeader || SessionVariables.CurrentUser.CanPublishActivity(SessionVariables.CurrentAccount, Model)))
@@ -127,9 +132,11 @@
                     }
                     else
                     {
-                        <option  packagename="@(emailPackage.Name)" packageid="@(emailPackage.ID)" value="#">Messaging</option>
+                        <option packagename="@(emailPackage.Name)" packageid="@(emailPackage.ID)" value="#">Messaging</option>
                     }
                 }
+                <option value="@Url.Action("surveys", "activity", new { id = Model.Uid })">Surveys</option>
+
                 @if (isActivityLeader)
                 {
                     if (SessionVariables.AccountPackage.GetFeature(FeatureType.TeamAccounts).Max.Value > 1)

@@ -1,4 +1,4 @@
-﻿@model List<FormQuestionViewModel>
+@model List<FormQuestionViewModel>
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = "Get Started";
@@ -11,30 +11,32 @@
     var isDuringProfileSetup = currentUser.IsNotEmpty() || savedEmail.IsNotBlank();
 }
 
-@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+@{
+    Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); 
+}
 
-@{ 
+@{
     Html.RenderPartial(
-        "~/Views/Shared/Registration/_AccountTopBar.cshtml",
-        SessionVariables.RegistrationStartPageAccount ?? registrationAccount,
-        new ViewDataDictionary()
-        {
-            { "ParticipationObject", participationObject },
-            { "isDuringProfileSetup", isDuringProfileSetup }
-        }
-    );
+                "~/Views/Shared/Registration/_AccountTopBar.cshtml",
+                SessionVariables.RegistrationStartPageAccount ?? registrationAccount,
+                new ViewDataDictionary()
+                {
+    { "ParticipationObject", participationObject },
+    { "isDuringProfileSetup", isDuringProfileSetup }
+                }
+            );
 }
 
 @{
     Html.RenderPartial
-    (
-        "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
-        new RegistrationHeaderViewModel(participationObject, true),
-        new ViewDataDictionary()
-        {
-            { "hidebuttons", true }
-        }
-    );
+            (
+                "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
+                new RegistrationHeaderViewModel(participationObject, true),
+                new ViewDataDictionary()
+                {
+    { "hidebuttons", true }
+                }
+            );
 }
 
 <div>
@@ -51,54 +53,54 @@
 
                         @if (showStep1)
                         {
-                            <div class="row" id="email-check-container">
-                                
-                                <div>
-                                    <p class="text-center reg-login new-account">
-                                        Please enter your email to get started.
-                                    </p>
-                                </div>
+                                <div class="row" id="email-check-container">
 
-                                <div class="form-group">
-                                    <div class="col-md-3 control-label">
-                                        <label for="email-check">
-                                            Email <span class='text-danger'>*</span>
-                                        </label>
+                                    <div>
+                                        <p class="text-center reg-login new-account">
+                                            Please enter your email to get started.
+                                        </p>
                                     </div>
-                                    <div class="col-md-6">
-                                        <input type="email"
+
+                                    <div class="form-group">
+                                        <div class="col-md-3 control-label">
+                                            <label for="email-check">
+                                                Email <span class='text-danger'>*</span>
+                                            </label>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <input type="email"
                                                id="email-check"
                                                name="email-check"
                                                class="form-control"
                                                onfocus="this.select()"
                                                required="required"
                                                value="" />
-                                    </div>
-                                </div>
-                                <div class="col-md-6 col-md-offset-3">
-                                    <div class="padding-v-20">
-                                        <button type="button" id="btn-check-email" class="btn btn-register-primary btn-lg">Next &raquo;</button>
-                                    </div>
-                                </div>
-
-                                <div class="clearfix"></div>
-
-                                <div class="col-md-6 col-md-offset-3 hide" id="account-confirmation-text">
-                                    <div role="alert" class="alert alert-success alert-icon">
-                                        <div class="icon">
-                                            <span class="s7-check-circle"></span>
-                                        </div>
-                                        <div class="message">
-                                            <p class="text-center text-medium-small">
-                                                We have sent you an email in order to complete your account and register. <br />
-                                                If you do not receive an email check your spam box. If you still cannot find it please contact us at <a href="@AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress">@AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress</a>
-                                            </p>
                                         </div>
                                     </div>
+                                    <div class="col-md-6 col-md-offset-3">
+                                        <div class="padding-v-20">
+                                            <button type="button" id="btn-check-email" class="btn btn-register-primary btn-lg">Next &raquo;</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="clearfix"></div>
+
+                                    <div class="col-md-6 col-md-offset-3 hide" id="account-confirmation-text">
+                                        <div role="alert" class="alert alert-success alert-icon">
+                                            <div class="icon">
+                                                <span class="s7-check-circle"></span>
+                                            </div>
+                                            <div class="message">
+                                                <p class="text-center text-medium-small">
+                                                    We have sent you an email in order to complete your account and register. <br />
+                                                    If you do not receive an email check your spam box. If you still cannot find it please contact us at <a href="@AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress">@AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress</a>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="clearfix"></div>
                                 </div>
-                                
-                                <div class="clearfix"></div>
-                            </div>                            
                         }
 
                     <div id="account-registration" class="@(showStep1 ? "hide" : "")">
@@ -118,58 +120,58 @@
                             </div>
                         </div>
 
-                        @foreach (var qvm in Model.Where(qvm => !qvm.Hide))
-                        {
-                            Html.RenderPartial(
-                                "~/Views/Shared/Form/_Question.cshtml",
-                                qvm);
-
-                            if (qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone)
+                            @foreach (var qvm in Model.Where(qvm => !qvm.Hide))
                             {
-                                <div class="row">
-                                    <div class="col-md-6 col-md-offset-3">
-                                        <div class="am-checkbox text-center">
-                                            <input type="checkbox" id="textnotifications" name="textnotifications" value="1" @(Request["textnotifications"] == "1" || System.Web.HttpContext.Current.Request.HttpMethod.ToString() == "GET" ? " checked=\"checked\" " : "") />
-                                            <label for="textnotifications">
-                                                I would like to receive text messages about my student&#39;s activities&#46;
-                                                Notifications may include information about attendance&#44; reminders&#44; and important information&#46;
-                                            </label>
+                                Html.RenderPartial(
+                                    "~/Views/Shared/Form/_Question.cshtml",
+                                    qvm);
+
+                                if (qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone)
+                                {
+                                        <div class="row">
+                                            <div class="col-md-6 col-md-offset-3">
+                                                <div class="am-checkbox text-center">
+                                                    <input type="checkbox" id="textnotifications" name="textnotifications" value="1" @(Request["textnotifications"] == "1" || System.Web.HttpContext.Current.Request.HttpMethod.ToString() == "GET" ? " checked=\"checked\" " : "") />
+                                                    <label for="textnotifications">
+                                                        I would like to receive text messages about @(UILabel.ActivityLabel(ActivityType.Activity, true).ToLower())
+                                                        Notifications may include information about attendance, reminders, and other important information.
+                                                    </label>
+                                                </div>
+                                            </div>
                                         </div>
+                                }
+                            }
+
+                            @if (currentUser.IsEmpty())
+                            {
+                                <div class="form-group new-account">
+                                    <label for="password1" class="control-label col-md-3">
+                                        Password <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="col-md-6">
+                                        <input type="password" class="form-control" id="password1" name="password1" />
                                     </div>
                                 </div>
+
+                                <div class="form-group new-account">
+                                    <label for="password1" class="control-label col-md-3">
+                                        Verify Password <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="col-md-6">
+                                        <input type="password" class="form-control" id="password2" name="password2" />
+                                    </div>
+                                </div>
+                                if (AfterSchoolLibrary.Helpers.Utilities.IsProduction || AfterSchoolLibrary.Helpers.Utilities.IsStaging)
+                                {
+                                        <div class="row padding-v-20">
+                                            <div class="form-group text-center">
+                                            @{
+                                                Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", ""); 
+                                            }
+                                            </div>
+                                        </div>
+                                }
                             }
-                        }
-
-                        @if (currentUser.IsEmpty())
-                        {
-                            <div class="form-group new-account">
-                                <label for="password1" class="control-label col-md-3">
-                                    Password <span class="text-danger">*</span>
-                                </label>
-                                <div class="col-md-6">
-                                    <input type="password" class="form-control" id="password1" name="password1" />
-                                </div>
-                            </div>
-
-                            <div class="form-group new-account">
-                                <label for="password1" class="control-label col-md-3">
-                                    Verify Password <span class="text-danger">*</span>
-                                </label>
-                                <div class="col-md-6">
-                                    <input type="password" class="form-control" id="password2" name="password2" />
-                                </div>
-                            </div>
-                        }
-
-
-                        @if (currentUser.IsEmpty())
-                        {
-                            <div class="row padding-v-20">
-                                <div class="form-group text-center">
-                                    @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", ""); }
-                                </div>
-                            </div>
-                        }
 
                         <div class="row padding-v-20">
                             <div class="col-md-6 col-md-offset-3">
@@ -211,7 +213,7 @@
         participationObject,
         new ViewDataDictionary()
         {
-            { "IsDuringCheckout", true }
+{ "IsDuringCheckout", true }
         }
     );
 }
@@ -286,10 +288,10 @@
         });
     });
 
-    function checkAndPostSignupForm(event, isFirstStep) {        
+    function checkAndPostSignupForm(event, isFirstStep) {
         if (isFirstStep && event.keyCode == 13) {
-            event.preventDefault();            
-            $('#btn-check-email').click();            
+            event.preventDefault();
+            $('#btn-check-email').click();
             return false;
         }
     }

@@ -8,6 +8,11 @@
     <link rel="shortcut icon" href="/favicon.png">
     <meta name="keywords" content="">
     <title>@UILabel.ProductName()</title>
+  
+
+    @*-------For Emojis css-------*@
+    <link rel="stylesheet" href="https://cdn.rawgit.com/mervick/emojionearea/master/dist/emojionearea.min.css">
+    
 
     @{Html.RenderPartial("~/Views/Shared/_HeadIncludes.cshtml");}
     @{Html.RenderPartial("~/Views/Shared/_ZendeskWidget.cshtml");}
@@ -45,7 +50,7 @@
     </div>
 
     @{Html.RenderPartial("~/Views/Shared/_JavascriptIncludes.cshtml");}
-
+    <script type="text/javascript" src="~/Scripts/emojionearea.min.js"></script>
     @RenderSection("scripts", required: false)
 
     <script>

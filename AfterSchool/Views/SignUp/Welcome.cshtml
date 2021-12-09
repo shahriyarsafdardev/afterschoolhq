@@ -17,73 +17,135 @@
         SearchSchool = 8,
     };
 
+    var showInviteWelcome = false;
+
+    if (Model.InviteCodeToShare.IsNotEmpty())
+    {
+        showInviteWelcome = true;
+    }
+
 }
 
-<style>    
-</style>
+@helper PrintWelcomeParagraph1()
+{
+    <span>Thank you for joining us at AfterSchool HQ!</span>
+}
+@helper PrintWelcomeParagraph2(bool showInviteWelcome)
+{
+    if (showInviteWelcome)
+    {
+        <span>You have been invited you to take the first step towards streamlining the promotion and management of your enrichment program at <strong>@(Model.InvitingAccount.IsNotEmpty() ? Model.InvitingAccount.Name : "'Account Not Found'")</strong>.</span>
+    }
+    else
+    {
+        <span>Boisterous cheers and applause for taking the first step towards streamlining the promotion and management of your enrichment program.</span>
+    }
+}
+@helper PrintWelcomeParagraph3()
+{
+    <span>To get your program up and running on our platform, we just need a few bits of information from you. I promise it will be quick, painless, and well worth a few minutes of your time.</span>
+}
+
+@helper PrintGraphic(string clientSuccessManagerName)
+{
+    <div>
+        <img src="~/img/client_success_manager_color.jpeg" alt="@clientSuccessManagerName" class="img-client-success-manager">
+        <div class="padding-v-10 text-center">
+            <p class="manager-name">@clientSuccessManagerName</p>
+            <p class="manager-position">Client Success Manager</p>
+        </div>
+    </div>
+}
+
+@helper PrintGraphicSmall(string clientSuccessManagerName)
+{
+<div class="row">
+    <div class="pull-left margin-l-20">
+        <img src="~/img/client_success_manager_color.jpeg" alt="@clientSuccessManagerName" class="img-client-success-manager" style="max-height: 150px;">
+    </div>
+    <div class="pull-left margin-l-20">
+        <p class="manager-name">@clientSuccessManagerName</p>
+        <p class="manager-position">Client Success Manager</p>
+    </div>
+    <div class="clearfix"></div>
+</div>
+}
 
 <div class="row main-content main-content-welcome-pages">
 
-    <div id="signup-welcome" @(signupType == SignUpType.Teacher1099 ? "hidden" :"" )>
+    <div id="signup-welcome" @(signupType == SignUpType.Teacher1099 ? "hidden" : "" )>
 
-        <div class="visible-lg visible-md welcome-outer-ring">
+        <div class="welcome-outer-ring visible-lg visible-xl visible-md">
             <div class="welcome-inner-ring">
+                <div class="row">
 
-                <div class="pull-left">
-                    <img src="~/img/client_success_manager_color.jpeg" alt="@clientSuccessManagerName" class="img-client-success-manager">
-                    <div class="clearfix"></div>
-                    <p class="manager-name">@clientSuccessManagerName</p>
-                    <p class="manager-position">Client Success Manager</p>
-                </div>
+                    <div class="col-md-4 col-lg-4">
+                        @PrintGraphic(clientSuccessManagerName)
+                    </div>
 
-                <div>
-                    <span class="welcome-text">Welcome</span>
-                    <p class="common-font" style="font-size: 20px; margin: 6px 1px 17px 36px;">Thank you for joining us at AfterSchool HQ! </p>
-                    <p class="common-font" style="font-size: 18px; margin: 17px 0 25px 37px;">Boisterous cheers and applause for taking the first step towards streamlining the promotion and management of your enrichment program. To get your program up and running on our platform, we just need a few bits of information from you. </p>
-                    <p class="common-font" style="font-size: 18px;">I promise it will be quick, painless, and well worth a few minutes of your time.</p>
-                    <button id="btn-GetStarted" type="button" class="col-md-3 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-proceedfuther" onclick="return proceedFurther('@EnumSignupPages.WelCome')">Get Started</button>
-                    <div class="clearfix"></div>
+                    <div class="col-md-8 col-lg-8">
+                        <span class="welcome-text">Welcome</span>
+                        <p class="common-font padding-v-10" style="font-size: 20px;">
+                            @PrintWelcomeParagraph1()
+                        </p>
+                        <p class="common-font" style="font-size: 18px;">
+                            @PrintWelcomeParagraph2(showInviteWelcome)
+                        </p>
+                        <p class="common-font" style="font-size: 18px;">
+                            @PrintWelcomeParagraph3()
+                        </p>
+
+                        <div class="margin-t-30">
+                            <button id="btn-GetStarted" type="button" class="col-md-3 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-proceedfuther" onclick="return proceedFurther('@EnumSignupPages.WelCome')">
+                                Get Started
+                            </button>
+
+                        </div>
+
+                        <p class="common-font text-center margin-t-30" style="font-size: 16px;">
+                            <a href="@Url.Action("index", "login", new { invite = Model.InviteCodeToShare })">Already have an account? Login &raquo;</a>
+                        </p>
+                    </div>
+
                 </div>
-                <div class="clearfix"></div>
             </div>
-            <div class="clearfix"></div>
         </div>
 
-        <div class="visible-xs visible-sm welcome-outer-ring" style="margin-bottom: 20px;">
+        <div class="welcome-outer-ring visible-xs visible-sm margin-b-20">
             <div class="mobile-inner-ring">
-                <h2 class="text-center welcome-text">Welcome</h2>
-                <div class="clearfix"></div>
-                <br />
 
-                <div class="col-sm-12 col-xs-12 text-center">
-                    <p class="common-font" style="font-size: 20px; margin: 6px 1px 17px 0px;">Thank you for joining us at AfterSchool HQ! </p>
-                    <p class="common-font" style="font-size: 18px; margin: 17px 0 25px 0px;">Boisterous cheers and applause for taking the first step towards streamlining the promotion and management of your enrichment program. To get your program up and running on our platform, we just need a few bits of information from you. </p>
-                    <p class="common-font" style="font-size: 18px;">I promise it will be quick, painless, and well worth a few minutes of your time.</p>
-                </div>
+                <div class="row padding-20">
 
-                <div class="col-sm-12 col-xs-12 margin-t-30">
-                    <div class="pull-left">
-                        <img src="~/img/client_success_manager_color.jpeg" alt="@clientSuccessManagerName" style="max-width: 70px; border-radius: 6px; border: solid 1px #00c5a3;">
+                    <div class="col-sm-12 col-md-6 col-lg-8">
+                        <span class="text-center welcome-text">Welcome</span>
+                        <p class="common-font padding-v-10" style="font-size: 20px;">
+                            @PrintWelcomeParagraph1()
+                        </p>
+                        <p class="common-font" style="font-size: 18px;">
+                            @PrintWelcomeParagraph2(showInviteWelcome)
+                        </p>
+                        <p class="common-font" style="font-size: 18px;">
+                            @PrintWelcomeParagraph3()
+                        </p>
                     </div>
-                    <div class="pull-left" style="margin-left: 20px;">
-                        <p style=" font-family: Montserrat; font-size: 18px; font-weight: bold; font-stretch: normal; font-style: normal; line-height: normal; letter-spacing: normal; text-align: left; color: #00c5a3;">@clientSuccessManagerName</p>
-                        <p style=" font-family: Montserrat; font-size: 18px; font-weight: normal; font-stretch: normal; font-style: normal; line-height: normal; letter-spacing: normal; text-align: left; color: #4a4a4a;">Client Success Manager</p>
+
+                    <div class="col-sm-12 padding-v-20">
+                        @PrintGraphicSmall(clientSuccessManagerName)
+                    </div>
+
+                    <div class="col-sm-12 col-md-6 col-lg-8">
+                        <button id="btn-GetStarted" type="button" class="col-md-3 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-proceedfuther margin-t-30" onclick="return proceedFurther('@EnumSignupPages.WelCome')">
+                            Get Started
+                        </button>
+
+                        <p class="common-font text-center margin-t-30" style="font-size: 16px;">
+                            <a href="@Url.Action("index", "login", new { invite = Model.InviteCodeToShare })">Already have an account? Login &raquo;</a>
+                        </p>
                     </div>
                 </div>
-
-                <div class="clearfix"></div>
-                <div class="text-center margin-v-40">
-                    <button id="btn-GetStarted" type="button" class="col-md-3 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-proceedfuther" onclick="return proceedFurther('@EnumSignupPages.WelCome')">Get Started</button>
-                    <div class="clearfix"></div>
-                </div>
-
-                <div class="clearfix"></div>
             </div>
-
-            <div class="clearfix"></div>
         </div>
 
-        <div class="clearfix"></div>
     </div>
 
     <div class="clearfix"></div>
@@ -249,8 +311,8 @@
 
                     <div class="row margin-t-35">
                         <div class="col-md-12">
-                            <label id="signup-search-label"></label>  
-                            <span class="label" style="color: #777777;">(Max character Limit 50)</span> 
+                            <label id="signup-search-label"></label>
+                            <span class="label" style="color: #777777;">(Max character Limit 50)</span>
                             <span class="label" style="color: #777777;">(Remaining <span id="remaining-search-char-counter">50</span> characters)</span>
                             <input id="signup-account-search" type="text" class="form-control" autocomplete="off" />
                             <div id="signup-account-search-list" class="border-light-gray pointer hide"></div>
@@ -314,6 +376,8 @@
                         @Html.AntiForgeryToken()
 
                         <input id="hidden-claim-accountId" type="hidden" name="accountId" />
+                        <input id="hidden-account-profileUrl" type="hidden" name="profileUrl" value="" />
+                        <input id="hidden-current-page" type="hidden" name="currentPage" value="" />
 
                         <div class="col-md-12 onboarding-form-group">
                             <label class="onboarding-lable">FIRST NAME</label>
@@ -340,7 +404,10 @@
                         <div class="clearfix"></div>
 
                         <div class="col-md-12 onboarding-form-group text-center" style="margin-top: 20px;">
-                            @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", ""); }
+                            @if (AfterSchoolLibrary.Helpers.Utilities.IsProduction || AfterSchoolLibrary.Helpers.Utilities.IsStaging)
+                            {
+                                Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "");
+                            }
                         </div>
                         <div class="clearfix"></div>
 
@@ -371,7 +438,7 @@
     <div class="clearfix"></div>
     <div id="signup-thank-you" style="display: none;">
         <div class="welcome-outer-ring">
-            <div class="search-inner-ring" style="min-height: 509px;padding-bottom: 5px;">                    
+            <div class="search-inner-ring" style="min-height: 509px;padding-bottom: 5px;">
                 <h2 class="text-center">Thank You!</h2>
                 <div class="clearfix"></div><br />
                 <h5 id="header-thankyou-not-recognized" class="text-center" style="display: none;">We have sent an email with instructions to <strong id="lbl-org-member-email"></strong>.</h5>
@@ -387,7 +454,35 @@
                 <h5 id="header-thankyou-recognized" class="text-center" style="display: none;">We see that you have email from same domain. We have sent you instruction to claim your account.</h5>
                 <h5 id="header-thankyou-request-access" class="text-center" style="display: none;font-size: 22px; font-weight: 600; font-stretch: normal; font-style: normal; line-height: normal; letter-spacing: 0.53px; text-align: center; color: rgb(74, 74, 74); margin-bottom: 40px;" ">Your access request has been sent to the owner of this profile.</h5>
                 <div class="clearfix"></div><br />
-            </div>            
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal" tabindex="-1" role="dialog" id="NoAccountFoundPopup">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="padding-top:0">
+                <h5 class="text-center">Invite account not found</h5>
+                <p>
+                    Oh no! Your invite got lost in transit! We’ll have that sorted out in no time. <strong>Please follow the instructions below and then proceed with your account setup.</strong>
+                </p>
+
+                <p>To connect your account with the account that invited you, please contact our support team with:</p>
+
+                <ul>
+                    <li>The email address you’re using to sign up</li>
+                    <li>The name or email address of the account that invited you.</li>
+                </ul>
+
+                <p class="text-center"><a href=" https://afterschoolhq.zendesk.com/hc/en-us/requests/new" target="_blank" class="btn btn-primary">Contact Support</a></p>
+            </div>
         </div>
     </div>
 </div>
@@ -400,6 +495,8 @@
         var isSearching = false;
         var isOrganization = false;
         var isSchool = false;
+        var isSearchSchoolPage =  false;
+        var hasAccountProfileUrl = false;
         var selectedAccount = '';
         var signupWelcome = $('#signup-welcome');
         var signupSelectUsertype = $('#signup-select-usertype');
@@ -423,6 +520,7 @@
         var headerThankYouNR2 = $('#header2-thankyou-not-recognized');
         var headerThankYouNR3 = $('#header3-thankyou-not-recognized');
         var hiddenClaimAccountId = $('#hidden-claim-accountId'); // this one is for existing accounts
+        var hiddenAccountProfileUrl = $('#hidden-account-profileUrl'); // this one is for account profile url
         var hiddenAccountName = $('#hidden-signup-accountName'); // this one is for creating new account flow and placed inside partial view
         var hiddenAccountType = $('#hidden-signup-accountType');
         var signupAccountSearchList = $('#signup-account-search-list');
@@ -496,7 +594,13 @@
                     doAccountSearch(signupAccountSearch, signupAccountSearchList)
                 }, 250);
 
+              
             });
+
+              @if(showInviteWelcome && Model.InvitingAccount.IsEmpty())
+              {
+                    <text>$("#NoAccountFoundPopup").modal('show');</text>
+              }
         });
 
         function signupListMouseOver(id) {
@@ -518,18 +622,20 @@
 
                 signupAccountSearch.val(text);
 
+                if (isSchool) {
+                    var profileUrl = slug;
+                    hiddenAccountProfileUrl = profileUrl;
+                    hasAccountProfileUrl = true;
+                    signupAccountSearchList.addClass('hide');
+                }
+
                 if (isClaimed == false) {
                     var url = slug + '?claimprofile=1';
-                    window.location = url ; //move to profile page
+                    window.location = url; //move to profile page
                 }
             } else {
                 selectedAccount = null; //support for back click
                 hiddenAccountName.val(signupAccountSearch.val())
-
-                if (isSchool) {
-                    window.location = `@Url.Content("~/parents.html")`;
-                    return;
-                }
             }
 
             signupAccountSearchList.addClass('hide');
@@ -646,6 +752,8 @@
                 isOrganization = false;
                 lblOrgSearchTitle.text('Find your school, organization or program');
                 signupSearchLable.html('SEARCH OR ADD YOUR SCHOOL, ORGANIZATION OR PRORAM NAME')
+                $("#hidden-current-page").val('@EnumSignupPages.SearchSchool');
+                isSearchSchoolPage = true;
                 clearSearch();
                 signupIndividualType.hide();
                 signupSearchName.show();
@@ -661,6 +769,18 @@
         }
 
         function decideToProceedFurther(input) {
+
+            if (isSchool && isSearchSchoolPage && hasAccountProfileUrl) {
+                window.location = hiddenAccountProfileUrl; //move to profile page
+                return;
+            } else if (isSchool && isSearchSchoolPage && !hasAccountProfileUrl)
+            {
+                selectedAccount = null; //support for back click
+                hiddenAccountName.val(signupAccountSearch.val())
+                    window.location = `@Url.Content("~/parents.html")`;
+                    return;
+            }
+
             if (input && $(input).hasClass('disabled')) {
                 Notifications.showBar({
                     title: 'Error',
@@ -821,6 +941,7 @@
         function clearSearch() {
             selectedAccount = null;
             hiddenClaimAccountId.val('');
+            hiddenAccountProfileUrl.val('');
             hiddenAccountName.val('');
             signupAccountSearch.val('');
             btnContinue.attr('disabled', 'disabled');

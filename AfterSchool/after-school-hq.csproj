@@ -668,8 +668,10 @@
     <Content Include="Assets\css\media_md.css" />
     <Content Include="Assets\css\media_sm.css" />
     <Content Include="Assets\css\media_xs.css" />
+    <Content Include="Assets\css\survey.css" />
     <Content Include="Assets\js\ahq-profiles.js" />
     <Content Include="Assets\js\underscore-min.js" />
+    <Content Include="Assets\lib\customTableSorter.js" />
     <Content Include="case-study-cfi70.html" />
     <Content Include="contact.html" />
     <Content Include="Content\quill.bubble.css" />
@@ -689,7 +691,6 @@
     <Content Include="img\BCALogo.jpg" />
     <Content Include="img\billy2.png" />
     <Content Include="img\darye.png" />
-    <Content Include="img\david.png" />
     <Content Include="img\fee.png" />
     <Content Include="img\frank-mckenna-LhOjrOlcLx4-unsplash.jpg" />
     <Content Include="img\gabriel-baranski-vGICUyYW2CE-unsplash.jpg" />
@@ -726,6 +727,7 @@
     <Content Include="img\lazyload-ph.png" />
     <Content Include="img\logo-white.png" />
     <Content Include="img\logo.png" />
+    <Content Include="img\musical-instruments-english.jpg" />
     <Content Include="img\parent-icon.png" />
     <Content Include="img\pencil-banner.jpg" />
     <Content Include="img\provider-icon.png" />
@@ -759,11 +761,11 @@
     <Content Include="privacy.html" />
     <Content Include="provider-faq.html" />
     <Content Include="providers.html" />
+    <Content Include="Scripts\emojionearea.min.js" />
     <Content Include="Scripts\quill.min.js" />
     <Content Include="sitemap-home.xml" />
     <Content Include="style.css" />
     <Content Include="teachers.html" />
-    <Content Include="team.html" />
     <Content Include="tos.html" />
     <Content Include="UnsupportedBrowser.html" />
     <Content Include="404.html" />
@@ -1336,6 +1338,11 @@
     <Content Include="Areas\Org\Views\Accounting\EditCoupon.cshtml" />
     <Content Include="Areas\Org\Views\Onboarding\GettingStarted.cshtml" />
     <Content Include="Areas\Admin\Views\Package\Logs.cshtml" />
+    <Content Include="Areas\Org\Views\Activity\Surveys.cshtml" />
+    <Content Include="Areas\Org\Views\Activity\NewSurvey.cshtml" />
+    <Content Include="Areas\Org\Views\Activity\ViewSurvey.cshtml" />
+    <Content Include="Areas\Org\Views\Registration\Surveys.cshtml" />
+    <Content Include="Areas\Org\Views\Activity\ViewSurveyResults.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />
@@ -1825,6 +1832,9 @@
     <Content Include="Views\Shared\_ActivityRegistrantsWithAllStatus.cshtml" />
     <Content Include="Views\Shared\_ActivityRegistrantsForSpecificStatus.cshtml" />
     <Content Include="Views\Shared\Registration\_BrowseParticipationObjectList.cshtml" />
+    <Content Include="Views\Shared\Modals\_TransferModal.cshtml" />
+    <Content Include="Views\Shared\Modals\_TransferModal-TransferButton.cshtml" />
+    <Content Include="Views\R\ActivitySelectDates.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -1839,6 +1849,7 @@
     <Folder Include="Areas\WebHooks\Views\Shared\" />
     <Folder Include="Areas\WebHooks\Views\Stripe\" />
     <Folder Include="Areas\WebHooks\Views\Twilio\" />
+    <Folder Include="Uploads\" />
     <Folder Include="Views\Indianapolis\" />
     <Folder Include="Views\Sitemap\" />
     <Folder Include="Views\User\" />

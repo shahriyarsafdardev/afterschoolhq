@@ -64,7 +64,7 @@
                         new ViewDataDictionary {
                             { "Url", Url.Action("editcost", "group", new { id = Model.Uid.ToString(), isnew = Request["isnew"] }) },
                             { "Text", "Pricing & Payment" },
-                            { "IsActive", isActive && Model.GetAccount().CanProcessPayments() },
+                            { "IsActive", isActive},
                         }
                     );
                 }

@@ -103,10 +103,12 @@ namespace AfterSchool.Models
 
         public StudentsViewBagObject(string activityUid)
         {
+            var currentAccount = SessionVariables.CurrentAccount;
+
             Messages = new SystemMessages();
-            Activity = Activity.LoadByUid(activityUid.ToGuid(), Messages);
+            Activity = currentAccount.GetActivity(activityUid.ToGuid(), Messages);
             ActivityGroup = Activity.GetActivityGroup(Messages);
-            AccountActivityGroup = ActivityGroup.GetAccountActivityGroup(SessionVariables.CurrentAccount, Messages);
+            AccountActivityGroup = ActivityGroup.GetAccountActivityGroup(currentAccount, Messages);
             Registrants = AccountActivityGroup.IsEmpty() ? ActivityGroup.GetRegistrants(msgs: Messages) : AccountActivityGroup.GetRegistrants(Messages);
         }
 
@@ -121,10 +123,12 @@ namespace AfterSchool.Models
 
         public StudentsViewBagObject(string activityGroupUid, string activityUid)
         {
+            var currentAccount = SessionVariables.CurrentAccount;
+
             Messages = new SystemMessages();
-            Activity = Activity.LoadByUid(activityUid.ToGuid(), Messages);
-            ActivityGroup = ActivityGroup.LoadByUid(activityGroupUid.ToGuid(), Messages);
-            AccountActivityGroup = ActivityGroup.GetAccountActivityGroup(SessionVariables.CurrentAccount, Messages);
+            Activity = currentAccount.GetActivity(activityUid.ToGuid(), Messages);
+            ActivityGroup = ActivityGroup.LoadByUid(activityGroupUid.ToGuid());
+            AccountActivityGroup = ActivityGroup.GetAccountActivityGroup(currentAccount, Messages);
             Registrants = AccountActivityGroup.IsEmpty() ? ActivityGroup.GetRegistrants(msgs: Messages) : AccountActivityGroup.GetRegistrants(Messages);
         }
     }

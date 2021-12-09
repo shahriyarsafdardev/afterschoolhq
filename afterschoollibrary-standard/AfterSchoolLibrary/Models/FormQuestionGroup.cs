@@ -25,6 +25,8 @@ namespace AfterSchoolLibrary.Models
 		public int? DisplayOrder { get { return (int?)MDV["DisplayOrder"].Value; } set { MDV["DisplayOrder"].Value = value; } }
 		public RegistrantType RegistrantTypeId { get { return (RegistrantType)MDV["RegistrantTypeId"].Value; } set { MDV["RegistrantTypeId"].Value = value; } }
 		public QuestionGroupDataType QuestionGroupDataTypeId { get { return (QuestionGroupDataType)MDV["QuestionGroupDataTypeId"].Value; } set { MDV["QuestionGroupDataTypeId"].Value = value; } }
+		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
+		public bool IsDeleted { get { return (bool)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
 		
 
         public FormQuestionGroup()
@@ -33,6 +35,8 @@ namespace AfterSchoolLibrary.Models
             this.LoadObjectValues(ObjectMap);
 			this.RegistrantTypeId = RegistrantType.NotSet;
 			this.QuestionGroupDataTypeId = QuestionGroupDataType.NotSet;
+			this.IsActive = false;
+			this.IsDeleted = false;
 			
         }
 
@@ -47,6 +51,8 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "DisplayOrder", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrantTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "QuestionGroupDataTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "IsActive", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -138,6 +144,14 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["QuestionGroupDataTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsActive"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsDeleted"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -162,6 +176,15 @@ namespace AfterSchoolLibrary.Models
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["FormId"], FormId);
 			dq.Criterias.Add(ObjectMap["RegistrantTypeId"], RegistrantTypeId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<FormQuestionGroup> LoadByFormIdByIsDeleted(int FormId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["FormId"], FormId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
@@ -210,7 +233,7 @@ namespace AfterSchoolLibrary.Models
         public List<FormQuestion> GetAllQuestions(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (this.ID.HasValue)
-                return FormQuestion.LoadByFormQuestionGroupId(this.ID.Value, msgs, dc).OrderBy(x => x.DisplayOrder).ToList();
+                return FormQuestion.LoadByFormQuestionGroupIdByIsDeleted(this.ID.Value, false, msgs, dc).OrderBy(x => x.DisplayOrder).ToList();
 
             return new List<FormQuestion>();
         }
@@ -236,6 +259,14 @@ namespace AfterSchoolLibrary.Models
             newGroup.RegistrantTypeId = this.RegistrantTypeId;
             newGroup.QuestionGroupDataTypeId = this.QuestionGroupDataTypeId;
             return newGroup;
+        }
+
+        public static bool Exists(Hashtable criterias = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return GetCount(
+                criterias: criterias,
+                msgs: msgs,
+                dc: dc) > 0;
         }
 
         #endregion

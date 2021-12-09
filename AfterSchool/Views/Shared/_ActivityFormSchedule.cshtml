@@ -3,8 +3,10 @@
 @{ 
     var schedules = (List<ActivitySchedule>)ViewData["Schedules"];
     var showScheduleList = false; // (bool)ViewBag.ShowScheduleList;
-    var openInstances = Model.GetInstances().Where(instance => instance.InstanceTypeId == InstanceType.InSession).ToList();
-    var closedInstances = Model.GetInstances().Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession).ToList();
+    var daysOfTheWeek = Model.GetDaysOfTheWeek();
+    var instances = Model.GetInstances();
+    var openInstances = instances.Where(instance => instance.InstanceTypeId == InstanceType.InSession).ToList();
+    var closedInstances = instances.Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession).ToList();
 
     var activityGroupType = new ActivityGroupType?();
     var activityType = new ActivityType?();
@@ -119,7 +121,7 @@
                         @{
                             Html.RenderPartial(
                               "~/Views/Shared/_SwitchButton.cshtml",
-                              openInstances.Any(),
+                              daysOfTheWeek.Any(),
                               new ViewDataDictionary()
                               {
                                     { "checkboxname", "hasschedule" },
@@ -461,6 +463,7 @@
         
         </div>
     }
+
 </div>
 
 <script>
@@ -505,8 +508,10 @@
     function checkHasSchedule() {
         if ($('#hasschedule').is(':checked')) {
             $('.has-schedule-switch').removeClass('hide');
+            $('#ongoing-div').removeClass('hide');
         } else {
             $('.has-schedule-switch').addClass('hide');
+            $('#ongoing-div').addClass('hide');
         }
     }
 
@@ -586,12 +591,14 @@
             $('#requiresalldays-group').removeClass('hide');
             $('#schedule-dates').addClass('hide');
             $('#ongoing-div').removeClass('hide');
+            $('#btn-advanced-settings').removeClass('hide');
         } else {
             $('#dailyrepeat').addClass('hide');
             $('#requiresalldays-group').addClass('hide');
             $('#repeating-schedule').addClass('hide');
             $('#schedule-dates').removeClass('hide');
             $('#ongoing-div').addClass('hide');
+            $('#btn-advanced-settings').addClass('hide');
 
             if ($('.schedule-date').length == $('.schedule-date.hide').length) {
                 showDates();

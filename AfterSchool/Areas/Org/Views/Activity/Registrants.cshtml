@@ -28,6 +28,7 @@
     var showStudentCRM = accountPackage.HasFeature(FeatureType.StudentCRM);
     var allowInvitesPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowInvites);
     var studentCRMPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.StudentCRM);
+    var isReadOnlySeatStatus = (bool)ViewBag.IsReadOnlySeatStatus;
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
@@ -110,10 +111,9 @@
             </div>
 
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <select id="assignmentType" onchange="changeAssignment()" class="form-control">
                         <option value="">View All Assignments</option>
-
                         
                         @foreach (var x in Enum.GetValues(typeof(RegistrationAssignmentType)).Cast<RegistrationAssignmentType>().Where(x => x != RegistrationAssignmentType.NotSet))
                         {
@@ -130,8 +130,20 @@
                         }
                     </select>
                 </div>
-                <div class="col-md-8">
-                    <div class="btn-group pull-right">
+                <div class="col-md-3">
+                    @if (Model.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
+                    {
+                        <select id="classes" onchange="changeClass()" class="form-control">
+                            <option value="">All Dates</option>
+                            @foreach(var instance in Model.GetSchedule().GetInSessionInstances())
+                            {
+                                <option value="@instance.ID">@instance.StartDateTime.ToShortDateTimeString()</option>
+                            }
+                        </select>
+                    }
+                </div>
+                <div class="col-md-6">
+                    <div class="btn-group pull-right @(Model.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass ? "hide" : "")">
 
                         @if (ViewBag.IsActivityLeader)
                         {
@@ -209,17 +221,18 @@
             <div class="clearfix"></div>
             <br />
             @{Html.RenderPartial(
-                    "~/Views/Shared/_ActivityRegistrantsWithAllStatus.cshtml",
-                    ras,
-                    new ViewDataDictionary()
-                    {
+                "~/Views/Shared/_ActivityRegistrantsWithAllStatus.cshtml",
+                ras,
+                new ViewDataDictionary()
+                {
                     { "Activity", Model },
                     { "Account", account },
                     { "EditAction", "registrantdetail" },
                     { "EditController", "activity" },
-                    { "AssignmentType", assignmentType }
-                    }
-               );}
+                    { "AssignmentType", assignmentType },
+                    { "IsReadOnlySeatStatus", isReadOnlySeatStatus }
+                }
+            );}
 
         </div>
     </div>
@@ -228,5 +241,14 @@
 <script>
     function changeAssignment() {
         location.href = '@Url.Action("registrants", "activity", new { id = Model.Uid })?atype=' + $('#assignmentType').val();
+    }
+    function changeClass() {
+        $('.instance').addClass('hide');
+
+        if ($('#classes').val() == '') {
+            $('.instance').removeClass('hide');
+        } else {
+            $('.instance-' + $('#classes').val()).removeClass('hide');
+        }
     }
 </script>

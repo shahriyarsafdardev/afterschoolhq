@@ -66,6 +66,44 @@
         </div>
 
     </div>
+
+</div>
+
+@{ 
+    var isSchool = Model.AccountTypeId.In(AccountService.LocationProviderAccountTypes);
+    var tabsMdSize = "3";
+
+    if (!isSchool)
+    {
+        tabsMdSize = "4";
+    }
+}
+
+<div class="margin-10">
+    <div class="col-lg-10 col-lg-offset-1 col-md-12">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="col-md-@tabsMdSize">
+                    <button type="button" class="btn btn-default btn-lg btn-block" id="search-allactivities">All Activities</button>
+                </div>
+
+                <div class="col-md-@tabsMdSize">
+                    <button type="button" class="btn btn-default btn-lg btn-block" id="search-physical">In Person</button>
+                </div>
+
+                @if (isSchool)
+                {
+                    <div class="col-md-@tabsMdSize">
+                        <button type="button" class="btn btn-default btn-lg btn-block" id="search-sport">Sports</button>
+                    </div>
+                }
+
+                <div class="col-md-@tabsMdSize">
+                    <button type="button" class="btn btn-default btn-lg btn-block" id="search-virtual">Virtual</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div id="search-noresults" class="hide margin-t-20 padding-30">
@@ -81,6 +119,9 @@
 </div>
 
 <script>
+
+    var searchableActivityType = '';
+
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         $('#search-name').keyup(function () {
             search();
@@ -88,6 +129,36 @@
         $('#search-seatsfilled, #search-grade, #search-gender, #search-dayofweek, #search-location').change(function () {
             search();
         });
+
+        $('#search-allactivities').click(function () {
+            $('.selectedBtn').removeClass('selectedBtn');
+            searchableActivityType = '';
+            search();
+            $("#search-allactivities").addClass('selectedBtn');
+        });
+
+        $('#search-physical').click(function () {
+            $('.selectedBtn').removeClass('selectedBtn');
+            searchableActivityType = 'physical';
+            search();
+            $("#search-physical").addClass('selectedBtn');
+        });
+
+        $('#search-sport').click(function () {
+            $('.selectedBtn').removeClass('selectedBtn');
+            searchableActivityType = 'sport';
+            search();
+            $("#search-sport").addClass('selectedBtn');
+        });
+
+        $('#search-virtual').click(function () {
+            $('.selectedBtn').removeClass('selectedBtn');
+            searchableActivityType = 'virtual';
+            search();
+            $("#search-virtual").addClass('selectedBtn');
+        });
+
+        $('#search-physical').trigger('click');
     });
 
     function search() {
@@ -100,7 +171,7 @@
         var location = $('#search-location').val();
         var totalDivs = 0;
         var hiddenDivs = 0;
-        var searchable = $('.searchable-object'); 
+        var searchable = $('.searchable-object');
         var searching = false;
 
         $('.participation-object-add').removeClass('hide');
@@ -129,7 +200,7 @@
                 }
             });
         }
-        
+
         if (gender != null && gender.length > 0) {
             searching = true;
             searchable.each(function () {
@@ -182,9 +253,30 @@
             });
         }
 
+        if (searchableActivityType != null && searchableActivityType.length > 0) {
+            searching = true;
+            searchable.each(function () {
+
+                console.log(searchableActivityType);
+
+                if ($(this).attr('isvirtual') != "1" && searchableActivityType == 'virtual' && !$(this).hasClass('hide')) {
+                    $(this).addClass('hide');
+                    hiddenDivs++;
+                }
+                else if ($(this).attr('isphysical') != "1" && searchableActivityType == 'physical' && !$(this).hasClass('hide')) {
+                    $(this).addClass('hide');
+                    hiddenDivs++;
+                }
+                else if ($(this).attr('issport') != "1" && searchableActivityType == 'sport' && !$(this).hasClass('hide')) {
+                    $(this).addClass('hide');
+                    hiddenDivs++;
+                }
+            });
+        }
+
         if (searching) {
             $('.participation-object-add').addClass('hide');
-        } 
+        }
 
         if (totalDivs == 0) {
             $('#no-activities').removeClass('hide');

@@ -7,11 +7,11 @@ using BasicLibrary.DataAccess;
 using AfterSchoolLibrary;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Services;
-using Hangfire;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Billing;
 using System.Web;
 using AfterSchoolLibrary.Helpers;
+using System.Collections;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -19,18 +19,17 @@ namespace AfterSchool.Areas.Org.Controllers
     {
         public AccountController() : base(AccountService.ProviderAccountTypes.ToList())
         {
-
         }
 
-        private bool GetIsFullScreen()
-        {
-            return Request["isnew"] == "1" || Request["isfullscreen"] == "1";
-        }
+        private bool GetIsFullScreen() =>
+            Request["isnew"] == "1" || Request["isfullscreen"] == "1";
 
         [HttpGet]
         public ActionResult GetStartedPayments(string id)
         {
-            ViewBag.Messages = new SystemMessages();
+            var msgs = new SystemMessages();
+            HandleTempMessages(msgs);
+            ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.IsFullScreen = true;
             return View(SessionVariables.CurrentAccount);
@@ -55,7 +54,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Organization Name is required", MessageType.UserError);
 
             Database.ExecuteTransaction(
-               action: (SystemMessages amsgs, DatabaseConnection adc) => {
+               action: (SystemMessages amsgs, DatabaseConnection adc) =>
+               {
                    // ..update profile title if account name has been changed 
                    if (name.IsNotEmpty() && a.Name != name)
                    {
@@ -83,20 +83,22 @@ namespace AfterSchool.Areas.Org.Controllers
 
                        a.LastModifiedDate = DateTime.UtcNow;
                        a.LastModifiedBy = SessionVariables.CurrentUser.ID;
-                       amsgs.AddRange(a.SaveWithStripe(adc));                       
+                       amsgs.AddRange(a.SaveWithStripe(adc));
                    }
                },
-               onSuccess: (SystemMessages smsgs) => {
+               onSuccess: (SystemMessages smsgs) =>
+               {
                    msgs.AddRange(smsgs);
 
                    if (msgs.HasNoErrors())
                        msgs.Add("Saved Successfully", MessageType.Success);
                },
-               onFailure: (SystemMessages fmsgs) => {
+               onFailure: (SystemMessages fmsgs) =>
+               {
                    msgs.AddRange(fmsgs);
                },
                onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
-           );           
+           );
 
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
@@ -108,10 +110,13 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Location()
         {
             var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Messages = new SystemMessages();
-            ViewBag.Location = currentAccount.GetDefaultLocation();
+            ViewBag.Location = currentAccount.GetDefaultLocation(msgs);
             ViewBag.IsFullScreen = GetIsFullScreen();
+            ViewBag.Messages = msgs;
+
             return View(currentAccount);
         }
 
@@ -160,17 +165,18 @@ namespace AfterSchool.Areas.Org.Controllers
                     hostAccountId: hostAccountId,
                     visitorAccount: currentAccount,
                     loggedInUser: currentUser,
-                    msgs: msgs
-                    );
+                    msgs: msgs);
 
                 if (msgs.HasNoErrors())
                     currentAccount.SetDefaultLocation(newLocation, currentUser, msgs);
             }
 
-            ViewBag.Messages = msgs;
+
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Location = currentAccount.GetDefaultLocation();
+            ViewBag.Location = currentAccount.GetDefaultLocation(msgs);
             ViewBag.IsFullScreen = GetIsFullScreen();
+            ViewBag.Messages = msgs;
+
             return View(currentAccount);
         }
 
@@ -193,10 +199,14 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult CheckSetup()
         {
             var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+            var model = currentAccount.GetCheckPaymentAccount(msgs) ?? new CheckPaymentAccount();
+
             ViewBag.Account = currentAccount;
             ViewBag.IsFullScreen = GetIsFullScreen();
-            ViewBag.Messages = new SystemMessages();
-            return View(currentAccount.GetCheckPaymentAccount() ?? new CheckPaymentAccount());
+            ViewBag.Messages = msgs;
+
+            return View(model);
         }
 
         [HttpPost]
@@ -238,16 +248,19 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors() && Request["isaccountredirect"] == "1")
             {
                 TempData["IsStripeIntegrated"] = true;
-                return Redirect(SessionVariables.CurrentAccount.ShortHomePageUrl);
+                return Redirect(currentAccount.ShortHomePageUrl);
             }
 
             if (msgs.HasNoErrors() && Request["isnew"] == "1")
                 return RedirectToAction("paymentsdone", new { isnew = 1 });
 
+            var model = currentAccount.GetCheckPaymentAccount(msgs) ?? new CheckPaymentAccount();
+
             ViewBag.Account = currentAccount;
             ViewBag.IsFullScreen = GetIsFullScreen();
             ViewBag.Messages = msgs;
-            return View(currentAccount.GetCheckPaymentAccount() ?? new CheckPaymentAccount());
+
+            return View(model);
         }
 
 
@@ -256,12 +269,12 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
+            var model = BankInfoViewModel.FromBankPaymentAccount(currentAccount.GetBankPaymentAccount(msgs) ?? new BankPaymentAccount());
 
             ViewBag.Account = currentAccount;
             ViewBag.IsFullScreen = GetIsFullScreen();
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.Messages = msgs;
 
-            var model = BankInfoViewModel.FromBankPaymentAccount(currentAccount.GetBankPaymentAccount(msgs) ?? new BankPaymentAccount());
             return View(model);
         }
 
@@ -329,11 +342,12 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult PaymentsEntity()
         {
             //.. this view is depreciated and paymentsoptions is the right view
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
-            var paymentsEntityVM = PaymentsEntityViewModel.LoadFromStripeAccount(SessionVariables.CurrentAccount.GetStripeCustomAccount(msgs));
+            var paymentsEntityVM = PaymentsEntityViewModel.LoadFromStripeAccount(currentAccount.GetStripeCustomAccount(msgs));
 
             ViewBag.Messages = msgs;
-            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.Account = currentAccount;
             ViewBag.IsFullScreen = GetIsFullScreen();
             return View(paymentsEntityVM);
         }
@@ -354,7 +368,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
-            var stripeAccount = account.GetStripeCustomAccount(msgs);            
+            var stripeAccount = account.GetStripeCustomAccount(msgs);
 
             if (paymentsEntityVM.BusinessType == LegalEntityType.NotSet)
                 msgs.Add("Please select your business type", MessageType.UserError);
@@ -467,10 +481,13 @@ namespace AfterSchool.Areas.Org.Controllers
                     return RedirectToAction("paymentsbank", "account", new { isnew = Request["isnew"] });
             }
 
+            var model = PaymentsEntityViewModel.LoadFromStripeAccount(account.GetStripeCustomAccount(msgs));
+
             ViewBag.Messages = msgs;
             ViewBag.Account = account;
             ViewBag.IsFullScreen = GetIsFullScreen();
-            return View(PaymentsEntityViewModel.LoadFromStripeAccount(account.GetStripeCustomAccount(msgs)));
+
+            return View(model);
         }
 
         [HttpGet]
@@ -528,9 +545,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
 
             ViewBag.HasActivities = account.HasActivities(msgs);
-            ViewBag.Account = account;            
+            ViewBag.Account = account;
             ViewBag.IsFullScreen = GetIsFullScreen();
-           
+
             var user = account.GetAccountOwner(msgs);
 
             //.. send support email to AHQ just to notifiy the team that a payment has been added/updated.
@@ -555,8 +572,8 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Features()
         {
             var account = SessionVariables.CurrentAccount;
-            var msgs = new SystemMessages();            
-            
+            var msgs = new SystemMessages();
+
             ViewBag.Features = account.GetAccountPackageFeatures(msgs);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Messages = msgs;
@@ -573,7 +590,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var accountPackage = a.GetActiveAccountPackage(msgs);
 
             Database.ExecuteTransaction(
-                action: (SystemMessages amsgs, DatabaseConnection adc) => {
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
                     foreach (FeatureType type in System.Enum.GetValues(typeof(FeatureType)))
                     {
                         if (Request[type.ToString()].IsNotEmpty())
@@ -598,16 +616,18 @@ namespace AfterSchool.Areas.Org.Controllers
                         }
                     }
                 },
-                onSuccess: (SystemMessages smsgs) => {
+                onSuccess: (SystemMessages smsgs) =>
+                {
                     msgs.AddRange(smsgs);
                     msgs.Add("Saved Successfully", MessageType.Success);
                     SessionVariables.AccountPackage = a.GetActiveAccountPackage();
                 },
-                onFailure: (SystemMessages fmsgs) => {
+                onFailure: (SystemMessages fmsgs) =>
+                {
                     msgs.AddRange(fmsgs);
                 }
             );
-            
+
             ViewBag.Features = a.GetAccountPackageFeatures(msgs);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Messages = msgs;
@@ -677,7 +697,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("All invites have been sent", MessageType.Success);
 
             var members = account.GetUsers(msgs: msgs);
-            
+
             ViewBag.AccountPackage = accountPackage;
             ViewBag.Members = members;
             ViewBag.NeedToUpgrade = members.Count >= accountPackage.GetFeature(FeatureType.TeamAccounts, msgs).GetMaxValue();
@@ -738,12 +758,13 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Forms()
+        public ActionResult Forms(string fromSurvey)
         {
             var msgs = new SystemMessages();
             var forms = SessionVariables.CurrentAccount.GetForms(msgs);
-            
+
             ViewBag.Messages = msgs;
+            ViewBag.FromSurvey = fromSurvey;
             return View(forms);
         }
 
@@ -751,21 +772,24 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult FormEdit(string id, string qg)
         {
             var currentAccount = SessionVariables.CurrentAccount;
-            if (currentAccount.IsEmpty() || id.IsEmpty())
+            var msgs = new SystemMessages();
+            HandleTempMessages(msgs);
+
+            if (id.IsEmpty())
                 return HttpNotFound();
 
-            var msgs = new SystemMessages();
             var form = currentAccount.GetForm(id.ToInteger(), msgs);
             var questionGroups = form.GetQuestionGroups(msgs);
             var individualGroups = questionGroups
                 .Where(x => x.RegistrantTypeId == RegistrantType.Individual)
                 .OrderBy(x => x.DisplayOrder).ToList();
-            var organizationGroups = questionGroups
-                .Where(x => x.RegistrantTypeId == RegistrantType.Organization)
-                .OrderBy(x => x.DisplayOrder).ToList();
+            // NOTE: temporarily disable organization groups
+            //var organizationGroups = questionGroups
+            //    .Where(x => x.RegistrantTypeId == RegistrantType.Organization)
+            //    .OrderBy(x => x.DisplayOrder).ToList();
 
-            //temporarily disable organization groups
-            organizationGroups = new List<FormQuestionGroup>();
+
+            var organizationGroups = new List<FormQuestionGroup>();
 
             //make sure only question groups with a setting of individual or organization are added to the final count
             questionGroups.Clear();
@@ -799,16 +823,15 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult FormEdit(string id, string copyfrom, string qg, string name, string description,  string cmd)
+        public ActionResult FormEdit(string id, string copyfrom, string qg, string name, string description, string cmd, string formtype)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
-            if (currentAccount.IsEmpty() || id.IsEmpty())
+            var msgs = new SystemMessages();
+
+            if (id.IsEmpty() && copyfrom.IsEmpty())
                 return HttpNotFound();
 
-
-
-            var msgs = new SystemMessages();
             Form form = null;
             FormQuestionGroup questionGroup = null;
 
@@ -818,14 +841,19 @@ namespace AfterSchool.Areas.Org.Controllers
             if (id.ToInteger() == 0)
             {
                 if (copyfrom.IsNumber())
-                    form = currentAccount.GetForm(id.ToInteger(), msgs)?
-                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, null, msgs);
+                    form = currentAccount.GetForm(copyfrom.ToInteger(), msgs)?
+                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, (FormType)formtype.ToInteger(), null, msgs, null);
                 else
-                    form = currentAccount.GetDefaultForm(msgs)
-                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, null, msgs);
+                    form = currentAccount.GetDefaultForm(msgs)?
+                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, (FormType)formtype.ToInteger(), null, msgs, null);
             }
             else
                 form = currentAccount.GetForm(id.ToInteger(), msgs);
+
+            var questions = new List<FormQuestion>();
+            var questionGroups = new List<FormQuestionGroup>();
+            var individualGroups = new List<FormQuestionGroup>();
+            var organizationGroups = new List<FormQuestionGroup>();
 
             if (msgs.HasNoErrors())
             {
@@ -833,31 +861,42 @@ namespace AfterSchool.Areas.Org.Controllers
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
                         if (name.IsNotBlank()) form.Name = name;
-                        if (description.IsNotBlank()) form.Description = description;
+                        form.Description = description;
+                        if (formtype.IsNotBlank()) form.FormTypeId = (FormType)formtype.ToInteger();
 
                         amsgs.AddRange(form.Save(adc));
-
-                        var questions = new List<FormQuestion>();
 
                         if (qg.IsNumber())
                         {
                             // create or update question groups
                             if (qg.ToInteger() == 0)
                             {
-                                questionGroup = new FormQuestionGroup()
+                                var sectionName = Request.Params["name-0"];
+                                var questionGroupExists = FormQuestionGroup.Exists(criterias: new Hashtable() { { "Name", sectionName }, { "FormId", form.ID }, { "IsDeleted" , false } }, msgs: amsgs, dc: adc);
+
+                                if (!questionGroupExists)
                                 {
-                                    CreateDate = DateTime.UtcNow,
-                                    CreatedBy = currentUser.ID,
-                                    LastModifiedDate = DateTime.UtcNow,
-                                    LastModifiedBy = currentUser.ID,
-                                    DisplayOrder = form.GetQuestionGroupCount(amsgs, adc) + 1,
-                                    FormId = form.ID,
-                                    QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
-                                    RegistrantTypeId = RegistrantType.Individual,
-                                    Name = Request.Params["name-0"]
-                                };
-                                amsgs.AddRange(questionGroup.Save(adc));
-                                questions = new List<FormQuestion>();
+                                    questionGroup = new FormQuestionGroup()
+                                    {
+                                        CreateDate = DateTime.UtcNow,
+                                        CreatedBy = currentUser.ID,
+                                        LastModifiedDate = DateTime.UtcNow,
+                                        LastModifiedBy = currentUser.ID,
+                                        DisplayOrder = form.GetQuestionGroupCount(amsgs, adc) + 1,
+                                        FormId = form.ID,
+                                        QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
+                                        RegistrantTypeId = RegistrantType.Individual,
+                                        Name = sectionName,
+                                        IsDeleted = false,
+                                        IsActive = true
+                                    };
+                                    amsgs.AddRange(questionGroup.Save(adc));
+                                    questions = new List<FormQuestion>();
+                                } 
+                                else
+                                {
+                                    questionGroup = FormQuestionGroup.Load(criterias: new Hashtable() { { "Name", sectionName }, { "FormId", form.ID }, { "IsDeleted", false } }, msgs: amsgs, dc: adc)?.FirstOrDefault();
+                                }                                
                             }
                             else
                             {
@@ -876,18 +915,27 @@ namespace AfterSchool.Areas.Org.Controllers
                             // save existing questions
                             questions.ForEach(question =>
                             {
-                                if (!question.IsLocked)
+                                var text = Request.Params[$"text-{question.ID}"];
+                                var desc = Request.Params[$"description-{question.ID}"];
+                                var options = Request.Params[$"options-text-{question.ID}"];
+                                var link = Request.Params[$"link-text-{question.ID}"];
+
+                                // this extra conditions are to prevent null entry in db from refresh-post calls
+                                if (!question.IsLocked && (text.IsNotEmpty() || desc.IsNotEmpty() || options.IsNotEmpty() || link.IsNotEmpty()))
                                 {
                                     question.IsActive = Request.Params[$"active-{question.ID}"].IsBoolean();
                                     question.IsRequired = Request.Params[$"required-{question.ID}"].IsBoolean();
+                                    question.IsAnswerDescriptionEnabled = Request.Params[$"answerDescription-{question.ID}"].IsBoolean();
 
                                     if (question.QuestionDataTypeId == QuestionDataType.NotSet)
                                     {
-                                        question.Text = Request.Params[$"text-{question.ID}"];
+                                        question.Text = text;
                                         // for Text Block
-                                        question.Description = Request.Params[$"description-{question.ID}"];
-                                        question.Options = Request.Params[$"options-text-{question.ID}"];
-                                        question.Link = Request.Params[$"link-text-{question.ID}"];
+                                        question.Description = desc;
+                                        question.Options = options;
+                                        question.Link = link;
+
+                                        question.DisplayOrder = Request.Params[$"displayOrderId-{question.ID}"].ToInteger();
                                         question.QuestionTypeId = (QuestionType)Request.Params[$"questiontype-{question.ID}"].ToInteger();
                                     }
 
@@ -898,34 +946,44 @@ namespace AfterSchool.Areas.Org.Controllers
                             });
 
                             // save new questions
-                            if (Request.Form["newquestioncount"].IsNumber() && Request.Form["newquestioncount"].ToInteger() > 0)
+                            if (Request.Form["newquestionsIds"].Length > 0)
                             {
-                                var questionCount = Request.Form["newquestioncount"].ToInteger();
-
-                                for (var i = 0; i < questionCount; i++)
+                                var questionIds = Request.Form["newquestionsIds"];
+                                var questionsList = questionIds.Split(',');
+                                foreach (var i in questionsList)
                                 {
-                                    var question = new FormQuestion
+                                    var text = Request.Params[string.Format("new-text-{0}", i)];
+
+                                    var questionExists = FormQuestion.Exists(criterias: new Hashtable() { { "Text", text }, { "FormId", form.ID }, { "FormQuestionGroupId", questionGroup.ID }, { "IsDeleted", false } }, msgs: amsgs, dc: adc);
+
+                                    if (!questionExists)
                                     {
-                                        FormId = form.ID,
-                                        CreateDate = DateTime.UtcNow,
-                                        LastModifiedDate = DateTime.UtcNow,
-                                        CreatedBy = currentUser.ID,
-                                        LastModifiedBy = currentUser.ID,
-                                        DisplayOrder = questionGroup.GetQuestionCount(amsgs, adc) + 1,
-                                        FormQuestionGroupId = questionGroup.ID,
-                                        IsTemplate = false,
-                                        QuestionDataTypeId = QuestionDataType.NotSet,
-                                        QuestionTypeId = (QuestionType)Request.Params[string.Format("new-questiontype-{0}", i)].ToInteger(),
-                                        Text = Request.Params[string.Format("new-text-{0}", i)],
-                                        Options = Request.Params[string.Format("new-options-text-{0}", i)],
-                                        Link = Request.Params[string.Format("new-link-text-{0}", i)],
-                                        Description = Request.Params[string.Format("new-description-{0}", i)],
-                                        IsActive = Request.Params[string.Format("new-active-{0}", i)].IsBoolean(),
-                                        IsRequired = Request.Params[string.Format("new-required-{0}", i)].IsBoolean()
-                                    };
-                                    amsgs.AddRange(question.Save(adc));
+                                        var question = new FormQuestion
+                                        {
+                                            FormId = form.ID,
+                                            CreateDate = DateTime.UtcNow,
+                                            LastModifiedDate = DateTime.UtcNow,
+                                            CreatedBy = currentUser.ID,
+                                            LastModifiedBy = currentUser.ID,
+                                            DisplayOrder = Request.Params[string.Format("new-sort-{0}", i)].ToInteger(),
+                                            //questionGroup.GetQuestionCount(amsgs, adc) + 1,
+                                            FormQuestionGroupId = questionGroup.ID,
+                                            IsTemplate = false,
+                                            QuestionDataTypeId = QuestionDataType.NotSet,
+                                            QuestionTypeId = (QuestionType)Request.Params[string.Format("new-questiontype-{0}", i)].ToInteger(),
+                                            Text = text,
+                                            Options = Request.Params[string.Format("new-options-text-{0}", i)],
+                                            Link = Request.Params[string.Format("new-link-text-{0}", i)],
+                                            Description = Request.Params[string.Format("new-description-{0}", i)],
+                                            IsActive = true,
+                                            IsDeleted = false,
+                                            IsRequired = Request.Params[string.Format("new-required-{0}", i)].IsBoolean(),
+                                            IsAnswerDescriptionEnabled = Request.Params[string.Format("new-description-enabled-{0}", i)].IsBoolean()
+                                        };
+                                        amsgs.AddRange(question.Save(adc));
+                                    }                                    
                                 }
-                            }                            
+                            }
                         }
                     },
                     onSuccess: (SystemMessages smsgs) =>
@@ -933,19 +991,17 @@ namespace AfterSchool.Areas.Org.Controllers
                         msgs.AddRange(smsgs);
                         msgs.Add("Form Saved", MessageType.Success);
                     },
-                    onFailure: (SystemMessages fmsgs) =>
-                    {
-                        msgs.AddRange(fmsgs);
-                    }
+                    onFailure: (SystemMessages fmsgs) =>msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
                 );
             }
 
-            var questionGroups = form.GetQuestionGroups(msgs);
-            var individualGroups = questionGroups
+            questionGroups = form.GetQuestionGroups(msgs);
+            individualGroups = questionGroups
                 .Where(x => x.RegistrantTypeId == RegistrantType.Individual)
                 .OrderBy(x => x.DisplayOrder)
                 .ToList();
-            var organizationGroups = questionGroups
+            organizationGroups = questionGroups
                 .Where(x => x.RegistrantTypeId == RegistrantType.Organization)
                 .OrderBy(x => x.DisplayOrder)
                 .ToList();
@@ -971,14 +1027,94 @@ namespace AfterSchool.Areas.Org.Controllers
                 case "next":
                     if (currentIndex < questionGroups.Count - 1) questionGroup = questionGroups[currentIndex + 1];
                     break;
+
             }
 
-            ViewBag.Messages = msgs;
             ViewBag.QuestionGroups = questionGroups;
             ViewBag.IndividualGroups = individualGroups;
             ViewBag.OrganizationGroups = organizationGroups;
             ViewBag.QuestionGroup = questionGroup;
+            ViewBag.Messages = msgs;
             return View(form);
+        }
+
+        [HttpGet]
+        public ActionResult Delete(string id)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+
+            var questionToDelete = FormQuestion.Load(id.ToInteger(), msgs);
+            questionToDelete.IsDeleted = true;
+            msgs.AddRange(questionToDelete.Save());
+
+            if (msgs.HasNoErrors())
+            {
+                msgs.Add(string.Format("{0} has been deleted", questionToDelete.Text), MessageType.Success);
+                SessionVariables.WebSession.LogActivity(
+                   account: currentAccount,
+                   actor: currentUser,
+                   actionType: WebSessionActionType.Deleted,
+                   objectType: ObjectType.FormQuestion,
+                   objectId: id.ToInteger(),
+                   objectText: questionToDelete.Text,
+                   indirectObjectType: ObjectType.FormQuestion,
+                   indirectObjectId: currentAccount.ID.Value,
+                   indirectObjectText: currentAccount.Name
+               );
+            }
+
+            ViewBag.Messages = msgs;
+            SetTempMessage(msgs);
+
+            return RedirectToAction("FormEdit", new { id = questionToDelete.FormId, qg = questionToDelete.FormQuestionGroupId });
+        }
+
+        [HttpGet]
+        public ActionResult DeleteSection(string id)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+
+            var sectionToDelete = FormQuestionGroup.Load(id: id.ToInteger(), msgs: msgs);
+            sectionToDelete.IsDeleted = true;
+            msgs.AddRange(sectionToDelete.Save());
+
+            //lets inactive all the questions for this section, so later when retrieving questions, we don't have to check for removed sections
+            var questionsInThisSection = FormQuestion.LoadByFormQuestionGroupId(FormQuestionGroupId: sectionToDelete.ID.Value, msgs: msgs);
+            foreach (var item in questionsInThisSection)
+            {
+                item.IsDeleted = true;
+                msgs.AddRange(item.Save());
+            }
+
+            if (msgs.HasNoErrors())
+            {
+                msgs.Add(string.Format("{0} has been deleted with all it's questions.", sectionToDelete.Name), MessageType.Success);
+                SessionVariables.WebSession.LogActivity(
+                   account: currentAccount,
+                   actor: currentUser,
+                   actionType: WebSessionActionType.Deleted,
+                   objectType: ObjectType.FormQuestionGroup,
+                   objectId: id.ToInteger(),
+                   objectText: sectionToDelete.Name,
+                   indirectObjectType: ObjectType.FormQuestionGroup,
+                   indirectObjectId: currentAccount.ID.Value,
+                   indirectObjectText: currentAccount.Name
+               );
+            }
+
+            ViewBag.Messages = msgs;
+            SetTempMessage(msgs);
+
+            return RedirectToAction("FormEdit", new { id = sectionToDelete.FormId, qg = "" });
         }
 
         private AccountProfile StyleViewBag(SystemMessages msgs)
@@ -1018,7 +1154,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Account = account;
             ViewBag.Location = profile.GetLocation(msgs);
-            
+
             ViewBag.Grades = GradeLevel.Load(msgs: msgs);
             ViewBag.GradeStart = profile.GetGradeLevelStart(msgs);
             ViewBag.GradeEnd = profile.GetGradeLevelEnd(msgs);
@@ -1049,9 +1185,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline, string primaryColor, string website, string mingrade, string maxgrade, 
-            string agestart, string ageend, string restrictbygrade, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string genderrestriction, 
-            string programCategories, string softskills, string academicsubjects, string teachingmethods, string profileemail, string profilephone, 
+        public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline, string primaryColor, string website, string mingrade, string maxgrade,
+            string agestart, string ageend, string restrictbygrade, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string genderrestriction,
+            string programCategories, string softskills, string academicsubjects, string teachingmethods, string profileemail, string profilephone,
             string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string state, string postalcode, string county, string country, string placeid, decimal latitude, decimal longitude,
             string opencovid, string elearningcenter, string virtualprogram, string ahqapproved, string videoUrl, IEnumerable<HttpPostedFileBase> photos)
         {
@@ -1059,7 +1195,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var account = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var profile = account.GetAccountProfile(msgs);
-            var allowedFiles = new string[] { ".png", ".jpg", ".jpeg" };            
+            var allowedFiles = new string[] { ".png", ".jpg", ".jpeg" };
 
             if (logo.IsNotEmpty())
             {
@@ -1097,7 +1233,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (locationname.IsEmpty())
                 msgs.Add("Location is a required field.", MessageType.UserError);
-            
+
             //server side validation for photos count, which should not be more then 6
             var properties = profile.GetProperties(AccountPropertyType.Photo, msgs);
             var savedPhotos = properties != null ? properties.Count : 0;
@@ -1149,13 +1285,13 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (SessionVariables.AccountUserType == UserType.TechSupport)
                     ahqapproved = ahqapproved.IsNumber() ? "1" : "0";
 
-                if(restrictbygrade.IsNotEmpty() && restrictbygrade.IsBoolean())
+                if (restrictbygrade.IsNotEmpty() && restrictbygrade.IsBoolean())
                 {
-                    if(restrictbygrade.ToBoolean())
+                    if (restrictbygrade.ToBoolean())
                     {
                         agestart = "";
                         ageend = "";
-                    } 
+                    }
                     else
                     {
                         mingrade = "";
@@ -1323,9 +1459,8 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Billing()
         {
-            Account currentAccount = SessionVariables.CurrentAccount;
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
-
             var packages = currentAccount.GetAccountPackages(msgs);
 
             if (packages.Count <= 0 || !packages.Any(m => !m.IsFree))
@@ -1344,7 +1479,6 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var accountPackage = SessionVariables.AccountPackage;
-
             var msgs = new SystemMessages();
 
             if (accountPackage.IsEmpty())
@@ -1365,7 +1499,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (ReturnUrl.IsNotEmpty())
                 ViewBag.ReturnUrl = ReturnUrl;
 
-             var package = id.IsGuid() ? Package.LoadByUid(id.ToGuid(), msgs) : accountPackage?.ToPackage();
+            var package = id.IsGuid() ? Package.LoadByUid(id.ToGuid(), msgs) : accountPackage?.ToPackage();
 
             Package suggestedPackage = null;
 
@@ -1387,7 +1521,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (id.IsEmpty())
                 msgs.Add("Package not found.", MessageType.UserError);
 
-            var features = PackageFeature.LoadByPackageId(id, msgs); 
+            var features = PackageFeature.LoadByPackageId(id, msgs);
 
             var featureTypeNotIn = new List<FeatureType>() {
                 FeatureType.NotSet,
@@ -1420,16 +1554,12 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var accountPackage = SessionVariables.AccountPackage;
-
-            if (currentAccount.IsEmpty())
-                return HttpNotFound();
-
             var msgs = new SystemMessages();
 
             Package package = null;
             AccountPackage newlyAddedPackage = null;
             Stripe.Customer customer = null;
-            
+
             var isFromTrialAccount = accountPackage?.IsDuringTrial ?? false;
 
             if (stripetoken.IsEmail() || cardId.IsEmpty())
@@ -1445,7 +1575,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         package = Package.LoadByUid(selectedPackageArr[1].ToGuid(), amsgs, adc);
 
-                        customer = currentAccount.CreateStripeCustomer();
+                        customer = currentAccount.CreateStripeCustomer(amsgs, adc);
 
                         if (stripetoken.IsNotEmpty())
                             currentAccount.CreateStripeCardFromToken(stripetoken, customer, amsgs, adc);
@@ -1470,11 +1600,11 @@ namespace AfterSchool.Areas.Org.Controllers
                         msgs.AddRange(fmsgs);
                     }
                 );
-            }            
-            
+            }
+
             if (newlyAddedPackage.IsNotEmpty())
                 SessionVariables.AccountPackage = currentAccount.GetAccountPackage(newlyAddedPackage.Uid, msgs);
-            
+
             if (msgs.HasNoErrors())
             {
                 ViewBag.BillingHistory = currentAccount.GetStripeBillingHistory(msgs);
@@ -1509,8 +1639,8 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
-            
-            ViewBag.Packages = Package.LoadByIsActive(true);
+
+            ViewBag.Packages = Package.LoadByIsActive(true, msgs);
             ViewBag.AccountPackage = currentAccount.GetActiveAccountPackage(msgs);
             ViewBag.Messages = msgs;
             return View(currentAccount);
@@ -1526,7 +1656,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             SessionVariables.AccountPackage = currentAccount.GetActiveAccountPackage(msgs);
 
-            ViewBag.Packages = Package.LoadByIsActive(true);
+            ViewBag.Packages = Package.LoadByIsActive(true, msgs);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Messages = msgs;
             return View("Packages", currentAccount);
@@ -1535,10 +1665,6 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult OAuthStripe()
         {
             var currentAccount = SessionVariables.CurrentAccount;
-
-            if (currentAccount.IsEmpty())
-                return HttpNotFound();
-
             var msgs = new SystemMessages();
 
             //.. user is redirected from onbording
@@ -1564,7 +1690,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     else
                         return Redirect(currentAccount.ShortHomePageUrl);
                 }
-                
+
                 return RedirectToAction("paymentsdone", new { source = Request["state"], isfullscreen = Request["isfullscreen"] });
             }
 
@@ -1581,6 +1707,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             SessionVariables.CurrentAccount.DisconnectStripeConnect(SessionVariables.CurrentUser, msgs);
 
+            ViewBag.Messages = msgs;
+
             return RedirectToAction("PaymentsOptions");
         }
 
@@ -1591,9 +1719,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (id.IsBlank())
                 msgs.Add("Card not found.", MessageType.UserError);
-            
+
             if (msgs.HasNoErrors())
-            {                
+            {
                 var customer = currentAccount.GetStripeCustomer(msgs);
                 currentAccount.UpdateStripeCard(id, customer, msgs);
             }

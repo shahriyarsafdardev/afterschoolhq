@@ -27,6 +27,10 @@ namespace AfterSchoolLibrary.Models
 		/// </summary>
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
+		/// <summary>
+		/// Required.
+		/// </summary>
+		public FormType FormTypeId { get { return (FormType)MDV["FormTypeId"].Value; } set { MDV["FormTypeId"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		
 
@@ -36,6 +40,7 @@ namespace AfterSchoolLibrary.Models
             this.LoadObjectValues(ObjectMap);
 			this.Uid = Guid.NewGuid();
 			this.IsActive = false;
+			this.FormTypeId = FormType.NotSet;
 			
         }
 
@@ -49,6 +54,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "IsActive", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "FormTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				
                 return _dp;
@@ -106,6 +112,8 @@ namespace AfterSchoolLibrary.Models
 				msgs.Add("AccountId is required on Form object", MessageType.Error);
 			if (this.Uid.IsEmpty())
 				msgs.Add("Uid is required on Form object", MessageType.Error);
+			if (this.FormTypeId.IsEmpty())
+				msgs.Add("FormTypeId is required on Form object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Form).Name));
@@ -138,6 +146,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["IsActive"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["FormTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
@@ -206,7 +218,7 @@ namespace AfterSchoolLibrary.Models
 
         public List<FormQuestionGroup> GetQuestionGroups(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return FormQuestionGroup.LoadByFormId(this.ID.Value, msgs, dc).OrderBy(x => x.DisplayOrder).ToList();
+            return FormQuestionGroup.LoadByFormIdByIsDeleted(this.ID.Value, false, msgs, dc).OrderBy(x => x.DisplayOrder).ToList();
         }
 
         public int GetQuestionGroupCount(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -214,7 +226,7 @@ namespace AfterSchoolLibrary.Models
             return FormQuestionGroup.GetCount(new Hashtable() { { "FormId", this.ID.Value } }, msgs, dc);
         }
 
-        public Form Copy(int loggedInUserId, int newAccountId, string formName = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public Form Copy(int loggedInUserId, int newAccountId, FormType formType, string formName = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();           
             var form = new Form
@@ -223,6 +235,7 @@ namespace AfterSchoolLibrary.Models
                 Description = this.Description,
                 LastModifiedDate = DateTime.UtcNow,
                 CreateDate = DateTime.UtcNow,
+                FormTypeId = formType,
                 LastModifiedBy = loggedInUserId,
                 CreatedBy = loggedInUserId,
                 AccountId = newAccountId,
@@ -231,7 +244,7 @@ namespace AfterSchoolLibrary.Models
             };
             msgs.AddRange(form.Save(dc: dc));
 
-            var groups = FormQuestionGroup.LoadByFormId(this.ID.Value, dc: dc);
+            var groups = this.FormTypeId == formType || formType == FormType.Registration ? FormQuestionGroup.LoadByFormId(FormId:this.ID.Value, dc:dc): new List<FormQuestionGroup>();
             foreach (var group in groups)
             {
                 var questions = FormQuestion.LoadByFormQuestionGroupId(group.ID.Value, dc: dc);
@@ -241,6 +254,7 @@ namespace AfterSchoolLibrary.Models
                 newGroup.CreateDate = DateTime.UtcNow;
                 newGroup.LastModifiedBy = newGroup.CreatedBy = loggedInUserId;
                 newGroup.FormId = form.ID;
+                newGroup.IsDeleted = false;
                 msgs.AddRange(newGroup.Save(dc: dc));
 
                 questions.ForEach(question => {
