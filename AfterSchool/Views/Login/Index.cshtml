@@ -1,27 +1,122 @@
-﻿
-@{
-    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+﻿@{ 
+    Layout = "~/Views/Shared/_LayoutLogin-Updated.cshtml";
     ViewBag.Title = "Login";
-    var msgs = (SystemMessages)ViewBag.Messages;
+    var msgs = (SystemMessages)ViewBag.Messages; 
 }
 
-<div class="am-wrapper am-login">
-    <div class="am-content">
-        <div class="main-content">
-            <div class="login-container">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <a href="/"><img src="@UILabel.ProductLogo()" alt="logo" width="100%" height="auto" class="logo-img"></a>                        
-                    </div>
-                    <div class="panel-body">
-                        
-                        @Html.Raw(UI.RenderMessagesToHtml(msgs))
+<style>
+    .bg-image {
+        /* The image used */
+        background-image: url("img/image-3-1800x900-1.png");
+        /* Center and scale the image nicely */
+        background-repeat: no-repeat;
+        background-position: left top;
+        background-size: 100% 100%;
+        flex: 1;
+        height: 100%;
+    }
 
-                        @{ Html.RenderPartial("_Login", null, new ViewDataDictionary() { { "ReturnUrl", Request["returnurl"] }, { "Invite", Request["invite"] } }); }
+    .login-form-email {
+        border-radius: 6px;
+        background-color: #fff;
+        background: url(img/envelop.png) no-repeat scroll 7px 7px;
+        padding-left: 40px;
+    }
+
+    .login-form-password {
+        border-radius: 6px;
+        background-color: #fff;
+        background: url(img/password.png) no-repeat scroll 9px 2px;
+        padding-left: 40px;
+    }
+
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 30px white inset !important;
+    }
+</style>
+
+<div class="container-login">
+    <div class="content pull-left">
+
+        <div style="position: fixed; top: 30px; left: 30px;">
+            <a href="/"><img src="~/img/ahq-logo-2-1-1.png" alt="logo" style="width: 325px;"></a>
+        </div>
+
+        <div class="rectangle-login-box">
+            <div class="form-group">
+                <p class="form-login-welcome">Welcome back.</p>
+                <p class="form-login-sign">Or <a href="#">sign up </a> for a free account.</p>
+            </div>
+            <br /><br />
+
+            @Html.Raw(UI.RenderMessagesToHtml(msgs))
+            <div class="clearfix"></div>
+
+            <form action="@Url.Action("index", "login", new { returnurl = ViewData["ReturnUrl"], invite = ViewData["invite"] })" method="post" class="form-horizontal" id="form-login">
+                <div class="form-group">
+                    <label class="short-description"> Email </label>
+                    <input id="username" name="username" type="text" class="form-control login-form-email" autocomplete="off" required>
+                </div>
+
+                <div class="form-group" style=" margin-bottom: 5px;">
+                    <label class="short-description"> Password </label>
+                    <input id="password" name="password" type="password" class="form-control login-form-password login-form-password-eye" autocomplete="new-password" required>
+                </div>
+
+                <div class="form-group" style="float: left;">
+                    <div class="remember margin-b-10">
+                        <div class="am-checkbox checkbox-inline text-center">
+                            <input type="checkbox" id="remember-login" name="remember" value="1" class="form-control" checked="checked">
+                            <label for="remember-login">Remember me </label>
+                        </div>
                     </div>
                 </div>
-            </div>
+
+                <div class="form-group pull-right login-form-forgot-password-container">
+                    <a href="/login/resetpassword" style="padding: 7px; line-height: 30px; font-weight: 300; text-decoration: underline; ">Forgot Password</a>
+                </div>
+                <div class="clearfix"></div>
+
+                <div class="form-group login-submit text-center">
+                    <button id="btn-login" type="submit" class="btn btn-primary btn-lg btn-block btn-login-updated" style="margin: 0 auto;">Log In</button>
+                    <br />
+                    <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLink" class="btn-clever-login">
+                        <img src="~/img/login-clever.png" style="width: 225px; height: 50px;" class="clever-login-img" />
+                    </a>
+                </div>
+
+            </form>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+
+    <div class="bg-image">
+        <div class="rectangle-thought">
+            <span class="thought-header-1">
+                Every kid is a genius in their own way. Our goal is to help them find their genius.
+            </span>
+            <br /><br /><br />
+            <span class="thought-header-2">
+                Darye Henry
+            </span>
+            <br /><br />
+            <span class="thought-header-3">
+                Founder, AfterSchool HQ
+            </span>
         </div>
     </div>
 </div>
 
+<script type="text/javascript">
+    //todo : convert error messages to toaster
+    PageEvent.add(PageEvent.AFTER_INIT, function () { loadUIMessages() });
+
+    function loadUIMessages() {
+        @*debugger
+        var msgs = JSON.parse(@Html.Raw(msgs));*@
+    }
+
+</script>

@@ -1840,6 +1840,7 @@
     <Content Include="Views\Shared\Modals\_TransferModal-TransferButton.cshtml" />
     <Content Include="Views\R\ActivitySelectDates.cshtml" />
     <Content Include="Views\Shared\Registration\_LoginModalWithUpdatedDesign.cshtml" />
+    <Content Include="Views\Shared\_LayoutLogin-Updated.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

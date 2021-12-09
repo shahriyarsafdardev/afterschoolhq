@@ -1158,3 +1158,111 @@
     top: 5px;
     right: 5px;
 }
+
+
+
+.rectangle-thought {
+    /* width: 640px;
+        height: 270px;*/
+    padding: 30px 60px 30px 60px;
+    border-radius: 10px;
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    border: solid 1px #fff;
+    background-color: rgba(114, 114, 114, 0.1);
+    position: fixed;
+    bottom: 20px;
+    /*right: 20px;*/
+    text-align: center;
+    margin: 0 10px;
+    width: 640px;
+}
+
+.thought-header-1 {
+    font-family: Montserrat;
+    font-size: 28px;
+    font-weight: 600;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    text-align: center;
+    color: #fff;
+}
+
+.thought-header-2 {
+    font-family: Montserrat;
+    font-size: 24px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    text-align: center;
+    color: #fff;
+}
+
+.thought-header-3 {
+    font-family: Montserrat;
+    font-size: 18px;
+    font-weight: 300;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    text-align: center;
+    color: #fff;
+}
+
+.form-login-sign {
+    font-family: Montserrat;
+    font-size: 16px;
+    font-weight: 300;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    text-align: left;
+    color: #494949;
+    margin-top: 15px;
+}
+
+.form-login-welcome {
+    font-family: Montserrat;
+    font-size: 24px;
+    font-weight: 600;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: 1px;
+    text-align: left;
+    color: #000;
+}
+
+.container-login {
+    display: flex;
+    height: 100vh;
+}
+
+.content {
+    /*flex: 0.7;*/
+    width: 600px;
+    height: 100%;
+    overflow: auto;
+}
+
+.rectangle-login-box {
+    /*width: 640px;*/
+    height: 270px;
+    padding: 30px 60px 30px 60px;
+    margin: 0 30px;
+    border-radius: 10px;
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    /*border: solid 1px #ccc;*/
+    /*background-color: rgba(114, 114, 114, 0.1);*/
+    text-align: left;
+    /*position: fixed;
+        top: 175px;*/
+    margin-top: 175px;
+}

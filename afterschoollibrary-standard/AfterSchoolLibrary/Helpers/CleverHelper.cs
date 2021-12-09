@@ -21,6 +21,14 @@ namespace AfterSchoolLibrary.Helpers
                 return $"{ClientId}:{SecretKey}".EncodeBase64();
             }
         }
+
+        public static string SSOLink
+        {
+            get
+            {
+                return $"https://clever.com/oauth/authorize?response_type=code&redirect_uri={RedirectUrl}&client_id={ClientId}";
+            }
+        }
     }
 }
 
