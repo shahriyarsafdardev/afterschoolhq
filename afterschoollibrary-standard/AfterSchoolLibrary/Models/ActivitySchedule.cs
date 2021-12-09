@@ -529,7 +529,7 @@ namespace AfterSchoolLibrary.Models
                         )
                      )
                     .ToList()
-                    .ForEach(instance => msgs.AddRange(instance.Delete(dc)));
+                    .ForEach(instance => CheckForActivityInstanceSeats(instance, msgs, dc));
 
                 // add new in session instances
                 scheduleDates
@@ -571,7 +571,7 @@ namespace AfterSchoolLibrary.Models
                     .Any()
                  )
                 .ToList()
-                .ForEach(instance => msgs.AddRange(instance.Delete(dc)));
+                .ForEach(instance => CheckForActivityInstanceSeats(instance, msgs, dc));
 
             // add new out of session instances
             scheduleDatesClosed
@@ -587,6 +587,21 @@ namespace AfterSchoolLibrary.Models
 
 
             msgs.AddRange(this.ValidateInSessionInstances(dc));
+
+            return msgs;
+        }
+
+
+        public SystemMessages CheckForActivityInstanceSeats(ActivityInstance instance, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            //.. if ActivityInstanceSeats exist for ActivityInstance (users already registered for given ActivityInstance)
+            //.. then the ActivityInstance should not be deleted
+            var occupiedSeats = ActivityInstanceSeats.GetSeatsTakenByActivityInstanceId(ActivityInstanceId: instance.ID.Value, msgs: msgs, dc: dc);
+
+            if (occupiedSeats <= 0)
+                msgs.AddRange(instance.Delete(dc));
+            else
+                msgs.Add(message: $"Schedule instance for {instance.StartDateTime.ToShortDateString()} To {instance.EndDateTime.ToShortDateString()} cannot be removed as students already registered in this interval.", messageType: MessageType.UserError);
 
             return msgs;
         }
