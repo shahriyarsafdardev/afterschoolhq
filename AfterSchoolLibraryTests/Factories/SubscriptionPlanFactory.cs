@@ -2,6 +2,7 @@
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
+using System;
 
 namespace AfterSchoolLibraryTests.Factories
 {
@@ -48,7 +49,9 @@ namespace AfterSchoolLibraryTests.Factories
                 PlanTypeId = SubscriptionPlanType.PaymentPlan,
                 IsActive = true,
                 TotalPeriods = totalPeriods,               
-                BillingPeriodTypeId = BillingPeriodType.Month
+                BillingPeriodTypeId = BillingPeriodType.Month,
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddMonths(totalPeriods)
             };
             msgs.AddRange(obj.SaveWithStripe(dc));
             return obj;
