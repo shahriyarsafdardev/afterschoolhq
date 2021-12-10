@@ -358,7 +358,7 @@ namespace AfterSchoolLibraryTests.Tests
                 msgs: msgs,
                 dc: dc);
 
-            var refund = transaction.Refund(99, true, 0, 0, BillerAccountOwner, msgs, dc);
+            var refund = transaction.CreateNewRefund(90, 0, 0, "re_1DNlPlCEgXQRZLhk3Rzzyzj6", TransactionType.Refund, transaction.PaymentTypeId, transaction.PaymentSourceTypeId, BillerAccountOwner, msgs, dc);
 
             Assert.True(refund.StripeChargeOrRefundId.IsNotEmpty());
         }
