@@ -396,11 +396,9 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		
-
         #endregion
 
-		#region "UserDefined"
+        #region "UserDefined"
 
         [Obsolete]
         public string Name

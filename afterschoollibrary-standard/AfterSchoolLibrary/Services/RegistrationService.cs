@@ -43,7 +43,7 @@ namespace AfterSchoolLibrary.Services
                     // so we can know that it's okay to delete the registrant
                     // TODO: Notice that this may be a dangerous assumption one day
                     // Registration activities are deleted with the registrant
-                    registration.GetRegistrant(amsgs, adc).DeleteWithRelatedRecords(amsgs, adc);
+                    registration.GetRegistrant(amsgs, adc).DeleteWithRelatedRecords(amsgs, adc);                    
                     registration.DeleteSessionActions(amsgs, adc);
                     registration.DeleteAnswers(amsgs, adc);
                     amsgs.AddRange(registration.Delete(adc));

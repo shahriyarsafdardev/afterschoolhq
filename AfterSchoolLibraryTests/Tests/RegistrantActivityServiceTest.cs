@@ -121,6 +121,23 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         [Fact]
+        public void CancelRegistrationTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var registrant = RegistrantFactory.Create(msgs, dc);
+            var registration = RegistrationFactory.Create(account, registrant, msgs, dc);
+            var registrantActivity = RegistrantActivityFactory.Create(activity, registrant, registration, msgs, dc);
+
+            //  Act
+            registrantActivity.CancelRegistration(msgs, dc);
+
+            // Assert
+            Assert.True(registrantActivity.IsDeleted);
+
+        }
+
+        [Fact]
         public void IsSendInvoiceEnabledTest()
         {
             // Arrange
