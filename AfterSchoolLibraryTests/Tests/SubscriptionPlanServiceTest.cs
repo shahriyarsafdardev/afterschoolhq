@@ -748,7 +748,7 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         /// <summary>
-        /// Activity schedule period is already started, so there will be pro-rated charge + subscription with future invoice (probably from next month)
+        /// Activity schedule period is already started
         /// </summary>
         /// <param name="costPerPeriod"></param>
         [Theory(DisplayName = "Case 1: SubscriptionPlanType.Subscription, PlanPaymentStartType.WhenActivityStarts, BillingPeriodType.Month")]
@@ -917,7 +917,7 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         /// <summary>
-        /// Activity schedule period is off future, so there will be no charge, just subscription plan when registrant joins.
+        /// Activity schedule period is off future, start subscription plan when registrant joins.
         /// </summary>
         /// <param name="costPerPeriod"></param>
         [Theory(DisplayName = "Case 2: SubscriptionPlanType.Subscription, PlanPaymentStartType.WhenActivityStarts, BillingPeriodType.Month, Only subscription")]

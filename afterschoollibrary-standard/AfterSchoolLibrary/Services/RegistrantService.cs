@@ -180,7 +180,7 @@ namespace AfterSchoolLibrary.Services
 
                 //.. Ongoing activity                
                 DateTime? billingCycleAnchor = null;
-                if (participationObject.Schedule.IsEmpty() && subscriptionPlanType != SubscriptionPlanType.PaymentPlan) // set only if not payment plan
+                if (participationObject.Schedule.IsEmpty())
                 {
                     //.. If first day of month, don't set anchor so no pro rate
                     //.. If registrant joins mid-period then we can set the billing cycle anchor as the last date of current cycle. for example if monthly and month is of 30th. set 30th.
@@ -197,7 +197,10 @@ namespace AfterSchoolLibrary.Services
                 }
 
                 //.. charge parent if they tries to join mid-period
-                if (participationObject.Schedule.IsNotEmpty() && participationObject.StartDate.HasValue && participationObject.StartDate.Value.IsBefore(DateTime.Now))
+                if (subscriptionPlanType != SubscriptionPlanType.PaymentPlan && 
+                    participationObject.Schedule.IsNotEmpty() && 
+                    participationObject.StartDate.HasValue && 
+                    participationObject.StartDate.Value.IsBefore(DateTime.Now))
                 {
                     if (startDateTime.IsNotEmpty() && endDateTime.IsNotEmpty())
                         isSubscriptionRequired = plan.CheckIfSubscriptionRequired(startDateTime, endDateTime.Value);
@@ -901,7 +904,7 @@ namespace AfterSchoolLibrary.Services
 
         public static List<RegistrantSubscriptionPlan> GetMasterRegistrantSubscriptionPlans(this Registrant registrant, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var submittedRecords = registrant.GetSubmittedRecords(msgs);
+            var submittedRecords = registrant.GetSubmittedRecords(msgs, dc);
             var plans = new List<RegistrantSubscriptionPlan>();
 
             submittedRecords.ForEach(submittedRecord => {
