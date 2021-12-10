@@ -176,13 +176,17 @@ namespace AfterSchoolLibrary.Services
                 if (plan.SplitCostEvenly)
                     stripeCouponId = GetSplitEvenlyCoupon(plan, checkoutObject, billingAccount, msgs, dc);
                 else
-                    stripeCouponId = GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);                
+                    stripeCouponId = GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
 
-                //.. Ongoing activity
+                //.. Ongoing activity                
                 DateTime? billingCycleAnchor = null;
-                if (participationObject.Schedule.IsEmpty())
+                if (participationObject.Schedule.IsEmpty() && subscriptionPlanType != SubscriptionPlanType.PaymentPlan) // set only if not payment plan
                 {
-                    //if first day of month, don't set anchor so no pro rate
+                    //.. If first day of month, don't set anchor so no pro rate
+                    //.. If registrant joins mid-period then we can set the billing cycle anchor as the last date of current cycle. for example if monthly and month is of 30th. set 30th.
+                    //.. Same way for weekly, only change would be weekly cycle would end on sunday
+                    //.. it'll get a prorated invoice for the shorter amount of time on the first month.
+                    //.. Then the customer will be invoiced normally after that https://stripe.com/docs/billing/subscriptions/billing-cycle#new-subscriptions            
                     if (DateTime.UtcNow.Date != DateTime.Now.FirstDateOfMonth().Date)
                     {
                         if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
@@ -207,14 +211,20 @@ namespace AfterSchoolLibrary.Services
                         startDateTime = DateTime.Now.LastDateOfWeek().AddDays(1);
                 }
 
+                if (startDateTime < DateTime.UtcNow)
+                {
+                    // if start date already happended, start billing immediately (stripe defaults to now + trial days)
+                    // this can be apply to both payment plan or subscription plan
+                    billingCycleAnchor = null; 
+                }
+
                 // create the subscription on the stripe account (could be added to main account or connected account)
                 if (isSubscriptionRequired)
                 {
                     var subscription = Billing.StripeHelper.CreateRegistrantSubscription(
                                     customerId: customer.Id,
                                     planId: plan.StripePlanId,
-                                    isProrated: subscriptionPlanType == SubscriptionPlanType.Subscription,
-                                    isPaymentPlan: subscriptionPlanType == SubscriptionPlanType.PaymentPlan,
+                                    isProrated: subscriptionPlanType == SubscriptionPlanType.Subscription && billingCycleAnchor.HasValue,
                                     sourceId: sourceId,
                                     platformFeePercent: platformFeePercent,
                                     stripeAccountId: stripeAccountId,
