@@ -389,7 +389,7 @@ namespace AfterSchoolLibrary.Services
             var amount = calcObj.GetFinalTotalCost(paymentType: checkoutObject.PaymentType);
             var amountReceivedByProvider = calcObj.GetAmountToProvider();
 
-            return (amount.Round(4), amountReceivedByProvider.Round(4), convenienceFee.Round(2), ccFee.Round(2));
+            return (Math.Round(amount, 4), Math.Round(amountReceivedByProvider, 4), Math.Round(convenienceFee, 2), Math.Round(ccFee, 2));
         }
 
         public static bool CheckRegistrantChargeForWeeklyBillingType(this Registrant registrant, Activity activity)
