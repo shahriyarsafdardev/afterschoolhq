@@ -1119,5 +1119,26 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors());
 
         }
+
+        [Fact]
+        public void ActivitySearchCountTest()
+        {
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(user, msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+
+            var getActivityCount = account.GetActivityCount(
+                    UserType.TechSupport,
+                    user,
+                    "test",
+                    ActivityType.Activity,
+                    false,
+                    false,
+                    false,
+                    msgs,
+                    dc);
+
+            Assert.Equal(1, getActivityCount);
+        }
     }
 }
