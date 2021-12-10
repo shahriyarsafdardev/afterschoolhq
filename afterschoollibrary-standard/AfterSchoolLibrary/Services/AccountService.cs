@@ -3254,8 +3254,8 @@ namespace AfterSchoolLibrary.Services
 
             // if can charge fees we bill it directly from our AHQ account
             var useStripeConnectedAccount = billingAccount.UseStripeConnectDuringCheckout(msgs, dc);
-            var platformFeeAmount = checkoutObject.CalculatePlatformFeeAmount(msgs, dc) * checkoutObject.ClassQuantity;
-            var amount = checkoutObject.GetStripeAmount(msgs, dc) * checkoutObject.ClassQuantity;
+            var platformFeeAmount = checkoutObject.CalculatePlatformFeeAmount(msgs, dc);
+            var amount = checkoutObject.GetStripeAmount(msgs, dc);
 
             // only charge tuition during checkout, because subscriptions are billed through stripe
             var charge = StripeHelper.CreateCharge(
@@ -3551,7 +3551,7 @@ namespace AfterSchoolLibrary.Services
 
         public static void ProcessRegistrationFee(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            if (checkoutObject.RegistrationCostWithCoupon(msgs, dc) > 0)
+            if (checkoutObject.RegistrationCost(msgs, dc) > 0)
                 AccountService.ProcessPaymentWithStripe(checkoutObject, msgs, dc);
 
             // must wait until after charges happen to know what card id is charged for sure
@@ -3921,7 +3921,7 @@ namespace AfterSchoolLibrary.Services
 
         public static bool CanProcessPayments(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (!account.GetAccountOwner(msgs, dc).VerifiedAccount)
+            if (!account.HasAccountOwner || !account.GetAccountOwner(msgs, dc).VerifiedAccount)
                 return false;
 
             var paymentFeatures = new List<FeatureType>() { FeatureType.UseStripeConnectedAccount, FeatureType.AcceptPayments };
