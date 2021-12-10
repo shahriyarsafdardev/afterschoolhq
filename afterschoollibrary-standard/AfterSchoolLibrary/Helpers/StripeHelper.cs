@@ -1272,7 +1272,7 @@ namespace AfterSchoolLibrary.Billing
                 Items = new List<SubscriptionItemOptions>() { new SubscriptionItemOptions() { Plan = planId, Quantity = 1 } },
                 Metadata = metaData,
                 Prorate = isProrated, //prorate only if ongoing activity and not paymentplan, else we will handle this manually
-                BillingCycleAnchor = billingCycleAnchor.Value
+                BillingCycleAnchor = billingCycleAnchor
             };
 
             if (startDate.Value.Date.AddDays(-1).IsAfter(DateTime.UtcNow.Date))
@@ -2213,6 +2213,30 @@ namespace AfterSchoolLibrary.Billing
             try
             {
                 invoice = GetInvoiceService().Get(invoiceId);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.Error, ex);
+                msgs.Add($"Invoice doesn't exist", MessageType.UserError);
+            }
+
+            return invoice;
+        }
+
+        public static Stripe.Invoice GetUpcomingInvoice(string customerId, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Stripe.Invoice invoice = null;
+
+            var options = new UpcomingInvoiceOptions
+            {
+                Customer = customerId,
+            };
+
+            try
+            {
+                invoice = GetInvoiceService().Upcoming(options);
             }
             catch (StripeException ex)
             {

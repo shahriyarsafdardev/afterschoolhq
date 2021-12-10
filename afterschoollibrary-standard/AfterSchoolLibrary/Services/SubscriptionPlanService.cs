@@ -596,7 +596,7 @@ namespace AfterSchoolLibrary.Services
             }
 
             // make sure endDate > startDate for stripe
-            if (DateTimeSpan.CompareDates(startDateTime, endDate.Value).Days < 1)
+            if (endDate.HasValue && DateTimeSpan.CompareDates(startDateTime, endDate.Value).TotalDays < 1)
                 endDate = startDateTime.AddDays(1);
 
             return endDate;

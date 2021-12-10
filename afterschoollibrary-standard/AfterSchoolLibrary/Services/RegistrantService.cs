@@ -149,7 +149,7 @@ namespace AfterSchoolLibrary.Services
 
         public static void StartPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
+          if (msgs.IsEmpty()) msgs = new SystemMessages();
             var participationObject = checkoutObject.ParticipationObject;
             var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
 
@@ -295,39 +295,15 @@ namespace AfterSchoolLibrary.Services
             var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
             var billingAccount = checkoutObject.BillingAccount;
             var masterRegistrant = submittedRecord.IsMaster ? submittedRecord : submittedRecord.GetMasterRegistrant(msgs, dc);
-
-            //get the total number of periods for current cycle x
-            var classesInCurrentCycle = participationObject.GetNumberOfClassesInCurrentCycle(plan.BillingPeriodTypeId, msgs, dc);
-
-            //get the total remaining periods in current cycle y
-            var classesRemainingInCurrentCycle = participationObject.GetNumberOfRemainingClassesInCurrentCycle(plan.BillingPeriodTypeId, msgs, dc);
-
+            var classesToCharge = GetClassesForCharge(checkoutObject, plan, msgs, dc);
+            var classesInCurrentCycle = classesToCharge.Item1;
+            var classesRemainingInCurrentCycle = classesToCharge.Item2;
+            
             if (classesInCurrentCycle <= 0 || classesRemainingInCurrentCycle <= 0)
                 return;
 
-            //caluclated price of current cycle to charge p = (y * costperperiod)/ x
-            var currentCycleCharge = classesRemainingInCurrentCycle * plan.CostPerPeriod.Value / classesInCurrentCycle;
+            var caclObj = GetAmountsRequiredToCharge(checkoutObject, plan, isSubscriptionRequired, classesRemainingInCurrentCycle, classesInCurrentCycle, msgs, dc);
 
-            if (!isSubscriptionRequired)
-            {
-                //.. if there will be subscrition, we will calculate next cycle also just in case if we miss any classes
-                //.. bascially this will be just adding a cost directly as we will charge whole for next cycle
-                var classesRemainingInNextCycle = participationObject.GetNumberOfRemainingClassesInNextCycle(plan.BillingPeriodTypeId, msgs, dc);
-
-                if (classesRemainingInNextCycle > 1)
-                {
-                    var nextCycleCharge = classesRemainingInNextCycle * plan.CostPerPeriod.Value / classesRemainingInNextCycle;
-                    currentCycleCharge += nextCycleCharge;
-                }
-            }
-
-            var calcObj = new FeeCalculationObject(currentCycleCharge, billingAccount, msgs, dc);
-            var convenienceFee = calcObj.GetConvenienceFee();
-            var ccFee = 0M;
-            if (checkoutObject.PaymentType == PaymentType.CreditCard)
-                ccFee = calcObj.GetCreditCardFee();
-
-            var amount = calcObj.GetFinalTotalCost(paymentType: checkoutObject.PaymentType);
             BankAccountPurchaseObject bankAccountPurchaseObject = null;
             CreditCardPurchaseObject creditCardPurchaseObject = null;            
 
@@ -347,12 +323,12 @@ namespace AfterSchoolLibrary.Services
             AccountService.ProcessPayment(
                 checkoutObject: new CheckoutObject()
                 {                    
-                    OverrideAmount = amount,
-                    AmountPaidByParent = amount,
-                    AmountReceivedByProvider = calcObj.GetAmountToProvider(),
+                    OverrideAmount = caclObj.Item1,
+                    AmountPaidByParent = caclObj.Item1,
+                    AmountReceivedByProvider = caclObj.Item2,
                     IsAmountProRated = true,
-                    ConvenienceFeeOverrideAmount = convenienceFee,
-                    PaymentTypeFeeOverrideAmount = ccFee,
+                    ConvenienceFeeOverrideAmount = caclObj.Item3,
+                    PaymentTypeFeeOverrideAmount = caclObj.Item4,
                     PayingAccount = checkoutObject.PayingAccount,
                     BillingAccount = billingAccount,
                     CreditCardPurchaseObject = creditCardPurchaseObject,
@@ -371,6 +347,49 @@ namespace AfterSchoolLibrary.Services
                 loggedInUser: loggedInUser,
                 msgs: msgs,
                 dc: dc);
+        }
+
+        public static (int, int) GetClassesForCharge(CheckoutObject checkoutObject, SubscriptionPlan plan, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            //get the total number of periods for current cycle x
+            var classesInCurrentCycle = checkoutObject.ParticipationObject.GetNumberOfClassesInCurrentCycle(plan.BillingPeriodTypeId, msgs, dc);
+
+            //get the total remaining periods in current cycle y
+            var classesRemainingInCurrentCycle = checkoutObject.ParticipationObject.GetNumberOfRemainingClassesInCurrentCycle(plan.BillingPeriodTypeId, msgs, dc);
+
+            return (classesInCurrentCycle, classesRemainingInCurrentCycle);
+        }
+
+        public static (decimal, decimal, decimal, decimal) GetAmountsRequiredToCharge(CheckoutObject checkoutObject, SubscriptionPlan plan, bool isSubscriptionRequired, int classesRemainingInCurrentCycle, int classesInCurrentCycle, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var participationObject = checkoutObject.ParticipationObject;
+
+            //caluclated price of current cycle to charge p = (y * costperperiod)/ x
+            var currentCycleCharge = classesRemainingInCurrentCycle * plan.CostPerPeriod.Value / classesInCurrentCycle;
+
+            if (!isSubscriptionRequired)
+            {
+                //.. if there will be subscrition, we will calculate next cycle also just in case if we miss any classes
+                //.. bascially this will be just adding a cost directly as we will charge whole for next cycle
+                var classesRemainingInNextCycle = participationObject.GetNumberOfRemainingClassesInNextCycle(plan.BillingPeriodTypeId, msgs, dc);
+
+                if (classesRemainingInNextCycle > 1)
+                {
+                    var nextCycleCharge = classesRemainingInNextCycle * plan.CostPerPeriod.Value / classesRemainingInNextCycle;
+                    currentCycleCharge += nextCycleCharge;
+                }
+            }
+
+            var calcObj = new FeeCalculationObject(currentCycleCharge, checkoutObject.BillingAccount, msgs, dc);
+            var convenienceFee = calcObj.GetConvenienceFee();
+            var ccFee = 0M;
+            if (checkoutObject.PaymentType == PaymentType.CreditCard)
+                ccFee = calcObj.GetCreditCardFee();
+
+            var amount = calcObj.GetFinalTotalCost(paymentType: checkoutObject.PaymentType);
+            var amountReceivedByProvider = calcObj.GetAmountToProvider();
+
+            return (amount.Round(4), amountReceivedByProvider.Round(4), convenienceFee.Round(2), ccFee.Round(2));
         }
 
         public static bool CheckRegistrantChargeForWeeklyBillingType(this Registrant registrant, Activity activity)
