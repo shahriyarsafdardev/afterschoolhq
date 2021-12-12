@@ -149,7 +149,7 @@ namespace AfterSchoolLibrary.Services
 
         public static void StartPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-          if (msgs.IsEmpty()) msgs = new SystemMessages();
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
             var participationObject = checkoutObject.ParticipationObject;
             var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
 
@@ -178,24 +178,6 @@ namespace AfterSchoolLibrary.Services
                 else
                     stripeCouponId = GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
 
-                //.. Ongoing activity                
-                DateTime? billingCycleAnchor = null;
-                if (participationObject.Schedule.IsEmpty())
-                {
-                    //.. If first day of month, don't set anchor so no pro rate
-                    //.. If registrant joins mid-period then we can set the billing cycle anchor as the last date of current cycle. for example if monthly and month is of 30th. set 30th.
-                    //.. Same way for weekly, only change would be weekly cycle would end on sunday
-                    //.. it'll get a prorated invoice for the shorter amount of time on the first month.
-                    //.. Then the customer will be invoiced normally after that https://stripe.com/docs/billing/subscriptions/billing-cycle#new-subscriptions            
-                    if (DateTime.UtcNow.Date != DateTime.Now.FirstDateOfMonth().Date)
-                    {
-                        if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
-                            billingCycleAnchor = startDateTime.LastDateOfMonth().AddDays(1);
-                        else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
-                            billingCycleAnchor = startDateTime.LastDateOfWeek().AddDays(1);
-                    }
-                }
-
                 //.. charge parent if they tries to join mid-period
                 if (subscriptionPlanType != SubscriptionPlanType.PaymentPlan && 
                     participationObject.Schedule.IsNotEmpty() && 
@@ -214,12 +196,7 @@ namespace AfterSchoolLibrary.Services
                         startDateTime = DateTime.Now.LastDateOfWeek().AddDays(1);
                 }
 
-                if (startDateTime < DateTime.UtcNow)
-                {
-                    // if start date already happended, start billing immediately (stripe defaults to now + trial days)
-                    // this can be apply to both payment plan or subscription plan
-                    billingCycleAnchor = null; 
-                }
+                var billingCycleAnchor = GetBillingCycleAnchor(participationObject, plan, startDateTime);
 
                 // create the subscription on the stripe account (could be added to main account or connected account)
                 if (isSubscriptionRequired)
@@ -227,7 +204,7 @@ namespace AfterSchoolLibrary.Services
                     var subscription = Billing.StripeHelper.CreateRegistrantSubscription(
                                     customerId: customer.Id,
                                     planId: plan.StripePlanId,
-                                    isProrated: subscriptionPlanType == SubscriptionPlanType.Subscription && billingCycleAnchor.HasValue,
+                                    isProrated: billingCycleAnchor.HasValue,
                                     sourceId: sourceId,
                                     platformFeePercent: platformFeePercent,
                                     stripeAccountId: stripeAccountId,
@@ -393,6 +370,46 @@ namespace AfterSchoolLibrary.Services
             var amountReceivedByProvider = calcObj.GetAmountToProvider();
 
             return (Math.Round(amount, 4), Math.Round(amountReceivedByProvider, 4), Math.Round(convenienceFee, 2), Math.Round(ccFee, 2));
+        }
+
+        public static DateTime? GetBillingCycleAnchor(ParticipationObject participationObject, SubscriptionPlan plan, DateTime startDateTime)
+        {
+            DateTime? billingCycleAnchor = null;
+
+            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
+            {
+                if (startDateTime <= DateTime.UtcNow && plan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
+                {
+                    //.. Payment Plans are just the registration fee broken up into multiple payments.
+                    //.. So when a person registers late it should just start the payment plan on checkout in that case. 
+                    //.. So first invoice will be from the current date to last date of current cycle and for that we will set billingCycleAnchor to the last date of that cycle. 
+                    if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
+                        billingCycleAnchor = DateTime.UtcNow.Date.LastDateOfMonth().AddDays(1);
+                    else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
+                        billingCycleAnchor = DateTime.UtcNow.Date.LastDateOfWeek().AddDays(1);
+                }                           
+            }
+            else if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
+            {
+                //.. Ongoing activity
+                if (participationObject.Schedule.IsEmpty())
+                {
+                    //.. If first day of month, don't set anchor so no pro rate
+                    if (DateTime.UtcNow.Date != DateTime.Now.FirstDateOfMonth().Date)
+                    {
+                        if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
+                            billingCycleAnchor = startDateTime.LastDateOfMonth().AddDays(1);
+                        else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
+                            billingCycleAnchor = startDateTime.LastDateOfWeek().AddDays(1);
+                    }
+                }
+                else if (startDateTime < DateTime.UtcNow)
+                {
+                    billingCycleAnchor = null; // ..else start billing immediately (stripe defaults to now + trial days)  
+                }
+            }
+
+            return billingCycleAnchor;
         }
 
         public static bool CheckRegistrantChargeForWeeklyBillingType(this Registrant registrant, Activity activity)
@@ -579,6 +596,21 @@ namespace AfterSchoolLibrary.Services
                 else if (plan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart)
                 {
                     return plan.StartDate.HasValue && plan.StartDate.Value.IsAfter(initialDate) ? plan.StartDate.Value.AddDays(1) : initialDate;
+                }
+            }
+            else if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
+            {
+                if (plan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
+                {
+                    if (participationObject.Schedule.IsNotEmpty())
+                        return participationObject.Schedule.StartDate.Value;
+                    else
+                        initialDate = DateTime.UtcNow;
+                } 
+                else if (plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout)
+                {
+                    //.. Future start date activity (should start when registrant checkout, can be before activity start, first payment invoice will be instant)
+                    initialDate = DateTime.UtcNow;
                 }
             }
 
