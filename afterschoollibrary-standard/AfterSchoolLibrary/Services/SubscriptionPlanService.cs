@@ -610,7 +610,7 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        private static DateTime? GetPaymenPlanEndDate(this SubscriptionPlan plan, DateTime startDateTime,  SystemMessages msgs = null)
+        public static DateTime? GetPaymenPlanEndDate(this SubscriptionPlan plan, DateTime startDateTime,  SystemMessages msgs = null)
         {
             if (plan.PlanTypeId != SubscriptionPlanType.PaymentPlan)
                 return null;
