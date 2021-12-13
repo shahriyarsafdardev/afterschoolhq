@@ -1123,15 +1123,15 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void ActivitySearchCountTest()
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var user = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(user, msgs, dc);
+            var activity = ActivityFactory.Create(account, msgs, dc);
 
             var getActivityCount = account.GetActivityCount(
                     UserType.TechSupport,
                     user,
-                    "test",
-                    ActivityType.Activity,
+                    "Test",
+                    ActivityType.NotSet,
                     false,
                     false,
                     false,
@@ -1139,6 +1139,28 @@ namespace AfterSchoolLibraryTests.Tests
                     dc);
 
             Assert.Equal(1, getActivityCount);
+        }
+
+        [Fact]
+        public void ActivitySearchCountWithCustomTypeAndNameTest()
+        {
+            var user = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(user, msgs, dc);
+            var activity = ActivityFactory.CreateWithNameAndType(account, "New Activity", ActivityType.Activity, msgs, dc);
+            var activitySecond = ActivityFactory.CreateWithNameAndType(account, "New Main", ActivityType.Activity, msgs, dc);
+
+            var getActivityCount = account.GetActivityCount(
+                    UserType.TechSupport,
+                    user,
+                    "New", //search term
+                    ActivityType.Activity,
+                    false,
+                    false,
+                    false,
+                    msgs,
+                    dc);
+
+            Assert.Equal(2, getActivityCount);
         }
     }
 }
