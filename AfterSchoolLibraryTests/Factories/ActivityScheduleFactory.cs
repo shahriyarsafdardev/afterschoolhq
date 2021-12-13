@@ -122,5 +122,63 @@ namespace AfterSchoolLibraryTests.Factories
                 msgs,
                 dc);
         }
+
+        public static void Create(Account account, Activity activity, ActivitySchedule schedule, WebUser user, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var scheduleDateRange = GetScheduleDateRange();
+            var scheduleDates = scheduleDateRange.Item1;
+            var scheduleDatesClosed = scheduleDateRange.Item2;
+
+            ActivityScheduleService.SetupSchedule(
+                activity.AccountId.Value,
+                schedule.ID.Value,
+                $"{activity.Name} - Schedule",
+                schedule.ScheduleDetails,
+                schedule.RepeatsWeekly.ToString(),
+                schedule.IsOngoing.ToString(),
+                schedule.StartDate.ToString(),
+                schedule.EndDate.ToString(),
+                schedule.DailyStartTime.ToString(),
+                schedule.DailyEndTime.ToString(),
+                scheduleDates.Select(x => new ActivityInstance(x.StartDate, x.EndDate)).ToList(),
+                scheduleDatesClosed,
+                "",
+                account,
+                activity.ActivityGroupId,
+                user.ID.Value,
+                msgs,
+                dc);
+        }
+
+        public static (List<DateRange>, List<DateTime>) GetScheduleDateRange()
+        {
+            var startDates = new List<DateRange>()
+            {
+                new DateRange() {
+                    StartDate = $"{DateTime.Now.Month}/{DateTime.UtcNow.AddDays(-2).Day}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(),
+                    EndDate = $"{DateTime.Now.Month}/{DateTime.UtcNow.AddDays(-2).Day}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()
+                },
+                new DateRange() {
+                    StartDate = $"{DateTime.Now.Month}/{DateTime.UtcNow.AddDays(-1).Day}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(),
+                    EndDate = $"{DateTime.Now.Month}/{DateTime.UtcNow.AddDays(-1).Day}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()
+                },
+                new DateRange() {
+                    StartDate = $"{DateTime.Now.Month}/{DateTime.UtcNow.AddDays(0).Day}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(),
+                    EndDate = $"{DateTime.Now.Month}/{DateTime.UtcNow.AddDays(0).Day}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()
+                },
+                new DateRange() {
+                    StartDate = $"{DateTime.Now.Month}/{DateTime.UtcNow.AddDays(1).Day}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(),
+                    EndDate = $"{DateTime.Now.Month}/{DateTime.UtcNow.AddDays(1).Day}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()
+                },
+                new DateRange() {
+                    StartDate = $"{DateTime.Now.Month}/{DateTime.UtcNow.AddDays(2).Day}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(),
+                    EndDate = $"{DateTime.Now.Month}/{DateTime.UtcNow.AddDays(2).Day}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()
+                },
+            };
+
+            var endDates = new List<DateTime>() { };
+
+            return (startDates, endDates);
+        }
     }
 }
