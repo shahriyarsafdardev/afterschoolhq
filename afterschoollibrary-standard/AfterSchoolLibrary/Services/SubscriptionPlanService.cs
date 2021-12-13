@@ -616,7 +616,11 @@ namespace AfterSchoolLibrary.Services
                 return null;
 
             var endDate = startDateTime;
-            var periodsToAdd = plan.TotalPeriods.Value - plan.NumberOfPeriodsPrePaid.IfEmpty(0);
+
+            if (plan.TotalPeriods.IsEmpty())
+                return endDate;
+
+            var periodsToAdd = plan.TotalPeriods.IfEmpty(0) - plan.NumberOfPeriodsPrePaid.IfEmpty(0);
             if(periodsToAdd > 0)
             {
                 switch (plan.BillingPeriodTypeId)

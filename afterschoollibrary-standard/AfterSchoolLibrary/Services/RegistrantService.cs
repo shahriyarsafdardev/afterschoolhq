@@ -378,16 +378,16 @@ namespace AfterSchoolLibrary.Services
 
             if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
             {
-                if (startDateTime <= DateTime.UtcNow && plan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
-                {
-                    //.. Payment Plans are just the registration fee broken up into multiple payments.
-                    //.. So when a person registers late it should just start the payment plan on checkout in that case. 
-                    //.. So first invoice will be from the current date to last date of current cycle and for that we will set billingCycleAnchor to the last date of that cycle. 
-                    if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
-                        billingCycleAnchor = DateTime.UtcNow.Date.LastDateOfMonth().AddDays(1);
-                    else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
-                        billingCycleAnchor = DateTime.UtcNow.Date.LastDateOfWeek().AddDays(1);
-                }                           
+                //.. Payment Plans are just the registration fee broken up into multiple payments.
+                //.. So when a person registers late it should just start the payment plan on checkout in that case. 
+
+                //if (startDateTime <= DateTime.UtcNow && plan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
+                //{
+                //    if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
+                //        billingCycleAnchor = DateTime.UtcNow.Date.LastDateOfMonth().AddDays(1);
+                //    else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
+                //        billingCycleAnchor = DateTime.UtcNow.Date.LastDateOfWeek().AddDays(1);
+                //}                           
             }
             else if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
             {
@@ -602,7 +602,9 @@ namespace AfterSchoolLibrary.Services
             {
                 if (plan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
                 {
-                    if (participationObject.Schedule.IsNotEmpty())
+                    if (participationObject.Schedule.IsNotEmpty() && 
+                        participationObject.Schedule.StartDate.IsNotEmpty() && 
+                        participationObject.Schedule.StartDate.Value.IsAfter(DateTime.UtcNow))
                         return participationObject.Schedule.StartDate.Value;
                     else
                         initialDate = DateTime.UtcNow;
