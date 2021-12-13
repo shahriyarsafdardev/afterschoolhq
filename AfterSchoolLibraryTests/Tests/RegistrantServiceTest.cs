@@ -609,5 +609,72 @@ namespace AfterSchoolLibraryTests.Tests
                 Assert.False(true, ex.Message);
             }
         }
+    
+        [Fact(DisplayName ="StartPaymentPlanTest")]
+        public void StartPlanTest()
+        {
+            // Arrange
+            var billingAccountOwner = WebUserFactory.Create("Don", "John", "DonJohn@test.com", true, msgs, dc);
+            var payingAccountOwner = WebUserFactory.Create("Cristine", "Trump", "CristineTrump@test.com", true, msgs, dc);
+            var billingAccount = AccountFactory.CreateAccount(billingAccountOwner, AccountType.School, stripeChargesEnabled: true, stripePayoutsEnabled: true, msgs, dc);
+            var payingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", payingAccountOwner, AccountType.School, msgs, dc);
+            var masterRegistrant = RegistrantFactory.Create(payingAccount, isMaster: true, msgs, dc);
+
+            //UseStripeConnectedAccount is true for this package
+            var package = PackageFactory.CreateFreePackageWithUseStripeConnectedAccount(msgs, dc);
+            AccountPackageFactory.Create(billingAccount, package, msgs, dc);
+
+            var schedule = ActivityScheduleFactory.Create(billingAccount, DateTime.UtcNow.AddDays(-1), DateTime.UtcNow.AddDays(1), msgs, dc);
+            var activity = ActivityFactory.Create(billingAccount, schedule, msgs, dc: dc);
+            var registrant = RegistrantFactory.Create(billingAccount, isMaster: false, msgs, dc: dc);
+            var registration = RegistrationFactory.Create(billingAccount, registrant, msgs, dc);
+            var participationObject = activity.GetParticipationObject(msgs, dc);
+
+            var stripePurchasingAccount = AccountFactory.CreateStripeAccountAndCustomer(account: payingAccount, msgs: msgs, dc: dc);
+            var sourceId = payingAccount.CreateStripeSourceFromToken(StripeHelper.TestSourceToken, stripePurchasingAccount.Item2, msgs, dc);
+            var creditCardPurchaseObject = new CreditCardPurchaseObject() { StripeToken = StripeHelper.TestSourceToken, StripeSourceId = sourceId };
+            var costPerPeriod = 100;
+            var paymentPlan = SubscriptionPlanFactory.CreatePaymentPlan(billingAccount, activity, costPerPeriod, 5, msgs, dc);
+
+            var checkoutObject = new CheckoutObject()
+            {
+                BillingAccount = billingAccount,
+                PayingAccount = payingAccount,
+                Coupon = null,
+                OverrideAmount = 100,
+                MasterRegistrant = masterRegistrant,
+                NumberOfSeats = 1,
+                ParticipationObject = participationObject,
+                PaymentPlan = paymentPlan,
+                PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                PaymentType = PaymentType.CreditCard,
+                SavePaymentInfo = true,
+                Registration = registration,
+                CreditCardPurchaseObject = creditCardPurchaseObject
+            };
+
+            // Act
+            registrant.StartPaymentPlan(checkoutObject, payingAccountOwner, msgs, dc);
+            var registrantSubscriptionPlan = RegistrantSubscriptionPlan.LoadByRegistrantId(registrant.ID.Value, msgs, dc).First();
+            var stripeSubscription = StripeHelper.GetSubscription(registrantSubscriptionPlan.StripeSubscriptionId, null, msgs);
+            var stripeInvoice = StripeHelper.GetInvoice(stripeSubscription.LatestInvoiceId, msgs);
+            
+            // Assert
+            // payment plan has stripeId
+            Assert.True(paymentPlan.StripePlanId.IsNotEmpty());
+            // was payment made
+            Assert.True(stripeInvoice.IsNotEmpty() && stripeInvoice.Paid);
+            // is payment amount correct
+            Assert.Equal(expected: checkoutObject.GetPaymentPlanCostTodayWithFees(msgs, dc) * 100, actual: stripeInvoice.AmountPaid);
+            // payment plan billing type should match stripe subscription interval 
+            Assert.Equal(expected: paymentPlan.BillingPeriodTypeId.ToString().ToLower(), actual: stripeSubscription.Plan.Interval);
+            // payment plan should have an end date
+            Assert.True(paymentPlan.EndDate.IsNotEmpty());
+            // payment plan end date should match the stripe subscription end date
+            Assert.Equal(expected: paymentPlan.EndDate.Value.Date, actual: stripeSubscription.CancelAt.Value.Date);
+            // payment plan should not be prorated
+            Assert.True(stripeInvoice.SubscriptionProrationDate.IsEmpty());
+
+        }
     }
 }
