@@ -2573,8 +2573,6 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void CreateRegistrantTest()
         {
-            try
-            {
                 // Arrange
                 var user = WebUserFactory.Create(msgs: msgs, dc: dc);
                 var webUser = WebUserFactory.Create(true, msgs: msgs, dc: dc);
@@ -2582,19 +2580,12 @@ namespace AfterSchoolLibraryTests.Tests
                 var account = AccountFactory.Create(user: user, msgs: msgs, dc: dc);
 
                 // Act                
-                //Registrant newRegistrant = RegistrantFactory.Create(user, false, msgs: msgs, dc: dc);
                 Registrant newRegistrant = AccountService.CreateRegistrant(account, "Allen", "Donald", "test@test.com", user, canBeAccessedBy, RegistrantType.Individual, false, false, true, 6067, RegistrantProfileStatus.Completed, webUser, msgs: msgs, dc: dc);
 
                 // Assert
                 Assert.NotNull(newRegistrant.ID);
                 Assert.NotNull(newRegistrant.WebUserId);
                 Assert.True(newRegistrant.IsDeleted == false);
-            }
-            catch (Exception ex)
-            {
-                //Assert
-                Assert.False(false, ex.Message);
-            }
         }
         [Fact]
         public void GetOpenPublishedSessionsTest()

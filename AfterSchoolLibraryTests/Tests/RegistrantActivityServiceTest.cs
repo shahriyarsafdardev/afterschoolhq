@@ -133,6 +133,7 @@ namespace AfterSchoolLibraryTests.Tests
             registrantActivity.CancelRegistration(msgs, dc);
 
             // Assert
+            Assert.NotNull(registrantActivity);
             Assert.True(registrantActivity.IsDeleted);
 
         }

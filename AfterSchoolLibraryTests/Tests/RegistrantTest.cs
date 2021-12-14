@@ -112,8 +112,6 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void DeleteWithRelatedRecordsTest()
         {
-            try
-            {
                 // Arrange
                 var user = WebUserFactory.Create(msgs: msgs, dc: dc);
                 var account = AccountFactory.Create(user: user, msgs: msgs, dc: dc);
@@ -123,44 +121,27 @@ namespace AfterSchoolLibraryTests.Tests
                 registrant.DeleteWithRelatedRecords(msgs, dc);
 
                 // Assert
-                Assert.True(registrant.IsDeleted);               
-            }
-            catch (Exception ex)
-            {
-                //Assert
-                Assert.False(false, ex.Message);
-            }
+                Assert.True(registrant.IsDeleted);
         }
 
+        [Fact]
         public void AddOrUpdateParticipationObjectTest()
         {
-            try
-            {
                 // Arrange
                 var user = WebUserFactory.Create(msgs: msgs, dc: dc);
                 var account = AccountFactory.Create(user: user, msgs: msgs, dc: dc);
                 var registrant = RegistrantFactory.Create(account, isMaster: false, msgs, dc);
                 var registration = RegistrationFactory.Create(account, registrant, msgs, dc);
-                //var location = LocationFactory.Create(account, msgs, dc);
-                //var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, 20, msgs, dc);
                 var activity = ActivityFactory.Create(account, 20, msgs, dc);
                 var participationObject = new ParticipationObject(activity, msgs, dc);
+
                 // Act                
                 var expected = registrant.AddOrUpdateParticipationObject(registration.ID.Value,participationObject.ObjectID.Value, ParticipationObjectType.Activity,RegistrationAssignmentType.Applied,null,null,100,user.ID.Value, msgs, dc);
 
                 // Assert
+                Assert.NotNull(expected);
                 Assert.True(expected.IsDeleted == false);
-            }
-            catch (Exception ex)
-            {
-                //Assert
-                Assert.False(false, ex.Message);
-            }
         }
-
-
-
-
 
     }
 
