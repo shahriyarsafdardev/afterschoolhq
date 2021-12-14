@@ -38,7 +38,7 @@ namespace AfterSchoolLibraryTests.Factories
 
         public static Account CreateAccountWithFreePackage(string accountName, string accountEmail, WebUser user, AccountType accountType, bool stripeChargesEnabled, bool stripePayoutsEnabled, SystemMessages msgs, DatabaseConnection dc)
         {
-            var obj = new Account() { OwnerId = user.ID, Name = accountName, Email = accountEmail, IsDeleted = false,
+            var obj = new Account() { OwnerId = user.ID, Name = accountName, Email = accountEmail, IsDeleted = false, IsActive = true, IsTest = false, 
                 AccountTypeId = accountType, StripeChargesEnabled = stripeChargesEnabled, StripePayoutsEnabled = stripePayoutsEnabled
             };
             msgs.AddRange(obj.Save(dc: dc));

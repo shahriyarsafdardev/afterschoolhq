@@ -346,7 +346,7 @@ namespace AfterSchoolLibraryTests.Tests
             // Assert
             Assert.True(msgs.HasNoErrors());
             Assert.NotNull(payout);
-            Assert.Empty(payout.StatementDescriptor);
+            Assert.Null(payout.StatementDescriptor);
         }
     }
 }

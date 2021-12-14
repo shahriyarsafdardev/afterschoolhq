@@ -32,7 +32,13 @@ namespace AfterSchoolLibraryTests.Factories
                 PayerAccountId = payerAccount.ID,
                 PaymentTypeId = paymentType,
                 Description = "User purchase",
-                TransactionTypeId = TransactionType.Charge
+                TransactionTypeId = TransactionType.Charge,
+                PaymentSourceTypeId = PaymentSourceType.AfterSchoolPlatform,
+                UsedStripeConnect = false,
+                ConvenienceFeeCharged = 7,
+                ConvenienceFeePayerAccountId = payerAccount.ID,
+                PaymentTypeFeeCharged = 4,
+                PaymentTypeFeePayerAccountId = payerAccount.ID
             };
             msgs.AddRange(obj.Save(dc));
             return obj;

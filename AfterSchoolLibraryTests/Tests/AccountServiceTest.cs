@@ -3700,8 +3700,8 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(payoutTransactions.FirstOrDefault().ID, transaction.ID);
         }
 
-        [Fact(DisplayName = "Failing Test case for DisableStripePayoutForCustomAccount")]
-        public void DisableStripePayoutForCustomAccountFailureTest()
+        [Fact(DisplayName = "Failing Test case for DisableStripePayoutForConnectAccountFailureTest")]
+        public void DisableStripePayoutForConnectAccountFailureTest()
         {
             // Arrange
             var loggedInUser = WebUserFactory.Create(msgs, dc);
@@ -3715,8 +3715,8 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Null(stripeAccount);
         }
 
-        [Fact(DisplayName = "Test DisableStripePayoutForCustomAccount")]
-        public void DisableStripePayoutForCustomAccountTest()
+        [Fact(DisplayName = "Disable stripe auto payout and move to manual AHQ payout")]
+        public void DisableStripeAutoPayoutForConnectAccountTest()
         {
             // Arrange
             var loggedInUser = WebUserFactory.Create(msgs, dc);
@@ -3731,8 +3731,29 @@ namespace AfterSchoolLibraryTests.Tests
             // Assert
             Assert.True(msgs.HasNoErrors());
             Assert.NotNull(stripeAccount);
-            //Assert.Equal(expected: (int)PayoutIntervalType.Manual, actual: billerAccount.StripePayoutsIntervalType);
-            Assert.True(msgs.HasMessageContainingText($"{billerAccount.ID}-{billerAccount.Name} updated with manual AHQ payout."));
+            Assert.Equal(expected: PayoutIntervalType.Manual.ToString().ToLower(), actual: stripeAccount.Settings.Payouts.Schedule.Interval);
+            Assert.True(msgs.HasMessageContainingText($"Account {billerAccount.Name}({billerAccount.ID}) updated with {PayoutIntervalType.Manual.ToString().ToLower()} AHQ payout."));
+        }
+
+        [Fact(DisplayName = "Enable stripe auto payout to those accounts which already had manual AHQ payout")]
+        public void EnableStripeAutoPayoutForConnectAccountTest()
+        {
+            // Arrange
+            var loggedInUser = WebUserFactory.Create(msgs, dc);
+            var billerAccount = AccountFactory.CreateAccount(user: loggedInUser, accountType: AccountType.School, stripePayoutsEnabled: true, stripeChargesEnabled: true, msgs: msgs, dc: dc);
+
+            // Update stripe account and customer to billerAccount
+            AccountFactory.CreateStripeAccountAndCustomer(account: billerAccount, msgs: msgs, dc: dc);
+
+            // Act
+            var stripeAccountWithManualPayout = StripeHelper.ToggleStripePayoutForConnectedAccount(account: billerAccount, payoutIntervalType: PayoutIntervalType.Manual, msgs: msgs);
+            var stripeAccountWithAutoPayout = StripeHelper.ToggleStripePayoutForConnectedAccount(account: billerAccount, payoutIntervalType: PayoutIntervalType.Daily, msgs: msgs);
+
+            // Assert
+            Assert.True(msgs.HasNoErrors());
+            Assert.NotNull(stripeAccountWithAutoPayout);
+            Assert.Equal(expected: PayoutIntervalType.Daily.ToString().ToLower(), actual: stripeAccountWithAutoPayout.Settings.Payouts.Schedule.Interval);
+            Assert.True(msgs.HasMessageContainingText($"Account {billerAccount.Name}({billerAccount.ID}) updated with {PayoutIntervalType.Daily.ToString().ToLower()} AHQ payout."));
         }
 
         [Theory(DisplayName = "Basic Test for PrepareManualPayouts")]
@@ -3759,19 +3780,23 @@ namespace AfterSchoolLibraryTests.Tests
             // Update stripe account and customer to billerAccount
             AccountFactory.CreateStripeAccountAndCustomer(account: billingAccount, msgs: msgs, dc: dc);
 
+            DelayExecution(10000);
+
+            // update stripe account with manual payout
+            StripeHelper.ToggleStripePayoutForConnectedAccount(account: billingAccount, payoutIntervalType: PayoutIntervalType.Manual, msgs: msgs);
+
             // Act
             AccountService.PreparePayouts(msgs: msgs, dc: dc);
 
             // Assert
             Assert.True(msgs.HasNoErrors());
-            Assert.True(msgs.HasMessageContainingText($"Account {billingAccount.Name}({billingAccount.ID}) updated with manual AHQ payout."));
-            Assert.True(msgs.HasMessageContainingText($"Payout job completed successfully on {DateTime.UtcNow.ToShortDateString()}."));
+            Assert.True(msgs.HasMessageContainingText($"Payout job started on at {DateTime.UtcNow.ToShortDateString()}."));
+            Assert.True(msgs.HasMessageContainingText($"Payout job completed on at {DateTime.UtcNow.ToShortDateString()}."));
 
             // check payout
             var payout = billingAccount.GetLastPayout(msgs, dc);
             Assert.NotNull(payout);
-            Assert.Equal(billingAccount.ID.Value, payout.AccountId);
-            Assert.Equal(amount, payout.Amount);
+            Assert.Equal(billingAccount.ID.Value, payout.AccountId);            
             Assert.Equal(PayoutStatus.Completed, payout.PayoutStatusId);
             Assert.Equal(PaymentType.ACH, payout.PaymentTypeId);
             Assert.Equal($"AHQ {billingAccount.Name.MaxChars(10)} {activity.Name.MaxChars(7)}", payout.StatementDescriptor);
@@ -3779,7 +3804,7 @@ namespace AfterSchoolLibraryTests.Tests
             // verify status of stripe account
             var stripeAccount = StripeHelper.GetCustomAccount(stripeAccountId: billingAccount.StripeUserId, msgs: msgs);
             Assert.NotNull(stripeAccount);
-            Assert.Equal(stripeAccount.Settings.Payouts.Schedule.Interval, nameof(PayoutIntervalType.Manual).ToLower());
+            Assert.Equal(stripeAccount.Settings.Payouts.Schedule.Interval, PayoutIntervalType.Manual.ToString().ToLower());
 
             // verify payout amount of stripe
             var stripePayout = StripeHelper.GetPayout(payoutId: payout.ExternalPayoutId, stripeAccountId: stripeAccount.Id, msgs: msgs);

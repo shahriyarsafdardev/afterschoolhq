@@ -4608,7 +4608,7 @@ namespace AfterSchoolLibrary.Services
             if (msgs.IsEmpty())
                 msgs = new SystemMessages();
 
-            msgs.Add($"Payout job started on at {DateTime.UtcNow.ToShortDateTimeString()}.", MessageType.Success);
+            msgs.Add($"Payout job started on at {DateTime.UtcNow.ToShortDateString()}.", MessageType.Success);
 
             //get accounts with ManualStripePayouts enabled
             var accountsToGeneratePayout = GetAccountsWithSpecificFeatures(featureTypeId: FeatureType.ManualStripePayouts, msgs: msgs, dc: dc);
@@ -4618,7 +4618,7 @@ namespace AfterSchoolLibrary.Services
                 accountsToGeneratePayout.PrepareManualPayouts(loggedInUser: webUser, msgs: msgs, dc: dc);
 
             if (msgs.HasNoErrors())
-                msgs.Add($"Payout job completed at {DateTime.UtcNow.ToShortDateTimeString()}.", MessageType.Success);
+                msgs.Add($"Payout job completed on at {DateTime.UtcNow.ToShortDateString()}.", MessageType.Success);
 
             return msgs;
         }
