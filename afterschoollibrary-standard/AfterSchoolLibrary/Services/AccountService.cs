@@ -4610,28 +4610,9 @@ namespace AfterSchoolLibrary.Services
 
             msgs.Add($"Payout job started on at {DateTime.UtcNow.ToShortDateTimeString()}.", MessageType.Success);
 
-            var webUser = WebUser.Load(id: 1, msgs: msgs, dc: dc); //load admin first            
-
             //get accounts with ManualStripePayouts enabled
             var accountsToGeneratePayout = GetAccountsWithSpecificFeatures(featureTypeId: FeatureType.ManualStripePayouts, msgs: msgs, dc: dc);
-
-            //foreach (var account in accounts)
-            //{                
-            //    // check accounts has ManualStripePayouts feature on
-            //    if (account.HasFeature(featureType: FeatureType.ManualStripePayouts, msgs: msgs, dc: dc))
-            //    {
-            //        //if payout type is not manual, then update that first in stripe
-            //        if (account.StripePayoutsIntervalType != (int)PayoutIntervalType.Manual)
-            //            account.DisableStripePayoutForCustomAccount(msgs: msgs, dc: dc);
-                    
-            //        if (msgs.HasNoErrors())
-            //            accountsToGeneratePayout.Add(account);
-
-            //        // if there is no user for Id = 1 (we have this admin user in all environment)
-            //        if (webUser.IsEmpty())
-            //            webUser = account.GetAccountOwner(msgs, dc);
-            //    }
-            //}            
+            var webUser = GetLoggedInUserForPayout(msgs, dc);
 
             if (accountsToGeneratePayout.Any())
                 accountsToGeneratePayout.PrepareManualPayouts(loggedInUser: webUser, msgs: msgs, dc: dc);
@@ -4663,8 +4644,8 @@ namespace AfterSchoolLibrary.Services
                         // load only those transactions which aren't payed out yet
                         foreach (var activityPayment in activityPayments)
                         {
-                            var transaction = activityPayment.GetTransactionForPayout(msgs: msgs, dc: dc);
-                            if (transaction.IsNotEmpty())
+                            var transaction = activityPayment.GetTransaction(msgs: msgs, dc: dc);
+                            if (transaction.IsNotEmpty() && transaction.CanRequestPayout(msgs, dc))
                                 transactions.Add(transaction);
                         }
 
@@ -4681,36 +4662,17 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-        public static Stripe.Account ToggleStripePayoutForConnectedAccount(this Account account, PayoutIntervalType payoutIntervalType, SystemMessages msgs, DatabaseConnection dc = null)
+        public static WebUser GetLoggedInUserForPayout(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var options = new Stripe.AccountUpdateOptions()
-            {
-                Settings = new Stripe.AccountSettingsOptions()
-                {
-                    Payouts = new Stripe.AccountSettingsPayoutsOptions()
-                    {
-                        Schedule = new Stripe.AccountSettingsPayoutsScheduleOptions()
-                        {
-                            Interval = payoutIntervalType.ToString().ToLower()
-                        }
-                    }
-                }
-            };
+            // load admin user
+            var webUser = WebUser.Load(id: 1, msgs: msgs, dc: dc);
 
-            var stripeAccount = StripeHelper.UpdateCustomAccount(account.StripeUserId, options, msgs);
+            // We will have this admin user in all environment but in case
+            // if don't find it, just load first Active webuser to be sure that system will not fail
+            if (webUser.IsEmpty())
+                webUser = WebUser.Load(criterias: new Hashtable() { { "IsActive", 1 } }, msgs: msgs, dc: dc).FirstOrDefault();
 
-            if (msgs.HasErrors()) 
-                return null;
-            
-            if(stripeAccount.IsNotEmpty())
-            {                
-                account.StripePayoutsIntervalType = (int)PayoutIntervalType.Manual;
-
-                msgs.Add($"Account {account.Name}({account.ID}) updated with manual AHQ payout.", MessageType.Success);
-                msgs.AddRange(account.Save(dc));
-            }
-
-            return stripeAccount;
+            return webUser;
         }
 
         #endregion

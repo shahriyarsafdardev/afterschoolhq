@@ -465,7 +465,6 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Account_StripeCustomerId ON [Account] (StripeCustomerId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Account_InviteCodeToShare ON [Account] (InviteCodeToShare)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Account_Subdomain ON [Account] (Subdomain)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Account_IsActive_IsDeleted_StripePayoutsIntervalType ON [Account] (StripePayoutsIntervalType,IsActive,IsDeleted)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountProfile_AccountId ON [AccountProfile] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_CheckPaymentAccount_AccountId ON [CheckPaymentAccount] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_BankPaymentAccount_AccountId ON [BankPaymentAccount] (AccountId)"));

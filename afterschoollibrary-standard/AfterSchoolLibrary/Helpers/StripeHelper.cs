@@ -297,6 +297,33 @@ namespace AfterSchoolLibrary.Billing
             return account;
         }
 
+        public static Account ToggleStripePayoutForConnectedAccount(Models.Account account, PayoutIntervalType payoutIntervalType, SystemMessages msgs)
+        {
+            var options = new AccountUpdateOptions()
+            {
+                Settings = new AccountSettingsOptions()
+                {
+                    Payouts = new AccountSettingsPayoutsOptions()
+                    {
+                        Schedule = new AccountSettingsPayoutsScheduleOptions()
+                        {
+                            Interval = payoutIntervalType.ToString().ToLower()
+                        }
+                    }
+                }
+            };
+
+            var stripeAccount = UpdateCustomAccount(account.StripeUserId, options, msgs);
+
+            if (msgs.HasErrors())
+                return null;
+
+            if (stripeAccount.IsNotEmpty())
+                msgs.Add($"Account {account.Name}({account.ID}) updated with manual AHQ payout.", MessageType.Success);
+
+            return stripeAccount;
+        }
+
         #endregion
 
         #region StripePerson

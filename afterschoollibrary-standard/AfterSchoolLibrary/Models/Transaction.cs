@@ -1454,34 +1454,6 @@ namespace AfterSchoolLibrary.Models
         }
 
         /// <summary>
-        /// This method is created to get all the transactions for providers
-        /// it will be used to create manual payouts
-        /// </summary>
-        /// <param name="BillerAccountId"></param>
-        /// <param name="msgs"></param>
-        /// <param name="dc"></param>
-        /// <returns>List<Transaction></returns>
-        public static List<Transaction> LoadTransactionReadyToPayoutForBillerAccount(int BillerAccountId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            DatabaseQuery dq = DatabaseQuery;
-            dq.Connection = dc;
-
-            var sql = $@"
-                            SELECT *
-                            FROM [Transaction] 
-                            WHERE 
-                                BillerAccountId = {BillerAccountId} AND 
-                                PayoutId IS NULL AND 
-                                IsDeleted = 0 AND 
-                                (
-                                    (PaymentTypeId = 1 and GETDATE() >= DATEADD(day, 2, CreateDate)) OR  -- cc 2 days
-                                    (PaymentTypeId = 5 and GETDATE() >= DATEADD(day, 5, CreateDate))     -- ach 5 days
-								)";
-
-            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-        }
-
-        /// <summary>
         /// This method is created to get transaction for activity payment
         /// it will be used to create manual payouts
         /// </summary>

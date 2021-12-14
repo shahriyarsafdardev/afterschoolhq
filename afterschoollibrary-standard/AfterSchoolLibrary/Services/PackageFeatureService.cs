@@ -4,6 +4,7 @@ using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
 using System.Linq;
 using System.Collections.Generic;
+using AfterSchoolLibrary.Billing;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -124,9 +125,9 @@ namespace AfterSchoolLibrary.Services
                 if (packageFeature.FeatureTypeId == FeatureType.ManualStripePayouts)
                 {
                     if (packageFeature.Max.Value > 0)
-                        account.ToggleStripePayoutForConnectedAccount(PayoutIntervalType.Manual, msgs, dc);
+                        StripeHelper.ToggleStripePayoutForConnectedAccount(account: account, payoutIntervalType: PayoutIntervalType.Manual, msgs: msgs);
                     else
-                        account.ToggleStripePayoutForConnectedAccount(PayoutIntervalType.Daily, msgs, dc);
+                        StripeHelper.ToggleStripePayoutForConnectedAccount(account: account, payoutIntervalType: PayoutIntervalType.Daily, msgs: msgs);
                 }
             }
         }
