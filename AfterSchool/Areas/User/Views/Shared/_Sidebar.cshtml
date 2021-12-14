@@ -28,18 +28,6 @@
             <li class="@(controller == "profile" ? "active" : "")">
                 <a href="@Url.Action("edit", "profile")"><i class="icon s7-user"></i><span>Profile</span></a>
             </li>
-            <li class="parent">
-                <div id='google_translate_element'></div>
-                <a href="#"><i class="icon s7-browser"></i> <span>Language</span></a>
-                <ul class="sub-menu">
-                    <li>
-                        <a class="dropdown-item languageOption selectedLang" href="javascript:void(0)" data-lang="en" data-text="English"><img src="~/Content/Flags/US.png" class="flagLang" /> English</a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item languageOption notSelectedLang" href="javascript:void(0)" data-lang="es" data-text="Espanol"><img src="~/Content/Flags/spain.png" class="flagLang" /> Espanol</a>
-                    </li>
-                </ul>
-            </li>
             @if (SessionVariables.CurrentUser.HasMultipleAccounts())
             {
                 var providerAccount = SessionVariables.CurrentUser.GetAccounts().Where(a => a.AccountTypeId != AccountType.Registrant).ToList().FirstOrDefault();
