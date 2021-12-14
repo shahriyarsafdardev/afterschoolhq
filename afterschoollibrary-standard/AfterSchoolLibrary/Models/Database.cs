@@ -209,7 +209,6 @@ namespace AfterSchoolLibrary.Models
 			WebUser.Update(new Hashtable(){{"VerifiedAccount",false}}, new Hashtable(){{"VerifiedAccount", DBNull.Value}}, WebUser.ObjectMap, dc);
 			WebUser.Update(new Hashtable(){{"IsRegistered",false}}, new Hashtable(){{"IsRegistered", DBNull.Value}}, WebUser.ObjectMap, dc);
 			WebUser.Update(new Hashtable(){{"AllowTextMessages",false}}, new Hashtable(){{"AllowTextMessages", DBNull.Value}}, WebUser.ObjectMap, dc);
-			WebUser.Update(new Hashtable(){{"isLanguagePreferenceDefault",false}}, new Hashtable(){{"isLanguagePreferenceDefault", DBNull.Value}}, WebUser.ObjectMap, dc);
 			Activity.Update(new Hashtable(){{"AllowToPayLater",false}}, new Hashtable(){{"AllowToPayLater", DBNull.Value}}, Activity.ObjectMap, dc);
 			Activity.Update(new Hashtable(){{"GenderRestriction",0}}, new Hashtable(){{"GenderRestriction", DBNull.Value}}, Activity.ObjectMap, dc);
 			Activity.Update(new Hashtable(){{"RegistrationModeId",0}}, new Hashtable(){{"RegistrationModeId", DBNull.Value}}, Activity.ObjectMap, dc);

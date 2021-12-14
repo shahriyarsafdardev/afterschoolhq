@@ -29,8 +29,6 @@ namespace AfterSchoolLibrary.Models
 		public bool IsRegistered { get { return (bool)MDV["IsRegistered"].Value; } set { MDV["IsRegistered"].Value = value; } }
 		public int? DefaultAccountId { get { return (int?)MDV["DefaultAccountId"].Value; } set { MDV["DefaultAccountId"].Value = value; } }
 		public bool AllowTextMessages { get { return (bool)MDV["AllowTextMessages"].Value; } set { MDV["AllowTextMessages"].Value = value; } }
-		public string LanguagePreference { get { return (string)MDV["LanguagePreference"].Value; } set { MDV["LanguagePreference"].Value = value; } }
-		public bool isLanguagePreferenceDefault { get { return (bool)MDV["isLanguagePreferenceDefault"].Value; } set { MDV["isLanguagePreferenceDefault"].Value = value; } }
 		
 
         public WebUser()
@@ -42,7 +40,6 @@ namespace AfterSchoolLibrary.Models
 			this.VerifiedAccount = false;
 			this.IsRegistered = false;
 			this.AllowTextMessages = false;
-			this.isLanguagePreferenceDefault = false;
 			
         }
 
@@ -61,8 +58,6 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "IsRegistered", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "DefaultAccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AllowTextMessages", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "LanguagePreference", System.Data.SqlDbType.NVarChar , "100");
-				_dp.Add(className, "isLanguagePreferenceDefault", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -168,14 +163,6 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["AllowTextMessages"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["LanguagePreference"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["isLanguagePreferenceDefault"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
