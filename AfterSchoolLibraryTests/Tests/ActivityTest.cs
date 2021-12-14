@@ -1119,5 +1119,21 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors());
 
         }
+
+        [Fact]
+        public void ActivityCheckLogOut()
+        {
+            var user = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(user, msgs, dc);
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var activityWebUser = ActivityWebUserFactory.Create(activity, user, msgs, dc); 
+            var redirectCheck = false;
+
+
+            if (!activity.IsPublished && user.IsNotEmpty() && user.HasAccessToActivity(activity, msgs, dc))
+                redirectCheck = true;
+
+            Assert.True(redirectCheck);
+        }
     }
 }
