@@ -1,9 +1,13 @@
 ﻿@model FormQuestionViewModel
 
-<textarea id="@Model.Id" 
-          name="@Model.Name" 
-          class="form-control" 
-          onfocus="this.select()" 
-          @Model.RequiredProperty 
-          @Html.Raw(Model.ToolTip) 
-          @Html.Raw(Model.ToolTipId)>@Model.Value</textarea>
+<div>
+<textarea id="@Model.Id"
+          name="@Model.Name"
+          class="form-control countWords"
+          onfocus="this.select()"
+          @Model.RequiredProperty
+          @Html.Raw(Model.ToolTip)
+          @Html.Raw(Model.ToolTipId) maxlength='400'>@Model.Value</textarea>
+    <span class="countLeft">0</span>
+    <span class="countMax">/ 400</span>
+</div>

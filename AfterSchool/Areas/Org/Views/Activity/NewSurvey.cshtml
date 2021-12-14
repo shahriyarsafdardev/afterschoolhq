@@ -8,15 +8,7 @@
     var activeForm = (ActivityForm)ViewBag.ActiveForm;
     var showManageForms = accountPackage.HasFeature(FeatureType.ManageForms);
     var showManageFormFields = forms.Count >= maxFormCount ? false : true;
-
-    var studentList = new List<SelectListItem>(); 
-    foreach (var student in (List<RegistrantActivity>)ViewBag.Students)
-    {
-        studentList.Add(new SelectListItem {
-            Text = student.RegistrantName,
-            Value = student.RegistrantId.ToString()
-        });
-    }
+    var studentList = (List<SelectListItem>)ViewBag.Students;
 }
 <link href="~/Assets/css/survey.css" rel="stylesheet" />
 @{Html.RenderPartial("OrgAccountHeader");}
