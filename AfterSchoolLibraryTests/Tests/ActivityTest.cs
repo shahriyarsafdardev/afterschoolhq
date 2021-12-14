@@ -1119,5 +1119,17 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors());
 
         }
+
+        [Fact]
+        public void CreateActivityWithCE()
+        {
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(user, msgs, dc);
+            var activity = Factories.ActivityFactory.CreateWithCE(account, true, msgs, dc);
+            activity.Publish(user, msgs, dc);
+
+            Assert.True(activity.IsPublished);
+
+        }
     }
 }
