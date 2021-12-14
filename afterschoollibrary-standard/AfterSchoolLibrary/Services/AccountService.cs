@@ -951,6 +951,27 @@ namespace AfterSchoolLibrary.Services
             return account.GetActiveAccountPackage(msgs, dc).AddOrUpdatePackageFeature(featureTypeId, maxValue, loggedInUser, msgs, dc);
         }
 
+        /// <summary>
+        /// Load all accounts with ProviderAccountTypes which has feature
+        /// </summary>
+        /// <param name="featureTypeId"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        public static List<Account> GetAccountsWithSpecificFeatures(FeatureType featureTypeId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            //.. load all AccountPackageFeature where provided FeatureTypeId has value > 0 and then grab the AccountPackageId
+            var accountPackageIds =  AccountPackageFeature.LoadByFeatureTypeIdByMaxValue(FeatureTypeId: featureTypeId, Max: 0, msgs: msgs, dc: dc)
+                .Select(m => m.AccountPackageId.Value).ToList();
+
+            //.. load all AccountPackage and get AccountId
+            var accountIds = AccountPackage.LoadByIds(ids: accountPackageIds, msgs: msgs, dc: dc)
+                .Select(m => m.AccountId.Value).ToList();
+
+            // return all accounts which are filtered by feature type
+            return Account.LoadByIdsByAccountTypes(ids: accountIds.Distinct().ToList(), accountTypes: AccountService.ProviderAccountTypes.ToList(), msgs: msgs, dc: dc).ToList();
+        }
+
         #endregion
 
         #region Users
@@ -4591,27 +4612,26 @@ namespace AfterSchoolLibrary.Services
 
             var webUser = WebUser.Load(id: 1, msgs: msgs, dc: dc); //load admin first            
 
-            //get accounts
-            var accounts = Account.LoadByAccountTypeIds(accountTypes: AccountService.ProviderAccountTypes.ToList(), isDeleted: false, start: null, length: null, msgs: msgs, dc: dc);
-            var accountsToGeneratePayout = new List<Account>();
+            //get accounts with ManualStripePayouts enabled
+            var accountsToGeneratePayout = GetAccountsWithSpecificFeatures(featureTypeId: FeatureType.ManualStripePayouts, msgs: msgs, dc: dc);
 
-            foreach (var account in accounts)
-            {                
-                // check accounts has ManualStripePayouts feature on
-                if (account.HasFeature(featureType: FeatureType.ManualStripePayouts, msgs: msgs, dc: dc))
-                {
-                    //if payout type is not manual, then update that first in stripe
-                    if (account.StripePayoutsIntervalType != (int)PayoutIntervalType.Manual)
-                        account.DisableStripePayoutForCustomAccount(msgs: msgs, dc: dc);
+            //foreach (var account in accounts)
+            //{                
+            //    // check accounts has ManualStripePayouts feature on
+            //    if (account.HasFeature(featureType: FeatureType.ManualStripePayouts, msgs: msgs, dc: dc))
+            //    {
+            //        //if payout type is not manual, then update that first in stripe
+            //        if (account.StripePayoutsIntervalType != (int)PayoutIntervalType.Manual)
+            //            account.DisableStripePayoutForCustomAccount(msgs: msgs, dc: dc);
                     
-                    if (msgs.HasNoErrors())
-                        accountsToGeneratePayout.Add(account);
+            //        if (msgs.HasNoErrors())
+            //            accountsToGeneratePayout.Add(account);
 
-                    // if there is no user for Id = 1 (we have this admin user in all environment)
-                    if (webUser.IsEmpty())
-                        webUser = account.GetAccountOwner(msgs, dc);
-                }
-            }
+            //        // if there is no user for Id = 1 (we have this admin user in all environment)
+            //        if (webUser.IsEmpty())
+            //            webUser = account.GetAccountOwner(msgs, dc);
+            //    }
+            //}            
 
             if (accountsToGeneratePayout.Any())
                 accountsToGeneratePayout.PrepareManualPayouts(loggedInUser: webUser, msgs: msgs, dc: dc);
@@ -4661,7 +4681,7 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-        public static Stripe.Account DisableStripePayoutForCustomAccount(this Account account, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Stripe.Account ToggleStripePayoutForConnectedAccount(this Account account, PayoutIntervalType payoutIntervalType, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var options = new Stripe.AccountUpdateOptions()
             {
@@ -4671,7 +4691,7 @@ namespace AfterSchoolLibrary.Services
                     {
                         Schedule = new Stripe.AccountSettingsPayoutsScheduleOptions()
                         {
-                            Interval = nameof(PayoutIntervalType.Manual).ToLower()
+                            Interval = payoutIntervalType.ToString().ToLower()
                         }
                     }
                 }
