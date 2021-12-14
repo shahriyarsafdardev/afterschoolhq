@@ -1805,6 +1805,7 @@ namespace AfterSchoolLibrary.Services
                             activityGroupId: groupId,
                             periodId: period?.ID,
                             amountCharged: activityParticipationObject.Cost,
+                            registeredDates: null,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
                             dc: adc);
@@ -3516,11 +3517,11 @@ namespace AfterSchoolLibrary.Services
                 if (msgs.HasNoErrors())
                 {
                     var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
-                        checkoutObject.ParticipationObject.ObjectID.Value,
-                        checkoutObject.ParticipationObject.ObjectType,
-                        registrant.ID.Value,
-                        msgs,
-                        dc);
+                                checkoutObject.ParticipationObject.ObjectID.Value,
+                                checkoutObject.ParticipationObject.ObjectType,
+                                registrant.ID.Value,
+                                msgs,
+                                dc);
                     
                     if (ra.IsNotEmpty() && !ra.IsAssigned(RegistrationAssignmentType.Reserved))                    
                         ra.ChangeSeatAssignment(RegistrationAssignmentType.Reserved, loggedInUser, msgs, dc);
@@ -3552,7 +3553,7 @@ namespace AfterSchoolLibrary.Services
 
         public static void ProcessRegistrationFee(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            if (checkoutObject.RegistrationCostWithCoupon(msgs, dc) > 0)
+            if (checkoutObject.RegistrationCost(msgs, dc) > 0)
                 AccountService.ProcessPaymentWithStripe(checkoutObject, msgs, dc);
 
             // must wait until after charges happen to know what card id is charged for sure
@@ -3922,7 +3923,7 @@ namespace AfterSchoolLibrary.Services
 
         public static bool CanProcessPayments(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (!account.GetAccountOwner(msgs, dc).VerifiedAccount)
+            if (!account.HasAccountOwner || !account.GetAccountOwner(msgs, dc).VerifiedAccount)
                 return false;
 
             var paymentFeatures = new List<FeatureType>() { FeatureType.UseStripeConnectedAccount, FeatureType.AcceptPayments };

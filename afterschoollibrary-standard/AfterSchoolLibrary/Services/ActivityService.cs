@@ -185,6 +185,37 @@ namespace AfterSchoolLibrary.Services
             return Math.Max(0, rtn);
         }
 
+        public static int GetSeatsRemainingForNextDate(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var schedule = activity.GetSchedule(msgs, dc);
+            if (schedule.IsNotEmpty())
+            {
+                var dates = schedule.GetNextInstances(1, activity, msgs, dc);
+
+                if (dates.Any())
+                    return activity.GetSeatsRemainingByDate(dates.First(), msgs, dc);
+            }            
+
+            return 0;
+        }
+
+        public static int GetSeatsRemainingByDate(this Activity activity, DateTime activityDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (activity.CostFrequencyTypeId == ActivityCostFrequencyType.PerActivity)
+                return activity.GetSeatsRemaining(msgs, dc);
+
+            if (activity.HasSchedule)
+            {
+                var schedule = activity.GetSchedule(msgs, dc);
+                var instance = schedule?.GetInSessionInstanceByDate(activityDate, msgs, dc);
+
+                if (instance.IsNotEmpty())
+                    return instance.GetSeatsRemaining(activity, msgs, dc);
+            }
+
+            return activity.SeatsAvailable.Value;
+        }
+
         public static int GetWaitingListSeatsRemaining(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var rtn = 0;
@@ -240,23 +271,23 @@ namespace AfterSchoolLibrary.Services
         {
             var gradeLevels = GradeLevel.Load(msgs: msgs, dc: dc);
 
-            var schedule = ActivityScheduleService.CreateNew(
-                  scheduleName: "Sample Schedule",
-                  details: "",
-                  repeatsWeekly: true,
-                  isongoing: false,
-                  startDate: DateTime.UtcNow.AddWeeks(1),
-                  endDate: DateTime.UtcNow.AddWeeks(5),
-                  dailyStartTime: DateTime.UtcNow.Date.AddHours(15),
-                  dailyEndTime: DateTime.UtcNow.Date.AddHours(17),
-                  scheduleDates: null,
-                  scheduleDatesClosed: null,
-                  accountId: account.ID.Value,
-                  activityGroupId: null,
-                  loggedInUserId: 0,
-                  msgs: msgs,
-                  dc: dc
-                );
+            //var schedule = ActivityScheduleService.CreateNew(
+            //      scheduleName: "Sample Schedule",
+            //      details: "",
+            //      repeatsWeekly: true,
+            //      isongoing: false,
+            //      startDate: DateTime.UtcNow.AddWeeks(1),
+            //      endDate: DateTime.UtcNow.AddWeeks(5),
+            //      dailyStartTime: DateTime.UtcNow.Date.AddHours(15),
+            //      dailyEndTime: DateTime.UtcNow.Date.AddHours(17),
+            //      scheduleDates: null,
+            //      scheduleDatesClosed: null,
+            //      accountId: account.ID.Value,
+            //      activityGroupId: null,
+            //      loggedInUserId: 0,
+            //      msgs: msgs,
+            //      dc: dc
+            //    );
 
             var locationName = "Sample Location";
             var address1 = "1234 N AfterSchool Avenue";
@@ -310,7 +341,7 @@ namespace AfterSchoolLibrary.Services
                 allowToPayLater: true,
                 registrationMode: RegistrationMode.Register,
                 accountId: account.ID,
-                scheduleId: schedule.ID,
+                scheduleId: null,
                 locationId: location.ID,
                 locationDetails: "<p>Please enter through the rear entrance of the school</p>",
                 activityGroupId: null,
@@ -701,6 +732,8 @@ namespace AfterSchoolLibrary.Services
                 HidePreciseLocation = activity.HidePreciseLocation,
                 InterestFormId = activity.InterestFormId,
                 IsConvenienceFeeTakenOutOfCost = activity.IsConvenienceFeeTakenOutOfCost,
+                CostFrequencyTypeId = activity.CostFrequencyTypeId,
+                RegistrationCutoffHours = activity.RegistrationCutoffHours,
             };
         }
 
@@ -872,6 +905,8 @@ namespace AfterSchoolLibrary.Services
             var isparentpricesubscription = values.GetValueOrDefault("isparentpricesubscription");
             var prepaidperiodspostpay = values.GetValueOrDefault("prepaidperiodspostpay");
             var postpayplanperiod = values.GetValueOrDefault("postpayplanperiod");
+            var costfrequencytype = values.GetValueOrDefault("costfrequencytype");
+            var cutoffhours = values.GetValueOrDefault("cutoffhours");
 
             var activityType = ActivityType.NotSet;
 
@@ -945,7 +980,8 @@ namespace AfterSchoolLibrary.Services
                     SeatsAvailable = seatsavailable.ToString().ToInteger(),
                     WaitingListSeats = waitinglistseats.ToString().ToInteger(),
                     AccountId = account.ID,
-                    RequiresParentalConsent = true
+                    RequiresParentalConsent = true,
+                    CostFrequencyTypeId = ActivityCostFrequencyType.PerActivity,
                 };
 
                 if (activityType.In(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
@@ -1051,6 +1087,9 @@ namespace AfterSchoolLibrary.Services
             if (regmode.IsNumber())
                 activity.RegistrationModeId = (RegistrationMode)regmode.ToString().ToInteger();
 
+            if (costfrequencytype.IsNumber())
+                activity.CostFrequencyTypeId = (ActivityCostFrequencyType)costfrequencytype.ToString().ToInteger();
+
             if (leadertype.IsNumber())
             {
                 var leaderType = (ActivityLeaderType)leadertype.ToString().ToInteger();
@@ -1072,6 +1111,9 @@ namespace AfterSchoolLibrary.Services
 
             if (isparentpricecost.IsNotEmpty() && isparentpricecost.ToString().IsBoolean())
                 activity.IsConvenienceFeeTakenOutOfCost = isparentpricecost.ToString().ToBoolean();
+
+            if (cutoffhours.IsNotEmpty() && cutoffhours.IsNumber())
+                activity.RegistrationCutoffHours = cutoffhours.ToString().ToInteger();
 
             if (msgs.HasNoErrors())
             {
@@ -1098,8 +1140,8 @@ namespace AfterSchoolLibrary.Services
                         if (activityGroup.IsNotEmpty())
                         {
                             activity.ActivityGroupId = activityGroup.ID.Value;
-                            activity.GradeLevelStart = activityGroup.MinGradeLevelId;
-                            activity.GradeLevelEnd = activityGroup.MaxGradeLevelId;
+                            activity.GradeLevelStart = activity.GradeLevelStart.IsNotEmpty() ? activity.GradeLevelStart : activityGroup.MinGradeLevelId;                            
+                            activity.GradeLevelEnd = activity.GradeLevelEnd.IsNotEmpty() ? activity.GradeLevelEnd : activityGroup.MaxGradeLevelId;
                             activity.GenderRestriction = activityGroup.GenderRestriction;
                         }
 
@@ -1136,7 +1178,7 @@ namespace AfterSchoolLibrary.Services
                             amsgs.AddRange(activity.SetupSchedule(
                                 account,
                                 schedule.IfEmpty(""),
-                                (List<DateRange>)scheduledates,
+                                (List<ActivityInstance>)scheduledates,
                                 (List<DateTime>)scheduledatesClosed,
                                 scheduledetails.IfEmpty(""),
                                 repeatsweekly.IfEmpty(""),
@@ -1145,6 +1187,7 @@ namespace AfterSchoolLibrary.Services
                                 dailystarttime.IfEmpty(""),
                                 dailyendtime.IfEmpty(""),
                                 isongoing.IfEmpty(""),
+                                days.IfEmpty(""),
                                 loggedInUserId,
                                 adc));
 
@@ -1340,7 +1383,7 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        private static SystemMessages SetupSchedule(this Activity activity, Account account, string schedule, List<DateRange> scheduledates, List<DateTime> scheduledatesclosed, string scheduledetails, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string isongoing, int loggedInUserId, DatabaseConnection dc = null)
+        private static SystemMessages SetupSchedule(this Activity activity, Account account, string schedule, List<ActivityInstance> scheduledates, List<DateTime> scheduledatesclosed, string scheduledetails, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string isongoing, string daysOfTheWeek, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
@@ -1359,6 +1402,7 @@ namespace AfterSchoolLibrary.Services
                 dailyendtime.ToString(),
                 scheduledates,
                 scheduledatesclosed,
+                daysOfTheWeek,
                 account,
                 activity.ActivityGroupId,
                 loggedInUserId,
@@ -1752,11 +1796,16 @@ namespace AfterSchoolLibrary.Services
             if (registrationperiod.ToInteger() == 0)
             {
                 var periodname = RegistrationPeriod.GenerateUniqueName(account.ID.Value, $"{activity.Name} - Reg Window", dc: dc).MaxChars(50);
+                var openDate = $"{registrationopendate} {registrationopentime}".ToDateTime();
+                var closeDate = $"{registrationclosedate} {registrationclosetime}".ToDateTime();
+
+                if (activity.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
+                    closeDate = openDate.AddYears(10);
 
                 activity.AddNewRegistrationPeriod(
                     periodname,
-                    $"{registrationopendate} {registrationopentime}".ToDateTime(),
-                    $"{registrationclosedate} {registrationclosetime}".ToDateTime(),
+                    openDate,
+                    closeDate,
                     account.ID.Value,
                     loggedInUserId,
                     msgs,
@@ -2158,10 +2207,31 @@ namespace AfterSchoolLibrary.Services
                 ras = RegistrantActivity.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc)
                     .Where(x =>
                         x.AssignmentTypeId != RegistrationAssignmentType.Invited &&
-                        x.AssignmentTypeId != RegistrationAssignmentType.Declined
+                        x.AssignmentTypeId != RegistrationAssignmentType.Declined &&
+                        x.AssignmentTypeId != RegistrationAssignmentType.Interested
                     ).ToList();
 
             return ras;
+        }
+
+        public static List<RegistrantActivity> GetRegistrantActivitiesForSurvey(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantActivity.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc)
+                .Where(a => a.HasParentRegistrantId(msgs, dc) && a.AssignmentTypeId.In(new List<RegistrationAssignmentType> {
+                    RegistrationAssignmentType.Reserved,
+                    RegistrationAssignmentType.ReservedPendingParentalConsent,
+                    RegistrationAssignmentType.ReservedPendingPayment
+                })).ToList();           
+        }
+
+        public static RegistrantActivity GetRegistrantActivity(this Activity activity, Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantActivity.LoadByParticipationObjectByRegistrant(activity.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value, msgs, dc);
+        }
+
+        public static RegistrantActivity GetRegistrantActivity(this Activity activity, int registrantId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantActivity.LoadByParticipationObjectByRegistrant(activity.ID.Value, ParticipationObjectType.Activity, registrantId, msgs, dc);
         }
 
         public static RegistrationPeriod AddNewRegistrationPeriod(this Activity activity, string name, DateTime startDateTime, DateTime endDateTime, int accountId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
@@ -2445,7 +2515,17 @@ namespace AfterSchoolLibrary.Services
         /// <returns></returns>
         public static DateTime? GetFirstDate(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return activity.GetSchedule(msgs, dc)?.GetInstances(msgs: msgs, dc: dc).FirstOrDefault()?.StartDateTime;
+            var schedule = activity.GetSchedule(msgs, dc);
+
+            if (schedule.IsNotEmpty())
+            {
+                if (schedule.IsOngoing)
+                    return schedule.GetNextInstances(1, activity, msgs, dc).FirstOrDefault(); 
+
+                return schedule.GetInstances(msgs: msgs, dc: dc).FirstOrDefault()?.StartDateTime;
+            }
+
+            return null;
         }
 
         /// <summary>

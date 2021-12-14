@@ -175,7 +175,7 @@ namespace AfterSchoolLibrary.Models
         {
 
             var purchaseableObject = PurchaseableObject.FromParticipationObjectIdParticipationObjectTypeId(ra.ParticipationObjectId.Value, ParticipationObjectType.Activity);
-            return AddCartItem(purchaseableObject, ra.ParticipationObjectId.Value, ParticipationObjectType.Activity, ra.ID.Value, msgs, dc: dc);
+            return AddCartItem(purchaseableObject, ra.ParticipationObjectId.Value, ParticipationObjectType.Activity, ra.ID.Value, null, msgs, dc);
         }
 
         public CartItem AddCartItem(Activity activity, SystemMessages msgs, DatabaseConnection dc = null)
@@ -186,12 +186,13 @@ namespace AfterSchoolLibrary.Models
                 activity.ID.Value,
                 ParticipationObjectType.Activity,
                 null,
+                null,
                 msgs,
                 dc
                 );
         }
 
-        public CartItem AddCartItem(ParticipationObject participationObject, SystemMessages msgs, DatabaseConnection dc = null)
+        public CartItem AddCartItem(ParticipationObject participationObject, List<DateTime> selectedDates, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var purchaseableObject = PurchaseableObject.FromParticipationObject(participationObject, msgs);
             return AddCartItem(
@@ -199,12 +200,13 @@ namespace AfterSchoolLibrary.Models
                 participationObject.ObjectID.Value,
                 participationObject.ObjectType,
                 null,
+                selectedDates,
                 msgs,
                 dc
                 );
         }
 
-        public CartItem AddCartItem(PurchaseableObject purchaseableObject, int participationObjectId, ParticipationObjectType participationObjectType, int? registrantActivityId, SystemMessages msgs, DatabaseConnection dc = null)
+        public CartItem AddCartItem(PurchaseableObject purchaseableObject, int participationObjectId, ParticipationObjectType participationObjectType, int? registrantActivityId, List<DateTime> selectedDates, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if(msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -225,19 +227,20 @@ namespace AfterSchoolLibrary.Models
                     ParticipationObjectId = participationObjectId,
                     ParticipationObjectTypeId = participationObjectType,
                     RegistrantActivityId = registrantActivityId,
+                    SelectedDates = selectedDates?.Select(x => x.ToShortDateTimeString()).ToStringList(","),
                     CreateDate = DateTime.UtcNow,
                     LastModifiedDate = DateTime.UtcNow,
                     CreatedBy = 0,
                     LastModifiedBy = 0
                 };
-                msgs.AddRange(item.Save(dc: dc));
+                msgs.AddRange(item.Save(dc));
 
                 //force reload
                 this.ResetCartItems();
                 return item;
             }
 
-            return this.GetCartItems(dc: dc).Where(x =>
+            return this.GetCartItems(msgs, dc).Where(x =>
                     x.ParticipationObjectId == participationObjectId &&
                     x.ParticipationObjectTypeId == participationObjectType
                 ).First();

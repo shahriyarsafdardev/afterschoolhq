@@ -19,7 +19,7 @@ namespace AfterSchoolLibraryTests.Migrations
             User = WebUserFactory.Create(msgs, dc);
             Account = AccountFactory.CreateWithFreePackage(User, AccountType.School, msgs, dc);
             Form = FormFactory.Create(Account, msgs, dc);
-            FormQuestionGroup = FormQuestionGroupFactory.Create(formId: Form.ID.Value, msgs: msgs, dc: dc);
+            FormQuestionGroup = FormQuestionGroupFactory.Create(formId: Form.ID.Value, isDeleted: false, msgs: msgs, dc: dc);
             
         }
 
