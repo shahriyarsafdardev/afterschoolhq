@@ -8,6 +8,7 @@ using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using AfterSchoolLibraryTests.Factories;
 using BasicLibrary.DataAccess;
+using AfterSchool.Models;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -1117,6 +1118,18 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.False(activity.IsPubliclyViewable);
             Assert.True(msgs.HasNoErrors());
+
+        }
+
+
+        [Fact]
+        public void CheckActivityPaymentErrorTest()
+        {
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(user, msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+
+            activity.GetItemsRequiredToPublish();
 
         }
     }
