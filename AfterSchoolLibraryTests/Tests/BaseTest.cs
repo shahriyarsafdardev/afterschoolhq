@@ -10,6 +10,7 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
+using System.Threading;
 
 namespace AfterSchoolLibraryTests
 {
@@ -67,5 +68,7 @@ namespace AfterSchoolLibraryTests
                 dc.Dispose();
             }
         }
+
+        public void DelayExecution(int milliseconds) =>  Thread.Sleep(milliseconds);
     }
 }

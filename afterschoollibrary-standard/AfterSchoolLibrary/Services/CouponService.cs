@@ -187,7 +187,7 @@ namespace AfterSchoolLibrary.Services
             if (amount >= couponValue)
                 return amount - couponValue;
 
-            return amount;
+            return 0;
         }
 
         public static string GetDiscountString(this Coupon coupon)

@@ -995,6 +995,7 @@ property: Description, string, NVarChar "4000"
 property: QuestionTypeId, QuestionType, Int
 property: QuestionDataTypeId, QuestionDataType, Int
 property: IsActive, bool, Bit
+property: IsDeleted, bool, Bit
 property: IsRequired, bool, Bit
 property: IsLocked, bool, Bit
 property: IsAnswerDescriptionEnabled, bool, Bit
@@ -1012,6 +1013,7 @@ loadmethod: FormId, List<>
 loadmethod: FormId|IsActive, List<>
 loadmethod: FormQuestionGroupId, List<>
 loadmethod: FormQuestionGroupId|IsActive, List<>
+loadmethod: FormQuestionGroupId|IsDeleted, List<>
 loadmethod: DependsOnQuestionId, List<>
 loadmethod: FormId|QuestionDataTypeId
 loadmethod: FormQuestionGroupId|QuestionDataTypeId
@@ -1026,6 +1028,7 @@ property: FormId, int?, Int, required
 property: DisplayOrder, int?, Int
 property: RegistrantTypeId, RegistrantType, Int
 property: QuestionGroupDataTypeId, QuestionGroupDataType, Int
+property: IsActive, bool, Bit
 property: IsDeleted, bool, Bit
 loadmethod: FormId, List<>
 loadmethod: FormId|RegistrantTypeId, List<>
@@ -1954,6 +1957,7 @@ join: Registrant.ID, RegistrantId, LeftOuterJoin
 join: SurveyResponse.ID, SurveyResponseId, LeftOuterJoin
 loadmethod: RegistrantId, List<>
 loadmethod: SurveyResponseId
+loadmethod: RegistrantId|SurveyResponseId|IsDeleted, List<>
 loadmethod: Uid
 loadmethod: Uid|SurveyResponseId
 loadmethod: Uid|RegistrantId

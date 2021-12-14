@@ -87,29 +87,26 @@ namespace AfterSchoolLibrary.Helpers
         }
 
 
-        public static SystemMessages SendSurveyEmail(SurveyResponse surveyResponse, string code, SystemMessages msgs)
+        public static SystemMessages SendSurveyEmail(int surveyResponseId, int registrantId, int surveyRequestId, string code, int codeId, SystemMessages msgs)
         {
             msgs = msgs ?? new SystemMessages();
-            var getRegistrant = Registrant.Load(surveyResponse.RegistrantId.Value);
-            var getSurvey = SurveyRequest.Load(surveyResponse.SurveyRequestId.Value);
-            var getRegistrantParent = getRegistrant.GetParentOrGuardian(msgs);
-            var IsEmailSame = false;
 
+            var registrant = Registrant.Load(registrantId);
+            var survey = SurveyRequest.Load(surveyRequestId);
+            var registrantParent = registrant.GetParentOrGuardian(msgs);
             var model = new NameValueCollection()
             {
-                { "Name", getRegistrant.Name },
-                { "Link", Utilities.SurveyBaseUrl+"/survey/"+surveyResponse.ID},
-                { "SignUpLink", Utilities.SurveyBaseUrl+"/onboarding/signup"},
-                { "SurveyName", getSurvey.Name}
+                { "Name", registrant.Name },
+                { "Link", Utilities.SurveyBaseUrl+"/survey/"+ surveyResponseId},
+                { "SignUpLink", Utilities.SurveyBaseUrl+"/onboarding/signup"},                
+                { "SurveyName", survey.Name}
             };
 
             if (code.IsNotEmpty())
+            {
                 model.Add(new NameValueCollection() { { "InviteCode", code } });
-
-
-            if (getRegistrant.Email == (getRegistrantParent.IsNotEmpty() ? getRegistrantParent.Email : ""))
-                IsEmailSame = true;
-
+                model.Add(new NameValueCollection() { { "AutoSignUpLink", Utilities.SurveyBaseUrl + "/onboarding/signup/" + codeId } });
+            }
 
             var subject = $"You have received a survey request";
             var body = ProcessTemplate(
@@ -118,14 +115,16 @@ namespace AfterSchoolLibrary.Helpers
                         code.IsNotEmpty() ? "survey_code_email" : "survey_code",
                         msgs);
 
-            if (IsEmailSame) {
-                SendSurveyEmailLastStep(subject, getRegistrant.Email, body, msgs);
-            }
-            else{
+            // check if child and parent has same email
+            var isRegistrantEmailSameAsParent = (registrant.Email == registrantParent?.Email);
+            if (isRegistrantEmailSameAsParent)
+                SendSurveyEmailLastStep(subject, registrant.Email, body, msgs);
+            else
+            {
                 //send both
-                SendSurveyEmailLastStep(subject, getRegistrant.Email, body, msgs);
-                if(getRegistrantParent.IsNotEmpty())
-                    SendSurveyEmailLastStep(subject, getRegistrantParent.Email, body, msgs);
+                SendSurveyEmailLastStep(subject, registrant.Email, body, msgs);
+                if (registrantParent.IsNotEmpty())
+                    SendSurveyEmailLastStep(subject, registrantParent.Email, body, msgs);
             }
 
             return msgs;
