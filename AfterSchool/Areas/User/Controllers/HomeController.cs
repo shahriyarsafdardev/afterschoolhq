@@ -92,7 +92,7 @@ namespace AfterSchool.Areas.User.Controllers
                 ).ToList();
 
             ViewBag.Providers = providers;
-            ViewBag.Messages = msgs;            
+            ViewBag.Messages = msgs;
 
             return View(registrants);
         }
