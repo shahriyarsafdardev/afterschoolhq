@@ -26,6 +26,7 @@ namespace AfterSchoolLibrary.Models
 		public int? PreviousId { get { return (int?)MDV["PreviousId"].Value; } set { MDV["PreviousId"].Value = value; } }
 		public int? WebUserId { get { return (int?)MDV["WebUserId"].Value; } set { MDV["WebUserId"].Value = value; } }
 		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
+		public string LanguageDisplayed { get { return (string)MDV["LanguageDisplayed"].Value; } set { MDV["LanguageDisplayed"].Value = value; } }
 		
 
         public WebSession()
@@ -50,6 +51,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "PreviousId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "WebUserId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "LanguageDisplayed", System.Data.SqlDbType.NVarChar , "100");
 				
                 return _dp;
             }
@@ -155,6 +157,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["AccountId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["LanguageDisplayed"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
