@@ -1,18 +1,18 @@
 ﻿@model Registrant
 @{
-                /**/
+    Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
 
-                Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
-
-                var msgs = (SystemMessages)ViewBag.Messages;
-                var qvms = (List<FormQuestionViewModel>)ViewBag.QuestionViewModels;
-                var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
-                var regName = !isTechSupport ? Model.Name : Model.GetFirstNameLastInitial();
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var qvms = (List<FormQuestionViewModel>)ViewBag.QuestionViewModels;
+    var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
+    var regName = !isTechSupport ? Model.Name : Model.GetFirstNameLastInitial();
 }
 <link href="~/Content/googleTranslate.css" rel="stylesheet" />
 <div class="main-content">
 
-    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+    @{
+        Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); 
+    }
 
     <div class="panel panel-default">
 
@@ -42,7 +42,8 @@
                 </div>
             }
 
-            <form class="form-horizontal" id="form-save-personal" method="post" action="@Url.Action("editpersonal", "family", new { id = Model.Uid, reg = Request["reg"], student = Request["student"] })">
+            <form class="form-horizontal" id="form-save-personal" method="post"
+                action="@Url.Action("editpersonal", "family", new { id = Model.Uid, reg = Request["reg"], student = Request["student"] })">
 
                 @foreach (var qvm in qvms)
                 {
@@ -51,7 +52,8 @@
 
                 <div class="margin-v-20">
                     <div class="col-md-offset-3 col-md-6">
-                        <button type="submit" id="btn-save-personal" class="btn btn-primary btn-block btn-lg">Save and Continue &raquo;</button>
+                        <button type="submit" id="btn-save-personal" class="btn btn-primary btn-block btn-lg">Save and
+                            Continue &raquo;</button>
                     </div>
                 </div>
 
@@ -70,4 +72,5 @@
     });
 </script>
 <script src="~/js/googleTranslateJs.js"></script>
-<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script type="text/javascript"
+    src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
