@@ -550,6 +550,7 @@
     <Compile Include="Areas\Admin\Controllers\AccountController.cs" />
     <Compile Include="Areas\Admin\Controllers\PackageController.cs" />
     <Compile Include="Areas\Admin\Controllers\PayoutController.cs" />
+    <Compile Include="Areas\Admin\Controllers\ScheduleTasksController.cs" />
     <Compile Include="Areas\Admin\Controllers\StripeHooksController.cs" />
     <Compile Include="Areas\Admin\Controllers\TransactionController.cs" />
     <Compile Include="Areas\Admin\Controllers\UploadController.cs" />
@@ -1343,6 +1344,7 @@
     <Content Include="Areas\Org\Views\Activity\ViewSurvey.cshtml" />
     <Content Include="Areas\Org\Views\Registration\Surveys.cshtml" />
     <Content Include="Areas\Org\Views\Activity\ViewSurveyResults.cshtml" />
+    <Content Include="Areas\Admin\Views\ScheduleTasks\Index.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />
