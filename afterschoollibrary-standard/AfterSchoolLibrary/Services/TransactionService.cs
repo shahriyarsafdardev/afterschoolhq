@@ -631,6 +631,7 @@ namespace AfterSchoolLibrary.Services
 
             if (msgs.HasNoErrors())
             {
+                string stripeRefundId = null;
 
                 if (paymentSourceType == PaymentSourceType.AfterSchoolPlatform)
                 {                    
@@ -648,6 +649,9 @@ namespace AfterSchoolLibrary.Services
 
                     if (stripeRefund.IsNotEmpty())
                     {
+                        // set stripe refund id, so we can use that later for create new refund
+                        stripeRefundId = stripeRefund.Id;
+
                         // get stripe transfer from original payment
                         var stripeOriginalPaymentChargeId = stripeRefund.ChargeId;
                         var stripeOriginalCharge = Billing.StripeHelper.GetCharge(stripeOriginalPaymentChargeId, msgs);
@@ -682,7 +686,7 @@ namespace AfterSchoolLibrary.Services
                         fullAmount: refundAmount,
                         convenienceFeeAmount: convenienceFeeAmount,
                         paymentTypeFeeAmount: paymentTypeFeeAmount,
-                        refundId: transaction.StripeChargeOrRefundId,
+                        refundId: stripeRefundId,
                         transactionType: TransactionType.Refund,
                         paymentType: paymentType,
                         paymentSourceType: paymentSourceType,
