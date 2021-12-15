@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 
 namespace AfterSchoolLibrary.Helpers
@@ -9,8 +10,9 @@ namespace AfterSchoolLibrary.Helpers
         public static string ClientId { get { return ConfigurationManager.AppSettings["Clever.ClientId"]; } }
         public static string RedirectUrl { get { return Utilities.BaseUrl() + "/oauth/clever"; } }
         public static string TokenRetrieveUrl { get { return "https://clever.com/oauth/tokens"; } }
-        public static string UserDetailUrl { get { return "https://api.clever.com/me"; } }
-
+        public static string UserDetailUrl { get { return "https://api.clever.com/v3.0/me"; } }
+        public static string UsersDetailUrl { get { return "https://api.clever.com/v3.0/users/"; } }
+     
         /// <summary>
         /// Provides authorization token for clever oAuth token
         /// </summary>
@@ -61,6 +63,48 @@ namespace Clever
         {
             public string access_token { get; set; }
             public string token_type { get; set; }
+        }
+
+
+
+        public class CleverUserDistrictDto
+        {
+            public Data data { get; set; }
+            public Link[] links { get; set; }
+        }
+
+        public class Data
+        {
+            public District_Contact district_contact { get; set; }
+            public string error { get; set; }
+            public DateTime last_sync { get; set; }
+            public DateTime launch_date { get; set; }
+            public string[] login_methods { get; set; }
+            public string name { get; set; }
+            public string portal_url { get; set; }
+            public string sis_type { get; set; }
+            public string state { get; set; }
+            public string id { get; set; }
+        }
+
+        public class District_Contact
+        {
+            public string district { get; set; }
+            public string email { get; set; }
+            public Name name { get; set; }
+            public string title { get; set; }
+        }
+
+        public class Name
+        {
+            public string first { get; set; }
+            public string last { get; set; }
+        }
+
+        public class Link
+        {
+            public string rel { get; set; }
+            public string uri { get; set; }
         }
     }
 }

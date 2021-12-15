@@ -10,6 +10,8 @@ using RestSharp;
 using Newtonsoft.Json;
 using AfterSchoolLibrary.Helpers;
 using Clever.Models;
+using AfterSchoolLibrary.Models;
+using BasicLibrary.DataAccess;
 
 namespace AfterSchool.Controllers
 {
@@ -100,12 +102,13 @@ namespace AfterSchool.Controllers
 
             var response = client.Execute(request);
             var tokenDto = JsonConvert.DeserializeObject<CleverTokenDto>(response.Content);
-            GetCleverUserDetails(token: tokenDto.access_token);
 
-            return View();
+            var id = GetCleverUserDetails(token: tokenDto.access_token);
+
+            return Json(new { status = "Succesfully User Login", ID = id }, JsonRequestBehavior.AllowGet);
         }
 
-        public void GetCleverUserDetails(string token)
+        public string GetCleverUserDetails(string token)
         {
             var client = new RestSharp.RestClient(CleverHelper.UserDetailUrl);
             client.Timeout = -1;
@@ -114,7 +117,38 @@ namespace AfterSchool.Controllers
             var response = client.Execute(request);
             Console.WriteLine(response.Content);
 
-            var cleverUser = JsonConvert.DeserializeObject<CleverUserDto>(response.Content);            
+            var cleverUser = JsonConvert.DeserializeObject<CleverUserDto>(response.Content);
+
+            string userId = GetUserDistrict(cleverUser.data.id, token);
+
+            return userId;
+        }
+
+        public string GetUserDistrict(string id, string token)
+        {
+            WebUser webUser = null;
+
+            var client = new RestSharp.RestClient(CleverHelper.UsersDetailUrl + id + "/district");
+
+            client.Timeout = -1;
+
+            var request = new RestRequest(Method.GET);
+
+            request.AddHeader("Authorization", "Bearer " + token);
+
+            var response = client.Execute(request);
+
+            var cleverUserDistrictDto = JsonConvert.DeserializeObject<CleverUserDistrictDto>(response.Content);
+            
+            webUser = WebUser.LoadByEmail(cleverUserDistrictDto.data.district_contact.email, true, null, null);
+         
+
+            if(webUser != null)
+            {
+                //do something
+            }
+
+            return cleverUserDistrictDto.data.id;
         }
     }
 }
