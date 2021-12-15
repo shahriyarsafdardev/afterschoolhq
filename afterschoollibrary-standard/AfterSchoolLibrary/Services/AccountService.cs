@@ -964,12 +964,20 @@ namespace AfterSchoolLibrary.Services
             var accountPackageIds =  AccountPackageFeature.LoadByFeatureTypeIdByMaxValue(FeatureTypeId: featureTypeId, Max: 0, msgs: msgs, dc: dc)
                 .Select(m => m.AccountPackageId.Value).ToList();
 
-            //.. load all AccountPackage and get AccountId
-            var accountIds = AccountPackage.LoadByIds(ids: accountPackageIds, msgs: msgs, dc: dc)
-                .Select(m => m.AccountId.Value).ToList();
+            if (accountPackageIds.Any())
+            {
+                //.. load all AccountPackage and get AccountId
+                var accountIds = AccountPackage.LoadByIds(ids: accountPackageIds, msgs: msgs, dc: dc)
+                    .Select(m => m.AccountId.Value).ToList();
 
-            // return all accounts which are filtered by feature type
-            return Account.LoadByIdsByAccountTypes(ids: accountIds.Distinct().ToList(), accountTypes: AccountService.ProviderAccountTypes.ToList(), msgs: msgs, dc: dc).ToList();
+                if (accountIds.Any())
+                {
+                    // return all accounts which are filtered by feature type
+                    return Account.LoadByIdsByAccountTypes(ids: accountIds.Distinct().ToList(), accountTypes: AccountService.ProviderAccountTypes.ToList(), msgs: msgs, dc: dc).ToList();
+                }
+            }
+
+            return null;
         }
 
         #endregion
@@ -4614,7 +4622,7 @@ namespace AfterSchoolLibrary.Services
             var accountsToGeneratePayout = GetAccountsWithSpecificFeatures(featureTypeId: FeatureType.ManualStripePayouts, msgs: msgs, dc: dc);
             var webUser = GetLoggedInUserForPayout(msgs, dc);
 
-            if (accountsToGeneratePayout.Any())
+            if (accountsToGeneratePayout.IsNotEmpty())
                 accountsToGeneratePayout.PrepareManualPayouts(loggedInUser: webUser, msgs: msgs, dc: dc);
             else
                 msgs.Add($"No accounts found for payout.", MessageType.Success);
@@ -4653,14 +4661,16 @@ namespace AfterSchoolLibrary.Services
                         // load only those transactions which aren't payed out yet
                         foreach (var activityPayment in activityPayments)
                         {
-                            msgs.Add($"Activity payment found for activity: ({activity.UniqueName}).", MessageType.Success);
+                            msgs.Add($"Activity payment found for activity: ({activity.UniqueName}). reference-({activityPayment.Uid})", MessageType.Success);
 
                             var transaction = activityPayment.GetTransaction(msgs: msgs, dc: dc);
                             if (transaction.IsNotEmpty() && transaction.CanRequestPayout(msgs, dc))
                             {
-                                msgs.Add($"Transaction worth {transaction.Amount} found.", MessageType.Success);
+                                msgs.Add($"Transaction worth {transaction.Amount} found. reference-({transaction.Uid})", MessageType.Success);
                                 transactions.Add(transaction);
-                            }
+                            } 
+                            else                            
+                                msgs.Add($"Either transaction not found or transaction does not match crietria for activity: ({activity.UniqueName}) and payment: ({activityPayment.Uid}).", MessageType.Success);
                         }
 
                         if (transactions.Any())
