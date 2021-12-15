@@ -40,7 +40,8 @@ namespace AfterSchoolLibraryTests.Factories
         RegistrantTypeId = RegistrantType.Individual,
         QuestionGroupDataTypeId = questionGroupDataType,
         DisplayOrder = 1,
-        IsDeleted = isDeleted
+        IsDeleted = isDeleted,
+        IsActive = true
       };
 
       msgs.AddRange(obj.Save(dc: dc));

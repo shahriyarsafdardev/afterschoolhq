@@ -112,22 +112,20 @@ namespace AfterSchoolLibraryTests.Tests
         public void GetValueTest()
         {
             //Arrage
-            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var user = Factories.WebUserFactory.Create(true, msgs, dc);
             var account = Factories.AccountFactory.Create(user, msgs, dc);
             var registrant = RegistrantFactory.Create(account, false, msgs, dc);
             var surveyResponse = SurveyResponseFactory.Create(registrant, msgs, dc);
-            var form = Factories.FormFactory.Create(account, msgs, dc);
+            var form = Factories.FormFactory.Create(account, true, msgs, dc);
 
             var formQuestionGroup = FormQuestionGroupFactory.Create(form.ID.Value, QuestionGroupDataType.PersonalInformation, false, msgs, dc);
 
-            var formQuestion = FormQuestionFactory.Create(form.ID.Value, formQuestionGroup.ID.Value, "Gender", "Male,Female,Other", QuestionType.RadioList, msgs, dc);
+            var formQuestion = FormQuestionFactory.Create(form.ID.Value, formQuestionGroup.ID.Value, "Gender", "Male,Female,Other", QuestionType.RadioList, false, msgs, dc);
 
             var formQuestionAnswer = FormQuestionAnswerFactory.Create(formQuestion.ID.Value, registrant.ID.Value, surveyResponse.ID.Value, formQuestion.Text, "Male", formQuestion.QuestionDataTypeId, msgs, dc);
 
-            //QuestionDataType questionDataType = QuestionDataType.RegistrantGender;
-
             //Act
-            var expected = registrant.GetValue(formQuestionAnswer.QuestionDataTypeId);
+            var expected = registrant.GetValue(formQuestionAnswer.QuestionDataTypeId, msgs, dc);
 
             //Assert
             Assert.Equal(expected, "Male");

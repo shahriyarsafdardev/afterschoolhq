@@ -360,9 +360,9 @@ namespace AfterSchoolLibrary.Models
                     .FirstOrDefault();
         }
 
-        public string GetValue(QuestionDataType questionDataType)
+        public string GetValue(QuestionDataType questionDataType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            string s = GetAnswer(questionDataType)?.Text.IfEmpty("-");
+            string s = GetAnswer(questionDataType, msgs, dc)?.Text.IfEmpty("-");
             if (s.IsNotEmpty() && AfterSchoolLibrary.Helpers.Utilities.IsAlreadyJsonString(s))
                 return AfterSchoolLibrary.Helpers.Utilities.GetKeyValuePairs(s).FirstOrDefault()?.value;
 
