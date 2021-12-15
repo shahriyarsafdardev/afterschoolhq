@@ -4616,6 +4616,8 @@ namespace AfterSchoolLibrary.Services
 
             if (accountsToGeneratePayout.Any())
                 accountsToGeneratePayout.PrepareManualPayouts(loggedInUser: webUser, msgs: msgs, dc: dc);
+            else
+                msgs.Add($"No accounts found for payout.", MessageType.Success);
 
             if (msgs.HasNoErrors())
                 msgs.Add($"Payout job completed on at {DateTime.UtcNow.ToShortDateString()}.", MessageType.Success);
@@ -4628,18 +4630,18 @@ namespace AfterSchoolLibrary.Services
         {
             foreach (var account in accounts)
             {
-                msgs.Add($"Payout process started for account: {account.Name} ", MessageType.Success);
+                msgs.Add($"Payout process started for account: ({account.UniqueName})", MessageType.Success);
 
                 //check for account whether it's getting paid via check or not and based on that we can use them in manual payouts
                 if (account.CanReceiveACHDeposits(msgs: msgs, dc: dc) && !account.CanReceiveCheckPayouts(msgs: msgs, dc: dc))
                 {
-                    msgs.Add($"{account.Name} CanReceiveACHDeposits and not opted for check payouts.", MessageType.Success);
+                    msgs.Add($"({account.UniqueName}) CanReceiveACHDeposits and not opted for check payouts.", MessageType.Success);
 
                     var activities = account.GetPublishedActivities(msgs: msgs, dc: dc);
 
                     foreach (var activity in activities)
                     {
-                        msgs.Add($"Checking payments for activity: {activity.Name}.", MessageType.Success);
+                        msgs.Add($"Checking payments for activity: ({activity.UniqueName}).", MessageType.Success);
 
                         var transactions = new List<Transaction>();
                         var activityPayments = ActivityPayment.LoadByParticipationObject(ParticipationObjectId: activity.ID.Value,
@@ -4651,7 +4653,7 @@ namespace AfterSchoolLibrary.Services
                         // load only those transactions which aren't payed out yet
                         foreach (var activityPayment in activityPayments)
                         {
-                            msgs.Add($"Activity payment found for activity: {activity.Name}.", MessageType.Success);
+                            msgs.Add($"Activity payment found for activity: ({activity.UniqueName}).", MessageType.Success);
 
                             var transaction = activityPayment.GetTransaction(msgs: msgs, dc: dc);
                             if (transaction.IsNotEmpty() && transaction.CanRequestPayout(msgs, dc))
@@ -4663,14 +4665,14 @@ namespace AfterSchoolLibrary.Services
 
                         if (transactions.Any())
                         {
-                            msgs.Add($"Payout process started for activity: {activity.Name}.", MessageType.Success);
+                            msgs.Add($"Payout process started for activity: ({activity.UniqueName}).", MessageType.Success);
 
                             var statementDescriptor = $"AHQ {account.Name.MaxChars(10)} {activity.Name.MaxChars(7)}";                            
                             var payout = account.RequestNewPayout(transactions: transactions, statementDescriptor: statementDescriptor, loggedInUser: loggedInUser, msgs: msgs, dc: dc);
 
                             if (payout.IsNotEmpty() && msgs.HasNoErrors())
                             {
-                                msgs.Add($"Payout created and ready for approval. reference - {payout.Uid}.", MessageType.Success);
+                                msgs.Add($"Payout created and ready for approval with description: ({statementDescriptor}).", MessageType.Success);
                                 payout.Approve(loggedInUser: loggedInUser, msgs: msgs, dc: dc);
                                 msgs.Add($"Payout {payout.Uid} approved.", MessageType.Success);
                             }
