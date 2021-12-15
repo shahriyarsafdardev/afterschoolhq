@@ -109,6 +109,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     getUngroupActivitiesOnly,
                     msgs);
 
+
                 activities = currentAccount.GetActivities(
                     SessionVariables.AccountUserType,
                     SessionVariables.CurrentUser,
@@ -119,6 +120,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     start,
                     length,
                     msgs);
+
 
                 hasArchivedActivities = currentAccount.GetActivityCount(
                     SessionVariables.AccountUserType,

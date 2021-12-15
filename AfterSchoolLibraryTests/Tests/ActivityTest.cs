@@ -1119,5 +1119,22 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors());
 
         }
+
+        [Fact]
+        public void InstructorActivityAccessTest()
+        {
+            var user = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.CreateAccount(user, msgs, dc);
+            var userType = AccountWebUserFactory.Create(account, user, UserType.Instructor, true, msgs, dc);
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var activityWebUser = ActivityWebUserFactory.Create(activity, user, msgs, dc);
+
+            var isAllowed = false;
+
+            if (user.HasAccessToActivity(activity, msgs, dc))
+                isAllowed = true;
+
+            Assert.True(isAllowed);
+        }
     }
 }
