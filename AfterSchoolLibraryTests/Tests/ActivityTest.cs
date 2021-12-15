@@ -1129,8 +1129,16 @@ namespace AfterSchoolLibraryTests.Tests
             var account = Factories.AccountFactory.Create(user, msgs, dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc);
 
-            activity.GetItemsRequiredToPublish();
+            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(account, msgs, dc: dc);
+            var activityRegistrationPeriod = Factories.ActivityRegistrationPeriodFactory.Create(activity, registrationPeriod, msgs, dc: dc);
 
+            var activityGroup = Factories.ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc: dc);
+            activity.ActivityGroupId = activityGroup.ID.Value;
+            activity.Save(dc: dc);
+
+            var errorList = activity.GetItemsRequiredToPublish(msgs, dc);
+
+            Assert.True(errorList.HasErrors());
         }
     }
 }

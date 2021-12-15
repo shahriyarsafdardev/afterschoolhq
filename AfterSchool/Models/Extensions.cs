@@ -4,6 +4,7 @@ using BasicLibrary;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using System.Collections.Specialized;
+using BasicLibrary.DataAccess;
 
 namespace AfterSchool.Models
 {
@@ -113,7 +114,7 @@ namespace AfterSchool.Models
             return "";
         }
 
-        public static SystemMessages GetItemsRequiredToPublish(this Activity activity)
+        public static SystemMessages GetItemsRequiredToPublish(this Activity activity, SystemMessages msg = null, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var setupMsgs = new SystemMessages();
@@ -225,7 +226,7 @@ namespace AfterSchool.Models
             if (activity.IsGroupArchived)
                 archiveMsgs.Add($"<a href=\"/org/group/restore/{activity.GetActivityGroup().Uid}\">Restore {activity.GetActivityGroup().Name}</a>. It is currently archived", MessageType.Error);
 
-            if(!activity.GetParticipationObject().IsRegistrationFree && activity.CostPerRegistrant > 0 && !SessionVariables.CurrentAccount.CanReceivePaymentDeposits() && !activity.GetParticipationObject().IsExternalToAccount(SessionVariables.CurrentAccount))
+            if(!activity.GetParticipationObject(msg, dc).IsRegistrationFree && activity.CostPerRegistrant > 0 && !SessionVariables.CurrentAccount.CanReceivePaymentDeposits(msg, dc) && !activity.GetParticipationObject(msg, dc).IsExternalToAccount(SessionVariables.CurrentAccount))
             {
                 var addPaymentMsgs = new SystemMessages();
                 addPaymentMsgs.Add($"<a href=\"/org/account/paymentsoptions\">Add Payment Method</a>. To accept payments", MessageType.Error);
