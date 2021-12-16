@@ -932,6 +932,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.ActiveMenu = "EditSchedule";
+            ViewBag.hasSchedule = hasschedule;
             return View(activity);
         }
 

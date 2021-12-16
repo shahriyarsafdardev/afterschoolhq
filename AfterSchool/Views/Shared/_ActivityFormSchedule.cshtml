@@ -13,6 +13,7 @@
     var activityMeetingLabel = "Activity";
     var activityMeetingVerbLabel = "meet";
     var forceNonRepeating = false;
+    var hasScheduled = false;
 
     if (ViewData["ActivityGroupType"].IsNotEmpty())
     {
@@ -44,6 +45,11 @@
             activityMeetingVerbLabel = "travel";
             forceNonRepeating = true;
         }
+    }
+
+    if(ViewData["IsScheduled"] != null && String.Equals(ViewData["IsScheduled"], "1"))
+    {
+        hasScheduled = true;
     }
 
     var showAllowSubscriptionPlans = SessionVariables.AccountPackage.HasFeature(FeatureType.AllowSubscriptionPlans);

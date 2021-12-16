@@ -4,6 +4,7 @@
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
     var accountPackage = (AccountPackage)ViewBag.AccountPackage;
     var activityId = (string)ViewBag.ActivityId;
+    var IsScheduled = ViewBag.hasSchedule;
 
     var fullscreen = Request["isnew"] == "1" && !Model.IsPublished;
     if (fullscreen)
@@ -41,7 +42,10 @@
                         Html.RenderPartial(
                             "~/Views/Shared/_ActivityFormSchedule.cshtml", 
                             (ActivitySchedule)ViewBag.Schedule, 
-                            new ViewDataDictionary() { { "ActivityType", (int)Model.ActivityTypeId } });
+                            new ViewDataDictionary() { 
+                                { "ActivityType", (int)Model.ActivityTypeId },
+                                { "IsScheduled", IsScheduled }
+                            });
                     }
 
                     <div class="form-group">
