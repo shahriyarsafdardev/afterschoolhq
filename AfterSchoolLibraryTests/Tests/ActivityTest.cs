@@ -1125,20 +1125,29 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void CheckActivityPaymentErrorTest()
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var user = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(user, msgs, dc);
+            var activity = ActivityFactory.Create(account, msgs, dc);
 
-            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(account, msgs, dc: dc);
-            var activityRegistrationPeriod = Factories.ActivityRegistrationPeriodFactory.Create(activity, registrationPeriod, msgs, dc: dc);
+            var schoolWebUser = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolWebUser, msgs, dc);
+            var location = LocationFactory.Create(schoolAccount, msgs, dc);
 
-            var activityGroup = Factories.ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc: dc);
-            activity.ActivityGroupId = activityGroup.ID.Value;
-            activity.Save(dc: dc);
+            activity.LocationId = location.ID.Value;
+            msgs.AddRange(activity.Save(dc));
 
-            var errorList = activity.GetItemsRequiredToPublish(msgs, dc);
+            var checkExternal = activity.GetParticipationObject(msgs, dc).IsExternallyProvided();
 
-            Assert.True(errorList.HasErrors());
+            //var registrationPeriod = Factories.RegistrationPeriodFactory.Create(account, msgs, dc: dc);
+            //var activityRegistrationPeriod = Factories.ActivityRegistrationPeriodFactory.Create(activity, registrationPeriod, msgs, dc: dc);
+
+            //var activityGroup = Factories.ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc: dc);
+            //activity.ActivityGroupId = activityGroup.ID.Value;
+            //activity.Save(dc: dc);
+
+            //var errorList = activity.GetItemsRequiredToPublish(msgs, dc);
+
+            //Assert.True(errorList.HasErrors());
         }
     }
 }
