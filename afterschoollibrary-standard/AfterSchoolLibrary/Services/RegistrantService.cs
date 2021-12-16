@@ -150,11 +150,11 @@ namespace AfterSchoolLibrary.Services
         public static int GetSubscriptionCount(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var subCount = 0;
-            var plan = registrant.GetRegistrantSubscriptionPlans(msgs).Where(rsp => !rsp.DateCancelled.HasValue && rsp.IsForParticipationObject(participationObject, msgs));
+            var plan = registrant.GetRegistrantSubscriptionPlans(msgs, dc).Where(rsp => !rsp.DateCancelled.HasValue && rsp.IsForParticipationObject(participationObject, msgs, dc));
             if (plan.IsNotEmpty())
             {
                 var planMain = plan.FirstOrDefault();
-                var payments = planMain.IsNotEmpty() ? planMain.GetPayments(): null;
+                var payments = planMain.IsNotEmpty() ? planMain.GetPayments(msgs, dc): null;
                 if (planMain.IsNotEmpty() && planMain.TotalPeriods.HasValue)
                 {
                     subCount = planMain.TotalPeriods.Value - payments.Count();
