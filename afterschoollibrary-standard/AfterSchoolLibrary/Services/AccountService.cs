@@ -402,13 +402,13 @@ namespace AfterSchoolLibrary.Services
 
             var loadActivityIdsBasedOnUser = ActivityWebUser.LoadByWebUserId(user.ID.Value).Select(a => a.ActivityId.Value).ToList();
             if (activityType.IsEmpty() && ungroupedOnly == true)
-                return Activity.LoadListByIdsByAccountId(loadActivityIdsBasedOnUser, account.ID.Value, msgs, dc).Where(a => a.IsArchived == isArchived && !a.IsDeleted && a.ActivityGroupId == null).Skip(start.Value).Take(length.Value).ToList();
+                return Activity.LoadListByIdsByAccountId(loadActivityIdsBasedOnUser, account.ID.Value, msgs, dc).Where(a => a.IsArchived == isArchived && !a.IsDeleted && a.ActivityGroupId == null).OrderBy(a=>a.Name).Skip(start.Value).Take(length.Value).ToList();
             else if (activityType.IsNotEmpty() && ungroupedOnly == true)
-                return Activity.LoadListByIdsByAccountId(loadActivityIdsBasedOnUser, account.ID.Value, msgs, dc).Where(a => a.IsArchived == isArchived && !a.IsDeleted && a.ActivityTypeId == activityType && a.ActivityGroupId == null).Skip(start.Value).Take(length.Value).ToList();
+                return Activity.LoadListByIdsByAccountId(loadActivityIdsBasedOnUser, account.ID.Value, msgs, dc).Where(a => a.IsArchived == isArchived && !a.IsDeleted && a.ActivityTypeId == activityType && a.ActivityGroupId == null).OrderBy(a => a.Name).Skip(start.Value).Take(length.Value).ToList();
             else if (activityType.IsNotEmpty() && ungroupedOnly == false)
-                return Activity.LoadListByIdsByAccountId(loadActivityIdsBasedOnUser, account.ID.Value, msgs, dc).Where(a => a.IsArchived == isArchived && !a.IsDeleted && a.ActivityTypeId == activityType && a.ActivityGroupId != null).Skip(start.Value).Take(length.Value).ToList();
+                return Activity.LoadListByIdsByAccountId(loadActivityIdsBasedOnUser, account.ID.Value, msgs, dc).Where(a => a.IsArchived == isArchived && !a.IsDeleted && a.ActivityTypeId == activityType && a.ActivityGroupId != null).OrderBy(a => a.Name).Skip(start.Value).Take(length.Value).ToList();
             else
-                return Activity.LoadListByIdsByAccountId(loadActivityIdsBasedOnUser, account.ID.Value, msgs, dc).Where(a => a.IsArchived == isArchived && !a.IsDeleted && a.ActivityGroupId != null).Skip(start.Value).Take(length.Value).ToList();
+                return Activity.LoadListByIdsByAccountId(loadActivityIdsBasedOnUser, account.ID.Value, msgs, dc).Where(a => a.IsArchived == isArchived && !a.IsDeleted && a.ActivityGroupId != null).OrderBy(a => a.Name).Skip(start.Value).Take(length.Value).ToList();
         }
 
         public static List<Activity> GetAllActivitiesForAccount(this Account account,  SystemMessages msgs = null, DatabaseConnection dc = null)
