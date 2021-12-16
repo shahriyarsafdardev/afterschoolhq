@@ -791,6 +791,12 @@ namespace AfterSchool.Areas.Org.Controllers
             List<DateTime> outOfSessionDates = null;
             Dictionary<string, object> values = null;
 
+            if (startdate.ToDateTime().DayOfYear > enddate.ToDateTime().DayOfYear)
+                msgs.Add("Please ensure start date is earlier than end date.", MessageType.UserError);
+
+            if (startdate.ToDateTime().DayOfYear == enddate.ToDateTime().DayOfYear)
+                msgs.Add("Please ensure start date and end date is not same.", MessageType.UserError);
+
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             if (activity.IsNotEmpty())
             {
