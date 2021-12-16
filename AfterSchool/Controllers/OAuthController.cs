@@ -104,8 +104,11 @@ namespace AfterSchool.Controllers
             var tokenDto = JsonConvert.DeserializeObject<CleverTokenDto>(response.Content);
 
             var id = GetCleverUserDetails(token: tokenDto.access_token);
+          
+            TempData["success"] = "Sucessfully Login "+ id;
 
-            return Json(new { status = "Succesfully User Login", ID = id }, JsonRequestBehavior.AllowGet);
+            return RedirectToAction("Index", "org/home");
+
         }
 
         public string GetCleverUserDetails(string token)
