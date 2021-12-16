@@ -407,6 +407,8 @@ namespace AfterSchoolLibrary.Services
                 return Activity.LoadListByIdsByAccountId(loadActivityIdsBasedOnUser, account.ID.Value, msgs, dc).Where(a => a.IsArchived == isArchived && !a.IsDeleted && a.ActivityTypeId == activityType && a.ActivityGroupId == null).OrderBy(a => a.Name).Skip(start.Value).Take(length.Value).ToList();
             else if (activityType.IsNotEmpty() && ungroupedOnly == false)
                 return Activity.LoadListByIdsByAccountId(loadActivityIdsBasedOnUser, account.ID.Value, msgs, dc).Where(a => a.IsArchived == isArchived && !a.IsDeleted && a.ActivityTypeId == activityType && a.ActivityGroupId != null).OrderBy(a => a.Name).Skip(start.Value).Take(length.Value).ToList();
+            else if(activityType.IsEmpty() && ungroupedOnly.IsEmpty() && isArchived.IsEmpty())
+                return Activity.LoadListByIdsByAccountId(loadActivityIdsBasedOnUser, account.ID.Value, msgs, dc).Where(a => !a.IsArchived && !a.IsDeleted && a.ActivityGroupId == null).OrderBy(a => a.Name).Skip(start.Value).Take(length.Value).ToList();
             else
                 return Activity.LoadListByIdsByAccountId(loadActivityIdsBasedOnUser, account.ID.Value, msgs, dc).Where(a => a.IsArchived == isArchived && !a.IsDeleted && a.ActivityGroupId != null).OrderBy(a => a.Name).Skip(start.Value).Take(length.Value).ToList();
         }
