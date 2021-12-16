@@ -142,24 +142,7 @@
                         <td>
                             @if (ra.IsWithdrawEnabled() && !isReadOnly)
                             {
-                                var registrant = ra.GetRegistrant();
-                                var msgs = new SystemMessages();
-                                var subCount = 0;
-                                var plan = registrant.GetRegistrantSubscriptionPlans(msgs).Where(rsp => !rsp.DateCancelled.HasValue && rsp.IsForParticipationObject(participationObject, msgs));
-                                if(plan.IsNotEmpty())
-                                {
-                                    var planMain = plan.FirstOrDefault();
-                                    var payments = planMain.GetPayments();
-                                    if (planMain.TotalPeriods.HasValue)
-                                    {
-                                        subCount = planMain.TotalPeriods.Value - payments.Count();
-                                    }
-                                    else
-                                    {
-                                        subCount = payments.Count();
-                                    }
-                                }
-
+                                var subCount = ra.GetRegistrant().GetSubscriptionCount(participationObject);
 
                                 <button id="btn-withdraw-@ra.Uid" class="btn btn-danger btn-sm" 
                                         onclick="return processWithdraw('@ra.Uid', '@ra.ID', '@ra.RegistrantUid', '@ra.ParticipationObjectId', '@ra.ParticipationObjectTypeId', '@ra.RegistrantFirstName','@subCount');">

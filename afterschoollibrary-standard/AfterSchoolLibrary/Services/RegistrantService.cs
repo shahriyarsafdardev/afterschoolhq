@@ -147,6 +147,27 @@ namespace AfterSchoolLibrary.Services
             submittedRecord.StartPlan(checkoutObject, SubscriptionPlanType.Subscription, loggedInUser, msgs, dc);
         }
 
+        public static int GetSubscriptionCount(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var subCount = 0;
+            var plan = registrant.GetRegistrantSubscriptionPlans(msgs).Where(rsp => !rsp.DateCancelled.HasValue && rsp.IsForParticipationObject(participationObject, msgs));
+            if (plan.IsNotEmpty())
+            {
+                var planMain = plan.FirstOrDefault();
+                var payments = planMain.IsNotEmpty() ? planMain.GetPayments(): null;
+                if (planMain.IsNotEmpty() && planMain.TotalPeriods.HasValue)
+                {
+                    subCount = planMain.TotalPeriods.Value - payments.Count();
+                }
+                else if(payments.IsNotEmpty())
+                {
+                    subCount = payments.Count();
+                }
+            }
+
+            return subCount;
+        }
+
         public static void StartPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
