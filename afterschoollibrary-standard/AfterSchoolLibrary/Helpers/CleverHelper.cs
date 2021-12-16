@@ -10,6 +10,7 @@ namespace AfterSchoolLibrary.Helpers
         public static string RedirectUrl { get { return Utilities.BaseUrl() + "/oauth/clever"; } }
         public static string TokenRetrieveUrl { get { return "https://clever.com/oauth/tokens"; } }
         public static string UserDetailUrl { get { return "https://api.clever.com/me"; } }
+        public static string PortalUrl { get { return "https://clever.com/in/placid-chalk-6926"; } }
 
         /// <summary>
         /// Provides authorization token for clever oAuth token
