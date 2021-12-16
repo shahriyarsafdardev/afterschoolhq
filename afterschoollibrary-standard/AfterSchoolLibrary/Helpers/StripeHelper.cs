@@ -319,7 +319,7 @@ namespace AfterSchoolLibrary.Billing
                 return null;
 
             if (stripeAccount.IsNotEmpty())
-                msgs.Add($"Account {account.Name}({account.ID}) updated with {payoutIntervalType.ToString().ToLower()} AHQ payout.", MessageType.Success);
+                msgs.Add($"Account: ({account.Name}) updated with { (payoutIntervalType == PayoutIntervalType.Manual ? "manual AHQ " : "daily Stripe " )} payout option.", MessageType.Success);
 
             return stripeAccount;
         }

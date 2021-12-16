@@ -1583,7 +1583,15 @@ namespace AfterSchool.Areas.Org.Controllers
                             currentAccount.UpdateStripeCard(cardId, customer, amsgs, adc);
 
                         if (amsgs.HasNoErrors())
+                        {
                             newlyAddedPackage = currentAccount.AddPackage(package.ID.Value, billingPeriod, SessionVariables.LoggedInUser, amsgs, adc);
+                            
+                            var manualStripePayouts = newlyAddedPackage.HasFeature(featureType: FeatureType.ManualStripePayouts, msgs: amsgs, dc: adc);
+                            if (manualStripePayouts)
+                                StripeHelper.ToggleStripePayoutForConnectedAccount(account: currentAccount, payoutIntervalType: PayoutIntervalType.Manual, msgs: amsgs);
+                            else
+                                StripeHelper.ToggleStripePayoutForConnectedAccount(account: currentAccount, payoutIntervalType: PayoutIntervalType.Daily, msgs: amsgs);
+                        }
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {

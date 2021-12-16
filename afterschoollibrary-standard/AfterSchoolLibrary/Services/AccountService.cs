@@ -1301,7 +1301,14 @@ namespace AfterSchoolLibrary.Services
             account.AddOrUpdatePackageFeature(FeatureType.UseStripeConnectedAccount, 1, loggedInUser, msgs, dc);
 
             if (msgs.HasNoErrors())
+            {
                 msgs.Add("Your account has been connected to Stripe", MessageType.Success);
+
+                // set payout type to manual for this account if it has package with ManualStripePayouts
+                var isManualStripeEnabled = account.GetAccountPackageFeature(featureType: FeatureType.ManualStripePayouts, msgs: msgs, dc: dc);
+                if (isManualStripeEnabled.IsNotEmpty() && isManualStripeEnabled.Max > 0)
+                    StripeHelper.ToggleStripePayoutForConnectedAccount(account: account, payoutIntervalType: PayoutIntervalType.Manual, msgs: msgs);
+            }
             else
                 account.DisconnectStripeConnect(loggedInUser, msgs, dc);
         }
