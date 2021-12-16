@@ -130,14 +130,14 @@ namespace AfterSchoolLibraryTests.Tests
 
 
             var registrants = activity.GetRegistrants(msgs, dc).FirstOrDefault();
-            var getParticipationObject = registrants.GetParticipationObjects(msgs, dc).FirstOrDefault();
-            var getSubPlans = registrants.GetRegistrantSubscriptionPlans(msgs, dc);
+            var participationObject = registrants.GetParticipationObjects(msgs, dc).FirstOrDefault();
+            var subPlans = registrants.GetRegistrantSubscriptionPlans(msgs, dc);
             var createTransaction = TransactionFactory.Create(account, registrantAccount, PaymentType.CreditCard, msgs, dc);
-            var addPayment = getSubPlans.FirstOrDefault().AddPayment(createTransaction, 50, registrantUser, msgs, dc);
+            var addPayment = subPlans.FirstOrDefault().AddPayment(createTransaction, 50, registrantUser, msgs, dc);
 
-            var getSubCount = registrant.GetSubscriptionCount(getParticipationObject, msgs, dc);
+            var subCount = registrant.GetSubscriptionCount(participationObject, msgs, dc);
 
-            Assert.True(getSubCount > 0);
+            Assert.True(subCount > 0);
         }
 
     }
