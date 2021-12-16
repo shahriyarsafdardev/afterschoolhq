@@ -2612,5 +2612,23 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.False(isUserAccountLocationOwner);
             Assert.True(isSchoolProviderLocationOwner);
         }
+
+        [Fact]
+        public void UpdateUserTypeTest()
+        {
+            //Arrage
+            var user = WebUserFactory.Create(true, msgs, dc);
+            var webUser = WebUserFactory.Create(true, msgs, dc);
+            var account = AccountFactory.Create(user, msgs, dc);
+
+            var accountWebUser = AccountWebUserFactory.Create(account, user, UserType.Administrator, true, msgs, dc);
+
+            //Act
+            AccountWebUserService.UpdateUserType(accountWebUser, webUser, "6", msgs, dc);
+
+            //Assert
+            Assert.True(accountWebUser.UserTypeId == UserType.Staff);
+            Assert.True(accountWebUser.LastModifiedBy == accountWebUser.AccountId);
+        }
     }
 }
