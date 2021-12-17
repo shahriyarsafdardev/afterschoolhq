@@ -342,7 +342,7 @@ namespace AfterSchoolLibrary.Models
 			dq.Joins.Add(SubscriptionPlan.ObjectMap["ID"], ObjectMap["SubscriptionPlanId"], DatabaseJoinTypeEnum.InnerJoin);
 			dq.Criterias.Add(SubscriptionPlan.ObjectMap["participationObjectId"], participationObjectId);
 			dq.Criterias.Add(SubscriptionPlan.ObjectMap["participationObjectTypeId"], (int)participationObjectType);
-			dq.Criterias.Add(SubscriptionPlan.ObjectMap["subscriptionPlanTypeId"], (int)planType);
+			dq.Criterias.Add(SubscriptionPlan.ObjectMap["planTypeId"], (int)planType);
 
 			return dq.GetCount(msgs) > 0;
 		}
