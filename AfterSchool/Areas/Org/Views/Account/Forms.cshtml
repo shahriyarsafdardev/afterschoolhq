@@ -137,10 +137,11 @@
                 {
                     <div class="form-group formTypeRow">
                         <label>Form Type</label>
-                        <select class="form-control formtype-select" id="formtype" name="formtype">
+                        <select class="form-control formtype-select" id="formtype" name="formtype" required>
+                            <option value="" selected>-- Select Form Type --</option>
                             @foreach (var type in Enum.GetValues(typeof(FormType)).Cast<FormType>().Where(a => !a.Equals(FormType.NotSet)))
                             {
-                                <option value="@((int)type)" @(type == FormType.Registration ? "selected=\"selected\"" : "")>
+                                <option value="@((int)type)">
                                     @type.ToString().SplitByUpperCase()
                                 </option>
                             }
