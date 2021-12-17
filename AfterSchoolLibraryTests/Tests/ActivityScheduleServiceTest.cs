@@ -1,6 +1,7 @@
 ﻿using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using AfterSchoolLibraryTests.Factories;
+using BasicLibrary;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -65,6 +66,33 @@ namespace AfterSchoolLibraryTests.Tests
                 //Assert
                 Assert.False(false, ex.Message);
             }
+        }
+
+        [Fact]
+        public void ValidateInSessionInstancesTest()
+        {
+            // Arrange
+            var webUser = WebUserFactory.Create(true, msgs, dc);
+            var account = AccountFactory.Create(webUser, msgs, dc);
+            var schedule = ActivityScheduleFactory.Create(account, DateTime.Now.AddDays(2), DateTime.Now, msgs, dc);
+            var activity = ActivityFactory.Create(account, schedule, msgs, dc);
+
+            var instances = new List<ActivityInstance>();
+
+            instances.Add(Factories.ActivityInstanceFactory.Create(
+                activity,
+                schedule,
+                InstanceType.InSession,
+                DateTime.Now.AddDays(2),
+                DateTime.Now,
+                msgs,
+                dc));
+           
+            // Act
+            SystemMessages systemMessages = schedule.ValidateInSessionInstances(dc);
+
+            // Assert
+            Assert.True(systemMessages.Count > 0);
         }
     }
 }

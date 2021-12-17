@@ -35,6 +35,21 @@ namespace AfterSchoolLibraryTests.Factories
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
+
+        public static ActivityInstance Create(Activity activity, ActivitySchedule activitySchedule, InstanceType instanceType, DateTime startDateTime, DateTime endDateTime, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var obj = new ActivityInstance()
+            {
+                ActivityId = activity.ID,
+                StartDateTime = startDateTime,
+                EndDateTime = endDateTime,
+                ActivityScheduleId = activitySchedule.ID,
+                InstanceTypeId = instanceType
+            };
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
+
         public static ActivityInstance Create(ActivityGroup activityGroup, ActivitySchedule activitySchedule, SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new ActivityInstance()
