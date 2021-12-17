@@ -2613,22 +2613,1033 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(isSchoolProviderLocationOwner);
         }
 
-        [Fact]
-        public void UpdateUserTypeTest()
+        [Theory(DisplayName = "Basic registration fee check with ACH")]
+        [InlineData(100, 7)]
+        public void ProcessRegistrationFeeTest1(decimal amount, decimal convenienceFee)
         {
-            //Arrage
-            var user = WebUserFactory.Create(true, msgs, dc);
-            var webUser = WebUserFactory.Create(true, msgs, dc);
-            var account = AccountFactory.Create(user, msgs, dc);
+            // Arrange
+            var billingAccountOwner = WebUserFactory.Create("Don", "John", "DonJohn@test.com", true, msgs, dc);
+            var purchasingAccountOwner = WebUserFactory.Create("Cristine", "Trump", "CristineTrump@test.com", true, msgs, dc);
+            var billingAccount = AccountFactory.CreateWithFreePackage("Billing account", "BillingAccount@test.com", billingAccountOwner, AccountType.School, msgs, dc);
+            var purchasingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", purchasingAccountOwner, AccountType.School, msgs, dc);
+            var masterRegistrant = RegistrantFactory.Create(purchasingAccount, isMaster: true, msgs, dc);
 
-            var accountWebUser = AccountWebUserFactory.Create(account, user, UserType.Administrator, true, msgs, dc);
+            var activity = ActivityFactory.Create(billingAccount, amount, msgs, dc: dc);
+            var registrant = RegistrantFactory.Create(billingAccount, isMaster: false, msgs, dc: dc);
+            var registration = RegistrationFactory.Create(billingAccount, registrant, msgs, dc);
+            var participantObject = activity.GetParticipationObject(msgs: msgs, dc: dc);
 
-            //Act
-            AccountWebUserService.UpdateUserType(accountWebUser, webUser, "6", msgs, dc);
+            // Update stripe account and customer of payer/parent
+            var stripePurchasingAccount = AccountFactory.CreateStripeAccountAndCustomer(account: purchasingAccount, msgs: msgs, dc: dc);
+            var sourceId = purchasingAccount.CreateStripeSourceFromToken(StripeHelper.TestSourceToken, stripePurchasingAccount.Item2, msgs, dc);
+            var bankAccountPurchaseObject = new BankAccountPurchaseObject() { PlaidPublicToken = StripeHelper.TestSourceToken, StripeSourceId = sourceId };
 
-            //Assert
-            Assert.True(accountWebUser.UserTypeId == UserType.Staff);
-            Assert.True(accountWebUser.LastModifiedBy == accountWebUser.AccountId);
+            var checkoutObject = new CheckoutObject()
+            {
+                PayingAccount = purchasingAccount,
+                BillingAccount = billingAccount,
+                ParticipationObject = participantObject,
+                PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                PaymentType = PaymentType.ACH,
+                BankAccountPurchaseObject = bankAccountPurchaseObject,
+                SubscriptionPlan = null,
+                PaymentPlan = null,
+                MasterRegistrant = masterRegistrant,
+                NumberOfSeats = 1,
+                RegistrantSubscriptionPlan = null,
+                Registration = registration,
+                ConvenienceFeePayer = billingAccount,
+                SavePaymentInfo = true,
+            };
+
+            // Act
+            AccountService.ProcessRegistrationFee(checkoutObject, user, msgs, dc);
+
+            // Assert
+            // account
+            Assert.NotNull(billingAccount);
+            Assert.NotNull(purchasingAccount);
+
+            // activity
+            Assert.NotNull(activity);
+            Assert.Equal(activity.AccountId, billingAccount.ID.Value);
+            Assert.Equal(activity.CostPerRegistrant, amount);
+
+            // registrant
+            Assert.NotNull(registrant);
+            Assert.NotNull(masterRegistrant);
+            Assert.Equal(registrant.AccountId, billingAccount.ID.Value);
+            Assert.Equal(masterRegistrant.AccountId, purchasingAccount.ID.Value);
+
+            // registration
+            Assert.NotNull(registration);
+            Assert.Equal(registration.RegistrantId, registrant.ID.Value);
+            Assert.Equal(registration.AccountId, billingAccount.ID.Value);
+
+            // purchase
+            var purchase = registration.GetPurchase(msgs, dc);
+            Assert.NotNull(purchase);
+            Assert.Equal(purchase.AmountPaid, amount + convenienceFee);
+            Assert.Equal(purchase.StripeSourceId, sourceId);
+            Assert.Equal(purchase.RegistrationId, registration.ID.Value);
+            Assert.Equal(purchase.RegistrantId, masterRegistrant.ID.Value);
+            Assert.Equal(purchase.PurchaserAccountId, purchasingAccount.ID.Value);
+            Assert.Null(purchase.CouponId);
+
+            // activityPayment                
+            var activityPayment = ActivityPayment.LoadByParticipationObject(ParticipationObjectId: activity.ID.Value,
+                        ParticipationObjectTypeId: ParticipationObjectType.Activity,
+                        IsDeleted: false,
+                        msgs: msgs,
+                        dc: dc).FirstOrDefault();
+            Assert.NotNull(activityPayment);
+            Assert.Equal(activityPayment.Amount, amount);            
+            Assert.Equal(activityPayment.ParticipationObjectId, activity.ID.Value);            
+            Assert.Equal(activityPayment.RegistrantId, registrant.ID.Value);
+            Assert.False(activityPayment.IsProRated);
+            // in registration fee case, we will not be storing amount paid by parent
+            // it will be only with the case of pro-rate and with plans
+            Assert.Null(activityPayment.AmountPaidByParent); 
+
+            // transaction
+            var transaction = activityPayment.GetTransaction(msgs, dc);
+            Assert.NotNull(transaction);
+            Assert.Equal(transaction.Amount, amount + convenienceFee);
+            Assert.Equal(transaction.StripeChargeOrRefundId, checkoutObject.StripeChargeId);
+            Assert.Equal(transaction.PurchaseId, purchase.ID.Value);            
+            Assert.Equal(transaction.ConvenienceFeeCharged, convenienceFee);
+            Assert.Equal(transaction.ConvenienceFeePayerAccountId, billingAccount.ID.Value);
+            Assert.Equal(0, transaction.PaymentTypeFeeCharged);
+            Assert.Null(transaction.PaymentTypeFeePayerAccountId);
+            Assert.Equal(transaction.BillerAccountId, billingAccount.ID.Value);
+            Assert.Equal(transaction.PayerAccountId, purchasingAccount.ID.Value);
+            Assert.Equal(0, transaction.CouponValue);
+            Assert.Null(transaction.CouponId);
+
+            // Stripe
+            var customer = purchasingAccount.GetStripeCustomer(msgs);
+            Assert.NotNull(customer);
+
+            var charge = StripeHelper.GetCharge(stripeChargeId: checkoutObject.StripeChargeId, msgs);
+            Assert.NotNull(charge);
+
+            // confirm that stripe charge matches transaction
+            Assert.Equal(charge.Amount, (amount + convenienceFee) * 100);
+            Assert.Equal(charge.CustomerId, customer.Id);
+
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Theory(DisplayName = "Basic registration fee check with CC")]
+        [InlineData(100, 7, 4)]
+        public void ProcessRegistrationFeeTest2(decimal amount, decimal convenienceFee, decimal paymentTypeFee)
+        {            
+            // Arrange
+            var billingAccountOwner = WebUserFactory.Create("Don", "John", "DonJohn@test.com", true, msgs, dc);
+            var purchasingAccountOwner = WebUserFactory.Create("Cristine", "Trump", "CristineTrump@test.com", true, msgs, dc);
+            var billingAccount = AccountFactory.CreateWithFreePackage("Billing account", "BillingAccount@test.com", billingAccountOwner, AccountType.School, msgs, dc);
+            var purchasingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", purchasingAccountOwner, AccountType.School, msgs, dc);
+            var masterRegistrant = RegistrantFactory.Create(purchasingAccount, isMaster: true, msgs, dc);
+
+            var activity = ActivityFactory.Create(billingAccount, amount, msgs, dc: dc);
+            var registrant = RegistrantFactory.Create(billingAccount, isMaster: false, msgs, dc: dc);
+            var registration = RegistrationFactory.Create(billingAccount, registrant, msgs, dc);
+            var participantObject = activity.GetParticipationObject(msgs: msgs, dc: dc);
+
+            // Update stripe account and customer of payer/parent
+            var stripePurchasingAccount =  AccountFactory.CreateStripeAccountAndCustomer(account: purchasingAccount, msgs: msgs, dc: dc);
+            var sourceId = purchasingAccount.CreateStripeSourceFromToken(StripeHelper.TestSourceToken, stripePurchasingAccount.Item2, msgs, dc);
+            var creditCardPurchaseObject = new CreditCardPurchaseObject() { StripeToken = StripeHelper.TestSourceToken, StripeSourceId = sourceId };
+            
+            var checkoutObject = new CheckoutObject()
+            {
+                PayingAccount = purchasingAccount,
+                BillingAccount = billingAccount,
+                ParticipationObject = participantObject,
+                PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                PaymentType = PaymentType.CreditCard,
+                CreditCardPurchaseObject = creditCardPurchaseObject,
+                SubscriptionPlan = null,
+                PaymentPlan = null,
+                MasterRegistrant = masterRegistrant,
+                NumberOfSeats = 1,                    
+                RegistrantSubscriptionPlan = null,
+                Registration = registration,
+                ConvenienceFeePayer = billingAccount,
+                CreditCardFeePayer = billingAccount,
+                SavePaymentInfo = true,
+            };
+
+            // Act
+            AccountService.ProcessRegistrationFee(checkoutObject, user, msgs, dc);
+
+            // Assert
+            // account
+            Assert.NotNull(billingAccount);
+            Assert.NotNull(purchasingAccount);
+
+            // activity
+            Assert.NotNull(activity);
+            Assert.Equal(activity.AccountId, billingAccount.ID.Value);
+            Assert.Equal(activity.CostPerRegistrant, amount);
+
+            // registrant
+            Assert.NotNull(registrant);
+            Assert.NotNull(masterRegistrant);
+            Assert.Equal(registrant.AccountId, billingAccount.ID.Value);
+            Assert.Equal(masterRegistrant.AccountId, purchasingAccount.ID.Value);
+
+            // registration
+            Assert.NotNull(registration);
+            Assert.Equal(registration.RegistrantId, registrant.ID.Value);
+            Assert.Equal(registration.AccountId, billingAccount.ID.Value);
+
+            // purchase
+            var purchase = registration.GetPurchase(msgs, dc);
+            Assert.NotNull(purchase);                
+            Assert.Equal(purchase.AmountPaid, amount + convenienceFee + paymentTypeFee);
+            Assert.Equal(purchase.StripeSourceId, sourceId);
+            Assert.Equal(purchase.RegistrationId, registration.ID.Value);
+            Assert.Equal(purchase.RegistrantId, masterRegistrant.ID.Value);
+            Assert.Equal(purchase.PurchaserAccountId, purchasingAccount.ID.Value);
+            Assert.Null(purchase.CouponId);
+
+            // activityPayment                
+            var activityPayment =  ActivityPayment.LoadByParticipationObject(ParticipationObjectId: activity.ID.Value,
+                        ParticipationObjectTypeId: ParticipationObjectType.Activity,
+                        IsDeleted: false,
+                        msgs: msgs,
+                        dc: dc).FirstOrDefault();
+            Assert.NotNull(activityPayment);
+            Assert.Equal(activityPayment.Amount, amount);            
+            Assert.Equal(activityPayment.ParticipationObjectId, activity.ID.Value);            
+            Assert.Equal(activityPayment.RegistrantId, registrant.ID.Value);
+            Assert.False(activityPayment.IsProRated);
+            Assert.Null(activityPayment.AmountPaidByParent);
+
+            // transaction
+            var transaction = activityPayment.GetTransaction(msgs, dc);
+            Assert.NotNull(transaction);
+            Assert.Equal(transaction.Amount, amount + convenienceFee + paymentTypeFee);
+            Assert.Equal(transaction.StripeChargeOrRefundId, checkoutObject.StripeChargeId);
+            Assert.Equal(transaction.PurchaseId, purchase.ID.Value);
+            Assert.Equal(transaction.PaymentTypeFeeCharged, paymentTypeFee);
+            Assert.Equal(transaction.ConvenienceFeeCharged, convenienceFee);
+            Assert.Equal(transaction.PaymentTypeFeePayerAccountId, billingAccount.ID.Value);
+            Assert.Equal(transaction.ConvenienceFeePayerAccountId, billingAccount.ID.Value);
+            Assert.Equal(transaction.BillerAccountId, billingAccount.ID.Value);
+            Assert.Equal(transaction.PayerAccountId, purchasingAccount.ID.Value);
+            Assert.Equal(0, transaction.CouponValue);
+            Assert.Null(transaction.CouponId);
+
+            // Stripe
+            var customer = purchasingAccount.GetStripeCustomer(msgs);
+            Assert.NotNull(customer);
+
+            var charge = StripeHelper.GetCharge(stripeChargeId: checkoutObject.StripeChargeId, msgs);
+            Assert.NotNull(charge);
+
+            // confirm that stripe charge matches transaction
+            Assert.Equal(charge.Amount, (amount + convenienceFee + paymentTypeFee) * 100);
+            Assert.Equal(charge.CustomerId, customer.Id);
+
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Theory(DisplayName = "Registration fee check with ACH with coupon")]
+        [InlineData(100, 7, 10, (int)CouponAmountType.FlatAmount)]
+        [InlineData(100, 7, 50, (int)CouponAmountType.FlatAmount)]
+        [InlineData(100, 7, 10, (int)CouponAmountType.Percentage)]
+        [InlineData(100, 7, 50, (int)CouponAmountType.Percentage)]
+        public void ProcessRegistrationFeeTest3(decimal amount, decimal convenienceFee, decimal couponAmount, int couponAmountType)
+        {
+            // Arrange
+            var billingAccountOwner = WebUserFactory.Create("Don", "John", "DonJohn@test.com", true, msgs, dc);
+            var purchasingAccountOwner = WebUserFactory.Create("Cristine", "Trump", "CristineTrump@test.com", true, msgs, dc);
+            var billingAccount = AccountFactory.CreateWithFreePackage("Billing account", "BillingAccount@test.com", billingAccountOwner, AccountType.School, msgs, dc);
+            var purchasingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", purchasingAccountOwner, AccountType.School, msgs, dc);
+            var masterRegistrant = RegistrantFactory.Create(purchasingAccount, isMaster: true, msgs, dc);
+
+            var activity = ActivityFactory.Create(billingAccount, amount, msgs, dc: dc);
+            var registrant = RegistrantFactory.Create(billingAccount, isMaster: false, msgs, dc: dc);
+            var registration = RegistrationFactory.Create(billingAccount, registrant, msgs, dc);
+            var coupon = CouponFactory.Create(account: billingAccount, amount: couponAmount, couponApplyType: CouponApplyType.RegistrationFee, couponAmountType: (CouponAmountType)couponAmountType, msgs: msgs, dc: dc);
+            var participantObject = activity.GetParticipationObject(msgs: msgs, dc: dc);
+
+            // Update stripe account and customer of payer/parent
+            var stripePurchasingAccount = AccountFactory.CreateStripeAccountAndCustomer(account: purchasingAccount, msgs: msgs, dc: dc);
+            var sourceId = purchasingAccount.CreateStripeSourceFromToken(StripeHelper.TestSourceToken, stripePurchasingAccount.Item2, msgs, dc);
+            var bankAccountPurchaseObject = new BankAccountPurchaseObject() { PlaidPublicToken = StripeHelper.TestSourceToken, StripeSourceId = sourceId };
+
+            var checkoutObject = new CheckoutObject()
+            {
+                Coupon = coupon,
+                PayingAccount = purchasingAccount,
+                BillingAccount = billingAccount,
+                IsAmountProRated = false,
+                ParticipationObject = participantObject,
+                PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                PaymentType = PaymentType.ACH,
+                BankAccountPurchaseObject = bankAccountPurchaseObject,
+                SubscriptionPlan = null,
+                PaymentPlan = null,
+                MasterRegistrant = masterRegistrant,
+                NumberOfSeats = 1,
+                RegistrantSubscriptionPlan = null,
+                Registration = registration,
+                ConvenienceFeePayer = billingAccount,
+                SavePaymentInfo = true,
+            };
+
+            // Act
+            AccountService.ProcessRegistrationFee(checkoutObject, user, msgs, dc);
+
+            // Assert
+            // account
+            Assert.NotNull(billingAccount);
+            Assert.NotNull(purchasingAccount);
+
+            // activity
+            Assert.NotNull(activity);
+            Assert.Equal(activity.AccountId, billingAccount.ID.Value);
+            Assert.Equal(activity.CostPerRegistrant, amount);
+
+            // registrant
+            Assert.NotNull(registrant);
+            Assert.NotNull(masterRegistrant);
+            Assert.Equal(registrant.AccountId, billingAccount.ID.Value);
+            Assert.Equal(masterRegistrant.AccountId, purchasingAccount.ID.Value);
+
+            // registration
+            Assert.NotNull(registration);
+            Assert.Equal(registration.RegistrantId, registrant.ID.Value);
+            Assert.Equal(registration.AccountId, billingAccount.ID.Value);
+
+            // purchase
+            var purchase = registration.GetPurchase(msgs, dc);
+            Assert.NotNull(purchase);
+            Assert.Equal(purchase.AmountPaid, coupon.GetDiscountedValue(amount + convenienceFee));
+            Assert.Equal(purchase.StripeSourceId, sourceId);
+            Assert.Equal(purchase.RegistrationId, registration.ID.Value);
+            Assert.Equal(purchase.RegistrantId, masterRegistrant.ID.Value);
+            Assert.Equal(purchase.PurchaserAccountId, purchasingAccount.ID.Value);
+
+            // check proper coupon is attached to purchase
+            Assert.Equal(purchase.CouponId, coupon.ID.Value);
+
+            // activityPayment                
+            var activityPayments = ActivityPayment.LoadByParticipationObject(ParticipationObjectId: activity.ID.Value,
+                        ParticipationObjectTypeId: ParticipationObjectType.Activity,
+                        IsDeleted: false,
+                        msgs: msgs,
+                        dc: dc);
+            var activityPayment = activityPayments.FirstOrDefault();
+            Assert.NotNull(activityPayment);
+            Assert.Equal(activityPayment.Amount, amount - coupon.GetValue(amount + convenienceFee));
+            Assert.Equal(activityPayment.ParticipationObjectId, activity.ID.Value);
+            Assert.Equal(activityPayment.RegistrantId, registrant.ID.Value);
+            Assert.False(activityPayment.IsProRated);
+            Assert.Null(activityPayment.AmountPaidByParent);
+
+            // transaction
+            var transaction = activityPayment.GetTransaction(msgs, dc);
+            Assert.NotNull(transaction);
+            Assert.Equal(transaction.Amount, coupon.GetDiscountedValue(amount + convenienceFee));
+            Assert.Equal(transaction.StripeChargeOrRefundId, checkoutObject.StripeChargeId);
+            Assert.Equal(transaction.PurchaseId, purchase.ID.Value);
+            Assert.Equal(0, transaction.PaymentTypeFeeCharged);
+            Assert.Null(transaction.PaymentTypeFeePayerAccountId);
+            Assert.Equal(transaction.ConvenienceFeeCharged, convenienceFee);
+            Assert.Equal(transaction.ConvenienceFeePayerAccountId, billingAccount.ID.Value);
+            Assert.Equal(transaction.BillerAccountId, billingAccount.ID.Value);
+            Assert.Equal(transaction.PayerAccountId, purchasingAccount.ID.Value);
+
+            // check proper coupon is attached to transaction
+            Assert.Equal(coupon.GetValue(amount + convenienceFee), transaction.CouponValue);
+            Assert.Equal(transaction.CouponId, coupon.ID.Value);
+
+            // Stripe
+            var customer = purchasingAccount.GetStripeCustomer(msgs);
+            Assert.NotNull(customer);
+
+            var charge = StripeHelper.GetCharge(stripeChargeId: checkoutObject.StripeChargeId, msgs);
+            Assert.NotNull(charge);
+
+            // confirm that stripe charge matches transaction
+            Assert.Equal(charge.Amount, (coupon.GetDiscountedValue(amount + convenienceFee)) * 100);
+            Assert.Equal(charge.CustomerId, customer.Id);
+
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Theory(DisplayName = "Registration fee check with CC with coupon")]
+        [InlineData(100, 7, 4, 10, (int)CouponAmountType.FlatAmount)]
+        [InlineData(100, 7, 4, 50, (int)CouponAmountType.FlatAmount)]
+        [InlineData(100, 7, 4, 10, (int)CouponAmountType.Percentage)]
+        [InlineData(100, 7, 4, 50, (int)CouponAmountType.Percentage)]
+        public void ProcessRegistrationFeeTest4(decimal amount, decimal convenienceFee, decimal paymentTypeFee, decimal couponAmount, int couponAmountType)
+        {
+            // Arrange
+            var billingAccountOwner = WebUserFactory.Create("Don", "John", "DonJohn@test.com", true, msgs, dc);
+            var purchasingAccountOwner = WebUserFactory.Create("Cristine", "Trump", "CristineTrump@test.com", true, msgs, dc);
+            var billingAccount = AccountFactory.CreateWithFreePackage("Billing account", "BillingAccount@test.com", billingAccountOwner, AccountType.School, msgs, dc);
+            var purchasingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", purchasingAccountOwner, AccountType.School, msgs, dc);
+            var masterRegistrant = RegistrantFactory.Create(purchasingAccount, isMaster: true, msgs, dc);
+
+            var activity = ActivityFactory.Create(billingAccount, amount, msgs, dc: dc);
+            var registrant = RegistrantFactory.Create(billingAccount, isMaster: false, msgs, dc: dc);
+            var registration = RegistrationFactory.Create(billingAccount, registrant, msgs, dc);
+            var coupon = CouponFactory.Create(account: billingAccount, amount: couponAmount, couponApplyType: CouponApplyType.RegistrationFee, couponAmountType: (CouponAmountType)couponAmountType, msgs: msgs, dc: dc);
+            var participantObject = activity.GetParticipationObject(msgs: msgs, dc: dc);
+
+            // Update stripe account and customer of payer/parent
+            var stripePurchasingAccount = AccountFactory.CreateStripeAccountAndCustomer(account: purchasingAccount, msgs: msgs, dc: dc);
+            var sourceId = purchasingAccount.CreateStripeSourceFromToken(StripeHelper.TestSourceToken, stripePurchasingAccount.Item2, msgs, dc);
+            var creditCardPurchaseObject = new CreditCardPurchaseObject() { StripeToken = StripeHelper.TestSourceToken, StripeSourceId = sourceId };
+
+            var checkoutObject = new CheckoutObject()
+            {
+                Coupon = coupon,
+                PayingAccount = purchasingAccount,
+                BillingAccount = billingAccount,                
+                IsAmountProRated = false,
+                ParticipationObject = participantObject,
+                PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                PaymentType = PaymentType.CreditCard,
+                CreditCardPurchaseObject = creditCardPurchaseObject,
+                SubscriptionPlan = null,
+                PaymentPlan = null,
+                MasterRegistrant = masterRegistrant,
+                NumberOfSeats = 1,
+                RegistrantSubscriptionPlan = null,
+                Registration = registration,
+                ConvenienceFeePayer = billingAccount,
+                CreditCardFeePayer = billingAccount,
+                SavePaymentInfo = true,
+            };
+
+            // Act
+            AccountService.ProcessRegistrationFee(checkoutObject, user, msgs, dc);
+
+            // Assert
+            // account
+            Assert.NotNull(billingAccount);
+            Assert.NotNull(purchasingAccount);
+
+            // activity
+            Assert.NotNull(activity);
+            Assert.Equal(activity.AccountId, billingAccount.ID.Value);
+            Assert.Equal(activity.CostPerRegistrant, amount);
+
+            // registrant
+            Assert.NotNull(registrant);
+            Assert.NotNull(masterRegistrant);
+            Assert.Equal(registrant.AccountId, billingAccount.ID.Value);
+            Assert.Equal(masterRegistrant.AccountId, purchasingAccount.ID.Value);
+
+            // registration
+            Assert.NotNull(registration);
+            Assert.Equal(registration.RegistrantId, registrant.ID.Value);
+            Assert.Equal(registration.AccountId, billingAccount.ID.Value);
+
+            // purchase
+            var purchase = registration.GetPurchase(msgs, dc);
+            Assert.NotNull(purchase);
+            Assert.Equal(purchase.AmountPaid, coupon.GetDiscountedValue(amount + convenienceFee) + paymentTypeFee);
+            Assert.Equal(purchase.StripeSourceId, sourceId);
+            Assert.Equal(purchase.RegistrationId, registration.ID.Value);
+            Assert.Equal(purchase.RegistrantId, masterRegistrant.ID.Value);
+            Assert.Equal(purchase.PurchaserAccountId, purchasingAccount.ID.Value);
+
+            // check proper coupon is attached to purchase
+            Assert.Equal(purchase.CouponId, coupon.ID.Value);
+
+            // activityPayment                
+            var activityPayment = ActivityPayment.LoadByParticipationObject(ParticipationObjectId: activity.ID.Value,
+                        ParticipationObjectTypeId: ParticipationObjectType.Activity,
+                        IsDeleted: false,
+                        msgs: msgs,
+                        dc: dc).FirstOrDefault();
+            Assert.NotNull(activityPayment);
+            Assert.Equal(activityPayment.Amount, amount - coupon.GetValue(amount + convenienceFee));
+            Assert.Equal(activityPayment.ParticipationObjectId, activity.ID.Value);
+            Assert.Equal(activityPayment.RegistrantId, registrant.ID.Value);
+            Assert.False(activityPayment.IsProRated);
+            Assert.Null(activityPayment.AmountPaidByParent);
+
+            // transaction
+            var transaction = activityPayment.GetTransaction(msgs, dc);
+            Assert.NotNull(transaction);
+            Assert.Equal(transaction.Amount, coupon.GetDiscountedValue(amount + convenienceFee) + paymentTypeFee);
+            Assert.Equal(transaction.StripeChargeOrRefundId, checkoutObject.StripeChargeId);
+            Assert.Equal(transaction.PurchaseId, purchase.ID.Value);
+            Assert.Equal(transaction.PaymentTypeFeeCharged, paymentTypeFee);
+            Assert.Equal(transaction.ConvenienceFeeCharged, convenienceFee);
+            Assert.Equal(transaction.PaymentTypeFeePayerAccountId, billingAccount.ID.Value);
+            Assert.Equal(transaction.ConvenienceFeePayerAccountId, billingAccount.ID.Value);
+            Assert.Equal(transaction.BillerAccountId, billingAccount.ID.Value);
+            Assert.Equal(transaction.PayerAccountId, purchasingAccount.ID.Value);
+
+            // check proper coupon is attached to transaction
+            Assert.Equal(coupon.GetValue(amount + convenienceFee), transaction.CouponValue);
+            Assert.Equal(transaction.CouponId, coupon.ID.Value);
+
+            // Stripe
+            var customer = purchasingAccount.GetStripeCustomer(msgs);
+            Assert.NotNull(customer);
+
+            var charge = StripeHelper.GetCharge(stripeChargeId: checkoutObject.StripeChargeId, msgs);
+            Assert.NotNull(charge);
+
+            // confirm that stripe charge matches transaction
+            Assert.Equal(charge.Amount, (coupon.GetDiscountedValue(amount + convenienceFee) + paymentTypeFee) * 100);
+            Assert.Equal(charge.CustomerId, customer.Id);
+
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Theory(DisplayName = "Registration fee check for selected dates(Individual classes) with ACH")]
+        [InlineData(100, 7, 1)]
+        [InlineData(100, 7, 2)]
+        [InlineData(100, 7, 5)]
+        public void ProcessRegistrationFeeTest5(decimal amount, decimal convenienceFee, int classQuantity)
+        {
+            // Arrange
+            var billingAccountOwner = WebUserFactory.Create("Don", "John", "DonJohn@test.com", true, msgs, dc);
+            var purchasingAccountOwner = WebUserFactory.Create("Cristine", "Trump", "CristineTrump@test.com", true, msgs, dc);
+            var billingAccount = AccountFactory.CreateWithFreePackage("Billing account", "BillingAccount@test.com", billingAccountOwner, AccountType.School, msgs, dc);
+            var purchasingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", purchasingAccountOwner, AccountType.School, msgs, dc);
+            var masterRegistrant = RegistrantFactory.Create(purchasingAccount, isMaster: true, msgs, dc);
+            var registrant = RegistrantFactory.Create(billingAccount, isMaster: false, msgs, dc: dc);
+            var registration = RegistrationFactory.Create(billingAccount, registrant, msgs, dc);
+
+            var schedule = ActivityScheduleFactory.Create(billingAccount, DateTime.Now, DateTime.Now.AddDays(10), msgs, dc);
+            var activity = ActivityFactory.Create(billingAccount, schedule, amount, msgs, dc: dc);
+            var participantObject = activity.GetParticipationObject(msgs: msgs, dc: dc);
+
+            // Update stripe account and customer of payer/parent
+            var stripePurchasingAccount = AccountFactory.CreateStripeAccountAndCustomer(account: purchasingAccount, msgs: msgs, dc: dc);
+            var sourceId = purchasingAccount.CreateStripeSourceFromToken(StripeHelper.TestSourceToken, stripePurchasingAccount.Item2, msgs, dc);
+            var bankAccountPurchaseObject = new BankAccountPurchaseObject() { PlaidPublicToken = StripeHelper.TestSourceToken, StripeSourceId = sourceId };            
+
+            // this will add number of class for ClassQuantity
+            var selectedDates = new List<DateTime>();
+            var start = DateTime.Now;
+            var end = DateTime.Now.AddDays(classQuantity);
+            selectedDates.AddRange(Enumerable.Range(0, end.Subtract(start).Days).Select(offset => start.AddDays(offset)).ToArray());
+
+            var checkoutObject = new CheckoutObject()
+            {
+                PayingAccount = purchasingAccount,
+                BillingAccount = billingAccount,
+                ParticipationObject = participantObject,
+                PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                PaymentType = PaymentType.ACH,
+                BankAccountPurchaseObject = bankAccountPurchaseObject,
+                SubscriptionPlan = null,
+                PaymentPlan = null,
+                MasterRegistrant = masterRegistrant,
+                NumberOfSeats = 1,
+                RegistrantSubscriptionPlan = null,
+                Registration = registration,
+                ConvenienceFeePayer = billingAccount,
+                SavePaymentInfo = true,
+                SelectedDates = selectedDates
+            };
+
+            // Act
+            AccountService.ProcessRegistrationFee(checkoutObject, user, msgs, dc);
+
+            // Assert
+            // account
+            Assert.NotNull(billingAccount);
+            Assert.NotNull(purchasingAccount);
+
+            // activity
+            Assert.NotNull(activity);
+            Assert.Equal(activity.AccountId, billingAccount.ID.Value);
+            Assert.Equal(activity.CostPerRegistrant, amount);
+
+            // registrant
+            Assert.NotNull(registrant);
+            Assert.NotNull(masterRegistrant);
+            Assert.Equal(registrant.AccountId, billingAccount.ID.Value);
+            Assert.Equal(masterRegistrant.AccountId, purchasingAccount.ID.Value);
+
+            // registration
+            Assert.NotNull(registration);
+            Assert.Equal(registration.RegistrantId, registrant.ID.Value);
+            Assert.Equal(registration.AccountId, billingAccount.ID.Value);
+
+            // purchase
+            var purchase = registration.GetPurchase(msgs, dc);
+            Assert.NotNull(purchase);
+            Assert.Equal(purchase.AmountPaid, (amount + convenienceFee) * classQuantity);
+            Assert.Equal(purchase.StripeSourceId, sourceId);
+            Assert.Equal(purchase.RegistrationId, registration.ID.Value);
+            Assert.Equal(purchase.RegistrantId, masterRegistrant.ID.Value);
+            Assert.Equal(purchase.PurchaserAccountId, purchasingAccount.ID.Value);
+            Assert.Null(purchase.CouponId);
+
+            // activityPayment                
+            var activityPayment = ActivityPayment.LoadByParticipationObject(ParticipationObjectId: activity.ID.Value,
+                        ParticipationObjectTypeId: ParticipationObjectType.Activity,
+                        IsDeleted: false,
+                        msgs: msgs,
+                        dc: dc).FirstOrDefault();
+            Assert.NotNull(activityPayment);
+            Assert.Equal(activityPayment.Amount, amount * classQuantity);
+            Assert.Equal(activityPayment.ParticipationObjectId, activity.ID.Value);
+            Assert.Equal(activityPayment.RegistrantId, registrant.ID.Value);
+            Assert.False(activityPayment.IsProRated);
+            Assert.Null(activityPayment.AmountPaidByParent);
+
+            // transaction
+            var transaction = activityPayment.GetTransaction(msgs, dc);
+            Assert.NotNull(transaction);
+            Assert.Equal(transaction.Amount, (amount + convenienceFee) * classQuantity);
+            Assert.Equal(transaction.StripeChargeOrRefundId, checkoutObject.StripeChargeId);
+            Assert.Equal(transaction.PurchaseId, purchase.ID.Value);
+            Assert.Equal(transaction.ConvenienceFeeCharged, convenienceFee);
+            Assert.Equal(transaction.ConvenienceFeePayerAccountId, billingAccount.ID.Value);
+            Assert.Equal(0, transaction.PaymentTypeFeeCharged);
+            Assert.Null(transaction.PaymentTypeFeePayerAccountId);
+            Assert.Equal(transaction.BillerAccountId, billingAccount.ID.Value);
+            Assert.Equal(transaction.PayerAccountId, purchasingAccount.ID.Value);
+            Assert.Equal(0, transaction.CouponValue);
+            Assert.Null(transaction.CouponId);
+
+            // Stripe
+            var customer = purchasingAccount.GetStripeCustomer(msgs);
+            Assert.NotNull(customer);
+
+            var charge = StripeHelper.GetCharge(stripeChargeId: checkoutObject.StripeChargeId, msgs);
+            Assert.NotNull(charge);
+
+            // confirm that stripe charge matches transaction
+            Assert.Equal(charge.Amount, (amount + convenienceFee) * classQuantity * 100);
+            Assert.Equal(charge.CustomerId, customer.Id);
+
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Theory(DisplayName = "Registration fee check for selected dates(Individual classes) with CC")]
+        [InlineData(100, 7, 4, 1)]
+        [InlineData(100, 7, 4, 2)]
+        [InlineData(100, 7, 4, 5)]
+        public void ProcessRegistrationFeeTest6(decimal amount, decimal convenienceFee, decimal paymentTypeFee, int classQuantity)
+        {
+            // Arrange
+            var billingAccountOwner = WebUserFactory.Create("Don", "John", "DonJohn@test.com", true, msgs, dc);
+            var purchasingAccountOwner = WebUserFactory.Create("Cristine", "Trump", "CristineTrump@test.com", true, msgs, dc);
+            var billingAccount = AccountFactory.CreateWithFreePackage("Billing account", "BillingAccount@test.com", billingAccountOwner, AccountType.School, msgs, dc);
+            var purchasingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", purchasingAccountOwner, AccountType.School, msgs, dc);
+            var masterRegistrant = RegistrantFactory.Create(purchasingAccount, isMaster: true, msgs, dc);            
+            var registrant = RegistrantFactory.Create(billingAccount, isMaster: false, msgs, dc: dc);
+            var registration = RegistrationFactory.Create(billingAccount, registrant, msgs, dc);
+
+            var schedule = ActivityScheduleFactory.Create(billingAccount, DateTime.Now, DateTime.Now.AddDays(10), msgs, dc);
+            var activity = ActivityFactory.Create(billingAccount, schedule, amount, msgs, dc: dc);
+            var participantObject = activity.GetParticipationObject(msgs: msgs, dc: dc);
+
+            // Update stripe account and customer of payer/parent
+            var stripePurchasingAccount = AccountFactory.CreateStripeAccountAndCustomer(account: purchasingAccount, msgs: msgs, dc: dc);
+            var sourceId = purchasingAccount.CreateStripeSourceFromToken(StripeHelper.TestSourceToken, stripePurchasingAccount.Item2, msgs, dc);
+            var creditCardPurchaseObject = new CreditCardPurchaseObject() { StripeToken = StripeHelper.TestSourceToken, StripeSourceId = sourceId };            
+
+            // this will add number of class for ClassQuantity
+            var selectedDates = new List<DateTime>();
+            var start = DateTime.Now;
+            var end = DateTime.Now.AddDays(classQuantity);
+            selectedDates.AddRange(Enumerable.Range(0, end.Subtract(start).Days).Select(offset => start.AddDays(offset)).ToArray());
+
+            var checkoutObject = new CheckoutObject()
+            {
+                PayingAccount = purchasingAccount,
+                BillingAccount = billingAccount,
+                ParticipationObject = participantObject,
+                PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                PaymentType = PaymentType.CreditCard,
+                CreditCardPurchaseObject = creditCardPurchaseObject,
+                SubscriptionPlan = null,
+                PaymentPlan = null,
+                MasterRegistrant = masterRegistrant,
+                NumberOfSeats = 1,
+                RegistrantSubscriptionPlan = null,
+                Registration = registration,
+                ConvenienceFeePayer = billingAccount,
+                CreditCardFeePayer = billingAccount,
+                SavePaymentInfo = true,
+                SelectedDates = selectedDates
+            };
+
+            // Act
+            AccountService.ProcessRegistrationFee(checkoutObject, user, msgs, dc);
+
+            // Assert
+            // account
+            Assert.NotNull(billingAccount);
+            Assert.NotNull(purchasingAccount);
+
+            // activity
+            Assert.NotNull(activity);
+            Assert.Equal(activity.AccountId, billingAccount.ID.Value);
+            Assert.Equal(activity.CostPerRegistrant, amount);
+
+            // registrant
+            Assert.NotNull(registrant);
+            Assert.NotNull(masterRegistrant);
+            Assert.Equal(registrant.AccountId, billingAccount.ID.Value);
+            Assert.Equal(masterRegistrant.AccountId, purchasingAccount.ID.Value);
+
+            // registration
+            Assert.NotNull(registration);
+            Assert.Equal(registration.RegistrantId, registrant.ID.Value);
+            Assert.Equal(registration.AccountId, billingAccount.ID.Value);
+
+            // purchase
+            var purchase = registration.GetPurchase(msgs, dc);
+            Assert.NotNull(purchase);
+            Assert.Equal(purchase.AmountPaid, (amount + convenienceFee + paymentTypeFee) * classQuantity);
+            Assert.Equal(purchase.StripeSourceId, sourceId);
+            Assert.Equal(purchase.RegistrationId, registration.ID.Value);
+            Assert.Equal(purchase.RegistrantId, masterRegistrant.ID.Value);
+            Assert.Equal(purchase.PurchaserAccountId, purchasingAccount.ID.Value);
+            Assert.Null(purchase.CouponId);
+
+            // activityPayment                
+            var activityPayment = ActivityPayment.LoadByParticipationObject(ParticipationObjectId: activity.ID.Value,
+                        ParticipationObjectTypeId: ParticipationObjectType.Activity,
+                        IsDeleted: false,
+                        msgs: msgs,
+                        dc: dc).FirstOrDefault();
+            Assert.NotNull(activityPayment);
+            Assert.Equal(activityPayment.Amount, amount * classQuantity);
+            Assert.Equal(activityPayment.ParticipationObjectId, activity.ID.Value);
+            Assert.Equal(activityPayment.RegistrantId, registrant.ID.Value);
+            Assert.False(activityPayment.IsProRated);
+            Assert.Null(activityPayment.AmountPaidByParent);
+
+            // transaction
+            var transaction = activityPayment.GetTransaction(msgs, dc);
+            Assert.NotNull(transaction);
+            Assert.Equal(transaction.Amount, (amount + convenienceFee + paymentTypeFee) * classQuantity);
+            Assert.Equal(transaction.StripeChargeOrRefundId, checkoutObject.StripeChargeId);
+            Assert.Equal(transaction.PurchaseId, purchase.ID.Value);
+            Assert.Equal(transaction.PaymentTypeFeeCharged, paymentTypeFee * classQuantity);
+            Assert.Equal(transaction.ConvenienceFeeCharged, convenienceFee * classQuantity);
+            Assert.Equal(transaction.PaymentTypeFeePayerAccountId, billingAccount.ID.Value);
+            Assert.Equal(transaction.ConvenienceFeePayerAccountId, billingAccount.ID.Value);
+            Assert.Equal(transaction.BillerAccountId, billingAccount.ID.Value);
+            Assert.Equal(transaction.PayerAccountId, purchasingAccount.ID.Value);
+            Assert.Equal(0, transaction.CouponValue);
+            Assert.Null(transaction.CouponId);
+
+            // Stripe
+            var customer = purchasingAccount.GetStripeCustomer(msgs);
+            Assert.NotNull(customer);
+
+            var charge = StripeHelper.GetCharge(stripeChargeId: checkoutObject.StripeChargeId, msgs);
+            Assert.NotNull(charge);
+
+            // confirm that stripe charge matches transaction
+            Assert.Equal(charge.Amount, (amount + convenienceFee + paymentTypeFee) * classQuantity * 100);
+            Assert.Equal(charge.CustomerId, customer.Id);
+
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Theory(DisplayName = "Registration fee check for selected dates(Individual classes) with ACH & coupon")]
+        [InlineData(100, 7, 1, 10, (int)CouponAmountType.FlatAmount)] // single class & 10$ off
+        [InlineData(100, 7, 2, 10, (int)CouponAmountType.FlatAmount)] // two class
+        [InlineData(100, 7, 5, 10, (int)CouponAmountType.FlatAmount)] // five class
+
+        [InlineData(100, 7, 1, 50, (int)CouponAmountType.FlatAmount)] // single class & 50$ off
+        [InlineData(100, 7, 2, 50, (int)CouponAmountType.FlatAmount)] // two class
+        [InlineData(100, 7, 5, 50, (int)CouponAmountType.FlatAmount)] // five class
+
+        [InlineData(100, 7, 1, 10, (int)CouponAmountType.Percentage)] // single class & 10% off
+        [InlineData(100, 7, 2, 10, (int)CouponAmountType.Percentage)] // two class
+        [InlineData(100, 7, 5, 10, (int)CouponAmountType.Percentage)] // five class
+
+        [InlineData(100, 7, 1, 50, (int)CouponAmountType.Percentage)] // single class & 50$ off
+        [InlineData(100, 7, 2, 50, (int)CouponAmountType.Percentage)] // two class
+        [InlineData(100, 7, 5, 50, (int)CouponAmountType.Percentage)] // five class
+        public void ProcessRegistrationFeeTest7(decimal amount, decimal convenienceFee, int classQuantity, decimal couponAmount, int couponAmountType)
+        {
+            // Arrange
+            var billingAccountOwner = WebUserFactory.Create("Don", "John", "DonJohn@test.com", true, msgs, dc);
+            var purchasingAccountOwner = WebUserFactory.Create("Cristine", "Trump", "CristineTrump@test.com", true, msgs, dc);
+            var billingAccount = AccountFactory.CreateWithFreePackage("Billing account", "BillingAccount@test.com", billingAccountOwner, AccountType.School, msgs, dc);
+            var purchasingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", purchasingAccountOwner, AccountType.School, msgs, dc);
+            var masterRegistrant = RegistrantFactory.Create(purchasingAccount, isMaster: true, msgs, dc);
+            var registrant = RegistrantFactory.Create(billingAccount, isMaster: false, msgs, dc: dc);
+            var registration = RegistrationFactory.Create(billingAccount, registrant, msgs, dc);
+
+            var schedule = ActivityScheduleFactory.Create(billingAccount, DateTime.Now, DateTime.Now.AddDays(10), msgs, dc);
+            var activity = ActivityFactory.Create(billingAccount, schedule, amount, msgs, dc: dc);
+            var coupon = CouponFactory.Create(account: billingAccount, amount: couponAmount, couponApplyType: CouponApplyType.RegistrationFee, couponAmountType: (CouponAmountType)couponAmountType, msgs: msgs, dc: dc);
+            var participantObject = activity.GetParticipationObject(msgs: msgs, dc: dc);
+
+            // Update stripe account and customer of payer/parent
+            var stripePurchasingAccount = AccountFactory.CreateStripeAccountAndCustomer(account: purchasingAccount, msgs: msgs, dc: dc);
+            var sourceId = purchasingAccount.CreateStripeSourceFromToken(StripeHelper.TestSourceToken, stripePurchasingAccount.Item2, msgs, dc);
+            var bankAccountPurchaseObject = new BankAccountPurchaseObject() { PlaidPublicToken = StripeHelper.TestSourceToken, StripeSourceId = sourceId };
+
+            // this will add number of class for ClassQuantity
+            var selectedDates = new List<DateTime>();
+            var start = DateTime.Now;
+            var end = DateTime.Now.AddDays(classQuantity);
+            selectedDates.AddRange(Enumerable.Range(0, end.Subtract(start).Days).Select(offset => start.AddDays(offset)).ToArray());
+
+            var checkoutObject = new CheckoutObject()
+            {
+                Coupon = coupon,
+                PayingAccount = purchasingAccount,
+                BillingAccount = billingAccount,
+                ParticipationObject = participantObject,
+                PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                PaymentType = PaymentType.ACH,
+                BankAccountPurchaseObject = bankAccountPurchaseObject,
+                SubscriptionPlan = null,
+                PaymentPlan = null,
+                MasterRegistrant = masterRegistrant,
+                NumberOfSeats = 1,
+                RegistrantSubscriptionPlan = null,
+                Registration = registration,
+                ConvenienceFeePayer = billingAccount,
+                SavePaymentInfo = true,
+                SelectedDates = selectedDates
+            };
+
+            // Act
+            AccountService.ProcessRegistrationFee(checkoutObject, user, msgs, dc);
+
+            // Assert
+            // account
+            Assert.NotNull(billingAccount);
+            Assert.NotNull(purchasingAccount);
+
+            // activity
+            Assert.NotNull(activity);
+            Assert.Equal(activity.AccountId, billingAccount.ID.Value);
+            Assert.Equal(activity.CostPerRegistrant, amount);
+
+            // registrant
+            Assert.NotNull(registrant);
+            Assert.NotNull(masterRegistrant);
+            Assert.Equal(registrant.AccountId, billingAccount.ID.Value);
+            Assert.Equal(masterRegistrant.AccountId, purchasingAccount.ID.Value);
+
+            // registration
+            Assert.NotNull(registration);
+            Assert.Equal(registration.RegistrantId, registrant.ID.Value);
+            Assert.Equal(registration.AccountId, billingAccount.ID.Value);
+
+            //discounted amount
+            var discountedAmount = coupon.GetDiscountedValue((amount + convenienceFee) * classQuantity);
+
+            // purchase
+            var purchase = registration.GetPurchase(msgs, dc);
+            Assert.NotNull(purchase);
+            Assert.Equal(purchase.AmountPaid, discountedAmount);
+            Assert.Equal(purchase.StripeSourceId, sourceId);
+            Assert.Equal(purchase.RegistrationId, registration.ID.Value);
+            Assert.Equal(purchase.RegistrantId, masterRegistrant.ID.Value);
+            Assert.Equal(purchase.PurchaserAccountId, purchasingAccount.ID.Value);
+
+            // check proper coupon is attached to purchase
+            Assert.Equal(purchase.CouponId, coupon.ID.Value);
+
+            // activityPayment                
+            var activityPayment = ActivityPayment.LoadByParticipationObject(ParticipationObjectId: activity.ID.Value,
+                        ParticipationObjectTypeId: ParticipationObjectType.Activity,
+                        IsDeleted: false,
+                        msgs: msgs,
+                        dc: dc).FirstOrDefault();
+            Assert.NotNull(activityPayment);
+            Assert.Equal(activityPayment.Amount, (amount * classQuantity) - coupon.GetValue((amount + convenienceFee) * classQuantity));
+            Assert.Equal(activityPayment.ParticipationObjectId, activity.ID.Value);
+            Assert.Equal(activityPayment.RegistrantId, registrant.ID.Value);
+            Assert.False(activityPayment.IsProRated);
+            Assert.Null(activityPayment.AmountPaidByParent);
+
+            // transaction
+            var transaction = activityPayment.GetTransaction(msgs, dc);
+            Assert.NotNull(transaction);
+            Assert.Equal(transaction.Amount, discountedAmount);
+            Assert.Equal(transaction.StripeChargeOrRefundId, checkoutObject.StripeChargeId);
+            Assert.Equal(transaction.PurchaseId, purchase.ID.Value);
+            Assert.Equal(transaction.ConvenienceFeeCharged, convenienceFee * classQuantity);
+            Assert.Equal(transaction.ConvenienceFeePayerAccountId, billingAccount.ID.Value);
+            Assert.Equal(0, transaction.PaymentTypeFeeCharged);
+            Assert.Null(transaction.PaymentTypeFeePayerAccountId);
+            Assert.Equal(transaction.BillerAccountId, billingAccount.ID.Value);
+            Assert.Equal(transaction.PayerAccountId, purchasingAccount.ID.Value);
+
+            // check proper coupon is attached to transaction
+            Assert.Equal(coupon.GetValue((amount + convenienceFee) * classQuantity), transaction.CouponValue);
+            Assert.Equal(transaction.CouponId, coupon.ID.Value);
+
+            // Stripe
+            var customer = purchasingAccount.GetStripeCustomer(msgs);
+            Assert.NotNull(customer);
+
+            var charge = StripeHelper.GetCharge(stripeChargeId: checkoutObject.StripeChargeId, msgs);
+            Assert.NotNull(charge);
+
+            // confirm that stripe charge matches transaction
+            Assert.Equal(charge.Amount, discountedAmount * 100);
+            Assert.Equal(charge.CustomerId, customer.Id);
+
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Theory(DisplayName = "Registration fee check for selected dates(Individual classes) with CC & coupon")]
+        [InlineData(100, 7, 4, 1, 10, (int)CouponAmountType.FlatAmount)] // single class & 10$ off
+        [InlineData(100, 7, 4, 2, 10, (int)CouponAmountType.FlatAmount)] // two class
+        [InlineData(100, 7, 4, 5, 10, (int)CouponAmountType.FlatAmount)] // five class
+
+        [InlineData(100, 7, 4, 1, 50, (int)CouponAmountType.FlatAmount)] // single class & 50$ off
+        [InlineData(100, 7, 4, 2, 50, (int)CouponAmountType.FlatAmount)] // two class
+        [InlineData(100, 7, 4, 5, 50, (int)CouponAmountType.FlatAmount)] // five class
+
+        [InlineData(100, 7, 4, 1, 10, (int)CouponAmountType.Percentage)] // single class & 10% off
+        [InlineData(100, 7, 4, 2, 10, (int)CouponAmountType.Percentage)] // two class
+        [InlineData(100, 7, 4, 5, 10, (int)CouponAmountType.Percentage)] // five class
+
+        [InlineData(100, 7, 4, 1, 50, (int)CouponAmountType.Percentage)] // single class & 50$ off
+        [InlineData(100, 7, 4, 2, 50, (int)CouponAmountType.Percentage)] // two class
+        [InlineData(100, 7, 4, 5, 50, (int)CouponAmountType.Percentage)] // five class
+        public void ProcessRegistrationFeeTest8(decimal amount, decimal convenienceFee, decimal paymentTypeFee, int classQuantity, decimal couponAmount, int couponAmountType)
+        {
+            // Arrange
+            var billingAccountOwner = WebUserFactory.Create("Don", "John", "DonJohn@test.com", true, msgs, dc);
+            var purchasingAccountOwner = WebUserFactory.Create("Cristine", "Trump", "CristineTrump@test.com", true, msgs, dc);
+            var billingAccount = AccountFactory.CreateWithFreePackage("Billing account", "BillingAccount@test.com", billingAccountOwner, AccountType.School, msgs, dc);
+            var purchasingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", purchasingAccountOwner, AccountType.School, msgs, dc);
+            var masterRegistrant = RegistrantFactory.Create(purchasingAccount, isMaster: true, msgs, dc);
+            var registrant = RegistrantFactory.Create(billingAccount, isMaster: false, msgs, dc: dc);
+            var registration = RegistrationFactory.Create(billingAccount, registrant, msgs, dc);
+
+            var schedule = ActivityScheduleFactory.Create(billingAccount, DateTime.Now, DateTime.Now.AddDays(10), msgs, dc);
+            var activity = ActivityFactory.Create(billingAccount, schedule, amount, msgs, dc: dc);
+            var coupon = CouponFactory.Create(account: billingAccount, amount: couponAmount, couponApplyType: CouponApplyType.RegistrationFee, couponAmountType: (CouponAmountType)couponAmountType, msgs: msgs, dc: dc);
+            var participantObject = activity.GetParticipationObject(msgs: msgs, dc: dc);
+
+            // Update stripe account and customer of payer/parent
+            var stripePurchasingAccount = AccountFactory.CreateStripeAccountAndCustomer(account: purchasingAccount, msgs: msgs, dc: dc);
+            var sourceId = purchasingAccount.CreateStripeSourceFromToken(StripeHelper.TestSourceToken, stripePurchasingAccount.Item2, msgs, dc);
+            var creditCardPurchaseObject = new CreditCardPurchaseObject() { StripeToken = StripeHelper.TestSourceToken, StripeSourceId = sourceId };
+
+            // this will add number of class for ClassQuantity
+            var selectedDates = new List<DateTime>();
+            var start = DateTime.Now;
+            var end = DateTime.Now.AddDays(classQuantity);
+            selectedDates.AddRange(Enumerable.Range(0, end.Subtract(start).Days).Select(offset => start.AddDays(offset)).ToArray());
+
+            var checkoutObject = new CheckoutObject()
+            {
+                Coupon = coupon,
+                PayingAccount = purchasingAccount,
+                BillingAccount = billingAccount,
+                ParticipationObject = participantObject,
+                PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                PaymentType = PaymentType.CreditCard,
+                CreditCardPurchaseObject = creditCardPurchaseObject,
+                SubscriptionPlan = null,
+                PaymentPlan = null,
+                MasterRegistrant = masterRegistrant,
+                NumberOfSeats = 1,
+                RegistrantSubscriptionPlan = null,
+                Registration = registration,
+                ConvenienceFeePayer = billingAccount,
+                CreditCardFeePayer = billingAccount,
+                SavePaymentInfo = true,
+                SelectedDates = selectedDates
+            };
+
+            // Act
+            AccountService.ProcessRegistrationFee(checkoutObject, user, msgs, dc);
+
+            // Assert
+            // account
+            Assert.NotNull(billingAccount);
+            Assert.NotNull(purchasingAccount);
+
+            // activity
+            Assert.NotNull(activity);
+            Assert.Equal(activity.AccountId, billingAccount.ID.Value);
+            Assert.Equal(activity.CostPerRegistrant, amount);
+
+            // registrant
+            Assert.NotNull(registrant);
+            Assert.NotNull(masterRegistrant);
+            Assert.Equal(registrant.AccountId, billingAccount.ID.Value);
+            Assert.Equal(masterRegistrant.AccountId, purchasingAccount.ID.Value);
+
+            // registration
+            Assert.NotNull(registration);
+            Assert.Equal(registration.RegistrantId, registrant.ID.Value);
+            Assert.Equal(registration.AccountId, billingAccount.ID.Value);
+
+            //discounted amount
+            var discountedAmount = coupon.GetDiscountedValue((amount + convenienceFee) * classQuantity);
+
+            // purchase
+            var purchase = registration.GetPurchase(msgs, dc);            
+            Assert.NotNull(purchase);
+            Assert.Equal(purchase.AmountPaid, discountedAmount + (paymentTypeFee * classQuantity));
+            Assert.Equal(purchase.StripeSourceId, sourceId);
+            Assert.Equal(purchase.RegistrationId, registration.ID.Value);
+            Assert.Equal(purchase.RegistrantId, masterRegistrant.ID.Value);
+            Assert.Equal(purchase.PurchaserAccountId, purchasingAccount.ID.Value);
+
+            // check proper coupon is attached to purchase
+            Assert.Equal(purchase.CouponId, coupon.ID.Value);
+
+            // activityPayment                
+            var activityPayment = ActivityPayment.LoadByParticipationObject(ParticipationObjectId: activity.ID.Value,
+                        ParticipationObjectTypeId: ParticipationObjectType.Activity,
+                        IsDeleted: false,
+                        msgs: msgs,
+                        dc: dc).FirstOrDefault();
+            Assert.NotNull(activityPayment);
+            Assert.Equal(activityPayment.Amount, (amount * classQuantity) - coupon.GetValue((amount + convenienceFee) * classQuantity));
+            Assert.Equal(activityPayment.ParticipationObjectId, activity.ID.Value);
+            Assert.Equal(activityPayment.RegistrantId, registrant.ID.Value);
+            Assert.False(activityPayment.IsProRated);
+            Assert.Null(activityPayment.AmountPaidByParent);
+
+            // transaction
+            var transaction = activityPayment.GetTransaction(msgs, dc);
+            Assert.NotNull(transaction);
+            Assert.Equal(transaction.Amount, discountedAmount + (paymentTypeFee * classQuantity));
+            Assert.Equal(transaction.StripeChargeOrRefundId, checkoutObject.StripeChargeId);
+            Assert.Equal(transaction.PurchaseId, purchase.ID.Value);
+            Assert.Equal(transaction.PaymentTypeFeeCharged, paymentTypeFee * classQuantity);
+            Assert.Equal(transaction.ConvenienceFeeCharged, convenienceFee * classQuantity);
+            Assert.Equal(transaction.PaymentTypeFeePayerAccountId, billingAccount.ID.Value);
+            Assert.Equal(transaction.ConvenienceFeePayerAccountId, billingAccount.ID.Value);
+            Assert.Equal(transaction.BillerAccountId, billingAccount.ID.Value);
+            Assert.Equal(transaction.PayerAccountId, purchasingAccount.ID.Value);
+
+            // check proper coupon is attached to transaction
+            Assert.Equal(coupon.GetValue((amount + convenienceFee) * classQuantity), transaction.CouponValue);
+            Assert.Equal(transaction.CouponId, coupon.ID.Value);
+
+            // Stripe
+            var customer = purchasingAccount.GetStripeCustomer(msgs);
+            Assert.NotNull(customer);
+
+            var charge = StripeHelper.GetCharge(stripeChargeId: checkoutObject.StripeChargeId, msgs);
+            Assert.NotNull(charge);
+
+            // confirm that stripe charge matches transaction
+            Assert.Equal(charge.Amount, (discountedAmount + (paymentTypeFee * classQuantity)) * 100);
+            Assert.Equal(charge.CustomerId, customer.Id);
+
+            Assert.True(msgs.HasNoErrors());
         }
     }
 }

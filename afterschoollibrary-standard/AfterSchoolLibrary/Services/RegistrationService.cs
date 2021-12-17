@@ -177,7 +177,7 @@ namespace AfterSchoolLibrary.Services
                 1,
                 checkoutObject.ParticipationObject.IsActivity() ? checkoutObject.ParticipationObject.GetAnyRelatedActivityGroupId() : new int?(),
                 checkoutObject.ParticipationObject.GetCurrentRegistrationPeriod(msgs, dc)?.ID,
-                checkoutObject.GetTotalCost(),
+                checkoutObject.GetTotalCostNoFees(msgs, dc),
                 checkoutObject.SelectedDates,
                 loggedInUser,
                 msgs,
