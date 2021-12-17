@@ -37,10 +37,7 @@
 
             @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.ActivitiesEdit))
              {
-                <div class="pull-right">
-                    <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLink" class="btn-clever-login">
-                        <img src="~/img/login-clever.png" style="width: 160px; height: 39px;" class="clever-login-img" />
-                    </a>
+                <div class="pull-right">                  
                     <a href="@Url.Action("editsetup", "activity", new { isnew = 1, type = (int)ActivityType.Activity })" class="btn btn-primary">
                         <i class="icon icon-left s7-plus"></i>
                         Add @UILabel.ActivityLabel(ActivityType.Activity)

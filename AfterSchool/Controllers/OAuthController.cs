@@ -105,9 +105,12 @@ namespace AfterSchool.Controllers
 
             var id = GetCleverUserDetails(token: tokenDto.access_token);
           
-            TempData["success"] = "Sucessfully Login "+ id;
+            if (!String.IsNullOrEmpty(id))
+                TempData["Success"] = "Sucessfully Connected " + id;
+            else
+                TempData["NotSuccess"] = "Not Sucessfully Connected ";
 
-            return RedirectToAction("Index", "org/home");
+            return RedirectToAction("Index", "Org/user/edit");
 
         }
 
@@ -145,13 +148,18 @@ namespace AfterSchool.Controllers
             
             webUser = WebUser.LoadByEmail(cleverUserDistrictDto.data.district_contact.email, true, null, null);
          
-
-            if(webUser != null)
+            if(webUser != null && !String.IsNullOrEmpty(cleverUserDistrictDto.data.id))
             {
-                //do something
+                var msgs = new SystemMessages();
+              
+                webUser.CleverUserId = cleverUserDistrictDto.data.id;
+
+                msgs.AddRange(webUser.Save());
+
+                return cleverUserDistrictDto.data.id;
             }
 
-            return cleverUserDistrictDto.data.id;
+            return null;
         }
     }
 }
