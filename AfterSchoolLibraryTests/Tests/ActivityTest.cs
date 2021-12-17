@@ -1129,7 +1129,7 @@ namespace AfterSchoolLibraryTests.Tests
             activity.Publish(user, msgs, dc);
 
             Assert.True(activity.IsPublished);
-
+            Assert.True(activity.IsPubliclyViewable);
         }
     }
 }
