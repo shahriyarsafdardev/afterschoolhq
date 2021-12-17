@@ -18,7 +18,6 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             var msgs = new SystemMessages();
             try
             {
-                throw new Exception("testing from dev");
                 msgs.Add("Getting serializedJson", MessageType.Notice);
                 var serializedJson = JsonConvert.SerializeObject(json);
                 msgs.Add("Getting stripeEvent", MessageType.Notice);
