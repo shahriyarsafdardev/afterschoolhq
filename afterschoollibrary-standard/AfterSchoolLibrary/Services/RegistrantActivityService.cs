@@ -144,6 +144,19 @@ namespace AfterSchoolLibrary.Services
                 dc: dc);
         }
 
+        public static bool HasPaymentPlan(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantSubscriptionPlan.ExistsByParticipationObjectByRegistrantsByPlanType(
+                participationObjectId: registrantActivity.ParticipationObjectId.Value,
+                participationObjectType: registrantActivity.ParticipationObjectTypeId,
+                registrantIds: registrantActivity.RegistrantId.Value.AsList(),
+                SubscriptionPlanType.PaymentPlan,
+                true,
+                msgs: msgs,
+                dc: dc);
+
+        }
+
         public static List<FormQuestionAnswer> GetAnswers(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return registrantActivity.GetRegistration(msgs, dc).GetAnswers(msgs, dc);
