@@ -1272,17 +1272,15 @@ namespace AfterSchoolLibrary.Billing
                 Items = new List<SubscriptionItemOptions>() { new SubscriptionItemOptions() { Plan = planId, Quantity = 1 } },
                 Metadata = metaData,
                 Prorate = isProrated, //prorate only if ongoing activity and not paymentplan, else we will handle this manually
-                //BillingCycleAnchor = billingCycleAnchor
+                BillingCycleAnchor = billingCycleAnchor
             };
 
-            //if (startDate.Value.Date.AddDays(-1).IsAfter(DateTime.UtcNow.Date))
-            //    options.TrialEnd = startDate.Value.AddDays(-1); // if start date is at least one day in the future, start a day before start date            
+            if (startDate.Value.Date.AddDays(-1).IsAfter(DateTime.UtcNow.Date))
+                options.TrialEnd = startDate.Value.AddDays(-1); // if start date is at least one day in the future, start a day before start date            
 
-            //// please make sure that billing ends when the program ends.
-            //if (endDate.HasValue && endDate.IsNotEmpty() && endDate.Value.Date.AddDays(-1).IsAfter(DateTime.UtcNow.Date))
-            //    options.CancelAt = endDate.Value;
-
-            options.CancelAt = DateTime.Now.AddMinutes(1);
+            // please make sure that billing ends when the program ends.
+            if (endDate.HasValue && endDate.IsNotEmpty() && endDate.Value.Date.AddDays(-1).IsAfter(DateTime.UtcNow.Date))
+                options.CancelAt = endDate.Value;
 
             if (stripeAccountId.IsNotEmpty())
                 options.TransferData = new SubscriptionTransferDataOptions()
