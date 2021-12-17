@@ -147,14 +147,13 @@ namespace AfterSchoolLibrary.Services
         public static bool HasPaymentPlan(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RegistrantSubscriptionPlan.ExistsByParticipationObjectByRegistrantsByPlanType(
-                participationObjectId: registrantActivity.ParticipationObjectId.Value,
-                participationObjectType: registrantActivity.ParticipationObjectTypeId,
-                registrantIds: registrantActivity.RegistrantId.Value.AsList(),
+                registrantActivity.ParticipationObjectId.Value,
+                registrantActivity.ParticipationObjectTypeId,
+                registrantActivity.RegistrantId.Value.AsList(),
                 SubscriptionPlanType.PaymentPlan,
                 true,
-                msgs: msgs,
-                dc: dc);
-
+                msgs,
+                dc);
         }
 
         public static List<FormQuestionAnswer> GetAnswers(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
