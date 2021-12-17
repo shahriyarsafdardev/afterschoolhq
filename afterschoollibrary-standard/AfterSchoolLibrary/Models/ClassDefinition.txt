@@ -34,7 +34,7 @@ property: VerifiedAccount, bool, Bit
 property: IsRegistered, bool, Bit
 property: DefaultAccountId, int?, Int
 property: AllowTextMessages, bool, Bit
-property: CleverUserId, int?, Int
+property: CleverUserId, string, NVarChar "100"
 loadmethod: Uid
 loadmethod: Uid|IsActive
 loadmethod: IsActive, List<>

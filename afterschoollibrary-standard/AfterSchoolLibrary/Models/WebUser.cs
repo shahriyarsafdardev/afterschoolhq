@@ -29,7 +29,7 @@ namespace AfterSchoolLibrary.Models
 		public bool IsRegistered { get { return (bool)MDV["IsRegistered"].Value; } set { MDV["IsRegistered"].Value = value; } }
 		public int? DefaultAccountId { get { return (int?)MDV["DefaultAccountId"].Value; } set { MDV["DefaultAccountId"].Value = value; } }
 		public bool AllowTextMessages { get { return (bool)MDV["AllowTextMessages"].Value; } set { MDV["AllowTextMessages"].Value = value; } }
-		public int? CleverUserId { get { return (int?)MDV["CleverUserId"].Value; } set { MDV["CleverUserId"].Value = value; } }
+		public string CleverUserId { get { return (string)MDV["CleverUserId"].Value; } set { MDV["CleverUserId"].Value = value; } }
 		
 
         public WebUser()
@@ -59,7 +59,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "IsRegistered", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "DefaultAccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AllowTextMessages", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "CleverUserId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "CleverUserId", System.Data.SqlDbType.NVarChar , "100");
 				
                 return _dp;
             }
