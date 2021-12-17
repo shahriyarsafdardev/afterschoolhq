@@ -1127,27 +1127,18 @@ namespace AfterSchoolLibraryTests.Tests
         {
             var user = WebUserFactory.Create(msgs, dc);
             var account = AccountFactory.Create(user, msgs, dc);
-            var activity = ActivityFactory.Create(account, msgs, dc);
 
             var schoolWebUser = WebUserFactory.Create(msgs, dc);
             var schoolAccount = AccountFactory.Create(schoolWebUser, msgs, dc);
             var location = LocationFactory.Create(schoolAccount, msgs, dc);
+            var activity = ActivityFactory.Create(schoolAccount, location, 12, msgs, dc);
 
-            activity.LocationId = location.ID.Value;
+            activity.ProviderAccountId = account.ID.Value;
             msgs.AddRange(activity.Save(dc));
 
-            var checkExternal = activity.GetParticipationObject(msgs, dc).IsExternallyProvided();
+            var errorMsgs = activity.IsPaymentMethodAddedForExternalAccount(account, msgs, dc);
 
-            //var registrationPeriod = Factories.RegistrationPeriodFactory.Create(account, msgs, dc: dc);
-            //var activityRegistrationPeriod = Factories.ActivityRegistrationPeriodFactory.Create(activity, registrationPeriod, msgs, dc: dc);
-
-            //var activityGroup = Factories.ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc: dc);
-            //activity.ActivityGroupId = activityGroup.ID.Value;
-            //activity.Save(dc: dc);
-
-            //var errorList = activity.GetItemsRequiredToPublish(msgs, dc);
-
-            //Assert.True(errorList.HasErrors());
+            Assert.Equal(1, errorMsgs.Count);
         }
     }
 }

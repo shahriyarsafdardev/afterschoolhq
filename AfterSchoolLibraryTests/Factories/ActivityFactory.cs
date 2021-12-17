@@ -83,6 +83,21 @@ namespace AfterSchoolLibraryTests.Factories
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
+        public static Activity Create(Account account, Location location, decimal? costPerRegistrant, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var name = "Test Activity";
+            var obj = new Activity()
+            {
+                AccountId = account.ID,
+                SeatsAvailable = 4,
+                LocationId = location.ID,
+                Name = name,
+                UniqueName = ActivityService.GenerateUniqueName(name, null, account.ID, msgs, dc),
+                CostPerRegistrant = costPerRegistrant
+            };
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
 
         public static Activity Create(Account account, ActivitySchedule schedule, decimal? costPerRegistrant, SystemMessages msgs, DatabaseConnection dc)
         {

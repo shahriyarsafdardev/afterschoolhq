@@ -226,18 +226,26 @@ namespace AfterSchool.Models
             if (activity.IsGroupArchived)
                 archiveMsgs.Add($"<a href=\"/org/group/restore/{activity.GetActivityGroup().Uid}\">Restore {activity.GetActivityGroup().Name}</a>. It is currently archived", MessageType.Error);
 
-            if(!activity.GetParticipationObject(msg, dc).IsRegistrationFree && activity.CostPerRegistrant > 0 && !SessionVariables.CurrentAccount.CanReceivePaymentDeposits(msg, dc) && !activity.GetParticipationObject(msg, dc).IsExternalToAccount(SessionVariables.CurrentAccount))
-            {
-                var addPaymentMsgs = new SystemMessages();
-                addPaymentMsgs.Add($"<a href=\"/org/account/paymentsoptions\">Add Payment Method</a>. To accept payments", MessageType.Error);
-                msgs.AddRange(addPaymentMsgs);
-            }
-
+            msgs.AddRange(activity.IsPaymentMethodAddedForExternalAccount(SessionVariables.CurrentAccount, msg, dc));
 
             if (archiveMsgs.HasErrors())
             {
                 archiveMsgs.Insert(0, new SystemMessage($"<span class=\"publish-error-title\">Archive Errors<span>", MessageType.UserError));
                 msgs.AddRange(archiveMsgs);
+            }
+
+            return msgs;
+        }
+
+        public static SystemMessages IsPaymentMethodAddedForExternalAccount(this Activity activity, Account account, SystemMessages msg = null, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            if (!activity.GetParticipationObject(msg, dc).IsRegistrationFree && activity.CostPerRegistrant > 0 && !account.CanReceivePaymentDeposits(msg, dc) && !activity.GetParticipationObject(msg, dc).IsExternalToAccount(account))
+            {
+                var addPaymentMsgs = new SystemMessages();
+                addPaymentMsgs.Add($"<a href=\"/org/account/paymentsoptions\">Add Payment Method</a>. To accept payments", MessageType.Error);
+                msgs.AddRange(addPaymentMsgs);
             }
 
             return msgs;
