@@ -10,8 +10,14 @@ namespace AfterSchoolLibrary.Helpers
         public static string ClientId { get { return ConfigurationManager.AppSettings["Clever.ClientId"]; } }
         public static string RedirectUrl { get { return Utilities.BaseUrl() + "/oauth/clever"; } }
         public static string TokenRetrieveUrl { get { return "https://clever.com/oauth/tokens"; } }
-        public static string UserDetailUrl { get { return "https://api.clever.com/v3.0/me"; } }
-        public static string UsersDetailUrl { get { return "https://api.clever.com/v3.0/users/"; } }
+        /// <summary>
+        /// This will return just a Id of user with some other details like user type
+        /// </summary>
+        public static string UserIdentityUrl { get { return "https://api.clever.com/v3.0/me"; } }
+        /// <summary>
+        /// This will return details of user like name, email etc but it will require User Id
+        /// </summary>
+        public static string UserDetailUrl { get { return "https://api.clever.com/v3.0/users/{UserId}/district"; } }
         public static string PortalUrl { get { return "https://clever.com/in/placid-chalk-6926"; } }
 
         /// <summary>
@@ -32,6 +38,8 @@ namespace AfterSchoolLibrary.Helpers
                 return $"https://clever.com/oauth/authorize?response_type=code&redirect_uri={RedirectUrl}&client_id={ClientId}";
             }
         }
+
+        public static string GetUsersDetailUrl(string Id) => UserDetailUrl.Replace("{UserId}", Id);
     }
 }
 

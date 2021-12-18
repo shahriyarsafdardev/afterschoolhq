@@ -10,8 +10,6 @@ using RestSharp;
 using Newtonsoft.Json;
 using AfterSchoolLibrary.Helpers;
 using Clever.Models;
-using AfterSchoolLibrary.Models;
-using BasicLibrary.DataAccess;
 
 namespace AfterSchool.Controllers
 {
@@ -90,10 +88,12 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult Clever(string code, string scope)
         {
+            var msgs = new SystemMessages();
+
             var client = new RestSharp.RestClient(CleverHelper.TokenRetrieveUrl);
             client.Timeout = -1;
 
-            var request = new RestRequest(Method.POST);            
+            var request = new RestRequest(Method.POST);
             request.AddHeader("Authorization", $"Basic " + CleverHelper.BasicAuthorizationToken);
             request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
             request.AddParameter("code", code);
@@ -103,20 +103,20 @@ namespace AfterSchool.Controllers
             var response = client.Execute(request);
             var tokenDto = JsonConvert.DeserializeObject<CleverTokenDto>(response.Content);
 
-            var id = GetCleverUserDetails(token: tokenDto.access_token);
-          
-            if (!String.IsNullOrEmpty(id))
-                TempData["Success"] = "Sucessfully Connected " + id;
-            else
-                TempData["NotSuccess"] = "Not Sucessfully Connected ";
+            GetCleverUserDetails(token: tokenDto.access_token, msgs: msgs);
 
-            return RedirectToAction("Index", "Org/user/edit");
+            // store temp msgs
+            SetTempMessage(msgs: msgs);
 
+            if (msgs.HasErrors())
+                AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(msgs); // log all error msgs 
+
+            return RedirectToAction("edit", "user", new { area = "org" });
         }
 
-        public string GetCleverUserDetails(string token)
+        public void GetCleverUserDetails(string token, SystemMessages msgs = null)
         {
-            var client = new RestSharp.RestClient(CleverHelper.UserDetailUrl);
+            var client = new RestSharp.RestClient(CleverHelper.UserIdentityUrl);
             client.Timeout = -1;
             var request = new RestRequest(Method.GET);
             request.AddHeader("Authorization", "Bearer " + token);
@@ -125,41 +125,37 @@ namespace AfterSchool.Controllers
 
             var cleverUser = JsonConvert.DeserializeObject<CleverUserDto>(response.Content);
 
-            string userId = GetUserDistrict(cleverUser.data.id, token);
-
-            return userId;
+            SetCleverIdentityForAHQUser(id: cleverUser.data.id, token: token, msgs: msgs);
         }
 
-        public string GetUserDistrict(string id, string token)
+        public void SetCleverIdentityForAHQUser(string id, string token, SystemMessages msgs = null)
         {
-            WebUser webUser = null;
-
-            var client = new RestSharp.RestClient(CleverHelper.UsersDetailUrl + id + "/district");
-
+            var client = new RestSharp.RestClient(CleverHelper.GetUsersDetailUrl(Id: id));
             client.Timeout = -1;
 
             var request = new RestRequest(Method.GET);
-
             request.AddHeader("Authorization", "Bearer " + token);
 
             var response = client.Execute(request);
-
             var cleverUserDistrictDto = JsonConvert.DeserializeObject<CleverUserDistrictDto>(response.Content);
-            
-            webUser = WebUser.LoadByEmail(cleverUserDistrictDto.data.district_contact.email, true, null, null);
-         
-            if(webUser != null && !String.IsNullOrEmpty(cleverUserDistrictDto.data.id))
+
+            var webUser = SessionVariables.CurrentUser;
+            if (webUser.IsNotEmpty() &&
+                cleverUserDistrictDto.IsNotEmpty() &&
+                cleverUserDistrictDto.data.IsNotEmpty() &&
+                cleverUserDistrictDto.data.id.IsNotEmpty())
             {
-                var msgs = new SystemMessages();
-              
-                webUser.CleverUserId = cleverUserDistrictDto.data.id;
+                if (webUser.CleverUserId == cleverUserDistrictDto.data.id)
+                    msgs.Add("This user is already associated with clever.", MessageType.Success);
+                else
+                {
+                    webUser.CleverUserId = cleverUserDistrictDto.data.id;
+                    msgs.AddRange(webUser.Save());
 
-                msgs.AddRange(webUser.Save());
-
-                return cleverUserDistrictDto.data.id;
+                    if (msgs.HasNoErrors())
+                        msgs.Add("Clever integration for this user has been successfully completed.", MessageType.Success);
+                }                
             }
-
-            return null;
         }
     }
 }

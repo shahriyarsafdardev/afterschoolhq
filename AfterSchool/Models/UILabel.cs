@@ -124,5 +124,13 @@ namespace AfterSchool.Models
 
             return text;
         }
+
+        public static string GetCleverConnectedLableForUsers()
+        {
+            if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.CleverUserId.IsNotEmpty())
+                return "<span style=\"font-size: 12px; font-family: calibri;\">(AHQ data shows that this user is integrated/connected with clever.)</span>";
+
+            return "";
+        }
     }
 }

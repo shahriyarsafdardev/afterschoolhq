@@ -27,15 +27,12 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Edit()
         {
-            SystemMessages msgs = new SystemMessages();
+            var msgs = new SystemMessages();
 
-            if (TempData["Success"] != null)
-               msgs.Add(TempData["Success"].ToString(), MessageType.Success);
-            else if (TempData["NotSuccess"] != null)
-                msgs.Add(TempData["NotSuccess"].ToString(), MessageType.UserError);
-
+            HandleTempMessages(msgs);
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
+
             return View(SessionVariables.CurrentUser);
         }
 
