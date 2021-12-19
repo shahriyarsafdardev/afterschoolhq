@@ -214,6 +214,15 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
+		public static WebUser LoadByCleverUserIdByIsActive(string CleverUserId, bool IsActive, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["CleverUserId"], CleverUserId);
+			dq.Criterias.Add(ObjectMap["IsActive"], IsActive);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
 		
 
         #endregion

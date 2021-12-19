@@ -1,12 +1,9 @@
-﻿@{ 
-    Layout = "~/Views/Shared/_LayoutLogin-Updated.cshtml";
+﻿@{ Layout = "~/Views/Shared/_LayoutLogin-Updated.cshtml";
     ViewBag.Title = "Login";
-    var msgs = (SystemMessages)ViewBag.Messages; 
-}
+    var msgs = (SystemMessages)ViewBag.Messages; }
 
 <style>
     .bg-image {
-        /* The image used */
         background-image: url("img/image-3-1800x900-1.png");
         /* Center and scale the image nicely */
         background-repeat: no-repeat;
@@ -16,25 +13,32 @@
         height: 100%;
     }
 
-    .login-form-email {
-        border-radius: 6px;
-        background-color: #fff;
-        background: url(img/envelop.png) no-repeat scroll 7px 7px;
+    .txt-generic-login {
+        width: 100%;
         padding-left: 40px;
+        border-radius: 6px !important;
     }
 
-    .login-form-password {
-        border-radius: 6px;
-        background-color: #fff;
-        background: url(img/password.png) no-repeat scroll 9px 2px;
-        padding-left: 40px;
+    .input-group-email {
+        position: absolute;
+        left: 9px;
+        top: 9px;
+        z-index: 9;
     }
 
-    input:-webkit-autofill,
-    input:-webkit-autofill:hover,
-    input:-webkit-autofill:focus,
-    input:-webkit-autofill:active {
-        -webkit-box-shadow: 0 0 0 30px white inset !important;
+    .btn-generic-login {
+        padding: 0;
+        margin: 0;
+        border: medium;
+        cursor: text;
+        background: transparent !important;
+    }
+
+    .input-group-password {
+        position: absolute;
+        left: 10px;
+        top: 3px;
+        z-index: 9;
     }
 </style>
 
@@ -56,14 +60,29 @@
             <div class="clearfix"></div>
 
             <form action="@Url.Action("index", "login", new { returnurl = ViewData["ReturnUrl"], invite = ViewData["invite"] })" method="post" class="form-horizontal" id="form-login">
+
                 <div class="form-group">
                     <label class="short-description"> Email </label>
-                    <input id="username" name="username" type="text" class="form-control login-form-email" autocomplete="off" required>
+                    <div class="input-group" style="width: 100%;">
+                        <input id="username" name="username" type="text" class="form-control txt-generic-login" required>
+                        <div class="input-group-email">
+                            <button id="inputGroupEmailPrepend" type="submit" class="btn btn-primary btn-sm btn-generic-login">
+                                <img src="~/img/envelop_trans.png" />
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="form-group" style=" margin-bottom: 5px;">
+                <div class="form-group">
                     <label class="short-description"> Password </label>
-                    <input id="password" name="password" type="password" class="form-control login-form-password login-form-password-eye" autocomplete="new-password" required>
+                    <div class="input-group" style="width: 100%;">
+                        <input id="password" name="password" type="password" class="form-control txt-generic-login" required>
+                        <div class="input-group-password">
+                            <button id="inputGroupPassworkPrepend" type="submit" class="btn btn-primary btn-sm btn-generic-login">
+                                <img src="~/img/password_trans.png" />
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-group" style="float: left;">
@@ -83,7 +102,7 @@
                 <div class="form-group login-submit text-center">
                     <button id="btn-login" type="submit" class="btn btn-primary btn-lg btn-block btn-login-updated" style="margin: 0 auto;">Log In</button>
                     <br />
-                    <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLink" class="btn-clever-login">
+                    <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLinkLogin" class="btn-clever-login">
                         <img src="~/img/login-clever.png" style="width: 225px; height: 50px;" class="clever-login-img" />
                     </a>
                 </div>

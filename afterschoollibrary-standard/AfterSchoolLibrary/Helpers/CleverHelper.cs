@@ -8,7 +8,8 @@ namespace AfterSchoolLibrary.Helpers
     {
         private static string SecretKey { get { return ConfigurationManager.AppSettings["Clever.ClientSecret"]; } }
         public static string ClientId { get { return ConfigurationManager.AppSettings["Clever.ClientId"]; } }
-        public static string RedirectUrl { get { return Utilities.BaseUrl() + "/oauth/clever"; } }
+        public static string RedirectUrlForIntegration { get { return Utilities.BaseUrl() + "/oauth/cleverintegration"; } }
+        public static string RedirectUrlForLogin { get { return Utilities.BaseUrl() + "/oauth/cleverlogin"; } }
         public static string TokenRetrieveUrl { get { return "https://clever.com/oauth/tokens"; } }
         /// <summary>
         /// This will return just a Id of user with some other details like user type
@@ -35,7 +36,15 @@ namespace AfterSchoolLibrary.Helpers
         {
             get
             {
-                return $"https://clever.com/oauth/authorize?response_type=code&redirect_uri={RedirectUrl}&client_id={ClientId}";
+                return $"https://clever.com/oauth/authorize?response_type=code&redirect_uri={RedirectUrlForIntegration}&client_id={ClientId}";
+            }
+        }
+
+        public static string SSOLinkLogin
+        {
+            get
+            {
+                return $"https://clever.com/oauth/authorize?response_type=code&redirect_uri={RedirectUrlForLogin}&client_id={ClientId}";
             }
         }
 

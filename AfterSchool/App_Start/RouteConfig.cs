@@ -49,8 +49,13 @@ namespace AfterSchool
 
             routes.MapRoute(
                 "OAuth",
-                "oauth/clever",
-                new { controller = "OAuth", action = "Clever" });
+                "oauth/cleverintegration",
+                new { controller = "oauth", action = "cleverintegration" });
+
+            routes.MapRoute(
+                "OAuthCleverLogin",
+                "oauth/cleverlogin",
+                new { controller = "oauth", action = "cleverlogin" });
 
             routes.MapRoute(
                 "Indianapolis",

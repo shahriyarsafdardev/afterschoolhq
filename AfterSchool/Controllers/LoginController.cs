@@ -21,6 +21,8 @@ namespace AfterSchool.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var loggedInWithAnAccount = currentUser.IsNotEmpty() && currentAccount.IsNotEmpty();
 
+            HandleTempMessages(msgs);
+
             if (loggedInWithAnAccount && (regaccount.IsEmpty() || currentAccount.AccountTypeId == AccountType.Registrant))
             {
                 if (!currentUser.IsRegistered)
@@ -116,6 +118,54 @@ namespace AfterSchool.Controllers
             }
 
             return View();
+        }
+
+
+        [HttpGet]
+        public ActionResult LoginUser(string id)
+        {
+            var msgs = new SystemMessages();
+
+            if (id.IsEmpty())
+            {
+                msgs.Add("Identifier expected", MessageType.UserError);
+                LoadTempMsgAndLogErrors(msgs);
+                return RedirectToAction("Index");
+            }
+
+            var user = WebUser.Load(id.ToInteger(), msgs);
+
+            if (user.IsEmpty())
+            {
+                msgs.Add("Invalid username and/or password", MessageType.UserError);
+                LoadTempMsgAndLogErrors(msgs);
+                return RedirectToAction("Index");
+            }
+            else
+                LoadSessionInfo(user, null, true, msgs);
+            
+            ViewBag.Messages = msgs;
+
+            if (msgs.HasNoErrors())
+            {
+                var currentAccount = SessionVariables.CurrentAccount;
+
+                // select account
+                if (currentAccount.IsEmpty())
+                    return RedirectToAction("select", "login");
+
+                if (user.IsNotEmpty() && currentAccount.IsNotEmpty())
+                    // LOG: WebUserName LoggedIn
+                    SessionVariables.WebSession.LogActivity(
+                        account: currentAccount,
+                        actor: user,
+                        actionType: WebSessionActionType.LoggedIn
+                    );                
+
+                return LoginRedirect(msgs: msgs);
+            }
+
+            return RedirectToAction("Index");
         }
 
         [HttpGet]

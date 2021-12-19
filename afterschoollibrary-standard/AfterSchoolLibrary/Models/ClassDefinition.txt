@@ -39,6 +39,7 @@ loadmethod: Uid
 loadmethod: Uid|IsActive
 loadmethod: IsActive, List<>
 loadmethod: FacebookId
+loadmethod: CleverUserId|IsActive
 [end]
 
 [-begin]

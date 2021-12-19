@@ -827,5 +827,39 @@ namespace AfterSchoolLibrary.Services
             var userType = loggedInUser.GetUserType(account, msgs, dc);
             return userType.In(new List<UserType>() { UserType.TechSupport, UserType.Owner, UserType.Administrator });
         }
+
+        #region Clever Integration
+
+        public static WebUser LoginByCleverUserId(string CleverUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return WebUser.LoadByCleverUserIdByIsActive(CleverUserId: CleverUserId, IsActive: true, msgs, dc);
+        }
+
+        public static WebUser GetUserByCleverId(string id, SystemMessages msgs = null)
+        {
+            if (id.IsNotEmpty())
+                return WebUserService.LoginByCleverUserId(CleverUserId: id, msgs: msgs);
+
+            return null;
+        }
+
+        public static void SetCleverIdentityToUser(string id, WebUser webUser, SystemMessages msgs = null)
+        {
+            if (webUser.IsNotEmpty() && id.IsNotEmpty())
+            {
+                if (webUser.CleverUserId == id)
+                    msgs.Add("This user is already associated with clever.", MessageType.Success);
+                else
+                {
+                    webUser.CleverUserId = id;
+                    msgs.AddRange(webUser.Save());
+
+                    if (msgs.HasNoErrors())
+                        msgs.Add("Clever integration for this user has been successfully completed.", MessageType.Success);
+                }
+            }
+        }
+
+        #endregion
     }
 }
