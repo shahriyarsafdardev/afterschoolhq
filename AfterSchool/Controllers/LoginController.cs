@@ -242,6 +242,32 @@ namespace AfterSchool.Controllers
             return View();
         }
 
+        [HttpPost]
+        public JsonResult ResetPasswordJson(string email)
+        {            
+            var msgs = new SystemMessages();
+            WebUser user = null;
+
+            if (!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
+                msgs.Add("Please enter a valid email address", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                user = WebUser.LoadByEmail(email, msgs);
+
+                if (user.IsNotEmpty())
+                    msgs.AddRange(user.SendPasswordResetToken(SessionVariables.IsAfterSchool.Value));
+
+                msgs.Add("If an account exists for your email address, you will receive an email momentarily to reset your password", MessageType.Success);
+            }
+
+            if (msgs.HasNoErrors())
+                return Json(new { success = true, status = "ok" }, JsonRequestBehavior.AllowGet);
+
+            //.. something went wrong, error occured
+            return Json(new { success = false, status = "error", data = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
+        }
+
         [HttpGet]
         public ActionResult ChangePassword(string token)
         {
@@ -338,6 +364,29 @@ namespace AfterSchool.Controllers
                 return Json(new { status = "ok", isNewParentAccount }, JsonRequestBehavior.DenyGet);
 
             return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.DenyGet);
+        }
+
+        [HttpGet]
+        public ActionResult AuthorizeUser(string id, string source, string redirectUrl)
+        {
+            var msgs = new SystemMessages();
+
+            if (id.IsEmpty())
+            {
+                msgs.Add("Identifier expected", MessageType.UserError);
+                LoadTempMsgAndLogErrors(msgs);
+                return RedirectToAction("Index");
+            }
+
+            var user = WebUser.Load(id.ToInteger(), msgs);
+
+            if (msgs.HasNoErrors() && user.IsNotEmpty())
+            {
+                LoadSessionInfo(user, null, true, source, msgs);
+                return Redirect(redirectUrl);
+            }
+
+            return RedirectToAction("Index");
         }
 
     }

@@ -304,7 +304,7 @@
                         else
                         {
 
-                            <button type="button" class="btn btn-link md-trigger" data-modal="modal-login">Login to Account</button>
+                            <button type="button" class="btn btn-link md-trigger" onclick="return showModal('modal-login')">Login to Account</button>
                         }
                     </div>
                 </div>
@@ -398,6 +398,16 @@
             type: "POST",
             url: url
         });
+    }
+
+    function showModal(id) {
+        $('#' + id).modal('show');
+        $('#' + id).addClass('md-show');
+    }
+
+    function hideModal(id) {
+        $('#' + id).modal('hide');
+        $('#' + id).removeClass('md-show');
     }
 </script>
 

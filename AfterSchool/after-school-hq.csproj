@@ -1846,6 +1846,8 @@
     <Content Include="Views\R\ActivitySelectDates.cshtml" />
     <Content Include="Views\Shared\Registration\_LoginModalWithUpdatedDesign.cshtml" />
     <Content Include="Views\Shared\_LayoutLogin-Updated.cshtml" />
+    <Content Include="Views\Shared\Registration\_ResetPassword.cshtml" />
+    <Content Include="Views\Shared\Registration\_ResetPasswordCompleted.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

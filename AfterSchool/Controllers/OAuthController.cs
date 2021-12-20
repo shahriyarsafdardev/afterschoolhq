@@ -102,7 +102,7 @@ namespace AfterSchool.Controllers
 
         [HttpGet]
         public ActionResult CleverLogin(string code, string scope)
-        {
+        {   
             var msgs = new SystemMessages();
 
             var token = CleverIntegrationService.GetToken(code: code, redirectUrl: CleverHelper.RedirectUrlForLogin);
@@ -114,12 +114,18 @@ namespace AfterSchool.Controllers
                 var user = WebUserService.GetUserByCleverId(id: userIdentity.data.id, msgs: msgs);
 
                 if (user.IsNotEmpty())
+                {
+                    var redirectUrl = TempData["redirectUrl"].IsNotEmpty() ? TempData["redirectUrl"].ToString() : "";
+                    if (redirectUrl.IsNotEmpty()) // user is parent
+                        return RedirectToAction("authorizeuser", "login", new { area = "", id = user.ID.ToString(), source = "parent-login", redirectUrl = redirectUrl });
+                    
                     return RedirectToAction("loginUser", "login", new { area = "", id = user.ID.ToString() });
+                }
                 else
                     msgs.Add("We didn't find any user in our database for this clever user.", MessageType.Error);
             }
 
-            LoadTempMsgAndLogErrors(msgs: msgs);            
+            LoadTempMsgAndLogErrors(msgs: msgs);
             return RedirectToAction("index", "login", new { area = "" });
         }
 

@@ -1116,7 +1116,7 @@
     letter-spacing: normal;
     text-align: center;
     color: #494949;
-    margin-top: 14px;
+    margin-top: 15px;
     margin-bottom: 35px;
 }
 
@@ -1265,4 +1265,105 @@
     /*position: fixed;
         top: 175px;*/
     margin-top: 175px;
+}
+
+.txt-generic-login {
+    width: 100%;
+    padding-left: 40px;
+    border-radius: 6px !important;
+}
+
+.input-group-email {
+    position: absolute;
+    left: 9px;
+    top: 9px;
+    z-index: 9;
+}
+
+.btn-generic-login {
+    padding: 0;
+    margin: 0;
+    border: medium;
+    cursor: text;
+    background: transparent !important;
+}
+
+.input-group-password {
+    position: absolute;
+    left: 10px;
+    top: 3px;
+    z-index: 9;
+}
+
+.login-form-email {
+    border-radius: 6px;
+    background-color: #fff;
+    background: url(../../img/envelop.png) no-repeat scroll 7px 7px;
+    padding-left: 40px;
+}
+
+.login-form-password {
+    border-radius: 6px;
+    background-color: #fff;
+    background: url(../../img/password.png) no-repeat scroll 9px 2px;
+    padding-left: 40px;
+}
+
+.btn-reset-pass {
+    border-radius: 6px;
+    font-family: Montserrat;
+    font-size: 18px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: 1.78px;
+    text-align: center;
+    color: #fff;
+}
+
+.span-notice-forgot-pass {
+    font-family: Montserrat;
+    font-weight: 300;
+    font-stretch: normal;
+    font-style: italic;
+    line-height: normal;
+    letter-spacing: normal;
+    text-align: center;
+    color: #494949;
+}
+
+.btn-close-login-form {
+    right: 20px;
+}
+
+.error-border {
+    border-radius: 5px;
+    border: #FF0000 1px solid;
+}
+
+.reset-pass-completed-msg-1 {
+    font-family: Montserrat;
+    font-size: 20px;
+    font-weight: 300;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    text-align: center;
+    color: #282828;
+    margin-top: 21px;
+}
+
+.reset-pass-completed-msg-2 {
+    font-family: Montserrat;
+    font-size: 16px;
+    font-weight: 300;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    text-align: center;
+    color: #494949;
+    margin-top: 15px;
 }

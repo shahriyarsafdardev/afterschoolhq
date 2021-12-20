@@ -1,20 +1,8 @@
-﻿<style>
-    .login-form-email {
-        border-radius: 6px;
-        background-color: #fff;
-        background: url(img/envelop.png) no-repeat scroll 7px 7px;
-        padding-left: 40px;
-    }
+﻿@{
+    TempData["redirectUrl"] = ViewData["LoginReturnUrl"].IsNotEmpty() ? ViewData["LoginReturnUrl"].ToString() : HttpContext.Current.Request.Url.AbsoluteUri;
+}
 
-    .login-form-password {
-        border-radius: 6px;
-        background-color: #fff;
-        background: url(img/password.png) no-repeat scroll 9px 2px;
-        padding-left: 40px;
-    }
-</style>
-
-<div id="modal-login" class="md-modal md-effect-9">
+<div id="modal-login" class="md-modal">
     <div class="md-content re-316">
 
         <div class="modal-body">
@@ -50,13 +38,12 @@
                     </div>
 
                     <div class="form-group login-form-forgot-password-container">
-                        <a href="/login/resetpassword" style="padding: 7px; line-height: 30px; font-weight: 300; text-decoration: underline; ">Forgot Password</a>
+                        <a href="#" style="padding: 7px; line-height: 30px; font-weight: 300; text-decoration: underline;" onclick="return showForgotPasswordModal()">Forgot Password</a>
                     </div>
 
                     <div class="form-group login-submit text-center">
                         <button type="button" id="btn-login" class="btn btn-primary btn-lg btn-block btn-login-updated" onclick="authorize()">Log In</button>
-                        
-                        <a href="https://clever.com/oauth/authorize?response_type=code&redirect_uri=http://localhost:54849/oauth/clever&client_id=6909bfddb2f7cc535ed2" class="btn-clever-login">
+                        <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLinkLogin" class="btn-clever-login">
                             <img src="~/img/login-clever.png" style="width: 225px; height: 50px;" class="clever-login-img" />
                         </a>
                     </div>
@@ -117,7 +104,7 @@
     </div>
 </div>
 
-
+@{ Html.RenderPartial("~/Views/Shared/Registration/_ResetPassword.cshtml"); }
 
 <script>
     let authorizationFormRedirectUrl = null;
@@ -126,6 +113,8 @@
     let signupFormAction = null;
 
     function authorize() {
+
+        showLoader();
 
         params = 'username=' + encodeURIComponent($('#lm-login-username').val()) +
             '&password=' + encodeURIComponent($('#lm-login-password').val()) +
@@ -162,6 +151,7 @@
                     $('#btn-login').prop('disabled', false);
                 }
 
+                hideLoader();
             }
         )
     }
@@ -241,6 +231,97 @@
     }
 
     function ensureModalClose(id) {
-        $('#modal-login').removeClass('md-show');
+        $('#' + id).removeClass('md-show');
     }
+
+    function showForgotPasswordModal() {
+        //first hide login modal
+        hideModal('modal-login');
+        // now show the reset password modal
+        showModal('modal-rest-password');
+    }
+
+    function validateAndReset() {
+        var email = $('#reset-email');
+        var isEmailValid = validateEmail(email.val());
+
+        if (!isEmailValid) {
+            email.addClass('error-border');
+            setTimeout(function () {
+                email.removeClass('error-border');
+            }, 3000);
+
+            $(email).parent().effect("shake");
+
+            return;
+        }
+
+        resetPassword(email.val());
+    }
+
+    function resetPassword(email) {
+        showLoader();
+        btnProcess('btn-reset-pass', 'Processing...', true);
+
+        $.ajax({
+            url: '@Url.Action("ResetPasswordJson", "Login", new { Area = "" })',
+            data: { email: email },
+            type: "POST",
+            dataType: "json",
+            success: function (data) {
+                if (data && data.success == true) {
+                    resetEmailCompleted();
+                    btnProcess('btn-reset-pass', 'Reset Password', false);
+                    hideModal('modal-rest-password');
+                    showModal('modal-reset-password-completed');
+                }
+                else {
+                    btnProcess('btn-reset-pass', 'Reset Password', false);
+
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: 'Something went wrong. Please contact customer support.',
+                        success: false
+                    });
+                }
+
+                hideLoader();
+                return;
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(errorThrown);
+                btnProcess('btn-reset-pass', 'Reset Password', false);
+                Notifications.showBar({
+                    title: 'Error',
+                    message: 'Something went wrong. Please contact customer support.',
+                    success: false
+                });
+
+                hideLoader();
+                return;
+            }
+        });
+    }
+
+    function resetEmailCompleted() {
+        //hide reset password modal
+        hideModal('modal-rest-password');
+        $('#reset-email').val('');
+    }
+
+    function btnProcess(id, text, isDisabled) {
+        $('#' + id).html(text);
+        $('#' + id).prop('disabled', isDisabled);
+    }
+
+    function validateEmail(emailText) {
+        var pattern = /^[a-zA-Z0-9\-_]+(\.[a-zA-Z0-9\-_]+)*@@[a-z0-9]+(\-[a-z0-9]+)*(\.[a-z0-9]+(\-[a-z0-9]+)*)*\.[a-z]{2,4}$/;
+        if (pattern.test(emailText)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
 </script>
