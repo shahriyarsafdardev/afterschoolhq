@@ -51,7 +51,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
     private void SendLogEmail(SystemMessages msgs)
     {
-      string toEmail = "darye+stripe+errors@afterschoolhq.com";
+      string toEmail = "dev@afterschoolhq.com";
       string subject = $"Stripe Webhook Errors - {AfterSchoolLibrary.Helpers.Utilities.HostName}";
       string body = msgs.RenderMessageList(MessageOutputType.Html);
 
@@ -314,29 +314,29 @@ namespace AfterSchool.Areas.WebHooks.Controllers
           {
             if (stripeRefund.TransferReversal.IsEmpty())
             {
-                        // NOTE: check if refund has a transfer, not sure how/if to handle
-                      }
 
-                      // check if transaction exists for refund
-                      var refundOriginalTransaction = Transaction.LoadByStripeChargeOrRefundId(stripeRefund.Id, msgs);
+            }
+            // NOTE: check if refund has a transfer, not sure how/if to handle
 
-                      // if no refund record exists in our db, create it from the transaction added to the checkoutObject
-                      // NOTE: not sure how to handle fees on partial refunds??
-                      if (refundOriginalTransaction.IsEmpty())
+            // check if transaction exists for refund
+            var refundOriginalTransaction = Transaction.LoadByStripeChargeOrRefundId(stripeRefund.Id, msgs);
+
+            // if no refund record exists in our db, create it from the transaction added to the checkoutObject
+            // NOTE: not sure how to handle fees on partial refunds??
+            if (refundOriginalTransaction.IsEmpty())
               refundOriginalTransaction = checkoutObject.Transaction;
 
             refundOriginalTransaction.CreateNewRefund(
-                          stripeRefund.Amount,
-                          0,
-                          0,
-                          stripeRefund.Id,
-                          TransactionType.Refund,
-                          refundOriginalTransaction.PaymentTypeId,
-                          refundOriginalTransaction.PaymentSourceTypeId,
-                          WebUser.Load(1, msgs),
-                          msgs
-                          );
-
+                        stripeRefund.Amount,
+                        0,
+                        0,
+                        stripeRefund.Id,
+                        TransactionType.Refund,
+                        refundOriginalTransaction.PaymentTypeId,
+                        refundOriginalTransaction.PaymentSourceTypeId,
+                        WebUser.Load(1, msgs),
+                        msgs
+                        );
           });
         }
       }
@@ -347,7 +347,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
       if (msgs.HasErrors())
         return Return500(msgs);
 
-            // send payment succeeded email, unless payment was made before today (for previously failed webhooks)
+      // send payment succeeded email, unless payment was made before today (for previously failed webhooks)
       var wasPaidToday = (bool)stripeInvoice.StatusTransitions?.PaidAt.IsNotEmpty() && stripeInvoice.StatusTransitions.PaidAt.Value.Date >= DateTime.Today.Date;
 
       if (wasPaidToday && stripeInvoice.AmountPaid > 0)
