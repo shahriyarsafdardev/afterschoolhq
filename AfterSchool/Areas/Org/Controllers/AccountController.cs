@@ -1588,9 +1588,9 @@ namespace AfterSchool.Areas.Org.Controllers
                             
                             var manualStripePayouts = newlyAddedPackage.HasFeature(featureType: FeatureType.ManualStripePayouts, msgs: amsgs, dc: adc);
                             if (manualStripePayouts)
-                                StripeHelper.ToggleStripePayoutForConnectedAccount(account: currentAccount, payoutIntervalType: PayoutIntervalType.Manual, msgs: amsgs);
+                                StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: currentAccount.StripeUserId, accountName: currentAccount.Name, payoutIntervalType: PayoutIntervalType.Manual, msgs: amsgs);
                             else
-                                StripeHelper.ToggleStripePayoutForConnectedAccount(account: currentAccount, payoutIntervalType: PayoutIntervalType.Daily, msgs: amsgs);
+                                StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: currentAccount.StripeUserId, accountName: currentAccount.Name, payoutIntervalType: PayoutIntervalType.Daily, msgs: amsgs);
                         }
                     },
                     onSuccess: (SystemMessages smsgs) =>

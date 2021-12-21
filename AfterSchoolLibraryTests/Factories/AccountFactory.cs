@@ -49,7 +49,7 @@ namespace AfterSchoolLibraryTests.Factories
             return obj;
         }
 
-        public static Account CreateAccount(WebUser user, AccountType accountType, bool stripeChargesEnabled, bool stripePayoutsEnabled, string stripeUserId, SystemMessages msgs, DatabaseConnection dc)
+        public static Account CreateAccountWithStripeFields(WebUser user, AccountType accountType, bool stripeChargesEnabled, bool stripePayoutsEnabled, string stripeUserId, SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new Account() { OwnerId = user.ID, Name = "Test Account", Email = "test@test.com", AccountTypeId = accountType, 
                 StripeChargesEnabled = stripeChargesEnabled, StripePayoutsEnabled = stripePayoutsEnabled, StripeUserId = stripeUserId };

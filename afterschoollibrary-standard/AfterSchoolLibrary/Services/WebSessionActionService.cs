@@ -43,5 +43,13 @@ namespace AfterSchoolLibrary.Services
 
             return webSessionAction;
         }
+
+        public static void SaveSummary(WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            foreach (SystemMessage item in msgs)
+                CreateNewLog(actor: loggedInUser, webSessionId: 0, actionStringFormat: "", actionString: item.Text,
+                    accountId: null, actionType: WebSessionActionType.ManualAHQPayout, objectType: ObjectType.NotSet, indirectObjectType: ObjectType.NotSet,
+                    objectId: null, indirectObjectId: null, msgs: null, dc: dc);
+        }
     }
 }

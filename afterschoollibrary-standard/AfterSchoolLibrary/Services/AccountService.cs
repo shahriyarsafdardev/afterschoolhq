@@ -1307,7 +1307,7 @@ namespace AfterSchoolLibrary.Services
                 // set payout type to manual for this account if it has package with ManualStripePayouts
                 var isManualStripeEnabled = account.GetAccountPackageFeature(featureType: FeatureType.ManualStripePayouts, msgs: msgs, dc: dc);
                 if (isManualStripeEnabled.IsNotEmpty() && isManualStripeEnabled.Max > 0)
-                    StripeHelper.ToggleStripePayoutForConnectedAccount(account: account, payoutIntervalType: PayoutIntervalType.Manual, msgs: msgs);
+                    StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: account.StripeUserId, accountName: account.Name, payoutIntervalType: PayoutIntervalType.Manual, msgs: msgs);
             }
             else
                 account.DisconnectStripeConnect(loggedInUser, msgs, dc);
@@ -4616,7 +4616,7 @@ namespace AfterSchoolLibrary.Services
 
         #endregion
 
-        #region Stripe Manaul Payout
+        #region Stripe Manual Payout
 
         public static SystemMessages PreparePayouts(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -4627,7 +4627,7 @@ namespace AfterSchoolLibrary.Services
 
             //get accounts with ManualStripePayouts enabled
             var accountsToGeneratePayout = GetAccountsWithSpecificFeatures(featureTypeId: FeatureType.ManualStripePayouts, msgs: msgs, dc: dc);
-            var webUser = GetLoggedInUserForPayout(msgs, dc);
+            var webUser = WebUserService.GetAdminUserForLogs(msgs, dc);
 
             if (accountsToGeneratePayout.IsNotEmpty())
                 accountsToGeneratePayout.PrepareManualPayouts(loggedInUser: webUser, msgs: msgs, dc: dc);
@@ -4637,7 +4637,7 @@ namespace AfterSchoolLibrary.Services
             if (msgs.HasNoErrors())
                 msgs.Add($"Payout job completed on at {DateTime.UtcNow.ToShortDateString()}.", MessageType.Success);
 
-            SaveSummary(webUser, msgs, dc);
+            WebSessionActionService.SaveSummary(webUser, msgs, dc);
             return msgs;
         }
 
@@ -4655,70 +4655,10 @@ namespace AfterSchoolLibrary.Services
                     var activities = account.GetPublishedActivities(msgs: msgs, dc: dc);
 
                     foreach (var activity in activities)
-                    {
-                        msgs.Add($"Checking payments for activity: ({activity.UniqueName}).", MessageType.Success);
-
-                        var transactions = new List<Transaction>();
-                        var activityPayments = ActivityPayment.LoadByParticipationObject(ParticipationObjectId: activity.ID.Value,
-                            ParticipationObjectTypeId: ParticipationObjectType.Activity,
-                            IsDeleted: false,
-                            msgs: msgs,
-                            dc: dc);
-
-                        // load only those transactions which aren't payed out yet
-                        foreach (var activityPayment in activityPayments)
-                        {
-                            msgs.Add($"Activity payment found for activity: ({activity.UniqueName}). reference-({activityPayment.Uid})", MessageType.Success);
-
-                            var transaction = activityPayment.GetTransaction(msgs: msgs, dc: dc);
-                            if (transaction.IsNotEmpty() && transaction.CanRequestPayout(msgs, dc))
-                            {
-                                msgs.Add($"Transaction worth {transaction.Amount} found. reference-({transaction.Uid})", MessageType.Success);
-                                transactions.Add(transaction);
-                            } 
-                            else                            
-                                msgs.Add($"Either transaction not found or transaction does not match crietria for activity: ({activity.UniqueName}) and payment: ({activityPayment.Uid}).", MessageType.Success);
-                        }
-
-                        if (transactions.Any())
-                        {
-                            msgs.Add($"Payout process started for activity: ({activity.UniqueName}).", MessageType.Success);
-
-                            var statementDescriptor = $"AHQ {account.Name.MaxChars(10)} {activity.Name.MaxChars(7)}";                            
-                            var payout = account.RequestNewPayout(transactions: transactions, statementDescriptor: statementDescriptor, loggedInUser: loggedInUser, msgs: msgs, dc: dc);
-
-                            if (payout.IsNotEmpty() && msgs.HasNoErrors())
-                            {
-                                msgs.Add($"Payout created and ready for approval with description: ({statementDescriptor}).", MessageType.Success);
-                                payout.Approve(loggedInUser: loggedInUser, msgs: msgs, dc: dc);
-                                msgs.Add($"Payout {payout.Uid} approved.", MessageType.Success);
-                            }
-                        }
-                    }
+                        activity.ProcessActivityPayouts(currentUser: loggedInUser, account: account, msgs: msgs, dc: dc);
                 }
             }
-        }
-
-        public static WebUser GetLoggedInUserForPayout(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            // load admin user
-            var webUser = WebUser.Load(id: 1, msgs: msgs, dc: dc);
-
-            // We will have this admin user in all environment but in case
-            // if don't find it, just load first Active webuser to be sure that system will not fail
-            if (webUser.IsEmpty())
-                webUser = WebUser.Load(criterias: new Hashtable() { { "IsActive", 1 } }, msgs: msgs, dc: dc).FirstOrDefault();
-
-            return webUser;
-        }
-
-        public static void SaveSummary(WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            foreach (SystemMessage item in msgs)
-                WebSessionActionService.CreateNewLog(actor: loggedInUser, webSessionId: 0, actionStringFormat: "", actionString: item.Text, 
-                    accountId: null, actionType: WebSessionActionType.ManualAHQPayout, objectType: ObjectType.NotSet, indirectObjectType: ObjectType.NotSet, 
-                    objectId: null, indirectObjectId: null, msgs: null, dc: dc);
-        }
+        }        
 
         #endregion
     }

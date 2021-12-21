@@ -125,9 +125,9 @@ namespace AfterSchoolLibrary.Services
                 if (packageFeature.FeatureTypeId == FeatureType.ManualStripePayouts)
                 {
                     if (packageFeature.Max.Value > 0)
-                        StripeHelper.ToggleStripePayoutForConnectedAccount(account: account, payoutIntervalType: PayoutIntervalType.Manual, msgs: msgs);
+                        StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: account.StripeUserId, accountName: account.Name, payoutIntervalType: PayoutIntervalType.Manual, msgs: msgs);
                     else
-                        StripeHelper.ToggleStripePayoutForConnectedAccount(account: account, payoutIntervalType: PayoutIntervalType.Daily, msgs: msgs);
+                        StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: account.StripeUserId, accountName: account.Name, payoutIntervalType: PayoutIntervalType.Daily, msgs: msgs);
                 }
             }
         }

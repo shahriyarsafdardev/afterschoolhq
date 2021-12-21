@@ -297,7 +297,7 @@ namespace AfterSchoolLibrary.Billing
             return account;
         }
 
-        public static Account ToggleStripePayoutForConnectedAccount(Models.Account account, PayoutIntervalType payoutIntervalType, SystemMessages msgs)
+        public static Stripe.Account ToggleStripePayoutForConnectedAccount(string customAccountsStripeUserId, string accountName, PayoutIntervalType payoutIntervalType, SystemMessages msgs)
         {
             var options = new AccountUpdateOptions()
             {
@@ -313,13 +313,13 @@ namespace AfterSchoolLibrary.Billing
                 }
             };
 
-            var stripeAccount = UpdateCustomAccount(account.StripeUserId, options, msgs);
+            var stripeAccount = UpdateCustomAccount(customAccountsStripeUserId, options, msgs);
 
             if (msgs.HasErrors())
                 return null;
 
             if (stripeAccount.IsNotEmpty())
-                msgs.Add($"Account: ({account.Name}) updated with { (payoutIntervalType == PayoutIntervalType.Manual ? "manual AHQ " : "daily Stripe " )} payout option.", MessageType.Success);
+                msgs.Add($"Account: ({accountName}) updated with { (payoutIntervalType == PayoutIntervalType.Manual ? "manual AHQ " : "daily Stripe " )} payout option.", MessageType.Success);
 
             return stripeAccount;
         }

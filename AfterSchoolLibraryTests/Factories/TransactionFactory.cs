@@ -22,7 +22,7 @@ namespace AfterSchoolLibraryTests.Factories
             return obj;
         }
 
-        public static Transaction CreateTransactionOfPastDate(Account billerAccount, Account payerAccount, decimal amount, PaymentType paymentType, SystemMessages msgs, DatabaseConnection dc)
+        public static Transaction CreateTransactionReadyForPayout(Account billerAccount, Account payerAccount, decimal amount, PaymentType paymentType, SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new Transaction()
             {

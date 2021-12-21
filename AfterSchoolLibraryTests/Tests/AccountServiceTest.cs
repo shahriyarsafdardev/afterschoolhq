@@ -3679,7 +3679,7 @@ namespace AfterSchoolLibraryTests.Tests
             var billerUser = WebUserFactory.Create(msgs, dc);
             var payerUser = WebUserFactory.Create(msgs, dc);
             var payerAccount = AccountFactory.Create(payerUser, msgs, dc);
-            var billerAccount = AccountFactory.CreateAccount(user: loggedInUser, accountType: AccountType.ActivityProvider, stripePayoutsEnabled: true, stripeChargesEnabled: true, stripeUserId: "1", msgs: msgs, dc: dc);
+            var billerAccount = AccountFactory.CreateAccountWithStripeFields(user: loggedInUser, accountType: AccountType.ActivityProvider, stripePayoutsEnabled: true, stripeChargesEnabled: true, stripeUserId: "1", msgs: msgs, dc: dc);
             var transaction = TransactionFactory.Create(billerAccount: billerAccount, payerAccount: payerAccount, paymentType: PaymentType.ACH, amount: 100,
                 platformPercentFee: 0, platformFlatFee: 0, convenienceFeePayerAccountId: billerUser.ID.Value, paymentTypeFeePayerAccountId: payerAccount.ID.Value,
                 convenienceFeeCharged: 7, paymentTypeFeeCharged: 4, msgs: msgs, dc: dc, transactionType: TransactionType.Charge);
@@ -3705,10 +3705,10 @@ namespace AfterSchoolLibraryTests.Tests
         {
             // Arrange
             var loggedInUser = WebUserFactory.Create(msgs, dc);
-            var billerAccount = AccountFactory.CreateAccount(user: loggedInUser, accountType: AccountType.ActivityProvider, stripePayoutsEnabled: true, stripeChargesEnabled: true, stripeUserId: "1", msgs: msgs, dc: dc);
+            var billerAccount = AccountFactory.CreateAccountWithStripeFields(user: loggedInUser, accountType: AccountType.ActivityProvider, stripePayoutsEnabled: true, stripeChargesEnabled: true, stripeUserId: "1", msgs: msgs, dc: dc);
 
             // Act
-            var stripeAccount = StripeHelper.ToggleStripePayoutForConnectedAccount(account: billerAccount, payoutIntervalType: PayoutIntervalType.Daily, msgs: msgs);
+            var stripeAccount = StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: billerAccount.StripeUserId, accountName: billerAccount.Name, payoutIntervalType: PayoutIntervalType.Daily, msgs: msgs);
 
             // Assert
             Assert.True(msgs.HasErrors()); //stripe account will not found
@@ -3726,7 +3726,7 @@ namespace AfterSchoolLibraryTests.Tests
             AccountFactory.CreateStripeAccountAndCustomer(account: billerAccount, msgs: msgs, dc: dc);
 
             // Act
-            var stripeAccount = StripeHelper.ToggleStripePayoutForConnectedAccount(account: billerAccount, payoutIntervalType: PayoutIntervalType.Manual, msgs: msgs);
+            var stripeAccount = StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: billerAccount.StripeUserId, accountName: billerAccount.Name, payoutIntervalType: PayoutIntervalType.Manual, msgs: msgs);
 
             // Assert
             Assert.True(msgs.HasNoErrors());
@@ -3746,8 +3746,8 @@ namespace AfterSchoolLibraryTests.Tests
             AccountFactory.CreateStripeAccountAndCustomer(account: billerAccount, msgs: msgs, dc: dc);
 
             // Act
-            var stripeAccountWithManualPayout = StripeHelper.ToggleStripePayoutForConnectedAccount(account: billerAccount, payoutIntervalType: PayoutIntervalType.Manual, msgs: msgs);
-            var stripeAccountWithAutoPayout = StripeHelper.ToggleStripePayoutForConnectedAccount(account: billerAccount, payoutIntervalType: PayoutIntervalType.Daily, msgs: msgs);
+            var stripeAccountWithManualPayout = StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: billerAccount.StripeUserId, accountName: billerAccount.Name, payoutIntervalType: PayoutIntervalType.Manual, msgs: msgs);
+            var stripeAccountWithAutoPayout = StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: billerAccount.StripeUserId, accountName: billerAccount.Name, payoutIntervalType: PayoutIntervalType.Daily, msgs: msgs);
 
             // Assert
             Assert.True(msgs.HasNoErrors());
@@ -3774,7 +3774,7 @@ namespace AfterSchoolLibraryTests.Tests
             activity.Publish(billingAccountOwner, msgs, dc);
 
             var registrant = RegistrantFactory.Create(billingAccount, isMaster: false, msgs, dc: dc);
-            var transaction = TransactionFactory.CreateTransactionOfPastDate(billerAccount: billingAccount, payerAccount: purchasingAccount, amount: amount, paymentType: PaymentType.CreditCard, msgs: msgs, dc: dc);
+            var transaction = TransactionFactory.CreateTransactionReadyForPayout(billerAccount: billingAccount, payerAccount: purchasingAccount, amount: amount, paymentType: PaymentType.CreditCard, msgs: msgs, dc: dc);
             var activityPayment = ActivityPaymentFactory.Create(account: billingAccount, amount: amount, activity: activity, registrant: registrant, transaction: transaction, msgs: msgs, dc: dc);
 
             // Update stripe account and customer to billerAccount
@@ -3783,7 +3783,7 @@ namespace AfterSchoolLibraryTests.Tests
             DelayExecution(10000);
 
             // update stripe account with manual payout
-            StripeHelper.ToggleStripePayoutForConnectedAccount(account: billingAccount, payoutIntervalType: PayoutIntervalType.Manual, msgs: msgs);
+            StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: billingAccount.StripeUserId, accountName: billingAccount.Name, payoutIntervalType: PayoutIntervalType.Manual, msgs: msgs);
 
             // Act
             AccountService.PreparePayouts(msgs: msgs, dc: dc);

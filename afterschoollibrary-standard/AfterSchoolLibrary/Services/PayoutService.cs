@@ -263,5 +263,20 @@ namespace AfterSchoolLibrary.Services
         {
             msgs.AddRange(Helpers.EmailHelper.SendPayoutRequestNotification(payout, toAccount));
         }
+
+        public static void ProcessManualPayouts(List<Transaction> transactions, string activityUniqueName, Account account, WebUser currentUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            msgs.Add($"Payout process started for activity: ({activityUniqueName}).", MessageType.Success);
+
+            var statementDescriptor = $"AHQ {account.UniqueName.MaxChars(10)} {activityUniqueName.MaxChars(7)}";
+            var payout = account.RequestNewPayout(transactions: transactions, statementDescriptor: statementDescriptor, loggedInUser: currentUser, msgs: msgs, dc: dc);
+
+            if (payout.IsNotEmpty() && msgs.HasNoErrors())
+            {
+                msgs.Add($"Payout created and ready for approval with description: ({statementDescriptor}).", MessageType.Success);
+                payout.Approve(loggedInUser: currentUser, msgs: msgs, dc: dc);
+                msgs.Add($"Payout {payout.Uid} approved.", MessageType.Success);
+            }
+        }
     }
 }
