@@ -832,7 +832,7 @@ namespace AfterSchoolLibrary.Services
 
         public static WebUser LoginByCleverUserId(string CleverUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return WebUser.LoadByCleverUserIdByIsActive(CleverUserId: CleverUserId, IsActive: true, msgs, dc);
+            return WebUser.LoadByCleverUserIdByIsActive(CleverUserId: CleverUserId, IsActive: true, msgs: msgs, dc: dc);
         }
 
         public static WebUser GetUserByCleverId(string id, SystemMessages msgs = null)
