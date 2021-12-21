@@ -16,7 +16,7 @@
     }
 }
 <div class="panel panel-default">
-    <div class="panel-heading">
+    <div class="panel-heading" style="margin:0">
         <div class="div-group pull-right">
             @if (activity.BelongsTo(account))
             {
@@ -26,15 +26,17 @@
             }
             <a href="@Url.Action(backtolistAction, backtolistController, new { id = activity.Uid })" class="btn btn-default">&laquo; Back to List</a>
         </div>
-        @Model.RegistrantName
+        <div class="pull-left" style="margin-top: 10px;">@Model.RegistrantName</div>
+        <div style="clear:both"></div>
     </div>
-    <div class="panel-body">
+    
+    <div class="panel-body" style="padding:0">
 
         <div class="panel panel-default">
             <div class="panel-heading">
                 Registration Data
             </div>
-            <div class="panel-body">
+            <div class="panel-body" style="padding:0">
                 <div class="table-responsive">
                     <table class="table table-striped">
                         <tr>
@@ -80,7 +82,7 @@
                 <div class="panel-heading">
                     Payment Information
                 </div>
-                <div class="panel-body">
+                <div class="panel-body" style="padding:0">
                     <form id="form-add-payment" action="@Url.Action("AddPayment", "activity", new { id = Model.Uid })" method="post">
                         <div class="table-responsive">
                             <table class="table table-striped">
