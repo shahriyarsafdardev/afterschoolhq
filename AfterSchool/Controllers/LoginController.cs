@@ -120,7 +120,6 @@ namespace AfterSchool.Controllers
             return View();
         }
 
-
         [HttpGet]
         public ActionResult LoginUser(string id)
         {

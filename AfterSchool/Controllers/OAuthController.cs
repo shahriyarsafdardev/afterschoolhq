@@ -8,6 +8,7 @@ using AfterSchool.Models;
 using System.Linq;
 using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Services;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchool.Controllers
 {
@@ -102,33 +103,49 @@ namespace AfterSchool.Controllers
 
         [HttpGet]
         public ActionResult CleverLogin(string code, string scope)
-        {   
+        {
             var msgs = new SystemMessages();
-
-            var token = CleverIntegrationService.GetToken(code: code, redirectUrl: CleverHelper.RedirectUrlForLogin);
-            var userIdentity = CleverIntegrationService.GetCleverUserIdentity(token: token.access_token);
-
-            if (userIdentity.IsNotEmpty() && userIdentity.data.IsNotEmpty() && userIdentity.data.id.IsNotEmpty())
-            {
-                // get ahq user for this clever id
-                var user = WebUserService.GetUserByCleverId(id: userIdentity.data.id, msgs: msgs);
-
-                if (user.IsNotEmpty())
-                {
-                    var redirectUrl = TempData["redirectUrl"].IsNotEmpty() ? TempData["redirectUrl"].ToString() : "";
-                    if (redirectUrl.IsNotEmpty()) // user is parent
-                        return RedirectToAction("authorizeuser", "login", new { area = "", id = user.ID.ToString(), source = "parent-login", redirectUrl = redirectUrl });
-                    
-                    return RedirectToAction("loginUser", "login", new { area = "", id = user.ID.ToString() });
-                }
-                else
-                    msgs.Add("We didn't find any user in our database for this clever user.", MessageType.Error);
-            }
+            var user = GetWebUserUsingCleverCode(code: code, redirectUrl: CleverHelper.RedirectUrlForLogin, msgs: msgs);
+            if (user.IsNotEmpty())
+                return RedirectToAction("loginUser", "login", new { area = "", id = user.ID.ToString() });
+            else
+                msgs.Add("We didn't find any user in our database for this clever user.", MessageType.Error);
 
             LoadTempMsgAndLogErrors(msgs: msgs);
             return RedirectToAction("index", "login", new { area = "" });
         }
 
+        [HttpGet]
+        public ActionResult CleverLoginFromAccountTopbar(string code, string scope)
+        {
+            var msgs = new SystemMessages();
+            var user = GetWebUserUsingCleverCode(code: code, redirectUrl: CleverHelper.RedirectUrlForAccount, msgs: msgs);
+
+            if (user.IsNotEmpty())
+            {
+                var redirectUrl = TempData["redirectUrl"].IsNotEmpty() ? TempData["redirectUrl"].ToString() : "";
+                if (redirectUrl.IsNotEmpty()) // user is parent
+                    return RedirectToAction("authorizeuser", "login", new { area = "", id = user.ID.ToString(), source = "parent-login", redirectUrl = redirectUrl });
+
+                return RedirectToAction("loginUser", "login", new { area = "", id = user.ID.ToString() });
+            }
+            else
+                msgs.Add("We didn't find any user in our database for this clever user.", MessageType.Error);
+
+            LoadTempMsgAndLogErrors(msgs: msgs);
+            return RedirectToAction("index", "login", new { area = "" });
+        }
+
+        public static WebUser GetWebUserUsingCleverCode(string code, string redirectUrl, SystemMessages msgs = null)
+        {
+            var token = CleverIntegrationService.GetToken(code: code, redirectUrl: redirectUrl);
+            var userIdentity = CleverIntegrationService.GetCleverUserIdentity(token: token.access_token);
+
+            if (userIdentity.IsNotEmpty() && userIdentity.data.IsNotEmpty() && userIdentity.data.id.IsNotEmpty())
+                return WebUserService.GetUserByCleverId(id: userIdentity.data.id, msgs: msgs);    // get ahq user for this clever id
+
+            return null;
+        }
         #endregion
     }
 }

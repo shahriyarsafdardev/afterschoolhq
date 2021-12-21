@@ -1,6 +1,10 @@
 ﻿/* Large devices (laptops/desktops, 1200px and up) */
 @media(min-width: 1200px) {
 
+    .hidden-lg {
+        display: none !important;
+    }
+
     .btn-upgrade-plan {        
         font-weight: bold;
         border-radius: 7px;

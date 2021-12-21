@@ -1,6 +1,10 @@
 ﻿/* Medium devices (landscape tablets, 768px to 1199px) */
 @media(min-width: 770px) and (max-width: 1199px) {
 
+    .hidden-md {
+        display: none !important;
+    }
+
     .btn-upgrade-plan {
         font-weight: bold;
         border-radius: 7px;

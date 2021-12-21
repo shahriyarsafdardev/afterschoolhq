@@ -1,5 +1,10 @@
 ﻿/* Extra small devices (phones) */
 @media screen and (max-width: 479px) {
+
+    .hidden-xs {
+        display: none !important;
+    }
+
     .mobile-padding-zero {
         padding: 0 !important;
     }

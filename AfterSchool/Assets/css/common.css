@@ -1221,8 +1221,7 @@
     font-stretch: normal;
     font-style: normal;
     line-height: normal;
-    letter-spacing: normal;
-    text-align: left;
+    letter-spacing: normal;    
     color: #494949;
     margin-top: 15px;
 }
@@ -1234,8 +1233,7 @@
     font-stretch: normal;
     font-style: normal;
     line-height: normal;
-    letter-spacing: 1px;
-    text-align: left;
+    letter-spacing: 1px;    
     color: #000;
 }
 
@@ -1366,4 +1364,18 @@
     text-align: center;
     color: #494949;
     margin-top: 15px;
+}
+
+.txt-clever-connected {
+    font-size: 12px;
+    font-family: calibri;
+}
+
+.footer-logo-small-screen {
+    position: absolute;
+    bottom: 66px;
+    margin-right: auto;
+    margin-left: auto;
+    left: 0px;
+    right: 0px;    
 }

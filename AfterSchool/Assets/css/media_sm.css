@@ -1,5 +1,9 @@
 ﻿/* Small devices (portrait tablets and large phones, 480px to 769px) */
 @media (min-width: 480px) and (max-width: 769px) {
+    .hidden-sm {
+        display: none !important;
+    }
+
     .mobile-padding-zero {
         padding: 0!important;
     }

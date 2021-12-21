@@ -79,9 +79,15 @@
                 <div class="row">
                     <div class="col-sm-6 col-sm-offset-3 margin-v-10">
                         <hr />
-                        <h4>Login With Clever @Html.Raw(UILabel.GetCleverConnectedLableForUsers()) </h4>  
+                        <h4>Login With Clever</h4>  
 
-                        <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLink" class="">
+                        @if (UILabel.IsCurrentUserCleverIntegrated())
+                        {
+                            <p class="txt-clever-connected">You are currently connected to a Clever account. To change your connected Clever account, click the "Login with Clever" button below.</p>
+                        }
+
+                        <br />
+                        <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLink">
                             <img src="~/img/login-clever.png" style="width: 160px; height: 39px;" class="clever-login-img" />
                         </a>
                     </div>

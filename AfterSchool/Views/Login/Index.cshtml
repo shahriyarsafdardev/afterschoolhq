@@ -11,10 +11,10 @@
         background-size: 100% 100%;
         flex: 1;
         height: 100%;
-    }    
+    }
 </style>
 
-<div class="container-login">
+<div class="container-login hidden-md hidden-sm hidden-xs">
     <div class="content-sidebar-login pull-left">
 
         <div style="position: fixed; top: 30px; left: 30px;">
@@ -23,8 +23,8 @@
 
         <div class="rectangle-login-box">
             <div class="form-group">
-                <p class="form-login-welcome">Welcome back.</p>
-                <p class="form-login-sign">Or <a href="#">sign up </a> for a free account.</p>
+                <p class="form-login-welcome text-left">Welcome back.</p>
+                <p class="form-login-sign text-left">Or <a href="#">sign up </a> for a free account.</p>
             </div>
             <br /><br />
 
@@ -38,7 +38,7 @@
                     <div class="input-group" style="width: 100%;">
                         <input id="username" name="username" type="text" class="form-control txt-generic-login" required>
                         <div class="input-group-email">
-                            <button id="inputGroupEmailPrepend" type="submit" class="btn btn-primary btn-sm btn-generic-login">
+                            <button id="inputGroupEmailPrepend" type="button" class="btn btn-primary btn-sm btn-generic-login">
                                 <img src="~/img/envelop_trans.png" />
                             </button>
                         </div>
@@ -50,7 +50,7 @@
                     <div class="input-group" style="width: 100%;">
                         <input id="password" name="password" type="password" class="form-control txt-generic-login" required>
                         <div class="input-group-password">
-                            <button id="inputGroupPassworkPrepend" type="submit" class="btn btn-primary btn-sm btn-generic-login">
+                            <button id="inputGroupPassworkPrepend" type="button" class="btn btn-primary btn-sm btn-generic-login">
                                 <img src="~/img/password_trans.png" />
                             </button>
                         </div>
@@ -101,13 +101,107 @@
     </div>
 </div>
 
-<script type="text/javascript">
-    //todo : convert error messages to toaster
-    PageEvent.add(PageEvent.AFTER_INIT, function () { loadUIMessages() });
+<div class="am-content-full hidden-xl hidden-lg">
 
-    function loadUIMessages() {
-        @*debugger
-        var msgs = JSON.parse(@Html.Raw(msgs));*@
+    <div style="margin-top: 30px;">
+        <div class="form-group">
+            <p class="form-login-welcome text-center">Welcome back.</p>
+            <p class="form-login-sign text-center">Or <a href="#">sign up </a> for a free account.</p>
+        </div>
+    </div>
+    <br />
+
+    <div class="row main-content main-content-medium-screen">
+
+        @Html.Raw(UI.RenderMessagesToHtml(msgs))
+        <div class="clearfix"></div>
+
+        <form id="form-login-small-screens" action="@Url.Action("index", "login", new { returnurl = ViewData["ReturnUrl"], invite = ViewData["invite"] })" method="post" class="form-horizontal">
+
+            <div class="form-group">
+                <label class="short-description"> Email </label>
+                <div class="input-group" style="width: 100%;">
+                    <input id="username-small-scrren" name="username" type="text" class="form-control txt-generic-login" required>
+                    <div class="input-group-email">
+                        <button id="inputGroupEmailPrepend-small-scrren" type="button" class="btn btn-primary btn-sm btn-generic-login">
+                            <img src="~/img/envelop_trans.png" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="short-description"> Password </label>
+                <div class="input-group" style="width: 100%;">
+                    <input id="password-small-scrren" name="password" type="password" class="form-control txt-generic-login" required>
+                    <div class="input-group-password">
+                        <button id="inputGroupPassworkPrepend-small-scrren" type="button" class="btn btn-primary btn-sm btn-generic-login">
+                            <img src="~/img/password_trans.png" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" style="float: left;">
+                <div class="remember margin-b-10">
+                    <div class="am-checkbox checkbox-inline text-center">
+                        <input type="checkbox" id="remember-login-small-scrren" name="remember" value="1" class="form-control" checked="checked">
+                        <label for="remember-login-small-scrren">Remember me </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group pull-right login-form-forgot-password-container">
+                <a href="/login/resetpassword" style="padding: 7px; line-height: 30px; font-weight: 300; text-decoration: underline; ">Forgot Password</a>
+            </div>
+            <div class="clearfix"></div>
+
+            <div class="form-group login-submit text-center">
+                <button id="btn-login-small-scrren" type="button" class="btn btn-primary btn-lg btn-block btn-login-updated" style="margin: 0 auto;" onclick="return validateLogin(true)">Log In</button>
+                <br />
+                <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLinkLogin" class="btn-clever-login">
+                    <img src="~/img/login-clever.png" style="width: 225px; height: 50px;" class="clever-login-img" />
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <div class="footer-logo-small-screen text-center">
+        <a href="/"><img src="~/img/ahq-logo-2-1-1.png" alt="logo" style="width: 250px;"></a>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    function validateLogin(isMobile) {        
+        if (isMobile) {
+
+            var email = $('#username-small-scrren');
+            var pass = $('#password-small-scrren');
+            var isEmailValid = validateEmail(email.val());
+            var isPassValid = pass.val() == '' ? false : true;
+
+            if (!isEmailValid) {
+                email.addClass('error-border');
+                setTimeout(function () {
+                    email.removeClass('error-border');
+                }, 3000);                
+            }
+
+            if (!isPassValid) {
+                pass.addClass('error-border');
+                setTimeout(function () {
+                    pass.removeClass('error-border');
+                }, 3000);                
+            }
+
+            if (isEmailValid == true && isPassValid == true) {
+                btnProcess('btn-login-small-scrren', 'Processing...', true);
+                $('#form-login-small-screens').submit();
+            }
+
+            return;            
+        }
     }
 
 </script>

@@ -10,6 +10,7 @@ namespace AfterSchoolLibrary.Helpers
         public static string ClientId { get { return ConfigurationManager.AppSettings["Clever.ClientId"]; } }
         public static string RedirectUrlForIntegration { get { return Utilities.BaseUrl() + "/oauth/cleverintegration"; } }
         public static string RedirectUrlForLogin { get { return Utilities.BaseUrl() + "/oauth/cleverlogin"; } }
+        public static string RedirectUrlForAccount { get { return Utilities.BaseUrl() + "/oauth/cleverloginfromaccounttopbar"; } }
         public static string TokenRetrieveUrl { get { return "https://clever.com/oauth/tokens"; } }
         /// <summary>
         /// This will return just a Id of user with some other details like user type
@@ -40,11 +41,25 @@ namespace AfterSchoolLibrary.Helpers
             }
         }
 
+        /// <summary>
+        /// This will be used at login page to redirect user based on account/user types after clever login completes
+        /// </summary>
         public static string SSOLinkLogin
         {
             get
             {
                 return $"https://clever.com/oauth/authorize?response_type=code&redirect_uri={RedirectUrlForLogin}&client_id={ClientId}";
+            }
+        }
+
+        /// <summary>
+        /// This will be used at account topbar to redirect user back to same account page after clever login completes
+        /// </summary>
+        public static string SSOLinkAccount
+        {
+            get
+            {
+                return $"https://clever.com/oauth/authorize?response_type=code&redirect_uri={RedirectUrlForAccount}&client_id={ClientId}";
             }
         }
 

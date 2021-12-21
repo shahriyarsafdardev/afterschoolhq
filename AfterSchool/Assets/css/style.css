@@ -9160,7 +9160,7 @@ button:focus {
     padding-left: 25px;
     padding-right: 25px;
     padding-top: 30px;
-  }
+  }    
 }
 @media (max-width: 767px) {
   .main-content {
@@ -19418,4 +19418,24 @@ a.text-limit span {
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+}
+
+@media(min-width: 768px) and (max-width: 1199px) {
+    .main-content-medium-screen {
+        width: 350px;
+        margin-right: auto;
+        margin-left: auto;
+        left: 0px;
+        right: 0px;
+    }
+}
+
+@media (min-width: 480px) and (max-width: 769px) {
+    .main-content-medium-screen {
+        width: 350px;
+        margin-right: auto;
+        margin-left: auto;
+        left: 0px;
+        right: 0px;
+    }
 }

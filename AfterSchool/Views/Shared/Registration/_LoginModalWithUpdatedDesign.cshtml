@@ -1,8 +1,4 @@
-﻿@{
-    TempData["redirectUrl"] = ViewData["LoginReturnUrl"].IsNotEmpty() ? ViewData["LoginReturnUrl"].ToString() : HttpContext.Current.Request.Url.AbsoluteUri;
-}
-
-<div id="modal-login" class="md-modal">
+﻿<div id="modal-login" class="md-modal">
     <div class="md-content re-316">
 
         <div class="modal-body">
@@ -20,12 +16,26 @@
 
                     <div class="form-group">
                         <label class="short-description"> Email </label>
-                        <input id="lm-login-username" name="username" type="email" class="form-control login-form-email">
+                        <div class="input-group" style="width: 100%;">
+                            <input id="lm-login-username" name="username" type="email" class="form-control txt-generic-login" required>
+                            <div class="input-group-email">
+                                <button id="inputGroupEmailPrepend" type="button" class="btn btn-primary btn-sm btn-generic-login">
+                                    <img src="~/img/envelop_trans.png" />
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="form-group" style=" margin-bottom: 5px;">
+                    <div class="form-group" style="margin-bottom: 5px;">
                         <label class="short-description"> Password </label>
-                        <input id="lm-login-password" name="password" class="form-control login-form-password login-form-password-eye" type="password" autocomplete="new-password">
+                        <div class="input-group" style="width: 100%;">
+                            <input id="lm-login-password" name="password" type="password" autocomplete="new-password" class="form-control txt-generic-login" required>
+                            <div class="input-group-password">
+                                <button id="inputGroupPassworkPrepend" type="button" class="btn btn-primary btn-sm btn-generic-login">
+                                    <img src="~/img/password_trans.png" />
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-group" style="float: left;">
@@ -43,7 +53,7 @@
 
                     <div class="form-group login-submit text-center">
                         <button type="button" id="btn-login" class="btn btn-primary btn-lg btn-block btn-login-updated" onclick="authorize()">Log In</button>
-                        <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLinkLogin" class="btn-clever-login">
+                        <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLinkAccount" class="btn-clever-login">
                             <img src="~/img/login-clever.png" style="width: 225px; height: 50px;" class="clever-login-img" />
                         </a>
                     </div>
@@ -307,21 +317,6 @@
         //hide reset password modal
         hideModal('modal-rest-password');
         $('#reset-email').val('');
-    }
-
-    function btnProcess(id, text, isDisabled) {
-        $('#' + id).html(text);
-        $('#' + id).prop('disabled', isDisabled);
-    }
-
-    function validateEmail(emailText) {
-        var pattern = /^[a-zA-Z0-9\-_]+(\.[a-zA-Z0-9\-_]+)*@@[a-z0-9]+(\-[a-z0-9]+)*(\.[a-z0-9]+(\-[a-z0-9]+)*)*\.[a-z]{2,4}$/;
-        if (pattern.test(emailText)) {
-            return true;
-        }
-        else {
-            return false;
-        }
     }
 
 </script>
