@@ -960,8 +960,8 @@ namespace AfterSchoolLibrary.Services
         /// <returns></returns>
         public static List<Account> GetAccountsWithSpecificFeatures(FeatureType featureTypeId, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            //.. load all AccountPackageFeature where provided FeatureTypeId has value > 0 and then grab the AccountPackageId
-            var accountPackageIds =  AccountPackageFeature.LoadByFeatureTypeIdByMaxValue(FeatureTypeId: featureTypeId, Max: 0, msgs: msgs, dc: dc)
+            //.. load all AccountPackageFeature where provided FeatureTypeId has value >= 1 and then grab the AccountPackageId
+            var accountPackageIds =  AccountPackageFeature.LoadByFeatureTypeIdByGreaterOrEqualMaxValue(FeatureTypeId: featureTypeId, Max: 1, msgs: msgs, dc: dc)
                 .Select(m => m.AccountPackageId.Value).ToList();
 
             if (accountPackageIds.Any())
