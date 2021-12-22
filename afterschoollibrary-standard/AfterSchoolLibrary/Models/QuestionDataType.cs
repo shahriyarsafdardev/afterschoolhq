@@ -80,5 +80,8 @@ public enum QuestionDataType
 	RegistrantChild2Grade,
 	RegistrantChild3Grade,
 	RegistrantChild4Grade,
-	RegistrantChild5Grade
+	RegistrantChild5Grade,
+	EmergencyContact3FirstName = 81,
+	EmergencyContact3LastName = 82,
+	EmergencyContact3Phone = 83,
 }

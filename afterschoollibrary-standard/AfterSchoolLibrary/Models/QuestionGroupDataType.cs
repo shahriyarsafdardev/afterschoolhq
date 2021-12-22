@@ -14,5 +14,6 @@ public enum QuestionGroupDataType
 	HealthInformation,
 	OrganizationInformation,
 	OrganizationContact,
-	RegistrantInterestInformation
+	RegistrantInterestInformation,
+	EmergencyContact3 = 15,
 }

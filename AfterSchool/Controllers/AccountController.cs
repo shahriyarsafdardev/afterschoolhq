@@ -907,7 +907,8 @@ namespace AfterSchool.Controllers
       var emergencyContactsQuestionGroups = form.GetQuestionGroups(msgs)
           .Where(group =>
               group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1 ||
-              group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2)
+              group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2 ||
+              group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact3)
           .ToList();
       var questions = new List<FormQuestion>();
 
@@ -954,6 +955,7 @@ namespace AfterSchool.Controllers
         {
           case QuestionDataType.EmergencyContact1Phone:
           case QuestionDataType.EmergencyContact2Phone:
+          case QuestionDataType.EmergencyContact3Phone:
             if (answer.IsNotEmpty() && !answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
               msgs.Add($"{question.FormQuestionGroupQuestionGroupDataTypeId.ToString().SplitByUpperCase()} {question.Text} must be a valid phone number", MessageType.UserError);
 
@@ -1212,7 +1214,8 @@ namespace AfterSchool.Controllers
                           .Where(answer =>
                               answer.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.HomeAddress ||
                               answer.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1 ||
-                              answer.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2
+                              answer.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2 ||
+                              answer.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact3
                           )
                           .ToList()
                           .ForEach(answer =>

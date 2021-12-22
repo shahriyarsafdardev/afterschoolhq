@@ -601,7 +601,8 @@ namespace AfterSchool.Areas.User.Controllers
             var emergencyContactsQuestionGroups = form.GetQuestionGroups(msgs)
                 .Where(group =>
                     group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1 ||
-                    group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2)
+                    group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2 ||
+                    group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact3)
                 .ToList();
             var questions = new List<FormQuestion>();
 
@@ -708,7 +709,7 @@ namespace AfterSchool.Areas.User.Controllers
                                 new List<QuestionGroupDataType>()
                                 {
                                     QuestionGroupDataType.EmergencyContact1,
-                                    QuestionGroupDataType.EmergencyContact1
+                                    QuestionGroupDataType.EmergencyContact1 // TODO: not sure but this should be contact 2 and we should have contact 3 here too. test this once.
                                 }, 
                                 amsgs, 
                                 adc);
