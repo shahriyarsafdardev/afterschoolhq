@@ -80,5 +80,8 @@ public enum QuestionDataType
 	RegistrantChild2Grade,
 	RegistrantChild3Grade,
 	RegistrantChild4Grade,
-	RegistrantChild5Grade
+	RegistrantChild5Grade,
+    RegistrantMiddleName,
+    Parent1MiddleName,
+    Parent2MiddleName
 }
