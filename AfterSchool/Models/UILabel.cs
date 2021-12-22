@@ -104,8 +104,7 @@ namespace AfterSchool.Models
         public static string GetGradeDescription(string gradeText)
         {
             if (gradeText.IsEmpty()) return gradeText;
-            var gradeValue = "";
-            gradeValue = AfterSchoolLibrary.Helpers.Utilities.IsAlreadyJsonString(gradeText)
+            var gradeValue = AfterSchoolLibrary.Helpers.Utilities.IsAlreadyJsonString(gradeText)
                 ? AfterSchoolLibrary.Helpers.Utilities.GetKeyValuePairs(gradeText).FirstOrDefault()?.value
                 : gradeText;
             if (gradeValue == "K")
