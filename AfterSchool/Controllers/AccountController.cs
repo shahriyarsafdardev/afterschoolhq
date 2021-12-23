@@ -657,7 +657,9 @@ namespace AfterSchool.Controllers
         switch (question.QuestionDataTypeId)
         {
           case QuestionDataType.RegistrantAddress2:
-            question.IsRequired = false;
+          case QuestionDataType.RegistrantWorkPhone:
+          case QuestionDataType.RegistrantHomePhone:
+                  question.IsRequired = false;
             break;
           default:
             question.IsRequired = true;
