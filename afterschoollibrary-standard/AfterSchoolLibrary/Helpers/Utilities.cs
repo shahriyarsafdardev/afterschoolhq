@@ -407,7 +407,6 @@ namespace AfterSchoolLibrary.Helpers
             Migrations.UpdateFormQuestionAnswers_20210918.Do(amsgs, adc);
             Migrations.SetExistingActivityCostFrequencyType_20211003.Do(amsgs, adc);
             Migrations.AddFeatureTypeSurvey_20211004.Do(amsgs, adc);
-            Migrations.SetNewDefaultForm_20211222.Do(amsgs, adc);
                   // Migrations.UpdateScheduleDaysOfTheWeek_20211016.Do(amsgs, adc);
 
                   Migrations.UpdateFormQuestionGroup_20211003.Do(amsgs, adc);
