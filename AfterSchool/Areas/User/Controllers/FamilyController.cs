@@ -607,9 +607,6 @@ namespace AfterSchool.Areas.User.Controllers
             var questions = new List<FormQuestion>();
 
             emergencyContactsQuestionGroups.ForEach(group => questions.AddRange(group.GetAllQuestions(msgs)));
-            questions.Where(question => question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1)
-                .ToList()
-                .ForEach(question => { question.IsRequired = true; });
 
             return questions;
         }
@@ -669,7 +666,14 @@ namespace AfterSchool.Areas.User.Controllers
                     switch (question.QuestionDataTypeId)
                     {
                         case QuestionDataType.EmergencyContact1Phone:
+                        case QuestionDataType.EmergencyContact1Phone2:
+                        case QuestionDataType.EmergencyContact1Phone3:
                         case QuestionDataType.EmergencyContact2Phone:
+                        case QuestionDataType.EmergencyContact2Phone2:
+                        case QuestionDataType.EmergencyContact2Phone3:
+                        case QuestionDataType.EmergencyContact3Phone:
+                        case QuestionDataType.EmergencyContact3Phone2:
+                        case QuestionDataType.EmergencyContact3Phone3:
                             if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
                                 msgs.Add($"{question.FormQuestionGroupQuestionGroupDataTypeId.ToString().SplitByUpperCase()} {question.Text} must be a valid phone number", MessageType.UserError);
 
@@ -680,7 +684,8 @@ namespace AfterSchool.Areas.User.Controllers
                     }
                 });
 
-                if (phones.Count == 2 && phones[0] == phones[1])
+                if ((phones.Count == 2 && phones[0] == phones[1]) || 
+                    (phones.Count == 3 && (phones[0] == phones[1] || phones[0] == phones[2] || phones[1] == phones[2])))
                     msgs.Add("Emergency phone numbers should not be the same", MessageType.UserError);
 
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
@@ -709,7 +714,8 @@ namespace AfterSchool.Areas.User.Controllers
                                 new List<QuestionGroupDataType>()
                                 {
                                     QuestionGroupDataType.EmergencyContact1,
-                                    QuestionGroupDataType.EmergencyContact1 // TODO: not sure but this should be contact 2 and we should have contact 3 here too. test this once.
+                                    QuestionGroupDataType.EmergencyContact2,
+                                    QuestionGroupDataType.EmergencyContact3
                                 }, 
                                 amsgs, 
                                 adc);

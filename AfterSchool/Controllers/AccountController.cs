@@ -913,9 +913,6 @@ namespace AfterSchool.Controllers
       var questions = new List<FormQuestion>();
 
       emergencyContactsQuestionGroups.ForEach(group => questions.AddRange(group.GetAllQuestions(msgs)));
-      questions.Where(question => question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1)
-          .ToList()
-          .ForEach(question => { question.IsRequired = true; });
 
       ViewBag.ParticipationObject = GetParticipationObjectFromCart();
 
@@ -953,22 +950,29 @@ namespace AfterSchool.Controllers
 
         switch (question.QuestionDataTypeId)
         {
-          case QuestionDataType.EmergencyContact1Phone:
-          case QuestionDataType.EmergencyContact2Phone:
-          case QuestionDataType.EmergencyContact3Phone:
-            if (answer.IsNotEmpty() && !answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
-              msgs.Add($"{question.FormQuestionGroupQuestionGroupDataTypeId.ToString().SplitByUpperCase()} {question.Text} must be a valid phone number", MessageType.UserError);
+              case QuestionDataType.EmergencyContact1Phone:
+              case QuestionDataType.EmergencyContact1Phone2:
+              case QuestionDataType.EmergencyContact1Phone3:
+              case QuestionDataType.EmergencyContact2Phone:
+              case QuestionDataType.EmergencyContact2Phone2:
+              case QuestionDataType.EmergencyContact2Phone3:
+              case QuestionDataType.EmergencyContact3Phone:
+              case QuestionDataType.EmergencyContact3Phone2:
+              case QuestionDataType.EmergencyContact3Phone3:
+                  if (answer.IsNotEmpty() && !answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                    msgs.Add($"{question.FormQuestionGroupQuestionGroupDataTypeId.ToString().SplitByUpperCase()} {question.Text} must be a valid phone number", MessageType.UserError);
+                  
+                  if (answer.IsNotEmpty())
+                      phones.Add(answer);
 
-            if (answer.IsNotEmpty())
-              phones.Add(answer);
-
-            break;
+                  break;
 
         }
       });
 
-      if (phones.Count == 2 && phones[0] == phones[1])
-        msgs.Add("Emergency phone numbers should not be the same", MessageType.UserError);
+      if ((phones.Count == 2 && phones[0] == phones[1]) || 
+        (phones.Count == 3 && (phones[0] == phones[1] || phones[0] == phones[2] || phones[1] == phones[2])))
+            msgs.Add("Emergency phone numbers should not be the same", MessageType.UserError);
 
       var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
 
