@@ -287,7 +287,7 @@ namespace AfterSchoolLibrary.Services
             return qhs;
         }
 
-        private static List<QuestionHolder> CreateEmergencyContact1Group()
+        public static List<QuestionHolder> CreateEmergencyContact1Group()
         {
             var qhs = new List<QuestionHolder>();
             var groupType = QuestionGroupDataType.EmergencyContact1;
@@ -303,7 +303,7 @@ namespace AfterSchoolLibrary.Services
             return qhs;
         }
 
-        private static List<QuestionHolder> CreateEmergencyContact2Group()
+        public static List<QuestionHolder> CreateEmergencyContact2Group()
         {
             var qhs = new List<QuestionHolder>();
             var groupType = QuestionGroupDataType.EmergencyContact2;
@@ -319,7 +319,7 @@ namespace AfterSchoolLibrary.Services
             return qhs;
         }
 
-        private static List<QuestionHolder> CreateEmergencyContact3Group()
+        public static List<QuestionHolder> CreateEmergencyContact3Group()
         {
             var qhs = new List<QuestionHolder>();
             var groupType = QuestionGroupDataType.EmergencyContact3;
@@ -649,7 +649,7 @@ namespace AfterSchoolLibrary.Services
             return qhs;
         }
 
-        private class QuestionHolder
+        public class QuestionHolder
         {
             public string Text;
             public bool IsLocked;

@@ -19,6 +19,17 @@ namespace AfterSchool.Models
             return new FormQuestionViewModel(question);
         }
 
+        /// <summary>
+        /// Workaround to make ViewModel accessible in service layer
+        /// </summary>
+        /// <param name="question"></param>
+        /// <param name="values"></param>
+        /// <returns></returns>
+        public static FormQuestionService.FormQuestionViewModel ToFormQuestionViewModelForService(this FormQuestion question, NameValueCollection values)
+        {
+            return new FormQuestionService.FormQuestionViewModel(question, values);
+        }
+
         public static AddressViewModel ToAddressViewModel(this PaymentsEntityViewModel paymentsEntityVM)
         {
             return new AddressViewModel()

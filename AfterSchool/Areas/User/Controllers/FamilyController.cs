@@ -653,58 +653,9 @@ namespace AfterSchool.Areas.User.Controllers
                     return RedirectToAction("index");
 
                 var questions = GetEmergencyContactQuestions(msgs);
-                var phones = new List<string>();
-                var firstNames = new List<string>();
-                var lastNames = new List<string>();
-                var primaryPhones = new List<string>();
 
-                // Validation
-                questions.ForEach(question =>
-                {
-                    var answer = Request[question.ToFormQuestionViewModel().Name];
-
-                    if (question.IsRequired && answer.IsEmpty())
-                        msgs.Add($"{question.Text} is required", MessageType.UserError);
-
-                    // store first names
-                    if (question.QuestionDataTypeId.In(new List<QuestionDataType>() { QuestionDataType.EmergencyContact1FirstName, QuestionDataType.EmergencyContact2FirstName, QuestionDataType.EmergencyContact3FirstName }))
-                        firstNames.Add(answer);
-
-                    // store last names
-                    if (question.QuestionDataTypeId.In(new List<QuestionDataType>() { QuestionDataType.EmergencyContact1LastName, QuestionDataType.EmergencyContact2LastName, QuestionDataType.EmergencyContact3LastName }))
-                        lastNames.Add(answer);
-
-                    // store primary phone numbers
-                    if (question.QuestionDataTypeId.In(new List<QuestionDataType>() { QuestionDataType.EmergencyContact1Phone, QuestionDataType.EmergencyContact2Phone, QuestionDataType.EmergencyContact3Phone }))
-                        primaryPhones.Add(answer);
-
-                    switch (question.QuestionDataTypeId)
-                    {
-                        case QuestionDataType.EmergencyContact1Phone:
-                        case QuestionDataType.EmergencyContact1Phone2:
-                        case QuestionDataType.EmergencyContact1Phone3:
-                        case QuestionDataType.EmergencyContact2Phone:
-                        case QuestionDataType.EmergencyContact2Phone2:
-                        case QuestionDataType.EmergencyContact2Phone3:
-                        case QuestionDataType.EmergencyContact3Phone:
-                        case QuestionDataType.EmergencyContact3Phone2:
-                        case QuestionDataType.EmergencyContact3Phone3:
-                            if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
-                                msgs.Add($"{question.FormQuestionGroupQuestionGroupDataTypeId.ToString().SplitByUpperCase()} {question.Text} must be a valid phone number", MessageType.UserError);
-
-                            if (answer.IsNotEmpty())
-                                phones.Add(answer);
-
-                            break;
-                    }
-                });
-
-                if ((phones.Count == 2 && phones[0] == phones[1]) || 
-                    (phones.Count == 3 && (phones[0] == phones[1] || phones[0] == phones[2] || phones[1] == phones[2])))
-                    msgs.Add("Emergency phone numbers should not be the same", MessageType.UserError);
-
-                ValidateEmergencyContacts(firstName: firstNames[1], lastName: lastNames[1], phone: primaryPhones[1], ecNumber: 2, msgs: msgs);
-                ValidateEmergencyContacts(firstName: firstNames[2], lastName: lastNames[2], phone: primaryPhones[2], ecNumber: 3, msgs: msgs);
+                // validate emergency contact fields
+                FormQuestionService.ValidateFormQuestionForEmergencyContacts(questions: questions.Select(question => question.ToFormQuestionViewModelForService(Request.Params)).ToList(), msgs: msgs);
 
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
 
