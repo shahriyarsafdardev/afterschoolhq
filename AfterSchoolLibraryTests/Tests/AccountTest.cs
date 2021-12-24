@@ -5,6 +5,7 @@ using Xunit.Abstractions;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using AfterSchoolLibraryTests.Factories;
+using System.Linq;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -136,7 +137,30 @@ namespace AfterSchoolLibraryTests.Tests
             var user = WebUserFactory.Create(msgs, dc);
             var account = AccountFactory.Create(user, msgs, dc);
             Assert.NotNull(Account.LoadByUid(account.Uid, msgs, dc));
-        }   
+        }
 
+        [Fact]
+        public void CheckIfRegistrantTShirtSizeOptionsExistsTest()
+        {
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
+            var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
+
+            Assert.Contains(questions, f => f.QuestionDataTypeId == QuestionDataType.RegistrantTShirtSize);
+        }
+
+        [Fact]
+        public void CheckNewRegistrantTShirtSizeOptionsTest()
+        {
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
+            var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
+            var question = questions.Where(f => f.QuestionDataTypeId == QuestionDataType.RegistrantTShirtSize).FirstOrDefault();
+            
+            Assert.Contains("Youth XS,Youth S,Youth M,Youth L,Youth XL,Adult S,Adult M,Adult L,Adult 2XL, Adult 3XL", question.Options);
+        }
+      
     }
+
+
 }
