@@ -5,6 +5,7 @@ using Xunit.Abstractions;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using AfterSchoolLibraryTests.Factories;
+using System.Linq;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -138,5 +139,16 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.NotNull(Account.LoadByUid(account.Uid, msgs, dc));
         }   
 
+        [Fact]
+        public void GetQuestionsParentRegistrationStep2Test()
+        {
+
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var homeAddressQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.HomeAddress);
+            var questions = homeAddressQuestionGroup.GetAllQuestions(msgs, dc);
+
+            Assert.Contains(questions, f => f.QuestionDataTypeId == QuestionDataType.RegistrantWorkPhone);
+            Assert.Contains(questions, f => f.QuestionDataTypeId == QuestionDataType.RegistrantHomePhone);
+        }
     }
 }
