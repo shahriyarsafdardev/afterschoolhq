@@ -9,6 +9,19 @@ namespace AfterSchoolLibrary.Services
 {
     public static class FormQuestionService
     {
+        public static List<FormQuestion> GetEmergencyContactQuestions(SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var questions = new List<FormQuestion>();
+            var form = FormService.GetAdministratorAccountForm(msgs, dc);
+
+            form.GetQuestionGroups(msgs, dc)
+                .Where(group => group.QuestionGroupDataTypeId.In(GetEmergencyContactQuestionGroups()))
+                .ToList()
+                .ForEach(group => questions.AddRange(group.GetAllQuestions(msgs, dc)));
+
+            return questions;
+        }
+
         public static SystemMessages ValidateFormQuestionForEmergencyContacts(List<FormQuestionViewModel> questions, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             // check required fields
@@ -16,24 +29,15 @@ namespace AfterSchoolLibrary.Services
 
             // check phone numbers
             questions.Where(m => m.Value.IsNotEmpty() && !m.Value.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx) &&
-                m.Question.QuestionDataTypeId.In(new List<QuestionDataType>() {
-                    QuestionDataType.EmergencyContact1Phone, QuestionDataType.EmergencyContact1Phone2, QuestionDataType.EmergencyContact1Phone3,
-                    QuestionDataType.EmergencyContact2Phone, QuestionDataType.EmergencyContact2Phone2, QuestionDataType.EmergencyContact2Phone3,
-                    QuestionDataType.EmergencyContact3Phone, QuestionDataType.EmergencyContact3Phone2, QuestionDataType.EmergencyContact3Phone3
-                }))
+                m.Question.QuestionDataTypeId.In(GetEmergencyContactPhoneTypes()))
                 .ToList()
-                .ForEach(z =>
-                {
+                .ForEach(z => {
                     msgs.Add($"{z.Question.FormQuestionGroupQuestionGroupDataTypeId.ToString().SplitByUpperCase()} {z.Question.Text} must be a valid phone number", MessageType.UserError);
                 });
 
             // emergency phone numbers should not be same
             var quesitonsWithDuplicatePhoneNumbers = questions
-                .Where(m => m.Value.IsNotEmpty() && m.Question.QuestionDataTypeId.In(new List<QuestionDataType>() {
-                    QuestionDataType.EmergencyContact1Phone, QuestionDataType.EmergencyContact1Phone2, QuestionDataType.EmergencyContact1Phone3,
-                    QuestionDataType.EmergencyContact2Phone, QuestionDataType.EmergencyContact2Phone2, QuestionDataType.EmergencyContact2Phone3,
-                    QuestionDataType.EmergencyContact3Phone, QuestionDataType.EmergencyContact3Phone2, QuestionDataType.EmergencyContact3Phone3
-                }))
+                .Where(m => m.Value.IsNotEmpty() && m.Question.QuestionDataTypeId.In(GetEmergencyContactPhoneTypes()))
                 .GroupBy(x => x.Value)
                 .Where(y => y.Count() > 1)
                 .ToList();
@@ -42,14 +46,14 @@ namespace AfterSchoolLibrary.Services
                 msgs.Add("Emergency phone numbers should not be the same", MessageType.UserError);
 
             // validation for ec2 fields, user must enter first-last name and phone numbers if they add any single field
-            var ec2 = questions.Where(m => m.Question.GetFormQuestionGroup(msgs).QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2).ToList();
+            var ec2 = questions.Where(m => m.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2).ToList();
             var ec2FirstName = ec2.FirstOrDefault(m => m.Question.QuestionDataTypeId == QuestionDataType.EmergencyContact2FirstName);
             var ec2LastName = ec2.FirstOrDefault(m => m.Question.QuestionDataTypeId == QuestionDataType.EmergencyContact2LastName);
             var ec2Phone = ec2.FirstOrDefault(m => m.Question.QuestionDataTypeId == QuestionDataType.EmergencyContact2Phone);
             ValidateEmergencyContacts(firstName: ec2FirstName.Value, lastName: ec2LastName.Value, phone: ec2Phone.Value, ecNumber: 2, msgs: msgs);
 
             // validation for ec3 fields
-            var ec3 = questions.Where(m => m.Question.GetFormQuestionGroup(msgs).QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact3).ToList();
+            var ec3 = questions.Where(m => m.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact3).ToList();
             var ec3FirstName = ec3.FirstOrDefault(m => m.Question.QuestionDataTypeId == QuestionDataType.EmergencyContact3FirstName);
             var ec3LastName = ec3.FirstOrDefault(m => m.Question.QuestionDataTypeId == QuestionDataType.EmergencyContact3LastName);
             var ec3Phone = ec3.FirstOrDefault(m => m.Question.QuestionDataTypeId == QuestionDataType.EmergencyContact3Phone);
@@ -72,6 +76,20 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
+        #region Helpers
+
+        public static List<QuestionGroupDataType> GetEmergencyContactQuestionGroups() =>
+            new List<QuestionGroupDataType>() { QuestionGroupDataType.EmergencyContact1, QuestionGroupDataType.EmergencyContact2, QuestionGroupDataType.EmergencyContact3 };
+
+        public static List<QuestionDataType> GetEmergencyContactPhoneTypes() => new List<QuestionDataType>() {
+            QuestionDataType.EmergencyContact1Phone, QuestionDataType.EmergencyContact1Phone2, QuestionDataType.EmergencyContact1Phone3,
+            QuestionDataType.EmergencyContact2Phone, QuestionDataType.EmergencyContact2Phone2, QuestionDataType.EmergencyContact2Phone3,
+            QuestionDataType.EmergencyContact3Phone, QuestionDataType.EmergencyContact3Phone2, QuestionDataType.EmergencyContact3Phone3
+        };
+
+        /// <summary>
+        /// Workaround to make ViewModel accessible in service layer
+        /// </summary>
         public class FormQuestionViewModel
         {
             public FormQuestion Question { get; set; }
@@ -190,5 +208,12 @@ namespace AfterSchoolLibrary.Services
                 }
             }
         }
+
+        public static FormQuestionViewModel ToFormQuestionViewModelForService(this FormQuestion question, NameValueCollection values)
+        {
+            return new FormQuestionViewModel(question, values);
+        }
+
+        #endregion
     }
 }

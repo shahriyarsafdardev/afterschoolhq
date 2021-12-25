@@ -32,7 +32,7 @@ namespace AfterSchool.Areas.User.Controllers
 
         private List<FormQuestion> GetStudentPersonalQuestions(SystemMessages msgs)
         {
-            var form = GetAdministratorAccountForm(msgs);
+            var form = FormService.GetAdministratorAccountForm(msgs);
             var studentQuestionGroup = form.GetQuestionGroups(msgs)
                 .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
             var questions = studentQuestionGroup.GetAllQuestions(msgs);
@@ -185,7 +185,7 @@ namespace AfterSchool.Areas.User.Controllers
 
         private List<FormQuestion> GetHealthQuestions(SystemMessages msgs)
         {
-            var form = GetAdministratorAccountForm(msgs);
+            var form = FormService.GetAdministratorAccountForm(msgs);
             var questionGroup = form.GetQuestionGroups(msgs)
                 .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.HealthInformation);
             var questions = questionGroup.GetAllQuestions(msgs);
@@ -319,7 +319,7 @@ namespace AfterSchool.Areas.User.Controllers
 
         private List<FormQuestion> GetPeronalQuestions(SystemMessages msgs)
         {
-            var form = GetAdministratorAccountForm(msgs);
+            var form = FormService.GetAdministratorAccountForm(msgs);
             var questionGroup = form.GetQuestionGroups(msgs)
                 .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
             var questions = questionGroup.GetAllQuestions(msgs);
@@ -483,7 +483,7 @@ namespace AfterSchool.Areas.User.Controllers
 
         private List<FormQuestion> GetHomeAddressQuestions(SystemMessages msgs)
         {
-            var form = GetAdministratorAccountForm(msgs);
+            var form = FormService.GetAdministratorAccountForm(msgs);
             var questionGroup = form.GetQuestionGroups(msgs)
                 .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.HomeAddress);
             var questions = questionGroup.GetAllQuestions(msgs);
@@ -593,23 +593,7 @@ namespace AfterSchool.Areas.User.Controllers
 
         #endregion
 
-        #region EmergencyContacts
-
-        private List<FormQuestion> GetEmergencyContactQuestions(SystemMessages msgs)
-        {
-            var form = GetAdministratorAccountForm(msgs);
-            var emergencyContactsQuestionGroups = form.GetQuestionGroups(msgs)
-                .Where(group =>
-                    group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1 ||
-                    group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2 ||
-                    group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact3)
-                .ToList();
-            var questions = new List<FormQuestion>();
-
-            emergencyContactsQuestionGroups.ForEach(group => questions.AddRange(group.GetAllQuestions(msgs)));
-
-            return questions;
-        }
+        #region EmergencyContacts        
 
         [HttpGet]
         public ActionResult EditEmergencyContact(string id)
@@ -624,8 +608,11 @@ namespace AfterSchool.Areas.User.Controllers
                 if (!SessionVariables.CurrentUser.HasAccessToRegistrant(registrant))
                     return RedirectToAction("index");
 
-                var questions = GetEmergencyContactQuestions(msgs);
+                var questions = FormQuestionService.GetEmergencyContactQuestions(msgs);
 
+                // TODO: refactor this and move to service layer.
+                // Blocker: VM is in web and can't be accessible in service side
+                // Resolution: we should move VM to service layer, but this will affect lots of spaces including registration panel + form builder etc
                 var values = new NameValueCollection();
                 questions.ForEach(question => {
                     values.Add(question.ToFormQuestionViewModel().Id, registrant.GetAnswer(question.QuestionDataTypeId)?.Text);
@@ -652,7 +639,7 @@ namespace AfterSchool.Areas.User.Controllers
                 if (!SessionVariables.CurrentUser.HasAccessToRegistrant(registrant))
                     return RedirectToAction("index");
 
-                var questions = GetEmergencyContactQuestions(msgs);
+                var questions = FormQuestionService.GetEmergencyContactQuestions(msgs);
 
                 // validate emergency contact fields
                 FormQuestionService.ValidateFormQuestionForEmergencyContacts(questions: questions.Select(question => question.ToFormQuestionViewModelForService(Request.Params)).ToList(), msgs: msgs);
@@ -726,20 +713,6 @@ namespace AfterSchool.Areas.User.Controllers
             return View(registrant);
         }
 
-        public static SystemMessages ValidateEmergencyContacts(string firstName, string lastName, string phone, int ecNumber, SystemMessages msgs = null)
-        {
-            if (firstName.IsEmpty() && (lastName.IsNotEmpty() || phone.IsNotEmpty()))
-                msgs.Add($"First name for contact {ecNumber} is required.", MessageType.UserError);
-
-            if (lastName.IsEmpty() && (firstName.IsNotEmpty() || phone.IsNotEmpty()))
-                msgs.Add($"Last name for contact {ecNumber} is required.", MessageType.UserError);
-
-            if (phone.IsEmpty() && (firstName.IsNotEmpty() || lastName.IsNotEmpty()))
-                msgs.Add($"Primary phone number for contact {ecNumber} is required.", MessageType.UserError);
-
-            return msgs;
-        }
-
         #endregion
 
         [HttpGet]
@@ -784,12 +757,6 @@ namespace AfterSchool.Areas.User.Controllers
                         });
                     });
             }
-        }
-
-        private Form GetAdministratorAccountForm(SystemMessages msgs)
-        {
-            var administratorAccount = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs).First();
-            return administratorAccount.GetDefaultForm(msgs);
         }
     }
 }

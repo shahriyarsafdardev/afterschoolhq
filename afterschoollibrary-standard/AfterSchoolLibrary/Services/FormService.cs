@@ -10,6 +10,18 @@ namespace AfterSchoolLibrary.Services
 {
     public static class FormService
     {
+        public static Form GetAdministratorAccountForm(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var administratorAccount = AccountService.GetAfterSchoolAccount(msgs, dc);
+            return administratorAccount.GetDefaultForm(msgs, dc);
+        }
+
+        public static Form GetInterestForm(WebUser currentUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var administratorAccount = AccountService.GetAfterSchoolAccount(msgs, dc);
+            return administratorAccount.GetOrCreateInterestForm(currentUser, msgs, dc);
+        }
+
         /// <summary>
         /// get template from default afterschool account with ID = 1
         /// </summary>

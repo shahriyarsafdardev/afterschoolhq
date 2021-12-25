@@ -3,6 +3,7 @@ using Xunit.Abstractions;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using System.Collections.Generic;
+using AfterSchoolLibraryTests.Factories;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -10,6 +11,29 @@ namespace AfterSchoolLibraryTests.Tests
     {
         public FormServiceTest(ITestOutputHelper output) : base(output)
         {
+        }
+
+        [Fact]
+        public void GetAdministratorAccountFormTest()
+        {
+            // Arrange & Act
+            var form = FormService.GetAdministratorAccountForm(msgs, dc);
+
+            // Assert
+            Assert.NotNull(form);
+        }
+
+        [Fact]
+        public void GetInterestFormFormTest()
+        {
+            // Arrange
+            var currentUser = WebUserFactory.Create(msgs, dc);
+
+            // Act
+            var form = FormService.GetInterestForm(currentUser, msgs, dc);
+
+            // Assert
+            Assert.NotNull(form);
         }
 
         [Fact]
