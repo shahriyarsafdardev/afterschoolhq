@@ -666,13 +666,8 @@ namespace AfterSchool.Areas.User.Controllers
                             });
 
                             UpdateChildrenRegistrants(
-                                registrant, 
-                                new List<QuestionGroupDataType>()
-                                {
-                                    QuestionGroupDataType.EmergencyContact1,
-                                    QuestionGroupDataType.EmergencyContact2,
-                                    QuestionGroupDataType.EmergencyContact3
-                                }, 
+                                registrant,
+                                FormQuestionService.GetEmergencyContactQuestionGroups(), 
                                 amsgs, 
                                 adc);
                         },
