@@ -4,7 +4,7 @@
         <div class="modal-body">
             <div class="col-md-8 col-md-offset-2">
 
-                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close btn-close-login-form" onclick="ensureModalClose('modal-login')">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close btn-close-login-form" onclick="hideModal('modal-login')">
                     <i class="icon s7-close"></i>
                 </button>
 
@@ -238,10 +238,6 @@
 
             }
         )
-    }
-
-    function ensureModalClose(id) {
-        $('#' + id).removeClass('md-show');
     }
 
     function showForgotPasswordModal() {

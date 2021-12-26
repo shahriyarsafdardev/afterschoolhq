@@ -84,12 +84,18 @@
                         @if (UILabel.IsCurrentUserCleverIntegrated())
                         {
                             <p class="txt-clever-connected">You are currently connected to a Clever account. To change your connected Clever account, click the "Login with Clever" button below.</p>
+                             <br />
+                            <a href="#" onclick="return showUpdateCleverAccount()">
+                                <img src="~/img/login-clever.png" style="width: 160px; height: 39px;" class="clever-login-img" />
+                            </a>
                         }
-
-                        <br />
-                        <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLink">
-                            <img src="~/img/login-clever.png" style="width: 160px; height: 39px;" class="clever-login-img" />
-                        </a>
+                        else
+                        {
+                            <br />
+                            <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLink">
+                                <img src="~/img/login-clever.png" style="width: 160px; height: 39px;" class="clever-login-img" />
+                            </a>
+                        }
                     </div>
                 </div>
                 
@@ -106,4 +112,11 @@
     </div>
 </div>
 
+@{ Html.RenderPartial("_ModalUpdateCleverAccount"); }
 
+<script>
+    function showUpdateCleverAccount() {
+        // now show the reset password modal
+        showModal('modal-update-clever-account');
+    }
+</script>

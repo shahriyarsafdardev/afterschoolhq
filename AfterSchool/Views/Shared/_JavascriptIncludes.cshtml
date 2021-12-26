@@ -123,6 +123,16 @@
         $("#ProgressBar").hide();
     }
 
+    function showModal(id) {
+        $('#' + id).modal('show');
+        $('#' + id).addClass('md-show');
+    }
+
+    function hideModal(id) {
+        $('#' + id).modal('hide');
+        $('#' + id).removeClass('md-show');
+    }
+
     document.querySelectorAll('.countWords').forEach(item => {
         item.addEventListener('input', event => {
             var maxlength = item.getAttribute("maxlength");
