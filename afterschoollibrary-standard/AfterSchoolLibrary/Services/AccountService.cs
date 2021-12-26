@@ -3013,7 +3013,7 @@ namespace AfterSchoolLibrary.Services
             else
                 paymentType = PaymentType.Check;
 
-            if (paymentType != PaymentType.NotSet)
+            if (paymentType != PaymentType.NotSet && msgs.HasNoErrors())
             {
                 var payout = PayoutService.CreateNew(account, statementDescriptor, transactions, PayoutStatus.Requested, paymentType, loggedInUser, msgs, dc);
 
