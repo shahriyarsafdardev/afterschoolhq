@@ -1170,9 +1170,7 @@ namespace AfterSchool.Controllers
                       parentRegistrant.GetAnswers(amsgs, adc)
                           .Where(answer =>
                               answer.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.HomeAddress ||
-                              answer.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1 ||
-                              answer.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2 ||
-                              answer.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact3
+                              answer.FormQuestionGroupQuestionGroupDataTypeId.In(FormQuestionService.GetEmergencyContactQuestionGroups())
                           )
                           .ToList()
                           .ForEach(answer =>
