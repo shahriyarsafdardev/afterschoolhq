@@ -5,6 +5,7 @@ using Xunit.Abstractions;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using AfterSchoolLibraryTests.Factories;
+using System.Linq;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -136,7 +137,38 @@ namespace AfterSchoolLibraryTests.Tests
             var user = WebUserFactory.Create(msgs, dc);
             var account = AccountFactory.Create(user, msgs, dc);
             Assert.NotNull(Account.LoadByUid(account.Uid, msgs, dc));
-        }   
+        }
+
+        [Fact]
+        public void RegistrantMiddleNameExistsTest()
+        {
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
+            var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
+
+            Assert.Contains(questions, f => f.QuestionDataTypeId == QuestionDataType.RegistrantMiddleName);
+        }
+
+        [Fact]
+        public void Parent1InformationMiddleNameExistsTest()
+        {
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.Parent1Information);
+            var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
+
+            Assert.Contains(questions, f => f.QuestionDataTypeId == QuestionDataType.Parent1MiddleName);
+        }
+
+        [Fact]
+        public void Parent2InformationMiddleNameExistsTest()
+        {
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.Parent2Information);
+            var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
+
+            Assert.Contains(questions, f => f.QuestionDataTypeId == QuestionDataType.Parent2MiddleName);
+        }
+
 
     }
 }
