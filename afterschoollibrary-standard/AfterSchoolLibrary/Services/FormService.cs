@@ -352,6 +352,9 @@ namespace AfterSchoolLibrary.Services
             qhs.Add(new QuestionHolder() { Text = "Last Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1LastName });
             qhs.Add(new QuestionHolder() { Text = "Email", IsActive = true, QuestionTypeId = QuestionType.Email, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1Email });
 
+            qhs.Add(new QuestionHolder() { Text = "Parent Guardian Relationship To Student", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1Employer, Options = "Mother,Father,Grandmother,Grandfather,Sister,Brother,Aunt,Uncle,Legal Guardian,Other" });
+            qhs.Add(new QuestionHolder() { Text = "Parent Guardian Employer", QuestionTypeId = QuestionType.DropDownList, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1RelationshipToRegistrant });
+           
             qhs.Add(new QuestionHolder() { Text = "Mobile Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1MobilePhone });
             qhs.Add(new QuestionHolder() { Text = "Home Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1HomePhone });
             qhs.Add(new QuestionHolder() { Text = "Work Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1WorkPhone });
@@ -378,6 +381,9 @@ namespace AfterSchoolLibrary.Services
             qhs.Add(new QuestionHolder() { Text = "Home Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2HomePhone });
             qhs.Add(new QuestionHolder() { Text = "Work Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2WorkPhone });
 
+            qhs.Add(new QuestionHolder() { Text = "Secondary Guardian Relationship To Student", QuestionTypeId = QuestionType.DropDownList, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2Employer, Options = "Mother,Father,Grandmother,Grandfather,Sister,Brother,Aunt,Uncle,Legal Guardian,Other" });
+            qhs.Add(new QuestionHolder() { Text = "Secondary Guardian Employer", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2RelationshipToRegistrant });
+          
             //qhs.Add(new QuestionHolder() { Text = "Phone", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2Phone1 });
             //qhs.Add(new QuestionHolder() { Text = "Phone Type", IsActive = true, QuestionTypeId = QuestionType.RadioList, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2PhoneType1, Options = "Mobile, Home, Work" });
             //qhs.Add(new QuestionHolder() { Text = "Alternate Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2Phone2 });
@@ -397,6 +403,8 @@ namespace AfterSchoolLibrary.Services
             qhs.Add(new QuestionHolder() { Text = "City", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantCity });
             qhs.Add(new QuestionHolder() { Text = "State", QuestionTypeId = QuestionType.DropDownList, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, Options = QuestionHolder.StateList, QuestionDataTypeId = QuestionDataType.RegistrantState });
             qhs.Add(new QuestionHolder() { Text = "Zip Code", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantPostalCode });
+            qhs.Add(new QuestionHolder() { Text = "Parent Guardian Relationship To Student", QuestionTypeId = QuestionType.DropDownList, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1Employer, Options = "Mother,Father,Grandmother,Grandfather,Sister,Brother,Aunt,Uncle,Legal Guardian,Other" });
+            qhs.Add(new QuestionHolder() { Text = "Parent Guardian Employer", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1RelationshipToRegistrant });
 
             return qhs;
         }
