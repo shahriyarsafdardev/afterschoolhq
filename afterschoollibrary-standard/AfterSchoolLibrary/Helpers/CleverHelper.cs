@@ -98,8 +98,6 @@ namespace Clever
             public string token_type { get; set; }
         }
 
-
-
         public class CleverUserDistrictDto
         {
             public Data data { get; set; }
