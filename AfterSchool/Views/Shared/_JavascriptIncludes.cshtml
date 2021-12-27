@@ -133,6 +133,21 @@
         $('#' + id).removeClass('md-show');
     }
 
+    function btnProcess(id, text, isDisabled) {
+        $('#' + id).html(text);
+        $('#' + id).prop('disabled', isDisabled);
+    }
+
+    function validateEmail(emailText) {
+        var pattern = /^[a-zA-Z0-9\-_]+(\.[a-zA-Z0-9\-_]+)*@@[a-z0-9]+(\-[a-z0-9]+)*(\.[a-z0-9]+(\-[a-z0-9]+)*)*\.[a-z]{2,4}$/;
+        if (pattern.test(emailText)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
     document.querySelectorAll('.countWords').forEach(item => {
         item.addEventListener('input', event => {
             var maxlength = item.getAttribute("maxlength");

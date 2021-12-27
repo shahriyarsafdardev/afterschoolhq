@@ -32,22 +32,6 @@
     @RenderBody()
    
     @{Html.RenderPartial("~/Views/Shared/_JavascriptIncludes.cshtml");}
-
-    <script>
-        function btnProcess(id, text, isDisabled) {
-            $('#' + id).html(text);
-            $('#' + id).prop('disabled', isDisabled);
-        }
-
-        function validateEmail(emailText) {
-            var pattern = /^[a-zA-Z0-9\-_]+(\.[a-zA-Z0-9\-_]+)*@@[a-z0-9]+(\-[a-z0-9]+)*(\.[a-z0-9]+(\-[a-z0-9]+)*)*\.[a-z]{2,4}$/;
-            if (pattern.test(emailText)) {
-                return true;
-            }
-            else {
-                return false;
-            }
-        }
-    </script>
+    
 </body>
 </html>

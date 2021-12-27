@@ -4,14 +4,14 @@
         <div class="modal-body">
             <div class="col-md-8 col-md-offset-2">
 
-                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close btn-close-login-form" onclick="hideModal('modal-login')">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close btn-close-login-form" onclick="updateAndHideModal()">
                     <i class="icon s7-close"></i>
                 </button>
 
                 <div class="login-form">
                     <div class="form-group">
                         <p class="txt-welcome-back">Welcome back.</p>
-                        <p class="txt-login-below">Login below or <a href="#" onclick="showSignUpForm()">Create a family account.</a></p>
+                        <p class="txt-login-below">Login below or <a href="#" onclick="showSignUpForm()">Create a family account</a></p>
                     </div>
 
                     <div class="form-group">
@@ -20,7 +20,7 @@
                             <input id="lm-login-username" name="username" type="email" class="form-control txt-generic-login" required>
                             <div class="input-group-email">
                                 <button id="inputGroupEmailPrepend" type="button" class="btn btn-primary btn-sm btn-generic-login">
-                                    <img src="~/img/envelop_trans.png" />
+                                    <img src="~/img/envelope 1.svg" />
                                 </button>
                             </div>
                         </div>
@@ -32,7 +32,7 @@
                             <input id="lm-login-password" name="password" type="password" autocomplete="new-password" class="form-control txt-generic-login" required>
                             <div class="input-group-password">
                                 <button id="inputGroupPassworkPrepend" type="button" class="btn btn-primary btn-sm btn-generic-login">
-                                    <img src="~/img/password_trans.png" />
+                                    <img src="~/img/unlock 1.svg" />
                                 </button>
                             </div>
                         </div>
@@ -62,6 +62,13 @@
                 </div>
 
                 <div class="sign-up-form hide">
+
+                    <div class="form-group">
+                        <p class="txt-welcome-back">Create a family account</p>
+                        <p class="txt-login-below"><a href="#" onclick="showLoginForm()">Back</a></p>
+                    </div>
+                    <br />
+
                     <div class="form-group">
                         <div class="input-group">
                             <span class="input-group-addon"><i class="icon s7-user"></i></span>
@@ -95,7 +102,7 @@
                         </div>
                     </div>
                     <div class="form-group login-submit text-center">
-                        <button type="button" id="btn-signup" class="btn btn-primary btn-lg btn-block" onclick="createNewAccount()">
+                        <button type="button" id="btn-signup" class="btn btn-primary btn-lg btn-block btn-login-updated" style="margin: 0 auto;" onclick="createNewAccount()">
                             Create Family Account &raquo;
                         </button>
                     </div>
@@ -124,46 +131,71 @@
 
     function authorize() {
 
-        showLoader();
+        var email = $('#lm-login-username');
+        var pass = $('#lm-login-password');
+        var isEmailValid = validateEmail(email.val());
+        var isPassValid = pass.val() == '' ? false : true;
 
-        params = 'username=' + encodeURIComponent($('#lm-login-username').val()) +
-            '&password=' + encodeURIComponent($('#lm-login-password').val()) +
-            '&remember=' + $('#lm-login-rememberme').val() +
-            '&source=parent-login';
+        if (!isEmailValid) {
+            email.addClass('error-border');
+            setTimeout(function () {
+                email.removeClass('error-border');
+            }, 3000);
 
-        var loginText = $('#btn-login').html();
-        $('#btn-login').html('Logging In...');
-        $('#btn-login').prop('disabled', true);
+            $(email).parent().effect("shake");
+        }
 
-        $.post(
-            '@Url.Action("authorize", "login")',
-            params,
-            function (data) {
+        if (!isPassValid) {
+            pass.addClass('error-border');
+            setTimeout(function () {
+                pass.removeClass('error-border');
+            }, 3000);
 
-                if (data && data.status == 'ok') {
-                    $('#btn-login').html('Redirecting...');
+            $(pass).parent().effect("shake");
+        }
 
-                    if (authorizationFormRedirectUrl) {
-                        location.href = authorizationFormRedirectUrl;
-                    } else if (authorizationFormAction) {
-                        $('#modal-login').removeClass('md-show');
-                        authorizationFormAction(function () { location.reload(); });
-                    }
-                    else if (data.isNewAccount) {
-                        location.reload();
+        if (isEmailValid == true && isPassValid == true) {
+
+            showLoader();
+
+            params = 'username=' + encodeURIComponent($('#lm-login-username').val()) +
+                '&password=' + encodeURIComponent($('#lm-login-password').val()) +
+                '&remember=' + $('#lm-login-rememberme').val() +
+                '&source=parent-login';
+
+            var loginText = $('#btn-login').html();
+            $('#btn-login').html('Logging In...');
+            $('#btn-login').prop('disabled', true);
+
+            $.post('@Url.Action("authorize", "login")', params,
+                function (data) {
+                    if (data && data.status == 'ok') {
+                        $('#btn-login').html('Redirecting...');
+
+                        if (authorizationFormRedirectUrl) {
+                            location.href = authorizationFormRedirectUrl;
+                        } else if (authorizationFormAction) {
+                            $('#modal-login').removeClass('md-show');
+                            authorizationFormAction(function () { location.reload(); });
+                        }
+                        else if (data.isNewAccount) {
+                            location.reload();
+                        } else {
+                            location.href = '@ViewData["ReturnUrl"]';
+                        }
                     } else {
-                        location.href = '@ViewData["ReturnUrl"]';
+                        Notifications.showErrors(data.messages);
+
+                        $('#btn-login').html(loginText);
+                        $('#btn-login').prop('disabled', false);
                     }
-                } else {
-                    Notifications.showErrors(data.messages);
 
-                    $('#btn-login').html(loginText);
-                    $('#btn-login').prop('disabled', false);
+                    hideLoader();
                 }
+            )
+        }
 
-                hideLoader();
-            }
-        )
+        return;
     }
 
     function setLoginRedirect(url, showSignUp) {
@@ -245,6 +277,16 @@
         hideModal('modal-login');
         // now show the reset password modal
         showModal('modal-rest-password');
+    }
+
+    function hideForgotPasswordModal() {        
+        hideModal('modal-rest-password');        
+        showModal('modal-login');
+    }
+
+    function updateAndHideModal() {
+        showLoginForm()
+        hideModal('modal-login');
     }
 
     function validateAndReset() {

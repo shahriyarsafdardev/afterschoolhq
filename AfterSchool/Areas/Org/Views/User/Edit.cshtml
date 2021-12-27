@@ -85,7 +85,7 @@
                         {
                             <p class="txt-clever-connected">You are currently connected to a Clever account. To change your connected Clever account, click the "Login with Clever" button below.</p>
                              <br />
-                            <a href="#" onclick="return showUpdateCleverAccount()">
+                            <a href="#" onclick="return showModal('modal-update-clever-account');">
                                 <img src="~/img/login-clever.png" style="width: 160px; height: 39px;" class="clever-login-img" />
                             </a>
                         }
@@ -113,10 +113,3 @@
 </div>
 
 @{ Html.RenderPartial("_ModalUpdateCleverAccount"); }
-
-<script>
-    function showUpdateCleverAccount() {
-        // now show the reset password modal
-        showModal('modal-update-clever-account');
-    }
-</script>
