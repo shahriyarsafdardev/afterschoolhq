@@ -8,7 +8,8 @@
         /* Center and scale the image nicely */
         background-repeat: no-repeat;
         background-position: left top;
-        background-size: 100% 100%;
+        /*background-size: 100% 100%;*/
+        background-size: cover;
         flex: 1;
         height: 100%;
     }
@@ -24,7 +25,7 @@
         <div class="rectangle-login-box">
             <div class="form-group">
                 <p class="form-login-welcome text-left">Welcome back.</p>
-                <p class="form-login-sign text-left">Or <a href="#">sign up </a> for a free account.</p>
+                <p class="form-login-sign text-left">Or <a href="@Url.Action("index", "signup", new { area = ""})">sign up </a> for a free account.</p>
             </div>
             <br /><br />
 
@@ -39,7 +40,7 @@
                         <input id="username" name="username" type="text" class="form-control txt-generic-login" required>
                         <div class="input-group-email">
                             <button id="inputGroupEmailPrepend" type="button" class="btn btn-primary btn-sm btn-generic-login">
-                                <img src="~/img/envelop_trans.png" />
+                                <img src="~/img/envelope.svg" />
                             </button>
                         </div>
                     </div>
@@ -51,7 +52,7 @@
                         <input id="password" name="password" type="password" class="form-control txt-generic-login" required>
                         <div class="input-group-password">
                             <button id="inputGroupPassworkPrepend" type="button" class="btn btn-primary btn-sm btn-generic-login">
-                                <img src="~/img/password_trans.png" />
+                                <img src="~/img/unlock.svg" />
                             </button>
                         </div>
                     </div>
@@ -66,8 +67,9 @@
                     </div>
                 </div>
 
-                <div class="form-group pull-right login-form-forgot-password-container">
-                    <a href="/login/resetpassword" style="padding: 7px; line-height: 30px; font-weight: 300; text-decoration: underline; ">Forgot Password</a>
+                <div class="form-group pull-right">
+                    <a href="/login/resetpassword" class="reset-login-pass">Forgot Password</a>
+                    @*<a href="#" class="reset-login-pass" onclick="return showModal('modal-rest-password');">Forgot Password</a>*@
                 </div>
                 <div class="clearfix"></div>
 
@@ -75,7 +77,7 @@
                     <button id="btn-login" type="submit" class="btn btn-primary btn-lg btn-block btn-login-updated" style="margin: 0 auto;">Log In</button>
                     <br />
                     <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLinkLogin" class="btn-clever-login">
-                        <img src="~/img/login-clever.png" style="width: 225px; height: 50px;" class="clever-login-img" />
+                        <img src="~/img/clever-login.png" style="width: 225px; height: 50px;" class="clever-login-img" />
                     </a>
                 </div>
 
@@ -124,7 +126,7 @@
                     <input id="username-small-scrren" name="username" type="text" class="form-control txt-generic-login" required>
                     <div class="input-group-email">
                         <button id="inputGroupEmailPrepend-small-scrren" type="button" class="btn btn-primary btn-sm btn-generic-login">
-                            <img src="~/img/envelop_trans.png" />
+                            <img src="~/img/envelope.svg" />
                         </button>
                     </div>
                 </div>
@@ -136,7 +138,7 @@
                     <input id="password-small-scrren" name="password" type="password" class="form-control txt-generic-login" required>
                     <div class="input-group-password">
                         <button id="inputGroupPassworkPrepend-small-scrren" type="button" class="btn btn-primary btn-sm btn-generic-login">
-                            <img src="~/img/password_trans.png" />
+                            <img src="~/img/unlock.svg" />
                         </button>
                     </div>
                 </div>
@@ -151,8 +153,9 @@
                 </div>
             </div>
 
-            <div class="form-group pull-right login-form-forgot-password-container">
-                <a href="/login/resetpassword" style="padding: 7px; line-height: 30px; font-weight: 300; text-decoration: underline; ">Forgot Password</a>
+            <div class="form-group pull-right">
+                <a href="/login/resetpassword" class="reset-login-pass">Forgot Password</a>
+                @*TODO: modal is not accessible in this layout <a href="#" class="reset-login-pass" onclick="return showModal('modal-rest-password');">Forgot Password</a>*@
             </div>
             <div class="clearfix"></div>
 
@@ -160,7 +163,7 @@
                 <button id="btn-login-small-scrren" type="button" class="btn btn-primary btn-lg btn-block btn-login-updated" style="margin: 0 auto;" onclick="return validateLogin(true)">Log In</button>
                 <br />
                 <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLinkLogin" class="btn-clever-login">
-                    <img src="~/img/login-clever.png" style="width: 225px; height: 50px;" class="clever-login-img" />
+                    <img src="~/img/clever-login.png" style="width: 225px; height: 50px;" class="clever-login-img" />
                 </a>
             </div>
         </form>
@@ -171,9 +174,11 @@
     </div>
 </div>
 
+@*@{ Html.RenderPartial("~/Views/Shared/Registration/_ResetPassword.cshtml"); }*@
+
 <script type="text/javascript">
 
-    function validateLogin(isMobile) {        
+    function validateLogin(isMobile) {
         if (isMobile) {
 
             var email = $('#username-small-scrren');
@@ -185,14 +190,14 @@
                 email.addClass('error-border');
                 setTimeout(function () {
                     email.removeClass('error-border');
-                }, 3000);                
+                }, 3000);
             }
 
             if (!isPassValid) {
                 pass.addClass('error-border');
                 setTimeout(function () {
                     pass.removeClass('error-border');
-                }, 3000);                
+                }, 3000);
             }
 
             if (isEmailValid == true && isPassValid == true) {
@@ -200,7 +205,7 @@
                 $('#form-login-small-screens').submit();
             }
 
-            return;            
+            return;
         }
     }
 

@@ -107,5 +107,53 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.False(canUser4Publish);
             Assert.False(canUser5Publish);
         }
+
+        [Fact]
+        public void GetUserByCleverIdTest()
+        {
+            // Arrange
+            var webUser = WebUserFactory.CreateWithCleverId(msgs, dc);
+
+            // Act
+            var userWithCleverIntegration = WebUserService.GetUserByCleverId(id: webUser.CleverUserId, msgs: msgs, dc: dc);
+
+            // Assert
+            Assert.NotNull(webUser);
+            Assert.NotNull(userWithCleverIntegration);
+            Assert.True(webUser.ID == userWithCleverIntegration.ID);
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void SetCleverIdentityToUserTest1()
+        {
+            // Arrange
+            var webUser = WebUserFactory.Create(msgs, dc);
+
+            // Act
+            WebUserService.SetCleverIdentityToUser(id: "1", webUser: webUser, msgs: msgs, dc: dc);
+
+            // Assert
+            Assert.NotNull(webUser);            
+            Assert.True(webUser.CleverUserId == "1");
+            Assert.True(msgs.HasNoErrors());
+            Assert.True(msgs.HasMessageContainingText("Clever integration for this user has been successfully completed."));
+        }
+
+        [Fact]
+        public void SetCleverIdentityToUserTest2()
+        {
+            // Arrange
+            var webUser = WebUserFactory.CreateWithCleverId(msgs, dc);
+
+            // Act
+            WebUserService.SetCleverIdentityToUser(id: "1", webUser: webUser, msgs: msgs, dc: dc);
+
+            // Assert
+            Assert.NotNull(webUser);
+            Assert.True(webUser.CleverUserId == "1");
+            Assert.True(msgs.HasNoErrors());
+            Assert.True(msgs.HasMessageContainingText("This user is already associated with clever."));
+        }
     }
 }

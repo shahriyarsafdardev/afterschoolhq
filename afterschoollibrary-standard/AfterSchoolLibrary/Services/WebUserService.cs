@@ -835,15 +835,15 @@ namespace AfterSchoolLibrary.Services
             return WebUser.LoadByCleverUserIdByIsActive(CleverUserId: CleverUserId, IsActive: true, msgs: msgs, dc: dc);
         }
 
-        public static WebUser GetUserByCleverId(string id, SystemMessages msgs = null)
+        public static WebUser GetUserByCleverId(string id, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (id.IsNotEmpty())
-                return WebUserService.LoginByCleverUserId(CleverUserId: id, msgs: msgs);
+                return WebUserService.LoginByCleverUserId(CleverUserId: id, msgs: msgs, dc: dc);
 
             return null;
         }
 
-        public static void SetCleverIdentityToUser(string id, WebUser webUser, SystemMessages msgs = null)
+        public static void SetCleverIdentityToUser(string id, WebUser webUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (webUser.IsNotEmpty() && id.IsNotEmpty())
             {
@@ -852,7 +852,7 @@ namespace AfterSchoolLibrary.Services
                 else
                 {
                     webUser.CleverUserId = id;
-                    msgs.AddRange(webUser.Save());
+                    msgs.AddRange(webUser.Save(dc: dc));
 
                     if (msgs.HasNoErrors())
                         msgs.Add("Clever integration for this user has been successfully completed.", MessageType.Success);
