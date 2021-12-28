@@ -390,15 +390,6 @@ namespace AfterSchool.Controllers
       var personalContactGroup = form.GetQuestionGroups(msgs)
           .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
       var questions = personalContactGroup.GetAllQuestions(msgs);
-      var nonIncludedQuestions = new List<QuestionDataType>()
-            {
-                QuestionDataType.RegistrantOrganization,
-                QuestionDataType.RegistrantGrade,
-                QuestionDataType.RegistrantGender,
-                QuestionDataType.RegistrantDateOfBirth,
-                QuestionDataType.RegistrantEthnicity,
-                QuestionDataType.RegistrantTShirtSize
-            };
 
       var nonIncludedQuestionsExistingUser = new List<QuestionDataType>()
             {
@@ -407,7 +398,7 @@ namespace AfterSchool.Controllers
                 QuestionDataType.RegistrantEmail
             };
 
-      questions = questions.Where(question => question.QuestionDataTypeId.NotIn(nonIncludedQuestions)).ToList();
+      questions = questions.Where(question => question.QuestionDataTypeId.NotIn(FormService.QuestionsToNotIncludeInParentPanel())).ToList();
 
       questions.ForEach(question =>
       {
@@ -742,15 +733,7 @@ namespace AfterSchool.Controllers
           .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
       var questions = personalContactGroup.GetAllQuestions(msgs);
 
-      questions = questions.Where(question =>
-              question.QuestionDataTypeId != QuestionDataType.RegistrantOrganization &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantGrade &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantGender &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantDateOfBirth &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantEthnicity &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantTShirtSize
-          )
-          .ToList();
+      questions = questions.Where(question => question.QuestionDataTypeId.NotIn(FormService.QuestionsToNotIncludeInParentPanel())).ToList();
 
       questions.ForEach(question =>
       {
@@ -2125,16 +2108,7 @@ namespace AfterSchool.Controllers
           .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
       var questions = personalContactGroup.GetAllQuestions(msgs);
 
-      questions = questions.Where(question =>
-              question.QuestionDataTypeId != QuestionDataType.RegistrantOrganization &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantGender &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantDateOfBirth &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantEthnicity &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantTShirtSize &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantHomePhone &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantWorkPhone
-          )
-          .ToList();
+     questions = questions.Where(question => question.QuestionDataTypeId.NotIn(FormService.QuestionsToNotIncludeInStudentPanel(isGradeIncluded: false))).ToList();
 
       questions.ForEach(question =>
       {
@@ -2307,17 +2281,7 @@ namespace AfterSchool.Controllers
           .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
       var questions = personalContactGroup.GetAllQuestions(msgs);
 
-      questions = questions.Where(question =>
-              question.QuestionDataTypeId != QuestionDataType.RegistrantOrganization &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantGrade &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantGender &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantDateOfBirth &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantEthnicity &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantTShirtSize &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantHomePhone &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantWorkPhone
-          )
-          .ToList();
+      questions = questions.Where(question => question.QuestionDataTypeId.NotIn(FormService.QuestionsToNotIncludeInStudentPanel(isGradeIncluded: true))).ToList();
 
       questions.ForEach(question =>
       {

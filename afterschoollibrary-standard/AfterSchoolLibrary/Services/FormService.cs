@@ -521,16 +521,31 @@ namespace AfterSchoolLibrary.Services
                 QuestionDataTypeId = QuestionDataType.RegistrantTShirtSize,
                 Options = "XXS,XS,S,M,L,XL,XXL,XXXL"
             });
+
+            qhs.Add(new QuestionHolder()
+            {
+                Text = "Race",
+                IsActive = true,
+                IsRequired = false,
+                QuestionTypeId = QuestionType.DropDownList,
+                GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.RegistrantRaceUsFed,
+                Options = RegistrantRace
+            });
+
             qhs.Add(new QuestionHolder()
             {
                 Text = "Ethnicity",
                 IsActive = true,
+                IsRequired = false,
                 QuestionTypeId = QuestionType.DropDownList,
                 GroupName = groupLabel,
                 QuestionGroupDataTypeId = groupType,
-                QuestionDataTypeId = QuestionDataType.RegistrantEthnicity,
-                Options = "American Indian/Alaskan Native,Asian/Pacific Islander,Black/African-American,Hispanic/Latino,White,Multiracial,Other"
+                QuestionDataTypeId = QuestionDataType.RegistrantEthnicityUsFed,
+                Options = RegistrantEthnicity
             });
+
             qhs.Add(new QuestionHolder()
             {
                 Text = "Organization",
@@ -652,6 +667,53 @@ namespace AfterSchoolLibrary.Services
             {
                 RegistrantTypeId = RegistrantType.Individual;
             }
+        }
+
+        public static string RegistrantRace
+        {
+            get
+            {
+                return "American Indian or Alaska Native,Asian,Black or African American,Native Hawaiian or Other Pacific Islander,White,Two or More Races";
+            }
+        }
+
+        public static string RegistrantEthnicity
+        {
+            get
+            {
+                return "Hispanic or Latino,Not Hispanic or Latino";
+            }
+        }
+
+        public static List<QuestionDataType> QuestionsToNotIncludeInParentPanel() => new List<QuestionDataType>() 
+        {
+            QuestionDataType.RegistrantOrganization,
+            QuestionDataType.RegistrantGrade,
+            QuestionDataType.RegistrantGender,
+            QuestionDataType.RegistrantDateOfBirth,
+            QuestionDataType.RegistrantRaceUsFed,
+            QuestionDataType.RegistrantEthnicityUsFed,
+            QuestionDataType.RegistrantTShirtSize
+        };
+
+        public static List<QuestionDataType> QuestionsToNotIncludeInStudentPanel(bool isGradeIncluded)
+        {
+            var list = new List<QuestionDataType>()
+            {
+                QuestionDataType.RegistrantOrganization,
+                QuestionDataType.RegistrantGender,
+                QuestionDataType.RegistrantDateOfBirth,
+                QuestionDataType.RegistrantRaceUsFed,
+                QuestionDataType.RegistrantEthnicityUsFed,
+                QuestionDataType.RegistrantTShirtSize,
+                QuestionDataType.RegistrantHomePhone,
+                QuestionDataType.RegistrantWorkPhone
+            };
+
+            if (isGradeIncluded)
+                list.Add(QuestionDataType.RegistrantGrade);
+
+            return list;
         }
     }
 }
