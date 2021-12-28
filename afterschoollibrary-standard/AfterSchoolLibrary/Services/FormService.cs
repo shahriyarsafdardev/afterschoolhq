@@ -310,7 +310,7 @@ namespace AfterSchoolLibrary.Services
             qhs.Add(new QuestionHolder() { Text = "Primary Phone", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact1Phone, IsRequired = true });
             qhs.Add(new QuestionHolder() { Text = "Additional Phone 1", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact1Phone2 });
             qhs.Add(new QuestionHolder() { Text = "Additional Phone 2", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact1Phone3 });
-            qhs.Add(new QuestionHolder() { Text = "Relationship To Registrant", IsActive = true, QuestionTypeId = QuestionType.DropDownList, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact1RelationshipToRegistrant, Options = Helpers.Utilities.RelationshipTRegistrantForEmergencyContactsList });
+            qhs.Add(new QuestionHolder() { Text = "Relationship To Registrant", IsActive = true, QuestionTypeId = QuestionType.DropDownList, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact1RelationshipToRegistrant, Options = RelationshipToRegistrantForEmergencyContactsList });
 
             return qhs;
         }
@@ -326,7 +326,7 @@ namespace AfterSchoolLibrary.Services
             qhs.Add(new QuestionHolder() { Text = "Primary Phone", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact2Phone });
             qhs.Add(new QuestionHolder() { Text = "Additional Phone 1", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact2Phone2 });
             qhs.Add(new QuestionHolder() { Text = "Additional Phone 2", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact2Phone3 });
-            qhs.Add(new QuestionHolder() { Text = "Relationship To Registrant", IsActive = true, QuestionTypeId = QuestionType.DropDownList, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact2RelationshipToRegistrant, Options = Helpers.Utilities.RelationshipTRegistrantForEmergencyContactsList });
+            qhs.Add(new QuestionHolder() { Text = "Relationship To Registrant", IsActive = true, QuestionTypeId = QuestionType.DropDownList, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact2RelationshipToRegistrant, Options = RelationshipToRegistrantForEmergencyContactsList });
 
             return qhs;
         }
@@ -342,7 +342,7 @@ namespace AfterSchoolLibrary.Services
             qhs.Add(new QuestionHolder() { Text = "Primary Phone", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact3Phone });
             qhs.Add(new QuestionHolder() { Text = "Additional Phone 1", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact3Phone2 });
             qhs.Add(new QuestionHolder() { Text = "Additional Phone 2", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact3Phone3 });
-            qhs.Add(new QuestionHolder() { Text = "Relationship To Registrant", IsActive = true, QuestionTypeId = QuestionType.DropDownList, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact3RelationshipToRegistrant, Options = Helpers.Utilities.RelationshipTRegistrantForEmergencyContactsList });
+            qhs.Add(new QuestionHolder() { Text = "Relationship To Registrant", IsActive = true, QuestionTypeId = QuestionType.DropDownList, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact3RelationshipToRegistrant, Options = RelationshipToRegistrantForEmergencyContactsList });
 
             return qhs;
         }
@@ -686,6 +686,14 @@ namespace AfterSchoolLibrary.Services
             public QuestionHolder()
             {
                 RegistrantTypeId = RegistrantType.Individual;
+            }
+        }
+
+        public static string RelationshipToRegistrantForEmergencyContactsList
+        {
+            get
+            {
+                return "Father,Mother,Grandfather,Grandmother,Brother,Sister,Uncle,Aunt,Legal Guardian,Other";
             }
         }
     }
