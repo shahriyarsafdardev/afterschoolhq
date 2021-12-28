@@ -23,9 +23,9 @@ namespace AfterSchool.Controllers
     {
       var currentUser = SessionVariables.CurrentUser;
       var form = FormService.GetInterestForm(currentUser, msgs);
-      var intererestGroup = form.GetQuestionGroups(msgs)
+      var interestGroup = form.GetQuestionGroups(msgs)
                               .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.RegistrantInterestInformation);
-      var questions = intererestGroup.GetAllQuestions(msgs);
+      var questions = interestGroup.GetAllQuestions(msgs);
 
       var nonIncludedQuestionsExistingUser = new List<QuestionDataType>()
             {
