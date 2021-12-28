@@ -19439,3 +19439,10 @@ a.text-limit span {
         right: 0px;
     }
 }
+
+@media screen and (max-width: 375px) {
+    .footer-logo-small-screen {
+        margin-top: 15px;
+        position: static !important;
+    }
+}

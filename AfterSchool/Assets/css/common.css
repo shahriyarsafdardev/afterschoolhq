@@ -1169,7 +1169,7 @@
     width: 640px;
     position: fixed;
     left: 50%;
-    bottom: 20px;
+    bottom: 100px;
     margin: 0 auto;
 }
 
@@ -1398,4 +1398,20 @@
     line-height: 30px;
     font-weight: 300;
     text-decoration: underline;
+}
+
+.photo-by-cole-keister {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    margin: 0 auto;
+    color: #fff;
+    font-size: 10px;
+    font-family: Montserrat;
+    font-size: 12px;
+    font-weight: 300;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
 }
