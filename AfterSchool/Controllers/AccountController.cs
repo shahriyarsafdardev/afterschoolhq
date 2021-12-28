@@ -537,8 +537,6 @@ namespace AfterSchool.Controllers
         switch (qvm.Question.QuestionDataTypeId)
         {
           case QuestionDataType.RegistrantMobilePhone:
-          case QuestionDataType.RegistrantHomePhone:
-          case QuestionDataType.RegistrantWorkPhone:
             if (qvm.Value.IsNotEmpty() && !qvm.Value.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
               msgs.Add($"{qvm.Question.Text} must be a valid phone number", MessageType.UserError);
             break;
@@ -697,6 +695,17 @@ namespace AfterSchool.Controllers
       {
         if (question.IsRequired && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
           msgs.Add($"{question.Text} is required", MessageType.UserError);
+
+          switch (question.QuestionDataTypeId)
+          {
+              case QuestionDataType.RegistrantHomePhone:
+              case QuestionDataType.RegistrantWorkPhone:
+                  if (Request[question.ToFormQuestionViewModel().Name].IsNotEmpty() && !Request[question.ToFormQuestionViewModel().Name].Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                      msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+                  break;
+              default:
+                  break;
+          }
       });
 
       var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
@@ -731,13 +740,13 @@ namespace AfterSchool.Controllers
       ViewBag.Messages = msgs;
 
       return View(qvms);
-    }
+        }
 
-    #endregion
+        #endregion
 
-    #region AddParent
+        #region AddParent
 
-    private List<FormQuestion> AddParentViewBag(SystemMessages msgs)
+        private List<FormQuestion> AddParentViewBag(SystemMessages msgs)
     {
       var form = GetAdministratorAccountForm(msgs);
       var personalContactGroup = form.GetQuestionGroups(msgs)
@@ -3008,6 +3017,6 @@ namespace AfterSchool.Controllers
         ViewBag.SessionActivities = GetAllParticipationObjectsForCheckout(registration, msgs);
     }
 
-    #endregion
-  }
+        #endregion
+    }
 }
