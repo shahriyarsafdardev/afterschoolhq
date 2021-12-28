@@ -62,60 +62,60 @@ namespace AfterSchoolLibraryTests.Tests
 
             // ec1
             // FirstName
-            CheckEmergencyContactQuestion(formQuestions: fqs, text: "First Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1FirstName, isRequired: true, isActive: true);
+            CheckEmergencyContactQuestion(formQuestions: fqs, text: "First Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1FirstName, options: null, isRequired: true, isActive: true);
 
             // LastName
-            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Last Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1LastName, isRequired: true, isActive: true);
+            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Last Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1LastName, options: null, isRequired: true, isActive: true);
 
             // Phone
-            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Primary Phone", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1Phone, isRequired: true, isActive: true);
+            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Primary Phone", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1Phone, options: null, isRequired: true, isActive: true);
 
             // Phone2
-            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Additional Phone 1", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1Phone2, isRequired: false, isActive: true);
+            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Additional Phone 1", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1Phone2, options: null, isRequired: false, isActive: true);
 
             // Phone3
-            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Additional Phone 2", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1Phone3, isRequired: false, isActive: true);
+            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Additional Phone 2", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1Phone3, options: null, isRequired: false, isActive: true);
 
             // RelationshipToRegistrant
-            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Relationship To Registrant", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1RelationshipToRegistrant, isRequired: false, isActive: true);
+            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Relationship To Registrant", questionTyped: QuestionType.DropDownList, questionDataTypeId: QuestionDataType.EmergencyContact1RelationshipToRegistrant, options: AfterSchoolLibrary.Helpers.Utilities.RelationshipTRegistrantForEmergencyContactsList, isRequired: false, isActive: true);
 
             // ec2
             // FirstName
-            CheckEmergencyContactQuestion(formQuestions: fqs, text: "First Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2FirstName, isRequired: false, isActive: true);
+            CheckEmergencyContactQuestion(formQuestions: fqs, text: "First Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2FirstName, options: null, isRequired: false, isActive: true);
 
             // LastName
-            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Last Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2LastName, isRequired: false, isActive: true);
+            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Last Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2LastName, options: null, isRequired: false, isActive: true);
 
             // Phone
-            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Primary Phone", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2Phone, isRequired: false, isActive: true);
+            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Primary Phone", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2Phone, options: null, isRequired: false, isActive: true);
 
             // Phone2
-            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Additional Phone 1", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2Phone2, isRequired: false, isActive: true);
+            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Additional Phone 1", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2Phone2, options: null, isRequired: false, isActive: true);
 
             // Phone3
-            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Additional Phone 2", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2Phone3, isRequired: false, isActive: true);
+            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Additional Phone 2", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2Phone3, options: null, isRequired: false, isActive: true);
 
             // RelationshipToRegistrant
-            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Relationship To Registrant", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2RelationshipToRegistrant, isRequired: false, isActive: true);
+            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Relationship To Registrant", questionTyped: QuestionType.DropDownList, questionDataTypeId: QuestionDataType.EmergencyContact2RelationshipToRegistrant, options: AfterSchoolLibrary.Helpers.Utilities.RelationshipTRegistrantForEmergencyContactsList, isRequired: false, isActive: true);
 
             // ec3
             // FirstName
-            CheckEmergencyContactQuestion(formQuestions: fqs, text: "First Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3FirstName, isRequired: false, isActive: true);
+            CheckEmergencyContactQuestion(formQuestions: fqs, text: "First Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3FirstName, options: null, isRequired: false, isActive: true);
 
             // LastName
-            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Last Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3LastName, isRequired: false, isActive: true);
+            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Last Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3LastName, options: null, isRequired: false, isActive: true);
 
             // Phone
-            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Primary Phone", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3Phone, isRequired: false, isActive: true);
+            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Primary Phone", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3Phone, options: null, isRequired: false, isActive: true);
 
             // Phone2
-            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Additional Phone 1", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3Phone2, isRequired: false, isActive: true);
+            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Additional Phone 1", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3Phone2, options: null, isRequired: false, isActive: true);
 
             // Phone3
-            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Additional Phone 2", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3Phone3, isRequired: false, isActive: true);
+            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Additional Phone 2", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3Phone3, options: null, isRequired: false, isActive: true);
 
             // RelationshipToRegistrant
-            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Relationship To Registrant", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3RelationshipToRegistrant, isRequired: false, isActive: true);
+            CheckEmergencyContactQuestion(formQuestions: fqs, text: "Relationship To Registrant", questionTyped: QuestionType.DropDownList, questionDataTypeId: QuestionDataType.EmergencyContact3RelationshipToRegistrant, options: AfterSchoolLibrary.Helpers.Utilities.RelationshipTRegistrantForEmergencyContactsList, isRequired: false, isActive: true);
         }
 
         [Fact]
@@ -129,12 +129,12 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.NotNull(qhs);
             Assert.True(qhs.Count == 6);
 
-            CheckEmergencyContactFields(contact: qhs[0], text: "First Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1FirstName, isRequired: true, isActive: true);
-            CheckEmergencyContactFields(contact: qhs[1], text: "Last Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1LastName, isRequired: true, isActive: true);
-            CheckEmergencyContactFields(contact: qhs[2], text: "Primary Phone", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1Phone, isRequired: true, isActive: true);
-            CheckEmergencyContactFields(contact: qhs[3], text: "Additional Phone 1", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1Phone2, isRequired: false, isActive: true);
-            CheckEmergencyContactFields(contact: qhs[4], text: "Additional Phone 2", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1Phone3, isRequired: false, isActive: true);
-            CheckEmergencyContactFields(contact: qhs[5], text: "Relationship To Registrant", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1RelationshipToRegistrant, isRequired: false, isActive: true);
+            CheckEmergencyContactFields(contact: qhs[0], text: "First Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1FirstName, options: null, isRequired: true, isActive: true);
+            CheckEmergencyContactFields(contact: qhs[1], text: "Last Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1LastName, options: null, isRequired: true, isActive: true);
+            CheckEmergencyContactFields(contact: qhs[2], text: "Primary Phone", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1Phone, options: null, isRequired: true, isActive: true);
+            CheckEmergencyContactFields(contact: qhs[3], text: "Additional Phone 1", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1Phone2, options: null, isRequired: false, isActive: true);
+            CheckEmergencyContactFields(contact: qhs[4], text: "Additional Phone 2", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1Phone3, options: null, isRequired: false, isActive: true);
+            CheckEmergencyContactFields(contact: qhs[5], text: "Relationship To Registrant", questionTyped: QuestionType.DropDownList, questionDataTypeId: QuestionDataType.EmergencyContact1RelationshipToRegistrant, options: AfterSchoolLibrary.Helpers.Utilities.RelationshipTRegistrantForEmergencyContactsList, isRequired: false, isActive: true);
         }
 
         [Fact]
@@ -148,12 +148,12 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.NotNull(qhs);
             Assert.True(qhs.Count == 6);
 
-            CheckEmergencyContactFields(contact: qhs[0], text: "First Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2FirstName, isRequired: false, isActive: true);
-            CheckEmergencyContactFields(contact: qhs[1], text: "Last Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2LastName, isRequired: false, isActive: true);
-            CheckEmergencyContactFields(contact: qhs[2], text: "Primary Phone", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2Phone, isRequired: false, isActive: true);
-            CheckEmergencyContactFields(contact: qhs[3], text: "Additional Phone 1", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2Phone2, isRequired: false, isActive: true);
-            CheckEmergencyContactFields(contact: qhs[4], text: "Additional Phone 2", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2Phone3, isRequired: false, isActive: true);
-            CheckEmergencyContactFields(contact: qhs[5], text: "Relationship To Registrant", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2RelationshipToRegistrant, isRequired: false, isActive: true);
+            CheckEmergencyContactFields(contact: qhs[0], text: "First Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2FirstName, options: null, isRequired: false, isActive: true);
+            CheckEmergencyContactFields(contact: qhs[1], text: "Last Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2LastName, options: null, isRequired: false, isActive: true);
+            CheckEmergencyContactFields(contact: qhs[2], text: "Primary Phone", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2Phone, options: null, isRequired: false, isActive: true);
+            CheckEmergencyContactFields(contact: qhs[3], text: "Additional Phone 1", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2Phone2, options: null, isRequired: false, isActive: true);
+            CheckEmergencyContactFields(contact: qhs[4], text: "Additional Phone 2", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2Phone3, options: null, isRequired: false, isActive: true);
+            CheckEmergencyContactFields(contact: qhs[5], text: "Relationship To Registrant", questionTyped: QuestionType.DropDownList, questionDataTypeId: QuestionDataType.EmergencyContact2RelationshipToRegistrant, options: AfterSchoolLibrary.Helpers.Utilities.RelationshipTRegistrantForEmergencyContactsList, isRequired: false, isActive: true);
         }
 
         [Fact]
@@ -167,27 +167,27 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.NotNull(qhs);
             Assert.True(qhs.Count == 6);
 
-            CheckEmergencyContactFields(contact: qhs[0], text: "First Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3FirstName, isRequired: false, isActive: true);
-            CheckEmergencyContactFields(contact: qhs[1], text: "Last Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3LastName, isRequired: false, isActive: true);
-            CheckEmergencyContactFields(contact: qhs[2], text: "Primary Phone", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3Phone, isRequired: false, isActive: true);
-            CheckEmergencyContactFields(contact: qhs[3], text: "Additional Phone 1", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3Phone2, isRequired: false, isActive: true);
-            CheckEmergencyContactFields(contact: qhs[4], text: "Additional Phone 2", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3Phone3, isRequired: false, isActive: true);
-            CheckEmergencyContactFields(contact: qhs[5], text: "Relationship To Registrant", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3RelationshipToRegistrant, isRequired: false, isActive: true);
+            CheckEmergencyContactFields(contact: qhs[0], text: "First Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3FirstName, options: null, isRequired: false, isActive: true);
+            CheckEmergencyContactFields(contact: qhs[1], text: "Last Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3LastName, options: null, isRequired: false, isActive: true);
+            CheckEmergencyContactFields(contact: qhs[2], text: "Primary Phone", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3Phone, options: null, isRequired: false, isActive: true);
+            CheckEmergencyContactFields(contact: qhs[3], text: "Additional Phone 1", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3Phone2, options: null, isRequired: false, isActive: true);
+            CheckEmergencyContactFields(contact: qhs[4], text: "Additional Phone 2", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3Phone3, options: null, isRequired: false, isActive: true);
+            CheckEmergencyContactFields(contact: qhs[5], text: "Relationship To Registrant", questionTyped: QuestionType.DropDownList, questionDataTypeId: QuestionDataType.EmergencyContact3RelationshipToRegistrant, options: AfterSchoolLibrary.Helpers.Utilities.RelationshipTRegistrantForEmergencyContactsList, isRequired: false, isActive: true);
         }
 
         #region Helpers
 
-        public static void CheckEmergencyContactQuestion(List<FormQuestion> formQuestions, string text, QuestionType questionTyped, QuestionDataType questionDataTypeId, bool isRequired, bool isActive)
+        public static void CheckEmergencyContactQuestion(List<FormQuestion> formQuestions, string text, QuestionType questionTyped, QuestionDataType questionDataTypeId, string options, bool isRequired, bool isActive)
         {
             // Arrange
             var question = formQuestions.Find(m => m.QuestionDataTypeId == questionDataTypeId);
 
             // Assert
             Assert.NotNull(question);
-            CheckEmergencyContactFields(question: question, text: text, questionTyped: questionTyped, questionDataTypeId: questionDataTypeId, isRequired: isRequired, isActive: isActive);
+            CheckEmergencyContactFields(question: question, text: text, questionTyped: questionTyped, questionDataTypeId: questionDataTypeId, options: options, isRequired: isRequired, isActive: isActive);
         }
 
-        public static void CheckEmergencyContactFields(FormQuestion question, string text, QuestionType questionTyped, QuestionDataType questionDataTypeId, bool isRequired, bool isActive)
+        public static void CheckEmergencyContactFields(FormQuestion question, string text, QuestionType questionTyped, QuestionDataType questionDataTypeId, string options, bool isRequired, bool isActive)
         {
             // Assert
             Assert.NotNull(question);
@@ -196,9 +196,10 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(question.QuestionDataTypeId == questionDataTypeId);
             Assert.True(question.IsRequired == isRequired);
             Assert.True(question.IsActive == isActive);
+            Assert.True(question.Options == options);
         }
 
-        public static void CheckEmergencyContactFields(FormService.QuestionHolder contact,  string text, QuestionType questionTyped, QuestionDataType questionDataTypeId, bool isRequired, bool isActive)
+        public static void CheckEmergencyContactFields(FormService.QuestionHolder contact,  string text, QuestionType questionTyped, QuestionDataType questionDataTypeId, string options, bool isRequired, bool isActive)
         {
             // Assert
             Assert.NotNull(contact);
@@ -207,6 +208,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(contact.QuestionDataTypeId == questionDataTypeId);
             Assert.True(contact.IsRequired == isRequired);
             Assert.True(contact.IsActive == isActive);
+            Assert.True(contact.Options == options);
         }
 
         #endregion
