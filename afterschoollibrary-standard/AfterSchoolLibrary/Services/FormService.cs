@@ -689,12 +689,7 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-        public static string RelationshipToRegistrantForEmergencyContactsList
-        {
-            get
-            {
-                return "Father,Mother,Grandfather,Grandmother,Brother,Sister,Uncle,Aunt,Legal Guardian,Other";
-            }
-        }
+        public static string RelationshipToRegistrantForEmergencyContactsList =>
+            "Father,Mother,Grandfather,Grandmother,Brother,Sister,Uncle,Aunt,Legal Guardian,Other";
     }
 }
