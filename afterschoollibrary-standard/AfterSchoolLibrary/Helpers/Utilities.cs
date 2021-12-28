@@ -156,6 +156,13 @@ namespace AfterSchoolLibrary.Helpers
     }
 
     public static string[] FullTextSearchWordsToIgnore = { "an", "and", "as", "at", "be", "by", "do", "for", "from", "if", "in", "is", "it", "of", "on", "or", "so", "the", "to", "was", "with" };
+    public static string RelationshipTRegistrantForEmergencyContactsList
+    {
+        get
+        {
+            return "Father,Mother,Grandfather,Grandmother,Brother,Sister,Uncle,Aunt,Legal Guardian,Other";
+        }
+    }
 
     public static string AppApiKey { get { return MasterAPIKey; } }
     public static string AppApiSecret { get { return MasterAPISecret; } }
