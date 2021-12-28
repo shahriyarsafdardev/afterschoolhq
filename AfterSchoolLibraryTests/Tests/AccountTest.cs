@@ -157,7 +157,7 @@ namespace AfterSchoolLibraryTests.Tests
             var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
             var question = questions.Where(f => f.QuestionDataTypeId == QuestionDataType.RegistrantTShirtSize).FirstOrDefault();
             
-            Assert.Contains("Youth XS,Youth S,Youth M,Youth L,Youth XL,Adult S,Adult M,Adult L,Adult 2XL, Adult 3XL", question.Options);
+            Assert.Contains("Youth XS,Youth S,Youth M,Youth L,Youth XL,Adult S,Adult M,Adult L,Adult XL,Adult 2XL, Adult 3XL", question.Options);
         }
       
     }
