@@ -646,6 +646,14 @@ namespace AfterSchoolLibrary.Services
             return qhs;
         }
 
+        public static SystemMessages PhoneValidation(string answer, FormQuestion question, SystemMessages msgs)
+        {
+            if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+
+            return msgs;
+        }
+
         public class QuestionHolder
         {
             public string Text;

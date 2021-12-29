@@ -700,8 +700,7 @@ namespace AfterSchool.Controllers
           {
               case QuestionDataType.RegistrantHomePhone:
               case QuestionDataType.RegistrantWorkPhone:
-                  if (Request[question.ToFormQuestionViewModel().Name].IsNotEmpty() && !Request[question.ToFormQuestionViewModel().Name].Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
-                      msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+                  FormService.PhoneValidation(Request[question.ToFormQuestionViewModel().Name], question, msgs);
                   break;
               default:
                   break;
@@ -1082,8 +1081,7 @@ namespace AfterSchool.Controllers
           case QuestionDataType.RegistrantHomePhone:
           case QuestionDataType.RegistrantWorkPhone:
           case QuestionDataType.RegistrantMobilePhone:
-            if (answer.IsNotEmpty() && !answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
-              msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+            FormService.PhoneValidation(answer, question, msgs);
             break;
 
         }
