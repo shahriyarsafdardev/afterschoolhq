@@ -534,7 +534,7 @@ namespace AfterSchoolLibrary.Services
                 GroupName = groupLabel,
                 QuestionGroupDataTypeId = groupType,
                 QuestionDataTypeId = QuestionDataType.RegistrantGrade,
-                Options = "Pre-K,K,1st,2nd,3rd,4th,5th,6th,7th,8th,9th,10th,11th,12th"
+                Options = RegistrantGrade
             });
             qhs.Add(new QuestionHolder()
             {
@@ -544,7 +544,7 @@ namespace AfterSchoolLibrary.Services
                 GroupName = groupLabel,
                 QuestionGroupDataTypeId = groupType,
                 QuestionDataTypeId = QuestionDataType.RegistrantGender,
-                Options = "Male,Female,Other"
+                Options = RegistrantGender
             });
             qhs.Add(new QuestionHolder()
             {
@@ -554,7 +554,7 @@ namespace AfterSchoolLibrary.Services
                 GroupName = groupLabel,
                 QuestionGroupDataTypeId = groupType,
                 QuestionDataTypeId = QuestionDataType.RegistrantTShirtSize,
-                Options = "XXS,XS,S,M,L,XL,XXL,XXXL"
+                Options = RegistrantTShirtSize
             });
 
             qhs.Add(new QuestionHolder()
@@ -703,6 +703,15 @@ namespace AfterSchoolLibrary.Services
                 RegistrantTypeId = RegistrantType.Individual;
             }
         }
+
+        public static string RegistrantGrade =>
+            "Pre-K,K,1st,2nd,3rd,4th,5th,6th,7th,8th,9th,10th,11th,12th";
+
+        public static string RegistrantGender =>
+            "Male,Female,Other";
+
+        public static string RegistrantTShirtSize =>
+            "XXS,XS,S,M,L,XL,XXL,XXXL";
 
         public static string RegistrantRace =>
             "American Indian or Alaska Native,Asian,Black or African American,Native Hawaiian or Other Pacific Islander,White,Two or More Races";
