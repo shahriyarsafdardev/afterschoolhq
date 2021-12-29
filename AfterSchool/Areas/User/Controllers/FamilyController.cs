@@ -52,12 +52,12 @@ namespace AfterSchool.Areas.User.Controllers
                     case QuestionDataType.RegistrantGrade:
                     case QuestionDataType.RegistrantDateOfBirth:
                     case QuestionDataType.RegistrantGender:
-                    case QuestionDataType.RegistrantTShirtSize:
                         question.IsRequired = true;
                         break;
 
                     case QuestionDataType.RegistrantHomePhone:
                     case QuestionDataType.RegistrantEmail:
+                    case QuestionDataType.RegistrantTShirtSize:
                         question.IsRequired = false;
                         break;
                 }
