@@ -192,9 +192,6 @@
     <Reference Include="Remotion.Linq, Version=2.1.0.0, Culture=neutral, PublicKeyToken=fee00910d6e5f53b, processorArchitecture=MSIL">
       <HintPath>..\packages\Remotion.Linq.2.1.1\lib\net45\Remotion.Linq.dll</HintPath>
     </Reference>
-    <Reference Include="RestSharp, Version=106.15.0.0, Culture=neutral, PublicKeyToken=598062e77f915f75, processorArchitecture=MSIL">
-      <HintPath>..\packages\RestSharp.106.15.0\lib\net452\RestSharp.dll</HintPath>
-    </Reference>
     <Reference Include="Rollbar, Version=3.7.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Rollbar.3.7.1\lib\net472\Rollbar.dll</HintPath>
     </Reference>
@@ -697,7 +694,7 @@
     <Content Include="img\banner-classroom.jpg" />
     <Content Include="img\BCALogo.jpg" />
     <Content Include="img\billy2.png" />
-    <Content Include="img\darye.png" />    
+    <Content Include="img\darye.png" />
     <Content Include="img\fee.png" />
     <Content Include="img\frank-mckenna-LhOjrOlcLx4-unsplash.jpg" />
     <Content Include="img\gabriel-baranski-vGICUyYW2CE-unsplash.jpg" />
