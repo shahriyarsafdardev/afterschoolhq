@@ -659,7 +659,10 @@ namespace AfterSchool.Controllers
           case QuestionDataType.RegistrantAddress2:
             question.IsRequired = false;
             break;
-          default:
+          case QuestionDataType.Parent1Employer:
+            question.IsRequired = false;
+            break;                
+            default:
             question.IsRequired = true;
             break;
         }
@@ -739,28 +742,19 @@ namespace AfterSchool.Controllers
     {
       var form = FormService.GetAdministratorAccountForm(msgs);
       var personalContactGroup = form.GetQuestionGroups(msgs)
-          .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
+          .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.Parent2Information);
       var questions = personalContactGroup.GetAllQuestions(msgs);
-
-      questions = questions.Where(question =>
-              question.QuestionDataTypeId != QuestionDataType.RegistrantOrganization &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantGrade &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantGender &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantDateOfBirth &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantEthnicity &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantTShirtSize
-          )
-          .ToList();
-
+     
       questions.ForEach(question =>
       {
         switch (question.QuestionDataTypeId)
         {
-          case QuestionDataType.RegistrantFirstName:
-          case QuestionDataType.RegistrantLastName:
-                // case QuestionDataType.RegistrantEmail:
-                case QuestionDataType.RegistrantMobilePhone:
-            question.IsRequired = true;
+           case QuestionDataType.Parent2FirstName:
+           case QuestionDataType.Parent2LastName:
+              //case QuestionDataType.Parent2Email:
+           case QuestionDataType.Parent2MobilePhone:
+           case QuestionDataType.Parent2RelationshipToRegistrant:
+                question.IsRequired = true;
             break;
         }
       });
