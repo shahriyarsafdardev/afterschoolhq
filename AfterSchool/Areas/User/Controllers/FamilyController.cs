@@ -494,10 +494,7 @@ namespace AfterSchool.Areas.User.Controllers
                 {
                     case QuestionDataType.RegistrantAddress2:
                         question.IsRequired = false;
-                        break;                    
-                    case QuestionDataType.Parent1Employer:
-                        question.IsRequired = false;
-                        break;                    
+                        break;
                     default:
                         question.IsRequired = true;
                         break;
