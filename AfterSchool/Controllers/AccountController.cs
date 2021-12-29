@@ -22,10 +22,10 @@ namespace AfterSchool.Controllers
     private List<FormQuestionViewModel> InterestedViewBag(ParticipationObject participationObject, SystemMessages msgs)
     {
       var currentUser = SessionVariables.CurrentUser;
-      var form = GetInterestForm(msgs);
-      var intererestGroup = form.GetQuestionGroups(msgs)
+      var form = FormService.GetInterestForm(currentUser, msgs);
+      var interestGroup = form.GetQuestionGroups(msgs)
                               .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.RegistrantInterestInformation);
-      var questions = intererestGroup.GetAllQuestions(msgs);
+      var questions = interestGroup.GetAllQuestions(msgs);
 
       var nonIncludedQuestionsExistingUser = new List<QuestionDataType>()
             {
@@ -386,7 +386,7 @@ namespace AfterSchool.Controllers
 
     private List<FormQuestionViewModel> GetStartedParentViewBag(ParticipationObject participationObject, SystemMessages msgs)
     {
-      var form = GetAdministratorAccountForm(msgs);
+      var form = FormService.GetAdministratorAccountForm(msgs);
       var personalContactGroup = form.GetQuestionGroups(msgs)
           .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
       var questions = personalContactGroup.GetAllQuestions(msgs);
@@ -638,7 +638,7 @@ namespace AfterSchool.Controllers
 
     private List<FormQuestion> AddHomeAddressViewBag(SystemMessages msgs)
     {
-      var form = GetAdministratorAccountForm(msgs);
+      var form = FormService.GetAdministratorAccountForm(msgs);
       var homeAddressQuestionGroup = form.GetQuestionGroups(msgs)
           .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.HomeAddress);
       var questions = homeAddressQuestionGroup.GetAllQuestions(msgs);
@@ -728,7 +728,7 @@ namespace AfterSchool.Controllers
 
     private List<FormQuestion> AddParentViewBag(SystemMessages msgs)
     {
-      var form = GetAdministratorAccountForm(msgs);
+      var form = FormService.GetAdministratorAccountForm(msgs);
       var personalContactGroup = form.GetQuestionGroups(msgs)
           .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
       var questions = personalContactGroup.GetAllQuestions(msgs);
@@ -884,26 +884,6 @@ namespace AfterSchool.Controllers
 
     #region AddEmergencyContacts
 
-    private List<FormQuestion> AddEmergencyContactsViewBag(SystemMessages msgs)
-    {
-      var form = GetAdministratorAccountForm(msgs);
-      var emergencyContactsQuestionGroups = form.GetQuestionGroups(msgs)
-          .Where(group =>
-              group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1 ||
-              group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2)
-          .ToList();
-      var questions = new List<FormQuestion>();
-
-      emergencyContactsQuestionGroups.ForEach(group => questions.AddRange(group.GetAllQuestions(msgs)));
-      questions.Where(question => question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1)
-          .ToList()
-          .ForEach(question => { question.IsRequired = true; });
-
-      ViewBag.ParticipationObject = GetParticipationObjectFromCart();
-
-      return questions;
-    }
-
     [HttpGet]
     public ActionResult AddEmergencyContacts()
     {
@@ -911,9 +891,10 @@ namespace AfterSchool.Controllers
       if (results.IsNotEmpty()) return results;
 
       var msgs = new SystemMessages();
-      var questions = AddEmergencyContactsViewBag(msgs);
+      var questions = FormQuestionService.GetEmergencyContactQuestions(msgs);
 
       ViewBag.Messages = msgs;
+      ViewBag.ParticipationObject = GetParticipationObjectFromCart();
 
       return View(questions.Select(question => question.ToFormQuestionViewModel()).ToList());
     }
@@ -922,34 +903,11 @@ namespace AfterSchool.Controllers
     public ActionResult AddEmergencyContacts(string id)
     {
       var msgs = new SystemMessages();
-      var questions = AddEmergencyContactsViewBag(msgs);
+      var questions = FormQuestionService.GetEmergencyContactQuestions(msgs);
       var parentRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
-      var phones = new List<string>();
 
-      questions.ForEach(question =>
-      {
-        var answer = Request[question.ToFormQuestionViewModel().Name];
-
-        if (question.IsRequired && answer.IsEmpty())
-          msgs.Add($"{question.Text} is required", MessageType.UserError);
-
-        switch (question.QuestionDataTypeId)
-        {
-          case QuestionDataType.EmergencyContact1Phone:
-          case QuestionDataType.EmergencyContact2Phone:
-            if (answer.IsNotEmpty() && !answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
-              msgs.Add($"{question.FormQuestionGroupQuestionGroupDataTypeId.ToString().SplitByUpperCase()} {question.Text} must be a valid phone number", MessageType.UserError);
-
-            if (answer.IsNotEmpty())
-              phones.Add(answer);
-
-            break;
-
-        }
-      });
-
-      if (phones.Count == 2 && phones[0] == phones[1])
-        msgs.Add("Emergency phone numbers should not be the same", MessageType.UserError);
+      // validate emergency contact fields
+      FormQuestionService.ValidateFormQuestionForEmergencyContacts(questions: questions.Select(question => question.ToFormQuestionViewModelForService(Request.Params)).ToList(), msgs: msgs);
 
       var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
 
@@ -984,6 +942,7 @@ namespace AfterSchool.Controllers
         return RedirectToAction("addstudent");
 
       ViewBag.Messages = msgs;
+      ViewBag.ParticipationObject = GetParticipationObjectFromCart();
 
       return View(qvms);
     }
@@ -1042,7 +1001,7 @@ namespace AfterSchool.Controllers
       if (results.IsNotEmpty()) return results;
 
       var msgs = new SystemMessages();
-      var adminAccountForm = GetAdministratorAccountForm(msgs);
+      var adminAccountForm = FormService.GetAdministratorAccountForm(msgs);
       var parentOrGuardian = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
       var questions = AddStudentViewBag(adminAccountForm, msgs);
       var values = new NameValueCollection();
@@ -1075,7 +1034,7 @@ namespace AfterSchool.Controllers
       if (results.IsNotEmpty()) return results;
 
       var msgs = new SystemMessages();
-      var adminAccountForm = GetAdministratorAccountForm(msgs);
+      var adminAccountForm = FormService.GetAdministratorAccountForm(msgs);
       var parentRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant(msgs);
       var parentRegistrant2 = SessionVariables.CurrentAccount.GetSecondParentOrGuardianRegistrant(msgs);
       var questions = AddStudentViewBag(adminAccountForm, msgs);
@@ -1194,8 +1153,7 @@ namespace AfterSchool.Controllers
                       parentRegistrant.GetAnswers(amsgs, adc)
                           .Where(answer =>
                               answer.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.HomeAddress ||
-                              answer.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1 ||
-                              answer.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2
+                              answer.FormQuestionGroupQuestionGroupDataTypeId.In(FormQuestionService.GetEmergencyContactQuestionGroups())
                           )
                           .ToList()
                           .ForEach(answer =>
@@ -1307,7 +1265,7 @@ namespace AfterSchool.Controllers
 
     private List<FormQuestion> AddHealthViewBag(SystemMessages msgs)
     {
-      var form = GetAdministratorAccountForm(msgs);
+      var form = FormService.GetAdministratorAccountForm(msgs);
       var healthQuestionGroup = form.GetQuestionGroups(msgs)
           .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.HealthInformation);
       var questions = healthQuestionGroup.GetAllQuestions(msgs);
@@ -2103,7 +2061,7 @@ namespace AfterSchool.Controllers
 
     private List<FormQuestion> GetStartedStudentViewBag(SystemMessages msgs)
     {
-      var form = GetAdministratorAccountForm(msgs);
+      var form = FormService.GetAdministratorAccountForm(msgs);
       var personalContactGroup = form.GetQuestionGroups(msgs)
           .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
       var questions = personalContactGroup.GetAllQuestions(msgs);
@@ -2276,7 +2234,7 @@ namespace AfterSchool.Controllers
 
     private List<FormQuestion> InviteParentViewBag(SystemMessages msgs)
     {
-      var form = GetAdministratorAccountForm(msgs);
+      var form = FormService.GetAdministratorAccountForm(msgs);
       var personalContactGroup = form.GetQuestionGroups(msgs)
           .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
       var questions = personalContactGroup.GetAllQuestions(msgs);
@@ -2860,19 +2818,7 @@ namespace AfterSchool.Controllers
         return Logout(Request.Url.ToString(), true);
 
       return null;
-    }
-
-    private Form GetAdministratorAccountForm(SystemMessages msgs)
-    {
-      var administratorAccount = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs).First();
-      return administratorAccount.GetDefaultForm(msgs);
-    }
-
-    private Form GetInterestForm(SystemMessages msgs)
-    {
-      var administratorAccount = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs).First();
-      return administratorAccount.GetOrCreateInterestForm(SessionVariables.CurrentUser, msgs);
-    }
+    }   
 
     private void AddSessionActivitiesToRegistration(ParticipationObject participationObject, Registration registration, Registrant submittedRecord, RegistrationPeriod period, SystemMessages msgs, DatabaseConnection dc = null)
     {
