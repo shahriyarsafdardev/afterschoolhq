@@ -383,6 +383,7 @@ namespace AfterSchoolLibrary.Services
             var groupLabel = "Parent/Guardian Information";
 
             qhs.Add(new QuestionHolder() { Text = "First Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1FirstName });
+            qhs.Add(new QuestionHolder() { Text = "Middle Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1MiddleName });
             qhs.Add(new QuestionHolder() { Text = "Last Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1LastName });
             qhs.Add(new QuestionHolder() { Text = "Email", IsActive = true, QuestionTypeId = QuestionType.Email, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1Email });
 
@@ -405,6 +406,7 @@ namespace AfterSchoolLibrary.Services
             var groupLabel = "Additional Parent/Guardian Information";
 
             qhs.Add(new QuestionHolder() { Text = "First Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2FirstName });
+            qhs.Add(new QuestionHolder() { Text = "Middle Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2MiddleName });
             qhs.Add(new QuestionHolder() { Text = "Last Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2LastName });
             qhs.Add(new QuestionHolder() { Text = "Email", IsActive = true, QuestionTypeId = QuestionType.Email, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2Email });
 
@@ -474,6 +476,17 @@ namespace AfterSchoolLibrary.Services
             });
             qhs.Add(new QuestionHolder()
             {
+                Text = "Middle Name",
+                IsActive = true,
+                IsRequired = false,
+                QuestionTypeId = QuestionType.TextBox,
+                QuestionGroupDataTypeId = groupType,
+                GroupName = groupLabel,
+                IsLocked = true,
+                QuestionDataTypeId = QuestionDataType.RegistrantMiddleName
+            });
+            qhs.Add(new QuestionHolder()
+            {
                 Text = "Last Name",
                 IsActive = true,
                 IsRequired = true,
@@ -539,7 +552,7 @@ namespace AfterSchoolLibrary.Services
                 GroupName = groupLabel,
                 QuestionGroupDataTypeId = groupType,
                 QuestionDataTypeId = QuestionDataType.RegistrantTShirtSize,
-                Options = "XXS,XS,S,M,L,XL,XXL,XXXL"
+                Options = "Youth XS,Youth S,Youth M,Youth L,Youth XL,Adult S,Adult M,Adult L,Adult XL,Adult 2XL, Adult 3XL"
             });
             qhs.Add(new QuestionHolder()
             {
