@@ -453,7 +453,7 @@ namespace AfterSchoolLibrary.Services
             return qhs;
         }
 
-        private static List<QuestionHolder> CreateStudentInformationGroup()
+        public static List<QuestionHolder> CreateStudentInformationGroup()
         {
             var qhs = new List<QuestionHolder>();
             var groupLabel = "Student Information";
@@ -704,21 +704,11 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-        public static string RegistrantRace
-        {
-            get
-            {
-                return "American Indian or Alaska Native,Asian,Black or African American,Native Hawaiian or Other Pacific Islander,White,Two or More Races";
-            }
-        }
+        public static string RegistrantRace =>
+            "American Indian or Alaska Native,Asian,Black or African American,Native Hawaiian or Other Pacific Islander,White,Two or More Races";
 
-        public static string RegistrantEthnicity
-        {
-            get
-            {
-                return "Hispanic or Latino,Not Hispanic or Latino";
-            }
-        }
+        public static string RegistrantEthnicity => 
+            "Hispanic or Latino,Not Hispanic or Latino";           
 
         public static string RelationshipToRegistrantForEmergencyContactsList =>
             "Father,Mother,Grandfather,Grandmother,Brother,Sister,Uncle,Aunt,Legal Guardian,Other";

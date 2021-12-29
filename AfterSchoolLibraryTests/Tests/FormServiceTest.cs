@@ -175,6 +175,23 @@ namespace AfterSchoolLibraryTests.Tests
             CheckEmergencyContactFields(contact: qhs[5], text: "Relationship To Registrant", questionTyped: QuestionType.DropDownList, questionDataTypeId: QuestionDataType.EmergencyContact3RelationshipToRegistrant, options: FormService.RelationshipToRegistrantForEmergencyContactsList, isRequired: false, isActive: true);
         }
 
+        [Fact(DisplayName = "Confirm that new form has both race and ethnicity")]
+        public void CreateStudentInformationGroupTest()
+        {
+            // Arrange & Act
+            var qhs = FormService.CreateStudentInformationGroup();
+
+            // Assert
+            Assert.NotNull(qhs);
+            Assert.True(qhs.Count == 13);
+            
+            CheckEmergencyContactFields(contact: qhs[10], text: "Race", questionTyped: QuestionType.DropDownList, 
+                questionDataTypeId: QuestionDataType.RegistrantRaceUsFed, options: FormService.RegistrantRace, isRequired: false, isActive: true);
+
+            CheckEmergencyContactFields(contact: qhs[11], text: "Ethnicity", questionTyped: QuestionType.DropDownList,
+                questionDataTypeId: QuestionDataType.RegistrantEthnicityUsFed, options: FormService.RegistrantEthnicity, isRequired: false, isActive: true);
+        }
+
         #region Helpers
 
         public static void CheckEmergencyContactQuestion(List<FormQuestion> formQuestions, string text, QuestionType questionTyped, QuestionDataType questionDataTypeId, string options, bool isRequired, bool isActive)
