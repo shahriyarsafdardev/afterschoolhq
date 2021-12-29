@@ -661,16 +661,7 @@ namespace AfterSchool.Controllers
             break;
           case QuestionDataType.Parent1Employer:
             question.IsRequired = false;
-            break;
-          case QuestionDataType.Parent1RelationshipToRegistrant:
-            question.IsRequired = false;
-            break;
-          case QuestionDataType.Parent2Employer:
-            question.IsRequired = false;
-            break;
-          case QuestionDataType.Parent2RelationshipToRegistrant:
-            question.IsRequired = false;
-            break;
+            break;                
             default:
             question.IsRequired = true;
             break;
@@ -762,6 +753,7 @@ namespace AfterSchool.Controllers
            case QuestionDataType.Parent2LastName:
               //case QuestionDataType.Parent2Email:
            case QuestionDataType.Parent2MobilePhone:
+           case QuestionDataType.Parent2RelationshipToRegistrant:
                 question.IsRequired = true;
             break;
         }
