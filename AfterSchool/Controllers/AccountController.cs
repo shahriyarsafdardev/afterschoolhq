@@ -648,7 +648,7 @@ namespace AfterSchool.Controllers
           case QuestionDataType.RegistrantAddress2:
           case QuestionDataType.RegistrantWorkPhone:
           case QuestionDataType.RegistrantHomePhone:
-          case QuestionDataType.Parent1Employer:
+          case QuestionDataType.RegistrantEmployer:
                question.IsRequired = false;
            break;
           default:
@@ -741,20 +741,21 @@ namespace AfterSchool.Controllers
     {
       var form = FormService.GetAdministratorAccountForm(msgs);
       var personalContactGroup = form.GetQuestionGroups(msgs)
-          .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.Parent2Information);
+          .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
       var questions = personalContactGroup.GetAllQuestions(msgs);
 
-      questions = questions.Where(question => question.QuestionDataTypeId.NotIn(FormService.QuestionsToNotIncludeInParentPanel())).ToList();
+      questions = questions.Where(question => question.QuestionDataTypeId.NotIn(FormService.QuestionsToNotIncludeInAdditionalParentPanel())).ToList();
 
       questions.ForEach(question =>
       {
         switch (question.QuestionDataTypeId)
         {
-           case QuestionDataType.Parent2FirstName:
-           case QuestionDataType.Parent2LastName:
-           case QuestionDataType.Parent2MobilePhone:
-           case QuestionDataType.Parent2RelationshipToRegistrant:
-                question.IsRequired = true;
+              case QuestionDataType.RegistrantFirstName:
+              case QuestionDataType.RegistrantLastName:
+              // case QuestionDataType.RegistrantEmail:
+              case QuestionDataType.RegistrantMobilePhone:
+              case QuestionDataType.RegistrantParentRelationship:
+                  question.IsRequired = true;
             break;
         }
       });
@@ -779,9 +780,10 @@ namespace AfterSchool.Controllers
       {
         switch (question.QuestionDataTypeId)
         {
-          case QuestionDataType.Parent2LastName:
-          case QuestionDataType.Parent2HomePhone:
-            values.Add(question.ToFormQuestionViewModel().Id, parentOrGuardian.GetAnswer(question.QuestionDataTypeId)?.Text);
+           case QuestionDataType.RegistrantHomePhone:
+           case QuestionDataType.RegistrantWorkPhone:
+           case QuestionDataType.RegistrantMobilePhone:
+                values.Add(question.ToFormQuestionViewModel().Id, parentOrGuardian.GetAnswer(question.QuestionDataTypeId)?.Text);
             break;
         }
       });
@@ -808,10 +810,10 @@ namespace AfterSchool.Controllers
 
         switch (question.QuestionDataTypeId)
         {
-          case QuestionDataType.Parent2HomePhone:
-          case QuestionDataType.Parent2WorkPhone:
-          case QuestionDataType.Parent2MobilePhone:
-            if (answer.IsNotEmpty() && !answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+            case QuestionDataType.RegistrantHomePhone:
+            case QuestionDataType.RegistrantWorkPhone:
+            case QuestionDataType.RegistrantMobilePhone:
+                 if(answer.IsNotEmpty() && !answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
               msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
             break;
 
@@ -834,10 +836,10 @@ namespace AfterSchool.Controllers
                       // create student account if requestioned by parent
                       if (createuseraccount.IsNumber())
               {
-                var firstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2FirstName).Value;
-                var lastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2LastName).Value;
-                var email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2Email).Value;
-                var phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2MobilePhone).Value;
+                var firstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value;
+                var lastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value;
+                var email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value;
+                var phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value;
 
                 otherParentUser = SessionVariables.CurrentAccount.InviteUser(
                              firstName: firstName,
@@ -1187,6 +1189,8 @@ namespace AfterSchool.Controllers
                             { QuestionDataType.RegistrantHomePhone,  QuestionDataType.Parent1HomePhone },
                             { QuestionDataType.RegistrantMobilePhone,  QuestionDataType.Parent1MobilePhone },
                             { QuestionDataType.RegistrantWorkPhone,  QuestionDataType.Parent1WorkPhone },
+                            { QuestionDataType.RegistrantEmployer,  QuestionDataType.Parent1Employer },
+                            { QuestionDataType.RegistrantParentRelationship,  QuestionDataType.Parent1RelationshipToRegistrant },
                 };
 
               foreach (var key in parent1Map.Keys)
@@ -1208,6 +1212,8 @@ namespace AfterSchool.Controllers
                             { QuestionDataType.RegistrantCity,  QuestionDataType.Parent1City },
                             { QuestionDataType.RegistrantState,  QuestionDataType.Parent1State },
                             { QuestionDataType.RegistrantPostalCode,  QuestionDataType.Parent1PostalCode },
+                            { QuestionDataType.RegistrantEmployer,  QuestionDataType.Parent1Employer },
+                            { QuestionDataType.RegistrantParentRelationship,  QuestionDataType.Parent1RelationshipToRegistrant },
                 };
 
               foreach (var key in parent1AddressMap.Keys)
@@ -1233,6 +1239,9 @@ namespace AfterSchool.Controllers
                                 { QuestionDataType.RegistrantHomePhone,  QuestionDataType.Parent2HomePhone },
                                 { QuestionDataType.RegistrantMobilePhone,  QuestionDataType.Parent2MobilePhone },
                                 { QuestionDataType.RegistrantWorkPhone,  QuestionDataType.Parent2WorkPhone },
+                                { QuestionDataType.RegistrantEmployer,  QuestionDataType.Parent2Employer },
+                                { QuestionDataType.RegistrantParentRelationship,  QuestionDataType.Parent2RelationshipToRegistrant },
+
                     };
 
                 foreach (var key in parent2Map.Keys)

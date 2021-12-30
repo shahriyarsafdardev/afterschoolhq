@@ -484,7 +484,7 @@ namespace AfterSchool.Areas.User.Controllers
                     case QuestionDataType.RegistrantAddress2:
                     case QuestionDataType.RegistrantWorkPhone:
                     case QuestionDataType.RegistrantHomePhone:
-                    case QuestionDataType.Parent1Employer:
+                    case QuestionDataType.RegistrantEmployer:
                         question.IsRequired = false;
                         break;
                     default:
