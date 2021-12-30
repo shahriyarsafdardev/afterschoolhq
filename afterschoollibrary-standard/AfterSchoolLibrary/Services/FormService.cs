@@ -457,7 +457,7 @@ namespace AfterSchoolLibrary.Services
             return qhs;
         }
 
-        private static List<QuestionHolder> CreateStudentInformationGroup()
+        public static List<QuestionHolder> CreateStudentInformationGroup()
         {
             var qhs = new List<QuestionHolder>();
             var groupLabel = "Student Information";
@@ -532,7 +532,7 @@ namespace AfterSchoolLibrary.Services
                 GroupName = groupLabel,
                 QuestionGroupDataTypeId = groupType,
                 QuestionDataTypeId = QuestionDataType.RegistrantGrade,
-                Options = "Pre-K,K,1st,2nd,3rd,4th,5th,6th,7th,8th,9th,10th,11th,12th"
+                Options = RegistrantGrade
             });
             qhs.Add(new QuestionHolder()
             {
@@ -542,7 +542,7 @@ namespace AfterSchoolLibrary.Services
                 GroupName = groupLabel,
                 QuestionGroupDataTypeId = groupType,
                 QuestionDataTypeId = QuestionDataType.RegistrantGender,
-                Options = "Male,Female,Other"
+                Options = RegistrantGender
             });
             qhs.Add(new QuestionHolder()
             {
@@ -552,18 +552,33 @@ namespace AfterSchoolLibrary.Services
                 GroupName = groupLabel,
                 QuestionGroupDataTypeId = groupType,
                 QuestionDataTypeId = QuestionDataType.RegistrantTShirtSize,
-                Options = "Youth XS,Youth S,Youth M,Youth L,Youth XL,Adult S,Adult M,Adult L,Adult XL,Adult 2XL, Adult 3XL"
+                Options = RegistrantTShirtSize
             });
+
+            qhs.Add(new QuestionHolder()
+            {
+                Text = "Race",
+                IsActive = true,
+                IsRequired = false,
+                QuestionTypeId = QuestionType.DropDownList,
+                GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.RegistrantRaceUsFed,
+                Options = RegistrantRace
+            });
+
             qhs.Add(new QuestionHolder()
             {
                 Text = "Ethnicity",
                 IsActive = true,
+                IsRequired = false,
                 QuestionTypeId = QuestionType.DropDownList,
                 GroupName = groupLabel,
                 QuestionGroupDataTypeId = groupType,
-                QuestionDataTypeId = QuestionDataType.RegistrantEthnicity,
-                Options = "American Indian/Alaskan Native,Asian/Pacific Islander,Black/African-American,Hispanic/Latino,White,Multiracial,Other"
+                QuestionDataTypeId = QuestionDataType.RegistrantEthnicityUsFed,
+                Options = RegistrantEthnicity
             });
+
             qhs.Add(new QuestionHolder()
             {
                 Text = "Organization",
@@ -695,7 +710,53 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
+        public static string RegistrantGrade =>
+            "Pre-K,K,1st,2nd,3rd,4th,5th,6th,7th,8th,9th,10th,11th,12th";
+
+        public static string RegistrantGender =>
+            "Male,Female,Other";
+
+        public static string RegistrantTShirtSize =>
+            "Youth XS,Youth S,Youth M,Youth L,Youth XL,Adult S,Adult M,Adult L,Adult XL,Adult 2XL, Adult 3XL";
+
+        public static string RegistrantRace =>
+            "American Indian or Alaska Native,Asian,Black or African American,Native Hawaiian or Other Pacific Islander,White,Two or More Races";
+
+        public static string RegistrantEthnicity => 
+            "Hispanic or Latino,Not Hispanic or Latino";           
+
         public static string RelationshipToRegistrantForEmergencyContactsList =>
             "Father,Mother,Grandfather,Grandmother,Brother,Sister,Uncle,Aunt,Legal Guardian,Other";
+
+        public static List<QuestionDataType> QuestionsToNotIncludeInParentPanel() => new List<QuestionDataType>() 
+        {
+            QuestionDataType.RegistrantOrganization,
+            QuestionDataType.RegistrantGrade,
+            QuestionDataType.RegistrantGender,
+            QuestionDataType.RegistrantDateOfBirth,
+            QuestionDataType.RegistrantRaceUsFed,
+            QuestionDataType.RegistrantEthnicityUsFed,
+            QuestionDataType.RegistrantTShirtSize
+        };
+
+        public static List<QuestionDataType> QuestionsToNotIncludeInStudentPanel(bool isGradeIncluded)
+        {
+            var list = new List<QuestionDataType>()
+            {
+                QuestionDataType.RegistrantOrganization,
+                QuestionDataType.RegistrantGender,
+                QuestionDataType.RegistrantDateOfBirth,
+                QuestionDataType.RegistrantRaceUsFed,
+                QuestionDataType.RegistrantEthnicityUsFed,
+                QuestionDataType.RegistrantTShirtSize,
+                QuestionDataType.RegistrantHomePhone,
+                QuestionDataType.RegistrantWorkPhone
+            };
+
+            if (isGradeIncluded)
+                list.Add(QuestionDataType.RegistrantGrade);
+
+            return list;
+        }
     }
 }
