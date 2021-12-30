@@ -1212,8 +1212,6 @@ namespace AfterSchool.Controllers
                             { QuestionDataType.RegistrantCity,  QuestionDataType.Parent1City },
                             { QuestionDataType.RegistrantState,  QuestionDataType.Parent1State },
                             { QuestionDataType.RegistrantPostalCode,  QuestionDataType.Parent1PostalCode },
-                            { QuestionDataType.RegistrantEmployer,  QuestionDataType.Parent1Employer },
-                            { QuestionDataType.RegistrantParentRelationship,  QuestionDataType.Parent1RelationshipToRegistrant },
                 };
 
               foreach (var key in parent1AddressMap.Keys)

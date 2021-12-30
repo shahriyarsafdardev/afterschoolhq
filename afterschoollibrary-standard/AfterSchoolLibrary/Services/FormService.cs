@@ -440,8 +440,8 @@ namespace AfterSchoolLibrary.Services
             qhs.Add(new QuestionHolder() { Text = "Home Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantHomePhone });
             qhs.Add(new QuestionHolder() { Text = "Work Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantWorkPhone });
 
-            qhs.Add(new QuestionHolder() { Text = "Parent Guardian Relationship To Student", QuestionTypeId = QuestionType.DropDownList, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantParentRelationship, Options = ParentRelationshipToRegistrant });
-            qhs.Add(new QuestionHolder() { Text = "Parent Guardian Employer", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantEmployer });
+            qhs.Add(new QuestionHolder() { Text = "Relationship To Student", QuestionTypeId = QuestionType.DropDownList, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantParentRelationship, Options = ParentRelationshipToRegistrant });
+            qhs.Add(new QuestionHolder() { Text = "Employer", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantEmployer });
 
             return qhs;
         }
@@ -596,7 +596,7 @@ namespace AfterSchoolLibrary.Services
             });
             qhs.Add(new QuestionHolder()
             { 
-                Text = "Secondary Guardian Relationship To Student", 
+                Text = "Relationship To Student",
                 QuestionTypeId = QuestionType.DropDownList, 
                 GroupName = groupLabel, 
                 QuestionGroupDataTypeId = groupType, 
@@ -605,7 +605,7 @@ namespace AfterSchoolLibrary.Services
             });
             qhs.Add(new QuestionHolder() 
             {
-                Text = "Secondary Guardian Employer", 
+                Text = "Employer",
                 QuestionTypeId = QuestionType.TextBox, 
                 GroupName = groupLabel, 
                 QuestionGroupDataTypeId = groupType, 
