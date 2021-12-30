@@ -1198,6 +1198,7 @@ namespace AfterSchool.Controllers
               var parent1Map = new Dictionary<QuestionDataType, QuestionDataType>()
                 {
                             { QuestionDataType.RegistrantFirstName,  QuestionDataType.Parent1FirstName },
+                            { QuestionDataType.RegistrantMiddleName,  QuestionDataType.Parent1MiddleName },
                             { QuestionDataType.RegistrantLastName,  QuestionDataType.Parent1LastName },
                             { QuestionDataType.RegistrantEmail,  QuestionDataType.Parent1Email },
                             { QuestionDataType.RegistrantHomePhone,  QuestionDataType.Parent1HomePhone },
@@ -1244,6 +1245,7 @@ namespace AfterSchool.Controllers
                         var parent2Map = new Dictionary<QuestionDataType, QuestionDataType>()
                     {
                                 { QuestionDataType.RegistrantFirstName,  QuestionDataType.Parent2FirstName },
+                                { QuestionDataType.RegistrantMiddleName,  QuestionDataType.Parent2MiddleName },
                                 { QuestionDataType.RegistrantLastName,  QuestionDataType.Parent2LastName },
                                 { QuestionDataType.RegistrantEmail,  QuestionDataType.Parent2Email },
                                 { QuestionDataType.RegistrantHomePhone,  QuestionDataType.Parent2HomePhone },
