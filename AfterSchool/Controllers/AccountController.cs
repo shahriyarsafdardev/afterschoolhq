@@ -657,8 +657,9 @@ namespace AfterSchool.Controllers
           case QuestionDataType.RegistrantAddress2:
           case QuestionDataType.RegistrantWorkPhone:
           case QuestionDataType.RegistrantHomePhone:
-                  question.IsRequired = false;
-            break;
+          case QuestionDataType.Parent1Employer:
+               question.IsRequired = false;
+           break;
           default:
             question.IsRequired = true;
             break;
@@ -749,28 +750,18 @@ namespace AfterSchool.Controllers
     {
       var form = FormService.GetAdministratorAccountForm(msgs);
       var personalContactGroup = form.GetQuestionGroups(msgs)
-          .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
+          .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.Parent2Information);
       var questions = personalContactGroup.GetAllQuestions(msgs);
-
-      questions = questions.Where(question =>
-              question.QuestionDataTypeId != QuestionDataType.RegistrantOrganization &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantGrade &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantGender &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantDateOfBirth &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantEthnicity &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantTShirtSize
-          )
-          .ToList();
 
       questions.ForEach(question =>
       {
         switch (question.QuestionDataTypeId)
         {
-          case QuestionDataType.RegistrantFirstName:
-          case QuestionDataType.RegistrantLastName:
-                // case QuestionDataType.RegistrantEmail:
-                case QuestionDataType.RegistrantMobilePhone:
-            question.IsRequired = true;
+           case QuestionDataType.Parent2FirstName:
+           case QuestionDataType.Parent2LastName:
+           case QuestionDataType.Parent2MobilePhone:
+           case QuestionDataType.Parent2RelationshipToRegistrant:
+                question.IsRequired = true;
             break;
         }
       });
@@ -795,8 +786,8 @@ namespace AfterSchool.Controllers
       {
         switch (question.QuestionDataTypeId)
         {
-          case QuestionDataType.RegistrantLastName:
-          case QuestionDataType.RegistrantHomePhone:
+          case QuestionDataType.Parent2LastName:
+          case QuestionDataType.Parent2HomePhone:
             values.Add(question.ToFormQuestionViewModel().Id, parentOrGuardian.GetAnswer(question.QuestionDataTypeId)?.Text);
             break;
         }
@@ -824,9 +815,9 @@ namespace AfterSchool.Controllers
 
         switch (question.QuestionDataTypeId)
         {
-          case QuestionDataType.RegistrantHomePhone:
-          case QuestionDataType.RegistrantWorkPhone:
-          case QuestionDataType.RegistrantMobilePhone:
+          case QuestionDataType.Parent2HomePhone:
+          case QuestionDataType.Parent2WorkPhone:
+          case QuestionDataType.Parent2MobilePhone:
             if (answer.IsNotEmpty() && !answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
               msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
             break;
@@ -850,10 +841,10 @@ namespace AfterSchool.Controllers
                       // create student account if requestioned by parent
                       if (createuseraccount.IsNumber())
               {
-                var firstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value;
-                var lastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value;
-                var email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value;
-                var phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value;
+                var firstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2FirstName).Value;
+                var lastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2LastName).Value;
+                var email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2Email).Value;
+                var phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2MobilePhone).Value;
 
                 otherParentUser = SessionVariables.CurrentAccount.InviteUser(
                              firstName: firstName,
