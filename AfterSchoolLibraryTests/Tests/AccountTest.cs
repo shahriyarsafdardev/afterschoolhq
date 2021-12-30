@@ -239,5 +239,24 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.Contains(questions, f => f.QuestionDataTypeId == QuestionDataType.Parent2RelationshipToRegistrant);
         }
+
+        [Fact]
+        public void RegistrantEmployerExistsTest()
+        {
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
+            var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
+
+            Assert.Contains(questions, f => f.QuestionDataTypeId == QuestionDataType.RegistrantEmployer);
+        }
+        [Fact]
+        public void RegistrantParentRelationshipExistsTest()
+        {
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
+            var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
+
+            Assert.Contains(questions, f => f.QuestionDataTypeId == QuestionDataType.RegistrantParentRelationship);
+        }
     }
 }
