@@ -717,7 +717,7 @@ namespace AfterSchoolLibrary.Services
             "Male,Female,Other";
 
         public static string RegistrantTShirtSize =>
-            "XXS,XS,S,M,L,XL,XXL,XXXL";
+            "Youth XS,Youth S,Youth M,Youth L,Youth XL,Adult S,Adult M,Adult L,Adult XL,Adult 2XL, Adult 3XL";
 
         public static string RegistrantRace =>
             "American Indian or Alaska Native,Asian,Black or African American,Native Hawaiian or Other Pacific Islander,White,Two or More Races";
