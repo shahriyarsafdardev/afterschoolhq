@@ -174,6 +174,7 @@ namespace AfterSchool.Areas.User.Controllers
                 return RedirectToAction("EditHealth", new { id = registrant.Uid, reg, student, returnUrl });
 
             ViewBag.Messages = msgs;
+            ViewBag.ResetGrade = "false";
 
             return View(registrant);
         }
@@ -323,15 +324,7 @@ namespace AfterSchool.Areas.User.Controllers
                 .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
             var questions = questionGroup.GetAllQuestions(msgs);
 
-            questions = questions.Where(question =>
-                   question.QuestionDataTypeId != QuestionDataType.RegistrantOrganization &&
-                   question.QuestionDataTypeId != QuestionDataType.RegistrantGrade &&
-                   question.QuestionDataTypeId != QuestionDataType.RegistrantGender &&
-                   question.QuestionDataTypeId != QuestionDataType.RegistrantDateOfBirth &&
-                   question.QuestionDataTypeId != QuestionDataType.RegistrantEthnicity &&
-                   question.QuestionDataTypeId != QuestionDataType.RegistrantTShirtSize
-               )
-               .ToList();
+            questions = questions.Where(question => question.QuestionDataTypeId.NotIn(FormService.QuestionsToNotIncludeInParentPanel())).ToList();
 
             questions.ForEach(question =>
             {
