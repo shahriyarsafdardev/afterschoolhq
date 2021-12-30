@@ -413,6 +413,9 @@ namespace AfterSchoolLibrary.Services
             qhs.Add(new QuestionHolder() { Text = "Mobile Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2MobilePhone });
             qhs.Add(new QuestionHolder() { Text = "Home Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2HomePhone });
             qhs.Add(new QuestionHolder() { Text = "Work Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2WorkPhone });
+            
+            qhs.Add(new QuestionHolder() { Text = "Secondary Guardian Relationship To Student", QuestionTypeId = QuestionType.DropDownList, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2RelationshipToRegistrant, Options = ParentRelationshipToRegistrant });
+            qhs.Add(new QuestionHolder() { Text = "Secondary Guardian Employer", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2Employer });
 
             //qhs.Add(new QuestionHolder() { Text = "Phone", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2Phone1 });
             //qhs.Add(new QuestionHolder() { Text = "Phone Type", IsActive = true, QuestionTypeId = QuestionType.RadioList, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2PhoneType1, Options = "Mobile, Home, Work" });
@@ -436,6 +439,9 @@ namespace AfterSchoolLibrary.Services
 
             qhs.Add(new QuestionHolder() { Text = "Home Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantHomePhone });
             qhs.Add(new QuestionHolder() { Text = "Work Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantWorkPhone });
+
+            qhs.Add(new QuestionHolder() { Text = "Relationship To Student", QuestionTypeId = QuestionType.DropDownList, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantParentRelationship, Options = ParentRelationshipToRegistrant });
+            qhs.Add(new QuestionHolder() { Text = "Employer", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantEmployer });
 
             return qhs;
         }
@@ -588,6 +594,24 @@ namespace AfterSchoolLibrary.Services
                 IsLocked = false,
                 QuestionDataTypeId = QuestionDataType.RegistrantOrganization
             });
+            qhs.Add(new QuestionHolder()
+            { 
+                Text = "Relationship To Student",
+                QuestionTypeId = QuestionType.DropDownList, 
+                GroupName = groupLabel, 
+                QuestionGroupDataTypeId = groupType, 
+                QuestionDataTypeId = QuestionDataType.RegistrantParentRelationship, 
+                Options = ParentRelationshipToRegistrant 
+            });
+            qhs.Add(new QuestionHolder() 
+            {
+                Text = "Employer",
+                QuestionTypeId = QuestionType.TextBox, 
+                GroupName = groupLabel, 
+                QuestionGroupDataTypeId = groupType, 
+                QuestionDataTypeId = QuestionDataType.RegistrantEmployer
+            });
+
             return qhs;
         }
 
@@ -728,7 +752,24 @@ namespace AfterSchoolLibrary.Services
         public static string RelationshipToRegistrantForEmergencyContactsList =>
             "Father,Mother,Grandfather,Grandmother,Brother,Sister,Uncle,Aunt,Legal Guardian,Other";
 
+        //Created separate list from Emergency Contact, as later they can differ at any stage
+        public static string ParentRelationshipToRegistrant =>
+            "Father,Mother,Grandfather,Grandmother,Brother,Sister,Uncle,Aunt,Legal Guardian,Other"; 
+                   
         public static List<QuestionDataType> QuestionsToNotIncludeInParentPanel() => new List<QuestionDataType>() 
+        {
+            QuestionDataType.RegistrantOrganization,
+            QuestionDataType.RegistrantGrade,
+            QuestionDataType.RegistrantGender,
+            QuestionDataType.RegistrantDateOfBirth,
+            QuestionDataType.RegistrantRaceUsFed,
+            QuestionDataType.RegistrantEthnicityUsFed,
+            QuestionDataType.RegistrantTShirtSize,
+            QuestionDataType.RegistrantParentRelationship,
+            QuestionDataType.RegistrantEmployer
+        };
+
+        public static List<QuestionDataType> QuestionsToNotIncludeInAdditionalParentPanel() => new List<QuestionDataType>()
         {
             QuestionDataType.RegistrantOrganization,
             QuestionDataType.RegistrantGrade,

@@ -648,8 +648,9 @@ namespace AfterSchool.Controllers
           case QuestionDataType.RegistrantAddress2:
           case QuestionDataType.RegistrantWorkPhone:
           case QuestionDataType.RegistrantHomePhone:
-                  question.IsRequired = false;
-            break;
+          case QuestionDataType.RegistrantEmployer:
+               question.IsRequired = false;
+           break;
           default:
             question.IsRequired = true;
             break;
@@ -743,17 +744,18 @@ namespace AfterSchool.Controllers
           .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
       var questions = personalContactGroup.GetAllQuestions(msgs);
 
-      questions = questions.Where(question => question.QuestionDataTypeId.NotIn(FormService.QuestionsToNotIncludeInParentPanel())).ToList();
+      questions = questions.Where(question => question.QuestionDataTypeId.NotIn(FormService.QuestionsToNotIncludeInAdditionalParentPanel())).ToList();
 
       questions.ForEach(question =>
       {
         switch (question.QuestionDataTypeId)
         {
-          case QuestionDataType.RegistrantFirstName:
-          case QuestionDataType.RegistrantLastName:
-                // case QuestionDataType.RegistrantEmail:
-                case QuestionDataType.RegistrantMobilePhone:
-            question.IsRequired = true;
+              case QuestionDataType.RegistrantFirstName:
+              case QuestionDataType.RegistrantLastName:
+              // case QuestionDataType.RegistrantEmail:
+              case QuestionDataType.RegistrantMobilePhone:
+              case QuestionDataType.RegistrantParentRelationship:
+                  question.IsRequired = true;
             break;
         }
       });
@@ -778,9 +780,10 @@ namespace AfterSchool.Controllers
       {
         switch (question.QuestionDataTypeId)
         {
-          case QuestionDataType.RegistrantLastName:
-          case QuestionDataType.RegistrantHomePhone:
-            values.Add(question.ToFormQuestionViewModel().Id, parentOrGuardian.GetAnswer(question.QuestionDataTypeId)?.Text);
+           case QuestionDataType.RegistrantHomePhone:
+           case QuestionDataType.RegistrantWorkPhone:
+           case QuestionDataType.RegistrantMobilePhone:
+                values.Add(question.ToFormQuestionViewModel().Id, parentOrGuardian.GetAnswer(question.QuestionDataTypeId)?.Text);
             break;
         }
       });
@@ -807,10 +810,10 @@ namespace AfterSchool.Controllers
 
         switch (question.QuestionDataTypeId)
         {
-          case QuestionDataType.RegistrantHomePhone:
-          case QuestionDataType.RegistrantWorkPhone:
-          case QuestionDataType.RegistrantMobilePhone:
-            if (answer.IsNotEmpty() && !answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+            case QuestionDataType.RegistrantHomePhone:
+            case QuestionDataType.RegistrantWorkPhone:
+            case QuestionDataType.RegistrantMobilePhone:
+                 if(answer.IsNotEmpty() && !answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
               msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
             break;
 
@@ -1187,6 +1190,8 @@ namespace AfterSchool.Controllers
                             { QuestionDataType.RegistrantHomePhone,  QuestionDataType.Parent1HomePhone },
                             { QuestionDataType.RegistrantMobilePhone,  QuestionDataType.Parent1MobilePhone },
                             { QuestionDataType.RegistrantWorkPhone,  QuestionDataType.Parent1WorkPhone },
+                            { QuestionDataType.RegistrantEmployer,  QuestionDataType.Parent1Employer },
+                            { QuestionDataType.RegistrantParentRelationship,  QuestionDataType.Parent1RelationshipToRegistrant },
                 };
 
               foreach (var key in parent1Map.Keys)
@@ -1234,6 +1239,9 @@ namespace AfterSchool.Controllers
                                 { QuestionDataType.RegistrantHomePhone,  QuestionDataType.Parent2HomePhone },
                                 { QuestionDataType.RegistrantMobilePhone,  QuestionDataType.Parent2MobilePhone },
                                 { QuestionDataType.RegistrantWorkPhone,  QuestionDataType.Parent2WorkPhone },
+                                { QuestionDataType.RegistrantEmployer,  QuestionDataType.Parent2Employer },
+                                { QuestionDataType.RegistrantParentRelationship,  QuestionDataType.Parent2RelationshipToRegistrant },
+
                     };
 
                 foreach (var key in parent2Map.Keys)
