@@ -52,12 +52,12 @@ namespace AfterSchool.Areas.User.Controllers
                     case QuestionDataType.RegistrantGrade:
                     case QuestionDataType.RegistrantDateOfBirth:
                     case QuestionDataType.RegistrantGender:
-                    case QuestionDataType.RegistrantTShirtSize:
                         question.IsRequired = true;
                         break;
 
                     case QuestionDataType.RegistrantHomePhone:
                     case QuestionDataType.RegistrantEmail:
+                    case QuestionDataType.RegistrantTShirtSize:
                         question.IsRequired = false;
                         break;
                 }
@@ -127,8 +127,7 @@ namespace AfterSchool.Areas.User.Controllers
                         case QuestionDataType.RegistrantHomePhone:
                         case QuestionDataType.RegistrantWorkPhone:
                         case QuestionDataType.RegistrantMobilePhone:
-                            if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
-                                msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+                            FormService.PhoneValidation(answer, question, msgs);
                             break;
                     }
                 });
@@ -397,10 +396,7 @@ namespace AfterSchool.Areas.User.Controllers
                     switch (question.QuestionDataTypeId)
                     {
                         case QuestionDataType.RegistrantMobilePhone:
-                        case QuestionDataType.RegistrantHomePhone:
-                        case QuestionDataType.RegistrantWorkPhone:
-                            if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
-                                msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+                            FormService.PhoneValidation(answer, question, msgs);
                             break;
 
                     }
@@ -486,6 +482,8 @@ namespace AfterSchool.Areas.User.Controllers
                 switch (question.QuestionDataTypeId)
                 {
                     case QuestionDataType.RegistrantAddress2:
+                    case QuestionDataType.RegistrantWorkPhone:
+                    case QuestionDataType.RegistrantHomePhone:
                         question.IsRequired = false;
                         break;
                     default:
@@ -545,6 +543,16 @@ namespace AfterSchool.Areas.User.Controllers
                 {
                     if (question.IsRequired && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
                         msgs.Add($"{question.Text} is required", MessageType.UserError);
+
+                    switch (question.QuestionDataTypeId)
+                    {
+                        case QuestionDataType.RegistrantHomePhone:
+                        case QuestionDataType.RegistrantWorkPhone:
+                            FormService.PhoneValidation(Request[question.ToFormQuestionViewModel().Name], question, msgs);
+                            break;
+                        default:
+                            break;
+                    }
                 });
 
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();

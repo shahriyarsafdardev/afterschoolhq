@@ -271,5 +271,17 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         #endregion
+
+        [Theory]
+        [InlineData("1234", 1)]
+        [InlineData("9024881888", 0)]
+        public void PhoneValidationTest(string phoneNumber, int count)
+        {
+            var formQuestion = new FormQuestion();
+            formQuestion.QuestionDataTypeId = QuestionDataType.RegistrantHomePhone;
+            FormService.PhoneValidation(phoneNumber, formQuestion, msgs);
+
+            Assert.Equal(msgs.Count, count);
+        }
     }
 }

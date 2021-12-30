@@ -528,8 +528,6 @@ namespace AfterSchool.Controllers
         switch (qvm.Question.QuestionDataTypeId)
         {
           case QuestionDataType.RegistrantMobilePhone:
-          case QuestionDataType.RegistrantHomePhone:
-          case QuestionDataType.RegistrantWorkPhone:
             if (qvm.Value.IsNotEmpty() && !qvm.Value.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
               msgs.Add($"{qvm.Question.Text} must be a valid phone number", MessageType.UserError);
             break;
@@ -648,7 +646,9 @@ namespace AfterSchool.Controllers
         switch (question.QuestionDataTypeId)
         {
           case QuestionDataType.RegistrantAddress2:
-            question.IsRequired = false;
+          case QuestionDataType.RegistrantWorkPhone:
+          case QuestionDataType.RegistrantHomePhone:
+                  question.IsRequired = false;
             break;
           default:
             question.IsRequired = true;
@@ -686,6 +686,16 @@ namespace AfterSchool.Controllers
       {
         if (question.IsRequired && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
           msgs.Add($"{question.Text} is required", MessageType.UserError);
+
+          switch (question.QuestionDataTypeId)
+          {
+              case QuestionDataType.RegistrantHomePhone:
+              case QuestionDataType.RegistrantWorkPhone:
+                  FormService.PhoneValidation(Request[question.ToFormQuestionViewModel().Name], question, msgs);
+                  break;
+              default:
+                  break;
+          }
       });
 
       var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
@@ -720,13 +730,13 @@ namespace AfterSchool.Controllers
       ViewBag.Messages = msgs;
 
       return View(qvms);
-    }
+        }
 
-    #endregion
+        #endregion
 
-    #region AddParent
+        #region AddParent
 
-    private List<FormQuestion> AddParentViewBag(SystemMessages msgs)
+        private List<FormQuestion> AddParentViewBag(SystemMessages msgs)
     {
       var form = FormService.GetAdministratorAccountForm(msgs);
       var personalContactGroup = form.GetQuestionGroups(msgs)
@@ -1054,8 +1064,7 @@ namespace AfterSchool.Controllers
           case QuestionDataType.RegistrantHomePhone:
           case QuestionDataType.RegistrantWorkPhone:
           case QuestionDataType.RegistrantMobilePhone:
-            if (answer.IsNotEmpty() && !answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
-              msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+            FormService.PhoneValidation(answer, question, msgs);
             break;
 
         }
@@ -2916,6 +2925,6 @@ namespace AfterSchool.Controllers
         ViewBag.SessionActivities = GetAllParticipationObjectsForCheckout(registration, msgs);
     }
 
-    #endregion
-  }
+        #endregion
+    }
 }
