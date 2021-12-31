@@ -39,7 +39,10 @@ namespace AfterSchool.Areas.User.Controllers
 
             questions = questions.Where(question =>
                     question.QuestionDataTypeId != QuestionDataType.RegistrantOrganization &&
-                    question.QuestionDataTypeId != QuestionDataType.RegistrantWorkPhone
+                    question.QuestionDataTypeId != QuestionDataType.RegistrantWorkPhone &&
+                    question.QuestionDataTypeId != QuestionDataType.RegistrantHomePhone &&
+                    question.QuestionDataTypeId != QuestionDataType.RegistrantParentRelationship &&
+                    question.QuestionDataTypeId != QuestionDataType.RegistrantEmployer
                 )
                 .ToList();
 
@@ -174,6 +177,7 @@ namespace AfterSchool.Areas.User.Controllers
                 return RedirectToAction("EditHealth", new { id = registrant.Uid, reg, student, returnUrl });
 
             ViewBag.Messages = msgs;
+            ViewBag.ResetGrade = "false";
 
             return View(registrant);
         }
@@ -323,15 +327,7 @@ namespace AfterSchool.Areas.User.Controllers
                 .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
             var questions = questionGroup.GetAllQuestions(msgs);
 
-            questions = questions.Where(question =>
-                   question.QuestionDataTypeId != QuestionDataType.RegistrantOrganization &&
-                   question.QuestionDataTypeId != QuestionDataType.RegistrantGrade &&
-                   question.QuestionDataTypeId != QuestionDataType.RegistrantGender &&
-                   question.QuestionDataTypeId != QuestionDataType.RegistrantDateOfBirth &&
-                   question.QuestionDataTypeId != QuestionDataType.RegistrantEthnicity &&
-                   question.QuestionDataTypeId != QuestionDataType.RegistrantTShirtSize
-               )
-               .ToList();
+            questions = questions.Where(question => question.QuestionDataTypeId.NotIn(FormService.QuestionsToNotIncludeInParentPanel())).ToList();
 
             questions.ForEach(question =>
             {
@@ -484,6 +480,19 @@ namespace AfterSchool.Areas.User.Controllers
                 .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.HomeAddress);
             var questions = questionGroup.GetAllQuestions(msgs);
 
+            var personalContactGroup = form.GetQuestionGroups(msgs)
+                  .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
+
+            var questionsWithPersonalInfo = personalContactGroup.GetAllQuestions(msgs);
+            var allQuestionsWithPersonalInfo = questionsWithPersonalInfo.Where(question => question.QuestionDataTypeId.In(new List<QuestionDataType>() {
+                QuestionDataType.RegistrantHomePhone,
+                QuestionDataType.RegistrantWorkPhone,
+                QuestionDataType.RegistrantParentRelationship,
+                QuestionDataType.RegistrantEmployer }))
+                .ToList();
+
+            questions.AddRange(allQuestionsWithPersonalInfo);
+
             questions.ForEach(question =>
             {
                 switch (question.QuestionDataTypeId)
@@ -491,6 +500,7 @@ namespace AfterSchool.Areas.User.Controllers
                     case QuestionDataType.RegistrantAddress2:
                     case QuestionDataType.RegistrantWorkPhone:
                     case QuestionDataType.RegistrantHomePhone:
+                    case QuestionDataType.RegistrantEmployer:
                         question.IsRequired = false;
                         break;
                     default:

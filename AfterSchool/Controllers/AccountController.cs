@@ -390,15 +390,6 @@ namespace AfterSchool.Controllers
       var personalContactGroup = form.GetQuestionGroups(msgs)
           .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
       var questions = personalContactGroup.GetAllQuestions(msgs);
-      var nonIncludedQuestions = new List<QuestionDataType>()
-            {
-                QuestionDataType.RegistrantOrganization,
-                QuestionDataType.RegistrantGrade,
-                QuestionDataType.RegistrantGender,
-                QuestionDataType.RegistrantDateOfBirth,
-                QuestionDataType.RegistrantEthnicity,
-                QuestionDataType.RegistrantTShirtSize
-            };
 
       var nonIncludedQuestionsExistingUser = new List<QuestionDataType>()
             {
@@ -407,7 +398,7 @@ namespace AfterSchool.Controllers
                 QuestionDataType.RegistrantEmail
             };
 
-      questions = questions.Where(question => question.QuestionDataTypeId.NotIn(nonIncludedQuestions)).ToList();
+      questions = questions.Where(question => question.QuestionDataTypeId.NotIn(FormService.QuestionsToNotIncludeInParentPanel())).ToList();
 
       questions.ForEach(question =>
       {
@@ -650,6 +641,18 @@ namespace AfterSchool.Controllers
           .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.HomeAddress);
       var questions = homeAddressQuestionGroup.GetAllQuestions(msgs);
 
+      var personalContactGroup = form.GetQuestionGroups(msgs)
+            .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
+     var questionsWithPersonalInfo = personalContactGroup.GetAllQuestions(msgs);
+     var allQuestionsWithPersonalInfo = questionsWithPersonalInfo.Where(question => question.QuestionDataTypeId.In(new List<QuestionDataType>() {
+         QuestionDataType.RegistrantHomePhone,
+         QuestionDataType.RegistrantWorkPhone,
+         QuestionDataType.RegistrantParentRelationship, 
+         QuestionDataType.RegistrantEmployer }))
+                .ToList();
+
+    questions.AddRange(allQuestionsWithPersonalInfo);
+
       questions.ForEach(question =>
       {
         switch (question.QuestionDataTypeId)
@@ -657,8 +660,9 @@ namespace AfterSchool.Controllers
           case QuestionDataType.RegistrantAddress2:
           case QuestionDataType.RegistrantWorkPhone:
           case QuestionDataType.RegistrantHomePhone:
-                  question.IsRequired = false;
-            break;
+          case QuestionDataType.RegistrantEmployer:
+               question.IsRequired = false;
+           break;
           default:
             question.IsRequired = true;
             break;
@@ -752,25 +756,18 @@ namespace AfterSchool.Controllers
           .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
       var questions = personalContactGroup.GetAllQuestions(msgs);
 
-      questions = questions.Where(question =>
-              question.QuestionDataTypeId != QuestionDataType.RegistrantOrganization &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantGrade &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantGender &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantDateOfBirth &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantEthnicity &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantTShirtSize
-          )
-          .ToList();
+      questions = questions.Where(question => question.QuestionDataTypeId.NotIn(FormService.QuestionsToNotIncludeInAdditionalParentPanel())).ToList();
 
       questions.ForEach(question =>
       {
         switch (question.QuestionDataTypeId)
         {
-          case QuestionDataType.RegistrantFirstName:
-          case QuestionDataType.RegistrantLastName:
-                // case QuestionDataType.RegistrantEmail:
-                case QuestionDataType.RegistrantMobilePhone:
-            question.IsRequired = true;
+              case QuestionDataType.RegistrantFirstName:
+              case QuestionDataType.RegistrantLastName:
+              // case QuestionDataType.RegistrantEmail:
+              case QuestionDataType.RegistrantMobilePhone:
+              case QuestionDataType.RegistrantParentRelationship:
+                  question.IsRequired = true;
             break;
         }
       });
@@ -795,9 +792,10 @@ namespace AfterSchool.Controllers
       {
         switch (question.QuestionDataTypeId)
         {
-          case QuestionDataType.RegistrantLastName:
-          case QuestionDataType.RegistrantHomePhone:
-            values.Add(question.ToFormQuestionViewModel().Id, parentOrGuardian.GetAnswer(question.QuestionDataTypeId)?.Text);
+           case QuestionDataType.RegistrantHomePhone:
+           case QuestionDataType.RegistrantWorkPhone:
+           case QuestionDataType.RegistrantMobilePhone:
+                values.Add(question.ToFormQuestionViewModel().Id, parentOrGuardian.GetAnswer(question.QuestionDataTypeId)?.Text);
             break;
         }
       });
@@ -824,10 +822,10 @@ namespace AfterSchool.Controllers
 
         switch (question.QuestionDataTypeId)
         {
-          case QuestionDataType.RegistrantHomePhone:
-          case QuestionDataType.RegistrantWorkPhone:
-          case QuestionDataType.RegistrantMobilePhone:
-            if (answer.IsNotEmpty() && !answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+            case QuestionDataType.RegistrantHomePhone:
+            case QuestionDataType.RegistrantWorkPhone:
+            case QuestionDataType.RegistrantMobilePhone:
+                 if(answer.IsNotEmpty() && !answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
               msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
             break;
 
@@ -986,7 +984,10 @@ namespace AfterSchool.Controllers
 
       questions = questions.Where(question =>
               question.QuestionDataTypeId != QuestionDataType.RegistrantOrganization &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantWorkPhone
+              question.QuestionDataTypeId != QuestionDataType.RegistrantWorkPhone &&
+              question.QuestionDataTypeId != QuestionDataType.RegistrantEmployer &&
+              question.QuestionDataTypeId != QuestionDataType.RegistrantHomePhone &&
+              question.QuestionDataTypeId != QuestionDataType.RegistrantParentRelationship
           )
           .ToList();
 
@@ -1117,7 +1118,6 @@ namespace AfterSchool.Controllers
               {
                 var firstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value;
                 var lastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value;
-                        // var phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value;
 
                         studentUser = currentAccount.CreateAndInviteUser(
                              firstName: firstName,
@@ -1165,32 +1165,34 @@ namespace AfterSchool.Controllers
 
                       // add answers to parent registrant record
                       // will be used later to copy information over to student records
-                      qvms.ForEach(qvm =>
-                      {
-                  student.AddOrUpdateAnswer(
-                              answerText: qvm.Value.IfEmpty("").Trim(),
-                              question: qvm.Question,
-                              loggedInUser: SessionVariables.CurrentUser,
-                              msgs: amsgs,
-                              dc: adc);
-                });
+                      qvms
+                        .ForEach(qvm =>
+                        {
+                          student.AddOrUpdateAnswer(
+                            answerText: qvm.Value.IfEmpty("").Trim(),
+                            question: qvm.Question,
+                            loggedInUser: SessionVariables.CurrentUser,
+                            msgs: amsgs,
+                            dc: adc);
+                        });
 
                       // copy parent answers to student for home address, emergency contacts
                       parentRegistrant.GetAnswers(amsgs, adc)
-                          .Where(answer =>
-                              answer.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.HomeAddress ||
-                              answer.FormQuestionGroupQuestionGroupDataTypeId.In(FormQuestionService.GetEmergencyContactQuestionGroups())
-                          )
-                          .ToList()
-                          .ForEach(answer =>
-                          {
-                      student.AddOrUpdateAnswer(
-                                  answerText: answer.Text.IfEmpty("").Trim(),
-                                  question: answer.ToFormQuestion(msgs: amsgs, dc: adc),
-                                  loggedInUser: SessionVariables.CurrentUser,
-                                  msgs: amsgs,
-                                  dc: adc);
-                    });
+                        .Where(answer =>
+                          answer.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.HomeAddress ||
+                          answer.FormQuestionGroupQuestionGroupDataTypeId.In(FormQuestionService
+                            .GetEmergencyContactQuestionGroups())
+                        )
+                        .ToList()
+                        .ForEach(answer =>
+                        {
+                          student.AddOrUpdateAnswer(
+                            answerText: answer.Text.IfEmpty("").Trim(),
+                            question: answer.ToFormQuestion(msgs: amsgs, dc: adc),
+                            loggedInUser: SessionVariables.CurrentUser,
+                            msgs: amsgs,
+                            dc: adc);
+                        });
 
                       // copy parent info over to student parent info
                       var allquestions = adminAccountForm.GetAllQuestions(amsgs, adc);
@@ -1204,6 +1206,8 @@ namespace AfterSchool.Controllers
                             { QuestionDataType.RegistrantHomePhone,  QuestionDataType.Parent1HomePhone },
                             { QuestionDataType.RegistrantMobilePhone,  QuestionDataType.Parent1MobilePhone },
                             { QuestionDataType.RegistrantWorkPhone,  QuestionDataType.Parent1WorkPhone },
+                            { QuestionDataType.RegistrantEmployer,  QuestionDataType.Parent1Employer },
+                            { QuestionDataType.RegistrantParentRelationship,  QuestionDataType.Parent1RelationshipToRegistrant },
                 };
 
               foreach (var key in parent1Map.Keys)
@@ -1251,6 +1255,9 @@ namespace AfterSchool.Controllers
                                 { QuestionDataType.RegistrantHomePhone,  QuestionDataType.Parent2HomePhone },
                                 { QuestionDataType.RegistrantMobilePhone,  QuestionDataType.Parent2MobilePhone },
                                 { QuestionDataType.RegistrantWorkPhone,  QuestionDataType.Parent2WorkPhone },
+                                { QuestionDataType.RegistrantEmployer,  QuestionDataType.Parent2Employer },
+                                { QuestionDataType.RegistrantParentRelationship,  QuestionDataType.Parent2RelationshipToRegistrant },
+
                     };
 
                 foreach (var key in parent2Map.Keys)
@@ -2094,16 +2101,7 @@ namespace AfterSchool.Controllers
           .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
       var questions = personalContactGroup.GetAllQuestions(msgs);
 
-      questions = questions.Where(question =>
-              question.QuestionDataTypeId != QuestionDataType.RegistrantOrganization &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantGender &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantDateOfBirth &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantEthnicity &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantTShirtSize &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantHomePhone &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantWorkPhone
-          )
-          .ToList();
+     questions = questions.Where(question => question.QuestionDataTypeId.NotIn(FormService.QuestionsToNotIncludeInStudentPanel(isGradeIncluded: false))).ToList();
 
       questions.ForEach(question =>
       {
@@ -2276,17 +2274,7 @@ namespace AfterSchool.Controllers
           .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
       var questions = personalContactGroup.GetAllQuestions(msgs);
 
-      questions = questions.Where(question =>
-              question.QuestionDataTypeId != QuestionDataType.RegistrantOrganization &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantGrade &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantGender &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantDateOfBirth &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantEthnicity &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantTShirtSize &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantHomePhone &&
-              question.QuestionDataTypeId != QuestionDataType.RegistrantWorkPhone
-          )
-          .ToList();
+      questions = questions.Where(question => question.QuestionDataTypeId.NotIn(FormService.QuestionsToNotIncludeInStudentPanel(isGradeIncluded: true))).ToList();
 
       questions.ForEach(question =>
       {
