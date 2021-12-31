@@ -174,7 +174,18 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(testPassword, testPasswordDecrypted);
         }
 
-        [Theory(Skip = "failing")]
+        [Fact]
+        public void IsValidPasswordTest()
+        {
+            var testPassword = "test2";
+            var testPasswordEncrypted = WebUserService.EncryptPassword(testPassword);
+            var validatePassword = WebUserService.IsValidPassword(testPassword, testPasswordEncrypted);
+
+            Assert.True(validatePassword);
+        }
+
+
+        [Theory]
         [InlineData("test@test.com", false)]
         public void SendInviteTest(string email, bool expectedResult)
         {
@@ -281,7 +292,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(username, WebUserService.GenerateUsername(f, l, dc: dc));
         }
 
-        [Theory(Skip = "failing")]
+        [Theory]
         [InlineData("test@test.com", true)]
         public void SendVerificationEmailTest(string email, bool result)
         {
@@ -308,7 +319,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.NotNull(WebUserService.LoginByUsername(username, password2, dc: dc));
         }
 
-        [Theory(Skip = "failing")]
+        [Theory]
         [InlineData("test@test.com", true)]
         public void SendPasswordResetTokenTest(string email, bool result)
         {
