@@ -641,6 +641,18 @@ namespace AfterSchool.Controllers
           .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.HomeAddress);
       var questions = homeAddressQuestionGroup.GetAllQuestions(msgs);
 
+      var personalContactGroup = form.GetQuestionGroups(msgs)
+            .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
+     var questionsWithPersonalInfo = personalContactGroup.GetAllQuestions(msgs);
+     var allQuestionsWithPersonalInfo = questionsWithPersonalInfo.Where(question => question.QuestionDataTypeId.In(new List<QuestionDataType>() {
+         QuestionDataType.RegistrantHomePhone,
+         QuestionDataType.RegistrantWorkPhone,
+         QuestionDataType.RegistrantParentRelationship, 
+         QuestionDataType.RegistrantEmployer }))
+                .ToList();
+
+    questions.AddRange(allQuestionsWithPersonalInfo);
+
       questions.ForEach(question =>
       {
         switch (question.QuestionDataTypeId)
@@ -974,6 +986,7 @@ namespace AfterSchool.Controllers
               question.QuestionDataTypeId != QuestionDataType.RegistrantOrganization &&
               question.QuestionDataTypeId != QuestionDataType.RegistrantWorkPhone &&
               question.QuestionDataTypeId != QuestionDataType.RegistrantEmployer &&
+              question.QuestionDataTypeId != QuestionDataType.RegistrantHomePhone &&
               question.QuestionDataTypeId != QuestionDataType.RegistrantParentRelationship
           )
           .ToList();

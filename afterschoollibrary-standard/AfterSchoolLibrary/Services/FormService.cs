@@ -430,9 +430,6 @@ namespace AfterSchoolLibrary.Services
             qhs.Add(new QuestionHolder() { Text = "State", QuestionTypeId = QuestionType.DropDownList, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, Options = QuestionHolder.StateList, QuestionDataTypeId = QuestionDataType.RegistrantState });
             qhs.Add(new QuestionHolder() { Text = "Zip Code", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantPostalCode });
 
-            qhs.Add(new QuestionHolder() { Text = "Home Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantHomePhone });
-            qhs.Add(new QuestionHolder() { Text = "Work Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantWorkPhone });
-
             return qhs;
         }
 
@@ -511,6 +508,10 @@ namespace AfterSchoolLibrary.Services
                 QuestionGroupDataTypeId = groupType,
                 QuestionDataTypeId = QuestionDataType.RegistrantMobilePhone
             });
+            
+            qhs.Add(new QuestionHolder() { Text = "Home Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantHomePhone });
+            qhs.Add(new QuestionHolder() { Text = "Work Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantWorkPhone });
+
             qhs.Add(new QuestionHolder()
             {
                 Text = "Date of Birth",
@@ -755,6 +756,8 @@ namespace AfterSchoolLibrary.Services
             QuestionDataType.RegistrantRaceUsFed,
             QuestionDataType.RegistrantEthnicityUsFed,
             QuestionDataType.RegistrantTShirtSize,
+            QuestionDataType.RegistrantWorkPhone,
+            QuestionDataType.RegistrantHomePhone,
             QuestionDataType.RegistrantParentRelationship,
             QuestionDataType.RegistrantEmployer
         };
@@ -781,7 +784,9 @@ namespace AfterSchoolLibrary.Services
                 QuestionDataType.RegistrantEthnicityUsFed,
                 QuestionDataType.RegistrantTShirtSize,
                 QuestionDataType.RegistrantHomePhone,
-                QuestionDataType.RegistrantWorkPhone
+                QuestionDataType.RegistrantWorkPhone,
+                QuestionDataType.RegistrantParentRelationship,
+                QuestionDataType.RegistrantEmployer
             };
 
             if (isGradeIncluded)
