@@ -198,35 +198,36 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(expectedOutput, output);
         }
 
-        [Fact(Skip = "failing")]
+        [Fact]
         public void FinalizeStartAndEndDateForSubscriptionTest()
         {
-            DateTime dayOfMonth = new DateTime(2021, 06, 06);
+            DateTime dayOfMonth = new DateTime(2022, 11, 10, 0, 0, 0);
 
             var activityGroup = ActivityGroupFactory.Create(ActivityOwnerAccount, ActivityGroupType.Session, msgs, dc);
 
             var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
             
             var activity = ActivityFactory.Create(ActivityOwnerAccount, schedule, activityGroup, msgs, dc);
+            var activityInstance = ActivityInstanceFactory.CreateWithInstanceType(activityGroup, schedule, dayOfMonth,dayOfMonth.AddDays(35),InstanceType.InSession, msgs, dc);
 
-            var (paymentStart, paymentEnd) = ActivityService.FinalizeStartAndEndDateForSubscription(activity, BillingPeriodType.Month, System.DayOfWeek.Monday, dayOfMonth, msgs,dc);
-
+            var (paymentStart, paymentEnd) = ActivityService.FinalizeStartAndEndDateForSubscription(activity, BillingPeriodType.Month, System.DayOfWeek.Monday, dayOfMonth, msgs, dc);
             Assert.True(paymentStart == dayOfMonth);
-        }    
+
+        }
         
-        [Fact(Skip = "failing")]
+        [Fact]
         public void FinalizeStartAndEndDateForOneWeekSubscriptionTest()
         {
-            DateTime dayOfMonth = new DateTime();
+            DateTime dayOfMonth = new DateTime(2022, 11, 10, 0, 0, 0);
 
             var activityGroup = ActivityGroupFactory.Create(ActivityOwnerAccount, ActivityGroupType.Session, msgs, dc);
 
             var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
             
             var activity = ActivityFactory.Create(ActivityOwnerAccount, schedule, activityGroup, msgs, dc);
+            var activityInstance = ActivityInstanceFactory.CreateWithInstanceType(activityGroup, schedule, dayOfMonth, dayOfMonth.AddDays(35), InstanceType.InSession, msgs, dc);
 
             var (paymentStart, paymentEnd) = ActivityService.FinalizeStartAndEndDateForSubscription(activity, BillingPeriodType.Week, System.DayOfWeek.Monday, dayOfMonth, msgs,dc);
-
 
             Assert.True(paymentStart.HasValue && paymentEnd.HasValue);
         }
