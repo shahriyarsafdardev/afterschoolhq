@@ -294,7 +294,7 @@ namespace AfterSchoolLibraryTests.Tests
         /// Activity schedule period is small for subscription to start, so just charge registrant directly instead for Subscription plan.
         /// </summary>
         /// <param name="costPerPeriod"></param>
-        [Theory(Skip = "failing", DisplayName = "Case 1: SubscriptionPlanType.Subscription, PlanPaymentStartType.OnCheckout, BillingPeriodType.Month, Only charge")]
+        [Theory(DisplayName = "Case 1: SubscriptionPlanType.Subscription, PlanPaymentStartType.OnCheckout, BillingPeriodType.Month, Only charge")]
         [InlineData(100)]        
         public void SubscriptionPlanDueOnRegistrationCheckoutTest1(int costPerPeriod)
         {
@@ -449,7 +449,7 @@ namespace AfterSchoolLibraryTests.Tests
         /// Activity schedule period is big and is on going, so Subscription plan will be initiated with a pro-rated charge.
         /// </summary>
         /// <param name="costPerPeriod"></param>
-        [Theory(Skip = "failing", DisplayName = "Case 2: SubscriptionPlanType.Subscription, PlanPaymentStartType.OnCheckout, BillingPeriodType.Month, Both charge + subscription")]
+        [Theory(DisplayName = "Case 2: SubscriptionPlanType.Subscription, PlanPaymentStartType.OnCheckout, BillingPeriodType.Month, Both charge + subscription")]
         [InlineData(100)]
         public void SubscriptionPlanDueOnRegistrationCheckoutTest2(int costPerPeriod)
         {
@@ -751,7 +751,7 @@ namespace AfterSchoolLibraryTests.Tests
         /// Activity schedule period is already started
         /// </summary>
         /// <param name="costPerPeriod"></param>
-        [Theory(Skip = "failing", DisplayName = "Case 1: SubscriptionPlanType.Subscription, PlanPaymentStartType.WhenActivityStarts, BillingPeriodType.Month")]
+        [Theory(DisplayName = "Case 1: SubscriptionPlanType.Subscription, PlanPaymentStartType.WhenActivityStarts, BillingPeriodType.Month")]
         [InlineData(100)]
         public void SubscriptionPlanDueOnRegistrationWhenActivityStartsTest1(int costPerPeriod)
         {
