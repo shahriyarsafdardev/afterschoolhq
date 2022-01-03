@@ -345,8 +345,6 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void ActivityCopyTest()
         {
-            try
-            {
                 // Arrange                
                 var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
                 var package = PackageFactory.Create(msgs, dc);
@@ -361,19 +359,11 @@ namespace AfterSchoolLibraryTests.Tests
                 Assert.NotNull(expected);
                 Assert.NotEqual(activity.ID, expected.ID);
                 Assert.NotEqual(activity.CreateDate, expected.CreateDate);
-            }
-            catch (Exception ex)
-            {
-                //Assert
-                Assert.False(false, ex.Message);
-            }
         }
 
         [Fact]
         public async void ActivityCopyScheduleCheckTest()
         {
-            try
-            {
                 // Arrange                
                 var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
                 var package = PackageFactory.Create(msgs, dc);
@@ -433,12 +423,7 @@ namespace AfterSchoolLibraryTests.Tests
                     Assert.NotEqual(instance.ID, copiedInstance.ID);
                     Assert.NotEqual(instance.CreateDate, copiedInstance.CreateDate);
                 }
-            }
-            catch (Exception ex)
-            {
-                //Assert
-                Assert.False(false, ex.Message);
-            }
+        
         }
 
         public static IEnumerable<object[]> Data => new List<object[]>() {
@@ -460,12 +445,11 @@ namespace AfterSchoolLibraryTests.Tests
             }
         };
 
-        [Theory(Skip = "failing")]
+        [Theory]
         [MemberData(nameof(Data))]        
         public async void ActivityCopyScheduleCheckTheoryTest(List<DateRange> dates)
         {
-            try
-            {
+
                 // Arrange                
                 var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
                 var package = PackageFactory.Create(msgs, dc);
@@ -521,19 +505,12 @@ namespace AfterSchoolLibraryTests.Tests
                     Assert.NotEqual(instance.ID, copiedInstance.ID);
                     Assert.NotEqual(instance.CreateDate, copiedInstance.CreateDate);
                 }
-            }
-            catch (Exception ex)
-            {
-                //Assert
-                Assert.False(false, ex.Message);
-            }
+            
         }
 
         [Fact]
         public void ActivityCopyPropertiesCheckTest()
         {
-            try
-            {
                 // Arrange
                 var package = PackageFactory.Create(msgs, dc);
                 var accountPackage = AccountPackageFactory.Create(ActivityOwnerAccount, package, msgs, dc);
@@ -562,19 +539,11 @@ namespace AfterSchoolLibraryTests.Tests
 
                     Assert.Equal(main.AccountPropertyTypeId, copied.AccountPropertyTypeId);
                 }
-            }
-            catch (Exception ex)
-            {
-                //Assert
-                Assert.False(false, ex.Message);
-            }
         }
 
         [Fact]
         public void ActivityCopyFormsCheckTest()
         {
-            try
-            {
                 // Arrange
                 var package = PackageFactory.Create(msgs, dc);
                 var accountPackage = AccountPackageFactory.Create(ActivityOwnerAccount, package, msgs, dc);
@@ -595,12 +564,6 @@ namespace AfterSchoolLibraryTests.Tests
                 Assert.Equal(activeActivityForm.AccountId, activityForm.AccountId);
                 
                 Assert.NotNull(copiedActivityForm);
-            }
-            catch (Exception ex)
-            {
-                //Assert
-                Assert.False(false, ex.Message);
-            }
         }
 
         #endregion
