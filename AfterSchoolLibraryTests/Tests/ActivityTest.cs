@@ -85,26 +85,18 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void LoadByIdByAccountIdTest()
         {
-            try
-            {
-                // Arrange
-                var user = WebUserFactory.Create(msgs: msgs, dc: dc);
-                var account = AccountFactory.Create(user: user, msgs: msgs, dc: dc);
-                var activity = ActivityFactory.Create(account: account, msgs: msgs, dc: dc);
+            // Arrange
+            var user = WebUserFactory.Create(msgs: msgs, dc: dc);
+            var account = AccountFactory.Create(user: user, msgs: msgs, dc: dc);
+            var activity = ActivityFactory.Create(account: account, msgs: msgs, dc: dc);
 
-                // Act
-                var expected = Activity.LoadByIdByAccountId(Id: activity.ID.Value, AccountId: account.ID.Value, msgs: msgs, dc: dc);
+            // Act
+            var expected = Activity.LoadByIdByAccountId(Id: activity.ID.Value, AccountId: account.ID.Value, msgs: msgs, dc: dc);
 
-                // Assert
-                Assert.Equal(expected: expected.ID, actual: activity.ID);
-                Assert.Equal(expected: expected.Uid, actual: activity.Uid);
-                Assert.Equal(expected: expected.Name, actual: activity.Name);
-            }
-            catch (Exception ex)
-            {
-                //Assert
-                Assert.False(false, ex.Message);
-            }            
+            // Assert
+            Assert.Equal(expected: expected.ID, actual: activity.ID);
+            Assert.Equal(expected: expected.Uid, actual: activity.Uid);
+            Assert.Equal(expected: expected.Name, actual: activity.Name);                    
         }
 
         [Fact]
@@ -239,21 +231,10 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(activity.IsPublished);
         }
 
-        /*
-        [Fact]
-        public void GetParentActivityTest()
-        {
-            var a = new Activity() { ParentActivityId = 2 };
-            a.Save(dc: dc);
-
-            Assert.NotNull(a.GetParentActivity(dc: dc));
-        }
-        */
-        
         /// <summary>
         /// Gets the days of the week that the activity repeats on weekly
         /// </summary>
-        [Fact(Skip = "Need to update")]
+        [Fact]
         public void GetDaysOfTheWeekTest()
         {
             var user = Factories.WebUserFactory.Create(msgs, dc);
@@ -321,25 +302,23 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         // will count the number of registrants for the particular activity of a given registrantion type
-        [Fact(Skip = "Need to fix")]
-        public void GetRegistrantCountByApplicationTypeTest()
+        [Theory]
+        [InlineData(RegistrationAssignmentType.NotSet)]
+        [InlineData(RegistrationAssignmentType.Invited)]
+        public void GetRegistrantCountByApplicationTypeTest(RegistrationAssignmentType registrationAssignmentType)
         {
-            //var user = Factories.WebUserFactory.Create(msgs, dc);
-            //var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
-            //var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
-            //var registrant = Factories.RegistrantFactory.Create(msgs, dc: dc);
-            //var regitrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
-
-            //var n = new RegistrantAssignment() { RegistrantId = registrant.ID.Value };
-            //var debug = activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Invited, dc: dc);
-            //Assert.Equal(1, activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Invited, dc: dc));
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
+            var registrant = Factories.RegistrantFactory.Create(msgs, dc: dc);
+            Factories.RegistrantActivityFactory.Create(activity, registrant, registrationAssignmentType, msgs, dc: dc);
+                        
+            Assert.Equal(1, activity.GetRegistrantCountByAssignmentType(registrationAssignmentType, dc: dc));
         }
 
         /// <summary>
         /// returns if an activity is full or not (checks the SeatsAvaible feild)
-        /// </summary>
-
-        //TODO weird error with DeBugging
+        /// </summary>        
         [Fact]
         public void isFullTest()
         {
@@ -354,8 +333,7 @@ namespace AfterSchoolLibraryTests.Tests
 
         /// <summary>
         /// returns boolean (if Waitinglistseats = 10 and registration type)
-        /// </summary>
-        //TODO add registrant to waitlist
+        /// </summary>        
         [Fact]
         public void isWaitingListFullTest()
         {
@@ -470,9 +448,9 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Single(activity.GetCompletedAttendance( dc: dc));
         }
 
-        [Theory(Skip = "failing")]
-        [InlineData("date","1",1,10)]
-        public void GetCompletedAttendanceWithPagingTest(string orderByParam,string direction,int pageNumber,int recordsPerPage)
+        [Theory]
+        [InlineData("Date", OrderByDirectionEnum.Descending, 0, 10)]
+        public void GetCompletedAttendanceWithPagingTest(string orderByParam, OrderByDirectionEnum direction, int pageNumber, int recordsPerPage)
         {
             var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
             var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
@@ -485,12 +463,12 @@ namespace AfterSchoolLibraryTests.Tests
             attendance.IsCompleted = true;
             attendance.Save(dc: dc);
 
-            Assert.Single(activity.GetCompletedAttendanceWithPaging(orderByParam, (OrderByDirectionEnum)Enum.Parse(typeof(OrderByDirectionEnum), direction), pageNumber, recordsPerPage, msgs, dc: dc));
+            Assert.Single(activity.GetCompletedAttendanceWithPaging(orderByParam, direction, pageNumber, recordsPerPage, msgs, dc: dc));
         }
         /// <summary>
         /// returns the numberof attendance objects asociated with the activity that have been marked as present
         /// </summary>
-        [Fact(Skip = "Need to update")]
+        [Fact]
         public void GetAttendancePresentCountTest()
         {
             var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
@@ -501,15 +479,19 @@ namespace AfterSchoolLibraryTests.Tests
             var form = Factories.FormFactory.Create(account, msgs, dc: dc);
             var activityForm = Factories.ActivityFormWebUserFactory.Create(account, activity, form, msgs, dc: dc);
             var attendance = new Attendance() { ActivityId = activity.ID.Value, ActivityInstanceId = activityInstance.ID.Value };
-            attendance.Save(dc: dc);
-            var registrant = Factories.RegistrantFactory.Create(account, isMaster: false, msgs, dc: dc);
-            var attendanceRegistrant = new AttendanceRegistrant() { AttendanceId = attendance.ID.Value, NumberPresent = 1, RegistrantId = registrant.ID.Value, NumberPossible = 1, NumberLate = 0 };
-            attendanceRegistrant.Save(dc: dc);
+            attendance.IsCompleted = true;
+            msgs.AddRange(attendance.Save(dc: dc));
 
-            Assert.Equal(1, activity.GetAttendancePresentCount(dc: dc));
+            var registrant = Factories.RegistrantFactory.Create(account, isMaster: false, msgs, dc: dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, RegistrationAssignmentType.Reserved, msgs, dc);
+            var attendanceRegistrant = new AttendanceRegistrant() { AttendanceId = attendance.ID.Value, NumberPresent = 1, RegistrantId = registrant.ID.Value, NumberPossible = 1, NumberLate = 0 };
+            msgs.AddRange(attendanceRegistrant.Save(dc: dc));
+
+            var presentCount = activity.GetAttendancePresentCount(msgs, dc: dc);
+            Assert.Equal(1, presentCount);
         }
         
-        [Fact(Skip = "Need to update")]
+        [Fact]
         public void GetAttendancePossibleCountTest()
         {
             var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
@@ -520,10 +502,13 @@ namespace AfterSchoolLibraryTests.Tests
             var form = Factories.FormFactory.Create(account, msgs, dc: dc);
             var activityForm = Factories.ActivityFormWebUserFactory.Create(account, activity, form, msgs, dc: dc);
             var attendance = new Attendance() { ActivityId = activity.ID.Value, ActivityInstanceId = activityInstance.ID.Value };
-            attendance.Save(dc: dc);
+            attendance.IsCompleted = true;
+            msgs.AddRange(attendance.Save(dc: dc));
+
             var registrant = Factories.RegistrantFactory.Create(account, isMaster: false, msgs, dc: dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, RegistrationAssignmentType.Reserved, msgs, dc);
             var attendanceRegistrant = new AttendanceRegistrant() { AttendanceId = attendance.ID.Value, NumberPresent = 1, RegistrantId = registrant.ID.Value, NumberPossible = 1, NumberLate = 0 };
-            attendanceRegistrant.Save(dc: dc);
+            msgs.AddRange(attendanceRegistrant.Save(dc: dc));
 
             Assert.Equal(1, activity.GetAttendancePossibleCount(dc: dc));
         }
@@ -580,8 +565,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.Single(activity.GetRegistrationPeriods(msgs, dc));
         }
-
-        // TODO HELP
+                
         [Fact]
         public void GetUpcomingRegistrationPeriodsTest()
         {
@@ -701,13 +685,16 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(activity.GetAccount(msgs, dc).IsNotEmpty() && activity.GetAccount(msgs, dc).ID == account.ID);
         }
 
-        [Fact(Skip = "failing")]
+        [Fact]
         public void CopyTest()
         {
             var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
             var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var form = Factories.FormFactory.Create(account, msgs, dc: dc);
+
+            account.DefaultFormId = form.ID;
+            msgs.AddRange(account.Save(dc));
 
             Assert.NotNull(activity.Copy("newActivity", false, accountOwner.ID.Value, msgs, dc: dc));
         }

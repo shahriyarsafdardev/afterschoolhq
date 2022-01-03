@@ -18,6 +18,19 @@ namespace AfterSchoolLibraryTests.Factories
             return obj;
         }
 
+        public static RegistrantActivity Create(Activity activity, Registrant registrant, RegistrationAssignmentType registrationAssignmentType, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var obj = new RegistrantActivity()
+            {
+                ParticipationObjectId = activity.ID,
+                ParticipationObjectTypeId = ParticipationObjectType.Activity,
+                RegistrantId = registrant.ID,
+                AssignmentTypeId = registrationAssignmentType
+            };
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
+
         public static RegistrantActivity Create(Activity activity, Registrant registrant, Registration registration, SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new RegistrantActivity()
