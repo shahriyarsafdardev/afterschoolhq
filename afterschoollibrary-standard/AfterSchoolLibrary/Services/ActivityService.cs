@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System.Text.RegularExpressions;
@@ -2823,6 +2822,28 @@ namespace AfterSchoolLibrary.Services
             } 
             
             msgs.Add("Error Removing Schedule", MessageType.UserError);
+        }
+
+        public static List<RegistrationAssignmentType> GetRegistrationAssignmentTypes(this Activity activity)
+        {
+            var dropdownOptions = new List<RegistrationAssignmentType>() { 
+                RegistrationAssignmentType.Reserved,
+                RegistrationAssignmentType.WaitingList,
+                RegistrationAssignmentType.Applied,
+                RegistrationAssignmentType.Invited,
+                RegistrationAssignmentType.Declined,
+                RegistrationAssignmentType.ReservedPendingPayment,
+                RegistrationAssignmentType.ReservedPendingParentalConsent,
+                RegistrationAssignmentType.Interested
+            };
+            
+            if(activity.ActivityTypeId == ActivityType.PermissionSlip)
+            {
+                dropdownOptions.Remove(RegistrationAssignmentType.WaitingList);
+                dropdownOptions.Remove(RegistrationAssignmentType.Applied);
+            }
+
+            return dropdownOptions;
         }
     }
 }

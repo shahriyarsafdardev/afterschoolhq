@@ -630,5 +630,29 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         #endregion
+
+        [Fact(DisplayName="GetRegistrationAssignmentTypesTest")]
+        public void GetRegistrationAssignmentTypesTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(ActivityOwnerAccount, ActivityType.Activity, msgs, dc);
+            var permissionslip = ActivityFactory.Create(ActivityOwnerAccount, ActivityType.PermissionSlip, msgs, dc);
+
+            // Act
+            var activityAssignmentTypes = activity.GetRegistrationAssignmentTypes();
+            var permissionAssignmentTypes = permissionslip.GetRegistrationAssignmentTypes();
+
+            // Assert
+            Assert.True(activityAssignmentTypes.IsNotEmpty());
+            Assert.Contains(RegistrationAssignmentType.Applied, activityAssignmentTypes);
+            Assert.Contains(RegistrationAssignmentType.WaitingList, activityAssignmentTypes);
+            Assert.DoesNotContain(RegistrationAssignmentType.Withdrawn, activityAssignmentTypes);
+
+            Assert.True(permissionAssignmentTypes.IsNotEmpty());
+            Assert.DoesNotContain(RegistrationAssignmentType.Applied, permissionAssignmentTypes);
+            Assert.DoesNotContain(RegistrationAssignmentType.WaitingList, permissionAssignmentTypes);
+            Assert.DoesNotContain(RegistrationAssignmentType.Withdrawn, permissionAssignmentTypes);
+
+        }
     }
 }

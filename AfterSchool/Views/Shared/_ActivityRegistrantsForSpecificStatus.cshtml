@@ -8,6 +8,7 @@
     var headerTitle = (RegistrationAssignmentType)ViewData["HeaderTitle"];    
     var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
     var isReadOnly = (bool)ViewData["IsReadOnly"];
+    var assignmentTypesForActivity = (List<RegistrationAssignmentType>)activity.GetRegistrationAssignmentTypes();
 }
 
 <div class="panel panel-default">
@@ -121,20 +122,8 @@
                                         onchange="moveRegistrantAssignment(@ra.RegistrantId, '@UI.JavascriptSafeString(ra.RegistrantName)', this)"
                                         @(isReadOnly ? "disable" : "")>
 
-                                    @foreach (var assignmenttype in Enum.GetValues(typeof(RegistrationAssignmentType)).Cast<RegistrationAssignmentType>())
+                                    @foreach (var assignmenttype in assignmentTypesForActivity)
                                     {
-
-                                        switch (assignmenttype)
-                                        {
-                                            case RegistrationAssignmentType.NotSet:
-                                                continue;
-                                            case RegistrationAssignmentType.WaitingList: case RegistrationAssignmentType.Applied: 
-                                                if (activity.ActivityTypeId == ActivityType.PermissionSlip)
-                                                {
-                                                    continue;
-                                                }
-                                                break;
-                                        }
                                         <option value="@((int)assignmenttype)" @(assignmenttype == ra.AssignmentTypeId ? "selected=\"selected\"" : "")>
                                             @assignmenttype.ToString().SplitByUpperCase()
                                         </option>
