@@ -976,14 +976,28 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(instances.Last().StartDateTime.ToShortDateTimeString(), activity.GetLastDate(msgs, dc).ToShortDateTimeString());
         }
 
-        [Fact(Skip = "Need to figure out why it's not working")]
+        [Fact]
         public void SendRegistrationSummaryReportsTest()
         {
             var user = Factories.WebUserFactory.Create(msgs, dc);
             var account = Factories.AccountFactory.Create(user, msgs, dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var form = account.GetOrCreateDefaultForm(user, msgs, dc);
+            var questions = form.GetActiveQuestions(msgs, dc);
+            var registrant = RegistrantFactory.Create(account, isMaster: false, msgs, dc: dc);
+            var registration = RegistrationFactory.Create(account, registrant, RegistrationCompletionStatus.Completed, msgs, dc);
+            var registrantActivity = RegistrantActivityFactory.Create(activity, registrant, registration, msgs, dc: dc);
+            var answer = FormQuestionAnswerFactory.Create(formQuestionId: questions[0].ID.Value,
+                activityId: activity.ID.Value,
+                registrantId: registrant.ID.Value,
+                registrationId: registration.ID.Value,
+                questionText: questions[0].Text,
+                answerText: "This is answer.",
+                questionDataTypeId: questions[0].QuestionDataTypeId, 
+                msgs: msgs,
+                dc: dc);
 
-            Assert.True(ActivityService.SendRegistrationSummaryReport(activity.ID.Value,"test", dc).HasNoErrors());
+            Assert.True(ActivityService.SendRegistrationSummaryReport(activity.ID.Value, "test", dc).HasNoErrors());
         }
 
         [Fact]

@@ -2561,7 +2561,9 @@ namespace AfterSchoolLibrary.Services
                 uiActivityLabel,
                 activity.ContactEmail,
                 subject,
-                body));
+                body, 
+                msgs, 
+                dc));
 
             return msgs;
         }
