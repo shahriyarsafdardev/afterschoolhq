@@ -543,15 +543,15 @@ namespace AfterSchoolLibrary.Services
             });
             qhs.Add(new QuestionHolder()
             {
-                Text = "T-Shirt Size",
+                Text = "Ethnicity",
                 IsActive = true,
-                QuestionTypeId = QuestionType.RadioList,
+                IsRequired = false,
+                QuestionTypeId = QuestionType.DropDownList,
                 GroupName = groupLabel,
                 QuestionGroupDataTypeId = groupType,
-                QuestionDataTypeId = QuestionDataType.RegistrantTShirtSize,
-                Options = RegistrantTShirtSize
+                QuestionDataTypeId = QuestionDataType.RegistrantEthnicityUsFed,
+                Options = RegistrantEthnicity
             });
-
             qhs.Add(new QuestionHolder()
             {
                 Text = "Race",
@@ -563,19 +563,16 @@ namespace AfterSchoolLibrary.Services
                 QuestionDataTypeId = QuestionDataType.RegistrantRaceUsFed,
                 Options = RegistrantRace
             });
-
             qhs.Add(new QuestionHolder()
             {
-                Text = "Ethnicity",
+                Text = "T-Shirt Size",
                 IsActive = true,
-                IsRequired = false,
-                QuestionTypeId = QuestionType.DropDownList,
+                QuestionTypeId = QuestionType.RadioList,
                 GroupName = groupLabel,
                 QuestionGroupDataTypeId = groupType,
-                QuestionDataTypeId = QuestionDataType.RegistrantEthnicityUsFed,
-                Options = RegistrantEthnicity
+                QuestionDataTypeId = QuestionDataType.RegistrantTShirtSize,
+                Options = RegistrantTShirtSize
             });
-
             qhs.Add(new QuestionHolder()
             {
                 Text = "Organization",
