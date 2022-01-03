@@ -242,16 +242,16 @@ namespace AfterSchoolLibraryTests.Tests
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var schedule = Factories.ActivityScheduleFactory.Create(account, msgs, dc: dc);
 
-            var s = new DateTime(1, 1, 1, 1, 1, 1);
-            var e = new DateTime(7, 7, 7, 7, 7, 7);
+            var start = DateTime.Now.AddDays(1);
+            var end = DateTime.Now.AddDays(3);
 
-            schedule.StartDate = s;
-            schedule.EndDate = e;
+            schedule.StartDate = start;
+            schedule.EndDate = end;
 
             var activityShedule = Factories.ActivityScheduleFactory.Create(account, msgs, dc: dc);
             activity.ActivityScheduleId = activityShedule.ID.Value;
             var activityInstance = Factories.ActivityInstanceFactory.Create(activity, activityShedule, msgs, dc: dc);
-            activityInstance.StartDateTime = s;
+            activityInstance.StartDateTime = start;
             var d = new ActivityDay() { ActivityId = activity.ID.Value };
             d.Save(dc: dc);
             d.ActivityId = activity.ID.Value;
@@ -534,7 +534,6 @@ namespace AfterSchoolLibraryTests.Tests
 
 
             var count = activity.GetAttendanceByDate(date, dc: dc);
-
             Assert.Single(activity.GetAttendanceByDate(date, dc: dc));
         }
 
@@ -674,6 +673,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.NotNull(activity.GetActiveRegistrationPeriod(dc: dc));
         }
+
         // returns the account that started the 
         [Fact]
         public void GetAccountTest()
@@ -723,46 +723,15 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.NotNull(activity.AddFormAndActivitate(form, accountOwner.ID.Value, false, msgs, dc));
         }
 
-        [Fact(Skip = "Need to add this test in the future")]
-        public void EditExistingTest()
-        {
-            
-        }
-
-        [Fact(Skip = "Need to add this test in the future")]
-        public void CreateNewTest()
-        {
-            
-        }
-
-        [Fact(Skip = "Moved to ActivityScheduleService, need to rewrite test")]
+        [Fact]
         public void AddNewScheduleTest()
         {
             var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
             var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
-            var activityGroup = Factories.ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
-            var activity = Factories.ActivityFactory.Create(account, activityGroup, msgs, dc);
+            var schedule = ActivityScheduleFactory.Create(account, DateTime.Now, DateTime.Now.AddDays(10), msgs, dc);
+            var activity = ActivityFactory.Create(account, schedule, 100, msgs, dc: dc);
 
-            var start = new DateTime(2017, 06, 06);
-            var end = new DateTime(2017, 10, 10);
-            var startTime = new DateTime(2018, 1, 1, 1, 1, 1);
-            var endTime = new DateTime(2018, 3, 3, 3, 3, 3);
-
-            //var schedule = activity.AddNewSchedule(
-            //    "newShed", 
-            //    "det", 
-            //    true, 
-            //    start, 
-            //    end, 
-            //    startTime, 
-            //    endtime, 
-            //    "1/1/2019-12:39 PM", 
-            //    account.ID.Value, 
-            //    accountOwner.ID.Value, 
-            //    msgs, 
-            //    dc);
-
-            // Assert.NotNull(schedule);
+            Assert.NotNull(schedule);
         }
 
         [Fact]
@@ -897,66 +866,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.NotNull(activity.AddMessage("subj", "Hello Class", registrantIds, false, accountOwner.ID.Value, msgs, dc));
         }
 
-        //[Fact]
-        //public void GetActivitiesByRegistrantByDayTest()
-        //{
-        //    var date = new DateTime(2018, 6, 11);
-        //    var user = Factories.WebUserFactory.Create(msgs, dc);
-        //    var account = Factories.AccountFactory.Create(user, msgs, dc);
-        //    var schedule = Factories.ActivityScheduleFactory.Create(account, msgs, dc);
-        //    var activity = Factories.ActivityFactory.Create(account, schedule, msgs, dc);
-        //    var activityInstance = Factories.ActivityInstanceFactory.Create(activity, schedule, date, date.AddHours(1), msgs, dc);
-        //    var registrant = Factories.RegistrantFactory.Create(account, msgs, dc);
-        //    var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);                        
-
-        //    Assert.Single(Activity.GetActivitiesByRegistrantByDay(registrant.ID.Value, DayOfWeekASL.NotSet, schedule.StartDate.Value, msgs, dc));
-        //}
-
-        //[Theory]
-        //[InlineData(3)]
-        //[InlineData(8)]
-        //public void GetByActivitiesByRegistrantsTest(int numberToCreate)
-        //{
-        //    var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
-        //    var user = Factories.WebUserFactory.Create(msgs, dc);
-        //    var account = Factories.AccountFactory.Create(user, msgs, dc);            
-
-        //    var registrantIds = new List<int>();
-        //    var activityIds = new List<int>();
-
-        //    for (var i = 0; i < numberToCreate; i++)
-        //    {
-        //        var schedule = Factories.ActivityScheduleFactory.Create(account, msgs, dc);
-        //        var activity = Factories.ActivityFactory.Create(account, schedule, msgs, dc);
-        //        var instance = Factories.ActivityInstanceFactory.Create(activity, schedule, msgs, dc);
-        //        var registrant = Factories.RegistrantFactory.Create(msgs, dc);
-        //        var registration = Factories.RegistrationFactory.Create(account, registrant, msgs, dc);
-
-        //        var ra = registrant.AddOrUpdateParticipationObject(
-        //            registrationId: registration.ID.Value,
-        //            participationObjectId: activity.ID.Value,
-        //            participationObjectType: ParticipationObjectType.Activity,
-        //            assignmentType: RegistrationAssignmentType.Reserved,
-        //            registrationPeriodId: null,
-        //            activityGroupId: null,
-        //            loggedInUserId: loggedInUser.ID.Value,
-        //            msgs: msgs,
-        //            dc: dc
-        //            );
-
-        //        registrantIds.Add(registrant.ID.Value);
-        //        activityIds.Add(activity.ID.Value);
-        //    }
-
-        //    Assert.Equal(
-        //        numberToCreate, 
-        //        Activity.GetByActivitiesByRegistrants(
-        //            activityIds: activityIds, 
-        //            registrantIds: registrantIds, 
-        //            dc: dc
-        //        ).Count);
-        //}
-
         [Fact]
         public void GetAllowedGendersTest()
         {
@@ -1021,7 +930,6 @@ namespace AfterSchoolLibraryTests.Tests
             var schedule = Factories.ActivityScheduleFactory.Create(account, msgs, dc);
             var activity = Factories.ActivityFactory.Create(account, schedule, msgs, dc);
             var activityInstance = Factories.ActivityInstanceFactory.Create(activity, schedule, msgs, dc);
-            
 
             Assert.True(activity.IsOutOfSession(msgs, dc));
         }
