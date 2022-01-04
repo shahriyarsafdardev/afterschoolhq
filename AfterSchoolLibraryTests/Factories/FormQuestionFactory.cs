@@ -56,5 +56,31 @@ namespace AfterSchoolLibraryTests.Factories
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
+
+        public static FormQuestion Create(int formId, int formQuestionGroupId, string text, string options, QuestionType questionTypeId, bool isLocked, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var obj = new FormQuestion()
+            {
+                CreateDate = DateTime.Now,
+                CreatedBy = 1,
+                LastModifiedBy = 1,
+                LastModifiedDate = DateTime.Now,
+                FormQuestionGroupId = formQuestionGroupId,
+                FormId = formId,
+                IsTemplate = true,
+                Text = text,
+                QuestionTypeId = questionTypeId,
+                QuestionDataTypeId = QuestionDataType.RegistrantGender,
+                IsActive = true,
+                IsRequired = true,
+                IsLocked = isLocked,
+                Options = options,
+                DisplayOrder = 1,
+                IsAnswerDescriptionEnabled = false
+            };
+
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
     }
 }
