@@ -19,7 +19,7 @@ namespace AfterSchool.Models
         {
             return new FormQuestionViewModel(question);
         }
-
+        
         public static AddressViewModel ToAddressViewModel(this PaymentsEntityViewModel paymentsEntityVM)
         {
             return new AddressViewModel()

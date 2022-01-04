@@ -1271,19 +1271,12 @@ namespace AfterSchoolLibrary.Billing
                 Coupon = stripeCouponId,
                 Items = new List<SubscriptionItemOptions>() { new SubscriptionItemOptions() { Plan = planId, Quantity = 1 } },
                 Metadata = metaData,
-                Prorate = billingCycleAnchor.HasValue && isProrated, //prorate only if ongoing activity and not paymentplan, else we will handle this manually
+                Prorate = isProrated, //prorate only if ongoing activity and not paymentplan, else we will handle this manually
+                BillingCycleAnchor = billingCycleAnchor
             };
 
             if (startDate.Value.Date.AddDays(-1).IsAfter(DateTime.UtcNow.Date))
-                options.TrialEnd = startDate.Value.AddDays(-1);
-            else if (billingCycleAnchor.HasValue)
-            {
-                //.. If registrant joins mid-period then we can set the billing cycle anchor as the last date of current cycle. for example if monthly and month is of 30th. set 30th.
-                //.. Same way for weekly, only change would be weekly cycle would end on sunday
-                //.. it'll get a prorated invoice for the shorter amount of time on the first month.
-                //.. Then the customer will be invoiced normally after that https://stripe.com/docs/billing/subscriptions/billing-cycle#new-subscriptions            
-                options.BillingCycleAnchor = billingCycleAnchor.Value;
-            }
+                options.TrialEnd = startDate.Value.AddDays(-1); // if start date is at least one day in the future, start a day before start date            
 
             // please make sure that billing ends when the program ends.
             if (endDate.HasValue && endDate.IsNotEmpty() && endDate.Value.Date.AddDays(-1).IsAfter(DateTime.UtcNow.Date))
@@ -2220,6 +2213,30 @@ namespace AfterSchoolLibrary.Billing
             try
             {
                 invoice = GetInvoiceService().Get(invoiceId);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.Error, ex);
+                msgs.Add($"Invoice doesn't exist", MessageType.UserError);
+            }
+
+            return invoice;
+        }
+
+        public static Stripe.Invoice GetUpcomingInvoice(string customerId, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Stripe.Invoice invoice = null;
+
+            var options = new UpcomingInvoiceOptions
+            {
+                Customer = customerId,
+            };
+
+            try
+            {
+                invoice = GetInvoiceService().Upcoming(options);
             }
             catch (StripeException ex)
             {
