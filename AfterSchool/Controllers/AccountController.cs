@@ -784,23 +784,8 @@ namespace AfterSchool.Controllers
       if (results.IsNotEmpty()) return results;
 
       var msgs = new SystemMessages();
-      var parentOrGuardian = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
-      var questions = AddParentViewBag(msgs);
-      var values = new NameValueCollection();
-
-      questions.ForEach(question =>
-      {
-        switch (question.QuestionDataTypeId)
-        {
-           case QuestionDataType.RegistrantHomePhone:
-           case QuestionDataType.RegistrantWorkPhone:
-           case QuestionDataType.RegistrantMobilePhone:
-                values.Add(question.ToFormQuestionViewModel().Id, parentOrGuardian.GetAnswer(question.QuestionDataTypeId)?.Text);
-            break;
-        }
-      });
-
-      var qvms = questions.Select(question => question.ToFormQuestionViewModel(values)).ToList();
+      var questions = AddParentViewBag(msgs);      
+      var qvms = questions.Select(question => question.ToFormQuestionViewModel()).ToList();
 
       ViewBag.Messages = msgs;
 
