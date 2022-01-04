@@ -13,11 +13,11 @@ namespace AfterSchoolLibraryTests.Tests
 {
     public class RegistrantServiceTest : BaseTest
     {
-        private WebUser user { get; set; }
+        private WebUser User { get; }
 
         public RegistrantServiceTest(ITestOutputHelper output) : base(output)
         {
-            user = WebUserFactory.Create(msgs, dc);
+            User = WebUserFactory.Create(msgs, dc);
         }
 
         [Theory(DisplayName = "StartSubscriptionPlan Test")]
@@ -34,18 +34,18 @@ namespace AfterSchoolLibraryTests.Tests
 
             //UseStripeConnectedAccount is true for this package
             var package = PackageFactory.CreateFreePackageWithUseStripeConnectedAccount(msgs, dc);
-            var accountPackage = AccountPackageFactory.Create(billingAccount, package, msgs, dc);
+            AccountPackageFactory.Create(billingAccount, package, msgs, dc);
 
             var activity = ActivityFactory.Create(billingAccount, msgs, dc: dc);
             var registrant = RegistrantFactory.Create(billingAccount, isMaster: false, msgs, dc: dc);
             var registration = RegistrationFactory.Create(billingAccount, registrant, msgs, dc);
             var subscriptionPlan = SubscriptionPlanFactory.Create(billingAccount, activity, SubscriptionPlanType.Subscription, amount, msgs, dc);
 
-            var stripeBillingObject = AccountFactory.CreateStripeAccountAndCustomer(billingAccount, msgs, dc);
+            AccountFactory.CreateStripeAccountAndCustomer(billingAccount, msgs, dc);
             var stripePayingObject = AccountFactory.CreateStripeAccountAndCustomer(payingAccount, msgs, dc);
             var sourceId = payingAccount.CreateStripeSourceFromToken(StripeHelper.TestSourceToken, stripePayingObject.Item2, msgs, dc);
 
-            CreditCardPurchaseObject creditCardPurchaseObject = new CreditCardPurchaseObject()
+            var creditCardPurchaseObject = new CreditCardPurchaseObject()
             {
                 StripeToken = StripeHelper.TestSourceToken,
                 StripeSourceId = sourceId
@@ -159,7 +159,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             //UseStripeConnectedAccount is true for this package
             var package = PackageFactory.CreateFreePackageWithUseStripeConnectedAccount(msgs, dc);
-            var accountPackage = AccountPackageFactory.Create(billingAccount, package, msgs, dc);
+            AccountPackageFactory.Create(billingAccount, package, msgs, dc);
             var activity = ActivityFactory.Create(billingAccount, msgs, dc: dc);
             var registrant = RegistrantFactory.Create(billingAccount, isMaster: false, msgs, dc: dc);
             var registration = RegistrationFactory.Create(billingAccount, registrant, msgs, dc);
@@ -172,11 +172,11 @@ namespace AfterSchoolLibraryTests.Tests
                 msgs: msgs,
                 dc: dc);
 
-            var stripeBillingObject = AccountFactory.CreateStripeAccountAndCustomer(billingAccount, msgs, dc);
+            AccountFactory.CreateStripeAccountAndCustomer(billingAccount, msgs, dc);
             var stripePayingObject = AccountFactory.CreateStripeAccountAndCustomer(payingAccount, msgs, dc);
             var sourceId = payingAccount.CreateStripeSourceFromToken(StripeHelper.TestSourceToken, stripePayingObject.Item2, msgs, dc);
 
-            CreditCardPurchaseObject creditCardPurchaseObject = new CreditCardPurchaseObject()
+            var creditCardPurchaseObject = new CreditCardPurchaseObject()
             {
                 StripeToken = StripeHelper.TestSourceToken,
                 StripeSourceId = sourceId
@@ -304,7 +304,7 @@ namespace AfterSchoolLibraryTests.Tests
             };
 
             // Act
-            masterRegistrant.ProcessActivityPayment(checkoutObject, null, user, msgs, dc);
+            masterRegistrant.ProcessActivityPayment(checkoutObject, null, User, msgs, dc);
 
             // Assert
             var activityPayment = ActivityPayment.LoadByParticipationObjectByRegistrant(participationObject.ObjectID.Value,
@@ -367,7 +367,7 @@ namespace AfterSchoolLibraryTests.Tests
             };
 
             // Act
-            masterRegistrant.ProcessActivityPayment(checkoutObject, null, user, msgs, dc);
+            masterRegistrant.ProcessActivityPayment(checkoutObject, null, User, msgs, dc);
 
             // Assert
             var activityPayment = ActivityPayment.LoadByParticipationObjectByRegistrant(participationObject.ObjectID.Value,
@@ -409,7 +409,7 @@ namespace AfterSchoolLibraryTests.Tests
             var tsOfSchedule = DateTime.UtcNow.AddDays(60) - DateTime.UtcNow.AddDays(-10);
             var startDates = new List<DateRange>();
 
-            for (int i = -10; i < tsOfSchedule.TotalDays - 10; i++)
+            for (var i = -10; i < tsOfSchedule.TotalDays - 10; i++)
             {
                 startDates.Add(new DateRange()
                 {
@@ -419,21 +419,21 @@ namespace AfterSchoolLibraryTests.Tests
             }
 
             var endDates = new List<DateTime>() { };
-            ActivityScheduleFactory.Create(billingAccount, activity, schedule, startDates, endDates, user, msgs, dc);
+            ActivityScheduleFactory.Create(billingAccount, activity, schedule, startDates, endDates, User, msgs, dc);
 
             var registrant = RegistrantFactory.Create(billingAccount, isMaster: false, msgs, dc: dc);
             var registration = RegistrationFactory.Create(billingAccount, registrant, msgs, dc);
-            var registrantActivity = RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
+            RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
             var subscriptionPlan = SubscriptionPlanFactory.Create(billingAccount, activity, SubscriptionPlanType.Subscription, amountPaidByParent, msgs, dc);
             var purchase = PurchaseFactory.Create(payingAccount, amountReceivedByProvider, registrantId: registrant.ID.Value, registrationId: registration.ID.Value, msgs, dc);
             var registrantSubscriptionPlan = RegistrantSubscriptionPlanFactory.Create(registrant, subscriptionPlan, purchase, amount: amountReceivedByProvider, convenienceFee: convenienceFee, paymentTypeFee: paymentTypeFee, msgs, dc);
             var participationObject = activity.GetParticipationObject(msgs, dc);
 
-            var stripeBillingObject = AccountFactory.CreateStripeAccountAndCustomer(billingAccount, msgs, dc);
+            AccountFactory.CreateStripeAccountAndCustomer(billingAccount, msgs, dc);
             var stripePayingObject = AccountFactory.CreateStripeAccountAndCustomer(payingAccount, msgs, dc);
             var sourceId = payingAccount.CreateStripeSourceFromToken(StripeHelper.TestSourceToken, stripePayingObject.Item2, msgs, dc);
 
-            CreditCardPurchaseObject creditCardPurchaseObject = new CreditCardPurchaseObject()
+            var creditCardPurchaseObject = new CreditCardPurchaseObject()
             {
                 StripeToken = StripeHelper.TestSourceToken,
                 StripeSourceId = sourceId
@@ -445,15 +445,13 @@ namespace AfterSchoolLibraryTests.Tests
             Account convenienceFeePayer;
             Account transactionFeePayer;
 
-            if (registrantSubscriptionPlan.ConvenienceFeesPaidBy == FeesPaidByType.Parent)
-                convenienceFeePayer = payingAccount;
-            else
-                convenienceFeePayer = billingAccount;
+            convenienceFeePayer = registrantSubscriptionPlan.ConvenienceFeesPaidBy == FeesPaidByType.Parent
+                ? payingAccount
+                : billingAccount;
 
-            if (registrantSubscriptionPlan.PaymentTypeFeesPaidBy == FeesPaidByType.Parent)
-                transactionFeePayer = payingAccount;
-            else
-                transactionFeePayer = billingAccount;
+            transactionFeePayer = registrantSubscriptionPlan.PaymentTypeFeesPaidBy == FeesPaidByType.Parent
+                ? payingAccount
+                : billingAccount;
 
             var checkoutObject = new CheckoutObject()
             {
@@ -477,7 +475,7 @@ namespace AfterSchoolLibraryTests.Tests
             };
 
             // Act
-            masterRegistrant.ChargeRegistrantMidPeriod(checkoutObject, SubscriptionPlanType.Subscription, isSubscriptionRequired: true, user, msgs, dc);
+            masterRegistrant.ChargeRegistrantMidPeriod(checkoutObject, SubscriptionPlanType.Subscription, isSubscriptionRequired: true, User, msgs, dc);
 
             // Assert
             //get the total number of periods for current cycle x
@@ -486,7 +484,7 @@ namespace AfterSchoolLibraryTests.Tests
             //get the total remaining periods in current cycle y
             var classesRemainingInCurrentCycle = participationObject.GetNumberOfRemainingClassesInCurrentCycle(subscriptionPlan.BillingPeriodTypeId, msgs, dc);
 
-            //caluclated price of current cycle to charge p = (y * costperperiod)/ x
+            //calculated price of current cycle to charge p = (y * costperperiod)/ x
             var currentCycleCharge = classesRemainingInCurrentCycle * subscriptionPlan.CostPerPeriod.Value / classesInCurrentCycle;
 
             if (classesInCurrentCycle <= 0 || classesRemainingInCurrentCycle <= 0)
