@@ -3119,6 +3119,7 @@ namespace AfterSchoolLibraryTests.Tests
             var actActivities = accountUser.GetActivities(accountWebUser.UserTypeId, instructorWebUser, ActivityType.Activity, false, false, false, start, length, msgs, dc);
 
             // Assert
+            Assert.True(msgs.HasNoErrors());
             Assert.Equal(length, actActivities.Count);
         }
 
