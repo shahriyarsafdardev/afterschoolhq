@@ -8,9 +8,12 @@
 
 @if (questionGroups.Count > 0)
 {
-    <li data-id="1" class="dd-item">
-        <div class="dd-handle title">@registrantType.ToString()</div>
-    </li>
+    if (FormType.Survey != Model.FormTypeId)
+    {
+        <li data-id="1" class="dd-item">
+            <div class="dd-handle title">@registrantType.ToString()</div>
+        </li>
+    }
     for (var i = 0; i < questionGroups.Count; i++)
     {
         var active = "";

@@ -341,33 +341,6 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
-        public static bool CheckAndCancelPlan(this SubscriptionPlan plan, RegistrantSubscriptionPlan rsp, Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (rsp.TotalPeriods.HasValue || plan.TotalPeriods.HasValue)
-            {
-                //.. refactor this logic, since we are not using total periods.
-                //.. right now we don't need to cancel the subsctiption, so not calling this methods.
-                var totalPayments = rsp.GetPaymentCount(msgs, dc);
-                var totalPeriods = rsp.TotalPeriods ?? plan.TotalPeriods.Value;
-
-                if (totalPayments >= totalPeriods)
-                {
-                    var stripeSubscription = Billing.StripeHelper.GetSubscription(rsp.StripeSubscriptionId, null, msgs);
-
-                    if (stripeSubscription.IsNotEmpty() && !stripeSubscription.CanceledAt.HasValue)
-                        msgs.AddRange(Billing.StripeHelper.CancelSubscription(
-                            rsp.StripeSubscriptionId,
-                            null
-                        ));
-
-                    if (msgs.HasNoErrors())
-                        return true;
-                }
-            }
-
-            return false;
-        }
-
         public static decimal GetTotalCostWithFees(this SubscriptionPlan subscriptionPlan, Account ownerAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (ownerAccount.IsEmpty())
@@ -571,6 +544,82 @@ namespace AfterSchoolLibrary.Services
                 return false;
 
             return true;
+        }
+
+        public static DateTime? GetPlanEndDateForRegistrantSubscription(this SubscriptionPlan plan, DateTime startDateTime, ParticipationObject participationObject, SystemMessages msgs = null)
+        {
+            if (msgs.IsEmpty())
+                msgs = new SystemMessages();
+
+            if (plan.PlanTypeId == SubscriptionPlanType.PostPayPlan || plan.PlanTypeId == SubscriptionPlanType.NotSet)
+                return null;
+
+            DateTime? endDate = null;
+
+            if (plan.EndDate.HasValue)
+                endDate = plan.EndDate.Value;
+
+            if (endDate.IsEmpty())
+            {
+                if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
+                    endDate = plan.GetSubscriptionEndDate(participationObject, msgs);
+
+                if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
+                    endDate = plan.GetPaymenPlanEndDate(startDateTime, msgs);
+            }
+
+            // make sure endDate > startDate for stripe
+            if (endDate.HasValue && DateTimeSpan.CompareDates(startDateTime, endDate.Value).TotalDays < 1)
+                endDate = startDateTime.AddDays(1);
+
+            return endDate;
+        }
+
+        private static DateTime? GetSubscriptionEndDate(this SubscriptionPlan plan, ParticipationObject participationObject, SystemMessages msgs = null)
+        {
+            if (plan.PlanTypeId == SubscriptionPlanType.Subscription && participationObject.Schedule.IsNotEmpty() && participationObject.Schedule.EndDate.HasValue)
+                return participationObject.Schedule.EndDate.Value.AddDays(1);
+
+            return null;
+        }
+
+        public static DateTime? GetPaymenPlanEndDate(this SubscriptionPlan plan, DateTime startDateTime,  SystemMessages msgs = null)
+        {
+            if (plan.PlanTypeId != SubscriptionPlanType.PaymentPlan)
+                return null;
+
+            var endDate = startDateTime;
+
+            if (plan.TotalPeriods.IsEmpty())
+                return endDate;
+
+            var periodsToAdd = plan.TotalPeriods.IfEmpty(0) - plan.NumberOfPeriodsPrePaid.IfEmpty(0);
+            if(periodsToAdd > 0)
+            {
+                switch (plan.BillingPeriodTypeId)
+                {
+                    case BillingPeriodType.Day:
+                        endDate = endDate.AddDays(periodsToAdd);
+                        break;
+                    case BillingPeriodType.Week:
+                        endDate = endDate.AddWeeks(periodsToAdd);
+                        break;
+                    case BillingPeriodType.TwoWeeks:
+                        endDate = endDate.AddWeeks(periodsToAdd * 2);
+                        break;
+                    case BillingPeriodType.Month:
+                        endDate = endDate.AddMonths(periodsToAdd);
+                        break;
+                    case BillingPeriodType.Year:
+                        endDate = endDate.AddYears(periodsToAdd);
+                        break;
+                    default:
+                        msgs.Add("Payment plan missing billing period type", MessageType.ApiError);
+                        break;
+                }
+            }
+                    
+            return endDate;
         }
     }
 }
