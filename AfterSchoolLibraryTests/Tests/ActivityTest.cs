@@ -975,7 +975,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(instances.Last().StartDateTime.ToShortDateTimeString(), activity.GetLastDate(msgs, dc).ToShortDateTimeString());
         }
 
-        [Fact(Skip = "apiKey cannot be null")]
+        [Fact]
         public void SendRegistrationSummaryReportsTest()
         {
             var user = WebUserFactory.Create(msgs, dc);
