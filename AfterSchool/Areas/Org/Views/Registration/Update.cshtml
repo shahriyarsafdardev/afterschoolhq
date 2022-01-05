@@ -69,10 +69,8 @@
 </div>
 <script>
     function registrationChange(id){
-        console.log('registrationChange', id);
         let link = '@Url.Action("update", "registration", new { id = "ID" })?r=' + this.value + '&returnUrl=@Request["returnurl"]';
         link = link.replace("ID", id);
-        console.log('Link', link);
         location.href = link;
     }
 </script>
