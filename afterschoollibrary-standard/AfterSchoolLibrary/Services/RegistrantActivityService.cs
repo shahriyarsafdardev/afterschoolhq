@@ -144,6 +144,18 @@ namespace AfterSchoolLibrary.Services
                 dc: dc);
         }
 
+        public static bool HasPaymentPlan(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantSubscriptionPlan.ExistsByParticipationObjectByRegistrantsByPlanType(
+                registrantActivity.ParticipationObjectId.Value,
+                registrantActivity.ParticipationObjectTypeId,
+                registrantActivity.RegistrantId.Value.AsList(),
+                SubscriptionPlanType.PaymentPlan,
+                true,
+                msgs,
+                dc);
+        }
+
         public static List<FormQuestionAnswer> GetAnswers(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return registrantActivity.GetRegistration(msgs, dc).GetAnswers(msgs, dc);
@@ -179,6 +191,16 @@ namespace AfterSchoolLibrary.Services
         public static Registrant GetMasterRegistrant(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return registrantActivity.GetRegistrant(msgs, dc)?.GetMasterRegistrant(msgs, dc);
+        }
+
+        public static bool HasParentRegistrantId(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return registrantActivity.GetMasterRegistrant(msgs, dc).IsNotEmpty();
+        }
+
+        public static int? GetParentRegistrantId(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return registrantActivity.GetMasterRegistrant(msgs, dc)?.ID;            
         }
 
         public static Registration GetRegistration(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)

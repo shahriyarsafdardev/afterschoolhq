@@ -182,7 +182,7 @@ namespace AfterSchoolLibrary.Services
                 var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, msgs);
                 // var stripeCouponId = plan.DoesCouponApply(checkoutObject.Coupon) ? checkoutObject.Coupon.StripeCouponId : null;
                 var startDateTime = submittedRecord.GetPlanStartDate(plan, checkoutObject.ParticipationObject, msgs, dc);
-                var endDateTime = submittedRecord.GetPlanEndDate(plan, checkoutObject.ParticipationObject, msgs, dc);
+                var endDateTime = plan.GetPlanEndDateForRegistrantSubscription(startDateTime, checkoutObject.ParticipationObject, msgs);
                 var platformFeePercent = new decimal?();
                 string stripeAccountId = null;
                 string stripeCouponId = null;
@@ -197,24 +197,13 @@ namespace AfterSchoolLibrary.Services
                 if (plan.SplitCostEvenly)
                     stripeCouponId = GetSplitEvenlyCoupon(plan, checkoutObject, billingAccount, msgs, dc);
                 else
-                    stripeCouponId = GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);                
-
-                //.. Ongoing activity
-                DateTime? billingCycleAnchor = null;
-                if (participationObject.Schedule.IsEmpty())
-                {
-                    //if first day of month, don't set anchor so no pro rate
-                    if (DateTime.UtcNow.Date != DateTime.Now.FirstDateOfMonth().Date)
-                    {
-                        if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
-                            billingCycleAnchor = startDateTime.LastDateOfMonth().AddDays(1);
-                        else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
-                            billingCycleAnchor = startDateTime.LastDateOfWeek().AddDays(1);
-                    }
-                }
+                    stripeCouponId = GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
 
                 //.. charge parent if they tries to join mid-period
-                if (participationObject.Schedule.IsNotEmpty() && participationObject.StartDate.HasValue && participationObject.StartDate.Value.IsBefore(DateTime.Now))
+                if (subscriptionPlanType != SubscriptionPlanType.PaymentPlan && 
+                    participationObject.Schedule.IsNotEmpty() && 
+                    participationObject.StartDate.HasValue && 
+                    participationObject.StartDate.Value.IsBefore(DateTime.Now))
                 {
                     if (startDateTime.IsNotEmpty() && endDateTime.IsNotEmpty())
                         isSubscriptionRequired = plan.CheckIfSubscriptionRequired(startDateTime, endDateTime.Value);
@@ -228,12 +217,15 @@ namespace AfterSchoolLibrary.Services
                         startDateTime = DateTime.Now.LastDateOfWeek().AddDays(1);
                 }
 
+                var billingCycleAnchor = GetBillingCycleAnchor(participationObject, plan, startDateTime);
+
                 // create the subscription on the stripe account (could be added to main account or connected account)
                 if (isSubscriptionRequired)
                 {
                     var subscription = Billing.StripeHelper.CreateRegistrantSubscription(
                                     customerId: customer.Id,
                                     planId: plan.StripePlanId,
+                                    isProrated: billingCycleAnchor.HasValue,
                                     sourceId: sourceId,
                                     platformFeePercent: platformFeePercent,
                                     stripeAccountId: stripeAccountId,
@@ -304,39 +296,15 @@ namespace AfterSchoolLibrary.Services
             var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
             var billingAccount = checkoutObject.BillingAccount;
             var masterRegistrant = submittedRecord.IsMaster ? submittedRecord : submittedRecord.GetMasterRegistrant(msgs, dc);
-
-            //get the total number of periods for current cycle x
-            var classesInCurrentCycle = participationObject.GetNumberOfClassesInCurrentCycle(plan.BillingPeriodTypeId, msgs, dc);
-
-            //get the total remaining periods in current cycle y
-            var classesRemainingInCurrentCycle = participationObject.GetNumberOfRemainingClassesInCurrentCycle(plan.BillingPeriodTypeId, msgs, dc);
-
+            var classesToCharge = GetClassesForCharge(checkoutObject, plan, msgs, dc);
+            var classesInCurrentCycle = classesToCharge.Item1;
+            var classesRemainingInCurrentCycle = classesToCharge.Item2;
+            
             if (classesInCurrentCycle <= 0 || classesRemainingInCurrentCycle <= 0)
                 return;
 
-            //caluclated price of current cycle to charge p = (y * costperperiod)/ x
-            var currentCycleCharge = classesRemainingInCurrentCycle * plan.CostPerPeriod.Value / classesInCurrentCycle;
+            var caclObj = GetAmountsRequiredToCharge(checkoutObject, plan, isSubscriptionRequired, classesRemainingInCurrentCycle, classesInCurrentCycle, msgs, dc);
 
-            if (!isSubscriptionRequired)
-            {
-                //.. if there will be subscrition, we will calculate next cycle also just in case if we miss any classes
-                //.. bascially this will be just adding a cost directly as we will charge whole for next cycle
-                var classesRemainingInNextCycle = participationObject.GetNumberOfRemainingClassesInNextCycle(plan.BillingPeriodTypeId, msgs, dc);
-
-                if (classesRemainingInNextCycle > 1)
-                {
-                    var nextCycleCharge = classesRemainingInNextCycle * plan.CostPerPeriod.Value / classesRemainingInNextCycle;
-                    currentCycleCharge += nextCycleCharge;
-                }
-            }
-
-            var calcObj = new FeeCalculationObject(currentCycleCharge, billingAccount, msgs, dc);
-            var convenienceFee = calcObj.GetConvenienceFee();
-            var ccFee = 0M;
-            if (checkoutObject.PaymentType == PaymentType.CreditCard)
-                ccFee = calcObj.GetCreditCardFee();
-
-            var amount = calcObj.GetFinalTotalCost(paymentType: checkoutObject.PaymentType);
             BankAccountPurchaseObject bankAccountPurchaseObject = null;
             CreditCardPurchaseObject creditCardPurchaseObject = null;            
 
@@ -356,12 +324,12 @@ namespace AfterSchoolLibrary.Services
             AccountService.ProcessPayment(
                 checkoutObject: new CheckoutObject()
                 {                    
-                    OverrideAmount = amount,
-                    AmountPaidByParent = amount,
-                    AmountReceivedByProvider = calcObj.GetAmountToProvider(),
+                    OverrideAmount = caclObj.Item1,
+                    AmountPaidByParent = caclObj.Item1,
+                    AmountReceivedByProvider = caclObj.Item2,
                     IsAmountProRated = true,
-                    ConvenienceFeeOverrideAmount = convenienceFee,
-                    PaymentTypeFeeOverrideAmount = ccFee,
+                    ConvenienceFeeOverrideAmount = caclObj.Item3,
+                    PaymentTypeFeeOverrideAmount = caclObj.Item4,
                     PayingAccount = checkoutObject.PayingAccount,
                     BillingAccount = billingAccount,
                     CreditCardPurchaseObject = creditCardPurchaseObject,
@@ -380,6 +348,89 @@ namespace AfterSchoolLibrary.Services
                 loggedInUser: loggedInUser,
                 msgs: msgs,
                 dc: dc);
+        }
+
+        public static (int, int) GetClassesForCharge(CheckoutObject checkoutObject, SubscriptionPlan plan, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            //get the total number of periods for current cycle x
+            var classesInCurrentCycle = checkoutObject.ParticipationObject.GetNumberOfClassesInCurrentCycle(plan.BillingPeriodTypeId, msgs, dc);
+
+            //get the total remaining periods in current cycle y
+            var classesRemainingInCurrentCycle = checkoutObject.ParticipationObject.GetNumberOfRemainingClassesInCurrentCycle(plan.BillingPeriodTypeId, msgs, dc);
+
+            return (classesInCurrentCycle, classesRemainingInCurrentCycle);
+        }
+
+        public static (decimal, decimal, decimal, decimal) GetAmountsRequiredToCharge(CheckoutObject checkoutObject, SubscriptionPlan plan, bool isSubscriptionRequired, int classesRemainingInCurrentCycle, int classesInCurrentCycle, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var participationObject = checkoutObject.ParticipationObject;
+
+            //caluclated price of current cycle to charge p = (y * costperperiod)/ x
+            var currentCycleCharge = classesRemainingInCurrentCycle * plan.CostPerPeriod.Value / classesInCurrentCycle;
+
+            if (!isSubscriptionRequired)
+            {
+                //.. if there will be subscrition, we will calculate next cycle also just in case if we miss any classes
+                //.. bascially this will be just adding a cost directly as we will charge whole for next cycle
+                var classesRemainingInNextCycle = participationObject.GetNumberOfRemainingClassesInNextCycle(plan.BillingPeriodTypeId, msgs, dc);
+
+                if (classesRemainingInNextCycle > 1)
+                {
+                    var nextCycleCharge = classesRemainingInNextCycle * plan.CostPerPeriod.Value / classesRemainingInNextCycle;
+                    currentCycleCharge += nextCycleCharge;
+                }
+            }
+
+            var calcObj = new FeeCalculationObject(currentCycleCharge, checkoutObject.BillingAccount, msgs, dc);
+            var convenienceFee = calcObj.GetConvenienceFee();
+            var ccFee = 0M;
+            if (checkoutObject.PaymentType == PaymentType.CreditCard)
+                ccFee = calcObj.GetCreditCardFee();
+
+            var amount = calcObj.GetFinalTotalCost(paymentType: checkoutObject.PaymentType);
+            var amountReceivedByProvider = calcObj.GetAmountToProvider();
+
+            return (Math.Round(amount, 4), Math.Round(amountReceivedByProvider, 4), Math.Round(convenienceFee, 2), Math.Round(ccFee, 2));
+        }
+
+        public static DateTime? GetBillingCycleAnchor(ParticipationObject participationObject, SubscriptionPlan plan, DateTime startDateTime)
+        {
+            DateTime? billingCycleAnchor = null;
+
+            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
+            {
+                //.. Payment Plans are just the registration fee broken up into multiple payments.
+                //.. So when a person registers late it should just start the payment plan on checkout in that case. 
+
+                //if (startDateTime <= DateTime.UtcNow && plan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
+                //{
+                //    if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
+                //        billingCycleAnchor = DateTime.UtcNow.Date.LastDateOfMonth().AddDays(1);
+                //    else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
+                //        billingCycleAnchor = DateTime.UtcNow.Date.LastDateOfWeek().AddDays(1);
+                //}                           
+            }
+            else if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
+            {
+                //.. Ongoing activity
+                if (participationObject.Schedule.IsEmpty())
+                {
+                    //.. If first day of month, don't set anchor so no pro rate
+                    if (DateTime.UtcNow.Date != DateTime.Now.FirstDateOfMonth().Date)
+                    {
+                        if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
+                            billingCycleAnchor = startDateTime.LastDateOfMonth().AddDays(1);
+                        else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
+                            billingCycleAnchor = startDateTime.LastDateOfWeek().AddDays(1);
+                    }
+                }
+                else if (startDateTime < DateTime.UtcNow)
+                {
+                    billingCycleAnchor = null; // ..else start billing immediately (stripe defaults to now + trial days)  
+                }
+            }
+
+            return billingCycleAnchor;
         }
 
         public static bool CheckRegistrantChargeForWeeklyBillingType(this Registrant registrant, Activity activity)
@@ -575,23 +626,25 @@ namespace AfterSchoolLibrary.Services
                     return plan.StartDate.HasValue && plan.StartDate.Value.IsAfter(initialDate) ? plan.StartDate.Value.AddDays(1) : initialDate;
                 }
             }
-
-            return initialDate;
-        }
-
-        public static DateTime? GetPlanEndDate(this Registrant registrant, SubscriptionPlan plan, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
+            else if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
             {
-                if (plan.EndDate.HasValue)
-                    return plan.EndDate.Value.AddDays(1);
-                else if (participationObject.Schedule.IsNotEmpty() && participationObject.Schedule.EndDate.HasValue)
-                    return participationObject.Schedule.EndDate.Value.AddDays(1);
-                else
-                    return null;
+                if (plan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
+                {
+                    if (participationObject.Schedule.IsNotEmpty() && 
+                        participationObject.Schedule.StartDate.IsNotEmpty() && 
+                        participationObject.Schedule.StartDate.Value.IsAfter(DateTime.UtcNow))
+                        return participationObject.Schedule.StartDate.Value;
+                    else
+                        initialDate = DateTime.UtcNow;
+                } 
+                else if (plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout)
+                {
+                    //.. Future start date activity (should start when registrant checkout, can be before activity start, first payment invoice will be instant)
+                    initialDate = DateTime.UtcNow;
+                }
             }
 
-            return null;
+            return initialDate;
         }
 
         private static PlanFeeObject GetFeeObject(CheckoutObject checkoutObject, Account billingAccount, SubscriptionPlan plan, SystemMessages msgs, DatabaseConnection dc = null)
@@ -913,7 +966,7 @@ namespace AfterSchoolLibrary.Services
 
         public static List<RegistrantSubscriptionPlan> GetMasterRegistrantSubscriptionPlans(this Registrant registrant, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var submittedRecords = registrant.GetSubmittedRecords(msgs);
+            var submittedRecords = registrant.GetSubmittedRecords(msgs, dc);
             var plans = new List<RegistrantSubscriptionPlan>();
 
             submittedRecords.ForEach(submittedRecord => {
@@ -1783,7 +1836,7 @@ namespace AfterSchoolLibrary.Services
             // Bharat: response to above question, (hypothetically) becuase in provider's student panel
             // you(darye) wanted to show amount paid by parent without fees, and not the amount that we charged.
             // I have updated this logic to add both AmountReceivedByProvider and AmountPaidByParent with flag IsAmountProRated
-            var amountPaid = checkoutObject.GetTotalCostToPurchaseTodayNoFees(msgs, dc) * checkoutObject.ClassQuantity;
+            var amountPaid = checkoutObject.GetTotalCostToPurchaseTodayNoFees(msgs, dc);
 
             if (checkoutObject.PostPayPlan.IsNotEmpty())
                 amountPaid = checkoutObject.GetPostPayPlanCostTodayWithFees();

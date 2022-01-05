@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
-using AfterSchoolLibrary;
 using BasicLibrary;
-using BasicLibrary.DataAccess;
 using AfterSchoolLibraryTests.Factories;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
@@ -138,6 +132,29 @@ namespace AfterSchoolLibraryTests.Tests
             var subCount = registrant.GetSubscriptionCount(participationObject, msgs, dc);
 
             Assert.True(subCount > 0);
+        }
+
+        [Fact]
+        public void GetValueTest()
+        {
+            //Arrage
+            var user = Factories.WebUserFactory.Create(true, msgs, dc);
+            var account = Factories.AccountFactory.Create(user, msgs, dc);
+            var registrant = RegistrantFactory.Create(account, false, msgs, dc);
+            var surveyResponse = SurveyResponseFactory.Create(registrant, msgs, dc);
+            var form = Factories.FormFactory.Create(account, true, msgs, dc);
+
+            var formQuestionGroup = FormQuestionGroupFactory.Create(form.ID.Value, QuestionGroupDataType.PersonalInformation, false, msgs, dc);
+
+            var formQuestion = FormQuestionFactory.Create(form.ID.Value, formQuestionGroup.ID.Value, "Gender", "Male,Female,Other", QuestionType.RadioList, false, msgs, dc);
+
+            var formQuestionAnswer = FormQuestionAnswerFactory.Create(formQuestion.ID.Value, registrant.ID.Value, surveyResponse.ID.Value, formQuestion.Text, "Male", formQuestion.QuestionDataTypeId, msgs, dc);
+
+            //Act
+            var expected = registrant.GetValue(formQuestionAnswer.QuestionDataTypeId, msgs, dc);
+
+            //Assert
+            Assert.Equal(expected, "Male");
         }
 
     }
