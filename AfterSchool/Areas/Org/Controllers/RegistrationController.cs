@@ -171,6 +171,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var registration = currentAccount.GetRegistration(id.ToGuid(), msgs);
 
+            LoadRegistrationViewBag(registration, id , msgs);
+           
             UpdateLoadQuestions(registration, null, msgs);
 
             ViewBag.ReturnURl = returnUrl;
