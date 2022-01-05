@@ -198,35 +198,36 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(expectedOutput, output);
         }
 
-        [Fact(Skip = "failing")]
+        [Fact]
         public void FinalizeStartAndEndDateForSubscriptionTest()
         {
-            DateTime dayOfMonth = new DateTime(2021, 06, 06);
+            DateTime dayOfMonth = new DateTime(2022, 11, 10, 0, 0, 0);
 
             var activityGroup = ActivityGroupFactory.Create(ActivityOwnerAccount, ActivityGroupType.Session, msgs, dc);
 
             var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
             
             var activity = ActivityFactory.Create(ActivityOwnerAccount, schedule, activityGroup, msgs, dc);
+            var activityInstance = ActivityInstanceFactory.CreateWithInstanceType(activityGroup, schedule, dayOfMonth,dayOfMonth.AddDays(35),InstanceType.InSession, msgs, dc);
 
-            var (paymentStart, paymentEnd) = ActivityService.FinalizeStartAndEndDateForSubscription(activity, BillingPeriodType.Month, System.DayOfWeek.Monday, dayOfMonth, msgs,dc);
-
+            var (paymentStart, paymentEnd) = ActivityService.FinalizeStartAndEndDateForSubscription(activity, BillingPeriodType.Month, System.DayOfWeek.Monday, dayOfMonth, msgs, dc);
             Assert.True(paymentStart == dayOfMonth);
-        }    
+
+        }
         
-        [Fact(Skip = "failing")]
+        [Fact]
         public void FinalizeStartAndEndDateForOneWeekSubscriptionTest()
         {
-            DateTime dayOfMonth = new DateTime();
+            DateTime dayOfMonth = new DateTime(2022, 11, 10, 0, 0, 0);
 
             var activityGroup = ActivityGroupFactory.Create(ActivityOwnerAccount, ActivityGroupType.Session, msgs, dc);
 
             var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
             
             var activity = ActivityFactory.Create(ActivityOwnerAccount, schedule, activityGroup, msgs, dc);
+            var activityInstance = ActivityInstanceFactory.CreateWithInstanceType(activityGroup, schedule, dayOfMonth, dayOfMonth.AddDays(35), InstanceType.InSession, msgs, dc);
 
             var (paymentStart, paymentEnd) = ActivityService.FinalizeStartAndEndDateForSubscription(activity, BillingPeriodType.Week, System.DayOfWeek.Monday, dayOfMonth, msgs,dc);
-
 
             Assert.True(paymentStart.HasValue && paymentEnd.HasValue);
         }
@@ -344,8 +345,6 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void ActivityCopyTest()
         {
-            try
-            {
                 // Arrange                
                 var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
                 var package = PackageFactory.Create(msgs, dc);
@@ -360,19 +359,11 @@ namespace AfterSchoolLibraryTests.Tests
                 Assert.NotNull(expected);
                 Assert.NotEqual(activity.ID, expected.ID);
                 Assert.NotEqual(activity.CreateDate, expected.CreateDate);
-            }
-            catch (Exception ex)
-            {
-                //Assert
-                Assert.False(false, ex.Message);
-            }
         }
 
         [Fact]
         public async void ActivityCopyScheduleCheckTest()
         {
-            try
-            {
                 // Arrange                
                 var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
                 var package = PackageFactory.Create(msgs, dc);
@@ -432,12 +423,7 @@ namespace AfterSchoolLibraryTests.Tests
                     Assert.NotEqual(instance.ID, copiedInstance.ID);
                     Assert.NotEqual(instance.CreateDate, copiedInstance.CreateDate);
                 }
-            }
-            catch (Exception ex)
-            {
-                //Assert
-                Assert.False(false, ex.Message);
-            }
+        
         }
 
         public static IEnumerable<object[]> Data => new List<object[]>() {
@@ -459,12 +445,11 @@ namespace AfterSchoolLibraryTests.Tests
             }
         };
 
-        [Theory(Skip = "failing")]
+        [Theory]
         [MemberData(nameof(Data))]        
         public async void ActivityCopyScheduleCheckTheoryTest(List<DateRange> dates)
         {
-            try
-            {
+
                 // Arrange                
                 var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
                 var package = PackageFactory.Create(msgs, dc);
@@ -520,19 +505,12 @@ namespace AfterSchoolLibraryTests.Tests
                     Assert.NotEqual(instance.ID, copiedInstance.ID);
                     Assert.NotEqual(instance.CreateDate, copiedInstance.CreateDate);
                 }
-            }
-            catch (Exception ex)
-            {
-                //Assert
-                Assert.False(false, ex.Message);
-            }
+            
         }
 
         [Fact]
         public void ActivityCopyPropertiesCheckTest()
         {
-            try
-            {
                 // Arrange
                 var package = PackageFactory.Create(msgs, dc);
                 var accountPackage = AccountPackageFactory.Create(ActivityOwnerAccount, package, msgs, dc);
@@ -561,19 +539,11 @@ namespace AfterSchoolLibraryTests.Tests
 
                     Assert.Equal(main.AccountPropertyTypeId, copied.AccountPropertyTypeId);
                 }
-            }
-            catch (Exception ex)
-            {
-                //Assert
-                Assert.False(false, ex.Message);
-            }
         }
 
         [Fact]
         public void ActivityCopyFormsCheckTest()
         {
-            try
-            {
                 // Arrange
                 var package = PackageFactory.Create(msgs, dc);
                 var accountPackage = AccountPackageFactory.Create(ActivityOwnerAccount, package, msgs, dc);
@@ -594,12 +564,6 @@ namespace AfterSchoolLibraryTests.Tests
                 Assert.Equal(activeActivityForm.AccountId, activityForm.AccountId);
                 
                 Assert.NotNull(copiedActivityForm);
-            }
-            catch (Exception ex)
-            {
-                //Assert
-                Assert.False(false, ex.Message);
-            }
         }
 
         #endregion
@@ -630,5 +594,29 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         #endregion
+
+        [Fact(DisplayName="GetRegistrationAssignmentTypesTest")]
+        public void GetRegistrationAssignmentTypesTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(ActivityOwnerAccount, ActivityType.Activity, msgs, dc);
+            var permissionslip = ActivityFactory.Create(ActivityOwnerAccount, ActivityType.PermissionSlip, msgs, dc);
+
+            // Act
+            var activityAssignmentTypes = activity.GetRegistrationAssignmentTypes();
+            var permissionAssignmentTypes = permissionslip.GetRegistrationAssignmentTypes();
+
+            // Assert
+            Assert.True(activityAssignmentTypes.IsNotEmpty());
+            Assert.Contains(RegistrationAssignmentType.Applied, activityAssignmentTypes);
+            Assert.Contains(RegistrationAssignmentType.WaitingList, activityAssignmentTypes);
+            Assert.DoesNotContain(RegistrationAssignmentType.Withdrawn, activityAssignmentTypes);
+
+            Assert.True(permissionAssignmentTypes.IsNotEmpty());
+            Assert.DoesNotContain(RegistrationAssignmentType.Applied, permissionAssignmentTypes);
+            Assert.DoesNotContain(RegistrationAssignmentType.WaitingList, permissionAssignmentTypes);
+            Assert.DoesNotContain(RegistrationAssignmentType.Withdrawn, permissionAssignmentTypes);
+
+        }
     }
 }
