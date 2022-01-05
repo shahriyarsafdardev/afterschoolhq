@@ -73,34 +73,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(plan.ID.HasValue);
         }
 
-        // TODO: this method is not being used anywhere at the moment and refactor required in this logic. so commenting it for now.
-        //[Theory(DisplayName = "CheckAndCancelPaymentPlanTest")]
-        //[InlineData(2, 2, true)]
-        //[InlineData(2, 1, false)]
-        //[InlineData(2, 3, true)]
-        //public void CheckAndCancelPaymentPlanTest(int totalPeriods, int totalPayments, bool expectedResult)
-        //{
-        //    var payerUser = WebUserFactory.Create(msgs, dc);
-        //    var payerAccount = AccountFactory.Create(payerUser, msgs, dc);
-        //    var activity = ActivityFactory.Create(PlanOwner, msgs, dc);
-        //    var paymentPlan = SubscriptionPlanFactory.CreatePaymentPlan(
-        //                        PlanOwner, 
-        //                        activity, 
-        //                        100, 
-        //                        totalPeriods, 
-        //                        msgs, 
-        //                        dc);
-        //    var purchase = PurchaseFactory.Create(payerAccount, 100, msgs, dc);
-        //    var registrant = RegistrantFactory.Create(msgs, dc);
-        //    var registrantSubscriptionPlan = RegistrantSubscriptionPlanFactory.Create(registrant, paymentPlan, purchase, msgs, dc);
-        //    var transaction = TransactionFactory.Create(PlanOwner, payerAccount, PaymentType.CreditCard, msgs, dc);
-
-        //    for (var i = 0; i < totalPayments; i++)
-        //        ActivityPaymentFactory.Create(PlanOwner, activity, registrantSubscriptionPlan, transaction, msgs, dc);
-
-        //    Assert.Equal(expectedResult, paymentPlan.CheckAndCancelPlan(registrantSubscriptionPlan, PlanOwner, msgs, dc));
-        //}
-
         [Fact]
         public void CreateNewSubscriptionPlanTest()
         {
@@ -294,7 +266,7 @@ namespace AfterSchoolLibraryTests.Tests
         /// Activity schedule period is small for subscription to start, so just charge registrant directly instead for Subscription plan.
         /// </summary>
         /// <param name="costPerPeriod"></param>
-        [Theory(Skip = "failing", DisplayName = "Case 1: SubscriptionPlanType.Subscription, PlanPaymentStartType.OnCheckout, BillingPeriodType.Month, Only charge")]
+        [Theory(DisplayName = "Case 1: SubscriptionPlanType.Subscription, PlanPaymentStartType.OnCheckout, BillingPeriodType.Month, Only charge")]
         [InlineData(100)]        
         public void SubscriptionPlanDueOnRegistrationCheckoutTest1(int costPerPeriod)
         {
@@ -449,7 +421,7 @@ namespace AfterSchoolLibraryTests.Tests
         /// Activity schedule period is big and is on going, so Subscription plan will be initiated with a pro-rated charge.
         /// </summary>
         /// <param name="costPerPeriod"></param>
-        [Theory(Skip = "failing", DisplayName = "Case 2: SubscriptionPlanType.Subscription, PlanPaymentStartType.OnCheckout, BillingPeriodType.Month, Both charge + subscription")]
+        [Theory(DisplayName = "Case 2: SubscriptionPlanType.Subscription, PlanPaymentStartType.OnCheckout, BillingPeriodType.Month, Both charge + subscription")]
         [InlineData(100)]
         public void SubscriptionPlanDueOnRegistrationCheckoutTest2(int costPerPeriod)
         {
@@ -751,7 +723,7 @@ namespace AfterSchoolLibraryTests.Tests
         /// Activity schedule period is already started
         /// </summary>
         /// <param name="costPerPeriod"></param>
-        [Theory(Skip = "failing", DisplayName = "Case 1: SubscriptionPlanType.Subscription, PlanPaymentStartType.WhenActivityStarts, BillingPeriodType.Month")]
+        [Theory(DisplayName = "Case 1: SubscriptionPlanType.Subscription, PlanPaymentStartType.WhenActivityStarts, BillingPeriodType.Month")]
         [InlineData(100)]
         public void SubscriptionPlanDueOnRegistrationWhenActivityStartsTest1(int costPerPeriod)
         {
