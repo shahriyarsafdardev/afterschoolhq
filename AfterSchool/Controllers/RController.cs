@@ -224,9 +224,10 @@ namespace AfterSchool.Controllers
 
             if (account.IsNotEmpty())
             {
-                locations.AddRange(account.GetAllAvailableLocations(msgs));
-
                 participationObjects = GetParticipationObjects(account, msgs);
+
+                locations.AddRange(account.GetAllAvailableLocations(msgs));
+                locations.AddRange(participationObjects.Where(po => po.Location.IsNotEmpty()).Select(po => po.Location));
 
                 regOpened = participationObjects.Where(po => po.RegistrationPeriod.IsOpen(account, msgs)).ToList();
                 regWillOpen = participationObjects.Where(po => po.RegistrationPeriod.WillOpen(account, msgs)).ToList();
@@ -267,7 +268,7 @@ namespace AfterSchool.Controllers
             ViewBag.Grades = grades;
             ViewBag.Messages = msgs;
             ViewBag.Cart = SessionVariables.Cart;
-            ViewBag.Locations = locations;
+            ViewBag.Locations = locations.DistinctBy(location => location.ID);
             ViewBag.ParticipationObjects = participationObjects;
             ViewBag.AccountProfile = account.GetAccountProfile(msgs);
             ViewBag.FeaturedProviders = featuredProviders;
@@ -353,8 +354,7 @@ namespace AfterSchool.Controllers
                 return RedirectUnsupportedBrowser();
 
             var msgs = new SystemMessages();
-            if (TempData["Messages"] != null && ((SystemMessages)TempData["Messages"]).IsNotEmpty())
-                msgs.AddRange((SystemMessages)TempData["Messages"]);
+            HandleTempMessages(msgs);
 
             ParticipationObject participationObject = null;            
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
