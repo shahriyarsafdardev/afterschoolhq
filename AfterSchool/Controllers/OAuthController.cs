@@ -95,7 +95,10 @@ namespace AfterSchool.Controllers
             var userIdentity = CleverIntegrationService.GetCleverUserIdentity(token: token.access_token);
 
             if (userIdentity.IsNotEmpty() && userIdentity.data.IsNotEmpty() && userIdentity.data.id.IsNotEmpty())
-                WebUserService.SetCleverIdentityToUser(id: userIdentity.data.id, webUser: SessionVariables.CurrentUser, msgs: msgs);
+            {
+                var userDetails = CleverIntegrationService.GetCleverUserDetails(id: userIdentity.data.id, token: token.access_token);
+                WebUserService.SetCleverIdentityToUser(id: userIdentity.data.id, name: userDetails?.data?.district_contact?.email, webUser: SessionVariables.CurrentUser, msgs: msgs);
+            }
 
             LoadTempMsgAndLogErrors(msgs: msgs);
             return RedirectToAction("edit", "user", new { area = "org" });

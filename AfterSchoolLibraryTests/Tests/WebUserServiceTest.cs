@@ -131,29 +131,14 @@ namespace AfterSchoolLibraryTests.Tests
             var webUser = WebUserFactory.Create(msgs, dc);
 
             // Act
-            WebUserService.SetCleverIdentityToUser(id: "1", webUser: webUser, msgs: msgs, dc: dc);
+            WebUserService.SetCleverIdentityToUser(id: "1", name: "Clever test", webUser: webUser, msgs: msgs, dc: dc);
 
             // Assert
             Assert.NotNull(webUser);            
             Assert.True(webUser.CleverUserId == "1");
+            Assert.True(webUser.CleverUserName == "Clever test");
             Assert.True(msgs.HasNoErrors());
-            Assert.True(msgs.HasMessageContainingText("Clever integration for this user has been successfully completed."));
-        }
-
-        [Fact]
-        public void SetCleverIdentityToUserTest2()
-        {
-            // Arrange
-            var webUser = WebUserFactory.CreateWithCleverId(msgs, dc);
-
-            // Act
-            WebUserService.SetCleverIdentityToUser(id: "1", webUser: webUser, msgs: msgs, dc: dc);
-
-            // Assert
-            Assert.NotNull(webUser);
-            Assert.True(webUser.CleverUserId == "1");
-            Assert.True(msgs.HasNoErrors());
-            Assert.True(msgs.HasMessageContainingText("This user is already associated with clever."));
+            Assert.True(msgs.HasMessageContainingText($"Clever integration for {webUser.DisplayName} has been successfully completed."));
         }
     }
 }

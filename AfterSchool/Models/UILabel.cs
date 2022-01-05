@@ -138,5 +138,13 @@ namespace AfterSchool.Models
 
             return false;
         }
+
+        public static string GetCleverUserNameForCurrentUser()
+        {
+            if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.CleverUserName.IsNotEmpty())
+                return SessionVariables.CurrentUser.CleverUserName;
+
+            return null;
+        }
     }
 }

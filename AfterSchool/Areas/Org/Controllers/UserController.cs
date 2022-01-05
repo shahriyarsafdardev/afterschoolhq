@@ -57,15 +57,15 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 msgs.Add("Email must be valid", MessageType.UserError);
             }
-            else if(!SessionVariables.CurrentUser.CanEmailBeUsed(email, msgs))
+            else if (!SessionVariables.CurrentUser.CanEmailBeUsed(email, msgs))
             {
-                msgs.Add("Email is already in use by another user", MessageType.UserError); 
+                msgs.Add("Email is already in use by another user", MessageType.UserError);
             }
             if ((!password1.IsEmpty() || !password2.IsEmpty()) && password1 != password2)
             {
                 msgs.Add("Passwords must match", MessageType.UserError);
             }
-            
+
             if (msgs.HasNoErrors())
             {
                 var user = WebUser.Load(SessionVariables.CurrentUser.ID.Value);
@@ -109,7 +109,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             SystemMessages msgs = new SystemMessages();
 
-            if(usertype.IsEmpty())
+            if (usertype.IsEmpty())
             {
                 msgs.Add("Account type is required", MessageType.UserError);
             }
@@ -152,6 +152,29 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = msgs;
             return View();
+        }
+
+        [HttpGet]
+        public ActionResult DisconnectCleverForCurrentUser()
+        {
+            var msgs = new SystemMessages();
+
+            if (SessionVariables.CurrentAccount.IsEmpty())
+                msgs.Add("Account not found.", MessageType.UserError);
+
+            if (SessionVariables.CurrentUser.IsEmpty())
+                msgs.Add("User is not logged In.", MessageType.UserError);            
+
+            if (msgs.HasNoErrors())
+            {
+                if (SessionVariables.CurrentUser.CleverUserId.IsEmpty())
+                    msgs.Add($"Clever is already disconnected for {SessionVariables.CurrentUser.DisplayName}", MessageType.UserError);
+                else
+                    WebUserService.DisconnectCleverIdentity(SessionVariables.CurrentUser, msgs);               
+            }
+
+            SetTempMessage(msgs);
+            return RedirectToAction("edit");
         }
     }
 }

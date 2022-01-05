@@ -843,20 +843,29 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static void SetCleverIdentityToUser(string id, WebUser webUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void DisconnectCleverIdentity(WebUser webUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (webUser.IsNotEmpty())
+            {
+                webUser.CleverUserId = null;
+                webUser.CleverUserName = null;
+                msgs.AddRange(webUser.Save(dc: dc));
+
+                if (msgs.HasNoErrors())
+                    msgs.Add($"Clever disconnected for {webUser.DisplayName}.", MessageType.Success);
+            }
+        }
+
+        public static void SetCleverIdentityToUser(string id, string name, WebUser webUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (webUser.IsNotEmpty() && id.IsNotEmpty())
             {
-                if (webUser.CleverUserId == id)
-                    msgs.Add("This user is already associated with clever.", MessageType.Success);
-                else
-                {
-                    webUser.CleverUserId = id;
-                    msgs.AddRange(webUser.Save(dc: dc));
+                webUser.CleverUserId = id;
+                webUser.CleverUserName = name;
+                msgs.AddRange(webUser.Save(dc: dc));
 
-                    if (msgs.HasNoErrors())
-                        msgs.Add("Clever integration for this user has been successfully completed.", MessageType.Success);
-                }
+                if (msgs.HasNoErrors())
+                    msgs.Add($"Clever integration for {webUser.DisplayName} has been successfully completed.", MessageType.Success);             
             }
         }
 

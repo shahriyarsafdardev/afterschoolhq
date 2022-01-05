@@ -83,11 +83,8 @@
 
                         @if (UILabel.IsCurrentUserCleverIntegrated())
                         {
-                            <p class="txt-clever-connected">You are currently connected to a Clever account. To change your connected Clever account, click the "Login with Clever" button below.</p>
-                             <br />
-                            <a href="#" onclick="return showModal('modal-update-clever-account');">
-                                <img src="~/img/clever-login.png" style="width: 160px; height: 39px;" class="clever-login-img" />
-                            </a>
+                            <p class="txt-clever-connected">You are currently connected to a Clever account with the username <b>@UILabel.GetCleverUserNameForCurrentUser()</b>. To change your connected Clever account, press the "Disconnect" button below.</p>
+                            <a type="button" class="btn btn-primary" href="@Url.Action("DisconnectCleverForCurrentUser", "User", new { Area = "Org" })" >Disconnect</a>
                         }
                         else
                         {
