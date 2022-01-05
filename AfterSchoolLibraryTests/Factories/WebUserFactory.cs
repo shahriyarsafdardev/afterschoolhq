@@ -16,7 +16,7 @@ namespace AfterSchoolLibraryTests.Factories
 
         public static WebUser Create(bool isActive, SystemMessages msgs, DatabaseConnection dc)
         {
-            var obj = new WebUser() { FirstName = "Don", LastName = "John", Email = "don@john.com", IsActive = isActive };
+            var obj = new WebUser() { FirstName = "Don", LastName = "John", Email = "don@john.com", IsActive = isActive, VerifiedAccount = true };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
