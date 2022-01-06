@@ -19440,7 +19440,7 @@ a.text-limit span {
     }
 }
 
-@media screen and (max-width: 375px) {
+@media screen and (max-width: 400px) {
     .footer-logo-small-screen {
         margin-top: 15px;
         position: static !important;
