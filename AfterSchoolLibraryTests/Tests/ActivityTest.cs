@@ -8,6 +8,7 @@ using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using AfterSchoolLibraryTests.Factories;
 using BasicLibrary.DataAccess;
+using AfterSchool.Models;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -1118,6 +1119,26 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.False(activity.IsPubliclyViewable);
             Assert.True(msgs.HasNoErrors());
 
+        }
+
+
+        [Fact]
+        public void CheckActivityPaymentErrorTest()
+        {
+            var user = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(user, msgs, dc);
+
+            var schoolWebUser = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolWebUser, msgs, dc);
+            var location = LocationFactory.Create(schoolAccount, msgs, dc);
+            var activity = ActivityFactory.Create(schoolAccount, location, 12, msgs, dc);
+
+            activity.ProviderAccountId = account.ID.Value;
+            msgs.AddRange(activity.Save(dc));
+
+            var errorMsgs = activity.IsPaymentMethodAddedForExternalAccount(account, msgs, dc);
+
+            Assert.Equal(1, errorMsgs.Count);
         }
 
         [Fact]
