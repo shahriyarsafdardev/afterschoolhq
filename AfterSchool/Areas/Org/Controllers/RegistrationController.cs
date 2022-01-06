@@ -592,9 +592,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (selectedRegistration.IsGuid())
                 registration = allRegistrations.First(x => x.Uid == selectedRegistration.ToGuid());
-            else
-                registration = allRegistrations.First();
-
+            
             if (registration.IsEmpty())
                 return;
 
