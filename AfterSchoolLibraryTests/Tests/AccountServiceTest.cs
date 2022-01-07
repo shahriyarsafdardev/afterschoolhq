@@ -581,19 +581,12 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void GetActivityByUIDFailingTest()
         {
-            try
-            {
-                // Act
-                var expected = account.GetActivity(Guid.NewGuid(), msgs, dc);
+            // Act
+            var expected = account.GetActivity(Guid.NewGuid(), msgs, dc);
 
-                // Assert
-                Assert.Null(expected);
-                Assert.True(msgs.HasNoErrors());
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            // Assert
+            Assert.Null(expected);
+            Assert.True(msgs.HasNoErrors());            
         }
 
         [Fact]
@@ -777,27 +770,19 @@ namespace AfterSchoolLibraryTests.Tests
         [InlineData(5)]
         public void GetActivitiesByIdsTest(int n)
         {
-            try
+            // Arrange
+            List<int> activityIds = new List<int>();
+            for (var i = 0; i < n; i++)
             {
-                // Arrange
-                List<int> activityIds = new List<int>();
-                for (var i = 0; i < n; i++)
-                {
-                    var activity = ActivityFactory.Create(account, msgs, dc);
-                    activityIds.Add(activity.ID.Value);
-                }
-
-                // Act
-                var expected = account.GetActivities(ActivityIds: activityIds, msgs: msgs, dc: dc);
-
-                // Assert
-                Assert.Equal(expected: expected.Count, actual: n);
+                var activity = ActivityFactory.Create(account, msgs, dc);
+                activityIds.Add(activity.ID.Value);
             }
-            catch (Exception ex)
-            {
-                //Assert
-                Assert.False(false, ex.Message);
-            }
+
+            // Act
+            var expected = account.GetActivities(ActivityIds: activityIds, msgs: msgs, dc: dc);
+
+            // Assert
+            Assert.Equal(expected: expected.Count, actual: n);            
         }
 
         [Fact]
@@ -827,27 +812,19 @@ namespace AfterSchoolLibraryTests.Tests
         [InlineData(5)]
         public void GetActivityGroupsTest(int n)
         {
-            try
+            // Arrange
+            List<int> activityGroupIds = new List<int>();
+            for (var i = 0; i < n; i++)
             {
-                // Arrange
-                List<int> activityGroupIds = new List<int>();
-                for (var i = 0; i < n; i++)
-                {
-                    var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
-                    activityGroupIds.Add(activityGroup.ID.Value);
-                }
-
-                // Act
-                var expected = account.GetActivityGroups(activityGroupIds: activityGroupIds, msgs: msgs, dc: dc);
-
-                // Assert
-                Assert.Equal(expected: expected.Count, actual: n);
+                var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+                activityGroupIds.Add(activityGroup.ID.Value);
             }
-            catch (Exception ex)
-            {
-                //Assert
-                Assert.False(false, ex.Message);
-            }
+
+            // Act
+            var expected = account.GetActivityGroups(activityGroupIds: activityGroupIds, msgs: msgs, dc: dc);
+
+            // Assert
+            Assert.Equal(expected: expected.Count, actual: n);            
         }
 
         [Fact]
