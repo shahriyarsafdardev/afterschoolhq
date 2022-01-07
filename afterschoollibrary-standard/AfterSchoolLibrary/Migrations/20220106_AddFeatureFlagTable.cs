@@ -19,7 +19,7 @@ namespace AfterSchoolLibrary.Migrations
                     using (var connection = new SqlConnection(adc.ConnectionString))
                     {
                         connection.Execute(@"if object_id('FeatureFlag', 'U') is null
-                                                    create table FeatureFlag (FlagName varchar, IsActive bit)");
+                                                    create table FeatureFlag (FlagName nvarchar(50), IsEnabled bit)");
                     }
                 },
                 uniqueIdenfier: "Migration_20220106_AddFeatureFlagTable",

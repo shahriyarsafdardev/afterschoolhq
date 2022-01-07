@@ -1,4 +1,6 @@
 using System.Web.Mvc;
+using AfterSchoolLibrary.FeatureFlag;
+using AfterSchoolLibrary.Models;
 using Microsoft.Owin;
 using Owin;
 using Hangfire;
@@ -28,7 +30,8 @@ namespace AfterSchool
 
         public void ConfigureServices(IServiceCollection services)
         {
-            //services.AddTransient(typeof());
+            services.AddSingleton(Database.Credentials);
+            services.AddTransient<IFeatureFlagRepository, FeatureFlagRepository>();
         }
     }
 }

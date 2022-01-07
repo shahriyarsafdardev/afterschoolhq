@@ -94,6 +94,8 @@ namespace AfterSchoolLibrary.Helpers
                     SetExistingActivityCostFrequencyType_20211003.Do(amsgs, adc);
                     AddFeatureTypeSurvey_20211004.Do(amsgs, adc);
                     UpdateFormQuestionGroup_20211003.Do(amsgs, adc);
+
+                    Migration_20220106_AddFeatureFlagTable.Do(amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs)
