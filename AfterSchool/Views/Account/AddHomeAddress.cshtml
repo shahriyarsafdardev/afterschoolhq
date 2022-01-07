@@ -16,7 +16,7 @@
         {
             { "ParticipationObject", participationObject },
             { "IsDuringProfileSetup", true }
-                }
+                        }
     );
 }
 
@@ -28,7 +28,7 @@
         new ViewDataDictionary()
         {
             { "hidebuttons", true }
-                }
+                        }
     );
 }
 
@@ -87,7 +87,7 @@
         {
             { "IsDuringCheckout", true },
             { "AllowToModifyCart", false }
-                                            }
+                                                        }
     );
 }
 
@@ -97,59 +97,56 @@
         $(document).ready(function () {
 
             var input = $('form').find('input:first')[0];
-            $(input).attr('autocomplete', 'rutjfkde');
+
             var streenumber = "";
-                var mainAddress = "";
+            var mainAddress = "";
 
-                var autocomplete = new google.maps.places.Autocomplete(input);
+            var autocomplete = new google.maps.places.Autocomplete(input, null);
+            autocomplete.setFields(['place_id', 'name', 'address_components', 'geometry']);
+            autocomplete.addListener('place_changed', function () {
+                const place = autocomplete.getPlace();
+                const components = place.address_components;
 
-                autocomplete.setFields(['place_id', 'name', 'address_components', 'geometry']);
+                if (typeof components !== 'undefined') {
+                    for (component of components) {
 
-                autocomplete.addListener('place_changed', function () {
-                    const place = autocomplete.getPlace();
-                    const components = place.address_components;
-
-                    if (typeof components !== 'undefined') {
-
-                        for (component of components) {
-
-                            const type = component.types[0];
-                            const longName = component.long_name;
-                            const shortName = component.short_name;
-                            switch (type) {
-                                case 'street_number':
-                                    streenumber = longName
-                                    break;
-                                case 'route':
-                                    mainAddress = streenumber + " " + shortName;
-                                    break;
-                                case 'sublocality_level_2':
-                                    mainAddress = mainAddress + " " + shortName;
-                                    break;
-                                case 'sublocality_level_1':
-                                    mainAddress = mainAddress + " " + shortName;
-                                    break;
-                                case 'locality':
-                                    $(input).val(mainAddress);
-                                    $('form').find('input').eq(2).val(shortName);
-                                    break;
-                                case 'postal_code':
-                                    $('form').find('input').eq(3).val(longName);
-                                    break;
-                                case 'administrative_area_level_2':
-                                    break;
-                                case 'administrative_area_level_1':
-                                    $('form').find('select').eq(0).find("option:contains(" + longName + ")").attr('selected', 'selected');
-                                    state = longName;
-                                    break;
-                                case 'country':
-                                    break;
-                            }
+                        const type = component.types[0];
+                        const longName = component.long_name;
+                        const shortName = component.short_name;
+                        switch (type) {
+                            case 'street_number':
+                                streenumber = longName
+                                break;
+                            case 'route':
+                                mainAddress = streenumber + ", " + shortName;
+                                break;
+                            case 'sublocality_level_2':
+                                mainAddress = mainAddress + ", " + shortName;
+                                break;
+                            case 'sublocality_level_1':
+                                mainAddress = mainAddress + " , " + shortName;
+                                break;
+                            case 'locality':
+                                $(input).val(mainAddress);
+                                $('form').find('input').eq(2).val(shortName);
+                                break;
+                            case 'postal_code':
+                                $('form').find('input').eq(3).val(longName);
+                                break;
+                            case 'administrative_area_level_2':
+                                break;
+                            case 'administrative_area_level_1':
+                                $('form').find('select').eq(0).find("option:contains(" + longName + ")").attr('selected', 'selected');
+                                state = longName;
+                                break;
+                            case 'country':
+                                break;
                         }
                     }
-                });
-
-            })
+                }
+            });
+            $(input).attr('placeholder', '');
+        })
 
     </script>
 }
