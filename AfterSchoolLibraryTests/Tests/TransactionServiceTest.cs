@@ -312,13 +312,6 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.True(msgs.HasNoErrors());
         }
-                Assert.True(msgs.HasNoErrors());
-            }
-            catch (Exception ex)
-            {
-                Assert.False(true, ex.Message);
-            }
-        }
 
         [Fact(DisplayName = "Test CreatePayout")]
         public void CreatePayoutTest()
