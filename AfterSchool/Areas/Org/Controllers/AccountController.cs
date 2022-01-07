@@ -919,22 +919,25 @@ namespace AfterSchool.Areas.Org.Controllers
                                 var desc = Request.Params[$"description-{question.ID}"];
                                 var options = Request.Params[$"options-text-{question.ID}"];
                                 var link = Request.Params[$"link-text-{question.ID}"];
+                                var isActive = Request.Params[$"active-{question.ID}"].IsBoolean();
+                                var isRequired = Request.Params[$"required-{question.ID}"].IsBoolean();
+                                var isAnswerDescriptionEnabled = Request.Params[$"answerDescription-{question.ID}"].IsBoolean();
 
                                 // this extra conditions are to prevent null entry in db from refresh-post calls
-                                if (!question.IsLocked && (text.IsNotEmpty() || desc.IsNotEmpty() || options.IsNotEmpty() || link.IsNotEmpty()))
+                                if (!question.IsLocked && 
+                                    (text.IsNotEmpty() || desc.IsNotEmpty() || options.IsNotEmpty() || link.IsNotEmpty() || 
+                                        question.IsActive != isActive || question.IsRequired != isRequired || question.IsAnswerDescriptionEnabled != isAnswerDescriptionEnabled))
                                 {
-                                    question.IsActive = Request.Params[$"active-{question.ID}"].IsBoolean();
-                                    question.IsRequired = Request.Params[$"required-{question.ID}"].IsBoolean();
-                                    question.IsAnswerDescriptionEnabled = Request.Params[$"answerDescription-{question.ID}"].IsBoolean();
+                                    question.IsActive = isActive;
+                                    question.IsRequired = isRequired;
+                                    question.IsAnswerDescriptionEnabled = isAnswerDescriptionEnabled;
 
                                     if (question.QuestionDataTypeId == QuestionDataType.NotSet)
                                     {
-                                        question.Text = text;
-                                        // for Text Block
+                                        question.Text = text;                                        
                                         question.Description = desc;
                                         question.Options = options;
                                         question.Link = link;
-
                                         question.DisplayOrder = Request.Params[$"displayOrderId-{question.ID}"].ToInteger();
                                         question.QuestionTypeId = (QuestionType)Request.Params[$"questiontype-{question.ID}"].ToInteger();
                                     }
