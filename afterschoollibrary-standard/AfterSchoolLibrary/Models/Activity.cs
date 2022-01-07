@@ -697,7 +697,7 @@ namespace AfterSchoolLibrary.Models
 			if (activityGroupId.IsNotEmpty())
 				dq.Criterias.Add(ObjectMap["ActivityGroupId"], activityGroupId);
 			else if (ungroupedOnly.HasValue && ungroupedOnly.Value)
-				dq.Criterias.Add(ObjectMap["activityGroupId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
+				dq.Criterias.Add(ObjectMap["ActivityGroupId"], null, DatabaseCriteriaOperatorEnum.Is);
 
 			if (accountActivityGroupId.IsNotEmpty())
 				dq.Criterias.Add(ObjectMap["AccountActivityGroupId"], accountActivityGroupId);

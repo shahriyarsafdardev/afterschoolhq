@@ -397,9 +397,6 @@ namespace AfterSchoolLibrary.Services
                 return Activity.LoadByAccountId(account.ID.Value, null, null, activityType, isArchived, isDeleted, ungroupedOnly, start, length, msgs, dc).ToList();
 
 
-            if (start.IsEmpty())
-                start = 0; length = 10;
-
             var activityIdsByWebUser = ActivityWebUser.LoadByWebUserId(user.ID.Value, msgs, dc).Select(a => a.ActivityId.Value).ToList();
             return Activity.LoadListByIdsByGroupByIsArchivedIsDeleted(activityIdsByWebUser, null, null, activityType, isArchived, isDeleted, ungroupedOnly, start, length, msgs, dc);
         }
