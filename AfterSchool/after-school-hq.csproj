@@ -600,6 +600,7 @@
     <Compile Include="Controllers\ServicesController.cs" />
     <Compile Include="Controllers\SignUpController.cs" />
     <Compile Include="Controllers\SitemapController.cs" />
+    <Compile Include="DefaultDependencyResolver.cs" />
     <Compile Include="Helpers\ActivitySetupHelper.cs" />
     <Compile Include="Helpers\RecaptchaHelper.cs" />
     <Compile Include="Models\ActionFilters\EnvironmentRestrictionAttribute.cs" />
