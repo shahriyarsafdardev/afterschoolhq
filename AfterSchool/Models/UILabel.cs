@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Collections;
 using BasicLibrary;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchool.Models
 {
@@ -129,6 +130,11 @@ namespace AfterSchool.Models
               return AfterSchoolLibrary.Helpers.Utilities.GetKeyValuePairs(text)?.Select(m => m.value)?.ToStringList(separator: ", ");
 
             return text;
+        }
+
+        public static bool CheckAllowTextMessage(WebUser currentUser)
+        {
+            return !currentUser.IsNotEmpty() || currentUser.AllowTextMessages && System.Web.HttpContext.Current.Request.HttpMethod.ToString() == "GET";
         }
     }
 }
