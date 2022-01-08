@@ -341,33 +341,6 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
-        public static bool CheckAndCancelPlan(this SubscriptionPlan plan, RegistrantSubscriptionPlan rsp, Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (rsp.TotalPeriods.HasValue || plan.TotalPeriods.HasValue)
-            {
-                //.. refactor this logic, since we are not using total periods.
-                //.. right now we don't need to cancel the subsctiption, so not calling this methods.
-                var totalPayments = rsp.GetPaymentCount(msgs, dc);
-                var totalPeriods = rsp.TotalPeriods ?? plan.TotalPeriods.Value;
-
-                if (totalPayments >= totalPeriods)
-                {
-                    var stripeSubscription = Billing.StripeHelper.GetSubscription(rsp.StripeSubscriptionId, null, msgs);
-
-                    if (stripeSubscription.IsNotEmpty() && !stripeSubscription.CanceledAt.HasValue)
-                        msgs.AddRange(Billing.StripeHelper.CancelSubscription(
-                            rsp.StripeSubscriptionId,
-                            null
-                        ));
-
-                    if (msgs.HasNoErrors())
-                        return true;
-                }
-            }
-
-            return false;
-        }
-
         public static decimal GetTotalCostWithFees(this SubscriptionPlan subscriptionPlan, Account ownerAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (ownerAccount.IsEmpty())
