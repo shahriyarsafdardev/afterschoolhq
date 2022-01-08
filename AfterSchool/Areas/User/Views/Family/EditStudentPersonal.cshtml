@@ -8,7 +8,7 @@
     var regName = !isTechSupport ? Model.Name : Model.GetFirstNameLastInitial();
     var gradeFormId = qvms.Where(qvm => qvm.Question.Text == "Grade").FirstOrDefault()?.Id;
     var exitUrl = Url.Action("index", (Request["reg"].IsGuid() ? "home" : "family"));
-    var resetGrade = ViewBag.ResetGrade;
+    var resetGrade = (string)ViewBag.ResetGrade;
 
     if (Request["returnurl"].IsNotBlank())
     {

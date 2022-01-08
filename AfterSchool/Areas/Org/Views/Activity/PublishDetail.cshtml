@@ -20,7 +20,7 @@
 
     var publishUrl = "#";
     var btnDisabled = "disabled";
-    if (Model.IsPublishable)
+    if (Model.IsPublishable && publishMsgs.Count == 0)
     {
         publishUrl = Url.Action("publish", "activity", new { id = Model.Uid });
         btnDisabled = "";
@@ -155,7 +155,7 @@
                             }
                         </div>
                         <div class="widget-tile">
-                            @if (!Model.IsPublishable)
+                            @if (!Model.IsPublishable || publishMsgs.Count > 0)
                             {
                                 <h3>Please review the items below and save your updates in order to publish your registration form</h3>
                                 foreach (SystemMessage msg in publishMsgs)
