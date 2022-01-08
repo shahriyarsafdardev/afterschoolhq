@@ -46,7 +46,7 @@
         <div class="panel-body">
             @if (maxFormCount > 0)
             {
-                <p class="pull-right text-bold">
+                <p class="pull-right text-bold formCount">
                     @currentFormCount of @maxFormCount Forms
                 </p>
                 <div class="clearfix"></div>
@@ -209,6 +209,16 @@
                         else {
                             $(this).show();
                         }
+                    }
+                }).promise().done(function () {
+                    var numOfVisibleRows = $('tr:visible').length;
+                    if (numOfVisibleRows == 0) {
+                        $('.table-responsive').append('<div class="text-center emptyTable">No search results found.</div>');
+                        $('.formCount').hide();
+                    }
+                    else {
+                        $('.emptyTable').remove();
+                        $('.formCount').show();
                     }
                 });
             });
