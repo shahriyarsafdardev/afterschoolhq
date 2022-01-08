@@ -788,24 +788,16 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void GetActivityGroupTest()
         {
-            try
-            {
-                // Arrange
-                var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+            // Arrange
+            var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
 
-                // Act
-                var expected = account.GetActivityGroup(Uid: activityGroup.Uid, msgs: msgs, dc: dc);
+            // Act
+            var expected = account.GetActivityGroup(Uid: activityGroup.Uid, msgs: msgs, dc: dc);
 
-                // Assert
-                Assert.Equal(expected: expected.ID, actual: activityGroup.ID);
-                Assert.Equal(expected: expected.Uid, actual: activityGroup.Uid);
-                Assert.Equal(expected: expected.Name, actual: activityGroup.Name);
-            }
-            catch (Exception ex)
-            {
-                //Assert
-                Assert.False(false, ex.Message);
-            }
+            // Assert
+            Assert.Equal(expected: expected.ID, actual: activityGroup.ID);
+            Assert.Equal(expected: expected.Uid, actual: activityGroup.Uid);
+            Assert.Equal(expected: expected.Name, actual: activityGroup.Name);
         }
 
         [Theory(DisplayName = "GetActivityGroups Test")]
