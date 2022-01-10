@@ -164,17 +164,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.NotEqual(password, passwordEncrypted);
         }
 
-        // commented out as we are not using DecryptPassword anymore
-        //[Fact(Skip = "failing")]
-        //public void DecryptPasswordTest()
-        //{
-        //    var testPassword = "test2";
-        //    var testPasswordEncrypted = WebUserService.EncryptPassword(testPassword);
-        //    var testPasswordDecrypted = WebUserService.DecryptPassword(testPasswordEncrypted);
-
-        //    Assert.Equal(testPassword, testPasswordDecrypted);
-        //}
-
         [Fact]
         public void IsValidPasswordTest()
         {
