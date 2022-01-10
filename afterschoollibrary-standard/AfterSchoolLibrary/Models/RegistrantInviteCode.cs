@@ -178,6 +178,16 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
+		public static List<RegistrantInviteCode> LoadByRegistrantIdBySurveyResponseIdByIsDeleted(int RegistrantId, int SurveyResponseId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
+			dq.Criterias.Add(ObjectMap["SurveyResponseId"], SurveyResponseId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
 		public static RegistrantInviteCode LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;

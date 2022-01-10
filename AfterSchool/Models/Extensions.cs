@@ -4,6 +4,7 @@ using BasicLibrary;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using System.Collections.Specialized;
+using BasicLibrary.DataAccess;
 
 namespace AfterSchool.Models
 {
@@ -18,7 +19,7 @@ namespace AfterSchool.Models
         {
             return new FormQuestionViewModel(question);
         }
-
+        
         public static AddressViewModel ToAddressViewModel(this PaymentsEntityViewModel paymentsEntityVM)
         {
             return new AddressViewModel()
@@ -113,7 +114,7 @@ namespace AfterSchool.Models
             return "";
         }
 
-        public static SystemMessages GetItemsRequiredToPublish(this Activity activity)
+        public static SystemMessages GetItemsRequiredToPublish(this Activity activity, SystemMessages msg = null, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var setupMsgs = new SystemMessages();
@@ -225,10 +226,26 @@ namespace AfterSchool.Models
             if (activity.IsGroupArchived)
                 archiveMsgs.Add($"<a href=\"/org/group/restore/{activity.GetActivityGroup().Uid}\">Restore {activity.GetActivityGroup().Name}</a>. It is currently archived", MessageType.Error);
 
+            msgs.AddRange(activity.IsPaymentMethodAddedForExternalAccount(SessionVariables.CurrentAccount, msg, dc));
+
             if (archiveMsgs.HasErrors())
             {
                 archiveMsgs.Insert(0, new SystemMessage($"<span class=\"publish-error-title\">Archive Errors<span>", MessageType.UserError));
                 msgs.AddRange(archiveMsgs);
+            }
+
+            return msgs;
+        }
+
+        public static SystemMessages IsPaymentMethodAddedForExternalAccount(this Activity activity, Account account, SystemMessages msg = null, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            if (!activity.GetParticipationObject(msg, dc).IsRegistrationFree && activity.CostPerRegistrant > 0 && !account.CanReceivePaymentDeposits(msg, dc) && !activity.GetParticipationObject(msg, dc).IsExternalToAccount(account))
+            {
+                var addPaymentMsgs = new SystemMessages();
+                addPaymentMsgs.Add($"<a href=\"/org/account/paymentsoptions\">Add Payment Method</a>. To accept payments", MessageType.Error);
+                msgs.AddRange(addPaymentMsgs);
             }
 
             return msgs;
