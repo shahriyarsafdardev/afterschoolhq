@@ -360,6 +360,15 @@ namespace AfterSchoolLibrary.Models
                     .FirstOrDefault();
         }
 
+        public string GetValue(QuestionDataType questionDataType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            string s = GetAnswer(questionDataType, msgs, dc)?.Text.IfEmpty("-");
+            if (s.IsNotEmpty() && AfterSchoolLibrary.Helpers.Utilities.IsAlreadyJsonString(s))
+                return AfterSchoolLibrary.Helpers.Utilities.GetKeyValuePairs(s).FirstOrDefault()?.value;
+
+            return s;
+        }
+
         public static List<Registrant> LoadList(List<int> ids, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
@@ -486,11 +495,12 @@ namespace AfterSchoolLibrary.Models
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
+
         //public List<Activity> GetActivitiesByDay(DayOfWeekASL day, DatabaseConnection dc = null)
         //{
         //    return Activity.GetActivitiesByRegistrantByDay(this.ID.Value, day, DateTime.UtcNow, dc: dc);
         //}
-        
+
         public static List<Registrant> LoadFirstRegistrants(int accountId, int? start, int? length, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
