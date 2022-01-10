@@ -95,21 +95,21 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        private static Package GetFirstPackageWithFeatureFromPackages(FeatureType feature, List<Package> packages)
+        private static Package GetFirstPackageWithFeatureFromPackages(FeatureType feature, List<Package> packages, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             foreach (var package in packages)
             {
-                if (package.HasFeature(feature))
+                if (package.HasFeature(feature, msgs, dc))
                     return package;
             }
             return null;
         }
 
-        private static Package GetFirstPackageWithFeatureFromPackages(FeatureType feature, List<Package> packages, int featureCount)
+        private static Package GetFirstPackageWithFeatureFromPackages(FeatureType feature, List<Package> packages, int featureCount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             foreach (var package in packages)
             {
-                if (package.HasFeature(feature) && package.GetFeature(feature).GetMaxValue() > featureCount)
+                if (package.HasFeature(feature, msgs, dc) && package.GetFeature(feature, msgs, dc).GetMaxValue() > featureCount)
                     return package;
             }
             return null;
@@ -127,7 +127,7 @@ namespace AfterSchoolLibrary.Services
                 return null;
             }
 
-            var packageWithFeature = GetFirstPackageWithFeatureFromPackages(feature, paidPackages);
+            var packageWithFeature = GetFirstPackageWithFeatureFromPackages(feature, paidPackages, msgs , dc);
 
             if (packageWithFeature.IsNotEmpty())
                 return packageWithFeature;
@@ -146,7 +146,7 @@ namespace AfterSchoolLibrary.Services
                 return null;
             }
 
-            var packageWithFeature = GetFirstPackageWithFeatureFromPackages(feature, paidPackages,featureCount);
+            var packageWithFeature = GetFirstPackageWithFeatureFromPackages(feature, paidPackages,featureCount, msgs, dc);
 
             if (packageWithFeature.IsNotEmpty())
                 return packageWithFeature;
