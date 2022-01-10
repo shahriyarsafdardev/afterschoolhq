@@ -14,7 +14,7 @@
             <label class="col-md-3 control-label">
                 Requires Parental Consent
             </label>
-            <div class="col-md-9" @if (!showAllowStudentRegistration) { <text> onclick="return showUpgradeMyPlan('@(allowStudentRegPackage.Name)',@(allowStudentRegPackage.ID))" </text> }>
+            <div class="col-md-9" @if (!showAllowStudentRegistration) { <text> onclick="return showUpgradeMyPlan('@(allowStudentRegPackage == null ? "" : allowStudentRegPackage.Name)',@(allowStudentRegPackage == null ? 0 : allowStudentRegPackage.ID))" </text> }>
                 @{
                     Html.RenderPartial(
                       "~/Views/Shared/_SwitchButton.cshtml",

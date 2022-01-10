@@ -8,6 +8,7 @@
     var headerTitle = (RegistrationAssignmentType)ViewData["HeaderTitle"];    
     var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
     var isReadOnly = (bool)ViewData["IsReadOnly"];
+    var assignmentTypesForActivity = (List<RegistrationAssignmentType>)activity.GetRegistrationAssignmentTypes();
 }
 
 <div class="panel panel-default">
@@ -60,94 +61,107 @@
                         }
 
                         <td>@account.ConvertToAccountTimeZone(ra.CreateDate.Value).ToLongDateTimeString()</td>
-                        
+                        @{ 
+                            var hasPaymentPlan = ra.HasPaymentPlan();
+                            var registrant = ra.GetRegistrant();
+                            var amountPaid = ra.GetAmountPaid();
+                        }
                         @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && headerTitle != RegistrationAssignmentType.Interested)
                         {
-                            var amount = ra.GetAmountPaid();
                             var isProRated = ra.GetIsProRatedFlagByParent();
 
-                            <td>
-                                @if (participationObject.IsFree)
-                                {
-                                    @:FREE
-                                }
-                                else
-                                {
-                                    @amount.ToCurrency()
+                    <td>
+                        @if (participationObject.IsFree)
+                        {
+                            @:FREE
+                        }
+                        else
+                        {
+                            @amountPaid.ToCurrency()
 
-                                    if (isProRated)
+                            if (isProRated)
+                            {
+                                <i class="s7-info icon-small"
+                                   data-toggle="popover"
+                                   data-trigger="hover"
+                                   data-html="true"
+                                   data-placement="top"
+                                   data-content="Amount paid for this student is pro-rated by AHQ system and Stripe.">
+                                </i>
+                            }
+
+                            if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && participationObject.IsNotFreeAndCanAcceptPayments && registrant.ParentRegistrantId.HasValue)
+                            {
+                                if (hasPaymentPlan)
+                                {
+                                    <i class="s7-flag icon-small" data-toggle="popover" data-trigger="hover" data-html="true" data-placement="top"
+                                       data-content="Student registered with payment plan.">
+                                    </i>
+                                }
+
+                                if (amountPaid == 0)
+                                {
+                                    var showPayLaterIcon = true;
+
+                                    if (activity.HasSubscriptionPlan())
                                     {
-                                         <i class="s7-info icon-small" 
-                                            data-toggle="popover" 
-                                            data-trigger="hover" 
-                                            data-html="true" 
-                                            data-placement="top"
-                                            data-content="Amount paid for this student is pro-rated by AHQ system and Stripe.">
+                                        var subscriptionPlan = activity.GetSubscriptionPlan();
+
+                                        if (subscriptionPlan.SplitCostEvenly && !activity.RegistrationFinalized)
+                                        {
+                                            showPayLaterIcon = false;
+                                        }
+                                    }
+                                    if (hasPaymentPlan)
+                                    {
+                                        showPayLaterIcon = false;
+                                    }
+                                    if (showPayLaterIcon)
+                                    {
+                                        <i class="s7-info icon-small" data-toggle="popover" data-trigger="hover" data-html="true" data-placement="top"
+                                           data-content="Student registered with option of allow to pay later.">
                                         </i>
                                     }
-
-                                    if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && participationObject.IsNotFreeAndCanAcceptPayments && ra.GetAmountPaid() == 0 && ra.GetRegistrant().ParentRegistrantId.HasValue)
-                                    {
-                                        var showButton = true;
-
-                                        if (activity.HasSubscriptionPlan())
-                                        {
-                                            var subscriptionPlan = activity.GetSubscriptionPlan();
-
-                                            if (subscriptionPlan.SplitCostEvenly && !activity.RegistrationFinalized)
-                                            {
-                                                showButton = false;
-                                            }
-                                        }
-
-                                        if (showButton)
-                                        { 
-                                            <i class="s7-info icon-small" data-toggle="popover" data-trigger="hover" data-html="true" data-placement="top"
-                                               data-content="Student registered with option of allow to pay later.">
-                                            </i>
-                                        }
-                                    }    
                                 }
-                            </td>
+                            }
+                        }
+                    </td>
                         }
                         @if (headerTitle != RegistrationAssignmentType.Interested && !participationObject.CanRegisterPerClass)
                         {
                         <td>
                             @if (ra.IsRegistrantActivityStatusAccessible())
                             {
-                                <select name="newassignmenttype" 
-                                        id="newassignmenttype-@ra.ID" 
-                                        class="form-control" 
+                                <select name="newassignmenttype"
+                                        id="newassignmenttype-@ra.ID"
+                                        class="form-control"
                                         onchange="moveRegistrantAssignment(@ra.RegistrantId, '@UI.JavascriptSafeString(ra.RegistrantName)', this)"
                                         @(isReadOnly ? "disable" : "")>
 
-                                    @foreach (var assignmenttype in Enum.GetValues(typeof(RegistrationAssignmentType)).Cast<RegistrationAssignmentType>())
+                                    @foreach (var assignmenttype in assignmentTypesForActivity)
                                     {
-                                            switch (assignmenttype)
-                                            {
-                                                case RegistrationAssignmentType.NotSet:
-                                                case RegistrationAssignmentType.Withdrawn:
-                                                    continue;
-                                            }
-                                            <option value="@((int)assignmenttype)" @(assignmenttype == ra.AssignmentTypeId ? "selected=\"selected\"" : "")>
-                                                @assignmenttype.ToString().SplitByUpperCase()
-                                            </option>
+                                        <option value="@((int)assignmenttype)" @(assignmenttype == ra.AssignmentTypeId ? "selected=\"selected\"" : "")>
+                                            @assignmenttype.ToString().SplitByUpperCase()
+                                        </option>
                                     }
                                 </select>
-                            } else 
+                            } else
                             {
                                 <label>@((RegistrationAssignmentType)ra.AssignmentTypeId)</label>
                             }
                         </td>
                         <td>
                             @if (ra.IsWithdrawEnabled() && !isReadOnly)
-                            { 
-                                <button id="btn-withdraw-@ra.Uid" class="btn btn-danger btn-sm" 
+                            {
+                                <button id="btn-withdraw-@ra.Uid" class="btn btn-danger btn-sm"
                                         onclick="return processWithdraw('@ra.Uid', '@ra.ID', '@ra.RegistrantUid', '@ra.ParticipationObjectId', '@ra.ParticipationObjectTypeId', '@ra.RegistrantFirstName');">
                                     Withdraw
                                 </button>
                             }
-                            @if (ra.IsSendInvoiceEnabled() && Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && participationObject.IsNotFreeAndCanAcceptPayments && ra.GetAmountPaid() == 0 && ra.GetRegistrant().ParentRegistrantId.HasValue && !isReadOnly)
+                            @if (ra.IsSendInvoiceEnabled() &&
+                                Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) &&
+                                participationObject.IsNotFreeAndCanAcceptPayments &&
+                                amountPaid == 0 && registrant.ParentRegistrantId.HasValue && !isReadOnly)
                             {
                                 var showButton = true;
 
@@ -160,7 +174,10 @@
                                         showButton = false;
                                     }
                                 }
-
+                                if (hasPaymentPlan)
+                                {
+                                    showButton = false;
+                                }
                                 if (showButton)
                                 {
                                     <button class="btn btn-default btn-sm" 
