@@ -14,7 +14,7 @@
     if (questionGroup.IsNotEmpty())
     {
         qgId = questionGroup.ID;
-        questions = questionGroup.GetActiveQuestions().Where(a => a.Text.IsNotEmpty() || a.QuestionTypeId == QuestionType.TextBlock).ToList();
+        questions = questionGroup.GetAllQuestions().Where(a => a.Text.IsNotEmpty() || a.QuestionTypeId == QuestionType.TextBlock).ToList();
     }
     var count = 1;
 }
@@ -68,7 +68,7 @@
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label">Form Type</label>
                                     <div class="col-sm-9">
-                                        <select class="form-control formtype-select" id="formtype" name="formtype">
+                                        <select class="form-control formtype-select" id="formtype" name="formtype" disabled>
                                             @foreach (var type in Enum.GetValues(typeof(FormType)).Cast<FormType>().Where(a => !a.Equals(FormType.NotSet)))
                                             {
                                                 <option value="@((int)type)" @(type == Model.FormTypeId ? "selected=\"selected\"" : "")>
@@ -399,7 +399,7 @@
 </div>
 
 <!------- Options and Emoji Modal Pop-up------------->
-<div id="modal-options" class="md-modal colored-header custom-width md-effect-9">
+<div id="modal-options" class="md-modal colored-header custom-width md-effect-9" style="top:45%;">
     <form id="form-options" name="form-options" action="#" method="post">
         <div class="md-content">
             <div class="modal-header">

@@ -199,11 +199,13 @@
       <HintPath>..\packages\RollbarSharp.1.0.0.0\lib\net45\RollbarSharp.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="SendGrid, Version=9.21.0.0, Culture=neutral, PublicKeyToken=4f047e93159395ca, processorArchitecture=MSIL">
+    <Reference Include="SendGrid, Version=9.21.0.0, Culture=neutral, PublicKeyToken=4f047e93159395ca">
       <HintPath>..\packages\SendGrid.9.21.0\lib\net452\SendGrid.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="SendGrid.CSharp.HTTP.Client, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="SendGrid.CSharp.HTTP.Client, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\packages\SendGrid.CSharp.HTTP.Client.3.4.8\lib\net45\SendGrid.CSharp.HTTP.Client.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="ServiceStack.Text, Version=3.9.71.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ServiceStack.Text.3.9.71\lib\net35\ServiceStack.Text.dll</HintPath>
@@ -224,8 +226,9 @@
     <Reference Include="StackExchange.Redis.StrongName, Version=1.2.6.0, Culture=neutral, PublicKeyToken=c219ff1ca8c2ce46, processorArchitecture=MSIL">
       <HintPath>..\packages\StackExchange.Redis.StrongName.1.2.6\lib\net46\StackExchange.Redis.StrongName.dll</HintPath>
     </Reference>
-    <Reference Include="StarkbankEcdsa, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\starkbank-ecdsa.1.2.0\lib\net452\StarkbankEcdsa.dll</HintPath>
+    <Reference Include="StarkbankEcdsa, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b2e6337a5d77bfbc">
+      <HintPath>..\packages\starkbank-ecdsa.1.3.3\lib\net452\StarkbankEcdsa.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Stripe.net, Version=37.15.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Stripe.net.37.15.0\lib\net461\Stripe.net.dll</HintPath>
@@ -674,6 +677,10 @@
     <Content Include="Assets\lib\customTableSorter.js" />
     <Content Include="case-study-cfi70.html" />
     <Content Include="contact.html" />
+    <Content Include="Content\Flags\spain.png" />
+    <Content Include="Content\Flags\france.png" />
+    <Content Include="Content\Flags\US.png" />
+    <Content Include="Content\googleTranslate.css" />
     <Content Include="Content\quill.bubble.css" />
     <Content Include="Content\quill.snow.css" />
     <Content Include="copyright.html" />
@@ -750,6 +757,7 @@
     <Content Include="iyi-providers.html" />
     <Content Include="js\blocs.min.js" />
     <Content Include="js\bootstrap.bundle.min.js" />
+    <Content Include="js\googleTranslateJs.js" />
     <Content Include="js\jquery-3.5.1.min.js" />
     <Content Include="js\lazysizes.min.js" />
     <Content Include="js\scrollFX.js" />

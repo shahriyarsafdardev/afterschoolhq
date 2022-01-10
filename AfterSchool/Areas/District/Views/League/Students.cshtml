@@ -48,8 +48,8 @@
                                <td>@item.RegistrantFirstName</td>
                                <td>@item.RegistrantLastName</td>
                                <td>@(registrant.GetAnswer(QuestionDataType.RegistrantDateOfBirth)?.Text.IfEmpty("-"))</td>
-                               <td>@(registrant.GetAnswer(QuestionDataType.RegistrantGrade)?.Text.IfEmpty("-"))</td>
-                               <td>@(registrant.GetAnswer(QuestionDataType.RegistrantGender)?.Text.IfEmpty("-"))</td>
+                               <td>@(registrant.GetValue(QuestionDataType.RegistrantGrade))</td>
+                               <td>@(registrant.GetValue(QuestionDataType.RegistrantGender))</td>
                                <td>@team.AccountName</td>
                                <td>@team.Name</td>
                                <td>@item.CreateDate.Value.ToShortDateString()</td>
