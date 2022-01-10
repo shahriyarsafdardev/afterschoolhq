@@ -7,8 +7,6 @@ using AfterSchoolLibrary.Services;
 using System.Linq;
 using System.Collections.Generic;
 using BasicLibrary.DataAccess;
-using System.Security.Claims;
-using Microsoft.EntityFrameworkCore.Update;
 using System.Web;
 
 namespace AfterSchoolLibrary.Helpers
@@ -25,6 +23,22 @@ namespace AfterSchoolLibrary.Helpers
                 body: body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)
                 );
+
+            msgs.AddRange(mailMsgs);
+
+            return msgs;
+        }
+
+        public static SystemMessages SendEmailToSupport(string subject, string body)
+        {
+            var msgs = new SystemMessages();
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(),
+                toEmail: AfterSchoolLibrary.Helpers.Email.SendGridSupportEmailAddress,
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId()
+            );
 
             msgs.AddRange(mailMsgs);
 
