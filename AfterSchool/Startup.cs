@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using System.Web.Mvc;
 using AfterSchoolLibrary.FeatureFlag;
 using AfterSchoolLibrary.Models;
@@ -7,6 +9,7 @@ using Hangfire;
 using Microsoft.Extensions.DependencyInjection;
 
 [assembly: OwinStartupAttribute(typeof(AfterSchool.Startup))]
+
 namespace AfterSchool
 {
     public partial class Startup
@@ -17,12 +20,13 @@ namespace AfterSchool
             ConfigureAuth(app);
 
             GlobalConfiguration.Configuration
-                .UseSqlServerStorage(AfterSchoolLibrary.Models.Database.Credentials.ConnectionString);
+                .UseSqlServerStorage(Database.Credentials.ConnectionString);
 
             var services = new ServiceCollection();
             ConfigureServices(services);
             var resolver = new DefaultDependencyResolver(services.BuildServiceProvider());
             DependencyResolver.SetResolver(resolver);
+
 
             app.UseHangfireDashboard();
             app.UseHangfireServer();
@@ -30,8 +34,13 @@ namespace AfterSchool
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton(Database.Credentials);
+            services.AddTransient(provider => Database.Credentials);
             services.AddTransient<IFeatureFlagRepository, FeatureFlagRepository>();
+
+            services.AddControllersAsServices(typeof(Startup).Assembly.GetExportedTypes()
+                .Where(t => !t.IsAbstract && !t.IsGenericTypeDefinition)
+                .Where(t => typeof(IController).IsAssignableFrom(t)
+                            || t.Name.EndsWith("Controller", StringComparison.OrdinalIgnoreCase)));
         }
     }
 }
