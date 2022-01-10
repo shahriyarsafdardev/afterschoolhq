@@ -23,6 +23,10 @@
             var value = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>(desc, desc) };
             var selected = Model.Value.IfBlank("").Trim() == value.ToJSON() ? " checked=\"checked\" " : "";
 
+            if(desc == "Adult S")
+            {
+                <br/>
+            }
             <div class="am-radio inline">
                 <input type="radio" id="@Model.Id-@optionNoSpaces" name="@Model.Name" class="form-control" @Model.RequiredProperty value="@value.ToJSON()" @selected />
                 <label for="@Model.Id-@optionNoSpaces">@desc</label>

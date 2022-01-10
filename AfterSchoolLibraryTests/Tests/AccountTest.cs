@@ -5,6 +5,7 @@ using Xunit.Abstractions;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using AfterSchoolLibraryTests.Factories;
+using System.Linq;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -136,7 +137,126 @@ namespace AfterSchoolLibraryTests.Tests
             var user = WebUserFactory.Create(msgs, dc);
             var account = AccountFactory.Create(user, msgs, dc);
             Assert.NotNull(Account.LoadByUid(account.Uid, msgs, dc));
-        }   
+        }
 
+        [Fact]
+        public void CheckIfRegistrantTShirtSizeOptionsExistsTest()
+        {
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
+            var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
+
+            Assert.Contains(questions, f => f.QuestionDataTypeId == QuestionDataType.RegistrantTShirtSize);
+        }
+
+        [Fact]
+        public void CheckNewRegistrantTShirtSizeOptionsTest()
+        {
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
+            var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
+            var question = questions.Where(f => f.QuestionDataTypeId == QuestionDataType.RegistrantTShirtSize).FirstOrDefault();
+
+            Assert.Contains(FormService.RegistrantTShirtSize, question.Options);
+        }
+
+        [Fact]
+        public void RegistrantMiddleNameExistsTest()
+        {
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
+            var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
+
+            Assert.Contains(questions, f => f.QuestionDataTypeId == QuestionDataType.RegistrantMiddleName);
+        }
+
+        [Fact]
+        public void Parent1InformationMiddleNameExistsTest()
+        {
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.Parent1Information);
+            var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
+
+            Assert.Contains(questions, f => f.QuestionDataTypeId == QuestionDataType.Parent1MiddleName);
+        }
+
+        [Fact]
+        public void Parent2InformationMiddleNameExistsTest()
+        {
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.Parent2Information);
+            var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
+
+            Assert.Contains(questions, f => f.QuestionDataTypeId == QuestionDataType.Parent2MiddleName);
+        }
+        [Fact]
+        public void GetQuestionsParentRegistrationStep2Test()
+        {
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var homeAddressQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.HomeAddress);
+            var questions = homeAddressQuestionGroup.GetAllQuestions(msgs, dc);
+
+            Assert.Contains(questions, f => f.QuestionDataTypeId == QuestionDataType.RegistrantWorkPhone);
+            Assert.Contains(questions, f => f.QuestionDataTypeId == QuestionDataType.RegistrantHomePhone);
+        }
+
+        [Fact]
+        public void Parent1InformationEmployerExistsTest()
+        {
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.Parent1Information);
+            var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
+
+            Assert.Contains(questions, f => f.QuestionDataTypeId == QuestionDataType.Parent1Employer);
+        }
+
+        [Fact]
+        public void Parent1InformationRelationshipToRegistrantExistsTest()
+        {
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.Parent1Information);
+            var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
+
+            Assert.Contains(questions, f => f.QuestionDataTypeId == QuestionDataType.Parent1RelationshipToRegistrant);
+        }
+
+        [Fact]
+        public void Parent2InformationEmployerExistsTest()
+        {
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.Parent2Information);
+            var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
+
+            Assert.Contains(questions, f => f.QuestionDataTypeId == QuestionDataType.Parent2Employer);
+        }
+
+        [Fact]
+        public void Parent2InformationRelationshipToRegistrantExistsTest()
+        {
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.Parent2Information);
+            var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
+
+            Assert.Contains(questions, f => f.QuestionDataTypeId == QuestionDataType.Parent2RelationshipToRegistrant);
+        }
+
+        [Fact]
+        public void RegistrantEmployerExistsTest()
+        {
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
+            var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
+
+            Assert.Contains(questions, f => f.QuestionDataTypeId == QuestionDataType.RegistrantEmployer);
+        }
+        [Fact]
+        public void RegistrantParentRelationshipExistsTest()
+        {
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
+            var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
+
+            Assert.Contains(questions, f => f.QuestionDataTypeId == QuestionDataType.RegistrantParentRelationship);
+        }
     }
 }

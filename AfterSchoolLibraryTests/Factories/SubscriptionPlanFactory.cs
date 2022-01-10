@@ -33,7 +33,9 @@ namespace AfterSchoolLibraryTests.Factories
                 PlanOwnerAccountId = planOwnerAccount.ID,
                 PlanTypeId = planType,
                 IsActive = true,
-                BillingPeriodTypeId = BillingPeriodType.Month
+                BillingPeriodTypeId = BillingPeriodType.Month,
+                PaymentStartTypeId = PlanPaymentStartType.WhenActivityStarts
+                
             };
             msgs.AddRange(obj.SaveWithStripe(dc: dc));
             return obj;
@@ -56,6 +58,60 @@ namespace AfterSchoolLibraryTests.Factories
             msgs.AddRange(obj.SaveWithStripe(dc));
             return obj;
         }
+
+        public static SubscriptionPlan Create(Account planOwnerAccount, Activity activity, decimal costPerPeriod, SubscriptionPlanType planType, BillingPeriodType billingPeriodType, PlanPaymentStartType planPaymentStartType,  SystemMessages msgs, DatabaseConnection dc)
+        {
+            var obj = new SubscriptionPlan()
+            {
+                ParticipationObjectId = activity.ID,
+                ParticipationObjectTypeId = ParticipationObjectType.Activity,
+                CostPerPeriod = costPerPeriod,
+                PlanOwnerAccountId = planOwnerAccount.ID,
+                PlanTypeId = planType,
+                IsActive = true,
+                TotalPeriods = null,
+                BillingPeriodTypeId = billingPeriodType,
+                PaymentStartTypeId = planPaymentStartType
+            };
+            msgs.AddRange(obj.SaveWithStripe(dc));
+            return obj;
+        }
+
+        public static SubscriptionPlan CreatePaymentPlan(Account planOwnerAccount, Activity activity, decimal costPerPeriod, int totalPeriods, BillingPeriodType billingPeriodType, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var obj = new SubscriptionPlan()
+            {
+                ParticipationObjectId = activity.ID,
+                ParticipationObjectTypeId = ParticipationObjectType.Activity,
+                CostPerPeriod = costPerPeriod,
+                PlanOwnerAccountId = planOwnerAccount.ID,
+                PlanTypeId = SubscriptionPlanType.PaymentPlan,
+                IsActive = true,
+                TotalPeriods = totalPeriods,
+                BillingPeriodTypeId = billingPeriodType
+            };
+            msgs.AddRange(obj.SaveWithStripe(dc));
+            return obj;
+        }
+
+        public static SubscriptionPlan CreatePaymentPlan(Account planOwnerAccount, Activity activity, decimal costPerPeriod, int totalPeriods, BillingPeriodType billingPeriodType, PlanPaymentStartType planPaymentStartType, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var obj = new SubscriptionPlan()
+            {
+                ParticipationObjectId = activity.ID,
+                ParticipationObjectTypeId = ParticipationObjectType.Activity,
+                CostPerPeriod = costPerPeriod,
+                PlanOwnerAccountId = planOwnerAccount.ID,
+                PlanTypeId = SubscriptionPlanType.PaymentPlan,
+                IsActive = true,
+                TotalPeriods = totalPeriods,
+                BillingPeriodTypeId = billingPeriodType,
+                PaymentStartTypeId = planPaymentStartType
+            };
+            msgs.AddRange(obj.SaveWithStripe(dc));
+            return obj;
+        }
+
         public static SubscriptionPlan Create(Account planOwnerAccount, ActivityGroup activityGroup, SubscriptionPlanType planType, SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new SubscriptionPlan()

@@ -329,6 +329,24 @@ namespace AfterSchoolLibrary.Models
 			return dq.GetCount(msgs) > 0;
 		}
 
+		public static bool ExistsByParticipationObjectByRegistrantsByPlanType(int participationObjectId, ParticipationObjectType participationObjectType, List<int> registrantIds, SubscriptionPlanType planType, bool includeExpired = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+		{
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.UseParameterizedQuery = false;
+			dq.Criterias.Add(ObjectMap["RegistrantId"], registrantIds, DatabaseCriteriaOperatorEnum.In);
+
+			if (!includeExpired)
+				dq.Criterias.Add(ObjectMap["DateCancelled"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
+
+			dq.Joins.Add(SubscriptionPlan.ObjectMap["ID"], ObjectMap["SubscriptionPlanId"], DatabaseJoinTypeEnum.InnerJoin);
+			dq.Criterias.Add(SubscriptionPlan.ObjectMap["participationObjectId"], participationObjectId);
+			dq.Criterias.Add(SubscriptionPlan.ObjectMap["participationObjectTypeId"], (int)participationObjectType);
+			dq.Criterias.Add(SubscriptionPlan.ObjectMap["planTypeId"], (int)planType);
+
+			return dq.GetCount(msgs) > 0;
+		}
+
 		#endregion
-    }
+	}
 }
