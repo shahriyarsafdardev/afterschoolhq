@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using BasicLibrary;
-using AfterSchoolLibrary;
 using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
+using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using BasicLibrary.DataAccess;
 
@@ -63,7 +62,7 @@ namespace AfterSchool.Areas.Admin.Controllers
             if (id.IsEmpty())
                 return View(new WebUser() { FirstName = "New", LastName = "User" });
 
-           return View(WebUser.LoadByUid(id.ToGuid()));
+            return View(WebUser.LoadByUid(id.ToGuid()));
         }
 
         [HttpPost]
@@ -80,11 +79,6 @@ namespace AfterSchool.Areas.Admin.Controllers
             else if (user.IsNotEmpty() && !user.Email.IsSameAs(email) && WebUser.ExistsByEmail(email, msgs))
                 msgs.Add("Email is already in use", MessageType.UserError);
 
-            //if (!phone.IsPhone())
-            //    msgs.Add("Phone must be unique and a valid US phone number", MessageType.UserError);
-            //else if (user.IsNotEmpty() && !user.Phone.IsSameAs(phone) && WebUser.ExistsByPhone(phone, msgs))
-            //    msgs.Add("Phone number is already in use", MessageType.UserError);
-
             if (password1 != password2)
                 msgs.Add("Password do not match", MessageType.UserError);
 
@@ -98,16 +92,15 @@ namespace AfterSchool.Areas.Admin.Controllers
                             user = new WebUser()
                             {
                                 CreateDate = DateTime.UtcNow,
-                                CreatedBy = SessionVariables.CurrentUser.ID
+                                CreatedBy = SessionVariables.CurrentUser.ID,
+                                FirstName = firstname,
+                                LastName = lastname,
+                                Email = email,
+                                Phone = phone,
+                                LastModifiedDate = DateTime.UtcNow,
+                                LastModifiedBy = SessionVariables.CurrentUser.ID,
+                                IsActive = !isactive.IsEmpty(),
                             };
-
-                        user.FirstName = firstname;
-                        user.LastName = lastname;
-                        user.Email = email;
-                        user.Phone = phone;
-                        user.LastModifiedDate = DateTime.UtcNow;
-                        user.LastModifiedBy = SessionVariables.CurrentUser.ID;
-                        user.IsActive = !isactive.IsEmpty();
 
                         if (password1.IsNotEmpty() && password2.IsNotEmpty())
                             user.Password = WebUserService.EncryptPassword(password1);
@@ -129,12 +122,10 @@ namespace AfterSchool.Areas.Admin.Controllers
                         msgs.Add("Save successful", MessageType.Success);
 
                         if (sysadmin.IsNumber())
-                            SendGridHelper.SendMail(
-                                fromEmail: AfterSchoolLibrary.Helpers.Email.SendGridNoReplyEmailAddress(true),
-                                toEmail: AfterSchoolLibrary.Helpers.Email.SendGridSupportEmailAddress,
-                                subject: $"ALERT: A new Super Admin Account has been created: {user.Email}",
-                                body: $"<p>{user.DisplayName}<br/>{user.Email}<br />{user.Phone}</p>",
-                                emailTemplateId: SendGridHelper.AfterSchoolHQGenericTemplateId);
+                            EmailHelper.SendEmailToSupport(
+                                $"ALERT: A new Super Admin Account has been created: {user.Email}",
+                                $"<p>{user.DisplayName}<br/>{user.Email}<br />{user.Phone}</p>"
+                            );
                     },
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
@@ -183,7 +174,7 @@ namespace AfterSchool.Areas.Admin.Controllers
             if(msgs.HasNoErrors())
             {
                 Account a = null;
-                UserType ut = UserType.NotSet;
+                UserType ut;
 
                 if (!id.IsNumber())
                 {
