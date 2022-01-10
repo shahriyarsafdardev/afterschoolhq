@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System.Text.RegularExpressions;
@@ -187,10 +186,14 @@ namespace AfterSchoolLibrary.Services
 
         public static int GetSeatsRemainingForNextDate(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var dates = activity.GetSchedule(msgs, dc).GetNextInstances(1, activity, msgs, dc);
+            var schedule = activity.GetSchedule(msgs, dc);
+            if (schedule.IsNotEmpty())
+            {
+                var dates = schedule.GetNextInstances(1, activity, msgs, dc);
 
-            if (dates.Any())
-                return activity.GetSeatsRemainingByDate(dates.First(), msgs, dc);
+                if (dates.Any())
+                    return activity.GetSeatsRemainingByDate(dates.First(), msgs, dc);
+            }            
 
             return 0;
         }
@@ -2210,6 +2213,16 @@ namespace AfterSchoolLibrary.Services
             return ras;
         }
 
+        public static List<RegistrantActivity> GetRegistrantActivitiesForSurvey(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantActivity.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc)
+                .Where(a => a.HasParentRegistrantId(msgs, dc) && a.AssignmentTypeId.In(new List<RegistrationAssignmentType> {
+                    RegistrationAssignmentType.Reserved,
+                    RegistrationAssignmentType.ReservedPendingParentalConsent,
+                    RegistrationAssignmentType.ReservedPendingPayment
+                })).ToList();           
+        }
+
         public static RegistrantActivity GetRegistrantActivity(this Activity activity, Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RegistrantActivity.LoadByParticipationObjectByRegistrant(activity.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value, msgs, dc);
@@ -2823,6 +2836,28 @@ namespace AfterSchoolLibrary.Services
             } 
             
             msgs.Add("Error Removing Schedule", MessageType.UserError);
+        }
+
+        public static List<RegistrationAssignmentType> GetRegistrationAssignmentTypes(this Activity activity)
+        {
+            var dropdownOptions = new List<RegistrationAssignmentType>() { 
+                RegistrationAssignmentType.Reserved,
+                RegistrationAssignmentType.WaitingList,
+                RegistrationAssignmentType.Applied,
+                RegistrationAssignmentType.Invited,
+                RegistrationAssignmentType.Declined,
+                RegistrationAssignmentType.ReservedPendingPayment,
+                RegistrationAssignmentType.ReservedPendingParentalConsent,
+                RegistrationAssignmentType.Interested
+            };
+            
+            if(activity.ActivityTypeId == ActivityType.PermissionSlip)
+            {
+                dropdownOptions.Remove(RegistrationAssignmentType.WaitingList);
+                dropdownOptions.Remove(RegistrationAssignmentType.Applied);
+            }
+
+            return dropdownOptions;
         }
     }
 }
