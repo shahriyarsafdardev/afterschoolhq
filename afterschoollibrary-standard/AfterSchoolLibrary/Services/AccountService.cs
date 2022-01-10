@@ -4652,7 +4652,7 @@ namespace AfterSchoolLibrary.Services
                 {
                     msgs.Add($"({account.UniqueName}) CanReceiveACHDeposits and not opted for check payouts.", MessageType.Success);
 
-                    var activities = account.GetPublishedActivities(msgs: msgs, dc: dc);
+                    var activities = account.GetActivities(msgs: msgs, dc: dc);
 
                     foreach (var activity in activities)
                         activity.ProcessActivityPayouts(currentUser: loggedInUser, account: account, msgs: msgs, dc: dc);
