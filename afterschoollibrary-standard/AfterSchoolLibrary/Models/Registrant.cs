@@ -360,6 +360,15 @@ namespace AfterSchoolLibrary.Models
                     .FirstOrDefault();
         }
 
+        public string GetValue(QuestionDataType questionDataType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            string s = GetAnswer(questionDataType, msgs, dc)?.Text.IfEmpty("-");
+            if (s.IsNotEmpty() && AfterSchoolLibrary.Helpers.Utilities.IsAlreadyJsonString(s))
+                return AfterSchoolLibrary.Helpers.Utilities.GetKeyValuePairs(s).FirstOrDefault()?.value;
+
+            return s;
+        }
+
         public static List<Registrant> LoadList(List<int> ids, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
