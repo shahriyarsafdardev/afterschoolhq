@@ -12,5 +12,12 @@ namespace AfterSchoolLibraryTests.Factories
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
+
+        public static Registration Create(Account account, Registrant registrant, RegistrationCompletionStatus completionStatusId, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var obj = new Registration() { AccountId = account.ID, RegistrantId = registrant.ID, CompletionStatusId = completionStatusId };
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
     }
 }

@@ -29,7 +29,7 @@ namespace AfterSchoolLibraryTests.Migrations
                 // Arrange
                 if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-                AfterSchoolLibrary.Helpers.Utilities.AdditionalData(dc);
+                AfterSchoolLibrary.Helpers.DatabaseInit.AdditionalData(dc);
 
                 // create package
                 var package1 = PackageFactory.CreatePackage("Test Package 1", "Test Package Description 1", 100m, user, msgs, dc);

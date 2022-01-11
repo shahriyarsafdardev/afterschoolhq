@@ -435,6 +435,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     UILabel.ActivityLabel(group.ActivityGroupTypeId, false),
                     emails,
                     null,
+                    null,
+                    null,
                     null)
             );
 

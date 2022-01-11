@@ -8,12 +8,19 @@ using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using System;
 using System.Text.RegularExpressions;
-using System.Web.Routing;
+using AfterSchoolLibrary.FeatureFlag;
 
 namespace AfterSchool.Controllers
 {
     public class RController : BaseController
     {
+        private readonly IFeatureFlagRepository featureFlagRepository;
+
+        public RController(IFeatureFlagRepository featureFlagRepository)
+        {
+            this.featureFlagRepository = featureFlagRepository;
+        }
+
         // GET: R
         public ActionResult Index()
         {
@@ -181,6 +188,8 @@ namespace AfterSchool.Controllers
                 AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(msgs);
             }
 
+            ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
+
             return View(account);
         }
 
@@ -273,6 +282,8 @@ namespace AfterSchool.Controllers
             ViewBag.AccountProfile = account.GetAccountProfile(msgs);
             ViewBag.FeaturedProviders = featuredProviders;
 
+            ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
+
             return View(account);
         }
 
@@ -344,6 +355,8 @@ namespace AfterSchool.Controllers
             ViewBag.AccountProfile = account.GetAccountProfile(msgs);
             ViewBag.Messages = msgs;
 
+            ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
+
             return View(account);
         }
 
@@ -411,6 +424,8 @@ namespace AfterSchool.Controllers
                 indirectObjectId: participationObject.OwnerAccount.ID.Value,
                 indirectObjectText: participationObject.OwnerAccount.Name
             );
+
+            ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
 
             return View(participationObject);
         }
