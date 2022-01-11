@@ -24,6 +24,24 @@ namespace AfterSchoolLibraryTests.Factories
             return obj;
         }
 
+        public static Activity Create(Account account, ActivityType activityType, ActivityGroup activityGroup ,SystemMessages msgs, DatabaseConnection dc)
+        {
+            var name = "Test Activity";
+            var obj = new Activity()
+            {
+                AccountId = account.ID,
+                SeatsAvailable = 4,
+                Name = name,
+                ActivityTypeId = activityType,
+                ActivityGroupId = activityGroup.ID,
+                UniqueName = ActivityService.GenerateUniqueName(name, null, account.ID, msgs, dc),
+                GradeLevelStart = GradeLevel.Load(msgs: msgs, dc: dc).First().ID,
+                GradeLevelEnd = GradeLevel.Load(msgs: msgs, dc: dc).Last().ID
+            };
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
+
         public static Activity Create(Account account, string name, SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new Activity()

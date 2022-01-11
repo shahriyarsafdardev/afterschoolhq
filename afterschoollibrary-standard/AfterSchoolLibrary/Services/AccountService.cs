@@ -396,9 +396,9 @@ namespace AfterSchoolLibrary.Services
             if (user.IsEmpty() || userType.In(AccountService.AdminUserTypes))
                 return Activity.LoadByAccountId(account.ID.Value, null, null, activityType, isArchived, isDeleted, ungroupedOnly, start, length, msgs, dc).ToList();
 
-            return Activity.LoadByAccountId(account.ID.Value, null, null, activityType, isArchived, isDeleted, ungroupedOnly, start, length, msgs, dc)
-                    .Where(activity => user.HasAccessToActivity(activity, msgs, dc))
-                    .ToList();
+
+            var activityIdsByWebUser = ActivityWebUser.LoadByWebUserId(user.ID.Value, msgs, dc).Select(a => a.ActivityId.Value).ToList();
+            return Activity.LoadListByIdsByGroupByIsArchivedIsDeleted(activityIdsByWebUser, null, null, activityType, isArchived, isDeleted, ungroupedOnly, start, length, msgs, dc);
         }
 
         public static List<Activity> GetAllActivitiesForAccount(this Account account,  SystemMessages msgs = null, DatabaseConnection dc = null)

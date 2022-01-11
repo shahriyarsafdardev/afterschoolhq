@@ -3230,5 +3230,37 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.NotNull(stripePayout);
             Assert.Equal(payout.Amount, stripePayout.Amount / 100);
         }
+        [Theory(DisplayName = "Get Activities For Instructor Test")]
+        [InlineData(1, 0, 1)]
+        [InlineData(10, 0, 5)]
+        [InlineData(30, 10, 5)]
+        public void GetActivitiesForInstructorsTest(int numberOfActivities, int start, int length)
+        {
+            // Arrange
+            var instructorWebUser = WebUserFactory.Create(msgs, dc);
+            var accountUser = AccountFactory.CreateAccount(instructorWebUser, msgs, dc);
+            var accountWebUser = AccountWebUserFactory.Create(accountUser, instructorWebUser, UserType.Instructor, true, msgs, dc);
+            List<Activity> arrangeActivities = new List<Activity>();
+
+
+            for (int i = 0; i < numberOfActivities; i++)
+            {
+                var activityGroup = ActivityGroupFactory.Create(accountUser, ActivityGroupType.Session, msgs, dc: dc);
+                var activity = ActivityFactory.Create(accountUser, ActivityType.Activity, activityGroup, msgs, dc);
+
+                if (i % 2 == 0)
+                   ActivityWebUserFactory.Create(activity, instructorWebUser, false, msgs, dc);
+
+                arrangeActivities.Add(activity);
+            }
+
+            // Act
+            var actActivities = accountUser.GetActivities(accountWebUser.UserTypeId, instructorWebUser, ActivityType.Activity, false, false, false, start, length, msgs, dc);
+
+            // Assert
+            Assert.True(msgs.HasNoErrors());
+            Assert.Equal(length, actActivities.Count);
+        }
+
     }
 }
