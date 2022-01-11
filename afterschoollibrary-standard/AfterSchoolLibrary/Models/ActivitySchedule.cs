@@ -630,8 +630,13 @@ namespace AfterSchoolLibrary.Models
             if (this.DaysOfTheWeek.IsNotBlank())
                 return this.DaysOfTheWeek.Split(',').ToIntegerArray().Select(x => (DayOfWeekASL)x).OrderBy(x => (int)x).ToList();
 
-            if (this.GetInstances(false, msgs, dc).IsNotEmpty())
-                return this.GetInstances(false, msgs, dc).Where(instance => instance.InstanceTypeId == InstanceType.InSession).Select(x => x.Day).Distinct().OrderBy(x => (int)x).ToList();
+            var instances = this.GetInstances(false, msgs, dc);
+            if (instances.IsNotEmpty())
+                return instances
+                    .Where(instance => instance.InstanceTypeId == InstanceType.InSession)
+                    .Select(x => x.Day).Distinct()
+                    .OrderBy(x => (int)x)
+                    .ToList();
 
             return new List<DayOfWeekASL>();
         }
