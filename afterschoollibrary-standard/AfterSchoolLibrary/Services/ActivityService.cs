@@ -2137,8 +2137,9 @@ namespace AfterSchoolLibrary.Services
 
         public static List<DayOfWeekASL> GetDaysOfTheWeek(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (activity.GetSchedule(msgs: msgs, dc: dc)?.GetDaysOfTheWeek(msgs, dc).Any() ?? false)
-                return activity.GetSchedule(msgs: msgs, dc: dc)?.GetDaysOfTheWeek();
+            var daysOfTheWeek = activity.GetSchedule(msgs: msgs, dc: dc)?.GetDaysOfTheWeek(msgs, dc);
+            if (daysOfTheWeek?.Any() ?? false)
+                return daysOfTheWeek;
 
             return new List<DayOfWeekASL>();
         }
@@ -2559,7 +2560,9 @@ namespace AfterSchoolLibrary.Services
                 uiActivityLabel,
                 activity.ContactEmail,
                 subject,
-                body));
+                body, 
+                msgs, 
+                dc));
 
             return msgs;
         }
