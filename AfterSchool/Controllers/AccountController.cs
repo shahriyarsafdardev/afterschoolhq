@@ -118,6 +118,8 @@ namespace AfterSchool.Controllers
       ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
       ViewBag.Messages = msgs;
 
+      ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
+
       return View(qvms);
     }
 
@@ -513,6 +515,8 @@ namespace AfterSchool.Controllers
       ViewBag.RegistrationAccount = registrationAccount;
       ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
       ViewBag.Messages = msgs;
+
+      ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
 
       return View(qvms);
     }
@@ -2144,6 +2148,8 @@ namespace AfterSchool.Controllers
 
       if (regaccount.IsGuid())
         ViewBag.RegistrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
+
+      ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
 
       return View(questions.Select(question => new FormQuestionViewModel(question)).ToList());
     }

@@ -55,5 +55,12 @@ namespace AfterSchoolLibraryTests.Factories
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
+
+        public static WebUser CreateWithCleverId(SystemMessages msgs, DatabaseConnection dc)
+        {
+            var obj = new WebUser() { FirstName = "Don", LastName = "John", Email = "don@john.com", IsActive = true, CleverUserId = "1" };
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
     }
 }
