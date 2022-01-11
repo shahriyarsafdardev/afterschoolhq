@@ -2138,7 +2138,7 @@ namespace AfterSchoolLibrary.Services
         public static List<DayOfWeekASL> GetDaysOfTheWeek(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var daysOfTheWeek = activity.GetSchedule(msgs: msgs, dc: dc)?.GetDaysOfTheWeek(msgs, dc);
-            if (daysOfTheWeek.Any())
+            if (daysOfTheWeek?.Any() ?? false)
                 return daysOfTheWeek;
 
             return new List<DayOfWeekASL>();
