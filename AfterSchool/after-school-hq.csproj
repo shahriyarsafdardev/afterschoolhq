@@ -80,6 +80,10 @@
     <Reference Include="CsvHelper, Version=12.0.0.0, Culture=neutral, PublicKeyToken=8c4959082be5c823, processorArchitecture=MSIL">
       <HintPath>..\packages\CsvHelper.12.1.2\lib\net45\CsvHelper.dll</HintPath>
     </Reference>
+    <Reference Include="Dapper, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\Dapper.2.0.123\lib\net461\Dapper.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
@@ -192,6 +196,9 @@
     <Reference Include="Remotion.Linq, Version=2.1.0.0, Culture=neutral, PublicKeyToken=fee00910d6e5f53b, processorArchitecture=MSIL">
       <HintPath>..\packages\Remotion.Linq.2.1.1\lib\net45\Remotion.Linq.dll</HintPath>
     </Reference>
+    <Reference Include="RestSharp, Version=106.15.0.0, Culture=neutral, PublicKeyToken=598062e77f915f75, processorArchitecture=MSIL">
+      <HintPath>..\packages\RestSharp.106.15.0\lib\net452\RestSharp.dll</HintPath>
+    </Reference>
     <Reference Include="Rollbar, Version=3.7.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Rollbar.3.7.1\lib\net472\Rollbar.dll</HintPath>
     </Reference>
@@ -199,11 +206,13 @@
       <HintPath>..\packages\RollbarSharp.1.0.0.0\lib\net45\RollbarSharp.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="SendGrid, Version=9.21.0.0, Culture=neutral, PublicKeyToken=4f047e93159395ca, processorArchitecture=MSIL">
+    <Reference Include="SendGrid, Version=9.21.0.0, Culture=neutral, PublicKeyToken=4f047e93159395ca">
       <HintPath>..\packages\SendGrid.9.21.0\lib\net452\SendGrid.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="SendGrid.CSharp.HTTP.Client, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="SendGrid.CSharp.HTTP.Client, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\packages\SendGrid.CSharp.HTTP.Client.3.4.8\lib\net45\SendGrid.CSharp.HTTP.Client.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="ServiceStack.Text, Version=3.9.71.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ServiceStack.Text.3.9.71\lib\net35\ServiceStack.Text.dll</HintPath>
@@ -224,8 +233,9 @@
     <Reference Include="StackExchange.Redis.StrongName, Version=1.2.6.0, Culture=neutral, PublicKeyToken=c219ff1ca8c2ce46, processorArchitecture=MSIL">
       <HintPath>..\packages\StackExchange.Redis.StrongName.1.2.6\lib\net46\StackExchange.Redis.StrongName.dll</HintPath>
     </Reference>
-    <Reference Include="StarkbankEcdsa, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\starkbank-ecdsa.1.2.0\lib\net452\StarkbankEcdsa.dll</HintPath>
+    <Reference Include="StarkbankEcdsa, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b2e6337a5d77bfbc">
+      <HintPath>..\packages\starkbank-ecdsa.1.3.3\lib\net452\StarkbankEcdsa.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Stripe.net, Version=37.15.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Stripe.net.37.15.0\lib\net461\Stripe.net.dll</HintPath>
@@ -550,6 +560,7 @@
     <Compile Include="Areas\Admin\Controllers\AccountController.cs" />
     <Compile Include="Areas\Admin\Controllers\PackageController.cs" />
     <Compile Include="Areas\Admin\Controllers\PayoutController.cs" />
+    <Compile Include="Areas\Admin\Controllers\ScheduleTasksController.cs" />
     <Compile Include="Areas\Admin\Controllers\StripeHooksController.cs" />
     <Compile Include="Areas\Admin\Controllers\TransactionController.cs" />
     <Compile Include="Areas\Admin\Controllers\UploadController.cs" />
@@ -606,6 +617,7 @@
     <Compile Include="Controllers\ServicesController.cs" />
     <Compile Include="Controllers\SignUpController.cs" />
     <Compile Include="Controllers\SitemapController.cs" />
+    <Compile Include="DefaultDependencyResolver.cs" />
     <Compile Include="Helpers\ActivitySetupHelper.cs" />
     <Compile Include="Helpers\RecaptchaHelper.cs" />
     <Compile Include="Models\ActionFilters\EnvironmentRestrictionAttribute.cs" />
@@ -658,6 +670,7 @@
     <Compile Include="Models\Utilities.cs" />
     <Compile Include="Models\WebSessionUtilities.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServiceProviderExtensions.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -1348,6 +1361,8 @@
     <Content Include="Areas\Org\Views\Activity\ViewSurvey.cshtml" />
     <Content Include="Areas\Org\Views\Registration\Surveys.cshtml" />
     <Content Include="Areas\Org\Views\Activity\ViewSurveyResults.cshtml" />
+    <Content Include="Areas\Org\Views\Shared\_ModalUpdateCleverAccount.cshtml" />
+    <Content Include="Areas\Admin\Views\ScheduleTasks\Index.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />
@@ -1840,6 +1855,10 @@
     <Content Include="Views\Shared\Modals\_TransferModal.cshtml" />
     <Content Include="Views\Shared\Modals\_TransferModal-TransferButton.cshtml" />
     <Content Include="Views\R\ActivitySelectDates.cshtml" />
+    <Content Include="Views\Shared\Registration\_LoginModalWithUpdatedDesign.cshtml" />
+    <Content Include="Views\Shared\_LayoutLogin-Updated.cshtml" />
+    <Content Include="Views\Shared\Registration\_ResetPassword.cshtml" />
+    <Content Include="Views\Shared\Registration\_ResetPasswordCompleted.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

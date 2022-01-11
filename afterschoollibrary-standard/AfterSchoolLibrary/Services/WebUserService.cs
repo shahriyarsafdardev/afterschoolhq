@@ -827,5 +827,68 @@ namespace AfterSchoolLibrary.Services
             var userType = loggedInUser.GetUserType(account, msgs, dc);
             return userType.In(new List<UserType>() { UserType.TechSupport, UserType.Owner, UserType.Administrator });
         }
+
+        #region Clever Integration
+
+        public static WebUser LoginByCleverUserId(string CleverUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return WebUser.LoadByCleverUserIdByIsActive(CleverUserId: CleverUserId, IsActive: true, msgs: msgs, dc: dc);
+        }
+
+        public static WebUser GetUserByCleverId(string id, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (id.IsNotEmpty())
+                return WebUserService.LoginByCleverUserId(CleverUserId: id, msgs: msgs, dc: dc);
+
+            return null;
+        }
+
+        public static void DisconnectCleverIdentity(WebUser webUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (webUser.IsNotEmpty())
+            {
+                webUser.CleverUserId = null;
+                webUser.CleverUserName = null;
+                msgs.AddRange(webUser.Save(dc: dc));
+
+                if (msgs.HasNoErrors())
+                    msgs.Add($"Clever disconnected for {webUser.DisplayName}.", MessageType.Success);
+            }
+        }
+
+        public static void SetCleverIdentityToUser(string id, string name, WebUser webUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (webUser.IsNotEmpty() && id.IsNotEmpty())
+            {
+                webUser.CleverUserId = id;
+                webUser.CleverUserName = name;
+                msgs.AddRange(webUser.Save(dc: dc));
+
+                if (msgs.HasNoErrors())
+                    msgs.Add($"Clever integration for {webUser.DisplayName} has been successfully completed.", MessageType.Success);             
+            }
+        }
+
+        #endregion
+        /// <summary>
+        /// Basically this should get first user which will be admin user and it will be there in all environments
+        /// If that user is not present then bring the first active user
+        /// this method should be used for logs
+        /// </summary>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        public static WebUser GetAdminUserForLogs(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            // load admin user
+            var webUser = WebUser.Load(id: 1, msgs: msgs, dc: dc);
+
+            // We will have this admin user in all environment but in case
+            // if don't find it, just load first Active webuser to be sure that system will not fail
+            if (webUser.IsEmpty())
+                webUser = WebUser.Load(criterias: new Hashtable() { { "IsActive", 1 } }, msgs: msgs, dc: dc).FirstOrDefault();
+
+            return webUser;
+        }
     }
 }

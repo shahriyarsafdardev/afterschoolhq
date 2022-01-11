@@ -1,6 +1,10 @@
 ﻿/* Large devices (laptops/desktops, 1200px and up) */
 @media(min-width: 1200px) {
 
+    .hidden-lg {
+        display: none !important;
+    }
+
     .btn-upgrade-plan {        
         font-weight: bold;
         border-radius: 7px;
@@ -95,5 +99,18 @@
         font-weight: bold;
         border-radius: 7px;
         margin-left: 20px;
+    }
+
+    .login-form-forgot-password-container {
+        float: right;
+    }
+
+    .btn-login-updated {
+        margin: 45px 10px 0 -60px;
+    }
+
+    .btn-clever-login {
+        margin: -50px -60px 0px 0px;
+        float: right;
     }
 }
