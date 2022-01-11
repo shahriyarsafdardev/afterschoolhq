@@ -1091,6 +1091,7 @@
 .tipTop {
     position: absolute;
     top: 30px;
+}
 .searchFormBtn {
     height: 39px;
     margin-top: -4px;
@@ -1103,15 +1104,18 @@
     width: 250px;
     height: 38px;
     margin-right: 10px;
-    margin-bottom:10px
+    margin-bottom: 10px
+}
+
 .fontSize12{
     font-size:12px;
 }
 .clearBoth{
     clear:both;
 }
-.fr{
-    float:right !important;
+.fr {
+    float: right !important;
+}
 .re-316 {
     /* width: 700px;
         height: 480px;*/
@@ -1196,7 +1200,7 @@
     width: 640px;
     position: fixed;
     left: 50%;
-    bottom: 100px;
+    bottom: 20px;
     margin: 0 auto;
 }
 
