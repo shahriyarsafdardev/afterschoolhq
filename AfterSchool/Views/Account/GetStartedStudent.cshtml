@@ -5,6 +5,8 @@
     ViewBag.Title = "Get Started";
     var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
     var msgs = (SystemMessages)ViewBag.Messages;
+
+    var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -15,7 +17,8 @@
         SessionVariables.RegistrationStartPageAccount,
         new ViewDataDictionary()
         {
-            { "ParticipationObject", participationObject }
+            { "ParticipationObject", participationObject },
+            { "CleverSsoEnabled", cleverSsoEnabled }
         }
     );
 }

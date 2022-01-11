@@ -107,5 +107,38 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.False(canUser4Publish);
             Assert.False(canUser5Publish);
         }
+
+        [Fact]
+        public void GetUserByCleverIdTest()
+        {
+            // Arrange
+            var webUser = WebUserFactory.CreateWithCleverId(msgs, dc);
+
+            // Act
+            var userWithCleverIntegration = WebUserService.GetUserByCleverId(id: webUser.CleverUserId, msgs: msgs, dc: dc);
+
+            // Assert
+            Assert.NotNull(webUser);
+            Assert.NotNull(userWithCleverIntegration);
+            Assert.True(webUser.ID == userWithCleverIntegration.ID);
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void SetCleverIdentityToUserTest1()
+        {
+            // Arrange
+            var webUser = WebUserFactory.Create(msgs, dc);
+
+            // Act
+            WebUserService.SetCleverIdentityToUser(id: "1", name: "Clever test", webUser: webUser, msgs: msgs, dc: dc);
+
+            // Assert
+            Assert.NotNull(webUser);            
+            Assert.True(webUser.CleverUserId == "1");
+            Assert.True(webUser.CleverUserName == "Clever test");
+            Assert.True(msgs.HasNoErrors());
+            Assert.True(msgs.HasMessageContainingText($"Clever integration for {webUser.DisplayName} has been successfully completed."));
+        }
     }
 }

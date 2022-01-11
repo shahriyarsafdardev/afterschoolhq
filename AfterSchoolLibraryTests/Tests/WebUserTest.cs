@@ -164,17 +164,18 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.NotEqual(password, passwordEncrypted);
         }
 
-        [Fact(Skip = "failing")]
-        public void DecryptPasswordTest()
+        [Fact]
+        public void IsValidPasswordTest()
         {
             var testPassword = "test2";
             var testPasswordEncrypted = WebUserService.EncryptPassword(testPassword);
-            var testPasswordDecrypted = WebUserService.DecryptPassword(testPasswordEncrypted);
+            var validatePassword = WebUserService.IsValidPassword(testPassword, testPasswordEncrypted);
 
-            Assert.Equal(testPassword, testPasswordDecrypted);
+            Assert.True(validatePassword);
         }
 
-        [Theory(Skip = "failing")]
+
+        [Theory]
         [InlineData("test@test.com", false)]
         public void SendInviteTest(string email, bool expectedResult)
         {
@@ -247,30 +248,41 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         //cannot test because Feature is not fully implemeted always returns true currently
-        //[Fact(Skip = "Not implemented")]
-        //public void HasAcessToFeatureFalseTest()
-        //{
-        //    var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-        //    var user = Factories.WebUserFactory.Create(msgs, dc: dc);
-        //    var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
+        //user.HasAccessToFeature doesn't exist added HasPermission Test
+        [Fact]
+        public void HasPermissionFalseTest()
+        {
+            var user = Factories.WebUserFactory.Create(msgs, dc: dc);
+            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
+            var accountUser = Factories.AccountWebUserFactory.Create(account, user, UserType.Parent, true, msgs, dc);
 
-        //    msgs.AddRange(account.AddUser(user, UserType.Parent, user.ID.Value, dc: dc));
 
-        //    Assert.False(user.HasAccessToFeature(FeatureType.ManageForms, account, dc: dc));
-        //}
+            Assert.False(user.HasPermission(PermissionType.StudentsManage, account, msgs, dc));
+        }
 
-        //[Fact(Skip = "Not implemented")]
-        //public void HasAcessToFeatureTrueTest()
-        //{
-        //    var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-        //    var user = Factories.WebUserFactory.Create(msgs, dc: dc);
-        //    var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
+        [Fact]
+        public void HasPermissionTrueTest()
+        {
+            var user = Factories.WebUserFactory.Create(msgs, dc: dc);
+            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
+            var accountUser = Factories.AccountWebUserFactory.Create(account, user, UserType.Administrator, true, msgs, dc);
 
-        //    msgs.AddRange(account.AddUser(user, UserType.SuperAdmin, user.ID.Value, dc: dc));
 
-        //    Assert.True(user.HasAccessToFeature(FeatureType.ViewInsights, account, dc: dc));
-        //}
+            Assert.True(user.HasPermission(PermissionType.StudentsManage, account, msgs, dc));
+        }
 
+        [Fact]
+        public void HasAccessToActivityTest()
+        {
+            var user = Factories.WebUserFactory.Create(msgs, dc: dc);
+            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
+
+            var activityUser = Factories.ActivityWebUserFactory.Create(activity, user, msgs, dc);
+
+            Assert.True(user.HasAccessToActivity(activity, msgs, dc));
+
+        }
         [Fact(DisplayName = "Generate unique username")]
         public void GenerateUsernameTest()
         {
@@ -281,7 +293,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(username, WebUserService.GenerateUsername(f, l, dc: dc));
         }
 
-        [Theory(Skip = "failing")]
+        [Theory]
         [InlineData("test@test.com", true)]
         public void SendVerificationEmailTest(string email, bool result)
         {
@@ -308,7 +320,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.NotNull(WebUserService.LoginByUsername(username, password2, dc: dc));
         }
 
-        [Theory(Skip = "failing")]
+        [Theory]
         [InlineData("test@test.com", true)]
         public void SendPasswordResetTokenTest(string email, bool result)
         {

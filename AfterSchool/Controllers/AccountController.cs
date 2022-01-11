@@ -1,22 +1,27 @@
-﻿using AfterSchool.Models;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Linq;
+using System.Web.Mvc;
+using AfterSchool.Helpers;
+using AfterSchool.Models;
+using AfterSchoolLibrary.FeatureFlag;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using Newtonsoft.Json.Converters;
-using Rollbar.DTOs;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Management;
-using System.Web.Mvc;
-using AfterSchool.Helpers;
-using System;
 
 namespace AfterSchool.Controllers
 {
   public class AccountController : BaseController
   {
+    private readonly IFeatureFlagRepository featureFlagRepository;
+
+    public AccountController(IFeatureFlagRepository featureFlagRepository)
+    {
+      this.featureFlagRepository = featureFlagRepository;
+    }
+
     #region Interested
 
     private List<FormQuestionViewModel> InterestedViewBag(ParticipationObject participationObject, SystemMessages msgs)
@@ -112,6 +117,8 @@ namespace AfterSchool.Controllers
       ViewBag.RegistrationAccount = registrationAccount;
       ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
       ViewBag.Messages = msgs;
+
+      ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
 
       return View(qvms);
     }
@@ -508,6 +515,8 @@ namespace AfterSchool.Controllers
       ViewBag.RegistrationAccount = registrationAccount;
       ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
       ViewBag.Messages = msgs;
+
+      ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
 
       return View(qvms);
     }
@@ -2124,8 +2133,10 @@ namespace AfterSchool.Controllers
     [HttpGet]
     public ActionResult GetStartedStudent(string regaccount)
     {
-      // disable and redirect to get started parent (since there is no way for students to register directly
-      return RedirectToAction("getstarted", new { regaccount });
+      if (!featureFlagRepository.IsEnabled("student-registration"))
+      {
+        return RedirectToAction("getstarted", new { regaccount });
+      }
 
       if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentAccount.AccountTypeId == AccountType.Registrant)
         return RedirectToAction("select");
@@ -2137,6 +2148,8 @@ namespace AfterSchool.Controllers
 
       if (regaccount.IsGuid())
         ViewBag.RegistrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
+
+      ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
 
       return View(questions.Select(question => new FormQuestionViewModel(question)).ToList());
     }
