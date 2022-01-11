@@ -827,5 +827,26 @@ namespace AfterSchoolLibrary.Services
             var userType = loggedInUser.GetUserType(account, msgs, dc);
             return userType.In(new List<UserType>() { UserType.TechSupport, UserType.Owner, UserType.Administrator });
         }
+
+        /// <summary>
+        /// Basically this should get first user which will be admin user and it will be there in all environments
+        /// If that user is not present then bring the first active user
+        /// this method should be used for logs
+        /// </summary>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        public static WebUser GetAdminUserForLogs(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            // load admin user
+            var webUser = WebUser.Load(id: 1, msgs: msgs, dc: dc);
+
+            // We will have this admin user in all environment but in case
+            // if don't find it, just load first Active webuser to be sure that system will not fail
+            if (webUser.IsEmpty())
+                webUser = WebUser.Load(criterias: new Hashtable() { { "IsActive", 1 } }, msgs: msgs, dc: dc).FirstOrDefault();
+
+            return webUser;
+        }
     }
 }

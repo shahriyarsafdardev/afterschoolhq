@@ -6,6 +6,7 @@ using AfterSchoolLibrary.Models;
 using Microsoft.Owin;
 using Owin;
 using Hangfire;
+using AfterSchoolLibrary.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 [assembly: OwinStartupAttribute(typeof(AfterSchool.Startup))]
@@ -30,6 +31,9 @@ namespace AfterSchool
 
             app.UseHangfireDashboard();
             app.UseHangfireServer();
+
+            // schedule and run the task daily at 3am EST
+            RecurringJob.AddOrUpdate(() => AccountService.PreparePayouts(null, null), Cron.Daily(hour: 3, minute: 00));
         }
 
         public void ConfigureServices(IServiceCollection services)
