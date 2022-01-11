@@ -37,7 +37,16 @@
     </div>
     <div class="col-md-12 onboarding-form-group">
         <label class="onboarding-lable">HOW'D YOU HEAR ABOUT US?</label>
-        <input type="text" name="HowHearAboutUs" required="required" class="form-control onboarding-input" value="@Model.HowHearAboutUs">
+        <select required="required" name="HowHearAboutUs" id="HowHearAboutUs" class="form-control onboarding-input" style="height:40px">
+            <option value=""></option>
+            <option value="Social Media">Social Media</option>
+            <option value="Search Engine">Search Engine</option>
+            <option value="Email">Email</option>
+            <option value="My School">My School</option>
+            <option value="Word of Mouth">Word of Mouth</option>
+            <option value="Conference/Event">Conference/Event</option>
+            <option value="Other">Other</option>
+        </select>
     </div>
 
     <div class="clearfix"></div>
