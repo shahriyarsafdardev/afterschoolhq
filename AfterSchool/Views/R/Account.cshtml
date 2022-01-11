@@ -35,6 +35,8 @@
     var firstActivity = Model.GetActivities(msgs)?.FirstOrDefault();
     var isExternallyProvidedActivity = false;
 
+    var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
+
     if (firstActivity.IsEmpty())
     {
         firstActivity = Model.GetExternallyProvidedActivities(msgs).FirstOrDefault();
@@ -71,10 +73,12 @@
 </style>
 
 @{
-    Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", Model, new ViewDataDictionary() {
-{ "LoginReturnUrl", Model.HomePageUrl },
-{ "IsAccount", true }
-});
+    Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", Model, new ViewDataDictionary()
+    {
+        { "LoginReturnUrl", Model.HomePageUrl },
+        { "IsAccount", true },
+        { "CleverSsoEnabled", cleverSsoEnabled }
+    });
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }

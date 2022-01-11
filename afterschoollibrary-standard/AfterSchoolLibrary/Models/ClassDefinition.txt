@@ -34,10 +34,13 @@ property: VerifiedAccount, bool, Bit
 property: IsRegistered, bool, Bit
 property: DefaultAccountId, int?, Int
 property: AllowTextMessages, bool, Bit
+property: CleverUserId, string, NVarChar "100"
+property: CleverUserName, string, NVarChar "100"
 loadmethod: Uid
 loadmethod: Uid|IsActive
 loadmethod: IsActive, List<>
 loadmethod: FacebookId
+loadmethod: CleverUserId|IsActive
 [end]
 
 [-begin]

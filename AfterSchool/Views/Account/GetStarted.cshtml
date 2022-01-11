@@ -9,6 +9,8 @@
     var savedEmail = Model.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail)?.Value;
     var showStep1 = currentUser.IsEmpty() && savedEmail.IsBlank();
     var isDuringProfileSetup = currentUser.IsNotEmpty() || savedEmail.IsNotBlank();
+
+    var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
 }
 
 @{
@@ -17,14 +19,14 @@
 
 @{
     Html.RenderPartial(
-                "~/Views/Shared/Registration/_AccountTopBar.cshtml",
-                SessionVariables.RegistrationStartPageAccount ?? registrationAccount,
-                new ViewDataDictionary()
-                {
-    { "ParticipationObject", participationObject },
-    { "isDuringProfileSetup", isDuringProfileSetup }
-                }
-            );
+        "~/Views/Shared/Registration/_AccountTopBar.cshtml",
+        SessionVariables.RegistrationStartPageAccount ?? registrationAccount,
+        new ViewDataDictionary()
+        {
+            { "ParticipationObject", participationObject },
+            { "isDuringProfileSetup", isDuringProfileSetup },
+            { "CleverSsoEnabled", cleverSsoEnabled }
+        });
 }
 
 @{

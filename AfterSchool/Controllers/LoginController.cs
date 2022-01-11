@@ -6,13 +6,19 @@ using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using System.Linq;
+using AfterSchoolLibrary.FeatureFlag;
 
 namespace AfterSchool.Controllers
 {
     public class LoginController : BaseController
     {
-        //
-        // GET: /Login/
+        private readonly IFeatureFlagRepository featureFlagRepository;
+
+        public LoginController(IFeatureFlagRepository featureFlagRepository)
+        {
+            this.featureFlagRepository = featureFlagRepository;
+        }
+
         [HttpGet]
         public ActionResult Index(string regaccount, string invite)
         {
@@ -20,6 +26,8 @@ namespace AfterSchool.Controllers
             var currentUser = SessionVariables.CurrentUser;
             var currentAccount = SessionVariables.CurrentAccount;
             var loggedInWithAnAccount = currentUser.IsNotEmpty() && currentAccount.IsNotEmpty();
+
+            HandleTempMessages(msgs);
 
             if (loggedInWithAnAccount && (regaccount.IsEmpty() || currentAccount.AccountTypeId == AccountType.Registrant))
             {
@@ -57,6 +65,7 @@ namespace AfterSchool.Controllers
             ViewBag.LoginType = "Internal";
             ViewBag.Messages = msgs;
             ViewBag.RegistrationAccount = regaccount;
+            ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
             return View();
         }
 
@@ -116,6 +125,53 @@ namespace AfterSchool.Controllers
             }
 
             return View();
+        }
+
+        [HttpGet]
+        public ActionResult LoginUser(string id)
+        {
+            var msgs = new SystemMessages();
+
+            if (id.IsEmpty())
+            {
+                msgs.Add("Identifier expected", MessageType.UserError);
+                LoadTempMsgAndLogErrors(msgs);
+                return RedirectToAction("Index");
+            }
+
+            var user = WebUser.Load(id.ToInteger(), msgs);
+
+            if (user.IsEmpty())
+            {
+                msgs.Add("Invalid username and/or password", MessageType.UserError);
+                LoadTempMsgAndLogErrors(msgs);
+                return RedirectToAction("Index");
+            }
+            else
+                LoadSessionInfo(user, null, true, msgs);
+            
+            ViewBag.Messages = msgs;
+
+            if (msgs.HasNoErrors())
+            {
+                var currentAccount = SessionVariables.CurrentAccount;
+
+                // select account
+                if (currentAccount.IsEmpty())
+                    return RedirectToAction("select", "login");
+
+                if (user.IsNotEmpty() && currentAccount.IsNotEmpty())
+                    // LOG: WebUserName LoggedIn
+                    SessionVariables.WebSession.LogActivity(
+                        account: currentAccount,
+                        actor: user,
+                        actionType: WebSessionActionType.LoggedIn
+                    );                
+
+                return LoginRedirect(msgs: msgs);
+            }
+
+            return RedirectToAction("Index");
         }
 
         [HttpGet]
@@ -190,6 +246,32 @@ namespace AfterSchool.Controllers
 
             ViewBag.Messages = msgs;
             return View();
+        }
+
+        [HttpPost]
+        public JsonResult ResetPasswordJson(string email)
+        {            
+            var msgs = new SystemMessages();
+            WebUser user = null;
+
+            if (!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
+                msgs.Add("Please enter a valid email address", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                user = WebUser.LoadByEmail(email, msgs);
+
+                if (user.IsNotEmpty())
+                    msgs.AddRange(user.SendPasswordResetToken(SessionVariables.IsAfterSchool.Value));
+
+                msgs.Add("If an account exists for your email address, you will receive an email momentarily to reset your password", MessageType.Success);
+            }
+
+            if (msgs.HasNoErrors())
+                return Json(new { success = true, status = "ok" }, JsonRequestBehavior.AllowGet);
+
+            //.. something went wrong, error occured
+            return Json(new { success = false, status = "error", data = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
         }
 
         [HttpGet]
@@ -288,6 +370,29 @@ namespace AfterSchool.Controllers
                 return Json(new { status = "ok", isNewParentAccount }, JsonRequestBehavior.DenyGet);
 
             return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.DenyGet);
+        }
+
+        [HttpGet]
+        public ActionResult AuthorizeUser(string id, string source, string redirectUrl)
+        {
+            var msgs = new SystemMessages();
+
+            if (id.IsEmpty())
+            {
+                msgs.Add("Identifier expected", MessageType.UserError);
+                LoadTempMsgAndLogErrors(msgs);
+                return RedirectToAction("Index");
+            }
+
+            var user = WebUser.Load(id.ToInteger(), msgs);
+
+            if (msgs.HasNoErrors() && user.IsNotEmpty())
+            {
+                LoadSessionInfo(user, null, true, source, msgs);
+                return Redirect(redirectUrl);
+            }
+
+            return RedirectToAction("Index");
         }
 
     }
