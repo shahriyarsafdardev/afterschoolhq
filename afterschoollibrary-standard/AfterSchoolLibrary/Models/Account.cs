@@ -1145,6 +1145,18 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).Select(a => a.Subdomain).ToList();
         }
 
+        public static List<Account> LoadByIdsByAccountTypes(List<int> ids, List<AccountType> accountTypes, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["ID"], ids, DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["IsActive"], true);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
+            dq.Criterias.Add(ObjectMap["IsTest"], false);
+            dq.Criterias.Add(ObjectMap["AccountTypeId"], accountTypes.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
         #endregion
     }
 }

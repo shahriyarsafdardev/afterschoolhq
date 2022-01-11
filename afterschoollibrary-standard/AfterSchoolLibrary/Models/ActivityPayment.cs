@@ -402,6 +402,6 @@ namespace AfterSchoolLibrary.Models
 			return Transaction.Load(this.TransactionId.Value, msgs, dc);
 		}
 
-        #endregion
-    }
+		#endregion
+	}
 }
