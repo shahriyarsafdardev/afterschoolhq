@@ -26,7 +26,7 @@ namespace AfterSchoolLibraryTests.Migrations
             // Arrange
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            AfterSchoolLibrary.Helpers.Utilities.AdditionalData(dc);
+            AfterSchoolLibrary.Helpers.DatabaseInit.AdditionalData(dc);
 
             // Act                   
             AfterSchoolLibrary.Migrations.AddFeatureTypeManualStripePayouts_20211128.Do(msgs, dc);
