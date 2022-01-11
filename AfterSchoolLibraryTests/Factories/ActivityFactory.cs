@@ -68,7 +68,8 @@ namespace AfterSchoolLibraryTests.Factories
                 UniqueName = ActivityService.GenerateUniqueName(name, null, account.ID, msgs, dc),
                 GradeLevelStart = GradeLevel.Load(msgs: msgs, dc: dc).First().ID,
                 GradeLevelEnd = GradeLevel.Load(msgs: msgs, dc: dc).Last().ID,
-                CostPerRegistrant = costPerRegistrant
+                CostPerRegistrant = costPerRegistrant,
+                IsPublished = true                
             };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
