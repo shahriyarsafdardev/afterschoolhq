@@ -28,7 +28,7 @@ namespace AfterSchoolLibraryTests.Migrations
         [Fact]
         public void RunMigration()
         {
-            AfterSchoolLibrary.Helpers.Utilities.AdditionalData(dc);
+            AfterSchoolLibrary.Helpers.DatabaseInit.AdditionalData(dc);
 
             // Act                   
             msgs.AddRange(SchoolAccount.AddVisitorAccount(ProviderAccount, HostPermissionType.ApproveOnly, ApprovalStatus.Approved, false, true, SchoolWebUser, dc));
