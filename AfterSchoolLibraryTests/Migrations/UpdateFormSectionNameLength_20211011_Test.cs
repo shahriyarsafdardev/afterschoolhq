@@ -35,7 +35,7 @@ namespace AfterSchoolLibraryTests.Migrations
                 // Arrange
                 if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-                AfterSchoolLibrary.Helpers.Utilities.AdditionalData(dc);
+                AfterSchoolLibrary.Helpers.DatabaseInit.AdditionalData(dc);
 
                 // Act                   
                 var formQuestionGroup = FormQuestionGroupFactory.Create(ProviderForm.ID.Value, true, msgs, dc);
@@ -61,7 +61,7 @@ namespace AfterSchoolLibraryTests.Migrations
             // Arrange
                 if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-                AfterSchoolLibrary.Helpers.Utilities.AdditionalData(dc);
+                AfterSchoolLibrary.Helpers.DatabaseInit.AdditionalData(dc);
 
                 // Act
                 AfterSchoolLibrary.Migrations.UpdateFormSectionNameLength_20211011.Do(msgs, dc);
