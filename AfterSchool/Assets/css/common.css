@@ -1085,6 +1085,14 @@
     color: white !important;
 }
 
+.fontSize12{
+    font-size:12px;
+}
+.clearBoth{
+    clear:both;
+}
+.fr{
+    float:right !important;
 .re-316 {
     /* width: 700px;
         height: 480px;*/
