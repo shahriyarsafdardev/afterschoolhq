@@ -5,15 +5,17 @@ using BasicLibrary;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
-using System.Collections.Generic;
+using AfterSchoolLibrary.FeatureFlag;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
     public class UserController : BaseLoggedInController
     {
-        public UserController() : base(AccountService.ProviderAccountTypes.ToList())
-        {
+        private readonly IFeatureFlagRepository featureFlagRepository;
 
+        public UserController(IFeatureFlagRepository featureFlagRepository) : base(AccountService.ProviderAccountTypes.ToList())
+        {
+            this.featureFlagRepository = featureFlagRepository;
         }
 
         // GET: User
@@ -32,6 +34,8 @@ namespace AfterSchool.Areas.Org.Controllers
             HandleTempMessages(msgs);
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
+
+            ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
 
             return View(SessionVariables.CurrentUser);
         }

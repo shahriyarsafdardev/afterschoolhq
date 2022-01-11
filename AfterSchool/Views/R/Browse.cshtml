@@ -13,12 +13,20 @@
     var session = (ParticipationObject)ViewBag.Session;
     var msgs = (SystemMessages)ViewBag.Messages;
     var accountProfile = (AccountProfile)ViewBag.AccountProfile;
+
+    var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
 }
 
 @{ Html.RenderPartial(
-           "~/Views/Shared/Registration/_AccountTopBar.cshtml",
-           Model,
-           new ViewDataDictionary() { { "LoginReturnUrl", Model.HomePageUrl }, { "session", session } }); }
+       "~/Views/Shared/Registration/_AccountTopBar.cshtml",
+       Model,
+       new ViewDataDictionary()
+       {
+           { "LoginReturnUrl", Model.HomePageUrl },
+           { "session", session },
+           { "CleverSsoEnabled", cleverSsoEnabled },
+       });
+}
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 

@@ -3,6 +3,7 @@
     var account = (Account)ViewBag.Account;
     ViewBag.Title = account.Name;
     var msgs = (SystemMessages)ViewBag.Messages;
+    var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
 }
 
 @{Html.RenderPartial("OrgAccountHeader", account.ID.ToString());}
@@ -76,25 +77,28 @@
                 }
 
                 <div class="clearfix"></div>
-                <div class="row">
-                    <div class="col-sm-6 col-sm-offset-3 margin-v-10">
-                        <hr />
-                        <h4>Login With Clever</h4>  
+                @if (cleverSsoEnabled)
+                {
+                    <div class="row">
+                        <div class="col-sm-6 col-sm-offset-3 margin-v-10">
+                            <hr/>
+                            <h4>Login With Clever</h4>
 
-                        @if (UILabel.IsCurrentUserCleverIntegrated())
-                        {
-                            <p class="txt-clever-connected">You are currently connected to a Clever account with the username <b>@UILabel.GetCleverUserNameForCurrentUser()</b>. To change your connected Clever account, press the "Disconnect" button below.</p>
-                            <a type="button" class="btn btn-primary" href="@Url.Action("DisconnectCleverForCurrentUser", "User", new { Area = "Org" })" >Disconnect</a>
-                        }
-                        else
-                        {
-                            <br />
-                            <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLink">
-                                <img src="~/img/clever-login.png" style="width: 160px; height: 39px;" class="clever-login-img" />
-                            </a>
-                        }
+                            @if (UILabel.IsCurrentUserCleverIntegrated())
+                            {
+                                <p class="txt-clever-connected">You are currently connected to a Clever account with the username <b>@UILabel.GetCleverUserNameForCurrentUser()</b>. To change your connected Clever account, press the "Disconnect" button below.</p>
+                                <a type="button" class="btn btn-primary" href="@Url.Action("DisconnectCleverForCurrentUser", "User", new { Area = "Org" })">Disconnect</a>
+                            }
+                            else
+                            {
+                                <br/>
+                                <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLink">
+                                    <img src="~/img/clever-login.png" style="width: 160px; height: 39px;" class="clever-login-img"/>
+                                </a>
+                            }
+                        </div>
                     </div>
-                </div>
+                }
                 
                 <br />
                 <div class="form-group">

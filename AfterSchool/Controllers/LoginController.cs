@@ -6,13 +6,19 @@ using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using System.Linq;
+using AfterSchoolLibrary.FeatureFlag;
 
 namespace AfterSchool.Controllers
 {
     public class LoginController : BaseController
     {
-        //
-        // GET: /Login/
+        private readonly IFeatureFlagRepository featureFlagRepository;
+
+        public LoginController(IFeatureFlagRepository featureFlagRepository)
+        {
+            this.featureFlagRepository = featureFlagRepository;
+        }
+
         [HttpGet]
         public ActionResult Index(string regaccount, string invite)
         {
@@ -59,6 +65,7 @@ namespace AfterSchool.Controllers
             ViewBag.LoginType = "Internal";
             ViewBag.Messages = msgs;
             ViewBag.RegistrationAccount = regaccount;
+            ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
             return View();
         }
 

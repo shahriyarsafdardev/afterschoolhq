@@ -1,6 +1,8 @@
 ﻿@{ Layout = "~/Views/Shared/_LayoutLogin-Updated.cshtml";
     ViewBag.Title = "Login";
-    var msgs = (SystemMessages)ViewBag.Messages; }
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
+}
 
 <style>
     .bg-image {
@@ -76,9 +78,12 @@
                 <div class="form-group login-submit text-center">
                     <button id="btn-login" type="submit" class="btn btn-primary btn-lg btn-block btn-login-updated" style="margin: 0 auto;">Log In</button>
                     <br />
-                    <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLinkLogin" class="btn-clever-login">
-                        <img src="~/img/clever-login.png" style="width: 225px; height: 50px;" class="clever-login-img" />
-                    </a>
+                    @if (cleverSsoEnabled)
+                    {
+                        <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLinkLogin" class="btn-clever-login">
+                            <img src="~/img/clever-login.png" style="width: 225px; height: 50px;" class="clever-login-img"/>
+                        </a>
+                    }
                 </div>
 
             </form>
@@ -166,9 +171,12 @@
             <div class="form-group login-submit text-center">
                 <button id="btn-login-small-scrren" type="button" class="btn btn-primary btn-lg btn-block btn-login-updated" style="margin: 0 auto;" onclick="return validateLogin(true)">Log In</button>
                 <br />
-                <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLinkLogin" class="btn-clever-login">
-                    <img src="~/img/clever-login.png" style="width: 225px; height: 50px;" class="clever-login-img" />
-                </a>
+                @if (cleverSsoEnabled)
+                {
+                    <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLinkLogin" class="btn-clever-login">
+                        <img src="~/img/clever-login.png" style="width: 225px; height: 50px;" class="clever-login-img"/>
+                    </a>
+                }
             </div>
         </form>
     </div>

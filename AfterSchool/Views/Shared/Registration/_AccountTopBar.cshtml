@@ -63,6 +63,8 @@
 
     var loginReturnUrl = ViewData["LoginReturnUrl"];
 
+    var cleverSsoEnabled = ViewData["CleverSsoEnabled"];
+
     //set redirection url for clever login to redirect user to home page if they try to login from account topbar
     TempData["redirectUrl"] = loginReturnUrl.IsNotEmpty() ? loginReturnUrl.ToString() : returnUrl;
 }
@@ -357,7 +359,13 @@
     }
 </div>
 
-@{ Html.RenderPartial("~/Views/Shared/Registration/_LoginModalWithUpdatedDesign.cshtml", null, new ViewDataDictionary() { { "ReturnUrl", loginReturnUrl } }); }
+@{
+    Html.RenderPartial("~/Views/Shared/Registration/_LoginModalWithUpdatedDesign.cshtml", null, new ViewDataDictionary()
+    {
+        { "ReturnUrl", loginReturnUrl },
+        { "CleverSsoEnabled", cleverSsoEnabled },
+    });
+}
 
 <script type="text/javascript">
     function popOverButton() {
