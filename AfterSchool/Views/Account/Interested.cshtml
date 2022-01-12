@@ -5,6 +5,8 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
     var registrationAccount = (Account)ViewBag.RegistrationAccount;
+
+    var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -16,9 +18,9 @@
         new ViewDataDictionary()
         {
             { "ParticipationObject", participationObject },
-            { "isDuringProfileSetup", SessionVariables.CurrentUser.IsNotEmpty() }
-        }
-    );
+            { "isDuringProfileSetup", SessionVariables.CurrentUser.IsNotEmpty() },
+            { "CleverSsoEnabled", cleverSsoEnabled }
+        });
 }
 
 @{

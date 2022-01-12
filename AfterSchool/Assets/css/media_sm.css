@@ -1,5 +1,9 @@
 ﻿/* Small devices (portrait tablets and large phones, 480px to 769px) */
 @media (min-width: 480px) and (max-width: 769px) {
+    .hidden-sm {
+        display: none !important;
+    }
+
     .mobile-padding-zero {
         padding: 0!important;
     }
@@ -119,5 +123,18 @@
     .Contactmodaldialog {
         width: auto !important;
         margin: 30px 15px;
+    }
+
+    .login-form-forgot-password-container {
+        text-align: center;
+        clear: both;
+    }
+
+    .btn-login-updated {
+        margin: 0 auto;
+    }
+
+    .clever-login-img {
+        margin-top: 20px;
     }
 }

@@ -678,6 +678,7 @@ namespace AfterSchoolLibrary.Models
         {
             // var dq = GetSearchQuery(searchText, accountId, questionId, regStatus, participationObjectIds, participationObjectType, rats, msgs, dc);
             var dq = DatabaseQuery;
+            dq.Connection = dc;
             var sql = GetSearchSQL(searchText, accountId, questionId, regStatus, participationObjectIds, participationObjectType, rats);
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
@@ -688,6 +689,7 @@ namespace AfterSchoolLibrary.Models
         public static int SearchCount(string searchText, int accountId, int? questionId, List<int> participationObjectIds, ParticipationObjectType participationObjectType, RegistrationStatus regStatus, List<RegistrationAssignmentType> rats, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
+            dq.Connection = dc;
             var sql = GetSearchSQL(searchText, accountId, questionId, regStatus, participationObjectIds, participationObjectType, rats, true);
             return dq.ExecuteSelect(sql).Rows[0][0].ToString().ToInteger();
         }

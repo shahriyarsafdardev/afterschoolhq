@@ -19,6 +19,10 @@
 
         <div class="panel-heading">
             <div class="pull-right">
+                <input type="text" id="search" class="form-control searchFormInput" placeholder="Search Forms" />
+                <button class="btn btn-primary searchFormBtn" id="searchBtn">
+                    Search
+                </button>
                 @if (showFormFields)
                 {
                     <button class="btn btn-primary btn-space md-trigger mdpopup" data-modal="modal-newform" onclick="showFormType()">
@@ -42,8 +46,8 @@
         <div class="panel-body">
             @if (maxFormCount > 0)
             {
-                <p class="pull-right text-bold">
-                    @currentFormCount of @maxFormCount Forms
+                <p class="pull-right text-bold formCount">
+                    <span id="currentFormNumber">@currentFormCount</span> of @maxFormCount Forms
                 </p>
                 <div class="clearfix"></div>
             }
@@ -188,6 +192,50 @@
                 $("#formtype").val("2");
                 $(".mdpopup").trigger('click');
             }
+
+
+            $("#searchBtn").on("click", function () {
+                tableSearch();
+            });
+
+            $("#search").keypress(function (event) {
+                if (event.which == 13) {
+                    tableSearch();
+                }
+            });
+
+            function tableSearch() {
+                var value = $("#search").val().toLowerCase();
+                $("table tbody tr").each(function (index) {
+                    if (index != 0) {
+                        var len = $('td:eq(1):contains("' + value + '")', $(this)).length;
+
+                        if (len > 0) {
+                            $(this).show();
+                        }
+                        else {
+                            $(this).hide();
+                        }
+                    }
+                }).promise().done(function () {
+                    var numOfVisibleRows = $('table tbody tr:visible', '.table-responsive').length;
+                    if (numOfVisibleRows == 0) {
+                        $('.emptyTable').remove();
+                        $('.table-responsive table tbody').append('<tr class="emptyTable text-center"><td colspan="4">No search results found.</tr></td>');
+                        $('.formCount').hide();
+                    }
+                    else {
+                        $('.emptyTable').remove();
+                        $('.formCount').show();
+                        $('#currentFormNumber').html(numOfVisibleRows);
+                    }
+                });
+            }
         })
+        $.expr[":"].contains = $.expr.createPseudo(function (arg) {
+            return function (elem) {
+                return $(elem).text().toUpperCase().indexOf(arg.toUpperCase()) >= 0;
+            };
+        });
     </script>
 }

@@ -36,15 +36,14 @@
             Welcome @SessionVariables.CurrentUser.FirstName!
 
             @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.ActivitiesEdit))
-            {
+             {
                 <div class="pull-right">
                     <a href="@Url.Action("editsetup", "activity", new { isnew = 1, type = (int)ActivityType.Activity })" class="btn btn-primary">
                         <i class="icon icon-left s7-plus"></i>
                         Add @UILabel.ActivityLabel(ActivityType.Activity)
                     </a>
                 </div>
-            }
-            
+             }
             <div class="clearfix"></div>
         </div>
         <div class="panel-body">            
