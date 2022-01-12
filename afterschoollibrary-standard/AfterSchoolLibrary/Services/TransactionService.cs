@@ -650,6 +650,9 @@ namespace AfterSchoolLibrary.Services
 
                     if (stripeRefund.IsNotEmpty())
                     {
+                        // set stripe refund id, so we can use that later for create new refund
+                        stripeRefundId = stripeRefund.Id;
+
                         // get stripe transfer from original payment
                         var stripeOriginalPaymentChargeId = stripeRefund.ChargeId;
                         var stripeOriginalCharge = Billing.StripeHelper.GetCharge(stripeOriginalPaymentChargeId, msgs);

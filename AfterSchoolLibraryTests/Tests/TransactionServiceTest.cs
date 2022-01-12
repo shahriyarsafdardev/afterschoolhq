@@ -313,6 +313,35 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors());
         }
 
+        [Fact]
+        public void RefundTest()
+        {
+            var amount = 100;
+            var originalTransaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, msgs, dc);
+            var purchase = Factories.PurchaseFactory.Create(PayerAccount, amount, msgs, dc);
+            var transaction = TransactionService.CreateNew(
+                BillerAccount,
+                PayerAccount,
+                amount,
+                originalTransaction.ConvenienceFeeCharged,
+                originalTransaction.ConvenienceFeePayerAccountId,
+                originalTransaction.PaymentTypeFeeCharged,
+                originalTransaction.ConvenienceFeePayerAccountId,
+                purchase,
+                "Net Club refund",
+                TransactionType.Charge,
+                "re_1DNlPlCEgXQRZLhk3Rzzyzj6",
+                originalTransaction,
+                originalTransaction.PaymentTypeId,
+                originalTransaction.PaymentSourceTypeId,
+                false,
+                BillerAccountOwner,
+                msgs: msgs,
+                dc: dc);
+
+            var refund = transaction.CreateNewRefund(90, 0, 0, "re_1DNlPlCEgXQRZLhk3Rzzyzj6", TransactionType.Refund, transaction.PaymentTypeId, transaction.PaymentSourceTypeId, BillerAccountOwner, msgs, dc);
+
+            Assert.True(refund.StripeChargeOrRefundId.IsNotEmpty());
         [Fact(DisplayName = "Test CreatePayout")]
         public void CreatePayoutTest()
         {
