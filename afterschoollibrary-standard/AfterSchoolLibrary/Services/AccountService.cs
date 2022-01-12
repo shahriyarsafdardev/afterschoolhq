@@ -3586,6 +3586,40 @@ namespace AfterSchoolLibrary.Services
                 AccountService.CreatePurchaseTransactionPayment(checkoutObject, loggedInUser, msgs, dc);
         }
 
+        public static void ProcessSubscriptionPlan(CheckoutObject checkoutObject, Registrant submittedRecord, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            submittedRecord.StartSubscriptionPlan(checkoutObject: checkoutObject, loggedInUser: loggedInUser, msgs: msgs, dc: dc);
+
+            if (msgs.HasNoErrors())
+                AccountService.CreatePurchaseTransactionPayment(checkoutObject, loggedInUser, msgs, dc);
+        }
+
+        public static void ProcessPaymentPlan(CheckoutObject checkoutObject, Registrant submittedRecord, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            // create a stripe coupon if needed
+            var coupon = checkoutObject.Coupon;
+            if (coupon.IsNotEmpty() && coupon.DoesApplyToRegistrationFee())
+            {
+                var discountValue = coupon.Amount;
+                if (coupon.AmountTypeId == CouponAmountType.FlatAmount) // calculate the new discount amount for the coupon
+                    discountValue = (checkoutObject.ParticipationObject.Cost - coupon.Amount) / checkoutObject.PaymentPlan.TotalPeriods;
+
+                coupon.CreateStripeCoupon(
+                    checkoutObject.BillingAccount.StripeUserId,
+                    StripeCouponDuration.Repeating,
+                    checkoutObject.PaymentPlan.TotalPeriods,
+                    discountValue.Value,
+                    msgs,
+                    dc
+                );
+            }
+
+            submittedRecord.StartPaymentPlan(checkoutObject: checkoutObject, loggedInUser: loggedInUser, msgs: msgs, dc: dc);
+
+            if (msgs.HasNoErrors())
+                AccountService.CreatePurchaseTransactionPayment(checkoutObject, loggedInUser, msgs, dc);
+        }
+
         public static void ProcessStudentRegistration(CheckoutObject checkoutObject, bool sendConfirmationEmail, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
@@ -3710,7 +3744,7 @@ namespace AfterSchoolLibrary.Services
                     // get the registrant record that was created just for the account
                     var submittedRecord = checkoutObject.Registration.GetRegistrant(amsgs, adc);
 
-                    AccountService.ProcessRegistrationWithoutPayment(
+                    ProcessRegistrationWithoutPayment(
                         checkoutObject: checkoutObject,
                         sendConfirmationEmail: false,
                         loggedInUser: loggedInUser,
@@ -3725,49 +3759,16 @@ namespace AfterSchoolLibrary.Services
                     var alreadyPaidRegFee = submittedRecord.GetAmountPaid(msgs, dc) > 0;
 
                     if (!isRegFree && !hasPaymentPlan && !alreadyPaidRegFee && !hasPostPayPlan)
-                        AccountService.ProcessRegistrationFee(checkoutObject, loggedInUser, amsgs, adc);
+                        ProcessRegistrationFee(checkoutObject, loggedInUser, amsgs, adc);
 
-                    // Process Subscriptions separately, don't charge all at once for the registration Fee
-                    // if they have a subscription plan
-                    // will also process registration fees
                     if (hasSubscription)
-                        submittedRecord.StartSubscriptionPlan(
-                            checkoutObject: checkoutObject,
-                            loggedInUser: loggedInUser,
-                            msgs: amsgs,
-                            dc: adc);
+                        ProcessSubscriptionPlan(checkoutObject, submittedRecord, loggedInUser, amsgs, adc);
 
                     if (hasPostPayPlan)
-                        AccountService.ProcessPostPayPlan(checkoutObject, loggedInUser, amsgs, adc);
+                        ProcessPostPayPlan(checkoutObject, loggedInUser, amsgs, adc);
 
-                    // if they have a payment plan
                     if (hasPaymentPlan)
-                    {
-                        // create a stripe coupon if needed
-                        var coupon = checkoutObject.Coupon;
-                        if (coupon.IsNotEmpty() && coupon.DoesApplyToRegistrationFee())
-                        {
-                            var discountValue = coupon.Amount;
-                            if (coupon.AmountTypeId == CouponAmountType.FlatAmount) // calculate the new discount amount for the coupon
-                                discountValue = (checkoutObject.ParticipationObject.Cost - coupon.Amount) / checkoutObject.PaymentPlan.TotalPeriods;
-
-                            coupon.CreateStripeCoupon(
-                                checkoutObject.BillingAccount.StripeUserId,
-                                StripeCouponDuration.Repeating,
-                                checkoutObject.PaymentPlan.TotalPeriods,
-                                discountValue.Value,
-                                amsgs,
-                                dc
-                            );
-                        }
-
-                        submittedRecord.StartPaymentPlan(
-                            checkoutObject: checkoutObject,
-                            loggedInUser: loggedInUser,
-                            msgs: amsgs,
-                            dc: adc
-                        );
-                    }
+                        ProcessPaymentPlan(checkoutObject, submittedRecord, loggedInUser, amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
