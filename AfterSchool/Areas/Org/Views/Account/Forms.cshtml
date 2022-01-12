@@ -47,7 +47,7 @@
             @if (maxFormCount > 0)
             {
                 <p class="pull-right text-bold formCount">
-                    @currentFormCount of @maxFormCount Forms
+                    <span id="currentFormNumber">@currentFormCount</span> of @maxFormCount Forms
                 </p>
                 <div class="clearfix"></div>
             }
@@ -195,33 +195,47 @@
 
 
             $("#searchBtn").on("click", function () {
+                tableSearch();
+            });
+
+            $("#search").keypress(function (event) {
+                if (event.which == 13) {
+                    tableSearch();
+                }
+            });
+
+            function tableSearch() {
                 var value = $("#search").val().toLowerCase();
-                $("table tr").each(function (index) {
+                $("table tbody tr").each(function (index) {
                     if (index != 0) {
+                        var len = $('td:eq(1):contains("' + value + '")', $(this)).length;
 
-                        $row = $(this);
-
-                        var id = $row.find("td:eq(1)").text().toLowerCase();
-
-                        if (id.indexOf(value) != 0) {
-                            $(this).hide();
+                        if (len > 0) {
+                            $(this).show();
                         }
                         else {
-                            $(this).show();
+                            $(this).hide();
                         }
                     }
                 }).promise().done(function () {
-                    var numOfVisibleRows = $('tr:visible').length;
+                    var numOfVisibleRows = $('table tbody tr:visible', '.table-responsive').length;
                     if (numOfVisibleRows == 0) {
-                        $('.table-responsive').append('<div class="text-center emptyTable">No search results found.</div>');
+                        $('.emptyTable').remove();
+                        $('.table-responsive table tbody').append('<tr class="emptyTable text-center"><td colspan="4">No search results found.</tr></td>');
                         $('.formCount').hide();
                     }
                     else {
                         $('.emptyTable').remove();
                         $('.formCount').show();
+                        $('#currentFormNumber').html(numOfVisibleRows);
                     }
                 });
-            });
+            }
         })
+        $.expr[":"].contains = $.expr.createPseudo(function (arg) {
+            return function (elem) {
+                return $(elem).text().toUpperCase().indexOf(arg.toUpperCase()) >= 0;
+            };
+        });
     </script>
 }
