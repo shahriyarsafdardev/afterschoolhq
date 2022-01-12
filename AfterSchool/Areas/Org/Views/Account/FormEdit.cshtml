@@ -1132,7 +1132,7 @@
                 var minLabel = start[1];
 
                 $('#question-rating-min').val(min);
-                $('#rating-min-label').val(min);
+                $('#rating-min-label').html(min);
 
                 if (minLabel)
                     $('#question-rating-label-min').val(minLabel);
@@ -1147,13 +1147,12 @@
                 var maxLabel = end[1];
 
                 $('#question-rating-max').val(max);
-                $('#rating-max-label').val(max);
-
+                $('#rating-max-label').html(max);
                 if (maxLabel)
                     $('#question-rating-label-max').val(maxLabel);
             }
         }
-
+        setOptionalLabelAndIncrement();
         var increment = splitedRating[2];
         if (increment)
             $('#question-rating-increment').val(parseInt(increment));
@@ -1165,14 +1164,14 @@
             $('#question-rating-min').val(1);
 
         $('#question-rating-label-min').val('');
-        $('#rating-min-label').val(1);
+        $('#rating-min-label').html(1);
 
         var max = $('#question-rating-max').val();
         if (max == '')
             $('#question-rating-max').val(5);
 
         $('#question-rating-label-max').val('');
-        $('#rating-max-label').val('5');
+        $('#rating-max-label').html('5');
 
         var increment = $('#question-rating-increment').val();
         if (increment == '')
@@ -1299,6 +1298,7 @@
     function setOptionalLabelAndIncrement() {
 
         var ratingMaxValue = $('#question-rating-max').val().replace(/[^\d.-]/g, '');
+        var ratingMinValue = $('#question-rating-min').val().replace(/[^\d.-]/g, '');
 
         if ($.isNumeric($('#question-rating-min').val())) {
             $('#rating-min-label').empty();
@@ -1312,7 +1312,7 @@
 
         $('#question-rating-increment').empty();
 
-        for (var i = 0; i < ratingMaxValue; i++) {
+        for (var i = ratingMinValue; i < ratingMaxValue; i++) {
             if (ratingMaxValue % i == 0) {
                 var newOption = $('<option value="' + i + '">' + i + '</option>');
                 $('#question-rating-increment').append(newOption);
