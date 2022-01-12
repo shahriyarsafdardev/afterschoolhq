@@ -196,6 +196,9 @@
     <Reference Include="Remotion.Linq, Version=2.1.0.0, Culture=neutral, PublicKeyToken=fee00910d6e5f53b, processorArchitecture=MSIL">
       <HintPath>..\packages\Remotion.Linq.2.1.1\lib\net45\Remotion.Linq.dll</HintPath>
     </Reference>
+    <Reference Include="RestSharp, Version=106.15.0.0, Culture=neutral, PublicKeyToken=598062e77f915f75, processorArchitecture=MSIL">
+      <HintPath>..\packages\RestSharp.106.15.0\lib\net452\RestSharp.dll</HintPath>
+    </Reference>
     <Reference Include="Rollbar, Version=3.7.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Rollbar.3.7.1\lib\net472\Rollbar.dll</HintPath>
     </Reference>
@@ -557,6 +560,7 @@
     <Compile Include="Areas\Admin\Controllers\AccountController.cs" />
     <Compile Include="Areas\Admin\Controllers\PackageController.cs" />
     <Compile Include="Areas\Admin\Controllers\PayoutController.cs" />
+    <Compile Include="Areas\Admin\Controllers\ScheduleTasksController.cs" />
     <Compile Include="Areas\Admin\Controllers\StripeHooksController.cs" />
     <Compile Include="Areas\Admin\Controllers\TransactionController.cs" />
     <Compile Include="Areas\Admin\Controllers\UploadController.cs" />
@@ -1357,6 +1361,8 @@
     <Content Include="Areas\Org\Views\Activity\ViewSurvey.cshtml" />
     <Content Include="Areas\Org\Views\Registration\Surveys.cshtml" />
     <Content Include="Areas\Org\Views\Activity\ViewSurveyResults.cshtml" />
+    <Content Include="Areas\Org\Views\Shared\_ModalUpdateCleverAccount.cshtml" />
+    <Content Include="Areas\Admin\Views\ScheduleTasks\Index.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />
@@ -1849,6 +1855,10 @@
     <Content Include="Views\Shared\Modals\_TransferModal.cshtml" />
     <Content Include="Views\Shared\Modals\_TransferModal-TransferButton.cshtml" />
     <Content Include="Views\R\ActivitySelectDates.cshtml" />
+    <Content Include="Views\Shared\Registration\_LoginModalWithUpdatedDesign.cshtml" />
+    <Content Include="Views\Shared\_LayoutLogin-Updated.cshtml" />
+    <Content Include="Views\Shared\Registration\_ResetPassword.cshtml" />
+    <Content Include="Views\Shared\Registration\_ResetPasswordCompleted.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

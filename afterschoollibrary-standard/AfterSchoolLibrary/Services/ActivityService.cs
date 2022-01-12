@@ -2138,7 +2138,7 @@ namespace AfterSchoolLibrary.Services
         public static List<DayOfWeekASL> GetDaysOfTheWeek(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var daysOfTheWeek = activity.GetSchedule(msgs: msgs, dc: dc)?.GetDaysOfTheWeek(msgs, dc);
-            if (daysOfTheWeek.Any())
+            if (daysOfTheWeek?.Any() ?? false)
                 return daysOfTheWeek;
 
             return new List<DayOfWeekASL>();
@@ -2861,6 +2861,29 @@ namespace AfterSchoolLibrary.Services
             }
 
             return dropdownOptions;
+        }
+
+        public static void ProcessActivityPayouts(this Activity activity, WebUser currentUser, Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            msgs.Add($"Checking payments for activity: ({activity.UniqueName}).", MessageType.Success);
+
+            var transactions = new List<Transaction>();
+            var activityPayments = ActivityPayment.LoadByParticipationObject(ParticipationObjectId: activity.ID.Value,
+                ParticipationObjectTypeId: ParticipationObjectType.Activity,
+                IsDeleted: false,
+                msgs: msgs,
+                dc: dc);
+
+            // load only those transactions which aren't payed out yet
+            foreach (var activityPayment in activityPayments)
+            {
+                var transaction = activityPayment.CheckTransactionForPayout(activityUniqueName: activity.UniqueName, msgs: msgs, dc: dc);
+                if (transaction.IsNotEmpty())
+                    transactions.Add(transaction);                
+            }
+
+            if (transactions.Any())
+                PayoutService.ProcessManualPayouts(transactions: transactions, activityUniqueName: activity.UniqueName, account: account, currentUser: currentUser, msgs: msgs, dc: dc);
         }
     }
 }

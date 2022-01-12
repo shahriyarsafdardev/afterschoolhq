@@ -556,6 +556,7 @@ namespace AfterSchoolLibrary.Services
             if (!transaction.PayoutId.HasValue)
                 return PayoutService.CreateNew(
                     account: transaction.GetBillerAccount(msgs, dc),
+                    statementDescriptor: null,
                     transactions: transaction.AsList(),
                     payoutStatus: payoutStatus,
                     paymentType: paymentType,
