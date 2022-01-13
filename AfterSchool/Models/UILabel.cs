@@ -135,6 +135,8 @@ namespace AfterSchool.Models
         public static bool CheckAllowTextMessage(WebUser currentUser)
         {
             return !currentUser.IsNotEmpty() || currentUser.AllowTextMessages && System.Web.HttpContext.Current.Request.HttpMethod.ToString() == "GET";
+        }
+
         public static bool IsCurrentUserCleverIntegrated()
         {
             if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.CleverUserId.IsNotEmpty())
