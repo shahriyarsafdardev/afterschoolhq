@@ -1478,11 +1478,11 @@ namespace AfterSchool.Controllers
           .Distinct()
           .ToList();
 
-      questions.AddRange(
-              allQuestions
-                  .Where(question => question.QuestionDataTypeId == QuestionDataType.NotSet)
-                  .Where(question => answers.Find(answer => answer.FormQuestionId == question.ID).IsEmpty())
-          );
+      questions.AddRange(allQuestions
+          .Where(question => !question.IsDeleted && question.QuestionDataTypeId == QuestionDataType.NotSet)
+          .Where(question => answers.Find(answer => answer.FormQuestionId == question.ID).IsEmpty())
+          .OrderBy(question => question.DisplayOrder)
+        );
 
       ViewBag.Registrant = SessionVariables.CurrentRegistrant;
 
