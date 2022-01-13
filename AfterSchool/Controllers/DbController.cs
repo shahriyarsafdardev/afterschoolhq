@@ -2,6 +2,7 @@ using System.Linq;
 using System.Web.Mvc;
 using BasicLibrary;
 using AfterSchool.Models;
+using AfterSchoolLibrary.Helpers;
 
 namespace AfterSchool.Controllers
 {
@@ -14,7 +15,7 @@ namespace AfterSchool.Controllers
             {
                 var msgs = new SystemMessages();
 
-                msgs.AddRange(AfterSchoolLibrary.Helpers.Utilities.InitDatabase(
+                msgs.AddRange(DatabaseInit.InitDatabase(
                     "darye@afterschoolhq.com", 
                     "help students learn", 
                     "317-316-0596", 

@@ -65,20 +65,20 @@ namespace AfterSchoolLibraryTests.Tests
                 dc
             );
 
-           var billerPaysNoFees = TransactionFactory.Create(
-                BillerAccount,
-                PayerAccount,
-                PaymentType.ACH,
-                amount,
-                platformPercentFee,
-                platformFlatFee,
-                PayerAccount.ID.Value, // convenience fee payer
-                PayerAccount.ID.Value, // payment type fee payer
-                convenienceFee,
-                paymentTypeFeeCharged,
-                msgs,
-                dc
-            );
+            var billerPaysNoFees = TransactionFactory.Create(
+                 BillerAccount,
+                 PayerAccount,
+                 PaymentType.ACH,
+                 amount,
+                 platformPercentFee,
+                 platformFlatFee,
+                 PayerAccount.ID.Value, // convenience fee payer
+                 PayerAccount.ID.Value, // payment type fee payer
+                 convenienceFee,
+                 paymentTypeFeeCharged,
+                 msgs,
+                 dc
+             );
 
             var billerPaysConvenienceFee = TransactionFactory.Create(
                  BillerAccount,
@@ -131,13 +131,13 @@ namespace AfterSchoolLibraryTests.Tests
                 Assert.Equal(expected: 0M, actual: transactionOutsideAhq.GetFeesChargedToBiller());
                 Assert.Equal(expected: convenienceFee, actual: oldTransaction.GetFeesChargedToBiller());
                 Assert.Equal(expected: 0M, actual: billerPaysNoFees.GetFeesChargedToBiller());
-                Assert.Equal(expected: convenienceFee, actual:  billerPaysConvenienceFee.GetFeesChargedToBiller());
+                Assert.Equal(expected: convenienceFee, actual: billerPaysConvenienceFee.GetFeesChargedToBiller());
                 Assert.Equal(expected: paymentTypeFeeCharged, billerPaysPaymentTypeFees.GetFeesChargedToBiller());
                 Assert.Equal(expected: convenienceFee + paymentTypeFeeCharged, billerPaysBothFees.GetFeesChargedToBiller());
             }
             else
                 Assert.True(false);
-                
+
         }
 
         /// <summary>
@@ -147,8 +147,8 @@ namespace AfterSchoolLibraryTests.Tests
         /// <param name="convenienceFee"></param>
         /// <param name="paymentTypeFee"></param>
         [Theory]
-        [InlineData(0.01, 1,1)]
-        [InlineData(5,1,1)]
+        [InlineData(0.01, 1, 1)]
+        [InlineData(5, 1, 1)]
         public void GetRefundableAmountTest(decimal amount, decimal convenienceFee, decimal paymentTypeFee)
         {
             var transaction1 = TransactionFactory.Create(
@@ -182,33 +182,33 @@ namespace AfterSchoolLibraryTests.Tests
                  TransactionType.NotSet
              );
 
-            Assert.Equal(Math.Max(amount - paymentTypeFee,paymentTypeFee), transaction1.GetRefundableAmount(false, msgs, dc));
+            Assert.Equal(Math.Max(amount - paymentTypeFee, paymentTypeFee), transaction1.GetRefundableAmount(false, msgs, dc));
             Assert.Equal(amount, transaction1.GetRefundableAmount(true, msgs, dc));
 
             Assert.Equal(0, transaction2.GetRefundableAmount(false, msgs, dc));
         }
 
         [Theory]
-        [InlineData(0.1,1,1)]
+        [InlineData(0.1, 1, 1)]
         [InlineData(25, 2.49, 2.18)]
         public void GetBillerAmountTest(decimal amount, decimal paymentTypeFee, decimal convenienceFee)
         {
             var transaction = TransactionFactory.Create(
-                BillerAccount, 
-                PayerAccount, 
-                PaymentType.CreditCard, 
-                amount, 
+                BillerAccount,
+                PayerAccount,
+                PaymentType.CreditCard,
+                amount,
                 0,
                 0,
-                BillerAccount.ID.Value, 
-                PayerAccount.ID.Value, 
-                convenienceFee, 
-                paymentTypeFee, 
-                msgs, 
+                BillerAccount.ID.Value,
+                PayerAccount.ID.Value,
+                convenienceFee,
+                paymentTypeFee,
+                msgs,
                 dc
             );
 
-            Assert.Equal(Math.Max(amount - (convenienceFee + paymentTypeFee),0), transaction.GetBillerAmount(msgs,dc));
+            Assert.Equal(Math.Max(amount - (convenienceFee + paymentTypeFee), 0), transaction.GetBillerAmount(msgs, dc));
         }
 
         [Theory]
@@ -248,7 +248,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(refund.IsNotEmpty());
             Assert.True(transaction.IsTotallyRefunded(true, msgs, dc));
         }
-        
+
         [Theory]
         [InlineData(110, 6, 4)]
         public void GetRefundableAmountWithCcFeeTest(decimal amount, decimal convenienceFee, decimal paymentTypeFee)
@@ -274,7 +274,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.Equal(refundableAmount, expectedRefund);
             Assert.Equal(refundableAmount, expectedRefund2);
-            Assert.True(msgs.HasNoErrors());                    
+            Assert.True(msgs.HasNoErrors());
         }
 
         [Theory]
@@ -305,12 +305,60 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.False(issAmountRefundable1);
             Assert.False(issAmountRefundable2);
-            Assert.True(issAmountRefundable3);                
+            Assert.True(issAmountRefundable3);
             Assert.False(issAmountRefundable4);
             Assert.True(issAmountRefundable5);
             Assert.False(issAmountRefundable6);
 
             Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void RefundTest()
+        {
+            var amount = 100;
+            var originalTransaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, msgs, dc);
+            var purchase = Factories.PurchaseFactory.Create(PayerAccount, amount, msgs, dc);
+            var transaction = TransactionService.CreateNew(
+                BillerAccount,
+                PayerAccount,
+                amount,
+                originalTransaction.ConvenienceFeeCharged,
+                originalTransaction.ConvenienceFeePayerAccountId,
+                originalTransaction.PaymentTypeFeeCharged,
+                originalTransaction.ConvenienceFeePayerAccountId,
+                purchase,
+                "Net Club refund",
+                TransactionType.Charge,
+                "re_1DNlPlCEgXQRZLhk3Rzzyzj6",
+                originalTransaction,
+                originalTransaction.PaymentTypeId,
+                originalTransaction.PaymentSourceTypeId,
+                false,
+                BillerAccountOwner,
+                msgs: msgs,
+                dc: dc);
+
+            var refund = transaction.CreateNewRefund(90, 0, 0, "re_1DNlPlCEgXQRZLhk3Rzzyzj6", TransactionType.Refund, transaction.PaymentTypeId, transaction.PaymentSourceTypeId, BillerAccountOwner, msgs, dc);
+
+            Assert.True(refund.StripeChargeOrRefundId.IsNotEmpty());
+        }
+
+        [Fact(DisplayName = "Test CreatePayout")]
+        public void CreatePayoutTest()
+        {
+            // Arrange
+            var transaction = TransactionFactory.Create(billerAccount: BillerAccount, payerAccount: PayerAccount, paymentType: PaymentType.ACH, amount: 100,
+                platformPercentFee: 0, platformFlatFee: 0, convenienceFeePayerAccountId: BillerAccount.ID.Value, paymentTypeFeePayerAccountId: PayerAccount.ID.Value,
+                convenienceFeeCharged: 7, paymentTypeFeeCharged: 4, msgs: msgs, dc: dc, transactionType: TransactionType.Charge);
+
+            // Act
+            var payout = transaction.CreatePayout(payoutStatus: PayoutStatus.Requested, paymentType: PaymentType.CreditCard, loggedInUser: PayerAccountOwner, msgs: msgs, dc: dc);
+
+            // Assert
+            Assert.True(msgs.HasNoErrors());
+            Assert.NotNull(payout);
+            Assert.Null(payout.StatementDescriptor);
         }
     }
 }

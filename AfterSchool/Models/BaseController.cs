@@ -362,5 +362,14 @@ namespace AfterSchool.Models
         {
             return Redirect(UnsupportedBrowserPage);
         }
+
+        public void LoadTempMsgAndLogErrors(SystemMessages msgs = null)
+        {
+            // store temp msgs
+            SetTempMessage(msgs: msgs);
+            
+            if (msgs.HasErrors())
+                AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(msgs); // log all error msgs 
+        }
     }
 }

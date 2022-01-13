@@ -155,17 +155,20 @@ namespace AfterSchool.Areas.Admin.Controllers
             var accountTypeIdList = accountTypeIds.Split(',').Select(x => (AccountType)x.ToInteger()).ToList();
             var currentUser = SessionVariables.CurrentUser;
 
-            packageFeature.Max = featureValue;
-            packageFeature.LastModifiedBy = currentUser.ID.Value;
-            packageFeature.LastModifiedDate = DateTime.UtcNow;
-            msgs.AddRange(packageFeature.Save());
+            if (packageFeature.IsNotEmpty()) {
+                packageFeature.Max = featureValue;
+                packageFeature.LastModifiedBy = currentUser.ID.Value;
+                packageFeature.LastModifiedDate = DateTime.UtcNow;
+                msgs.AddRange(packageFeature.Save());
+            }
+            else
+                packageFeature = PackageFeatureService.AddPackageFeature(packageId, featureTypeId.ToEnum<FeatureType>(), featureValue, currentUser, msgs);
 
             packageFeature.ResetAllAccountFeaturesToPackageFeature(
                 accountTypeIdList, 
                 resetIfAcctValueGreaterThan, 
                 currentUser, 
                 msgs);
-
 
             var features = package.GetFeatures(msgs);
 
