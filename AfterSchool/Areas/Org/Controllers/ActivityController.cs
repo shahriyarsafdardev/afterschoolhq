@@ -2412,7 +2412,8 @@ namespace AfterSchool.Areas.Org.Controllers
 				MasterRegistrant = masterRegistrant,
 				PaymentType = (PaymentType)paymenttype.ToInteger(),
 				PaymentSourceType = PaymentSourceType.ManualProvider,
-				OverrideAmount = amountpaid.ToDecimal()
+				OverrideAmount = amountpaid.ToDecimal(),
+				PaymentTypeFeeOverrideAmount = 0,
 				},
 				loggedInUser: SessionVariables.CurrentUser,
 				msgs: msgs
