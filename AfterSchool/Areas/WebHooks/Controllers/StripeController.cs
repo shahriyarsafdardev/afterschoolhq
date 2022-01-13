@@ -222,6 +222,12 @@ namespace AfterSchool.Areas.WebHooks.Controllers
       }
 
       var plan = rsp.GetSubscriptionPlan(msgs);
+      if (stripeInvoice.AmountPaid <= 0 && chargeId.IsEmpty())
+      {
+        msgs.Add($"Ignoring - Charge not found, probably $0 invoice for future plans - Stripe Sub ID {stripeSubscriptionId}", MessageType.Notice);
+        return ReturnOK(msgs);
+      }
+
       var registrant = rsp.GetRegistrant(msgs);
       var masterRegistrant = registrant.GetMasterRegistrant(msgs);
       var purchasingAccount = masterRegistrant.GetAccount(msgs);
