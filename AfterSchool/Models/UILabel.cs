@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Collections;
 using BasicLibrary;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchool.Models
 {
@@ -131,6 +132,9 @@ namespace AfterSchool.Models
             return text;
         }
 
+        public static bool CheckAllowTextMessage(WebUser currentUser)
+        {
+            return !currentUser.IsNotEmpty() || currentUser.AllowTextMessages && System.Web.HttpContext.Current.Request.HttpMethod.ToString() == "GET";
         public static bool IsCurrentUserCleverIntegrated()
         {
             if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.CleverUserId.IsNotEmpty())
