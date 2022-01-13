@@ -274,7 +274,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.Equal(refundableAmount, expectedRefund);
             Assert.Equal(refundableAmount, expectedRefund2);
-            Assert.True(msgs.HasNoErrors());                    
+            Assert.True(msgs.HasNoErrors());
         }
 
         [Theory]
@@ -305,7 +305,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.False(issAmountRefundable1);
             Assert.False(issAmountRefundable2);
-            Assert.True(issAmountRefundable3);                
+            Assert.True(issAmountRefundable3);
             Assert.False(issAmountRefundable4);
             Assert.True(issAmountRefundable5);
             Assert.False(issAmountRefundable6);
@@ -342,13 +342,15 @@ namespace AfterSchoolLibraryTests.Tests
             var refund = transaction.CreateNewRefund(90, 0, 0, "re_1DNlPlCEgXQRZLhk3Rzzyzj6", TransactionType.Refund, transaction.PaymentTypeId, transaction.PaymentSourceTypeId, BillerAccountOwner, msgs, dc);
 
             Assert.True(refund.StripeChargeOrRefundId.IsNotEmpty());
+        }
+
         [Fact(DisplayName = "Test CreatePayout")]
         public void CreatePayoutTest()
         {
             // Arrange
             var transaction = TransactionFactory.Create(billerAccount: BillerAccount, payerAccount: PayerAccount, paymentType: PaymentType.ACH, amount: 100,
                 platformPercentFee: 0, platformFlatFee: 0, convenienceFeePayerAccountId: BillerAccount.ID.Value, paymentTypeFeePayerAccountId: PayerAccount.ID.Value,
-                convenienceFeeCharged: 7, paymentTypeFeeCharged: 4, msgs: msgs, dc:dc, transactionType: TransactionType.Charge);
+                convenienceFeeCharged: 7, paymentTypeFeeCharged: 4, msgs: msgs, dc: dc, transactionType: TransactionType.Charge);
 
             // Act
             var payout = transaction.CreatePayout(payoutStatus: PayoutStatus.Requested, paymentType: PaymentType.CreditCard, loggedInUser: PayerAccountOwner, msgs: msgs, dc: dc);
