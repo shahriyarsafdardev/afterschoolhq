@@ -613,6 +613,14 @@ namespace AfterSchool.Areas.Org.Controllers
 
                             if (accountFeature.FeatureTypeId == FeatureType.TrialDays && accountPackage.TrialStartDate.HasValue)
                                 amsgs.AddRange(accountPackage.UpdateTrialDays(accountFeature.Max.Value.ToInteger(), adc));
+                            else if (accountFeature.FeatureTypeId == FeatureType.ManualStripePayouts)
+                            {
+                                var manualStripePayouts = accountPackage.HasFeature(featureType: FeatureType.ManualStripePayouts, msgs: amsgs, dc: adc);
+                                if (manualStripePayouts)
+                                    StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: a.StripeUserId, accountName: a.Name, payoutIntervalType: PayoutIntervalType.Manual, msgs: amsgs);
+                                else
+                                    StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: a.StripeUserId, accountName: a.Name, payoutIntervalType: PayoutIntervalType.Daily, msgs: amsgs);
+                            }
                         }
                     }
                 },
