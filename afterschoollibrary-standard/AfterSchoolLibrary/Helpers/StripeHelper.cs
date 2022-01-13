@@ -1329,7 +1329,7 @@ namespace AfterSchoolLibrary.Billing
 
             // please make sure that billing ends when the program ends.
             if (endDate.HasValue && endDate.IsNotEmpty() && endDate.Value.Date.AddDays(-1).IsAfter(DateTime.UtcNow.Date))
-                options.CancelAt = endDate.Value;        
+                options.CancelAt = endDate.Value;
 
             if (stripeAccountId.IsNotEmpty())
                 options.TransferData = new SubscriptionTransferDataOptions()

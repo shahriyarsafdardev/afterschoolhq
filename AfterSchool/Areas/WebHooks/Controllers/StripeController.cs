@@ -382,16 +382,28 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
     private IHttpActionResult SubscriptionCompleted(Stripe.Event stripeEvent, SystemMessages msgs)
     {
-      var subscription = (Stripe.Subscription)stripeEvent.Data.Object;
+        if (stripeEvent.IsNotEmpty() &&
+                    stripeEvent.Data.IsNotEmpty() &&
+                    stripeEvent.Data.Object.IsNotEmpty())
+        {
+            var subscription = (Stripe.Subscription)stripeEvent.Data.Object;
 
-      if (subscription.Plan.IsNotEmpty() && subscription.Plan.Id.IsNotEmpty())
-      {
-        var dbSubscription = SubscriptionPlan.LoadByStripePlanId(subscription.Plan.Id, msgs);
-        dbSubscription.IsActive = false;
-        dbSubscription.Save();
-      }
+            if (subscription.Plan.IsNotEmpty() && subscription.Plan.Id.IsNotEmpty())
+            {
+                var dbSubscription = SubscriptionPlan.LoadByStripePlanId(subscription.Plan.Id, msgs);
+                if (dbSubscription.IsNotEmpty() &&
+                    dbSubscription.IsActive)
+                {
+                    dbSubscription.IsActive = false;
+                    msgs.AddRange(dbSubscription.Save());
+                }
+            }
+        }
 
-      return ReturnOK(msgs);
+        if (msgs.HasErrors())
+            return Return500(msgs);
+
+        return ReturnOK(msgs);
     }
   }
 }
