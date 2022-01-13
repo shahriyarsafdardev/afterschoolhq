@@ -402,7 +402,8 @@ namespace AfterSchool.Controllers
             {
                 QuestionDataType.RegistrantFirstName,
                 QuestionDataType.RegistrantLastName,
-                QuestionDataType.RegistrantEmail
+                QuestionDataType.RegistrantEmail,
+                QuestionDataType.RegistrantMiddleName
             };
 
       questions = questions.Where(question => question.QuestionDataTypeId.NotIn(FormService.QuestionsToNotIncludeInParentPanel())).ToList();
