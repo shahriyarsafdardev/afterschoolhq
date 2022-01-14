@@ -34,10 +34,13 @@ property: VerifiedAccount, bool, Bit
 property: IsRegistered, bool, Bit
 property: DefaultAccountId, int?, Int
 property: AllowTextMessages, bool, Bit
+property: CleverUserId, string, NVarChar "100"
+property: CleverUserName, string, NVarChar "100"
 loadmethod: Uid
 loadmethod: Uid|IsActive
 loadmethod: IsActive, List<>
 loadmethod: FacebookId
+loadmethod: CleverUserId|IsActive
 [end]
 
 [-begin]
@@ -1608,6 +1611,7 @@ property: PaymentTypeId, PaymentType, Int, required
 property: DateRequested, DateTime?, DateTime, required
 property: RequestedBy, int?, Int, required
 property: ExternalPayoutId, string, NVarChar "100", , a place to store the check id or stripe payout id
+property: StatementDescriptor, string, NVarChar "22", , a place to store statements that will be used by stripe payout
 loadmethod: AccountId, List<>
 loadmethod: AccountId|PayoutStatusId, List<>
 loadmethod: PayoutStatusId, List<>
@@ -1990,7 +1994,7 @@ values: NotSet, New, InProgress, Completed
 [begin]
 type: Enum
 name: WebSessionActionType
-values: NotSet, Created, Updated, Published, Unpublished, Sent, BeganRegistration, Registered, Paid, Refunded, Requested, Invited, Archived, Deleted, ManuallyRegistered, ManuallyPaid, ManuallyRefunded, Approved, Verified, Viewed, Moved, Navigated, Searched, Paged, Connected, SignedUp, LoggedIn, LoggedOut, Copied, Restored, Browsed, Followed, Unfollowed, Shared, Contacted, Interested, BrowsedAllActivities, Added, Removed
+values: NotSet, Created, Updated, Published, Unpublished, Sent, BeganRegistration, Registered, Paid, Refunded, Requested, Invited, Archived, Deleted, ManuallyRegistered, ManuallyPaid, ManuallyRefunded, Approved, Verified, Viewed, Moved, Navigated, Searched, Paged, Connected, SignedUp, LoggedIn, LoggedOut, Copied, Restored, Browsed, Followed, Unfollowed, Shared, Contacted, Interested, BrowsedAllActivities, Added, Removed, ManualAHQPayout
 [end]
 
 [begin]
@@ -2092,7 +2096,7 @@ values: NotSet, Individual, Organization
 [begin]
 type: Enum
 name: FeatureType
-values: NotSet, Attendance, AcceptPayments, EmailMessaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageExternalLeagues, UseStripeConnectedAccount, AcceptACH, ManageLeagues, ManageFieldTrips, ManagePermissionSlips, ManageLearningPods,	TextMessaging, AllowInvites, AllowStudentRegistration, AllowPaymentPlans, AllowSubscriptionPlans, AllowPayLater, StudentCRM, ManageCoupons, Teacher1099, Survey
+values: NotSet, Attendance, AcceptPayments, EmailMessaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageExternalLeagues, UseStripeConnectedAccount, AcceptACH, ManageLeagues, ManageFieldTrips, ManagePermissionSlips, ManageLearningPods,	TextMessaging, AllowInvites, AllowStudentRegistration, AllowPaymentPlans, AllowSubscriptionPlans, AllowPayLater, StudentCRM, ManageCoupons, Teacher1099, Survey, ManualStripePayouts
 [end]
 
 [begin]
@@ -2334,4 +2338,10 @@ values: NotSet, NewAccountSignUp, TrialSignUp, ConvertingFromTrial, ChangePackag
 type: Enum
 name: ActivityCostFrequencyType
 values: NotSet, PerActivity, PerClass
+[end]
+
+[begin]
+type: Enum
+name: PayoutIntervalType
+values: Daily, Weekly, Monthly, Manual
 [end]

@@ -193,7 +193,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 var ids = transactionIds.Split(',').Select(p => p.ToInteger()).ToList();
 
                 transactions = currentAccount.GetBillerAccountTransactions(ids, msgs);
-                currentAccount.RequestNewPayout(transactions, SessionVariables.CurrentUser, msgs);
+                currentAccount.RequestNewPayout(null, transactions, SessionVariables.CurrentUser, msgs);
 
                 ViewBag.TotalAmount = transactions.Sum(p => p.GetBillerPayout(msgs)).ToCurrency();
                 ViewBag.TranIds = transactionIds;

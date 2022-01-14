@@ -1,0 +1,42 @@
+﻿<div id="modal-update-clever-account" class="md-modal">
+    <div class="md-content re-316">
+
+        <div class="modal-body">
+            <div class="text-center" style="padding: 0 20px;">
+
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close btn-close-login-form" onclick="hideModal('modal-update-clever-account')">
+                    <i class="icon s7-close"></i>
+                </button>
+
+                <div class="login-form">
+                    <div class="form-group">
+                        <p class="txt-welcome-back">Update Clever Account</p>
+                    </div>
+
+                    <p class="span-notice-forgot-pass" style="font-style: normal;">
+                        <span style="font-weight: bold;">WARNING:</span> Clicking "Accept" will disconnect your current Clever account information. you will be prompted to Login again with your new account information.
+                    </p>
+
+                    <div class="text-center" style="margin-top: 30px;">
+                        <div class="hidden-xs hidden-sm">
+                            <button type="button" id="btn-Cancel-lg" class="btn btn-primary btn-clever-cancel" onclick="hideModal('modal-update-clever-account')">Cancel</button>
+                            <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLink" class="btn btn-primary btn-clever-accept">Accept</a>
+                        </div>
+                        <div class="hidden-xl hidden-lg hidden-md">
+                            <button type="button" id="btn-Cancel-sm" style="margin: 0 auto;" class="btn btn-primary btn-center btn-clever-cancel" onclick="hideModal('modal-update-clever-account')">Cancel</button>
+                            <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLink" style="margin-top: 10px;" class="btn btn-primary btn-clever-accept">Accept</a>
+                        </div>
+                    </div>
+
+                    <div class="clearfix"></div>
+                </div>
+
+                <div class="clearfix"></div>
+            </div>
+
+            <div class="clearfix"></div>
+        </div>
+
+        <div class="clearfix"></div>
+    </div>
+</div>
