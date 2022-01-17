@@ -60,6 +60,13 @@
             url = unpublishActivity.ShortHomePageUrl;
         }
     }
+
+    var loginReturnUrl = ViewData["LoginReturnUrl"];
+
+    var cleverSsoEnabled = ViewData["CleverSsoEnabled"];
+
+    //set redirection url for clever login to redirect user to home page if they try to login from account topbar
+    TempData["redirectUrl"] = loginReturnUrl.IsNotEmpty() ? loginReturnUrl.ToString() : returnUrl;
 }
 
 @helper RenderReturnToHomeUrl(ParticipationObject session, Account registrationStartPage)
@@ -304,7 +311,7 @@
                         else
                         {
 
-                            <button type="button" class="btn btn-link md-trigger" data-modal="modal-login">Login to Account</button>
+                            <button type="button" class="btn btn-link md-trigger" onclick="return showModal('modal-login')">Login to Account</button>
                         }
                     </div>
                 </div>
@@ -352,7 +359,13 @@
     }
 </div>
 
-@{ Html.RenderPartial("~/Views/Shared/Registration/_LoginModal.cshtml", null, new ViewDataDictionary() { { "ReturnUrl", ViewData["LoginReturnUrl"] } }); }
+@{
+    Html.RenderPartial("~/Views/Shared/Registration/_LoginModalWithUpdatedDesign.cshtml", null, new ViewDataDictionary()
+    {
+        { "ReturnUrl", loginReturnUrl },
+        { "CleverSsoEnabled", cleverSsoEnabled },
+    });
+}
 
 <script type="text/javascript">
     function popOverButton() {

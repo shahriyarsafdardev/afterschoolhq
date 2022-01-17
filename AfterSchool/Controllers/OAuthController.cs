@@ -1,24 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Web.Mvc;
 using System.Net;
 using System.IO;
 using System.Web.Script.Serialization;
 using BasicLibrary;
 using AfterSchool.Models;
-using AfterSchoolLibrary.Services;
 using System.Linq;
+using AfterSchoolLibrary.Helpers;
+using AfterSchoolLibrary.Services;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchool.Controllers
 {
-    public class OAuthController : BaseLoggedInController
+    public class OAuthController : BaseController
     {
-        public OAuthController() : base(AccountService.CustomerAccountTypes.ToList())
+        public OAuthController()
         {
 
         }
 
-        //
         // GET: /Stripe/
         public ActionResult Stripe(string id)
         {
@@ -83,6 +83,72 @@ namespace AfterSchool.Controllers
 
             return View();
         }
-        
+
+        #region Clever Integration
+
+        [HttpGet]
+        public ActionResult CleverIntegration(string code, string scope)
+        {
+            var msgs = new SystemMessages();
+
+            var token = CleverIntegrationService.GetToken(code: code, redirectUrl: CleverHelper.RedirectUrlForIntegration);
+            var userIdentity = CleverIntegrationService.GetCleverUserIdentity(token: token.access_token);
+
+            if (userIdentity.IsNotEmpty() && userIdentity.data.IsNotEmpty() && userIdentity.data.id.IsNotEmpty())
+            {
+                var userDetails = CleverIntegrationService.GetCleverUserDetails(id: userIdentity.data.id, token: token.access_token);
+                WebUserService.SetCleverIdentityToUser(id: userIdentity.data.id, name: userDetails?.data?.district_contact?.email, webUser: SessionVariables.CurrentUser, msgs: msgs);
+            }
+
+            LoadTempMsgAndLogErrors(msgs: msgs);
+            return RedirectToAction("edit", "user", new { area = "org" });
+        }
+
+        [HttpGet]
+        public ActionResult CleverLogin(string code, string scope)
+        {
+            var msgs = new SystemMessages();
+            var user = GetWebUserUsingCleverCode(code: code, redirectUrl: CleverHelper.RedirectUrlForLogin, msgs: msgs);
+            if (user.IsNotEmpty())
+                return RedirectToAction("loginUser", "login", new { area = "", id = user.ID.ToString() });
+            else
+                msgs.Add("We didn't find any user in our database for this clever user.", MessageType.Error);
+
+            LoadTempMsgAndLogErrors(msgs: msgs);
+            return RedirectToAction("index", "login", new { area = "" });
+        }
+
+        [HttpGet]
+        public ActionResult CleverLoginFromAccountTopbar(string code, string scope)
+        {
+            var msgs = new SystemMessages();
+            var user = GetWebUserUsingCleverCode(code: code, redirectUrl: CleverHelper.RedirectUrlForAccount, msgs: msgs);
+
+            if (user.IsNotEmpty())
+            {
+                var redirectUrl = TempData["redirectUrl"].IsNotEmpty() ? TempData["redirectUrl"].ToString() : "";
+                if (redirectUrl.IsNotEmpty()) // user is parent
+                    return RedirectToAction("authorizeuser", "login", new { area = "", id = user.ID.ToString(), source = "parent-login", redirectUrl = redirectUrl });
+
+                return RedirectToAction("loginUser", "login", new { area = "", id = user.ID.ToString() });
+            }
+            else
+                msgs.Add("We didn't find any user in our database for this clever user.", MessageType.Error);
+
+            LoadTempMsgAndLogErrors(msgs: msgs);
+            return RedirectToAction("index", "login", new { area = "" });
+        }
+
+        public static WebUser GetWebUserUsingCleverCode(string code, string redirectUrl, SystemMessages msgs = null)
+        {
+            var token = CleverIntegrationService.GetToken(code: code, redirectUrl: redirectUrl);
+            var userIdentity = CleverIntegrationService.GetCleverUserIdentity(token: token.access_token);
+
+            if (userIdentity.IsNotEmpty() && userIdentity.data.IsNotEmpty() && userIdentity.data.id.IsNotEmpty())
+                return WebUserService.GetUserByCleverId(id: userIdentity.data.id, msgs: msgs);    // get ahq user for this clever id
+
+            return null;
+        }
+        #endregion
     }
 }
