@@ -156,13 +156,9 @@ namespace AfterSchoolLibrary.Services
                 var planMain = plan.FirstOrDefault();
                 var payments = planMain.IsNotEmpty() ? planMain.GetPayments(msgs, dc): null;
                 if (planMain.IsNotEmpty() && planMain.TotalPeriods.HasValue)
-                {
                     subCount = planMain.TotalPeriods.Value - payments.Count();
-                }
                 else if(payments.IsNotEmpty())
-                {
                     subCount = payments.Count();
-                }
             }
 
             return subCount;
