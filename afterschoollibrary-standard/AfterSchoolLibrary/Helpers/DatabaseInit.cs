@@ -95,6 +95,8 @@ namespace AfterSchoolLibrary.Helpers
                     AddFeatureTypeSurvey_20211004.Do(amsgs, adc);
                     UpdateFormQuestionGroup_20211003.Do(amsgs, adc);
 
+                    AddFeatureTypeManualStripePayouts_20211128.Do(amsgs, adc);
+
                     Migration_20220106_AddFeatureFlagTable.Do(amsgs, adc);
 					Migrations.UpdateNameColumnFormQuestionGroup_20211119.Do(amsgs, adc);
                 },

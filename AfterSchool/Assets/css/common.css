@@ -1179,6 +1179,7 @@
     width: 225px;
     height: 50px;
     border-radius: 6px;
+    margin: 0 auto;
 }
 
 .btn-close-login-form {
