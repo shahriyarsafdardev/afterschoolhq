@@ -33,7 +33,7 @@ namespace AfterSchoolLibraryTests.Migrations
                 // Arrange
                 if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-                AfterSchoolLibrary.Helpers.Utilities.AdditionalData(dc);
+                AfterSchoolLibrary.Helpers.DatabaseInit.AdditionalData(dc);
 
                 // Act                   
                  AfterSchoolLibrary.Migrations.AddFeatureTypeTeacher1099ToSchools_20210622.Do(msgs, dc);

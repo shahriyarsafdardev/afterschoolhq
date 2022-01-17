@@ -35,6 +35,8 @@
     var firstActivity = Model.GetActivities(msgs)?.FirstOrDefault();
     var isExternallyProvidedActivity = false;
 
+    var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
+
     if (firstActivity.IsEmpty())
     {
         firstActivity = Model.GetExternallyProvidedActivities(msgs).FirstOrDefault();
@@ -71,10 +73,12 @@
 </style>
 
 @{
-    Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", Model, new ViewDataDictionary() {
-{ "LoginReturnUrl", Model.HomePageUrl },
-{ "IsAccount", true }
-});
+    Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", Model, new ViewDataDictionary()
+    {
+        { "LoginReturnUrl", Model.HomePageUrl },
+        { "IsAccount", true },
+        { "CleverSsoEnabled", cleverSsoEnabled }
+    });
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -531,7 +535,7 @@
         <a href="@Url.Action("editsetup", "activity", new { isnew = 1, type = (int)ActivityType.Activity, area = "org", source = Request["source"]})" class="btn btn-default btn-activity-footer">Add Activity</a>
     </div>
 
-    if (!onboardingStepsAcknowledged || !isOnboadingCompleted)
+    if (!onboardingStepsAcknowledged)
     {
         <div id="modal-getting-started" class="modal fade" tabindex="-1" role="dialog">
             <div class="modal-dialog modal-lg" role="document">
