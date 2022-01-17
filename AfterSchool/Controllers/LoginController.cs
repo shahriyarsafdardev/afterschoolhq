@@ -97,7 +97,7 @@ namespace AfterSchool.Controllers
                     LoadSessionInfo(user, null, remember.IsBoolean(), msgs);
             }
 
-
+            ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
             ViewBag.Messages = msgs;
 
             if (msgs.HasNoErrors())
