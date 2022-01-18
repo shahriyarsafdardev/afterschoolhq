@@ -615,7 +615,7 @@ namespace AfterSchoolLibrary.Models
                                     .ToList();
 
             // check for dates where end time is less than start time
-            if (updatedInstances.Where(x => !x.GetDateRange().IsValid()).Any())
+            if (updatedInstances.Select(x => x.GetDateRange()).Any(x => !(x.StartDate <= x.EndDate)))
                 msgs.Add("You have dates where the end time is earlier than or equal to the start time", MessageType.UserError);
             
             // check for overlapping times 
