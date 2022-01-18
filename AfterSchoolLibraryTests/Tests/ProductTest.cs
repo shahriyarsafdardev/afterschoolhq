@@ -26,42 +26,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(Product.Load(product.ID.Value, msgs, dc).IsNotEmpty());
         }
 
-        [Theory]
-        [InlineData(8, 10)]
-        [InlineData(15, 10)]
-        public void LoadPagingTest(int numberToCreate, int numberPerPage)
-        {
-            for (var i = 0; i < numberToCreate; i++)
-            {
-                var product = Factories.ProductFactory.Create(ProductAccount, msgs, dc);
-            }
-
-            Assert.Equal(
-                Math.Min(numberPerPage, numberToCreate),
-                Product.Load(null, 0, numberPerPage, msgs, dc).Count
-            );
-        }
-
-        /// <summary>
-        /// Gets number of products in the database
-        /// </summary>
-        /// <param name="numberToCreate"></param>
-        [Theory]
-        [InlineData(8)]
-        [InlineData(2)]
-        public void GetCountTest(int numberToCreate)
-        {
-            for (var i = 0; i < numberToCreate; i++)
-            {
-                var product = Factories.ProductFactory.Create(ProductAccount, msgs, dc);
-            }
-
-            Assert.Equal(numberToCreate, Product.GetCount(msgs: msgs, dc: dc));
-        }
-
-        /// <summary>
-        /// saves the plan to the DB
-        /// </summary>
         [Fact]
         public void SaveTest()
         {
@@ -73,9 +37,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors());
         }
 
-        /// <summary>
-        /// removes the plan from the DB
-        /// </summary>
         [Fact]
         public void DeleteTest()
         {
@@ -83,12 +44,9 @@ namespace AfterSchoolLibraryTests.Tests
 
             msgs.AddRange(product.Delete(dc));
 
-            Assert.Equal(0, Product.GetCount(msgs: msgs, dc: dc));
+            Assert.Null(Product.Load(product.ID.Value));
         }
 
-        /// <summary>
-        /// loads the plan using its own ID
-        /// </summary>
         [Fact]
         public void ReloadTest()
         {

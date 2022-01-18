@@ -27,7 +27,7 @@ namespace AfterSchoolLibraryTests.Migrations
         }
 
 
-        [Fact]
+        [Fact(Skip = "Use for debugging")]
         public void BeforeMigration()
         {
             try
@@ -53,7 +53,7 @@ namespace AfterSchoolLibraryTests.Migrations
     }
 
 
-        [Fact]
+        [Fact(Skip = "Use for debugging")]
         public void RunMigration()
         {    
             try
