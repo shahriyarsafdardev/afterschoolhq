@@ -248,24 +248,29 @@ namespace AfterSchool.Areas.Org.Controllers
             if (id.IsNotGuid())
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
+            Models.Extensions.ValidateStartAndEndDateWithTime(opendate, opentime, closedate, closetime, msgs);
             var group = account.GetActivityGroup(id.ToGuid(), msgs);
-            var regperiod = new RegistrationPeriod();
 
-            if (period.IsInteger())
-                regperiod = account.GetRegistrationPeriod(period.ToInteger(), msgs);
-            else
+            if (msgs.HasNoErrors())
             {
-                regperiod.CreatedBy = currentUser.ID.Value;
-                regperiod.CreateDate = DateTime.UtcNow;
-                regperiod.ActivityGroupId = group.ID;
-                regperiod.AccountId = account.ID;
-            }
+                var regperiod = new RegistrationPeriod();
 
-            regperiod.StartDateTime = string.Format("{0} {1}", opendate, opentime).ToDateTime();
-            regperiod.EndDateTime = string.Format("{0} {1}", closedate, closetime).ToDateTime();
-            regperiod.LastModifiedBy = currentUser.ID.Value;
-            regperiod.LastModifiedDate = DateTime.UtcNow;
-            msgs.AddRange(regperiod.Save());
+                if (period.IsInteger())
+                    regperiod = account.GetRegistrationPeriod(period.ToInteger(), msgs);
+                else
+                {
+                    regperiod.CreatedBy = currentUser.ID.Value;
+                    regperiod.CreateDate = DateTime.UtcNow;
+                    regperiod.ActivityGroupId = group.ID;
+                    regperiod.AccountId = account.ID;
+                }
+
+                regperiod.StartDateTime = string.Format("{0} {1}", opendate, opentime).ToDateTime();
+                regperiod.EndDateTime = string.Format("{0} {1}", closedate, closetime).ToDateTime();
+                regperiod.LastModifiedBy = currentUser.ID.Value;
+                regperiod.LastModifiedDate = DateTime.UtcNow;
+                msgs.AddRange(regperiod.Save());
+            }
 
             PeriodViewBag(group, msgs);
             ViewBag.Messages = msgs;
@@ -1167,6 +1172,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 { "startdate", startdate },
                 { "enddate", enddate },
             };
+
+            Models.Extensions.ValidateStartAndEndDate(startdate, enddate, msgs);
             var league = SaveLeague(id, values, msgs);
 
             if (msgs.HasNoErrors())
