@@ -3,6 +3,10 @@
     ViewBag.Title = Model.Name;
     var msgs = (SystemMessages)ViewBag.Messages;
     var qvms = (List<FormQuestionViewModel>)ViewBag.QuestionViewModels;
+    var registrant = (Registrant)ViewBag.Registrant;
+    var registrations = (List<Registration>)ViewBag.Registrations;
+    var selectedRegistration = (Registration)ViewBag.SelectedRegistration;
+    var account = (Account)ViewBag.Account;    
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -16,7 +20,21 @@
             @{Html.RenderPartial("_ActivityGroupTitle", Model.Name); }
         </div>
         <div class="panel-body">
+        
+            <div class="pull-right">
+                <select name="r" id="r" class="form-control" onchange= "registrationChange(this.value)">
+                    @foreach (var registration in registrations)
+                    {
+                        <option value="@registration.Uid"
+                                @(registration.ID == selectedRegistration.ID ? "selected=\"selected\"" : "")>
+                            Registration - @account.ConvertToAccountTimeZone(registration.CreateDate.Value).ToShortDateTimeString()
+                        </option>
+                    }
+                </select>
 
+            </div>
+
+          
             <form id="form-add-reg" action="@Url.Action("update", "registration", new { id = Model.Uid })" class="form-horizontal" method="post" enctype="multipart/form-data">
                 <input type="hidden" name="returnUrl" value="@ViewBag.ReturnURl">
                 @foreach (var group in qvms.Select(qvm => qvm.Question.GetFormQuestionGroup()).DistinctBy(group => group.ID).OrderBy(group => group.DisplayOrder))
@@ -49,3 +67,10 @@
         </div>
     </div>
 </div>
+<script>
+    function registrationChange(id){
+        let link = '@Url.Action("update", "registration", new { id = "ID" })?r=' + this.value + '&returnUrl=@Request["returnurl"]';
+        link = link.replace("ID", id);
+        location.href = link;
+    }
+</script>

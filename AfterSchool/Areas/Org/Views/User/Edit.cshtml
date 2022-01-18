@@ -3,6 +3,7 @@
     var account = (Account)ViewBag.Account;
     ViewBag.Title = account.Name;
     var msgs = (SystemMessages)ViewBag.Messages;
+    var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
 }
 
 @{Html.RenderPartial("OrgAccountHeader", account.ID.ToString());}
@@ -59,6 +60,7 @@
                         <input type="password" class="form-control" id="password2" name="password2" value="" onfocus="this.select()" />
                     </div>
                 </div>
+
                 @if(Model.IsRegistered && SessionVariables.CurrentUser.ID != Model.ID)
                 { 
                     <div class="form-group">
@@ -73,9 +75,35 @@
                         </div>
                     </div>
                 }
+
+                <div class="clearfix"></div>
+                @if (cleverSsoEnabled)
+                {
+                    <div class="row">
+                        <div class="col-sm-6 col-sm-offset-3 margin-v-10">
+                            <hr/>
+                            <h4>Login With Clever</h4>
+
+                            @if (UILabel.IsCurrentUserCleverIntegrated())
+                            {
+                                <p class="txt-clever-connected">You are currently connected to a Clever account with the username <b>@UILabel.GetCleverUserNameForCurrentUser()</b>. To change your connected Clever account, press the "Disconnect" button below.</p>
+                                <a type="button" class="btn btn-primary" href="@Url.Action("DisconnectCleverForCurrentUser", "User", new { Area = "Org" })">Disconnect</a>
+                            }
+                            else
+                            {
+                                <br/>
+                                <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLink">
+                                    <img src="~/img/clever-login.png" style="width: 160px; height: 39px;" class="clever-login-img"/>
+                                </a>
+                            }
+                        </div>
+                    </div>
+                }
+                
+                <br />
                 <div class="form-group">
                     <label class="col-sm-3 control-label"></label>
-                    <div class="col-sm-6">
+                    <div class="col-sm-6 text-center">
                         <button type="submit" class="btn btn-primary">Update</button>
                         <button type="reset" class="btn btn-default">Discard Changes</button>
                     </div>
@@ -85,4 +113,4 @@
     </div>
 </div>
 
-
+@{ Html.RenderPartial("_ModalUpdateCleverAccount"); }

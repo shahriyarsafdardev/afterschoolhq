@@ -18,7 +18,8 @@ namespace AfterSchoolLibraryTests.Factories
                 ActivityId = activity.ID,
                 StartDateTime = DateTime.UtcNow,
                 EndDateTime = DateTime.UtcNow.AddHours(2),
-                ActivityScheduleId = activitySchedule.ID
+                ActivityScheduleId = activitySchedule.ID,
+                InstanceTypeId = InstanceType.InSession
             };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;

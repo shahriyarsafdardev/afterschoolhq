@@ -1,4 +1,5 @@
-﻿using BasicLibrary;
+﻿using System;
+using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
@@ -9,14 +10,14 @@ namespace AfterSchoolLibraryTests.Factories
     {
         public static WebUser Create(SystemMessages msgs, DatabaseConnection dc)
         {
-            var obj = new WebUser() { FirstName = "Don", LastName = "John", Email = "don@john.com" };
+            var obj = new WebUser() { FirstName = "Don", LastName = "John", Email = $"don+{DateTime.Now.Ticks}@example.com" };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
 
         public static WebUser Create(bool isActive, SystemMessages msgs, DatabaseConnection dc)
         {
-            var obj = new WebUser() { FirstName = "Don", LastName = "John", Email = "don@john.com", IsActive = isActive, VerifiedAccount = true };
+            var obj = new WebUser() { FirstName = "Don", LastName = "John", Email = $"don+{DateTime.Now.Ticks}@example.com", IsActive = isActive, VerifiedAccount = true };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
@@ -44,14 +45,21 @@ namespace AfterSchoolLibraryTests.Factories
 
         public static WebUser CreateWithUsername(string username, SystemMessages msgs, DatabaseConnection dc)
         {
-            var obj = new WebUser() { FirstName = "Don", LastName = "John", Email = "don@john.com", Username = username };
+            var obj = new WebUser() { FirstName = "Don", LastName = "John", Email = $"don+{DateTime.Now.Ticks}@example.com", Username = username };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
 
         public static WebUser CreateWithUsername(string username, string password, SystemMessages msgs, DatabaseConnection dc)
         {
-            var obj = new WebUser() { FirstName = "Don", LastName = "John", Email = "don@john.com", Username = username, Password = WebUserService.EncryptPassword(password) };
+            var obj = new WebUser() { FirstName = "Don", LastName = "John", Email = $"don+{DateTime.Now.Ticks}@example.com", Username = username, Password = WebUserService.EncryptPassword(password) };
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
+
+        public static WebUser CreateWithCleverId(SystemMessages msgs, DatabaseConnection dc)
+        {
+            var obj = new WebUser() { FirstName = "Don", LastName = "John", Email = $"don+{DateTime.Now.Ticks}@example.com", IsActive = true, CleverUserId = "1" };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
