@@ -10,8 +10,8 @@ namespace AfterSchoolLibraryTests.FeatureFlag
         [Fact]
         public void EnableTest()
         {
-            var featureFlagRepository = new FeatureFlagRepository(Database.LocalTestCredentials);
-            var testFlagName = $"testFlag{DateTime.Now:o}";
+            var featureFlagRepository = new FeatureFlagRepository(TestHelpers.TestDatabaseCredentials());
+            var testFlagName = $"testFlag{DateTime.Now:u}";
 
             Assert.False(featureFlagRepository.IsEnabled(testFlagName));
 

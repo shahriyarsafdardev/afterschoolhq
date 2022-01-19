@@ -21,8 +21,8 @@ namespace AfterSchoolLibraryTests.Migrations
             account = AccountFactory.Create(user, msgs, dc);
         }
 
-        [Fact]
-        public void RunMigration()
+        [Fact(Skip = "Use for debugging")]
+        public void Test()
         {    
             try
             {

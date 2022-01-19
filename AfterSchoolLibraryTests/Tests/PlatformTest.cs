@@ -17,27 +17,27 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         [Theory(DisplayName = "Get Total Checkout Cost with Credit Card ")]
-        [InlineData(.01, 2.00)]
-        [InlineData(20, 22.00)]
-        [InlineData(50, 54.48)]
-        [InlineData(100, 108.98)]
-        [InlineData(200, 216.98)]
-        public void GetCheckoutCostWithCreditCardTest(decimal registrationFee, double expectedResult)
+        [InlineData(.01, 2)]
+        [InlineData(20, 22.5)]
+        [InlineData(50, 55)]
+        [InlineData(100, 110)]
+        [InlineData(200, 218)]
+        public void GetCheckoutCostWithCreditCardTest(decimal registrationFee, decimal expectedResult)
         {
             var accountOwner = WebUserFactory.Create(msgs, dc);
             var account = AccountFactory.CreateWithFreePackage(accountOwner, AccountType.ActivityProvider, msgs, dc);
             var calcObj = new FeeCalculationObject(registrationFee, account, msgs, dc);
 
-            Assert.Equal(expectedResult.ToDecimal(), calcObj.GetFinalTotalCost(PaymentType.CreditCard));
+            Assert.Equal(expectedResult, calcObj.GetFinalTotalCost(PaymentType.CreditCard));
         }
 
         [Theory(DisplayName = "Get Total Checkout Cost without Credit Card ")]
-        [InlineData(.01, 1.49)]
-        [InlineData(20, 20.99)]
-        [InlineData(50, 52.49)]
-        [InlineData(100, 104.99)]
-        [InlineData(200, 209.99)]
-        public void GetCheckoutCostWithoutCreditCardTest(decimal registrationFee, double expectedResult)
+        [InlineData(.01, 1.5)]
+        [InlineData(20, 21.5)]
+        [InlineData(50, 53)]
+        [InlineData(100, 106)]
+        [InlineData(200, 211)]
+        public void GetCheckoutCostWithoutCreditCardTest(decimal registrationFee, decimal expectedResult)
         {
             var accountOwner = WebUserFactory.Create(msgs, dc);
             var account = AccountFactory.Create(accountOwner, msgs, dc);
@@ -45,7 +45,7 @@ namespace AfterSchoolLibraryTests.Tests
             var accountPackage = AccountPackageFactory.Create(account, package, msgs, dc);
             var calcObj = new FeeCalculationObject(registrationFee, account, msgs, dc);
 
-            Assert.Equal(expectedResult.ToDecimal(), calcObj.GetCostWithConvenienceFee());
+            Assert.Equal(expectedResult, calcObj.GetCostWithConvenienceFee());
         }
     }
 }

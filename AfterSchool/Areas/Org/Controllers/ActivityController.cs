@@ -819,6 +819,16 @@ namespace AfterSchool.Areas.Org.Controllers
 				});
 			}
 
+			if(startdate.IsNotEmpty() && enddate.IsNotEmpty())
+			{
+				DateTime startDate = startdate.ToDateTime();
+				DateTime endDate = enddate.ToDateTime();
+				if (endDate < startDate)
+				{
+					msgs.Add("Please ensure start dates and start times are earlier than the corresponding end date and end times", MessageType.UserError);
+				}
+			}
+
 			if (msgs.HasNoErrors())
 			{
 				values = new Dictionary<string, object>()
@@ -2412,7 +2422,8 @@ namespace AfterSchool.Areas.Org.Controllers
 				MasterRegistrant = masterRegistrant,
 				PaymentType = (PaymentType)paymenttype.ToInteger(),
 				PaymentSourceType = PaymentSourceType.ManualProvider,
-				OverrideAmount = amountpaid.ToDecimal()
+				OverrideAmount = amountpaid.ToDecimal(),
+				PaymentTypeFeeOverrideAmount = 0,
 				},
 				loggedInUser: SessionVariables.CurrentUser,
 				msgs: msgs

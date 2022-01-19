@@ -402,7 +402,8 @@ namespace AfterSchool.Controllers
             {
                 QuestionDataType.RegistrantFirstName,
                 QuestionDataType.RegistrantLastName,
-                QuestionDataType.RegistrantEmail
+                QuestionDataType.RegistrantEmail,
+                QuestionDataType.RegistrantMiddleName
             };
 
       questions = questions.Where(question => question.QuestionDataTypeId.NotIn(FormService.QuestionsToNotIncludeInParentPanel())).ToList();
@@ -793,23 +794,8 @@ namespace AfterSchool.Controllers
       if (results.IsNotEmpty()) return results;
 
       var msgs = new SystemMessages();
-      var parentOrGuardian = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
-      var questions = AddParentViewBag(msgs);
-      var values = new NameValueCollection();
-
-      questions.ForEach(question =>
-      {
-        switch (question.QuestionDataTypeId)
-        {
-           case QuestionDataType.RegistrantHomePhone:
-           case QuestionDataType.RegistrantWorkPhone:
-           case QuestionDataType.RegistrantMobilePhone:
-                values.Add(question.ToFormQuestionViewModel().Id, parentOrGuardian.GetAnswer(question.QuestionDataTypeId)?.Text);
-            break;
-        }
-      });
-
-      var qvms = questions.Select(question => question.ToFormQuestionViewModel(values)).ToList();
+      var questions = AddParentViewBag(msgs);      
+      var qvms = questions.Select(question => question.ToFormQuestionViewModel()).ToList();
 
       ViewBag.Messages = msgs;
 
@@ -1493,11 +1479,11 @@ namespace AfterSchool.Controllers
           .Distinct()
           .ToList();
 
-      questions.AddRange(
-              allQuestions
-                  .Where(question => question.QuestionDataTypeId == QuestionDataType.NotSet)
-                  .Where(question => answers.Find(answer => answer.FormQuestionId == question.ID).IsEmpty())
-          );
+      questions.AddRange(allQuestions
+          .Where(question => !question.IsDeleted && question.QuestionDataTypeId == QuestionDataType.NotSet)
+          .Where(question => answers.Find(answer => answer.FormQuestionId == question.ID).IsEmpty())
+          .OrderBy(question => question.DisplayOrder)
+        );
 
       ViewBag.Registrant = SessionVariables.CurrentRegistrant;
 
