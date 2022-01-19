@@ -538,6 +538,11 @@ namespace AfterSchoolLibrary.Services
             return activity.Copy(newName, useSameForm, false, true, true, loggedInUserId, msgs, dc);
         }
 
+        public static Activity CopyWithoutSchedule(this Activity activity, string newName, bool useSameForm, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return activity.Copy(newName, useSameForm, false, true, false, loggedInUserId, msgs, dc);
+        }
+
         public static Activity Copy(this Activity activity, string newName, bool useSameForm, bool includeSignUpPeriods, bool includeSchedule, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return activity.Copy(newName, useSameForm, false, includeSignUpPeriods, includeSchedule, loggedInUserId, msgs, dc);

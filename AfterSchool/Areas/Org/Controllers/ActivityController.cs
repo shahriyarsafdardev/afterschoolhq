@@ -1311,7 +1311,7 @@ namespace AfterSchool.Areas.Org.Controllers
 		var msgs = new SystemMessages();
 		var activityToCopy = currentAccount.GetActivity(id.ToGuid(), msgs);
 
-		var activity = activityToCopy.Copy(
+		var activity = activityToCopy.CopyWithoutSchedule(
 						activitynamecopy,
 						true,
 						currentUser.ID.Value,
