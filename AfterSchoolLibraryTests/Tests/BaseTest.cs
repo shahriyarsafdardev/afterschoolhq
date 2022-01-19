@@ -31,28 +31,24 @@ namespace AfterSchoolLibraryTests
             {
                 AfterSchoolLibrary.Helpers.Utilities.InitializeApp();
 
-                if (System.Reflection.Assembly.GetExecutingAssembly().Location.ToLower().Contains("work"))
-                    dc = new DatabaseConnection(Database.TestCredentials.ConnectionString);
-                else
-                    dc = new DatabaseConnection(Database.LocalTestCredentials.ConnectionString);
-
+                dc = new DatabaseConnection(TestHelpers.TestDatabaseCredentials().ConnectionString);
                 msgs = new SystemMessages();
                 dc.Open();
-                Database.CreateTables(dc);
-                Database.AlterTables(dc);
-                Database.UpdateData(dc);
-                dc.BeginTransaction();
-
-                // clean up data, sometimes tests run and data is stored
-                // temp work around
-                var dq = new DatabaseQuery();
-                dq.Connection = dc;
-                var sql = "EXEC sys.sp_msforeachtable 'DELETE FROM ?'";
-                dq.ExecuteSql(sql);
-
-                // need some default data in the AfterSchool admin account in order to run certain tests
-                msgs.AddRange(AccountService.CreateAfterSchoolAccount(null, null, null, null, dc));
-                msgs.AddRange(GradeLevel.CreateDefaultGradeLevels(dc));
+                // Database.CreateTables(dc);
+                // Database.AlterTables(dc);
+                // Database.UpdateData(dc);
+                // dc.BeginTransaction();
+                //
+                // // clean up data, sometimes tests run and data is stored
+                // // temp work around
+                // var dq = new DatabaseQuery();
+                // dq.Connection = dc;
+                // var sql = "EXEC sys.sp_msforeachtable 'DELETE FROM ?'";
+                // dq.ExecuteSql(sql);
+                //
+                // // need some default data in the AfterSchool admin account in order to run certain tests
+                // msgs.AddRange(AccountService.CreateAfterSchoolAccount(null, null, null, null, dc));
+                // msgs.AddRange(GradeLevel.CreateDefaultGradeLevels(dc));
             }
         }
 
@@ -63,7 +59,7 @@ namespace AfterSchoolLibraryTests
                 if (msgs.Count > 0)
                     _output.WriteLine(msgs.RenderMessageList(MessageOutputType.Text));
 
-                dc.RollbackTransaction();
+                //dc.RollbackTransaction();
                 dc.Close();
                 dc.Dispose();
             }
