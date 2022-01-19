@@ -26,8 +26,8 @@ namespace AfterSchoolLibraryTests.Migrations
             
         }
 
-        [Fact]
-        public void RunMigration()
+        [Fact(Skip = "Use for debugging")]
+        public void Test()
         {    
             try
             {

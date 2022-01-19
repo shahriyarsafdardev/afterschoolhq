@@ -35,29 +35,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(RefundRequest.Load(refundRequest.ID.Value, msgs, dc).IsNotEmpty());
         }
 
-        /// <summary>
-        /// Gets number of transactions in the database
-        /// </summary>
-        /// <param name="numberToCreate"></param>
-        [Theory]
-        [InlineData(8)]
-        [InlineData(2)]
-        public void GetCountTest(int numberToCreate)
-        {
-            for (var i = 0; i < numberToCreate; i++)
-            {
-                var amount = 25;
-                var transaction = TransactionFactory.Create(BillingAccount, PayingAccount, PaymentType.ACH, msgs, dc);
-                var refundRequest = RefundRequestFactory.Create(amount, transaction, BillingAccount, "i want my money back", PayingWebUser, msgs, dc);
-            }
-
-            Assert.Equal(numberToCreate, RefundRequest.GetCount(msgs: msgs, dc: dc));
-        }
-
-
-        /// <summary>
-        /// saves the plan to the DB
-        /// </summary>
         [Fact]
         public void SaveTest()
         {
@@ -81,7 +58,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             msgs.AddRange(refundRequest.Delete(dc));
 
-            Assert.Equal(0, RefundRequest.GetCount(msgs: msgs, dc: dc));
+            Assert.Null(RefundRequest.Load(refundRequest.ID.Value));
         }
 
         [Fact]

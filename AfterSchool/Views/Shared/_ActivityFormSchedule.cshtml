@@ -503,6 +503,10 @@
         });
 
         checkHasSchedule();
+
+        $('input[name=startdate],input[name=enddate],#dailystarttime,#dailyendtime').on('change', function () {
+            validateSetup(0, event);
+        });
     });
 
     function checkHasSchedule() {
