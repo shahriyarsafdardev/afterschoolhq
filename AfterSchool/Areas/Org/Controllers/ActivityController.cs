@@ -2322,20 +2322,20 @@ namespace AfterSchool.Areas.Org.Controllers
     }
 
         [HttpPost]
-        public JsonResult WithdrawRegistrant(string participationObjectId, string registrantUId, string type, string isYes)
+        public JsonResult WithdrawRegistrant(string participationObjectId, string registrantUId, string type, string isWithdrawAndCancelClicked)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
             var isCancelPayment = true;
 
-		if (currentAccount.IsEmpty())
-			return Json(new { success = false, status = "error" }, JsonRequestBehavior.AllowGet);
+			if (currentAccount.IsEmpty())
+				return Json(new { success = false, status = "error" }, JsonRequestBehavior.AllowGet);
 
-		if (participationObjectId.IsEmpty() || registrantUId.IsEmpty() || type.IsEmpty())
-			return Json(new { success = false, status = "error" }, JsonRequestBehavior.AllowGet);
+			if (participationObjectId.IsEmpty() || registrantUId.IsEmpty() || type.IsEmpty())
+				return Json(new { success = false, status = "error" }, JsonRequestBehavior.AllowGet);
 
-            if (isYes.IsNotEmpty())
-                isCancelPayment = isYes == "true";
+			if (isWithdrawAndCancelClicked.IsNotEmpty())
+				isCancelPayment = isWithdrawAndCancelClicked == "true";
 
             var registrant = currentAccount.GetRegistrant(registrantUId.ToGuid(), msgs);
 

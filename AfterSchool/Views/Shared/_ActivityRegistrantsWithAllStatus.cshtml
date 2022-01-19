@@ -205,7 +205,7 @@
                 <div class="modal-body">
                     <p class="text-center">Are you sure you want to withdraw <strong><%= registrantName %></strong> from <strong><%= activityName %></strong> ? </p>
                     <p class="text-center">
-                        <%= registrantName %> is on payment plan. Do you want to cancel the remaining <%= count %> payments?
+                        <%= registrantName %> is on a payment plan. Do you want to cancel the remaining <%= count %> payments?
                     </p>
                     <div class="" style="margin: 0 25%;">
                                 <div class="am-radio">
@@ -315,7 +315,7 @@
         return false;
     }
 
-    function withdraw(participationObjectId, registrantId, type, registrantActivityUId, registrantActivityId, isYes) {
+    function withdraw(participationObjectId, registrantId, type, registrantActivityUId, registrantActivityId, isWithdrawAndCancelClicked) {
         if (participationObjectId && registrantId) {
             showLoader();
 
@@ -323,7 +323,7 @@
             $.ajax({
                 type: "POST",
                 url: url,
-                data: { participationObjectId: participationObjectId, registrantUId: registrantId, type, isYes },
+                data: { participationObjectId: participationObjectId, registrantUId: registrantId, type, isWithdrawAndCancelClicked },
                 success: function (data) {
                     if (data && data.success == true) {
 

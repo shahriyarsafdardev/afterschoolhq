@@ -241,9 +241,9 @@ namespace AfterSchoolLibrary.Helpers
             {
                 var lastPara = "";
                 if(isProviderCancelled)
-                    lastPara = "Additional payments remaining on your payment plan with "+ participationObject.Provider.Name + " will be cancelled. If you need a refund, please request one through the AfterSchool HQ <a href='"+ Utilities.BaseUrl() + "/User/activity'>dashboard</a>";
+                    lastPara = "Additional payments remaining on your payment plan with "+ participationObject?.Provider?.Name + " will be cancelled. If you need a refund, please request one through the AfterSchool HQ <a href='"+ Utilities.BaseUrl() + "/User/activity'>dashboard</a>";
                 else
-                    lastPara = "The payment plan associated with this activity has not been cancelled and will continue for " + payments.Count() + " payments. If you believe this is an error, please contact the provider.";
+                    lastPara = "The payment plan associated with this activity has not been cancelled and will continue for " + payments?.Count() + " payments. If you believe this is an error, please contact the provider.";
 
                 model.Add(new NameValueCollection() {
                     { "LastParagraph", lastPara}
