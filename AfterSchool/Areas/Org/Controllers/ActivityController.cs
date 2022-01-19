@@ -819,6 +819,16 @@ namespace AfterSchool.Areas.Org.Controllers
 				});
 			}
 
+			if(startdate.IsNotEmpty() && enddate.IsNotEmpty())
+			{
+				DateTime startDate = startdate.ToDateTime();
+				DateTime endDate = enddate.ToDateTime();
+				if (endDate < startDate)
+				{
+					msgs.Add("Please ensure start dates and start times are earlier than the corresponding end date and end times", MessageType.UserError);
+				}
+			}
+
 			if (msgs.HasNoErrors())
 			{
 				values = new Dictionary<string, object>()

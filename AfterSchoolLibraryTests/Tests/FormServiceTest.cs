@@ -225,13 +225,12 @@ namespace AfterSchoolLibraryTests.Tests
 
             // Assert
             Assert.NotNull(qhs);
-            Assert.True(qhs.Count == 13);
-            
-            ReviewEachField(contact: qhs[10], text: "Race", questionTyped: QuestionType.DropDownList, 
-                questionDataTypeId: QuestionDataType.RegistrantRaceUsFed, options: FormService.RegistrantRace, isRequired: false, isActive: true);
 
-            ReviewEachField(contact: qhs[11], text: "Ethnicity", questionTyped: QuestionType.DropDownList,
+            ReviewEachField(contact: qhs[10], text: "Ethnicity", questionTyped: QuestionType.DropDownList,
                 questionDataTypeId: QuestionDataType.RegistrantEthnicityUsFed, options: FormService.RegistrantEthnicity, isRequired: false, isActive: true);
+
+            ReviewEachField(contact: qhs[11], text: "Race", questionTyped: QuestionType.DropDownList,
+                questionDataTypeId: QuestionDataType.RegistrantRaceUsFed, options: FormService.RegistrantRace, isRequired: false, isActive: true);
         }
 
         #region Helpers

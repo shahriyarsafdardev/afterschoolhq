@@ -266,7 +266,7 @@ namespace AfterSchoolLibraryTests.Tests
         /// Activity schedule period is small for subscription to start, so just charge registrant directly instead for Subscription plan.
         /// </summary>
         /// <param name="costPerPeriod"></param>
-        [Theory(DisplayName = "Case 1: SubscriptionPlanType.Subscription, PlanPaymentStartType.OnCheckout, BillingPeriodType.Month, Only charge")]
+        [Theory(DisplayName = "Case 1: SubscriptionPlanType.Subscription, PlanPaymentStartType.OnCheckout, BillingPeriodType.Month, Only charge", Skip = "Stripe Dependency")]
         [InlineData(100)]        
         public void SubscriptionPlanDueOnRegistrationCheckoutTest1(int costPerPeriod)
         {
@@ -421,7 +421,7 @@ namespace AfterSchoolLibraryTests.Tests
         /// Activity schedule period is big and is on going, so Subscription plan will be initiated with a pro-rated charge.
         /// </summary>
         /// <param name="costPerPeriod"></param>
-        [Theory(DisplayName = "Case 2: SubscriptionPlanType.Subscription, PlanPaymentStartType.OnCheckout, BillingPeriodType.Month, Both charge + subscription")]
+        [Theory(DisplayName = "Case 2: SubscriptionPlanType.Subscription, PlanPaymentStartType.OnCheckout, BillingPeriodType.Month, Both charge + subscription", Skip = "Stripe Dependency")]
         [InlineData(100)]
         public void SubscriptionPlanDueOnRegistrationCheckoutTest2(int costPerPeriod)
         {
@@ -589,7 +589,7 @@ namespace AfterSchoolLibraryTests.Tests
         /// Activity schedule period is big and is off future, so there will be no charge, just subscription plan.
         /// </summary>
         /// <param name="costPerPeriod"></param>
-        [Theory(DisplayName = "Case 3: SubscriptionPlanType.Subscription, PlanPaymentStartType.OnCheckout, BillingPeriodType.Month, Only subscription")]
+        [Theory(DisplayName = "Case 3: SubscriptionPlanType.Subscription, PlanPaymentStartType.OnCheckout, BillingPeriodType.Month, Only subscription", Skip = "Stripe Dependency")]
         [InlineData(100)]
         public void SubscriptionPlanDueOnRegistrationCheckoutTest3(int costPerPeriod)
         {
@@ -723,7 +723,7 @@ namespace AfterSchoolLibraryTests.Tests
         /// Activity schedule period is already started
         /// </summary>
         /// <param name="costPerPeriod"></param>
-        [Theory(DisplayName = "Case 1: SubscriptionPlanType.Subscription, PlanPaymentStartType.WhenActivityStarts, BillingPeriodType.Month")]
+        [Theory(DisplayName = "Case 1: SubscriptionPlanType.Subscription, PlanPaymentStartType.WhenActivityStarts, BillingPeriodType.Month", Skip = "Stripe Dependency")]
         [InlineData(100)]
         public void SubscriptionPlanDueOnRegistrationWhenActivityStartsTest1(int costPerPeriod)
         {
@@ -892,7 +892,7 @@ namespace AfterSchoolLibraryTests.Tests
         /// Activity schedule period is off future, start subscription plan when registrant joins.
         /// </summary>
         /// <param name="costPerPeriod"></param>
-        [Theory(DisplayName = "Case 2: SubscriptionPlanType.Subscription, PlanPaymentStartType.WhenActivityStarts, BillingPeriodType.Month, Only subscription")]
+        [Theory(DisplayName = "Case 2: SubscriptionPlanType.Subscription, PlanPaymentStartType.WhenActivityStarts, BillingPeriodType.Month, Only subscription", Skip = "Stripe Dependency")]
         [InlineData(100)]
         public void SubscriptionPlanDueOnRegistrationWhenActivityStartsTest2(int costPerPeriod)
         {
@@ -1025,7 +1025,7 @@ namespace AfterSchoolLibraryTests.Tests
         /// Stripe plan will end as per number of payments and interval choosen by provider 
         /// </summary>
         /// <param name="costPerPeriod"></param>
-        [Theory(DisplayName = "Case 1: SubscriptionPlanType.PaymentPlan, PlanPaymentStartType.OnCheckout, BillingPeriodType.Month, # Of Payments = 1")]
+        [Theory(DisplayName = "Case 1: SubscriptionPlanType.PaymentPlan, PlanPaymentStartType.OnCheckout, BillingPeriodType.Month, # Of Payments = 1", Skip = "Stripe Dependency")]
         [InlineData(100)]
         public void PaymentPlanOngoing(int costPerPeriod)
         {
@@ -1158,7 +1158,7 @@ namespace AfterSchoolLibraryTests.Tests
         /// For this specific case tehre will be 1 instant payment, next payment next month with end date next month end
         /// </summary>
         /// <param name="costPerPeriod"></param>
-        [Theory(DisplayName = "Case 2: SubscriptionPlanType.PaymentPlan, PlanPaymentStartType.OnCheckout, BillingPeriodType.Month, # Of Payments = 2")]
+        [Theory(DisplayName = "Case 2: SubscriptionPlanType.PaymentPlan, PlanPaymentStartType.OnCheckout, BillingPeriodType.Month, # Of Payments = 2", Skip = "Stripe Dependency")]
         [InlineData(100)]
         public void PaymentPlanOngoing2(int costPerPeriod)
         {
@@ -1294,7 +1294,7 @@ namespace AfterSchoolLibraryTests.Tests
         /// For this specific case there will be 1 instant payment, next payment next week till 4 payments completed
         /// </summary>
         /// <param name="costPerPeriod"></param>
-        [Theory(DisplayName = "Case 3: SubscriptionPlanType.PaymentPlan, PlanPaymentStartType.OnCheckout, BillingPeriodType.Week, # Of Payments = 4")]
+        [Theory(DisplayName = "Case 3: SubscriptionPlanType.PaymentPlan, PlanPaymentStartType.OnCheckout, BillingPeriodType.Week, # Of Payments = 4", Skip = "Stripe Dependency")]
         [InlineData(100)]
         public void PaymentPlanOngoing3(int costPerPeriod)
         {

@@ -25,8 +25,8 @@ namespace AfterSchoolLibraryTests.Migrations
             ProviderAccount = AccountFactory.CreateWithFreePackage(ProviderWebUser, AccountType.ActivityProvider, msgs, dc);
         }
 
-        [Fact]
-        public void RunMigration()
+        [Fact(Skip = "Use for debugging")]
+        public void Test()
         {
             AfterSchoolLibrary.Helpers.DatabaseInit.AdditionalData(dc);
 
