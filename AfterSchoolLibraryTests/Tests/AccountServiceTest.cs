@@ -3458,8 +3458,7 @@ namespace AfterSchoolLibraryTests.Tests
            
           
             Assert.True(msgs.HasNoErrors());
-            Assert.Equal(3, fee);
-
+           
             //Assert
             //account
             Assert.NotNull(billingAccount);
