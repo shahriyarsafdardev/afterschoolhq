@@ -5,6 +5,7 @@ using BasicLibrary;
 using AfterSchoolLibraryTests.Factories;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
+using System.Linq;
 
 namespace AfterSchoolLibraryTests.Tests
 {
