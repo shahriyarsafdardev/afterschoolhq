@@ -150,6 +150,58 @@ namespace AfterSchoolLibraryTests.Tests
                          || ("You have dates that overlap" == value) 
                          || systemMessages.Count == 0 ? true: false, "Failed");
           
-        }  
+        }
+
+        [Fact]
+        public void ValidateStartAndEndDateTrueTest()
+        {
+            // Arrange
+            var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount,DateTime.Now, DateTime.Now.AddDays(7), msgs, dc);
+
+            // Act
+            AfterSchool.Models.Extensions.ValidateStartAndEndDate(schedule.StartDate.Value.ToString(), schedule.EndDate.Value.ToString(), msgs);
+
+            // Assert
+            Assert.True(msgs.HasNoErrors());
+        }
+        [Fact]
+        public void ValidateStartAndEndDateFalseTest()
+        {
+            // Arrange
+            var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, DateTime.Now, DateTime.Now.AddDays(-7), msgs, dc);
+
+            // Act
+            AfterSchool.Models.Extensions.ValidateStartAndEndDate(schedule.StartDate.Value.ToString(), schedule.EndDate.Value.ToString(), msgs);
+
+            // Assert
+            Assert.False(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void ValidateStartAndEndDateWithTimeTrueTest()
+        {
+            // Arrange
+            var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, DateTime.Now.AddMinutes(60), DateTime.Now.AddDays(7).AddMinutes(100), msgs, dc);
+
+            // Act
+            AfterSchool.Models.Extensions.ValidateStartAndEndDateWithTime(schedule.StartDate.ToShortDateString(),schedule.StartDate.ToShortTimeString(), schedule.EndDate.ToShortDateString(), schedule.EndDate.ToShortTimeString(), msgs);
+
+            // Assert
+            Assert.True(msgs.HasNoErrors());
+        }
+
+
+        [Fact]
+        public void ValidateStartAndEndDateWithTimeFalseTest()
+        {
+            // Arrange
+            var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, DateTime.Now.AddMinutes(60), DateTime.Now.AddDays(-7).AddMinutes(100), msgs, dc);
+
+            // Act
+            AfterSchool.Models.Extensions.ValidateStartAndEndDateWithTime(schedule.StartDate.ToShortDateString(), schedule.StartDate.ToShortTimeString(), schedule.EndDate.ToShortDateString(), schedule.EndDate.ToShortTimeString(), msgs);
+
+            // Assert
+            Assert.False(msgs.HasNoErrors());
+        }
     }
 }
