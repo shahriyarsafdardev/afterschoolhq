@@ -1,10 +1,9 @@
 ﻿using System;
+using AfterSchoolLibrary.Models;
+using AfterSchoolLibraryTests.Factories;
+using BasicLibrary;
 using Xunit;
 using Xunit.Abstractions;
-using AfterSchoolLibrary.Models;
-using BasicLibrary;
-using BasicLibrary.DataAccess;
-using AfterSchoolLibraryTests.Factories;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -27,58 +26,31 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(Coupon.Load(coupon.ID.Value, msgs, dc).IsNotEmpty());
         }
 
-        [Theory]
-        [InlineData(8, 10)]
-        [InlineData(15, 10)]
-        public void LoadPagingTest(int numberToCreate, int numberPerPage)
-        {
-            for (var i = 0; i < numberToCreate; i++)
-            {
-                var coupon = CouponFactory.Create(SendingAccount, msgs, dc);
-            }
-
-            Assert.Equal(
-                Math.Min(numberPerPage, numberToCreate),
-                Coupon.Load(null, 0, numberPerPage, msgs, dc).Count
-            );
-        }
-
-        [Theory]
-        [InlineData(8)]
-        [InlineData(2)]
-        public void GetCountTest(int numberToCreate)
-        {
-            for (var i = 0; i < numberToCreate; i++)
-            {
-                var coupon = Factories.CouponFactory.Create(SendingAccount, msgs, dc);
-            }
-
-            Assert.Equal(numberToCreate, Coupon.GetCount(msgs: msgs, dc: dc));
-        }
-
         [Fact]
         public void SaveTest()
         {
-            var coupon = Factories.CouponFactory.Create(SendingAccount, msgs, dc);
+            var coupon = CouponFactory.Create(SendingAccount, msgs, dc);
 
             coupon.LastModifiedBy = 1;
             msgs.AddRange(coupon.Save(dc));
 
             Assert.True(msgs.HasNoErrors());
         }
+
         [Fact]
         public void DeleteTest()
         {
-            var coupon = Factories.CouponFactory.Create(SendingAccount, msgs, dc);
+            var coupon = CouponFactory.Create(SendingAccount, msgs, dc);
 
             msgs.AddRange(coupon.Delete(dc));
 
-            Assert.Equal(0, Coupon.GetCount(msgs: msgs, dc: dc));
+            Assert.Null(Coupon.Load(coupon.ID.Value));
         }
+
         [Fact]
         public void ReloadTest()
         {
-            var coupon = Factories.CouponFactory.Create(SendingAccount, msgs, dc);
+            var coupon = CouponFactory.Create(SendingAccount, msgs, dc);
 
             Assert.Equal(coupon.ID, coupon.Reload(msgs, dc).ID);
         }

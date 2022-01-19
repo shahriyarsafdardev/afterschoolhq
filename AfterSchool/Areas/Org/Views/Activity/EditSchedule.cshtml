@@ -67,3 +67,24 @@
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    function validateSetup(flag, event, url) {
+        var startDate = moment($('#startdate').val());
+        var endDate = moment($('#enddate').val());
+        var beginningTime = moment($('#dailystarttime').val(), 'h:mma');
+        var endingTime = moment($('#dailyendtime').val(), 'h:mma');
+
+        if (endDate.isBefore(startDate) || (endDate.isSame(startDate) && (endingTime.isSame(beginningTime) || endingTime.isBefore(beginningTime))))
+        {
+            Notifications.showBar({
+                title: 'Error',
+                message: 'Please make the end date after the start date.',
+                success: false
+            });
+
+            event.preventDefault();
+            return false;
+        }
+    }
+</script>

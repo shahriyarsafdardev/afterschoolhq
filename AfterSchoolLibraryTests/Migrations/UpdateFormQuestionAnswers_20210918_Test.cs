@@ -23,7 +23,7 @@ namespace AfterSchoolLibraryTests.Migrations
             
         }
 
-        [Fact(DisplayName = "Radio list button")]
+        [Fact(DisplayName = "Radio list button", Skip = "Use for debugging")]
         public void RunMigration1()
         {
             // Arrange
@@ -43,7 +43,7 @@ namespace AfterSchoolLibraryTests.Migrations
             Assert.Equal(expected: "[{\"key\":\"Male\",\"value\":\"Male\"}]", actual: expected.Text);
         }
 
-        [Fact(DisplayName = "Checkbox list button")]
+        [Fact(DisplayName = "Checkbox list button", Skip = "Use for debugging")]
         public void RunMigration2()
         {
             // Arrange
@@ -63,7 +63,7 @@ namespace AfterSchoolLibraryTests.Migrations
             Assert.Equal(expected: "[{\"key\":\"CSS\",\"value\":\"CSS\"},{\"key\":\"HTML\",\"value\":\"HTML\"}]", actual: expected.Text);
         }
 
-        [Fact(DisplayName = "Dropdown list button")]
+        [Fact(DisplayName = "Dropdown list button", Skip = "Use for debugging")]
         public void RunMigration3()
         {
             // Arrange
@@ -83,7 +83,7 @@ namespace AfterSchoolLibraryTests.Migrations
             Assert.Equal(expected: "[{\"key\":\"6th\",\"value\":\"6th\"}]", actual: expected.Text);
         }
 
-        [Fact(DisplayName = "No updates on empty answer")]
+        [Fact(DisplayName = "No updates on empty answer", Skip = "Use for debugging")]
         public void RunMigration4()
         {
             // Arrange
@@ -102,7 +102,7 @@ namespace AfterSchoolLibraryTests.Migrations
             Assert.Empty(expected.Text);
         }
 
-        [Fact(DisplayName = "No updates on json answer")]
+        [Fact(DisplayName = "No updates on json answer", Skip = "Use for debugging")]
         public void RunMigration5()
         {
             // Arrange
