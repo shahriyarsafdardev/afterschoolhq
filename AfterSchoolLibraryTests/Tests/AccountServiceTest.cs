@@ -21,7 +21,7 @@ namespace AfterSchoolLibraryTests.Tests
         public AccountServiceTest(ITestOutputHelper output) : base(output)
         {
             user = WebUserFactory.Create(msgs, dc);
-            account = AccountFactory.Create(user, msgs, dc);
+            account = AccountFactory.Create(user, msgs, dc);            
         }
 
         [Fact(DisplayName = "CreateNewTest")]
@@ -3170,8 +3170,10 @@ namespace AfterSchoolLibraryTests.Tests
 
             var purchasingAccountOwner = WebUserFactory.Create("purchasingUser", "A", "purchasingUserA@test.com", true, msgs, dc);
             var purchasingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", purchasingAccountOwner, AccountType.Registrant, msgs, dc);
-
+            
             var period = RegistrationPeriodFactory.Create(billingAccount, msgs, dc);
+
+            GradeLevelFactory.CreateAllGradesLevels(msgs, dc);
             var activity = ActivityFactory.Create(account: billingAccount, costPerRegistrant: amount, msgs: msgs, dc: dc);
             msgs.AddRange(period.AddActivity(activity, true, billingAccountOwner.ID.Value, dc));
             activity.Publish(billingAccountOwner, msgs, dc);
@@ -3246,7 +3248,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(length, actActivities.Count);
         }
 
-        [Theory(DisplayName = "ProcessSubscriptionPlan Test")]
+        [Theory(DisplayName = "ProcessSubscriptionPlan Test", Skip = "Stripe Dependency")]
         [InlineData(110, 5)]
         [InlineData(12, 5)]
         public void ProcessSubscriptionPlanTest(decimal amount, decimal paymentTypeFeeOverrideAmount)
@@ -3257,10 +3259,11 @@ namespace AfterSchoolLibraryTests.Tests
             var billingAccount = AccountFactory.CreateAccount(billingAccountOwner, AccountType.School, stripeChargesEnabled: true, stripePayoutsEnabled: true, msgs, dc);
             var payingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", payingAccountOwner, AccountType.School, msgs, dc);
             var masterRegistrant = RegistrantFactory.Create(payingAccount, isMaster: true, msgs, dc);
+            GradeLevelFactory.CreateAllGradesLevels(msgs, dc);
 
             //UseStripeConnectedAccount is true for this package
             var package = PackageFactory.CreateFreePackageWithUseStripeConnectedAccount(msgs, dc);
-            AccountPackageFactory.Create(billingAccount, package, msgs, dc);
+            AccountPackageFactory.Create(billingAccount, package, msgs, dc);            
 
             var activity = ActivityFactory.Create(billingAccount, msgs, dc: dc);
             var registrant = RegistrantFactory.Create(billingAccount, isMaster: false, msgs, dc: dc);
@@ -3374,7 +3377,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors());
         }
 
-        [Theory(DisplayName = "ProcessPaymentPlan Test")]
+        [Theory(DisplayName = "ProcessPaymentPlan Test", Skip = "Stripe Dependency")]
         [InlineData(110, 5)]
         [InlineData(12, 5)]
         public void ProcessPaymentPlanTest(decimal amount, decimal paymentTypeFeeOverrideAmount)
@@ -3387,6 +3390,7 @@ namespace AfterSchoolLibraryTests.Tests
             var billingAccount = AccountFactory.CreateAccount(billingAccountOwner, AccountType.School, stripeChargesEnabled: true, stripePayoutsEnabled: true, msgs, dc);
             var payingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", payingAccountOwner, AccountType.School, msgs, dc);
             var masterRegistrant = RegistrantFactory.Create(payingAccount, isMaster: true, msgs, dc);
+            GradeLevelFactory.CreateAllGradesLevels(msgs, dc);
 
             //UseStripeConnectedAccount is true for this package
             var package = PackageFactory.CreateFreePackageWithUseStripeConnectedAccount(msgs, dc);
@@ -3509,7 +3513,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors());
         }
 
-        [Theory(DisplayName = "ProcessPostPayPlan Test")]
+        [Theory(DisplayName = "ProcessPostPayPlan Test", Skip = "Stripe Dependency")]
         [InlineData(110, 5)]
         [InlineData(12, 5)]
         public void ProcessPostPayPlanTest(decimal amount, decimal paymentTypeFeeOverrideAmount)
@@ -3521,6 +3525,7 @@ namespace AfterSchoolLibraryTests.Tests
             var billingAccount = AccountFactory.CreateAccount(billingAccountOwner, AccountType.School, stripeChargesEnabled: true, stripePayoutsEnabled: true, msgs, dc);
             var payingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", payingAccountOwner, AccountType.School, msgs, dc);
             var masterRegistrant = RegistrantFactory.Create(payingAccount, isMaster: true, msgs, dc);
+            GradeLevelFactory.CreateAllGradesLevels(msgs, dc);
 
             //UseStripeConnectedAccount is true for this package
             var package = PackageFactory.CreateFreePackageWithUseStripeConnectedAccount(msgs, dc);
@@ -3608,7 +3613,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors());
         }
 
-        [Theory(DisplayName = "ProcessRegistrationWithPayment Test")]
+        [Theory(DisplayName = "ProcessRegistrationWithPayment Test", Skip = "Stripe Dependency")]
         [InlineData(110, 5, SubscriptionPlanType.Subscription,10)]
         public void ProcessRegistrationWithPaymentTest(decimal amount, decimal paymentTypeFeeOverrideAmount, SubscriptionPlanType subscriptionPlanType, decimal costPerPeriod)
         {
@@ -3618,6 +3623,7 @@ namespace AfterSchoolLibraryTests.Tests
             var billingAccount = AccountFactory.CreateAccount(billingAccountOwner, AccountType.School, stripeChargesEnabled: true, stripePayoutsEnabled: true, msgs, dc);
             var payingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", payingAccountOwner, AccountType.School, msgs, dc);
             var masterRegistrant = RegistrantFactory.CreateWithNames(payingAccount, isMaster: true, msgs, dc);
+            GradeLevelFactory.CreateAllGradesLevels(msgs, dc);
 
             //UseStripeConnectedAccount is true for this package
             var package = PackageFactory.CreateFreePackageWithUseStripeConnectedAccount(msgs, dc);
