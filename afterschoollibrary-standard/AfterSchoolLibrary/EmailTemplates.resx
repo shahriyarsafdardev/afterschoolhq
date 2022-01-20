@@ -253,4 +253,7 @@
   <data name="Survey_Code" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>emailtemplates\survey-code.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="Registration_Withdrawal_Parent" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>emailtemplates\registration-withdrawal-parent.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
 </root>
