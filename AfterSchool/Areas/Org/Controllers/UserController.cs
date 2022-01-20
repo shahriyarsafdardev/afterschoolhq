@@ -32,9 +32,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
 
             HandleTempMessages(msgs);
+
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
-
             ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
 
             return View(SessionVariables.CurrentUser);
@@ -97,6 +97,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
             return View(SessionVariables.CurrentUser);
         }
 
