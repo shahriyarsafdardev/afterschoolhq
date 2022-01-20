@@ -372,12 +372,14 @@ namespace AfterSchoolLibraryTests.Tests
             var activity = ActivityFactory.Create(ActivityOwnerAccount, schedule, msgs, dc);
 
             // Act
-            var expected = activity.CopyWithoutSchedule(newName: activity.Name + "- [copy]", useSameForm: false, loggedInUserId: LoggedInUser.ID.Value, msgs: msgs, dc: dc);
+            var copiedActivity = activity.CopyWithoutSchedule(newName: activity.Name + "- [copy]", useSameForm: false, loggedInUserId: LoggedInUser.ID.Value, msgs: msgs, dc: dc);
 
             // Assert
-            Assert.NotNull(expected);
-            Assert.NotEqual(activity.ID, expected.ID);
-            Assert.NotEqual(activity.CreateDate, expected.CreateDate);
+            Assert.NotNull(copiedActivity);
+            Assert.NotEqual(activity.ID, copiedActivity.ID);
+            Assert.NotEqual(activity.CreateDate, copiedActivity.CreateDate);
+            
+            Assert.Null(copiedActivity.ActivityScheduleId);
         }
 
         [Fact]
@@ -573,11 +575,11 @@ namespace AfterSchoolLibraryTests.Tests
             AccountPropertyFactory.Create(activity, AccountPropertyType.InterestThankYouEmail, msgs, dc);
 
             // Act
-            var expected = activity.Copy(newName: activity.Name + "- [copy]", useSameForm: false, loggedInUserId: LoggedInUser.ID.Value, msgs: msgs, dc: dc);
+            var copiedActivity = activity.CopyWithoutSchedule(newName: activity.Name + "- [copy]", useSameForm: false, loggedInUserId: LoggedInUser.ID.Value, msgs: msgs, dc: dc);
 
             // Assert
             var activityProperties = activity.GetActivityProperties(msgs, dc);
-            var copiedActivityProperties = expected.GetActivityProperties(msgs, dc);
+            var copiedActivityProperties = copiedActivity.GetActivityProperties(msgs, dc);
 
             Assert.Equal(activityProperties.Count, copiedActivityProperties.Count);
 
@@ -587,10 +589,12 @@ namespace AfterSchoolLibraryTests.Tests
                 var copied = copiedActivityProperties[i];
 
                 Assert.Equal(main.ActivityId, activity.ID);
-                Assert.Equal(copied.ActivityId, expected.ID);
+                Assert.Equal(copied.ActivityId, copiedActivity.ID);
 
                 Assert.Equal(main.AccountPropertyTypeId, copied.AccountPropertyTypeId);
             }
+
+            Assert.Null(copiedActivity.ActivityScheduleId);
         }
 
         [Fact]
@@ -629,11 +633,11 @@ namespace AfterSchoolLibraryTests.Tests
             var activityForm = ActivityFormWebUserFactory.CreateActiveForm(ActivityOwnerAccount, activity, form, msgs, dc);
 
             // Act
-            var expected = activity.Copy(newName: activity.Name + "- [copy]", useSameForm: true, loggedInUserId: LoggedInUser.ID.Value, msgs: msgs, dc: dc);
+            var copiedActivity = activity.CopyWithoutSchedule(newName: activity.Name + "- [copy]", useSameForm: true, loggedInUserId: LoggedInUser.ID.Value, msgs: msgs, dc: dc);
 
             // Assert
             var activeActivityForm = activity.GetActiveActivityForm(msgs, dc);
-            var copiedActivityForm = expected.GetActiveActivityForm(msgs, dc);
+            var copiedActivityForm = copiedActivity.GetActiveActivityForm(msgs, dc);
 
             Assert.Equal(activeActivityForm.Name, activityForm.Name);
             Assert.Equal(activeActivityForm.FormId, activityForm.FormId);
@@ -641,6 +645,8 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(activeActivityForm.AccountId, activityForm.AccountId);
 
             Assert.NotNull(copiedActivityForm);
+
+            Assert.Null(copiedActivity.ActivityScheduleId);
         }
 
         #endregion
