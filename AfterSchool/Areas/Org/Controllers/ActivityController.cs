@@ -2321,29 +2321,35 @@ namespace AfterSchool.Areas.Org.Controllers
 		return View("Registrants", activity);
     }
 
-    [HttpPost]
-    public JsonResult WithdrawRegistrant(string participationObjectId, string registrantUId, string type)
-    {
-		var currentAccount = SessionVariables.CurrentAccount;
-		var msgs = new SystemMessages();
+        [HttpPost]
+        public JsonResult WithdrawRegistrant(string participationObjectId, string registrantUId, string type, string isWithdrawAndCancelClicked)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+            var isCancelPayment = true;
 
-		if (currentAccount.IsEmpty())
-			return Json(new { success = false, status = "error" }, JsonRequestBehavior.AllowGet);
+			if (currentAccount.IsEmpty())
+				return Json(new { success = false, status = "error" }, JsonRequestBehavior.AllowGet);
 
-		if (participationObjectId.IsEmpty() || registrantUId.IsEmpty() || type.IsEmpty())
-			return Json(new { success = false, status = "error" }, JsonRequestBehavior.AllowGet);
+			if (participationObjectId.IsEmpty() || registrantUId.IsEmpty() || type.IsEmpty())
+				return Json(new { success = false, status = "error" }, JsonRequestBehavior.AllowGet);
 
-		var registrant = currentAccount.GetRegistrant(registrantUId.ToGuid(), msgs);
+			if (isWithdrawAndCancelClicked.IsNotEmpty())
+				isCancelPayment = isWithdrawAndCancelClicked == "true";
 
-		if (registrant.IsNotEmpty())
-		{
-			registrant.WithdrawRegistration(
-				participationObjectId: participationObjectId.ToInteger(),
-				participationObjectType: (ParticipationObjectType)Enum.Parse(typeof(ParticipationObjectType), type),
-				loggedInUser: SessionVariables.CurrentUser,
-				account: currentAccount,
-				msgs: msgs);
-		}
+            var registrant = currentAccount.GetRegistrant(registrantUId.ToGuid(), msgs);
+
+            if (registrant.IsNotEmpty())
+            {
+                registrant.WithdrawRegistration(
+                    participationObjectId: participationObjectId.ToInteger(),
+                    participationObjectType: (ParticipationObjectType)Enum.Parse(typeof(ParticipationObjectType), type),
+                    loggedInUser: SessionVariables.CurrentUser,
+                    isCancelPayment: isCancelPayment,
+                    isParent: false,
+                    account: currentAccount,
+                    msgs: msgs);
+            }
 
 		if (msgs.HasNoErrors())
 			return Json(new { success = true, status = "ok" }, JsonRequestBehavior.AllowGet);
