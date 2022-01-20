@@ -3172,8 +3172,7 @@ namespace AfterSchoolLibraryTests.Tests
             var purchasingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", purchasingAccountOwner, AccountType.Registrant, msgs, dc);
             
             var period = RegistrationPeriodFactory.Create(billingAccount, msgs, dc);
-
-            GradeLevelFactory.CreateAllGradesLevels(msgs, dc);
+            
             var activity = ActivityFactory.Create(account: billingAccount, costPerRegistrant: amount, msgs: msgs, dc: dc);
             msgs.AddRange(period.AddActivity(activity, true, billingAccountOwner.ID.Value, dc));
             activity.Publish(billingAccountOwner, msgs, dc);
@@ -3259,7 +3258,6 @@ namespace AfterSchoolLibraryTests.Tests
             var billingAccount = AccountFactory.CreateAccount(billingAccountOwner, AccountType.School, stripeChargesEnabled: true, stripePayoutsEnabled: true, msgs, dc);
             var payingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", payingAccountOwner, AccountType.School, msgs, dc);
             var masterRegistrant = RegistrantFactory.Create(payingAccount, isMaster: true, msgs, dc);
-            GradeLevelFactory.CreateAllGradesLevels(msgs, dc);
 
             //UseStripeConnectedAccount is true for this package
             var package = PackageFactory.CreateFreePackageWithUseStripeConnectedAccount(msgs, dc);
@@ -3390,7 +3388,6 @@ namespace AfterSchoolLibraryTests.Tests
             var billingAccount = AccountFactory.CreateAccount(billingAccountOwner, AccountType.School, stripeChargesEnabled: true, stripePayoutsEnabled: true, msgs, dc);
             var payingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", payingAccountOwner, AccountType.School, msgs, dc);
             var masterRegistrant = RegistrantFactory.Create(payingAccount, isMaster: true, msgs, dc);
-            GradeLevelFactory.CreateAllGradesLevels(msgs, dc);
 
             //UseStripeConnectedAccount is true for this package
             var package = PackageFactory.CreateFreePackageWithUseStripeConnectedAccount(msgs, dc);
@@ -3525,7 +3522,6 @@ namespace AfterSchoolLibraryTests.Tests
             var billingAccount = AccountFactory.CreateAccount(billingAccountOwner, AccountType.School, stripeChargesEnabled: true, stripePayoutsEnabled: true, msgs, dc);
             var payingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", payingAccountOwner, AccountType.School, msgs, dc);
             var masterRegistrant = RegistrantFactory.Create(payingAccount, isMaster: true, msgs, dc);
-            GradeLevelFactory.CreateAllGradesLevels(msgs, dc);
 
             //UseStripeConnectedAccount is true for this package
             var package = PackageFactory.CreateFreePackageWithUseStripeConnectedAccount(msgs, dc);
@@ -3623,7 +3619,6 @@ namespace AfterSchoolLibraryTests.Tests
             var billingAccount = AccountFactory.CreateAccount(billingAccountOwner, AccountType.School, stripeChargesEnabled: true, stripePayoutsEnabled: true, msgs, dc);
             var payingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", payingAccountOwner, AccountType.School, msgs, dc);
             var masterRegistrant = RegistrantFactory.CreateWithNames(payingAccount, isMaster: true, msgs, dc);
-            GradeLevelFactory.CreateAllGradesLevels(msgs, dc);
 
             //UseStripeConnectedAccount is true for this package
             var package = PackageFactory.CreateFreePackageWithUseStripeConnectedAccount(msgs, dc);
