@@ -13,6 +13,7 @@
     var activityMeetingLabel = "Activity";
     var activityMeetingVerbLabel = "meet";
     var forceNonRepeating = false;
+    var hasScheduled = false;
 
     if (ViewData["ActivityGroupType"].IsNotEmpty())
     {
@@ -44,6 +45,11 @@
             activityMeetingVerbLabel = "travel";
             forceNonRepeating = true;
         }
+    }
+
+    if(ViewData["hasSchedule"] != null && String.Equals(ViewData["hasSchedule"], "1"))
+    {
+        hasScheduled = true;
     }
 
     var showAllowSubscriptionPlans = SessionVariables.AccountPackage.HasFeature(FeatureType.AllowSubscriptionPlans);
@@ -121,7 +127,7 @@
                         @{
                             Html.RenderPartial(
                               "~/Views/Shared/_SwitchButton.cshtml",
-                              daysOfTheWeek.Any(),
+                              hasScheduled,
                               new ViewDataDictionary()
                               {
                                     { "checkboxname", "hasschedule" },

@@ -940,10 +940,11 @@ namespace AfterSchool.Areas.Org.Controllers
 		if (ViewBag.Schedule == null)
 			ViewBag.Schedule = ActivitySchedule.GetNewDefaultSchedule(inSessionDates.Select(item => item.ToDateRange()).ToList());
 
-		ViewBag.Messages = msgs;
-		ViewBag.ActiveMenu = "EditSchedule";
-		return View(activity);
-    }
+            ViewBag.Messages = msgs;
+            ViewBag.ActiveMenu = "EditSchedule";
+            ViewBag.hasSchedule = hasschedule;
+            return View(activity);
+        }
 
     [HttpGet]
     public ActionResult EditLocation(string id)

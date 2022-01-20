@@ -33,6 +33,7 @@ property: LastActivity, DateTime?, DateTime
 property: VerifiedAccount, bool, Bit
 property: IsRegistered, bool, Bit
 property: DefaultAccountId, int?, Int
+property: HowHearAboutUs, string, NVarChar "500"
 property: AllowTextMessages, bool, Bit
 property: CleverUserId, string, NVarChar "100"
 property: CleverUserName, string, NVarChar "100"

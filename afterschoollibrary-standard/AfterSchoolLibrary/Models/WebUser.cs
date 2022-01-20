@@ -31,6 +31,7 @@ namespace AfterSchoolLibrary.Models
 		public bool AllowTextMessages { get { return (bool)MDV["AllowTextMessages"].Value; } set { MDV["AllowTextMessages"].Value = value; } }
 		public string CleverUserId { get { return (string)MDV["CleverUserId"].Value; } set { MDV["CleverUserId"].Value = value; } }
 		public string CleverUserName { get { return (string)MDV["CleverUserName"].Value; } set { MDV["CleverUserName"].Value = value; } }
+		public string HowHearAboutUs { get { return (string)MDV["HowHearAboutUs"].Value; } set { MDV["HowHearAboutUs"].Value = value; } }
 		
 
         public WebUser()
@@ -62,6 +63,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "AllowTextMessages", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "CleverUserId", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "CleverUserName", System.Data.SqlDbType.NVarChar , "100");
+				_dp.Add(className, "HowHearAboutUs", System.Data.SqlDbType.NVarChar , "500");
 				
                 return _dp;
             }
@@ -175,6 +177,12 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["CleverUserName"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["HowHearAboutUs"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
