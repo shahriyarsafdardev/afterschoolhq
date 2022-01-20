@@ -4,7 +4,7 @@
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
     var accountPackage = (AccountPackage)ViewBag.AccountPackage;
     var activityId = (string)ViewBag.ActivityId;
-    var IsScheduled = ViewBag.hasSchedule;
+    var hasSchedule = ViewBag.hasSchedule;
 
     var fullscreen = Request["isnew"] == "1" && !Model.IsPublished;
     if (fullscreen)
@@ -44,7 +44,7 @@
                             (ActivitySchedule)ViewBag.Schedule, 
                             new ViewDataDictionary() { 
                                 { "ActivityType", (int)Model.ActivityTypeId },
-                                { "IsScheduled", IsScheduled }
+                                { "hasSchedule", hasSchedule }
                             });
                     }
 
