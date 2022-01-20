@@ -632,6 +632,25 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         [Fact]
+        public void CopyWithoutScheduleTest()
+        {
+            // Arrange
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, msgs, dc: dc);
+            var activity = ActivityFactory.Create(account, msgs, dc: dc);
+            var form = FormFactory.Create(account, msgs, dc: dc);
+            account.DefaultFormId = form.ID;
+            msgs.AddRange(account.Save(dc));
+
+            // Act
+            var copiedActivity = activity.CopyWithoutSchedule("newActivity", false, accountOwner.ID.Value, msgs, dc: dc);
+
+            // Assert
+            Assert.NotNull(copiedActivity);
+            Assert.Null(copiedActivity.ActivityScheduleId);
+        }
+
+        [Fact]
         public void CopyDefaultFormTest()
         {
             var accountOwner = WebUserFactory.Create(msgs, dc);
