@@ -259,12 +259,12 @@
         $(document).ready(function () {
             $(document).on("change", ".yesno", function () {
                 if ($(this).val() == "yes") {
-                    $("#btn-manual-withdraw").text('Withdrawal & Cancel Payments »').button("refresh");
+                    $("#btn-manual-withdraw").text('Withdraw & Cancel Payments »').button("refresh");
                     var value = $("#btn-manual-withdraw").attr('onclick');
                     $("#btn-manual-withdraw").attr('onclick', value.replace('false', 'true'));
                 }
                 else {
-                    $("#btn-manual-withdraw").text('Withdrawal & Continue Payments »').button("refresh");
+                    $("#btn-manual-withdraw").text('Withdraw & Continue Payments »').button("refresh");
                     var value = $("#btn-manual-withdraw").attr('onclick');
                     $("#btn-manual-withdraw").attr('onclick', value.replace('true', 'false'));
                 }
