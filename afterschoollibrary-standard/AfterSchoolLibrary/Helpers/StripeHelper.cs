@@ -297,6 +297,33 @@ namespace AfterSchoolLibrary.Billing
             return account;
         }
 
+        public static Stripe.Account ToggleStripePayoutForConnectedAccount(string customAccountsStripeUserId, string accountName, PayoutIntervalType payoutIntervalType, SystemMessages msgs)
+        {
+            var options = new AccountUpdateOptions()
+            {
+                Settings = new AccountSettingsOptions()
+                {
+                    Payouts = new AccountSettingsPayoutsOptions()
+                    {
+                        Schedule = new AccountSettingsPayoutsScheduleOptions()
+                        {
+                            Interval = payoutIntervalType.ToString().ToLower()
+                        }
+                    }
+                }
+            };
+
+            var stripeAccount = UpdateCustomAccount(customAccountsStripeUserId, options, msgs);
+
+            if (msgs.HasErrors())
+                return null;
+
+            if (stripeAccount.IsNotEmpty())
+                msgs.Add($"Account: ({accountName}) updated with { (payoutIntervalType == PayoutIntervalType.Manual ? "manual AHQ" : "daily Stripe" )} payout option.", MessageType.Success);
+
+            return stripeAccount;
+        }
+
         #endregion
 
         #region StripePerson
@@ -421,7 +448,7 @@ namespace AfterSchoolLibrary.Billing
             return new PayoutService(StripeClient);
         }
 
-        public static Payout CreatePayout(decimal amount, string externalAccountId, string connectedAccountId, Dictionary<string, string> metaData, SystemMessages msgs)
+        public static Payout CreatePayout(decimal amount, string externalAccountId, string connectedAccountId, string statementDescriptor, Dictionary<string, string> metaData, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -432,7 +459,7 @@ namespace AfterSchoolLibrary.Billing
                 Destination = externalAccountId,
                 Metadata = metaData,
                 Method = "standard",
-                StatementDescriptor = "AHQ Payout"
+                StatementDescriptor = statementDescriptor
             };
 
             var requestOptions = new RequestOptions()
@@ -450,6 +477,28 @@ namespace AfterSchoolLibrary.Billing
             {
                 msgs.Add(ex.Message, MessageType.UserError, ex);
                 msgs.Add($"Payout was not created", MessageType.UserError);
+            }
+
+            return stripePayout;
+        }
+
+        public static Stripe.Payout GetPayout(string payoutId, string stripeAccountId, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var requestOptions = new RequestOptions();
+            if (stripeAccountId.IsNotEmpty())
+                requestOptions.StripeAccount = stripeAccountId;
+
+            Payout stripePayout = null;
+
+            try
+            {
+                stripePayout = GetPayoutService().Get(payoutId, null, requestOptions);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add($"No Stripe Payout found with ID: {payoutId}", MessageType.Notice, ex);
             }
 
             return stripePayout;
@@ -1280,7 +1329,7 @@ namespace AfterSchoolLibrary.Billing
 
             // please make sure that billing ends when the program ends.
             if (endDate.HasValue && endDate.IsNotEmpty() && endDate.Value.Date.AddDays(-1).IsAfter(DateTime.UtcNow.Date))
-                options.CancelAt = endDate.Value;        
+                options.CancelAt = endDate.Value;
 
             if (stripeAccountId.IsNotEmpty())
                 options.TransferData = new SubscriptionTransferDataOptions()

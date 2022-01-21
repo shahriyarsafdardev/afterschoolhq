@@ -1,0 +1,367 @@
+﻿@{
+    var cleverSsoEnabledRaw = ViewData["CleverSsoEnabled"];
+    var cleverSsoEnabled = !(cleverSsoEnabledRaw is null) && (bool)cleverSsoEnabledRaw;
+}
+<div id="modal-login" class="md-modal">
+    <div class="md-content re-316">
+
+        <div class="modal-body">
+            <div class="col-md-8 col-md-offset-2">
+
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close btn-close-login-form" onclick="updateAndHideModal()">
+                    <i class="icon s7-close"></i>
+                </button>
+
+                <div class="login-form">
+                    <div class="form-group">
+                        <p class="txt-welcome-back">Welcome back.</p>
+                        <p class="txt-login-below">Login below or <a href="#" onclick="showSignUpForm()">Create a family account</a></p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="short-description"> Email </label>
+                        <div class="input-group" style="width: 100%;">
+                            <input id="lm-login-username" name="username" type="email" class="form-control txt-generic-login" required>
+                            <div class="input-group-email">
+                                <button id="inputGroupEmailPrepend" type="button" class="btn btn-primary btn-sm btn-generic-login">
+                                    <img src="~/img/envelope.svg" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 5px;">
+                        <label class="short-description"> Password </label>
+                        <div class="input-group" style="width: 100%;">
+                            <input id="lm-login-password" name="password" type="password" autocomplete="new-password" class="form-control txt-generic-login" required>
+                            <div class="input-group-password">
+                                <button id="inputGroupPassworkPrepend" type="button" class="btn btn-primary btn-sm btn-generic-login">
+                                    <img src="~/img/unlock.svg" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="float: left;">
+                        <div class="remember margin-b-10">
+                            <div class="am-checkbox checkbox-inline text-center" onclick="toggleRememberMe('#lm-login-rememberme')">
+                                <input type="checkbox" id="lm-login-rememberme" value="1" class="form-control" checked="checked">
+                                <label for="remember-login">Remember me </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group login-form-forgot-password-container">
+                        <a href="#" style="padding: 7px; line-height: 30px; font-weight: 300; text-decoration: underline;" onclick="return showForgotPasswordModal()">Forgot Password</a>
+                    </div>
+
+                    <div class="form-group login-submit text-center">
+                        <button type="button" id="btn-login" class="btn btn-primary btn-lg btn-block btn-login-updated" onclick="authorize()">Log In</button>
+                        @if (cleverSsoEnabled)
+                        {
+                            <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLinkAccount" class="btn btn-lg btn-block">
+                                <img src="~/img/clever-login.png" style="width: 225px; height: 50px;" class="clever-login-img"/>
+                            </a>
+                        }
+                    </div>
+
+                    <div class="clearfix"></div>
+                </div>
+
+                <div class="sign-up-form hide">
+
+                    <div class="form-group">
+                        <p class="txt-welcome-back">Create a family account</p>
+                        <p class="txt-login-below"><a href="#" onclick="showLoginForm()">Back</a></p>
+                    </div>
+                    <br />
+
+                    <div class="form-group">
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="icon s7-user"></i></span>
+                            <input id="lm-signup-firstname" name="firstname" type="text" placeholder="First Name" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="icon s7-user"></i></span>
+                            <input id="lm-signup-lastname" name="lastname" type="text" placeholder="Last Name" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="icon s7-mail"></i></span>
+                            <input id="lm-signup-email" name="email" type="text" placeholder="Email Address" autocomplete="off" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="icon s7-lock"></i></span>
+                            <input id="lm-signup-password" name="password" type="password" placeholder="Password" autocomplete="off" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="remember margin-b-10">
+                            <div class="am-checkbox checkbox-inline text-center" onclick="toggleRememberMe('#lm-signup-rememberme')">
+                                <input type="checkbox" id="lm-signup-rememberme" value="1" class="form-control" checked="checked">
+                                <label for="remember-signup">Remember me on this computer</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group login-submit text-center">
+                        <button type="button" id="btn-signup" class="btn btn-primary btn-lg btn-block btn-login-updated" style="margin: 0 auto;" onclick="createNewAccount()">
+                            Create Family Account &raquo;
+                        </button>
+                    </div>
+                    <div class="form-group footer row">
+                        <div class="col-xs-12 col-md-12 text-center"><a href="#" onclick="showLoginForm()">Already have an account?</a></div>
+                    </div>
+                </div>
+
+                <div class="clearfix"></div>
+            </div>
+
+            <div class="clearfix"></div>
+        </div>
+
+        <div class="clearfix"></div>
+    </div>
+</div>
+
+@{ Html.RenderPartial("~/Views/Shared/Registration/_ResetPassword.cshtml"); }
+
+<script>
+    let authorizationFormRedirectUrl = null;
+    let authorizationFormAction = null;
+    let signupFormRedirectUrl = null;
+    let signupFormAction = null;
+
+    function authorize() {
+
+        var email = $('#lm-login-username');
+        var pass = $('#lm-login-password');
+        var isEmailValid = validateEmail(email.val());
+        var isPassValid = pass.val() == '' ? false : true;
+
+        if (!isEmailValid) {
+            email.addClass('error-border');
+            setTimeout(function () {
+                email.removeClass('error-border');
+            }, 3000);
+
+            $(email).parent().effect("shake");
+        }
+
+        if (!isPassValid) {
+            pass.addClass('error-border');
+            setTimeout(function () {
+                pass.removeClass('error-border');
+            }, 3000);
+
+            $(pass).parent().effect("shake");
+        }
+
+        if (isEmailValid == true && isPassValid == true) {
+
+            showLoader();
+
+            params = 'username=' + encodeURIComponent($('#lm-login-username').val()) +
+                '&password=' + encodeURIComponent($('#lm-login-password').val()) +
+                '&remember=' + $('#lm-login-rememberme').val() +
+                '&source=parent-login';
+
+            var loginText = $('#btn-login').html();
+            $('#btn-login').html('Logging In...');
+            $('#btn-login').prop('disabled', true);
+
+            $.post('@Url.Action("authorize", "login")', params,
+                function (data) {
+                    if (data && data.status == 'ok') {
+                        $('#btn-login').html('Redirecting...');
+
+                        if (authorizationFormRedirectUrl) {
+                            location.href = authorizationFormRedirectUrl;
+                        } else if (authorizationFormAction) {
+                            $('#modal-login').removeClass('md-show');
+                            authorizationFormAction(function () { location.reload(); });
+                        }
+                        else if (data.isNewAccount) {
+                            location.reload();
+                        } else {
+                            location.href = '@ViewData["ReturnUrl"]';
+                        }
+                    } else {
+                        Notifications.showErrors(data.messages);
+
+                        $('#btn-login').html(loginText);
+                        $('#btn-login').prop('disabled', false);
+                    }
+
+                    hideLoader();
+                }
+            )
+        }
+
+        return;
+    }
+
+    function setLoginRedirect(url, showSignUp) {
+        authorizationFormRedirectUrl = url;
+        signupFormRedirectUrl = url;
+
+        if (showSignUp) {
+            showSignUpForm();
+        }
+    }
+
+    function setLoginAction(callback, showSignUp) {
+        authorizationFormAction = callback;
+        signupFormAction = callback;
+
+        if (showSignUp) {
+            showSignUpForm();
+        }
+    }
+
+    function showSignUpForm() {
+        $('.sign-up-form').removeClass('hide');
+        $('.login-form').addClass('hide');
+    }
+
+    function showLoginForm() {
+        $('.sign-up-form').addClass('hide');
+        $('.login-form').removeClass('hide');
+    }
+
+    function toggleRememberMe(id) {
+        var val = !$(id).prop("checked");
+        $(id).prop("checked", val);
+    }
+
+    function createNewAccount() {
+        params = 'email=' + encodeURIComponent($('#lm-signup-email').val()) +
+            '&firstname=' + encodeURIComponent($('#lm-signup-firstname').val()) +
+            '&lastname=' + encodeURIComponent($('#lm-signup-lastname').val()) +
+            '&password=' + encodeURIComponent($('#lm-signup-password').val()) +
+            '&remember=' + $('#lm-signup-rememberme').val();
+
+        var signupText = $('#btn-signup').html();
+        $('#btn-signup').html('Creating Account...');
+        $('#btn-signup').prop('disabled', true);
+
+        $.post(
+            '@Url.Action("personal", "signup")',
+            params,
+            function (data) {
+
+                if (data && data.status == 'ok') {
+                    $('#btn-signup').html('Redirecting...');
+
+                    if (signupFormRedirectUrl) {
+                        location.href = signupFormRedirectUrl;
+                    } else if (signupFormAction) {
+                        $('#modal-login').removeClass('md-show');
+                        signupFormAction(function () { location.reload(); });
+                    }
+                    else if (data.isNewAccount) {
+                        location.reload();
+                    } else {
+                        location.href = '@ViewData["ReturnUrl"]';
+                    }
+                } else {
+                    Notifications.showErrors(data.messages);
+
+                    $('#btn-signup').html(signupText);
+                    $('#btn-signup').prop('disabled', false);
+                }
+
+            }
+        )
+    }
+
+    function showForgotPasswordModal() {
+        //first hide login modal
+        hideModal('modal-login');
+        // now show the reset password modal
+        showModal('modal-rest-password');
+    }
+
+    function hideForgotPasswordModal() {        
+        hideModal('modal-rest-password');        
+        showModal('modal-login');
+    }
+
+    function updateAndHideModal() {
+        showLoginForm()
+        hideModal('modal-login');
+    }
+
+    function validateAndReset() {
+        var email = $('#reset-email');
+        var isEmailValid = validateEmail(email.val());
+
+        if (!isEmailValid) {
+            email.addClass('error-border');
+            setTimeout(function () {
+                email.removeClass('error-border');
+            }, 3000);
+
+            $(email).parent().effect("shake");
+
+            return;
+        }
+
+        resetPassword(email.val());
+    }
+
+    function resetPassword(email) {
+        showLoader();
+        btnProcess('btn-reset-pass', 'Processing...', true);
+
+        $.ajax({
+            url: '@Url.Action("ResetPasswordJson", "Login", new { Area = "" })',
+            data: { email: email },
+            type: "POST",
+            dataType: "json",
+            success: function (data) {
+                if (data && data.success == true) {
+                    resetEmailCompleted();
+                    btnProcess('btn-reset-pass', 'Reset Password', false);
+                    hideModal('modal-rest-password');
+                    showModal('modal-reset-password-completed');
+                }
+                else {
+                    btnProcess('btn-reset-pass', 'Reset Password', false);
+
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: 'Something went wrong. Please contact customer support.',
+                        success: false
+                    });
+                }
+
+                hideLoader();
+                return;
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(errorThrown);
+                btnProcess('btn-reset-pass', 'Reset Password', false);
+                Notifications.showBar({
+                    title: 'Error',
+                    message: 'Something went wrong. Please contact customer support.',
+                    success: false
+                });
+
+                hideLoader();
+                return;
+            }
+        });
+    }
+
+    function resetEmailCompleted() {
+        //hide reset password modal
+        hideModal('modal-rest-password');
+        $('#reset-email').val('');
+    }
+
+</script>

@@ -243,4 +243,14 @@
     .hidden-xl {
         display: none !important;
     }
+
+    .login-form-forgot-password-container {
+        float: right;
+    }
+
+
+    .btn-clever-login {
+        margin: -50px -60px 0px 0px;
+        float: right;
+    }
 }

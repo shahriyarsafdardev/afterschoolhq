@@ -396,9 +396,9 @@ namespace AfterSchoolLibrary.Services
             if (user.IsEmpty() || userType.In(AccountService.AdminUserTypes))
                 return Activity.LoadByAccountId(account.ID.Value, null, null, activityType, isArchived, isDeleted, ungroupedOnly, start, length, msgs, dc).ToList();
 
-            return Activity.LoadByAccountId(account.ID.Value, null, null, activityType, isArchived, isDeleted, ungroupedOnly, start, length, msgs, dc)
-                    .Where(activity => user.HasAccessToActivity(activity, msgs, dc))
-                    .ToList();
+
+            var activityIdsByWebUser = ActivityWebUser.LoadByWebUserId(user.ID.Value, msgs, dc).Select(a => a.ActivityId.Value).ToList();
+            return Activity.LoadListByIdsByGroupByIsArchivedIsDeleted(activityIdsByWebUser, null, null, activityType, isArchived, isDeleted, ungroupedOnly, start, length, msgs, dc);
         }
 
         public static List<Activity> GetAllActivitiesForAccount(this Account account,  SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -951,6 +951,35 @@ namespace AfterSchoolLibrary.Services
             return account.GetActiveAccountPackage(msgs, dc).AddOrUpdatePackageFeature(featureTypeId, maxValue, loggedInUser, msgs, dc);
         }
 
+        /// <summary>
+        /// Load all accounts with ProviderAccountTypes which has feature
+        /// </summary>
+        /// <param name="featureTypeId"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        public static List<Account> GetAccountsWithSpecificFeatures(FeatureType featureTypeId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            //.. load all AccountPackageFeature where provided FeatureTypeId has value >= 1 and then grab the AccountPackageId
+            var accountPackageIds =  AccountPackageFeature.LoadByFeatureTypeIdByGreaterOrEqualMaxValue(FeatureTypeId: featureTypeId, Max: 1, msgs: msgs, dc: dc)
+                .Select(m => m.AccountPackageId.Value).ToList();
+
+            if (accountPackageIds.Any())
+            {
+                //.. load all AccountPackage and get AccountId
+                var accountIds = AccountPackage.LoadByIds(ids: accountPackageIds, msgs: msgs, dc: dc)
+                    .Select(m => m.AccountId.Value).ToList();
+
+                if (accountIds.Any())
+                {
+                    // return all accounts which are filtered by feature type
+                    return Account.LoadByIdsByAccountTypes(ids: accountIds.Distinct().ToList(), accountTypes: AccountService.ProviderAccountTypes.ToList(), msgs: msgs, dc: dc).ToList();
+                }
+            }
+
+            return null;
+        }
+
         #endregion
 
         #region Users
@@ -1272,7 +1301,14 @@ namespace AfterSchoolLibrary.Services
             account.AddOrUpdatePackageFeature(FeatureType.UseStripeConnectedAccount, 1, loggedInUser, msgs, dc);
 
             if (msgs.HasNoErrors())
+            {
                 msgs.Add("Your account has been connected to Stripe", MessageType.Success);
+
+                // set payout type to manual for this account if it has package with ManualStripePayouts
+                var isManualStripeEnabled = account.GetAccountPackageFeature(featureType: FeatureType.ManualStripePayouts, msgs: msgs, dc: dc);
+                if (isManualStripeEnabled.IsNotEmpty() && isManualStripeEnabled.Max > 0 && account.StripeUserId.IsNotEmpty())
+                    StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: account.StripeUserId, accountName: account.Name, payoutIntervalType: PayoutIntervalType.Manual, msgs: msgs);
+            }
             else
                 account.DisconnectStripeConnect(loggedInUser, msgs, dc);
         }
@@ -2970,28 +3006,18 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
-        public static Payout RequestNewPayout(this Account account, List<Transaction> transactions, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Payout RequestNewPayout(this Account account, string statementDescriptor, List<Transaction> transactions, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var paymentType = PaymentType.NotSet;
 
             if (account.CanReceiveACHDeposits(msgs, dc))
                 paymentType = PaymentType.ACH;
             else
-            {
                 paymentType = PaymentType.Check;
-                //var checkAccount = account.GetCheckPaymentAccount(msgs, dc);
-                //if (checkAccount.IsNotEmpty())
-                //{
-                //    if (!checkAccount.IsVerified)
-                //        msgs.Add("Your payment address is not verified. Please correct in Settings > Accept Payments", MessageType.UserError);
-                //    else
-                //        paymentType = PaymentType.Check;
-                //}
-            }
 
-            if (paymentType != PaymentType.NotSet)
+            if (paymentType != PaymentType.NotSet && msgs.HasNoErrors())
             {
-                var payout = PayoutService.CreateNew(account, transactions, PayoutStatus.Requested, paymentType, loggedInUser, msgs, dc);
+                var payout = PayoutService.CreateNew(account, statementDescriptor, transactions, PayoutStatus.Requested, paymentType, loggedInUser, msgs, dc);
 
                 if (payout.IsNotEmpty())
                     payout.SendPayoutRequestNotification(account, msgs);
@@ -4078,6 +4104,7 @@ namespace AfterSchoolLibrary.Services
 
             return Math.Round(feeAmount / totalCost, 4);
         }
+
         public static void SendStripePayout(this Account account, Payout payout, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var requestor = payout.GetRequestor(msgs, dc);
@@ -4103,12 +4130,16 @@ namespace AfterSchoolLibrary.Services
 
                 var stripeAccount = account.GetStripeCustomAccount(msgs);
 
-                StripeHelper.CreatePayout(
+                var stripePayout = StripeHelper.CreatePayout(
                     amount: payout.Amount.Value,
                     externalAccountId: stripeAccount.ExternalAccounts.First().Id,
+                    statementDescriptor: payout.StatementDescriptor.IsNotEmpty() ? payout.StatementDescriptor : "AHQ Payout",
                     connectedAccountId: account.StripeUserId,
                     metaData: metaData,
                     msgs: msgs);
+
+                if (msgs.HasNoErrors() && stripePayout.IsNotEmpty())
+                    payout.SetExternalPayoutId(externalPayoutId: stripePayout.Id, loggedInUser: loggedInUser, msgs: msgs, dc: dc);
             }
         }
 
@@ -4587,5 +4618,50 @@ namespace AfterSchoolLibrary.Services
 
         #endregion
 
+        #region Stripe Manual Payout
+
+        public static SystemMessages PreparePayouts(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty())
+                msgs = new SystemMessages();
+
+            msgs.Add($"Payout job started on at {DateTime.UtcNow.ToShortDateString()}.", MessageType.Success);
+
+            //get accounts with ManualStripePayouts enabled
+            var accountsToGeneratePayout = GetAccountsWithSpecificFeatures(featureTypeId: FeatureType.ManualStripePayouts, msgs: msgs, dc: dc);
+            var webUser = WebUserService.GetAdminUserForLogs(msgs, dc);
+
+            if (accountsToGeneratePayout.IsNotEmpty())
+                accountsToGeneratePayout.PrepareManualPayouts(loggedInUser: webUser, msgs: msgs, dc: dc);
+            else
+                msgs.Add($"No accounts found for payout.", MessageType.Success);
+
+            if (msgs.HasNoErrors())
+                msgs.Add($"Payout job completed on at {DateTime.UtcNow.ToShortDateString()}.", MessageType.Success);
+
+            WebSessionActionService.SaveSummary(webUser, msgs, dc);
+            return msgs;
+        }
+
+        public static void PrepareManualPayouts(this List<Account> accounts, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            foreach (var account in accounts)
+            {
+                msgs.Add($"Payout process started for account: ({account.UniqueName})", MessageType.Success);
+
+                //check for account whether it's getting paid via check or not and based on that we can use them in manual payouts
+                if (account.CanReceiveACHDeposits(msgs: msgs, dc: dc) && !account.CanReceiveCheckPayouts(msgs: msgs, dc: dc))
+                {
+                    msgs.Add($"({account.UniqueName}) CanReceiveACHDeposits and not opted for check payouts.", MessageType.Success);
+
+                    var activities = account.GetActivities(msgs: msgs, dc: dc);
+
+                    foreach (var activity in activities)
+                        activity.ProcessActivityPayouts(currentUser: loggedInUser, account: account, msgs: msgs, dc: dc);
+                }
+            }
+        }        
+
+        #endregion
     }
 }

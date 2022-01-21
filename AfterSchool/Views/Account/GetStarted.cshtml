@@ -9,22 +9,24 @@
     var savedEmail = Model.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail)?.Value;
     var showStep1 = currentUser.IsEmpty() && savedEmail.IsBlank();
     var isDuringProfileSetup = currentUser.IsNotEmpty() || savedEmail.IsNotBlank();
+
+    var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
 }
 
 @{
-    Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); 
+    Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs);
 }
 
 @{
     Html.RenderPartial(
-                "~/Views/Shared/Registration/_AccountTopBar.cshtml",
-                SessionVariables.RegistrationStartPageAccount ?? registrationAccount,
-                new ViewDataDictionary()
-                {
-    { "ParticipationObject", participationObject },
-    { "isDuringProfileSetup", isDuringProfileSetup }
-                }
-            );
+        "~/Views/Shared/Registration/_AccountTopBar.cshtml",
+        SessionVariables.RegistrationStartPageAccount ?? registrationAccount,
+        new ViewDataDictionary()
+        {
+            { "ParticipationObject", participationObject },
+            { "isDuringProfileSetup", isDuringProfileSetup },
+            { "CleverSsoEnabled", cleverSsoEnabled }
+        });
 }
 
 @{
@@ -113,7 +115,7 @@
                                     </div>
                                     <div class="message">
                                         <p class="text-center reg-login new-account">
-                                            Please enter your info below to begin registation.
+                                            Please enter your info below to begin registration.
                                         </p>
                                     </div>
                                 </div>
@@ -131,9 +133,9 @@
                                         <div class="row">
                                             <div class="col-md-6 col-md-offset-3">
                                                 <div class="am-checkbox text-center">
-                                                    <input type="checkbox" id="textnotifications" name="textnotifications" value="1" @(Request["textnotifications"] == "1" || System.Web.HttpContext.Current.Request.HttpMethod.ToString() == "GET" ? " checked=\"checked\" " : "") />
+                                                    <input type="checkbox" id="textnotifications" name="textnotifications" value="1" @(UILabel.CheckAllowTextMessage(currentUser) ? " checked=\"checked\" " : "") />
                                                     <label for="textnotifications">
-                                                        I would like to receive text messages about @(UILabel.ActivityLabel(ActivityType.Activity, true).ToLower())
+                                                        I would like to receive text messages about @(UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()).
                                                         Notifications may include information about attendance, reminders, and other important information.
                                                     </label>
                                                 </div>

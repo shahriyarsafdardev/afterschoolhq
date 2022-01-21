@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Text;
 using Xunit;
 using Xunit.Abstractions;
 using BasicLibrary;
-using AfterSchoolLibrary;
 using AfterSchoolLibrary.Services;
 using AfterSchoolLibraryTests.Factories;
 
@@ -21,8 +19,8 @@ namespace AfterSchoolLibraryTests.Tests
             var newUser = WebUserService.CreateNew(
                             firstName: "jeff",
                             lastName: "gordon",
-                            email: "jeff@gordon.com",
-                            phone: "317-224-3123",
+                            email: $"jeff+{DateTime.Now.Ticks}@example.com",
+                            phone: $"317-555-{(DateTime.Now.Ticks % 10000):0000}",
                             password: null,
                             isActive: false,
                             isRegistered: false,
@@ -33,7 +31,6 @@ namespace AfterSchoolLibraryTests.Tests
                             dc: dc);
 
             Assert.True(newUser.ID.HasValue);
-
         }
 
         [Fact]
@@ -106,6 +103,39 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.False(canUser3Publish);
             Assert.False(canUser4Publish);
             Assert.False(canUser5Publish);
+        }
+
+        [Fact]
+        public void GetUserByCleverIdTest()
+        {
+            // Arrange
+            var webUser = WebUserFactory.CreateWithCleverId(msgs, dc);
+
+            // Act
+            var userWithCleverIntegration = WebUserService.GetUserByCleverId(id: webUser.CleverUserId, msgs: msgs, dc: dc);
+
+            // Assert
+            Assert.NotNull(webUser);
+            Assert.NotNull(userWithCleverIntegration);
+            Assert.True(webUser.ID == userWithCleverIntegration.ID);
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Fact]
+        public void SetCleverIdentityToUserTest1()
+        {
+            // Arrange
+            var webUser = WebUserFactory.Create(msgs, dc);
+
+            // Act
+            WebUserService.SetCleverIdentityToUser(id: "1", name: "Clever test", webUser: webUser, msgs: msgs, dc: dc);
+
+            // Assert
+            Assert.NotNull(webUser);            
+            Assert.True(webUser.CleverUserId == "1");
+            Assert.True(webUser.CleverUserName == "Clever test");
+            Assert.True(msgs.HasNoErrors());
+            Assert.True(msgs.HasMessageContainingText($"Clever integration for {webUser.DisplayName} has been successfully completed."));
         }
     }
 }
