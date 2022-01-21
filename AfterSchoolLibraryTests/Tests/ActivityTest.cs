@@ -31,23 +31,7 @@ namespace AfterSchoolLibraryTests.Tests
             var activity = ActivityFactory.Create(account, msgs, dc);
             Assert.NotNull(Activity.Load(activity.ID.Value, dc: dc));
         }
-        /// <summary>
-        /// Gets the number of Activiites in the DB
-        /// </summary>
-        [Fact]
-        public void GetCountTest()
-        {
-            var startCount = Activity.GetCount(msgs: msgs, dc: dc);
-            var accountOwner = WebUserFactory.Create(msgs, dc);
-            var account = AccountFactory.Create(accountOwner, msgs, dc);
-            ActivityFactory.Create(account, msgs, dc);
 
-            Assert.Equal(startCount + 1, Activity.GetCount(msgs: msgs, dc: dc));
-        }
-        /// <summary>
-        /// Saves the Account in the DB, returns messages that will send errors if this is not recorded
-        /// in the DB properly
-        /// </summary>
         [Fact]
         public void SaveTest()
         {
@@ -57,9 +41,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.True(activity.Save(dc: dc).HasNoErrors());
         }
-        /// <summary>
-        /// Removes the Activity from the DB, it should not be able to be loaded from the DB afterwards
-        /// </summary>
+
         [Fact]
         public void DeleteTest()
         {
@@ -70,9 +52,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Null(Activity.Load(activity.ID.Value, dc: dc));
         }
 
-        /// <summary>
-        /// Loads the activity from the DB (using it's ID) and returns it.
-        /// </summary>
         [Fact]
         public void ReloadTest()
         {
@@ -138,10 +117,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.NotNull(Activity.LoadByUid(activity.Uid, dc: dc));
         }
-        /// <summary>
-        /// activity groups are collections of activities, this method will load a list of
-        /// the activities in a group from the DB
-        /// </summary>
+
         [Fact]
         public void LoadByActivityGroupIdTest()
         {
@@ -175,9 +151,7 @@ namespace AfterSchoolLibraryTests.Tests
             activity.Save(dc: dc);
             Assert.NotNull(Activity.LoadByUniqueNameByAccountId(activity.UniqueName, account.ID.Value, dc: dc));
         }
-        /// <summary>
-        /// Loads using a List of Activity Ids
-        /// </summary>
+
         [Fact]
         public void LoadListTest()
         {
@@ -209,9 +183,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(1, Activity.GetCountByAccountId(account.ID.Value, activity.ActivityGroupId.Value, null, null, null, null, msgs, dc));
         }
 
-        /// <summary>
-        /// loads the Activities under one Account and should return a list of one Account
-        /// </summary>
         [Fact]
         public void LoadByAccountIdLongTest()
         {
@@ -231,9 +202,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(activity.IsPublished);
         }
 
-        /// <summary>
-        /// Gets the days of the week that the activity repeats on weekly
-        /// </summary>
         [Fact]
         public void GetDaysOfTheWeekTest()
         {
@@ -259,9 +227,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Single(activity.GetDaysOfTheWeek(dc: dc));
         }
 
-        /// <summary>
-        /// Returns a list of the registrants that have "signed up" for the activity
-        /// </summary>
         [Fact]
         public void GetRegistrantsTest()
         {
@@ -286,9 +251,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Single(activity.GetRegistrantActivities(true, dc: dc));
         }
 
-        /// <summary>
-        ///  Returns a list of all of the RegistrantActivities associated with the activity
-        /// </summary>
         [Fact]
         public void GetRegistrantsCountTest()
         {
@@ -301,7 +263,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(1, activity.GetRegistrantCount(msgs, dc));
         }
 
-        // will count the number of registrants for the particular activity of a given registrantion type
         [Theory]
         [InlineData(RegistrationAssignmentType.NotSet)]
         [InlineData(RegistrationAssignmentType.Invited)]
@@ -316,9 +277,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(1, activity.GetRegistrantCountByAssignmentType(registrationAssignmentType, dc: dc));
         }
 
-        /// <summary>
-        /// returns if an activity is full or not (checks the SeatsAvaible feild)
-        /// </summary>
         [Fact]
         public void isFullTest()
         {
@@ -331,9 +289,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.False(activity.IsFull(dc: dc));
         }
 
-        /// <summary>
-        /// returns boolean (if Waitinglistseats = 10 and registration type)
-        /// </summary>
         [Fact]
         public void isWaitingListFullTest()
         {
@@ -345,9 +300,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(activity.IsWaitingListFull(dc: dc)); //0 open with 0 on waiting list means full
         }
 
-        /// <summary>
-        /// Returns a list of all WebUSers signed up for the same activityID
-        /// </summary>
         [Fact]
         public void GetTeamMembersTest()
         {
@@ -361,9 +313,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(activityWebUser.ToString(), activity.GetTeamMembers(dc: dc).ElementAt(0).ToString());
         }
 
-        /// <summary>
-        /// returns a list of all forms ascociated with that activity
-        /// </summary>
         [Fact]
         public void GetFormsTest()
         {
@@ -376,10 +325,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Single(activity.GetForms(dc: dc));
         }
 
-
-        /// <summary>
-        /// Same as above, but they must also be active (not to be confused with a simple activity form)
-        /// </summary>
         [Fact]
         public void GetActiveFormTest()
         {
@@ -394,9 +339,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.NotNull(activity.GetActiveForm(msgs, dc));
         }
 
-        /// <summary>
-        /// Returns a list of the activity forms
-        /// </summary>
         [Fact]
         public void GetActivityFormsTest()
         {
@@ -409,9 +351,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Single(activity.GetActivityForms(dc: dc));
         }
 
-        /// <summary>
-        /// Returns a list of the Attendance objects asociated with this activity.
-        /// </summary>
         [Fact]
         public void GetAttendanceTest()
         {
@@ -428,9 +367,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Single(activity.GetAttendance(dc: dc));
         }
 
-        /// <summary>
-        /// Returns a list of the Attendance objects asociated with this activity that are completed.
-        /// </summary>
         [Fact]
         public void GetCompletedAttendanceTest()
         {
@@ -465,9 +401,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.Single(activity.GetCompletedAttendanceWithPaging(orderByParam, direction, pageNumber, recordsPerPage, msgs, dc: dc));
         }
-        /// <summary>
-        /// returns the numberof attendance objects asociated with the activity that have been marked as present
-        /// </summary>
+
         [Fact]
         public void GetAttendancePresentCountTest()
         {
@@ -537,9 +471,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Single(activity.GetAttendanceByDate(date, dc: dc));
         }
 
-        /// <summary>
-        /// returns a list of activity Registration Periods
-        /// </summary>
         [Fact]
         public void GetActivityRegistrationPeriodsTest()
         {
@@ -552,6 +483,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.Single(activity.GetActivityRegistrationPeriods(dc: dc));
         }
+
         [Fact]
         public void GetRegistrationPeriodsTest()
         {
@@ -697,6 +629,25 @@ namespace AfterSchoolLibraryTests.Tests
             msgs.AddRange(account.Save(dc));
 
             Assert.NotNull(activity.Copy("newActivity", false, accountOwner.ID.Value, msgs, dc: dc));
+        }
+
+        [Fact]
+        public void CopyWithoutScheduleTest()
+        {
+            // Arrange
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, msgs, dc: dc);
+            var activity = ActivityFactory.Create(account, msgs, dc: dc);
+            var form = FormFactory.Create(account, msgs, dc: dc);
+            account.DefaultFormId = form.ID;
+            msgs.AddRange(account.Save(dc));
+
+            // Act
+            var copiedActivity = activity.CopyWithoutSchedule("newActivity", false, accountOwner.ID.Value, msgs, dc: dc);
+
+            // Assert
+            Assert.NotNull(copiedActivity);
+            Assert.Null(copiedActivity.ActivityScheduleId);
         }
 
         [Fact]
@@ -947,9 +898,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.NotNull(activity.GetFirstDate(msgs, dc));
         }
 
-        /// <summary>
-        /// Tests to make sure that the Activity can properly get the last scheduled date
-        /// </summary>
         [Fact]
         public void GetLastDateTest()
         {

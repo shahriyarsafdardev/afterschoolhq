@@ -386,7 +386,7 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static WebUser CreateNewWithNoPhone(string firstName, string lastName, string email, string password, bool isActive, bool isRegistered, bool isVerified, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static WebUser CreateNewWithNoPhone(string firstName, string lastName, string email, string password, bool isActive, bool isRegistered, bool isVerified, WebUser loggedInUser, string howHearAboutUs, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (firstName.IsEmpty())
                 msgs.Add("First Name is required", MessageType.UserError);
@@ -418,7 +418,8 @@ namespace AfterSchoolLibrary.Services
                     CreatedBy = loggedInUser?.ID.IfEmpty(0),
                     LastModifiedDate = DateTime.UtcNow,
                     LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                    Username = WebUserService.GenerateUsername(firstName, lastName)
+                    Username = WebUserService.GenerateUsername(firstName, lastName),
+                    HowHearAboutUs = howHearAboutUs
                 };
 
                 if (password.IsNotEmpty())

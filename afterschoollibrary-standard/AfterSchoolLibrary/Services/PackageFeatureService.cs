@@ -122,7 +122,7 @@ namespace AfterSchoolLibrary.Services
                     msgs,
                     dc);
 
-                if (packageFeature.FeatureTypeId == FeatureType.ManualStripePayouts)
+                if (packageFeature.FeatureTypeId == FeatureType.ManualStripePayouts && account.StripeUserId.IsNotEmpty())
                 {
                     if (packageFeature.Max.Value > 0)
                         StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: account.StripeUserId, accountName: account.Name, payoutIntervalType: PayoutIntervalType.Manual, msgs: msgs);

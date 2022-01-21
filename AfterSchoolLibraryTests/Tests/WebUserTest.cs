@@ -99,14 +99,20 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(user.CanEmailBeUsed(testEmail, msgs, dc) == result);
         }
 
-        [Theory(DisplayName = "Check if email already exists at all in system")]
-        [InlineData("test1@test.com", "test1@test.com", true)]
-        [InlineData("test1@test.com", "test2@test.com", false)]
-        public void ExistsByEmailTest(string email1, string testEmail, bool result)
+        [Fact]
+        public void ExistsByEmailSameTest()
         {
-            var user = Factories.WebUserFactory.CreateWithEmail(email1, msgs, dc);
+            var user = Factories.WebUserFactory.Create(msgs, dc);
 
-            Assert.Equal(result, WebUser.ExistsByEmail(testEmail, msgs, dc));
+            Assert.True(WebUser.ExistsByEmail(user.Email, msgs, dc));
+        }
+
+        [Fact]
+        public void ExistsByEmailDifferentTest()
+        {
+            Factories.WebUserFactory.Create(msgs, dc);
+            var differentEmail = $"don+{DateTime.Now.Ticks}@example.com";
+            Assert.False(WebUser.ExistsByEmail(differentEmail, msgs, dc));
         }
 
         [Fact(DisplayName = "Check if UID exists in webuser table - passing")]
@@ -175,17 +181,17 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
 
-        [Theory]
-        [InlineData("test@test.com", false)]
-        public void SendInviteTest(string email, bool expectedResult)
+        [Fact]
+        public void SendInviteTest()
         {
             var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
-            var user = Factories.WebUserFactory.CreateWithEmail(email, msgs, dc: dc);
+            var user = Factories.WebUserFactory.Create(msgs, dc);
             var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
 
-            var hasErrors = user.SendInviteToAccount(account, "invite message", loggedInUser, dc).HasErrors();
+            var sendInviteToAccount = user.SendInviteToAccount(account, "invite message", loggedInUser, dc);
+            var hasErrors = sendInviteToAccount.HasErrors();
 
-            Assert.Equal(hasErrors, expectedResult);
+            Assert.False(hasErrors);
         }
 
         [Theory(DisplayName = "Get associated accounts")]
@@ -310,23 +316,24 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(user.VerifiedAccount);
         }
 
-        [Theory(DisplayName = "Changes a user's password")]
-        [InlineData("username1", "password1", "password2")]
-        public void ChangePasswordTest(string username, string password, string password2)
+        [Fact]
+        public void ChangePasswordTest()
         {
-            var user = Factories.WebUserFactory.CreateWithUsername(username, password, msgs, dc: dc);
-            msgs.AddRange(user.ChangePassword(password2, dc: dc));
+            var username = $"test+{DateTime.Now:u}";
+            var password = $"{DateTime.Now:u}";
+            var password2 = $"{DateTime.Now:u}";
+            var user = Factories.WebUserFactory.CreateWithUsername(username, password, msgs, dc);
+            msgs.AddRange(user.ChangePassword(password2, dc));
 
             Assert.NotNull(WebUserService.LoginByUsername(username, password2, dc: dc));
         }
 
-        [Theory]
-        [InlineData("test@test.com", true)]
-        public void SendPasswordResetTokenTest(string email, bool result)
+        [Fact]
+        public void SendPasswordResetTokenTest()
         {
-            var user = Factories.WebUserFactory.CreateWithEmail(email, msgs, dc: dc);
+            var user = Factories.WebUserFactory.Create(msgs, dc);
 
-            Assert.Equal(user.SendPasswordResetToken(true, dc: dc).HasNoErrors(), result);
+            Assert.True(user.SendPasswordResetToken(true, dc).HasNoErrors());
         }
 
         [Fact(DisplayName = "Checks if user is active for an account")]
@@ -421,6 +428,21 @@ namespace AfterSchoolLibraryTests.Tests
             accountOwner.CompleteSignUp(account, "jeff", "gordon", "jeff@gordon.com", "1234", null, msgs, dc);
 
             Assert.True(accountOwner.HasAccessTo(account, msgs, dc));
+        }
+
+        [Fact]
+        public void CreateUserWithHearAboutUs()
+        {
+            var user = Factories.WebUserFactory.CreateWithReferringSource("Search engine", msgs, dc); 
+
+            Assert.Equal("Search engine", user.HowHearAboutUs);
+        }
+        [Fact]
+        public void CreateUserWithHearAboutUsFalseTest()
+        {
+            var user = Factories.WebUserFactory.Create( msgs, dc);
+
+            Assert.False(user.HowHearAboutUs.IsNotEmpty());
         }
     }
 }

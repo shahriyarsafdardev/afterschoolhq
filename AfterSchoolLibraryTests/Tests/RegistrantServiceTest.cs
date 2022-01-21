@@ -20,7 +20,7 @@ namespace AfterSchoolLibraryTests.Tests
             User = WebUserFactory.Create(msgs, dc);
         }
 
-        [Theory(DisplayName = "StartSubscriptionPlan Test")]
+        [Theory(DisplayName = "StartSubscriptionPlan Test", Skip = "Stripe Dependency")]
         [InlineData(110)]
         [InlineData(12)]
         public void StartSubscriptionPlanTest(decimal amount)
@@ -145,7 +145,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors());
         }
 
-        [Theory(DisplayName = "StartPaymentPlan Test")]
+        [Theory(DisplayName = "StartPaymentPlan Test", Skip = "Stripe Dependency")]
         [InlineData(110)]
         [InlineData(12)]
         public void StartPaymentPlanTest(decimal amount)
@@ -387,7 +387,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors());
         }
 
-        [Theory]
+        [Theory(Skip = "Stripe Dependency")]
         [InlineData(100, 83.33, 6, 4)]
         [InlineData(10, 9.1, 0.5, 0.5)]
         public void ChargeRegistrantMidPeriodTest(decimal amountPaidByParent, decimal amountReceivedByProvider, decimal convenienceFee, decimal paymentTypeFee)
