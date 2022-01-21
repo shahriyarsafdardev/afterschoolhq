@@ -247,30 +247,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (id.IsNotGuid())
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-
-            Models.Extensions.ValidateStartAndEndDateWithTime(opendate, opentime, closedate, closetime, msgs);
             var group = account.GetActivityGroup(id.ToGuid(), msgs);
 
-            if (msgs.HasNoErrors())
-            {
-                var regperiod = new RegistrationPeriod();
-
-                if (period.IsInteger())
-                    regperiod = account.GetRegistrationPeriod(period.ToInteger(), msgs);
-                else
-                {
-                    regperiod.CreatedBy = currentUser.ID.Value;
-                    regperiod.CreateDate = DateTime.UtcNow;
-                    regperiod.ActivityGroupId = group.ID;
-                    regperiod.AccountId = account.ID;
-                }
-
-                regperiod.StartDateTime = string.Format("{0} {1}", opendate, opentime).ToDateTime();
-                regperiod.EndDateTime = string.Format("{0} {1}", closedate, closetime).ToDateTime();
-                regperiod.LastModifiedBy = currentUser.ID.Value;
-                regperiod.LastModifiedDate = DateTime.UtcNow;
-                msgs.AddRange(regperiod.Save());
-            }
+            RegistrationPeriodService.CreateOrUpdate(currentUser, account, group, period, opendate, closedate, opentime, closetime, msgs);
 
             PeriodViewBag(group, msgs);
             ViewBag.Messages = msgs;
@@ -1173,7 +1152,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 { "enddate", enddate },
             };
 
-            Models.Extensions.ValidateStartAndEndDate(startdate, enddate, msgs);
+            AfterSchoolLibrary.Extensions.ValidateStartAndEndDate(startdate, enddate, msgs);
+
             var league = SaveLeague(id, values, msgs);
 
             if (msgs.HasNoErrors())
