@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Text;
 using Xunit;
 using Xunit.Abstractions;
 using BasicLibrary;
-using AfterSchoolLibrary;
 using AfterSchoolLibrary.Services;
 using AfterSchoolLibraryTests.Factories;
 
@@ -21,8 +19,8 @@ namespace AfterSchoolLibraryTests.Tests
             var newUser = WebUserService.CreateNew(
                             firstName: "jeff",
                             lastName: "gordon",
-                            email: "jeff@gordon.com",
-                            phone: "317-224-3123",
+                            email: $"jeff+{DateTime.Now.Ticks}@example.com",
+                            phone: $"317-555-{(DateTime.Now.Ticks % 10000):0000}",
                             password: null,
                             isActive: false,
                             isRegistered: false,
@@ -33,7 +31,6 @@ namespace AfterSchoolLibraryTests.Tests
                             dc: dc);
 
             Assert.True(newUser.ID.HasValue);
-
         }
 
         [Fact]

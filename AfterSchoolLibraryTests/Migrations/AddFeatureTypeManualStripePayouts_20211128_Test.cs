@@ -20,8 +20,8 @@ namespace AfterSchoolLibraryTests.Migrations
             SchoolAccount = AccountFactory.CreateWithFreePackage(SchoolWebUser, AccountType.School, msgs, dc);
         }
 
-        [Fact(DisplayName = "Test Migration Success")]
-        public void RunMigration1()
+        [Fact(Skip = "Use for debugging")]
+        public void Test()
         {
             // Arrange
             if (msgs.IsEmpty()) msgs = new SystemMessages();

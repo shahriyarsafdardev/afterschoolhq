@@ -252,7 +252,7 @@
 }
 
 .onboarding-form-group {
-    padding: 12px 0;
+    padding: 12px 8px;
 }
 
 .m-b-20 {
@@ -1445,4 +1445,9 @@
     font-style: normal;
     line-height: normal;
     letter-spacing: normal;
+}
+}
+
+.textCenterImportant{
+    text-align:center !important;
 }
