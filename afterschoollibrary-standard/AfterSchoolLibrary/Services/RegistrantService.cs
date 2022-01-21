@@ -147,6 +147,23 @@ namespace AfterSchoolLibrary.Services
             submittedRecord.StartPlan(checkoutObject, SubscriptionPlanType.Subscription, loggedInUser, msgs, dc);
         }
 
+        public static int GetSubscriptionCount(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var subCount = 0;
+            var plan = registrant.GetRegistrantSubscriptionPlans(msgs, dc).Where(rsp => !rsp.DateCancelled.HasValue && rsp.IsForParticipationObject(participationObject, msgs, dc));
+            if (plan.IsNotEmpty())
+            {
+                var planMain = plan.FirstOrDefault();
+                var payments = planMain.IsNotEmpty() ? planMain.GetPayments(msgs, dc): null;
+                if (planMain.IsNotEmpty() && planMain.TotalPeriods.HasValue)
+                    subCount = planMain.TotalPeriods.Value - payments.Count();
+                else if(payments.IsNotEmpty())
+                    subCount = payments.Count();
+            }
+
+            return subCount;
+        }
+
         public static void StartPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -518,6 +535,13 @@ namespace AfterSchoolLibrary.Services
                     .Where(rsp => !rsp.DateCancelled.HasValue && rsp.IsForParticipationObject(participationObject, msgs, dc))
                     .ToList()
                     .FirstOrDefault();
+        }
+        public static int GetAllActiveSubscriptionCount(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return registrant
+                    .GetRegistrantSubscriptionPlans(msgs, dc)
+                    .Where(rsp => !rsp.DateCancelled.HasValue && rsp.IsForParticipationObject(participationObject, msgs, dc))
+                    .Count();
         }
 
         public static bool HasCancelledSubscription(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -1503,7 +1527,7 @@ namespace AfterSchoolLibrary.Services
             );
         }
 
-        public static void WithdrawRegistration(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType, WebUser loggedInUser, Account account, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void WithdrawRegistration(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType, WebUser loggedInUser, Account account, bool isCancelPayment,  SystemMessages msgs, bool isParent = false, DatabaseConnection dc = null)
         {
             var masterRegistrant = registrant.GetMasterRegistrant(msgs, dc);
             var ras = registrant.GetRegistrantActivities(msgs, dc);
@@ -1533,7 +1557,7 @@ namespace AfterSchoolLibrary.Services
                     ra.ChangeSeatAssignment(RegistrationAssignmentType.Withdrawn, loggedInUser, amsgs, adc);
 
                     // cancel subscription if it has one
-                    if (msgs.HasNoErrors())
+                    if (msgs.HasNoErrors() && isCancelPayment)
                         registrant.CancelSubcriptionIfExists(participationObjectId, participationObjectType, loggedInUser, amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) =>
@@ -1542,7 +1566,7 @@ namespace AfterSchoolLibrary.Services
 
                     // Notify Provider
                     var participationObject = ra.GetParticipationObject(msgs, dc);
-                    Helpers.EmailHelper.SendRegistrationWithdrawal(registrant, participationObject, loggedInUser, msgs);
+                    Helpers.EmailHelper.SendRegistrationWithdrawal(registrant, participationObject, loggedInUser, isParent, isCancelPayment,  msgs);
                 },
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                 onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),

@@ -116,9 +116,8 @@ namespace AfterSchool.Controllers
 
       ViewBag.RegistrationAccount = registrationAccount;
       ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
-      ViewBag.Messages = msgs;
-
       ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
+      ViewBag.Messages = msgs;      
 
       return View(qvms);
     }
@@ -240,6 +239,7 @@ namespace AfterSchool.Controllers
       if (msgs.HasNoErrors())
         return RedirectToAction("thankyou", new { id = registration.Uid });
 
+      ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
       ViewBag.Messages = msgs;
 
       return View(qvms);
@@ -515,9 +515,8 @@ namespace AfterSchool.Controllers
 
       ViewBag.RegistrationAccount = registrationAccount;
       ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
-      ViewBag.Messages = msgs;
-
       ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
+      ViewBag.Messages = msgs;      
 
       return View(qvms);
     }
@@ -635,6 +634,7 @@ namespace AfterSchool.Controllers
       if (msgs.HasNoErrors())
         return RedirectToAction("addhomeaddress");
 
+      ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
       ViewBag.Messages = msgs;
 
       return View(qvms);
@@ -2130,12 +2130,11 @@ namespace AfterSchool.Controllers
       var msgs = new SystemMessages();
       var questions = GetStartedStudentViewBag(msgs);
 
+      ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
       ViewBag.Messages = msgs;
 
       if (regaccount.IsGuid())
-        ViewBag.RegistrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
-
-      ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
+        ViewBag.RegistrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);      
 
       return View(questions.Select(question => new FormQuestionViewModel(question)).ToList());
     }
@@ -2258,7 +2257,10 @@ namespace AfterSchool.Controllers
 
       if (msgs.HasNoErrors())
         return RedirectToAction("inviteparent");
+
+      ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
       ViewBag.Messages = msgs;
+
       return View(qvms);
     }
 

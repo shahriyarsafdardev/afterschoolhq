@@ -429,5 +429,20 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.True(accountOwner.HasAccessTo(account, msgs, dc));
         }
+
+        [Fact]
+        public void CreateUserWithHearAboutUs()
+        {
+            var user = Factories.WebUserFactory.CreateWithReferringSource("Search engine", msgs, dc); 
+
+            Assert.Equal("Search engine", user.HowHearAboutUs);
+        }
+        [Fact]
+        public void CreateUserWithHearAboutUsFalseTest()
+        {
+            var user = Factories.WebUserFactory.Create( msgs, dc);
+
+            Assert.False(user.HowHearAboutUs.IsNotEmpty());
+        }
     }
 }

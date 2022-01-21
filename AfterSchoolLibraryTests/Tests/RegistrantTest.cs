@@ -4,6 +4,8 @@ using Xunit.Abstractions;
 using BasicLibrary;
 using AfterSchoolLibraryTests.Factories;
 using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Services;
+using System.Linq;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -72,6 +74,37 @@ namespace AfterSchoolLibraryTests.Tests
                 //Assert
                 Assert.False(false, ex.Message);
             }
+        }
+
+        [Fact]
+        public void GetSubscriptionCount()
+        {
+            var poviderUser = WebUserFactory.Create(msgs: msgs, dc: dc);
+            var registrantUser = WebUserFactory.Create("Vikas", "Lalwani","vikas@gmail.com",true, msgs: msgs, dc: dc);
+
+            var account = AccountFactory.Create(user: poviderUser, msgs: msgs, dc: dc);
+            var registrantAccount = AccountFactory.Create(registrantUser, AccountType.Registrant, msgs, dc);
+
+            var registrant = RegistrantFactory.Create(registrantAccount, isMaster: false, msgs, dc);
+            var activity = ActivityFactory.Create(account, msgs, dc);
+
+            var subscriptionPlan = SubscriptionPlanFactory.Create(account, activity, SubscriptionPlanType.Subscription, msgs, dc);
+            var purchase = PurchaseFactory.Create(registrantAccount, 100, msgs, dc);
+
+            var activityRegister = RegistrantActivityFactory.Create(activity, registrant, msgs,dc);
+
+            var registrantSubscription = RegistrantSubscriptionPlanFactory.Create(registrant, subscriptionPlan, purchase, msgs, dc);
+
+
+            var registrants = activity.GetRegistrants(msgs, dc).FirstOrDefault();
+            var participationObject = registrants.GetParticipationObjects(msgs, dc).FirstOrDefault();
+            var subPlans = registrants.GetRegistrantSubscriptionPlans(msgs, dc);
+            var createTransaction = TransactionFactory.Create(account, registrantAccount, PaymentType.CreditCard, msgs, dc);
+            var addPayment = subPlans.FirstOrDefault().AddPayment(createTransaction, 50, registrantUser, msgs, dc);
+
+            var subCount = registrant.GetSubscriptionCount(participationObject, msgs, dc);
+
+            Assert.True(subCount > 0);
         }
 
         [Fact]
