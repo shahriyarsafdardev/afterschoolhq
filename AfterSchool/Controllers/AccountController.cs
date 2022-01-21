@@ -1320,11 +1320,40 @@ namespace AfterSchool.Controllers
       return questions;
     }
 
-    [HttpGet]
+    private List<FormQuestion> StudentRegistrationParentViewBag(SystemMessages msgs)
+    {
+        var form = FormService.GetAdministratorAccountForm(msgs);
+        var personalContactGroup = form.GetQuestionGroups(msgs)
+            .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.Parent1Information);
+        var questions = personalContactGroup.GetAllQuestions(msgs);
+
+        questions = questions.Where(question => question.QuestionDataTypeId.NotIn(FormService.QuestionsToNotIncludeInStudentRegistrationParentPanel())).ToList();
+
+        questions.ForEach(question =>
+        {
+            switch (question.QuestionDataTypeId)
+            {
+                case QuestionDataType.Parent1FirstName:
+                case QuestionDataType.Parent1LastName:
+                case QuestionDataType.Parent1Email:
+                    question.IsRequired = true;
+                    question.Text = "Parent's " + question.Text;
+                    break;
+            }
+        });
+
+        ViewBag.ParticipationObject = GetParticipationObjectFromCart();
+
+        return questions;
+    }
+
+        [HttpGet]
     public ActionResult StudentRegistration()
     {
       var msgs = new SystemMessages();
       var questions = StudentRegistrationViewBag(msgs);
+      var parentQuestions = StudentRegistrationParentViewBag(msgs);
+      questions.AddRange(parentQuestions);
 
       ViewBag.Messages = msgs;
 

@@ -61,7 +61,7 @@
                                 </p>
                             </div>
 
-                            @foreach (var qvm in Model.Where(qvm => !qvm.Hide))
+                            @foreach (var qvm in Model.Where(qvm => !qvm.Hide && qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation))
                             {
                                 Html.RenderPartial(
                                     "~/Views/Shared/Form/_Question.cshtml",
@@ -82,19 +82,21 @@
                                 }
                             }
 
-                            <div class="clearfix"></div>
+                            <div class="form-group">
+                                <label for="password1" class="control-label col-md-3">
+                                    Password <span class="text-danger">*</span>
+                                </label>
+                                <div class="col-md-6">
+                                    <input id="password1" name="password1" type="password" class="form-control" />
+                                </div>
+                            </div>
 
-                            <div class="col-md-6 col-md-offset-3 hide" id="account-confirmation-text">
-                                <div role="alert" class="alert alert-success alert-icon">
-                                    <div class="icon">
-                                        <span class="s7-check-circle"></span>
-                                    </div>
-                                    <div class="message">
-                                        <p class="text-center text-medium-small">
-                                            We have sent you an email in order to complete your account and register. <br />
-                                            If you do not receive an email check your spam box. If you still cannot find it please contact us at <a href="@AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress">@AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress</a>
-                                        </p>
-                                    </div>
+                            <div class="form-group">
+                                <label for="password1" class="control-label col-md-3">
+                                    Verify Password <span class="text-danger">*</span>
+                                </label>
+                                <div class="col-md-6">
+                                    <input id="password2" name="password2" type="password" class="form-control" />
                                 </div>
                             </div>
 
@@ -105,99 +107,23 @@
                                     Invite Parent or Guardian
                                 </p>
                             </div>
+
                             <div class="text-center parent-instructions">
                                 <p>Your parent or guardian will confirm additional details required by schools and providers.</p>
                             </div>
-                        </div>
 
-                        <div id="account-registration" class="@(showStep1 ? "hide" : "")">
-
-                            @*<div class="row">
-                                <div class="col-md-6 col-md-offset-3">
-                                    <div role="alert" class="alert alert-success alert-icon">
-                                        <div class="icon">
-                                            <span class="s7-check-circle"></span>
-                                        </div>
-                                        <div class="message">
-                                            <p class="text-center reg-login new-account">
-                                                Please enter your info below to begin registration.
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>*@
-
-                            @*@foreach (var qvm in Model.Where(qvm => !qvm.Hide))
+                            @foreach (var qvm in Model.Where(qvm => !qvm.Hide && qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.Parent1Information))
                             {
                                 Html.RenderPartial(
                                     "~/Views/Shared/Form/_Question.cshtml",
                                     qvm);
-
-                                if (qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone)
-                                {
-                                    <div class="row">
-                                        <div class="col-md-6 col-md-offset-3">
-                                            <div class="am-checkbox text-center">
-                                                <input type="checkbox" id="textnotifications" name="textnotifications" value="1" @(UILabel.CheckAllowTextMessage(currentUser) ? " checked=\"checked\" " : "") />
-                                                <label for="textnotifications">
-                                                    I would like to receive text messages about @(UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()).
-                                                    Notifications may include information about attendance, reminders, and other important information.
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                }
-                            }*@
-
-                            @if (currentUser.IsEmpty())
-                            {
-                                <div class="form-group new-account">
-                                    <label for="password1" class="control-label col-md-3">
-                                        Password <span class="text-danger">*</span>
-                                    </label>
-                                    <div class="col-md-6">
-                                        <input type="password" class="form-control" id="password1" name="password1" />
-                                    </div>
-                                </div>
-
-                                <div class="form-group new-account">
-                                    <label for="password1" class="control-label col-md-3">
-                                        Verify Password <span class="text-danger">*</span>
-                                    </label>
-                                    <div class="col-md-6">
-                                        <input type="password" class="form-control" id="password2" name="password2" />
-                                    </div>
-                                </div>
-                                if (AfterSchoolLibrary.Helpers.Utilities.IsProduction || AfterSchoolLibrary.Helpers.Utilities.IsStaging)
-                                {
-                                    <div class="row padding-v-20">
-                                        <div class="form-group text-center">
-                                            @{
-                                                Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "");
-                                            }
-                                        </div>
-                                    </div>
-                                }
                             }
 
-                            <div class="row padding-v-20">
-                                <div class="col-md-6 col-md-offset-3">
-                                    <div class="am-checkbox text-center">
-                                        <input type="checkbox" id="agree" name="agree" value="1" @(Request["agree"] == "1" ? " checked=\"checked\" " : "") />
-                                        <label for="agree">
-                                            I agree to the <a href="@Url.Action("tos", "legal")" target="_blank">terms and conditions</a> of using @UILabel.ProductName()
-                                        </label>
-                                    </div>
-                                </div>
+                            <div class="padding-v-20">
+                                <button type="submit" id="btn-create-account" class="btn btn-register-primary btn-lg">Save &amp; Continue &raquo;</button>
                             </div>
 
-
-                            <div class="row padding-v-20">
-                                <div class="col-md-6 col-md-offset-3">
-                                    <button type="submit" id="btn-create-account" class="btn btn-register-primary btn-lg">Save &amp; Continue &raquo;</button>
-                                </div>
-                            </div>
-                        </div>
+                        </div>                        
 
                         <div class="row">
                             <div class="padding-v-20 text-center">
