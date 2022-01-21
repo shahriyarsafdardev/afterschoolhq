@@ -139,6 +139,36 @@ namespace AfterSchoolLibrary
 
         public static TValue GetValueOrDefault<TKey,TValue> (this IDictionary<TKey, TValue> dictionary, TKey key) =>
             dictionary.TryGetValue(key, out var ret) ? ret : default;
+
+        public static void ValidateStartAndEndDate(string startdate, string enddate, SystemMessages msgs)
+        {
+            if (startdate.IsNotEmpty() && enddate.IsNotEmpty())
+            {
+                DateTime startDate = startdate.ToDateTime();
+                DateTime endDate = enddate.ToDateTime();
+                if (endDate < startDate)
+                {
+                    msgs.Add("Please ensure start date is earlier than the corresponding end date", MessageType.UserError);
+                }
+            }
+        }
+
+        public static void ValidateStartAndEndDateWithTime(string startdate, string starttime, string enddate, string endtime, SystemMessages msgs)
+        {
+            if (startdate.IsNotEmpty() && enddate.IsNotEmpty())
+            {
+                DateTime startDate = startdate.ToDateTime();
+                DateTime endDate = enddate.ToDateTime();
+
+                TimeSpan exactStartTime = starttime.ToDateTime().TimeOfDay;
+                TimeSpan exactEndTime = endtime.ToDateTime().TimeOfDay;
+
+                if (endDate.Add(exactEndTime) < startDate.Add(exactStartTime))
+                {
+                    msgs.Add("Please ensure start date, start time is earlier than the corresponding end date, end time", MessageType.UserError);
+                }
+            }
+        }
     }
 
     public struct DateTimeSpan

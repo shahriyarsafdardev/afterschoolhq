@@ -168,6 +168,9 @@
 
         checkFormVal();
 
+        $('input[name=startdate],input[name=enddate]').on('change', function () {
+            validateSetup(event);
+        });
     });
 
     function checkFormVal() {
