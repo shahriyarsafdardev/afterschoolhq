@@ -84,6 +84,11 @@
                                             <button type="button" id="btn-check-email" class="btn btn-register-primary btn-lg">Next &raquo;</button>
                                         </div>
                                     </div>
+                                    <div class="col-md-6 col-md-offset-3">
+                                        <div class="padding-v-20">
+                                            <button type="button" id="btn-student-signup" class="btn btn-register-primary btn-lg hidden">Sign Up As Student &raquo;</button>
+                                        </div>
+                                    </div>
 
                                     <div class="clearfix"></div>
 
@@ -245,6 +250,10 @@
         });
 
         $('#btn-check-email').click(function () {
+            if ($('#btn-check-email').html() == 'Sign Up As Parent') {
+                showSignUpForm();
+                return;
+            }
             var email = $('#email-check').val();
             var originalBtnText = $('#btn-check-email').html();
 
@@ -272,13 +281,17 @@
                         } else if (data.isInUse) {
                             // send email
                             sendAccountConfirmation(email);
-                        } else {
+                        }
+                        else if (!data.isInUse && !data.isRegistered) {
+                            $('#btn-check-email').html('Sign Up As Parent');
+                            $('#btn-student-signup').removeClass('hidden');
+                        }else {
                             // show sign up form
-                            setTimeout(function () {
+                            @*setTimeout(function () {
                                 $('#account-registration').removeClass('hide');
                                 $('#email-check-container').addClass('hide');
                                 $('#@Model.Find(qvm => qvm.Question.QuestionTypeId == QuestionType.Email).Id').val(email);
-                            }, 500);
+                            }, 500);*@
                         }
 
                     } else {
@@ -288,6 +301,12 @@
                 }
             );
         });
+
+        $("#btn-student-signup").click(function (event) {
+            event.preventDefault();
+            var url = '@Url.Action("StudentRegistration", "Account")';
+            window.location.href = url;
+        });
     });
 
     function checkAndPostSignupForm(event, isFirstStep) {
@@ -296,5 +315,14 @@
             $('#btn-check-email').click();
             return false;
         }
+    }
+
+    function showSignUpForm() {
+        // show sign up form
+         setTimeout(function () {
+            $('#account-registration').removeClass('hide');
+            $('#email-check-container').addClass('hide');
+            $('#@Model.Find(qvm => qvm.Question.QuestionTypeId == QuestionType.Email).Id').val(email);
+        }, 500);
     }
 </script>

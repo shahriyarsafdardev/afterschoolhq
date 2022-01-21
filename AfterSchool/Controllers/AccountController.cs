@@ -757,9 +757,9 @@ namespace AfterSchool.Controllers
 
         #endregion
 
-        #region AddParent
+    #region AddParent
 
-        private List<FormQuestion> AddParentViewBag(SystemMessages msgs)
+    private List<FormQuestion> AddParentViewBag(SystemMessages msgs)
     {
       var form = FormService.GetAdministratorAccountForm(msgs);
       var personalContactGroup = form.GetQuestionGroups(msgs)
@@ -1287,6 +1287,55 @@ namespace AfterSchool.Controllers
       ViewBag.Messages = msgs;
 
       return View(qvms);
+    }
+
+    #endregion
+
+    #region StudentRegistration
+
+    private List<FormQuestion> StudentRegistrationViewBag(SystemMessages msgs)
+    {
+      var form = FormService.GetAdministratorAccountForm(msgs);
+      var personalContactGroup = form.GetQuestionGroups(msgs)
+          .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
+      var questions = personalContactGroup.GetAllQuestions(msgs);
+
+      questions = questions.Where(question => question.QuestionDataTypeId.NotIn(FormService.QuestionsToNotIncludeInStudentRegistrationPanel())).ToList();
+
+      questions.ForEach(question =>
+      {
+        switch (question.QuestionDataTypeId)
+        {
+          case QuestionDataType.RegistrantFirstName:
+          case QuestionDataType.RegistrantLastName:
+          case QuestionDataType.RegistrantEmail:
+          case QuestionDataType.RegistrantGrade:
+            question.IsRequired = true;
+            break;
+        }
+      });
+
+      ViewBag.ParticipationObject = GetParticipationObjectFromCart();
+
+      return questions;
+    }
+
+    [HttpGet]
+    public ActionResult StudentRegistration()
+    {
+      var msgs = new SystemMessages();
+      var questions = StudentRegistrationViewBag(msgs);
+
+      ViewBag.Messages = msgs;
+
+      return View(questions.Select(question => new FormQuestionViewModel(question)).ToList());
+    }
+
+    [HttpPost]
+    public ActionResult StudentRegistration(string textnotifications)
+    {
+            //----ToDo
+            return View();
     }
 
     #endregion

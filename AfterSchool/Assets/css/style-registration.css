@@ -357,6 +357,10 @@ body.registration {
     font-size: 20px;
 }
 
+.parent-instructions {
+    font-size: 10px;
+}
+
 .reg-ul {
     list-style-position: inside;
 }

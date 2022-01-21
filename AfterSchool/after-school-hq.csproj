@@ -1859,6 +1859,7 @@
     <Content Include="Views\Shared\_LayoutLogin-Updated.cshtml" />
     <Content Include="Views\Shared\Registration\_ResetPassword.cshtml" />
     <Content Include="Views\Shared\Registration\_ResetPasswordCompleted.cshtml" />
+    <Content Include="Views\Account\StudentRegistration.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
