@@ -916,6 +916,7 @@ property: ActivityGroupId, int?, Int
 property: Rating, int?, Int
 property: AssignmentTypeId, RegistrationAssignmentType, Int
 property: AmountCharged, decimal?, Money
+property: IsDeleted, bool?, Bit
 -join: Activity.ID, ActivityId, InnerJoin
 join: Registrant.ID, RegistrantId, InnerJoin
 -join: Account.ID, Activity.AccountId, InnerJoin
@@ -1108,6 +1109,7 @@ property: PaymentTypeFeePayerAccountId, int?, Int, , which account is paying the
 property: ConvenienceFeePayerAccountId, int?, Int, , which account is paying the convenience fee
 property: CouponId, int?, Int
 property: CouponValue, decimal?, Decimal "10,2"
+property: IsDeleted, bool?, Bit
 loadmethod: Uid
 loadmethod: Uid|AccountId
 loadmethod: RegistrantId, List<>
