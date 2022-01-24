@@ -59,6 +59,7 @@
                                 <p class="text-center reg-login new-account">
                                     Personal Information
                                 </p>
+                                <input type="hidden" id="regaccount" name="regaccount" value="@registrationAccount.Uid" />
                             </div>
 
                             @foreach (var qvm in Model.Where(qvm => !qvm.Hide && qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation))

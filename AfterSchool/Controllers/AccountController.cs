@@ -1347,13 +1347,32 @@ namespace AfterSchool.Controllers
         return questions;
     }
 
-        [HttpGet]
-    public ActionResult StudentRegistration()
+    [HttpGet]
+    public ActionResult StudentRegistration(string regaccount)
     {
       var msgs = new SystemMessages();
+      var participationObject = GetParticipationObjectFromCart();
       var questions = StudentRegistrationViewBag(msgs);
-      var parentQuestions = StudentRegistrationParentViewBag(msgs);
+      Account registrationAccount = null;
+
+        if (regaccount.IsGuid())
+            registrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
+
+        // no activity is selected
+        if (participationObject.IsEmpty())
+        {
+            if (SessionVariables.RegistrationStartPageAccount.IsNotEmpty() || registrationAccount.IsNotEmpty())
+                return Redirect(SessionVariables.RegistrationStartPageAccount?.HomePageUrl ?? registrationAccount?.HomePageUrl);
+
+            return HttpNotFound();
+        }
+
+            var parentQuestions = StudentRegistrationParentViewBag(msgs);
       questions.AddRange(parentQuestions);
+      ViewBag.RegistrationAccount = registrationAccount;
+      ViewBag.ParticipationObject = participationObject;
+      ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
+      ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
 
       ViewBag.Messages = msgs;
 
@@ -1361,10 +1380,129 @@ namespace AfterSchool.Controllers
     }
 
     [HttpPost]
-    public ActionResult StudentRegistration(string textnotifications)
+    public ActionResult StudentRegistration(string regaccount, string password1, string password2, string agree, string textnotifications)
     {
-            //----ToDo
-            return View();
+            var msgs = new SystemMessages();
+            var participationObject = GetParticipationObjectFromCart();
+            var questions = StudentRegistrationViewBag(msgs);
+            var currentUser = SessionVariables.CurrentUser;
+
+            questions.ForEach(question =>
+            {
+                var answer = Request[question.ToFormQuestionViewModel().Name];
+
+                if (question.IsRequired && answer.IsEmpty())
+                    msgs.Add($"{question.Text} is required", MessageType.UserError);
+
+                switch (question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantMobilePhone:
+                        if (answer.IsNotEmpty() && !answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                            msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+                        break;
+
+                }
+            });
+
+            if (currentUser.IsEmpty())
+            {
+                if (password1.IsEmpty())
+                    msgs.Add("Password 1 is required", MessageType.UserError);
+                if (password1.Length < 8)
+                    msgs.Add("Password needs to have at least 8 characters", MessageType.UserError);
+                if (password2.IsEmpty())
+                    msgs.Add("Password 2 is required", MessageType.UserError);
+                if (password1 != password2)
+                    msgs.Add("Passwords must match", MessageType.UserError);
+                //if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+                //    msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
+            }
+            if (AfterSchoolLibrary.Helpers.Utilities.IsProduction || AfterSchoolLibrary.Helpers.Utilities.IsStaging)
+            {
+                if (!agree.IsBoolean())
+                    msgs.Add("You must agree to the terms of service", MessageType.UserError);
+            }
+
+            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+
+            if (msgs.HasNoErrors())
+            {
+                var firstName = questions.First(qvm => qvm.QuestionDataTypeId == QuestionDataType.RegistrantFirstName);
+                var lastName = questions.First(qvm => qvm.QuestionDataTypeId == QuestionDataType.RegistrantLastName);
+                var email = questions.First(qvm => qvm.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
+                var phone = questions.First(qvm => qvm.QuestionDataTypeId == QuestionDataType.RegistrantGrade);
+                var parentFirstName = questions.First(qvm => qvm.QuestionDataTypeId == QuestionDataType.Parent1FirstName);
+                var parentLastName = questions.First(qvm => qvm.QuestionDataTypeId == QuestionDataType.Parent1LastName);
+                var parentEmail = questions.First(qvm => qvm.QuestionDataTypeId == QuestionDataType.Parent1Email);
+
+                WebUser user = null;
+                Account account = null;
+                Registrant registrant = null;
+
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        user = CreateOrUpdateUser(
+                            currentUser,
+                            firstName.ToString(),
+                            lastName.ToString(),
+                            email.ToString(),
+                            phone.ToString(),
+                            password1,
+                            textnotifications.IfBlank("0").ToBoolean(),
+                            amsgs,
+                            adc);
+
+
+                        if (amsgs.HasNoErrors() && user.IsNotEmpty())
+                        {
+                            account = CreateOrUpdateAccount(user, amsgs, adc);
+
+                            // LOG: Someone Created Account AccountName
+                            SessionVariables.WebSession.LogActivity(
+                                account: account,
+                                actor: currentUser,
+                                actionType: WebSessionActionType.Created,
+                                objectType: ObjectType.Account,
+                                objectId: account.ID.Value,
+                                objectText: account.Name
+                           );
+
+                            // LOG: Someone Created User UserName
+                            SessionVariables.WebSession.LogActivity(
+                                account: account,
+                                actor: currentUser,
+                                actionType: WebSessionActionType.SignedUp,
+                                objectType: ObjectType.WebUser,
+                                objectId: user.ID.Value,
+                                objectText: user.FullName
+                           );
+                        }
+
+                        if (amsgs.HasNoErrors())
+                            registrant = CreateOrUpdateRegistrant(account, user, amsgs, adc);
+
+                        if (amsgs.HasNoErrors())
+                            AddOrUpdateStandardAnswers(qvms, registrant, user, amsgs, adc);
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+                        LoadSessionInfo(user, account);
+                    },
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                );
+            }
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("addhomeaddress");
+
+            ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
+            ViewBag.Messages = msgs;
+
+            return View(qvms);
     }
 
     #endregion
