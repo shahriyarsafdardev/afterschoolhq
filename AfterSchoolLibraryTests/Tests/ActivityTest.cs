@@ -1147,14 +1147,22 @@ namespace AfterSchoolLibraryTests.Tests
             var user = WebUserFactory.Create(msgs, dc);
             var account = AccountFactory.Create(user, msgs, dc);
             var activity = ActivityFactory.Create(account, msgs, dc);
-            var activityWebUser = ActivityWebUserFactory.Create(activity, user, msgs, dc); 
-            var redirectCheck = false;
+            ActivityWebUserFactory.Create(activity, user, msgs, dc);
 
+            Assert.True(!activity.IsPublished && user.HasAccessToActivity(activity, msgs, dc));
+        }
 
-            if (!activity.IsPublished && user.IsNotEmpty() && user.HasAccessToActivity(activity, msgs, dc))
-                redirectCheck = true;
+        [Fact]
+        public void ActivityCheckLogOutFailedCase1()
+        {
+            var user = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(user, msgs, dc);
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            activity.IsPublished = true;
+            activity.Save(dc);
+            ActivityWebUserFactory.Create(activity, user, msgs, dc);
 
-            Assert.True(redirectCheck);
+            Assert.False(!activity.IsPublished && user.HasAccessToActivity(activity, msgs, dc));
         }
     }
 }
