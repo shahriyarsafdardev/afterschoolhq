@@ -199,19 +199,20 @@
     <Reference Include="RestSharp, Version=106.15.0.0, Culture=neutral, PublicKeyToken=598062e77f915f75, processorArchitecture=MSIL">
       <HintPath>..\packages\RestSharp.106.15.0\lib\net452\RestSharp.dll</HintPath>
     </Reference>
-    <Reference Include="Rollbar, Version=3.7.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rollbar.3.7.1\lib\net472\Rollbar.dll</HintPath>
+    <Reference Include="Rollbar, Version=4.0.3.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\Rollbar.4.0.3\lib\net472\Rollbar.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="RollbarSharp, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\RollbarSharp.1.0.0.0\lib\net45\RollbarSharp.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="SendGrid, Version=9.21.0.0, Culture=neutral, PublicKeyToken=4f047e93159395ca">
-      <HintPath>..\packages\SendGrid.9.21.0\lib\net452\SendGrid.dll</HintPath>
+    <Reference Include="SendGrid, Version=9.25.2.0, Culture=neutral, PublicKeyToken=4f047e93159395ca">
+      <HintPath>..\packages\SendGrid.9.25.2\lib\net452\SendGrid.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="SendGrid.CSharp.HTTP.Client, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\SendGrid.CSharp.HTTP.Client.3.4.8\lib\net45\SendGrid.CSharp.HTTP.Client.dll</HintPath>
+      <HintPath>..\packages\SendGrid.CSharp.HTTP.Client.3.4.10\lib\net45\SendGrid.CSharp.HTTP.Client.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="ServiceStack.Text, Version=3.9.71.0, Culture=neutral, processorArchitecture=MSIL">
@@ -1335,7 +1336,6 @@
     <Content Include="Areas\User\Views\Billing\Transactions.cshtml" />
     <Content Include="Areas\User\Views\Billing\Plans.cshtml" />
     <Content Include="Areas\User\Views\Shared\_BillingHeader.cshtml" />
-    <Content Include="RollbarPayloadsStore.db" />
     <Content Include="Areas\User\Views\Shared\Modals\_Withdraw.cshtml" />
     <Content Include="Areas\User\Views\Shared\Activities\_WithdrawLink.cshtml" />
     <Content Include="Areas\Org\Views\Accounting\RefundRequests.cshtml" />
