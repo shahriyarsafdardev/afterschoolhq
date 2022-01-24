@@ -7,16 +7,7 @@
         </div>
         <div class="col-md-6">
             <div class="pull-right padding-10 userTop">
-                <div class="dropdown selectLanguage float-left" style="">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <img src="~/Content/Flags/US.png" class="flagLang" />English
-                    </button>
-                    <div class="dropdown-menu ddlOptions" aria-labelledby="dropdownMenuButton">
-                        <a class="dropdown-item languageOption selectedLang" href="javascript:void(0)" data-lang="en" data-text="English"><img src="~/Content/Flags/US.png" class="flagLang" /> English</a>
-                        <a class="dropdown-item languageOption notSelectedLang" href="javascript:void(0)" data-lang="es" data-text="Espanol"><img src="~/Content/Flags/spain.png" class="flagLang" /> Espanol</a>
-                    </div>
-                </div>
-                <div id='google_translate_element'></div>
+                @Html.Partial("_GoogleTranslateDropDown");
                 <div style="float:left">Logged in as: <a href="@Url.Action("edit", "profile")">@SessionVariables.CurrentUser.DisplayName</a> </div>
             </div>
         </div>
