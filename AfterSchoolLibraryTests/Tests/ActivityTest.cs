@@ -189,7 +189,7 @@ namespace AfterSchoolLibraryTests.Tests
             var user = WebUserFactory.Create(msgs, dc);
             var account = AccountFactory.Create(user, msgs, dc: dc);
             ActivityFactory.Create(account, msgs, dc: dc);
-            Assert.Single(Activity.LoadByAccountId(account.ID.Value, null, null, null, false, false, null, 0, 100, msgs, dc));
+            Assert.Single(Activity.LoadByAccountId(account.ID.Value, null, null, null, false, false, null, 0, 100,"", msgs, dc));
         }
 
         [Fact]
@@ -982,12 +982,13 @@ namespace AfterSchoolLibraryTests.Tests
         {
             var user = WebUserFactory.Create(msgs, dc);
             var account = AccountFactory.Create(user, msgs, dc);
-            var activity = ActivityFactory.Create(account, msgs, dc);
+            var activityName = "Activity_" + DateTime.Now.Ticks;
+            var activity = ActivityFactory.Create(account, activityName, msgs, dc);
 
             var getActivityCount = account.GetActivityCount(
                     UserType.TechSupport,
                     user,
-                    "Test",
+                    activityName,
                     ActivityType.NotSet,
                     false,
                     false,
@@ -1003,13 +1004,15 @@ namespace AfterSchoolLibraryTests.Tests
         {
             var user = WebUserFactory.Create(msgs, dc);
             var account = AccountFactory.Create(user, msgs, dc);
-            var activity = ActivityFactory.CreateWithNameAndType(account, "New Activity", ActivityType.Activity, msgs, dc);
-            var activitySecond = ActivityFactory.CreateWithNameAndType(account, "New Main", ActivityType.Activity, msgs, dc);
+            var activityName = "TestCountActivity_" + DateTime.Now.Ticks;
+            var activityNameSecond = "TestCountActivity_" + DateTime.Now.Ticks;
+            var activity = ActivityFactory.CreateWithNameAndType(account, activityName, ActivityType.Activity, msgs, dc);
+            var activitySecond = ActivityFactory.CreateWithNameAndType(account, activityNameSecond, ActivityType.Activity, msgs, dc);
 
             var getActivityCount = account.GetActivityCount(
                     UserType.TechSupport,
                     user,
-                    "New", //search term
+                    "TestCountActivity_", //search term
                     ActivityType.Activity,
                     false,
                     false,
