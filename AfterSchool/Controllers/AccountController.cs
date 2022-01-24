@@ -516,6 +516,7 @@ namespace AfterSchool.Controllers
       ViewBag.RegistrationAccount = registrationAccount;
       ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
       ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
+      ViewBag.StudentRegistrationEnabled = featureFlagRepository.IsEnabled("student-registration");
       ViewBag.Messages = msgs;      
 
       return View(qvms);
@@ -1350,9 +1351,13 @@ namespace AfterSchool.Controllers
     [HttpGet]
     public ActionResult StudentRegistration(string regaccount)
     {
+      if (!featureFlagRepository.IsEnabled("student-registration"))
+      {
+          return RedirectToAction("getstarted", new { regaccount });
+      }
       var msgs = new SystemMessages();
       var participationObject = GetParticipationObjectFromCart();
-      var questions = StudentRegistrationViewBag(msgs);
+      
       Account registrationAccount = null;
 
         if (regaccount.IsGuid())
@@ -1367,7 +1372,8 @@ namespace AfterSchool.Controllers
             return HttpNotFound();
         }
 
-            var parentQuestions = StudentRegistrationParentViewBag(msgs);
+      var questions = StudentRegistrationViewBag(msgs);
+      var parentQuestions = StudentRegistrationParentViewBag(msgs);
       questions.AddRange(parentQuestions);
       ViewBag.RegistrationAccount = registrationAccount;
       ViewBag.ParticipationObject = participationObject;
@@ -1385,6 +1391,8 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var participationObject = GetParticipationObjectFromCart();
             var questions = StudentRegistrationViewBag(msgs);
+            var parentQuestions = StudentRegistrationParentViewBag(msgs);
+            questions.AddRange(parentQuestions);
             var currentUser = SessionVariables.CurrentUser;
 
             questions.ForEach(question =>
@@ -1427,13 +1435,14 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var firstName = questions.First(qvm => qvm.QuestionDataTypeId == QuestionDataType.RegistrantFirstName);
-                var lastName = questions.First(qvm => qvm.QuestionDataTypeId == QuestionDataType.RegistrantLastName);
-                var email = questions.First(qvm => qvm.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
-                var phone = questions.First(qvm => qvm.QuestionDataTypeId == QuestionDataType.RegistrantGrade);
-                var parentFirstName = questions.First(qvm => qvm.QuestionDataTypeId == QuestionDataType.Parent1FirstName);
-                var parentLastName = questions.First(qvm => qvm.QuestionDataTypeId == QuestionDataType.Parent1LastName);
-                var parentEmail = questions.First(qvm => qvm.QuestionDataTypeId == QuestionDataType.Parent1Email);
+                var firstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName);
+                var lastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName);
+                var email = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
+                var phone = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone);
+                var grade = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantGrade);
+                var parentFirstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1FirstName);
+                var parentLastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1LastName);
+                var parentEmail = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1Email);
 
                 WebUser user = null;
                 Account account = null;
@@ -1445,10 +1454,10 @@ namespace AfterSchool.Controllers
                     {
                         user = CreateOrUpdateUser(
                             currentUser,
-                            firstName.ToString(),
-                            lastName.ToString(),
-                            email.ToString(),
-                            phone.ToString(),
+                            firstName.Value.Trim(),
+                            lastName.Value.Trim(),
+                            email.Value.Trim(),
+                            phone.Value.Trim(),
                             password1,
                             textnotifications.IfBlank("0").ToBoolean(),
                             amsgs,
