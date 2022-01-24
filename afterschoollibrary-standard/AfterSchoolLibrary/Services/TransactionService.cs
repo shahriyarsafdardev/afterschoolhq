@@ -556,6 +556,7 @@ namespace AfterSchoolLibrary.Services
             if (!transaction.PayoutId.HasValue)
                 return PayoutService.CreateNew(
                     account: transaction.GetBillerAccount(msgs, dc),
+                    statementDescriptor: null,
                     transactions: transaction.AsList(),
                     payoutStatus: payoutStatus,
                     paymentType: paymentType,
@@ -649,6 +650,9 @@ namespace AfterSchoolLibrary.Services
 
                     if (stripeRefund.IsNotEmpty())
                     {
+                        // set stripe refund id, so we can use that later for create new refund
+                        stripeRefundId = stripeRefund.Id;
+
                         // get stripe transfer from original payment
                         var stripeOriginalPaymentChargeId = stripeRefund.ChargeId;
                         var stripeOriginalCharge = Billing.StripeHelper.GetCharge(stripeOriginalPaymentChargeId, msgs);

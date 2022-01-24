@@ -49,7 +49,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(account.ID.HasValue);
         }
 
-        [Fact(DisplayName = "CreateSampleAccountTest")]
+        [Fact(Skip = "Not sure")]
         public void CreateSampleAccountTest()
         {
             var accountCount = Account.GetCount(msgs: msgs, dc: dc);
@@ -177,23 +177,6 @@ namespace AfterSchoolLibraryTests.Tests
 
         }
 
-        [Theory(DisplayName = "Load accounts by list of account type ids")]
-        [InlineData(AccountType.School)]
-        public void LoadByAccountTypeIdsTest(AccountType accountType)
-        {
-            var accountOwner = WebUserFactory.Create(msgs, dc);
-            var account = AccountFactory.Create(accountOwner, accountType, msgs, dc);
-            var accountTypes = new List<AccountType>()
-            {
-                AccountType.ActivityProvider,
-                AccountType.Registrant,
-                AccountType.School,
-                AccountType.SchoolDistrict
-            };
-
-            Assert.Single(Account.LoadByAccountTypeIds(accountTypes, false, null, null, msgs, dc));
-        }
-
         [Theory(DisplayName = "Get Platform Flat Fee")]
         [InlineData(.99, 1, .99)]
         [InlineData(3, 1, 3)]
@@ -272,7 +255,7 @@ namespace AfterSchoolLibraryTests.Tests
         /// <param name="platformPercentageFee"></param>
         /// <param name="costPerPeriod"></param>
         /// <param name="expectedPlatformPercentage"></param>
-        [Theory]
+        [Theory(Skip = "Stripe Dependency")]
         [InlineData(.99, .05, 2, 1, 0.5)]
         [InlineData(.99, .05, 20, 1, 0.1489)]
         [InlineData(.99, .05, 100, 1, 0.0991)]
@@ -298,7 +281,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(expectedPlatformPercentage, subscriptionPlanFeePercent);
         }
 
-        [Theory]
+        [Theory(Skip = "Stripe Dependency")]
         [InlineData(true, true)]
         [InlineData(false, false)]
         public void CanProcessPaymentsTest(bool addPaymentFeatureToAccount, bool expectedResult)
@@ -336,7 +319,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(expectedResult, account.HasAccountPackageFeature(featureType, msgs, dc));
         }
 
-        [Fact]
+        [Fact(Skip = "Stripe Dependency")]
         public void CreateStripeCustomAccountTestIndividual()
         {
             var accountOwner = WebUserFactory.Create(msgs, dc);
@@ -363,7 +346,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors() && msgs.HasNo(new MessageType[] { MessageType.Warning }));
         }
 
-        [Fact]
+        [Fact(Skip = "Stripe Dependency")]
         public void CreateStripeCustomAccountTestCompany()
         {
             var createOptions = AccountFactory.GetAccountCreateOptions();
@@ -392,10 +375,10 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors() && msgs.HasNo(new MessageType[] { MessageType.Warning }));
         }
 
-        [Theory(DisplayName= "GetBillerAccountTransactionsTest")]
+        [Theory(DisplayName = "GetBillerAccountTransactionsTest")]
         [InlineData(1)]
         [InlineData(5)]
-        
+
         public void GetBillerAccountTransactionsTest(int expectedNumberOfTransactions)
         {
             var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
@@ -438,7 +421,7 @@ namespace AfterSchoolLibraryTests.Tests
             var actualNumberOfTransactions = payerAccount.GetPayerAccountTransactions(transactionIds, msgs, dc);
 
             Assert.Equal(expectedNumberOfTransactions, actualNumberOfTransactions.Count);
-        }        
+        }
 
         [Fact(DisplayName = "GetBillerTransactionTest")]
         public void GetBillerTransactionTest()
@@ -469,7 +452,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(expectedTransaction.ID, actualTransaction.ID);
         }
 
-        [Theory(DisplayName ="GetAllActivitiesForAccountTest")]
+        [Theory(DisplayName = "GetAllActivitiesForAccountTest")]
         [InlineData(1)]
         [InlineData(5)]
         public void GetAllActivitiesForAccountTest(int expectedNumberOfActivities)
@@ -581,19 +564,12 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void GetActivityByUIDFailingTest()
         {
-            try
-            {
-                // Act
-                var expected = account.GetActivity(Guid.NewGuid(), msgs, dc);
+            // Act
+            var expected = account.GetActivity(Guid.NewGuid(), msgs, dc);
 
-                // Assert
-                Assert.Null(expected);
-                Assert.True(msgs.HasNoErrors());
-            }
-            catch(Exception ex)
-            {
-                throw ex;
-            }
+            // Assert
+            Assert.Null(expected);
+            Assert.True(msgs.HasNoErrors());            
         }
 
         [Fact]
@@ -777,77 +753,53 @@ namespace AfterSchoolLibraryTests.Tests
         [InlineData(5)]
         public void GetActivitiesByIdsTest(int n)
         {
-            try
+            // Arrange
+            List<int> activityIds = new List<int>();
+            for (var i = 0; i < n; i++)
             {
-                // Arrange
-                List<int> activityIds = new List<int>();
-                for (var i = 0; i < n; i++)
-                {
-                    var activity = ActivityFactory.Create(account, msgs, dc);
-                    activityIds.Add(activity.ID.Value);
-                }
-
-                // Act
-                var expected = account.GetActivities(ActivityIds: activityIds, msgs: msgs, dc: dc);
-
-                // Assert
-                Assert.Equal(expected: expected.Count, actual: n);
+                var activity = ActivityFactory.Create(account, msgs, dc);
+                activityIds.Add(activity.ID.Value);
             }
-            catch (Exception ex)
-            {
-                //Assert
-                Assert.False(false, ex.Message);
-            }
+
+            // Act
+            var expected = account.GetActivities(ActivityIds: activityIds, msgs: msgs, dc: dc);
+
+            // Assert
+            Assert.Equal(expected: expected.Count, actual: n);            
         }
 
         [Fact]
         public void GetActivityGroupTest()
         {
-            try
-            {
-                // Arrange
-                var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+            // Arrange
+            var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
 
-                // Act
-                var expected = account.GetActivityGroup(Uid: activityGroup.Uid, msgs: msgs, dc: dc);
+            // Act
+            var expected = account.GetActivityGroup(Uid: activityGroup.Uid, msgs: msgs, dc: dc);
 
-                // Assert
-                Assert.Equal(expected: expected.ID, actual: activityGroup.ID);
-                Assert.Equal(expected: expected.Uid, actual: activityGroup.Uid);
-                Assert.Equal(expected: expected.Name, actual: activityGroup.Name);
-            }
-            catch (Exception ex)
-            {
-                //Assert
-                Assert.False(false, ex.Message);
-            }
+            // Assert
+            Assert.Equal(expected: expected.ID, actual: activityGroup.ID);
+            Assert.Equal(expected: expected.Uid, actual: activityGroup.Uid);
+            Assert.Equal(expected: expected.Name, actual: activityGroup.Name);
         }
 
         [Theory(DisplayName = "GetActivityGroups Test")]
         [InlineData(5)]
         public void GetActivityGroupsTest(int n)
         {
-            try
+            // Arrange
+            List<int> activityGroupIds = new List<int>();
+            for (var i = 0; i < n; i++)
             {
-                // Arrange
-                List<int> activityGroupIds = new List<int>();
-                for (var i = 0; i < n; i++)
-                {
-                    var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
-                    activityGroupIds.Add(activityGroup.ID.Value);
-                }
-
-                // Act
-                var expected = account.GetActivityGroups(activityGroupIds: activityGroupIds, msgs: msgs, dc: dc);
-
-                // Assert
-                Assert.Equal(expected: expected.Count, actual: n);
+                var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+                activityGroupIds.Add(activityGroup.ID.Value);
             }
-            catch (Exception ex)
-            {
-                //Assert
-                Assert.False(false, ex.Message);
-            }
+
+            // Act
+            var expected = account.GetActivityGroups(activityGroupIds: activityGroupIds, msgs: msgs, dc: dc);
+
+            // Assert
+            Assert.Equal(expected: expected.Count, actual: n);            
         }
 
         [Fact]
@@ -1669,7 +1621,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             // Assert
             Assert.NotNull(expected);
-            Assert.Equal(expected: expected.FirstOrDefault().ID.Value , actual: attendanceRegistrant.ID);
+            Assert.Equal(expected: expected.FirstOrDefault().ID.Value, actual: attendanceRegistrant.ID);
         }
 
         [Fact]
@@ -1806,21 +1758,21 @@ namespace AfterSchoolLibraryTests.Tests
 
         [Fact]
         public void IsApprovedAsVisitorToTest()
-        {            
+        {
             // Arrange
             var visitorOwner = WebUserFactory.Create(msgs, dc);
             var visitorAccount = AccountFactory.Create(visitorOwner, msgs, dc);
             var hostOwner = WebUserFactory.Create(msgs, dc);
             var hostAccount = AccountFactory.Create(hostOwner, msgs, dc);
             var accountRelationship = AccountRelationshipService.CreateNew(
-                hostAccount, 
-                visitorAccount, 
-                ApprovalStatus.Approved, 
-                HostPermissionType.Edit, 
+                hostAccount,
+                visitorAccount,
+                ApprovalStatus.Approved,
+                HostPermissionType.Edit,
                 true,
                 false,
-                user, 
-                msgs, 
+                user,
+                msgs,
                 dc);
 
             // Act
@@ -1876,7 +1828,8 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(expected: expected, actual: amount + convenienceFee);
         }
 
-        [Theory(DisplayName = "CreatePurchaseTransactionPayment test")]
+        [Theory(DisplayName = "CreatePurchaseTransactionPayment test", Skip = "Stripe Dependency")]
+        [Trait("Category", "Stripe")]
         [InlineData(100, 6, 4, 110, 100, false)] //no pro-rate
         [InlineData(100, 6, 4, 90, 83.33, true)] //assume user joins mid-period and so as we have to keep pro-rated amount, its 94.3m(otherwise it would 100m)
         [InlineData(10, 2, 0, 12, 10, false)] //no pro-rate
@@ -2020,6 +1973,23 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         [Fact]
+        public void CreateRegistrantTest()
+        {
+                // Arrange
+                var user = WebUserFactory.Create(msgs: msgs, dc: dc);
+                var webUser = WebUserFactory.Create(true, msgs: msgs, dc: dc);
+                List<WebUser> canBeAccessedBy = WebUser.LoadByIsActive(true, msgs: msgs, dc: dc);
+                var account = AccountFactory.Create(user: user, msgs: msgs, dc: dc);
+
+                // Act                
+                Registrant newRegistrant = AccountService.CreateRegistrant(account, "Allen", "Donald", "test@test.com", user, canBeAccessedBy, RegistrantType.Individual, false, false, true, 6067, RegistrantProfileStatus.Completed, webUser, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.NotNull(newRegistrant.ID);
+                Assert.NotNull(newRegistrant.WebUserId);
+                Assert.True(newRegistrant.IsDeleted == false);
+        }
+        [Fact]
         public void GetOpenPublishedSessionsTest()
         {
             var activityGroup1 = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
@@ -2062,7 +2032,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(isSchoolProviderLocationOwner);
         }
 
-        [Theory(DisplayName = "Basic registration fee check with ACH")]
+        [Theory(DisplayName = "Basic registration fee check with ACH", Skip = "Stripe Dependency")]
         [InlineData(100, 7)]
         public void ProcessRegistrationFeeTest1(decimal amount, decimal convenienceFee)
         {
@@ -2179,7 +2149,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors());
         }
 
-        [Theory(DisplayName = "Basic registration fee check with CC")]
+        [Theory(DisplayName = "Basic registration fee check with CC", Skip = "Stripe Dependency")]
         [InlineData(100, 7, 4)]
         public void ProcessRegistrationFeeTest2(decimal amount, decimal convenienceFee, decimal paymentTypeFee)
         {            
@@ -2295,7 +2265,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors());
         }
 
-        [Theory(DisplayName = "Registration fee check with ACH with coupon")]
+        [Theory(DisplayName = "Registration fee check with ACH with coupon", Skip = "Stripe Dependency")]
         [InlineData(100, 7, 10, (int)CouponAmountType.FlatAmount)]
         [InlineData(100, 7, 50, (int)CouponAmountType.FlatAmount)]
         [InlineData(100, 7, 10, (int)CouponAmountType.Percentage)]
@@ -2421,7 +2391,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors());
         }
 
-        [Theory(DisplayName = "Registration fee check with CC with coupon")]
+        [Theory(DisplayName = "Registration fee check with CC with coupon", Skip = "Stripe Dependency")]
         [InlineData(100, 7, 4, 10, (int)CouponAmountType.FlatAmount)]
         [InlineData(100, 7, 4, 50, (int)CouponAmountType.FlatAmount)]
         [InlineData(100, 7, 4, 10, (int)CouponAmountType.Percentage)]
@@ -2547,7 +2517,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors());
         }
 
-        [Theory(DisplayName = "Registration fee check for selected dates(Individual classes) with ACH")]
+        [Theory(DisplayName = "Registration fee check for selected dates(Individual classes) with ACH", Skip = "Stripe Dependency")]
         [InlineData(100, 7, 1)]
         [InlineData(100, 7, 2)]
         [InlineData(100, 7, 5)]
@@ -2672,7 +2642,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors());
         }
 
-        [Theory(DisplayName = "Registration fee check for selected dates(Individual classes) with CC")]
+        [Theory(DisplayName = "Registration fee check for selected dates(Individual classes) with CC", Skip = "Stripe Dependency")]
         [InlineData(100, 7, 4, 1)]
         [InlineData(100, 7, 4, 2)]
         [InlineData(100, 7, 4, 5)]
@@ -2798,7 +2768,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors());
         }
 
-        [Theory(DisplayName = "Registration fee check for selected dates(Individual classes) with ACH & coupon")]
+        [Theory(DisplayName = "Registration fee check for selected dates(Individual classes) with ACH & coupon", Skip = "Stripe Dependency")]
         [InlineData(100, 7, 1, 10, (int)CouponAmountType.FlatAmount)] // single class & 10$ off
         [InlineData(100, 7, 2, 10, (int)CouponAmountType.FlatAmount)] // two class
         [InlineData(100, 7, 5, 10, (int)CouponAmountType.FlatAmount)] // five class
@@ -2944,7 +2914,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors());
         }
 
-        [Theory(DisplayName = "Registration fee check for selected dates(Individual classes) with CC & coupon")]
+        [Theory(DisplayName = "Registration fee check for selected dates(Individual classes) with CC & coupon", Skip = "Stripe Dependency")]
         [InlineData(100, 7, 4, 1, 10, (int)CouponAmountType.FlatAmount)] // single class & 10$ off
         [InlineData(100, 7, 4, 2, 10, (int)CouponAmountType.FlatAmount)] // two class
         [InlineData(100, 7, 4, 5, 10, (int)CouponAmountType.FlatAmount)] // five class
@@ -3090,5 +3060,208 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.True(msgs.HasNoErrors());
         }
+
+        [Fact(DisplayName = "Test RequestNewPayout with Check")]
+        public void RequestNewPayoutCheckTest()
+        {
+            // Arrange
+            var loggedInUser = WebUserFactory.Create(msgs, dc);
+            var billerUser = WebUserFactory.Create(msgs, dc);
+            var payerUser = WebUserFactory.Create(msgs, dc);
+            var payerAccount = AccountFactory.Create(payerUser, msgs, dc);
+            var billerAccount = AccountFactory.Create(billerUser, msgs, dc);
+            var transaction = TransactionFactory.Create(billerAccount: billerAccount, payerAccount: payerAccount, paymentType: PaymentType.Check, amount: 100,
+                platformPercentFee: 0, platformFlatFee: 0, convenienceFeePayerAccountId: billerUser.ID.Value, paymentTypeFeePayerAccountId: payerAccount.ID.Value,
+                convenienceFeeCharged: 7, paymentTypeFeeCharged: 4, msgs: msgs, dc: dc, transactionType: TransactionType.Charge);
+
+            // Act
+            var payout = billerAccount.RequestNewPayout(statementDescriptor: "Ahq Payout - Test", transactions: transaction.AsList(), loggedInUser: loggedInUser, msgs: msgs, dc: dc);
+
+            // Assert
+            Assert.True(msgs.HasNoErrors());
+            Assert.NotNull(payout);
+            Assert.NotNull(payout.ID);
+            Assert.Equal(expected: "Ahq Payout - Test", actual: payout.StatementDescriptor);
+            Assert.Equal(expected: PaymentType.Check, actual: payout.PaymentTypeId);
+            Assert.Equal(expected: PayoutStatus.Requested, actual: payout.PayoutStatusId);
+
+            var payoutTransactions = payout.GetTransactions(msgs: msgs, dc: dc);
+            Assert.Single(payoutTransactions);
+            Assert.Equal(payoutTransactions.FirstOrDefault().ID, transaction.ID);
+        }
+
+        [Fact(DisplayName = "Test RequestNewPayout with ACH")]
+        public void RequestNewPayoutACHTest()
+        {
+            // Arrange
+            var loggedInUser = WebUserFactory.Create(msgs, dc);
+            var billerUser = WebUserFactory.Create(msgs, dc);
+            var payerUser = WebUserFactory.Create(msgs, dc);
+            var payerAccount = AccountFactory.Create(payerUser, msgs, dc);
+            var billerAccount = AccountFactory.CreateAccountWithStripeFields(user: loggedInUser, accountType: AccountType.ActivityProvider, stripePayoutsEnabled: true, stripeChargesEnabled: true, stripeUserId: "1", msgs: msgs, dc: dc);
+            var transaction = TransactionFactory.Create(billerAccount: billerAccount, payerAccount: payerAccount, paymentType: PaymentType.ACH, amount: 100,
+                platformPercentFee: 0, platformFlatFee: 0, convenienceFeePayerAccountId: billerUser.ID.Value, paymentTypeFeePayerAccountId: payerAccount.ID.Value,
+                convenienceFeeCharged: 7, paymentTypeFeeCharged: 4, msgs: msgs, dc: dc, transactionType: TransactionType.Charge);
+
+            // Act
+            var payout = billerAccount.RequestNewPayout(statementDescriptor: "Ahq Payout - Test", transactions: transaction.AsList(), loggedInUser: loggedInUser, msgs: msgs, dc: dc);
+
+            // Assert
+            Assert.True(msgs.HasNoErrors());
+            Assert.NotNull(payout);
+            Assert.NotNull(payout.ID);
+            Assert.Equal(expected: "Ahq Payout - Test", actual: payout.StatementDescriptor);
+            Assert.Equal(expected: PaymentType.ACH, actual: payout.PaymentTypeId);
+            Assert.Equal(expected: PayoutStatus.Requested, actual: payout.PayoutStatusId);
+
+            var payoutTransactions = payout.GetTransactions(msgs: msgs, dc: dc);
+            Assert.Single(payoutTransactions);
+            Assert.Equal(payoutTransactions.FirstOrDefault().ID, transaction.ID);
+        }
+
+        [Fact(DisplayName = "Failing Test case for DisableStripePayoutForConnectAccountFailureTest")]
+        public void DisableStripePayoutForConnectAccountFailureTest()
+        {
+            // Arrange
+            var loggedInUser = WebUserFactory.Create(msgs, dc);
+            var billerAccount = AccountFactory.CreateAccountWithStripeFields(user: loggedInUser, accountType: AccountType.ActivityProvider, stripePayoutsEnabled: true, stripeChargesEnabled: true, stripeUserId: "1", msgs: msgs, dc: dc);
+
+            // Act
+            var stripeAccount = StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: billerAccount.StripeUserId, accountName: billerAccount.Name, payoutIntervalType: PayoutIntervalType.Daily, msgs: msgs);
+
+            // Assert
+            Assert.True(msgs.HasErrors()); //stripe account will not found
+            Assert.Null(stripeAccount);
+        }
+
+        [Fact(DisplayName = "Disable stripe auto payout and move to manual AHQ payout", Skip = "Stripe Dependency")]
+        public void DisableStripeAutoPayoutForConnectAccountTest()
+        {
+            // Arrange
+            var loggedInUser = WebUserFactory.Create(msgs, dc);
+            var billerAccount = AccountFactory.CreateAccount(user: loggedInUser, accountType: AccountType.School, stripePayoutsEnabled: true, stripeChargesEnabled: true, msgs: msgs, dc: dc);
+
+            // Update stripe account and customer to billerAccount
+            AccountFactory.CreateStripeAccountAndCustomer(account: billerAccount, msgs: msgs, dc: dc);
+
+            // Act
+            var stripeAccount = StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: billerAccount.StripeUserId, accountName: billerAccount.Name, payoutIntervalType: PayoutIntervalType.Manual, msgs: msgs);
+
+            // Assert
+            Assert.True(msgs.HasNoErrors());
+            Assert.NotNull(stripeAccount);
+            Assert.Equal(expected: PayoutIntervalType.Manual.ToString().ToLower(), actual: stripeAccount.Settings.Payouts.Schedule.Interval);            
+            Assert.True(msgs.HasMessageContainingText($"Account: ({billerAccount.Name}) updated with manual AHQ payout option."));
+        }
+
+        [Fact(DisplayName = "Enable stripe auto payout to those accounts which already had manual AHQ payout", Skip = "Stripe Dependency")]
+        public void EnableStripeAutoPayoutForConnectAccountTest()
+        {
+            // Arrange
+            var loggedInUser = WebUserFactory.Create(msgs, dc);
+            var billerAccount = AccountFactory.CreateAccount(user: loggedInUser, accountType: AccountType.School, stripePayoutsEnabled: true, stripeChargesEnabled: true, msgs: msgs, dc: dc);
+
+            // Update stripe account and customer to billerAccount
+            AccountFactory.CreateStripeAccountAndCustomer(account: billerAccount, msgs: msgs, dc: dc);
+
+            // Act
+            var stripeAccountWithManualPayout = StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: billerAccount.StripeUserId, accountName: billerAccount.Name, payoutIntervalType: PayoutIntervalType.Manual, msgs: msgs);
+            var stripeAccountWithAutoPayout = StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: billerAccount.StripeUserId, accountName: billerAccount.Name, payoutIntervalType: PayoutIntervalType.Daily, msgs: msgs);
+
+            // Assert
+            Assert.True(msgs.HasNoErrors());
+            Assert.NotNull(stripeAccountWithAutoPayout);
+            Assert.Equal(expected: PayoutIntervalType.Daily.ToString().ToLower(), actual: stripeAccountWithAutoPayout.Settings.Payouts.Schedule.Interval);
+            Assert.True(msgs.HasMessageContainingText($"Account: ({billerAccount.Name}) updated with manual AHQ payout option."));
+            Assert.True(msgs.HasMessageContainingText($"Account: ({billerAccount.Name}) updated with daily Stripe payout option."));            
+        }
+
+        [Theory(DisplayName = "Basic Test for PrepareManualPayouts", Skip = "Stripe Dependency")]
+        [InlineData(100)]
+        public void PrepareManualPayoutsTest(decimal amount)
+        {
+            // Arrange
+            var billingAccountOwner = WebUserFactory.Create("billingUser", "A", "billingUserA@test.com", true, msgs, dc);
+            var billingAccount = AccountFactory.CreateAccountWithFreePackage(accountName: "billingAccount-A", accountEmail: billingAccountOwner.Email, user: billingAccountOwner, accountType: AccountType.School,
+                stripePayoutsEnabled: true, stripeChargesEnabled: true, msgs: msgs, dc: dc);
+
+            var purchasingAccountOwner = WebUserFactory.Create("purchasingUser", "A", "purchasingUserA@test.com", true, msgs, dc);
+            var purchasingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", purchasingAccountOwner, AccountType.Registrant, msgs, dc);
+
+            var period = RegistrationPeriodFactory.Create(billingAccount, msgs, dc);
+            var activity = ActivityFactory.Create(account: billingAccount, costPerRegistrant: amount, msgs: msgs, dc: dc);
+            msgs.AddRange(period.AddActivity(activity, true, billingAccountOwner.ID.Value, dc));
+            activity.Publish(billingAccountOwner, msgs, dc);
+
+            var registrant = RegistrantFactory.Create(billingAccount, isMaster: false, msgs, dc: dc);
+            var transaction = TransactionFactory.CreateTransactionReadyForPayout(billerAccount: billingAccount, payerAccount: purchasingAccount, amount: amount, paymentType: PaymentType.CreditCard, msgs: msgs, dc: dc);
+            var activityPayment = ActivityPaymentFactory.Create(account: billingAccount, amount: amount, activity: activity, registrant: registrant, transaction: transaction, msgs: msgs, dc: dc);
+
+            // Update stripe account and customer to billerAccount
+            AccountFactory.CreateStripeAccountAndCustomer(account: billingAccount, msgs: msgs, dc: dc);
+
+            DelayExecution(10000);
+
+            // update stripe account with manual payout
+            StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: billingAccount.StripeUserId, accountName: billingAccount.Name, payoutIntervalType: PayoutIntervalType.Manual, msgs: msgs);
+
+            // Act
+            AccountService.PreparePayouts(msgs: msgs, dc: dc);
+
+            // Assert
+            Assert.True(msgs.HasNoErrors());
+            Assert.True(msgs.HasMessageContainingText($"Payout job started on at {DateTime.UtcNow.ToShortDateString()}."));
+            Assert.True(msgs.HasMessageContainingText($"Payout job completed on at {DateTime.UtcNow.ToShortDateString()}."));
+
+            // check payout
+            var payout = billingAccount.GetLastPayout(msgs, dc);
+            Assert.NotNull(payout);
+            Assert.Equal(billingAccount.ID.Value, payout.AccountId);
+            Assert.Equal(PayoutStatus.Completed, payout.PayoutStatusId);
+            Assert.Equal(PaymentType.ACH, payout.PaymentTypeId);
+            Assert.Equal($"AHQ {billingAccount.UniqueName.MaxChars(10)} {activity.UniqueName.MaxChars(7)}", payout.StatementDescriptor);
+
+            // verify status of stripe account
+            var stripeAccount = StripeHelper.GetCustomAccount(stripeAccountId: billingAccount.StripeUserId, msgs: msgs);
+            Assert.NotNull(stripeAccount);
+            Assert.Equal(stripeAccount.Settings.Payouts.Schedule.Interval, PayoutIntervalType.Manual.ToString().ToLower());
+
+            // verify payout amount of stripe
+            var stripePayout = StripeHelper.GetPayout(payoutId: payout.ExternalPayoutId, stripeAccountId: stripeAccount.Id, msgs: msgs);
+            Assert.NotNull(stripePayout);
+            Assert.Equal(payout.Amount, stripePayout.Amount / 100);
+        }
+        [Theory(DisplayName = "Get Activities For Instructor Test")]
+        [InlineData(1, 0, 1)]
+        [InlineData(10, 0, 5)]
+        [InlineData(30, 10, 5)]
+        public void GetActivitiesForInstructorsTest(int numberOfActivities, int start, int length)
+        {
+            // Arrange
+            var instructorWebUser = WebUserFactory.Create(msgs, dc);
+            var accountUser = AccountFactory.CreateAccount(instructorWebUser, msgs, dc);
+            var accountWebUser = AccountWebUserFactory.Create(accountUser, instructorWebUser, UserType.Instructor, true, msgs, dc);
+            List<Activity> arrangeActivities = new List<Activity>();
+
+
+            for (int i = 0; i < numberOfActivities; i++)
+            {
+                var activityGroup = ActivityGroupFactory.Create(accountUser, ActivityGroupType.Session, msgs, dc: dc);
+                var activity = ActivityFactory.Create(accountUser, ActivityType.Activity, activityGroup, msgs, dc);
+
+                if (i % 2 == 0)
+                   ActivityWebUserFactory.Create(activity, instructorWebUser, false, msgs, dc);
+
+                arrangeActivities.Add(activity);
+            }
+
+            // Act
+            var actActivities = accountUser.GetActivities(accountWebUser.UserTypeId, instructorWebUser, ActivityType.Activity, false, false, false, start, length, msgs, dc);
+
+            // Assert
+            Assert.True(msgs.HasNoErrors());
+            Assert.Equal(length, actActivities.Count);
+        }
+
     }
 }

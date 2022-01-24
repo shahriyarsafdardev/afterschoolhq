@@ -201,7 +201,7 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        public static void SendRegistrationWithdrawal(Registrant registrant, ParticipationObject participationObject, WebUser loggedInUser, SystemMessages msgs)
+        public static void SendRegistrationWithdrawal(Registrant registrant, ParticipationObject participationObject, WebUser loggedInUser, bool isParent, bool isProviderCancelled, SystemMessages msgs)
         {
             var model = new NameValueCollection()
             {
@@ -214,11 +214,50 @@ namespace AfterSchoolLibrary.Helpers
             };
 
             var subject = $"{registrant.Name}'s registration for {participationObject.Name} has been withdrawn";
-            var body = ProcessTemplate(
-                EmailTemplates.Registration_Withdrawal,
+            var body = "";
+
+            var plan = registrant.GetRegistrantSubscriptionPlans(msgs).Where(rsp => !rsp.DateCancelled.HasValue && rsp.IsForParticipationObject(participationObject, msgs))?.FirstOrDefault();
+            var payments = plan?.GetPayments();
+
+            if (isParent)
+            {
+                if (plan.IsNotEmpty() && plan.TotalPeriods.HasValue)
+                    model.Add(new NameValueCollection() {
+                    { "Payment",  payments?.Count().ToString() +" out of " +plan?.TotalPeriods.Value.ToString()},
+                    { "PlanURL", $"{Utilities.BaseUrl()}/Org/accounting/" }
+                });
+                else
+                    model.Add(new NameValueCollection() {
+                    { "Payment",  payments?.Count().ToString()},
+                    { "PlanURL", $"{Utilities.BaseUrl()}/Org/accounting/" }
+                });
+                body = ProcessTemplate(
+                EmailTemplates.Registration_Withdrawal_Parent,
                 model,
-                "Registration_Withdrawal",
+                "Registration_Withdrawal_Parent",
                 msgs);
+            }
+            else
+            {
+                var lastPara = "";
+                if (registrant.GetRegistrantActivity(participationObject, msgs).HasPaymentPlan(msgs))
+                {
+                    if (isProviderCancelled)
+                        lastPara = "Additional payments remaining on your payment plan with " + participationObject?.Provider?.Name + " will be cancelled. If you need a refund, please request one through the AfterSchool HQ <a href='" + Utilities.BaseUrl() + "/User/activity'>dashboard</a>";
+                    else
+                        lastPara = "The payment plan associated with this activity has not been cancelled and will continue for " + payments?.Count() + " payments. If you believe this is an error, please contact the provider.";
+                }
+                model.Add(new NameValueCollection() {
+                    { "LastParagraph", lastPara}
+                });
+
+                body = ProcessTemplate(
+                      EmailTemplates.Registration_Withdrawal,
+                      model,
+                      "Registration_Withdrawal",
+                      msgs);
+            }
+              
 
             // SEND EMAILS
             var mailMsgs = new SystemMessages();

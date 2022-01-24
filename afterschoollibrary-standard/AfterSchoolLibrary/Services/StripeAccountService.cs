@@ -191,6 +191,7 @@ namespace AfterSchoolLibrary.Services
                 amount: payout.Amount.Value,
                 externalAccountId: stripeAccount.BankAccountId,
                 connectedAccountId: account.StripeUserId,
+                statementDescriptor: payout.StatementDescriptor.IsNotEmpty() ? payout.StatementDescriptor : "AHQ Payout",
                 metaData: metaData,
                 msgs: msgs);
         }

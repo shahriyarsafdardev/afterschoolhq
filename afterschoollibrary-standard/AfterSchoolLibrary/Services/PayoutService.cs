@@ -10,7 +10,7 @@ namespace AfterSchoolLibrary.Services
 {
     public static class PayoutService
     {
-        public static Payout CreateNew(Account account, List<Transaction> transactions, PayoutStatus payoutStatus, PaymentType paymentType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Payout CreateNew(Account account, string statementDescriptor, List<Transaction> transactions, PayoutStatus payoutStatus, PaymentType paymentType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             Payout payout = null;
 
@@ -31,7 +31,8 @@ namespace AfterSchoolLibrary.Services
                         PaymentTypeId = paymentType,
                         PayoutStatusId = payoutStatus,
                         DateRequested = DateTime.UtcNow,
-                        RequestedBy = loggedInUser?.ID.IfEmpty(0)
+                        RequestedBy = loggedInUser?.ID.IfEmpty(0),
+                        StatementDescriptor = statementDescriptor
                     };
 
                     amsgs.AddRange(payout.Save(adc));
@@ -211,6 +212,7 @@ namespace AfterSchoolLibrary.Services
                 amount: payout.Amount.Value,
                 externalAccountId: null,
                 connectedAccountId: null,
+                statementDescriptor: payout.StatementDescriptor.IsNotEmpty() ? payout.StatementDescriptor : "AHQ Payout",
                 metaData: new Dictionary<string, string>()
                 {
                     { "AccountUid", payoutAccount.Uid.ToString() },
@@ -260,6 +262,21 @@ namespace AfterSchoolLibrary.Services
         public static void SendPayoutRequestNotification(this Payout payout, Account toAccount, SystemMessages msgs)
         {
             msgs.AddRange(Helpers.EmailHelper.SendPayoutRequestNotification(payout, toAccount));
+        }
+
+        public static void ProcessManualPayouts(List<Transaction> transactions, string activityUniqueName, Account account, WebUser currentUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            msgs.Add($"Payout process started for activity: ({activityUniqueName}).", MessageType.Success);
+
+            var statementDescriptor = $"AHQ {account.UniqueName.MaxChars(10)} {activityUniqueName.MaxChars(7)}";
+            var payout = account.RequestNewPayout(transactions: transactions, statementDescriptor: statementDescriptor, loggedInUser: currentUser, msgs: msgs, dc: dc);
+
+            if (payout.IsNotEmpty() && msgs.HasNoErrors())
+            {
+                msgs.Add($"Payout created and ready for approval with description: ({statementDescriptor}).", MessageType.Success);
+                payout.Approve(loggedInUser: currentUser, msgs: msgs, dc: dc);
+                msgs.Add($"Payout {payout.Uid} approved.", MessageType.Success);
+            }
         }
     }
 }

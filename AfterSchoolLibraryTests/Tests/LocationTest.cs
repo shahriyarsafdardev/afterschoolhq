@@ -26,35 +26,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(Location.Load(location.ID.Value, msgs, dc).IsNotEmpty());
         }
 
-        [Theory]
-        [InlineData(8, 10)]
-        [InlineData(15, 10)]
-        public void LoadPagingTest(int numberToCreate, int numberPerPage)
-        {
-            for (var i = 0; i < numberToCreate; i++)
-            {
-                var location = LocationFactory.Create(HostAccount, msgs, dc);
-            }
-
-            Assert.Equal(
-                Math.Min(numberPerPage, numberToCreate),
-                Location.Load(null, 0, numberPerPage, msgs, dc).Count
-            );
-        }
-
-        [Theory]
-        [InlineData(8)]
-        [InlineData(2)]
-        public void GetCountTest(int numberToCreate)
-        {
-            for (var i = 0; i < numberToCreate; i++)
-            {
-                var location = LocationFactory.Create(HostAccount, msgs, dc);
-            }
-
-            Assert.Equal(numberToCreate, Location.GetCount(msgs: msgs, dc: dc));
-        }
-
         [Fact]
         public void SaveTest()
         {
@@ -73,7 +44,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             msgs.AddRange(location.Delete(dc));
 
-            Assert.Equal(0, Location.GetCount(msgs: msgs, dc: dc));
+            Assert.Null(Location.Load(location.ID.Value));
         }
 
         [Fact]
