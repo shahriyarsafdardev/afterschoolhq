@@ -22,7 +22,6 @@
     <PackageReference Include="AWSSDK.Core" Version="3.3.104.25" />
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.3.104.27" />
     <PackageReference Include="AWSSDK.S3" Version="3.3.110.23" />
-    <PackageReference Include="BCrypt.Net-Next" Version="3.2.1" />
     <PackageReference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform" Version="2.0.1" />
     <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
     <PackageReference Include="Microsoft.Net.Compilers" Version="3.1.1" />
@@ -31,7 +30,6 @@
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.5.0" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
     <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.1" />
-    <PackageReference Include="System.Security.Cryptography.Cng" Version="4.5.0" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" />
