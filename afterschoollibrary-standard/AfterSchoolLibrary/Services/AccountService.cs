@@ -2930,7 +2930,8 @@ namespace AfterSchoolLibrary.Services
                 CreateDate = DateTime.UtcNow,
                 LastModifiedDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
-                LastModifiedBy = loggedInUser?.ID.IfEmpty(0)
+                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                IsDeleted = false
             };
             msgs.AddRange(registrant.Save(dc));
 
@@ -2972,6 +2973,7 @@ namespace AfterSchoolLibrary.Services
                         FirstName = firstName,
                         LastName = lastName,
                         Email = email,
+                        IsDeleted = false
                     };
                     amsgs.AddRange(registrant.Save(adc));
 

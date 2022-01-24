@@ -130,6 +130,40 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(expected, "Male");
         }
 
+        [Fact]
+        public void DeleteWithRelatedRecordsTest()
+        {
+                // Arrange
+                var user = WebUserFactory.Create(msgs: msgs, dc: dc);
+                var account = AccountFactory.Create(user: user, msgs: msgs, dc: dc);
+                var registrant = RegistrantFactory.Create(account, isMaster: false, msgs, dc);
+
+                // Act                
+                registrant.DeleteWithRelatedRecords(msgs, dc);
+
+                // Assert
+                Assert.True(registrant.IsDeleted);
+        }
+
+        [Fact]
+        public void AddOrUpdateParticipationObjectTest()
+        {
+                // Arrange
+                var user = WebUserFactory.Create(msgs: msgs, dc: dc);
+                var account = AccountFactory.Create(user: user, msgs: msgs, dc: dc);
+                var registrant = RegistrantFactory.Create(account, isMaster: false, msgs, dc);
+                var registration = RegistrationFactory.Create(account, registrant, msgs, dc);
+                var activity = ActivityFactory.Create(account, 20, msgs, dc);
+                var participationObject = new ParticipationObject(activity, msgs, dc);
+
+                // Act                
+                var expected = registrant.AddOrUpdateParticipationObject(registration.ID.Value,participationObject.ObjectID.Value, ParticipationObjectType.Activity,RegistrationAssignmentType.Applied,null,null,100,user.ID.Value, msgs, dc);
+
+                // Assert
+                Assert.NotNull(expected);
+                Assert.True(expected.IsDeleted == false);
+        }
+
     }
 
 }

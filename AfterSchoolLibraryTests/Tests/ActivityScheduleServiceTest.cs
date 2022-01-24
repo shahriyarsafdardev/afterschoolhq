@@ -28,52 +28,45 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact(DisplayName = "CreateSchedule")]
         public void CreateSchedule()
         {
-            try
-            {
-                // Arrange                
-                var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
-                var activity = ActivityFactory.Create(ActivityOwnerAccount, schedule, msgs, dc);
-                var AccountOwner = WebUserFactory.Create("Don", "John", "DonJohn@test.com", true, msgs, dc);
+            // Arrange                
+            var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
+            var activity = ActivityFactory.Create(ActivityOwnerAccount, schedule, msgs, dc);
+            var AccountOwner = WebUserFactory.Create("Don", "John", "DonJohn@test.com", true, msgs, dc);
 
-                var startDates = new List<DateRange>()
+            var startDates = new List<DateRange>()
                 {
                     new DateRange() {StartDate = $"6/{DateTime.Now.Month}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(), EndDate = $"6/{DateTime.Now.Month}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()},
                     new DateRange() {StartDate = $"7/{DateTime.Now.Month}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(), EndDate = $"7/{DateTime.Now.Month}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()},
                     new DateRange() {StartDate = $"8/{DateTime.Now.Month}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(), EndDate = $"8/{DateTime.Now.Month}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()},
                 };
 
-                var endDates = new List<DateTime>() { };
-                
-                var scheduleName = ActivitySchedule.GenerateUniqueName(Convert.ToInt32(ActivityOwnerAccount.ID), $"{activity.Name} - Schedule", msgs, dc);
+            var endDates = new List<DateTime>() { };
+
+            var scheduleName = ActivitySchedule.GenerateUniqueName(Convert.ToInt32(ActivityOwnerAccount.ID), $"{activity.Name} - Schedule", msgs, dc);
 
 
-                // Act
-                schedule = ActivityScheduleService.CreateNew(
-                   scheduleName,
-                   schedule.ScheduleDetails,
-                   schedule.RepeatsWeekly,
-                   schedule.IsOngoing,
-                   schedule.StartDate,
-                   schedule.EndDate,
-                   schedule.DailyStartTime,
-                   schedule.DailyEndTime,
-                   startDates.Select(x => new ActivityInstance(x.StartDate, x.EndDate)).ToList(),
-                   endDates,
-                   "",
-                   AccountOwner.ID.Value,
-                   activity.ActivityGroupId,
-                   AccountOwner.ID.Value,
-                   msgs,
-                   dc);
-              
-                // Assert
-                Assert.NotNull(schedule);
-            }
-            catch (Exception ex)
-            {
-                //Assert
-                Assert.False(false, ex.Message);
-            }
+            // Act
+            schedule = ActivityScheduleService.CreateNew(
+               scheduleName,
+               schedule.ScheduleDetails,
+               schedule.RepeatsWeekly,
+               schedule.IsOngoing,
+               schedule.StartDate,
+               schedule.EndDate,
+               schedule.DailyStartTime,
+               schedule.DailyEndTime,
+               startDates.Select(x => new ActivityInstance(x.StartDate, x.EndDate)).ToList(),
+               endDates,
+               "",
+               AccountOwner.ID.Value,
+               activity.ActivityGroupId,
+               AccountOwner.ID.Value,
+               msgs,
+               dc);
+
+            // Assert
+            Assert.True(msgs.HasNoErrors());
+            Assert.NotNull(schedule);
         }
 
         [Fact(DisplayName = "IsEndingInTwoDays")]
@@ -150,6 +143,31 @@ namespace AfterSchoolLibraryTests.Tests
                          || ("You have dates that overlap" == value) 
                          || systemMessages.Count == 0 ? true: false, "Failed");
           
-        }  
+        }
+
+        [Fact]
+        public void ValidateStartAndEndDateTrueTest()
+        {
+            // Arrange
+            var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount,DateTime.Now, DateTime.Now.AddDays(7), msgs, dc);
+
+            // Act
+            AfterSchoolLibrary.Extensions.ValidateStartAndEndDate(schedule.StartDate.Value.ToString(), schedule.EndDate.Value.ToString(), msgs);
+
+            // Assert
+            Assert.True(msgs.HasNoErrors());
+        }
+        [Fact]
+        public void ValidateStartAndEndDateFalseTest()
+        {
+            // Arrange
+            var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, DateTime.Now, DateTime.Now.AddDays(-7), msgs, dc);
+
+            // Act
+            AfterSchoolLibrary.Extensions.ValidateStartAndEndDate(schedule.StartDate.Value.ToString(), schedule.EndDate.Value.ToString(), msgs);
+
+            // Assert
+            Assert.False(msgs.HasNoErrors());
+        }
     }
 }
