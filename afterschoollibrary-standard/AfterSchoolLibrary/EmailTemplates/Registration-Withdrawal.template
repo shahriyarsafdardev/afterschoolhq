@@ -2,17 +2,11 @@
   <p>Hey @Model.ActivityContactName,</p>
 
   <p>
-    @Model.RegistrantName has been withdrawn from @Model.ActivityName by @Model.CurrentUserName. The registration status for @Model.RegistrantName has been changed to Withdrawn.
+    This is an automated email letting you know that @Model.RegistrantName has been withdrawn from @Model.ActivityName. If you believe this is a mistake, please contact the provider.
   </p>
 
   <p>
-    <strong>Important Notes:</strong>
-    <ul>
-      <li>This action will <em>NOT</em> automatically trigger a refund. The customer must request a refund separately</li>
-      <li>The registration information will stay in your account and in your activity. It will only change the registration status</li>
-      <li>If this registration is connected to a recurring subscription, the subscription will be cancelled at the end of the current period</li>
-      <li>If you have any questions please contact us at <a href="mailto:@Model.SupportEmail">@Model.SupportEmail</a></li>
-    </ul>
+    @Model.LastParagraph
   </p>
 
   <p>

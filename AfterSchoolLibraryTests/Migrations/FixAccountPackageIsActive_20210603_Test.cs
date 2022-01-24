@@ -21,15 +21,15 @@ namespace AfterSchoolLibraryTests.Migrations
             account = AccountFactory.Create(user, msgs, dc);
         }
 
-        [Fact]
-        public void RunMigration()
+        [Fact(Skip = "Use for debugging")]
+        public void Test()
         {    
             try
             {
                 // Arrange
                 if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-                AfterSchoolLibrary.Helpers.Utilities.AdditionalData(dc);
+                AfterSchoolLibrary.Helpers.DatabaseInit.AdditionalData(dc);
 
                 // create package
                 var package1 = PackageFactory.CreatePackage("Test Package 1", "Test Package Description 1", 100m, user, msgs, dc);

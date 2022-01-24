@@ -8,12 +8,19 @@ using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using System;
 using System.Text.RegularExpressions;
-using System.Web.Routing;
+using AfterSchoolLibrary.FeatureFlag;
 
 namespace AfterSchool.Controllers
 {
     public class RController : BaseController
     {
+        private readonly IFeatureFlagRepository featureFlagRepository;
+
+        public RController(IFeatureFlagRepository featureFlagRepository)
+        {
+            this.featureFlagRepository = featureFlagRepository;
+        }
+
         // GET: R
         public ActionResult Index()
         {
@@ -181,6 +188,8 @@ namespace AfterSchool.Controllers
                 AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(msgs);
             }
 
+            ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
+
             return View(account);
         }
 
@@ -264,7 +273,6 @@ namespace AfterSchool.Controllers
             ViewBag.RegistrationOpened = regOpened;
             ViewBag.RegistrationWillOpen = regWillOpen;
             ViewBag.RegistrationClosed = regClosed;
-
             ViewBag.Grades = grades;
             ViewBag.Messages = msgs;
             ViewBag.Cart = SessionVariables.Cart;
@@ -272,6 +280,7 @@ namespace AfterSchool.Controllers
             ViewBag.ParticipationObjects = participationObjects;
             ViewBag.AccountProfile = account.GetAccountProfile(msgs);
             ViewBag.FeaturedProviders = featuredProviders;
+            ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
 
             return View(account);
         }
@@ -343,6 +352,7 @@ namespace AfterSchool.Controllers
             ViewBag.BankAccounts = currentAccount.GetStripeBankAccounts(msgs);
             ViewBag.AccountProfile = account.GetAccountProfile(msgs);
             ViewBag.Messages = msgs;
+            ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
 
             return View(account);
         }
@@ -391,16 +401,8 @@ namespace AfterSchool.Controllers
             else
                 return HttpNotFound();
 
-
             RestartRegistrationSession(clearCart: session.IsEmpty());
-            SetRegistrationStartPage(account);
-
-            ViewBag.Messages = msgs;
-            ViewBag.Account = account;
-            ViewBag.CanPublishActivity = canPublishActivity;
-            ViewBag.CanRegisterFor = true;
-            ViewBag.Session = session;
-            ViewBag.AccountProfile = accountProfile;
+            SetRegistrationStartPage(account);            
 
             // LOG: Someone Viewed ParticipationObjectType ParticipationObjectName by Account AccountName
             SessionVariables.WebSession.LogActivity(
@@ -414,6 +416,14 @@ namespace AfterSchool.Controllers
                 indirectObjectId: participationObject.OwnerAccount.ID.Value,
                 indirectObjectText: participationObject.OwnerAccount.Name
             );
+
+            ViewBag.Messages = msgs;
+            ViewBag.Account = account;
+            ViewBag.CanPublishActivity = canPublishActivity;
+            ViewBag.CanRegisterFor = true;
+            ViewBag.Session = session;
+            ViewBag.AccountProfile = accountProfile;
+            ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
 
             return View(participationObject);
         }

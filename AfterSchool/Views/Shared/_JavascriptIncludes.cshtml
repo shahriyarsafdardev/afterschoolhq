@@ -108,11 +108,11 @@
     // #endregion: phone number validation
 
     function showLoader() {
-        $('#modal-saving').removeClass('hide');        
+        $('#modal-saving').removeClass('hide');
     }
 
     function hideLoader() {
-        $('#modal-saving').addClass('hide');        
+        $('#modal-saving').addClass('hide');
     }
 
     function showProgressBar() {
@@ -123,6 +123,31 @@
         $("#ProgressBar").hide();
     }
 
+    function showModal(id) {
+        $('#' + id).modal('show');
+        $('#' + id).addClass('md-show');
+    }
+
+    function hideModal(id) {
+        $('#' + id).modal('hide');
+        $('#' + id).removeClass('md-show');
+    }
+
+    function btnProcess(id, text, isDisabled) {
+        $('#' + id).html(text);
+        $('#' + id).prop('disabled', isDisabled);
+    }
+
+    function validateEmail(emailText) {
+        var pattern = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+        if (pattern.test(emailText)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
     document.querySelectorAll('.countWords').forEach(item => {
         item.addEventListener('input', event => {
             var maxlength = item.getAttribute("maxlength");
@@ -130,7 +155,7 @@
             var countElement = $(item).closest("div").find("span.countLeft");
 
             if (currentLength == maxlength) {
-                Notifications.showMessage('Error', 'You cannot enter more than 400 characters', false);
+                Notifications.showMessage('Error', 'You cannot enter more than ' + maxlength + ' characters', false);
                 countElement.html(currentLength);
             } else {
                 countElement.html(currentLength);

@@ -62,3 +62,21 @@
         </div>
     </div>
 </div>
+
+
+<script type="text/javascript">
+    function validateSetup(event) {
+        var startDate = moment($('#startdate').val());
+        var endDate = moment($('#enddate').val());
+        if (endDate.isBefore(startDate) || endDate.isSame(startDate))
+        {
+            Notifications.showBar({
+                title: 'Error',
+                message: 'Please make sure the end date is after the start date.',
+                success: false
+            });
+            event.preventDefault();
+            return false;
+        }
+    }
+</script>

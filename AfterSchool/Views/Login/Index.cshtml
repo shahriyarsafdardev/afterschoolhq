@@ -1,27 +1,223 @@
-﻿
-@{
-    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+﻿@{ Layout = "~/Views/Shared/_LayoutLogin-Updated.cshtml";
     ViewBag.Title = "Login";
     var msgs = (SystemMessages)ViewBag.Messages;
+    var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
 }
 
-<div class="am-wrapper am-login">
-    <div class="am-content">
-        <div class="main-content">
-            <div class="login-container">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <a href="/"><img src="@UILabel.ProductLogo()" alt="logo" width="100%" height="auto" class="logo-img"></a>                        
-                    </div>
-                    <div class="panel-body">
-                        
-                        @Html.Raw(UI.RenderMessagesToHtml(msgs))
+<style>
+    .bg-image {
+        background-image: url("../img/4k-wallpaper-adorable-blur-boy-1148998-small.jpg");
+        /* Center and scale the image nicely */
+        background-repeat: no-repeat;
+        background-position: left top;
+        /*background-size: 100% 100%;*/
+        background-size: cover;
+        flex: 1;
+        height: 100%;
+    }
+</style>
 
-                        @{ Html.RenderPartial("_Login", null, new ViewDataDictionary() { { "ReturnUrl", Request["returnurl"] }, { "Invite", Request["invite"] } }); }
+<div class="container-login hidden-md hidden-sm hidden-xs">
+    <div class="content-sidebar-login pull-left">
+
+        <div style="position: fixed; top: 30px; left: 30px;">
+            <a href="/"><img src="~/img/ahq-logo-2-1-1.png" alt="logo" style="width: 325px;"></a>
+        </div>
+
+        <div class="rectangle-login-box">
+            <div class="form-group">
+                <p class="form-login-welcome text-left">Welcome back.</p>
+                <p class="form-login-sign text-left">Or <a href="@Url.Action("index", "signup", new { area = ""})">sign up </a> for a free account.</p>
+            </div>
+            <br /><br />
+
+            @Html.Raw(UI.RenderMessagesToHtml(msgs))
+            <div class="clearfix"></div>
+
+            <form action="@Url.Action("index", "login", new { returnurl = ViewData["ReturnUrl"], invite = ViewData["invite"] })" method="post" class="form-horizontal" id="form-login">
+
+                <div class="form-group">
+                    <label class="short-description"> Email </label>
+                    <div class="input-group" style="width: 100%;">
+                        <input id="username" name="username" type="text" class="form-control txt-generic-login" required>
+                        <div class="input-group-email">
+                            <button id="inputGroupEmailPrepend" type="button" class="btn btn-primary btn-sm btn-generic-login">
+                                <img src="~/img/envelope.svg" />
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
+
+                <div class="form-group">
+                    <label class="short-description"> Password </label>
+                    <div class="input-group" style="width: 100%;">
+                        <input id="password" name="password" type="password" class="form-control txt-generic-login" required>
+                        <div class="input-group-password">
+                            <button id="inputGroupPassworkPrepend" type="button" class="btn btn-primary btn-sm btn-generic-login">
+                                <img src="~/img/unlock.svg" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group" style="float: left;">
+                    <div class="remember margin-b-10">
+                        <div class="am-checkbox checkbox-inline text-center">
+                            <input type="checkbox" id="remember-login" name="remember" value="1" class="form-control" checked="checked">
+                            <label for="remember-login">Remember me </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group pull-right">
+                    <a href="/login/resetpassword" class="reset-login-pass">Forgot Password</a>
+                    @*<a href="#" class="reset-login-pass" onclick="return showModal('modal-rest-password');">Forgot Password</a>*@
+                </div>
+                <div class="clearfix"></div>
+
+                <div class="form-group login-submit text-center">
+                    <button id="btn-login" type="submit" class="btn btn-primary btn-lg btn-block btn-login-updated">Log In</button>
+                    <br />
+                    @if (cleverSsoEnabled)
+                    {
+                        <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLinkLogin" class="btn-clever-login">
+                            <img src="~/img/clever-login.png" style="width: 225px; height: 50px;" class="clever-login-img"/>
+                        </a>
+                    }
+                </div>
+
+            </form>
+            <div class="clearfix"></div>
         </div>
+    </div>
+
+    <div class="bg-image">
+        <div class="rectangle-thought">
+            <span class="thought-header-1">
+                Every kid is a genius in their own way. Our goal is to help them find their genius.
+            </span>
+            <br /><br /><br />
+            <span class="thought-header-2">
+                Darye Henry
+            </span>
+            <br /><br />
+            <span class="thought-header-3">
+                Founder, AfterSchool HQ
+            </span>
+        </div>
+
+        <span class="photo-by-cole-keister">
+        </span>
     </div>
 </div>
 
+<div class="am-content-full hidden-xl hidden-lg">
+
+    <div style="margin-top: 30px;">
+        <div class="form-group">
+            <p class="form-login-welcome text-center">Welcome back.</p>
+            <p class="form-login-sign text-center">Or <a href="#">sign up </a> for a free account.</p>
+        </div>
+    </div>
+    <br />
+
+    <div class="row main-content main-content-medium-screen">
+
+        @Html.Raw(UI.RenderMessagesToHtml(msgs))
+        <div class="clearfix"></div>
+
+        <form id="form-login-small-screens" action="@Url.Action("index", "login", new { returnurl = ViewData["ReturnUrl"], invite = ViewData["invite"] })" method="post" class="form-horizontal">
+
+            <div class="form-group">
+                <label class="short-description"> Email </label>
+                <div class="input-group" style="width: 100%;">
+                    <input id="username-small-scrren" name="username" type="text" class="form-control txt-generic-login" required>
+                    <div class="input-group-email">
+                        <button id="inputGroupEmailPrepend-small-scrren" type="button" class="btn btn-primary btn-sm btn-generic-login">
+                            <img src="~/img/envelope.svg" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="short-description"> Password </label>
+                <div class="input-group" style="width: 100%;">
+                    <input id="password-small-scrren" name="password" type="password" class="form-control txt-generic-login" required>
+                    <div class="input-group-password">
+                        <button id="inputGroupPassworkPrepend-small-scrren" type="button" class="btn btn-primary btn-sm btn-generic-login">
+                            <img src="~/img/unlock.svg" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" style="float: left;">
+                <div class="remember margin-b-10">
+                    <div class="am-checkbox checkbox-inline text-center">
+                        <input type="checkbox" id="remember-login-small-scrren" name="remember" value="1" class="form-control" checked="checked">
+                        <label for="remember-login-small-scrren">Remember me </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group pull-right">
+                <a href="/login/resetpassword" class="reset-login-pass">Forgot Password</a>
+                @*TODO: modal is not accessible in this layout <a href="#" class="reset-login-pass" onclick="return showModal('modal-rest-password');">Forgot Password</a>*@
+            </div>
+            <div class="clearfix"></div>
+
+            <div class="form-group login-submit text-center">
+                <button id="btn-login-small-scrren" type="button" class="btn btn-primary btn-lg btn-block btn-login-updated" onclick="return validateLogin(true)">Log In</button>
+                <br />
+                @if (cleverSsoEnabled)
+                {
+                    <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLinkLogin" class="btn-clever-login">
+                        <img src="~/img/clever-login.png" style="width: 225px; height: 50px;" class="clever-login-img"/>
+                    </a>
+                }
+            </div>
+        </form>
+    </div>
+
+    <div class="footer-logo-small-screen text-center">
+        <a href="/"><img src="~/img/ahq-logo-2-1-1.png" alt="logo" style="width: 250px;"></a>
+    </div>
+</div>
+
+@*@{ Html.RenderPartial("~/Views/Shared/Registration/_ResetPassword.cshtml"); }*@
+
+<script type="text/javascript">
+
+    function validateLogin(isMobile) {
+        if (isMobile) {
+
+            var email = $('#username-small-scrren');
+            var pass = $('#password-small-scrren');
+            var isEmailValid = validateEmail(email.val());
+            var isPassValid = pass.val() == '' ? false : true;
+
+            if (!isEmailValid) {
+                email.addClass('error-border');
+                setTimeout(function () {
+                    email.removeClass('error-border');
+                }, 3000);
+            }
+
+            if (!isPassValid) {
+                pass.addClass('error-border');
+                setTimeout(function () {
+                    pass.removeClass('error-border');
+                }, 3000);
+            }
+
+            if (isEmailValid == true && isPassValid == true) {
+                btnProcess('btn-login-small-scrren', 'Processing...', true);
+                $('#form-login-small-screens').submit();
+            }
+
+            return;
+        }
+    }
+
+</script>

@@ -25,10 +25,10 @@ namespace AfterSchoolLibraryTests.Migrations
             ProviderAccount = AccountFactory.CreateWithFreePackage(ProviderWebUser, AccountType.ActivityProvider, msgs, dc);
         }
 
-        [Fact]
-        public void RunMigration()
+        [Fact(Skip = "Use for debugging")]
+        public void Test()
         {
-            AfterSchoolLibrary.Helpers.Utilities.AdditionalData(dc);
+            AfterSchoolLibrary.Helpers.DatabaseInit.AdditionalData(dc);
 
             // Act                   
             msgs.AddRange(SchoolAccount.AddVisitorAccount(ProviderAccount, HostPermissionType.ApproveOnly, ApprovalStatus.Approved, false, true, SchoolWebUser, dc));
