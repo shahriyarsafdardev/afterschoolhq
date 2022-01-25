@@ -864,7 +864,7 @@ namespace AfterSchoolLibrary.Models
         public string Username { get; set; }
         public string Password { get; set; }
 
-		public string ConnectionString { get { return string.Format("Data Source={0};User Id={1};Password={2};Initial Catalog={3};", Server, Username, Password, DatabaseName); } }
+		public string ConnectionString { get { return string.Format("Data Source={0};User Id={1};Password={2};Initial Catalog={3};Encrypt=false", Server, Username, Password, DatabaseName); } }
 
         public DatabaseCredentials()
         {
