@@ -4,8 +4,7 @@ Imports System.Collections
 Imports System.Collections.Generic
 Imports System.Text
 Imports System.Data
-Imports System.Data.SqlClient
-'Imports System.Data.SqlServerCe
+Imports Microsoft.Data.SqlClient
 
 Namespace DataAccess
     <Serializable()> _
@@ -1368,7 +1367,7 @@ Namespace DataAccess
                 End If
         End Sub
 
-        Private Sub AddParameter(ByRef command As SqlClient.SqlCommand, ByVal parameterValue As DatabaseParameterValue)
+        Private Sub AddParameter(ByRef command As SqlCommand, ByVal parameterValue As DatabaseParameterValue)
             If parameterValue.Value Is Nothing Then
                 command.Parameters.Add("@" & parameterValue.Parameter.ParameterName, parameterValue.Parameter.ParameterType).Value = DBNull.Value
             Else
@@ -2946,22 +2945,22 @@ Namespace DataAccess
         '    End Set
         'End Property
 
-        Private _sqlconnection As Data.SqlClient.SqlConnection
-        Private Property SqlConnection() As Data.SqlClient.SqlConnection
+        Private _sqlconnection As SqlConnection
+        Private Property SqlConnection() As SqlConnection
             Get
                 Return _sqlconnection
             End Get
-            Set(ByVal value As Data.SqlClient.SqlConnection)
+            Set(ByVal value As SqlConnection)
                 _sqlconnection = value
             End Set
         End Property
 
-        Private _sqltransaction As Data.SqlClient.SqlTransaction
-        Private Property SqlTransaction() As Data.SqlClient.SqlTransaction
+        Private _sqltransaction As SqlTransaction
+        Private Property SqlTransaction() As SqlTransaction
             Get
                 Return _sqltransaction
             End Get
-            Set(ByVal value As Data.SqlClient.SqlTransaction)
+            Set(ByVal value As SqlTransaction)
                 _sqltransaction = value
             End Set
         End Property

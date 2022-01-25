@@ -69,43 +69,46 @@ namespace AfterSchoolLibrary.Services
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            ActivitySchedule schedule = null;            
+            ActivitySchedule schedule = null;
 
-            Database.ExecuteTransaction(
-               action: (SystemMessages amsgs, DatabaseConnection adc) =>
-               {
-                   schedule = new ActivitySchedule
+            Extensions.ValidateStartAndEndDateWithTime(startDate.ToShortDateString(), dailyStartTime.ToShortTimeString(), endDate.ToShortDateString(), dailyEndTime.ToShortTimeString(), msgs);
+
+            if(msgs.HasNoErrors())
+                Database.ExecuteTransaction(
+                   action: (SystemMessages amsgs, DatabaseConnection adc) =>
                    {
-                       Name = scheduleName,
-                       ScheduleDetails = details.IfBlank("").MaxChars(4000),
-                       AccountId = accountId,
-                       RepeatsWeekly = repeatsWeekly,
-                       IsOngoing = isongoing,
-                       StartDate = startDate,
-                       EndDate = endDate,
-                       DailyStartTime = dailyStartTime,
-                       DailyEndTime = dailyEndTime,
-                       DaysOfTheWeek = daysOfTheWeek,
-                       CreateDate = DateTime.UtcNow,
-                       LastModifiedDate = DateTime.UtcNow,
-                       CreatedBy = loggedInUserId,
-                       LastModifiedBy = loggedInUserId,
-                       ActivityGroupId = activityGroupId
-                   };
-                   amsgs.AddRange(schedule.Save(adc));
+                       schedule = new ActivitySchedule
+                       {
+                           Name = scheduleName,
+                           ScheduleDetails = details.IfBlank("").MaxChars(4000),
+                           AccountId = accountId,
+                           RepeatsWeekly = repeatsWeekly,
+                           IsOngoing = isongoing,
+                           StartDate = startDate,
+                           EndDate = endDate,
+                           DailyStartTime = dailyStartTime,
+                           DailyEndTime = dailyEndTime,
+                           DaysOfTheWeek = daysOfTheWeek,
+                           CreateDate = DateTime.UtcNow,
+                           LastModifiedDate = DateTime.UtcNow,
+                           CreatedBy = loggedInUserId,
+                           LastModifiedBy = loggedInUserId,
+                           ActivityGroupId = activityGroupId
+                       };
+                       amsgs.AddRange(schedule.Save(adc));
 
-                   amsgs.AddRange(schedule.UpdateInstances(scheduleDates, scheduleDatesClosed, loggedInUserId, adc));                   
-               },
-               onSuccess: (SystemMessages successMsgs) =>
-               {
-                   msgs.AddRange(successMsgs);
-               },
-               onFailure: (SystemMessages failureMsgs) =>
-               {
-                   msgs.AddRange(failureMsgs);
-               },
-               dc: dc
-           );
+                       amsgs.AddRange(schedule.UpdateInstances(scheduleDates, scheduleDatesClosed, loggedInUserId, adc));                   
+                   },
+                   onSuccess: (SystemMessages successMsgs) =>
+                   {
+                       msgs.AddRange(successMsgs);
+                   },
+                   onFailure: (SystemMessages failureMsgs) =>
+                   {
+                       msgs.AddRange(failureMsgs);
+                   },
+                   dc: dc
+               );
 
             return schedule;
         }
