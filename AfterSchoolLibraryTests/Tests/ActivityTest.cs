@@ -1013,5 +1013,29 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.True(isAllowed);
         }
+
+        [Fact]
+        public void ActivityCheckLogOut()
+        {
+            var user = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(user, msgs, dc);
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            ActivityWebUserFactory.Create(activity, user, msgs, dc);
+
+            Assert.True(!activity.IsPublished && user.HasAccessToActivity(activity, msgs, dc));
+        }
+
+        [Fact]
+        public void ActivityCheckLogOutFailedCase1()
+        {
+            var user = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(user, msgs, dc);
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            activity.IsPublished = true;
+            activity.Save(dc);
+            ActivityWebUserFactory.Create(activity, user, msgs, dc);
+
+            Assert.False(!activity.IsPublished && user.HasAccessToActivity(activity, msgs, dc));
+        }
     }
 }
