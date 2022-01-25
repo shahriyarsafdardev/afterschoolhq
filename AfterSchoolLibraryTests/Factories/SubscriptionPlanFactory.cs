@@ -34,7 +34,8 @@ namespace AfterSchoolLibraryTests.Factories
                 PlanTypeId = planType,
                 IsActive = true,
                 BillingPeriodTypeId = BillingPeriodType.Month,
-                PaymentStartTypeId = PlanPaymentStartType.WhenActivityStarts
+                PaymentStartTypeId = PlanPaymentStartType.WhenActivityStarts,
+                NumberOfPeriodsPrePaid = 1
                 
             };
             msgs.AddRange(obj.SaveWithStripe(dc: dc));
