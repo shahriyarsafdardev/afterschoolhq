@@ -5,7 +5,7 @@
 }
 <div class="btn-toolbar">
     <div class="btn-group hidden-xs">
-        @if (showStudentCRM)
+        @if (showStudentCRM || studentCRMPackage == null)
         {
             <a href="@Url.Action("index", "registration")" class="btn btn-alt6@(actionName == "index" ? "-active" : "")">
                 <i class="s7-graph2"></i>  Students
@@ -23,18 +23,21 @@
         </a>
     </div>
     <div class="hidden-lg hidden-sm hidden-md">
-        <select class="form-control" onchange="this.value == '#' ? showUpgradeMyPlan('@(studentCRMPackage.Name)',@(studentCRMPackage.ID)) : location.href = this.value;">
-            <option value="">Navigation</option>
-            @if (showStudentCRM)
-            {
-                <option value="@Url.Action("index", "registration")">Students</option>
-            }
-            else
-            {
-                <option value="#">Students</option>
-            }
-            
-            <option value="@Url.Action("messages", "registration")">Messages</option>
-        </select>
+        @if (studentCRMPackage != null)
+        {
+            <select class="form-control" onchange="this.value == '#' ? showUpgradeMyPlan('@(studentCRMPackage.Name)',@(studentCRMPackage.ID)) : location.href = this.value;">
+                <option value="">Navigation</option>
+                @if (showStudentCRM)
+                {
+                    <option value="@Url.Action("index", "registration")">Students</option>
+                }
+                else
+                {
+                    <option value="#">Students</option>
+                }
+
+                <option value="@Url.Action("messages", "registration")">Messages</option>
+            </select>
+        }
     </div>
 </div>

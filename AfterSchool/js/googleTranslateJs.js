@@ -36,12 +36,12 @@ $(document).ready(function () {
 
             function setFlagHTML(value) {
 
-                var flagHTML = '<img src="/Content/Flags/US.png" class="flagLang"/> English';
+                var flagHTML = 'English';
                 if (value == "es") {
-                    flagHTML = '<img src="/Content/Flags/spain.png" class="flagLang"/> Espanol';
+                    flagHTML = 'Espanol';
                 }
                 else if (value == "fr") {
-                    flagHTML = '<img src="/Content/Flags/france.png" class="flagLang"/> French';
+                    flagHTML = 'French';
                 }
 
                 $("#dropdownMenuButton").html(flagHTML);
