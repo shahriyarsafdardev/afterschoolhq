@@ -2346,5 +2346,41 @@ namespace AfterSchoolLibrary.Helpers
 
             return "";
         }
+
+        public static SystemMessages SendParentAccountInvitedEmail(string parentFirstName, string activityName, string activityUrl, string customMessage, string studentFirstName, string studentEmail, string parentEmail)
+        {
+            var msgs = new SystemMessages();
+
+              customMessage = $"<p>{customMessage.Replace("\n", "<br />")}</p><hr />";
+
+            var model = new NameValueCollection()
+            {
+                { "FirstName", parentFirstName },
+                { "ProductName", activityName },
+                { "SupportEmail", Email.AppSupportEmailAddress },
+                { "InviteUrl", activityUrl },
+                { "CustomMessage", customMessage }
+            };
+
+            var body = ProcessTemplate(
+                EmailTemplates.Account_Invited,
+                model,
+                "accountinvited",
+                msgs
+                );
+
+            var subject = $"{studentFirstName} has invited you for account creation on AfterSchool HQ!";
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(true), //-- Here replace with "invitedAccount.IsAfterSchool"
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(parentEmail),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(true)  //-- Here replace with "invitedAccount.IsAfterSchool"
+                );
+
+            msgs.AddRange(mailMsgs);
+            return msgs;
+        }
     }
 }
