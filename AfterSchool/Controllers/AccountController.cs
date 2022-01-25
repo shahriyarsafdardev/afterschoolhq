@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using AfterSchool.Helpers;
 using AfterSchool.Models;
 using AfterSchoolLibrary.FeatureFlag;
+using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
@@ -1316,8 +1317,6 @@ namespace AfterSchool.Controllers
         }
       });
 
-      ViewBag.ParticipationObject = GetParticipationObjectFromCart();
-
       return questions;
     }
 
@@ -1343,19 +1342,19 @@ namespace AfterSchool.Controllers
             }
         });
 
-        ViewBag.ParticipationObject = GetParticipationObjectFromCart();
-
         return questions;
     }
 
     [HttpGet]
     public ActionResult StudentRegistration(string regaccount)
     {
+      var msgs = new SystemMessages();
+
       if (!featureFlagRepository.IsEnabled("student-registration"))
       {
           return RedirectToAction("getstarted", new { regaccount });
       }
-      var msgs = new SystemMessages();
+      
       var participationObject = GetParticipationObjectFromCart();
       
       Account registrationAccount = null;
@@ -1494,6 +1493,15 @@ namespace AfterSchool.Controllers
 
                         if (amsgs.HasNoErrors())
                             AddOrUpdateStandardAnswers(qvms, registrant, user, amsgs, adc);
+
+                        //.. send invite email to parent.
+                        var body = $"<p>{registrant.Name} has signed up for an account on AfterSchool HQ at {participationObject.GetBrowseUrl(true)}. Please create your AHQ account to know and approve of activities your child requests to participate in.<p>";
+
+                        EmailHelper.SendEmail(
+                            toEmail: parentEmail.Value.Trim(),
+                            subject: $"{registrant.Name} invitation for account creation on AfterSchool HQ.",
+                            body,
+                            isAfterSchool: true);
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
