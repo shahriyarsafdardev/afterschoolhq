@@ -1443,6 +1443,7 @@ namespace AfterSchool.Controllers
                 var parentLastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1LastName);
                 var parentEmail = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1Email);
 
+                Account parentAccount; 
                 WebUser user = null;
                 Account account = null;
                 Registrant registrant = null;
@@ -1451,42 +1452,73 @@ namespace AfterSchool.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        user = CreateOrUpdateUser(
-                            currentUser,
-                            firstName.Value.Trim(),
-                            lastName.Value.Trim(),
-                            email.Value.Trim(),
-                            phone.Value.Trim(),
-                            password1,
-                            textnotifications.IfBlank("0").ToBoolean(),
-                            amsgs,
-                            adc);
+                        var canBeAccessedBy = currentUser.AsList();
+                        parentAccount = Account.LoadByEmail(parentEmail.Value.Trim(), amsgs, adc);
 
-
-                        if (amsgs.HasNoErrors() && user.IsNotEmpty())
+                        if (parentAccount.IsNotEmpty())
                         {
-                            account = CreateOrUpdateAccount(user, amsgs, adc);
+                            user = parentAccount.CreateAndInviteUser(
+                             firstName.Value.Trim(),
+                             lastName.Value.Trim(),
+                             email.Value.Trim(),
+                             phone.Value.Trim(),
+                             message: "",
+                             userType: UserType.Student,
+                             loggedInUser: currentUser,
+                             msgs: amsgs,
+                             dc: adc);
+                            canBeAccessedBy.Add(user);
+                            if (amsgs.HasNoErrors() && user.IsNotEmpty())
+                            {
+                                // create student registrant record
+                                account = parentAccount.CreateRegistrant(
+                                    registrantOwner: user,
+                                    canBeAccessedBy: user,
+                                    registrantType: RegistrantType.Individual,
+                                    isMaster: true,
+                                    isParentOrGuardian: false,
+                                    allowTextMessages: false,
+                                    schoolLocationId: new int?(),
+                                    profileStatus: RegistrantProfileStatus.Started,
+                                    loggedInUser: currentUser,
+                                    msgs: amsgs,
+                                    dc: adc);
+    
+                                // LOG: Someone Created Account AccountName
+                                SessionVariables.WebSession.LogActivity(
+                                    account: account,
+                                    actor: currentUser,
+                                    actionType: WebSessionActionType.Created,
+                                    objectType: ObjectType.Account,
+                                    objectId: account.ID.Value,
+                                    objectText: account.Name
+                               );
 
-                            // LOG: Someone Created Account AccountName
-                            SessionVariables.WebSession.LogActivity(
-                                account: account,
-                                actor: currentUser,
-                                actionType: WebSessionActionType.Created,
-                                objectType: ObjectType.Account,
-                                objectId: account.ID.Value,
-                                objectText: account.Name
-                           );
-
-                            // LOG: Someone Created User UserName
-                            SessionVariables.WebSession.LogActivity(
-                                account: account,
-                                actor: currentUser,
-                                actionType: WebSessionActionType.SignedUp,
-                                objectType: ObjectType.WebUser,
-                                objectId: user.ID.Value,
-                                objectText: user.FullName
-                           );
+                                // LOG: Someone Created User UserName
+                                SessionVariables.WebSession.LogActivity(
+                                    account: account,
+                                    actor: currentUser,
+                                    actionType: WebSessionActionType.SignedUp,
+                                    objectType: ObjectType.WebUser,
+                                    objectId: user.ID.Value,
+                                    objectText: user.FullName
+                               );
+                            }
                         }
+                        //user = CreateOrUpdateUser(
+                        //    currentUser,
+                        //    firstName.Value.Trim(),
+                        //    lastName.Value.Trim(),
+                        //    email.Value.Trim(),
+                        //    phone.Value.Trim(),
+                        //    password1,
+                        //    textnotifications.IfBlank("0").ToBoolean(),
+                        //    amsgs,
+                        //    adc);
+                        
+
+
+                        
 
                         if (amsgs.HasNoErrors())
                             registrant = CreateOrUpdateRegistrant(account, user, amsgs, adc);
