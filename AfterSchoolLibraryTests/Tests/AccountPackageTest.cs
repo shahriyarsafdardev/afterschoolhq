@@ -30,38 +30,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(AccountPackage.Load(accountPackage.ID.Value, msgs, dc).IsNotEmpty());
         }
 
-        [Theory]
-        [InlineData(8, 10)]
-        [InlineData(15, 10)]
-        public void LoadPagingTest(int numberToCreate, int numberPerPage)
-        {
-            for (var i = 0; i < numberToCreate; i++)
-            {
-                var accountPackage = AccountPackageFactory.Create(Account, Package, msgs, dc);
-            }
-
-            Assert.Equal(
-                Math.Min(numberPerPage, numberToCreate),
-                AccountPackage.Load(null, 0, numberPerPage, msgs, dc).Count
-            );
-        }
-
-        [Theory]
-        [InlineData(8)]
-        [InlineData(2)]
-        public void GetCountTest(int numberToCreate)
-        {
-            for (var i = 0; i < numberToCreate; i++)
-            {
-                var accountPackage = AccountPackageFactory.Create(Account, Package, msgs, dc);
-            }
-
-            Assert.Equal(numberToCreate, AccountPackage.GetCount(msgs: msgs, dc: dc));
-        }
-
-        /// <summary>
-        /// saves the plan to the DB
-        /// </summary>
         [Fact]
         public void SaveTest()
         {
@@ -83,7 +51,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             msgs.AddRange(accountPackage.Delete(dc));
 
-            Assert.Equal(0, AccountPackage.GetCount(msgs: msgs, dc: dc));
+            Assert.Null(AccountPackage.Load(accountPackage.ID.Value));
         }
 
         /// <summary>

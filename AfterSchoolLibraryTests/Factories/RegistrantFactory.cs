@@ -32,5 +32,12 @@ namespace AfterSchoolLibraryTests.Factories
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
+
+        public static Registrant CreateWithNames(Account account, bool isMaster = true, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var obj = new Registrant() { Email = "test@test.com", FirstName = "Test Name" , LastName = "Test Last Name", AccountId = account.ID, IsMaster = isMaster };
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
     }
 }
