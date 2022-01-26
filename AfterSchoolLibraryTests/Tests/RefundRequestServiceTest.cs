@@ -26,7 +26,7 @@ namespace AfterSchoolLibraryTests.Tests
             TestTransaction = TransactionFactory.Create(BillingAccount, PayingAccount, PaymentType.ACH, 50, msgs, dc);
         }
 
-        [Fact(DisplayName = "CreateNewTest")]
+        [Fact]
         public void CreateNewTest()
         {
             var amount = 25;
@@ -35,16 +35,17 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(RefundRequest.Load(refundRequest.ID.Value, msgs, dc).IsNotEmpty());
         }
 
-        [Fact(DisplayName = "GetCreatorTest")]
+        [Fact]
         public void GetCreatorTest()
         {
             var amount = 25;
-            var refundRequest = RefundRequestFactory.Create(amount, TestTransaction, BillingAccount, "i want my money back", PayingWebUser, msgs, dc);
+            var refundRequest = RefundRequestFactory.Create(amount, TestTransaction, BillingAccount, "i want my money back", PayingWebUser,
+                msgs, dc);
 
-            Assert.Equal(PayingWebUser.ID.ToString(),refundRequest.GetCreator().ID.ToString());
+            Assert.Equal(PayingWebUser.ID.ToString(), refundRequest.GetCreator(msgs, dc).ID.ToString());
         }
 
-        [Fact(DisplayName = "ApproveAndProcessRequestTest")]
+        [Fact]
         public void ApproveAndProcessRequestTest()
         {
             var amount = 25;
@@ -53,15 +54,5 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.Equal(RefundRequestStatus.Completed, refundRequest.RefundRequestStatusId);
         }   
-
-        [Fact(DisplayName = "UpdateStatusTest")]
-        public void UpdateStatusTest()
-        {
-            var amount = 25;
-            var refundRequest = RefundRequestFactory.Create(amount, TestTransaction, BillingAccount, "i want my money back", PayingWebUser, msgs, dc);
-
-           
-
-        }
     }
 }

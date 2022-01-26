@@ -60,6 +60,13 @@
             url = unpublishActivity.ShortHomePageUrl;
         }
     }
+
+    var loginReturnUrl = ViewData["LoginReturnUrl"];
+
+    var cleverSsoEnabled = ViewData["CleverSsoEnabled"];
+
+    //set redirection url for clever login to redirect user to home page if they try to login from account topbar
+    TempData["redirectUrl"] = loginReturnUrl.IsNotEmpty() ? loginReturnUrl.ToString() : returnUrl;
 }
 
 @helper RenderReturnToHomeUrl(ParticipationObject session, Account registrationStartPage)
@@ -256,25 +263,8 @@
                         @if (currentUser.IsNotEmpty())
                         {
 
-                            if (enableApproveButton)
-                            {
-                                <a href="@Url.Action("publishdetail", "activity", new { Area = "org", id = participationObject.Uid })"
-                                   class="btn btn-primary btn-sm">
-                                    Approve &amp; Publish Activity &raquo;
-                                </a>
-                            }
-                            @RenderReturnToHomeUrl(session, registrationStartPage)
-                        }
-                        <div class="dropdown selectLanguage" style="float:left">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <img src="~/Content/Flags/US.png" class="flagLang" /> English
-                            </button>
-                            <div class="dropdown-menu ddlOptions" aria-labelledby="dropdownMenuButton">
-                                <a class="dropdown-item languageOption selectedLang" href="javascript:void(0)" data-lang="en" data-text="English"><img src="~/Content/Flags/US.png" class="flagLang" /> English</a>
-                                <a class="dropdown-item languageOption notSelectedLang" href="javascript:void(0)" data-lang="es" data-text="Espanol"><img src="~/Content/Flags/spain.png" class="flagLang" /> Espanol</a>
-                            </div>
-                        </div>
-                        <div id='google_translate_element'></div>
+                        @RenderReturnToHomeUrl(session, registrationStartPage)
+                        @Html.Partial("_GoogleTranslateDropDown");
                         @if (currentUser.IsNotEmpty())
                         {
 
@@ -331,10 +321,19 @@
                         }
                         else
                         {
-                            <button type="button" class="btn btn-link md-trigger" data-modal="modal-login">Login to Account</button>
+
+                            <button type="button" class="btn btn-link md-trigger" onclick="return showModal('modal-login')">Login to Account</button>
                         }
                     </div>
                 </div>
+            </div>
+        }
+        else
+        {
+            <div class="col-md-8 col-sm-8 col-xs-12">
+             <div class="btn-group pull-right">
+                 @Html.Partial("_GoogleTranslateDropDown");
+            </div>
             </div>
 
         }
@@ -363,7 +362,13 @@
     }
 </div>
 
-@{ Html.RenderPartial("~/Views/Shared/Registration/_LoginModal.cshtml", null, new ViewDataDictionary() { { "ReturnUrl", ViewData["LoginReturnUrl"] } }); }
+@{
+    Html.RenderPartial("~/Views/Shared/Registration/_LoginModalWithUpdatedDesign.cshtml", null, new ViewDataDictionary()
+    {
+        { "ReturnUrl", loginReturnUrl },
+        { "CleverSsoEnabled", cleverSsoEnabled },
+    });
+}
 
 <script type="text/javascript">
     function popOverButton() {

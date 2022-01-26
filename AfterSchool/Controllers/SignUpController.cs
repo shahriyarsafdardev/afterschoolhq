@@ -77,21 +77,22 @@ namespace AfterSchool.Controllers
         WebUser user = null;
         Account account = null;
 
-        Database.ExecuteTransaction
-        (
-            action: (SystemMessages amsgs, DatabaseConnection adc) =>
-            {
-              user = WebUserService.CreateNewWithNoPhone(
-                          firstName: model.FirstName,
-                          lastName: model.LastName,
-                          email: model.Email,
-                          password: model.Password2,
-                          isActive: true,
-                          isRegistered: true,
-                          isVerified: false,
-                          loggedInUser: null,
-                          msgs: amsgs,
-                          dc: adc);
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        user = WebUserService.CreateNewWithNoPhone(
+                            firstName: model.FirstName,
+                            lastName: model.LastName,
+                            email: model.Email,
+                            password: model.Password2,
+                            isActive: true,
+                            isRegistered: true,
+                            isVerified: false,
+                            loggedInUser: null,
+                            howHearAboutUs: model.HowHearAboutUs,
+                            msgs: amsgs,
+                            dc: adc);
 
               account = user.AddNewAccount(
                              orgName: model.OrgName,
@@ -175,21 +176,22 @@ namespace AfterSchool.Controllers
         WebUser user = null;
         Account account = null;
 
-        Database.ExecuteTransaction
-        (
-            action: (SystemMessages amsgs, DatabaseConnection adc) =>
-            {
-              user = WebUserService.CreateNewWithNoPhone(
-                          firstName: model.FirstName,
-                          lastName: model.LastName,
-                          email: model.Email,
-                          password: model.Password2,
-                          isActive: true,
-                          isRegistered: true,
-                          isVerified: false,
-                          loggedInUser: null,
-                          msgs: amsgs,
-                          dc: adc);
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        user = WebUserService.CreateNewWithNoPhone(
+                            firstName: model.FirstName,
+                            lastName: model.LastName,
+                            email: model.Email,
+                            password: model.Password2,
+                            isActive: true,
+                            isRegistered: true,
+                            isVerified: false,
+                            loggedInUser: null,
+                            howHearAboutUs: model.HowHearAboutUs,
+                            msgs: amsgs,
+                            dc: adc);
 
               if (model.SignupType.IsNotEmpty() && model.SignupType == SignUpType.Teacher1099)
                 model.OrgName = $"{model.FirstName} {model.LastName} Teacher";
@@ -936,21 +938,22 @@ namespace AfterSchool.Controllers
       {
         WebUser user = null;
 
-        Database.ExecuteTransaction
-        (
-            action: (SystemMessages amsgs, DatabaseConnection adc) =>
-            {
-              user = WebUserService.CreateNewWithNoPhone(
-                          firstName: model.FirstName,
-                          lastName: model.LastName,
-                          email: model.Email,
-                          password: model.Password2,
-                          isActive: true,
-                          isRegistered: true,
-                          isVerified: false,
-                          loggedInUser: new WebUser { ID = 0 },
-                          msgs: amsgs,
-                          dc: adc);
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        user = WebUserService.CreateNewWithNoPhone(
+                            firstName: model.FirstName,
+                            lastName: model.LastName,
+                            email: model.Email,
+                            password: model.Password2,
+                            isActive: true,
+                            isRegistered: true,
+                            isVerified: false,
+                            loggedInUser: new WebUser { ID = 0 },
+                            howHearAboutUs: model.HowHearAboutUs,
+                            msgs: amsgs,
+                            dc: adc);
 
               invitingAccount.AddUser(user, UserType.Administrator, new WebUser { ID = 0 }, amsgs, adc);
             },
@@ -981,12 +984,12 @@ namespace AfterSchool.Controllers
       return View(model);
     }
 
-    /* APIS */
-    [HttpPost]
-    public ActionResult Personal(string firstname, string lastname, string email, string password, string remember)
-    {
-      if (!IsRequestFromApp())
-        return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+        /* APIS */
+        [HttpPost]
+        public ActionResult Personal(string firstname, string lastname, string email, string password, string remember, string howhearaboutus)
+        {
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
 
       var msgs = new SystemMessages();
 
@@ -1007,23 +1010,24 @@ namespace AfterSchool.Controllers
       WebUser user = null;
       Account account = null;
 
-      if (msgs.HasNoErrors())
-      {
-        Database.ExecuteTransaction
-        (
-            action: (SystemMessages amsgs, DatabaseConnection adc) =>
+            if (msgs.HasNoErrors())
             {
-              user = WebUserService.CreateNewWithNoPhone(
-                          firstName: firstname,
-                          lastName: lastname,
-                          email: email,
-                          password: password,
-                          isActive: true,
-                          isRegistered: true,
-                          isVerified: false,
-                          loggedInUser: null,
-                          msgs: amsgs,
-                          dc: adc);
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        user = WebUserService.CreateNewWithNoPhone(
+                            firstName: firstname,
+                            lastName: lastname,
+                            email: email,
+                            password: password,
+                            isActive: true,
+                            isRegistered: true,
+                            isVerified: false,
+                            loggedInUser: null,
+                            howHearAboutUs: howhearaboutus,
+                            msgs: amsgs,
+                            dc: adc);
 
               if (user.IsNotEmpty())
                 account = user.AddNewRegistrantAccount(userType: UserType.Owner, isActive: true, isAfterSchool: true, loggedInUser: user, msgs: amsgs, dc: adc);

@@ -49,7 +49,8 @@
         currentUser.IsNotEmpty() &&
         (currentAccount.ID == Model.OwnerAccount.ID) &&
         (currentUser.HasAccessTo(Model.OwnerAccount));
-    
+
+    var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
 }
 <style>
     .disabled {
@@ -58,11 +59,13 @@
     }
 </style>
 @{
-    Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", account, new ViewDataDictionary() {
+    Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", account, new ViewDataDictionary()
+    {
         { "LoginReturnUrl", Model.GetHomePageUrl() },
         { "CanPublishActivity", ViewBag.CanPublishActivity },
         { "ParticipationObject", Model },
         { "Session", session },
+        { "CleverSsoEnabled", cleverSsoEnabled },
         { "InsideActDetails", Model.Name}
     });
 }

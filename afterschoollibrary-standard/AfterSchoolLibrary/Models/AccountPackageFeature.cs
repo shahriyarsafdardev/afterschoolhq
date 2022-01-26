@@ -192,6 +192,15 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
+        public static List<AccountPackageFeature> LoadByFeatureTypeIdByGreaterOrEqualMaxValue(FeatureType FeatureTypeId, int Max, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["FeatureTypeId"], (int)FeatureTypeId);
+            dq.Criterias.Add(ObjectMap["Max"], Max, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
         public decimal GetMaxValue()
         {
             return this.Max.HasValue ? this.Max.Value : 0;
