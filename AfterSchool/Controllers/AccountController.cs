@@ -1497,12 +1497,6 @@ namespace AfterSchool.Controllers
                         //.. send invite email to parent.
                         var body = $"<p>{registrant.Name} has signed up for an account on AfterSchool HQ at {participationObject.GetBrowseUrl(true)}. Please create your AHQ account to know and approve of activities your child requests to participate in.<p>";
 
-                        //EmailHelper.SendEmail(
-                        //    toEmail: parentEmail.Value.Trim(),
-                        //    subject: $"{registrant.Name} invitation for account creation on AfterSchool HQ.",
-                        //    body,
-                        //    isAfterSchool: true);
-
                         amsgs = EmailHelper.SendParentAccountInvitedEmail(parentFirstName.Value.Trim(), "Brot Cooking", participationObject.GetBrowseUrl(true), body, firstName.Value.Trim(), email.Value.Trim(), parentEmail.Value.Trim());
 
                     },

@@ -2363,7 +2363,7 @@ namespace AfterSchoolLibrary.Helpers
             };
 
             var body = ProcessTemplate(
-                EmailTemplates.Account_Invited,
+                EmailTemplates.ParentAccount_Invited,
                 model,
                 "accountinvited",
                 msgs

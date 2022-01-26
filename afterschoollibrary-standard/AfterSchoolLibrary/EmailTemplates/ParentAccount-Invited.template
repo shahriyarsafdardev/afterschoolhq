@@ -1,0 +1,9 @@
+﻿<div>
+  <p>Hey @Model.FirstName,</p>
+  
+  @Model.CustomMessage
+
+  <p>
+      AfterSchool HQ.
+  </p>
+</div>
