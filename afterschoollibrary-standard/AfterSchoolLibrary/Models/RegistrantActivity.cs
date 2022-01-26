@@ -41,6 +41,7 @@ namespace AfterSchoolLibrary.Models
 		public int? Rating { get { return (int?)MDV["Rating"].Value; } set { MDV["Rating"].Value = value; } }
 		public RegistrationAssignmentType AssignmentTypeId { get { return (RegistrationAssignmentType)MDV["AssignmentTypeId"].Value; } set { MDV["AssignmentTypeId"].Value = value; } }
 		public decimal? AmountCharged { get { return (decimal?)MDV["AmountCharged"].Value; } set { MDV["AmountCharged"].Value = value; } }
+		public bool? IsDeleted { get { return (bool?)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
 		public string RegistrantEmail { get { return (string)MDV["RegistrantEmail"].Value; } }
 		public string RegistrantFirstName { get { return (string)MDV["RegistrantFirstName"].Value; } }
 		public string RegistrantLastName { get { return (string)MDV["RegistrantLastName"].Value; } }
@@ -82,6 +83,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "Rating", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AssignmentTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AmountCharged", System.Data.SqlDbType.Money);
+				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "RegistrantEmail", typeof(Registrant).Name, "Email", System.Data.SqlDbType.NVarChar, "Registrant");
 				_dp.Add(className, "RegistrantFirstName", typeof(Registrant).Name, "FirstName", System.Data.SqlDbType.NVarChar, "Registrant");
 				_dp.Add(className, "RegistrantLastName", typeof(Registrant).Name, "LastName", System.Data.SqlDbType.NVarChar, "Registrant");
@@ -224,6 +226,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["AmountCharged"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsDeleted"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

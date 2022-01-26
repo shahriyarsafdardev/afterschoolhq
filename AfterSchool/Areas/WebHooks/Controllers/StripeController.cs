@@ -222,6 +222,12 @@ namespace AfterSchool.Areas.WebHooks.Controllers
       }
 
       var plan = rsp.GetSubscriptionPlan(msgs);
+      if (stripeInvoice.AmountPaid <= 0 && chargeId.IsEmpty())
+      {
+        msgs.Add($"Ignoring - Charge not found, probably $0 invoice for future plans - Stripe Sub ID {stripeSubscriptionId}", MessageType.Notice);
+        return ReturnOK(msgs);
+      }
+
       var registrant = rsp.GetRegistrant(msgs);
       var masterRegistrant = registrant.GetMasterRegistrant(msgs);
       var purchasingAccount = masterRegistrant.GetAccount(msgs);
@@ -376,16 +382,28 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
     private IHttpActionResult SubscriptionCompleted(Stripe.Event stripeEvent, SystemMessages msgs)
     {
-      var subscription = (Stripe.Subscription)stripeEvent.Data.Object;
+        if (stripeEvent.IsNotEmpty() &&
+                    stripeEvent.Data.IsNotEmpty() &&
+                    stripeEvent.Data.Object.IsNotEmpty())
+        {
+            var subscription = (Stripe.Subscription)stripeEvent.Data.Object;
 
-      if (subscription.Plan.IsNotEmpty() && subscription.Plan.Id.IsNotEmpty())
-      {
-        var dbSubscription = SubscriptionPlan.LoadByStripePlanId(subscription.Plan.Id, msgs);
-        dbSubscription.IsActive = false;
-        dbSubscription.Save();
-      }
+            if (subscription.Plan.IsNotEmpty() && subscription.Plan.Id.IsNotEmpty())
+            {
+                var dbSubscription = SubscriptionPlan.LoadByStripePlanId(subscription.Plan.Id, msgs);
+                if (dbSubscription.IsNotEmpty() &&
+                    dbSubscription.IsActive)
+                {
+                    dbSubscription.IsActive = false;
+                    msgs.AddRange(dbSubscription.Save());
+                }
+            }
+        }
 
-      return ReturnOK(msgs);
+        if (msgs.HasErrors())
+            return Return500(msgs);
+
+        return ReturnOK(msgs);
     }
   }
 }

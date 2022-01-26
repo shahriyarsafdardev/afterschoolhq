@@ -70,7 +70,7 @@ namespace AfterSchoolLibraryTests.Tests
                 msgs, 
                 dc);
 
-            Assert.Equal(1, AccountRelationship.GetCount(msgs: msgs, dc: dc));
+            Assert.Equal(accountRelationship1.ID.Value, accountRelationship2.ID.Value);
         }
 
         [Fact]

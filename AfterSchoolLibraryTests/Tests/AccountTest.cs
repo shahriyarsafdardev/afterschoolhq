@@ -41,25 +41,6 @@ namespace AfterSchoolLibraryTests.Tests
             );
         }
 
-        //Gets the Number of accounts in the DB
-        [Theory(DisplayName = "Get # of accounts in db")]
-        [InlineData(8)]
-        [InlineData(2)]
-        public void GetCountTest(int numberToCreate)
-        {
-            var originalCount = Account.GetCount(msgs: msgs, dc: dc);
-            for (var i = 0; i < numberToCreate; i++)
-            {
-                var accountOwner = WebUserFactory.Create(msgs, dc);
-                var account = AccountFactory.Create(accountOwner, msgs, dc);
-            }
-
-            Assert.Equal(originalCount + numberToCreate, Account.GetCount(msgs: msgs, dc: dc));
-        }
-
-        /// <summary>
-        /// saves the account to the DB
-        /// </summary>
         [Fact(DisplayName = "Save account")]
         public void SaveTest()
         {
@@ -71,24 +52,17 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors());
         }
 
-        /// <summary>
-        /// removes the account from the DB
-        /// </summary>
         [Fact(DisplayName = "Delete an account")]
         public void DeleteTest()
         {
-            var originalCount = Account.GetCount(msgs: msgs, dc: dc);
             var accountOwner = WebUserFactory.Create(msgs, dc);
             var account = AccountFactory.Create(accountOwner, msgs, dc);
 
             msgs.AddRange(account.Delete(dc));
 
-            Assert.Equal(originalCount, Account.GetCount(msgs: msgs, dc: dc));
+            Assert.Null(Account.Load(account.ID.Value));
         }
 
-        /// <summary>
-        /// loads the account using its own ID
-        /// </summary>
         [Fact(DisplayName = "Reload account")]
         public void ReloadTest()
         {
@@ -188,16 +162,6 @@ namespace AfterSchoolLibraryTests.Tests
             var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
 
             Assert.Contains(questions, f => f.QuestionDataTypeId == QuestionDataType.Parent2MiddleName);
-        }
-        [Fact]
-        public void GetQuestionsParentRegistrationStep2Test()
-        {
-            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
-            var homeAddressQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.HomeAddress);
-            var questions = homeAddressQuestionGroup.GetAllQuestions(msgs, dc);
-
-            Assert.Contains(questions, f => f.QuestionDataTypeId == QuestionDataType.RegistrantWorkPhone);
-            Assert.Contains(questions, f => f.QuestionDataTypeId == QuestionDataType.RegistrantHomePhone);
         }
 
         [Fact]

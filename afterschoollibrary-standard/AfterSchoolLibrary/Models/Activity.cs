@@ -695,6 +695,35 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
+		public static List<Activity> LoadListByIdsByGroupByIsArchivedIsDeleted(List<int> ids, int? activityGroupId, int? accountActivityGroupId, ActivityType? activityType, bool? isArchived, bool? isDeleted, bool? ungroupedOnly, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+		{
+			DatabaseQuery dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ID"], ids.ToArray(), DatabaseCriteriaOperatorEnum.In);
+
+			if (activityGroupId.IsNotEmpty())
+				dq.Criterias.Add(ObjectMap["ActivityGroupId"], activityGroupId);
+			else if (ungroupedOnly.HasValue && ungroupedOnly.Value)
+				dq.Criterias.Add(ObjectMap["ActivityGroupId"], null, DatabaseCriteriaOperatorEnum.Is);
+
+			if (accountActivityGroupId.IsNotEmpty())
+				dq.Criterias.Add(ObjectMap["AccountActivityGroupId"], accountActivityGroupId);
+
+			if (activityType.IsNotEmpty())
+				dq.Criterias.Add(ObjectMap["ActivityTypeId"], (int)activityType);
+
+			if (isArchived.IsNotEmpty())
+				dq.Criterias.Add(ObjectMap["IsArchived"], isArchived);
+
+			if (isDeleted.IsNotEmpty())
+				dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
+
+			dq.SelectRange.Start = start;
+			dq.SelectRange.Length = length;
+
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
 		public static List<Activity> LoadList(List<int> ids, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;

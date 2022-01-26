@@ -29,42 +29,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(SubscriptionPlan.Load(plan.ID.Value, msgs, dc).IsNotEmpty());
         }
 
-        [Theory]
-        [InlineData(8, 10)]
-        [InlineData(15, 10)]
-        public void LoadPagingTest(int numberToCreate, int numberPerPage)
-        {
-            for (var i = 0; i < numberToCreate; i++)
-            {
-                var plan = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, Activity, SubscriptionPlanType.Subscription, msgs, dc);
-            }
-
-            Assert.Equal(
-                Math.Min(numberPerPage, numberToCreate),
-                SubscriptionPlan.Load(null, 0, numberPerPage, msgs, dc).Count
-            );
-        }
-
-        /// <summary>
-        /// Gets number of subscription plans in the database
-        /// </summary>
-        /// <param name="numberToCreate"></param>
-        [Theory]
-        [InlineData(8)]
-        [InlineData(2)]
-        public void GetCountTest(int numberToCreate)
-        {
-            for (var i = 0; i < numberToCreate; i++)
-            {
-                var plan = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, Activity, SubscriptionPlanType.Subscription, msgs, dc);
-            }
-
-            Assert.Equal(numberToCreate, SubscriptionPlan.GetCount(msgs: msgs, dc: dc));
-        }
-
-        /// <summary>
-        /// saves the plan to the DB
-        /// </summary>
         [Fact]
         public void SaveTest()
         {
@@ -86,12 +50,9 @@ namespace AfterSchoolLibraryTests.Tests
 
             msgs.AddRange(plan.Delete(dc));
 
-            Assert.Equal(0, SubscriptionPlan.GetCount(msgs: msgs, dc: dc));
+            Assert.Null(SubscriptionPlan.Load(plan.ID.Value));
         }
 
-        /// <summary>
-        /// loads the plan using its own ID
-        /// </summary>
         [Fact]
         public void ReloadTest()
         {

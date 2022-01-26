@@ -1,0 +1,110 @@
+﻿@{
+    ViewBag.Title = "Schedule Tasks";
+}
+
+<div class="page-head">
+    <h2>Schedule Tasks</h2>
+</div>
+<div class="main-content">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <table class="table table-responsive table-hover">
+                <thead>
+                    <tr>
+                        <th>Job Name</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Manual Payout</td>
+                        <td><a class="btn btn-success" onclick="return runCronJob()">Run now</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="clearfix"></div>
+    <div id="summary-container" class="panel panel-default" style="display: none;">
+        <div class="panel-heading">
+            <i class="s7-credit"></i> Summary
+        </div>
+
+        <div class="panel-body">
+            <ul id="summary-list" class=""></ul>
+        </div>
+    </div>
+</div>
+
+@using (Html.BeginForm(actionName: "", controllerName: "", method: FormMethod.Post, htmlAttributes: new { @id = "frm-runCronJob", @class = "form-validator" }))
+{
+    @Html.AntiForgeryToken()
+}
+
+
+<script type="text/javascript">
+
+    function runCronJob() {        
+        var formData = $("#frm-runCronJob").serialize();
+        var url = '@Url.Action("RunCronJob", "ScheduleTasks", new { Area = "Admin" })';
+                
+        showLoader();
+
+        $.ajax({
+            url: url,
+            data: formData,
+            type: "POST",
+            dataType: "json",
+            success: function (data) {
+                if (data && data.success == false) {
+                    var errors = ''
+                    data.messages.forEach(function (error) {
+                        if (error && error.Text) {
+                            errors += '<li>' + error.Text + '</li>';
+                        }
+                        else {
+                            errors += '<li>' + error + '</li>';
+                        }
+                    });
+
+                    $('#summary-list').html(errors);
+                    $('#summary-container').show();
+
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: 'Job failed',
+                        success: false
+                    });
+
+                    hideLoader();
+                    return false;
+                } else { 
+                    hideLoader();
+                    var msgs = ''
+                    data.messages.forEach(function (msg) {
+                        if (msg && msg.Text) {
+                            msgs += '<li>' + msg.Text + '</li>';
+                        }
+                        else {
+                            msgs += '<li>' + msg + '</li>';
+                        }
+                    });
+
+                    $('#summary-list').html(msgs);
+                    $('#summary-container').show();
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(errorThrown);
+                Notifications.showBar({
+                    title: 'Error',
+                    message: 'Something went wrong. Please contact customer support.',
+                    success: false
+                });
+                hideLoader();
+                return;
+            }
+        });
+    }
+</script>

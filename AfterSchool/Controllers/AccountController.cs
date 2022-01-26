@@ -1,22 +1,27 @@
-﻿using AfterSchool.Models;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Linq;
+using System.Web.Mvc;
+using AfterSchool.Helpers;
+using AfterSchool.Models;
+using AfterSchoolLibrary.FeatureFlag;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using Newtonsoft.Json.Converters;
-using Rollbar.DTOs;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Management;
-using System.Web.Mvc;
-using AfterSchool.Helpers;
-using System;
 
 namespace AfterSchool.Controllers
 {
   public class AccountController : BaseController
   {
+    private readonly IFeatureFlagRepository featureFlagRepository;
+
+    public AccountController(IFeatureFlagRepository featureFlagRepository)
+    {
+      this.featureFlagRepository = featureFlagRepository;
+    }
+
     #region Interested
 
     private List<FormQuestionViewModel> InterestedViewBag(ParticipationObject participationObject, SystemMessages msgs)
@@ -111,7 +116,8 @@ namespace AfterSchool.Controllers
 
       ViewBag.RegistrationAccount = registrationAccount;
       ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
-      ViewBag.Messages = msgs;
+      ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
+      ViewBag.Messages = msgs;      
 
       return View(qvms);
     }
@@ -233,6 +239,7 @@ namespace AfterSchool.Controllers
       if (msgs.HasNoErrors())
         return RedirectToAction("thankyou", new { id = registration.Uid });
 
+      ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
       ViewBag.Messages = msgs;
 
       return View(qvms);
@@ -395,7 +402,8 @@ namespace AfterSchool.Controllers
             {
                 QuestionDataType.RegistrantFirstName,
                 QuestionDataType.RegistrantLastName,
-                QuestionDataType.RegistrantEmail
+                QuestionDataType.RegistrantEmail,
+                QuestionDataType.RegistrantMiddleName
             };
 
       questions = questions.Where(question => question.QuestionDataTypeId.NotIn(FormService.QuestionsToNotIncludeInParentPanel())).ToList();
@@ -507,7 +515,8 @@ namespace AfterSchool.Controllers
 
       ViewBag.RegistrationAccount = registrationAccount;
       ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
-      ViewBag.Messages = msgs;
+      ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
+      ViewBag.Messages = msgs;      
 
       return View(qvms);
     }
@@ -625,6 +634,7 @@ namespace AfterSchool.Controllers
       if (msgs.HasNoErrors())
         return RedirectToAction("addhomeaddress");
 
+      ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
       ViewBag.Messages = msgs;
 
       return View(qvms);
@@ -784,23 +794,8 @@ namespace AfterSchool.Controllers
       if (results.IsNotEmpty()) return results;
 
       var msgs = new SystemMessages();
-      var parentOrGuardian = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
-      var questions = AddParentViewBag(msgs);
-      var values = new NameValueCollection();
-
-      questions.ForEach(question =>
-      {
-        switch (question.QuestionDataTypeId)
-        {
-           case QuestionDataType.RegistrantHomePhone:
-           case QuestionDataType.RegistrantWorkPhone:
-           case QuestionDataType.RegistrantMobilePhone:
-                values.Add(question.ToFormQuestionViewModel().Id, parentOrGuardian.GetAnswer(question.QuestionDataTypeId)?.Text);
-            break;
-        }
-      });
-
-      var qvms = questions.Select(question => question.ToFormQuestionViewModel(values)).ToList();
+      var questions = AddParentViewBag(msgs);      
+      var qvms = questions.Select(question => question.ToFormQuestionViewModel()).ToList();
 
       ViewBag.Messages = msgs;
 
@@ -1315,8 +1310,12 @@ namespace AfterSchool.Controllers
         }
       });
 
-      ViewBag.ParticipationObject = GetParticipationObjectFromCart();
-      ViewBag.ShowStepNumber = SessionVariables.CurrentAccount.GetChildrenRegistrants(msgs).Count < 2;
+       if (GetParticipationObjectFromCart().IsEmpty())
+           msgs.Add("Activity not found", MessageType.Warning);
+       else
+            ViewBag.ParticipationObject = GetParticipationObjectFromCart();
+
+       ViewBag.ShowStepNumber = SessionVariables.CurrentAccount.GetChildrenRegistrants(msgs).Count < 2;
 
       return questions;
     }
@@ -1484,11 +1483,11 @@ namespace AfterSchool.Controllers
           .Distinct()
           .ToList();
 
-      questions.AddRange(
-              allQuestions
-                  .Where(question => question.QuestionDataTypeId == QuestionDataType.NotSet)
-                  .Where(question => answers.Find(answer => answer.FormQuestionId == question.ID).IsEmpty())
-          );
+      questions.AddRange(allQuestions
+          .Where(question => !question.IsDeleted && question.QuestionDataTypeId == QuestionDataType.NotSet)
+          .Where(question => answers.Find(answer => answer.FormQuestionId == question.ID).IsEmpty())
+          .OrderBy(question => question.DisplayOrder)
+        );
 
       ViewBag.Registrant = SessionVariables.CurrentRegistrant;
 
@@ -1914,6 +1913,10 @@ namespace AfterSchool.Controllers
       if (!registration.IsPaid(msgs))
       {
         var participationObject = registration.GetFirstParticipationObject(msgs);
+
+        if (participationObject.IsEmpty())
+            return HttpNotFound();
+
         var currentRegistrant = registration.GetRegistrant(msgs).GetMasterRegistrant(msgs);
         var parentRegistrant = currentRegistrant.GetParentOrGuardian(msgs);
         var parentAccount = parentRegistrant.GetAccount(msgs);
@@ -2124,8 +2127,10 @@ namespace AfterSchool.Controllers
     [HttpGet]
     public ActionResult GetStartedStudent(string regaccount)
     {
-      // disable and redirect to get started parent (since there is no way for students to register directly
-      return RedirectToAction("getstarted", new { regaccount });
+      if (!featureFlagRepository.IsEnabled("student-registration"))
+      {
+        return RedirectToAction("getstarted", new { regaccount });
+      }
 
       if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentAccount.AccountTypeId == AccountType.Registrant)
         return RedirectToAction("select");
@@ -2133,10 +2138,11 @@ namespace AfterSchool.Controllers
       var msgs = new SystemMessages();
       var questions = GetStartedStudentViewBag(msgs);
 
+      ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
       ViewBag.Messages = msgs;
 
       if (regaccount.IsGuid())
-        ViewBag.RegistrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
+        ViewBag.RegistrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);      
 
       return View(questions.Select(question => new FormQuestionViewModel(question)).ToList());
     }
@@ -2259,7 +2265,10 @@ namespace AfterSchool.Controllers
 
       if (msgs.HasNoErrors())
         return RedirectToAction("inviteparent");
+
+      ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
       ViewBag.Messages = msgs;
+
       return View(qvms);
     }
 
