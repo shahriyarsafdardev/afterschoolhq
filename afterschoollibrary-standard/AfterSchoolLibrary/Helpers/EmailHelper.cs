@@ -2347,20 +2347,15 @@ namespace AfterSchoolLibrary.Helpers
             return "";
         }
 
-        public static SystemMessages SendParentAccountInvitedEmail(WebUser studentWebUser, string parentFirstName, string activityName, string activityUrl, string customMessage, string studentFirstName, string studentEmail, string parentEmail)
+        public static SystemMessages SendParentAccountInvitedEmail(WebUser studentWebUser, string parentFirstName, string activityUrl, string parentEmail)
         {
             var msgs = new SystemMessages();
 
-              customMessage = $"<p>{customMessage.Replace("\n", "<br />")}</p><hr />";
-
             var model = new NameValueCollection()
             {
-                { "RegistrantFirstName", parentFirstName },
+                { "RegistrantFirstName", studentWebUser.FirstName },
                 { "ParentFirstName", parentFirstName },
-                { "ProductName", activityName },
-                { "SupportEmail", Email.AppSupportEmailAddress },
-                { "InviteUrl", activityUrl },
-                { "CustomMessage", customMessage }
+                { "ActivityUrl", activityUrl }
             };
 
             var body = ProcessTemplate(
@@ -2370,7 +2365,7 @@ namespace AfterSchoolLibrary.Helpers
                 msgs
                 );
 
-            var subject = $"{studentFirstName} has invited you for account creation on AfterSchool HQ!";
+            var subject = $"{studentWebUser.FirstName} has invited you for account creation on AfterSchool HQ!";
 
             var mailMsgs = SendGridHelper.SendMail(
                 fromEmail: Email.SendGridNoReplyEmailAddress(true), //-- Here replace with "invitedAccount.IsAfterSchool"
