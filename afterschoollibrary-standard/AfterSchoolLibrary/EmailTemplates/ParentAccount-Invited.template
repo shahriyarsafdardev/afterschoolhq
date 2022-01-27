@@ -2,6 +2,8 @@
   <p>Hey @Model.FirstName,</p>
   
   @Model.CustomMessage
+  <p>
+	{studentRegistrant.Name} has signed up for an account on AfterSchool HQ at {participationObject.GetBrowseUrl(true)}. Please create your AHQ account to know and approve of activities your child requests to participate in.<p>
 
   <p>
       AfterSchool HQ.

@@ -2347,7 +2347,7 @@ namespace AfterSchoolLibrary.Helpers
             return "";
         }
 
-        public static SystemMessages SendParentAccountInvitedEmail(string parentFirstName, string activityName, string activityUrl, string customMessage, string studentFirstName, string studentEmail, string parentEmail)
+        public static SystemMessages SendParentAccountInvitedEmail(WebUser studentWebUser, string parentFirstName, string activityName, string activityUrl, string customMessage, string studentFirstName, string studentEmail, string parentEmail)
         {
             var msgs = new SystemMessages();
 
@@ -2355,7 +2355,8 @@ namespace AfterSchoolLibrary.Helpers
 
             var model = new NameValueCollection()
             {
-                { "FirstName", parentFirstName },
+                { "RegistrantFirstName", parentFirstName },
+                { "ParentFirstName", parentFirstName },
                 { "ProductName", activityName },
                 { "SupportEmail", Email.AppSupportEmailAddress },
                 { "InviteUrl", activityUrl },

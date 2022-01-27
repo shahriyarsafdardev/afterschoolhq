@@ -1421,8 +1421,6 @@ namespace AfterSchool.Controllers
                     msgs.Add("Password 2 is required", MessageType.UserError);
                 if (password1 != password2)
                     msgs.Add("Passwords must match", MessageType.UserError);
-                //if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
-                //    msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
             }
             if (AfterSchoolLibrary.Helpers.Utilities.IsProduction || AfterSchoolLibrary.Helpers.Utilities.IsStaging)
             {
@@ -1443,10 +1441,12 @@ namespace AfterSchool.Controllers
                 var parentLastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1LastName);
                 var parentEmail = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1Email);
 
-                Account parentAccount; 
-                WebUser user = null;
-                Account account = null;
-                Registrant registrant = null;
+                Account parentAccount = null; 
+                WebUser studentUser = null;
+                WebUser parentUser = null;
+                Account studentAccount = null;
+                Registrant studentRegistrant = null;
+                Registrant parentRegistrant = null;
 
                 Database.ExecuteTransaction
                 (
@@ -1455,87 +1455,108 @@ namespace AfterSchool.Controllers
                         var canBeAccessedBy = currentUser.AsList();
                         parentAccount = Account.LoadByEmail(parentEmail.Value.Trim(), amsgs, adc);
 
-                        if (parentAccount.IsNotEmpty())
+                        if (!parentAccount.IsNotEmpty())
                         {
-                            user = parentAccount.CreateAndInviteUser(
-                             firstName.Value.Trim(),
-                             lastName.Value.Trim(),
-                             email.Value.Trim(),
-                             phone.Value.Trim(),
-                             message: "",
-                             userType: UserType.Student,
-                             loggedInUser: currentUser,
-                             msgs: amsgs,
-                             dc: adc);
-                            canBeAccessedBy.Add(user);
-                            if (amsgs.HasNoErrors() && user.IsNotEmpty())
+                            parentUser = CreateOrUpdateUser(
+                          null,
+                          parentFirstName.Value.Trim(),
+                          parentLastName.Value.Trim(),
+                          parentEmail.Value.Trim(),
+                          phone.Value.Trim(),
+                          "",
+                          textnotifications.IfBlank("0").ToBoolean(),
+                          amsgs,
+                          adc);
+
+
+                            if (amsgs.HasNoErrors() && parentUser.IsNotEmpty())
                             {
-                                // create student registrant record
-                                account = parentAccount.CreateRegistrant(
-                                    registrantOwner: user,
-                                    canBeAccessedBy: user,
-                                    registrantType: RegistrantType.Individual,
-                                    isMaster: true,
-                                    isParentOrGuardian: false,
-                                    allowTextMessages: false,
-                                    schoolLocationId: new int?(),
-                                    profileStatus: RegistrantProfileStatus.Started,
-                                    loggedInUser: currentUser,
-                                    msgs: amsgs,
-                                    dc: adc);
-    
+                                parentAccount = CreateOrUpdateAccount(parentUser, amsgs, adc);
+
                                 // LOG: Someone Created Account AccountName
                                 SessionVariables.WebSession.LogActivity(
-                                    account: account,
+                                    account: parentAccount,
                                     actor: currentUser,
                                     actionType: WebSessionActionType.Created,
                                     objectType: ObjectType.Account,
-                                    objectId: account.ID.Value,
-                                    objectText: account.Name
+                                    objectId: parentAccount.ID.Value,
+                                    objectText: parentAccount.Name
                                );
 
                                 // LOG: Someone Created User UserName
                                 SessionVariables.WebSession.LogActivity(
-                                    account: account,
+                                    account: parentAccount,
                                     actor: currentUser,
                                     actionType: WebSessionActionType.SignedUp,
                                     objectType: ObjectType.WebUser,
-                                    objectId: user.ID.Value,
-                                    objectText: user.FullName
+                                    objectId: parentUser.ID.Value,
+                                    objectText: parentUser.FullName
                                );
                             }
+
+                            if (amsgs.HasNoErrors())
+                                parentRegistrant = CreateOrUpdateRegistrant(parentAccount, parentUser, amsgs, adc);
                         }
-                        //user = CreateOrUpdateUser(
-                        //    currentUser,
-                        //    firstName.Value.Trim(),
-                        //    lastName.Value.Trim(),
-                        //    email.Value.Trim(),
-                        //    phone.Value.Trim(),
-                        //    password1,
-                        //    textnotifications.IfBlank("0").ToBoolean(),
-                        //    amsgs,
-                        //    adc);
-                        
+
+                        studentUser = parentAccount.CreateAndInviteUser(
+                             firstName: firstName.Value.Trim(),
+                             lastName: lastName.Value.Trim(),
+                             email: email.Value.Trim(),
+                             phone: phone.Value.Trim(),
+                             message: $"Your parent/guardian ({parentUser.DisplayName}) has invited you to sign up for {AfterSchoolLibrary.Helpers.Utilities.AppName()} to register for activities",
+                             userType: UserType.Student,
+                             loggedInUser: parentUser,
+                             msgs: amsgs,
+                             dc: adc);
+
+                        if (amsgs.HasNoErrors() && studentUser.IsNotEmpty())
+                        {
+                            // create student registrant record
+                            studentRegistrant = parentAccount.CreateRegistrant(
+                                registrantOwner: studentUser,
+                                canBeAccessedBy: canBeAccessedBy,
+                                registrantType: RegistrantType.Individual,
+                                isMaster: true,
+                                isParentOrGuardian: false,
+                                allowTextMessages: false,
+                                schoolLocationId: new int?(),
+                                profileStatus: RegistrantProfileStatus.Started,
+                                loggedInUser: currentUser,
+                                msgs: amsgs,
+                                dc: adc);
 
 
-                        
+                            // LOG: Someone Created Registrant RegistrantName for Account AccountName
+                            if (studentRegistrant.IsNotEmpty() && amsgs.HasNoErrors())
+                            {
+                                SessionVariables.WebSession.LogActivity(
+                                        account: parentAccount,
+                                        actor: currentUser,
+                                        actionType: WebSessionActionType.Created,
+                                        objectType: ObjectType.Registrant,
+                                        objectId: studentRegistrant.ID.Value,
+                                        objectText: studentRegistrant.FullName,
+                                        indirectObjectType: ObjectType.Account,
+                                        indirectObjectId: parentAccount.ID.Value,
+                                        indirectObjectText: parentAccount.Name
+                                    );
+                            }
+                        }
+
 
                         if (amsgs.HasNoErrors())
-                            registrant = CreateOrUpdateRegistrant(account, user, amsgs, adc);
-
-                        if (amsgs.HasNoErrors())
-                            AddOrUpdateStandardAnswers(qvms, registrant, user, amsgs, adc);
+                            AddOrUpdateStandardAnswers(qvms, studentRegistrant, studentUser, amsgs, adc);
 
                         //.. send invite email to parent.
-                        var body = $"<p>{registrant.Name} has signed up for an account on AfterSchool HQ at {participationObject.GetBrowseUrl(true)}. Please create your AHQ account to know and approve of activities your child requests to participate in.<p>";
+                        var body = $"<p>{studentRegistrant.Name} has signed up for an account on AfterSchool HQ at {participationObject.GetBrowseUrl(true)}. Please create your AHQ account to know and approve of activities your child requests to participate in.<p>";
 
-                        amsgs = EmailHelper.SendParentAccountInvitedEmail(parentFirstName.Value.Trim(), "Brot Cooking", participationObject.GetBrowseUrl(true), body, firstName.Value.Trim(), email.Value.Trim(), parentEmail.Value.Trim());
+                        //amsgs = EmailHelper.SendParentAccountInvitedEmail(studentUser, parentFirstName.Value.Trim(), participationObject.GetBrowseUrl(true), body, firstName.Value.Trim(), email.Value.Trim(), parentEmail.Value.Trim());
 
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         msgs.AddRange(smsgs);
-                        LoadSessionInfo(user, account);
+                        LoadSessionInfo(studentUser, parentAccount);
                     },
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
