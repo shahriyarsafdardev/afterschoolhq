@@ -1593,8 +1593,12 @@ namespace AfterSchool.Controllers
         }
       });
 
-      ViewBag.ParticipationObject = GetParticipationObjectFromCart();
-      ViewBag.ShowStepNumber = SessionVariables.CurrentAccount.GetChildrenRegistrants(msgs).Count < 2;
+       if (GetParticipationObjectFromCart().IsEmpty())
+           msgs.Add("Activity not found", MessageType.Warning);
+       else
+            ViewBag.ParticipationObject = GetParticipationObjectFromCart();
+
+       ViewBag.ShowStepNumber = SessionVariables.CurrentAccount.GetChildrenRegistrants(msgs).Count < 2;
 
       return questions;
     }
@@ -2192,6 +2196,10 @@ namespace AfterSchool.Controllers
       if (!registration.IsPaid(msgs))
       {
         var participationObject = registration.GetFirstParticipationObject(msgs);
+
+        if (participationObject.IsEmpty())
+            return HttpNotFound();
+
         var currentRegistrant = registration.GetRegistrant(msgs).GetMasterRegistrant(msgs);
         var parentRegistrant = currentRegistrant.GetParentOrGuardian(msgs);
         var parentAccount = parentRegistrant.GetAccount(msgs);
