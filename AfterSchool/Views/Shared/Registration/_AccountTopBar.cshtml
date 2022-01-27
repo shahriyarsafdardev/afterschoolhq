@@ -96,8 +96,8 @@
 <div class="reg-login-bar">
     @if (Model.IsNotEmpty() && Model.ID.HasValue)
     {
-    <div class="row">
-        <div class="col-md-6 col-sm-6 col-xs-12">
+    <div class="row" style="line-height: 35px;">
+        <div class="col-md-4 col-sm-4 col-xs-12">
 
             @if (isAccount && isAccountAndLoggedInUserIsOwner && Model.OnboardingCompletionStatus() != GettingStartedOptions.ProcessCompleted && isOnboardingStepsAcknowledged != "True" && !isInEditMode)
             {
@@ -246,25 +246,16 @@
 
         @if (!isDuringProfileSetup)
         {
-            <div class="col-md-6 col-sm-6 col-xs-12">
+            <div class="col-md-8 col-sm-8 col-xs-12">
                 <div class="pull-right navTop">
                     <input type="checkbox" id="nav-check">
-                    <div class="nav-btn">
-                        <label for="nav-check">
-                            <span></span>
-                            <span></span>
-                            <span></span>
-                        </label>
-                    </div>
+                    
                     <div class="nav-links">
 
-                        @RenderReturnToHomeUrl(session, registrationStartPage)
-
-                        @if (currentUser.IsNotEmpty())
-                        {
 
                         @RenderReturnToHomeUrl(session, registrationStartPage)
                         @Html.Partial("_GoogleTranslateDropDown");
+
                         @if (currentUser.IsNotEmpty())
                         {
 
