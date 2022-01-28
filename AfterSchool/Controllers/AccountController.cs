@@ -1393,8 +1393,11 @@ namespace AfterSchool.Controllers
         var parentQuestions = StudentRegistrationParentViewBag(msgs);
         questions.AddRange(parentQuestions);
         var currentUser = SessionVariables.CurrentUser;
+        Account registrationAccount = null;
+            if (regaccount.IsGuid())
+                registrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
 
-        questions.ForEach(question =>
+            questions.ForEach(question =>
         {
             var answer = Request[question.ToFormQuestionViewModel().Name];
 
@@ -1569,8 +1572,9 @@ namespace AfterSchool.Controllers
         ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
         ViewBag.Messages = msgs;
         ViewBag.ParticipationObject = participationObject;
+        ViewBag.RegistrationAccount = registrationAccount;
 
-        return View(qvms);
+            return View(qvms);
     }
 
         #endregion
