@@ -72,7 +72,7 @@
                                 {
                                     <div class="row">
                                         <div class="col-md-6 col-md-offset-3">
-                                            <div class="am-checkbox text-center">
+                                            <div class="am-checkbox">
                                                 <input type="checkbox" id="textnotifications" name="textnotifications" value="1" @(UILabel.CheckAllowTextMessage(currentUser) ? " checked=\"checked\" " : "") />
                                                 <label for="textnotifications">
                                                     I would like to receive text notifications from my school or provider through AHQ.
@@ -121,10 +121,40 @@
                             }
 
                             <div class="padding-v-20">
-                                <button type="submit" id="btn-create-account" class="btn btn-register-primary btn-lg">Save &amp; Continue &raquo;</button>
+                                <div class="col-md-6 col-md-offset-3 parent-instructions">
+                                    <p>This should not be the same email used in the previous step.</p>
+                                </div>
                             </div>
 
-                        </div>                        
+                            <div class="row">
+                                <div class="col-md-6 col-md-offset-3">
+                                    <div class="am-checkbox">
+                                        <input type="checkbox" id="agree" name="agree" value="1" @(Request["agree"] == "1" ? " checked=\"checked\" " : "") />
+                                        <label for="agree">
+                                            I agree to the <a href="@Url.Action("tos", "legal")" target="_blank">terms and conditions</a> of using @UILabel.ProductName()
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 col-md-offset-3">
+                                    <div class="am-checkbox">
+                                        <input type="checkbox" id="isStudent" name="isStudent" value="1" @(UILabel.CheckAllowTextMessage(currentUser) ? " checked=\"checked\" " : "") />
+                                        <label for="isStudent">
+                                            I am a student (if you are a parent, <a href="@Url.Action("", "")" target="_blank">click here</a>)
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="padding-v-20">
+                                <div class="col-md-6 col-md-offset-3">
+                                    <button type="submit" id="btn-create-account" class="btn btn-register-primary btn-lg">Save &amp; Continue &raquo;</button>
+                                </div>
+                            </div>
+
+                        </div>
 
                         <div class="row">
                             <div class="padding-v-20 text-center">

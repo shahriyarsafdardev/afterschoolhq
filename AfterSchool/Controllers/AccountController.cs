@@ -1385,192 +1385,193 @@ namespace AfterSchool.Controllers
     }
 
     [HttpPost]
-        public ActionResult StudentRegistration(string regaccount, string password1, string password2, string agree, string textnotifications)
+    public ActionResult StudentRegistration(string regaccount, string password1, string password2, string agree, string textnotifications)
+    {
+        var msgs = new SystemMessages();
+        var participationObject = GetParticipationObjectFromCart();
+        var questions = StudentRegistrationViewBag(msgs);
+        var parentQuestions = StudentRegistrationParentViewBag(msgs);
+        questions.AddRange(parentQuestions);
+        var currentUser = SessionVariables.CurrentUser;
+
+        questions.ForEach(question =>
         {
-            var msgs = new SystemMessages();
-            var participationObject = GetParticipationObjectFromCart();
-            var questions = StudentRegistrationViewBag(msgs);
-            var parentQuestions = StudentRegistrationParentViewBag(msgs);
-            questions.AddRange(parentQuestions);
-            var currentUser = SessionVariables.CurrentUser;
+            var answer = Request[question.ToFormQuestionViewModel().Name];
 
-            questions.ForEach(question =>
+            if (question.IsRequired && answer.IsEmpty())
+                msgs.Add($"{question.Text} is required", MessageType.UserError);
+
+            switch (question.QuestionDataTypeId)
             {
-                var answer = Request[question.ToFormQuestionViewModel().Name];
+                case QuestionDataType.RegistrantMobilePhone:
+                    if (answer.IsNotEmpty() && !answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                        msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+                    break;
 
-                if (question.IsRequired && answer.IsEmpty())
-                    msgs.Add($"{question.Text} is required", MessageType.UserError);
+            }
+        });
 
-                switch (question.QuestionDataTypeId)
+        if (currentUser.IsEmpty())
+        {
+            if (password1.IsEmpty())
+                msgs.Add("Password 1 is required", MessageType.UserError);
+            if (password1.Length < 8)
+                msgs.Add("Password needs to have at least 8 characters", MessageType.UserError);
+            if (password2.IsEmpty())
+                msgs.Add("Password 2 is required", MessageType.UserError);
+            if (password1 != password2)
+                msgs.Add("Passwords must match", MessageType.UserError);
+        }
+        if (AfterSchoolLibrary.Helpers.Utilities.IsProduction || AfterSchoolLibrary.Helpers.Utilities.IsStaging)
+        {
+            if (!agree.IsBoolean())
+                msgs.Add("You must agree to the terms of service", MessageType.UserError);
+        }
+
+        var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+
+        if (msgs.HasNoErrors())
+        {
+            var firstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName);
+            var lastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName);
+            var email = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
+            var phone = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone);
+            var parentFirstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1FirstName);
+            var parentLastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1LastName);
+            var parentEmail = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1Email);
+
+            Account parentAccount = null;
+            WebUser parentUser = null;
+            Registrant parentRegistrant = null;
+            WebUser studentUser = null;
+            Registrant studentRegistrant = null;
+
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    case QuestionDataType.RegistrantMobilePhone:
-                        if (answer.IsNotEmpty() && !answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
-                            msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
-                        break;
+                    var canBeAccessedBy = currentUser.AsList();
 
-                }
-            });
-
-            if (currentUser.IsEmpty())
-            {
-                if (password1.IsEmpty())
-                    msgs.Add("Password 1 is required", MessageType.UserError);
-                if (password1.Length < 8)
-                    msgs.Add("Password needs to have at least 8 characters", MessageType.UserError);
-                if (password2.IsEmpty())
-                    msgs.Add("Password 2 is required", MessageType.UserError);
-                if (password1 != password2)
-                    msgs.Add("Passwords must match", MessageType.UserError);
-            }
-            if (AfterSchoolLibrary.Helpers.Utilities.IsProduction || AfterSchoolLibrary.Helpers.Utilities.IsStaging)
-            {
-                if (!agree.IsBoolean())
-                    msgs.Add("You must agree to the terms of service", MessageType.UserError);
-            }
-
-            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
-
-            if (msgs.HasNoErrors())
-            {
-                var firstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName);
-                var lastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName);
-                var email = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
-                var phone = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone);
-                var parentFirstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1FirstName);
-                var parentLastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1LastName);
-                var parentEmail = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1Email);
-
-                Account parentAccount = null;
-                WebUser parentUser = null;
-                Registrant parentRegistrant = null;
-                WebUser studentUser = null;
-                Registrant studentRegistrant = null;
-
-                Database.ExecuteTransaction
-                (
-                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    studentUser = CreateOrUpdateUser(
+                            null,
+                            firstName.Value.Trim(),
+                            lastName.Value.Trim(),
+                            email.Value.Trim(),
+                            phone.Value.Trim(),
+                            "",
+                            textnotifications.IfBlank("0").ToBoolean(),
+                            amsgs,
+                            adc
+                        );
+                    if (amsgs.HasNoErrors() && studentUser.IsNotEmpty())
                     {
-                        var canBeAccessedBy = currentUser.AsList();
-
-                        studentUser = CreateOrUpdateUser(
-                              null,
-                              firstName.Value.Trim(),
-                              lastName.Value.Trim(),
-                              email.Value.Trim(),
-                              phone.Value.Trim(),
-                              "",
-                              textnotifications.IfBlank("0").ToBoolean(),
-                              amsgs,
-                              adc
-                          );
-                        if (amsgs.HasNoErrors() && studentUser.IsNotEmpty())
+                        parentAccount = Account.LoadByEmail(parentEmail.Value.Trim(), amsgs, adc);
+                        if (parentAccount.IsNotEmpty())
+                            parentUser = parentAccount.GetUsers(null, null, amsgs, adc).FirstOrDefault();
+                        else
                         {
-                            parentAccount = Account.LoadByEmail(parentEmail.Value.Trim(), amsgs, adc);
-                            if (parentAccount.IsNotEmpty())
-                                parentUser = parentAccount.GetUsers(null, null, amsgs, adc).FirstOrDefault();
-                            else
-                            {
 
-                                parentAccount = studentUser.AddNewRegistrantAccountWithUserName(
-                                userType: UserType.Owner,
+                            parentAccount = studentUser.AddNewRegistrantAccountWithUserName(
+                            userType: UserType.Owner,
+                            parentFirstName.Value.Trim(),
+                            parentLastName.Value.Trim(),
+                            parentEmail.Value.Trim(),
+                            isActive: true,
+                            isAfterSchool: true,
+                            loggedInUser: studentUser,
+                            msgs: amsgs,
+                            dc: adc);
+
+                            // LOG: Someone Created Account AccountName
+                            SessionVariables.WebSession.LogActivity(
+                                account: parentAccount,
+                                actor: studentUser,
+                                actionType: WebSessionActionType.Created,
+                                objectType: ObjectType.Account,
+                                objectId: parentAccount.ID.Value,
+                                objectText: parentAccount.Name
+                            );
+
+                            // LOG: Someone Created User UserName
+                            SessionVariables.WebSession.LogActivity(
+                                account: parentAccount,
+                                actor: studentUser,
+                                actionType: WebSessionActionType.SignedUp,
+                                objectType: ObjectType.WebUser,
+                                objectId: studentUser.ID.Value,
+                                objectText: studentUser.FullName
+                            );
+
+
+                            if (amsgs.HasNoErrors())
+                                parentRegistrant = CreateOrUpdateRegistrant(parentAccount, studentUser, amsgs, adc);
+
+                            //.. send invite email to parent.
+                            EmailHelper.SendParentAccountInvitedEmail(
+                                studentUser,
                                 parentFirstName.Value.Trim(),
-                                parentLastName.Value.Trim(),
-                                parentEmail.Value.Trim(),
-                                isActive: true,
-                                isAfterSchool: true,
-                                loggedInUser: studentUser,
-                                msgs: amsgs,
-                                dc: adc);
-
-                                // LOG: Someone Created Account AccountName
-                                SessionVariables.WebSession.LogActivity(
-                                    account: parentAccount,
-                                    actor: studentUser,
-                                    actionType: WebSessionActionType.Created,
-                                    objectType: ObjectType.Account,
-                                    objectId: parentAccount.ID.Value,
-                                    objectText: parentAccount.Name
+                                participationObject.GetBrowseUrl(true),
+                                parentEmail.Value.Trim()
                                 );
-
-                                // LOG: Someone Created User UserName
-                                SessionVariables.WebSession.LogActivity(
-                                    account: parentAccount,
-                                    actor: studentUser,
-                                    actionType: WebSessionActionType.SignedUp,
-                                    objectType: ObjectType.WebUser,
-                                    objectId: studentUser.ID.Value,
-                                    objectText: studentUser.FullName
-                                );
-
-
-                                if (amsgs.HasNoErrors())
-                                    parentRegistrant = CreateOrUpdateRegistrant(parentAccount, studentUser, amsgs, adc);
-
-                                //.. send invite email to parent.
-                                EmailHelper.SendParentAccountInvitedEmail(
-                                    studentUser,
-                                    parentFirstName.Value.Trim(),
-                                    participationObject.GetBrowseUrl(true),
-                                    parentEmail.Value.Trim()
-                                    );
-                            }
-
-
-
-                            // create student registrant record
-                            studentRegistrant = parentAccount.CreateRegistrant(
-                                registrantOwner: studentUser,
-                                canBeAccessedBy: canBeAccessedBy,
-                                registrantType: RegistrantType.Individual,
-                                isMaster: true,
-                                isParentOrGuardian: false,
-                                allowTextMessages: false,
-                                schoolLocationId: new int?(),
-                                profileStatus: RegistrantProfileStatus.Started,
-                                loggedInUser: studentUser,
-                                msgs: amsgs,
-                                dc: adc);
-
-
-                            // LOG: Someone Created Registrant RegistrantName for Account AccountName
-                            if (studentRegistrant.IsNotEmpty() && amsgs.HasNoErrors())
-                            {
-                                SessionVariables.WebSession.LogActivity(
-                                        account: parentAccount,
-                                        actor: currentUser,
-                                        actionType: WebSessionActionType.Created,
-                                        objectType: ObjectType.Registrant,
-                                        objectId: studentRegistrant.ID.Value,
-                                        objectText: studentRegistrant.FullName,
-                                        indirectObjectType: ObjectType.Account,
-                                        indirectObjectId: parentAccount.ID.Value,
-                                        indirectObjectText: parentAccount.Name
-                                    );
-                            }
                         }
 
 
-                        if (amsgs.HasNoErrors())
-                            AddOrUpdateStandardAnswers(qvms, studentRegistrant, studentUser, amsgs, adc);
-                    },
-                    onSuccess: (SystemMessages smsgs) =>
-                    {
-                        msgs.AddRange(smsgs);
-                        LoadSessionInfo(studentUser, parentAccount);
-                    },
-                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
-                );
-            }
 
-            if (msgs.HasNoErrors())
-                return RedirectToAction("addhomeaddress");
+                        // create student registrant record
+                        studentRegistrant = parentAccount.CreateRegistrant(
+                            registrantOwner: studentUser,
+                            canBeAccessedBy: canBeAccessedBy,
+                            registrantType: RegistrantType.Individual,
+                            isMaster: true,
+                            isParentOrGuardian: false,
+                            allowTextMessages: false,
+                            schoolLocationId: new int?(),
+                            profileStatus: RegistrantProfileStatus.Started,
+                            loggedInUser: studentUser,
+                            msgs: amsgs,
+                            dc: adc);
 
-            ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
-            ViewBag.Messages = msgs;
 
-            return View(qvms);
+                        // LOG: Someone Created Registrant RegistrantName for Account AccountName
+                        if (studentRegistrant.IsNotEmpty() && amsgs.HasNoErrors())
+                        {
+                            SessionVariables.WebSession.LogActivity(
+                                    account: parentAccount,
+                                    actor: currentUser,
+                                    actionType: WebSessionActionType.Created,
+                                    objectType: ObjectType.Registrant,
+                                    objectId: studentRegistrant.ID.Value,
+                                    objectText: studentRegistrant.FullName,
+                                    indirectObjectType: ObjectType.Account,
+                                    indirectObjectId: parentAccount.ID.Value,
+                                    indirectObjectText: parentAccount.Name
+                                );
+                        }
+                    }
+
+
+                    if (amsgs.HasNoErrors())
+                        AddOrUpdateStandardAnswers(qvms, studentRegistrant, studentUser, amsgs, adc);
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+                    LoadSessionInfo(studentUser, parentAccount);
+                },
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+            );
         }
+
+        if (msgs.HasNoErrors())
+            return RedirectToAction("addhomeaddress");
+
+        ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
+        ViewBag.Messages = msgs;
+        ViewBag.ParticipationObject = participationObject;
+
+        return View(qvms);
+    }
 
         #endregion
 
