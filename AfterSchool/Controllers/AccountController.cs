@@ -1543,6 +1543,9 @@ namespace AfterSchool.Controllers
 
                         // Create parent registrant
                         parentRegistrant = studentAccount.CreateRegistrant(
+                            firstName: parentUser.FirstName,
+                            lastName: parentUser.LastName,
+                            email: parentUser.Email,
                             registrantOwner: parentUser,
                             canBeAccessedBy: parentUser.AsList(),
                             registrantType: RegistrantType.Individual,
