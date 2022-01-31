@@ -51,7 +51,7 @@
                 </div>
 
                 <div>
-                    <form class="form-horizontal" id="signup-form" method="post" action="@Url.Action("StudentRegistration", "account")">
+                    <form class="form-horizontal" id="signup-form" method="post" action="@Url.Action("StudentRegistration", "account")" onkeydown="return checkAndPostSignupForm(event, '@Json.Encode(showStep1)')">
 
                         <div class="row" id="email-check-container">
 
