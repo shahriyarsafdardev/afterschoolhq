@@ -281,10 +281,10 @@
                             // send email
                             sendAccountConfirmation(email);
                         }
-                        else if (!data.isInUse && !data.isRegistered) {
-                            $('#btn-check-email').html('Sign Up As Parent');
-                            $('#btn-check-email').addClass("newParentSignUp");
-                                if ($("#isStudentRegistrationEnabled").val() == 'True') {
+                        else if (!data.isInUse && !data.isRegistered) {                            
+                            if ($("#isStudentRegistrationEnabled").val() == 'True') {
+                                $('#btn-check-email').html('Sign Up As Parent');
+                                $('#btn-check-email').addClass("newParentSignUp");
                                     $('#btn-student-signup').removeClass('hidden');
                                 }
                         }
