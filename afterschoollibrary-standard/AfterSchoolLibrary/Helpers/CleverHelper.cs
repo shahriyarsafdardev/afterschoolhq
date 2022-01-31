@@ -6,62 +6,38 @@ namespace AfterSchoolLibrary.Helpers
 {
     public class CleverHelper
     {
-        private static string SecretKey { get { return ConfigurationManager.AppSettings["Clever.ClientSecret"]; } }
-        public static string ClientId { get { return ConfigurationManager.AppSettings["Clever.ClientId"]; } }
-        public static string RedirectUrlForIntegration { get { return Utilities.BaseUrl() + "/oauth/cleverintegration"; } }
-        public static string RedirectUrlForLogin { get { return Utilities.BaseUrl() + "/oauth/cleverlogin"; } }
-        public static string RedirectUrlForAccount { get { return Utilities.BaseUrl() + "/oauth/cleverloginfromaccounttopbar"; } }
-        public static string TokenRetrieveUrl { get { return "https://clever.com/oauth/tokens"; } }
+        private static string SecretKey => ConfigurationManager.AppSettings["Clever.ClientSecret"];
+        public static string ClientId => ConfigurationManager.AppSettings["Clever.ClientId"];
+        public static string RedirectUrlForIntegration => Utilities.BaseUrl() + "/oauth/cleverintegration";
+        public static string RedirectUrlForLogin => Utilities.BaseUrl() + "/oauth/cleverlogin";
+        public static string RedirectUrlForAccount => Utilities.BaseUrl() + "/oauth/cleverloginfromaccounttopbar";
+        public static string TokenRetrieveUrl => "https://clever.com/oauth/tokens";
         /// <summary>
         /// This will return just a Id of user with some other details like user type
         /// </summary>
-        public static string UserIdentityUrl { get { return "https://api.clever.com/v3.0/me"; } }
+        public static string UserIdentityUrl => "https://api.clever.com/v3.0/me";
         /// <summary>
         /// This will return details of user like name, email etc but it will require User Id
         /// </summary>
-        public static string UserDetailUrl { get { return "https://api.clever.com/v3.0/users/{UserId}/district"; } }
-        public static string PortalUrl { get { return "https://clever.com/in/placid-chalk-6926"; } }
+        public static string UserDetailUrl => "https://api.clever.com/v3.0/users/{UserId}";
+        public static string PortalUrl => "https://clever.com/in/placid-chalk-6926";
 
         /// <summary>
         /// Provides authorization token for clever oAuth token
         /// </summary>
-        public static string BasicAuthorizationToken
-        { 
-            get 
-            {
-                return $"{ClientId}:{SecretKey}".EncodeBase64();
-            }
-        }
+        public static string BasicAuthorizationToken => $"{ClientId}:{SecretKey}".EncodeBase64();
 
-        public static string SSOLink
-        {
-            get
-            {
-                return $"https://clever.com/oauth/authorize?response_type=code&redirect_uri={RedirectUrlForIntegration}&client_id={ClientId}";
-            }
-        }
+        public static string SSOLink => $"https://clever.com/oauth/authorize?response_type=code&redirect_uri={RedirectUrlForIntegration}&client_id={ClientId}";
 
         /// <summary>
         /// This will be used at login page to redirect user based on account/user types after clever login completes
         /// </summary>
-        public static string SSOLinkLogin
-        {
-            get
-            {
-                return $"https://clever.com/oauth/authorize?response_type=code&redirect_uri={RedirectUrlForLogin}&client_id={ClientId}";
-            }
-        }
+        public static string SSOLinkLogin => $"https://clever.com/oauth/authorize?response_type=code&redirect_uri={RedirectUrlForLogin}&client_id={ClientId}";
 
         /// <summary>
         /// This will be used at account topbar to redirect user back to same account page after clever login completes
         /// </summary>
-        public static string SSOLinkAccount
-        {
-            get
-            {
-                return $"https://clever.com/oauth/authorize?response_type=code&redirect_uri={RedirectUrlForAccount}&client_id={ClientId}";
-            }
-        }
+        public static string SSOLinkAccount => $"https://clever.com/oauth/authorize?response_type=code&redirect_uri={RedirectUrlForAccount}&client_id={ClientId}";
 
         public static string GetUsersDetailUrl(string Id) => UserDetailUrl.Replace("{UserId}", Id);
     }
@@ -98,44 +74,60 @@ namespace Clever
             public string token_type { get; set; }
         }
 
-        public class CleverUserDistrictDto
+        public class CleverUserDetailsDto
         {
             public Data data { get; set; }
             public Link[] links { get; set; }
-        }
-
-        public class Data
-        {
-            public District_Contact district_contact { get; set; }
-            public string error { get; set; }
-            public DateTime last_sync { get; set; }
-            public DateTime launch_date { get; set; }
-            public string[] login_methods { get; set; }
-            public string name { get; set; }
-            public string portal_url { get; set; }
-            public string sis_type { get; set; }
-            public string state { get; set; }
-            public string id { get; set; }
-        }
-
-        public class District_Contact
-        {
-            public string district { get; set; }
-            public string email { get; set; }
-            public Name name { get; set; }
-            public string title { get; set; }
-        }
-
-        public class Name
-        {
-            public string first { get; set; }
-            public string last { get; set; }
         }
 
         public class Link
         {
             public string rel { get; set; }
             public string uri { get; set; }
+        }
+
+        public class Data
+        {
+            public string id { get; set; }
+            public string email { get; set; }
+            public DateTime created { get; set; }
+            public string district { get; set; }            
+            public DateTime last_modified { get; set; }
+            public Name name { get; set; }
+            public Roles roles { get; set; }            
+        }
+
+        public class Name
+        {
+            public string first { get; set; }
+            public string last { get; set; }
+            public string middle { get; set; }
+        }
+
+        public class Roles
+        {
+            public Teacher teacher { get; set; }
+
+            public DistrictAdmin district_admin { get; set; }
+
+            public Student student { get; set; }
+        }
+
+        public class Teacher
+        {
+            public List<object> schools { get; set; }
+            public string legacy_id { get; set; }
+        }
+
+        public class DistrictAdmin
+        {
+            public string legacy_id { get; set; }
+        }
+
+        public class Student
+        {
+            public object enrollments { get; set; }
+            public List<object> schools { get; set; }
         }
     }
 }

@@ -36,7 +36,7 @@ namespace AfterSchoolLibrary.Services
             return JsonConvert.DeserializeObject<CleverUserDto>(response.Content);
         }
 
-        public static CleverUserDistrictDto GetCleverUserDetails(string id, string token)
+        public static CleverUserDetailsDto GetCleverUserDetails(string id, string token)
         {
             var client = new RestSharp.RestClient(CleverHelper.GetUsersDetailUrl(Id: id));
             client.Timeout = -1;
@@ -45,7 +45,7 @@ namespace AfterSchoolLibrary.Services
             request.AddHeader("Authorization", "Bearer " + token);
 
             var response = client.Execute(request);
-            return JsonConvert.DeserializeObject<CleverUserDistrictDto>(response.Content);
+            return JsonConvert.DeserializeObject<CleverUserDetailsDto>(response.Content);
         }
     }
 }
