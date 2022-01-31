@@ -32,5 +32,5 @@ if "%DEPLOYMENT_GROUP_NAME%"=="" (
 
 	mkdir !target!
 
-	%systemroot%\System32\xcopy %path% !target! /e /i /y /s
+	%systemroot%\System32\xcopy %path% !target! /e /i /y /s /d
 )
