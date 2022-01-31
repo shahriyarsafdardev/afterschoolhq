@@ -718,19 +718,20 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var currentUser = SessionVariables.CurrentUser;
-            int id = 0;
-            if (userid.IsNotEmpty())
-                id = userid.ToInteger();
 
-            var user = WebUser.Load(id, msgs);
-            var awu = AccountWebUser.LoadByWebUserIdByIsDeleted(user.ID.Value, false , msgs).FirstOrDefault();
+            if (userid.IsEmpty())
+                msgs.Add("User id cannot be empty", MessageType.UserError);
 
-            if (awu.IsNotEmpty())
+            if (msgs.HasNoErrors())
             {
-                awu.UpdateUserType(currentUser, newusertypeid, msgs);
+                var user = WebUser.Load(userid.ToInteger(), msgs);
+                var awu = AccountWebUser.LoadByWebUserIdByIsDeleted(user.ID.Value, false, msgs).FirstOrDefault();
+
+                if (awu.IsNotEmpty())
+                    awu.UpdateUserType(currentUser, newusertypeid, msgs);
             }
 
-            return Json(new { status = (msgs.Count == 0 ? "ok" : "error") },JsonRequestBehavior.AllowGet);
+            return Json(new { status = (msgs.HasNoErrors() ? "ok" : "error") },JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult TeamRemoveMember(string id)
