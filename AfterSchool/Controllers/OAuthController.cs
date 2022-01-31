@@ -97,7 +97,7 @@ namespace AfterSchool.Controllers
             if (userIdentity.IsNotEmpty() && userIdentity.data.IsNotEmpty() && userIdentity.data.id.IsNotEmpty())
             {
                 var userDetails = CleverIntegrationService.GetCleverUserDetails(id: userIdentity.data.id, token: token.access_token);
-                WebUserService.SetCleverIdentityToUser(id: userIdentity.data.id, name: userDetails?.data?.district_contact?.email, webUser: SessionVariables.CurrentUser, msgs: msgs);
+                WebUserService.SetCleverIdentityToUser(id: userIdentity.data.id, name: userDetails?.data?.email, webUser: SessionVariables.CurrentUser, msgs: msgs);
             }
 
             LoadTempMsgAndLogErrors(msgs: msgs);
@@ -115,7 +115,7 @@ namespace AfterSchool.Controllers
                 msgs.Add("We didn't find any user in our database for this clever user.", MessageType.Error);
 
             LoadTempMsgAndLogErrors(msgs: msgs);
-            return RedirectToAction("index", "login", new { area = "" });
+            return Logout();
         }
 
         [HttpGet]
@@ -136,7 +136,7 @@ namespace AfterSchool.Controllers
                 msgs.Add("We didn't find any user in our database for this clever user.", MessageType.Error);
 
             LoadTempMsgAndLogErrors(msgs: msgs);
-            return RedirectToAction("index", "login", new { area = "" });
+            return Logout();
         }
 
         public static WebUser GetWebUserUsingCleverCode(string code, string redirectUrl, SystemMessages msgs = null)
