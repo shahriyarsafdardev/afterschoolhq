@@ -68,44 +68,6 @@
     </div>
 
 </div>
-
-@*@{
-        var isSchool = Model.AccountTypeId.In(AccountService.LocationProviderAccountTypes);
-        var tabsMdSize = "3";
-
-        if (!isSchool)
-        {
-            tabsMdSize = "4";
-        }
-    }
-
-    <div class="margin-10">
-        <div class="col-lg-10 col-lg-offset-1 col-md-12">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="col-md-@tabsMdSize">
-                        <button type="button" class="btn btn-default btn-lg btn-block" id="search-allactivities">All Activities</button>
-                    </div>
-
-                    <div class="col-md-@tabsMdSize">
-                        <button type="button" class="btn btn-default btn-lg btn-block" id="search-physical">In Person</button>
-                    </div>
-
-                    @if (isSchool)
-                    {
-                        <div class="col-md-@tabsMdSize">
-                            <button type="button" class="btn btn-default btn-lg btn-block" id="search-sport">Sports</button>
-                        </div>
-                    }
-
-                    <div class="col-md-@tabsMdSize">
-                        <button type="button" class="btn btn-default btn-lg btn-block" id="search-virtual">Virtual</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>*@
-
 <div id="search-noresults" class="hide margin-t-20 padding-30">
     <p>&nbsp;</p>
     <p>&nbsp;</p>
