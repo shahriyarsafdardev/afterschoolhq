@@ -719,7 +719,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var currentUser = SessionVariables.CurrentUser;
 
-            if (userid.IsEmpty())
+            if (userid.IsEmpty() || userid.Trim() == "0")
                 msgs.Add("User id cannot be empty", MessageType.UserError);
 
             if (msgs.HasNoErrors())
