@@ -1400,22 +1400,22 @@ namespace AfterSchool.Controllers
             if (regaccount.IsGuid())
                 registrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
 
-            questions.ForEach(question =>
-        {
-            var answer = Request[question.ToFormQuestionViewModel().Name];
-
-            if (question.IsRequired && answer.IsEmpty())
-                msgs.Add($"{question.Text} is required", MessageType.UserError);
-
-            switch (question.QuestionDataTypeId)
+            questions.ForEach(question => 
             {
-                case QuestionDataType.RegistrantMobilePhone:
-                    if (answer.IsNotEmpty() && !answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
-                        msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
-                    break;
+                var answer = Request[question.ToFormQuestionViewModel().Name];
+                
+                if (question.IsRequired && answer.IsEmpty())
+                    msgs.Add($"{question.Text} is required", MessageType.UserError);
+                
+                switch (question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantMobilePhone:
+                        if (answer.IsNotEmpty() && !answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                            msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+                        break;
 
-            }
-        });
+                }
+            });
 
             if (currentUser.IsEmpty())
             {
@@ -1428,6 +1428,7 @@ namespace AfterSchool.Controllers
                 if (password1 != password2)
                     msgs.Add("Passwords must match", MessageType.UserError);
             }
+
             if (AfterSchoolLibrary.Helpers.Utilities.IsProduction || AfterSchoolLibrary.Helpers.Utilities.IsStaging)
             {
                 if (!agree.IsBoolean())
@@ -1537,7 +1538,8 @@ namespace AfterSchool.Controllers
                             userType: UserType.Owner,
                             canUseExistingUserAccount: true,
                             loggedInUser: studentUser,
-                            msgs: msgs);
+                            msgs: amsgs,
+                            dc: adc);
 
                         // Create parent registrant
                         parentRegistrant = studentAccount.CreateRegistrant(
@@ -1550,13 +1552,13 @@ namespace AfterSchool.Controllers
                             schoolLocationId: null,
                             profileStatus: RegistrantProfileStatus.Started,
                             loggedInUser: studentUser,
-                            msgs: msgs,
+                            msgs: amsgs,
                             dc: adc);
 
                         studentRegistrant.AddUserWithAccess(
                             user: parentUser,
                             loggedInUser: studentUser,
-                            msgs: msgs,
+                            msgs: amsgs,
                             dc: adc);
 
                         // add answers to student registrant record
