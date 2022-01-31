@@ -285,8 +285,11 @@
                             if ($("#isStudentRegistrationEnabled").val() == 'True') {
                                 $('#btn-check-email').html('Sign Up As Parent');
                                 $('#btn-check-email').addClass("newParentSignUp");
-                                    $('#btn-student-signup').removeClass('hidden');
-                                }
+                                $('#btn-student-signup').removeClass('hidden');
+                            }
+                            else {
+                                showSignUpForm(email);
+                            }
                         }
                     } else {
                         $('#btn-check-email').html(originalBtnText);
@@ -311,7 +314,7 @@
         }
     }
 
-    function showSignUpForm() {
+    function showSignUpForm(email) {
         // show sign up form
          setTimeout(function () {
             $('#account-registration').removeClass('hide');
