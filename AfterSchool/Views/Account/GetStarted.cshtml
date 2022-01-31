@@ -248,12 +248,12 @@
         });
 
         $('#btn-check-email').click(function () {
+            var email = $('#email-check').val();
             //if ($('#btn-check-email').html() == 'Sign Up As Parent') {
             if ($('#btn-check-email').hasClass("newParentSignUp")) {
-                showSignUpForm();
+                showSignUpForm(email);
                 return;
             }
-            var email = $('#email-check').val();
             var originalBtnText = $('#btn-check-email').html();
 
             $('#btn-check-email').html('Checking...');
@@ -302,6 +302,7 @@
         $("#btn-student-signup").click(function (event) {
             event.preventDefault();
             var url = '@Url.Action("StudentRegistration", "Account", new { regaccount = Request["regaccount"] })';
+            localStorage.setItem('studentRegisterEmail', $("#email-check").val());
             window.location.href = url;
         });
     });
