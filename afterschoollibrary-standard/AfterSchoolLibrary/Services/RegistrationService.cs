@@ -305,7 +305,7 @@ namespace AfterSchoolLibrary.Services
             RegistrationReportType reportType, List<RegistrationAssignmentType> rats, RegistrationStatus registrationStatus, string uiActivityLabel, string emails, string subject, string body,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (msgs.IsNotEmpty())
+            if (msgs.IsEmpty())
                 msgs = new SystemMessages();
 
             var account = Account.Load(accountId, msgs, dc);
