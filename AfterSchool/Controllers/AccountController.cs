@@ -2738,6 +2738,10 @@ namespace AfterSchool.Controllers
             ViewBag.Messages = msgs;
 
             LoadSessionActivitiesViewBag(participationObject, registration, msgs);
+            // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
+            var questions = RegisterViewBag(participationObject, msgs);
+
+            ViewBag.QuestionViewModels = questions.Select(question => question.ToFormQuestionViewModel()).ToList();
 
             return View(participationObject);
         }
@@ -2747,7 +2751,27 @@ namespace AfterSchool.Controllers
         {
             var msgs = new SystemMessages();
             var participationObject = GetParticipationObjectFromCart();
+
             // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
+            var questions = RegisterViewBag(participationObject, msgs);
+            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+
+            questions.ForEach(question =>
+            {
+                if (question.IsRequired)
+                {
+                    var populated = true;
+
+                    if (question.QuestionTypeId == QuestionType.FileUpload && Request.Files[question.ToFormQuestionViewModel().Name].IsEmpty())
+                        populated = false;
+                    else if (question.QuestionTypeId != QuestionType.FileUpload && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
+                        populated = false;
+
+                    if (!populated)
+                        msgs.Add($"{question.Text} is required", MessageType.UserError);
+                }
+
+            });
 
             if (agree.IsEmpty())
                 msgs.Add("You must agree to participate", MessageType.UserError);
@@ -2760,16 +2784,24 @@ namespace AfterSchool.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                // account gets copy / snapshot of master registrant record
-                // required in order to make sure registration data doesn't change as registrant changes information in master record.
-                var submittedRecord = SessionVariables.CurrentRegistrant.SubmitRecordToAccount(
-                    ownerAccount: participationObject.OwnerAccount,
-                    loggedInUser: SessionVariables.CurrentUser,
-                    msgs: amsgs,
-                    dc: adc);
+                        // account gets copy / snapshot of master registrant record
+                        // required in order to make sure registration data doesn't change as registrant changes information in master record.
+                        var submittedRecord = SessionVariables.CurrentRegistrant.SubmitRecordToAccount(
+                            ownerAccount: participationObject.OwnerAccount,
+                            loggedInUser: SessionVariables.CurrentUser,
+                            msgs: amsgs,
+                            dc: adc);
 
-                // Create Registration
-                registration = submittedRecord.AddRegistration(
+                        if (qvms.IsNotEmpty())
+                            AddOrUpdateStandardAnswers(
+                                qvms,
+                                SessionVariables.CurrentRegistrant,
+                                SessionVariables.CurrentUser,
+                                amsgs,
+                                adc);
+
+                        // Create Registration
+                        registration = submittedRecord.AddRegistration(
                                 ownerAccountId: participationObject.OwnerAccount.ID.Value,
                                 activityGroupId: participationObject.GetAnyRelatedActivityGroupId(),
                                 accountActivityGroupId: participationObject.GetAccountActivityGroupId(),
@@ -2778,6 +2810,15 @@ namespace AfterSchool.Controllers
                                 loggedInUserId: SessionVariables.CurrentUser.ID.Value,
                                 msgs: amsgs,
                                 dc: adc);
+
+                        if (qvms.IsNotEmpty())
+                            AddCustomQuestions(
+                                qvms,
+                                submittedRecord,
+                                registration,
+                                SessionVariables.CurrentUser,
+                                amsgs,
+                                adc);
 
                         if (amsgs.HasNoErrors())
                             AddSessionActivitiesToRegistration(
@@ -2791,14 +2832,14 @@ namespace AfterSchool.Controllers
                         if (msgs.HasNoErrors())
                             AccountService.ProcessStudentRegistration(
                                 checkoutObject: new CheckoutObject()
-                                    {
-                                        BillingAccount = participationObject.OwnerAccount,
-                                        PayingAccount = SessionVariables.CurrentAccount,
-                                        NumberOfSeats = 1,
-                                        ParticipationObject = participationObject,
-                                        Registration = registration,
-                                        MasterRegistrant = SessionVariables.CurrentRegistrant
-                                    },
+                                {
+                                    BillingAccount = participationObject.OwnerAccount,
+                                    PayingAccount = SessionVariables.CurrentAccount,
+                                    NumberOfSeats = 1,
+                                    ParticipationObject = participationObject,
+                                    Registration = registration,
+                                    MasterRegistrant = SessionVariables.CurrentRegistrant
+                                },
                                 sendConfirmationEmail: true,
                                 loggedInUser: SessionVariables.CurrentUser,
                                 msgs: msgs, dc: adc);

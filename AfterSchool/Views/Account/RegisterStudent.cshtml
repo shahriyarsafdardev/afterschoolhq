@@ -6,6 +6,11 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var alreadyRegistered = (bool)ViewBag.AlreadyRegistered;
     var sessionActivities = (List<ParticipationObject>)ViewBag.SessionActivities;
+    var qvms = (List<FormQuestionViewModel>)ViewBag.QuestionViewModels;
+    var groups = qvms.Select(qvm => qvm.Question.ToFormQuestionGroup())
+       .OrderBy(group => group.DisplayOrder)
+       .DistinctBy(group => group.ID)
+       .ToList();
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -54,47 +59,55 @@
                     }
                     else
                     {
-                        <form method="post" id="register-form" class="form-horizontal" action="@Url.Action("RegisterStudent", "account")">
+                <form method="post" id="register-form" class="form-horizontal" action="@Url.Action("RegisterStudent", "account")">
 
-                            @if (sessionActivities.IsNotEmpty() && sessionActivities.Any())
-                            {
-                                Html.RenderPartial(
-                                    "~/Views/Shared/Activity/_ActivityPreferences.cshtml",
-                                    sessionActivities);
-                            }
+                    @foreach (var group in groups)
+                    {
+                        Html.RenderPartial(
+                            "~/Views/Shared/Form/_Group.cshtml",
+                            group,
+                            new ViewDataDictionary() { { "QuestionViewModels", qvms.Where(qvm => qvm.Question.FormQuestionGroupId == group.ID).ToList() } });
+                    }
 
-                            <div class="form-group">
-                                <div class="col-md-12 text-center">
-                                    <div class="am-checkbox">
-                                        <input type="checkbox" required class="form-control" name="agree" id="agree" />
-                                        <label for="agree">
-                                            I confirm that I have entered both my information and my parent's information correctly and I intend to participate in <strong>@Model.Name</strong><br />
-                                        </label>
-                                    </div>
+                    @if (sessionActivities.IsNotEmpty() && sessionActivities.Any())
+                    {
+                        Html.RenderPartial(
+                            "~/Views/Shared/Activity/_ActivityPreferences.cshtml",
+                            sessionActivities);
+                    }
+
+                    <div class="form-group">
+                        <div class="col-md-12 text-center">
+                            <div class="am-checkbox">
+                                <input type="checkbox" required class="form-control" name="agree" id="agree" />
+                                <label for="agree">
+                                    I confirm that I have entered both my information and my parent's information correctly and I intend to participate in <strong>@Model.Name</strong><br />
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-12 text-center">
+                            <div class="padding-v-20">
+                                <div class="col-md-6 col-md-offset-3">
+                                    <button type="submit" id="btn-create-account" class="btn btn-register-primary btn-lg">Register &raquo;</button>
                                 </div>
                             </div>
+                        </div>
+                    </div>
 
-                            <div class="form-group">
-                                <div class="col-md-12 text-center">
-                                    <div class="padding-v-20">
-                                        <div class="col-md-6 col-md-offset-3">
-                                            <button type="submit" id="btn-create-account" class="btn btn-register-primary btn-lg">Register &raquo;</button>
-                                        </div>
-                                    </div>
+                    <div class="form-group">
+                        <div class="col-md-12 text-center">
+                            <div class="row">
+                                <div class="padding-v-20 text-center">
+                                    <a href="javascript:history.go(-1)" class="text-muted">&laquo; Back</a>
                                 </div>
                             </div>
+                        </div>
+                    </div>
 
-                            <div class="form-group">
-                                <div class="col-md-12 text-center">
-                                    <div class="row">
-                                        <div class="padding-v-20 text-center">
-                                            <a href="javascript:history.go(-1)" class="text-muted">&laquo; Back</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </form>
+                </form>
                     }
 
                 </div>
