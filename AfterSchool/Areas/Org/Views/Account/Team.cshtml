@@ -131,10 +131,10 @@
         $("#userName").html(userName);
         $("#newUserType").html(newAssignmentText);
         $("#modalConfirm").modal('show');
-        $("#ConfirmUpdate").attr('onclick', "updateAssignment2('" + user + "','" + userName + "','" + newAssignment + "','" + newAssignmentText + "')");
+        $("#ConfirmUpdate").attr('onclick', "confirmUpdate('" + user + "','" + userName + "','" + newAssignment + "','" + newAssignmentText + "')");
     }
 
-    function updateAssignment2(user, userName, newAssignment, newAssignmentText) {
+    function confirmUpdate(user, userName, newAssignment, newAssignmentText) {
         $.get(
             `@Url.Action("updateusertype", "account", new { })?userid=${user}&newusertypeid=${newAssignment}`,
             function (data) {
