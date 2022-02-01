@@ -30,7 +30,7 @@
                     <div class="panel-heading">
                         
                         <div class="pull-right">
-                            <select name="r" id="r" class="form-control" onchange="location.href='@Url.Action("edit", "registration", new { id = Model.Uid })?r=' + this.value + '&returnUrl=@Request["returnurl"]'">
+                            <select name="r" id="r" class="form-control" onchange="registrationChange(this.value)">
                                 @foreach (var registration in registrations)
                                 {
                                     <option 
@@ -224,6 +224,11 @@
 
 
 <script>
+    function registrationChange(id){
+        let link = '@Url.Action("edit", "registration", new { id = "ID" })?r=' + id + '&returnUrl=@Request["returnurl"]';
+        link = link.replace("ID", id);
+        location.href = link;
+    }
     function moveSeat(ra, rat) {
         $('#form-move-seat').attr('action', '@Url.Action("moveseat", "registration", new { id = Model.Uid.ToString(), r = selectedRegistration.Uid.ToString() })&returnurl=@listUrl');
         $('#activity-ra').val(ra);

@@ -1,13 +1,12 @@
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 
 public enum AmountType
 {
 	NotSet = 0,
 
-	[Display(Name = "Percentage")]
+	[Description("Percentage")]
 	Percentage,
 
-	[Display(Name = "Amount")]
+	[Description("Amount")]
 	FlatAmount
 }

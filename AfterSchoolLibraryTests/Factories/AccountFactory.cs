@@ -36,6 +36,28 @@ namespace AfterSchoolLibraryTests.Factories
             return obj;
         }
 
+        public static Account CreateAccountWithFreePackage(string accountName, string accountEmail, WebUser user, AccountType accountType, bool stripeChargesEnabled, bool stripePayoutsEnabled, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var obj = new Account() { OwnerId = user.ID, Name = accountName, Email = accountEmail, IsDeleted = false, IsActive = true, IsTest = false, 
+                AccountTypeId = accountType, StripeChargesEnabled = stripeChargesEnabled, StripePayoutsEnabled = stripePayoutsEnabled
+            };
+            msgs.AddRange(obj.Save(dc: dc));
+
+            var package = PackageFactory.CreateFreePackage(msgs, dc);
+            var accountPackage = AccountPackageFactory.Create(obj, package, msgs, dc);
+
+            return obj;
+        }
+
+        public static Account CreateAccountWithStripeFields(WebUser user, AccountType accountType, bool stripeChargesEnabled, bool stripePayoutsEnabled, string stripeUserId, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var obj = new Account() { OwnerId = user.ID, Name = "Test Account", Email = "test@test.com", AccountTypeId = accountType, 
+                StripeChargesEnabled = stripeChargesEnabled, StripePayoutsEnabled = stripePayoutsEnabled, StripeUserId = stripeUserId };
+
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
+
         public static Account CreateWithFreePackage(WebUser user, AccountType accountType, SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new Account() { OwnerId = user.ID, Name = "Test Account", Email = "test@test.com", AccountTypeId = accountType };

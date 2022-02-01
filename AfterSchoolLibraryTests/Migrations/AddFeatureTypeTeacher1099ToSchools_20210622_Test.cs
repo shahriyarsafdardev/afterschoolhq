@@ -25,15 +25,15 @@ namespace AfterSchoolLibraryTests.Migrations
             ProviderAccount = AccountFactory.CreateWithFreePackage(ProviderWebUser, AccountType.ActivityProvider, msgs, dc);
         }
 
-        [Fact]
-        public void RunMigration()
+        [Fact(Skip = "Use for debugging")]
+        public void Test()
         {    
             try
             {
                 // Arrange
                 if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-                AfterSchoolLibrary.Helpers.Utilities.AdditionalData(dc);
+                AfterSchoolLibrary.Helpers.DatabaseInit.AdditionalData(dc);
 
                 // Act                   
                  AfterSchoolLibrary.Migrations.AddFeatureTypeTeacher1099ToSchools_20210622.Do(msgs, dc);

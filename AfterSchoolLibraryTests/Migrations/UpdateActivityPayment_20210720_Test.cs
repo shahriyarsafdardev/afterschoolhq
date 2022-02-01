@@ -26,15 +26,15 @@ namespace AfterSchoolLibraryTests.Migrations
             
         }
 
-        [Fact]
-        public void RunMigration()
+        [Fact(Skip = "Use for debugging")]
+        public void Test()
         {    
             try
             {
                 // Arrange
                 if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-                AfterSchoolLibrary.Helpers.Utilities.AdditionalData(dc);
+                AfterSchoolLibrary.Helpers.DatabaseInit.AdditionalData(dc);
                 var registrant = RegistrantFactory.Create(ParentAccount, false, msgs, dc);
                 var activity = ActivityFactory.Create(ProviderAccount, msgs, dc);
                 var transaction = TransactionFactory.Create(ProviderAccount, ParentAccount, PaymentType.ACH, msgs, dc);

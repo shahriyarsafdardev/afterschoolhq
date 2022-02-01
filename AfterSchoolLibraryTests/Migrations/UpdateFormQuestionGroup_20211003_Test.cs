@@ -21,7 +21,7 @@ namespace AfterSchoolLibraryTests.Migrations
             Form = FormFactory.Create(Account, msgs, dc);
         }
 
-        [Fact(DisplayName = "Activate inactive group")]
+        [Fact(DisplayName = "Activate inactive group", Skip = "Use for debugging")]
         public void RunMigration1()
         {
             // Arrange
@@ -40,7 +40,7 @@ namespace AfterSchoolLibraryTests.Migrations
             Assert.True(expected.IsDeleted);
         }
 
-        [Fact(DisplayName = "No change on existing active group")]
+        [Fact(DisplayName = "No change on existing active group", Skip = "Use for debugging")]
         public void RunMigration2()
         {
             // Arrange
