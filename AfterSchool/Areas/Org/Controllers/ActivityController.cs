@@ -194,12 +194,15 @@ namespace AfterSchool.Areas.Org.Controllers
         }
       }
 
-            LoadEditSetupViewBag(activity, activityGroup, msgs);
-            ViewBag.ActiveMenu = "EditSetup";
-            if (id.IsEmpty())
-                activity.IsContinuousEnrollment = true;
+		LoadEditSetupViewBag(activity, activityGroup, msgs);
 
-      return View(activity);
+		// we should default to have ContinuousEnrollment off
+		if (id.IsEmpty())
+			activity.IsContinuousEnrollment = false;
+
+		ViewBag.ActiveMenu = "EditSetup";
+
+		return View(activity);
     }
 
         [HttpPost]
