@@ -229,5 +229,13 @@ namespace AfterSchoolLibraryTests.Factories
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
+
+        public static Activity UpdateCE(Account account, Activity activity, bool isContinuousEnrollment, SystemMessages msgs, DatabaseConnection dc)
+        {
+            activity.IsContinuousEnrollment = isContinuousEnrollment;
+            msgs.AddRange(activity.Save(dc: dc));
+            return activity;
+        }
+
     }
 }

@@ -1049,5 +1049,20 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(activity.IsPublished);
             Assert.True(activity.IsPubliclyViewable);
         }
+
+        [Fact]
+        public void UpdateActivityWithCETest()
+        {
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(user, msgs, dc);
+            var schedule = ActivityScheduleFactory.Create(account, msgs, dc);
+            var activity = ActivityFactory.Create(account, schedule, msgs, dc);
+            ActivityFactory.UpdateCE(account, activity, true, msgs,dc);
+            activity.Publish(user, msgs, dc);
+
+            Assert.True(msgs.HasNoErrors());
+            Assert.True(activity.IsPublished);
+            Assert.True(activity.IsPubliclyViewable);
+        }
     }
 }
