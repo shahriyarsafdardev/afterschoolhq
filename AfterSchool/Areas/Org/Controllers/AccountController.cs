@@ -714,6 +714,26 @@ namespace AfterSchool.Areas.Org.Controllers
             return View("Team", account);
         }
 
+        public ActionResult UpdateUserType(string userid, string newusertypeid)
+        {
+            var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+
+            if (userid.IsEmpty() || userid.Trim() == "0")
+                msgs.Add("User id cannot be empty", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                var user = WebUser.Load(userid.ToInteger(), msgs);
+                var awu = AccountWebUser.LoadByWebUserIdByIsDeleted(user.ID.Value, false, msgs).FirstOrDefault();
+
+                if (awu.IsNotEmpty())
+                    awu.UpdateUserType(currentUser, newusertypeid, msgs);
+            }
+
+            return Json(new { status = (msgs.HasNoErrors() ? "ok" : "error") },JsonRequestBehavior.AllowGet);
+        }
+
         public ActionResult TeamRemoveMember(string id)
         {
             var msgs = new SystemMessages();
