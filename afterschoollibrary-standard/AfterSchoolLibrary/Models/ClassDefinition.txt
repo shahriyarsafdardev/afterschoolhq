@@ -85,6 +85,7 @@ property: IsDeleted, bool, Bit
 property: IsPublished, bool, Bit
 property: IsArchived, bool, Bit
 property: IsInviteOnly, bool, Bit
+property: IsContinuousEnrollment, bool, Bit
 property: ActivityGroupId, int?, Int
 property: ActivityScheduleId, int?, Int
 property: UniqueName, string, NVarChar "100"
