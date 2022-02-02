@@ -1952,6 +1952,7 @@
     <Content Include="Views\Shared\Registration\_ResetPasswordCompleted.cshtml" />
     <Content Include="Views\Account\StudentRegistration.cshtml" />
     <Content Include="Views\Shared\_GoogleTranslateDropDown.cshtml" />
+    <Content Include="Views\Account\RegistrationComplete.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

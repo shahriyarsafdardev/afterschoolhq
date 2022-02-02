@@ -2851,13 +2851,47 @@ namespace AfterSchool.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("ThankYou", new { id = registration.Uid });
+                return RedirectToAction("RegistrationComplete", new { id = registration.Uid });
 
             ViewBag.Messages = msgs;
 
             LoadSessionActivitiesViewBag(participationObject, registration, msgs);
 
             return View(participationObject);
+        }
+
+        #endregion
+
+        #region RegistrationComplete
+
+        private void RegistrationCompleteViewBag(string registrationUid, SystemMessages msgs)
+        {
+            ResetRegistrationSession();
+
+            var registration = Registration.LoadByUid(registrationUid.ToGuid(), msgs);
+            var registrant = registration.GetRegistrant(msgs);
+            var masterRegistrant = registrant.GetMasterRegistrant(msgs);
+            var (participationObject, assignmentType) = GetParticipationObjectFromRegistration(registration, msgs);
+
+            ViewBag.Registrant = masterRegistrant;
+            ViewBag.Messages = msgs;
+            ViewBag.ParticipationObject = participationObject;
+            ViewBag.AssignmentType = assignmentType;
+        }
+
+        private ActionResult RegistrationCompleteActionGet(string registrationUid)
+        {
+            var msgs = new SystemMessages();
+
+            RegistrationCompleteViewBag(registrationUid, msgs);
+
+            return View();
+        }
+
+        [HttpGet]
+        public ActionResult RegistrationComplete(string id)
+        {
+            return HandleIsLoggedIn() ?? RegistrationCompleteActionGet(id);
         }
 
         #endregion
