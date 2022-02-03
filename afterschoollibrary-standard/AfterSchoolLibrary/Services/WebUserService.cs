@@ -609,6 +609,41 @@ namespace AfterSchoolLibrary.Services
             return account;
         }
 
+        public static Account AddNewStudentAccount(this WebUser user, UserType userType, bool isActive, int? packageId, BillingPeriodType? packageBillingPeriod, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            Account account = null;
+
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    account = AccountService.CreateNew(
+                                    orgName: $"{user.LastName} Family",
+                                    email: user.Email,
+                                    phone: user.Phone,
+                                    isActive: isActive,
+                                    accountType: AccountType.Registrant,
+                                    accountOwner: userType == UserType.Owner ? user : null,
+                                    packageId: null,
+                                    packageBillingPeriod: null,
+                                    timeZone: null,
+                                    createWithStripe: true,
+                                    loggedInUser: loggedInUser,
+                                    isAfterSchool: isAfterSchool,
+                                    msgs: amsgs,
+                                    dc: adc);
+
+                    user.AddAccount(account, userType, loggedInUser, amsgs, adc);
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+
+            return account;
+        }
+
         /// <summary>
         /// For adding a payment account to a student/registrant/participant account
         /// </summary>
@@ -673,6 +708,11 @@ namespace AfterSchoolLibrary.Services
             );
 
             return account;
+        }
+
+        public static Account AddNewStudentAccount(this WebUser accountOwner, UserType userType, bool isActive, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return AddNewStudentAccount(accountOwner, userType, isActive, null, null, isAfterSchool, loggedInUser, msgs, dc);
         }
 
         public static Account AddNewRegistrantAccount(this WebUser accountOwner, UserType userType, bool isActive, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
