@@ -221,7 +221,7 @@
 
             <div class="clearfix"></div>
             <br />
-            @if(ras.Count() == 0)
+            @if(ras.IsEmpty() || ras.Count() == 0)
             {
               <hr style="width:100%" />
               <div class="text-center text-bold">No students have registered yet</div>
