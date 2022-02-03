@@ -1094,11 +1094,11 @@ namespace AfterSchoolLibrary.Models
             string services, string timing, string pricing, string cost, string starting, string other, string specialNeeds, decimal distance, int PageNum, int PageSize,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            using (var connection = new System.Data.SqlClient.SqlConnection(Utilities.ConnectionString))
+            using (var connection = new Microsoft.Data.SqlClient.SqlConnection(Utilities.ConnectionString))
             {
                 var sql = Helpers.SearchQuery.LoadAccountSearchQuery(cost, starting, distance, PageNum, PageSize, hostAccountId > 0);            
 
-                var command = new System.Data.SqlClient.SqlCommand(sql, connection);
+                var command = new Microsoft.Data.SqlClient.SqlCommand(sql, connection);
                 command.Parameters.AddWithValue("@AccountId", hostAccountId <= 0 ? Convert.DBNull : hostAccountId);
                 command.Parameters.AddWithValue("@SearchTerm", search.IsNotBlank() ? $"\"*{search}*\"" : $"\"\"");
                 command.Parameters.AddWithValue("@Neighborhood", neighborhoods.IsNotEmpty() ? neighborhoods : Convert.DBNull);
@@ -1143,6 +1143,18 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["Subdomain"], null, DatabaseCriteriaOperatorEnum.IsNot);
 
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).Select(a => a.Subdomain).ToList();
+        }
+
+        public static List<Account> LoadByIdsByAccountTypes(List<int> ids, List<AccountType> accountTypes, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["ID"], ids, DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["IsActive"], true);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
+            dq.Criterias.Add(ObjectMap["IsTest"], false);
+            dq.Criterias.Add(ObjectMap["AccountTypeId"], accountTypes.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
         #endregion

@@ -97,4 +97,10 @@
         $('#closetime').val(closetime);
         $('#period-add').val(id);
     }
+
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('input[name=opendate],input[name=closedate],input[name=closetime],input[name=opentime]').on('change', function () {
+            validateSetup(event);
+        });
+    });
 </script>

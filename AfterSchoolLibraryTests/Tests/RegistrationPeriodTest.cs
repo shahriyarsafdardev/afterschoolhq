@@ -27,35 +27,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(RegistrationPeriod.Load(period.ID.Value, msgs, dc).IsNotEmpty());
         }
 
-        [Theory]
-        [InlineData(8, 10)]
-        [InlineData(15, 10)]
-        public void LoadPagingTest(int numberToCreate, int numberPerPage)
-        {
-            for (var i = 0; i < numberToCreate; i++)
-            {
-                var period = RegistrationPeriodFactory.Create(PeriodOwnerAccount, msgs, dc);
-            }
-
-            Assert.Equal(
-                Math.Min(numberPerPage, numberToCreate),
-                RegistrationPeriod.Load(null, 0, numberPerPage, msgs, dc).Count
-            );
-        }
-
-        [Theory]
-        [InlineData(8)]
-        [InlineData(2)]
-        public void GetCountTest(int numberToCreate)
-        {
-            for (var i = 0; i < numberToCreate; i++)
-            {
-                var period = RegistrationPeriodFactory.Create(PeriodOwnerAccount, msgs, dc);
-            }
-
-            Assert.Equal(numberToCreate, RegistrationPeriod.GetCount(msgs: msgs, dc: dc));
-        }
-
         [Fact]
         public void SaveTest()
         {
@@ -73,7 +44,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             msgs.AddRange(period.Delete(dc));
 
-            Assert.Equal(0, RegistrationPeriod.GetCount(msgs: msgs, dc: dc));
+            Assert.Null(RegistrationPeriod.Load(period.ID.Value));
         }
         [Fact]
         public void ReloadTest()

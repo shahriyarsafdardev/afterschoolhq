@@ -31,6 +31,7 @@
     var isReadOnlySeatStatus = (bool)ViewBag.IsReadOnlySeatStatus;
 }
 
+
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
 
 <div class="main-content">
@@ -258,3 +259,23 @@
         }
     }
 </script>
+
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            $(document).on("change", ".yesno", function () {
+                if ($(this).val() == "yes") {
+                    $("#btn-manual-withdraw").text('Withdraw & Cancel Payments »').button("refresh");
+                    var value = $("#btn-manual-withdraw").attr('onclick');
+                    $("#btn-manual-withdraw").attr('onclick', value.replace('false', 'true'));
+                }
+                else {
+                    $("#btn-manual-withdraw").text('Withdraw & Continue Payments »').button("refresh");
+                    var value = $("#btn-manual-withdraw").attr('onclick');
+                    $("#btn-manual-withdraw").attr('onclick', value.replace('true', 'false'));
+                }
+
+            })
+        })
+    </script>
+}

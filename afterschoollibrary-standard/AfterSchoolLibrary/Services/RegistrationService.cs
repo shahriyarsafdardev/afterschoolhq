@@ -1,4 +1,4 @@
-﻿using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using Newtonsoft.Json;
@@ -300,11 +300,15 @@ namespace AfterSchoolLibrary.Services
 
         #region CSVReport
 
-        public static SystemMessages EmailCSVReport(int accountId, string searchText, int? questionId, List<int> participationObjectIds, ParticipationObjectType participationObjectType, string filename, RegistrationReportType reportType, List<RegistrationAssignmentType> rats, RegistrationStatus registrationStatus, string uiActivityLabel, string emails, string subject, string body)
+        public static SystemMessages EmailCSVReport(int accountId, string searchText, int? questionId, 
+            List<int> participationObjectIds, ParticipationObjectType participationObjectType, string filename, 
+            RegistrationReportType reportType, List<RegistrationAssignmentType> rats, RegistrationStatus registrationStatus, string uiActivityLabel, string emails, string subject, string body,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
+            if (msgs.IsEmpty())
+                msgs = new SystemMessages();
 
-            var account = Account.Load(accountId);
+            var account = Account.Load(accountId, msgs, dc);
 
             var registrations = account.SearchRegistrations(
                 searchText,
@@ -314,7 +318,9 @@ namespace AfterSchoolLibrary.Services
                 registrationStatus,
                 rats,
                 null,
-                null);
+                null, 
+                msgs, 
+                dc);
 
             var csv = RegistrationService.ExportCSV(
                 registrations,
@@ -323,7 +329,9 @@ namespace AfterSchoolLibrary.Services
                 registrationStatus,
                 participationObjectIds,
                 participationObjectType,
-                rats);
+                rats, 
+                msgs,
+                dc);
 
             var fileLink = RegistrationService.UploadCSV(account, filename, csv, msgs);
 
@@ -634,7 +642,7 @@ namespace AfterSchoolLibrary.Services
             row.Add(registration.FirstRegistration.RegistrantLastName);
             row.Add(registration.FirstRegistration.RegistrantEmail);
 
-            AddActivitiesToCSVReport(row, registration, reportType);
+            AddActivitiesToCSVReport(row, registration, reportType, msgs, dc);
 
             if (reportType != RegistrationReportType.Basic)
             {
