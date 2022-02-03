@@ -169,5 +169,51 @@ namespace AfterSchoolLibraryTests.Tests
             // Assert
             Assert.False(msgs.HasNoErrors());
         }
+
+        [Fact]
+        public void RemoveOutOfSessionInstancesTest()
+        {
+            // Arrange
+            var webUser = WebUserFactory.Create(true, msgs, dc);
+            var account = AccountFactory.Create(webUser, msgs, dc);
+            var tsOfSchedule = DateTime.UtcNow.AddDays(10) - DateTime.UtcNow.AddDays(-1);
+            var schedule = ActivityScheduleFactory.Create(account, DateTime.UtcNow.AddDays(-1), DateTime.UtcNow.AddDays(10), msgs, dc);
+            var activity = ActivityFactory.Create(account, schedule, msgs, dc);
+
+            var instances = new List<ActivityInstance>();
+            
+            for (var i = - 1; i < tsOfSchedule.TotalDays - 1; i++)
+            {
+                var start = $"{DateTime.UtcNow.AddDays(i).Month}/{DateTime.UtcNow.AddDays(i).Day}/{DateTime.UtcNow.AddDays(i).Year} 3:00:00 PM".ToDateTime();
+                var end = $"{DateTime.UtcNow.AddDays(i).Month}/{DateTime.UtcNow.AddDays(i).Day}/{DateTime.UtcNow.AddDays(i).Year} 5:00:00 PM".ToDateTime();
+
+                instances.Add(ActivityInstanceFactory.Create(activity, schedule, InstanceType.InSession, start, end, msgs, dc));
+            }
+
+            // provider choose to not meet on 3rd day from now for this activity, so it will be a new OutOfSession instance where class will not meet
+            instances.Add(ActivityInstanceFactory.Create(activity, schedule, InstanceType.OutOfSession, DateTime.UtcNow.AddDays(3), DateTime.UtcNow.AddDays(3), msgs, dc));
+
+            // Assert
+            Assert.True(msgs.HasNoErrors());
+            Assert.True(instances.Count == 12); // 11 InSession, 1 OutOfSession
+
+            // Act
+            var inSessionInstances = schedule?.GetInSessionInstances(msgs, dc);
+            var outOfSessionInstances = schedule?.GetOutSessionInstances(msgs, dc);
+
+            // Assert
+            Assert.True(msgs.HasNoErrors());
+            Assert.True(instances.Count == 12);
+            Assert.True(inSessionInstances.Count == 11);
+            Assert.True(outOfSessionInstances.Count == 1);
+
+            // Final Act
+            inSessionInstances.RemoveOutOfSessionInstances(schedule, msgs, dc);
+
+            // Assert
+            Assert.True(msgs.HasNoErrors());
+            Assert.True(instances.Count == 12);
+            Assert.True(inSessionInstances.Count == 10); // we have removed one OutOfSession instance from all 11 inSessionInstances
+        }
     }
 }

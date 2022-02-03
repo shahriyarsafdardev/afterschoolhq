@@ -220,5 +220,25 @@ namespace AfterSchoolLibrary.Services
 
             return instance;
         }
+        public static List<ActivityInstance> RemoveOutOfSessionInstances(this List<ActivityInstance> instances, ActivitySchedule schedule, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var outOfSessionInstances = schedule?.GetOutSessionInstances(msgs, dc);
+
+            if (outOfSessionInstances?.Any() == true)
+            {
+                var overlappingiInstances = instances.Where(m =>
+                                                outOfSessionInstances.Any(t =>
+                                                    t.Day == m.Day &&
+                                                    t.StartDateTime.ToShortDateString() == m.StartDateTime.ToShortDateString() &&
+                                                    t.EndDateTime.ToShortDateString() == m.EndDateTime.ToShortDateString()
+                                                    )
+                                                );
+
+                if (overlappingiInstances?.Any() == true)
+                    instances.RemoveAll(m => overlappingiInstances.Any(t => t.ID == m.ID));
+            }
+            
+            return instances;
+        }
     }
 }
