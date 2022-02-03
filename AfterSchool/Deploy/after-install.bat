@@ -32,5 +32,14 @@ if "%DEPLOYMENT_GROUP_NAME%"=="" (
 
 	mkdir !target!
 
-	%systemroot%\System32\xcopy %path% !target! /e /i /y /s /d
+	%systemroot%\System32\robocopy %path% !target! /e
+
+    echo %ERRORLEVEL%
+
+	if %ERRORLEVEL% LSS 8 goto finish
+
+    Echo Something failed & goto :eof
+
+    :finish
+    Echo All done, no fatal errors.
 )
