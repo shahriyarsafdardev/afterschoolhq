@@ -171,6 +171,6 @@
 
 <script>
     PageEvent.add(PageEvent.AFTER_INIT, function () {
-        $("input", "#signup-form").eq(4).val(localStorage.getItem('studentRegisterEmail'));
+        $("input", "#signup-form").eq(4).val(localStorage.getItem('studentRegisterEmail')).attr('readonly', 'readonly'); 
     });
 </script >

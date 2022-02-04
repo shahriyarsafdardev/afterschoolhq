@@ -85,7 +85,7 @@
                                 <div class="col-md-6 col-md-offset-3">
                                     <div class="padding-v-20">
                                         <button type="button" id="btn-check-email" class="btn btn-register-primary btn-lg">Next &raquo;</button>
-                                        <button type="button" id="btn-student-signup" class="btn btn-register-primary btn-lg hidden">Sign Up As Student &raquo;</button>
+                                        <button type="button" id="btn-student-signup" class="btn btn-register-primary btn-lg hidden">Sign Up As Student</button>
                                     </div>
                                 </div>
                                 <div class="clearfix"></div>
@@ -242,6 +242,7 @@
     }
 
     PageEvent.add(PageEvent.AFTER_INIT, function () {
+        console.log(window.url)
         $('#signup-form').submit(function () {
             $('#btn-create-account').html('Saving...');
             $('#btn-create-account').prop('disabled', true);
@@ -283,9 +284,7 @@
                         }
                         else if (!data.isInUse && !data.isRegistered) {                            
                             if ($("#isStudentRegistrationEnabled").val() == 'True') {
-                                $('#btn-check-email').html('Sign Up As Parent');
-                                $('#btn-check-email').addClass("newParentSignUp");
-                                $('#btn-student-signup').removeClass('hidden');
+                                showStudentRegistration();
                             }
                             else {
                                 showSignUpForm(email);
@@ -318,9 +317,15 @@
     function showSignUpForm(email) {
         // show sign up form
          setTimeout(function () {
-            $('#account-registration').removeClass('hide');
+             $('#account-registration').removeClass('hide');   
             $('#email-check-container').addClass('hide');
             $('#@Model.Find(qvm => qvm.Question.QuestionTypeId == QuestionType.Email).Id').val(email);
         }, 500);
+    }
+    function showStudentRegistration() {
+        $('#btn-check-email').html('Sign Up As Parent');
+        $('#btn-check-email').addClass("newParentSignUp");
+        $('#btn-student-signup').removeClass('hidden');
+        $('#email-check').attr('disabled', 'disabled');
     }
 </script>

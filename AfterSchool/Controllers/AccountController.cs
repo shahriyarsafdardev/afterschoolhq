@@ -2754,6 +2754,9 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var participationObject = GetParticipationObjectFromCart();
 
+            if (agree.IsEmpty())
+                msgs.Add("You must agree to participate", MessageType.UserError);
+
             // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
             var questions = RegisterViewBag(participationObject, msgs);
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
@@ -2775,8 +2778,7 @@ namespace AfterSchool.Controllers
 
             });
 
-            if (agree.IsEmpty())
-                msgs.Add("You must agree to participate", MessageType.UserError);
+            
 
             Registration registration = null;
 
@@ -2831,7 +2833,7 @@ namespace AfterSchool.Controllers
                                 amsgs,
                                 adc);
 
-                        if (msgs.HasNoErrors())
+                        if (amsgs.HasNoErrors())
                             AccountService.ProcessStudentRegistration(
                                 checkoutObject: new CheckoutObject()
                                 {
@@ -2844,7 +2846,7 @@ namespace AfterSchool.Controllers
                                 },
                                 sendConfirmationEmail: true,
                                 loggedInUser: SessionVariables.CurrentUser,
-                                msgs: msgs, dc: adc);
+                                msgs: amsgs, dc: adc);
                     },
                     onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
@@ -2856,7 +2858,8 @@ namespace AfterSchool.Controllers
                 return RedirectToAction("RegistrationComplete", new { id = registration.Uid });
 
             ViewBag.Messages = msgs;
-
+            ViewBag.AlreadyRegistered = false;
+            ViewBag.QuestionViewModels = qvms;
             LoadSessionActivitiesViewBag(participationObject, registration, msgs);
 
             return View(participationObject);
