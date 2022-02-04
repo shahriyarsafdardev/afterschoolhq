@@ -488,43 +488,6 @@
 @section Scripts
 {
     <script src="~/Scripts/jquery.validate.js"></script>
-    <script>
-        $(document).ready(function () {
-            $(".emailMain").on('blur', function () {
-                var dataToSend = JSON.stringify({ emailId: $(".emailMain").val() });
-                $.ajax({
-                    url: '/Signup/IsEmailAlreadyExists',
-                    type: 'post',
-                    dataType: 'json',
-                    data: dataToSend,
-                    contentType: 'application/json',
-                    success: function (data) {
-                        if (!data) {
-                            Notifications.showBar({
-                                title: 'Error',
-                                message: 'Email id already exists.',
-                                success: false
-                            });
-                            $(".register-continue").attr('disabled', 'disabled');
-                            $(".emailMain").attr('style', 'border: 1px solid red;');
-                        }
-                        else {
-                            $(".register-continue").removeAttr('disabled');
-                            $(".emailMain").removeAttr('style');
-                        }
-                    },
-                    error: function (jqXHR, textStatus, errorThrown) {
-                        Notifications.showBar({
-                            title: 'Error',
-                            message: 'Something went wrong. Please contact customer support.',
-                            success: false
-                        });
-                        return;
-                    }
-                });
-            })
-        })
-    </script>
     <script type="text/javascript">
 
         var searchTimeout = null;
@@ -581,8 +544,6 @@
 
         PageEvent.add(PageEvent.AFTER_INIT, function () {
 
-
-
             signupAccountSearch.keyup(function (e) {
                 var searchLength = signupAccountSearch.val().length;
 
@@ -638,7 +599,39 @@
                     <text>$("#NoAccountFoundPopup").modal('show');</text>
               }
         });
-
+        function validateEmail(value) {
+            var dataToSend = JSON.stringify({ emailId: value });
+            $.ajax({
+                url: '/Signup/IsEmailAlreadyExists',
+                type: 'post',
+                dataType: 'json',
+                data: dataToSend,
+                contentType: 'application/json',
+                success: function (data) {
+                    if (!data) {
+                        Notifications.showBar({
+                            title: 'Error',
+                            message: 'Email id already exists.',
+                            success: false
+                        });
+                        $(".register-continue").attr('disabled', 'disabled');
+                        $("#email").attr('style', 'border: 1px solid red;');
+                    }
+                    else {
+                        $(".register-continue").removeAttr('disabled');
+                        $("#email").removeAttr('style');
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: 'Something went wrong. Please contact customer support.',
+                        success: false
+                    });
+                    return;
+                }
+            });
+        }
         function signupListMouseOver(id) {
             $(`#signup-search-listItem-${id}`).attr('style', signupListItemStyleHover);
         }

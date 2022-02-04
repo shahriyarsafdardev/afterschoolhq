@@ -23,7 +23,7 @@
 
     <div class="col-md-12 onboarding-form-group">
         <label class="onboarding-lable">EMAIL ADDRESS</label>
-        <input type="email" name="email" required="required" autocomplete="off" class="form-control onboarding-input emailMain" value="@Model.Email" />
+        <input type="email" name="email" required="required" autocomplete="off" class="form-control onboarding-input" id="email" value="@Model.Email" onblur="validateEmail(this.value)" />
     </div>
 
     <div class="col-md-12 onboarding-form-group">
