@@ -609,11 +609,19 @@ namespace AfterSchool.Controllers
         [HttpPost]
         public JsonResult IsEmailAlreadyExists(string emailId)
         {
-            WebUser wu = WebUser.LoadByEmail(emailId, null);
-            if (wu.IsNotEmpty())
-                return Json(false);
+            var msgs = new SystemMessages();
+            WebUser wu = WebUser.LoadByEmail(emailId, msgs);
+            if (msgs.HasNoErrors())
+            {
+                if (wu.IsNotEmpty())
+                    return Json(new { success = false, error = false });
+                else
+                    return Json(new { success = true, error = false });
+            }
             else
-                return Json(true);
+            {
+                return Json(new { success = false, error = true });
+            }
         }
 
         [HttpGet]

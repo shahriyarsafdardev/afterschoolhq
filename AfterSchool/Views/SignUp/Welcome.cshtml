@@ -609,18 +609,28 @@
                     data: dataToSend,
                     contentType: 'application/json',
                     success: function (data) {
-                        if (!data) {
-                            Notifications.showBar({
-                                title: 'Error',
-                                message: 'Email id already exists.',
-                                success: false
-                            });
-                            $(".register-continue").attr('disabled', 'disabled');
-                            $("#email").attr('style', 'border: 1px solid red;');
+                        if (!data.error) {
+                            if (!data.success) {
+                                Notifications.showBar({
+                                    title: 'Error',
+                                    message: 'Email id already exists.',
+                                    success: false
+                                });
+                                $(".register-continue").attr('disabled', 'disabled');
+                                $("#email").attr('style', 'border: 1px solid red;');
+                            }
+                            else {
+                                $(".register-continue").removeAttr('disabled');
+                                $("#email").removeAttr('style');
+                            }
                         }
                         else {
-                            $(".register-continue").removeAttr('disabled');
-                            $("#email").removeAttr('style');
+                            Notifications.showBar({
+                                title: 'Error',
+                                message: 'Something went wrong. Please contact customer support.',
+                                success: false
+                            });
+                            return;
                         }
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
