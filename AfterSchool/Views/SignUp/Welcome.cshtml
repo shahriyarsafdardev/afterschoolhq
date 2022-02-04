@@ -599,38 +599,49 @@
                     <text>$("#NoAccountFoundPopup").modal('show');</text>
               }
         });
-        function validateEmail(value) {
-            var dataToSend = JSON.stringify({ emailId: value });
-            $.ajax({
-                url: '/Signup/IsEmailAlreadyExists',
-                type: 'post',
-                dataType: 'json',
-                data: dataToSend,
-                contentType: 'application/json',
-                success: function (data) {
-                    if (!data) {
+        function validateEmailServerSide(value) {
+            if (validateEmail(value)) {
+                var dataToSend = JSON.stringify({ emailId: value });
+                $.ajax({
+                    url: '/Signup/IsEmailAlreadyExists',
+                    type: 'post',
+                    dataType: 'json',
+                    data: dataToSend,
+                    contentType: 'application/json',
+                    success: function (data) {
+                        if (!data) {
+                            Notifications.showBar({
+                                title: 'Error',
+                                message: 'Email id already exists.',
+                                success: false
+                            });
+                            $(".register-continue").attr('disabled', 'disabled');
+                            $("#email").attr('style', 'border: 1px solid red;');
+                        }
+                        else {
+                            $(".register-continue").removeAttr('disabled');
+                            $("#email").removeAttr('style');
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
                         Notifications.showBar({
                             title: 'Error',
-                            message: 'Email id already exists.',
+                            message: 'Something went wrong. Please contact customer support.',
                             success: false
                         });
-                        $(".register-continue").attr('disabled', 'disabled');
-                        $("#email").attr('style', 'border: 1px solid red;');
+                        return;
                     }
-                    else {
-                        $(".register-continue").removeAttr('disabled');
-                        $("#email").removeAttr('style');
-                    }
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    Notifications.showBar({
-                        title: 'Error',
-                        message: 'Something went wrong. Please contact customer support.',
-                        success: false
-                    });
-                    return;
-                }
-            });
+                });
+            }
+            else {
+                Notifications.showBar({
+                    title: 'Error',
+                    message: 'Email id is not in valid format.',
+                    success: false
+                });
+                $(".register-continue").attr('disabled', 'disabled');
+                $("#email").attr('style', 'border: 1px solid red;');
+            }
         }
         function signupListMouseOver(id) {
             $(`#signup-search-listItem-${id}`).attr('style', signupListItemStyleHover);
