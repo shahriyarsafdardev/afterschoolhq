@@ -35,5 +35,6 @@ public enum FeatureType
 	StudentCRM,
 	ManageCoupons,
 	Teacher1099,
-	Survey
+	Survey,
+	ManualStripePayouts
 }

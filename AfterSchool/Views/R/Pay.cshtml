@@ -7,6 +7,8 @@
     var accountProfile = (AccountProfile)ViewBag.AccountProfile;
     var sources = (List<Stripe.Source>)ViewBag.Sources;
     var bankAccounts = (List<Stripe.BankAccount>)ViewBag.BankAccounts;
+
+    var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
 }
 
 @{
@@ -15,9 +17,9 @@
         Model,
         new ViewDataDictionary()
         {
-            { "LoginReturnUrl", Model.HomePageUrl }
-        }
-    );
+            { "LoginReturnUrl", Model.HomePageUrl },
+            { "CleverSsoEnabled", cleverSsoEnabled }
+        });
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }

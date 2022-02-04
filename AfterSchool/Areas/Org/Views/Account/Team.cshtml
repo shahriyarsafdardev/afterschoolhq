@@ -105,3 +105,57 @@
         </div>
     </div>
 </div>
+
+<div id="modalConfirm"  class="modal fade" role="dialog">
+     <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                <h3 class="modal-title">Are you sure you want to change <span id="userName"></span> type to <span id="newUserType"></span>?</h3>
+            </div>
+     
+            <div class="modal-footer">
+                <button class="btn btn-primary md-close" id="ConfirmUpdate" onclick="confirmUserTypeUpdate()">Confirm</button>
+                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function updateAssignment(user, userName, selectBox) {
+        userName = userName.replace(/,/g, '');
+        let newAssignment = selectBox.value;
+        let newAssignmentText = selectBox.options[selectBox.selectedIndex].text;
+        $("#userName").html(userName);
+        $("#newUserType").html(newAssignmentText);
+        $("#modalConfirm").modal('show');
+        $("#ConfirmUpdate").attr('onclick', "confirmUpdate('" + user + "','" + userName + "','" + newAssignment + "','" + newAssignmentText + "')");
+    }
+
+    function confirmUpdate(user, userName, newAssignment, newAssignmentText) {
+        $.get(
+            `@Url.Action("updateusertype", "account", new { })?userid=${user}&newusertypeid=${newAssignment}`,
+            function (data) {
+                if (data && data.status == 'ok') {
+                    Notifications.showBar({
+                        title: 'Success',
+                        message: `${userName}'s type has been updated to ${newAssignmentText}.`
+                    });
+                    if (newAssignmentText == "Owner") {
+                        window.location.reload();
+                    }
+                } else {
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: `Error updating the user type for ${userName}. Please <a href="mailto:@AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress" class="white">contact support</a>.`
+                    });
+                }
+            }
+        );
+        $("#modalConfirm").modal('hide');
+    }
+
+
+</script>

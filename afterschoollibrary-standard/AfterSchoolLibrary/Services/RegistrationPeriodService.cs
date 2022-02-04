@@ -135,5 +135,30 @@ namespace AfterSchoolLibrary.Services
 
             return false;
         }
+
+        public static void CreateOrUpdate(WebUser currentUser, Account account, ActivityGroup group, string period, string opendate, string closedate, string opentime, string closetime, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            Extensions.ValidateStartAndEndDateWithTime(opendate, opentime, closedate, closetime, msgs);
+
+            if (msgs.HasNoErrors())
+            {
+                var regperiod = new RegistrationPeriod();
+                if (period.IsInteger())
+                    regperiod = account.GetRegistrationPeriod(period.ToInteger(), msgs);
+                else
+                {
+                    regperiod.CreatedBy = currentUser.ID.Value;
+                    regperiod.CreateDate = DateTime.UtcNow;
+                    regperiod.ActivityGroupId = group.ID;
+                    regperiod.AccountId = account.ID;
+                }
+
+                regperiod.StartDateTime = string.Format("{0} {1}", opendate, opentime).ToDateTime();
+                regperiod.EndDateTime = string.Format("{0} {1}", closedate, closetime).ToDateTime();
+                regperiod.LastModifiedBy = currentUser.ID.Value;
+                regperiod.LastModifiedDate = DateTime.UtcNow;
+                msgs.AddRange(regperiod.Save());
+            }
+        }
     }
 }

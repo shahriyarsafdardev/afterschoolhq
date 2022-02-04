@@ -982,7 +982,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
-            var activity = currentAccount.GetActivity(id.ToGuid(), msgs).Copy(activitynamecopy, true, currentUser.ID.Value, msgs);
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs).CopyWithoutSchedule(activitynamecopy, true, currentUser.ID.Value, msgs);
 
             ViewBag.Messages = msgs;
             
