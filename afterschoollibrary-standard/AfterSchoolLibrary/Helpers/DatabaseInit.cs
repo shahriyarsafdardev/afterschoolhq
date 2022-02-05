@@ -99,6 +99,8 @@ namespace AfterSchoolLibrary.Helpers
 
                     Migration_20220106_AddFeatureFlagTable.Do(amsgs, adc);
 					Migrations.UpdateNameColumnFormQuestionGroup_20211119.Do(amsgs, adc);
+
+                    UpdateActivityContinuesEnrollmentFlag_20220205.Do(amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs)
