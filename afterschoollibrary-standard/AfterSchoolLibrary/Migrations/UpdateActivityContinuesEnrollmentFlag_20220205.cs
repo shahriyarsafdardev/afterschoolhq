@@ -13,7 +13,7 @@ namespace AfterSchoolLibrary.Migrations
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     var query = "UPDATE Activity SET IsContinuousEnrollment = 0 WHERE IsContinuousEnrollment IS NULL";
-                    var dq = Activity.get_DatabaseQuery(Activity.ObjectMap);
+                    var dq = Activity.get_DatabaseQuery(Activity.ObjectMap, adc);
                     amsgs.AddRange(dq.ExecuteSql(query));
                 },
                 uniqueIdenfier: "UpdateActivityContinuesEnrollmentFlag_20220205",
