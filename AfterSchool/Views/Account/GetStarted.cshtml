@@ -9,9 +9,8 @@
     var savedEmail = Model.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail)?.Value;
     var showStep1 = currentUser.IsEmpty() && savedEmail.IsBlank();
     var isDuringProfileSetup = currentUser.IsNotEmpty() || savedEmail.IsNotBlank();
-    var isStudentRegistrationEnabled = ViewBag.StudentRegistrationEnabled;
-
-    var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
+    var isStudentRegistrationEnabled = ViewBag.StudentRegistrationEnabled != null ? (bool)ViewBag.StudentRegistrationEnabled : false;
+    var cleverSsoEnabled = ViewBag.CleverSsoEnabled != null ? (bool)ViewBag.CleverSsoEnabled : false;
 }
 
 @{
@@ -31,15 +30,13 @@
 }
 
 @{
-    Html.RenderPartial
-            (
-                "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
-                new RegistrationHeaderViewModel(participationObject, true),
-                new ViewDataDictionary()
-                {
-    { "hidebuttons", true }
-                }
-            );
+    Html.RenderPartial(
+        "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
+        new RegistrationHeaderViewModel(participationObject, true),
+        new ViewDataDictionary()
+        {
+            { "hidebuttons", true }
+        });
 }
 
 <div>
@@ -48,9 +45,9 @@
             <div class="panel-body">
 
                 <div class="text-center reg-instructions">
-                    <p><strong>Step 1 of 6: <u>Parent</u> Sign Up / Sign in <!--Parent / Guardian Information--></strong></p>
+                    <p> <strong> Sign Up / Sign in </strong></p>
                 </div>
-                <input type="hidden" id="isStudentRegistrationEnabled" name="isStudentRegistrationEnabled" value="@ViewBag.StudentRegistrationEnabled.ToString()" />
+                <input type="hidden" id="isStudentRegistrationEnabled" name="isStudentRegistrationEnabled" value="@isStudentRegistrationEnabled.ToString()" />
                 <div>
                     <form class="form-horizontal" id="signup-form" method="post" action="@Url.Action("getstarted", "account")" onkeydown="return checkAndPostSignupForm(event, '@Json.Encode(showStep1)')">
 
@@ -84,8 +81,8 @@
                                 
                                 <div class="col-md-6 col-md-offset-3">
                                     <div class="padding-v-20">
-                                        <button type="button" id="btn-check-email" class="btn btn-register-primary btn-lg">Next &raquo;</button>
-                                        <button type="button" id="btn-student-signup" class="btn btn-register-primary btn-lg hidden">Sign Up As Student</button>
+                                        <button type="button" id="btn-check-email" class="btn btn-register-primary btn-lg" onclick="return checkRegistrantEmail()">Next &raquo;</button>
+                                        <button type="button" id="btn-student-signup" class="btn btn-register-primary btn-lg hidden" onclick="return studentSignup(event)">Sign Up As Student &raquo;</button>
                                     </div>
                                 </div>
                                 <div class="clearfix"></div>
@@ -127,9 +124,7 @@
 
                             @foreach (var qvm in Model.Where(qvm => !qvm.Hide))
                             {
-                                Html.RenderPartial(
-                                    "~/Views/Shared/Form/_Question.cshtml",
-                                    qvm);
+                                Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
 
                                 if (qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone)
                                 {
@@ -218,15 +213,20 @@
         participationObject,
         new ViewDataDictionary()
         {
-{ "IsDuringCheckout", true }
-        }
-    );
+            { "IsDuringCheckout", true }
+        });
 }
 
 <script>
 
-    function sendAccountConfirmation(email) {
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#signup-form').submit(function () {
+            $('#btn-create-account').html('Saving...');
+            $('#btn-create-account').prop('disabled', true);
+        });
+    });
 
+    function sendAccountConfirmation(email) {
         $.get(
             '/services/sendaccountconfirmationemail?email=' + encodeURIComponent(email) + '&redirecturl=@(Server.UrlEncode(participationObject.GetRegistrationPageUrl()))',
             function (data) {
@@ -238,73 +238,66 @@
                 }
             }
         );
-
     }
 
-    PageEvent.add(PageEvent.AFTER_INIT, function () {
-        console.log(window.url)
-        $('#signup-form').submit(function () {
-            $('#btn-create-account').html('Saving...');
-            $('#btn-create-account').prop('disabled', true);
-        });
+    function checkRegistrantEmail() {
+        var email = $('#email-check').val();
+        var btnCheckEmail = $('#btn-check-email');
+        var originalBtnText = btnCheckEmail.html();
 
-        $('#btn-check-email').click(function () {
-            var email = $('#email-check').val();
-            //if ($('#btn-check-email').html() == 'Sign Up As Parent') {
-            if ($('#btn-check-email').hasClass("newParentSignUp")) {
-                showSignUpForm(email);
-                return;
-            }
-            var originalBtnText = $('#btn-check-email').html();
+        if (btnCheckEmail.hasClass("newParentSignUp")) {
+            showSignUpForm(email);
+            return;
+        }
 
-            $('#btn-check-email').html('Checking...');
+        btnCheckEmail.html('Checking...');
 
-            $.get(
-                '/services/checkaccountstatus?email=' + encodeURIComponent(email),
-                function (data) {
-                    if (data && data.status == 'ok') {
+        $.get(
+            '/services/checkaccountstatus?email=' + encodeURIComponent(email),
+            function (data) {
+                if (data && data.status == 'ok') {
 
-                        if (data.isRegistered) {
-                            // show login form
+                    if (data.isRegistered) {
+                        // show login form
 
-                            $('#btn-check-email').html('Logging In...');
+                        btnCheckEmail.html('Logging In...');
+
+                        setTimeout(function () {
+                            $('#modal-login').addClass('md-show');
+                            $('#lm-login-username').val(email);
 
                             setTimeout(function () {
-                                $('#modal-login').addClass('md-show');
-                                $('#lm-login-username').val(email);
+                                $('#lm-login-password').focus();
+                            }, 500);
+                        }, 1000);
 
-                                setTimeout(function () {
-                                    $('#lm-login-password').focus();
-                                }, 500);
-                            }, 1000);
-
-                        } else if (data.isInUse) {
-                            // send email
-                            sendAccountConfirmation(email);
-                        }
-                        else if (!data.isInUse && !data.isRegistered) {                            
-                            if ($("#isStudentRegistrationEnabled").val() == 'True') {
-                                showStudentRegistration();
-                            }
-                            else {
-                                showSignUpForm(email);
-                            }
-                        }
-                    } else {
-                        $('#btn-check-email').html(originalBtnText);
-                        Notifications.showErrors(data.messages);
+                    } else if (data.isInUse) {
+                        // send email
+                        sendAccountConfirmation(email);
                     }
+                    else if (!data.isInUse && !data.isRegistered) {
+                        var isStudentRegistrationEnabled = $("#isStudentRegistrationEnabled").val();
+                        if (isStudentRegistrationEnabled !== null && isStudentRegistrationEnabled.toLowerCase() == 'true') {
+                           showStudentRegistration();
+                        }
+                        else {
+                            showSignUpForm(email);
+                        }
+                    }
+                } else {
+                    btnCheckEmail.html(originalBtnText);
+                    Notifications.showErrors(data.messages);
                 }
-            );
-        });
+            }
+        );
+    }
 
-        $("#btn-student-signup").click(function (event) {
-            event.preventDefault();
-            var url = '@Url.Action("StudentRegistration", "Account", new { regaccount = Request["regaccount"] })';
-            localStorage.setItem('studentRegisterEmail', $("#email-check").val());
-            window.location.href = url;
-        });
-    });
+    function studentSignup(event) {
+        event.preventDefault();
+        var url = '@Url.Action("StudentRegistration", "Account", new { regaccount = Request["regaccount"] })';
+        localStorage.setItem('studentRegisterEmail', $("#email-check").val());
+        window.location.href = url;
+    }
 
     function checkAndPostSignupForm(event, isFirstStep) {
         if (isFirstStep && event.keyCode == 13) {
@@ -317,7 +310,7 @@
     function showSignUpForm(email) {
         // show sign up form
          setTimeout(function () {
-             $('#account-registration').removeClass('hide');   
+            $('#account-registration').removeClass('hide');
             $('#email-check-container').addClass('hide');
             $('#@Model.Find(qvm => qvm.Question.QuestionTypeId == QuestionType.Email).Id').val(email);
         }, 500);
