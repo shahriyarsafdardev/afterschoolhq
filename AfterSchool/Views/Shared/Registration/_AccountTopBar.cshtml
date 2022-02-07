@@ -220,13 +220,13 @@
             @if (registrationStartPage.IsNotEmpty())
             {
                 <a href="@registrationStartPage.HomePageUrl" class="reg-login-bar-homepage">
-                    <span class="reg-login-bar-title" style="@(ViewData["InsideActDetails"] != null ? "color:#b2b2b4": "")">@registrationStartPage.Name</span>
+                    <span class="reg-login-bar-title notranslate" style="@(ViewData["InsideActDetails"] != null ? "color:#b2b2b4": "")">@registrationStartPage.Name</span>
                 </a>
                 if (ViewData["InsideActDetails"] != null)
                 {
                     <span class="reg-login-bar-homepage" style="color:#b2b2b4; margin-top:8px; font-size:16px; margin-right:0 ">></span>
                     <a href="javascript:void(0)" class="reg-login-bar-homepage">
-                        <span class="reg-login-bar-title">@ViewData["InsideActDetails"]</span>
+                        <span class="reg-login-bar-title notranslate">@ViewData["InsideActDetails"]</span>
                     </a>
                 }
             }
@@ -234,11 +234,11 @@
             {
                 if (currentAccount.IsNotEmpty())
                 {
-                    <span class="reg-login-bar-title">@currentAccount.Name</span>
+                    <span class="reg-login-bar-title notranslate">@currentAccount.Name</span>
                 }
                 else
                 {
-                    <span class="reg-login-bar-title">@currentUser.DisplayName</span>
+                    <span class="reg-login-bar-title notranslate">@currentUser.DisplayName</span>
                 }
             }
 
