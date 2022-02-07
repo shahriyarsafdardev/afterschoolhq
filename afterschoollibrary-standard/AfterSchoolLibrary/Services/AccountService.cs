@@ -1076,7 +1076,7 @@ namespace AfterSchoolLibrary.Services
                     awu.UserTypeId = ut;
                     amsgs.AddRange(awu.Save(adc));
 
-                    if (ut == UserType.Owner && account.OwnerId != user.ID)
+                    if (ut == UserType.Owner && account.OwnerId != user.ID && user.IsActive)
                     {
                         account.OwnerId = user.ID.Value;
                         amsgs.AddRange(account.Save(adc));

@@ -863,6 +863,16 @@ namespace AfterSchoolLibrary.Services
 
                         if (account.StripeCustomerId.IsEmpty())
                             amsgs.AddRange(account.SaveWithStripe(dc));
+                    } 
+                    else {
+                        var awu = AccountWebUser.LoadByAccountIdByWebUserId(AccountId: account.ID.Value, WebUserId: user.ID.Value, msgs: amsgs, dc: adc);
+                        if (awu.IsNotEmpty() && user.IsActive && awu.IsActive && awu.UserTypeId == UserType.Owner && account.OwnerId != user.ID)
+                        {
+                            // this is parent completing it's signup
+                            // so we will update owner ship of account from student to parent
+                            account.OwnerId = user.ID.Value;
+                            amsgs.AddRange(account.Save(adc));
+                        }
                     }
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),

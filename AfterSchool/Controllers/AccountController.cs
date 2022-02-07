@@ -1487,7 +1487,7 @@ namespace AfterSchool.Controllers
                             {
                             // create account
                             studentAccount = studentUser.AddNewStudentAccount(
-                                    userType: UserType.Student,
+                                    userType: UserType.Owner, // student will be owner of this account, till parent not completes registration
                                     isActive: true,
                                     isAfterSchool: SessionVariables.IsAfterSchool.Value,
                                     loggedInUser: studentUser,
