@@ -2723,6 +2723,36 @@ namespace AfterSchool.Controllers
 
         #region RegisterStudent
 
+        private List<FormQuestion> RegisterStudentViewBag(ParticipationObject participationObject, SystemMessages msgs)
+        {
+            var allQuestions = participationObject.Form.GetActiveQuestions(msgs).ToList();
+            
+            var requiredQuestions = allQuestions
+                .Where(question => question.IsRequired &&
+                    question.FormQuestionGroupRegistrantTypeId == RegistrantType.Individual &&
+                    question.QuestionDataTypeId == QuestionDataType.NotSet) // bring only custome questions
+                .ToList();
+
+            var answers = SessionVariables.CurrentRegistrant.GetAnswers(msgs);
+
+            var questions = requiredQuestions.Where(question =>
+                    answers.FirstOrDefault(answer => answer.QuestionDataTypeId == question.QuestionDataTypeId).IsEmpty() ||
+                    answers.FirstOrDefault(answer => answer.QuestionDataTypeId == question.QuestionDataTypeId).Text.IsBlank()
+                )
+                .Distinct()
+                .ToList();
+
+            questions.AddRange(allQuestions
+                .Where(question => !question.IsDeleted && question.QuestionDataTypeId == QuestionDataType.NotSet)
+                .Where(question => answers.Find(answer => answer.FormQuestionId == question.ID).IsEmpty())
+                .OrderBy(question => question.DisplayOrder)
+              );
+
+            ViewBag.Registrant = SessionVariables.CurrentRegistrant;
+
+            return questions;
+        }
+
         [HttpGet]
         public ActionResult RegisterStudent()
         {
@@ -2741,7 +2771,7 @@ namespace AfterSchool.Controllers
 
             LoadSessionActivitiesViewBag(participationObject, registration, msgs);
             // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
-            var questions = RegisterViewBag(participationObject, msgs);
+            var questions = RegisterStudentViewBag(participationObject, msgs);
 
             ViewBag.QuestionViewModels = questions.Select(question => question.ToFormQuestionViewModel()).ToList();
 
@@ -2758,7 +2788,7 @@ namespace AfterSchool.Controllers
                 msgs.Add("You must agree to participate", MessageType.UserError);
 
             // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
-            var questions = RegisterViewBag(participationObject, msgs);
+            var questions = RegisterStudentViewBag(participationObject, msgs);
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
 
             questions.ForEach(question =>
