@@ -308,10 +308,18 @@ namespace AfterSchoolLibrary.Helpers
 
         public static List<KeyValuePair> GetKeyValuePairs(string s)
         {
-            if (s.IsEmpty())
-                return new List<KeyValuePair>();
+            var data = new List<KeyValuePair>();
 
-            return JsonConvert.DeserializeObject<List<KeyValuePair>>(s);
+            if (s.IsEmpty())
+                return data;
+
+            var stringInput = s.Trim();
+            if ((stringInput.StartsWith("{") && stringInput.EndsWith("}")))
+                data.Add(JsonConvert.DeserializeObject<KeyValuePair>(s)); //For json object
+            if (stringInput.StartsWith("[") && stringInput.EndsWith("]"))
+                data.AddRange(JsonConvert.DeserializeObject<List<KeyValuePair>>(s)); //For json array
+
+            return data;
         }
     }
 

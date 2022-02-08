@@ -58,7 +58,7 @@
                     <label class="col-sm-3 control-label"></label>
                     <div class="col-sm-6">
                         <div class="pull-right">
-                            <button type="submit" class="btn btn-primary btn-lg">Invite Team Members &raquo;</button>
+                            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">Invite Team Members &raquo;</button>
                         </div>
                         <div class="pull-left">
                             <a href="@Url.Action("team", "account")" class="text-muted">
@@ -72,3 +72,20 @@
 
     </div>
 </div>
+
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            $("#submitBtn").on('click', function () {
+                if (!$("input:radio[name='usertype']").is(":checked")) {
+                      Notifications.showBar({
+                        title: 'Error',
+                        message: 'Select any Account type',
+                        success: false
+                    });
+                }
+            })
+            
+        })
+    </script>
+}

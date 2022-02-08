@@ -381,6 +381,9 @@ namespace AfterSchool.Controllers
 
                 var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
 
+                if (!activity.IsPublished && currentUser.IsNotEmpty() && currentUser.HasAccessToActivity(activity, msgs))
+                    return Redirect(account.HomePageUrl);
+
                 if (activity.IsEmpty())
                     return RedirectToProfile(account.UniqueName, "Activity not found", MessageType.Error);
 

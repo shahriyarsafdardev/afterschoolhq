@@ -42,6 +42,23 @@ namespace AfterSchoolLibraryTests.Factories
             return obj;
         }
 
+        public static Activity CreateWithCE(Account account, bool isContinuousEnrollment, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var name = "Test Activity";
+            var obj = new Activity()
+            {
+                AccountId = account.ID,
+                SeatsAvailable = 4,
+                Name = name,
+                UniqueName = ActivityService.GenerateUniqueName(name, null, account.ID, msgs, dc),
+                GradeLevelStart = GradeLevel.Load(msgs: msgs, dc: dc).First().ID,
+                GradeLevelEnd = GradeLevel.Load(msgs: msgs, dc: dc).Last().ID,
+                IsContinuousEnrollment = isContinuousEnrollment
+            };
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
+
         public static Activity Create(Account account, string name, SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new Activity()
@@ -228,5 +245,13 @@ namespace AfterSchoolLibraryTests.Factories
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
+
+        public static Activity UpdateCE(Account account, Activity activity, bool isContinuousEnrollment, SystemMessages msgs, DatabaseConnection dc)
+        {
+            activity.IsContinuousEnrollment = isContinuousEnrollment;
+            msgs.AddRange(activity.Save(dc: dc));
+            return activity;
+        }
+
     }
 }

@@ -1059,5 +1059,56 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.True(isAllowed);
         }
+
+        [Fact]
+        public void ActivityCheckLogOut()
+        {
+            var user = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(user, msgs, dc);
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            ActivityWebUserFactory.Create(activity, user, msgs, dc);
+
+            Assert.True(!activity.IsPublished && user.HasAccessToActivity(activity, msgs, dc));
+        }
+
+        [Fact]
+        public void ActivityCheckLogOutFailedCase1()
+        {
+            var user = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(user, msgs, dc);
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            activity.IsPublished = true;
+            activity.Save(dc);
+            ActivityWebUserFactory.Create(activity, user, msgs, dc);
+
+            Assert.False(!activity.IsPublished && user.HasAccessToActivity(activity, msgs, dc));
+        }
+
+        [Fact]
+        public void CreateActivityWithCE()
+        {
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(user, msgs, dc);
+            var activity = Factories.ActivityFactory.CreateWithCE(account, true, msgs, dc);
+            activity.Publish(user, msgs, dc);
+
+            Assert.True(activity.IsPublished);
+            Assert.True(activity.IsPubliclyViewable);
+        }
+
+        [Fact]
+        public void UpdateActivityWithCETest()
+        {
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(user, msgs, dc);
+            var schedule = ActivityScheduleFactory.Create(account, msgs, dc);
+            var activity = ActivityFactory.Create(account, schedule, msgs, dc);
+            ActivityFactory.UpdateCE(account, activity, true, msgs,dc);
+            activity.Publish(user, msgs, dc);
+
+            Assert.True(msgs.HasNoErrors());
+            Assert.True(activity.IsPublished);
+            Assert.True(activity.IsPubliclyViewable);
+        }
     }
 }

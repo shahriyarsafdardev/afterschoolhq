@@ -21,7 +21,7 @@ namespace AfterSchoolLibraryTests.Tests
         public AccountServiceTest(ITestOutputHelper output) : base(output)
         {
             user = WebUserFactory.Create(msgs, dc);
-            account = AccountFactory.Create(user, msgs, dc);
+            account = AccountFactory.Create(user, msgs, dc);            
         }
 
         [Fact(DisplayName = "CreateNewTest")]
@@ -3187,8 +3187,9 @@ namespace AfterSchoolLibraryTests.Tests
 
             var purchasingAccountOwner = WebUserFactory.Create("purchasingUser", "A", "purchasingUserA@test.com", true, msgs, dc);
             var purchasingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", purchasingAccountOwner, AccountType.Registrant, msgs, dc);
-
+            
             var period = RegistrationPeriodFactory.Create(billingAccount, msgs, dc);
+            
             var activity = ActivityFactory.Create(account: billingAccount, costPerRegistrant: amount, msgs: msgs, dc: dc);
             msgs.AddRange(period.AddActivity(activity, true, billingAccountOwner.ID.Value, dc));
             activity.Publish(billingAccountOwner, msgs, dc);
@@ -3263,5 +3264,474 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(length, actActivities.Count);
         }
 
+        [Theory(DisplayName = "ProcessSubscriptionPlan Test", Skip = "Stripe Dependency")]
+        [InlineData(110, 5)]
+        [InlineData(12, 5)]
+        public void ProcessSubscriptionPlanTest(decimal amount, decimal paymentTypeFeeOverrideAmount)
+        {
+            // Arrange
+            var billingAccountOwner = WebUserFactory.Create("Don", "John", "DonJohn@test.com", true, msgs, dc);
+            var payingAccountOwner = WebUserFactory.Create("Cristine", "Trump", "CristineTrump@test.com", true, msgs, dc);
+            var billingAccount = AccountFactory.CreateAccount(billingAccountOwner, AccountType.School, stripeChargesEnabled: true, stripePayoutsEnabled: true, msgs, dc);
+            var payingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", payingAccountOwner, AccountType.School, msgs, dc);
+            var masterRegistrant = RegistrantFactory.Create(payingAccount, isMaster: true, msgs, dc);
+
+            //UseStripeConnectedAccount is true for this package
+            var package = PackageFactory.CreateFreePackageWithUseStripeConnectedAccount(msgs, dc);
+            AccountPackageFactory.Create(billingAccount, package, msgs, dc);            
+
+            var activity = ActivityFactory.Create(billingAccount, msgs, dc: dc);
+            var registrant = RegistrantFactory.Create(billingAccount, isMaster: false, msgs, dc: dc);
+            var registration = RegistrationFactory.Create(billingAccount, registrant, msgs, dc);
+            var subscriptionPlan = SubscriptionPlanFactory.Create(billingAccount, activity, SubscriptionPlanType.Subscription, amount, msgs, dc);
+
+            AccountFactory.CreateStripeAccountAndCustomer(billingAccount, msgs, dc);
+            var stripePayingObject = AccountFactory.CreateStripeAccountAndCustomer(payingAccount, msgs, dc);
+            var sourceId = payingAccount.CreateStripeSourceFromToken(StripeHelper.TestSourceToken, stripePayingObject.Item2, msgs, dc);
+
+            var creditCardPurchaseObject = new CreditCardPurchaseObject()
+            {
+                StripeToken = StripeHelper.TestSourceToken,
+                StripeSourceId = sourceId
+            };
+
+            // Will wait for 10 seconds for stripe to create this account
+            DelayExecution(10000);
+
+            var participationObject = activity.GetParticipationObject(msgs, dc);
+            var checkoutObject = new CheckoutObject()
+            {
+                BillingAccount = billingAccount,
+                PayingAccount = payingAccount,
+                Coupon = null,
+                OverrideAmount = amount,
+                MasterRegistrant = masterRegistrant,
+                NumberOfSeats = 1,
+                ParticipationObject = participationObject,
+                SubscriptionPlan = subscriptionPlan,
+                PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                //ConvenienceFeeOverrideAmount = 5,
+                PaymentTypeFeeOverrideAmount = paymentTypeFeeOverrideAmount,
+                PaymentType = PaymentType.CreditCard,
+                CreditCardPurchaseObject = creditCardPurchaseObject,
+                SavePaymentInfo = true,
+                Registration = registration
+            };
+
+            //Act
+            AccountService.ProcessSubscriptionPlan(
+                checkoutObject,
+                masterRegistrant,
+                payingAccountOwner,
+                msgs,
+                dc);
+
+            //Assert
+            //account
+            Assert.NotNull(billingAccount);
+            Assert.NotNull(payingAccount);
+
+            //activity
+            Assert.NotNull(activity);
+            Assert.Equal(activity?.AccountId, billingAccount.ID.Value);
+
+            //registrant
+            Assert.NotNull(registrant);
+            Assert.NotNull(masterRegistrant);
+            Assert.Equal(registrant?.AccountId, billingAccount.ID.Value);
+            Assert.Equal(masterRegistrant?.AccountId, payingAccount.ID.Value);
+
+            //registration
+            Assert.NotNull(registration);
+            Assert.Equal(registration?.RegistrantId, registrant.ID.Value);
+            Assert.Equal(registration?.AccountId, billingAccount.ID.Value);
+
+            var startDateTime = masterRegistrant.GetPlanStartDate(subscriptionPlan, participationObject, msgs, dc);
+            var endDateTime = subscriptionPlan.GetPlanEndDateForRegistrantSubscription(startDateTime, participationObject, msgs);
+            var isSubscriptionRequired = true;
+
+            if (startDateTime.IsNotEmpty() && endDateTime.IsNotEmpty())
+                isSubscriptionRequired = subscriptionPlan.CheckIfSubscriptionRequired(startDateTime, endDateTime.Value);
+
+            if (isSubscriptionRequired)
+            {
+                //registrantSubscriptionPlan
+                var registrantSubscriptionPlan = checkoutObject.RegistrantSubscriptionPlan;
+                Assert.NotNull(registrantSubscriptionPlan);
+                Assert.Equal(registrantSubscriptionPlan?.Amount, amount);
+                Assert.Equal(registrantSubscriptionPlan?.SubscriptionPlanId, subscriptionPlan.ID.Value);
+
+                //here we will use masterRegistrant as we created plan for him
+                Assert.Equal(registrantSubscriptionPlan?.RegistrantId, masterRegistrant.ID.Value);
+                Assert.Equal(registrantSubscriptionPlan?.ConvenienceFee, checkoutObject.GetSubscriptionCostTodayConvenienceFee(msgs, dc));
+                Assert.Equal(registrantSubscriptionPlan?.PaymentTypeFee, checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc));
+
+                //subscription plan
+                Assert.NotNull(subscriptionPlan);
+                Assert.Equal(subscriptionPlan?.ParticipationObjectId, participationObject.ObjectID.Value);
+                Assert.Equal(subscriptionPlan?.ParticipationObjectTypeId, participationObject.ObjectType);
+                Assert.Equal(subscriptionPlan?.CostPerPeriod, amount);
+                Assert.Equal(subscriptionPlan?.PlanOwnerAccountId, billingAccount.ID.Value);
+                Assert.Equal(BillingPeriodType.Month, subscriptionPlan?.BillingPeriodTypeId);
+                Assert.Equal(SubscriptionPlanType.Subscription, subscriptionPlan?.PlanTypeId);
+
+                //purchase
+                var purchase = checkoutObject.Purchase;
+                Assert.NotNull(purchase);
+                Assert.Equal(purchase?.ID, purchase.ID.Value);
+                Assert.Equal(purchase?.AmountPaid, amount);
+                Assert.Equal(purchase?.RegistrationId, registration.ID.Value);
+                Assert.Equal(purchase?.RegistrantId, masterRegistrant.ID.Value);
+                Assert.Equal(purchase?.PurchaserAccountId, payingAccount.ID.Value);
+            }
+
+            //Stripe
+            var product = StripeHelper.GetProduct(activity.Uid.ToString(), stripeAccountId: null, msgs);
+            Assert.NotNull(product);
+
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Theory(DisplayName = "ProcessPaymentPlan Test", Skip = "Stripe Dependency")]
+        [InlineData(110, 5)]
+        [InlineData(12, 5)]
+        public void ProcessPaymentPlanTest(decimal amount, decimal paymentTypeFeeOverrideAmount)
+        {
+            // Arrange
+            var StartDate = DateTime.UtcNow;
+            var EndDate = DateTime.UtcNow.AddDays(35);
+            var billingAccountOwner = WebUserFactory.Create("Don", "John", "DonJohn@test.com", true, msgs, dc);
+            var payingAccountOwner = WebUserFactory.Create("Cristine", "Trump", "CristineTrump@test.com", true, msgs, dc);
+            var billingAccount = AccountFactory.CreateAccount(billingAccountOwner, AccountType.School, stripeChargesEnabled: true, stripePayoutsEnabled: true, msgs, dc);
+            var payingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", payingAccountOwner, AccountType.School, msgs, dc);
+            var masterRegistrant = RegistrantFactory.Create(payingAccount, isMaster: true, msgs, dc);
+
+            //UseStripeConnectedAccount is true for this package
+            var package = PackageFactory.CreateFreePackageWithUseStripeConnectedAccount(msgs, dc);
+            AccountPackageFactory.Create(billingAccount, package, msgs, dc);
+
+            var activity = ActivityFactory.Create(billingAccount, msgs, dc: dc);
+            var registrant = RegistrantFactory.Create(billingAccount, isMaster: false, msgs, dc: dc);
+            var registration = RegistrationFactory.Create(billingAccount, registrant, msgs, dc);
+            var subscriptionPlan = SubscriptionPlanFactory.Create(billingAccount, activity, SubscriptionPlanType.PaymentPlan, amount, msgs, dc);
+
+            AccountFactory.CreateStripeAccountAndCustomer(billingAccount, msgs, dc);
+            var stripePayingObject = AccountFactory.CreateStripeAccountAndCustomer(payingAccount, msgs, dc);
+            var sourceId = payingAccount.CreateStripeSourceFromToken(StripeHelper.TestSourceToken, stripePayingObject.Item2, msgs, dc);
+
+            var creditCardPurchaseObject = new CreditCardPurchaseObject()
+            {
+                StripeToken = StripeHelper.TestSourceToken,
+                StripeSourceId = sourceId
+            };
+
+            // Will wait for 10 seconds for stripe to create this account
+            DelayExecution(10000);
+
+            var participationObject = activity.GetParticipationObject(msgs, dc);
+            var checkoutObject = new CheckoutObject()
+            {
+                BillingAccount = billingAccount,
+                PayingAccount = payingAccount,
+                Coupon = null,
+                OverrideAmount = amount,
+                MasterRegistrant = masterRegistrant,
+                NumberOfSeats = 1,
+                ParticipationObject = participationObject,
+                SubscriptionPlan = subscriptionPlan,
+                PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                //ConvenienceFeeOverrideAmount = 5,
+                PaymentTypeFeeOverrideAmount = paymentTypeFeeOverrideAmount,
+                PaymentType = PaymentType.CreditCard,
+                CreditCardPurchaseObject = creditCardPurchaseObject,
+                SavePaymentInfo = true,
+                Registration = registration,
+                PaymentPlan = subscriptionPlan.PlanTypeId == SubscriptionPlanType.PaymentPlan ? subscriptionPlan : null,
+
+            };
+
+            //Act
+            AccountService.ProcessPaymentPlan(
+                checkoutObject,
+                masterRegistrant,
+                payingAccountOwner,
+                msgs,
+                dc);
+           
+          
+            Assert.True(msgs.HasNoErrors());
+           
+            //Assert
+            //account
+            Assert.NotNull(billingAccount);
+            Assert.NotNull(payingAccount);
+
+            //activity
+            Assert.NotNull(activity);
+            Assert.Equal(activity?.AccountId, billingAccount.ID.Value);
+
+            //registrant
+            Assert.NotNull(registrant);
+            Assert.NotNull(masterRegistrant);
+            Assert.Equal(registrant?.AccountId, billingAccount.ID.Value);
+            Assert.Equal(masterRegistrant?.AccountId, payingAccount.ID.Value);
+
+            //registration
+            Assert.NotNull(registration);
+            Assert.Equal(registration?.RegistrantId, registrant.ID.Value);
+            Assert.Equal(registration?.AccountId, billingAccount.ID.Value);
+
+            var startDateTime = masterRegistrant.GetPlanStartDate(subscriptionPlan, participationObject, msgs, dc);
+            var endDateTime = subscriptionPlan.GetPlanEndDateForRegistrantSubscription(startDateTime, participationObject, msgs);
+            var isSubscriptionRequired = true;
+
+            if (startDateTime.IsNotEmpty() && endDateTime.IsNotEmpty())
+                isSubscriptionRequired = subscriptionPlan.CheckIfSubscriptionRequired(startDateTime, endDateTime.Value);
+
+            if (isSubscriptionRequired)
+            {
+                //registrantSubscriptionPlan
+                var registrantSubscriptionPlan = checkoutObject.RegistrantSubscriptionPlan;
+                Assert.NotNull(registrantSubscriptionPlan);
+                Assert.Equal(registrantSubscriptionPlan?.Amount, amount);
+                Assert.Equal(registrantSubscriptionPlan?.SubscriptionPlanId, subscriptionPlan.ID.Value);
+
+                //here we will use masterRegistrant as we created plan for him
+                Assert.Equal(registrantSubscriptionPlan?.RegistrantId, masterRegistrant.ID.Value);
+                Assert.Equal(registrantSubscriptionPlan?.ConvenienceFee, checkoutObject.GetSubscriptionCostTodayConvenienceFee(msgs, dc));
+                Assert.Equal(registrantSubscriptionPlan?.PaymentTypeFee, checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc));
+
+                //subscription plan
+                Assert.NotNull(subscriptionPlan);
+                Assert.Equal(subscriptionPlan?.ParticipationObjectId, participationObject.ObjectID.Value);
+                Assert.Equal(subscriptionPlan?.ParticipationObjectTypeId, participationObject.ObjectType);
+                Assert.Equal(subscriptionPlan?.CostPerPeriod, amount);
+                Assert.Equal(subscriptionPlan?.PlanOwnerAccountId, billingAccount.ID.Value);
+                Assert.Equal(BillingPeriodType.Month, subscriptionPlan?.BillingPeriodTypeId);
+                Assert.Equal(SubscriptionPlanType.Subscription, subscriptionPlan?.PlanTypeId);
+
+                //purchase
+                var purchase = checkoutObject.Purchase;
+                Assert.NotNull(purchase);
+                Assert.Equal(purchase?.ID, purchase.ID.Value);
+                Assert.Equal(purchase?.AmountPaid, amount);
+                Assert.Equal(purchase?.RegistrationId, registration.ID.Value);
+                Assert.Equal(purchase?.RegistrantId, masterRegistrant.ID.Value);
+                Assert.Equal(purchase?.PurchaserAccountId, payingAccount.ID.Value);
+            }
+
+            //Stripe
+            var product = StripeHelper.GetProduct(activity.Uid.ToString(), stripeAccountId: null, msgs);
+            Assert.NotNull(product);
+
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Theory(DisplayName = "ProcessPostPayPlan Test", Skip = "Stripe Dependency")]
+        [InlineData(110, 5)]
+        [InlineData(12, 5)]
+        public void ProcessPostPayPlanTest(decimal amount, decimal paymentTypeFeeOverrideAmount)
+        {
+            // Arrange
+            var billingAccountOwner = WebUserFactory.Create("Don", "John", "DonJohn@test.com", true, msgs, dc);
+            var payingAccountOwner = WebUserFactory.Create("Cristine", "Trump", "CristineTrump@test.com", true, msgs, dc);
+           
+            var billingAccount = AccountFactory.CreateAccount(billingAccountOwner, AccountType.School, stripeChargesEnabled: true, stripePayoutsEnabled: true, msgs, dc);
+            var payingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", payingAccountOwner, AccountType.School, msgs, dc);
+            var masterRegistrant = RegistrantFactory.Create(payingAccount, isMaster: true, msgs, dc);
+
+            //UseStripeConnectedAccount is true for this package
+            var package = PackageFactory.CreateFreePackageWithUseStripeConnectedAccount(msgs, dc);
+            AccountPackageFactory.Create(billingAccount, package, msgs, dc);
+
+            var activity = ActivityFactory.Create(billingAccount, msgs, dc: dc);
+            var registrant = RegistrantFactory.Create(billingAccount, isMaster: false, msgs, dc: dc);
+            var registration = RegistrationFactory.Create(billingAccount, registrant, msgs, dc);
+            var subscriptionPlan = SubscriptionPlanFactory.Create(billingAccount, activity, SubscriptionPlanType.PostPayPlan, amount, msgs, dc);
+
+            AccountFactory.CreateStripeAccountAndCustomer(billingAccount, msgs, dc);
+            var stripePayingObject = AccountFactory.CreateStripeAccountAndCustomer(payingAccount, msgs, dc);
+            var sourceId = payingAccount.CreateStripeSourceFromToken(StripeHelper.TestSourceToken, stripePayingObject.Item2, msgs, dc);
+
+            var creditCardPurchaseObject = new CreditCardPurchaseObject()
+            {
+                StripeToken = StripeHelper.TestSourceToken,
+                StripeSourceId = sourceId
+            };
+
+            // Will wait for 10 seconds for stripe to create this account
+            DelayExecution(10000);
+
+            var participationObject = activity.GetParticipationObject(msgs, dc);
+            var checkoutObject = new CheckoutObject()
+            {
+                BillingAccount = billingAccount,
+                PayingAccount = payingAccount,
+                Coupon = null,
+                OverrideAmount = amount,
+                MasterRegistrant = masterRegistrant,
+                NumberOfSeats = 1,
+                ParticipationObject = participationObject,
+                SubscriptionPlan = subscriptionPlan,
+                PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                //ConvenienceFeeOverrideAmount = 5,
+                PaymentTypeFeeOverrideAmount = paymentTypeFeeOverrideAmount,
+                PaymentType = PaymentType.CreditCard,
+                CreditCardPurchaseObject = creditCardPurchaseObject,
+                ConvenienceFeePayer = billingAccount,
+                CreditCardFeePayer = billingAccount,
+                SavePaymentInfo = true,
+                Registration = registration,
+                PostPayPlan = subscriptionPlan
+            };
+
+            //Act
+            AccountService.ProcessPostPayPlan(
+                checkoutObject,
+                user,
+                msgs,
+                dc);
+
+            //Assert
+            //account
+            Assert.NotNull(billingAccount);
+            Assert.NotNull(payingAccount);
+
+            //activity
+            Assert.NotNull(activity);
+            Assert.Equal(activity?.AccountId, billingAccount.ID.Value);
+
+            //registrant
+            Assert.NotNull(registrant);
+            Assert.NotNull(masterRegistrant);
+            Assert.Equal(registrant?.AccountId, billingAccount.ID.Value);
+            Assert.Equal(masterRegistrant?.AccountId, payingAccount.ID.Value);
+
+            //registration
+            Assert.NotNull(registration);
+            Assert.Equal(registration?.RegistrantId, registrant.ID.Value);
+            Assert.Equal(registration?.AccountId, billingAccount.ID.Value);
+
+            var startDateTime = masterRegistrant.GetPlanStartDate(subscriptionPlan, participationObject, msgs, dc);
+            var endDateTime = subscriptionPlan.GetPlanEndDateForRegistrantSubscription(startDateTime, participationObject, msgs);
+            var isSubscriptionRequired = true;
+
+            if (startDateTime.IsNotEmpty() && endDateTime.IsNotEmpty())
+                isSubscriptionRequired = subscriptionPlan.CheckIfSubscriptionRequired(startDateTime, endDateTime.Value);
+        
+            //Stripe
+            var product = StripeHelper.GetProduct(activity.Uid.ToString(), stripeAccountId: null, msgs);
+            Assert.NotNull(product);
+
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        [Theory(DisplayName = "ProcessRegistrationWithPayment Test", Skip = "Stripe Dependency")]
+        [InlineData(110, 5, SubscriptionPlanType.Subscription,10)]
+        public void ProcessRegistrationWithPaymentTest(decimal amount, decimal paymentTypeFeeOverrideAmount, SubscriptionPlanType subscriptionPlanType, decimal costPerPeriod)
+        {
+            // Arrange
+            var billingAccountOwner = WebUserFactory.Create("Don", "John", "DonJohn@test.com", true, msgs, dc);
+            var payingAccountOwner = WebUserFactory.Create("Cristine", "Trump", "CristineTrump@test.com", true, msgs, dc);
+            var billingAccount = AccountFactory.CreateAccount(billingAccountOwner, AccountType.School, stripeChargesEnabled: true, stripePayoutsEnabled: true, msgs, dc);
+            var payingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", payingAccountOwner, AccountType.School, msgs, dc);
+            var masterRegistrant = RegistrantFactory.CreateWithNames(payingAccount, isMaster: true, msgs, dc);
+
+            //UseStripeConnectedAccount is true for this package
+            var package = PackageFactory.CreateFreePackageWithUseStripeConnectedAccount(msgs, dc);
+            AccountPackageFactory.Create(billingAccount, package, msgs, dc);
+
+            var activity = ActivityFactory.Create(billingAccount, msgs, dc: dc);
+            var registrant = RegistrantFactory.CreateWithNames(billingAccount, isMaster: false, msgs, dc: dc);
+            var registration = RegistrationFactory.Create(billingAccount, registrant, msgs, dc);
+            var subscriptionPlan = SubscriptionPlanFactory.Create(planOwnerAccount: account, activity: activity, planType: subscriptionPlanType , costPerPeriod: costPerPeriod, msgs: msgs, dc: dc);
+
+            AccountFactory.CreateStripeAccountAndCustomer(billingAccount, msgs, dc);
+            var stripePayingObject = AccountFactory.CreateStripeAccountAndCustomer(payingAccount, msgs, dc);
+            var sourceId = payingAccount.CreateStripeSourceFromToken(StripeHelper.TestSourceToken, stripePayingObject.Item2, msgs, dc);
+
+            var creditCardPurchaseObject = new CreditCardPurchaseObject()
+            {
+                StripeToken = StripeHelper.TestSourceToken,
+                StripeSourceId = sourceId
+            };
+
+            // Will wait for 10 seconds for stripe to create this account
+            DelayExecution(10000);
+
+            var participationObject = activity.GetParticipationObject(msgs, dc);
+            var checkoutObject = new CheckoutObject()
+            {
+                BillingAccount = billingAccount,
+                PayingAccount = payingAccount,
+                Coupon = null,
+                OverrideAmount = amount,
+                MasterRegistrant = masterRegistrant,
+                NumberOfSeats = 1,
+                ParticipationObject = participationObject,
+                SubscriptionPlan = subscriptionPlan,
+                PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                //ConvenienceFeeOverrideAmount = 5,
+                PaymentTypeFeeOverrideAmount = paymentTypeFeeOverrideAmount,
+                PaymentType = PaymentType.CreditCard,
+                CreditCardPurchaseObject = creditCardPurchaseObject,
+                SavePaymentInfo = true,
+                Registration = registration
+            };
+
+            //Act
+            AccountService.ProcessRegistrationWithPayment(
+                checkoutObject,
+                payingAccountOwner,
+                msgs,
+                dc);
+
+            //Assert
+            //account
+            Assert.NotNull(billingAccount);
+            Assert.NotNull(payingAccount);
+
+            //activity
+            Assert.NotNull(activity);
+            Assert.Equal(activity?.AccountId, billingAccount.ID.Value);
+
+            //registrant
+            Assert.NotNull(registrant);
+            Assert.NotNull(masterRegistrant);
+            Assert.Equal(registrant?.AccountId, billingAccount.ID.Value);
+            Assert.Equal(masterRegistrant?.AccountId, payingAccount.ID.Value);
+
+            //registration
+            Assert.NotNull(registration);
+            Assert.Equal(registration?.RegistrantId, registrant.ID.Value);
+            Assert.Equal(registration?.AccountId, billingAccount.ID.Value);
+
+            var startDateTime = masterRegistrant.GetPlanStartDate(subscriptionPlan, participationObject, msgs, dc);
+            var endDateTime = subscriptionPlan.GetPlanEndDateForRegistrantSubscription(startDateTime, participationObject, msgs);
+            var isSubscriptionRequired = true;
+
+            if (startDateTime.IsNotEmpty() && endDateTime.IsNotEmpty())
+                isSubscriptionRequired = subscriptionPlan.CheckIfSubscriptionRequired(startDateTime, endDateTime.Value);
+
+            Assert.True(msgs.HasNoErrors());
+        }        
+
+        [Fact]
+        public void UpdateUserTypeTest()
+        {
+            //Arrage
+            var user = WebUserFactory.Create(true, msgs, dc);
+            var webUser = WebUserFactory.Create(true, msgs, dc);
+            var account = AccountFactory.Create(user, msgs, dc);
+
+            var accountWebUser = AccountWebUserFactory.Create(account, user, UserType.Administrator, true, msgs, dc);
+
+            //Act
+            AccountWebUserService.UpdateUserType(accountWebUser, webUser, "6", msgs, dc);
+
+            //Assert
+            Assert.True(accountWebUser.UserTypeId == UserType.Staff);
+            Assert.True(accountWebUser.LastModifiedBy == webUser.ID);
+        }
     }
 }

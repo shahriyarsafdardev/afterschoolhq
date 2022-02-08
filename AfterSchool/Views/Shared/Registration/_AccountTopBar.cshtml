@@ -96,7 +96,7 @@
 <div class="reg-login-bar">
     @if (Model.IsNotEmpty() && Model.ID.HasValue)
     {
-    <div class="row">
+    <div class="row" style="line-height: 35px;">
         <div class="col-md-4 col-sm-4 col-xs-12">
 
             @if (isAccount && isAccountAndLoggedInUserIsOwner && Model.OnboardingCompletionStatus() != GettingStartedOptions.ProcessCompleted && isOnboardingStepsAcknowledged != "True" && !isInEditMode)
@@ -220,8 +220,15 @@
             @if (registrationStartPage.IsNotEmpty())
             {
                 <a href="@registrationStartPage.HomePageUrl" class="reg-login-bar-homepage">
-                    <span class="reg-login-bar-title">@registrationStartPage.Name</span>
+                    <span class="reg-login-bar-title" style="@(ViewData["InsideActDetails"] != null ? "color:#b2b2b4": "")">@registrationStartPage.Name</span>
                 </a>
+                if (ViewData["InsideActDetails"] != null)
+                {
+                    <span class="reg-login-bar-homepage" style="color:#b2b2b4; margin-top:8px; font-size:16px; margin-right:0 ">></span>
+                    <a href="javascript:void(0)" class="reg-login-bar-homepage">
+                        <span class="reg-login-bar-title">@ViewData["InsideActDetails"]</span>
+                    </a>
+                }
             }
             else if (currentUser.IsNotEmpty())
             {
@@ -240,20 +247,15 @@
         @if (!isDuringProfileSetup)
         {
             <div class="col-md-8 col-sm-8 col-xs-12">
-                <div class="btn-group pull-right">
-                    <div>
+                <div class="pull-right navTop">
+                    <input type="checkbox" id="nav-check">
+                    
+                    <div class="nav-links">
+
 
                         @RenderReturnToHomeUrl(session, registrationStartPage)
-                        <div class="dropdown selectLanguage" style="float:left">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <img src="~/Content/Flags/US.png" class="flagLang" /> English
-                            </button>
-                            <div class="dropdown-menu ddlOptions" aria-labelledby="dropdownMenuButton">
-                                <a class="dropdown-item languageOption selectedLang" href="javascript:void(0)" data-lang="en" data-text="English"><img src="~/Content/Flags/US.png" class="flagLang" /> English</a>
-                                <a class="dropdown-item languageOption notSelectedLang" href="javascript:void(0)" data-lang="es" data-text="Espanol"><img src="~/Content/Flags/spain.png" class="flagLang" /> Espanol</a>
-                            </div>
-                        </div>
-                        <div id='google_translate_element'></div>
+                        @Html.Partial("_GoogleTranslateDropDown");
+
                         @if (currentUser.IsNotEmpty())
                         {
 
@@ -321,18 +323,10 @@
         {
             <div class="col-md-8 col-sm-8 col-xs-12">
              <div class="btn-group pull-right">
-                <div class="dropdown selectLanguage" style="float:left">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <img src="~/Content/Flags/US.png" class="flagLang" /> English
-                    </button>
-                    <div class="dropdown-menu ddlOptions" aria-labelledby="dropdownMenuButton">
-                        <a class="dropdown-item languageOption selectedLang" href="javascript:void(0)" data-lang="en" data-text="English"><img src="~/Content/Flags/US.png" class="flagLang" /> English</a>
-                        <a class="dropdown-item languageOption notSelectedLang" href="javascript:void(0)" data-lang="es" data-text="Espanol"><img src="~/Content/Flags/spain.png" class="flagLang" /> Espanol</a>
-                    </div>
-                </div>
-                <div id='google_translate_element'></div>
+                 @Html.Partial("_GoogleTranslateDropDown");
             </div>
             </div>
+
         }
     </div>
     }

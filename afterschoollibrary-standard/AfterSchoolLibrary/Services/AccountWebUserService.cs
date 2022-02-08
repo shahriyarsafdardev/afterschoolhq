@@ -32,6 +32,14 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(awu.Save(dc));
         }
 
+        public static void UpdateUserType(this AccountWebUser awu, WebUser loggedInUser, string usertype, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            awu.LastModifiedDate = DateTime.UtcNow;
+            awu.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+            awu.UserTypeId = usertype.ToEnum<UserType>();
+            msgs.AddRange(awu.Save(dc));
+        }
+
         public static Account GetAccount(this AccountWebUser awu, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return Account.Load(awu.AccountId.Value, msgs, dc);
