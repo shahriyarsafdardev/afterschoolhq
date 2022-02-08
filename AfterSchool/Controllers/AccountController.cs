@@ -2729,8 +2729,7 @@ namespace AfterSchool.Controllers
             var answers = SessionVariables.CurrentRegistrant.GetAnswers(msgs);
 
             var questions = allQuestions
-                .Where(question => !question.IsDeleted && question.QuestionDataTypeId == QuestionDataType.NotSet)
-                .Where(question => answers.Find(answer => answer.FormQuestionId == question.ID).IsEmpty())
+                .Where(question => !question.IsDeleted && question.QuestionDataTypeId == QuestionDataType.NotSet && answers.Find(answer => answer.FormQuestionId == question.ID).IsEmpty())
                 .OrderBy(question => question.DisplayOrder)
                 .ToList();              
 
