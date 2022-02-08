@@ -327,12 +327,51 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		
 
-        #endregion
+
+		#endregion
 
 		#region "UserDefined"
+		public static List<WebSessionAction> LoadByAccountId(int AccountId, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
 
-        #endregion
-    }
+			dq.SelectRange.Start = start;
+			dq.SelectRange.Length = length;
+			dq.OrderBys.Add(ObjectMap["CreateDate"], OrderByDirectionEnum.Descending);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<WebSessionAction> LoadByAccountIdActivityId(int activityId, int AccountId, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			dq.Criterias.Add(ObjectMap["ObjectId"], activityId);
+			dq.Criterias.Add(ObjectMap["ObjectTypeId"], 10);
+
+			dq.SelectRange.Start = start;
+			dq.SelectRange.Length = length;
+			dq.OrderBys.Add(ObjectMap["CreateDate"], OrderByDirectionEnum.Descending);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<WebSessionAction> LoadByActivityGroupId(int groupId, int AccountId, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			dq.Criterias.Add(ObjectMap["ObjectId"], groupId);
+
+			dq.Criterias.Add(ObjectMap["ObjectTypeId"], 15);
+
+			dq.SelectRange.Start = start;
+			dq.SelectRange.Length = length;
+			dq.OrderBys.Add(ObjectMap["CreateDate"], OrderByDirectionEnum.Descending);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+		#endregion
+	}
 }
