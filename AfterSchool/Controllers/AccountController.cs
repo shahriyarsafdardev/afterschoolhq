@@ -2726,30 +2726,15 @@ namespace AfterSchool.Controllers
         private List<FormQuestion> RegisterStudentViewBag(ParticipationObject participationObject, SystemMessages msgs)
         {
             var allQuestions = participationObject.Form.GetActiveQuestions(msgs).ToList();
-            
-            var requiredQuestions = allQuestions
-                .Where(question => question.IsRequired &&
-                    question.FormQuestionGroupRegistrantTypeId == RegistrantType.Individual &&
-                    question.QuestionDataTypeId == QuestionDataType.NotSet) // bring only custome questions
-                .ToList();
-
             var answers = SessionVariables.CurrentRegistrant.GetAnswers(msgs);
 
-            var questions = requiredQuestions.Where(question =>
-                    answers.FirstOrDefault(answer => answer.QuestionDataTypeId == question.QuestionDataTypeId).IsEmpty() ||
-                    answers.FirstOrDefault(answer => answer.QuestionDataTypeId == question.QuestionDataTypeId).Text.IsBlank()
-                )
-                .Distinct()
-                .ToList();
-
-            questions.AddRange(allQuestions
+            var questions = allQuestions
                 .Where(question => !question.IsDeleted && question.QuestionDataTypeId == QuestionDataType.NotSet)
                 .Where(question => answers.Find(answer => answer.FormQuestionId == question.ID).IsEmpty())
                 .OrderBy(question => question.DisplayOrder)
-              );
+                .ToList();              
 
             ViewBag.Registrant = SessionVariables.CurrentRegistrant;
-
             return questions;
         }
 
