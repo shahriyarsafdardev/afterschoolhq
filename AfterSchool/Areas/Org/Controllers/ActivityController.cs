@@ -182,18 +182,23 @@ namespace AfterSchool.Areas.Org.Controllers
         }
       }
 
-      LoadEditSetupViewBag(activity, activityGroup, msgs);
-      ViewBag.ActiveMenu = "EditSetup";
+		LoadEditSetupViewBag(activity, activityGroup, msgs);
 
-      return View(activity);
+		// we should default to have ContinuousEnrollment off
+		if (id.IsEmpty())
+			activity.IsContinuousEnrollment = false;
+
+		ViewBag.ActiveMenu = "EditSetup";
+
+		return View(activity);
     }
 
-    [HttpPost]
-    public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type, string inviteonly, string minseatsrequired, string isAdvanceSettingEnabled, string costfrequencytype, string cutoffhours)
-    {
-		var currentAccount = SessionVariables.CurrentAccount;
-		var currentUser = SessionVariables.CurrentUser;
-		var msgs = new SystemMessages();
+        [HttpPost]
+        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type, string inviteonly, string minseatsrequired, string isAdvanceSettingEnabled, string costfrequencytype, string cutoffhours, string isContinuousEnrollmentEnabled)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
 
 		Activity activity;
 		Activity defaultActivity;
@@ -231,33 +236,34 @@ namespace AfterSchool.Areas.Org.Controllers
 			form = activeForm.FormId.Value.ToString();
 		}
 
-		if (msgs.HasNoErrors())
-		{
-			var values = new Dictionary<string, object>()
-					{
-						{ "name", name.MaxChars(75) },
-						{ "seatsavailable", seatsavailable },
-						{ "waitinglistseats", waitinglistseats },
-						{ "registrationperiod", registrationperiod },
-						{ "registrationopendate", registrationopendate },
-						{ "registrationopentime", registrationopentime },
-						{ "registrationclosedate", registrationclosedate },
-						{ "registrationclosetime", registrationclosetime },
-						{ "timezone", timezone },
-						{ "form", form },
-						{ "regmode", regmode.IsNotEmpty() ? regmode : ((int)RegistrationMode.Register).ToString() },
-						{ "group", group },
-						{ "type", type },
-						{ "inviteonly", inviteonly.IsBoolean().ToString() },
-						{ "minseatsrequired", minseatsrequired },
-						{ "gradestart", activity.IsNotEmpty()  ? activity.GradeLevelStart : defaultActivity.GradeLevelStart },
-						{ "gradeend", activity.IsNotEmpty() ? activity.GradeLevelEnd :defaultActivity.GradeLevelEnd },
-						{ "genderrestrictions", activity.IsNotEmpty() && activity.GenderRestriction.IsNotEmpty() ? (int)activity.GenderRestriction :(int)defaultActivity.GenderRestriction },
-						{ "agestart", activity.IsNotEmpty() ? activity.AgeStart : defaultActivity.AgeStart },
-						{ "ageend",activity.IsNotEmpty() ? activity.AgeEnd : defaultActivity.AgeEnd },
-						{ "costfrequencytype", costfrequencytype },
-						{ "cutoffhours", cutoffhours },
-					};
+            if (msgs.HasNoErrors())
+            {
+                var values = new Dictionary<string, object>()
+                {
+                    { "name", name.MaxChars(75) },
+                    { "seatsavailable", seatsavailable },
+                    { "waitinglistseats", waitinglistseats },
+                    { "registrationperiod", registrationperiod },
+                    { "registrationopendate", registrationopendate },
+                    { "registrationopentime", registrationopentime },
+                    { "registrationclosedate", registrationclosedate },
+                    { "registrationclosetime", registrationclosetime },
+                    { "timezone", timezone },
+                    { "form", form },
+                    { "regmode", regmode.IsNotEmpty() ? regmode : ((int)RegistrationMode.Register).ToString() },
+                    { "group", group },
+                    { "type", type },
+                    { "inviteonly", inviteonly.IsBoolean().ToString() },
+                    { "minseatsrequired", minseatsrequired },
+                    { "gradestart", activity.IsNotEmpty()  ? activity.GradeLevelStart : defaultActivity.GradeLevelStart },
+                    { "gradeend", activity.IsNotEmpty() ? activity.GradeLevelEnd :defaultActivity.GradeLevelEnd },
+                    { "genderrestrictions", activity.IsNotEmpty() && activity.GenderRestriction.IsNotEmpty() ? (int)activity.GenderRestriction :(int)defaultActivity.GenderRestriction },
+                    { "agestart", activity.IsNotEmpty() ? activity.AgeStart : defaultActivity.AgeStart },
+                    { "ageend",activity.IsNotEmpty() ? activity.AgeEnd : defaultActivity.AgeEnd },
+                    { "costfrequencytype", costfrequencytype },
+                    { "cutoffhours", cutoffhours },
+                    { "isContinuousEnrollmentEnabled", isContinuousEnrollmentEnabled.IsNotEmpty() && isContinuousEnrollmentEnabled.ToBoolean() },
+                };
 
 			if (activity.IsNotEmpty())
 			{
