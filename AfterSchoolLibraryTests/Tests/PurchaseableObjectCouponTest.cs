@@ -34,19 +34,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(PurchaseableObjectCoupon.Load(poc.ID.Value, msgs, dc).IsNotEmpty());
         }
 
-        [Theory]
-        [InlineData(8)]
-        [InlineData(2)]
-        public void GetCountTest(int numberToCreate)
-        {
-            for (var i = 0; i < numberToCreate; i++)
-            {
-                var poc = PurchaseableObjectCouponFactory.Create(PurchaseableObject, Coupon, msgs, dc);
-            }
-
-            Assert.Equal(numberToCreate, PurchaseableObjectCoupon.GetCount(msgs: msgs, dc: dc));
-        }
-
         [Fact]
         public void SaveTest()
         {
@@ -54,6 +41,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.True(msgs.HasNoErrors());
         }
+
         [Fact]
         public void DeleteTest()
         {
@@ -61,8 +49,9 @@ namespace AfterSchoolLibraryTests.Tests
 
             msgs.AddRange(poc.Delete(dc));
 
-            Assert.Equal(0, PurchaseableObjectCoupon.GetCount(msgs: msgs, dc: dc));
+            Assert.Null(PurchaseableObjectCoupon.Load(poc.ID.Value));
         }
+
         [Fact]
         public void ReloadTest()
         {

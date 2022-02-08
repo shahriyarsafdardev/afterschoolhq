@@ -185,4 +185,20 @@
     function sendPeriod(id) {
         $('#period-notify').val(id);
     }
+    function validateSetup(event) {
+        var startDate = moment($('#opendate').val());
+        var endDate = moment($('#closedate').val());
+        var beginningTime = moment($('#opentime').val(), 'h:mma');
+        var endingTime = moment($('#closetime').val(), 'h:mma');
+
+        if (endDate.isBefore(startDate) || (endDate.isSame(startDate) && (endingTime.isSame(beginningTime) || endingTime.isBefore(beginningTime)))) {
+            Notifications.showBar({
+                title: 'Error',
+                message: 'Please make sure the end date is after the start date.',
+                success: false
+            });
+            event.preventDefault();
+            return false;
+        }
+    }
 </script>

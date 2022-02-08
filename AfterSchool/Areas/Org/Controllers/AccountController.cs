@@ -613,6 +613,14 @@ namespace AfterSchool.Areas.Org.Controllers
 
                             if (accountFeature.FeatureTypeId == FeatureType.TrialDays && accountPackage.TrialStartDate.HasValue)
                                 amsgs.AddRange(accountPackage.UpdateTrialDays(accountFeature.Max.Value.ToInteger(), adc));
+                            else if (accountFeature.FeatureTypeId == FeatureType.ManualStripePayouts && a.StripeUserId.IsNotEmpty())
+                            {
+                                var manualStripePayouts = accountPackage.HasFeature(featureType: FeatureType.ManualStripePayouts, msgs: amsgs, dc: adc);
+                                if (manualStripePayouts)
+                                    StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: a.StripeUserId, accountName: a.Name, payoutIntervalType: PayoutIntervalType.Manual, msgs: amsgs);
+                                else
+                                    StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: a.StripeUserId, accountName: a.Name, payoutIntervalType: PayoutIntervalType.Daily, msgs: amsgs);
+                            }
                         }
                     }
                 },
@@ -704,6 +712,26 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
 
             return View("Team", account);
+        }
+
+        public ActionResult UpdateUserType(string userid, string newusertypeid)
+        {
+            var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+
+            if (userid.IsEmpty() || userid.Trim() == "0")
+                msgs.Add("User id cannot be empty", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                var user = WebUser.Load(userid.ToInteger(), msgs);
+                var awu = AccountWebUser.LoadByWebUserIdByIsDeleted(user.ID.Value, false, msgs).FirstOrDefault();
+
+                if (awu.IsNotEmpty())
+                    awu.UpdateUserType(currentUser, newusertypeid, msgs);
+            }
+
+            return Json(new { status = (msgs.HasNoErrors() ? "ok" : "error") },JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult TeamRemoveMember(string id)
@@ -1586,7 +1614,18 @@ namespace AfterSchool.Areas.Org.Controllers
                             currentAccount.UpdateStripeCard(cardId, customer, amsgs, adc);
 
                         if (amsgs.HasNoErrors())
+                        {
                             newlyAddedPackage = currentAccount.AddPackage(package.ID.Value, billingPeriod, SessionVariables.LoggedInUser, amsgs, adc);
+
+                            if (currentAccount.StripeUserId.IsNotEmpty())
+                            {
+                                var manualStripePayouts = newlyAddedPackage.HasFeature(featureType: FeatureType.ManualStripePayouts, msgs: amsgs, dc: adc);
+                                if (manualStripePayouts)
+                                    StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: currentAccount.StripeUserId, accountName: currentAccount.Name, payoutIntervalType: PayoutIntervalType.Manual, msgs: amsgs);
+                                else
+                                    StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: currentAccount.StripeUserId, accountName: currentAccount.Name, payoutIntervalType: PayoutIntervalType.Daily, msgs: amsgs);
+                            }
+                        }
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {

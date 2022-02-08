@@ -10,6 +10,8 @@
     var canDelete = SessionVariables.OriginalLoggedInUser.IsNotEmpty();
     string inviteUrl = Url.Action("invite", "user");
 
+    var currentUserType = currentUser.GetUserType(currentAccount);
+
     if (!ViewData["AccountId"].IsEmpty())
     {
         accountId = ViewData["AccountId"].ToString();
@@ -63,54 +65,93 @@
             {
                 foreach (WebUser user in Model)
                 {
-                    <tr>
+            <tr>
+                @if (isAfterSchoolAdmin)
+                {
+                    <td>
+                        <a href="@Url.Action("impersonate", "user", new { id = accountId, uid = @user.Uid })" class="btn btn-default btn-xs">
+                            <i class="icon icon-left s7-user"></i> View
+                        </a>
+                    </td>
+                }
+                <td>@user.DisplayName</td>
+                <td><a href="mailto:@user.Email">@user.Email</a></td>
+                <td>@user.IsRegistered.ToYesNo()</td>
+                <td>@user.IsActive.ToYesNo()</td>
+                @if (!isAfterSchoolAdmin)
+                {
+                <td>
+                    @if (currentUserType == UserType.Administrator || currentUserType == UserType.Owner || currentUserType == UserType.TechSupport)
+                    {
+                        if ((user.GetUserType(currentAccount) == UserType.Administrator || user.GetUserType(currentAccount) == UserType.Owner) && currentUserType == UserType.Administrator)
+                        {
+                            @user.GetUserType(currentAccount).ToString().SplitByUpperCase()
+                        }
+                        else if (user.GetUserType(currentAccount) == UserType.Owner && currentUserType == UserType.Owner)
+                        {
+                            @user.GetUserType(currentAccount).ToString().SplitByUpperCase()
+                        }
+                        else
+                        {
+                            <select name="newassignmenttype"
+                                    id="newassignmenttype-@user.ID"
+                                    class="form-control"
+                                    onchange="updateAssignment(@user.ID, '@UI.JavascriptSafeString(user.FullName)', this)">
+
+                                @foreach (var assignmenttype in Enum.GetValues(typeof(UserType)).Cast<UserType>())
+                                {
+                                    switch (assignmenttype)
+                                    {
+                                        case UserType.NotSet:
+                                        case UserType.Parent:
+                                        case UserType.Student:
+                                        case UserType.SuperAdmin:
+                                            continue;
+                                    }
+                                    <option value="@((int)assignmenttype)" @(assignmenttype == user.GetUserType(currentAccount) ? "selected=\"selected\"" : "")>
+                                        @assignmenttype.ToString().SplitByUpperCase()
+                                    </option>
+                                }
+                            </select>
+                        }
+                    }
+                    else
+                    {
+                        @user.GetUserType(currentAccount).ToString().SplitByUpperCase()
+                    }
+                </td>
+                }
+                <td>@user.CreateDate.Value.ToLongDateString()</td>
+                <td>
+                    <div class="btn-group">
                         @if (isAfterSchoolAdmin)
                         {
-                            <td>
-                                <a href="@Url.Action("impersonate", "user", new { id = accountId, uid = @user.Uid })" class="btn btn-default btn-xs">
-                                    <i class="icon icon-left s7-user"></i> View
-                                </a>
-                            </td>
+                            <a href="@Url.Action("edit", "user", new { id = user.Uid, returnUrl = returnUrl })" class="btn btn-default btn-xs">
+                                <i class="icon icon-left s7-edit"></i> Edit
+                            </a>
                         }
-                        <td>@user.DisplayName</td>
-                        <td><a href="mailto:@user.Email">@user.Email</a></td>
-                        <td>@user.IsRegistered.ToYesNo()</td>
-                        <td>@user.IsActive.ToYesNo()</td>
-                        @if (!isAfterSchoolAdmin)
+                        else if (!user.IsRegistered)
                         {
-                            <td>@user.GetUserType(currentAccount).ToString().SplitByUpperCase()</td>
+                            <button type="button"
+                                    class="btn btn-default btn-sm md-trigger"
+                                    data-modal="modal-invite"
+                                    onclick="showInviteLink('@user.GetInviteUrl(currentAccount)')">
+                                Get Invite Link
+                            </button>
+
                         }
-                        <td>@user.CreateDate.Value.ToLongDateString()</td>
-                        <td>
-                            <div class="btn-group">
-                                @if (isAfterSchoolAdmin)
-                                {
-                                    <a href="@Url.Action("edit", "user", new { id = user.Uid, returnUrl = returnUrl })" class="btn btn-default btn-xs">
-                                        <i class="icon icon-left s7-edit"></i> Edit
-                                    </a>
-                                }
-                                else if (!user.IsRegistered)
-                                {
-                                    <button type="button"
-                                            class="btn btn-default btn-sm md-trigger"
-                                            data-modal="modal-invite"
-                                            onclick="showInviteLink('@user.GetInviteUrl(currentAccount)')">
-                                        Get Invite Link
-                                    </button>
+                        else if (SessionVariables.AccountUserType.In(AccountService.AdminUserTypes) && (user.ID != currentUser.ID))
+                        {
+                            <button type="button"
+                                    class="btn btn-danger btn-sm md-trigger"
+                                    data-modal="modal-confirm-delete"
+                                    onclick="removeUser('@user.Uid', '@UI.JavascriptSafeString(user.DisplayName)')">
+                                <i class="s7-trash"></i> Remove
+                            </button>
 
-                                }
-                                else if (SessionVariables.AccountUserType.In(AccountService.AdminUserTypes) && (user.ID != currentUser.ID))
-                                {
-                                    <button type="button"
-                                            class="btn btn-danger btn-sm md-trigger"
-                                            data-modal="modal-confirm-delete"
-                                            onclick="removeUser('@user.Uid', '@UI.JavascriptSafeString(user.DisplayName)')">
-                                        <i class="s7-trash"></i> Remove
-                                    </button>
+                            Html.RenderPartial("~/Views/Shared/_Modal.cshtml", new ModalViewModel() { ActionButtonHtml = "Remove Team Member &raquo;", ActionButtonId = "btn-confirm-delete", HtmlBody = $"<p>Are you sure you want to remove <strong><span class=\"delete-user-name\"></span></strong> from the team?</p><p><strong>If you want to re-add <span class=\"delete-user-name\"></span> you will need to invite them again</strong></p>", ID = "modal-confirm-delete", Title = "Remove Team Member" });
 
-                                    Html.RenderPartial("~/Views/Shared/_Modal.cshtml", new ModalViewModel() { ActionButtonHtml = "Remove Team Member &raquo;", ActionButtonId = "btn-confirm-delete", HtmlBody = $"<p>Are you sure you want to remove <strong><span class=\"delete-user-name\"></span></strong> from the team?</p><p><strong>If you want to re-add <span class=\"delete-user-name\"></span> you will need to invite them again</strong></p>", ID = "modal-confirm-delete", Title = "Remove Team Member" });
-
-                                    <script>
+                            <script>
                                         var userUid = '';
                                         function removeUser(uid, name) {
                                             $('.delete-user-name').html(name);
@@ -121,11 +162,11 @@
                                                 location.href = '@Url.Action("TeamRemoveMember", "account")/' + userUid;
                                             });
                                         });
-                                    </script>
-                                }
-                            </div>
-                        </td>
-                    </tr>
+                            </script>
+                        }
+                    </div>
+                </td>
+            </tr>
                 }
             }
             else

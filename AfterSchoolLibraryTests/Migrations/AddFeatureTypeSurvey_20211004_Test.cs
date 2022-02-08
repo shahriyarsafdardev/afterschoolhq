@@ -23,15 +23,15 @@ namespace AfterSchoolLibraryTests.Migrations
             SchoolAccount = AccountFactory.CreateWithFreePackage(SchoolWebUser, AccountType.School, msgs, dc);
         }
 
-        [Fact]
-        public void RunMigration()
+        [Fact(Skip = "Use for debugging")]
+        public void Test()
         {    
             try
             {
                 // Arrange
                 if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-                AfterSchoolLibrary.Helpers.Utilities.AdditionalData(dc);
+                AfterSchoolLibrary.Helpers.DatabaseInit.AdditionalData(dc);
 
                 // Act                   
                  AfterSchoolLibrary.Migrations.AddFeatureTypeSurvey_20211004.Do(msgs, dc);

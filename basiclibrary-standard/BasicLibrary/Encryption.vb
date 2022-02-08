@@ -1,7 +1,5 @@
 Imports System.IO
-Imports System.Security
 Imports System.Security.Cryptography
-Imports System.Data.SqlClient
 
 ''' <summary>
 ''' Enum of all the Keys

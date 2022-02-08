@@ -31,7 +31,7 @@
         $('#modal-grade-ineligibility').removeClass('md-show');
 
         if (modifyCart) {
-            location.href = '@Model.GetBrowseUrl()';
+            location.href = '@(Model.OwnerAccount.IsNotEmpty() && Model.OwnerAccount.BrowseUrl.IsNotEmpty() ? Model.OwnerAccount.BrowseUrl : Model.GetBrowseUrl())';
         } else {
             location.href = '@Url.Action("select", "account")';
         }
