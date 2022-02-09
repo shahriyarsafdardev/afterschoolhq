@@ -117,23 +117,16 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Summary(string id)
         {
-            var league = ActivityGroup.LoadByUid(id.ToGuid());
-            var aag = AccountActivityGroup.LoadByAccountIdByActivityGroupId(SessionVariables.CurrentAccount.ID.Value, league.ID.Value);
+            var msgs = new SystemMessages();
+            var league = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
+            var aag = AccountActivityGroup.LoadByAccountIdByActivityGroupId(SessionVariables.CurrentAccount.ID.Value, league.ID.Value, msgs);
 
             if (!aag.IsPublished)
                 return RedirectToAction("publishwizard1", new { id = league.Uid });
 
             var registrations = aag.GetRegistrations();
-            var actions = SessionAction.LoadByActivityGroupId(
-                league.ID.Value,
-                new List<SessionActionType>() {
-                    SessionActionType.ActivityGroupCreate,
-                    SessionActionType.ActivityGroupPublish,
-                    SessionActionType.ActivityGroupUnpublish,
-                },
-                0,
-                15);
-            ViewBag.Messages = new SystemMessages();
+            var actions = WebSessionAction.LoadByActivityGroupId(league.ID.Value, SessionVariables.CurrentAccount.ID.Value, 0, 15, msgs);
+            ViewBag.Messages = msgs;
             ViewBag.Actions = actions;
             ViewBag.Registrations = registrations;
             ViewBag.AccountActivityGroup = aag;

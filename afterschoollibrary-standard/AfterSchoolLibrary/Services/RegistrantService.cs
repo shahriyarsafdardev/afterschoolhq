@@ -8,6 +8,7 @@ using System.Collections;
 using Twilio.Rest.Api.V2010.Account;
 using System.Net;
 using Newtonsoft.Json.Linq;
+using AfterSchoolLibrary.Helpers;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -1878,5 +1879,73 @@ namespace AfterSchoolLibrary.Services
         }
 
         private static string GetFormattedAnswerForCheckboxList(string s) => $"[" + s + "]";
+
+        public static RegistrantHelper PrepareRegistrantDetails(this List<Registrant> registrants, Registrant masterRegistrant, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var activityInstances = new List<(ActivityInstance ActivityInstance, Registrant Registrant, int? ParticipationObjectId, ParticipationObjectType ParticipationObjectType)>();
+            var providers = new List<Account>();
+            var registrantActivities = new List<RegistrantActivity>();
+
+            registrants.ForEach(registrant => {
+
+                if (registrant.SchoolLocationId.HasValue)
+                {
+                    var account = registrant.GetSchoolLocation(msgs, dc)?.GetHostAccount(msgs, dc);
+                    if (account.IsNotEmpty() && !providers.Any(provider => provider.ID == account.ID))
+                        providers.Add(account);
+                }
+
+                registrant.GetSubmittedRecords(msgs, dc).ForEach(submittedRecord => {
+
+                    var ras = submittedRecord.GetRegistrantActivities(Registration.ReservedStatuses, msgs, dc);
+                    var account = submittedRecord.GetAccount(msgs, dc);
+
+                    ras.ForEach(ra => {
+                        var schedule = ra.GetSchedule(msgs, dc);
+                        var instances = schedule?.GetInSessionInstances(msgs: msgs, dc: dc);
+                        var participantObject = new ParticipationObject(ra.ParticipationObjectId.Value, ra.ParticipationObjectTypeId, msgs, dc);
+
+                        if (instances.IsNotEmpty())
+                        {
+                            var activityInstanceSeats = ActivityInstanceSeats.LoadByRegistrantActivityId(ra.ID.Value, msgs, dc);
+                            if (participantObject.CanRegisterPerClass)
+                                instances.RemoveAll(instance => instance.ID.NotIn(activityInstanceSeats.Select(activityInstanceSeat => activityInstanceSeat.ActivityInstanceId)));
+
+                            // remove out of session instances from in session
+                            // this will required when there are dates for (Enter any dates that you will not meet), check schedule page of provider side
+                            instances.RemoveOutOfSessionInstances(schedule, msgs, dc);
+
+                            activityInstances.AddRange(instances.Select(instance => (
+                                instance,
+                                registrant,
+                                ra.ParticipationObjectId,
+                                ra.ParticipationObjectTypeId)));
+                        }
+                    });
+
+                    if (masterRegistrant.IsParentOrGuardian)
+                        registrantActivities.AddRange(ras);
+
+                    if (!providers.Any(provider => provider.ID == account.ID))
+                        providers.Add(account);
+                });
+            });
+
+            var model = new RegistrantHelper();
+            model.Providers = providers;
+            
+            model.ActivityInstances = activityInstances.Where(item => item.ActivityInstance.StartDateTime.Value.Date >= DateTime.UtcNow.Date)
+                .OrderBy(item => item.ActivityInstance.StartDateTime.Value)
+                .Take(10)
+                .ToList();
+
+            model.RegistrantActivities = registrantActivities.Where(ra =>
+                    (ra.AssignmentTypeId.In(new List<RegistrationAssignmentType>() { RegistrationAssignmentType.ReservedPendingParentalConsent, RegistrationAssignmentType.ReservedPendingPayment }) ||
+                    (ra.AssignmentTypeId == RegistrationAssignmentType.Applied && ra.GetRegistration(msgs, dc).ESignature.IsEmpty())) &&
+                    !ra.HasPlan(msgs, dc))
+                .ToList();
+
+            return model;
+        }
     }
 }
