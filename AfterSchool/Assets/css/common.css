@@ -1175,6 +1175,15 @@
     margin: 0 15px 0 0 !important;
 }
 
+.am-checkbox-updated input[type="checkbox"] + label:before {
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 14px !important;
+    border: solid 1px #00c5a3 !important;
+    border-radius: 0px !important;
+    margin: 0 15px 0 0 !important;
+}
+
 .btn-login-updated {
     width: 225px;
     height: 50px;

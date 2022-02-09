@@ -9,7 +9,6 @@
     var savedEmail = Model.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail)?.Value;
     var showStep1 = currentUser.IsEmpty() && savedEmail.IsBlank();
     var isDuringProfileSetup = currentUser.IsNotEmpty() || savedEmail.IsNotBlank();
-
     var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
 }
 
@@ -26,19 +25,17 @@
             { "ParticipationObject", participationObject },
             { "isDuringProfileSetup", isDuringProfileSetup },
             { "CleverSsoEnabled", cleverSsoEnabled }
-                        });
+        });
 }
 
 @{
-    Html.RenderPartial
-            (
-                "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
-                new RegistrationHeaderViewModel(participationObject, true),
-                new ViewDataDictionary()
-                {
-    { "hidebuttons", true }
-                        }
-            );
+    Html.RenderPartial(
+        "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
+        new RegistrationHeaderViewModel(participationObject, true),
+        new ViewDataDictionary()
+        {
+            { "hidebuttons", true }
+        });
 }
 
 <div>
@@ -46,9 +43,11 @@
         <div class="panel">
             <div class="panel-body">
 
+                <br />
                 <div class="text-center reg-instructions">
                     <p><strong>Please enter your information below to begin registration.</strong></p>
                 </div>
+                <br /><br />
 
                 <div>
                     <form class="form-horizontal" id="signup-form" method="post" action="@Url.Action("StudentRegistration", "account")">
@@ -56,31 +55,18 @@
                         <div class="row" id="email-check-container">
 
                             <div>
-                                <p class="text-center reg-login new-account">
+                                <p class="text-center reg-login new-account" style="color: #00c5a3; font-weight: bold;">
                                     Personal Information
                                 </p>
                                 <input type="hidden" id="regaccount" name="regaccount" value="@registrationAccount.Uid" />
                             </div>
 
-                            @foreach (var qvm in Model.Where(qvm => !qvm.Hide && qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation))
+                            @foreach (var qvm in Model.Where(qvm => !qvm.Hide && qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation &&
+                                qvm.Question.QuestionDataTypeId.In(new List<QuestionDataType>() {
+                                    QuestionDataType.RegistrantFirstName, QuestionDataType.RegistrantLastName, QuestionDataType.RegistrantMiddleName, QuestionDataType.RegistrantEmail
+                                })))
                             {
-                                Html.RenderPartial(
-                                    "~/Views/Shared/Form/_Question.cshtml",
-                                    qvm);
-
-                                if (qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone)
-                                {
-                                    <div class="row">
-                                        <div class="col-md-6 col-md-offset-3">
-                                            <div class="am-checkbox">
-                                                <input type="checkbox" id="textnotifications" name="textnotifications" value="1" @(UILabel.CheckAllowTextMessage(currentUser) ? " checked=\"checked\" " : "") />
-                                                <label for="textnotifications">
-                                                    I would like to receive text notifications from my school or provider through AHQ.
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                }
+                                Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
                             }
 
                             <div class="form-group">
@@ -101,37 +87,60 @@
                                 </div>
                             </div>
 
+                            @foreach (var qvm in Model.Where(qvm => !qvm.Hide &&
+                                qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation &&
+                                qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantGrade))
+                            {
+                                Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
+                            }
+
+                            @foreach (var qvm in Model.Where(qvm => !qvm.Hide &&
+                                qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation &&
+                                qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone))
+                            {
+                                Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
+
+                                <div class="row">
+                                    <div class="col-md-6 col-md-offset-3">
+                                        <div class="am-checkbox am-checkbox-updated">
+                                            <input type="checkbox" id="textnotifications" name="textnotifications" value="1" @(UILabel.CheckAllowTextMessage(currentUser) ? " checked=\"checked\" " : "") />
+                                            <label for="textnotifications">
+                                                I would like to receive text notifications from my school or provider through AHQ.
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
                             <div class="clearfix"></div>
+                            <br /><br />
 
                             <div>
-                                <p class="text-center reg-login new-account">
+                                <p class="text-center reg-login new-account" style="color: #00c5a3; font-weight: bold;">
                                     Invite Parent or Guardian
                                 </p>
                             </div>
 
-                            <div class="text-center parent-instructions">
+                            <div class="text-center parent-instructions" style="font-weight: bold; color: gray;">
                                 <p>Your parent or guardian will confirm additional details required by schools and providers.</p>
                             </div>
 
                             @foreach (var qvm in Model.Where(qvm => !qvm.Hide && qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.Parent1Information))
                             {
-                                Html.RenderPartial(
-                                    "~/Views/Shared/Form/_Question.cshtml",
-                                    qvm);
+                                Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
                             }
 
-                            <div class="padding-v-20">
-                                <div class="col-md-6 col-md-offset-3 parent-instructions">
-                                    <p>This should not be the same email used in the previous step.</p>
-                                </div>
+                            <div class="col-md-6 col-md-offset-3 parent-instructions" style="color: gray; font-size: 13px;">
+                                <p>This should not be the same email used in the previous step.</p>
                             </div>
+                            <br /> <br /> <br />
 
                             <div class="row">
                                 <div class="col-md-6 col-md-offset-3">
-                                    <div class="am-checkbox">
+                                    <div class="am-checkbox am-checkbox-updated">
                                         <input type="checkbox" id="agree" name="agree" value="1" @(Request["agree"] == "1" ? " checked=\"checked\" " : "") />
-                                        <label for="agree">
-                                            I agree to the <a href="@Url.Action("tos", "legal")" target="_blank">terms and conditions</a> of using @UILabel.ProductName()
+                                        <label for="agree" style="font-weight: bold;">
+                                            I agree with the <a href="@Url.Action("tos", "legal")" target="_blank" style="color: #00a38a;">Terms and Conditions</a>.
                                         </label>
                                     </div>
                                 </div>
@@ -139,29 +148,23 @@
 
                             <div class="row">
                                 <div class="col-md-6 col-md-offset-3">
-                                    <div class="am-checkbox">
+                                    <div class="am-checkbox am-checkbox-updated">
                                         <input type="checkbox" id="isStudent" name="isStudent" value="1" @(UILabel.CheckAllowTextMessage(currentUser) ? " checked=\"checked\" " : "") />
-                                        <label for="isStudent">
-                                            I am a student (if you are a parent, <a href="@Url.Action("", "")" target="_blank">click here</a>)
+                                        <label for="isStudent" style="font-weight: bold;">
+                                            I am a student (if you are a parent, <a href="@Url.Action("", "")" target="_blank" style="text-decoration: underline;">click here</a>)
                                         </label>
                                     </div>
                                 </div>
                             </div>
+                            <br />
 
                             <div class="padding-v-20">
                                 <div class="col-md-6 col-md-offset-3">
-                                    <button type="submit" id="btn-create-account" class="btn btn-register-primary btn-lg">Save &amp; Continue &raquo;</button>
+                                    <button type="submit" id="btn-create-account" class="btn btn-register-primary btn-lg"> Continue </button>
                                 </div>
                             </div>
 
                         </div>
-
-                        <div class="row">
-                            <div class="padding-v-20 text-center">
-                                <a href="javascript:history.go(-1)" class="text-muted">&laquo; Back</a>
-                            </div>
-                        </div>
-
                     </form>
                 </div>
             </div>

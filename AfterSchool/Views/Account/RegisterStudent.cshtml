@@ -23,7 +23,7 @@
         new ViewDataDictionary()
         {
             { "ParticipationObject", Model }
-                                        }
+        }
     );
 }
 
@@ -35,7 +35,7 @@
         new ViewDataDictionary()
         {
             { "hidebuttons", true }
-                        }
+        }
     );
 }
 
@@ -72,9 +72,7 @@
 
                             @if (sessionActivities.IsNotEmpty() && sessionActivities.Any())
                             {
-                                Html.RenderPartial(
-                                    "~/Views/Shared/Activity/_ActivityPreferences.cshtml",
-                                    sessionActivities);
+                                Html.RenderPartial("~/Views/Shared/Activity/_ActivityPreferences.cshtml", sessionActivities);
                             }
 
                             <div class="form-group">
@@ -135,6 +133,6 @@
         new ViewDataDictionary()
         {
             { "IsDuringCheckout", true }
-                                                        }
+        }
     );
 }
