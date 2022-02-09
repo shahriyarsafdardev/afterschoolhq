@@ -1,4 +1,4 @@
-﻿@model List<SessionAction>
+﻿@model List<WebSessionAction>
 @{ 
     var account = (Account)ViewData["account"];
 }
@@ -28,7 +28,7 @@
 
                         <tr>
                             <td class="text-nowrap">@account.ConvertToAccountTimeZone(action.CreateDate.Value).ToShortTimeString()</td>
-                            <td>@action.ToString()</td>
+                            <td>@action.ActionString</td>
                         </tr>
                     }
                 }

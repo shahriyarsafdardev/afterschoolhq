@@ -30,21 +30,9 @@ namespace AfterSchool.Areas.Org.Controllers
         if (activity.IsEmpty())
             return HttpNotFound();
 
-        var actions = SessionAction.LoadByAccountIdByActivityId(
+        var actions = WebSessionAction.LoadByAccountIdActivityId(
             activity.ID.Value,
             currentAccount.ID.Value,
-            new List<SessionActionType>() {
-                        SessionActionType.ActivityRegistrationUpdated,
-                        SessionActionType.ActivityRegistrationCompleted,
-                        SessionActionType.ActivityCreate,
-                        SessionActionType.ActivityPublish,
-                        SessionActionType.ActivityUnpublish,
-                        SessionActionType.RegistrationAddActivity,
-                        SessionActionType.RegistrationRemoveActivity,
-                        SessionActionType.ActivityMoveToApplication,
-                        SessionActionType.ActivityMoveToReserved,
-                        SessionActionType.ActivityMoveToWaitingList
-            },
             0,
             15,
             msgs);

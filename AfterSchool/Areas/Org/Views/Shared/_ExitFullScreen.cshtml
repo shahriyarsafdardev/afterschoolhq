@@ -2,6 +2,7 @@
 @{
     var fullscreenExitUrl = Model;
     var fullscreenExitText = (string)ViewBag.FullscreenExitText;
+    var isClose = false;
 
     if (fullscreenExitUrl.IsBlank())
     {
@@ -21,11 +22,31 @@
     if (fullscreenExitText.IsBlank())
     {
         fullscreenExitText = "X";
+        isClose = true;
     }
 }
 
 <div class="pull-right">
-    <a href="@fullscreenExitUrl" class="btn btn-default">@Html.Raw(fullscreenExitText)</a>
+    <a href="@(isClose ? "javascript:void(0)": fullscreenExitUrl)" class="btn btn-default" @(isClose ? "onclick=alertClose()": "") data-href="@fullscreenExitUrl">@Html.Raw(fullscreenExitText)</a>
 </div>
 
+<div id="confirmationModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                Leaving now will discard any progress. Are you sure you want to exit?
+            </div>
+            <div class="modal-footer">
+                <a href="@fullscreenExitUrl" class="btn btn-danger">Yes</a>
+                <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+            </div>
+        </div>
+
+    </div>
+</div>
 

@@ -20,6 +20,21 @@ namespace AfterSchoolLibraryTests.Factories
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
+
+        public static Registrant CreateParent(Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var obj = new Registrant() { Email = "parent@test.com", AccountId = account.ID, IsMaster = true, IsParentOrGuardian = true };
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
+
+        public static Registrant CreateStudent(Account account, int parentRegistrantId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var obj = new Registrant() { Email = "student@test.com", AccountId = account.ID, IsMaster = false, ParentRegistrantId = parentRegistrantId, IsParentOrGuardian = false };
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
+
         public static Registrant Create(WebUser user, SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new Registrant() { Email = "test@test.com", WebUserId = user.ID };
