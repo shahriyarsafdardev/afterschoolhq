@@ -42,20 +42,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 return RedirectToAction("getstarted");                      
 
             
-            var actions = SessionAction.LoadByAccountId(
+             var actions = WebSessionAction.LoadByAccountId(
                 account.ID.Value,
-                new List<SessionActionType>() {
-                    SessionActionType.RegistrationCompletedView,
-                    SessionActionType.RegistrationUpdated,
-                    SessionActionType.ActivityCreate,
-                    SessionActionType.ActivityPublish,
-                    SessionActionType.ActivityUnpublish,
-                    SessionActionType.RegistrationAddActivity,
-                    SessionActionType.RegistrationRemoveActivity,
-                    SessionActionType.ActivityMoveToApplication,
-                    SessionActionType.ActivityMoveToReserved,
-                    SessionActionType.ActivityMoveToWaitingList,
-                },
                 0,
                 10,
                 msgs);

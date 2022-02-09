@@ -1,7 +1,7 @@
 ﻿@model Activity
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
-    var actions = (List<SessionAction>)ViewBag.Actions;
+    var actions = (List<WebSessionAction>)ViewBag.Actions;
     var registrants = Model.GetRegistrantActivities();
     decimal totalPaid = 0;
     int registrantCount = registrants.Sum(x => x.TotalSeats);
