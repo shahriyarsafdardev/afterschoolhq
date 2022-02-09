@@ -1,5 +1,5 @@
 ﻿function googleTranslateElementInit() {
-    new google.translate.TranslateElement({ includedLanguages: 'en,es,fr', layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL }, 'google_translate_element');
+    new google.translate.TranslateElement({ pageLanguage: 'en', includedLanguages: 'en,es,fr', layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL }, 'google_translate_element');
 }
 
 function triggerHtmlEvent(element, eventName) {
@@ -66,5 +66,9 @@ $(document).ready(function () {
         }
         a.selectedIndex = selectIndex;
         a.dispatchEvent(new Event('change'));
+        if (value == "en") {
+            localStorage.removeItem('languageSelected');
+            window.location.reload();
+        }
     }
 })
