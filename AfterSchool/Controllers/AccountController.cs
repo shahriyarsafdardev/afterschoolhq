@@ -403,7 +403,8 @@ namespace AfterSchool.Controllers
                 QuestionDataType.RegistrantFirstName,
                 QuestionDataType.RegistrantLastName,
                 QuestionDataType.RegistrantEmail,
-                QuestionDataType.RegistrantMiddleName
+                QuestionDataType.RegistrantMiddleName,
+                QuestionDataType.RegistrantMobilePhone
             };
 
             questions = questions.Where(question => question.QuestionDataTypeId.NotIn(FormService.QuestionsToNotIncludeInParentPanel())).ToList();
@@ -429,6 +430,7 @@ namespace AfterSchool.Controllers
             {
                 qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value = SessionVariables.CurrentUser.FirstName;
                 qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value = SessionVariables.CurrentUser.LastName;
+                qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value = SessionVariables.CurrentUser.Phone;
                 qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value = SessionVariables.CurrentUser.Email;
 
                 qvms.ForEach(qvm =>
@@ -1341,6 +1343,12 @@ namespace AfterSchool.Controllers
         public ActionResult StudentRegistration(string regaccount)
         {
             var msgs = new SystemMessages();
+
+            // handles admin accounts that have or need parent accounts
+            var redirectResult = HandleGetStartedAccountRedirect(false, msgs);
+            if (redirectResult.IsNotEmpty())
+                return redirectResult;
+
             if (!featureFlagRepository.IsEnabled("student-registration"))
             {
                 return RedirectToAction("getstarted", new { regaccount });
@@ -1407,13 +1415,10 @@ namespace AfterSchool.Controllers
                 if (password1 != password2)
                     msgs.Add("Passwords must match", MessageType.UserError);
             }
-            if (AfterSchoolLibrary.Helpers.Utilities.IsProduction || AfterSchoolLibrary.Helpers.Utilities.IsStaging)
-            {
-                if (!agree.IsBoolean())
-                    msgs.Add("You must agree to the terms of service", MessageType.UserError);
-                if (!isStudent.IsBoolean())
-                    msgs.Add("You must be student in order to register", MessageType.UserError);
-            }
+            if (!agree.IsBoolean())
+                msgs.Add("You must agree to the terms of service", MessageType.UserError);
+            if (!isStudent.IsBoolean())
+                msgs.Add("You must be student in order to register", MessageType.UserError);
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
             if (msgs.HasNoErrors())
             {
