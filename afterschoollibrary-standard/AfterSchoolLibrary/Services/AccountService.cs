@@ -4714,7 +4714,7 @@ namespace AfterSchoolLibrary.Services
                                 isParentOrGuardian: false,
                                 allowTextMessages: false,
                                 schoolLocationId: schoolLocationId,
-                                profileStatus: RegistrantProfileStatus.Started,
+                                profileStatus: RegistrantProfileStatus.Completed,
                                 loggedInUser: studentUser,
                                 msgs: amsgs,
                                 dc: adc);
@@ -4779,7 +4779,7 @@ namespace AfterSchoolLibrary.Services
                             isParentOrGuardian: true,
                             allowTextMessages: allowTextMessages,
                             schoolLocationId: null,
-                            profileStatus: RegistrantProfileStatus.Started,
+                            profileStatus: RegistrantProfileStatus.Completed,
                             loggedInUser: studentUser,
                             msgs: amsgs,
                             dc: adc);

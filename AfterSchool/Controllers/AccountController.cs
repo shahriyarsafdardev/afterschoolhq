@@ -1671,6 +1671,9 @@ namespace AfterSchool.Controllers
 
             if (masterRegistrant.ProfileStatusId == RegistrantProfileStatus.Started)
                 return RedirectToAction("getstarted");
+            
+            if (!masterRegistrant.IsParentOrGuardian && masterRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed)
+                return RedirectToAction("Home", "User");
 
             if (!masterRegistrant.IsParentOrGuardian)
             {
