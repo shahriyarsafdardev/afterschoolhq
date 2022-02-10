@@ -158,6 +158,7 @@
                             <th class="text-center">Amount</th>
                             <th class="text-center">Conv Fee</th>
                             <th class="text-center">Trans Fee</th>
+                            <th class="text-center">Stripe Fee</th>
                             <th class="text-center">Payout Amount</th>
                             <th class="text-center">Status</th>
                             <th class="text-center">Type</th>
@@ -174,8 +175,16 @@
                                 var disableChk = !transaction.CanRequestPayout() ? "disabled" : "";
                                 var billerAccount = transaction.GetBillerAccount();
                                 var payerAccount = transaction.GetPayerAccount();
+                                var payerAmount = transaction.GetPayerAmount();
                                 var useStripeConnect = billerAccount.HasFeature(FeatureType.UseStripeConnectedAccount);
                                 var enableTransfer = !transaction.UsedStripeConnect && !transaction.PayoutId.HasValue && useStripeConnect && billerAccount.StripePayoutsEnabled;
+                                
+                                Transaction originalTransaction = null;
+
+                                if (transaction.IsRefund())
+                                {
+                                    originalTransaction = transaction.GetOriginalTransaction();
+                                }
 
                                 <tr id="row-@transaction.Uid">
                                     <td>
@@ -194,55 +203,48 @@
                                         @transaction.Description
                                     </td>
                                     <td class="text-center">
-                                        @(transaction.IsRefund() ? "-" : "")@transaction.GetPayerAmount().ToCurrency()
+                                        @(transaction.IsRefund() ? "-" : "")@payerAmount.ToCurrency()
                                     </td>
-                                    <td class="text-center">
-                                        @if (transaction.IsCharge())
+                                    @if (transaction.PaymentSourceTypeId == PaymentSourceType.AfterSchoolPlatform)
+                                    {
+                                        if (transaction.IsCharge())
                                         {
-                                            @transaction.ConvenienceFeeCharged.ToCurrency()
+                                            <td class="text-center">
+                                                @transaction.ConvenienceFeeCharged.ToCurrency()
+                                            </td>
+                                            <td class="text-center">
+                                                @transaction.PaymentTypeFeeCharged.ToCurrency()
+                                            </td>
+                                            <td class="text-center">
+                                                @transaction.GetStripeFee().ToCurrency()
+                                            </td>
+                                            <td class="text-center">
+                                                @transaction.GetBillerPayout().ToCurrency()
+                                            </td>
+                                            <td class="text-center">
+                                                @if (transaction.HasRefunds())
+                                                {
+                                                    @:Refunded
+                                                }
+                                                else
+                                                {
+                                                    @currentStatus
+                                                }
+                                            </td>
                                         }
                                         else
                                         {
-                                            @:-
+
                                         }
-                                    </td>
-                                    <td class="text-center">
-                                        @if (transaction.IsCharge())
-                                        {
-                                            @transaction.PaymentTypeFeeCharged.ToCurrency()
-                                        }
-                                        else
-                                        {
-                                            @:-
-                                        }
-                                    </td>
-                                    <td class="text-center">
-                                        @if (transaction.IsCharge())
-                                        {
-                                            @transaction.GetBillerPayout().ToCurrency()
-                                        }
-                                        else
-                                        {
-                                            @:-
-                                        }
-                                    </td>
-                                    <td class="text-center">
-                                        @if (transaction.IsCharge())
-                                        {
-                                            if (transaction.HasRefunds())
-                                            {
-                                                @:Refunded
-                                            }
-                                            else
-                                            {
-                                                @currentStatus
-                                            }
-                                        }
-                                        else
-                                        {
-                                            @:-
-                                        }
-                                    </td>
+                                    }
+                                    else
+                                    {
+                                        <td class="text-center">-</td>
+                                        <td class="text-center">-</td>
+                                        <td class="text-center">-</td>
+                                        <td class="text-center">-</td>
+                                        <td class="text-center">-</td>
+                                    }
                                     <td class="text-center">
                                         @transaction.PaymentTypeId.ToString().SplitByUpperCase()
                                     </td>

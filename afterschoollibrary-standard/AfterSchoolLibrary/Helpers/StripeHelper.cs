@@ -35,6 +35,14 @@ namespace AfterSchoolLibrary.Billing
             return ((cost + StripeFlatFee) / (1 - StripePercentFee)) - cost;
         }
 
+        public static decimal GetStripeACHFee(decimal cost, bool feeTakenOutOfCost)
+        {
+            if (feeTakenOutOfCost)
+                return cost * StripeBankPercentFee;
+
+            return (cost / (1 - StripeBankPercentFee)) - cost;
+        }
+
         public static string SecretKey
         {
             get

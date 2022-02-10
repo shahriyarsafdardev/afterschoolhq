@@ -860,6 +860,20 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
+        public static decimal GetStripeFee(this Transaction transaction) 
+        {
+            if (transaction.IsCharge() && transaction.PaymentSourceTypeId == PaymentSourceType.AfterSchoolPlatform)
+            {
+                if (transaction.PaymentTypeId == PaymentType.CredtCard)
+                    return AfterSchoolLibrary.Billing.Helpers.GetStripeFee(transaction.GetPayerAmount(), true);
+                
+                if (transaction.PaymentTypeId == PaymentType.ACH)
+                    return AfterSchoolLibrary.Billing.Helpers.GetStripeACHFee(transaction.GetPayerAmount(), true);
+            }
+
+            return 0;
+        }
+
         public static void MoveToAccount(this Transaction transaction, Account toAccount, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (transaction.IsEmpty() || toAccount.IsEmpty())
