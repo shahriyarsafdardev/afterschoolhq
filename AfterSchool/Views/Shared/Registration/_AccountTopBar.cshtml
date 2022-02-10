@@ -221,11 +221,11 @@
             {
                 <div class="reg-login-bar-title">
                     <a href="@registrationStartPage.HomePageUrl">
-                        <span class="reg-login-bar-title-item" style="@(ViewData["InsideActDetails"] != null ? "color:#b2b2b4": "")">@registrationStartPage.Name</span>
+                        <span class="reg-login-bar-title-item notranslate" style="@(ViewData["InsideActDetails"] != null ? "color:#b2b2b4": "")">@registrationStartPage.Name</span>
                     </a>
                     @if (ViewData["InsideActDetails"] != null)
                     {
-                        <span class="reg-login-bar-title-item"> > @ViewData["InsideActDetails"]</span>
+                        <span class="reg-login-bar-title-item notranslate"> > @ViewData["InsideActDetails"]</span>
                     }
                 </div>
             }
@@ -233,11 +233,11 @@
             {
                 if (currentAccount.IsNotEmpty())
                 {
-                    <span class="reg-login-bar-title">@currentAccount.Name</span>
+                    <span class="reg-login-bar-title notranslate">@currentAccount.Name</span>
                 }
                 else
                 {
-                    <span class="reg-login-bar-title">@currentUser.DisplayName</span>
+                    <span class="reg-login-bar-title notranslate">@currentUser.DisplayName</span>
                 }
             }
 
