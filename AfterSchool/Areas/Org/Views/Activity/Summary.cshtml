@@ -162,7 +162,7 @@
                         </div>
                     }
 
-                    @if (schedule.IsNotEmpty())
+                    @if (schedule.IsNotEmpty() && !Model.IsContinuousEnrollment)
                     {
                         <div class="panel panel-default">
                             <div class="panel-heading">

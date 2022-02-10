@@ -170,7 +170,7 @@ namespace AfterSchool.Models
                 else if (participationObject.RegistrationPeriod.IsOpen(account))
                 {
                     if (participationObject.IsContinousEnrollmentEnabled)
-                        return "";
+                        return "<span style=\"display:inline-block;\">Registration will remain open</span>";
                     else
                         return $"<span style=\"display:inline-block;\">Registration will close</span> <span style=\"display:inline-block;\">{participationObject.RegistrationPeriod.EndDateTime.ToShortDateString()} {participationObject.RegistrationPeriod.EndDateTime.Value.ToShortTimeString()}</span>";
                 }
