@@ -1379,8 +1379,10 @@ namespace AfterSchool.Controllers
             questions.AddRange(parentQuestions);
             var currentUser = SessionVariables.CurrentUser;
             Account registrationAccount = null;
+
             if (regaccount.IsGuid())
                 registrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
+
             questions.ForEach(question =>
             {
                 var answer = Request[question.ToFormQuestionViewModel().Name];
@@ -1391,29 +1393,35 @@ namespace AfterSchool.Controllers
                 switch (question.QuestionDataTypeId)
                 {
                     case QuestionDataType.RegistrantMobilePhone:
-                        if (answer.IsNotEmpty() && !answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
-                            msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+                        if (answer.IsNotEmpty())
+                        {
+                            if (!answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                                msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+
+                            if (WebUser.ExistsByPhone(answer, msgs))
+                                msgs.Add("Phone is already in use, do you already have an account?", MessageType.UserError);
+                        }
                         break;
                 }
             });
+
             if (currentUser.IsEmpty())
             {
                 if (password1.IsEmpty())
-                    msgs.Add("Password 1 is required", MessageType.UserError);
+                    msgs.Add("Password is required", MessageType.UserError);
                 if (password1.Length < 8)
                     msgs.Add("Password needs to have at least 8 characters", MessageType.UserError);
                 if (password2.IsEmpty())
-                    msgs.Add("Password 2 is required", MessageType.UserError);
+                    msgs.Add("Confirm Password is required", MessageType.UserError);
                 if (password1 != password2)
-                    msgs.Add("Passwords must match", MessageType.UserError);
+                    msgs.Add("Confirm Password must match with main Password", MessageType.UserError);
             }
-            if (AfterSchoolLibrary.Helpers.Utilities.IsProduction || AfterSchoolLibrary.Helpers.Utilities.IsStaging)
-            {
-                if (!agree.IsBoolean())
-                    msgs.Add("You must agree to the terms of service", MessageType.UserError);
-                if (!isStudent.IsBoolean())
-                    msgs.Add("You must be student in order to register", MessageType.UserError);
-            }
+
+            if (!agree.IsBoolean())
+                msgs.Add("You must agree to the terms of service", MessageType.UserError);
+            if (!isStudent.IsBoolean())
+                msgs.Add("You must be student in order to register", MessageType.UserError);
+
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
             if (msgs.HasNoErrors())
             {
@@ -1424,10 +1432,12 @@ namespace AfterSchool.Controllers
                 var parentFirstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1FirstName);
                 var parentLastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1LastName);
                 var parentEmail = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1Email);
+
                 if (WebUser.ExistsByEmail(email.Value.Trim(), msgs))
                     msgs.Add("Student email already exists.", MessageType.UserError);
                 if (email.Value.Trim().IsSameAs(parentEmail.Value.Trim()))
                     msgs.Add("Parent email cannot be the same as your student email address when creating a login account", MessageType.UserError);
+
                 if (msgs.HasNoErrors())
                 {
                     WebUser studentUser = null;
@@ -1452,6 +1462,7 @@ namespace AfterSchool.Controllers
                                     loggedInUser: null,
                                     msgs: amsgs,
                                     dc: adc);
+
                             if (amsgs.HasNoErrors() && studentUser.IsNotEmpty())
                             {
                                 // create account
@@ -1469,6 +1480,7 @@ namespace AfterSchool.Controllers
                                 var location = participationObject?.Location;
                                 if (location.IsNotEmpty() && location.GetHostAccount(amsgs, adc)?.AccountTypeId != AccountType.School)
                                     location = null;
+                                
                                 // create student registrant record
                                 studentRegistrant = studentAccount.CreateRegistrant(
                                         registrantOwner: studentUser,
@@ -1482,6 +1494,7 @@ namespace AfterSchool.Controllers
                                         loggedInUser: studentUser,
                                         msgs: amsgs,
                                         dc: adc);
+
                                 if (amsgs.HasNoErrors())
                                     qvms.ForEach(qvm =>
                                     {
@@ -1496,6 +1509,7 @@ namespace AfterSchool.Controllers
                                         }
                                     });
                             }
+
                             // invite parent: 
                             parentUser = studentAccount.InviteUser(
                                     firstName: parentFirstName.Value,
@@ -1508,6 +1522,7 @@ namespace AfterSchool.Controllers
                                     loggedInUser: studentUser,
                                     msgs: amsgs,
                                     dc: adc);
+
                             // Create parent registrant
                             parentRegistrant = studentAccount.CreateRegistrant(
                                     firstName: parentUser.FirstName,
@@ -1524,11 +1539,13 @@ namespace AfterSchool.Controllers
                                     loggedInUser: studentUser,
                                     msgs: amsgs,
                                     dc: adc);
+
                             studentRegistrant.AddUserWithAccess(
                                 user: parentUser,
                                 loggedInUser: studentUser,
                                 msgs: amsgs,
                                 dc: adc);
+
                             // add answers to student registrant record
                             qvms.ForEach(qvm =>
                             {

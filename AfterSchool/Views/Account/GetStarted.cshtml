@@ -82,7 +82,7 @@
                                 <div class="col-md-6 col-md-offset-3">
                                     <div class="padding-v-20">
                                         <button type="button" id="btn-check-email" class="btn btn-register-primary btn-lg" onclick="return checkRegistrantEmail()">Next &raquo;</button>
-                                        <button type="button" id="btn-student-signup" class="btn btn-register-primary btn-lg hidden" style="background-color: #fff; color: #00ae85; border: 2px solid;" onclick="return studentSignup(event)">Sign Up As Student</button>
+                                        <button type="button" id="btn-student-signup" class="showLoader btn btn-register-primary btn-lg hidden" style="background-color: #fff; color: #00ae85; border: 2px solid;" onclick="return studentSignup(event)">Sign Up As Student</button>
                                     </div>
                                 </div>
                                 <div class="clearfix"></div>
@@ -241,12 +241,13 @@
     }
 
     function checkRegistrantEmail() {
+        showLoader();
         var email = $('#email-check').val();
         var btnCheckEmail = $('#btn-check-email');
         var originalBtnText = btnCheckEmail.html();
 
-        if (btnCheckEmail.hasClass("newParentSignUp")) {
-            showSignUpForm(email);
+        if (btnCheckEmail.hasClass("newParentSignUp")) {            
+            showSignUpForm(email);            
             return;
         }
 
@@ -256,7 +257,7 @@
             '/services/checkaccountstatus?email=' + encodeURIComponent(email),
             function (data) {
                 if (data && data.status == 'ok') {
-
+                    hideLoader();
                     if (data.isRegistered) {
                         // show login form
 
@@ -285,6 +286,7 @@
                         }
                     }
                 } else {
+                    hideLoader();
                     btnCheckEmail.html(originalBtnText);
                     Notifications.showErrors(data.messages);
                 }
@@ -294,6 +296,7 @@
 
     function studentSignup(event) {
         event.preventDefault();
+        showLoader();
         var url = '@Url.Action("StudentRegistration", "Account", new { regaccount = Request["regaccount"] })';
         localStorage.setItem('studentRegisterEmail', $("#email-check").val());
         window.location.href = url;
@@ -313,6 +316,7 @@
             $('#account-registration').removeClass('hide');
             $('#email-check-container').addClass('hide');
             $('#@Model.Find(qvm => qvm.Question.QuestionTypeId == QuestionType.Email).Id').val(email);
+            hideLoader();
         }, 500);
     }
     function showStudentRegistration() {
