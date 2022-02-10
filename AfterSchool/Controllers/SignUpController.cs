@@ -606,17 +606,35 @@ namespace AfterSchool.Controllers
       return View();
     }
 
-    [HttpGet]
-    public ActionResult Confirm(string id)
-    {
-      var msgs = new SystemMessages();
-      WebUser user = null;
-      if (id.IsGuid())
-      {
-        user = WebUser.LoadByUid(id.ToGuid());
-        if (user.IsRegistered)
-          user = null;
-      }
+        [HttpPost]
+        public JsonResult IsEmailAlreadyExists(string emailId)
+        {
+            var msgs = new SystemMessages();
+            WebUser wu = WebUser.LoadByEmail(emailId, msgs);
+            if (msgs.HasNoErrors())
+            {
+                if (wu.IsNotEmpty())
+                    return Json(new { success = false, error = false });
+                else
+                    return Json(new { success = true, error = false });
+            }
+            else
+            {
+                return Json(new { success = false, error = true });
+            }
+        }
+
+        [HttpGet]
+        public ActionResult Confirm(string id)
+        {
+            var msgs = new SystemMessages();
+            WebUser user = null;
+            if (id.IsGuid())
+            {
+                user = WebUser.LoadByUid(id.ToGuid());
+                if (user.IsRegistered)
+                    user = null;
+            }
 
       if (user.IsEmpty())
         msgs.Add("Invalid id", MessageType.UserError);

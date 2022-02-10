@@ -97,7 +97,7 @@
     @if (Model.IsNotEmpty() && Model.ID.HasValue)
     {
     <div class="row" style="line-height: 35px;">
-        <div class="col-md-4 col-sm-4 col-xs-12">
+        <div class="col-md-6 col-sm-6 col-xs-12">
 
             @if (isAccount && isAccountAndLoggedInUserIsOwner && Model.OnboardingCompletionStatus() != GettingStartedOptions.ProcessCompleted && isOnboardingStepsAcknowledged != "True" && !isInEditMode)
             {
@@ -219,16 +219,15 @@
 
             @if (registrationStartPage.IsNotEmpty())
             {
-                <a href="@registrationStartPage.HomePageUrl" class="reg-login-bar-homepage">
-                    <span class="reg-login-bar-title notranslate" style="@(ViewData["InsideActDetails"] != null ? "color:#b2b2b4": "")">@registrationStartPage.Name</span>
-                </a>
-                if (ViewData["InsideActDetails"] != null)
-                {
-                    <span class="reg-login-bar-homepage" style="color:#b2b2b4; margin-top:8px; font-size:16px; margin-right:0 ">></span>
-                    <a href="javascript:void(0)" class="reg-login-bar-homepage">
-                        <span class="reg-login-bar-title notranslate">@ViewData["InsideActDetails"]</span>
+                <div class="reg-login-bar-title">
+                    <a href="@registrationStartPage.HomePageUrl">
+                        <span class="reg-login-bar-title-item notranslate" style="@(ViewData["InsideActDetails"] != null ? "color:#b2b2b4": "")">@registrationStartPage.Name</span>
                     </a>
-                }
+                    @if (ViewData["InsideActDetails"] != null)
+                    {
+                        <span class="reg-login-bar-title-item notranslate"> > @ViewData["InsideActDetails"]</span>
+                    }
+                </div>
             }
             else if (currentUser.IsNotEmpty())
             {
@@ -246,7 +245,7 @@
 
         @if (!isDuringProfileSetup)
         {
-            <div class="col-md-8 col-sm-8 col-xs-12">
+            <div class="col-md-6 col-sm-6 col-xs-12">
                 <div class="pull-right navTop">
                     <input type="checkbox" id="nav-check">
                     
@@ -321,7 +320,7 @@
         }
         else
         {
-            <div class="col-md-8 col-sm-8 col-xs-12">
+            <div class="col-md-6 col-sm-6 col-xs-12">
              <div class="btn-group pull-right">
                  @Html.Partial("_GoogleTranslateDropDown");
             </div>
