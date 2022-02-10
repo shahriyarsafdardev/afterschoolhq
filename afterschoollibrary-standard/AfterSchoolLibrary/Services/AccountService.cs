@@ -4661,7 +4661,149 @@ namespace AfterSchoolLibrary.Services
                         activity.ProcessActivityPayouts(currentUser: loggedInUser, account: account, msgs: msgs, dc: dc);
                 }
             }
-        }        
+        }
+
+        #endregion
+
+        #region Student-Registration
+
+        public static (Account, WebUser, Registrant) ProcessStudentRegistration(string firstName, string lastName, string email, string phone, string password, int? schoolLocationId, bool allowTextMessages, bool isAfterSchool,
+            List<KeyValuePair<FormQuestion, string>> qvModel,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            Account studentAccount = null;
+            WebUser studentUser = null;
+            Registrant studentRegistrant = null;
+
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    studentUser = WebUserService.CreateNewWithOptionalPhone(
+                        firstName: firstName,
+                        lastName: lastName,
+                        email: email,
+                        phone: phone,
+                        password: password,
+                        isActive: true,
+                        isRegistered: true,
+                        isVerified: false,
+                        allowTextMessages: allowTextMessages,
+                        loggedInUser: null,
+                        msgs: amsgs,
+                        dc: adc);
+
+                    if (amsgs.HasNoErrors() && studentUser.IsNotEmpty())
+                    {
+                        // create account
+                        studentAccount = studentUser.AddNewStudentAccount(
+                            userType: UserType.Owner, // student will be owner of this account, till parent not completes registration
+                            isActive: true,
+                            isAfterSchool: isAfterSchool,
+                            loggedInUser: studentUser,
+                            msgs: amsgs,
+                            dc: adc);
+
+                        if (amsgs.HasNoErrors() && studentAccount.IsNotEmpty())
+                        {
+                            // create student registrant record
+                            studentRegistrant = studentAccount.CreateRegistrant(
+                                registrantOwner: studentUser,
+                                canBeAccessedBy: studentUser.AsList(),
+                                registrantType: RegistrantType.Individual,
+                                isMaster: true,
+                                isParentOrGuardian: false,
+                                allowTextMessages: false,
+                                schoolLocationId: schoolLocationId,
+                                profileStatus: RegistrantProfileStatus.Started,
+                                loggedInUser: studentUser,
+                                msgs: amsgs,
+                                dc: adc);
+
+                            if (amsgs.HasNoErrors() && studentRegistrant.IsNotEmpty())
+                            {
+                                // add or update answer for registratnt
+                                qvModel.ForEach(qvm =>
+                                {
+                                    if (qvm.Key.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation)
+                                    {
+                                        studentRegistrant.AddOrUpdateAnswer(
+                                            answerText: qvm.Value,
+                                            question: qvm.Key,
+                                            loggedInUser: studentUser,
+                                            msgs: amsgs,
+                                            dc: adc);
+                                    }
+                                });
+                            }
+                        }
+                    }                    
+                });
+
+            return (studentAccount, studentUser, studentRegistrant);
+        }
+
+        public static (WebUser, Registrant) ProcessParentRegistration(this Account studentAccount, string firstName, string lastName, string email, string browserUrl, bool allowTextMessages,
+            List<KeyValuePair<FormQuestion, string>> qvModel, WebUser studentUser,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            WebUser parentUser = null;
+            Registrant parentRegistrant = null;
+
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    // invite parent: 
+                    parentUser = studentAccount.InviteUser(
+                        firstName: firstName,
+                        lastName: lastName,
+                        email: email,
+                        phone: string.Empty,
+                        message: $"{firstName} has signed up for an account on AfterSchool HQ at {browserUrl}. Please create your AHQ account to know and approve of activities your child requests to participate in.",
+                        userType: UserType.Owner,
+                        canUseExistingUserAccount: true,
+                        loggedInUser: studentUser,
+                        msgs: amsgs,
+                        dc: adc);
+
+                    if (amsgs.HasNoErrors() && parentUser.IsNotEmpty())
+                    {
+                        // Create parent registrant
+                        parentRegistrant = studentAccount.CreateRegistrant(
+                            firstName: parentUser.FirstName,
+                            lastName: parentUser.LastName,
+                            email: parentUser.Email,
+                            registrantOwner: parentUser,
+                            canBeAccessedBy: parentUser.AsList(),
+                            registrantType: RegistrantType.Individual,
+                            isMaster: true,
+                            isParentOrGuardian: true,
+                            allowTextMessages: allowTextMessages,
+                            schoolLocationId: null,
+                            profileStatus: RegistrantProfileStatus.Started,
+                            loggedInUser: studentUser,
+                            msgs: amsgs,
+                            dc: adc);
+
+                        if (amsgs.HasNoErrors() && parentRegistrant.IsNotEmpty())
+                        {
+                            // add answers to student registrant record
+                            qvModel.ForEach(qvm => {
+                                if (qvm.Key.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.Parent1Information)
+                                {
+                                    parentRegistrant.AddOrUpdateAnswer(
+                                        answerText: qvm.Value,
+                                        question: qvm.Key,
+                                        loggedInUser: studentUser,
+                                        msgs: amsgs,
+                                        dc: adc);
+                                }
+                            });
+                        }
+                    }
+                });
+
+            return (parentUser, parentRegistrant);
+        }
 
         #endregion
     }
