@@ -59,16 +59,16 @@
 
 @helper PrintGraphicSmall(string clientSuccessManagerName)
 {
-<div class="row">
-    <div class="pull-left margin-l-20">
-        <img src="~/img/client_success_manager_color.jpeg" alt="@clientSuccessManagerName" class="img-client-success-manager" style="max-height: 150px;">
+    <div class="row">
+        <div class="pull-left margin-l-20">
+            <img src="~/img/client_success_manager_color.jpeg" alt="@clientSuccessManagerName" class="img-client-success-manager" style="max-height: 150px;">
+        </div>
+        <div class="pull-left margin-l-20">
+            <p class="manager-name">@clientSuccessManagerName</p>
+            <p class="manager-position">Client Success Manager</p>
+        </div>
+        <div class="clearfix"></div>
     </div>
-    <div class="pull-left margin-l-20">
-        <p class="manager-name">@clientSuccessManagerName</p>
-        <p class="manager-position">Client Success Manager</p>
-    </div>
-    <div class="clearfix"></div>
-</div>
 }
 
 <div class="row main-content main-content-welcome-pages">
@@ -544,8 +544,6 @@
 
         PageEvent.add(PageEvent.AFTER_INIT, function () {
 
-
-
             signupAccountSearch.keyup(function (e) {
                 var searchLength = signupAccountSearch.val().length;
 
@@ -593,7 +591,7 @@
                     doAccountSearch(signupAccountSearch, signupAccountSearchList)
                 }, 250);
 
-              
+
             });
 
               @if(showInviteWelcome && Model.InvitingAccount.IsEmpty())
@@ -601,7 +599,60 @@
                     <text>$("#NoAccountFoundPopup").modal('show');</text>
               }
         });
-
+        function validateEmailServerSide(value) {
+            if (validateEmail(value)) {
+                var dataToSend = JSON.stringify({ emailId: value });
+                $.ajax({
+                    url: '/Signup/IsEmailAlreadyExists',
+                    type: 'post',
+                    dataType: 'json',
+                    data: dataToSend,
+                    contentType: 'application/json',
+                    success: function (data) {
+                        if (!data.error) {
+                            if (!data.success) {
+                                Notifications.showBar({
+                                    title: 'Error',
+                                    message: 'Email id already exists.',
+                                    success: false
+                                });
+                                $(".register-continue").attr('disabled', 'disabled');
+                                $("#email").attr('style', 'border: 1px solid red;');
+                            }
+                            else {
+                                $(".register-continue").removeAttr('disabled');
+                                $("#email").removeAttr('style');
+                            }
+                        }
+                        else {
+                            Notifications.showBar({
+                                title: 'Error',
+                                message: 'Something went wrong. Please contact customer support.',
+                                success: false
+                            });
+                            return;
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        Notifications.showBar({
+                            title: 'Error',
+                            message: 'Something went wrong. Please contact customer support.',
+                            success: false
+                        });
+                        return;
+                    }
+                });
+            }
+            else {
+                Notifications.showBar({
+                    title: 'Error',
+                    message: 'Email id is not in valid format.',
+                    success: false
+                });
+                $(".register-continue").attr('disabled', 'disabled');
+                $("#email").attr('style', 'border: 1px solid red;');
+            }
+        }
         function signupListMouseOver(id) {
             $(`#signup-search-listItem-${id}`).attr('style', signupListItemStyleHover);
         }
@@ -955,4 +1006,5 @@
     // #endregion: phone number validation
 
     </script>
+
 }
