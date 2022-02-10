@@ -625,6 +625,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 activities = currentAccount.GetActivities(
                     userType: UserType.Administrator,
                     user: currentUser,
+                    null,
                     activityType: null,
                     isArchived: false,
                     isDeleted: false,
@@ -715,6 +716,7 @@ namespace AfterSchool.Areas.Org.Controllers
             activities = currentAccount.GetActivities(
                 UserType.Administrator,
                 currentUser,
+                null,
                 null,
                 false,
                 false,

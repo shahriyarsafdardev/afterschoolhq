@@ -22,6 +22,7 @@
     var currentListUrl = Url.Action("index", "activity", new { archive = 0 });
     var archivedListUrl = Url.Action("index", "activity", new { archive = 1 });
     var hasArchivedActivities = (bool)ViewData["HasArchivedActivities"];
+    var hasSearchQuery = Request["q"].IsNotEmpty();
 
     if (group.IsNotEmpty())
     {
@@ -56,7 +57,7 @@
     var managePermissionSlipsPackage = PackageService.GetPackageWithFeatureMaximumAvailability(FeatureType.ManagePermissionSlips, maxPermissionSlipCount);
 }
 
-@if (Model.Count == 0 && group.IsEmpty() && !hasArchivedActivities)
+@if (Model.Count == 0 && group.IsEmpty() && !hasArchivedActivities && !hasSearchQuery)
 {
     if (activityType == ActivityType.PermissionSlip)
     {
@@ -147,263 +148,278 @@ else
         </div>
     }
 
-    <div class="table-responsive">
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>@UILabel.ActivityLabel(activityType)</th>
-                    @if (activityType != ActivityType.PermissionSlip)
+        <div class="table-responsive">
+            @if (activityType == ActivityType.Activity)
+            {
+                <div class="pull-right">
+                    <input type="text" id="search" class="form-control searchFormInput" placeholder="Search for activity" style="float: left;width: 300px;height: 38px;margin-right: 10px;" value="@Request["q"]" />
+                    <button class="btn btn-primary searchFormBtn" id="searchBtn" onclick="doSearch()">
+                        Search
+                    </button>
+                </div>
+            }
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>@UILabel.ActivityLabel(activityType)</th>
+                        @if (activityType != ActivityType.PermissionSlip)
+                        {
+                            <th class="text-center">Starts</th>
+                            <th class="text-center">Days</th>
+                        }
+                        @if (activityType.NotIn(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
+                        {
+                            <th class="text-center">Grades</th>
+                            <th class="text-center">Ages</th>
+                        }
+                        <th class="text-center">Students</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Count > 0)
                     {
-                        <th class="text-center">Starts</th>
-                        <th class="text-center">Days</th>
-                    }
-                    @if (activityType.NotIn(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
-                    {
-                        <th class="text-center">Grades</th>
-                        <th class="text-center">Ages</th>
-                    }
-                    <th class="text-center">Students</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model.Count > 0)
-                {
-                    var assignmentTypes = new List<RegistrationAssignmentType>()
-                    {
-                        RegistrationAssignmentType.Reserved,
-                        RegistrationAssignmentType.ReservedPendingParentalConsent,
-                        RegistrationAssignmentType.ReservedPendingPayment
-                    };
+                        var assignmentTypes = new List<RegistrationAssignmentType>()
+                            {
+                                RegistrationAssignmentType.Reserved,
+                                RegistrationAssignmentType.ReservedPendingParentalConsent,
+                                RegistrationAssignmentType.ReservedPendingPayment
+                            };
 
-                    foreach (Activity activity in Model)
-                    {
-                        var reservedTextClass = activity.IsFull() ? "text-danger text-bold" : "";
-                        var waitingTextClass = activity.IsWaitingListFull() ? "text-danger text-bold" : "";
-                        var showLink = activity.BelongsTo(currentAccount);
+                        foreach (Activity activity in Model)
+                        {
+                            var reservedTextClass = activity.IsFull() ? "text-danger text-bold" : "";
+                            var waitingTextClass = activity.IsWaitingListFull() ? "text-danger text-bold" : "";
+                            var showLink = activity.BelongsTo(currentAccount);
 
-                        <tr>
-                            <td>
-                                <a href="@Url.Action("summary", "activity", new { id = @activity.Uid})" class="btn btn-primary btn-sm">Manage</a>
-                            </td>
-                            <td>
-                                @activity.Name @(activity.ActivityGroupId.HasValue ? "- " + activity.ActivityGroupName : "")
-                                @if (activity.LocationId.HasValue && activity.ActivityLocationTypeId == ActivityLocationType.Physical)
+                            <tr>
+                                <td>
+                                    <a href="@Url.Action("summary", "activity", new { id = @activity.Uid})" class="btn btn-primary btn-sm">Manage</a>
+                                </td>
+                                <td>
+                                    @activity.Name @(activity.ActivityGroupId.HasValue ? "- " + activity.ActivityGroupName : "")
+                                    @if (activity.LocationId.HasValue && activity.ActivityLocationTypeId == ActivityLocationType.Physical)
+                                    {
+                                        if (showLink)
+                                        {
+                                            <span>
+                                                @@ <a href="@Url.Action("editlocation", "activity", new { id = activity.Uid })">@(activity.GetLocation()?.Name)</a>
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span>
+                                                @@ @(activity.GetLocation()?.Name)
+                                            </span>
+                                        }
+                                    }
+                                </td>
+                                @if (activityType != ActivityType.PermissionSlip)
                                 {
-                                    if (showLink)
-                                    {
-                                        <span>
-                                            @@ <a href="@Url.Action("editlocation", "activity", new { id = activity.Uid })">@(activity.GetLocation()?.Name)</a>
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span>
-                                            @@ @(activity.GetLocation()?.Name)
-                                        </span>
-                                    }
+                                    <td class="text-center">
+                                        @if (showLink)
+                                        {
+                                            if (activity.HasSchedule)
+                                            {
+                                                <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">
+                                                    @activity.GetFirstDate().ToShortDateString().Replace("/", "-")
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">-</a>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (activity.HasSchedule)
+                                            {
+                                                <span>
+                                                    @activity.GetFirstDate().ToShortDateString().Replace("/", "-")
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span>-</span>
+                                            }
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        @if (showLink)
+                                        {
+                                            if (activity.GetDaysOfTheWeek().Any())
+                                            {
+                                                <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">
+                                                    @activity.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().MaxChars(2)).ToStringList(", ")
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">-</a>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (activity.GetDaysOfTheWeek().Any())
+                                            {
+                                                <span>
+                                                    @activity.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().MaxChars(2)).ToStringList(", ")
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span>-</span>
+                                            }
+                                        }
+                                    </td>
                                 }
-                            </td>
-                            @if (activityType != ActivityType.PermissionSlip)
-                            {
-                                <td class="text-center">
-                                    @if (showLink)
-                                    {
-                                        if (activity.HasSchedule)
+                                @if (activityType.NotIn(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
+                                {
+                                    <td class="text-center">
+                                        @if (showLink)
                                         {
-                                            <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">
-                                                @activity.GetFirstDate().ToShortDateString().Replace("/", "-")
-                                            </a>
+                                            if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
+                                            {
+                                                <a href="@Url.Action("editrestrictions", "activity", new { id = activity.Uid })">
+                                                    @activity.GetStartingGradeLevel().Name - @activity.GetEndingGradeLevel().Name
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <a href="@Url.Action("editrestrictions", "activity", new { id = activity.Uid })">-</a>
+                                            }
                                         }
                                         else
                                         {
-                                            <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">-</a>
+                                            if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
+                                            {
+                                                <span>
+                                                    @activity.GetStartingGradeLevel().Name - @activity.GetEndingGradeLevel().Name
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span>-</span>
+                                            }
                                         }
-                                    }
-                                    else
-                                    {
-                                        if (activity.HasSchedule)
+                                    </td>
+                                    <td class="text-center">
+                                        @if (showLink)
                                         {
-                                            <span>
-                                                @activity.GetFirstDate().ToShortDateString().Replace("/", "-")
-                                            </span>
+                                            if (activity.AgeStart.HasValue && activity.AgeEnd.HasValue)
+                                            {
+                                                <a href="@Url.Action("editrestrictions", "activity", new { id = activity.Uid })">
+                                                    @activity.AgeStart - @activity.AgeEnd
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <a href="@Url.Action("editrestrictions", "activity", new { id = activity.Uid })">-</a>
+                                            }
                                         }
                                         else
                                         {
-                                            <span>-</span>
+                                            if (activity.AgeStart.HasValue && activity.AgeEnd.HasValue)
+                                            {
+                                                <span>
+                                                    @activity.AgeStart - @activity.AgeEnd
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span>-</span>
+                                            }
                                         }
-                                    }
+                                    </td>
+                                }
+                                <td class="text-center @reservedTextClass">
+                                    <a href="@Url.Action("registrants", "activity", new { id = activity.Uid })">@activity.GetRegistrantCountByAssignmentTypes(assignmentTypes)</a>
                                 </td>
-                                <td class="text-center">
-                                    @if (showLink)
-                                    {
-                                        if (activity.GetDaysOfTheWeek().Any())
-                                        {
-                                            <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">
-                                                @activity.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().MaxChars(2)).ToStringList(", ")
-                                            </a>
-                                        }
-                                        else
-                                        {
-                                            <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">-</a>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (activity.GetDaysOfTheWeek().Any())
-                                        {
-                                            <span>
-                                                @activity.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().MaxChars(2)).ToStringList(", ")
-                                            </span>
-                                        }
-                                        else
-                                        {
-                                            <span>-</span>
-                                        }
-                                    }
-                                </td>
-                            }
-                            @if (activityType.NotIn(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
-                            {
-                                <td class="text-center">
-                                    @if (showLink)
-                                    {
-                                        if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
-                                        {
-                                            <a href="@Url.Action("editrestrictions", "activity", new { id = activity.Uid })">
-                                                @activity.GetStartingGradeLevel().Name - @activity.GetEndingGradeLevel().Name
-                                            </a>
-                                        }
-                                        else
-                                        {
-                                            <a href="@Url.Action("editrestrictions", "activity", new { id = activity.Uid })">-</a>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
-                                        {
-                                            <span>
-                                                @activity.GetStartingGradeLevel().Name - @activity.GetEndingGradeLevel().Name
-                                            </span>
-                                        }
-                                        else
-                                        {
-                                            <span>-</span>
-                                        }
-                                    }
-                                </td>
-                                 <td class="text-center">
-                                    @if (showLink)
-                                    {
-                                        if (activity.AgeStart.HasValue && activity.AgeEnd.HasValue)
-                                        {
-                                            <a href="@Url.Action("editrestrictions", "activity", new { id = activity.Uid })">
-                                                @activity.AgeStart - @activity.AgeEnd
-                                            </a>
-                                        }
-                                        else
-                                        {
-                                            <a href="@Url.Action("editrestrictions", "activity", new { id = activity.Uid })">-</a>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (activity.AgeStart.HasValue && activity.AgeEnd.HasValue)
-                                        {
-                                            <span>
-                                                @activity.AgeStart - @activity.AgeEnd
-                                            </span>
-                                        }
-                                        else
-                                        {
-                                            <span>-</span>
-                                        }
-                                    }
-                                </td>
-                            }
-                            <td class="text-center @reservedTextClass">
-                                <a href="@Url.Action("registrants", "activity", new { id = activity.Uid })">@activity.GetRegistrantCountByAssignmentTypes(assignmentTypes)</a>
-                            </td>
 
-                            <td>
-                                <div class="btn-group pull-right">
+                                <td>
+                                    <div class="btn-group pull-right">
 
-                                    @if (activity.ActivityScheduleId.HasValue && false)
-                                    {
-                                        <button class="md-trigger btn btn-default btn-sm" data-modal="modal-schedule" id="edit-schedule-@activity.Uid"
-                                                onclick="editSchedule('@UI.JavascriptSafeString(@activity.Name)', '@activity.Uid', @activity.ActivityScheduleId)">
-                                            <i class="s7-edit"></i> Schedule
-                                        </button>
-                                    }
-
-                                    @if (group.IsEmpty())
-                                    {
-                                        <a href="@Url.Action("publishdetail", "activity", new { id = activity.Uid })" class="btn btn-default btn-sm">Publish...</a>
-                                    }
-
-                                    @if (activity.AccountId == currentAccount.ID)
-                                    {
-                                        if (activityType == ActivityType.PermissionSlip)
+                                        @if (activity.ActivityScheduleId.HasValue && false)
                                         {
-                                            if (managePermissionSlips && showPermissionSlipFields)
+                                            <button class="md-trigger btn btn-default btn-sm" data-modal="modal-schedule" id="edit-schedule-@activity.Uid"
+                                                    onclick="editSchedule('@UI.JavascriptSafeString(@activity.Name)', '@activity.Uid', @activity.ActivityScheduleId)">
+                                                <i class="s7-edit"></i> Schedule
+                                            </button>
+                                        }
+
+                                        @if (group.IsEmpty())
+                                        {
+                                            <a href="@Url.Action("publishdetail", "activity", new { id = activity.Uid })" class="btn btn-default btn-sm">Publish...</a>
+                                        }
+
+                                        @if (activity.AccountId == currentAccount.ID)
+                                        {
+                                            if (activityType == ActivityType.PermissionSlip)
+                                            {
+                                                if (managePermissionSlips && showPermissionSlipFields)
+                                                {
+                                                    <button class="md-trigger btn btn-default btn-sm" data-modal="modal-copy-activity"
+                                                            onclick="ActivitySetup.setCopyActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("copy", "activity", new { id = activity.Uid.ToString(), isnew = 1 })')" @(needToUpgrade ? "disabled=\"disabled\"" : "")>
+                                                        <i class="s7-copy-file"></i> Copy
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <button class="md-trigger btn btn-default btn-sm showNotification" onclick="return HandleNotification('@(managePermissionSlipsPackage != null ? managePermissionSlipsPackage.Name: "")',@(managePermissionSlipsPackage != null ? managePermissionSlipsPackage.ID: 0))">
+                                                        <i class="s7-copy-file"></i> Copy
+                                                    </button>
+
+                                                }
+                                            }
+                                            else
                                             {
                                                 <button class="md-trigger btn btn-default btn-sm" data-modal="modal-copy-activity"
                                                         onclick="ActivitySetup.setCopyActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("copy", "activity", new { id = activity.Uid.ToString(), isnew = 1 })')" @(needToUpgrade ? "disabled=\"disabled\"" : "")>
                                                     <i class="s7-copy-file"></i> Copy
                                                 </button>
                                             }
-                                            else
-                                            {
-                                                <button class="md-trigger btn btn-default btn-sm showNotification" onclick="return HandleNotification('@(managePermissionSlipsPackage != null ? managePermissionSlipsPackage.Name: "")',@(managePermissionSlipsPackage != null ? managePermissionSlipsPackage.ID: 0))">
-                                                    <i class="s7-copy-file"></i> Copy
-                                                </button>
-                                                 
-                                            }
-                                        }
-                                        else
-                                        {
-                                            <button class="md-trigger btn btn-default btn-sm" data-modal="modal-copy-activity"
-                                                    onclick="ActivitySetup.setCopyActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("copy", "activity", new { id = activity.Uid.ToString(), isnew = 1 })')" @(needToUpgrade ? "disabled=\"disabled\"" : "")>
-                                                <i class="s7-copy-file"></i> Copy
-                                            </button>
-                                        }
-                                    }
-
-                                    @if (currentUser.IsActivityLeader(activity) || SessionVariables.AccountUserType.In(AccountService.AdminUserTypes))
-                                    {
-                                        if (!activity.IsGroupArchived)
-                                        {
-                                            if (!activity.IsArchived)
-                                            {
-                                                <button class="btn btn-default btn-sm md-trigger" data-modal="modal-archive" onclick="archiveActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("archive", "activity", new { id = activity.Uid.ToString() })')"><i class="s7-albums"></i> Archive</button>
-                                            }
-                                            else
-                                            {
-                                                <button class="btn btn-default btn-sm md-trigger" data-modal="modal-restore" onclick="restoreActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("restore", "activity", new { id = activity.Uid.ToString() })')"><i class="s7-albums"></i> Restore</button>
-                                            }
                                         }
 
-                                        if (currentUser.IsActivityLeader(activity))
+                                        @if (currentUser.IsActivityLeader(activity) || SessionVariables.AccountUserType.In(AccountService.AdminUserTypes))
                                         {
-                                            <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("delete", "activity", new { id = activity.Uid.ToString() })')"><span class="text-danger"><i class="s7-trash"></i></span></button>
+                                            if (!activity.IsGroupArchived)
+                                            {
+                                                if (!activity.IsArchived)
+                                                {
+                                                    <button class="btn btn-default btn-sm md-trigger" data-modal="modal-archive" onclick="archiveActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("archive", "activity", new { id = activity.Uid.ToString() })')"><i class="s7-albums"></i> Archive</button>
+                                                }
+                                                else
+                                                {
+                                                    <button class="btn btn-default btn-sm md-trigger" data-modal="modal-restore" onclick="restoreActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("restore", "activity", new { id = activity.Uid.ToString() })')"><i class="s7-albums"></i> Restore</button>
+                                                }
+                                            }
+
+                                            if (currentUser.IsActivityLeader(activity))
+                                            {
+                                                <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("delete", "activity", new { id = activity.Uid.ToString() })')"><span class="text-danger"><i class="s7-trash"></i></span></button>
+                                            }
                                         }
-                                    }
-                                </div>
-                            </td>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else if (Model.Count() == 0 && hasSearchQuery)
+                    {
+                        <tr class="text-center">
+                            <td colspan="9">No activity found with search terms '@Request["q"]'</td>
                         </tr>
                     }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="9">There are no @UILabel.ActivityLabel(activityType, true).ToLower(). Please <a href="@addUrl">add new @UILabel.ActivityLabel(activityType).ToLower()</a></td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+                    else
+                    {
+                        <tr>
+                            <td colspan="9">There are no @UILabel.ActivityLabel(activityType, true).ToLower(). Please <a href="@addUrl">add new @UILabel.ActivityLabel(activityType).ToLower()</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
 
     Html.RenderPartial(
         "~/Views/Shared/_Paging.cshtml",
@@ -528,6 +544,9 @@ else
 </div>
 
 <script>
+     function doSearch(){
+         location.href = `@Url.Action("index", "activity")?type=1&${getQuery()}`;
+    }
     function updateSchedule() {
         var schedule = $('#schedule').val();
         var activity = $('#schedule-activity').val();
@@ -577,6 +596,10 @@ else
     function restoreActivity(name, url) {
         $('#restore-activity-name').html(name);
         $('#restore-activity-button').attr('href', url);
+    }
+    function getQuery() {
+        var q = $('#search').val();
+        return `q=${q}`;
     }
 </script>
 

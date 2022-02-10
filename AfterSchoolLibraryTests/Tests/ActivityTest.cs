@@ -180,7 +180,7 @@ namespace AfterSchoolLibraryTests.Tests
             var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc: dc);
             activity.ActivityGroupId = activityGroup.ID.Value;
             msgs.AddRange(activity.Save(dc));
-            Assert.Equal(1, Activity.GetCountByAccountId(account.ID.Value, activity.ActivityGroupId.Value, null, null, null, null, msgs, dc));
+            Assert.Equal(1, Activity.GetCountByAccountId(account.ID.Value, "", activity.ActivityGroupId.Value, null, null, null, null, msgs, dc));
         }
 
         [Fact]
@@ -189,7 +189,7 @@ namespace AfterSchoolLibraryTests.Tests
             var user = WebUserFactory.Create(msgs, dc);
             var account = AccountFactory.Create(user, msgs, dc: dc);
             ActivityFactory.Create(account, msgs, dc: dc);
-            Assert.Single(Activity.LoadByAccountId(account.ID.Value, null, null, null, false, false, null, 0, 100, msgs, dc));
+            Assert.Single(Activity.LoadByAccountId(account.ID.Value, null, null, null, false, false, null, 0, 100,"", msgs, dc));
         }
 
         [Fact]
@@ -975,6 +975,52 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.False(activity.IsPubliclyViewable);
             Assert.True(msgs.HasNoErrors());
 
+        }
+
+        [Fact]
+        public void ActivitySearchCountTest()
+        {
+            var user = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(user, msgs, dc);
+            var activityName = "Activity_" + DateTime.Now.Ticks;
+            var activity = ActivityFactory.Create(account, activityName, msgs, dc);
+
+            var getActivityCount = account.GetActivityCount(
+                    UserType.TechSupport,
+                    user,
+                    activityName,
+                    ActivityType.NotSet,
+                    false,
+                    false,
+                    false,
+                    msgs,
+                    dc);
+
+            Assert.Equal(1, getActivityCount);
+        }
+
+        [Fact]
+        public void ActivitySearchCountWithCustomTypeAndNameTest()
+        {
+            var user = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(user, msgs, dc);
+            var activityName = "TestCountActivity_" + DateTime.Now.Ticks;
+            var activityNameSecond = "TestCountActivity_" + DateTime.Now.Ticks;
+            var activity = ActivityFactory.CreateWithNameAndType(account, activityName, ActivityType.Activity, msgs, dc);
+            var activitySecond = ActivityFactory.CreateWithNameAndType(account, activityNameSecond, ActivityType.Activity, msgs, dc);
+
+            var getActivityCount = account.GetActivityCount(
+                    UserType.TechSupport,
+                    user,
+                    "TestCountActivity_", //search term
+                    ActivityType.Activity,
+                    false,
+                    false,
+                    false,
+                    msgs,
+                    dc);
+
+            Assert.Equal(2, getActivityCount);
         }
 
 
