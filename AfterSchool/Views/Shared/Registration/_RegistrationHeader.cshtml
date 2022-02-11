@@ -114,7 +114,7 @@
             <div class="col-lg-@midColSpan col-md-6 col-sm-12">
 
 
-                <h1 class="activity-title">
+                <h1 class="activity-title notranslate">
                     <span>@Html.Raw(Model.Title)</span>
                     @if (Model.SessionName.IsNotEmpty())
                     {
@@ -193,7 +193,7 @@
 
                 if (currentUser.IsNotEmpty())
                 {
-                    followButtonAttrs = $"onclick=\"follow()\" class=\"btn btn-header-action {(isFollowing ? "hide" : "")}\" id=\"btn-follow\"";
+                    followButtonAttrs = $"onclick=\"follow()\" class=\"profileViewBtns btn btn-header-action {(isFollowing ? "hide" : "")}\" id=\"btn-follow\"";
                 }
 
                 <div class="col-lg-4 col-md-6 col-sm-12">
@@ -217,7 +217,7 @@
                             </button>
                         </div>
 
-                        <button class="btn btn-header-action btn-share">
+                        <button class="btn btn-header-action btn-share profileViewBtns">
                             <i class="icon icon-left s7-share"></i>
                             Share
                         </button>
@@ -226,7 +226,7 @@
                         {
                             if (!Model.Account.IsClaimed)
                             {
-                                <button id="model-claim" class="btn btn-header-action md-trigger btn-danger" data-modal="modal-claim-profile" onclick="resetClaimForm()">
+                                <button id="model-claim" class="btn btn-header-action md-trigger btn-danger profileViewBtns" data-modal="modal-claim-profile" onclick="resetClaimForm()">
                                     <i class="icon icon-left s7-door-lock"></i>
                                     <span class="">Claim Profile</span>
                                 </button>
@@ -234,14 +234,14 @@
 
                             if (Model.Account.ContactFormId.HasValue)
                             {
-                                <a href="@Model.Account.ContactUrl" class="btn btn-header-action">
+                                <a href="@Model.Account.ContactUrl" class="btn btn-header-action profileViewBtns">
                                     <i class="icon icon-left s7-mail"></i>
                                     <span class="">Contact Us</span>
                                 </a>
                             }
                             else
                             {
-                                <button class="btn btn-header-action md-trigger" data-modal="modal-contact-provider" onclick="resetContactProviderForm()">
+                                <button class="btn btn-header-action md-trigger profileViewBtns" data-modal="modal-contact-provider" onclick="resetContactProviderForm()">
                                     <i class="icon icon-left s7-mail"></i>
                                     <span class="">Contact Us</span>
                                 </button>
@@ -251,7 +251,7 @@
                             {
                                 <div>
                                     <div class="btn-group" style="width:100%;">
-                                        <button class="btn btn-header-action dropdown-toggle" data-toggle="dropdown">
+                                        <button class="btn btn-header-action dropdown-toggle profileViewBtns" data-toggle="dropdown">
                                             <i class="s7-more"></i>
                                             More
                                             <span class="caret"></span>
@@ -550,7 +550,7 @@
     {
         if (!isInEditMode || Model.Account.HasActivities())
         {
-            <button onclick="location.href='@Model.Account.BrowseUrl'" class="btn btn-header-action">
+            <button onclick="location.href='@Model.Account.BrowseUrl'" class="btn btn-header-action profileViewBtns">
                 <i class="icon icon-left s7-gleam"></i>
                 <span class="">
                     View @UILabel.ActivityLabel(ActivityType.Activity, true)
@@ -573,14 +573,14 @@
                 payUrl = Url.Action("confirm", "signup", new { id = currentUser.Uid, returnurl = payUrl });
             }
 
-            <button onclick="location.href='@payUrl'" class="btn btn-header-action">
+            <button onclick="location.href='@payUrl'" class="btn btn-header-action profileViewBtns">
                 <i class="icon icon-left s7-credit"></i>
                 <span class="">Make A Payment</span>
             </button>
         }
         else
         {
-            <button type="button" class="btn btn-header-action md-trigger" data-modal="modal-login" onclick="setLoginRedirect('@Model.Account.PayUrl', true)">
+            <button type="button" class="btn btn-header-action md-trigger profileViewBtns" data-modal="modal-login" onclick="setLoginRedirect('@Model.Account.PayUrl', true)">
                 <i class="icon icon-left s7-credit"></i>
                 <span class="">Make A Payment</span>
             </button>

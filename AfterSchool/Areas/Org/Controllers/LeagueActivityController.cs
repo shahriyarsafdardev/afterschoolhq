@@ -90,9 +90,9 @@ namespace AfterSchool.Areas.Org.Controllers
             }
             else
             {
-                totalActivityCount = currentAccount.GetActivityCount(SessionVariables.AccountUserType, currentUser, null, isArchived, false, null, msgs);
-                activities = currentAccount.GetActivities(SessionVariables.AccountUserType, currentUser, null, isArchived, false, null, start, length, msgs);
-                hasArchivedActivities = currentAccount.GetActivityCount(SessionVariables.AccountUserType, currentUser, null, true, false, null, msgs) > 0;
+                totalActivityCount = currentAccount.GetActivityCount(SessionVariables.AccountUserType, currentUser, null, null, isArchived, false, null, msgs);
+                activities = currentAccount.GetActivities(SessionVariables.AccountUserType, currentUser, null, null, isArchived, false, null, start, length, msgs);
+                hasArchivedActivities = currentAccount.GetActivityCount(SessionVariables.AccountUserType, currentUser, null, null, true, false, null, msgs) > 0;
             }
 
             var totalPages = Math.Ceiling(totalActivityCount.ToDouble() / recordsPerPage).ToInteger();

@@ -1446,12 +1446,12 @@
     line-height: normal;
     letter-spacing: normal;
 }
-}
+
 
 .textCenterImportant{
     text-align:center !important;
 }
-}
+
 
 
 .navTop> .nav-btn {
@@ -1476,3 +1476,9 @@
     display: none;
 }
 
+
+.profileViewBtns {
+    background-color: none !important;
+    border: 3px solid white !important;
+    background: transparent !important
+}
