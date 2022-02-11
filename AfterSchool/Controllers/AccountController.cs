@@ -1526,10 +1526,6 @@ namespace AfterSchool.Controllers
         {
             if (WebUser.ExistsByEmail(email, msgs))
                 msgs.Add("Student email already exists.", MessageType.UserError);
-
-            if (WebUser.ExistsByEmail(parentEmail, msgs))
-                msgs.Add("Student email already exists.", MessageType.UserError);
-
             if (email.IsSameAs(parentEmail))
                 msgs.Add("Parent email cannot be the same as your student email address when creating a login account", MessageType.UserError);
         }
