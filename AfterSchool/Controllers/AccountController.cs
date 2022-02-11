@@ -2425,26 +2425,6 @@ namespace AfterSchool.Controllers
             return user;
         }
 
-        private WebUser CreateOrUpdateInterestedUser(WebUser currentUser, string firstName, string lastName, string email, string phone, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            WebUser user;
-
-            if (currentUser.IsEmpty())
-            {
-                user = WebUserService.StartUserAccount(firstName, lastName, email, msgs, dc);
-            }
-            else
-            {
-                user = currentUser;
-                user.Phone = phone.Trim();
-                user.LastModifiedBy = currentUser.ID;
-                user.LastModifiedDate = System.DateTime.UtcNow;
-                msgs.AddRange(user.Save(dc));
-            }
-
-            return user;
-        }
-
         private Account CreateOrUpdateAccount(WebUser user, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var account = user.GetRegistrantAccount(msgs, dc);
