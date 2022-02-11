@@ -15,6 +15,11 @@
     var forceNonRepeating = false;
     var hasScheduled = false;
 
+    if (ViewData["isContinousEnrollmentEnabled"] != null && String.Equals(ViewData["isContinousEnrollmentEnabled"], true))
+    {
+        Model.IsOngoing = true;
+    }
+
     if (ViewData["ActivityGroupType"].IsNotEmpty())
     {
         activityGroupType = (ActivityGroupType)ViewData["ActivityGroupType"].ToString().ToInteger();
