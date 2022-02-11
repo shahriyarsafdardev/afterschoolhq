@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Web;
 using System.Web.Mvc;
 using AfterSchool.Helpers;
 using AfterSchool.Models;
@@ -1410,10 +1411,7 @@ namespace AfterSchool.Controllers
                 ValidateEmailsForStudentRegistration(email: email.Value.Trim(), parentEmail: parentEmail.Value.Trim(), msgs);
                 if (msgs.HasNoErrors())
                 {
-                    //prepare a model of question and answers that we can pass to service layer
-                    List<KeyValuePair<FormQuestion, string>> qvModel = new List<KeyValuePair<FormQuestion, string>>();
-                    foreach (var qvm in qvms)
-                        qvModel.Add(new KeyValuePair<FormQuestion, string>(qvm.Question, qvm.Value.IfEmpty("").Trim()));
+                    var questionAnswerModel = GetQuestionAnswerModel(qvms);
 
                     var studentDetails = AccountService.ProcessStudentRegistration(
                         firstName: firstName.Value,
@@ -1424,7 +1422,7 @@ namespace AfterSchool.Controllers
                         schoolLocationId: location?.ID.Value,  // probably should have a school location id
                         allowTextMessages: textnotifications.IfBlank("0").ToBoolean(),
                         isAfterSchool: SessionVariables.IsAfterSchool.Value,
-                        qvModel: qvModel,
+                        questionAnswerModel: questionAnswerModel,
                         msgs: msgs);
 
                     if (msgs.HasNoErrors())
@@ -1441,7 +1439,7 @@ namespace AfterSchool.Controllers
                                 email: parentEmail.Value.Trim(),
                                 browserUrl: participationObject?.GetBrowseUrl(true),
                                 allowTextMessages: textnotifications.IfBlank("").ToBoolean(),
-                                qvModel: qvModel,
+                                questionAnswerModel: questionAnswerModel,
                                 studentUser: studentUser,
                                 msgs: msgs);
 
@@ -1532,6 +1530,16 @@ namespace AfterSchool.Controllers
 
             if (email.IsSameAs(parentEmail))
                 msgs.Add("Parent email cannot be the same as your student email address when creating a login account", MessageType.UserError);
+        }
+
+        private List<KeyValuePair<FormQuestion, string>> GetQuestionAnswerModel(List<FormQuestionViewModel> qvms)
+        {
+            //prepare a model of question and answers that we can pass to service layer
+            List<KeyValuePair<FormQuestion, string>> model = new List<KeyValuePair<FormQuestion, string>>();
+            foreach (var qvm in qvms)
+                model.Add(new KeyValuePair<FormQuestion, string>(qvm.Question, qvm.Value.IfEmpty("").Trim()));
+
+            return model;
         }
 
         #endregion
@@ -2662,49 +2670,14 @@ namespace AfterSchool.Controllers
                 .Where(question => !question.IsDeleted && question.QuestionDataTypeId == QuestionDataType.NotSet && answers.Find(answer => answer.FormQuestionId == question.ID).IsEmpty())
                 .OrderBy(question => question.DisplayOrder)
                 .ToList();
+
             ViewBag.Registrant = SessionVariables.CurrentRegistrant;
+            ViewBag.QuestionViewModels = questions.Select(question => question.ToFormQuestionViewModel()).ToList();
             return questions;
         }
 
-        [HttpGet]
-        public ActionResult RegisterStudent()
+        private void ValidateRegisterStudentQuestions(List<FormQuestion> questions, SystemMessages msgs)
         {
-            var msgs = new SystemMessages();
-
-            // check if parent has been invited 
-            // if not redirect to parent invite page
-            if (SessionVariables.CurrentRegistrant.GetParentOrGuardian(msgs).IsEmpty())
-                return RedirectToAction("InviteParent");
-
-            var participationObject = GetParticipationObjectFromCart();
-            var (submittedRecord, registration) = SessionVariables.CurrentRegistrant.GetSubmittedRecord(participationObject, msgs);
-
-            ViewBag.AlreadyRegistered = submittedRecord.IsNotEmpty();
-            ViewBag.Messages = msgs;
-
-            LoadSessionActivitiesViewBag(participationObject, registration, msgs);
-
-            // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
-            var questions = RegisterStudentViewBag(participationObject, msgs);
-            ViewBag.QuestionViewModels = questions.Select(question => question.ToFormQuestionViewModel()).ToList();
-
-            return View(participationObject);
-        }
-
-        [HttpPost]
-        public ActionResult RegisterStudent(string agree)
-        {
-            var msgs = new SystemMessages();
-            var participationObject = GetParticipationObjectFromCart();
-            // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
-
-            if (agree.IsEmpty())
-                msgs.Add("You must agree to participate", MessageType.UserError);
-
-            // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
-            var questions = RegisterStudentViewBag(participationObject, msgs);
-            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
-
             questions.ForEach(question =>
             {
                 if (question.IsRequired)
@@ -2720,80 +2693,108 @@ namespace AfterSchool.Controllers
                         msgs.Add($"{question.Text} is required", MessageType.UserError);
                 }
             });
+        }
 
+        [HttpGet]
+        public ActionResult RegisterStudent()
+        {
+            var msgs = new SystemMessages();
+
+            // check if parent has been invited, if not redirect to parent invite page
+            if (SessionVariables.CurrentRegistrant.GetParentOrGuardian(msgs).IsEmpty())
+                return RedirectToAction("InviteParent");
+
+            var participationObject = GetParticipationObjectFromCart();
+            var (submittedRecord, registration) = SessionVariables.CurrentRegistrant.GetSubmittedRecord(participationObject, msgs);
+
+            LoadSessionActivitiesViewBag(participationObject, registration, msgs);
+
+            // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
+            RegisterStudentViewBag(participationObject, msgs);
+
+            ViewBag.AlreadyRegistered = submittedRecord.IsNotEmpty();
+            ViewBag.Messages = msgs;
+            return View(participationObject);
+        }
+
+        [HttpPost]
+        public ActionResult RegisterStudent(string agree)
+        {
+            var msgs = new SystemMessages();
+            var participationObject = GetParticipationObjectFromCart();
+            if (agree.IsEmpty())
+                msgs.Add("You must agree to participate", MessageType.UserError);
+
+            // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
+            var questions = RegisterStudentViewBag(participationObject, msgs);
+            ValidateRegisterStudentQuestions(questions: questions, msgs: msgs);
             Registration registration = null;
 
             if (msgs.HasNoErrors())
             {
-                Database.ExecuteTransaction
-                (
-                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                // check this code
+                var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+                var files = GetFilesModel();
+                var questionAnswerModel = GetQuestionAnswerModel(qvms);
+                var registrantDetails = AccountService.ProcessRegisterStudent(ownerAccount: participationObject.OwnerAccount,
+                    registrant: SessionVariables.CurrentRegistrant,
+                    questionAnswerModel: questionAnswerModel,
+                    activityGroupId: participationObject.GetAnyRelatedActivityGroupId(),
+                    accountActivityGroupId: participationObject.GetAccountActivityGroupId(),
+                    periodId: participationObject.GetCurrentRegistrationPeriod(msgs)?.ID,
+                    files: files,
+                    loggedInUser: SessionVariables.CurrentUser,
+                    msgs: msgs);
+
+                registration = registrantDetails.Item1;
+                var registrant = registrantDetails.Item2;
+
+                if (msgs.HasNoErrors() && registration.IsNotEmpty() && registrant.IsNotEmpty())
+                {
+                    AddSessionActivitiesToRegistration(
+                        participationObject,
+                        registration,
+                        registrant,
+                        participationObject.RegistrationPeriod,
+                        msgs);
+
+                    if (msgs.HasNoErrors())
                     {
-                        // account gets copy / snapshot of master registrant record
-                        // required in order to make sure registration data doesn't change as registrant changes information in master record.
-                        var submittedRecord = SessionVariables.CurrentRegistrant.SubmitRecordToAccount(
-                            ownerAccount: participationObject.OwnerAccount,
+                        AccountService.ProcessStudentRegistration(
+                            checkoutObject: new CheckoutObject()
+                            {
+                                BillingAccount = participationObject.OwnerAccount,
+                                PayingAccount = SessionVariables.CurrentAccount,
+                                NumberOfSeats = 1,
+                                ParticipationObject = participationObject,
+                                Registration = registration,
+                                MasterRegistrant = SessionVariables.CurrentRegistrant
+                            },
+                            sendConfirmationEmail: true,
                             loggedInUser: SessionVariables.CurrentUser,
-                            msgs: amsgs,
-                            dc: adc);
-
-                        if (qvms.IsNotEmpty())
-                            AddOrUpdateStandardAnswers(qvms, SessionVariables.CurrentRegistrant, SessionVariables.CurrentUser, amsgs, adc);
-
-                        // Create Registration
-                        registration = submittedRecord.AddRegistration(
-                                        ownerAccountId: participationObject.OwnerAccount.ID.Value,
-                                        activityGroupId: participationObject.GetAnyRelatedActivityGroupId(),
-                                        accountActivityGroupId: participationObject.GetAccountActivityGroupId(),
-                                        periodId: participationObject.GetCurrentRegistrationPeriod(amsgs, adc)?.ID,
-                                        completionStatus: RegistrationCompletionStatus.RequiresParentSignature,
-                                        loggedInUserId: SessionVariables.CurrentUser.ID.Value,
-                                        msgs: amsgs,
-                                        dc: adc);
-
-                        if (qvms.IsNotEmpty())
-                            AddCustomQuestions(qvms, submittedRecord, registration, SessionVariables.CurrentUser, amsgs, adc);
-
-                        if (amsgs.HasNoErrors())
-                            AddSessionActivitiesToRegistration(
-                                participationObject,
-                                registration,
-                                submittedRecord,
-                                participationObject.RegistrationPeriod,
-                                amsgs,
-                                adc);
-
-                        if (amsgs.HasNoErrors())
-                            AccountService.ProcessStudentRegistration(
-                                checkoutObject: new CheckoutObject()
-                                    {
-                                        BillingAccount = participationObject.OwnerAccount,
-                                        PayingAccount = SessionVariables.CurrentAccount,
-                                        NumberOfSeats = 1,
-                                        ParticipationObject = participationObject,
-                                        Registration = registration,
-                                        MasterRegistrant = SessionVariables.CurrentRegistrant
-                                    },
-                                sendConfirmationEmail: true,
-                                loggedInUser: SessionVariables.CurrentUser,
-                                msgs: amsgs, 
-                                dc: adc);
-                    },
-                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
-                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
-                );
+                            msgs: msgs);
+                    }
+                }
             }
 
             if (msgs.HasNoErrors())
                 return RedirectToAction("RegistrationComplete", new { id = registration.Uid });
 
-            ViewBag.Messages = msgs;
-            ViewBag.AlreadyRegistered = false;
-            ViewBag.QuestionViewModels = qvms;
             LoadSessionActivitiesViewBag(participationObject, registration, msgs);
 
+            ViewBag.Messages = msgs;
+            ViewBag.AlreadyRegistered = false;
+
             return View(participationObject);
+        }
+
+        private List<AfterSchoolLibrary.Helpers.FilesCollection> GetFilesModel()
+        {
+            List<AfterSchoolLibrary.Helpers.FilesCollection> files = new List<AfterSchoolLibrary.Helpers.FilesCollection>();
+            foreach (HttpPostedFileBase item in Request.Files)
+                files.Add(new AfterSchoolLibrary.Helpers.FilesCollection() { ContentLength = item.ContentLength, InputStream = item.InputStream, FileName = item.FileName });
+
+            return files;
         }
 
         #endregion

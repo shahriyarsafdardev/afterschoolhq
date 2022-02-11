@@ -10,6 +10,7 @@ using Lob.Models;
 using AfterSchool.Models;
 using System.Data;
 using Twilio.Rest.Api.V2010.Account.Usage.Record;
+using AfterSchoolLibrary.Helpers;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -4668,9 +4669,11 @@ namespace AfterSchoolLibrary.Services
         #region Student-Registration
 
         public static (Account, WebUser, Registrant) ProcessStudentRegistration(string firstName, string lastName, string email, string phone, string password, int? schoolLocationId, bool allowTextMessages, bool isAfterSchool,
-            List<KeyValuePair<FormQuestion, string>> qvModel,
+            List<KeyValuePair<FormQuestion, string>> questionAnswerModel,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
             Account studentAccount = null;
             WebUser studentUser = null;
             Registrant studentRegistrant = null;
@@ -4722,7 +4725,7 @@ namespace AfterSchoolLibrary.Services
                             if (amsgs.HasNoErrors() && studentRegistrant.IsNotEmpty())
                             {
                                 // add or update answer for registratnt
-                                qvModel.ForEach(qvm =>
+                                questionAnswerModel.ForEach(qvm =>
                                 {
                                     if (qvm.Key.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation)
                                     {
@@ -4737,15 +4740,21 @@ namespace AfterSchoolLibrary.Services
                             }
                         }
                     }                    
-                });
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc);
 
             return (studentAccount, studentUser, studentRegistrant);
         }
 
         public static (WebUser, Registrant) ProcessParentRegistration(this Account studentAccount, string firstName, string lastName, string email, string browserUrl, bool allowTextMessages,
-            List<KeyValuePair<FormQuestion, string>> qvModel, WebUser studentUser,
+            List<KeyValuePair<FormQuestion, string>> questionAnswerModel, WebUser studentUser,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
             WebUser parentUser = null;
             Registrant parentRegistrant = null;
 
@@ -4787,7 +4796,7 @@ namespace AfterSchoolLibrary.Services
                         if (amsgs.HasNoErrors() && parentRegistrant.IsNotEmpty())
                         {
                             // add answers to student registrant record
-                            qvModel.ForEach(qvm => {
+                            questionAnswerModel.ForEach(qvm => {
                                 if (qvm.Key.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.Parent1Information)
                                 {
                                     parentRegistrant.AddOrUpdateAnswer(
@@ -4800,9 +4809,108 @@ namespace AfterSchoolLibrary.Services
                             });
                         }
                     }
-                });
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc);
 
             return (parentUser, parentRegistrant);
+        }
+
+        public static (Registration, Registrant) ProcessRegisterStudent(Account ownerAccount, Registrant registrant, 
+            List<KeyValuePair<FormQuestion, string>> questionAnswerModel, int? activityGroupId, int? accountActivityGroupId, int? periodId, List<FilesCollection> files,
+            WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Registration registration = null;
+            Registrant submittedRecord = null;
+
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    // account gets copy / snapshot of master registrant record
+                    // required in order to make sure registration data doesn't change as registrant changes information in master record.
+                    submittedRecord = registrant.SubmitRecordToAccount(
+                            ownerAccount: ownerAccount,
+                            loggedInUser: loggedInUser,
+                            msgs: amsgs,
+                            dc: adc);                    
+
+                    // Create Registration
+                    registration = submittedRecord.AddRegistration(
+                                    ownerAccountId: ownerAccount.ID.Value,
+                                    activityGroupId: activityGroupId,
+                                    accountActivityGroupId: accountActivityGroupId,
+                                    periodId: periodId,
+                                    completionStatus: RegistrationCompletionStatus.RequiresParentSignature,
+                                    loggedInUserId: loggedInUser.ID.Value,
+                                    msgs: amsgs,
+                                    dc: adc);
+
+                    if (questionAnswerModel.IsNotEmpty() && questionAnswerModel.Count > 0)
+                    {
+                        questionAnswerModel.Where(qvm => qvm.Key.QuestionDataTypeId != QuestionDataType.NotSet).ToList()
+                        .ForEach(qvm =>
+                        {
+                            registrant.AddOrUpdateAnswer(
+                                answerText: qvm.Value,
+                                question: qvm.Key,
+                                loggedInUser: loggedInUser,
+                                msgs: amsgs,
+                                dc: adc);
+                        });
+
+                        AddCustomQuestions(questionAnswerModel: questionAnswerModel, submittedRecord: submittedRecord, registration: registration, files: files, currentUser: loggedInUser, msgs: amsgs, dc: adc);
+                    }
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc);
+
+            return (registration, submittedRecord);
+        }
+
+        private static void AddCustomQuestions(List<KeyValuePair<FormQuestion, string>> questionAnswerModel, Registrant submittedRecord, Registration registration, List<FilesCollection> files, 
+            WebUser currentUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            // add custom answers to questions directly to this registration
+            questionAnswerModel.Where(qvm => qvm.Key.QuestionDataTypeId == QuestionDataType.NotSet)
+            .ToList()
+            .ForEach(qvm =>
+            {
+                if (qvm.Key.QuestionTypeId == QuestionType.FileUpload)
+                {
+                    var name = $"question-{(int)qvm.Key.ID}";
+                    if (files.IsNotEmpty() && files.Any(m => m.FileName == name) && files.Where(m => m.FileName == name).FirstOrDefault().ContentLength > 0)
+                    {
+                        var file = files.Where(m => m.FileName == name).FirstOrDefault();
+                        //5 MB = 5242880 Bytes
+                        //File uploaded here should be less than of 5MB
+                        if (file.ContentLength <= 5242880)
+                            submittedRecord.AddOrUpdateAnswer(
+                                file: file.InputStream,
+                                filename: file.FileName,
+                                question: qvm.Key,
+                                registrationId: registration.ID,
+                                loggedInUser: currentUser,
+                                msgs: msgs,
+                                dc: dc);
+                        else
+                            msgs.Add("Upload a file less than or equal to 5 megabytes", MessageType.UserError);
+                    }
+                }
+                else
+                    submittedRecord.AddOrUpdateAnswer(
+                        answerText: qvm.Value,
+                        question: qvm.Key,
+                        registrationId: registration?.ID,
+                        loggedInUser: currentUser,
+                        msgs: msgs,
+                        dc: dc);
+            });
         }
 
         #endregion
