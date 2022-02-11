@@ -101,6 +101,7 @@ namespace AfterSchoolLibrary.Helpers
 					Migrations.UpdateNameColumnFormQuestionGroup_20211119.Do(amsgs, adc);
 
                     UpdateActivityContinuesEnrollmentFlag_20220205.Do(amsgs, adc);
+                    Migration_20220202_SessionActionToWebSessionAction.Do(amsgs, adc);                    
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs)

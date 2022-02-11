@@ -2,7 +2,7 @@
 @{
     var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
     var msgs = (SystemMessages)ViewBag.Messages;
-    var actions = (List<SessionAction>)ViewBag.Actions;
+    var actions = (List<WebSessionAction>)ViewBag.Actions;
     var registrants = Model.GetRegistrantActivities();
     var schedule = (ActivitySchedule)ViewBag.Schedule;
     var totalPaid = (decimal)ViewBag.TotalPaid;

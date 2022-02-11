@@ -1,7 +1,7 @@
 ﻿@model Account
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
-    var actions = (List<SessionAction>)ViewBag.Actions;
+    var actions = (List<WebSessionAction>)ViewBag.Actions;
     var registrations = (List<Registration>)ViewBag.CurrentRegistrations;
     var totalPaid = (decimal)ViewBag.TotalPaid;
     int registrationCount = (int)ViewBag.RegistrationCount;

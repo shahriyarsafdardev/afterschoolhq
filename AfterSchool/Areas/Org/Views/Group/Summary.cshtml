@@ -1,7 +1,7 @@
 ﻿@model ActivityGroup
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
-    var actions = (List<SessionAction>)ViewBag.Actions;
+    var actions = (List<WebSessionAction>)ViewBag.Actions;
     var registrations = (List<Registration>)ViewBag.Registrations;
 
     decimal totalPaid = 0;
