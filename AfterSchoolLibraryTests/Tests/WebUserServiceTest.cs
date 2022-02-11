@@ -4,6 +4,7 @@ using Xunit.Abstractions;
 using BasicLibrary;
 using AfterSchoolLibrary.Services;
 using AfterSchoolLibraryTests.Factories;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -136,6 +137,27 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(webUser.CleverUserName == "Clever test");
             Assert.True(msgs.HasNoErrors());
             Assert.True(msgs.HasMessageContainingText($"Clever integration for {webUser.DisplayName} has been successfully completed."));
+        }
+
+        [Fact]
+        public void AddNewStudentAccountTest()
+        {
+            // Arrange
+            var webUser = WebUserFactory.Create(msgs, dc);
+
+            // Act
+            var account = WebUserService.AddNewStudentAccount(user: webUser, userType: UserType.Owner, isActive: true, isAfterSchool: true, loggedInUser: webUser, msgs: msgs, dc: dc);
+
+            // Assert
+            var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, webUser.ID.Value, msgs, dc);
+
+            Assert.True(msgs.HasNoErrors());
+            Assert.NotNull(awu);
+            Assert.NotNull(account);
+
+            Assert.True(account.OwnerId == webUser.ID.Value);
+            Assert.True(account.AccountTypeId == AccountType.Registrant);
+            Assert.True(awu.UserTypeId == UserType.Owner);
         }
     }
 }

@@ -609,7 +609,7 @@ namespace AfterSchoolLibrary.Services
             return account;
         }
 
-        public static Account AddNewStudentAccount(this WebUser user, UserType userType, bool isActive, int? packageId, BillingPeriodType? packageBillingPeriod, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Account AddNewStudentAccount(this WebUser user, UserType userType, bool isActive, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Account account = null;
 
@@ -708,11 +708,6 @@ namespace AfterSchoolLibrary.Services
             );
 
             return account;
-        }
-
-        public static Account AddNewStudentAccount(this WebUser accountOwner, UserType userType, bool isActive, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return AddNewStudentAccount(accountOwner, userType, isActive, null, null, isAfterSchool, loggedInUser, msgs, dc);
         }
 
         public static Account AddNewRegistrantAccount(this WebUser accountOwner, UserType userType, bool isActive, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
