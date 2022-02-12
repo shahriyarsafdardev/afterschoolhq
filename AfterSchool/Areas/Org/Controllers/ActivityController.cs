@@ -47,15 +47,15 @@ namespace AfterSchool.Areas.Org.Controllers
 		return View(activity);
     }
 
-    [HttpGet]
-    public ActionResult Index(string group, string pn, string rpp, string archive, string copyerror, string type)
-    {
-		var currentAccount = SessionVariables.CurrentAccount;
-		var msgs = new SystemMessages();
-		var pageNumber = 1;
-		var recordsPerPage = 10;
-		var isArchived = false;
-		var activityType = ActivityType.Activity;
+        [HttpGet]
+        public ActionResult Index(string group, string pn, string rpp, string archive, string copyerror, string type, string q)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+            var pageNumber = 1;
+            var recordsPerPage = 10;
+            var isArchived = false;
+            var activityType = ActivityType.Activity;
 
 		if (pn.IsNumber() && pn.ToInteger() > 0)
 			pageNumber = pn.ToInteger();
@@ -88,35 +88,38 @@ namespace AfterSchool.Areas.Org.Controllers
 		{
 			var getUngroupActivitiesOnly = currentAccount.AccountTypeId == AccountType.School;
 
-			totalActivityCount = currentAccount.GetActivityCount(
-				SessionVariables.AccountUserType,
-				SessionVariables.CurrentUser,
-				activityType,
-				isArchived,
-				false,
-				getUngroupActivitiesOnly,
-				msgs);
+                totalActivityCount = currentAccount.GetActivityCount(
+                    SessionVariables.AccountUserType,
+                    SessionVariables.CurrentUser,
+                    q,
+                    activityType,
+                    isArchived,
+                    false,
+                    getUngroupActivitiesOnly,
+                    msgs);
 
-			activities = currentAccount.GetActivities(
-				SessionVariables.AccountUserType,
-				SessionVariables.CurrentUser,
-				activityType,
-				isArchived,
-				false,
-				getUngroupActivitiesOnly,
-				start,
-				length,
-				msgs);
+                activities = currentAccount.GetActivities(
+                    SessionVariables.AccountUserType,
+                    SessionVariables.CurrentUser,
+                    q,
+                    activityType,
+                    isArchived,
+                    false,
+                    getUngroupActivitiesOnly,
+                    start,
+                    length,
+                    msgs);
 
-			hasArchivedActivities = currentAccount.GetActivityCount(
-				SessionVariables.AccountUserType,
-				SessionVariables.CurrentUser,
-				activityType,
-				true,
-				false,
-				getUngroupActivitiesOnly,
-				msgs) > 0;
-		}
+                hasArchivedActivities = currentAccount.GetActivityCount(
+                    SessionVariables.AccountUserType,
+                    SessionVariables.CurrentUser,
+                    q,
+                    activityType,
+                    true,
+                    false,
+                    getUngroupActivitiesOnly,
+                    msgs) > 0;
+            }
 
 		var totalPages = Math.Ceiling(totalActivityCount.ToDouble() / recordsPerPage).ToInteger();
 

@@ -149,10 +149,12 @@ body.registration {
 }
 
 .reg-login-bar-title {
-    font-size: 1.4em;
     color: #fff;
-    display: block;
     padding: 5px 0px 0px 10px;
+}
+
+.reg-login-bar-title-item {
+    color: #fff;
 }
 
 .reg-login-bar .btn-link {

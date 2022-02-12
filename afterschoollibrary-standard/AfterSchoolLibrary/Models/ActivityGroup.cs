@@ -627,7 +627,7 @@ namespace AfterSchoolLibrary.Models
         public List<Activity> GetActivities(ActivityType? activityType, bool? isArchived, bool? isDeleted, int? start, int? length, bool forceReload = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (_Activities.IsEmpty() || forceReload)
-                _Activities = Activity.LoadByAccountId(this.AccountId.Value, this.ID.Value, null, activityType, isArchived, isDeleted, null, start, length, msgs, dc);
+                _Activities = Activity.LoadByAccountId(this.AccountId.Value, this.ID.Value, null, activityType, isArchived, isDeleted, null, start, length, null, msgs, dc);
 
             return _Activities;
         }
@@ -730,7 +730,7 @@ namespace AfterSchoolLibrary.Models
         public int GetActivityCountByAccountId(int accountId, ActivityType? activityType, bool? isArchived, bool? isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (this.ID.HasValue)
-                return Activity.GetCountByAccountId(accountId, this.ID, activityType, isArchived, isDeleted, null, msgs, dc);
+                return Activity.GetCountByAccountId(accountId, null, this.ID, activityType, isArchived, isDeleted, null, msgs, dc);
 
             return 0;
         }

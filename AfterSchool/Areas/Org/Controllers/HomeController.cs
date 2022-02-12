@@ -38,7 +38,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (account.IsNewProviderForOtherAccounts())
                 return RedirectToAction("getstartedpayments", "account");
 
-            if (account.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, null, null, null, null) == 0 && (account.AccountTypeId != AccountType.School || account.GetExternalLeagueInviteCount() == 0))
+            if (account.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, null, null, null, null, null) == 0 && (account.AccountTypeId != AccountType.School || account.GetExternalLeagueInviteCount() == 0))
                 return RedirectToAction("getstarted");                      
 
             
@@ -51,6 +51,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activityCount = account.GetActivityCount(
                 SessionVariables.AccountUserType,
                 currentUser,
+                null,
                 null,
                 null,
                 false,
