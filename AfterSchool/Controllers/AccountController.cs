@@ -1351,31 +1351,37 @@ namespace AfterSchool.Controllers
                 return redirectResult;
 
             if (!featureFlagRepository.IsEnabled("student-registration"))
-            {
                 return RedirectToAction("getstarted", new { regaccount });
-            }
+            
             if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentAccount.AccountTypeId == AccountType.Registrant)
                 return RedirectToAction("select");
-            var participationObject = GetParticipationObjectFromCart();
+            
             Account registrationAccount = null;
             if (regaccount.IsGuid())
                 registrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
+
             // no activity is selected
+            var participationObject = GetParticipationObjectFromCart();
             if (participationObject.IsEmpty())
             {
                 if (SessionVariables.RegistrationStartPageAccount.IsNotEmpty() || registrationAccount.IsNotEmpty())
                     return Redirect(SessionVariables.RegistrationStartPageAccount?.HomePageUrl ?? registrationAccount?.HomePageUrl);
+
                 return HttpNotFound();
             }
+
             var questions = StudentRegistrationViewBag(msgs);
             var parentQuestions = StudentRegistrationParentViewBag(msgs);
             questions.AddRange(parentQuestions);
+
             ViewBag.RegistrationAccount = registrationAccount;
             ViewBag.ParticipationObject = participationObject;
             ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
             ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
             ViewBag.Messages = msgs;
-            return View(questions.Select(question => new FormQuestionViewModel(question)).ToList());
+
+            var qvm = questions.Select(question => new FormQuestionViewModel(question)).ToList();
+            return View(qvm);
         }
         
         [HttpPost]
@@ -1386,15 +1392,15 @@ namespace AfterSchool.Controllers
             var participationObject = GetParticipationObjectFromCart();
             var questions = StudentRegistrationViewBag(msgs);
             var parentQuestions = StudentRegistrationParentViewBag(msgs);
-            questions.AddRange(parentQuestions);
-            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+            questions.AddRange(parentQuestions);            
 
             if (currentUser.IsEmpty())
                 ValidateStudentRegistrationPasswords(password: password1, confirmPassword: password2, msgs: msgs);
 
             ValidateStudentRegistrationQuestions(questions: questions, msgs: msgs);
             ValidateStudentConfirmation(agree: agree, isStudent: isStudent, msgs: msgs);
-            
+
+            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
             if (msgs.HasNoErrors())
             {
                 var firstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName);
@@ -1454,7 +1460,7 @@ namespace AfterSchool.Controllers
 
                                 SessionVariables.CurrentUser = studentUser;
                                 SessionVariables.CurrentAccount = studentAccount;
-                                SessionVariables.AccountUserType = studentUser.GetUserType(studentAccount);
+                                SessionVariables.AccountUserType = studentUser.GetUserType(studentAccount, msgs);
                                 SessionVariables.CurrentRegistrant = studentRegistrant;
                             }
                         }
