@@ -1418,6 +1418,7 @@ namespace AfterSchool.Controllers
                 if (msgs.HasNoErrors())
                 {
                     var questionAnswerModel = GetQuestionAnswerModel(qvms);
+                    var parentWebUser = WebUser.LoadByEmail(parentEmail.Value, msgs);
 
                     var studentDetails = AccountService.ProcessStudentRegistration(
                         firstName: firstName.Value,
@@ -1429,6 +1430,7 @@ namespace AfterSchool.Controllers
                         allowTextMessages: textnotifications.IfBlank("0").ToBoolean(),
                         isAfterSchool: SessionVariables.IsAfterSchool.Value,
                         questionAnswerModel: questionAnswerModel,
+                        parentWebUser,
                         msgs: msgs);
 
                     if (msgs.HasNoErrors())
@@ -1436,8 +1438,8 @@ namespace AfterSchool.Controllers
                         var studentAccount = studentDetails.Item1;
                         var studentUser = studentDetails.Item2;
                         var studentRegistrant = studentDetails.Item3;
-
-                        if (studentAccount.IsNotEmpty() && studentUser.IsNotEmpty() && studentRegistrant.IsNotEmpty())
+                        
+                        if (studentAccount.IsNotEmpty() && studentUser.IsNotEmpty() && studentRegistrant.IsNotEmpty() && parentWebUser.IsEmpty())
                         {
                             var parentDetails = studentAccount.ProcessParentRegistration(
                                 firstName: parentFirstName.Value,
@@ -1456,14 +1458,14 @@ namespace AfterSchool.Controllers
                                 studentRegistrant.AddUserWithAccess(
                                    user: parentUser,
                                    loggedInUser: studentUser,
-                                   msgs: msgs);
-
-                                SessionVariables.CurrentUser = studentUser;
-                                SessionVariables.CurrentAccount = studentAccount;
-                                SessionVariables.AccountUserType = studentUser.GetUserType(studentAccount, msgs);
-                                SessionVariables.CurrentRegistrant = studentRegistrant;
+                                   msgs: msgs);                               
                             }
                         }
+
+                        SessionVariables.CurrentUser = studentUser;
+                        SessionVariables.CurrentAccount = studentAccount;
+                        SessionVariables.AccountUserType = studentUser.GetUserType(studentAccount, msgs);
+                        SessionVariables.CurrentRegistrant = studentRegistrant;
                     }
                 }
             }

@@ -4669,7 +4669,7 @@ namespace AfterSchoolLibrary.Services
         #region Student-Registration
 
         public static (Account, WebUser, Registrant) ProcessStudentRegistration(string firstName, string lastName, string email, string phone, string password, int? schoolLocationId, bool allowTextMessages, bool isAfterSchool,
-            List<KeyValuePair<FormQuestion, string>> questionAnswerModel,
+            List<KeyValuePair<FormQuestion, string>> questionAnswerModel, WebUser parentWebUser = null,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -4699,7 +4699,7 @@ namespace AfterSchoolLibrary.Services
                     {
                         // create account
                         studentAccount = studentUser.AddNewStudentAccount(
-                            userType: UserType.Owner, // student will be owner of this account, till parent not completes registration
+                            userType: parentWebUser.IsNotEmpty() ? UserType.Student : UserType.Owner,
                             isActive: true,
                             isAfterSchool: isAfterSchool,
                             loggedInUser: studentUser,
@@ -4710,7 +4710,7 @@ namespace AfterSchoolLibrary.Services
                         {
                             // create student registrant record
                             studentRegistrant = studentAccount.CreateRegistrant(
-                                registrantOwner: studentUser,
+                                registrantOwner: parentWebUser.IsNotEmpty() ? parentWebUser : studentUser,
                                 canBeAccessedBy: studentUser.AsList(),
                                 registrantType: RegistrantType.Individual,
                                 isMaster: true,
