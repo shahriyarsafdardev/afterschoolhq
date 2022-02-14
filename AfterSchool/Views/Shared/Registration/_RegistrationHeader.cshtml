@@ -189,7 +189,7 @@
 
             @if (!hideButtons)
             {
-                var followButtonAttrs = $"class=\"btn btn-header-action {(isFollowing ? "hide" : "")} md-trigger\" data-modal=\"modal-login\" onclick=\"setLoginAction(function (callback) {{ follow(callback); }}, true)\" id=\"btn-follow\"";
+                var followButtonAttrs = $"class=\"btn btn-header-action profileViewBtns {(isFollowing ? "hide" : "")} md-trigger\" data-modal=\"modal-login\" onclick=\"setLoginAction(function (callback) {{ follow(callback); }}, true)\" id=\"btn-follow\"";
 
                 if (currentUser.IsNotEmpty())
                 {
