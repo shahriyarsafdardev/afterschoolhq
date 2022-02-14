@@ -1477,7 +1477,7 @@
 }
 
 
-.profileViewBtns {
+.transparent-bg {
     background-color: none !important;
     border: 3px solid white !important;
     background: transparent !important
