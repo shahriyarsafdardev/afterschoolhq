@@ -4,7 +4,7 @@ using BasicLibrary.DataAccess;
 
 namespace AfterSchoolLibrary.Migrations
 {
-    public class UpdateActivityContinuesEnrollmentFlag_20220205
+    public class Migration_20220214_UpdateActivityContinuousEnrollmentFlag
     {
         public static void Do(SystemMessages msgs, DatabaseConnection dc)
         {
@@ -16,7 +16,7 @@ namespace AfterSchoolLibrary.Migrations
                     var dq = Activity.get_DatabaseQuery(Activity.ObjectMap, adc);
                     amsgs.AddRange(dq.ExecuteSql(query));
                 },
-                uniqueIdenfier: "UpdateActivityContinuesEnrollmentFlag_20220205",
+                uniqueIdenfier: "Migration_20220214_UpdateActivityContinuousEnrollmentFlag",
                 msgs: msgs,
                 dc: dc
             );

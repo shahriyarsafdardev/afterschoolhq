@@ -8,12 +8,12 @@ using Xunit.Abstractions;
 
 namespace AfterSchoolLibraryTests.Migrations
 {
-    public class UpdateActivityContinuesEnrollmentFlag_20220205_Test : BaseTest
+    public class Migration_20220214_UpdateActivityContinuousEnrollmentFlag_Test : BaseTest
     {
         private WebUser ProviderWebUser { get; set; }
         private Account ProviderAccount { get; set; }
 
-        public UpdateActivityContinuesEnrollmentFlag_20220205_Test(ITestOutputHelper output) : base(output)
+        public Migration_20220214_UpdateActivityContinuousEnrollmentFlag_Test(ITestOutputHelper output) : base(output)
         {
             ProviderWebUser = WebUserFactory.Create(msgs, dc);
             ProviderAccount = AccountFactory.CreateWithFreePackage(ProviderWebUser, AccountType.ActivityProvider, msgs, dc);
@@ -28,7 +28,7 @@ namespace AfterSchoolLibraryTests.Migrations
             var actWithoutCE2 = ActivityFactory.Create(account: ProviderAccount, msgs: msgs, dc: dc);
 
             // Act
-            AfterSchoolLibrary.Migrations.UpdateActivityContinuesEnrollmentFlag_20220205.Do(msgs, dc);
+            AfterSchoolLibrary.Migrations.Migration_20220214_UpdateActivityContinuousEnrollmentFlag.Do(msgs, dc);
 
             // Assert
             var activities = Activity.LoadList(ids: new List<int>() { actWithCE.ID.Value, actWithoutCE.ID.Value, actWithoutCE2.ID.Value }, msgs: msgs, dc: dc);
