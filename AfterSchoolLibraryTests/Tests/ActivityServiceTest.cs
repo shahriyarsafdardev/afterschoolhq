@@ -539,7 +539,6 @@ namespace AfterSchoolLibraryTests.Tests
                 var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
                 AccountPropertyFactory.Create(activity, AccountPropertyType.RegistrationThankYouEmail, msgs, dc);
                 AccountPropertyFactory.Create(activity, AccountPropertyType.ApplicationThankYouEmail, msgs, dc);
-                AccountPropertyFactory.Create(activity, AccountPropertyType.InterestThankYouEmail, msgs, dc);
 
                 // Act
                 var expected = activity.Copy(newName: activity.Name + "- [copy]", useSameForm: false, loggedInUserId: LoggedInUser.ID.Value, msgs: msgs, dc: dc);
