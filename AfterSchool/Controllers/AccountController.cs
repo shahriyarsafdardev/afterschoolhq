@@ -1721,11 +1721,10 @@ namespace AfterSchool.Controllers
 
         #region Register
 
+        //TODO: remove this code once student registration settles down. we are not using this anymore in this controller
         private List<FormQuestion> RegisterViewBag(ParticipationObject participationObject, SystemMessages msgs)
         {
-            var allQuestions = participationObject.Form
-                .GetActiveQuestions(msgs)
-                .ToList();
+            var allQuestions = participationObject.Form.GetActiveQuestions(msgs).ToList();
             var requiredQuestions = allQuestions
                 .Where(question => question.IsRequired &&
                     question.FormQuestionGroupRegistrantTypeId == RegistrantType.Individual &&
@@ -1765,29 +1764,22 @@ namespace AfterSchool.Controllers
             var (submittedRecord, registration) = currentRegistrant.GetSubmittedRecord(participationObject, msgs);
 
             if (!parentOrGuardian.IsProfileCompleted && parentOrGuardian.GetOwner(msgs).ID == SessionVariables.CurrentUser.ID)
-                return RedirectToAction(
-                    "editpersonal",
-                    "family",
-                    new { Area = "user", id = parentOrGuardian.Uid, reg = registration?.Uid, student = currentRegistrant?.Uid, returnUrl = Url.Action("select", "account") });
+                return RedirectToAction("editpersonal", "family", new { Area = "user", id = parentOrGuardian.Uid, reg = registration?.Uid, student = currentRegistrant?.Uid, returnUrl = Url.Action("select", "account") });
 
             if (!currentRegistrant.IsProfileCompleted)
-                return RedirectToAction(
-                    "editstudentpersonal",
-                    "family",
-                    new { Area = "user", id = currentRegistrant.Uid, reg = registration?.Uid, student = currentRegistrant?.Uid, returnUrl = Url.Action("select", "account") });
+                return RedirectToAction("editstudentpersonal", "family", new { Area = "user", id = currentRegistrant.Uid, reg = registration?.Uid, student = currentRegistrant?.Uid, returnUrl = Url.Action("select", "account") });
 
             // check grade eligibility (extra check)
             if (!participationObject.IsStudentGradeInRange(currentRegistrant, msgs))
                 return RedirectToAction("select");
 
-            var needsToRegister = submittedRecord.NeedsToRegister(registration, participationObject, selectedDates, msgs);
-
             // current registrant is already registered
+            var needsToRegister = submittedRecord.NeedsToRegister(registration, participationObject, selectedDates, msgs);
             if (!needsToRegister && !participationObject.IsSession())
                 return RedirectToAction("select");
 
             // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
-            var questions = RegisterViewBag(participationObject, msgs);
+            var questions = RegisterStudentViewBag(participationObject, msgs);
 
             // if there are no additional questions to answer, 
             // if it doesn't require parental consent, 
@@ -1803,10 +1795,8 @@ namespace AfterSchool.Controllers
                 return RedirectToAction("finalizeregistration", new { id = registration.Uid });
             }
 
-            ViewBag.QuestionViewModels = questions.Select(question => question.ToFormQuestionViewModel()).ToList();
-            ViewBag.Messages = msgs;
-
             LoadSessionActivitiesViewBag(participationObject, registration, msgs);
+            ViewBag.Messages = msgs;
 
             return View(participationObject);
         }
@@ -1823,9 +1813,10 @@ namespace AfterSchool.Controllers
             var participationObject = GetParticipationObjectFromCart();
 
             // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
-            var questions = RegisterViewBag(participationObject, msgs);
+            var questions = RegisterStudentViewBag(participationObject, msgs);
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
 
+            // TODO: refactor this code. check ValidateRegisterStudentQuestions
             questions.ForEach(question =>
             {
                 if (question.IsRequired)
@@ -1855,11 +1846,9 @@ namespace AfterSchool.Controllers
 
                 return RedirectToAction("payment", new { id = registration.Uid });
             }
-
-            ViewBag.QuestionViewModels = qvms;
-            ViewBag.Messages = msgs;
-
+            
             LoadSessionActivitiesViewBag(participationObject, registration, msgs);
+            ViewBag.Messages = msgs;
 
             return View(participationObject);
         }
