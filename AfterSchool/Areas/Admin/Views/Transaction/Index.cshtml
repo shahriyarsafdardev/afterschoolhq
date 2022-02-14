@@ -232,9 +232,38 @@
                                                 }
                                             </td>
                                         }
+                                        else if (transaction.IsRefund())
+                                        {
+                                            <td class="text-center">
+                                                -@transaction.ConvenienceFeeCharged.ToCurrency()
+                                            </td>
+                                            <td class="text-center">
+                                                -@transaction.PaymentTypeFeeCharged.ToCurrency()
+                                            </td>
+                                            <td class="text-center">
+                                                - @* NEED TO CALCULATE THIS, but can figure out later *@
+                                            </td>
+                                            <td class="text-center">
+                                                -@transaction.GetBillerPayout().ToCurrency()
+                                            </td>
+                                            <td class="text-center">
+                                                @if (transaction.HasRefunds())
+                                                {
+                                                    @:Refunded
+                                                }
+                                                else
+                                                {
+                                                    @currentStatus
+                                                }
+                                            </td>
+                                        }
                                         else
                                         {
-
+                                            <td class="text-center">-</td>
+                                            <td class="text-center">-</td>
+                                            <td class="text-center">-</td>
+                                            <td class="text-center">-</td>
+                                            <td class="text-center">-</td>
                                         }
                                     }
                                     else
