@@ -362,10 +362,15 @@ namespace AfterSchoolLibrary.Models
 		public static List<WebSessionAction> LoadByAccountIdActivityIdWithActionType(int activityId, int AccountId, List<WebSessionActionType> actionTypes, int? start, int? length,  SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
+			var objType = new List<ObjectType>(){
+				ObjectType.Activity,
+				ObjectType.Transaction
+			};
+
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
 			dq.Criterias.Add(ObjectMap["ObjectId"], activityId);
-			dq.Criterias.Add(ObjectMap["ObjectTypeId"], 10);
+			dq.Criterias.Add(ObjectMap["ObjectTypeId"], objType.Select(x => (int)x).ToList(), BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.In);
 
 			dq.SelectRange.Start = start;
 			dq.SelectRange.Length = length;

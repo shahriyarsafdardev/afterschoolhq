@@ -35,13 +35,11 @@ namespace AfterSchool.Areas.Org.Controllers
             currentAccount.ID.Value,
 			new List<WebSessionActionType>()
 			{
+				WebSessionActionType.Published,
 				WebSessionActionType.Registered,
 				WebSessionActionType.Paid,
-				WebSessionActionType.ManuallyPaid,
 				WebSessionActionType.Refunded,
-				WebSessionActionType.Removed,
-				WebSessionActionType.Added,
-				WebSessionActionType.Moved,
+				WebSessionActionType.ManuallyPaid,
 				WebSessionActionType.ManuallyRefunded,
 				WebSessionActionType.ManuallyRegistered,
 			},
