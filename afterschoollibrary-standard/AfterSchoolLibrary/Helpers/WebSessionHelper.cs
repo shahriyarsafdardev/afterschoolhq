@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using BasicLibrary;
 
 namespace AfterSchoolLibrary.Helpers
 {
@@ -24,7 +25,7 @@ namespace AfterSchoolLibrary.Helpers
 
         private static string ReplaceParams(string template, Dictionary<string, string> formatParams)
         {
-            return formatParams.Aggregate(template, (args, pair) => args.Replace($"{{{pair.Key}}}", pair.Value));
+            return formatParams.Aggregate(template, (args, pair) => args.Replace($"{{{pair.Key}}}", pair.Value.SplitByUpperCase()));
         }
 
         private static Dictionary<string, string> FormatTemplate(string template, Dictionary<string, string> formatParams)

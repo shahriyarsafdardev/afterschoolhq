@@ -2443,8 +2443,20 @@ namespace AfterSchool.Areas.Org.Controllers
 				msgs: msgs
 				);
 
-			if (msgs.HasNoErrors())
-			msgs.Add("Payment has been added", MessageType.Success);
+				if (msgs.HasNoErrors())
+				{
+					msgs.Add("Payment has been added", MessageType.Success);
+
+					SessionVariables.WebSession.LogActivity(
+					 account: currentAccount,
+					 actor: SessionVariables.CurrentUser,
+					 actionType: WebSessionActionType.ManuallyPaid,
+					 objectType: ObjectType.Activity,
+					 objectId: activity.ID.Value,
+					 objectText: " Manually paid amount " + amountpaid
+					);
+				}
+				
 		}
 
 		ViewBag.Messages = msgs;
@@ -3129,7 +3141,17 @@ namespace AfterSchool.Areas.Org.Controllers
 		ViewBag.QuestionViewModels = qvms;
 
 		if (msgs.HasNoErrors())
-			return RedirectToAction("registrants", new { id = activity.Uid });
+        {
+			SessionVariables.WebSession.LogActivity(
+				account: currentAccount,
+				actor: SessionVariables.CurrentUser,
+				actionType: WebSessionActionType.ManuallyRegistered,
+				objectType: ObjectType.Activity,
+				objectId: activity.ID.Value,
+				objectText: "Student registered manually for activity "+ activity.Name
+		   );
+		   return RedirectToAction("registrants", new { id = activity.Uid });
+        }
 
 		return View(activity);
     }

@@ -364,12 +364,16 @@ namespace AfterSchoolLibrary.Models
 			var dq = DatabaseQuery;
 			var objType = new List<ObjectType>(){
 				ObjectType.Activity,
-				ObjectType.Transaction
+				ObjectType.Transaction,
+				ObjectType.Registrant
 			};
 
 			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-			dq.Criterias.Add(ObjectMap["ObjectId"], activityId);
+			var dcs = new DatabaseCriterias(LogicalOperatorType.Or);
+			dcs.Add(ObjectMap["ObjectId"], activityId);
+			dcs.Add(ObjectMap["IndirectObjectId"], activityId);
+
+			dq.Criterias.Add(dcs);
 			dq.Criterias.Add(ObjectMap["ObjectTypeId"], objType.Select(x => (int)x).ToList(), BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.In);
 
 			dq.SelectRange.Start = start;

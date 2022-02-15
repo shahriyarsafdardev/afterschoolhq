@@ -388,11 +388,31 @@ namespace AfterSchool.Areas.Org.Controllers
                     transaction.ManualRefund(amount.ToDecimal(), SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
+                {
+                    SaveRefundLog(currentAccount, WebSessionActionType.ManuallyRefunded, amount, transaction, msgs);
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                }
             }
 
             return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
         }
+
+        public void SaveRefundLog(Account currentAccount, WebSessionActionType webSessionActionType, string amount, Transaction transaction, SystemMessages msgs)
+        {
+            var activityId = ActivityPayment.LoadByTransactionIdByIsDeleted(transaction.ID.Value, false, msgs)?.FirstOrDefault()?.ParticipationObjectId.Value;
+            var activity = Activity.Load(activityId.Value, msgs);
+
+            SessionVariables.WebSession.LogActivity(
+                      account: currentAccount,
+                      actor: SessionVariables.CurrentUser,
+                      actionType: webSessionActionType,
+                      objectType: ObjectType.Activity,
+                      objectId: activity.ID.Value,
+                      objectText: webSessionActionType == WebSessionActionType.ManuallyRefunded ? " Manual refund requested of " + amount : " amount "+ amount,
+                      indirectObjectId: transaction.ID.Value
+            );
+        }
+
 
         [HttpPost]
         public ActionResult RequestRefund(string uid, string amount, string reason)
@@ -409,6 +429,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 if (msgs.HasNoErrors())
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+
             }
 
             return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
@@ -428,7 +449,11 @@ namespace AfterSchool.Areas.Org.Controllers
                     request.ApproveRequestAsProvider(null, SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
+                {
+                    var transaction = Transaction.Load(request.TransactionId.Value, msgs);
+                    SaveRefundLog(currentAccount, WebSessionActionType.Refunded, request.Amount.ToCurrency(), transaction, msgs);
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                }
             }
 
             return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
@@ -448,7 +473,11 @@ namespace AfterSchool.Areas.Org.Controllers
                     request.UpdateStatus(RefundRequestStatus.ApprovedManualRefund, SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
+                {
+                    var transaction = Transaction.Load(request.TransactionId.Value, msgs);
+                    SaveRefundLog(currentAccount, WebSessionActionType.ManuallyRefunded, request.Amount.ToCurrency(), transaction, msgs);
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                }
             }
 
             return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
