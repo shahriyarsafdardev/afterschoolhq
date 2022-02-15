@@ -312,12 +312,10 @@
 
     function showSignUpForm(email) {
         // show sign up form
-         setTimeout(function () {
             $('#account-registration').removeClass('hide');
             $('#email-check-container').addClass('hide');
             $('#@Model.Find(qvm => qvm.Question.QuestionTypeId == QuestionType.Email).Id').val(email);
             hideLoader();
-        }, 500);
     }
     function showStudentRegistration() {
         $('#btn-check-email').html('Sign Up As Parent');

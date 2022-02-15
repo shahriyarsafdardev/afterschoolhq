@@ -201,6 +201,10 @@
     font-size: 18px;
 }
 
+.parent-instructions {
+    font-size: 14px;
+}
+
 #signup-search-label {
     font-size: 14px;
     font-weight: 600;

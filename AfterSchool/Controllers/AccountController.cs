@@ -1485,25 +1485,21 @@ namespace AfterSchool.Controllers
 
         private void ValidateStudentRegistrationQuestions(List<FormQuestion> questions, SystemMessages msgs)
         {
-            questions.ForEach(question => 
+            questions.ForEach(question =>
             {
                 var answer = Request[question.ToFormQuestionViewModel().Name];
 
                 if (question.IsRequired && answer.IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
 
-                switch (question.QuestionDataTypeId)
-                {
-                    case QuestionDataType.RegistrantMobilePhone:
-                        if (answer.IsNotEmpty())
-                        {
-                            if (!answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
-                                msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
 
-                            if (WebUser.ExistsByPhone(answer, msgs))
-                                msgs.Add("Phone is already in use, do you already have an account?", MessageType.UserError);
-                        }
-                        break;
+                if (question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone && answer.IsNotEmpty())
+                {
+                    if (!answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                        msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+
+                    if (WebUser.ExistsByPhone(answer, msgs))
+                        msgs.Add("Phone is already in use, do you already have an account?", MessageType.UserError);
                 }
             });
         }
@@ -1676,6 +1672,10 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
 
+            // Case 3 - New Student Register with Parent Exists
+            if(SessionVariables.AccountUserType == UserType.Student)
+                return RedirectToAction("Home", "User");
+
             var masterRegistrant = SessionVariables.CurrentUser.GetMasterRegistrant();
 
             if (masterRegistrant.IsEmpty())
@@ -1684,9 +1684,11 @@ namespace AfterSchool.Controllers
             if (masterRegistrant.ProfileStatusId == RegistrantProfileStatus.Started)
                 return RedirectToAction("getstarted");
             
+            // Case 2 - new Student Register witn New Parent Email
             if (!masterRegistrant.IsParentOrGuardian && masterRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed)
                 return RedirectToAction("Home", "User");
 
+            // Case 1 - Parent Registration flow
             if (!masterRegistrant.IsParentOrGuardian)
             {
                 SessionVariables.CurrentRegistrant = masterRegistrant;
@@ -2695,7 +2697,7 @@ namespace AfterSchool.Controllers
 
             // check if parent has been invited, if not redirect to parent invite page
             if (SessionVariables.CurrentRegistrant.GetParentOrGuardian(msgs).IsEmpty())
-                return RedirectToAction("InviteParent");
+                return RedirectToAction("StudentRegistrationn");
 
             var participationObject = GetParticipationObjectFromCart();
             var (submittedRecord, registration) = SessionVariables.CurrentRegistrant.GetSubmittedRecord(participationObject, msgs);
