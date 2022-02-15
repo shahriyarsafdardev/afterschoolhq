@@ -59,7 +59,6 @@
                 </div>
                 <div class="col-md-4">
                     <button type="button" class="btn btn-primary btn-lg" onclick="search()">Search</button>
-                    <button type="button" class="btn btn-primary btn-lg hide" onclick="DownloadToCSV()">Export To CSV</button>
                 </div>
             </div>
 
@@ -129,10 +128,6 @@
                     function search() {
                         window.location.href = `@Url.Action("index", "transaction")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}`;
                     }
-                    function DownloadToCSV() {
-                         window.location.href = `@Url.Action("DownloadCSV", "transaction")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}`;
-                    }
-
                 </script>
             </div>
 
@@ -170,22 +165,13 @@
                         {
                             foreach (var transaction in Model)
                             {
-                                var registrant = transaction.GetPurchase()?.GetRegistrant();
                                 var currentStatus = transaction.GetStatus();
-                                var disableChk = !transaction.CanRequestPayout() ? "disabled" : "";
                                 var billerAccount = transaction.GetBillerAccount();
                                 var payerAccount = transaction.GetPayerAccount();
                                 var payerAmount = transaction.GetPayerAmount();
                                 var useStripeConnect = billerAccount.HasFeature(FeatureType.UseStripeConnectedAccount);
                                 var enableTransfer = !transaction.UsedStripeConnect && !transaction.PayoutId.HasValue && useStripeConnect && billerAccount.StripePayoutsEnabled;
                                 
-                                Transaction originalTransaction = null;
-
-                                if (transaction.IsRefund())
-                                {
-                                    originalTransaction = transaction.GetOriginalTransaction();
-                                }
-
                                 <tr id="row-@transaction.Uid">
                                     <td>
                                         @transaction.GetTransactionNumber()

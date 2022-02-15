@@ -478,9 +478,6 @@ namespace AfterSchoolLibrary.Services
             if (!transaction.IsCharge())
                 return "Processed";
 
-            //if (transaction.PlatformPercentFee.HasValue)
-            //    return "Paid";
-
             if (!transaction.HasRefundableAmount(false, msgs, dc))
                 return "Refunded";
 
@@ -864,11 +861,11 @@ namespace AfterSchoolLibrary.Services
         {
             if (transaction.IsCharge() && transaction.PaymentSourceTypeId == PaymentSourceType.AfterSchoolPlatform)
             {
-                if (transaction.PaymentTypeId == PaymentType.CredtCard)
-                    return AfterSchoolLibrary.Billing.Helpers.GetStripeFee(transaction.GetPayerAmount(), true);
+                if (transaction.PaymentTypeId == PaymentType.CreditCard)
+                    return StripeHelper.GetStripeFee(transaction.GetPayerAmount(), true);
                 
                 if (transaction.PaymentTypeId == PaymentType.ACH)
-                    return AfterSchoolLibrary.Billing.Helpers.GetStripeACHFee(transaction.GetPayerAmount(), true);
+                    return StripeHelper.GetStripeAchFee(transaction.GetPayerAmount(), true);
             }
 
             return 0;

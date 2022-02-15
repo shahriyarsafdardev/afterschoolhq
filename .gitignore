@@ -57,3 +57,4 @@ Thumbs.db
 
 # User-specific stuff
 .idea
+*.bak
