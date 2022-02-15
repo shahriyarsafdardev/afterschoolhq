@@ -265,14 +265,6 @@
                                 </div>
                             }
                         }
-                        else if (groupId.IsEmpty())
-                        {
-                            //.. we will not show this button if activity is associated with session or activity group.
-                            <a href="@Model.ParticipationObject.GetInterestedPageUrl()" class="btn btn-header-action profileViewBtns">
-                                <i class="icon icon-left s7-bell"></i>
-                                <span class="">I'm Interested</span>
-                            </a>
-                        }
 
                     </div>
                     <div class="clearfix"></div>
@@ -472,10 +464,6 @@
 
             $('#btn-follow').prop('disabled', false);
         });
-    }
-
-    function interested() {
-
     }
 
     function resetClaimForm() {
