@@ -4669,7 +4669,7 @@ namespace AfterSchoolLibrary.Services
         #region Student-Registration
 
         public static (Account, WebUser, Registrant) ProcessStudentRegistration(string firstName, string lastName, string email, string phone, string password, int? schoolLocationId, bool allowTextMessages, bool isAfterSchool,
-            List<KeyValuePair<FormQuestion, string>> questionAnswerModel, WebUser parentWebUser = null,
+            List<KeyValuePair<FormQuestion, string>> questionAnswerModel, Account parentAccount = null,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -4697,20 +4697,11 @@ namespace AfterSchoolLibrary.Services
 
                     if (amsgs.HasNoErrors() && studentUser.IsNotEmpty())
                     {
-                        // create account
-                        studentAccount = studentUser.AddNewStudentAccount(
-                            userType: parentWebUser.IsNotEmpty() ? UserType.Student : UserType.Owner,
-                            isActive: true,
-                            isAfterSchool: isAfterSchool,
-                            loggedInUser: studentUser,
-                            msgs: amsgs,
-                            dc: adc);
-
-                        if (amsgs.HasNoErrors() && studentAccount.IsNotEmpty())
+                        if (parentAccount.IsNotEmpty())
                         {
                             // create student registrant record
-                            studentRegistrant = studentAccount.CreateRegistrant(
-                                registrantOwner: parentWebUser.IsNotEmpty() ? parentWebUser : studentUser,
+                            studentRegistrant = parentAccount.CreateRegistrant(
+                                registrantOwner: studentUser,
                                 canBeAccessedBy: studentUser.AsList(),
                                 registrantType: RegistrantType.Individual,
                                 isMaster: true,
@@ -4721,23 +4712,50 @@ namespace AfterSchoolLibrary.Services
                                 loggedInUser: studentUser,
                                 msgs: amsgs,
                                 dc: adc);
+                        }
+                        else
+                        {
+                            // create account
+                            studentAccount = studentUser.AddNewStudentAccount(
+                            userType:  UserType.Owner,
+                            isActive: true,
+                            isAfterSchool: isAfterSchool,
+                            loggedInUser: studentUser,
+                            msgs: amsgs,
+                            dc: adc);
 
-                            if (amsgs.HasNoErrors() && studentRegistrant.IsNotEmpty())
+                            if (amsgs.HasNoErrors() && studentAccount.IsNotEmpty())
                             {
-                                // add or update answer for registratnt
-                                questionAnswerModel.ForEach(qvm =>
-                                {
-                                    if (qvm.Key.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation)
-                                    {
-                                        studentRegistrant.AddOrUpdateAnswer(
-                                            answerText: qvm.Value,
-                                            question: qvm.Key,
-                                            loggedInUser: studentUser,
-                                            msgs: amsgs,
-                                            dc: adc);
-                                    }
-                                });
+                                // create student registrant record
+                                studentRegistrant = studentAccount.CreateRegistrant(
+                                    registrantOwner: studentUser,
+                                    canBeAccessedBy: studentUser.AsList(),
+                                    registrantType: RegistrantType.Individual,
+                                    isMaster: true,
+                                    isParentOrGuardian: false,
+                                    allowTextMessages: false,
+                                    schoolLocationId: schoolLocationId,
+                                    profileStatus: RegistrantProfileStatus.Completed,
+                                    loggedInUser: studentUser,
+                                    msgs: amsgs,
+                                    dc: adc);
                             }
+                        }
+                        if (amsgs.HasNoErrors() && studentRegistrant.IsNotEmpty())
+                        {
+                            // add or update answer for registratnt
+                            questionAnswerModel.ForEach(qvm =>
+                            {
+                                if (qvm.Key.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation)
+                                {
+                                    studentRegistrant.AddOrUpdateAnswer(
+                                        answerText: qvm.Value,
+                                        question: qvm.Key,
+                                        loggedInUser: studentUser,
+                                        msgs: amsgs,
+                                        dc: adc);
+                                }
+                            });
                         }
                     }                    
                 },

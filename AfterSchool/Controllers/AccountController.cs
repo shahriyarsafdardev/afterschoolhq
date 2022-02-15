@@ -1419,7 +1419,7 @@ namespace AfterSchool.Controllers
                 {
                     var questionAnswerModel = GetQuestionAnswerModel(qvms);
                     var parentWebUser = WebUser.LoadByEmail(parentEmail.Value, msgs);
-
+                    var parentAccount = parentWebUser?.GetAccounts().FirstOrDefault();
                     var studentDetails = AccountService.ProcessStudentRegistration(
                         firstName: firstName.Value,
                         lastName: lastName.Value,
@@ -1430,7 +1430,7 @@ namespace AfterSchool.Controllers
                         allowTextMessages: textnotifications.IfBlank("0").ToBoolean(),
                         isAfterSchool: SessionVariables.IsAfterSchool.Value,
                         questionAnswerModel: questionAnswerModel,
-                        parentWebUser,
+                        parentAccount,
                         msgs: msgs);
 
                     if (msgs.HasNoErrors())
@@ -1439,7 +1439,7 @@ namespace AfterSchool.Controllers
                         var studentUser = studentDetails.Item2;
                         var studentRegistrant = studentDetails.Item3;
                         
-                        if (studentAccount.IsNotEmpty() && studentUser.IsNotEmpty() && studentRegistrant.IsNotEmpty() && parentWebUser.IsEmpty())
+                        if (studentAccount.IsNotEmpty() && studentUser.IsNotEmpty() && studentRegistrant.IsNotEmpty() && parentAccount.IsEmpty())
                         {
                             var parentDetails = studentAccount.ProcessParentRegistration(
                                 firstName: parentFirstName.Value,
@@ -1460,12 +1460,23 @@ namespace AfterSchool.Controllers
                                    loggedInUser: studentUser,
                                    msgs: msgs);                               
                             }
+                            SessionVariables.CurrentUser = studentUser;
+                            SessionVariables.CurrentAccount = studentAccount;
+                            SessionVariables.AccountUserType = studentUser.GetUserType(studentAccount, msgs);
+                            SessionVariables.CurrentRegistrant = studentRegistrant;
                         }
+                        // in case of existing parent, we need to set session for parent account data
+                        else
+                        {
+                            SessionVariables.CurrentUser = parentWebUser;
+                            SessionVariables.CurrentAccount = parentAccount;
+                            SessionVariables.AccountUserType = parentWebUser.GetUserType(parentAccount, msgs);
+                            SessionVariables.CurrentRegistrant = studentRegistrant;
+                            SessionVariables.ParentAccount = parentAccount;
+                        }
+                        SessionVariables.OriginalLoggedInUser = studentUser;
 
-                        SessionVariables.CurrentUser = studentUser;
-                        SessionVariables.CurrentAccount = studentAccount;
-                        SessionVariables.AccountUserType = studentUser.GetUserType(studentAccount, msgs);
-                        SessionVariables.CurrentRegistrant = studentRegistrant;
+
                     }
                 }
             }
@@ -2731,7 +2742,9 @@ namespace AfterSchool.Controllers
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
                 var files = GetFilesModel();
                 var questionAnswerModel = GetQuestionAnswerModel(qvms);
-                var registrantDetails = AccountService.ProcessRegisterStudent(ownerAccount: participationObject.OwnerAccount,
+                if (SessionVariables.ParentAccount.IsEmpty())
+                {
+                    var registrantDetails = AccountService.ProcessRegisterStudent(ownerAccount: participationObject.OwnerAccount,
                     registrant: SessionVariables.CurrentRegistrant,
                     questionAnswerModel: questionAnswerModel,
                     activityGroupId: participationObject.GetAnyRelatedActivityGroupId(),
@@ -2741,35 +2754,39 @@ namespace AfterSchool.Controllers
                     loggedInUser: SessionVariables.CurrentUser,
                     msgs: msgs);
 
-                registration = registrantDetails.Item1;
-                var registrant = registrantDetails.Item2;
+                    registration = registrantDetails.Item1;
+                    var registrant = registrantDetails.Item2;
 
-                if (msgs.HasNoErrors() && registration.IsNotEmpty() && registrant.IsNotEmpty())
-                {
-                    AddSessionActivitiesToRegistration(
-                        participationObject,
-                        registration,
-                        registrant,
-                        participationObject.RegistrationPeriod,
-                        msgs);
-
-                    if (msgs.HasNoErrors())
+                    if (msgs.HasNoErrors() && registration.IsNotEmpty() && registrant.IsNotEmpty())
                     {
-                        AccountService.ProcessStudentRegistration(
-                            checkoutObject: new CheckoutObject()
-                            {
-                                BillingAccount = participationObject.OwnerAccount,
-                                PayingAccount = SessionVariables.CurrentAccount,
-                                NumberOfSeats = 1,
-                                ParticipationObject = participationObject,
-                                Registration = registration,
-                                MasterRegistrant = SessionVariables.CurrentRegistrant
-                            },
-                            sendConfirmationEmail: true,
-                            loggedInUser: SessionVariables.CurrentUser,
-                            msgs: msgs);
+                        AddSessionActivitiesToRegistration(
+                            participationObject,
+                            registration,
+                            registrant,
+                            participationObject.RegistrationPeriod,
+                            msgs);
+
+                        if (msgs.HasNoErrors())
+                        {
+                            AccountService.ProcessStudentRegistration(
+                                checkoutObject: new CheckoutObject()
+                                {
+                                    BillingAccount = participationObject.OwnerAccount,
+                                    PayingAccount = SessionVariables.CurrentAccount,
+                                    NumberOfSeats = 1,
+                                    ParticipationObject = participationObject,
+                                    Registration = registration,
+                                    MasterRegistrant = SessionVariables.CurrentRegistrant
+                                },
+                                sendConfirmationEmail: true,
+                                loggedInUser: SessionVariables.CurrentUser,
+                                msgs: msgs);
+                        }
                     }
                 }
+                else
+                    registration = Registration.LoadByAccountId(participationObject.OwnerAccount.ID.Value, msgs).FirstOrDefault();
+
             }
 
             if (msgs.HasNoErrors())
