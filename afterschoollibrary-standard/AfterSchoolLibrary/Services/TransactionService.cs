@@ -478,9 +478,6 @@ namespace AfterSchoolLibrary.Services
             if (!transaction.IsCharge())
                 return "Processed";
 
-            //if (transaction.PlatformPercentFee.HasValue)
-            //    return "Paid";
-
             if (!transaction.HasRefundableAmount(false, msgs, dc))
                 return "Refunded";
 
@@ -858,6 +855,20 @@ namespace AfterSchoolLibrary.Services
             }
 
             return null;
+        }
+
+        public static decimal GetStripeFee(this Transaction transaction) 
+        {
+            if (transaction.IsCharge() && transaction.PaymentSourceTypeId == PaymentSourceType.AfterSchoolPlatform)
+            {
+                if (transaction.PaymentTypeId == PaymentType.CreditCard)
+                    return StripeHelper.GetStripeFee(transaction.GetPayerAmount(), true);
+                
+                if (transaction.PaymentTypeId == PaymentType.ACH)
+                    return StripeHelper.GetStripeAchFee(transaction.GetPayerAmount(), true);
+            }
+
+            return 0;
         }
 
         public static void MoveToAccount(this Transaction transaction, Account toAccount, SystemMessages msgs, DatabaseConnection dc = null)
