@@ -98,8 +98,10 @@ namespace AfterSchoolLibrary.Helpers
                     AddFeatureTypeManualStripePayouts_20211128.Do(amsgs, adc);
 
                     Migration_20220106_AddFeatureFlagTable.Do(amsgs, adc);
-                    Migration_20220202_SessionActionToWebSessionAction.Do(amsgs, adc);
-                    Migrations.UpdateNameColumnFormQuestionGroup_20211119.Do(amsgs, adc);
+					Migrations.UpdateNameColumnFormQuestionGroup_20211119.Do(amsgs, adc);
+                    
+                    Migration_20220202_SessionActionToWebSessionAction.Do(amsgs, adc);     
+                    Migration_20220214_UpdateActivityContinuousEnrollmentFlag.Do(amsgs, adc);               
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs)
