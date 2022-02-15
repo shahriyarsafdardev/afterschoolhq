@@ -24,19 +24,6 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         [Fact]
-        public void GetInterestFormFormTest()
-        {
-            // Arrange
-            var currentUser = WebUserFactory.Create(msgs, dc);
-
-            // Act
-            var form = FormService.GetInterestForm(currentUser, msgs, dc);
-
-            // Assert
-            Assert.NotNull(form);
-        }
-
-        [Fact]
         public void AddNewAfterSchoolDefaultFormTest()
         {
             // Arrange
