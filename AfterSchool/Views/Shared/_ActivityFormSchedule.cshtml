@@ -14,8 +14,9 @@
     var activityMeetingVerbLabel = "meet";
     var forceNonRepeating = false;
     var hasScheduled = false;
+    var isContinousEnrollmentEnabled = ViewData["isContinousEnrollmentEnabled"] != null && String.Equals(ViewData["isContinousEnrollmentEnabled"], true) ? true : false;
 
-    if (ViewData["isContinousEnrollmentEnabled"] != null && String.Equals(ViewData["isContinousEnrollmentEnabled"], true))
+    if (isContinousEnrollmentEnabled)
     {
         Model.IsOngoing = true;
     }
@@ -59,6 +60,17 @@
 
     var showAllowSubscriptionPlans = SessionVariables.AccountPackage.HasFeature(FeatureType.AllowSubscriptionPlans);
     var allowSubscriptionPlansPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowSubscriptionPlans);
+}
+@if(isContinousEnrollmentEnabled)
+{
+    <style>
+        .isongoing .switch-button input[type="checkbox"]:checked + span {
+            background-color: #ababab;
+        }
+        .isongoing .switch-button input[type="checkbox"]:checked + span label{
+            border-color: #ababab;
+        }
+    </style>
 }
 
 <div class="panel panel-default panel-small-padding">
@@ -184,9 +196,9 @@
                     <div class="hide advanced-settings">
                         <div class="form-group" id="ongoing-div">
                             <label class="col-md-3 control-label">
-                                Is this an ongoing @UILabel.ActivityLabel(ActivityType.Activity).ToLower()?
+                                Is this an ongoing @UILabel.ActivityLabel(ActivityType.Activity).ToLower()? <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Ongoing @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() do not have an end date and allow parents to sign up their children for ongoing subscriptions." data-placement="top"></i>
                             </label>
-                            <div class="col-md-9" @if (!showAllowSubscriptionPlans) { <text> onclick="return showUpgradeMyPlan('@(allowSubscriptionPlansPackage.Name)',@(allowSubscriptionPlansPackage.ID))"</text> }>
+                            <div class="col-md-9 isongoing" @if (!showAllowSubscriptionPlans) { <text> onclick="return showUpgradeMyPlan('@(allowSubscriptionPlansPackage.Name)',@(allowSubscriptionPlansPackage.ID))"</text> }>
                                 @{
                                     Html.RenderPartial(
                                         "~/Views/Shared/_SwitchButton.cshtml",
@@ -195,13 +207,13 @@
                                         {
                                             { "checkboxname", "isongoing" },
                                             { "checkboxid", "isongoing" },
-                                            { "disabled", !showAllowSubscriptionPlans }
+                                            { "disabled", isContinousEnrollmentEnabled ? true : !showAllowSubscriptionPlans }
                                         }
                                     );
                                 }
 
-                                <p class="text-muted padding-v-10">
-                                    Ongoing @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() do not have an end date and allow parents to sign up their children for ongoing subscriptions.
+                                <p class="text-muted padding-v-10 font-style-italic">
+                                    <img src="~/Assets/img/alert-2.svg" class="alert-image-style"> Activities must be listed as ongoing while Continuous enrollment is enabled.
                                 </p>
                             </div>
                         </div>
@@ -488,7 +500,12 @@
         $('#isongoing').change(function () {
             checkIsOnGoing();
         });
-        
+         @if(isContinousEnrollmentEnabled)
+         {
+          <text>
+            ActivitySetup.showAdvancedSettings()
+          </text>
+         }
         // checkScheduleVal();
         showClosedDates();
         checkIsOnGoing();
