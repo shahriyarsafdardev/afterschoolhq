@@ -354,11 +354,6 @@ namespace AfterSchoolLibrary.Models
             return $"{GetHomePageUrl(isAfterSchool)}/selectdates";
         }
 
-        public string GetInterestedPageUrl(bool isAfterSchool = true)
-        {
-            return $"{GetHomePageUrl(isAfterSchool)}/interested";
-        }
-
         public bool IsSport()
         {
             if (this.ObjectType == ParticipationObjectType.Activity)
@@ -422,18 +417,6 @@ namespace AfterSchoolLibrary.Models
                     return this.GetAccountActivityGroup()
                         .GetActivityGroup(msgs, dc)
                         .GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, msgs, dc)?
-                        .Value;
-            }
-            else if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.Interested)
-            {
-                if (IsActivity())
-                    return this.GetActivity().GetActivityProperty(AccountPropertyType.InterestThankYouEmail, msgs, dc)?.Value;
-                else if (IsActivityGroup())
-                    return this.GetActivityGroup().GetGroupProperty(AccountPropertyType.InterestThankYouEmail, msgs, dc)?.Value;
-                else if (IsAccountActivityGroup())
-                    return this.GetAccountActivityGroup()
-                        .GetActivityGroup(msgs, dc)
-                        .GetGroupProperty(AccountPropertyType.InterestThankYouEmail, msgs, dc)?
                         .Value;
             }
             else

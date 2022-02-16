@@ -391,10 +391,10 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static List<Activity> GetActivities(this Account account, UserType userType, WebUser user, ActivityType? activityType, bool? isArchived, bool? isDeleted, bool? ungroupedOnly, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Activity> GetActivities(this Account account, UserType userType, WebUser user, string q, ActivityType? activityType, bool? isArchived, bool? isDeleted, bool? ungroupedOnly, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (user.IsEmpty() || userType.In(AccountService.AdminUserTypes))
-                return Activity.LoadByAccountId(account.ID.Value, null, null, activityType, isArchived, isDeleted, ungroupedOnly, start, length, msgs, dc).ToList();
+                return Activity.LoadByAccountId(account.ID.Value, null, null, activityType, isArchived, isDeleted, ungroupedOnly, start, length,q, msgs, dc).ToList();
 
 
             var activityIdsByWebUser = ActivityWebUser.LoadByWebUserId(user.ID.Value, msgs, dc).Select(a => a.ActivityId.Value).ToList();
@@ -406,12 +406,12 @@ namespace AfterSchoolLibrary.Services
             return Activity.LoadByAccountId(account.ID.Value, msgs, dc);  
         }
 
-        public static int GetActivityCount(this Account account, UserType userType, WebUser user, ActivityType? activityType, bool? isArchived, bool? isDeleted, bool? ungroupedOnly, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetActivityCount(this Account account, UserType userType, WebUser user, string q, ActivityType? activityType, bool? isArchived, bool? isDeleted, bool? ungroupedOnly, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (user.IsEmpty() || userType.In(AccountService.AdminUserTypes))
-                return Activity.GetCountByAccountId(account.ID.Value, null, activityType, isArchived, isDeleted, ungroupedOnly, msgs, dc);
+                return Activity.GetCountByAccountId(account.ID.Value, q, null, activityType, isArchived, isDeleted, ungroupedOnly, msgs, dc);
 
-            return account.GetActivities(userType, user, activityType, isArchived, isDeleted, ungroupedOnly, null, null, msgs, dc).Count();
+            return account.GetActivities(userType, user,q, activityType, isArchived, isDeleted, ungroupedOnly, null, null, msgs, dc).Count();
         }
 
         public static int GetActivityCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -3656,47 +3656,6 @@ namespace AfterSchoolLibrary.Services
                 dc: dc
             );
 
-        }
-
-        public static void ProcessInterestRegistration(CheckoutObject checkoutObject, bool sendConfirmationEmail, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            Database.ExecuteTransaction
-            (
-                action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                {
-                    // mark as completed
-                    checkoutObject.Registration.SetRegistrationStatus(
-                        completionStatus: RegistrationCompletionStatus.Completed,
-                        loggedInUser: loggedInUser,
-                        msgs: amsgs,
-                        dc: adc);
-
-                    // TODO: Allow user to register for multiple activities in one session at once MAYBE
-                    RegistrationService.ProcessInterestAssignment(
-                        registration: checkoutObject.Registration,
-                        participationObject: checkoutObject.ParticipationObject,
-                        registrant: checkoutObject.Registration.GetRegistrant(amsgs, adc),
-                        period: checkoutObject.ParticipationObject.GetCurrentRegistrationPeriod(amsgs, adc),
-                        loggedInUser: loggedInUser,
-                        msgs: amsgs,
-                        dc: adc);
-
-                    // subscribe to the account
-                    checkoutObject.BillingAccount.AddOrUpdateSubscriber(loggedInUser, SubscriberStatus.Subscribed, loggedInUser, amsgs, adc);
-                    checkoutObject.ParticipationObject.AddOrUpdateSubscriber(loggedInUser, SubscriberStatus.Subscribed, loggedInUser, amsgs, adc);
-                },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
-
-                    if (sendConfirmationEmail)
-                        checkoutObject.Registration.SendInterestConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
-
-                },
-                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
-                dc: dc
-            );
         }
 
         public static void ProcessRegistrationWithoutPayment(CheckoutObject checkoutObject, bool sendConfirmationEmail, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)

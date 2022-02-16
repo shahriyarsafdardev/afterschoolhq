@@ -341,7 +341,7 @@ namespace AfterSchoolLibrary.Models
 
         public List<Activity> GetActivities(ActivityType? activityType = null, bool? isArchived = null, bool? isDeleted = null, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Activity.LoadByAccountId(this.AccountId.Value, null, this.ID, activityType, isArchived, isDeleted, null, start, length, msgs, dc);
+            return Activity.LoadByAccountId(this.AccountId.Value, null, this.ID, activityType, isArchived, isDeleted, null, start, length, null, msgs, dc);
         }
 
         public int GetActivityCount(ActivityType? activityType = null, bool? isArchived = null, bool? isDeleted = null, SystemMessages msgs = null, DatabaseConnection dc = null)
