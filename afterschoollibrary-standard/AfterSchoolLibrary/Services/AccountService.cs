@@ -1219,6 +1219,20 @@ namespace AfterSchoolLibrary.Services
             return user;
         }
 
+        public static WebUser InviteParentUser(this Account account, string firstName, string lastName, string email, string phone, string message, UserType userType, bool canUseExistingUserAccount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var user = account.AddUser(firstName, lastName, email, phone, userType, canUseExistingUserAccount, loggedInUser, msgs, dc);
+
+            if (msgs.HasNoErrors())
+                msgs.AddRange(EmailHelper.SendParentAccountInvitedEmail(user.FirstName, loggedInUser.FirstName, user.GetInviteUrl(account), message, email));
+
+            if (msgs.HasErrors())
+                msgs.Add($"An invitation was not sent to {email.Trim()}, a system error has occurred", MessageType.UserError);
+            return user;
+        }
+
         public static bool HasTreasurer(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return account.HasUserType(UserType.Treasurer, msgs, dc);
@@ -4780,12 +4794,12 @@ namespace AfterSchoolLibrary.Services
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     // invite parent: 
-                    parentUser = studentAccount.InviteUser(
+                    parentUser = studentAccount.InviteParentUser(
                         firstName: firstName,
                         lastName: lastName,
                         email: email,
                         phone: string.Empty,
-                        message: $"{firstName} has signed up for an account on AfterSchool HQ at {browserUrl}. Please create your AHQ account to know and approve of activities your child requests to participate in.",
+                        message: $"{studentUser.FirstName} has created an account on AfterSchool HQ to register for {browserUrl}.",
                         userType: UserType.Owner,
                         canUseExistingUserAccount: true,
                         loggedInUser: studentUser,
