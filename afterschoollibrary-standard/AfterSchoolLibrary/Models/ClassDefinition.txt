@@ -449,6 +449,8 @@ property: IsELearningCenter, bool, Bit
 property: IsAHQApproved, bool, Bit
 property: IsVirtualProgram, bool, Bit
 property: VideoUrl, string, NVarChar "200"
+property: CostLow, decimal?, Money
+property: CostHigh, decimal?, Money
 loadmethod: AccountId
 join: Account.ID, AccountId, InnerJoin
 joinproperty: Account.Name, string, NVarChar

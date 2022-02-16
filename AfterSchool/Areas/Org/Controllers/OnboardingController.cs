@@ -171,12 +171,14 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.GradeEnd = gradeEnd.IsNotEmpty() ? gradeEnd.ID : maxGradeId;            
             ViewBag.AgeStart = ageStart.HasValue ? ageStart.Value : 0;            
             ViewBag.AgeEnd = ageEnd.HasValue ? ageEnd.Value : 18;
+            ViewBag.CostLow = profile.CostLow.HasValue ? profile.CostLow : 0;
+            ViewBag.CostHigh = profile.CostHigh.HasValue ? profile.CostHigh : 0;
 
             return View(account);
         }
 
         [HttpPost]
-        public ActionResult AdditionalInfo(string mingrade, string maxgrade, string agestart, string ageend, string opencovid, string elearningcenter, string isvirtualprogram)
+        public ActionResult AdditionalInfo(string mingrade, string maxgrade, string agestart, string ageend, string opencovid, string elearningcenter, string isvirtualprogram, string costlow, string costhigh)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -207,6 +209,8 @@ namespace AfterSchool.Areas.Org.Controllers
                             elearningcenter: isElc,
                             isvirtualprogram: isVirtualProgram,
                             loggedInUser: currentUser,
+                            costhigh: costhigh,
+                            costlow: costlow,
                             msgs: amsgs,
                             dc: adc);
                     },
@@ -227,6 +231,8 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.OpenCovid = opencovid.IsBoolean() && opencovid.ToBoolean();
             ViewBag.ELC = isElc;
             ViewBag.IsVirtualProgram = isVirtualProgram;
+            ViewBag.CostLow = costlow;
+            ViewBag.CostHigh = costhigh;
 
             return View(account);
         }

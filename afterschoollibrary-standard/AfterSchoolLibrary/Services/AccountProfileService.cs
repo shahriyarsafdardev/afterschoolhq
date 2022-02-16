@@ -325,7 +325,7 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(profile.Save(dc));
         }
 
-        public static void UpdateProfileAdditionalInfo(this AccountProfile profile, string mingrade, string maxgrade, string agestart, string ageend, bool opencovid = false, bool elearningcenter = false, bool isvirtualprogram = false, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void UpdateProfileAdditionalInfo(this AccountProfile profile, string mingrade, string maxgrade, string agestart, string ageend, string costhigh, string costlow, bool opencovid = false, bool elearningcenter = false, bool isvirtualprogram = false, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             profile.GradeLevelStart = mingrade.IsInteger() ? mingrade.ToInteger() : new int?();
             profile.GradeLevelEnd = maxgrade.IsInteger() ? maxgrade.ToInteger() : new int?();
@@ -336,6 +336,8 @@ namespace AfterSchoolLibrary.Services
             profile.IsVirtualProgram = isvirtualprogram;
             profile.LastModifiedBy = loggedInUser.ID.Value;
             profile.LastModifiedDate = DateTime.UtcNow;
+            profile.CostHigh = costhigh.ToDecimal();
+            profile.CostLow = costlow.ToDecimal();
             msgs.AddRange(profile.Save(dc)); 
         }
 

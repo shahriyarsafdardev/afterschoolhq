@@ -11,6 +11,8 @@
     var ageStart = (int)ViewBag.AgeStart;
     var ageEnd = (int)ViewBag.AgeEnd;
     var isRestrictByGrade = (bool)ViewBag.IsRestrictByGrade;
+    var costLow = (decimal)ViewBag.CostLow;
+    var costHigh = (decimal)ViewBag.CostHigh;
     var headerText = $"Share info about your organization with parents.";
 }
 
@@ -23,11 +25,10 @@
                 <form class="form form-horizontal" method="post" action="@Url.Action("additionalinfo", "onboarding")">
 
                     @{ Html.RenderPartial("~/Views/Shared/_Loaders.cshtml",
-                            new ViewDataDictionary() {
+                              new ViewDataDictionary() {
                                { "count", 6 },
                                { "activeDotNumber", 2 }
-                            });
-                    }
+      }); }
 
                     <div class="col-md-12 onboarding-form-group">
                         <h1 class="text-center register-thankyou-2">@headerText</h1>
@@ -40,7 +41,25 @@
                                     { "ageStart", ageStart },
                                     { "ageEnd", ageEnd },
                                     { "restrictbygrade", isRestrictByGrade } }
-                                    ); }
+                                        ); }
+
+                    <div class="clearfix"></div>
+                    <div class="col-md-12 onboarding-form-group">
+                        <label class="onboarding-lable"> Price Range of Activities Offered </label>
+                        <div class="clearfix"></div>
+                        <div class="">
+                            <div class="col-md-4 col-xs-12 padding-0">
+                                <input id="costlow" name="costlow" class="form-control onboarding-input" type="text" required="required" value="@costLow" onclick="this.select()" style="height: 44px;">
+                            </div>
+                            <p class="col-md-1 col-xs-12 margin-v-10 desktop-text-center" style="color: #00c5a3; font-size: 16px;">
+                                TO
+                            </p>
+                            <div class="col-md-4 col-xs-12 padding-0">
+                                <input id="costhigh" name="costhigh" class="form-control onboarding-input" type="text" required="required" value="@costHigh" onclick="this.select()" style="height: 44px;">
+                            </div>
+                        </div>
+
+                    </div>
 
                     <div class="clearfix"></div>
                     <div class="col-md-12 onboarding-form-group">
