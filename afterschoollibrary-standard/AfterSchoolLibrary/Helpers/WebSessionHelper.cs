@@ -25,7 +25,7 @@ namespace AfterSchoolLibrary.Helpers
 
         private static string ReplaceParams(string template, Dictionary<string, string> formatParams)
         {
-            return formatParams.Aggregate(template, (args, pair) => args.Replace($"{{{pair.Key}}}", pair.Value.SplitByUpperCase()));
+            return formatParams.Aggregate(template, (args, pair) => args.Replace($"{{{pair.Key}}}", pair.Key == "actionType" ? pair.Value.SplitByUpperCase() : pair.Value));
         }
 
         private static Dictionary<string, string> FormatTemplate(string template, Dictionary<string, string> formatParams)
@@ -59,6 +59,7 @@ namespace AfterSchoolLibrary.Helpers
                     return FormatTemplate(actorActionOfObjectTemplate, formatParams);
 
                 case WebSessionActionType.Refunded:
+                case WebSessionActionType.ManuallyRefunded:
                     var actorWasActionObjectTextFormat = "{actorName} was {actionType} {objectText}";
                     return FormatTemplate(actorWasActionObjectTextFormat, formatParams);
 
@@ -90,6 +91,8 @@ namespace AfterSchoolLibrary.Helpers
                     return FormatTemplate(actorActionObjectToTemplate, formatParams);
 
                 case WebSessionActionType.Registered:
+                case WebSessionActionType.ManuallyRegistered:
+                case WebSessionActionType.ManuallyPaid:
                 case WebSessionActionType.Paid:
                     var actorActionObjectTextTemplate = "{actorName} {actionType} {objectText} ";
                     return FormatTemplate(actorActionObjectTextTemplate, formatParams);
@@ -107,9 +110,6 @@ namespace AfterSchoolLibrary.Helpers
                  *  case WebSessionActionType.Unpublished:
                  *  case WebSessionActionType.Sent:
                  *  case WebSessionActionType.Archived:
-                 *  case WebSessionActionType.ManuallyRegistered:
-                 *  case WebSessionActionType.ManuallyPaid:
-                 *  case WebSessionActionType.ManuallyRefunded:
                  *  case WebSessionActionType.Approved:
                  *  case WebSessionActionType.Verified:
                  *  case WebSessionActionType.Viewed:

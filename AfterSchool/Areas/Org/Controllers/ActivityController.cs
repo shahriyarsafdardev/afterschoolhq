@@ -2453,7 +2453,7 @@ namespace AfterSchool.Areas.Org.Controllers
 					 actionType: WebSessionActionType.ManuallyPaid,
 					 objectType: ObjectType.Activity,
 					 objectId: activity.ID.Value,
-					 objectText: " Manually paid amount " + amountpaid
+					 objectText: " of amount " + amountpaid
 					);
 				}
 				
@@ -3148,7 +3148,7 @@ namespace AfterSchool.Areas.Org.Controllers
 				actionType: WebSessionActionType.ManuallyRegistered,
 				objectType: ObjectType.Activity,
 				objectId: activity.ID.Value,
-				objectText: "Student registered manually for activity "+ activity.Name
+				objectText: "Student for activity "+ activity.Name
 		   );
 		   return RedirectToAction("registrants", new { id = activity.Uid });
         }

@@ -408,7 +408,7 @@ namespace AfterSchool.Areas.Org.Controllers
                       actionType: webSessionActionType,
                       objectType: ObjectType.Activity,
                       objectId: activity.ID.Value,
-                      objectText: webSessionActionType == WebSessionActionType.ManuallyRefunded ? " Manual refund requested of " + amount : " amount "+ amount,
+                      objectText: webSessionActionType == WebSessionActionType.ManuallyRefunded ? " request of " + amount : " of amount "+ amount,
                       indirectObjectId: transaction.ID.Value
             );
         }
