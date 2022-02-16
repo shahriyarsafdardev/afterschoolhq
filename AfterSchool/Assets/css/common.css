@@ -405,8 +405,14 @@
 }
 
 .filter-header {
-    font-weight: bold;
     padding-top: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    color: #4a4a4a;
 }
 
 .filter-footer-container {
@@ -1483,4 +1489,9 @@
     background-color: none !important;
     border: 3px solid white !important;
     background: transparent !important
+}
+
+.filter-end-line {
+    margin: 18px 0 10px -15px;
+    border: solid 1px #f2f2f5;
 }

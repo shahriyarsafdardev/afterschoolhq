@@ -77,6 +77,25 @@
         color: white;
     }
 
+    .primary-search-color {
+        color: @primaryColor;
+    }
+
+    .primary-bg-color {
+        background-color: @primaryColor;
+    }
+
+    .am-generic-checkbox input[type="checkbox"] + label::before {
+        border: solid 1px @primaryColor !important;
+        margin: 0 10px 0 0 !important;
+    }
+
+    .am-generic-checkbox input[type="checkbox"]:checked + label::before {
+        background-color: @primaryColor;
+        color: white;
+        border-color: @primaryColor;
+    }
+
 </style>
 
 <div class="visible-lg visible-md">
@@ -118,11 +137,15 @@
 
 <div id="main-view-container" style="display: flex;">
     <div id="list-view" style="flex: 1;">
-        <div id="filters" class="col-md-3" style="display: none; padding-right: 0; padding-bottom: 120px;padding-top: 10px; background-color: #F9F9F9;">
+        <div id="filters" class="col-md-3" style="display: none; padding-right: 0; padding-bottom: 120px;padding-top: 10px; background-color: #fff;">
+            <span class="primary-search-color" isOpen="true" style="font-size: 22px; position: absolute; right: -7px; z-index: 9999; cursor: pointer;" onclick="return toggleSideBar(this)">
+                <i id="search-sidebar-arrow" class="fa fa-chevron-circle-left" aria-hidden="true"></i>
+            </span>
+
             @{ Html.RenderPartial("~/Views/Shared/_DirectoryFilters.cshtml"); }
         </div>
 
-        <div id="search-container" class="col-md-9 pt-20 pb-20" style="">
+        <div id="search-container" class="col-md-9 pt-20 pb-20" style="background-color: #f8f8f8;">
 
             @*<div class="text-center">
             <button class="btn contactUsBtn" type="button" data-toggle="modal" data-target="#ContactUsModal">Can't find what you are looking for? <span class="contactSpan">CONTACT US</span></button>
@@ -134,11 +157,15 @@
                     <span class="glyphicon glyphicon-search form-control-feedback" style="top: -3px; right:0; left: unset;"></span>
                 </div>
             </div>
-            <div class="btn-group col-lg-3 col-md-3">
+            <div class="am-checkbox am-generic-checkbox col-lg-3 col-md-3" style="">
+                <input id="chk-map-view" name="show-map" isEnabled="true" checked="checked" value="1" type="checkbox" class="schedulerepeat-checkbox" onclick="return toggleMapView(this)" />
+                <label for="chk-map-view" class="margin-h-10 mobile-padding" style="font-weight: 600;">Show Map</label>
+            </div>
+            @*<div class="btn-group col-lg-3 col-md-3">
                 <button type="button" class="btn btn-default" style="border-bottom-left-radius: 5px; border-top-left-radius: 5px;">List</button>
                 <button type="button" class="btn btn-default btn-generic" style="border-bottom-right-radius: 5px; border-top-right-radius: 5px;">Map</button>
-            </div>
-            <div id="search-result"> </div>
+            </div>*@
+            <div id="search-result" class="row"> </div>
 
             <div class="clearfix"></div>
             <div id="ProgressBar" style="z-index: 100001; text-align: center; display: none;">
@@ -239,9 +266,9 @@
         }
     </style>
 
-    <div id="<%= searchResult.AccountUid %>" name="<%= searchResult.AccountName %>" class="col-xl-12 col-sm-6 col-md-6 col-lg-6 col-xl-6 participation-object" style="height: 410px; margin-bottom: 10px;">
+    <div id="<%= searchResult.AccountUid %>" name="<%= searchResult.AccountName %>" class="col-xl-12 col-sm-12 col-md-12 col-lg-6 col-xl-4 participation-object" style="height: 410px; margin-bottom: 10px;">
 
-        <div class="panel" style="overflow: hidden; cursor: pointer; margin-right: 0;" onclick="WebPage.navigateIframe('<%= searchResult.HomePageUrl %>?dir=@accountUniqueName')">
+        <div class="panel" style="overflow: hidden; cursor: pointer; margin-right: 0; box-shadow: 0 5px 10px 0 rgba(0, 0, 0, 0.15);" onclick="WebPage.navigateIframe('<%= searchResult.HomePageUrl %>?dir=@accountUniqueName')">
             <div id="dynamicLogo-<%= searchResult.AccountUid %>" class="reg-header" style="min-height: 100px; height: 150px; padding: 5px 5px; position: relative;">
 
                 <% if(showDistance) { %>
@@ -383,6 +410,7 @@
             });
 
             loadFiltersAndInitiateSearch();
+            loadInitialTabs();
 
             if (!isMobile) {
                 $('#filters').show();
@@ -467,7 +495,6 @@
             //    else if (input.length > 3) { inputElement.value = `(${zip}) ${middle}`; }
             //    else if (input.length > 0) { inputElement.value = `(${zip}`; }
             //}
-
         })
 
         function showModalIsyp() {
@@ -865,7 +892,8 @@
             } else {
                 $('#txtSearch').val('');
             }
-
+            
+            resetTags();
             resetFlags();
             loadAccounts();
         }
@@ -874,6 +902,35 @@
             isReachedScrollEnd = false;
             page = 0;
             inCallback = false;
+        }
+
+        function toggleSideBar(element) {
+            var isOpen = $(element).attr('isOpen');
+            if (isOpen === 'true') {
+                $(element).attr('isOpen', false)
+                $('#search-sidebar-arrow').removeClass('fa-chevron-circle-left').addClass('fa-chevron-circle-right');
+                $("#filters").animate({
+                    width: '0px'
+                });
+            } else {
+                $(element).attr('isOpen', true)
+                $('#search-sidebar-arrow').removeClass('fa-chevron-circle-right').addClass('fa-chevron-circle-left');
+                $("#filters").animate({
+                    width: '25%'
+                });
+            }            
+        }
+
+        function toggleMapView(element) {
+            var isMapViewEnabled = $(element).attr('isEnabled');
+            if (isMapViewEnabled === 'true') {
+                $(element).attr('isEnabled', false)
+                $("#map-view").css('flex', '0')
+                
+            } else {
+                $(element).attr('isEnabled', true)
+                $("#map-view").css('flex', '0.5')
+            }            
         }
     </script>
 }
