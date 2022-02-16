@@ -327,7 +327,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
 			values.Add("registrationthankyouemail", "Thank you for registering.");
 			values.Add("applicationthankyouemail", "Thank you for applying.");
-			values.Add("interestthankyouemail", "Thank you for your interest. We will be in touch with you soon to follow up.");
 
 			activity = ActivityService.CreateNew(
 				loggedInUserId: currentUser.ID.Value,
@@ -1228,7 +1227,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
     [ValidateInput(false)]
     [HttpPost]
-    public ActionResult EditConfirmation(string id, string registrationthankyouemail, string applicationthankyouemail, string interestthankyouemail, string cmd)
+    public ActionResult EditConfirmation(string id, string registrationthankyouemail, string applicationthankyouemail, string cmd)
     {
 		var currentAccount = SessionVariables.CurrentAccount;
 		var currentUser = SessionVariables.CurrentUser;
@@ -1241,7 +1240,6 @@ namespace AfterSchool.Areas.Org.Controllers
 			var values = new Dictionary<string, object>()
 					{
 						{ "registrationthankyouemail", registrationthankyouemail },
-						{ "interestthankyouemail", interestthankyouemail },
 						{ "applicationthankyouemail", applicationthankyouemail }
 					};
 
