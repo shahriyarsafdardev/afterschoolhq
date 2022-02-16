@@ -212,9 +212,12 @@
                                     );
                                 }
 
+                                @if (isContinousEnrollmentEnabled)
+                                {
                                 <p class="text-muted padding-v-10 font-style-italic">
                                     <img src="~/Assets/img/alert-2.svg" class="alert-image-style"> Activities must be listed as ongoing while Continuous enrollment is enabled.
                                 </p>
+                                }
                             </div>
                         </div>
                     </div>
