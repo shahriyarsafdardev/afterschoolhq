@@ -207,7 +207,7 @@
                                             </td>
                                             <td class="text-center">
                                                 @* BILLER PAYOUT AMOUNT NEED TO REVIEW EXISTING METHODS *@
-                                                @(transaction.Amount.Value - transaction.GetFees()).ToCurrency()
+                                                @((transaction.Amount.Value - transaction.GetFees()).ToCurrency())
                                             </td>
                                             <td class="text-center">
                                                 @if (transaction.HasRefunds())
