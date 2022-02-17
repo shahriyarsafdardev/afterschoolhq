@@ -1516,6 +1516,13 @@ namespace AfterSchool.Controllers
         private List<FormQuestion> RegisterViewBag(ParticipationObject participationObject, SystemMessages msgs)
         {
             var allQuestions = participationObject.Form.GetActiveQuestions(msgs).ToList();
+            var defaultquestions = FormQuestionService.GetEmergencyContactQuestions(msgs);
+            var defaultRequiredQuestions = defaultquestions
+                .Where(question => question.IsRequired &&
+                    question.FormQuestionGroupRegistrantTypeId == RegistrantType.Individual &&
+                    question.QuestionDataTypeId != QuestionDataType.NotSet)
+                .ToList();
+            
             var requiredQuestions = allQuestions
                 .Where(question => question.IsRequired &&
                     question.FormQuestionGroupRegistrantTypeId == RegistrantType.Individual &&
@@ -1531,6 +1538,15 @@ namespace AfterSchool.Controllers
                 .Distinct()
                 .ToList();
 
+            var defaultQuestionsWithAnswers = defaultRequiredQuestions.Where(question =>
+                    answers.FirstOrDefault(answer => answer.QuestionDataTypeId == question.QuestionDataTypeId).IsEmpty() ||
+                    answers.FirstOrDefault(answer => answer.QuestionDataTypeId == question.QuestionDataTypeId).Text.IsBlank()
+                )
+                .Distinct()
+                .ToList();
+
+            questions.AddRange(defaultQuestionsWithAnswers);
+
             questions.AddRange(allQuestions
                 .Where(question => !question.IsDeleted && question.QuestionDataTypeId == QuestionDataType.NotSet)
                 .Where(question => answers.Find(answer => answer.FormQuestionId == question.ID).IsEmpty())
@@ -1538,6 +1554,7 @@ namespace AfterSchool.Controllers
               );
 
             ViewBag.Registrant = SessionVariables.CurrentRegistrant;
+            ViewBag.QuestionViewModels = questions.Select(question => question.ToFormQuestionViewModel()).ToList();
 
             return questions;
         }
@@ -1570,7 +1587,7 @@ namespace AfterSchool.Controllers
                 return RedirectToAction("select");
 
             // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
-            var questions = RegisterStudentViewBag(participationObject, msgs);
+            var questions = RegisterViewBag(participationObject, msgs);
 
             // if there are no additional questions to answer, 
             // if it doesn't require parental consent, 
