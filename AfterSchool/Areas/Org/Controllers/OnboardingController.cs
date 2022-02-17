@@ -426,13 +426,15 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.AcademicSubjects = profile.GetProperties(AccountPropertyType.AcademicSubjects, msgs);
             ViewBag.Softskills = profile.GetProperties(AccountPropertyType.SoftSkills, msgs);
             ViewBag.ProgramCategories = profile.GetProperties(AccountPropertyType.Classifications, msgs);
+            ViewBag.ProgramsAllDayDuringWorkWeek = profile.GetProperties(AccountPropertyType.ProgramsAllDayDuringWorkWeek, msgs);
+
             ViewBag.Messages = msgs;
 
             return View(account);
         }
 
         [HttpPost]
-        public ActionResult ServicesOffered(string programCategories, string softskills, string academicsubjects, string teachingmethods)
+        public ActionResult ServicesOffered(string programCategories, string softskills, string academicsubjects, string teachingmethods, string programsalldayduringworkweek)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -459,6 +461,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             softskills: softskills,
                             academicsubjects: academicsubjects,
                             teachingmethods: teachingmethods,
+                            programsalldayduringworkweek : programsalldayduringworkweek,
                             loggedInUser: currentUser,
                             msgs: amsgs,
                             dc: adc);
