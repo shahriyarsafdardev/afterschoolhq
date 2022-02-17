@@ -4,6 +4,7 @@ Imports System.Collections.Generic
 Imports System.Linq
 Imports System.Data
 Imports System.Web
+Imports BasicLibrary.DataAccess
 
 <Serializable()> _
 Public Class BaseObject
@@ -227,6 +228,14 @@ Public Class BaseObject
         Get
             Dim _databaseQuery As New DataAccess.DatabaseQuery()
             _databaseQuery.Connection = New DataAccess.DatabaseConnection(Utilities.ConnectionString)
+            _databaseQuery.SelectParameters.AddRange(om)
+            Return _databaseQuery
+        End Get
+    End Property
+    Public Shared ReadOnly Property DatabaseQuery(ByVal om As DataAccess.DatabaseParameters, ByVal dc As DatabaseConnection) As DataAccess.DatabaseQuery
+        Get
+            Dim _databaseQuery As New DataAccess.DatabaseQuery()
+            _databaseQuery.Connection = dc
             _databaseQuery.SelectParameters.AddRange(om)
             Return _databaseQuery
         End Get

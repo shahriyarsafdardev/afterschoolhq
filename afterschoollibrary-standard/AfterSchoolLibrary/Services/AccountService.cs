@@ -3673,47 +3673,6 @@ namespace AfterSchoolLibrary.Services
 
         }
 
-        public static void ProcessInterestRegistration(CheckoutObject checkoutObject, bool sendConfirmationEmail, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            Database.ExecuteTransaction
-            (
-                action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                {
-                    // mark as completed
-                    checkoutObject.Registration.SetRegistrationStatus(
-                        completionStatus: RegistrationCompletionStatus.Completed,
-                        loggedInUser: loggedInUser,
-                        msgs: amsgs,
-                        dc: adc);
-
-                    // TODO: Allow user to register for multiple activities in one session at once MAYBE
-                    RegistrationService.ProcessInterestAssignment(
-                        registration: checkoutObject.Registration,
-                        participationObject: checkoutObject.ParticipationObject,
-                        registrant: checkoutObject.Registration.GetRegistrant(amsgs, adc),
-                        period: checkoutObject.ParticipationObject.GetCurrentRegistrationPeriod(amsgs, adc),
-                        loggedInUser: loggedInUser,
-                        msgs: amsgs,
-                        dc: adc);
-
-                    // subscribe to the account
-                    checkoutObject.BillingAccount.AddOrUpdateSubscriber(loggedInUser, SubscriberStatus.Subscribed, loggedInUser, amsgs, adc);
-                    checkoutObject.ParticipationObject.AddOrUpdateSubscriber(loggedInUser, SubscriberStatus.Subscribed, loggedInUser, amsgs, adc);
-                },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
-
-                    if (sendConfirmationEmail)
-                        checkoutObject.Registration.SendInterestConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
-
-                },
-                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
-                dc: dc
-            );
-        }
-
         public static void ProcessRegistrationWithoutPayment(CheckoutObject checkoutObject, bool sendConfirmationEmail, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction

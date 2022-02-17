@@ -9,8 +9,6 @@
     </div>
     <div class="panel-body">
 
-        @ShowEmailContent(properties, AccountPropertyType.InterestThankYouEmail)
-
         @ShowEmailContent(properties, AccountPropertyType.RegistrationThankYouEmail)
 
         <div class="col-md-offset-3 col-md-9 padding-v-30">
@@ -42,9 +40,8 @@
                  }
              ); }
 
-            @if (item != AccountPropertyType.InterestThankYouEmail)
-            {
-                <p class="text-muted">
+
+              <p class="text-muted">
                     <em>
                         <span>
                             This thank you message is sent when the @UILabel.ActivityLabel(Model.ActivityTypeId).ToLower() is set to
@@ -52,18 +49,8 @@
                             Mode.
                         </span>
                     </em>
-                </p>
-            }
-            else
-            {
-                <p class="text-muted">
-                    <em>
-                        <span>
-                            This thank you message is sent when the a parent clicks on "I'm Interested" to learn more about your @UILabel.ActivityLabel(ActivityType.Activity).ToLower()
-                        </span>
-                    </em>
-                </p>
-            }
+              </p>
+
         </div>
     </div>
 }

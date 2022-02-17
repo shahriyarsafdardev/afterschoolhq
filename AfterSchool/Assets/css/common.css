@@ -1103,6 +1103,14 @@
     color: #00b492;
     width: 100px;
 }
+
+.searchActivitiesBtn {
+    height: 39px;
+    background-color: white;
+    color: #00b492;
+    width: 100px;
+}
+
 .searchFormInput {
     float: left;
     width: 250px;
@@ -1460,12 +1468,9 @@
     letter-spacing: normal;
 }
 
-
 .textCenterImportant{
     text-align:center !important;
 }
-
-
 
 .navTop> .nav-btn {
     display: none;
@@ -1476,7 +1481,6 @@
     float: right;
     font-size: 18px;
 }
-
     .navTop> .nav-links > a {
         display: inline-block;
         padding: 13px 10px 13px 10px;
@@ -1484,13 +1488,12 @@
         color: #efefef;
     }
 
-
 .navTop> #nav-check {
     display: none;
 }
 
 
-.profileViewBtns {
+.transparent-bg {
     background-color: none !important;
     border: 3px solid white !important;
     background: transparent !important
