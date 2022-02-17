@@ -45,18 +45,19 @@
 
                     <div class="clearfix"></div>
                     <div class="col-md-12 onboarding-form-group">
-                        <label class="onboarding-lable"> Price Range of Activities Offered </label>
+                        <label class="onboarding-lable"> PRICE RANGE OF ACTIVITIES OFFERED </label>
                         <div class="clearfix"></div>
                         <div class="">
                             <div class="col-md-4 col-xs-12 padding-0">
-                                <input id="costlow" name="costlow" class="form-control onboarding-input" type="text" required="required" value="@costLow" onclick="this.select()" style="height: 44px;">
+                                <input id="costlow" name="costlow" class="form-control onboarding-input" type="text" required="required" value="@((string)ViewBag.IsNewProfile == "1" ? "" : costLow.ToString("0.00"))" onclick="this.select()" onblur="checkLowHighValue()" style="height: 44px;">
                             </div>
                             <p class="col-md-1 col-xs-12 margin-v-10 desktop-text-center" style="color: #00c5a3; font-size: 16px;">
                                 TO
                             </p>
                             <div class="col-md-4 col-xs-12 padding-0">
-                                <input id="costhigh" name="costhigh" class="form-control onboarding-input" type="text" required="required" value="@costHigh" onclick="this.select()" style="height: 44px;">
+                                <input id="costhigh" name="costhigh" class="form-control onboarding-input" type="text" required="required" value="@((string)ViewBag.IsNewProfile == "1" ? "" : costHigh.ToString("0.00"))" onclick="this.select()" onblur="checkLowHighValue()" style="height: 44px;">
                             </div>
+                            <div class="col-lg-12 padding-0 text-muted margin-t-10" style="font-style:italic">If all of your programs are free enter 0 into both fields</div>
                         </div>
 
                     </div>
@@ -119,3 +120,26 @@
         </div>
     </div>
 </div>
+<script>
+    function checkLowHighValue() {
+        if ($("#costlow").val() != "" && $("#costhigh").val() != "") {
+            if (parseFloat($("#costlow").val()) > parseFloat($("#costhigh").val())) {
+                Notifications.showBar({
+                    title: 'Error',
+                    message: 'Please make the low cost range value less than high cost.',
+                    success: false
+                });
+                $('#costlow').attr('style', 'height: 44px; border: 1px solid red');
+                $('#costhigh').attr('style', 'height: 44px; border: 1px solid red');
+                $('.register-continue').attr('disabled', "disabled");
+                return false;
+            }
+            else {
+                $('#costlow').attr('style', 'height: 44px;');
+                $('#costhigh').attr('style', 'height: 44px;');
+                $('.register-continue').removeAttr('disabled');
+                return true;
+            }
+        }
+    }
+</script>

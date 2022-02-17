@@ -161,6 +161,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
             HandleTempMessages(msgs);
 
+            if (profile.CostLow.IsEmpty() && profile.CostHigh.IsEmpty())
+                ViewBag.IsNewProfile = "1";
+
             ViewBag.Grades = grades;
             ViewBag.Messages = msgs;
             ViewBag.ELC = profile.IsNotEmpty() && profile.IsELearningCenter;
@@ -233,6 +236,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IsVirtualProgram = isVirtualProgram;
             ViewBag.CostLow = costlow;
             ViewBag.CostHigh = costhigh;
+            ViewBag.IsNewProfile = "0";
 
             return View(account);
         }
