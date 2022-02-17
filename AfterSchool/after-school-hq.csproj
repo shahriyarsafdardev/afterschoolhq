@@ -1951,6 +1951,9 @@
     <Content Include="Views\Shared\Registration\_ResetPassword.cshtml" />
     <Content Include="Views\Shared\Registration\_ResetPasswordCompleted.cshtml" />
     <Content Include="Views\Shared\_GoogleTranslateDropDown.cshtml" />
+    <Content Include="Views\Shared\_ISYPIntroModal.cshtml" />
+    <Content Include="Views\Shared\_DirectoryContactUs.cshtml" />
+    <Content Include="Views\Shared\_DirectoryMobileSearch.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

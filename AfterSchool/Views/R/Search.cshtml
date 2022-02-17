@@ -56,17 +56,6 @@
         height: 200px;
     }
 
-    .blur-bg {
-        background-color: White;
-        background-repeat: no-repeat;
-        height: 100%;
-        opacity: 0.5;
-        position: fixed;
-        top: 0;
-        width: 100%;
-        z-index: 1000000;
-    }
-
     .has-search .form-control:focus {
         border-color: @primaryColor;
     }
@@ -77,12 +66,16 @@
         color: white;
     }
 
-    .primary-search-color {
+    .primary-color {
         color: @primaryColor;
     }
 
     .primary-bg-color {
         background-color: @primaryColor;
+    }
+
+    .primary-border-color {
+        border-color: @primaryColor;
     }
 
     .am-generic-checkbox input[type="checkbox"] + label::before {
@@ -101,9 +94,7 @@
 <div class="visible-lg visible-md">
     <div class="row" style="border-bottom: 2px solid @primaryColor;">
         <div class="@(headerImageUrl.IsNotEmpty() ? "search-bg" : "")" style="min-height: 100%; background: white; padding: 35px 20px;">
-
             <div class="reg-header-overlay col-md-12">
-
                 <div class="col-lg-3 col-md-3 header-logo" style="margin-top: -25px;">
                     <a href=@(website.IsNotEmpty() ? website : "")>
                         <img src="@logoUrl" style="width: 110px;" />
@@ -115,158 +106,76 @@
     </div>
 </div>
 
-<div class="visible-sm visible-xs bg-color">
-    <div class="col-xs-10">
-        <div class="form-group has-feedback has-search" style="margin-top: 10px;">
-            <span class="glyphicon glyphicon-search form-control-feedback" style="top: -3px;"></span>
-            <input id="txtSearch-mobile" name="search" type="text" class="form-control" placeholder="Type here to search - STEM, Science, Karate, Football, etc" onkeyup="return waitAndFilterSearch()">
-        </div>
-    </div>
-    <div class="col-xs-2" style="padding: 0; text-align: center;">
-        <img id="img-mobile-filter" src="~/img/filter.png" class="filter hide" isOpen="0"  onclick="return mobileFilter()" />
-    </div>
+@{ Html.RenderPartial("~/Views/Shared/_DirectoryMobileSearch.cshtml"); }
 
-    <div class="clearfix"></div>
-
-    <div id="mobile-filter-footer" class="filter-footer-container">
-        <button type="button" class="btn btn-default btn-lg btn-center" style="border-color: steelblue; color:blue" onclick="return applyMobileFilter()">Apply Filters</button>
-    </div>
-
-    <div class="clearfix"></div>
-</div>
-
-<div id="main-view-container" style="display: flex;">
-    <div id="list-view" style="flex: 1;">
-        <div id="filters" class="col-md-3" style="display: none; padding-right: 0; padding-bottom: 120px;padding-top: 10px; background-color: #fff;">
-            <span class="primary-search-color" isOpen="true" style="font-size: 22px; position: absolute; right: -7px; z-index: 9999; cursor: pointer;" onclick="return toggleSideBar(this)">
+<div id="main-view-container" class="display-flex">
+    <div id="list-view" class="flex-1">
+        <div id="filters" class="col-md-3 directory-filters">
+            <span class="primary-color directory-sidebar-arrow" isOpen="true" onclick="return toggleSideBar(this)">
                 <i id="search-sidebar-arrow" class="fa fa-chevron-circle-left" aria-hidden="true"></i>
             </span>
 
             @{ Html.RenderPartial("~/Views/Shared/_DirectoryFilters.cshtml"); }
         </div>
 
-        <div id="search-container" class="col-md-9 pt-20 pb-20" style="background-color: #f8f8f8;">
-
-            @*<div class="text-center">
-            <button class="btn contactUsBtn" type="button" data-toggle="modal" data-target="#ContactUsModal">Can't find what you are looking for? <span class="contactSpan">CONTACT US</span></button>
-        </div>*@
+        <div id="search-container" class="directory-search-container col-md-9 pt-20 pb-20">
 
             <div class="col-lg-9 col-md-9">
                 <div class="form-group has-feedback has-search" style="margin-left: 20px;">
-                    <input id="txtSearch" name="search" type="text" class="form-control" placeholder="Search For Programs" style="border-radius: 5px; padding-right: 32px; padding-left: 10px;" onkeyup="return waitAndFilterSearch(this.value)">
-                    <span class="glyphicon glyphicon-search form-control-feedback" style="top: -3px; right:0; left: unset;"></span>
+                    <input id="txtSearch" name="search" type="text" class="form-control directory-search-input" placeholder="Search For Programs" onkeyup="return waitAndFilterSearch(this.value)">
+                    <span class="glyphicon glyphicon-search form-control-feedback directory-search-magnyfier-icon"></span>
                 </div>
             </div>
-            <div class="am-checkbox am-generic-checkbox col-lg-3 col-md-3" style="">
+
+            <div class="am-checkbox am-generic-checkbox col-lg-3 col-md-3">
                 <input id="chk-map-view" name="show-map" isEnabled="true" checked="checked" value="1" type="checkbox" class="schedulerepeat-checkbox" onclick="return toggleMapView(this)" />
-                <label for="chk-map-view" class="margin-h-10 mobile-padding" style="font-weight: 600;">Show Map</label>
+                <label for="chk-map-view" class="margin-h-10 mobile-padding font-weight-bold">Show Map</label>
             </div>
-            @*<div class="btn-group col-lg-3 col-md-3">
-                <button type="button" class="btn btn-default" style="border-bottom-left-radius: 5px; border-top-left-radius: 5px;">List</button>
-                <button type="button" class="btn btn-default btn-generic" style="border-bottom-right-radius: 5px; border-top-right-radius: 5px;">Map</button>
-            </div>*@
-            <div id="search-result" class="row"> </div>
 
             <div class="clearfix"></div>
-            <div id="ProgressBar" style="z-index: 100001; text-align: center; display: none;">
+            @*<div class="btn-group col-lg-3 col-md-3">
+                    <button type="button" class="btn btn-default" style="border-bottom-left-radius: 5px; border-top-left-radius: 5px;">List</button>
+                    <button type="button" class="btn btn-default btn-generic" style="border-bottom-right-radius: 5px; border-top-right-radius: 5px;">Map</button>
+                </div>*@
+            <div id="search-result" class="row"> </div>
+            <div class="clearfix"></div>
+
+            <div class="directory-search-no-result"></div>
+
+            <div id="ProgressBar">
                 <img src="~/img/lod_bg.gif">
             </div>
+
+            <div id="notification-contact-us" class="text-center">
+                <button class="btn btn-contact-us" style="border: 3px solid @primaryColor;" type="button" data-toggle="modal" data-target="#ContactUsModal">
+                    Can't find what you are looking for?
+                    <span class="contactSpan">CONTACT US</span>
+                </button>
+            </div>
+            <div class="clearfix"></div>
         </div>
     </div>
 
-    <div id="map-view" style="flex: 0.5; background: white;">
-
-    </div>
-
+    <div id="map-view"></div>
 </div>
 
 <div class="clearfix"></div>
 
-<div>
-    <div id="blured-bg"></div>
-    <div style="position: fixed; z-index: 1000001;">
-        <div id="modal-isyp-intro" class="md-modal">
-            <div class="md-content modal-lg">
-                <div class="modal-header isyp-modal-header text-center">
-                    <img src="@logoUrl" style="width: 200px; margin-top: 40px;" />
-                </div>
-                <div class="modal-body" style="color: black;">
-                    <h1 style="margin: 0;">Learn, explore, and play this summer!</h1>
-                    <br />
-                    <div style="overflow-wrap: break-word;">
-                        From sports to science to arts and culture, Indy Summer Youth Programs offer a wide variety of programs to ensure there’s something for everyone. 
-                        Many programs provide healthy meals and snacks, 
-                        and free and low-cost enrollment options,
-                        as well as scholarships, are available to help cover the costs of attendance.  
-                        Find the right summer program for your child.
-                    </div>
+@{ Html.RenderPartial("~/Views/Shared/_ISYPIntroModal.cshtml", logoUrl); }
 
-                    <div style="padding: 15px; text-align: center;">
-                        <button class="btn btn-register" style="width: 180px; border-color: @primaryColor; background-color: @primaryColor; transition: none;" onclick="return closeModalIsyp();"> Get Started</button>
-                        <div class="clearfix"></div>
-                    </div>
-                    <div class="clearfix"></div>
-                </div>
-                <div class="clearfix"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-@*<div class="modal fade" id="ContactUsModal" tabindex="-1" role="dialog" aria-labelledby="ContactUsModal" aria-hidden="true">
-    <div class="modal-dialog contactUsModal Contactmodaldialog" role="document">
-        <div class="">
-
-            <div class="">
-                <div class="modalHeader">Can't find the program you're looking for?</div>
-                <div style="padding-bottom:10px" class="text-center">
-                    We want to help you find the perfect program for your student(s). Let us know what we're missing and we will do our best to connect you with a provider.
-                </div>
-
-                <form id="ContactUsForm" onsubmit="return false">
-
-                    <div class="col-md-12 onboarding-form-group floatNone">
-                        <label class="onboarding-lable">NAME *</label>
-                        <input type="text" name="name" id="name" required="required" autocomplete="off" class="form-control onboarding-input" value="" />
-                    </div>
-                    <div class="col-md-12 onboarding-form-group floatNone">
-                        <label class="onboarding-lable">EMAIL ADDRESS *</label>
-                        <input type="email" name="email" id="email" required="required" autocomplete="off" class="form-control onboarding-input" value="" />
-                    </div>
-
-                    <div class="col-md-12 onboarding-form-group floatNone">
-                        <label class="onboarding-lable">PHONE NUMBER</label>
-                        <input type="text" name="phone" id="phone" required="required" autocomplete="off" class="form-control onboarding-input" value="" />
-                    </div>
-                    <div class="col-md-12 onboarding-form-group floatNone">
-                        <label class="onboarding-lable">MESSAGE *</label>
-                        <textarea name="message" id="message" required="" autocomplete="off" placeholder="List the type of programs, age range or budget, etc. that you are looking for. If you have specific program in mind, please include the website if available." style="height:200px" class="form-control onboarding-input"></textarea>
-                    </div>
-                    <div class="g-recaptcha" data-sitekey="6Lfg2BEUAAAAADCXTFVlYUywSoqvMUgLd-tERDxO">
-                    </div>
-                    <br/>
-                    <div class="text-center">
-                        <div clas="formSubmitting"></div>
-                        <button type="submit" class="btn btn-primary btn-lg btnContactUsSubmit">Submit</button>
-                    </div>
-                </form>
-            </div>
-
-        </div>
-    </div>
-</div>*@
+@{ Html.RenderPartial("~/Views/Shared/_DirectoryContactUs.cshtml", logoUrl); }
 
 <script id="script-search-result-list" type="text/template">
 
     <% _.each(response, function(searchResult){ %>
 
     <style>
-        #dynamicLogo-<%=searchResult.AccountUid%> {
+        #dynamicLogo-<%=searchResult.AccountUid% > {
             background-image: url("<%= searchResult.ProfileHeaderImageUrl %>");
         }
     </style>
 
-    <div id="<%= searchResult.AccountUid %>" name="<%= searchResult.AccountName %>" class="col-xl-12 col-sm-12 col-md-12 col-lg-6 col-xl-4 participation-object" style="height: 410px; margin-bottom: 10px;">
+    <div id="<%= searchResult.AccountUid %>" name="<%= searchResult.AccountName %>" class="participation-object" style="height: 410px; margin-bottom: 10px; width: 350px;">
 
         <div class="panel" style="overflow: hidden; cursor: pointer; margin-right: 0; box-shadow: 0 5px 10px 0 rgba(0, 0, 0, 0.15);" onclick="WebPage.navigateIframe('<%= searchResult.HomePageUrl %>?dir=@accountUniqueName')">
             <div id="dynamicLogo-<%= searchResult.AccountUid %>" class="reg-header" style="min-height: 100px; height: 150px; padding: 5px 5px; position: relative;">
@@ -416,86 +325,85 @@
                 $('#filters').show();
             }
 
-            //$(".btnContactUsSubmit").on('click', function () {
-            //    if ($('#name').val() && $('#email').val() && $('#message').val()) {
-
-            //        var subjectLine = 'New Search Page Form Submission From: ' + $('#name').val();
-            //        if ($('#phone').val()) {
-            //            subjectLine = subjectLine + ' - ' + $('#phone').val();
-            //        }
-            //        var params =
-            //            'name=' + encodeURIComponent($('#name').val()) +
-            //            '&pageName=search' +
-            //            '&fromEmail=' + encodeURIComponent($('#email').val()) +
-            //            '&message=' + encodeURIComponent($('#message').val()) +
-            //            '&MainSubject=' + encodeURIComponent(subjectLine) +
-            //            '&g_recaptcha_response=' + $('#g-recaptcha-response').val() +
-            //            '&phone=' + $('#phone').val();
-
-            //        $('.formSubmitting').html('Submitting...');
-            //        $('.btnContactUsSubmit').prop('disabled', true);
-
-            //        $.post(
-            //            '/services/submitcontactform',
-            //            params,
-            //            function (data) {
-
-            //                $('.formSubmitting').html('Submit');
-            //                $('.btnContactUsSubmit').prop('disabled', false);
-            //                grecaptcha.reset();
-
-            //                if (data && data.status == 'ok') {
-
-            //                    $('#name').val('');
-            //                    $('#email').val('');
-            //                    $('#message').val('');
-            //                    $('#phone').val('');
-
-            //                    Notifications.showBar({
-            //                        title: 'Success',
-            //                        message: 'Your message has been sent.',
-            //                        success: true
-            //                    });
-
-            //                } else {
-
-
-            //                    var text = "";
-            //                    for (var message of data.messages) {
-
-            //                        text = text + message.Text;
-            //                    }
-            //                    Notifications.showBar({
-            //                        title: 'Failed',
-            //                        message: text,
-            //                        success: false
-            //                    });
-            //                }
-            //            }
-            //        );
-
-            //        return false;
-            //    }
-
-            //    return true;
-            //})
-
-            //var inputElement = document.getElementById('phone');
-            //inputElement.addEventListener('keydown', enforceFormat);
-            //inputElement.addEventListener('keyup', formatToPhone);
-
-            ////format phone number when we load
-            //if (inputElement && inputElement.value) {
-            //    var input = inputElement.value.replace(/\D/g, '').substring(0, 10); // First ten digits of input only
-            //    var zip = input.substring(0, 3);
-            //    var middle = input.substring(3, 6);
-            //    var last = input.substring(6, 10);
-
-            //    if (input.length > 6) { inputElement.value = `(${zip}) ${middle} ${last}`; } //(xxx) xxx xxxx
-            //    else if (input.length > 3) { inputElement.value = `(${zip}) ${middle}`; }
-            //    else if (input.length > 0) { inputElement.value = `(${zip}`; }
-            //}
+            formatContactPhoneForDirectory();
         })
+
+        function formatContactPhoneForDirectory() {
+            var inputElement = document.getElementById('phone');
+            inputElement.addEventListener('keydown', enforceFormat);
+            inputElement.addEventListener('keyup', formatToPhone);
+
+            //format phone number when we load
+            if (inputElement && inputElement.value) {
+                var input = inputElement.value.replace(/\D/g, '').substring(0, 10); // First ten digits of input only
+                var zip = input.substring(0, 3);
+                var middle = input.substring(3, 6);
+                var last = input.substring(6, 10);
+
+                if (input.length > 6) { inputElement.value = `(${zip}) ${middle} ${last}`; } //(xxx) xxx xxxx
+                else if (input.length > 3) { inputElement.value = `(${zip}) ${middle}`; }
+                else if (input.length > 0) { inputElement.value = `(${zip}`; }
+            }
+        }
+
+        function submitContactForDirectory() {
+            if ($('#name').val() && $('#email').val() && $('#message').val())
+            {
+                var subjectLine = 'New Search Page Form Submission From: ' + $('#name').val();
+                if ($('#phone').val()) {
+                    subjectLine = subjectLine + ' - ' + $('#phone').val();
+                }
+
+                var params =
+                    'name=' + encodeURIComponent($('#name').val()) +
+                    '&pageName=search' +
+                    '&fromEmail=' + encodeURIComponent($('#email').val()) +
+                    '&message=' + encodeURIComponent($('#message').val()) +
+                    '&MainSubject=' + encodeURIComponent(subjectLine) +
+                    '&g_recaptcha_response=' + $('#g-recaptcha-response').val() +
+                    '&phone=' + $('#phone').val();
+
+                $('.formSubmitting').html('Submitting...');
+                $('.btnContactUsSubmit').prop('disabled', true);
+
+                $.post('/services/submitcontactform', params, function (data)
+                {
+                    $('.formSubmitting').html('Submit');
+                    $('.btnContactUsSubmit').prop('disabled', false);
+                    grecaptcha.reset();
+
+                    if (data && data.status == 'ok') {
+                        $('#name').val('');
+                        $('#email').val('');
+                        $('#message').val('');
+                        $('#phone').val('');
+
+                        Notifications.showBar({
+                            title: 'Success',
+                            message: 'Your message has been sent.',
+                            success: true
+                        });
+                    }
+                    else
+                    {
+                        var text = "";
+                        for (var message of data.messages) {
+                            text = text + message.Text;
+                        }
+
+                        Notifications.showBar({
+                            title: 'Failed',
+                            message: text,
+                            success: false
+                        });
+                    }
+                });
+
+                return false;
+            }
+
+            return true;
+        }
 
         function showModalIsyp() {
             $('#modal-isyp-intro').addClass('md-show');
@@ -767,9 +675,13 @@
                             //..page size is less then the default, then it means no more records present
                             isReachedScrollEnd = true;
                         }
+
+                        $('#notification-contact-us').show();
+                        $('.directory-search-no-result').html('');
                     }
                     else {
                         if (data && data.status == 'error') {
+                            $('#notification-contact-us').show();
                             $('#search-result').html('');
 
                             var error = '';
@@ -785,14 +697,9 @@
                             });
                         }
                         else if (data && data.status == "no-result" && page <= 0) {
-                            /*$('#search-result').html('<p style="margin-top: 35px; text-align: center; font-size: 16px;"></p>');*/
-
-                            Notifications.showBar({
-                                title: 'Error',
-                                message: 'Sorry, there are no results.',
-                                success: false
-                            });
-
+                            $('#notification-contact-us').show();
+                            $('#search-result').html('');
+                            $('.directory-search-no-result').html('<p>There are no activities that match this criteria. <br> To find more, remove filters or zoom out on the map.</p>');
                             isReachedScrollEnd = true;
                             page = 0;
                         }
@@ -892,7 +799,7 @@
             } else {
                 $('#txtSearch').val('');
             }
-            
+
             resetTags();
             resetFlags();
             loadAccounts();
@@ -918,7 +825,7 @@
                 $("#filters").animate({
                     width: '25%'
                 });
-            }            
+            }
         }
 
         function toggleMapView(element) {
@@ -926,11 +833,11 @@
             if (isMapViewEnabled === 'true') {
                 $(element).attr('isEnabled', false)
                 $("#map-view").css('flex', '0')
-                
+
             } else {
                 $(element).attr('isEnabled', true)
                 $("#map-view").css('flex', '0.5')
-            }            
+            }
         }
     </script>
 }

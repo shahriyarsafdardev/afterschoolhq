@@ -85,9 +85,7 @@
         <div class="input-group-addon" style="cursor: pointer; border-bottom-right-radius: 5px; border-top-right-radius: 5px;" onclick="return validatePostalCodeAndSearch();">
             <span class="input-group-text" style="font-size: 12px;">Update</span>
         </div>
-    </div>
-
-    <div class="clearfix"></div>
+    </div>    
 </div>
 <div class="filter-end-line"></div>
 
@@ -112,8 +110,7 @@
     {
         <p onclick="return loadMore(this, 'list-neighborhoods', '@neighborhoods.Count')" class="show-more">Show more...</p>
     }
-
-    <div class="clearfix"></div>
+    
     <div class="filter-end-line"></div>
 }
 
@@ -143,9 +140,9 @@
                 </div>
             }
         </div>
+        <div class="clearfix"></div>
     </div>
 </div>
-<div class="clearfix"></div>
 <div class="filter-end-line"></div>
 
 <div>
@@ -174,9 +171,10 @@
                 <label for="chk-ages-4" class="filter-body mobile-padding">15 - 18 yrs</label>
             </div>
         </div>
+
+        <div class="clearfix"></div>
     </div>
 </div>
-<div class="clearfix"></div>
 <div class="filter-end-line"></div>
 
 <div class="form-group">
@@ -235,7 +233,8 @@
 <div class="filter-end-line"></div>
 
 <div class="form-group">
-    <h4 class="filter-header accordion-toggle collapsed" data-toggle="collapse" href="#collapse-cost">Cost</h4>
+    <h4 id="header-cost" class="filter-header accordion-toggle collapsed" data-toggle="collapse" isOpen="false" href="#collapse-cost" onclick="return loadTabs('cost')">Cost</h4>
+    <div id="tags-container-cost"></div>
 
     <div id="collapse-cost" class="collapse">
         <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
@@ -262,7 +261,8 @@
 <div class="filter-end-line"></div>
 
 <div id="list-pricing" class="form-group">
-    <h4 class="filter-header accordion-toggle collapsed" data-toggle="collapse" href="#collapse-pricing">Pricing options</h4>
+    <h4 id="header-pricing" class="filter-header accordion-toggle collapsed" data-toggle="collapse" isOpen="false" href="#collapse-pricing" onclick="return loadTabs('pricing')">Pricing options</h4>
+    <div id="tags-container-pricing"></div>
 
     <div id="collapse-pricing" class="collapse">
         @foreach (var item in pricingOptions.OrderBy(m => m))
@@ -277,7 +277,8 @@
 <div class="filter-end-line"></div>
 
 <div class="form-group">
-    <h4 class="filter-header accordion-toggle collapsed" data-toggle="collapse" href="#collapse-starts-in">Starts in</h4>
+    <h4 id="header-starting" class="filter-header accordion-toggle collapsed" data-toggle="collapse" isOpen="false" href="#collapse-starts-in" onclick="return loadTabs('starting')">Starts in</h4>
+    <div id="tags-container-starting"></div>
 
     <div id="collapse-starts-in" class="collapse">
         <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
@@ -299,7 +300,8 @@
 <div class="filter-end-line"></div>
 
 <div class="form-group">
-    <h4 class="filter-header accordion-toggle collapsed" data-toggle="collapse" href="#collapse-other">Other</h4>
+    <h4 id="header-other" class="filter-header accordion-toggle collapsed" data-toggle="collapse" isOpen="false" href="#collapse-other" onclick="return loadTabs('other')">Other</h4>
+    <div id="tags-container-other"></div>
 
     <div id="collapse-other" class="collapse">
         <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
@@ -321,7 +323,8 @@
 <div class="filter-end-line"></div>
 
 <div id="list-special-needs" class="form-group">
-    <h4 class="filter-header accordion-toggle collapsed" data-toggle="collapse" href="#collapse-special-needs">Special Needs</h4>
+    <h4 id="header-special-needs" class="filter-header accordion-toggle collapsed" data-toggle="collapse" isOpen="false" href="#collapse-special-needs" onclick="return loadTabs('special-needs')">Special Needs</h4>
+    <div id="tags-container-special-needs"></div>
 
     <div id="collapse-special-needs" class="collapse">
         @foreach (var item in specialNeeds)
@@ -400,6 +403,11 @@
         loadTabs('gender');
         loadTabs('services');
         loadTabs('timing');
+        loadTabs('cost');
+        loadTabs('pricing');
+        loadTabs('starting');
+        loadTabs('other');
+        loadTabs('special-needs');
     }
 
     function loadTabs(name) {
@@ -432,5 +440,10 @@
         $('#tags-container-gender').html('');
         $('#tags-container-services').html('');
         $('#tags-container-timing').html('');
+        $('#tags-container-cost').html('');
+        $('#tags-container-pricing').html('');
+        $('#tags-container-starting').html('');
+        $('#tags-container-other').html('');
+        $('#tags-container-special-needs').html('');
     }
 </script>

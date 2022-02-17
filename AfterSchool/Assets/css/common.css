@@ -773,9 +773,8 @@
     padding-bottom: 20px;
 }
 
-.contactUsBtn {
-    background-color: white;
-    border: 3px solid #00b492;
+.btn-contact-us {
+    background-color: white;    
     border-radius: 5px;
     padding: 13px 25px;
 }
@@ -1494,4 +1493,100 @@
 .filter-end-line {
     margin: 18px 0 10px -15px;
     border: solid 1px #f2f2f5;
+}
+
+.directory-search-no-result {
+    margin-top: 35px;
+    text-align: center;
+    font-size: 14px;
+    margin-bottom: 35px;
+    font-weight: bold;
+}
+
+.blur-bg {
+    background-color: White;
+    background-repeat: no-repeat;
+    height: 100%;
+    opacity: 0.5;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000000;
+}
+
+.display-flex {
+    display: flex;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.directory-filters {
+    display: none;
+    padding-right: 0;
+    padding-bottom: 120px;
+    padding-top: 10px;
+    background-color: #fff;
+    max-width: 300px;
+}
+
+.directory-sidebar-arrow {
+    font-size: 22px;
+    position: absolute;
+    right: -7px;
+    z-index: 9999;
+    cursor: pointer;
+}
+
+.directory-search-container {
+    background-color: #f8f8f8;
+}
+
+.directory-search-input {
+    border-radius: 5px;
+    padding-right: 32px;
+    padding-left: 10px;
+}
+
+.directory-search-magnyfier-icon {
+    top: -3px;
+    right: 0;
+    left: unset;
+}
+
+#search-result {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#ProgressBar {
+    z-index: 100001;
+    text-align: center;
+    display: none;
+}
+
+#notification-contact-us {
+    margin-top: 10px;
+    display: none;
+}
+
+#map-view {
+    flex: 0.5;
+    background: white;
+}
+
+.modal-isyp-intro {
+    position: fixed;
+    z-index: 1000001;
+}
+
+.modal-isyp-logo {
+    width: 200px;
+    margin-top: 40px;
+}
+
+.btn-isyp-getstarted {
+    width: 180px;
+    transition: none;
 }
