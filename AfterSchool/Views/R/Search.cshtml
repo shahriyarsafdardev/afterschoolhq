@@ -131,12 +131,8 @@
                 <input id="chk-map-view" name="show-map" isEnabled="true" checked="checked" value="1" type="checkbox" class="schedulerepeat-checkbox" onclick="return toggleMapView(this)" />
                 <label for="chk-map-view" class="margin-h-10 mobile-padding font-weight-bold">Show Map</label>
             </div>
-
             <div class="clearfix"></div>
-            @*<div class="btn-group col-lg-3 col-md-3">
-                    <button type="button" class="btn btn-default" style="border-bottom-left-radius: 5px; border-top-left-radius: 5px;">List</button>
-                    <button type="button" class="btn btn-default btn-generic" style="border-bottom-right-radius: 5px; border-top-right-radius: 5px;">Map</button>
-                </div>*@
+
             <div id="search-result" class="row"> </div>
             <div class="clearfix"></div>
 
@@ -170,7 +166,7 @@
     <% _.each(response, function(searchResult){ %>
 
     <style>
-        #dynamicLogo-<%=searchResult.AccountUid% > {
+        #dynamicLogo-<%=searchResult.AccountUid %> {
             background-image: url("<%= searchResult.ProfileHeaderImageUrl %>");
         }
     </style>

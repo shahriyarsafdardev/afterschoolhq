@@ -1590,3 +1590,75 @@
     width: 180px;
     transition: none;
 }
+
+#txtZipCode, input::-webkit-input-placeholder {
+    font-size: 10px;
+    line-height: 3;
+}
+
+.filter-body {
+    font-size: 12px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    text-align: left;
+    color: #4a4a4a;
+}
+
+.am-filter-checkbox input[type="checkbox"] + label::before {
+    margin: 0px 10px -2px 0px !important;
+}
+
+.accordion-toggle:after {
+    font-family: 'Glyphicons Halflings';
+    content: "\2212";
+    float: right;
+    color: grey;
+    margin-right: 15px;
+    font-weight: 100 !important;
+    font-size: 10px;
+    cursor: pointer;
+}
+
+.accordion-toggle.collapsed:after {
+    font-family: 'Glyphicons Halflings';
+    content: "\002b";
+    float: right;
+    color: grey;
+    margin-right: 15px;
+    font-weight: 100 !important;
+    font-size: 10px;
+    cursor: pointer;
+}
+
+.directory-badge {
+    font-size: 10px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    text-align: center;
+    color: #fff;
+    margin-right: 1px;
+}
+
+    .directory-badge::first-letter {
+        text-transform: capitalize;
+    }
+
+#txtZipCode {
+    height: 35px;
+    border-bottom-left-radius: 5px;
+    border-top-left-radius: 5px;
+    padding: 10px;
+    z-index: 0;
+}
+
+#divValidatePostalCode {
+    cursor: pointer;
+    border-bottom-right-radius: 5px;
+    border-top-right-radius: 5px;
+}

@@ -12,67 +12,6 @@
     var specialNeeds = AfterSchoolLibrary.Helpers.ProfileHelper.SpecialNeedsOfferings;
 }
 
-<style>
-    #txtZipCode, input::-webkit-input-placeholder {
-        font-size: 10px;
-        line-height: 3;
-    }
-
-    .filter-body {
-        font-size: 12px;
-        font-weight: normal;
-        font-stretch: normal;
-        font-style: normal;
-        line-height: normal;
-        letter-spacing: normal;
-        text-align: left;
-        color: #4a4a4a;
-    }
-
-    .am-filter-checkbox input[type="checkbox"] + label::before {
-        margin: 0px 10px -2px 0px !important;
-    }
-
-    .accordion-toggle:after {
-        font-family: 'Glyphicons Halflings';
-        
-        content: "\2212";
-        float: right;
-        color: grey;
-        margin-right: 15px;
-        font-weight: 100 !important;
-        font-size: 10px;
-        cursor: pointer;
-    }
-
-    .accordion-toggle.collapsed:after {
-        font-family: 'Glyphicons Halflings';
-        content: "\002b";
-        float: right;
-        color: grey;
-        margin-right: 15px;
-        font-weight: 100 !important;
-        font-size: 10px;
-        cursor: pointer;
-    }
-
-    .directory-badge {
-        font-size: 10px;
-        font-weight: normal;
-        font-stretch: normal;
-        font-style: normal;
-        line-height: normal;
-        letter-spacing: normal;
-        text-align: center;
-        color: #fff;
-        margin-right: 1px;
-    }
-
-        .directory-badge::first-letter {
-            text-transform: capitalize;
-        }
-</style>
-
 <div style="text-align: center; text-decoration: underline;">
     <a id="clear-filters" href="#" style="display: none;" onclick="return clearFilters();">Clear Filters</a>
     <div class="clearfix"></div>
@@ -81,8 +20,8 @@
 <div>
     <h4 class="filter-header">Find programs nearby</h4>
     <div class="input-group has-search" style="width: 250px;">
-        <input id="txtZipCode" type="text" class="form-control" name="zipcode" style="height: 35px; border-bottom-left-radius: 5px; border-top-left-radius: 5px; padding: 10px; z-index: 0;" placeholder="Enter your school or Zip Code" />
-        <div class="input-group-addon" style="cursor: pointer; border-bottom-right-radius: 5px; border-top-right-radius: 5px;" onclick="return validatePostalCodeAndSearch();">
+        <input id="txtZipCode" type="text" class="form-control" name="zipcode" placeholder="Enter your school or Zip Code" />
+        <div id="divValidatePostalCode" class="input-group-addon" onclick="return validatePostalCodeAndSearch();">
             <span class="input-group-text" style="font-size: 12px;">Update</span>
         </div>
     </div>    
