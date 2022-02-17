@@ -246,8 +246,8 @@
         var btnCheckEmail = $('#btn-check-email');
         var originalBtnText = btnCheckEmail.html();
 
-        if (btnCheckEmail.hasClass("newParentSignUp")) {            
-            showSignUpForm(email);            
+        if (btnCheckEmail.hasClass("newParentSignUp")) {
+            showSignUpForm(email);
             return;
         }
 
@@ -312,14 +312,14 @@
 
     function showSignUpForm(email) {
         // show sign up form
-            $('#account-registration').removeClass('hide');
-            $('#email-check-container').addClass('hide');
-            $('#@Model.Find(qvm => qvm.Question.QuestionTypeId == QuestionType.Email).Id').val(email);
-            hideLoader();
+        $('#account-registration').removeClass('hide');
+        $('#email-check-container').addClass('hide');
+        $('#@Model.Find(qvm => qvm.Question.QuestionTypeId == QuestionType.Email).Id').val(email);
+        hideLoader();
     }
     function showStudentRegistration() {
         $('#btn-check-email').html('Sign Up As Parent');
-        $('#btn-check-email').addClass("newParentSignUp");
+        $('#btn-check-emailzaddClass("newParentSignUp");
         $('#btn-student-signup').removeClass('hidden');
         $('#email-check').attr('disabled', 'disabled');
     }
