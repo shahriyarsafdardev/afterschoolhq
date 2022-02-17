@@ -1662,3 +1662,50 @@
     border-bottom-right-radius: 5px;
     border-top-right-radius: 5px;
 }
+
+#directory-panel {
+    overflow: hidden;
+    cursor: pointer;
+    margin-right: 0;
+    box-shadow: 0 5px 10px 0 rgba(0, 0, 0, 0.15);
+}
+
+.directory-search-panel-holder {
+    height: 410px;
+    margin-bottom: 10px;
+    width: 350px;
+}
+
+.panel-tabs {
+    min-height: 100px !important;
+    height: 150px;
+    padding: 5px 5px !important;
+    position: relative;
+}
+
+#directory-location-badge-holder {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background-color: #fff;
+    color: #333;
+}
+
+.directory-panel-age-and-grade {
+    position: absolute;
+    top: 10px;
+    left: 15px;
+    overflow: hidden;
+    height: 20px;
+}
+
+.directory-panel-profile-title {
+    min-height: 60px;
+    height: 60px;
+    display: block;
+}
+
+.directory-panel-account-name {
+    margin-top: 20px;
+    height: 75px;
+}
