@@ -1209,7 +1209,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.CostHigh = profile.CostHigh.HasValue ? profile.CostHigh : 0;
 
             if (profile.CostLow.IsEmpty() && profile.CostHigh.IsEmpty())
-                ViewBag.IsNewProfile = "1";
+                ViewBag.IsNewProfile = true;
 
             return profile;
         }

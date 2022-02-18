@@ -33,7 +33,7 @@
     var isFullScreen = (bool)ViewBag.IsFullScreen;
     var formAction = Url.Action("style", "account", new { isfullscreen = Request["isfullscreen"], returnurl = Request["returnurl"] });
     var exitText = "Back to My Profile &raquo;";
-    var isNewProfile = ((string)ViewBag.IsNewProfile) != null ? (string)ViewBag.IsNewProfile : "";
+    var isNewProfile = (bool)ViewBag.IsNewProfile;
     if (isFullScreen)
     {
         Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
@@ -227,7 +227,7 @@
                                     <div class="col-md-5 col-xs-12 padding-0">
                                         <div class="input-group">
                                             <span class="input-group-addon">$</span>
-                                            <input id="costlow" name="costlow" class="form-control" type="number" required="required" value="@(isNewProfile == "1" ? "" : costLow.ToString("0.00"))" onclick="this.select()" step=".01" onblur="checkLowHighValue()" style="height: 44px;">
+                                            <input id="costlow" name="costlow" class="form-control" type="number" required="required" value="@(isNewProfile ? "" : costLow.ToString("0.00"))" onclick="this.select()" step=".01" onblur="checkLowHighValue()" style="height: 44px;">
                                         </div>
                                     </div>
                                     <p class="col-md-2 col-xs-12 margin-v-10 desktop-text-center" style="font-size: 16px;">
@@ -236,7 +236,7 @@
                                     <div class="col-md-5 col-xs-12 padding-0">
                                         <div class="input-group">
                                             <span class="input-group-addon">$</span>
-                                            <input id="costhigh" name="costhigh" class="form-control" type="number" required="required" value="@(isNewProfile == "1" ? "" : costHigh.ToString("0.00"))" onclick="this.select()" step=".01" onblur="checkLowHighValue()" style="height: 44px;">
+                                            <input id="costhigh" name="costhigh" class="form-control" type="number" required="required" value="@(isNewProfile ? "" : costHigh.ToString("0.00"))" onclick="this.select()" step=".01" onblur="checkLowHighValue()" style="height: 44px;">
                                         </div>
                                     </div>
                                     <div class="col-lg-12 padding-0 text-muted margin-t-10" style="font-style:italic">If all of your programs are free enter 0 into both fields</div>
