@@ -765,10 +765,10 @@
             maxTags: 3
         });
         function checkLowHighValue() {
-            if ($("#costlow").val() != "" && $("#costhigh").val() != "") {
-                $("#costlow").val(parseFloat($("#costlow").val()).toFixed(2));
-                $("#costhigh").val(parseFloat($("#costhigh").val()).toFixed(2));
-                if (parseFloat($("#costlow").val()) > parseFloat($("#costhigh").val())) {
+            var costLow = $("#costlow").val();
+            var costHigh = $("#costhigh").val();
+            if (costLow != "" && costHigh != "") {
+                if (parseFloat(costLow) > parseFloat(costHigh)) {
                     Notifications.showBar({
                         title: 'Error',
                         message: 'Please make the low cost range value less than high cost.',
@@ -785,12 +785,14 @@
                     $('.register-continue').removeAttr('disabled');
                     return true;
                 }
+                $("#costlow").val(parseFloat(costLow).toFixed(2));
+                $("#costhigh").val(parseFloat(costHigh).toFixed(2));
             }
-            else if ($("#costlow").val() != "") {
-                $("#costlow").val(parseFloat($("#costlow").val()).toFixed(2));
+            else if (costLow != "") {
+                $("#costlow").val(parseFloat(costLow).toFixed(2));
             }
-            else if ($("#costhigh").val() != "") {
-                $("#costhigh").val(parseFloat($("#costhigh").val()).toFixed(2));
+            else if (costHigh != "") {
+                $("#costhigh").val(parseFloat(costHigh).toFixed(2));
             }
         }
 
