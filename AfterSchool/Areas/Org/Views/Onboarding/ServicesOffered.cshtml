@@ -11,9 +11,9 @@
     var specialneedsfferings = (List<AccountProperty>)ViewBag.SpecialNeedsOffering;
     var programsalldayduringworkweek = (List<AccountProperty>) ViewBag.ProgramsAllDayDuringWorkWeek;
     var YesNo = "";
-    if (programsalldayduringworkweek.IsNotEmpty())
+    if (programsalldayduringworkweek.IsNotEmpty() && programsalldayduringworkweek.Count() > 0)
     {
-       YesNo = programsalldayduringworkweek.FirstOrDefault().Value;
+        YesNo = programsalldayduringworkweek.FirstOrDefault().Value;
     }
  }
 
