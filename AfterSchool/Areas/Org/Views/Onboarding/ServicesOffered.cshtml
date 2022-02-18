@@ -10,10 +10,10 @@
     var pricingoptions = (List<AccountProperty>)ViewBag.PricingOption;
     var specialneedsfferings = (List<AccountProperty>)ViewBag.SpecialNeedsOffering;
     var programsalldayduringworkweek = (List<AccountProperty>) ViewBag.ProgramsAllDayDuringWorkWeek;
-    var YesNo = "";
+    var yesno = "";
     if (programsalldayduringworkweek.IsNotEmpty() && programsalldayduringworkweek.Count() > 0)
     {
-        YesNo = programsalldayduringworkweek.FirstOrDefault().Value;
+        yesno = programsalldayduringworkweek.FirstOrDefault().Value;
     }
  }
 
@@ -26,9 +26,9 @@
 
                     @{ Html.RenderPartial("~/Views/Shared/_Loaders.cshtml",
                                  new ViewDataDictionary() {
-                                                       { "count", 6 },
-                                                       { "activeDotNumber", 5 }
-         });
+                                 { "count", 6 },
+                                 { "activeDotNumber", 5 }
+                        });
                     }
 
                     <div class="col-md-12 onboarding-form-group">
@@ -228,11 +228,11 @@
                         <div class="clearfix"></div>
                         <div class="pull-left col-md-12" style="padding: 0;">
                             <div class="am-radio inline">
-                                <input type="radio" id="programsalldayduringworkweek-yes" name="programsalldayduringworkweek" class="form-control onboarding-input" value="1" @(YesNo == "1" ? "checked=\"checked\"" : "") />
+                                <input type="radio" id="programsalldayduringworkweek-yes" name="programsalldayduringworkweek" class="form-control onboarding-input" value="1" @(yesno == "1" ? "checked=\"checked\"" : "") />
                                 <label for="programsalldayduringworkweek-yes">YES</label>
                             </div>
                             <div class="am-radio inline">
-                                <input type="radio" id="programsalldayduringworkweek-no" name="programsalldayduringworkweek" class="form-control onboarding-input" value="0" @(YesNo == "0" ? "checked=\"checked\"" : "") />
+                                <input type="radio" id="programsalldayduringworkweek-no" name="programsalldayduringworkweek" class="form-control onboarding-input" value="0" @(yesno == "0" ? "checked=\"checked\"" : "") />
                                 <label for="programsalldayduringworkweek-no">NO</label>
                             </div>
                         </div>

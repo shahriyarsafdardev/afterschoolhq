@@ -475,7 +475,17 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
                 return RedirectToAction("Links");
 
+            ViewBag.ServiceOffered = profile.GetProperties(AccountPropertyType.ServiceOffered, msgs);
+            ViewBag.TimeOffered = profile.GetProperties(AccountPropertyType.TimeOffered, msgs);
+            ViewBag.PricingOption = profile.GetProperties(AccountPropertyType.PricingOption, msgs);
+            ViewBag.SpecialNeedsOffering = profile.GetProperties(AccountPropertyType.SpecialNeedsOffering, msgs);
+            ViewBag.TeachingMethods = profile.GetProperties(AccountPropertyType.TeachingMethods, msgs);
+            ViewBag.AcademicSubjects = profile.GetProperties(AccountPropertyType.AcademicSubjects, msgs);
+            ViewBag.Softskills = profile.GetProperties(AccountPropertyType.SoftSkills, msgs);
+            ViewBag.ProgramCategories = profile.GetProperties(AccountPropertyType.Classifications, msgs);
+            ViewBag.ProgramsAllDayDuringWorkWeek = profile.GetProperties(AccountPropertyType.ProgramsAllDayDuringWorkWeek, msgs);
             ViewBag.Messages = msgs;
+
             return View(account);
         }
 
