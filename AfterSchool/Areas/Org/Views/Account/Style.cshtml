@@ -22,10 +22,10 @@
     var pricingOptions = (List<AccountProperty>)ViewBag.PricingOptions;
     var specialNeedsOfferings = (List<AccountProperty>)ViewBag.SpecialNeedsOfferings;
     var programsalldayduringworkweek = (List<AccountProperty>)ViewBag.ProgramsAllDayDuringWorkWeek;
-    var YesNo = "";
+    var isProgramsAllDayDuringWorkWeek = "";
     if (programsalldayduringworkweek.IsNotEmpty() && programsalldayduringworkweek.Count() > 0)
     {
-        YesNo = programsalldayduringworkweek.FirstOrDefault().Value;
+        isProgramsAllDayDuringWorkWeek = programsalldayduringworkweek.FirstOrDefault().Value;
     }
     var isFullScreen = (bool)ViewBag.IsFullScreen;
     var formAction = Url.Action("style", "account", new { isfullscreen = Request["isfullscreen"], returnurl = Request["returnurl"] });
@@ -426,11 +426,11 @@
 
                                 <div class="col-md-9">
                                     <div class="am-radio inline">
-                                        <input type="radio" id="programsalldayduringworkweek-yes" name="programsalldayduringworkweek" class="form-control onboarding-input" value="1" @(YesNo == "1" ? "checked=\"checked\"" : "") />
+                                        <input type="radio" id="programsalldayduringworkweek-yes" name="programsalldayduringworkweek" class="form-control onboarding-input" value="1" @(isProgramsAllDayDuringWorkWeek == "1" ? "checked=\"checked\"" : "") />
                                         <label for="programsalldayduringworkweek-yes">YES</label>
                                     </div>
                                     <div class="am-radio inline">
-                                        <input type="radio" id="programsalldayduringworkweek-no" name="programsalldayduringworkweek" class="form-control onboarding-input" value="0" @(YesNo == "0" ? "checked=\"checked\"" : "") />
+                                        <input type="radio" id="programsalldayduringworkweek-no" name="programsalldayduringworkweek" class="form-control onboarding-input" value="0" @(isProgramsAllDayDuringWorkWeek == "0" ? "checked=\"checked\"" : "") />
                                         <label for="programsalldayduringworkweek-no">NO</label>
                                     </div>
                                 </div>
