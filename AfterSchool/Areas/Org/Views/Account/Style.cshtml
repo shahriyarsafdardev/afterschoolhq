@@ -13,6 +13,9 @@
     var headerImageUrl = (string)ViewBag.HeaderImageUrl;
     var grades = (List<GradeLevel>)ViewBag.Grades;
 
+    var costLow = (decimal)ViewBag.CostLow;
+    var costHigh = (decimal)ViewBag.CostHigh;
+
     var programCategories = (List<AccountProperty>)ViewBag.Classifications;
     var softSkills = (List<AccountProperty>)ViewBag.SoftSkills;
     var academicSubjects = (List<AccountProperty>)ViewBag.AcademicSubjects;
@@ -170,11 +173,11 @@
                             Html.RenderPartial(
                                 "~/Views/Shared/_RestrictBySelection.cshtml",
                                 null,
-                                new ViewDataDictionary() { 
-                                    { "minGradeLevelId", Model.GradeLevelStart }, 
-                                    { "MaxGradeLevelId", Model.GradeLevelEnd }, 
-                                    { "grades", grades }, { "ageStart", Model.AgeStart }, 
-                                    { "ageEnd", Model.AgeEnd }, 
+                                new ViewDataDictionary() {
+                                    { "minGradeLevelId", Model.GradeLevelStart },
+                                    { "MaxGradeLevelId", Model.GradeLevelEnd },
+                                    { "grades", grades }, { "ageStart", Model.AgeStart },
+                                    { "ageEnd", Model.AgeEnd },
                                     { "restrictbygrade", Model.RestrictByGrade() } }
                                 );
                         }
@@ -211,13 +214,39 @@
 
                         <div class="form-group">
                             <label class="col-md-3 control-label">
+                                Price range of activities offered
+                            </label>
+                            <div class="col-md-9">
+                                <div class="">
+                                    <div class="col-md-5 col-xs-12 padding-0">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">$</span>
+                                            <input id="costlow" name="costlow" class="form-control" type="number" required="required" value="@((string)ViewBag.IsNewProfile == "1" ? "" : costLow.ToString("0.00"))" onclick="this.select()" step=".01" onblur="checkLowHighValue()" style="height: 44px;">
+                                        </div>
+                                    </div>
+                                    <p class="col-md-2 col-xs-12 margin-v-10 desktop-text-center" style="font-size: 16px;">
+                                        To
+                                    </p>
+                                    <div class="col-md-5 col-xs-12 padding-0">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">$</span>
+                                            <input id="costhigh" name="costhigh" class="form-control" type="number" required="required" value="@((string)ViewBag.IsNewProfile == "1" ? "" : costHigh.ToString("0.00"))" onclick="this.select()" step=".01" onblur="checkLowHighValue()" style="height: 44px;">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12 padding-0 text-muted margin-t-10" style="font-style:italic">If all of your programs are free enter 0 into both fields</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">
                                 Providing services during COVID?
                             </label>
                             <div class="col-md-9">
                                 @{ Html.RenderPartial(
-                                             "~/Views/Shared/_SwitchButton.cshtml",
-                                             Model.IsOpenDuringCovid,
-                                             new ViewDataDictionary() { { "checkboxname", "opencovid" }, { "checkboxid", "opencovid" } });
+                                              "~/Views/Shared/_SwitchButton.cshtml",
+                                              Model.IsOpenDuringCovid,
+                                              new ViewDataDictionary() { { "checkboxname", "opencovid" }, { "checkboxid", "opencovid" } });
                                 }
                             </div>
                         </div>
@@ -228,9 +257,9 @@
                             </label>
                             <div class="col-md-9">
                                 @{ Html.RenderPartial(
-                                             "~/Views/Shared/_SwitchButton.cshtml",
-                                             Model.IsVirtualProgram,
-                                             new ViewDataDictionary() { { "checkboxname", "virtualprogram" }, { "checkboxid", "virtualprogram" } });
+                                              "~/Views/Shared/_SwitchButton.cshtml",
+                                              Model.IsVirtualProgram,
+                                              new ViewDataDictionary() { { "checkboxname", "virtualprogram" }, { "checkboxid", "virtualprogram" } });
                                 }
                             </div>
                         </div>
@@ -241,9 +270,9 @@
                             </label>
                             <div class="col-md-9">
                                 @{ Html.RenderPartial(
-                                             "~/Views/Shared/_SwitchButton.cshtml",
-                                             Model.IsELearningCenter,
-                                             new ViewDataDictionary() { { "checkboxname", "elearningcenter" }, { "checkboxid", "elearningcenter" } });
+                                              "~/Views/Shared/_SwitchButton.cshtml",
+                                              Model.IsELearningCenter,
+                                              new ViewDataDictionary() { { "checkboxname", "elearningcenter" }, { "checkboxid", "elearningcenter" } });
                                 }
                                 <p class="text-muted">You host/care for students to assist e-learning during the school day</p>
                             </div>
@@ -735,7 +764,35 @@
         $('#teachingmethods').tagsinput({
             maxTags: 3
         });
-
+        function checkLowHighValue() {
+            if ($("#costlow").val() != "" && $("#costhigh").val() != "") {
+                $("#costlow").val(parseFloat($("#costlow").val()).toFixed(2));
+                $("#costhigh").val(parseFloat($("#costhigh").val()).toFixed(2));
+                if (parseFloat($("#costlow").val()) > parseFloat($("#costhigh").val())) {
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: 'Please make the low cost range value less than high cost.',
+                        success: false
+                    });
+                    $('#costlow').attr('style', 'height: 44px; border: 1px solid red');
+                    $('#costhigh').attr('style', 'height: 44px; border: 1px solid red');
+                    $('.register-continue').attr('disabled', "disabled");
+                    return false;
+                }
+                else {
+                    $('#costlow').attr('style', 'height: 44px;');
+                    $('#costhigh').attr('style', 'height: 44px;');
+                    $('.register-continue').removeAttr('disabled');
+                    return true;
+                }
+            }
+            else if ($("#costlow").val() != "") {
+                $("#costlow").val(parseFloat($("#costlow").val()).toFixed(2));
+            }
+            else if ($("#costhigh").val() != "") {
+                $("#costhigh").val(parseFloat($("#costhigh").val()).toFixed(2));
+            }
+        }
 
         $('#txtVideoUrl').blur(function () {
             var url = $('#txtVideoUrl').val();
