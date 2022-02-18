@@ -2114,7 +2114,7 @@ values: None, MaleOnly, FemaleOnly
 [begin]
 type: Enum
 name: AccountPropertyType
-values: NotSet, LandingPageText, RegistrationThankYouEmail, ApplicationThankYouEmail, NoActivitiesText, FacebookAdPixel, Award, Certification, Photo, ServiceOffered, TimeOffered, PricingOption, Classifications, SoftSkills, AcademicSubjects, TeachingMethods, InterestThankYouEmail, SpecialNeedsOffering
+values: NotSet, LandingPageText, RegistrationThankYouEmail, ApplicationThankYouEmail, NoActivitiesText, FacebookAdPixel, Award, Certification, Photo, ServiceOffered, TimeOffered, PricingOption, Classifications, SoftSkills, AcademicSubjects, TeachingMethods, InterestThankYouEmail, SpecialNeedsOffering, ProgramsAllDayDuringWorkWeek
 [end]
 
 [begin]

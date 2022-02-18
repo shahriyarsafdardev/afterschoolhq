@@ -24,6 +24,12 @@
     var timesOffered = (List<AccountProperty>)ViewBag.TimesOffered;
     var pricingOptions = (List<AccountProperty>)ViewBag.PricingOptions;
     var specialNeedsOfferings = (List<AccountProperty>)ViewBag.SpecialNeedsOfferings;
+    var programsalldayduringworkweek = (List<AccountProperty>)ViewBag.ProgramsAllDayDuringWorkWeek;
+    var YesNo = "";
+    if (programsalldayduringworkweek.IsNotEmpty() && programsalldayduringworkweek.Count() > 0)
+    {
+        YesNo = programsalldayduringworkweek.FirstOrDefault().Value;
+    }
     var isFullScreen = (bool)ViewBag.IsFullScreen;
     var formAction = Url.Action("style", "account", new { isfullscreen = Request["isfullscreen"], returnurl = Request["returnurl"] });
     var exitText = "Back to My Profile &raquo;";
@@ -441,6 +447,21 @@
                                 <div class="col-md-9">
                                     <input type="text" name="teachingmethods" id="teachingmethods" class="form-control" data-role="tagsinput" value="@teachingMethods.Select(x => x.Value).ToStringList(",")" />
                                     <p class="text-small text-muted">ex: Project Based Learning, Team work, Games</p>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label"> Do Any Of Your Programs Run All Day During the Work Week?</label>
+
+                                <div class="col-md-9">
+                                    <div class="am-radio inline">
+                                        <input type="radio" id="programsalldayduringworkweek-yes" name="programsalldayduringworkweek" class="form-control onboarding-input" value="1" @(YesNo == "1" ? "checked=\"checked\"" : "") />
+                                        <label for="programsalldayduringworkweek-yes">YES</label>
+                                    </div>
+                                    <div class="am-radio inline">
+                                        <input type="radio" id="programsalldayduringworkweek-no" name="programsalldayduringworkweek" class="form-control onboarding-input" value="0" @(YesNo == "0" ? "checked=\"checked\"" : "") />
+                                        <label for="programsalldayduringworkweek-no">NO</label>
+                                    </div>
                                 </div>
                             </div>
 

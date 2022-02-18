@@ -9,6 +9,12 @@
     var timesoffered = (List<AccountProperty>)ViewBag.TimeOffered;
     var pricingoptions = (List<AccountProperty>)ViewBag.PricingOption;
     var specialneedsfferings = (List<AccountProperty>)ViewBag.SpecialNeedsOffering;
+    var programsalldayduringworkweek = (List<AccountProperty>) ViewBag.ProgramsAllDayDuringWorkWeek;
+    var yesno = "";
+    if (programsalldayduringworkweek.IsNotEmpty() && programsalldayduringworkweek.Count() > 0)
+    {
+        yesno = programsalldayduringworkweek.FirstOrDefault().Value;
+    }
  }
 
 <div class="row main-content main-content-welcome-pages">
@@ -19,10 +25,10 @@
                 <form class="form form-horizontal" method="post" action="@Url.Action("servicesoffered", "onboarding")">
 
                     @{ Html.RenderPartial("~/Views/Shared/_Loaders.cshtml",
-                               new ViewDataDictionary() {
-                                                       { "count", 6 },
-                                                       { "activeDotNumber", 5 }
-                               });
+                                 new ViewDataDictionary() {
+                                 { "count", 6 },
+                                 { "activeDotNumber", 5 }
+                        });
                     }
 
                     <div class="col-md-12 onboarding-form-group">
@@ -212,6 +218,23 @@
                             <label class="onboarding-lable">TEACHING METHODS (UP TO 3)</label>
                             <input type="text" name="teachingmethods" id="teachingmethods" class="form-control onboarding-input" data-role="tagsinput" value="@teachingmethods.Select(x => x.Value).ToStringList(",")" />
                             <p class="text-muted" style="padding: 5px 0; font-size: 14px;">ex: Project Based Learning, Team work, Games</p>
+                        </div>
+                    </div>
+
+                    <div class="clearfix"></div>
+                    <div class="col-md-12 onboarding-form-group">
+                        <label class="onboarding-lable"> DO ANY OF YOUR PROGRAMS RUN ALL DAY DURING THE WORK WEEK?</label>
+
+                        <div class="clearfix"></div>
+                        <div class="pull-left col-md-12" style="padding: 0;">
+                            <div class="am-radio inline">
+                                <input type="radio" id="programsalldayduringworkweek-yes" name="programsalldayduringworkweek" class="form-control onboarding-input" value="1" @(yesno == "1" ? "checked=\"checked\"" : "") />
+                                <label for="programsalldayduringworkweek-yes">YES</label>
+                            </div>
+                            <div class="am-radio inline">
+                                <input type="radio" id="programsalldayduringworkweek-no" name="programsalldayduringworkweek" class="form-control onboarding-input" value="0" @(yesno == "0" ? "checked=\"checked\"" : "") />
+                                <label for="programsalldayduringworkweek-no">NO</label>
+                            </div>
                         </div>
                     </div>
 

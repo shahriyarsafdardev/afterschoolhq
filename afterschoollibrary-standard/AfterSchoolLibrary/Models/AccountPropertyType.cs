@@ -17,5 +17,6 @@ public enum AccountPropertyType
 	AcademicSubjects,
 	TeachingMethods,
 	InterestThankYouEmail,
-	SpecialNeedsOffering
+	SpecialNeedsOffering,
+	ProgramsAllDayDuringWorkWeek
 }
