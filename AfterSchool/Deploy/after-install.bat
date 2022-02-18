@@ -32,7 +32,7 @@ if "%DEPLOYMENT_GROUP_NAME%"=="" (
 
 	mkdir !target!
 
-	%systemroot%\System32\robocopy %path% !target! /e
+	%systemroot%\System32\robocopy %path% !target! /e /xf "Microsoft.Data.SqlClient.SNI.x64.dll"
 
     echo %ERRORLEVEL%
 
