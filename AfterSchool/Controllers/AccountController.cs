@@ -1098,21 +1098,22 @@ namespace AfterSchool.Controllers
         {
             var form = FormService.GetAdministratorAccountForm(msgs);
             var personalContactGroup = form.GetQuestionGroups(msgs)
-                .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.Parent1Information);
+                .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
             var questions = personalContactGroup.GetAllQuestions(msgs);
             questions = questions.Where(question => question.QuestionDataTypeId.NotIn(FormService.QuestionsToNotIncludeInStudentRegistrationParentPanel())).ToList();
             questions.ForEach(question =>
             {
                 switch (question.QuestionDataTypeId)
                 {
-                    case QuestionDataType.Parent1FirstName:
-                    case QuestionDataType.Parent1LastName:
-                    case QuestionDataType.Parent1Email:
+                    case QuestionDataType.RegistrantFirstName:
+                    case QuestionDataType.RegistrantLastName:
+                    case QuestionDataType.RegistrantEmail:
                         question.IsRequired = true;
                         question.Text = "Parent's " + question.Text;
                         break;
                 }
             });
+            ViewBag.ParentQuestions = questions.Select(parentQuestion => new FormQuestionViewModel(parentQuestion)).ToList();
             return questions;
         }
         
@@ -1148,7 +1149,6 @@ namespace AfterSchool.Controllers
 
             var questions = StudentRegistrationViewBag(msgs);
             var parentQuestions = StudentRegistrationParentViewBag(msgs);
-            questions.AddRange(parentQuestions);
 
             ViewBag.RegistrationAccount = registrationAccount;
             ViewBag.ParticipationObject = participationObject;
@@ -1167,8 +1167,7 @@ namespace AfterSchool.Controllers
             var currentUser = SessionVariables.CurrentUser;
             var participationObject = GetParticipationObjectFromCart();
             var questions = StudentRegistrationViewBag(msgs);
-            var parentQuestions = StudentRegistrationParentViewBag(msgs);
-            questions.AddRange(parentQuestions);            
+            var parentQuestions = StudentRegistrationParentViewBag(msgs);            
 
             if (currentUser.IsEmpty())
                 ValidateStudentRegistrationPasswords(password: password1, confirmPassword: password2, msgs: msgs);
@@ -1179,28 +1178,28 @@ namespace AfterSchool.Controllers
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
             if (msgs.HasNoErrors())
             {
-                var firstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName);
-                var lastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName);
-                var email = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
-                var phone = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone);
-                var parentFirstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1FirstName);
-                var parentLastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1LastName);
-                var parentEmail = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1Email);
+                var firstName = qvms?.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName)?.Value?.Split(',')?[0];
+                var lastName = qvms?.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName)?.Value.Split(',')?[0];
+                var email = qvms?.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail)?.Value.Split(',')?[0];
+                var phone = qvms?.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone)?.Value;
+                var parentFirstName = qvms?.Last(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName)?.Value.Split(',')?[1];
+                var parentLastName = qvms?.Last(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName)?.Value.Split(',')?[1];
+                var parentEmail = qvms?.Last(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail)?.Value.Split(',')?[1];
                 var location = participationObject?.Location;
                 if (location.IsNotEmpty() && location.GetHostAccount(msgs)?.AccountTypeId != AccountType.School)
                     location = null;
 
-                ValidateEmailsForStudentRegistration(email: email.Value.Trim(), parentEmail: parentEmail.Value.Trim(), msgs);
+                ValidateEmailsForStudentRegistration(email: email, parentEmail: parentEmail, msgs);
                 if (msgs.HasNoErrors())
                 {
                     var questionAnswerModel = GetQuestionAnswerModel(qvms);
-                    var parentWebUser = WebUser.LoadByEmail(parentEmail.Value, msgs);
+                    var parentWebUser = WebUser.LoadByEmail(parentEmail, msgs);
                     var parentAccount = parentWebUser?.GetAccounts().FirstOrDefault();
                     var studentDetails = AccountService.ProcessStudentRegistration(
-                        firstName: firstName.Value,
-                        lastName: lastName.Value,
-                        email: email.Value.Trim(),
-                        phone: phone.Value.Trim(),
+                        firstName: firstName,
+                        lastName: lastName,
+                        email: email,
+                        phone: phone,
                         password: password1,
                         schoolLocationId: location?.ID.Value,  // probably should have a school location id
                         allowTextMessages: textnotifications.IfBlank("0").ToBoolean(),
@@ -1214,16 +1213,16 @@ namespace AfterSchool.Controllers
                         var studentAccount = studentDetails.Item1;
                         var studentUser = studentDetails.Item2;
                         var studentRegistrant = studentDetails.Item3;
-                        
+                        var questionAnswerParentModel = GetQuestionAnswerModel(qvms,true);
                         if (studentAccount.IsNotEmpty() && studentUser.IsNotEmpty() && studentRegistrant.IsNotEmpty() && parentAccount.IsEmpty())
                         {
                             var parentDetails = studentAccount.ProcessParentRegistration(
-                                firstName: parentFirstName.Value,
-                                lastName: parentLastName.Value,
-                                email: parentEmail.Value.Trim(),
+                                firstName: parentFirstName,
+                                lastName: parentLastName,
+                                email: parentEmail,
                                 browserUrl: participationObject?.GetBrowseUrl(true),
                                 allowTextMessages: textnotifications.IfBlank("").ToBoolean(),
-                                questionAnswerModel: questionAnswerModel,
+                                questionAnswerModel: questionAnswerParentModel,
                                 studentUser: studentUser,
                                 msgs: msgs);
 
@@ -1319,13 +1318,28 @@ namespace AfterSchool.Controllers
                 msgs.Add("Parent email cannot be the same as your student email address when creating a login account", MessageType.UserError);
         }
 
-        private List<KeyValuePair<FormQuestion, string>> GetQuestionAnswerModel(List<FormQuestionViewModel> qvms)
+        private List<KeyValuePair<FormQuestion, string>> GetQuestionAnswerModel(List<FormQuestionViewModel> qvms, bool isParent=false)
         {
             //prepare a model of question and answers that we can pass to service layer
             List<KeyValuePair<FormQuestion, string>> model = new List<KeyValuePair<FormQuestion, string>>();
             foreach (var qvm in qvms)
-                model.Add(new KeyValuePair<FormQuestion, string>(qvm.Question, qvm.Value.IfEmpty("").Trim()));
-
+            {
+                switch (qvm.Question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantFirstName:
+                    case QuestionDataType.RegistrantLastName:
+                    case QuestionDataType.RegistrantEmail:
+                        if (!isParent)
+                            model.Add(new KeyValuePair<FormQuestion, string>(qvm.Question, qvm.Value?.Split(',')?[0].Trim()));
+                        else
+                            model.Add(new KeyValuePair<FormQuestion, string>(qvm.Question, qvm.Value?.Split(',')?[1].Trim()));
+                        break;
+                    default:
+                        if(!isParent)
+                            model.Add(new KeyValuePair<FormQuestion, string>(qvm.Question, qvm.Value.IfEmpty("").Trim()));
+                    break;
+                }
+            }
             return model;
         }
 
@@ -1516,13 +1530,7 @@ namespace AfterSchool.Controllers
         private List<FormQuestion> RegisterViewBag(ParticipationObject participationObject, SystemMessages msgs)
         {
             var allQuestions = participationObject.Form.GetActiveQuestions(msgs).ToList();
-            var defaultquestions = FormQuestionService.GetEmergencyContactQuestions(msgs);
-            var defaultRequiredQuestions = defaultquestions
-                .Where(question => question.IsRequired &&
-                    question.FormQuestionGroupRegistrantTypeId == RegistrantType.Individual &&
-                    question.QuestionDataTypeId != QuestionDataType.NotSet)
-                .ToList();
-            
+
             var requiredQuestions = allQuestions
                 .Where(question => question.IsRequired &&
                     question.FormQuestionGroupRegistrantTypeId == RegistrantType.Individual &&
@@ -1537,15 +1545,6 @@ namespace AfterSchool.Controllers
                 )
                 .Distinct()
                 .ToList();
-
-            var defaultQuestionsWithAnswers = defaultRequiredQuestions.Where(question =>
-                    answers.FirstOrDefault(answer => answer.QuestionDataTypeId == question.QuestionDataTypeId).IsEmpty() ||
-                    answers.FirstOrDefault(answer => answer.QuestionDataTypeId == question.QuestionDataTypeId).Text.IsBlank()
-                )
-                .Distinct()
-                .ToList();
-
-            questions.AddRange(defaultQuestionsWithAnswers);
 
             questions.AddRange(allQuestions
                 .Where(question => !question.IsDeleted && question.QuestionDataTypeId == QuestionDataType.NotSet)

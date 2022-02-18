@@ -4788,7 +4788,7 @@ namespace AfterSchoolLibrary.Services
                         {
                             // add answers to student registrant record
                             questionAnswerModel.ForEach(qvm => {
-                                if (qvm.Key.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.Parent1Information)
+                                if (qvm.Key.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation)
                                 {
                                     parentRegistrant.AddOrUpdateAnswer(
                                         answerText: qvm.Value,

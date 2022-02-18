@@ -10,6 +10,7 @@
     var showStep1 = currentUser.IsEmpty() && savedEmail.IsBlank();
     var isDuringProfileSetup = currentUser.IsNotEmpty() || savedEmail.IsNotBlank();
     var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
+    var parentQuestions = (List<FormQuestionViewModel>)ViewBag.ParentQuestions;
 }
 
 @{
@@ -125,7 +126,7 @@
                                 <p>Your parent or guardian will confirm additional details required by schools and providers.</p>
                             </div>
 
-                            @foreach (var qvm in Model.Where(qvm => !qvm.Hide && qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.Parent1Information))
+                            @foreach (var qvm in parentQuestions)
                             {
                                 Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
                             }
