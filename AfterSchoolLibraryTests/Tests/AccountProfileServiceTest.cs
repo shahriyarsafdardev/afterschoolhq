@@ -29,5 +29,15 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.True(accountProfile.GetProperties(AccountPropertyType.ProgramsAllDayDuringWorkWeek, msgs, dc).Count == 1);
         }
+
+        [Fact]
+        public void UpdateProfileAdditionalInfoTest()
+        {
+            var accountProfile = AccountProfileFactory.Create(account, msgs, dc);
+
+            AccountProfileService.UpdateProfileAdditionalInfo(accountProfile, "", "", "", "", "10", "12", false , false, false, user, msgs, dc);
+
+            Assert.True(accountProfile.CostHigh == 10);
+        }
     }
 }
