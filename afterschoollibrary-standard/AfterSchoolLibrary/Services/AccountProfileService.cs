@@ -277,7 +277,7 @@ namespace AfterSchoolLibrary.Services
             );
         }             
         
-        public static void UpdateProfileLinks(this AccountProfile profile, string website, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void UpdateProfileLinks(this AccountProfile profile, string website, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string registrationurl, string buttontext, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             profile.Website = website.MaxChars(400);
             profile.Twitter = twitter;
@@ -286,6 +286,8 @@ namespace AfterSchoolLibrary.Services
             profile.LinkedIn = linkedin;
             profile.YouTube = youtube;
             profile.CalendarBookingLink = calendar;
+            profile.RegistrationUrl = registrationurl;
+            profile.ButtonText = buttontext;
             profile.LastModifiedBy = loggedInUser.ID.Value;
             profile.LastModifiedDate = DateTime.UtcNow;
             msgs.AddRange(profile.Save(dc));

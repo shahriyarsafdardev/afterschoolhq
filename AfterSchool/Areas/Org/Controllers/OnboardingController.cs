@@ -489,7 +489,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult Links(string website, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar)
+        public ActionResult Links(string website, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string registrationurl, string buttontext)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -531,6 +531,8 @@ namespace AfterSchool.Areas.Org.Controllers
                             linkedin: linkedin,
                             youtube: youtube,
                             calendar: calendar,
+                            registrationurl: registrationurl,
+                            buttontext: buttontext,
                             loggedInUser: currentUser,
                             msgs: amsgs,
                             dc: adc);

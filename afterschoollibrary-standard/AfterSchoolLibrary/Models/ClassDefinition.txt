@@ -448,6 +448,8 @@ property: IsOpenDuringCovid, bool, Bit
 property: IsELearningCenter, bool, Bit
 property: IsAHQApproved, bool, Bit
 property: IsVirtualProgram, bool, Bit
+property: RegistrationUrl, string, NVarChar "200"
+property: ButtonText, string, NVarChar "100"
 property: VideoUrl, string, NVarChar "200"
 loadmethod: AccountId
 join: Account.ID, AccountId, InnerJoin

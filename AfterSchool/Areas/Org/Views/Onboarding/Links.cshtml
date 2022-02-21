@@ -22,14 +22,52 @@
                 <form class="form form-horizontal" method="post" action="@Url.Action("links", "onboarding")">
 
                     @{ Html.RenderPartial("~/Views/Shared/_Loaders.cshtml",
-                             new ViewDataDictionary() {
+                                new ViewDataDictionary() {
                                { "count", 6 },
                                { "activeDotNumber", 6 }
-                             });
+});
                     }
 
                     <div class="col-md-12 onboarding-form-group">
-                        <h1 class="text-center register-thankyou-2">Enter links.</h1>
+                        <h1 class="text-center register-thankyou-2">Get connected with parents.</h1>
+                    </div>
+
+                    <div class="col-md-12 onboarding-form-group">
+                        <label class="onboarding-lable"> I AM USING AFTERSCHOOL HQ TO COLLECT REGISTRATIONS</label>
+                        <div class="text-muted margin-b-10" style="font-style:italic">To give parents the best experience we recommend using Afterschool HQ to register</div>
+                        <div class="clearfix"></div>
+                        <div class="pull-left col-md-12" style="padding: 0;">
+                            <div class="am-radio inline">
+                                <input type="radio" id="collectregistration-yes" name="collectregistration" class="form-control onboarding-input" value="1" checked onchange="valueChanged()" />
+                                <label for="collectregistration-yes">YES</label>
+                            </div>
+                            <div class="am-radio inline">
+                                <input type="radio" id="collectregistration-no" name="collectregistration" class="form-control onboarding-input no" value="0" onchange="valueChanged()" />
+                                <label for="collectregistration-no">NO</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+
+                    <div class="col-md-12 onboarding-form-group hide" id="regUrlDiv">
+                        <label class="onboarding-lable">REGISTRATION OR LEARN MORE URL</label>
+                        <input type="text" class="form-control onboarding-input" name="registrationurl" id="registrationurl" value="" placeholder="https://your-website.com/register" style="height: 44px;" />
+                    </div>
+                    <div class="clearfix"></div>
+
+                    <div class="col-md-12 onboarding-form-group hide" id="btnTxtDiv">
+                        <label class="onboarding-lable">BUTTON TEXT</label>
+                        <div class="clearfix"></div>
+                        <div class="pull-left col-md-12" style="padding: 0;">
+                            <div class="am-radio inline">
+                                <input type="radio" id="buttontext-register" name="buttontext" class="form-control onboarding-input" value="register" />
+                                <label for="buttontext-register">Register</label>
+                            </div>
+                            <div class="am-radio inline">
+                                <input type="radio" id="buttontext-learnmore" name="buttontext" class="form-control onboarding-input" value="learnmore" />
+                                <label for="buttontext-learnmore">Learn More</label>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="clearfix"></div>
@@ -102,3 +140,18 @@
         </div>
     </div>
 </div>
+
+@section scripts{
+    <script>
+        function valueChanged() {
+            if ($('.no').is(":checked")) {
+                $("#regUrlDiv").removeClass('hide');
+                $("#btnTxtDiv").removeClass('hide');
+            }
+            else {
+                $("#regUrlDiv").addClass('hide');
+                $("#btnTxtDiv").addClass('hide');
+            }
+        }
+    </script>
+}
