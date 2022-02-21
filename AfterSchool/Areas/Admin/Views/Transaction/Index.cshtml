@@ -157,6 +157,7 @@
                             <th class="text-center">Payout Amount</th>
                             <th class="text-center">Status</th>
                             <th class="text-center">Type</th>
+                            <th class="text-center">Stripe ID</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -205,7 +206,8 @@
                                                 @transaction.GetStripeFee().ToCurrency()
                                             </td>
                                             <td class="text-center">
-                                                @transaction.GetBillerPayout().ToCurrency()
+                                                @* BILLER PAYOUT AMOUNT NEED TO REVIEW EXISTING METHODS *@
+                                                @((transaction.Amount.Value - transaction.GetFees()).ToCurrency())
                                             </td>
                                             <td class="text-center">
                                                 @if (transaction.HasRefunds())
@@ -262,6 +264,9 @@
                                     }
                                     <td class="text-center">
                                         @transaction.PaymentTypeId.ToString().SplitByUpperCase()
+                                    </td>
+                                    <td>
+                                        @transaction.StripeChargeOrRefundId
                                     </td>
                                     <td>
                                         <div class="btn-group">
