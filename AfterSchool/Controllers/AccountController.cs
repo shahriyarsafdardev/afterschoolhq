@@ -7,6 +7,7 @@ using System.Web.Mvc;
 using AfterSchool.Helpers;
 using AfterSchool.Models;
 using AfterSchoolLibrary.FeatureFlag;
+using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
@@ -1243,6 +1244,10 @@ namespace AfterSchool.Controllers
                         // in case of existing parent, we need to set session for parent account data
                         else
                         {
+                            if (msgs.HasNoErrors())
+                                studentRegistrant.AddUserWithAccess(user: parentWebUser,loggedInUser: studentUser, msgs: msgs);
+                            //if (msgs.HasNoErrors())
+                            //    msgs.AddRange(EmailHelper.SendParentAccountInvitedEmail(parentWebUser.FirstName, studentUser.FirstName, parentWebUser.GetInviteUrl(studentAccount), $"{studentUser.FirstName} has created an account on AfterSchool HQ to register for {participationObject?.GetBrowseUrl(true)}.", parentWebUser.Email));
                             SessionVariables.CurrentUser = parentWebUser;
                             SessionVariables.CurrentAccount = parentAccount;
                             SessionVariables.AccountUserType = parentWebUser.GetUserType(parentAccount, msgs);
@@ -2534,8 +2539,9 @@ namespace AfterSchool.Controllers
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
                 var files = GetFilesModel();
                 var questionAnswerModel = GetQuestionAnswerModel(qvms);
+                var sendConfrimationEmail = true;
                 if (SessionVariables.ParentAccount.IsEmpty())
-                {
+                    sendConfrimationEmail = false;
                     var registrantDetails = AccountService.ProcessRegisterStudent(ownerAccount: participationObject.OwnerAccount,
                     registrant: SessionVariables.CurrentRegistrant,
                     questionAnswerModel: questionAnswerModel,
@@ -2570,15 +2576,11 @@ namespace AfterSchool.Controllers
                                     Registration = registration,
                                     MasterRegistrant = SessionVariables.CurrentRegistrant
                                 },
-                                sendConfirmationEmail: true,
+                                sendConfirmationEmail: sendConfrimationEmail,
                                 loggedInUser: SessionVariables.CurrentUser,
                                 msgs: msgs);
                         }
                     }
-                }
-                else
-                    registration = Registration.LoadByAccountId(participationObject.OwnerAccount.ID.Value, msgs).FirstOrDefault();
-
             }
 
             if (msgs.HasNoErrors())
