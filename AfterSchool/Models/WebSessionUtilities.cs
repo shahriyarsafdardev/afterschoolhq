@@ -91,7 +91,7 @@ namespace AfterSchool.Models
             //..actor	action		    Object		            ObjectType	        IndirectObjectId
             //..Bharat  Navigated to    FIRST SAMUEL CHURCH(W)  DirectoryAccount   ISYP
 
-            string actorName = (actor.IsNotEmpty() ? actor.FullName : "Someone");
+            string actorName = (actor.IsNotEmpty() ? actor.DisplayName : "Someone");
 
             var actionStringDict = AfterSchoolLibrary.Helpers.WebSessionHelper.GetActionString(objectType, actorName, actionType, objectText, indirectObjectType, indirectObjectText);
 
