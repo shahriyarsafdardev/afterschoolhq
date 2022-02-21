@@ -161,8 +161,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             HandleTempMessages(msgs);
 
-            if (profile.CostLow.IsEmpty() && profile.CostHigh.IsEmpty())
-                ViewBag.IsNewProfile = true;
+            ViewBag.IsNewProfile = profile.CostLow.IsEmpty() && profile.CostHigh.IsEmpty();
 
             ViewBag.Grades = grades;
             ViewBag.Messages = msgs;
