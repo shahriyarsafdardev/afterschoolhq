@@ -24,6 +24,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "after-school-hq.Tests", "af
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AfterSchoolLibrary.Tests", "AfterSchoolLibrary.Tests\AfterSchoolLibrary.Tests.csproj", "{4A60A832-A5B4-4CBB-9E2B-2ED2B3676EA1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Emmersion.InfluxDB", "..\Emmersion.InfluxDB\Emmersion.InfluxDB\Emmersion.InfluxDB.csproj", "{DF50E2FA-2751-42E2-9593-0AEFDBB7648A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -54,6 +56,10 @@ Global
 		{4A60A832-A5B4-4CBB-9E2B-2ED2B3676EA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4A60A832-A5B4-4CBB-9E2B-2ED2B3676EA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4A60A832-A5B4-4CBB-9E2B-2ED2B3676EA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF50E2FA-2751-42E2-9593-0AEFDBB7648A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF50E2FA-2751-42E2-9593-0AEFDBB7648A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF50E2FA-2751-42E2-9593-0AEFDBB7648A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF50E2FA-2751-42E2-9593-0AEFDBB7648A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
