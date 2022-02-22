@@ -516,7 +516,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
 
         [HttpPost]
-        public ActionResult Links(string website, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string registrationurl, string buttontext)
+        public ActionResult Links(string website, string twitter, string facebook, string instagram, string linkedin, string youtube,
+            string calendar, string registrationurl, string buttontext, string collectregistration)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -525,6 +526,11 @@ namespace AfterSchool.Areas.Org.Controllers
 
             HandleTempMessages(msgs);
 
+            if (collectregistration == "1")
+            {
+                registrationurl = "";
+                buttontext = "";
+            }
 
             if (registrationurl.IsNotEmpty() && !registrationurl.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
                 msgs.Add("Please enter a valid registration url address", MessageType.UserError);

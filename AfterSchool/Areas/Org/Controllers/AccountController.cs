@@ -1220,11 +1220,15 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline, string primaryColor, string registrationurl, string buttontext, string website, string mingrade, string maxgrade,
-            string agestart, string ageend, string restrictbygrade, string costlow, string costhigh, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string genderrestriction,
-            string programCategories, string softskills, string academicsubjects, string teachingmethods, string programsalldayduringworkweek, string profileemail, string profilephone,
-            string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string state, string postalcode, string county, string country, string placeid, decimal latitude, decimal longitude,
-            string opencovid, string elearningcenter, string virtualprogram, string ahqapproved, string videoUrl, IEnumerable<HttpPostedFileBase> photos)
+        public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline,
+            string primaryColor, string collectregistration, string registrationurl, string buttontext, string website, string mingrade,
+            string maxgrade, string agestart, string ageend, string restrictbygrade, string costlow, string costhigh, string twitter,
+            string facebook, string instagram, string linkedin, string youtube, string calendar, string genderrestriction,
+            string programCategories, string softskills, string academicsubjects, string teachingmethods,
+            string programsalldayduringworkweek, string profileemail, string profilephone, string locationname, string streetnumber,
+            string streetname, string address2, string neighborhood, string city, string state, string postalcode, string county,
+            string country, string placeid, decimal latitude, decimal longitude, string opencovid, string elearningcenter,
+            string virtualprogram, string ahqapproved, string videoUrl, IEnumerable<HttpPostedFileBase> photos)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -1246,6 +1250,12 @@ namespace AfterSchool.Areas.Org.Controllers
                     !Request.Files["headerimage"].FileName.ToLower().Contains(allowedFiles) ||
                     Request.Files["headerimage"].ContentLength > AfterSchoolLibrary.Helpers.Utilities.ImageUploadMaxBytes)
                     msgs.Add("Please upload a valid jpg or png file", MessageType.UserError);
+            }
+
+            if (collectregistration == "1")
+            {
+                registrationurl = "";
+                buttontext = "";
             }
 
             if (website.IsNotEmpty() && !website.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
