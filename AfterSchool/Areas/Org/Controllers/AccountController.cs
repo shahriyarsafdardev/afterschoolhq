@@ -1205,6 +1205,8 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.ProgramsAllDayDuringWorkWeek = profile.GetProperties(AccountPropertyType.ProgramsAllDayDuringWorkWeek, msgs);
             ViewBag.IsFullScreen = GetIsFullScreen();
             ViewBag.Messages = msgs;
+            ViewBag.CostLow = profile.CostLow.HasValue ? profile.CostLow.Value.ToString("0.00") : "";
+            ViewBag.CostHigh = profile.CostHigh.HasValue ? profile.CostHigh.Value.ToString("0.00") : "";
 
             return profile;
         }
@@ -1218,7 +1220,7 @@ namespace AfterSchool.Areas.Org.Controllers
         [ValidateInput(false)]
         [HttpPost]
         public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline, string primaryColor, string website, string mingrade, string maxgrade,
-            string agestart, string ageend, string restrictbygrade, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string genderrestriction,
+            string agestart, string ageend, string restrictbygrade, string costlow, string costhigh, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string genderrestriction,
             string programCategories, string softskills, string academicsubjects, string teachingmethods, string programsalldayduringworkweek, string profileemail, string profilephone,
             string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string state, string postalcode, string county, string country, string placeid, decimal latitude, decimal longitude,
             string opencovid, string elearningcenter, string virtualprogram, string ahqapproved, string videoUrl, IEnumerable<HttpPostedFileBase> photos)
@@ -1343,6 +1345,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     maxgrade,
                     agestart,
                     ageend,
+                    costlow,
+                    costhigh,
                     twitter,
                     facebook,
                     instagram,

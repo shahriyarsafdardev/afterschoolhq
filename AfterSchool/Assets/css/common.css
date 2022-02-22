@@ -774,7 +774,7 @@
 }
 
 .btn-contact-us {
-    background-color: white;    
+    background-color: white;
     border-radius: 5px;
     padding: 13px 25px;
 }
@@ -1489,6 +1489,10 @@
     background-color: none !important;
     border: 3px solid white !important;
     background: transparent !important
+}
+
+.padding-0{
+    padding: 0 !important
 }
 
 .filter-end-line {
