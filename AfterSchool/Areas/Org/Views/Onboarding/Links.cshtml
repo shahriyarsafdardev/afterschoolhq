@@ -41,33 +41,33 @@
                             <div class="clearfix"></div>
                             <div class="pull-left col-md-12" style="padding: 0;">
                                 <div class="am-radio inline">
-                                    <input type="radio" id="collectregistration-yes" name="collectregistration" class="form-control onboarding-input" value="1" checked onchange="valueChanged()" />
+                                    <input type="radio" id="collectregistration-yes" name="collectregistration" class="form-control onboarding-input" value="1" checked @(profile.RegistrationUrl.IsNotEmpty() ? "" : "checked") onchange="valueChanged()" />
                                     <label for="collectregistration-yes">YES</label>
                                 </div>
                                 <div class="am-radio inline">
-                                    <input type="radio" id="collectregistration-no" name="collectregistration" class="form-control onboarding-input no" value="0" onchange="valueChanged()" />
+                                    <input type="radio" id="collectregistration-no" name="collectregistration" class="form-control onboarding-input no" value="0" @(profile.RegistrationUrl.IsNotEmpty() ? "checked" : "") onchange="valueChanged()" />
                                     <label for="collectregistration-no">NO</label>
                                 </div>
                             </div>
                         </div>
                         <div class="clearfix"></div>
 
-                        <div class="col-md-12 onboarding-form-group hide" id="regUrlDiv">
-                            <label class="onboarding-lable">REGISTRATION OR LEARN MORE URL</label>
-                            <input type="text" class="form-control onboarding-input" name="registrationurl" id="registrationurl" value="" placeholder="https://your-website.com/register" title="This link will be displayed in a button on your Provider Profile for parents to access." style="height: 44px;" onblur="makeRadioRequired()" />
+                        <div class="col-md-12 onboarding-form-group @(profile.RegistrationUrl.IsNotEmpty() ? "": "hide")" id="regUrlDiv">
+                            <label class="onboarding-lable">REGISTRATION OR LEARN MORE URL <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="This link will be displayed in a button on your Provider Profile for parents to access." data-placement="top" style="font-size: 14px; color: #777;"></i></label>
+                            <input type="text" class="form-control onboarding-input" name="registrationurl" id="registrationurl" value="@profile.RegistrationUrl" placeholder="https://your-website.com/register" title="This link will be displayed in a button on your Provider Profile for parents to access." style="height: 44px;" onblur="makeRadioRequired()" />
                         </div>
                         <div class="clearfix"></div>
 
-                        <div class="col-md-12 onboarding-form-group hide" id="btnTxtDiv">
+                        <div class="col-md-12 onboarding-form-group @(profile.ButtonText.IsNotEmpty() ? "": "hide")" id="btnTxtDiv">
                             <label class="onboarding-lable">BUTTON TEXT</label>
                             <div class="clearfix"></div>
                             <div class="pull-left col-md-12" style="padding: 0;">
                                 <div class="am-radio inline">
-                                    <input type="radio" id="buttontext-register" name="buttontext" class="custom-radio-btn-required form-control onboarding-input" value="register" />
+                                    <input type="radio" id="buttontext-register" name="buttontext" class="custom-radio-btn-required form-control onboarding-input" value="register" @(profile.ButtonText == "register" ? "checked" : "") @(profile.ButtonText.IsNotEmpty() ? "required" : "") />
                                     <label for="buttontext-register">Register</label>
                                 </div>
                                 <div class="am-radio inline">
-                                    <input type="radio" id="buttontext-learnmore" name="buttontext" class="custom-radio-btn-required form-control onboarding-input" value="learnmore" />
+                                    <input type="radio" id="buttontext-learnmore" name="buttontext" class="custom-radio-btn-required form-control onboarding-input" value="learnmore" @(profile.ButtonText == "learnmore" ? "checked" : "")  />
                                     <label for="buttontext-learnmore">Learn More</label>
                                 </div>
                             </div>
