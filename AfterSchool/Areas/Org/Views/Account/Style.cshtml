@@ -21,6 +21,12 @@
     var timesOffered = (List<AccountProperty>)ViewBag.TimesOffered;
     var pricingOptions = (List<AccountProperty>)ViewBag.PricingOptions;
     var specialNeedsOfferings = (List<AccountProperty>)ViewBag.SpecialNeedsOfferings;
+    var programsalldayduringworkweek = (List<AccountProperty>)ViewBag.ProgramsAllDayDuringWorkWeek;
+    var isProgramsAllDayDuringWorkWeek = false;
+    if (programsalldayduringworkweek.IsNotEmpty() && programsalldayduringworkweek.Count() > 0)
+    {
+        isProgramsAllDayDuringWorkWeek = programsalldayduringworkweek.FirstOrDefault().Value == "1";
+    }
     var isFullScreen = (bool)ViewBag.IsFullScreen;
     var formAction = Url.Action("style", "account", new { isfullscreen = Request["isfullscreen"], returnurl = Request["returnurl"] });
     var exitText = "Back to My Profile &raquo;";
@@ -165,96 +171,97 @@
                         <div class="panel-heading text-center-sm">
                             Additional Details
                         </div>
+                        <div class="panel-body mobile-padding-zero">
 
-                        @{
-                            Html.RenderPartial(
-                                "~/Views/Shared/_RestrictBySelection.cshtml",
-                                null,
-                                new ViewDataDictionary() { 
-                                    { "minGradeLevelId", Model.GradeLevelStart }, 
-                                    { "MaxGradeLevelId", Model.GradeLevelEnd }, 
-                                    { "grades", grades }, { "ageStart", Model.AgeStart }, 
-                                    { "ageEnd", Model.AgeEnd }, 
-                                    { "restrictbygrade", Model.RestrictByGrade() } }
-                                );
-                        }
+                            @{
+                                Html.RenderPartial(
+                                    "~/Views/Shared/_RestrictBySelection.cshtml",
+                                    null,
+                                    new ViewDataDictionary() {
+                                        { "minGradeLevelId", Model.GradeLevelStart },
+                                        { "MaxGradeLevelId", Model.GradeLevelEnd },
+                                        { "grades", grades }, { "ageStart", Model.AgeStart },
+                                        { "ageEnd", Model.AgeEnd },
+                                        { "restrictbygrade", Model.RestrictByGrade() } }
+                                    );
+                            }
 
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">My program is designed for</label>
-                            <div class="col-md-9">
-                                <div class="am-radio">
-                                    <input type="radio"
-                                           name="genderrestriction"
-                                           id="genderrestriction-@((int)GenderRestrictionType.None)"
-                                           value="@((int)GenderRestrictionType.None)"
-                                           @(Model.GenderRestriction == GenderRestrictionType.None ? "checked=\"checked\"" : "") />
-                                    <label for="genderrestriction-@((int)GenderRestrictionType.None)">All Genders</label>
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">My program is designed for</label>
+                                <div class="col-md-9">
+                                    <div class="am-radio">
+                                        <input type="radio"
+                                               name="genderrestriction"
+                                               id="genderrestriction-@((int)GenderRestrictionType.None)"
+                                               value="@((int)GenderRestrictionType.None)"
+                                               @(Model.GenderRestriction == GenderRestrictionType.None ? "checked=\"checked\"" : "") />
+                                        <label for="genderrestriction-@((int)GenderRestrictionType.None)">All Genders</label>
+                                    </div>
+                                    <div class="am-radio">
+                                        <input type="radio"
+                                               name="genderrestriction"
+                                               id="genderrestriction-@((int)GenderRestrictionType.MaleOnly)"
+                                               value="@((int)GenderRestrictionType.MaleOnly)"
+                                               @(Model.GenderRestriction == GenderRestrictionType.MaleOnly ? "checked=\"checked\"" : "") />
+                                        <label for="genderrestriction-@((int)GenderRestrictionType.MaleOnly)">Boys</label>
+                                    </div>
+                                    <div class="am-radio">
+                                        <input type="radio"
+                                               name="genderrestriction"
+                                               id="genderrestriction-@((int)GenderRestrictionType.FemaleOnly)"
+                                               value="@((int)GenderRestrictionType.FemaleOnly)"
+                                               @(Model.GenderRestriction == GenderRestrictionType.FemaleOnly ? "checked=\"checked\"" : "") />
+                                        <label for="genderrestriction-@((int)GenderRestrictionType.FemaleOnly)">Girls</label>
+                                    </div>
                                 </div>
-                                <div class="am-radio">
-                                    <input type="radio"
-                                           name="genderrestriction"
-                                           id="genderrestriction-@((int)GenderRestrictionType.MaleOnly)"
-                                           value="@((int)GenderRestrictionType.MaleOnly)"
-                                           @(Model.GenderRestriction == GenderRestrictionType.MaleOnly ? "checked=\"checked\"" : "") />
-                                    <label for="genderrestriction-@((int)GenderRestrictionType.MaleOnly)">Boys</label>
-                                </div>
-                                <div class="am-radio">
-                                    <input type="radio"
-                                           name="genderrestriction"
-                                           id="genderrestriction-@((int)GenderRestrictionType.FemaleOnly)"
-                                           value="@((int)GenderRestrictionType.FemaleOnly)"
-                                           @(Model.GenderRestriction == GenderRestrictionType.FemaleOnly ? "checked=\"checked\"" : "") />
-                                    <label for="genderrestriction-@((int)GenderRestrictionType.FemaleOnly)">Girls</label>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    Providing services during COVID?
+                                </label>
+                                <div class="col-md-9">
+                                    @{ Html.RenderPartial(
+                                           "~/Views/Shared/_SwitchButton.cshtml",
+                                           Model.IsOpenDuringCovid,
+                                           new ViewDataDictionary() { { "checkboxname", "opencovid" }, { "checkboxid", "opencovid" } });
+                                    }
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">
-                                Providing services during COVID?
-                            </label>
-                            <div class="col-md-9">
-                                @{ Html.RenderPartial(
-                                             "~/Views/Shared/_SwitchButton.cshtml",
-                                             Model.IsOpenDuringCovid,
-                                             new ViewDataDictionary() { { "checkboxname", "opencovid" }, { "checkboxid", "opencovid" } });
-                                }
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    Are you offering virtual programs?
+                                </label>
+                                <div class="col-md-9">
+                                    @{ Html.RenderPartial(
+                                           "~/Views/Shared/_SwitchButton.cshtml",
+                                           Model.IsVirtualProgram,
+                                           new ViewDataDictionary() { { "checkboxname", "virtualprogram" }, { "checkboxid", "virtualprogram" } });
+                                    }
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">
-                                Are you offering virtual programs?
-                            </label>
-                            <div class="col-md-9">
-                                @{ Html.RenderPartial(
-                                             "~/Views/Shared/_SwitchButton.cshtml",
-                                             Model.IsVirtualProgram,
-                                             new ViewDataDictionary() { { "checkboxname", "virtualprogram" }, { "checkboxid", "virtualprogram" } });
-                                }
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    Are you an E-Learning Center?
+                                </label>
+                                <div class="col-md-9">
+                                    @{ Html.RenderPartial(
+                                           "~/Views/Shared/_SwitchButton.cshtml",
+                                           Model.IsELearningCenter,
+                                           new ViewDataDictionary() { { "checkboxname", "elearningcenter" }, { "checkboxid", "elearningcenter" } });
+                                    }
+                                    <p class="text-muted">You host/care for students to assist e-learning during the school day</p>
+                                </div>
                             </div>
+
+                            @if (!isFullScreen)
+                            {
+                                @SubmitButtons()
+                            }
+
                         </div>
-
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">
-                                Are you an E-Learning Center?
-                            </label>
-                            <div class="col-md-9">
-                                @{ Html.RenderPartial(
-                                             "~/Views/Shared/_SwitchButton.cshtml",
-                                             Model.IsELearningCenter,
-                                             new ViewDataDictionary() { { "checkboxname", "elearningcenter" }, { "checkboxid", "elearningcenter" } });
-                                }
-                                <p class="text-muted">You host/care for students to assist e-learning during the school day</p>
-                            </div>
-                        </div>
-
-                        @if (!isFullScreen)
-                        {
-                            @SubmitButtons()
-                        }
-
-                    </div>
                     </div>
 
                     <!-- Photos -->
@@ -412,6 +419,20 @@
                                 <div class="col-md-9">
                                     <input type="text" name="teachingmethods" id="teachingmethods" class="form-control" data-role="tagsinput" value="@teachingMethods.Select(x => x.Value).ToStringList(",")" />
                                     <p class="text-small text-muted">ex: Project Based Learning, Team work, Games</p>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label"> Do Any Of Your Programs Run All Day During the Work Week?</label>
+                                <div class="col-md-9">
+                                    <div class="am-radio inline">
+                                        <input type="radio" id="programsalldayduringworkweek-yes" name="programsalldayduringworkweek" class="form-control onboarding-input" value="1"/>
+                                        <label for="programsalldayduringworkweek-yes">YES</label>
+                                    </div>
+                                    <div class="am-radio inline">
+                                        <input type="radio" id="programsalldayduringworkweek-no" name="programsalldayduringworkweek" class="form-control onboarding-input" value="0"/>
+                                        <label for="programsalldayduringworkweek-no">NO</label>
+                                    </div>
                                 </div>
                             </div>
 
@@ -777,6 +798,20 @@
 
             return false;
         }
+
+        function setFormValuesOnLoad() {
+            if (@isProgramsAllDayDuringWorkWeek.ToJSON())
+                $('#programsalldayduringworkweek-yes').attr("checked", true);
+            else
+                $('#programsalldayduringworkweek-no').attr("checked", true);
+        }
+
+        PageEvent.add(PageEvent.AFTER_INIT, function()
+            {
+                setFormValuesOnLoad();
+            }
+        );
+
     </script>
 
 }

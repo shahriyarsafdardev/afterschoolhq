@@ -9,6 +9,12 @@
     var timesoffered = (List<AccountProperty>)ViewBag.TimeOffered;
     var pricingoptions = (List<AccountProperty>)ViewBag.PricingOption;
     var specialneedsfferings = (List<AccountProperty>)ViewBag.SpecialNeedsOffering;
+    var programsalldayduringworkweek = (List<AccountProperty>) ViewBag.ProgramsAllDayDuringWorkWeek;
+    var isProgramsAllDayDuringWorkWeek = false;
+    if (programsalldayduringworkweek.IsNotEmpty() && programsalldayduringworkweek.Count() > 0)
+    {
+        isProgramsAllDayDuringWorkWeek = programsalldayduringworkweek.FirstOrDefault().Value == "1";
+    }
  }
 
 <div class="row main-content main-content-welcome-pages">
@@ -19,10 +25,10 @@
                 <form class="form form-horizontal" method="post" action="@Url.Action("servicesoffered", "onboarding")">
 
                     @{ Html.RenderPartial("~/Views/Shared/_Loaders.cshtml",
-                               new ViewDataDictionary() {
-                                                       { "count", 6 },
-                                                       { "activeDotNumber", 5 }
-                               });
+                                 new ViewDataDictionary() {
+                                 { "count", 6 },
+                                 { "activeDotNumber", 5 }
+                        });
                     }
 
                     <div class="col-md-12 onboarding-form-group">
@@ -216,6 +222,23 @@
                     </div>
 
                     <div class="clearfix"></div>
+                    <div class="col-md-12 onboarding-form-group">
+                        <label class="onboarding-lable"> DO ANY OF YOUR PROGRAMS RUN ALL DAY DURING THE WORK WEEK?</label>
+
+                        <div class="clearfix"></div>
+                        <div class="pull-left col-md-12" style="padding: 0;">
+                            <div class="am-radio inline">
+                                <input type="radio" id="programsalldayduringworkweek-yes" name="programsalldayduringworkweek" class="form-control onboarding-input" value="1"/>
+                                <label for="programsalldayduringworkweek-yes">YES</label>
+                            </div>
+                            <div class="am-radio inline">
+                                <input type="radio" id="programsalldayduringworkweek-no" name="programsalldayduringworkweek" class="form-control onboarding-input" value="0"/>
+                                <label for="programsalldayduringworkweek-no">NO</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="clearfix"></div>
                     <div class="visible-sm visible-xs margin-v-30">
                         <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right col-xs-12 register-continue">Save and Continue</button>
 
@@ -286,6 +309,19 @@
                 $(element).html('Show More Options');
             }
         }
+
+        function setFormValuesOnLoad() {
+            if (@isProgramsAllDayDuringWorkWeek.ToJSON())
+                $('#programsalldayduringworkweek-yes').attr("checked", true);
+            else
+                $('#programsalldayduringworkweek-no').attr("checked", true);
+        }
+
+        PageEvent.add(PageEvent.AFTER_INIT, function()
+            {
+                setFormValuesOnLoad();
+            }
+        );
     </script>
 
 }
