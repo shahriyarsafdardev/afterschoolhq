@@ -13,8 +13,8 @@
     var headerImageUrl = (string)ViewBag.HeaderImageUrl;
     var grades = (List<GradeLevel>)ViewBag.Grades;
 
-    var costLow = (decimal)ViewBag.CostLow;
-    var costHigh = (decimal)ViewBag.CostHigh;
+    var costLow = (string)ViewBag.CostLow;
+    var costHigh = (string)ViewBag.CostHigh;
 
     var programCategories = (List<AccountProperty>)ViewBag.Classifications;
     var softSkills = (List<AccountProperty>)ViewBag.SoftSkills;
@@ -24,16 +24,16 @@
     var timesOffered = (List<AccountProperty>)ViewBag.TimesOffered;
     var pricingOptions = (List<AccountProperty>)ViewBag.PricingOptions;
     var specialNeedsOfferings = (List<AccountProperty>)ViewBag.SpecialNeedsOfferings;
-    var programsalldayduringworkweek = (List<AccountProperty>)ViewBag.ProgramsAllDayDuringWorkWeek;
+    var programsAllDayDuringWorkWeek = (List<AccountProperty>)ViewBag.ProgramsAllDayDuringWorkWeek;
     var isProgramsAllDayDuringWorkWeek = false;
-    if (programsalldayduringworkweek.IsNotEmpty() && programsalldayduringworkweek.Count() > 0)
+    var programsAllDayDuringWorkWeekCaptured = programsAllDayDuringWorkWeek.IsNotEmpty() && programsAllDayDuringWorkWeek.Any();
+    if (programsAllDayDuringWorkWeekCaptured)
     {
-        isProgramsAllDayDuringWorkWeek = programsalldayduringworkweek.FirstOrDefault().Value == "1";
+        isProgramsAllDayDuringWorkWeek = programsAllDayDuringWorkWeek.FirstOrDefault()?.Value == "1";
     }
     var isFullScreen = (bool)ViewBag.IsFullScreen;
     var formAction = Url.Action("style", "account", new { isfullscreen = Request["isfullscreen"], returnurl = Request["returnurl"] });
     var exitText = "Back to My Profile &raquo;";
-    var isNewProfile = (bool)ViewBag.IsNewProfile;
     if (isFullScreen)
     {
         Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
@@ -228,7 +228,7 @@
                                         <div class="col-md-5 col-xs-12 padding-0">
                                             <div class="input-group">
                                                 <span class="input-group-addon">$</span>
-                                                <input id="costlow" name="costlow" class="form-control" type="number" required="required" value="@(isNewProfile ? "" : costLow.ToString("0.00"))" onclick="this.select()" step=".01" onblur="checkLowHighValue()" style="height: 44px;">
+                                                <input id="costlow" name="costlow" class="form-control" type="number" required="required" value="@costLow" onclick="this.select()" step=".01" onblur="checkLowHighValue()" style="height: 44px;">
                                             </div>
                                         </div>
                                         <p class="col-md-2 col-xs-12 margin-v-10 desktop-text-center" style="font-size: 16px;">
@@ -237,7 +237,7 @@
                                         <div class="col-md-5 col-xs-12 padding-0">
                                             <div class="input-group">
                                                 <span class="input-group-addon">$</span>
-                                                <input id="costhigh" name="costhigh" class="form-control" type="number" required="required" value="@(isNewProfile ? "" : costHigh.ToString("0.00"))" onclick="this.select()" step=".01" onblur="checkLowHighValue()" style="height: 44px;">
+                                                <input id="costhigh" name="costhigh" class="form-control" type="number" required="required" value="@costHigh" onclick="this.select()" step=".01" onblur="checkLowHighValue()" style="height: 44px;">
                                             </div>
                                         </div>
                                         <div class="col-lg-12 padding-0 text-muted margin-t-10" style="font-style:italic">If all of your programs are free enter 0 into both fields</div>
@@ -790,6 +790,8 @@
             var costLow = $("#costlow").val();
             var costHigh = $("#costhigh").val();
             if (costLow != "" && costHigh != "") {
+                $("#costlow").val(parseFloat(costLow).toFixed(2));
+                $("#costhigh").val(parseFloat(costHigh).toFixed(2));
                 if (parseFloat(costLow) > parseFloat(costHigh)) {
                     Notifications.showBar({
                         title: 'Error',
@@ -807,8 +809,6 @@
                     $('.register-continue').removeAttr('disabled');
                     return true;
                 }
-                $("#costlow").val(parseFloat(costLow).toFixed(2));
-                $("#costhigh").val(parseFloat(costHigh).toFixed(2));
             }
             else if (costLow != "") {
                 $("#costlow").val(parseFloat(costLow).toFixed(2));
@@ -860,6 +860,8 @@
         }
 
         function setFormValuesOnLoad() {
+            if (!@programsAllDayDuringWorkWeekCaptured.ToJSON())
+                return;
             if (@isProgramsAllDayDuringWorkWeek.ToJSON())
                 $('#programsalldayduringworkweek-yes').attr("checked", true);
             else

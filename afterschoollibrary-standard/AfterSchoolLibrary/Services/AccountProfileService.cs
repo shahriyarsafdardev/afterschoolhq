@@ -262,7 +262,9 @@ namespace AfterSchoolLibrary.Services
                         profile.ManageProperties(specialNeedsOfferings, AccountPropertyType.SpecialNeedsOffering, loggedInUser, amsgs, adc);
                                      
                     profile.ManageProperties(classifications.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.Classifications, loggedInUser, amsgs, adc);
-                    profile.ManageProperties(programsalldayduringworkweek.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.ProgramsAllDayDuringWorkWeek, loggedInUser, msgs, dc);
+
+                    if (programsalldayduringworkweek.IsNotEmpty())
+                        profile.ManageProperties(programsalldayduringworkweek.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.ProgramsAllDayDuringWorkWeek, loggedInUser, msgs, dc);
 
                     profile.ManageProperties(softskills.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.SoftSkills, loggedInUser, amsgs, adc);
 

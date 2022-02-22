@@ -1205,10 +1205,8 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.ProgramsAllDayDuringWorkWeek = profile.GetProperties(AccountPropertyType.ProgramsAllDayDuringWorkWeek, msgs);
             ViewBag.IsFullScreen = GetIsFullScreen();
             ViewBag.Messages = msgs;
-            ViewBag.CostLow = profile.CostLow.HasValue ? profile.CostLow : 0;
-            ViewBag.CostHigh = profile.CostHigh.HasValue ? profile.CostHigh : 0;
-
-            ViewBag.IsNewProfile = profile.CostLow.IsEmpty() && profile.CostHigh.IsEmpty();
+            ViewBag.CostLow = profile.CostLow.HasValue ? profile.CostLow.Value.ToString("0.00") : "";
+            ViewBag.CostHigh = profile.CostHigh.HasValue ? profile.CostHigh.Value.ToString("0.00") : "";
 
             return profile;
         }

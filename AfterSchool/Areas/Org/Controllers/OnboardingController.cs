@@ -173,8 +173,8 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.GradeEnd = gradeEnd.IsNotEmpty() ? gradeEnd.ID : maxGradeId;            
             ViewBag.AgeStart = ageStart.HasValue ? ageStart.Value : 0;            
             ViewBag.AgeEnd = ageEnd.HasValue ? ageEnd.Value : 18;
-            ViewBag.CostLow = profile.CostLow.HasValue ? profile.CostLow : 0;
-            ViewBag.CostHigh = profile.CostHigh.HasValue ? profile.CostHigh : 0;
+            ViewBag.CostLow = profile.CostLow.HasValue ? profile.CostLow.Value.ToString("0.00") : "";
+            ViewBag.CostHigh = profile.CostHigh.HasValue ? profile.CostHigh.Value.ToString("0.00") : "";
 
             return View(account);
         }
@@ -433,7 +433,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.SpecialNeedsOffering = profile.GetProperties(AccountPropertyType.SpecialNeedsOffering, msgs);
             ViewBag.TeachingMethods = profile.GetProperties(AccountPropertyType.TeachingMethods, msgs);
             ViewBag.AcademicSubjects = profile.GetProperties(AccountPropertyType.AcademicSubjects, msgs);
-            ViewBag.Softskills = profile.GetProperties(AccountPropertyType.SoftSkills, msgs);
+            ViewBag.SoftSkills = profile.GetProperties(AccountPropertyType.SoftSkills, msgs);
             ViewBag.ProgramCategories = profile.GetProperties(AccountPropertyType.Classifications, msgs);
             ViewBag.ProgramsAllDayDuringWorkWeek = profile.GetProperties(AccountPropertyType.ProgramsAllDayDuringWorkWeek, msgs);
 
