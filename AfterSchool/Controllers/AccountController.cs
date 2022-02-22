@@ -1246,8 +1246,8 @@ namespace AfterSchool.Controllers
                         {
                             if (msgs.HasNoErrors())
                                 studentRegistrant.AddUserWithAccess(user: parentWebUser,loggedInUser: studentUser, msgs: msgs);
-                            //if (msgs.HasNoErrors())
-                            //    msgs.AddRange(EmailHelper.SendParentAccountInvitedEmail(parentWebUser.FirstName, studentUser.FirstName, parentWebUser.GetInviteUrl(studentAccount), $"{studentUser.FirstName} has created an account on AfterSchool HQ to register for {participationObject?.GetBrowseUrl(true)}.", parentWebUser.Email));
+                            if (msgs.HasNoErrors())
+                                msgs.AddRange(EmailHelper.SendParentStudentAccountEmail(parentWebUser.FirstName, studentUser.FirstName, AfterSchoolLibrary.Helpers.Utilities.LoginUrl(), parentWebUser.Email, participationObject?.GetBrowseUrl(true)));
                             SessionVariables.CurrentUser = parentWebUser;
                             SessionVariables.CurrentAccount = parentAccount;
                             SessionVariables.AccountUserType = parentWebUser.GetUserType(parentAccount, msgs);
@@ -1255,8 +1255,6 @@ namespace AfterSchool.Controllers
                             SessionVariables.ParentAccount = parentAccount;
                         }
                         SessionVariables.OriginalLoggedInUser = studentUser;
-
-
                     }
                 }
             }
