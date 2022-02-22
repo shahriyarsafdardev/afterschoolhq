@@ -49,6 +49,64 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(account.ID.HasValue);
         }
 
+        [Fact(DisplayName = "ProcessStudentRegistrationTest")]
+        public void ProcessStudentRegistrationTest()
+        {
+            //Arrange
+            var user = WebUserFactory.Create(msgs, dc);
+            var parentAccount = AccountFactory.CreateWithFreePackage(user, AccountType.School, msgs, dc);
+            var form = FormFactory.Create(parentAccount, msgs, dc);
+            var formQuestionGroup = FormQuestionGroupFactory.Create(formId: form.ID.Value, isDeleted: false, msgs: msgs, dc: dc);
+
+            var questionAnswerModel = GetQuestionAnswerModel(formQuestionGroup,msgs);
+
+            //Act
+            var studentDetails = AccountService.ProcessStudentRegistration(
+                        firstName: "John",
+                        lastName: "David",
+                        email: $"don+{DateTime.Now.Ticks}@example.com",
+                        phone: null,
+                        password: "12345678",
+                        schoolLocationId: null,
+                        allowTextMessages: true,
+                        isAfterSchool: true,
+                        questionAnswerModel: questionAnswerModel,
+                        parentAccount,
+                        msgs: msgs);
+
+            //Assert
+            Assert.True(studentDetails.Item1.IsEmpty());
+            Assert.True(studentDetails.Item2.IsNotEmpty());
+            Assert.True(studentDetails.Item3.IsNotEmpty());
+            Assert.True(studentDetails.Item3.AccountId == parentAccount.ID);
+        }
+
+        private List<KeyValuePair<FormQuestion, string>> GetQuestionAnswerModel(FormQuestionGroup formQuestionGroup, SystemMessages msgs)
+        {
+            List<KeyValuePair<FormQuestion, string>> model = new List<KeyValuePair<FormQuestion, string>>();
+
+            var registrantFirstName = FormQuestionFactory.Create(formId: formQuestionGroup.FormId.Value, formQuestionGroupId: formQuestionGroup.ID.Value, text: "First Name", questionDataType: QuestionDataType.RegistrantFirstName, questionTypeId : QuestionType.TextBox, msgs: msgs, dc: dc);
+
+            var registrantMiddleName = FormQuestionFactory.Create(formId: formQuestionGroup.FormId.Value, formQuestionGroupId: formQuestionGroup.ID.Value, text: "Middle Name", questionDataType: QuestionDataType.RegistrantMiddleName, questionTypeId : QuestionType.TextBox, msgs: msgs, dc: dc);
+
+            var registrantLastName = FormQuestionFactory.Create(formId: formQuestionGroup.FormId.Value, formQuestionGroupId: formQuestionGroup.ID.Value, text: "Last Name", questionDataType: QuestionDataType.RegistrantLastName, questionTypeId : QuestionType.TextBox, msgs: msgs, dc: dc);
+
+            var registrantEmail = FormQuestionFactory.Create(formId: formQuestionGroup.FormId.Value, formQuestionGroupId: formQuestionGroup.ID.Value, text: "Email", questionDataType: QuestionDataType.RegistrantEmail, questionTypeId : QuestionType.TextBox, msgs: msgs, dc: dc);
+
+            var registrantGrade = FormQuestionFactory.Create(formId: formQuestionGroup.FormId.Value, formQuestionGroupId: formQuestionGroup.ID.Value, text: "Grade", options: "Pre-K,K,1st,2nd,3rd,4th,5th,6th,7th,8th,9th,10th,11th,12th", questionTypeId: QuestionType.DropDownList, msgs: msgs, dc: dc);
+
+            var registrantMobilePhone = FormQuestionFactory.Create(formId: 48, formQuestionGroupId: formQuestionGroup.ID.Value, text: "Mobile Phone", questionDataType: QuestionDataType.RegistrantMobilePhone, questionTypeId : QuestionType.TextBox, msgs: msgs, dc: dc);
+            
+            model.Add(new KeyValuePair<FormQuestion, string>(registrantFirstName, "John"));
+            model.Add(new KeyValuePair<FormQuestion, string>(registrantMiddleName, ""));
+            model.Add(new KeyValuePair<FormQuestion, string>(registrantLastName, "William"));
+            model.Add(new KeyValuePair<FormQuestion, string>(registrantEmail, $"john{DateTime.Now.ToString()}@yopmail.com"));
+            model.Add(new KeyValuePair<FormQuestion, string>(registrantGrade, "5th"));
+            model.Add(new KeyValuePair<FormQuestion, string>(registrantMobilePhone, "518-555-0114"));
+
+            return model;
+        }        
+
         [Fact(Skip = "Not sure")]
         public void CreateSampleAccountTest()
         {
