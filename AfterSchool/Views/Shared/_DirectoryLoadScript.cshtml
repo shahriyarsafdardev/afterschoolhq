@@ -1,0 +1,123 @@
+﻿@model string 
+
+<script id="script-search-result-list" type="text/template">
+
+    <% _.each(response, function(searchResult){ %>
+
+    <style>
+        #dynamicLogo-<%=searchResult.AccountUid %> {
+            background-image: url("<%= searchResult.ProfileHeaderImageUrl %>");
+        }
+    </style>
+
+    <div id="<%= searchResult.AccountUid %>" name="<%= searchResult.AccountName %>" class="participation-object directory-search-panel-holder">
+
+        <div id="directory-panel" class="panel" onclick="WebPage.navigateIframe('<%= searchResult.HomePageUrl %>?dir=@Model')">
+            <div id="dynamicLogo-<%= searchResult.AccountUid %>" class="reg-header panel-tabs">
+
+                <% if(showDistance) { %>
+
+                <div class="distance-lable">
+                    <%= Math.round(searchResult.TotalDifference * 100) / 100 %> mi
+                </div>
+
+                <% } %>
+
+                <% if(searchResult.IsAccountNowEnrolling) { %>
+
+                <div class="pull-right margin-l-10">
+                    <span class="badge badge-danger profile-badge text-small">
+                        Now Enrolling
+                    </span>
+                </div>
+
+                <% } %>
+
+                <% if(searchResult.IsVirtualProgram) { %>
+
+                <div class="pull-right margin-l-10">
+                    <span class="badge profile-badge text-small">
+                        Virtual
+                    </span>
+                </div>
+
+                <% } %>
+
+                <% if(searchResult.IsOpenDuringCovid) { %>
+
+                <div class="pull-right margin-l-10">
+                    <span class="badge badge-success profile-badge text-small">
+                        Open During COVID
+                    </span>
+                </div>
+
+                <% } %>
+
+                <% if(searchResult.IsELearningCenter) { %>
+
+                <div class="pull-right margin-l-10">
+                    <span class="badge badge-success profile-badge text-small">
+                        E-Learning Center
+                    </span>
+                </div>
+
+                <% } %>
+
+                <div id="directory-location-badge-holder">
+                    <div class="padding-h-10">
+                        <span class="text-small">
+                            <%= searchResult.Location %>
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+            <div class="panel-body" style="position: relative;">
+
+                <div class="directory-panel-age-and-grade">
+
+                    <div class="pull-left margin-l-5">
+                        <% if(searchResult.IsRestrictByGrade) { %>
+
+                        <span class="badge badge-gray profile-badge text-small">
+                            <%= searchResult.GradeStart %> - <%= searchResult.GradeEnd %> Grade
+                        </span>
+
+                        <% } else { %>
+
+                        <span class="badge badge-gray profile-badge text-small">
+                            Ages <%= searchResult.AgeStart %> - <%= searchResult.AgeEnd %>
+                        </span>
+
+                        <% } %>
+                    </div>
+
+                </div>
+
+                <div class="text-wrap directory-panel-account-name">
+                    <h3 style="height: 51px; overflow-y: hidden;">
+                        <strong title="<%= searchResult.AccountName %>"><%= searchResult.AccountName %></strong>
+                    </h3>
+                </div>
+
+                <div class="clearfix"></div>
+                <div class="text-wrap">
+                    <span class="text-medium-small directory-panel-profile-title">
+                        <%= searchResult.ProfileHeadline %>
+                    </span>
+                </div>
+
+                <div class="clearfix"></div>
+                <div class="margin-t-20">
+                    <a href="javascript:WebPage.navigateIframe('<%= searchResult.HomePageUrl %>?dir=@Model')" class="btn btn-register btn-block join-directory-btn">
+                        Learn More &raquo;
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <% }) %>
+
+</script>

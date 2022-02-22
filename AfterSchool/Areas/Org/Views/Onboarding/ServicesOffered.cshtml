@@ -3,12 +3,19 @@
 
     var programCategories = (List<AccountProperty>)ViewBag.ProgramCategories;
     var softSkills = (List<AccountProperty>)ViewBag.SoftSkills;
-    var academicsubjects = (List<AccountProperty>)ViewBag.AcademicSubjects;
-    var teachingmethods = (List<AccountProperty>)ViewBag.TeachingMethods;
-    var servicesoffered = (List<AccountProperty>)ViewBag.ServiceOffered;
-    var timesoffered = (List<AccountProperty>)ViewBag.TimeOffered;
-    var pricingoptions = (List<AccountProperty>)ViewBag.PricingOption;
-    var specialneedsfferings = (List<AccountProperty>)ViewBag.SpecialNeedsOffering;
+    var academicSubjects = (List<AccountProperty>)ViewBag.AcademicSubjects;
+    var teachingMethods = (List<AccountProperty>)ViewBag.TeachingMethods;
+    var serviceOffered = (List<AccountProperty>)ViewBag.ServiceOffered;
+    var timeOffered = (List<AccountProperty>)ViewBag.TimeOffered;
+    var pricingOption = (List<AccountProperty>)ViewBag.PricingOption;
+    var specialNeedsOffering = (List<AccountProperty>)ViewBag.SpecialNeedsOffering;
+    var programsAllDayDuringWorkWeek = (List<AccountProperty>) ViewBag.ProgramsAllDayDuringWorkWeek;
+    var isProgramsAllDayDuringWorkWeek = false;
+    var programsAllDayDuringWorkWeekCaptured = programsAllDayDuringWorkWeek.IsNotEmpty() && programsAllDayDuringWorkWeek.Any();
+    if (programsAllDayDuringWorkWeekCaptured)
+    {
+        isProgramsAllDayDuringWorkWeek = programsAllDayDuringWorkWeek.FirstOrDefault()?.Value == "1";
+    }
  }
 
 <div class="row main-content main-content-welcome-pages">
@@ -19,10 +26,10 @@
                 <form class="form form-horizontal" method="post" action="@Url.Action("servicesoffered", "onboarding")">
 
                     @{ Html.RenderPartial("~/Views/Shared/_Loaders.cshtml",
-                               new ViewDataDictionary() {
-                                                       { "count", 6 },
-                                                       { "activeDotNumber", 5 }
-                               });
+                                 new ViewDataDictionary() {
+                                 { "count", 6 },
+                                 { "activeDotNumber", 5 }
+                        });
                     }
 
                     <div class="col-md-12 onboarding-form-group">
@@ -63,7 +70,7 @@
                                            name="services-offered-@item.ToLower()"
                                            id="services-offered-@item.ToLower()"
                                            value="@item"
-                                           @(servicesoffered.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
+                                           @(serviceOffered.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
                                     <label for="services-offered-@item.ToLower()">@item</label>
                                 </div>
                             }
@@ -78,7 +85,7 @@
                                            name="services-offered-@item.ToLower()"
                                            id="services-offered-@item.ToLower()"
                                            value="@item"
-                                           @(servicesoffered.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
+                                           @(serviceOffered.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
                                     <label for="services-offered-@item.ToLower()">@item</label>
                                 </div>
                             }
@@ -111,7 +118,7 @@
                                                name="times-offered-@item.ToLower()"
                                                id="times-offered-@item.ToLower()"
                                                value="@item"
-                                               @(timesoffered.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
+                                               @(timeOffered.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
                                         <label for="times-offered-@item.ToLower()">@item</label>
                                     </div>
                                 }
@@ -126,7 +133,7 @@
                                                name="times-offered-@item.ToLower()"
                                                id="times-offered-@item.ToLower()"
                                                value="@item"
-                                               @(timesoffered.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
+                                               @(timeOffered.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
                                         <label for="times-offered-@item.ToLower()">@item</label>
                                     </div>
                                 }
@@ -147,7 +154,7 @@
                                                name="pricing-options-@item.ToLower()"
                                                id="pricing-options-@item.ToLower()"
                                                value="@item"
-                                               @(pricingoptions.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
+                                               @(pricingOption.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
                                         <label for="pricing-options-@item.ToLower()">@item</label>
                                     </div>
                                 }
@@ -169,7 +176,7 @@
                                                name="special-needs-@item.ToLower()"
                                                id="special-needs-@item.ToLower()"
                                                value="@item"
-                                               @(specialneedsfferings.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
+                                               @(specialNeedsOffering.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
                                         <label for="special-needs-@item.ToLower()">@item</label>
                                     </div>
                                 }
@@ -185,7 +192,7 @@
                                                name="special-needs-@item.ToLower()"
                                                id="special-needs-@item.ToLower()"
                                                value="@item"
-                                               @(specialneedsfferings.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
+                                               @(specialNeedsOffering.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
                                         <label for="special-needs-@item.ToLower()">@item</label>
                                     </div>
                                 }
@@ -203,15 +210,32 @@
                         <div class="clearfix"></div>
                         <div class="col-md-12 onboarding-form-group">
                             <label class="onboarding-lable">ACADEMIC SUBJECTS (UP TO 5)</label>
-                            <input type="text" name="academicsubjects" id="academicsubjects" class="form-control onboarding-input" data-role="tagsinput" value="@academicsubjects.Select(x => x.Value).ToStringList(",")" />
+                            <input type="text" name="academicsubjects" id="academicsubjects" class="form-control onboarding-input" data-role="tagsinput" value="@academicSubjects.Select(x => x.Value).ToStringList(",")" />
                             <p class="text-muted" style="padding: 5px 0; font-size: 14px;">ex: Math, Science, Language Arts, Physical Education</p>
                         </div>
 
                         <div class="clearfix"></div>
                         <div class="col-md-12 onboarding-form-group">
                             <label class="onboarding-lable">TEACHING METHODS (UP TO 3)</label>
-                            <input type="text" name="teachingmethods" id="teachingmethods" class="form-control onboarding-input" data-role="tagsinput" value="@teachingmethods.Select(x => x.Value).ToStringList(",")" />
+                            <input type="text" name="teachingmethods" id="teachingmethods" class="form-control onboarding-input" data-role="tagsinput" value="@teachingMethods.Select(x => x.Value).ToStringList(",")" />
                             <p class="text-muted" style="padding: 5px 0; font-size: 14px;">ex: Project Based Learning, Team work, Games</p>
+                        </div>
+                    </div>
+
+                    <div class="clearfix"></div>
+                    <div class="col-md-12 onboarding-form-group">
+                        <label class="onboarding-lable"> DO ANY OF YOUR PROGRAMS RUN ALL DAY DURING THE WORK WEEK?</label>
+
+                        <div class="clearfix"></div>
+                        <div class="pull-left col-md-12" style="padding: 0;">
+                            <div class="am-radio inline">
+                                <input type="radio" id="programsalldayduringworkweek-yes" name="programsalldayduringworkweek" class="form-control onboarding-input" value="1"/>
+                                <label for="programsalldayduringworkweek-yes">YES</label>
+                            </div>
+                            <div class="am-radio inline">
+                                <input type="radio" id="programsalldayduringworkweek-no" name="programsalldayduringworkweek" class="form-control onboarding-input" value="0"/>
+                                <label for="programsalldayduringworkweek-no">NO</label>
+                            </div>
                         </div>
                     </div>
 
@@ -286,6 +310,21 @@
                 $(element).html('Show More Options');
             }
         }
+
+        function setFormValuesOnLoad() {
+            if (!@programsAllDayDuringWorkWeekCaptured.ToJSON())
+                return;
+            if (@isProgramsAllDayDuringWorkWeek.ToJSON())
+                $('#programsalldayduringworkweek-yes').attr("checked", true);
+            else
+                $('#programsalldayduringworkweek-no').attr("checked", true);
+        }
+
+        PageEvent.add(PageEvent.AFTER_INIT, function()
+            {
+                setFormValuesOnLoad();
+            }
+        );
     </script>
 
 }

@@ -1,0 +1,21 @@
+﻿
+
+<div class="visible-sm visible-xs bg-color">
+    <div class="col-xs-10">
+        <div class="form-group has-feedback has-search" style="margin-top: 10px;">
+            <span class="glyphicon glyphicon-search form-control-feedback" style="top: -3px;"></span>
+            <input id="txtSearch-mobile" name="search" type="text" class="form-control" placeholder="Search For Programs" onkeyup="return waitAndFilterSearch()">
+        </div>
+    </div>
+    <div class="col-xs-2" style="padding: 0; text-align: center;">
+        <img id="img-mobile-filter" src="~/img/filter.png" class="filter hide" isOpen="0" onclick="return mobileFilter()" />
+    </div>
+
+    <div class="clearfix"></div>
+
+    <div id="mobile-filter-footer" class="filter-footer-container">
+        <button type="button" class="btn btn-default btn-lg btn-center" style="border-color: steelblue; color:blue" onclick="return applyMobileFilter()">Apply Filters</button>
+    </div>
+
+    <div class="clearfix"></div>
+</div>

@@ -47,6 +47,8 @@ namespace AfterSchoolLibrary.Models
 		public string RegistrationUrl { get { return (string)MDV["RegistrationUrl"].Value; } set { MDV["RegistrationUrl"].Value = value; } }
 		public string ButtonText { get { return (string)MDV["ButtonText"].Value; } set { MDV["ButtonText"].Value = value; } }
 		public string VideoUrl { get { return (string)MDV["VideoUrl"].Value; } set { MDV["VideoUrl"].Value = value; } }
+		public decimal? CostLow { get { return (decimal?)MDV["CostLow"].Value; } set { MDV["CostLow"].Value = value; } }
+		public decimal? CostHigh { get { return (decimal?)MDV["CostHigh"].Value; } set { MDV["CostHigh"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		public string AccountUniqueName { get { return (string)MDV["AccountUniqueName"].Value; } }
 		public bool AccountIsTest { get { return (bool)MDV["AccountIsTest"].Value; } }
@@ -103,6 +105,8 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "RegistrationUrl", System.Data.SqlDbType.NVarChar , "200");
 				_dp.Add(className, "ButtonText", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "VideoUrl", System.Data.SqlDbType.NVarChar , "200");
+				_dp.Add(className, "CostLow", System.Data.SqlDbType.Money);
+				_dp.Add(className, "CostHigh", System.Data.SqlDbType.Money);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountUniqueName", typeof(Account).Name, "UniqueName", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountIsTest", typeof(Account).Name, "IsTest", System.Data.SqlDbType.Bit, "Account");
@@ -297,6 +301,14 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["VideoUrl"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["CostLow"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["CostHigh"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

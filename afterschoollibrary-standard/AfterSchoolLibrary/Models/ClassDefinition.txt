@@ -451,6 +451,8 @@ property: IsVirtualProgram, bool, Bit
 property: RegistrationUrl, string, NVarChar "200"
 property: ButtonText, string, NVarChar "100"
 property: VideoUrl, string, NVarChar "200"
+property: CostLow, decimal?, Money
+property: CostHigh, decimal?, Money
 loadmethod: AccountId
 join: Account.ID, AccountId, InnerJoin
 joinproperty: Account.Name, string, NVarChar
@@ -2114,7 +2116,7 @@ values: None, MaleOnly, FemaleOnly
 [begin]
 type: Enum
 name: AccountPropertyType
-values: NotSet, LandingPageText, RegistrationThankYouEmail, ApplicationThankYouEmail, NoActivitiesText, FacebookAdPixel, Award, Certification, Photo, ServiceOffered, TimeOffered, PricingOption, Classifications, SoftSkills, AcademicSubjects, TeachingMethods, InterestThankYouEmail, SpecialNeedsOffering
+values: NotSet, LandingPageText, RegistrationThankYouEmail, ApplicationThankYouEmail, NoActivitiesText, FacebookAdPixel, Award, Certification, Photo, ServiceOffered, TimeOffered, PricingOption, Classifications, SoftSkills, AcademicSubjects, TeachingMethods, InterestThankYouEmail, SpecialNeedsOffering, ProgramsAllDayDuringWorkWeek
 [end]
 
 [begin]
