@@ -476,17 +476,22 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(account);
         }
 
+
+
         [HttpGet]
         public ActionResult Links()
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
 
+            ViewBag.IsDirectoryAccountProvider = AccountService.CheckIfDirectoryAccount(account, msgs);
+
             HandleTempMessages(msgs);
 
             ViewBag.Messages = msgs;
             return View(account);
         }
+
 
         [HttpPost]
         public ActionResult Links(string website, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string registrationurl, string buttontext)
@@ -497,6 +502,10 @@ namespace AfterSchool.Areas.Org.Controllers
             var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
 
             HandleTempMessages(msgs);
+
+
+            if (registrationurl.IsNotEmpty() && !registrationurl.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
+                msgs.Add("Please enter a valid registration url address", MessageType.UserError);
 
             if (website.IsNotEmpty() && !website.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
                 msgs.Add("Please enter a valid website address", MessageType.UserError);
@@ -546,6 +555,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
                 return RedirectToAction("Done");
 
+            ViewBag.IsDirectoryAccountProvider = AccountService.CheckIfDirectoryAccount(account, msgs);
             ViewBag.Messages = msgs;
             return View(account);
         }

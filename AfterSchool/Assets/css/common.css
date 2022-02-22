@@ -1485,3 +1485,9 @@
     border: 3px solid white !important;
     background: transparent !important
 }
+
+.custom-radio-btn-required {
+    opacity: 0;
+    position: absolute;
+    display: inline !important
+}

@@ -1204,6 +1204,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.TeachingMethods = teachingMethods;
             ViewBag.IsFullScreen = GetIsFullScreen();
             ViewBag.Messages = msgs;
+            ViewBag.IsDirectoryAccountProvider = AccountService.CheckIfDirectoryAccount(account, msgs);
 
             return profile;
         }
@@ -1216,7 +1217,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline, string primaryColor, string website, string mingrade, string maxgrade,
+        public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline, string primaryColor, string registrationurl, string buttontext, string website, string mingrade, string maxgrade,
             string agestart, string ageend, string restrictbygrade, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string genderrestriction,
             string programCategories, string softskills, string academicsubjects, string teachingmethods, string profileemail, string profilephone,
             string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string state, string postalcode, string county, string country, string placeid, decimal latitude, decimal longitude,
@@ -1246,6 +1247,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (website.IsNotEmpty() && !website.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
                 msgs.Add("Please enter a valid website address", MessageType.UserError);
+
+            if (registrationurl.IsNotEmpty() && !registrationurl.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
+                msgs.Add("Please enter a valid registration url address", MessageType.UserError);
 
             if (facebook.IsNotEmpty() && !facebook.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
                 msgs.Add("Please enter a valid Facebook profile address", MessageType.UserError);
@@ -1334,6 +1338,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     title,
                     headline,
                     about,
+                    registrationurl,
+                    buttontext,
                     website,
                     opencovid.IsNumber() && opencovid.ToBoolean(),
                     elearningcenter.IsNumber() && elearningcenter.ToBoolean(),
