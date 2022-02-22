@@ -10,10 +10,10 @@
     var pricingoptions = (List<AccountProperty>)ViewBag.PricingOption;
     var specialneedsfferings = (List<AccountProperty>)ViewBag.SpecialNeedsOffering;
     var programsalldayduringworkweek = (List<AccountProperty>) ViewBag.ProgramsAllDayDuringWorkWeek;
-    var yesno = "";
+    var isProgramsAllDayDuringWorkWeek = false;
     if (programsalldayduringworkweek.IsNotEmpty() && programsalldayduringworkweek.Count() > 0)
     {
-        yesno = programsalldayduringworkweek.FirstOrDefault().Value;
+        isProgramsAllDayDuringWorkWeek = programsalldayduringworkweek.FirstOrDefault().Value == "1";
     }
  }
 
@@ -228,11 +228,11 @@
                         <div class="clearfix"></div>
                         <div class="pull-left col-md-12" style="padding: 0;">
                             <div class="am-radio inline">
-                                <input type="radio" id="programsalldayduringworkweek-yes" name="programsalldayduringworkweek" class="form-control onboarding-input" value="1" @(yesno == "1" ? "checked=\"checked\"" : "") />
+                                <input type="radio" id="programsalldayduringworkweek-yes" name="programsalldayduringworkweek" class="form-control onboarding-input" value="1"/>
                                 <label for="programsalldayduringworkweek-yes">YES</label>
                             </div>
                             <div class="am-radio inline">
-                                <input type="radio" id="programsalldayduringworkweek-no" name="programsalldayduringworkweek" class="form-control onboarding-input" value="0" @(yesno == "0" ? "checked=\"checked\"" : "") />
+                                <input type="radio" id="programsalldayduringworkweek-no" name="programsalldayduringworkweek" class="form-control onboarding-input" value="0"/>
                                 <label for="programsalldayduringworkweek-no">NO</label>
                             </div>
                         </div>
@@ -309,6 +309,19 @@
                 $(element).html('Show More Options');
             }
         }
+
+        function setFormValuesOnLoad() {
+            if (@isProgramsAllDayDuringWorkWeek.ToJSON())
+                $('#programsalldayduringworkweek-yes').attr("checked", true);
+            else
+                $('#programsalldayduringworkweek-no').attr("checked", true);
+        }
+
+        PageEvent.add(PageEvent.AFTER_INIT, function()
+            {
+                setFormValuesOnLoad();
+            }
+        );
     </script>
 
 }
