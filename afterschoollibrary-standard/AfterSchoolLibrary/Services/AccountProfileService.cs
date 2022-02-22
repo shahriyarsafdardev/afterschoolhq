@@ -331,7 +331,8 @@ namespace AfterSchoolLibrary.Services
             profile.ManageProperties(timesOffered, AccountPropertyType.TimeOffered, loggedInUser, msgs, dc);
             profile.ManageProperties(pricingOptions, AccountPropertyType.PricingOption, loggedInUser, msgs, dc);
             profile.ManageProperties(specialNeedsOfferings, AccountPropertyType.SpecialNeedsOffering, loggedInUser, msgs, dc);
-            profile.ManageProperties(programsalldayduringworkweek.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.ProgramsAllDayDuringWorkWeek, loggedInUser, msgs, dc);
+            if (programsalldayduringworkweek.IsNotEmpty())
+                profile.ManageProperties(programsalldayduringworkweek.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.ProgramsAllDayDuringWorkWeek, loggedInUser, msgs, dc);
             profile.ManageProperties(classifications.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.Classifications, loggedInUser, msgs, dc);
             profile.ManageProperties(softskills.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.SoftSkills, loggedInUser, msgs, dc);
             profile.ManageProperties(academicsubjects.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.AcademicSubjects, loggedInUser, msgs, dc);
