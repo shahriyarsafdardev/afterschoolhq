@@ -13,6 +13,9 @@
     var headerImageUrl = (string)ViewBag.HeaderImageUrl;
     var grades = (List<GradeLevel>)ViewBag.Grades;
 
+    var costLow = (string)ViewBag.CostLow;
+    var costHigh = (string)ViewBag.CostHigh;
+
     var programCategories = (List<AccountProperty>)ViewBag.Classifications;
     var softSkills = (List<AccountProperty>)ViewBag.SoftSkills;
     var academicSubjects = (List<AccountProperty>)ViewBag.AcademicSubjects;
@@ -21,16 +24,16 @@
     var timesOffered = (List<AccountProperty>)ViewBag.TimesOffered;
     var pricingOptions = (List<AccountProperty>)ViewBag.PricingOptions;
     var specialNeedsOfferings = (List<AccountProperty>)ViewBag.SpecialNeedsOfferings;
-    var programsalldayduringworkweek = (List<AccountProperty>)ViewBag.ProgramsAllDayDuringWorkWeek;
+    var programsAllDayDuringWorkWeek = (List<AccountProperty>)ViewBag.ProgramsAllDayDuringWorkWeek;
     var isProgramsAllDayDuringWorkWeek = false;
-    if (programsalldayduringworkweek.IsNotEmpty() && programsalldayduringworkweek.Count() > 0)
+    var programsAllDayDuringWorkWeekCaptured = programsAllDayDuringWorkWeek.IsNotEmpty() && programsAllDayDuringWorkWeek.Any();
+    if (programsAllDayDuringWorkWeekCaptured)
     {
-        isProgramsAllDayDuringWorkWeek = programsalldayduringworkweek.FirstOrDefault().Value == "1";
+        isProgramsAllDayDuringWorkWeek = programsAllDayDuringWorkWeek.FirstOrDefault()?.Value == "1";
     }
     var isFullScreen = (bool)ViewBag.IsFullScreen;
     var formAction = Url.Action("style", "account", new { isfullscreen = Request["isfullscreen"], returnurl = Request["returnurl"] });
     var exitText = "Back to My Profile &raquo;";
-
     if (isFullScreen)
     {
         Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
@@ -218,13 +221,39 @@
 
                             <div class="form-group">
                                 <label class="col-md-3 control-label">
+                                    Price range of activities offered
+                                </label>
+                                <div class="col-md-9">
+                                    <div class="">
+                                        <div class="col-md-5 col-xs-12 padding-0">
+                                            <div class="input-group">
+                                                <span class="input-group-addon">$</span>
+                                                <input id="costlow" name="costlow" class="form-control" type="number" required="required" value="@costLow" onclick="this.select()" step=".01" onblur="checkLowHighValue()" style="height: 44px;">
+                                            </div>
+                                        </div>
+                                        <p class="col-md-2 col-xs-12 margin-v-10 desktop-text-center" style="font-size: 16px;">
+                                            To
+                                        </p>
+                                        <div class="col-md-5 col-xs-12 padding-0">
+                                            <div class="input-group">
+                                                <span class="input-group-addon">$</span>
+                                                <input id="costhigh" name="costhigh" class="form-control" type="number" required="required" value="@costHigh" onclick="this.select()" step=".01" onblur="checkLowHighValue()" style="height: 44px;">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12 padding-0 text-muted margin-t-10" style="font-style:italic">If all of your programs are free enter 0 into both fields</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
                                     Providing services during COVID?
                                 </label>
                                 <div class="col-md-9">
                                     @{ Html.RenderPartial(
-                                           "~/Views/Shared/_SwitchButton.cshtml",
-                                           Model.IsOpenDuringCovid,
-                                           new ViewDataDictionary() { { "checkboxname", "opencovid" }, { "checkboxid", "opencovid" } });
+                                                  "~/Views/Shared/_SwitchButton.cshtml",
+                                                  Model.IsOpenDuringCovid,
+                                                  new ViewDataDictionary() { { "checkboxname", "opencovid" }, { "checkboxid", "opencovid" } });
                                     }
                                 </div>
                             </div>
@@ -235,9 +264,9 @@
                                 </label>
                                 <div class="col-md-9">
                                     @{ Html.RenderPartial(
-                                           "~/Views/Shared/_SwitchButton.cshtml",
-                                           Model.IsVirtualProgram,
-                                           new ViewDataDictionary() { { "checkboxname", "virtualprogram" }, { "checkboxid", "virtualprogram" } });
+                                                 "~/Views/Shared/_SwitchButton.cshtml",
+                                                 Model.IsVirtualProgram,
+                                                 new ViewDataDictionary() { { "checkboxname", "virtualprogram" }, { "checkboxid", "virtualprogram" } });
                                     }
                                 </div>
                             </div>
@@ -248,9 +277,9 @@
                                 </label>
                                 <div class="col-md-9">
                                     @{ Html.RenderPartial(
-                                           "~/Views/Shared/_SwitchButton.cshtml",
-                                           Model.IsELearningCenter,
-                                           new ViewDataDictionary() { { "checkboxname", "elearningcenter" }, { "checkboxid", "elearningcenter" } });
+                                                 "~/Views/Shared/_SwitchButton.cshtml",
+                                                 Model.IsELearningCenter,
+                                                 new ViewDataDictionary() { { "checkboxname", "elearningcenter" }, { "checkboxid", "elearningcenter" } });
                                     }
                                     <p class="text-muted">You host/care for students to assist e-learning during the school day</p>
                                 </div>
@@ -424,6 +453,7 @@
 
                             <div class="form-group">
                                 <label class="col-md-3 control-label"> Do Any Of Your Programs Run All Day During the Work Week?</label>
+
                                 <div class="col-md-9">
                                     <div class="am-radio inline">
                                         <input type="radio" id="programsalldayduringworkweek-yes" name="programsalldayduringworkweek" class="form-control onboarding-input" value="1"/>
@@ -756,7 +786,37 @@
         $('#teachingmethods').tagsinput({
             maxTags: 3
         });
-
+        function checkLowHighValue() {
+            var costLow = $("#costlow").val();
+            var costHigh = $("#costhigh").val();
+            if (costLow != "" && costHigh != "") {
+                $("#costlow").val(parseFloat(costLow).toFixed(2));
+                $("#costhigh").val(parseFloat(costHigh).toFixed(2));
+                if (parseFloat(costLow) > parseFloat(costHigh)) {
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: 'Please make the low cost range value less than high cost.',
+                        success: false
+                    });
+                    $('#costlow').attr('style', 'height: 44px; border: 1px solid red');
+                    $('#costhigh').attr('style', 'height: 44px; border: 1px solid red');
+                    $('.register-continue').attr('disabled', "disabled");
+                    return false;
+                }
+                else {
+                    $('#costlow').attr('style', 'height: 44px;');
+                    $('#costhigh').attr('style', 'height: 44px;');
+                    $('.register-continue').removeAttr('disabled');
+                    return true;
+                }
+            }
+            else if (costLow != "") {
+                $("#costlow").val(parseFloat(costLow).toFixed(2));
+            }
+            else if (costHigh != "") {
+                $("#costhigh").val(parseFloat(costHigh).toFixed(2));
+            }
+        }
 
         $('#txtVideoUrl').blur(function () {
             var url = $('#txtVideoUrl').val();
@@ -800,6 +860,8 @@
         }
 
         function setFormValuesOnLoad() {
+            if (!@programsAllDayDuringWorkWeekCaptured.ToJSON())
+                return;
             if (@isProgramsAllDayDuringWorkWeek.ToJSON())
                 $('#programsalldayduringworkweek-yes').attr("checked", true);
             else
@@ -811,7 +873,6 @@
                 setFormValuesOnLoad();
             }
         );
-
     </script>
 
 }

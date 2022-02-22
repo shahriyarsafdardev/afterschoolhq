@@ -161,6 +161,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             HandleTempMessages(msgs);
 
+            ViewBag.IsNewProfile = profile.CostLow.IsEmpty() && profile.CostHigh.IsEmpty();
+
             ViewBag.Grades = grades;
             ViewBag.Messages = msgs;
             ViewBag.ELC = profile.IsNotEmpty() && profile.IsELearningCenter;
@@ -171,12 +173,14 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.GradeEnd = gradeEnd.IsNotEmpty() ? gradeEnd.ID : maxGradeId;            
             ViewBag.AgeStart = ageStart.HasValue ? ageStart.Value : 0;            
             ViewBag.AgeEnd = ageEnd.HasValue ? ageEnd.Value : 18;
+            ViewBag.CostLow = profile.CostLow.HasValue ? profile.CostLow.Value.ToString("0.00") : "";
+            ViewBag.CostHigh = profile.CostHigh.HasValue ? profile.CostHigh.Value.ToString("0.00") : "";
 
             return View(account);
         }
 
         [HttpPost]
-        public ActionResult AdditionalInfo(string mingrade, string maxgrade, string agestart, string ageend, string opencovid, string elearningcenter, string isvirtualprogram)
+        public ActionResult AdditionalInfo(string mingrade, string maxgrade, string agestart, string ageend, string opencovid, string elearningcenter, string isvirtualprogram, string costlow, string costhigh)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -207,6 +211,8 @@ namespace AfterSchool.Areas.Org.Controllers
                             elearningcenter: isElc,
                             isvirtualprogram: isVirtualProgram,
                             loggedInUser: currentUser,
+                            costhigh: costhigh,
+                            costlow: costlow,
                             msgs: amsgs,
                             dc: adc);
                     },
@@ -227,6 +233,9 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.OpenCovid = opencovid.IsBoolean() && opencovid.ToBoolean();
             ViewBag.ELC = isElc;
             ViewBag.IsVirtualProgram = isVirtualProgram;
+            ViewBag.CostLow = costlow;
+            ViewBag.CostHigh = costhigh;
+            ViewBag.IsNewProfile = false;
 
             return View(account);
         }
@@ -424,7 +433,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.SpecialNeedsOffering = profile.GetProperties(AccountPropertyType.SpecialNeedsOffering, msgs);
             ViewBag.TeachingMethods = profile.GetProperties(AccountPropertyType.TeachingMethods, msgs);
             ViewBag.AcademicSubjects = profile.GetProperties(AccountPropertyType.AcademicSubjects, msgs);
-            ViewBag.Softskills = profile.GetProperties(AccountPropertyType.SoftSkills, msgs);
+            ViewBag.SoftSkills = profile.GetProperties(AccountPropertyType.SoftSkills, msgs);
             ViewBag.ProgramCategories = profile.GetProperties(AccountPropertyType.Classifications, msgs);
             ViewBag.ProgramsAllDayDuringWorkWeek = profile.GetProperties(AccountPropertyType.ProgramsAllDayDuringWorkWeek, msgs);
 
