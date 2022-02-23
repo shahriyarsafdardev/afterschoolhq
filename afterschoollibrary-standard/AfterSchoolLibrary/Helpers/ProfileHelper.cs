@@ -18,7 +18,7 @@ namespace AfterSchoolLibrary.Helpers
         {
             get
             {
-                return new string[] { "After-school programs", "Before-school programs", "During-school programs", "Evening programs", "Weekend programs", "Summer programs" };
+                return new string[] { "After-school programs", "Before-school programs", "During-school programs", "Evening programs", "Weekend programs", "Summer programs", "Overnight programs" };
             }
         }
 
