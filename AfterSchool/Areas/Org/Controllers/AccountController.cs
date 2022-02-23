@@ -1207,6 +1207,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.CostLow = profile.CostLow.HasValue ? profile.CostLow.Value.ToString("0.00") : "";
             ViewBag.CostHigh = profile.CostHigh.HasValue ? profile.CostHigh.Value.ToString("0.00") : "";
+            ViewBag.IsDirectoryAccountProvider = AccountService.CheckIfDirectoryAccount(account, msgs);
 
             return profile;
         }
@@ -1219,11 +1220,15 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline, string primaryColor, string website, string mingrade, string maxgrade,
-            string agestart, string ageend, string restrictbygrade, string costlow, string costhigh, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string genderrestriction,
-            string programCategories, string softskills, string academicsubjects, string teachingmethods, string programsalldayduringworkweek, string profileemail, string profilephone,
-            string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string state, string postalcode, string county, string country, string placeid, decimal latitude, decimal longitude,
-            string opencovid, string elearningcenter, string virtualprogram, string ahqapproved, string videoUrl, IEnumerable<HttpPostedFileBase> photos)
+        public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline,
+            string primaryColor, string collectregistration, string registrationurl, string buttontext, string website, string mingrade,
+            string maxgrade, string agestart, string ageend, string restrictbygrade, string costlow, string costhigh, string twitter,
+            string facebook, string instagram, string linkedin, string youtube, string calendar, string genderrestriction,
+            string programCategories, string softskills, string academicsubjects, string teachingmethods,
+            string programsalldayduringworkweek, string profileemail, string profilephone, string locationname, string streetnumber,
+            string streetname, string address2, string neighborhood, string city, string state, string postalcode, string county,
+            string country, string placeid, decimal latitude, decimal longitude, string opencovid, string elearningcenter,
+            string virtualprogram, string ahqapproved, string videoUrl, IEnumerable<HttpPostedFileBase> photos)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -1247,8 +1252,17 @@ namespace AfterSchool.Areas.Org.Controllers
                     msgs.Add("Please upload a valid jpg or png file", MessageType.UserError);
             }
 
+            if (collectregistration == "1")
+            {
+                registrationurl = "";
+                buttontext = "";
+            }
+
             if (website.IsNotEmpty() && !website.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
                 msgs.Add("Please enter a valid website address", MessageType.UserError);
+
+            if (registrationurl.IsNotEmpty() && !registrationurl.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
+                msgs.Add("Please enter a valid registration url address", MessageType.UserError);
 
             if (facebook.IsNotEmpty() && !facebook.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
                 msgs.Add("Please enter a valid Facebook profile address", MessageType.UserError);
@@ -1337,6 +1351,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     title,
                     headline,
                     about,
+                    registrationurl,
+                    buttontext,
                     website,
                     opencovid.IsNumber() && opencovid.ToBoolean(),
                     elearningcenter.IsNumber() && elearningcenter.ToBoolean(),

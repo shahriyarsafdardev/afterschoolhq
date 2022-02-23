@@ -1491,6 +1491,12 @@
     background: transparent !important
 }
 
+.custom-radio-btn-required {
+    opacity: 0;
+    position: absolute;
+    display: inline !important
+}
+
 .padding-0{
     padding: 0 !important
 }

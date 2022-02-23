@@ -498,11 +498,15 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(account);
         }
 
+
+
         [HttpGet]
         public ActionResult Links()
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
+
+            ViewBag.IsDirectoryAccountProvider = AccountService.CheckIfDirectoryAccount(account, msgs);
 
             HandleTempMessages(msgs);
 
@@ -510,8 +514,10 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(account);
         }
 
+
         [HttpPost]
-        public ActionResult Links(string website, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar)
+        public ActionResult Links(string website, string twitter, string facebook, string instagram, string linkedin, string youtube,
+            string calendar, string registrationurl, string buttontext, string collectregistration)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -519,6 +525,15 @@ namespace AfterSchool.Areas.Org.Controllers
             var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
 
             HandleTempMessages(msgs);
+
+            if (collectregistration == "1")
+            {
+                registrationurl = "";
+                buttontext = "";
+            }
+
+            if (registrationurl.IsNotEmpty() && !registrationurl.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
+                msgs.Add("Please enter a valid registration url address", MessageType.UserError);
 
             if (website.IsNotEmpty() && !website.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
                 msgs.Add("Please enter a valid website address", MessageType.UserError);
@@ -553,6 +568,8 @@ namespace AfterSchool.Areas.Org.Controllers
                             linkedin: linkedin,
                             youtube: youtube,
                             calendar: calendar,
+                            registrationurl: registrationurl,
+                            buttontext: buttontext,
                             loggedInUser: currentUser,
                             msgs: amsgs,
                             dc: adc);
@@ -566,6 +583,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
                 return RedirectToAction("Done");
 
+            ViewBag.IsDirectoryAccountProvider = AccountService.CheckIfDirectoryAccount(account, msgs);
             ViewBag.Messages = msgs;
             return View(account);
         }
