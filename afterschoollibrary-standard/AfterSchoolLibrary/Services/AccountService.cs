@@ -4785,15 +4785,12 @@ namespace AfterSchoolLibrary.Services
                         {
                             // add answers to student registrant record
                             questionAnswerModel.ForEach(qvm => {
-                                if (qvm.Key.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation)
-                                {
-                                    parentRegistrant.AddOrUpdateAnswer(
-                                        answerText: qvm.Value,
-                                        question: qvm.Key,
-                                        loggedInUser: studentUser,
-                                        msgs: amsgs,
-                                        dc: adc);
-                                }
+                                parentRegistrant.AddOrUpdateAnswer(
+                                    answerText: qvm.Value,
+                                    question: qvm.Key,
+                                    loggedInUser: studentUser,
+                                    msgs: amsgs,
+                                    dc: adc);
                             });
                         }
                     }

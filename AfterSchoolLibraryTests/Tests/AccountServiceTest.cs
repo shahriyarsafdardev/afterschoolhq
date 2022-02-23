@@ -49,16 +49,20 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(account.ID.HasValue);
         }
 
-        [Fact(DisplayName = "ProcessStudentRegistrationTest")]
-        public void ProcessStudentRegistrationTest()
+        [Theory(DisplayName = "ProcessStudentRegistrationTest")]
+        [InlineData(false)] //Parent doesn't have a account
+        [InlineData(true)] //Parent does have a account
+        public void ProcessStudentRegistrationTest(bool parentAccountExists)
         {
             //Arrange
             var user = WebUserFactory.Create(msgs, dc);
-            var parentAccount = AccountFactory.CreateWithFreePackage(user, AccountType.School, msgs, dc);
+            var parentAccount = AccountFactory.CreateWithFreePackage(user, AccountType.Registrant, msgs, dc);
             var form = FormFactory.Create(parentAccount, msgs, dc);
             var formQuestionGroup = FormQuestionGroupFactory.Create(formId: form.ID.Value, isDeleted: false, msgs: msgs, dc: dc);
+            if (!parentAccountExists)
+                parentAccount = null;
 
-            var questionAnswerModel = GetQuestionAnswerModel(formQuestionGroup,msgs);
+            var questionAnswerModel = FormQuestionFactory.GetPersonalInformationQuestionAnswerModel(formQuestionGroup, msgs, dc);
 
             //Act
             var studentDetails = AccountService.ProcessStudentRegistration(
@@ -73,39 +77,69 @@ namespace AfterSchoolLibraryTests.Tests
                         questionAnswerModel: questionAnswerModel,
                         parentAccount,
                         msgs: msgs);
+            var studentAccount = studentDetails.Item1;
+            var studentUser = studentDetails.Item2;
+            var studentRegistrant = studentDetails.Item3;
 
             //Assert
-            Assert.True(studentDetails.Item1.IsEmpty());
-            Assert.True(studentDetails.Item2.IsNotEmpty());
-            Assert.True(studentDetails.Item3.IsNotEmpty());
-            Assert.True(studentDetails.Item3.AccountId == parentAccount.ID);
+            if (parentAccountExists)
+            {
+                Assert.True(studentAccount.IsEmpty());
+                Assert.True(studentUser.IsNotEmpty());
+                Assert.True(studentRegistrant.IsNotEmpty());
+                Assert.True(studentRegistrant.AccountId == parentAccount.ID);
+                Assert.True(studentRegistrant.WebUserId == studentUser.ID);
+            }
+            else
+            {
+                Assert.True(studentAccount.IsNotEmpty());
+                Assert.True(studentUser.IsNotEmpty());
+                Assert.True(studentRegistrant.IsNotEmpty());
+                Assert.True(studentAccount.CreatedBy == studentUser.ID);
+                Assert.True(studentAccount.AccountTypeId == AccountType.Registrant);
+                Assert.True(studentRegistrant.AccountId == studentAccount.ID);
+                Assert.True(studentRegistrant.WebUserId == studentUser.ID);
+                Assert.True(studentRegistrant.IsParentOrGuardian == false);
+                Assert.True(studentRegistrant.IsMaster == true);
+            }
+            
         }
 
-        private List<KeyValuePair<FormQuestion, string>> GetQuestionAnswerModel(FormQuestionGroup formQuestionGroup, SystemMessages msgs)
+        [Fact(DisplayName = "ProcessParentRegistrationTest")]
+        public void ProcessParentRegistrationTest()
         {
-            List<KeyValuePair<FormQuestion, string>> model = new List<KeyValuePair<FormQuestion, string>>();
+            //Arrange
+            var studentUser = WebUserFactory.Create(msgs, dc);
+            var studentAccount = AccountFactory.CreateWithFreePackage(studentUser, AccountType.Registrant, msgs, dc);
+            var form = FormFactory.Create(studentAccount, msgs, dc);
+            var formQuestionGroup = FormQuestionGroupFactory.Create(formId: form.ID.Value, isDeleted: false, msgs: msgs, dc: dc);
 
-            var registrantFirstName = FormQuestionFactory.Create(formId: formQuestionGroup.FormId.Value, formQuestionGroupId: formQuestionGroup.ID.Value, text: "First Name", questionDataType: QuestionDataType.RegistrantFirstName, questionTypeId : QuestionType.TextBox, msgs: msgs, dc: dc);
+            var questionAnswerModel = FormQuestionFactory.GetPersonalInformationQuestionAnswerModel(formQuestionGroup, msgs, dc);
 
-            var registrantMiddleName = FormQuestionFactory.Create(formId: formQuestionGroup.FormId.Value, formQuestionGroupId: formQuestionGroup.ID.Value, text: "Middle Name", questionDataType: QuestionDataType.RegistrantMiddleName, questionTypeId : QuestionType.TextBox, msgs: msgs, dc: dc);
+            //Act
+            var parentDetails = studentAccount.ProcessParentRegistration(
+                                firstName: "John",
+                                lastName: "David",
+                                email: $"don+{DateTime.Now.Ticks}@example.com",
+                                browserUrl: "https://qa.afterschoolhq.com/testaccount/activity/testactivity",
+                                allowTextMessages: true,
+                                questionAnswerModel: questionAnswerModel,
+                                studentUser: studentUser,
+                                msgs: msgs);
 
-            var registrantLastName = FormQuestionFactory.Create(formId: formQuestionGroup.FormId.Value, formQuestionGroupId: formQuestionGroup.ID.Value, text: "Last Name", questionDataType: QuestionDataType.RegistrantLastName, questionTypeId : QuestionType.TextBox, msgs: msgs, dc: dc);
+            var parentUser = parentDetails.Item1;
+            var parentRegistrant = parentDetails.Item2;
+            //ParentUser is created on Student Account && Parentregistrant is created on Student Account. 
 
-            var registrantEmail = FormQuestionFactory.Create(formId: formQuestionGroup.FormId.Value, formQuestionGroupId: formQuestionGroup.ID.Value, text: "Email", questionDataType: QuestionDataType.RegistrantEmail, questionTypeId : QuestionType.TextBox, msgs: msgs, dc: dc);
-
-            var registrantGrade = FormQuestionFactory.Create(formId: formQuestionGroup.FormId.Value, formQuestionGroupId: formQuestionGroup.ID.Value, text: "Grade", options: "Pre-K,K,1st,2nd,3rd,4th,5th,6th,7th,8th,9th,10th,11th,12th", questionTypeId: QuestionType.DropDownList, msgs: msgs, dc: dc);
-
-            var registrantMobilePhone = FormQuestionFactory.Create(formId: 48, formQuestionGroupId: formQuestionGroup.ID.Value, text: "Mobile Phone", questionDataType: QuestionDataType.RegistrantMobilePhone, questionTypeId : QuestionType.TextBox, msgs: msgs, dc: dc);
-            
-            model.Add(new KeyValuePair<FormQuestion, string>(registrantFirstName, "John"));
-            model.Add(new KeyValuePair<FormQuestion, string>(registrantMiddleName, ""));
-            model.Add(new KeyValuePair<FormQuestion, string>(registrantLastName, "William"));
-            model.Add(new KeyValuePair<FormQuestion, string>(registrantEmail, $"john{DateTime.Now.ToString()}@yopmail.com"));
-            model.Add(new KeyValuePair<FormQuestion, string>(registrantGrade, "5th"));
-            model.Add(new KeyValuePair<FormQuestion, string>(registrantMobilePhone, "518-555-0114"));
-
-            return model;
-        }        
+            //Assert
+            Assert.True(parentUser.IsNotEmpty());
+            Assert.True(parentUser.CreatedBy == studentUser.ID);
+            Assert.True(parentRegistrant.IsNotEmpty());
+            Assert.True(parentRegistrant.AccountId == studentAccount.ID);
+            Assert.True(parentRegistrant.IsParentOrGuardian == true);
+            Assert.True(parentRegistrant.IsMaster == true);
+            Assert.True(parentRegistrant.WebUserId == parentUser.ID);
+        }       
 
         [Fact(Skip = "Not sure")]
         public void CreateSampleAccountTest()
