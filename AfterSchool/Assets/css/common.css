@@ -405,8 +405,14 @@
 }
 
 .filter-header {
-    font-weight: bold;
     padding-top: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    color: #4a4a4a;
 }
 
 .filter-footer-container {
@@ -767,9 +773,8 @@
     padding-bottom: 20px;
 }
 
-.contactUsBtn {
+.btn-contact-us {
     background-color: white;
-    border: 3px solid #00b492;
     border-radius: 5px;
     padding: 13px 25px;
 }
@@ -1484,6 +1489,237 @@
     background-color: none !important;
     border: 3px solid white !important;
     background: transparent !important
+}
+
+.custom-radio-btn-required {
+    opacity: 0;
+    position: absolute;
+    display: inline !important
+}
+
+.padding-0{
+    padding: 0 !important
+}
+
+.filter-end-line {
+    margin: 18px 0 10px -15px;
+    border: solid 1px #f2f2f5;
+}
+
+.directory-search-no-result {
+    margin-top: 35px;
+    text-align: center;
+    font-size: 14px;
+    margin-bottom: 35px;
+    font-weight: bold;
+}
+
+.blur-bg {
+    background-color: White;
+    background-repeat: no-repeat;
+    height: 100%;
+    opacity: 0.5;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000000;
+}
+
+.display-flex {
+    display: flex;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.directory-filters {
+    display: none;
+    padding-right: 0;
+    padding-bottom: 120px;
+    padding-top: 10px;
+    background-color: #fff;
+    max-width: 300px;
+}
+
+.directory-sidebar-arrow {
+    font-size: 22px;
+    position: absolute;
+    right: -7px;
+    z-index: 9999;
+    cursor: pointer;
+}
+
+.directory-search-container {
+    background-color: #f8f8f8;
+}
+
+.directory-search-input {
+    border-radius: 5px;
+    padding-right: 32px;
+    padding-left: 10px;
+}
+
+.directory-search-magnyfier-icon {
+    top: -3px;
+    right: 0;
+    left: unset;
+}
+
+#search-result {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#ProgressBar {
+    z-index: 100001;
+    text-align: center;
+    display: none;
+}
+
+#notification-contact-us {
+    margin-top: 10px;
+    display: none;
+}
+
+#map-view {
+    flex: 0.5;
+    background: white;
+}
+
+.modal-isyp-intro {
+    position: fixed;
+    z-index: 1000001;
+}
+
+.modal-isyp-logo {
+    width: 200px;
+    margin-top: 40px;
+}
+
+.btn-isyp-getstarted {
+    width: 180px;
+    transition: none;
+}
+
+#txtZipCode, input::-webkit-input-placeholder {
+    font-size: 10px;
+    line-height: 3;
+}
+
+.filter-body {
+    font-size: 12px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    text-align: left;
+    color: #4a4a4a;
+}
+
+.am-filter-checkbox input[type="checkbox"] + label::before {
+    margin: 0px 10px -2px 0px !important;
+}
+
+.accordion-toggle:after {
+    font-family: 'Glyphicons Halflings';
+    content: "\2212";
+    float: right;
+    color: grey;
+    margin-right: 15px;
+    font-weight: 100 !important;
+    font-size: 10px;
+    cursor: pointer;
+}
+
+.accordion-toggle.collapsed:after {
+    font-family: 'Glyphicons Halflings';
+    content: "\002b";
+    float: right;
+    color: grey;
+    margin-right: 15px;
+    font-weight: 100 !important;
+    font-size: 10px;
+    cursor: pointer;
+}
+
+.directory-badge {
+    font-size: 10px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    text-align: center;
+    color: #fff;
+    margin-right: 1px;
+}
+
+    .directory-badge::first-letter {
+        text-transform: capitalize;
+    }
+
+#txtZipCode {
+    height: 35px;
+    border-bottom-left-radius: 5px;
+    border-top-left-radius: 5px;
+    padding: 10px;
+    z-index: 0;
+}
+
+#divValidatePostalCode {
+    cursor: pointer;
+    border-bottom-right-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+#directory-panel {
+    overflow: hidden;
+    cursor: pointer;
+    margin-right: 0;
+    box-shadow: 0 5px 10px 0 rgba(0, 0, 0, 0.15);
+}
+
+.directory-search-panel-holder {
+    height: 410px;
+    margin-bottom: 10px;
+    width: 350px;
+}
+
+.panel-tabs {
+    min-height: 100px !important;
+    height: 150px;
+    padding: 5px 5px !important;
+    position: relative;
+}
+
+#directory-location-badge-holder {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background-color: #fff;
+    color: #333;
+}
+
+.directory-panel-age-and-grade {
+    position: absolute;
+    top: 10px;
+    left: 15px;
+    overflow: hidden;
+    height: 20px;
+}
+
+.directory-panel-profile-title {
+    min-height: 60px;
+    height: 60px;
+    display: block;
+}
+
+.directory-panel-account-name {
+    margin-top: 20px;
+    height: 75px;
+}
 }
 
 .font-style-italic{
