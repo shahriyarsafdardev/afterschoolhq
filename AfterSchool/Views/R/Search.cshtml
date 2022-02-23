@@ -152,7 +152,9 @@
         </div>
     </div>
 
-    <div id="map-view"></div>
+    <div id="map-view">
+        <div id="map" style="height: 100%;"></div>
+    </div>
 </div>
 
 <div class="clearfix"></div>
@@ -165,6 +167,8 @@
 
 @section Scripts
 {
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBq47Ro2O69sQhVLEW4_2L0ClOBSW_Srmc&libraries=places"></script>
+
     <script src="~/Assets/js/ahq-directory-search.js"></script>
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <script type="text/javascript">
@@ -184,6 +188,7 @@
             }
 
             directoryPageLoad();
+            initMap();
         })
 
         function loadAccounts(search, neighborhoods, grades, ages, gender, services, timing, pricing, cost, starting, other, special, zip = 0) {
@@ -265,6 +270,49 @@
                     hideProgressBar();
                     return false;
                 }
+            });
+        }
+
+        let map;
+        let service;
+        let infowindow;
+
+        function initMap() {
+            const indianapolis = new google.maps.LatLng(39.7684, 86.1581);
+
+            infowindow = new google.maps.InfoWindow();
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: indianapolis,
+                zoom: 15,
+            });
+
+            const request = {
+                query: "School",
+            };
+
+            service = new google.maps.places.PlacesService(map);
+            service.findPlaceFromQuery(request, (results, status) => {
+                if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+                    for (let i = 0; i < results.length; i++) {
+                        createMarker(results[i]);
+                    }
+
+                    map.setCenter(results[0].geometry.location);
+                }
+            });
+        }
+
+        function createMarker(place) {
+            if (!place.geometry || !place.geometry.location) return;
+
+            const marker = new google.maps.Marker({
+                map,
+                position: place.geometry.location,
+            });
+
+            google.maps.event.addListener(marker, "click", () => {
+                infowindow.setContent(place.name || "");
+                infowindow.open(map);
             });
         }
 
