@@ -2447,6 +2447,20 @@ namespace AfterSchoolLibrary.Services
                 .ToList();
         }
 
+        public static bool CheckIfDirectoryAccount(Account account, SystemMessages msgs)
+        {
+            var isDirectoryAccount = false;
+            var visitorAccount = AccountRelationship.LoadByVisitorAccountId(account.ID.Value, msgs);
+            if (visitorAccount.IsNotEmpty() && visitorAccount.Count > 0)
+            {
+                var hostAccount = Account.Load(visitorAccount.FirstOrDefault().HostAccountId.Value, msgs);
+                if (hostAccount.IsNotEmpty() && hostAccount.AccountTypeId == global::AccountType.Directory)
+                    isDirectoryAccount = true;
+            }
+
+            return isDirectoryAccount;
+        }
+
         public static List<Account> GetVisitorAccounts(this Account hostAccount, List<AccountType> accountTypes, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return AccountRelationship.LoadByHostAccountIdByAccountTypes(hostAccount.ID.Value, accountTypes, msgs, dc)

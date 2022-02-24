@@ -161,6 +161,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             HandleTempMessages(msgs);
 
+            ViewBag.IsNewProfile = profile.CostLow.IsEmpty() && profile.CostHigh.IsEmpty();
+
             ViewBag.Grades = grades;
             ViewBag.Messages = msgs;
             ViewBag.ELC = profile.IsNotEmpty() && profile.IsELearningCenter;
@@ -171,12 +173,14 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.GradeEnd = gradeEnd.IsNotEmpty() ? gradeEnd.ID : maxGradeId;            
             ViewBag.AgeStart = ageStart.HasValue ? ageStart.Value : 0;            
             ViewBag.AgeEnd = ageEnd.HasValue ? ageEnd.Value : 18;
+            ViewBag.CostLow = profile.CostLow.HasValue ? profile.CostLow.Value.ToString("0.00") : "";
+            ViewBag.CostHigh = profile.CostHigh.HasValue ? profile.CostHigh.Value.ToString("0.00") : "";
 
             return View(account);
         }
 
         [HttpPost]
-        public ActionResult AdditionalInfo(string mingrade, string maxgrade, string agestart, string ageend, string opencovid, string elearningcenter, string isvirtualprogram)
+        public ActionResult AdditionalInfo(string mingrade, string maxgrade, string agestart, string ageend, string opencovid, string elearningcenter, string isvirtualprogram, string costlow, string costhigh)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -207,6 +211,8 @@ namespace AfterSchool.Areas.Org.Controllers
                             elearningcenter: isElc,
                             isvirtualprogram: isVirtualProgram,
                             loggedInUser: currentUser,
+                            costhigh: costhigh,
+                            costlow: costlow,
                             msgs: amsgs,
                             dc: adc);
                     },
@@ -227,6 +233,9 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.OpenCovid = opencovid.IsBoolean() && opencovid.ToBoolean();
             ViewBag.ELC = isElc;
             ViewBag.IsVirtualProgram = isVirtualProgram;
+            ViewBag.CostLow = costlow;
+            ViewBag.CostHigh = costhigh;
+            ViewBag.IsNewProfile = false;
 
             return View(account);
         }
@@ -424,15 +433,17 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.SpecialNeedsOffering = profile.GetProperties(AccountPropertyType.SpecialNeedsOffering, msgs);
             ViewBag.TeachingMethods = profile.GetProperties(AccountPropertyType.TeachingMethods, msgs);
             ViewBag.AcademicSubjects = profile.GetProperties(AccountPropertyType.AcademicSubjects, msgs);
-            ViewBag.Softskills = profile.GetProperties(AccountPropertyType.SoftSkills, msgs);
+            ViewBag.SoftSkills = profile.GetProperties(AccountPropertyType.SoftSkills, msgs);
             ViewBag.ProgramCategories = profile.GetProperties(AccountPropertyType.Classifications, msgs);
+            ViewBag.ProgramsAllDayDuringWorkWeek = profile.GetProperties(AccountPropertyType.ProgramsAllDayDuringWorkWeek, msgs);
+
             ViewBag.Messages = msgs;
 
             return View(account);
         }
 
         [HttpPost]
-        public ActionResult ServicesOffered(string programCategories, string softskills, string academicsubjects, string teachingmethods)
+        public ActionResult ServicesOffered(string programCategories, string softskills, string academicsubjects, string teachingmethods, string programsalldayduringworkweek)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -459,6 +470,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             softskills: softskills,
                             academicsubjects: academicsubjects,
                             teachingmethods: teachingmethods,
+                            programsalldayduringworkweek : programsalldayduringworkweek,
                             loggedInUser: currentUser,
                             msgs: amsgs,
                             dc: adc);
@@ -472,9 +484,21 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
                 return RedirectToAction("Links");
 
+            ViewBag.ServiceOffered = profile.GetProperties(AccountPropertyType.ServiceOffered, msgs);
+            ViewBag.TimeOffered = profile.GetProperties(AccountPropertyType.TimeOffered, msgs);
+            ViewBag.PricingOption = profile.GetProperties(AccountPropertyType.PricingOption, msgs);
+            ViewBag.SpecialNeedsOffering = profile.GetProperties(AccountPropertyType.SpecialNeedsOffering, msgs);
+            ViewBag.TeachingMethods = profile.GetProperties(AccountPropertyType.TeachingMethods, msgs);
+            ViewBag.AcademicSubjects = profile.GetProperties(AccountPropertyType.AcademicSubjects, msgs);
+            ViewBag.Softskills = profile.GetProperties(AccountPropertyType.SoftSkills, msgs);
+            ViewBag.ProgramCategories = profile.GetProperties(AccountPropertyType.Classifications, msgs);
+            ViewBag.ProgramsAllDayDuringWorkWeek = profile.GetProperties(AccountPropertyType.ProgramsAllDayDuringWorkWeek, msgs);
             ViewBag.Messages = msgs;
+
             return View(account);
         }
+
+
 
         [HttpGet]
         public ActionResult Links()
@@ -482,14 +506,18 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
 
+            ViewBag.IsDirectoryAccountProvider = AccountService.CheckIfDirectoryAccount(account, msgs);
+
             HandleTempMessages(msgs);
 
             ViewBag.Messages = msgs;
             return View(account);
         }
 
+
         [HttpPost]
-        public ActionResult Links(string website, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar)
+        public ActionResult Links(string website, string twitter, string facebook, string instagram, string linkedin, string youtube,
+            string calendar, string registrationurl, string buttontext, string collectregistration)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -497,6 +525,15 @@ namespace AfterSchool.Areas.Org.Controllers
             var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
 
             HandleTempMessages(msgs);
+
+            if (collectregistration == "1")
+            {
+                registrationurl = "";
+                buttontext = "";
+            }
+
+            if (registrationurl.IsNotEmpty() && !registrationurl.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
+                msgs.Add("Please enter a valid registration url address", MessageType.UserError);
 
             if (website.IsNotEmpty() && !website.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
                 msgs.Add("Please enter a valid website address", MessageType.UserError);
@@ -531,6 +568,8 @@ namespace AfterSchool.Areas.Org.Controllers
                             linkedin: linkedin,
                             youtube: youtube,
                             calendar: calendar,
+                            registrationurl: registrationurl,
+                            buttontext: buttontext,
                             loggedInUser: currentUser,
                             msgs: amsgs,
                             dc: adc);
@@ -544,6 +583,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
                 return RedirectToAction("Done");
 
+            ViewBag.IsDirectoryAccountProvider = AccountService.CheckIfDirectoryAccount(account, msgs);
             ViewBag.Messages = msgs;
             return View(account);
         }
