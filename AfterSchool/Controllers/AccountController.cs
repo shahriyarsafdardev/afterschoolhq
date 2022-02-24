@@ -852,7 +852,6 @@ namespace AfterSchool.Controllers
                 if (question.IsRequired && answer.IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
 
-
                 switch (question.QuestionDataTypeId)
                 {
                     case QuestionDataType.RegistrantHomePhone:
@@ -860,7 +859,6 @@ namespace AfterSchool.Controllers
                     case QuestionDataType.RegistrantMobilePhone:
                         FormService.PhoneValidation(answer, question, msgs);
                         break;
-
                 }
             });
 
@@ -887,44 +885,43 @@ namespace AfterSchool.Controllers
 
                         if (placeid.IsNotEmpty())
                             school = LocationService.CreateOrUpdateFromGoogle(locationname, streetnumber, streetname, address2, neighborhood, city, county, state, postalcode, country, placeid, latitude, longitude, SessionVariables.CurrentUser, amsgs, adc);
-
-
-                // create student account if requested by parent
-                if (createuseraccount.IsNumber())
+                        
+                        // create student account if requested by parent
+                        if (createuseraccount.IsNumber())
                         {
                             var firstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value;
                             var lastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value;
 
                             studentUser = currentAccount.CreateAndInviteUser(
-                         firstName: firstName,
-                         lastName: lastName,
-                         email: email,
-                         phone: null,
-                         message: $"Your parent/guardian ({currentUser.DisplayName}) has invited you to sign up for {AfterSchoolLibrary.Helpers.Utilities.AppName()} to register for activities",
-                         userType: UserType.Student,
-                         loggedInUser: currentUser,
-                         msgs: amsgs,
-                         dc: adc);
-
+                                firstName: firstName,
+                                lastName: lastName,
+                                email: email,
+                                phone: null,
+                                message: $"Your parent/guardian ({currentUser.DisplayName}) has invited you to sign up for {AfterSchoolLibrary.Helpers.Utilities.AppName()} to register for activities",
+                                userType: UserType.Student,
+                                loggedInUser: currentUser,
+                                msgs: amsgs,
+                                dc: adc);
+                            
                             canBeAccessedBy.Add(studentUser);
                         }
 
-                // create student registrant record
-                student = SessionVariables.CurrentAccount.CreateRegistrant(
-                    registrantOwner: studentUser,
-                    canBeAccessedBy: canBeAccessedBy,
-                    registrantType: RegistrantType.Individual,
-                    isMaster: true,
-                    isParentOrGuardian: false,
-                    allowTextMessages: false,
-                    schoolLocationId: school.IsNotEmpty() ? school.ID : new int?(),
-                    profileStatus: RegistrantProfileStatus.Started,
-                    loggedInUser: currentUser,
-                    msgs: amsgs,
-                    dc: adc);
+                        // create student registrant record
+                        student = SessionVariables.CurrentAccount.CreateRegistrant(
+                            registrantOwner: studentUser,
+                            canBeAccessedBy: canBeAccessedBy,
+                            registrantType: RegistrantType.Individual,
+                            isMaster: true,
+                            isParentOrGuardian: false,
+                            allowTextMessages: false,
+                            schoolLocationId: school.IsNotEmpty() ? school.ID : new int?(),
+                            profileStatus: RegistrantProfileStatus.Started,
+                            loggedInUser: currentUser,
+                            msgs: amsgs,
+                            dc: adc);
 
-                // LOG: Someone Created Registrant RegistrantName for Account AccountName
-                if (student.IsNotEmpty() && amsgs.HasNoErrors())
+                        // LOG: Someone Created Registrant RegistrantName for Account AccountName
+                        if (student.IsNotEmpty() && amsgs.HasNoErrors())
                         {
                             SessionVariables.WebSession.LogActivity(
                                 account: currentAccount,
@@ -939,40 +936,38 @@ namespace AfterSchool.Controllers
                            );
                         }
 
-                // add answers to parent registrant record
-                // will be used later to copy information over to student records
-                qvms
-                  .ForEach(qvm =>
-                  {
-                                    student.AddOrUpdateAnswer(
-                              answerText: qvm.Value.IfEmpty("").Trim(),
-                              question: qvm.Question,
-                              loggedInUser: SessionVariables.CurrentUser,
-                              msgs: amsgs,
-                              dc: adc);
-                                });
+                        // add answers to parent registrant record
+                        // will be used later to copy information over to student records
+                        qvms.ForEach(qvm =>
+                        {
+                            student.AddOrUpdateAnswer(
+                                answerText: qvm.Value.IfEmpty("").Trim(),
+                                question: qvm.Question,
+                                loggedInUser: SessionVariables.CurrentUser,
+                                msgs: amsgs,
+                                dc: adc);
+                        });
 
-                // copy parent answers to student for home address, emergency contacts
-                parentRegistrant.GetAnswers(amsgs, adc)
-                  .Where(answer =>
-                    answer.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.HomeAddress ||
-                    answer.FormQuestionGroupQuestionGroupDataTypeId.In(FormQuestionService
-                      .GetEmergencyContactQuestionGroups())
-                  )
-                  .ToList()
-                  .ForEach(answer =>
-                  {
-                                    student.AddOrUpdateAnswer(
-                              answerText: answer.Text.IfEmpty("").Trim(),
-                              question: answer.ToFormQuestion(msgs: amsgs, dc: adc),
-                              loggedInUser: SessionVariables.CurrentUser,
-                              msgs: amsgs,
-                              dc: adc);
-                                });
+                        // copy parent answers to student for home address, emergency contacts
+                        parentRegistrant.GetAnswers(amsgs, adc)
+                          .Where(answer =>
+                            answer.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.HomeAddress ||
+                            answer.FormQuestionGroupQuestionGroupDataTypeId.In(FormQuestionService
+                              .GetEmergencyContactQuestionGroups())
+                          )
+                          .ToList()
+                          .ForEach(answer =>
+                          {
+                              student.AddOrUpdateAnswer(
+                                  answerText: answer.Text.IfEmpty("").Trim(),
+                                  question: answer.ToFormQuestion(msgs: amsgs, dc: adc),
+                                  loggedInUser: SessionVariables.CurrentUser,
+                                  msgs: amsgs,
+                                  dc: adc);
+                          });
 
-                // copy parent info over to student parent info
-                var allquestions = adminAccountForm.GetAllQuestions(amsgs, adc);
-
+                        // copy parent info over to student parent info
+                        var allquestions = adminAccountForm.GetAllQuestions(amsgs, adc);
                         var parent1Map = new Dictionary<QuestionDataType, QuestionDataType>()
                         {
                             { QuestionDataType.RegistrantFirstName,  QuestionDataType.Parent1FirstName },
@@ -1004,7 +999,7 @@ namespace AfterSchool.Controllers
                             { QuestionDataType.RegistrantAddress2,  QuestionDataType.Parent1Address2 },
                             { QuestionDataType.RegistrantCity,  QuestionDataType.Parent1City },
                             { QuestionDataType.RegistrantState,  QuestionDataType.Parent1State },
-                            { QuestionDataType.RegistrantPostalCode,  QuestionDataType.Parent1PostalCode },
+                            { QuestionDataType.RegistrantPostalCode,  QuestionDataType.Parent1PostalCode }
                         };
 
                         foreach (var key in parent1AddressMap.Keys)
@@ -1021,8 +1016,8 @@ namespace AfterSchool.Controllers
 
                         if (parentRegistrant2.IsNotEmpty())
                         {
-                    // get parent 2 info
-                    var parent2Map = new Dictionary<QuestionDataType, QuestionDataType>()
+                            // get parent 2 info
+                            var parent2Map = new Dictionary<QuestionDataType, QuestionDataType>()
                             {
                                 { QuestionDataType.RegistrantFirstName,  QuestionDataType.Parent2FirstName },
                                 { QuestionDataType.RegistrantMiddleName,  QuestionDataType.Parent2MiddleName },
@@ -1032,8 +1027,7 @@ namespace AfterSchool.Controllers
                                 { QuestionDataType.RegistrantMobilePhone,  QuestionDataType.Parent2MobilePhone },
                                 { QuestionDataType.RegistrantWorkPhone,  QuestionDataType.Parent2WorkPhone },
                                 { QuestionDataType.RegistrantEmployer,  QuestionDataType.Parent2Employer },
-                                { QuestionDataType.RegistrantParentRelationship,  QuestionDataType.Parent2RelationshipToRegistrant },
-
+                                { QuestionDataType.RegistrantParentRelationship,  QuestionDataType.Parent2RelationshipToRegistrant }
                             };
 
                             foreach (var key in parent2Map.Keys)
@@ -1049,8 +1043,8 @@ namespace AfterSchool.Controllers
                             }
                         }
 
-                // TODO: maybe should get sibling and copy health info
-            },
+                        // TODO: maybe should get sibling and copy health info
+                    },
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         msgs.AddRange(smsgs);
@@ -1168,7 +1162,6 @@ namespace AfterSchool.Controllers
             var currentUser = SessionVariables.CurrentUser;
             var participationObject = GetParticipationObjectFromCart();
             var questions = StudentRegistrationViewBag(msgs);
-            var parentQuestions = StudentRegistrationParentViewBag(msgs);            
 
             if (currentUser.IsEmpty())
                 ValidateStudentRegistrationPasswords(password: password1, confirmPassword: password2, msgs: msgs);
@@ -1240,14 +1233,16 @@ namespace AfterSchool.Controllers
                             SessionVariables.CurrentAccount = studentAccount;
                             SessionVariables.AccountUserType = studentUser.GetUserType(studentAccount, msgs);
                             SessionVariables.CurrentRegistrant = studentRegistrant;
-                        }
-                        // in case of existing parent, we need to set session for parent account data
+                        }                        
                         else
                         {
+                            // in case of existing parent, we need to set session for parent account data
                             if (msgs.HasNoErrors())
                                 studentRegistrant.AddUserWithAccess(user: parentWebUser,loggedInUser: studentUser, msgs: msgs);
+
                             if (msgs.HasNoErrors())
                                 msgs.AddRange(EmailHelper.SendParentStudentAccountEmail(parentWebUser.FirstName, studentUser.FirstName, AfterSchoolLibrary.Helpers.Utilities.LoginUrl(), parentWebUser.Email, participationObject?.GetBrowseUrl(true)));
+
                             SessionVariables.CurrentUser = parentWebUser;
                             SessionVariables.CurrentAccount = parentAccount;
                             SessionVariables.AccountUserType = parentWebUser.GetUserType(parentAccount, msgs);
@@ -1280,7 +1275,6 @@ namespace AfterSchool.Controllers
 
                 if (question.IsRequired && answer.IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
-
 
                 if (question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone && answer.IsNotEmpty())
                 {
@@ -1528,8 +1522,7 @@ namespace AfterSchool.Controllers
         #endregion
 
         #region Register
-
-        //TODO: remove this code once student registration settles down. we are not using this anymore in this controller
+        
         private List<FormQuestion> RegisterViewBag(ParticipationObject participationObject, SystemMessages msgs)
         {
             var allQuestions = participationObject.Form.GetActiveQuestions(msgs).ToList();
@@ -1624,29 +1617,12 @@ namespace AfterSchool.Controllers
 
             // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
             var questions = RegisterStudentViewBag(participationObject, msgs);
-            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
-
-            // TODO: refactor this code. check ValidateRegisterStudentQuestions
-            questions.ForEach(question =>
-            {
-                if (question.IsRequired)
-                {
-                    var populated = true;
-
-                    if (question.QuestionTypeId == QuestionType.FileUpload && Request.Files[question.ToFormQuestionViewModel().Name].IsEmpty())
-                        populated = false;
-                    else if (question.QuestionTypeId != QuestionType.FileUpload && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
-                        populated = false;
-
-                    if (!populated)
-                        msgs.Add($"{question.Text} is required", MessageType.UserError);
-                }
-
-            });
+            ValidateRegisterStudentQuestions(questions: questions, msgs: msgs);
 
             if (signature.IsEmpty())
                 msgs.Add("E-signature is required", MessageType.UserError);
 
+            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
             var registration = CreateRegistration(participationObject, qvms, signature, msgs);
 
             if (msgs.HasNoErrors())
@@ -2523,6 +2499,7 @@ namespace AfterSchool.Controllers
         {
             var msgs = new SystemMessages();
             var participationObject = GetParticipationObjectFromCart();
+
             if (agree.IsEmpty())
                 msgs.Add("You must agree to participate", MessageType.UserError);
 
@@ -2533,14 +2510,15 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                // check this code
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
                 var files = GetFilesModel();
                 var questionAnswerModel = GetQuestionAnswerModel(qvms);
                 var sendConfrimationEmail = true;
+                
                 if (SessionVariables.ParentAccount.IsEmpty())
                     sendConfrimationEmail = false;
-                    var registrantDetails = AccountService.ProcessRegisterStudent(ownerAccount: participationObject.OwnerAccount,
+                
+                var registrantDetails = AccountService.ProcessRegisterStudent(ownerAccount: participationObject.OwnerAccount,
                     registrant: SessionVariables.CurrentRegistrant,
                     questionAnswerModel: questionAnswerModel,
                     activityGroupId: participationObject.GetAnyRelatedActivityGroupId(),
@@ -2549,40 +2527,35 @@ namespace AfterSchool.Controllers
                     files: files,
                     loggedInUser: SessionVariables.CurrentUser,
                     msgs: msgs);
-
-                    registration = registrantDetails.Item1;
-                    var registrant = registrantDetails.Item2;
-
-                    if (msgs.HasNoErrors() && registration.IsNotEmpty() && registrant.IsNotEmpty())
+                
+                registration = registrantDetails.Item1;
+                var registrant = registrantDetails.Item2;
+                
+                if (msgs.HasNoErrors() && registration.IsNotEmpty() && registrant.IsNotEmpty())
+                {
+                    AddSessionActivitiesToRegistration(participationObject, registration, registrant, participationObject.RegistrationPeriod, msgs);
+                    
+                    if (msgs.HasNoErrors())
                     {
-                        AddSessionActivitiesToRegistration(
-                            participationObject,
-                            registration,
-                            registrant,
-                            participationObject.RegistrationPeriod,
-                            msgs);
-
-                        if (msgs.HasNoErrors())
-                        {
-                            AccountService.ProcessStudentRegistration(
-                                checkoutObject: new CheckoutObject()
-                                {
-                                    BillingAccount = participationObject.OwnerAccount,
-                                    PayingAccount = SessionVariables.CurrentAccount,
-                                    NumberOfSeats = 1,
-                                    ParticipationObject = participationObject,
-                                    Registration = registration,
-                                    MasterRegistrant = SessionVariables.CurrentRegistrant
-                                },
-                                sendConfirmationEmail: sendConfrimationEmail,
-                                loggedInUser: SessionVariables.CurrentUser,
-                                msgs: msgs);
-                        }
+                        AccountService.ProcessStudentRegistration(
+                            checkoutObject: new CheckoutObject()
+                            {
+                                BillingAccount = participationObject.OwnerAccount,
+                                PayingAccount = SessionVariables.CurrentAccount,
+                                NumberOfSeats = 1,
+                                ParticipationObject = participationObject,
+                                Registration = registration,
+                                MasterRegistrant = SessionVariables.CurrentRegistrant
+                            },
+                            sendConfirmationEmail: sendConfrimationEmail,
+                            loggedInUser: SessionVariables.CurrentUser,
+                            msgs: msgs);
                     }
+                }
             }
 
-            if (msgs.HasNoErrors())
-                return RedirectToAction("RegistrationComplete", new { id = registration.Uid });
+            if (msgs.HasNoErrors() && registration.IsNotEmpty())
+                return RedirectToAction("RegistrationComplete", new { id = registration?.Uid });
 
             LoadSessionActivitiesViewBag(participationObject, registration, msgs);
 
