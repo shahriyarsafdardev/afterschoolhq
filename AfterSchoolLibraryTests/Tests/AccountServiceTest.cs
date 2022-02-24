@@ -18,6 +18,8 @@ namespace AfterSchoolLibraryTests.Tests
         private WebUser user { get; set; }
         private Account account { get; set; }
 
+        WebUser person = new WebUser() { FirstName = "Don", LastName = "John", Email = $"don+{DateTime.Now.Ticks}@example.com", IsActive = true };
+
         public AccountServiceTest(ITestOutputHelper output) : base(output)
         {
             user = WebUserFactory.Create(msgs, dc);
@@ -66,9 +68,9 @@ namespace AfterSchoolLibraryTests.Tests
 
             //Act
             var studentDetails = AccountService.ProcessStudentRegistration(
-                        firstName: "John",
-                        lastName: "David",
-                        email: $"don+{DateTime.Now.Ticks}@example.com",
+                        firstName: person.FirstName,
+                        lastName: person.LastName,
+                        email: person.Email,
                         phone: null,
                         password: "12345678",
                         schoolLocationId: null,
@@ -89,6 +91,8 @@ namespace AfterSchoolLibraryTests.Tests
                 Assert.True(studentRegistrant.IsNotEmpty());
                 Assert.True(studentRegistrant.AccountId == parentAccount.ID);
                 Assert.True(studentRegistrant.WebUserId == studentUser.ID);
+                Assert.True(studentRegistrant.IsParentOrGuardian == false);
+                Assert.True(studentRegistrant.IsMaster == true);
             }
             else
             {
@@ -102,11 +106,11 @@ namespace AfterSchoolLibraryTests.Tests
                 Assert.True(studentRegistrant.IsParentOrGuardian == false);
                 Assert.True(studentRegistrant.IsMaster == true);
             }
-            
         }
 
-        [Fact(DisplayName = "ProcessParentRegistrationTest")]
-        public void ProcessParentRegistrationTest()
+        [Theory(DisplayName = "ProcessStudentRegistrationTest")]
+        [InlineData("https://qa.afterschoolhq.com/testaccount/activity/testactivity")]
+        public void ProcessParentRegistrationTest(string url)
         {
             //Arrange
             var studentUser = WebUserFactory.Create(msgs, dc);
@@ -118,10 +122,10 @@ namespace AfterSchoolLibraryTests.Tests
 
             //Act
             var parentDetails = studentAccount.ProcessParentRegistration(
-                                firstName: "John",
-                                lastName: "David",
-                                email: $"don+{DateTime.Now.Ticks}@example.com",
-                                browserUrl: "https://qa.afterschoolhq.com/testaccount/activity/testactivity",
+                                firstName: person.FirstName,
+                                lastName: person.LastName,
+                                email: person.Email,
+                                browserUrl: url,
                                 allowTextMessages: true,
                                 questionAnswerModel: questionAnswerModel,
                                 studentUser: studentUser,
