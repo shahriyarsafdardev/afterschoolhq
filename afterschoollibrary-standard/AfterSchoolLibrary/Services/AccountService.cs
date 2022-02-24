@@ -2756,6 +2756,8 @@ namespace AfterSchoolLibrary.Services
                             {
                                 //..Location, ProfileHeaderImageUrl
                                 var location = Location.Load(Convert.ToInt32(row["LocationId"]));
+                                response.Latitude = location.Latitude.IsNotEmpty() ? ToLatitudeLongitude(location.Latitude.Value) : "" ;
+                                response.Longitude = location.Longitude.IsNotEmpty() ? ToLatitudeLongitude(location.Longitude.Value) : "";
                                 response.Location = location.FormatCityState(false);
 
                                 if (response.ProfileHeaderImageUrl.IsEmpty())
@@ -2779,6 +2781,22 @@ namespace AfterSchoolLibrary.Services
             }
 
             return null;
+        }
+
+        public static string ToLatitudeLongitude(decimal? val)
+        {
+            var latLongFormatted = "";
+            var firstFiveDigits = val.IsNotEmpty() ? val.Value.ToString().Substring(0, 5) : "";
+
+            if(firstFiveDigits.IsNotEmpty())
+            {
+                if (firstFiveDigits.Contains("-"))
+                    latLongFormatted = firstFiveDigits.Substring(0, 3) + "." + firstFiveDigits.Substring(3, 2);
+                else
+                    latLongFormatted = firstFiveDigits.Substring(0, 2) + "." + firstFiveDigits.Substring(2, 2);
+            }
+
+            return latLongFormatted;
         }
 
         #endregion
