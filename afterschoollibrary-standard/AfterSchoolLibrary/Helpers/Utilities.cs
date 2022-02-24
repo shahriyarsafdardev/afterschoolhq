@@ -387,4 +387,11 @@ namespace AfterSchoolLibrary.Helpers
         public string key { get; set; }
         public string value { get; set; }
     }
+
+    public class FilesCollection
+    {
+        public int ContentLength { get;set; }
+        public string FileName { get; set; }
+        public Stream InputStream { get;set;}        
+    }
 }

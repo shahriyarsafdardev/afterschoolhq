@@ -10,7 +10,7 @@ namespace AfterSchoolLibraryTests.Factories
     {
         public static WebUser Create(SystemMessages msgs, DatabaseConnection dc)
         {
-            var obj = new WebUser() { FirstName = "Don", LastName = "John", Email = $"don+{DateTime.Now.Ticks}@example.com" };
+            var obj = new WebUser() { FirstName = "Don", LastName = "John", Email = $"don+{DateTime.Now.Ticks}@example.com", IsActive = true };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
