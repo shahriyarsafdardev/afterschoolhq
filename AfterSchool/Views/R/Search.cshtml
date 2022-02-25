@@ -356,7 +356,8 @@
                     var newmarker = new google.maps.Marker({
                         position: new google.maps.LatLng(places[i].Latitude, places[i].Longitude),
                         map: map,
-                        title: places[i].AccountName
+                        title: places[i].AccountName,
+                        icon: '../img/red-icon-map.png'
                     });
                     newmarker['infowindow'] = new google.maps.InfoWindow({
                         content: places[i].AccountName
