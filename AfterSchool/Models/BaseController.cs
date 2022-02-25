@@ -257,6 +257,7 @@ namespace AfterSchool.Models
         {
             CookieVariables.CurrentUser = null;
             CookieVariables.CurrentAccount = null;
+            CookieVariables.ParentAccount = null;
         }
 
         internal ActionResult Logout(string returnUrl = null, bool goToLoginScreenBeforeReturn = false)
@@ -265,6 +266,7 @@ namespace AfterSchool.Models
             SessionVariables.OriginalLoggedInUser = null;
             SessionVariables.CurrentAccount = null;
             SessionVariables.CurrentRegistrant = null;
+            SessionVariables.ParentAccount = null;
             ClearCookies();
 
             if (returnUrl.IsNotEmpty() && !goToLoginScreenBeforeReturn)

@@ -30,8 +30,12 @@
             </li>
             @if (SessionVariables.CurrentUser.HasMultipleAccounts())
             {
-                var providerAccount = SessionVariables.CurrentUser.GetAccounts().Where(a => a.AccountTypeId != AccountType.Registrant).ToList().FirstOrDefault();
-                <li class=""><a href="@Url.Action("select", "login", new { area = "", id = providerAccount.Uid.ToString() })"><i class="icon s7-shuffle"></i> Switch to @providerAccount.Name </a></li>
+                var providerAccount = SessionVariables.CurrentUser.GetAccounts().Where(a => a.AccountTypeId != AccountType.Registrant).FirstOrDefault();
+                if (providerAccount != null)
+                {
+                    <li class=""><a href="@Url.Action("select", "login", new { area = "", id = providerAccount.Uid.ToString() })"><i class="icon s7-shuffle"></i> Switch to @providerAccount.Name </a></li>
+                }
+
             }
             <li>
                 <a href="@Url.Action("index", "logout", new { area = "" })"><i class="icon s7-power"></i> Logout</a>

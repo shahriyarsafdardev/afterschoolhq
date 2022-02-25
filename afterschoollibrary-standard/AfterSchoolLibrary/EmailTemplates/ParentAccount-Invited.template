@@ -1,0 +1,7 @@
+﻿<div>
+	<p>Hey @Model.ParentFirstName,</p>
+
+	<p>@Model.CustomMessage</p>
+
+	<p>Please create your own AfterSchool HQ account <a href="@Model.InviteUrl">@Model.InviteUrl</a> to learn about and approve of activities your child requests to participate in.</p>
+</div>

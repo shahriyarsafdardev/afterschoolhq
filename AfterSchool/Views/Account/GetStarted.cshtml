@@ -9,8 +9,8 @@
     var savedEmail = Model.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail)?.Value;
     var showStep1 = currentUser.IsEmpty() && savedEmail.IsBlank();
     var isDuringProfileSetup = currentUser.IsNotEmpty() || savedEmail.IsNotBlank();
-
-    var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
+    var isStudentRegistrationEnabled = ViewBag.StudentRegistrationEnabled != null ? (bool)ViewBag.StudentRegistrationEnabled : false;
+    var cleverSsoEnabled = ViewBag.CleverSsoEnabled != null ? (bool)ViewBag.CleverSsoEnabled : false;
 }
 
 @{
@@ -30,15 +30,13 @@
 }
 
 @{
-    Html.RenderPartial
-            (
-                "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
-                new RegistrationHeaderViewModel(participationObject, true),
-                new ViewDataDictionary()
-                {
-    { "hidebuttons", true }
-                }
-            );
+    Html.RenderPartial(
+        "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
+        new RegistrationHeaderViewModel(participationObject, true),
+        new ViewDataDictionary()
+        {
+            { "hidebuttons", true }
+        });
 }
 
 <div>
@@ -47,100 +45,100 @@
             <div class="panel-body">
 
                 <div class="text-center reg-instructions">
-                    <p><strong>Step 1 of 6: <u>Parent</u> Sign Up / Sign in <!--Parent / Guardian Information--></strong></p>
+                    <p> <strong> Sign Up / Sign in </strong></p>
                 </div>
-
+                <input type="hidden" id="isStudentRegistrationEnabled" name="isStudentRegistrationEnabled" value="@isStudentRegistrationEnabled.ToString()" />
                 <div>
                     <form class="form-horizontal" id="signup-form" method="post" action="@Url.Action("getstarted", "account")" onkeydown="return checkAndPostSignupForm(event, '@Json.Encode(showStep1)')">
 
                         @if (showStep1)
                         {
-                                <div class="row" id="email-check-container">
+                            <div class="row" id="email-check-container">
 
-                                    <div>
-                                        <p class="text-center reg-login new-account">
-                                            Please enter your email to get started.
-                                        </p>
+                                <div>
+                                    <p class="text-center reg-login new-account">
+                                        Please enter your email to get started.
+                                    </p>
+
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="col-md-3 control-label">
+                                        <label for="email-check">
+                                            Email <span class='text-danger'>*</span>
+                                        </label>
                                     </div>
-
-                                    <div class="form-group">
-                                        <div class="col-md-3 control-label">
-                                            <label for="email-check">
-                                                Email <span class='text-danger'>*</span>
-                                            </label>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <input type="email"
+                                    <div class="col-md-6">
+                                        <input type="email"
                                                id="email-check"
                                                name="email-check"
                                                class="form-control"
                                                onfocus="this.select()"
                                                required="required"
                                                value="" />
-                                        </div>
                                     </div>
-                                    <div class="col-md-6 col-md-offset-3">
-                                        <div class="padding-v-20">
-                                            <button type="button" id="btn-check-email" class="btn btn-register-primary btn-lg">Next &raquo;</button>
-                                        </div>
-                                    </div>
-
-                                    <div class="clearfix"></div>
-
-                                    <div class="col-md-6 col-md-offset-3 hide" id="account-confirmation-text">
-                                        <div role="alert" class="alert alert-success alert-icon">
-                                            <div class="icon">
-                                                <span class="s7-check-circle"></span>
-                                            </div>
-                                            <div class="message">
-                                                <p class="text-center text-medium-small">
-                                                    We have sent you an email in order to complete your account and register. <br />
-                                                    If you do not receive an email check your spam box. If you still cannot find it please contact us at <a href="@AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress">@AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress</a>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="clearfix"></div>
                                 </div>
+                                
+                                <div class="col-md-6 col-md-offset-3">
+                                    <div class="padding-v-20">
+                                        <button type="button" id="btn-check-email" class="btn btn-register-primary btn-lg" onclick="return checkRegistrantEmail()">Next &raquo;</button>
+                                        <button type="button" id="btn-student-signup" class="showLoader btn btn-register-primary btn-lg hidden" style="background-color: #fff; color: #00ae85; border: 2px solid;" onclick="return studentSignup(event)">Sign Up As Student</button>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+
+                                <div class="col-md-6 col-md-offset-3 hide" id="account-confirmation-text">
+                                    <div role="alert" class="alert alert-success alert-icon">
+                                        <div class="icon">
+                                            <span class="s7-check-circle"></span>
+                                        </div>
+                                        <div class="message">
+                                            <p class="text-center text-medium-small">
+                                                We have sent you an email in order to complete your account and register. <br />
+                                                If you do not receive an email check your spam box. If you still cannot find it please contact us at <a href="@AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress">@AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress</a>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="clearfix"></div>
+                            </div>
                         }
 
-                    <div id="account-registration" class="@(showStep1 ? "hide" : "")">
+                        <div id="account-registration" class="@(showStep1 ? "hide" : "")">
 
-                        <div class="row">
-                            <div class="col-md-6 col-md-offset-3">
-                                <div role="alert" class="alert alert-success alert-icon">
-                                    <div class="icon">
-                                        <span class="s7-check-circle"></span>
-                                    </div>
-                                    <div class="message">
-                                        <p class="text-center reg-login new-account">
-                                            Please enter your info below to begin registration.
-                                        </p>
+                            <div class="row">
+                                <div class="col-md-6 col-md-offset-3">
+                                    <div role="alert" class="alert alert-success alert-icon">
+                                        <div class="icon">
+                                            <span class="s7-check-circle"></span>
+                                        </div>
+                                        <div class="message">
+                                            <p class="text-center reg-login new-account">
+                                                Please enter your info below to begin registration.
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
                             @foreach (var qvm in Model.Where(qvm => !qvm.Hide))
                             {
-                                Html.RenderPartial(
-                                    "~/Views/Shared/Form/_Question.cshtml",
-                                    qvm);
+                                Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
 
                                 if (qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone)
                                 {
-                                        <div class="row">
-                                            <div class="col-md-6 col-md-offset-3">
-                                                <div class="am-checkbox text-center">
-                                                    <input type="checkbox" id="textnotifications" name="textnotifications" value="1" @(UILabel.CheckAllowTextMessage(currentUser) ? " checked=\"checked\" " : "") />
-                                                    <label for="textnotifications">
-                                                        I would like to receive text messages about @(UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()).
-                                                        Notifications may include information about attendance, reminders, and other important information.
-                                                    </label>
-                                                </div>
+                                    <div class="row">
+                                        <div class="col-md-6 col-md-offset-3">
+                                            <div class="am-checkbox text-center">
+                                                <input type="checkbox" id="textnotifications" name="textnotifications" value="1" @(UILabel.CheckAllowTextMessage(currentUser) ? " checked=\"checked\" " : "") />
+                                                <label for="textnotifications">
+                                                    I would like to receive text messages about @(UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()).
+                                                    Notifications may include information about attendance, reminders, and other important information.
+                                                </label>
                                             </div>
                                         </div>
+                                    </div>
                                 }
                             }
 
@@ -165,34 +163,34 @@
                                 </div>
                                 if (AfterSchoolLibrary.Helpers.Utilities.IsProduction || AfterSchoolLibrary.Helpers.Utilities.IsStaging)
                                 {
-                                        <div class="row padding-v-20">
-                                            <div class="form-group text-center">
+                                    <div class="row padding-v-20">
+                                        <div class="form-group text-center">
                                             @{
-                                                Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", ""); 
+                                                Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "");
                                             }
-                                            </div>
                                         </div>
+                                    </div>
                                 }
                             }
 
-                        <div class="row padding-v-20">
-                            <div class="col-md-6 col-md-offset-3">
-                                <div class="am-checkbox text-center">
-                                    <input type="checkbox" id="agree" name="agree" value="1" @(Request["agree"] == "1" ? " checked=\"checked\" " : "") />
-                                    <label for="agree">
-                                        I agree to the <a href="@Url.Action("tos", "legal")" target="_blank">terms and conditions</a> of using @UILabel.ProductName()
-                                    </label>
+                            <div class="row padding-v-20">
+                                <div class="col-md-6 col-md-offset-3">
+                                    <div class="am-checkbox text-center">
+                                        <input type="checkbox" id="agree" name="agree" value="1" @(Request["agree"] == "1" ? " checked=\"checked\" " : "") />
+                                        <label for="agree">
+                                            I agree to the <a href="@Url.Action("tos", "legal")" target="_blank">terms and conditions</a> of using @UILabel.ProductName()
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="row padding-v-20">
+                                <div class="col-md-6 col-md-offset-3">
+                                    <button type="submit" id="btn-create-account" class="btn btn-register-primary btn-lg">Save &amp; Continue &raquo;</button>
                                 </div>
                             </div>
                         </div>
-
-
-                        <div class="row padding-v-20">
-                            <div class="col-md-6 col-md-offset-3">
-                                <button type="submit" id="btn-create-account" class="btn btn-register-primary btn-lg">Save &amp; Continue &raquo;</button>
-                            </div>
-                        </div>
-                    </div>
 
                         <div class="row">
                             <div class="padding-v-20 text-center">
@@ -215,15 +213,20 @@
         participationObject,
         new ViewDataDictionary()
         {
-{ "IsDuringCheckout", true }
-        }
-    );
+            { "IsDuringCheckout", true }
+        });
 }
 
 <script>
 
-    function sendAccountConfirmation(email) {
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#signup-form').submit(function () {
+            $('#btn-create-account').html('Saving...');
+            $('#btn-create-account').prop('disabled', true);
+        });
+    });
 
+    function sendAccountConfirmation(email) {
         $.get(
             '/services/sendaccountconfirmationemail?email=' + encodeURIComponent(email) + '&redirecturl=@(Server.UrlEncode(participationObject.GetRegistrationPageUrl()))',
             function (data) {
@@ -235,60 +238,69 @@
                 }
             }
         );
-
     }
 
-    PageEvent.add(PageEvent.AFTER_INIT, function () {
-        $('#signup-form').submit(function () {
-            $('#btn-create-account').html('Saving...');
-            $('#btn-create-account').prop('disabled', true);
-        });
+    function checkRegistrantEmail() {
+        showLoader();
+        var email = $('#email-check').val();
+        var btnCheckEmail = $('#btn-check-email');
+        var originalBtnText = btnCheckEmail.html();
 
-        $('#btn-check-email').click(function () {
-            var email = $('#email-check').val();
-            var originalBtnText = $('#btn-check-email').html();
+        if (btnCheckEmail.hasClass("newParentSignUp")) {
+            showSignUpForm(email);
+            return;
+        }
 
-            $('#btn-check-email').html('Checking...');
+        btnCheckEmail.html('Checking...');
 
-            $.get(
-                '/services/checkaccountstatus?email=' + encodeURIComponent(email),
-                function (data) {
-                    if (data && data.status == 'ok') {
+        $.get(
+            '/services/checkaccountstatus?email=' + encodeURIComponent(email),
+            function (data) {
+                if (data && data.status == 'ok') {
+                    hideLoader();
+                    if (data.isRegistered) {
+                        // show login form
 
-                        if (data.isRegistered) {
-                            // show login form
+                        btnCheckEmail.html('Logging In...');
 
-                            $('#btn-check-email').html('Logging In...');
+                        setTimeout(function () {
+                            $('#modal-login').addClass('md-show');
+                            $('#lm-login-username').val(email);
 
                             setTimeout(function () {
-                                $('#modal-login').addClass('md-show');
-                                $('#lm-login-username').val(email);
-
-                                setTimeout(function () {
-                                    $('#lm-login-password').focus();
-                                }, 500);
-                            }, 1000);
-
-                        } else if (data.isInUse) {
-                            // send email
-                            sendAccountConfirmation(email);
-                        } else {
-                            // show sign up form
-                            setTimeout(function () {
-                                $('#account-registration').removeClass('hide');
-                                $('#email-check-container').addClass('hide');
-                                $('#@Model.Find(qvm => qvm.Question.QuestionTypeId == QuestionType.Email).Id').val(email);
+                                $('#lm-login-password').focus();
                             }, 500);
-                        }
+                        }, 1000);
 
-                    } else {
-                        $('#btn-check-email').html(originalBtnText);
-                        Notifications.showErrors(data.messages);
+                    } else if (data.isInUse) {
+                        // send email
+                        sendAccountConfirmation(email);
                     }
+                    else if (!data.isInUse && !data.isRegistered) {
+                        var isStudentRegistrationEnabled = $("#isStudentRegistrationEnabled").val();
+                        if (isStudentRegistrationEnabled !== null && isStudentRegistrationEnabled.toLowerCase() == 'true') {
+                           showStudentRegistration();
+                        }
+                        else {
+                            showSignUpForm(email);
+                        }
+                    }
+                } else {
+                    hideLoader();
+                    btnCheckEmail.html(originalBtnText);
+                    Notifications.showErrors(data.messages);
                 }
-            );
-        });
-    });
+            }
+        );
+    }
+
+    function studentSignup(event) {
+        event.preventDefault();
+        showLoader();
+        var url = '@Url.Action("StudentRegistration", "Account", new { regaccount = Request["regaccount"] })';
+        localStorage.setItem('studentRegisterEmail', $("#email-check").val());
+        window.location.href = url;
+    }
 
     function checkAndPostSignupForm(event, isFirstStep) {
         if (isFirstStep && event.keyCode == 13) {
@@ -296,5 +308,19 @@
             $('#btn-check-email').click();
             return false;
         }
+    }
+
+    function showSignUpForm(email) {
+        // show sign up form
+        $('#account-registration').removeClass('hide');
+        $('#email-check-container').addClass('hide');
+        $('#@Model.Find(qvm => qvm.Question.QuestionTypeId == QuestionType.Email).Id').val(email);
+        hideLoader();
+    }
+    function showStudentRegistration() {
+        $('#btn-check-email').html('Sign Up As Parent');
+        $('#btn-check-email').addClass("newParentSignUp");
+        $('#btn-student-signup').removeClass('hidden');
+        $('#email-check').attr('disabled', 'disabled');
     }
 </script>

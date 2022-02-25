@@ -80,6 +80,18 @@ namespace AfterSchool.Models
             }
         }
 
+        public static string ParentAccount
+        {
+            get
+            {
+                return GetCookie("ParentAccount");
+            }
+            set
+            {
+                SetCookie("ParentAccount", value);
+            }
+        }
+
         public static string ShowISYPModal
         {
             get
