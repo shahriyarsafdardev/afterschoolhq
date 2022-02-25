@@ -286,8 +286,6 @@
 
         function initMap() {
 
-            // For more details see 
-            // http://code.google.com/apis/maps/documentation/javascript/styling.html
             var noPOILabels = [
                 {
                     featureType: "poi",
@@ -312,42 +310,8 @@
 
             map.mapTypes.set('no_poi', noPOIMapType);
             map.setMapTypeId('no_poi');
-            var request = {
-                location: { lat: 39.76, lng: -86.15 },
-                radius: '10000',
-                type: "school",
-            };
-
-
-            service = new google.maps.places.PlacesService(map);
-            //service.nearbySearch(request, callback);
-
         }
 
-        function callback(results, status) {
-            if (status == google.maps.places.PlacesServiceStatus.OK) {
-                for (var i = 0; i < results.length; i++) {
-                    createMarker(results[i]);
-                }
-            }
-        }
-
-        function createMarker(place) {
-            if ((place.name.toLowerCase().includes('school'))) {
-                if (!place.geometry || !place.geometry.location) return;
-
-                var newmarker  = new google.maps.Marker({
-                    map,
-                    position: place.geometry.location,
-                });
-                infowindow = new google.maps.InfoWindow();
-                google.maps.event.addListener(newmarker, "click", () => {
-                    infowindow.setContent(place.name);
-                    infowindow.open(map, newmarker);
-                });
-                marker.push(newmarker);
-            }
-        }
 
         function addMarkersOnMap(places) {
             for (i = 0; i < places.length; i++) {
@@ -370,74 +334,6 @@
                 }
             }
         }
-        //function initMap() {
-        //    // Create the map.
-        //    const pyrmont = { lat: 39.76, lng: -86.15  };
-        //    const map = new google.maps.Map(document.getElementById("map"), {
-        //        center: pyrmont,
-        //        zoom: 12,
-        //    });
-        //    // Create the places service.
-        //    const service = new google.maps.places.PlacesService(map);
-        //    let getNextPage;
-        //    const moreButton = document.getElementById("more");
-
-        //    moreButton.onclick = function () {
-        //        moreButton.disabled = true;
-        //        if (getNextPage) {
-        //            getNextPage();
-        //        }
-        //    };
-
-        //    // Perform a nearby search.
-        //    service.nearbySearch(
-        //        { location: pyrmont, radius: 100000, type: "school" },
-        //        (results, status, pagination) => {
-        //            if (status !== "OK" || !results) return;
-
-        //            addPlaces(results, map);
-        //            moreButton.disabled = !pagination || !pagination.hasNextPage;
-        //            if (pagination && pagination.hasNextPage) {
-        //                getNextPage = () => {
-        //                    // Note: nextPage will call the same handler function as the initial call
-        //                    pagination.nextPage();
-        //                };
-        //            }
-        //        }
-        //    );
-        //}
-
-        //function addPlaces(places, map) {
-        //    const placesList = document.getElementById("places");
-
-        //    for (const place of places) {
-                
-        //        if (place.geometry && place.geometry.location && (place.name.toLowerCase().includes('school'))) {
-        //            const image = {
-        //                url: place.icon,
-        //                size: new google.maps.Size(71, 71),
-        //                origin: new google.maps.Point(0, 0),
-        //                anchor: new google.maps.Point(17, 34),
-        //                scaledSize: new google.maps.Size(25, 25),
-        //            };
-
-        //            new google.maps.Marker({
-        //                map,
-        //                icon: image,
-        //                title: place.name,
-        //                position: place.geometry.location,
-        //            });
-
-        //            const li = document.createElement("li");
-
-        //            li.textContent = place.name;
-        //            placesList.appendChild(li);
-        //            li.addEventListener("click", () => {
-        //                map.setCenter(place.geometry.location);
-        //            });
-        //        }
-        //    }
-        //}
 
     </script>
 }
