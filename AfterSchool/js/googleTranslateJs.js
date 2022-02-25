@@ -1,5 +1,5 @@
 ﻿function googleTranslateElementInit() {
-    new google.translate.TranslateElement({ pageLanguage: 'en', includedLanguages: 'en,es,fr,ht', layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL }, 'google_translate_element');
+    new google.translate.TranslateElement({ pageLanguage: 'en', includedLanguages: 'en,es,fr,ht,sw', layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL }, 'google_translate_element');
 }
 
 function triggerHtmlEvent(element, eventName) {
@@ -37,14 +37,20 @@ $(document).ready(function () {
     function setFlagHTML(value) {
 
         var flagHTML = 'English';
-        if (value == "es") {
-            flagHTML = 'Espanol';
-        }
-        else if (value == "fr") {
-            flagHTML = 'French';
-        }
-        else if (value == "ht") {
-            flagHTML = 'Haitian Creole';
+
+        switch (value) {
+            case "es":
+                flagHTML = 'Espanol';
+                break;
+            case "fr":
+                flagHTML = 'French';
+                break;
+            case "ht":
+                flagHTML = 'Haitian Creole';
+                break;
+            case "sw":
+                flagHTML = 'Swahili';
+                break;
         }
 
         $("#dropdownMenuButton").html(flagHTML);
@@ -68,6 +74,9 @@ $(document).ready(function () {
                 break;
             case "ht":
                 selectIndex = 2;
+                break;
+            case "sw":
+                selectIndex = 4;
                 break;
         }
         a.selectedIndex = selectIndex;
