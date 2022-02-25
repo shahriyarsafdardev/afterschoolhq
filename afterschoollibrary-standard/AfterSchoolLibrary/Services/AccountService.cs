@@ -2806,9 +2806,19 @@ namespace AfterSchoolLibrary.Services
             if(firstFiveDigits.IsNotEmpty())
             {
                 if (firstFiveDigits.Contains("-"))
-                    latLongFormatted = firstFiveDigits.Substring(0, 3) + "." + firstFiveDigits.Substring(3, 2);
+                {
+                    if(firstFiveDigits.Contains("."))
+                        latLongFormatted = firstFiveDigits;
+                    else
+                        latLongFormatted = firstFiveDigits.Substring(0, 3) + "." + firstFiveDigits.Substring(3, 2);
+                }
                 else
-                    latLongFormatted = firstFiveDigits.Substring(0, 2) + "." + firstFiveDigits.Substring(2, 2);
+                {
+                    if (firstFiveDigits.Contains("."))
+                        latLongFormatted = firstFiveDigits;
+                    else
+                        latLongFormatted = firstFiveDigits.Substring(0, 2) + "." + firstFiveDigits.Substring(2, 2);
+                }
             }
 
             return latLongFormatted;
