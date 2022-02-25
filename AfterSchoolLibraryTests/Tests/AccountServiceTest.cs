@@ -18,6 +18,8 @@ namespace AfterSchoolLibraryTests.Tests
         private WebUser user { get; set; }
         private Account account { get; set; }
 
+        WebUser person = new WebUser() { FirstName = "Don", LastName = "John", Email = $"don+{DateTime.Now.Ticks}@example.com", IsActive = true };
+
         public AccountServiceTest(ITestOutputHelper output) : base(output)
         {
             user = WebUserFactory.Create(msgs, dc);
@@ -48,6 +50,100 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.True(account.ID.HasValue);
         }
+
+        [Theory(DisplayName = "ProcessStudentRegistrationTest")]
+        [InlineData(false)] //Parent doesn't have a account
+        [InlineData(true)] //Parent does have a account
+        public void ProcessStudentRegistrationTest(bool parentAccountExists)
+        {
+            //Arrange
+            var user = WebUserFactory.Create(msgs, dc);
+            var parentAccount = AccountFactory.CreateWithFreePackage(user, AccountType.Registrant, msgs, dc);
+            var form = FormFactory.Create(parentAccount, msgs, dc);
+            var formQuestionGroup = FormQuestionGroupFactory.Create(formId: form.ID.Value, isDeleted: false, msgs: msgs, dc: dc);
+            if (!parentAccountExists)
+                parentAccount = null;
+
+            var questionAnswerModel = FormQuestionFactory.GetPersonalInformationQuestionAnswerModel(formQuestionGroup, msgs, dc);
+
+            //Act
+            var studentDetails = AccountService.ProcessStudentRegistration(
+                        firstName: person.FirstName,
+                        lastName: person.LastName,
+                        email: person.Email,
+                        phone: null,
+                        password: "12345678",
+                        schoolLocationId: null,
+                        allowTextMessages: true,
+                        isAfterSchool: true,
+                        questionAnswerModel: questionAnswerModel,
+                        parentAccount,
+                        msgs: msgs);
+            var studentAccount = studentDetails.Item1;
+            var studentUser = studentDetails.Item2;
+            var studentRegistrant = studentDetails.Item3;
+
+            //Assert
+            if (parentAccountExists)
+            {
+                Assert.True(studentAccount.IsEmpty());
+                Assert.True(studentUser.IsNotEmpty());
+                Assert.True(studentRegistrant.IsNotEmpty());
+                Assert.True(studentRegistrant.AccountId == parentAccount.ID);
+                Assert.True(studentRegistrant.WebUserId == studentUser.ID);
+                Assert.True(studentRegistrant.IsParentOrGuardian == false);
+                Assert.True(studentRegistrant.IsMaster == true);
+            }
+            else
+            {
+                Assert.True(studentAccount.IsNotEmpty());
+                Assert.True(studentUser.IsNotEmpty());
+                Assert.True(studentRegistrant.IsNotEmpty());
+                Assert.True(studentAccount.CreatedBy == studentUser.ID);
+                Assert.True(studentAccount.AccountTypeId == AccountType.Registrant);
+                Assert.True(studentRegistrant.AccountId == studentAccount.ID);
+                Assert.True(studentRegistrant.WebUserId == studentUser.ID);
+                Assert.True(studentRegistrant.IsParentOrGuardian == false);
+                Assert.True(studentRegistrant.IsMaster == true);
+            }
+        }
+
+        [Theory(DisplayName = "ProcessStudentRegistrationTest")]
+        [InlineData("https://qa.afterschoolhq.com/testaccount/activity/testactivity")]
+        public void ProcessParentRegistrationTest(string url)
+        {
+            //Arrange
+            var studentUser = WebUserFactory.Create(msgs, dc);
+            var studentAccount = AccountFactory.CreateWithFreePackage(studentUser, AccountType.Registrant, msgs, dc);
+            var form = FormFactory.Create(studentAccount, msgs, dc);
+            var formQuestionGroup = FormQuestionGroupFactory.Create(formId: form.ID.Value, isDeleted: false, msgs: msgs, dc: dc);
+
+            var questionAnswerModel = FormQuestionFactory.GetPersonalInformationQuestionAnswerModel(formQuestionGroup, msgs, dc);
+
+            //Act
+            var parentDetails = studentAccount.ProcessParentRegistration(
+                                firstName: person.FirstName,
+                                lastName: person.LastName,
+                                email: person.Email,
+                                browserUrl: url,
+                                allowTextMessages: true,
+                                questionAnswerModel: questionAnswerModel,
+                                studentUser: studentUser,
+                                msgs: msgs);
+
+            var parentUser = parentDetails.Item1;
+            var parentRegistrant = parentDetails.Item2;
+            //ParentUser is created on Student Account && Parentregistrant is created on Student Account. 
+
+            //Assert
+            Assert.True(parentUser.IsNotEmpty());
+            Assert.True(parentUser.CreatedBy == studentUser.ID);
+            Assert.True(parentRegistrant.IsNotEmpty());
+            Assert.True(parentRegistrant.AccountId == studentAccount.ID);
+            Assert.True(parentRegistrant.IsParentOrGuardian == true);
+            Assert.True(parentRegistrant.IsMaster == true);
+            Assert.True(parentRegistrant.WebUserId == parentUser.ID);
+        }       
 
         [Fact(Skip = "Not sure")]
         public void CreateSampleAccountTest()

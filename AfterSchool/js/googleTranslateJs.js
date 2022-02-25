@@ -1,5 +1,5 @@
 ﻿function googleTranslateElementInit() {
-    new google.translate.TranslateElement({ pageLanguage: 'en', includedLanguages: 'en,es,fr', layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL }, 'google_translate_element');
+    new google.translate.TranslateElement({ pageLanguage: 'en', includedLanguages: 'en,es,fr,ht', layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL }, 'google_translate_element');
 }
 
 function triggerHtmlEvent(element, eventName) {
@@ -43,6 +43,9 @@ $(document).ready(function () {
         else if (value == "fr") {
             flagHTML = 'French';
         }
+        else if (value == "ht") {
+            flagHTML = 'Haitian Creole';
+        }
 
         $("#dropdownMenuButton").html(flagHTML);
         $(".selectedLang").removeClass('selectedLang');
@@ -58,10 +61,13 @@ $(document).ready(function () {
                 selectIndex = 0;
                 break;
             case "es":
-                selectIndex = 2;
+                selectIndex = 3;
                 break;
             case "fr":
                 selectIndex = 1;
+                break;
+            case "ht":
+                selectIndex = 2;
                 break;
         }
         a.selectedIndex = selectIndex;

@@ -2346,5 +2346,71 @@ namespace AfterSchoolLibrary.Helpers
 
             return "";
         }
+
+        public static SystemMessages SendParentAccountInvitedEmail(string parentFirstName, string studentFirstName, string inviteUrl, string message, string parentEmail)
+        {
+            var msgs = new SystemMessages();
+
+            var model = new NameValueCollection()
+            {
+                { "ParentFirstName", parentFirstName },
+                { "RegistrantFirstName", studentFirstName },
+                { "InviteUrl", inviteUrl },
+                { "CustomMessage", message }
+            };
+
+            var body = ProcessTemplate(
+                EmailTemplates.ParentAccount_Invited,
+                model,
+                "accountinvited",
+                msgs
+                );
+
+            var subject = $"{studentFirstName} has invited you for account creation on AfterSchool HQ!";
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(true),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(parentEmail),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(true)
+                );
+
+            msgs.AddRange(mailMsgs);
+            return msgs;
+        }
+
+        public static SystemMessages SendParentStudentAccountEmail(string parentFirstName, string studentFirstName, string loginURL , string parentEmail, string activityURL)
+        {
+            var msgs = new SystemMessages();
+
+            var model = new NameValueCollection()
+            {
+                { "ParentFirstName", parentFirstName },
+                { "RegistrantFirstName", studentFirstName },
+                { "LoginUrl", loginURL },
+                { "ActivityUrl", activityURL }
+            };
+
+            var body = ProcessTemplate(
+                EmailTemplates.ParentStudentAccount_Approval,
+                model,
+                "accountinvited",
+                msgs
+                );
+
+            var subject = $"{studentFirstName} need your approval for account creation on AfterSchool HQ!";
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(true),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(parentEmail),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(true)
+                );
+
+            msgs.AddRange(mailMsgs);
+            return msgs;
+        }
     }
 }
