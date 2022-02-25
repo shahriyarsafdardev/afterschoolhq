@@ -14,6 +14,27 @@
         {
             <div class="form-group">
                 <label class="col-md-3 control-label">
+                    Allow Students To Register
+                </label>
+                <div class="col-md-9" @if (!showAllowStudentRegistration){ <text> onclick="return showUpgradeMyPlan('@(allowStudentRegPackage.IsNotEmpty() ? allowStudentRegPackage.Name : "")',@(allowStudentRegPackage.IsNotEmpty() ? allowStudentRegPackage.ID.Value.ToString() : ""))" </text> }>
+                    @{
+                        Html.RenderPartial(
+                          "~/Views/Shared/_SwitchButton.cshtml",
+                          Model.IsAllowedStudentToRegister,
+                          new ViewDataDictionary()
+                          {
+                            { "checkboxname", "isStudentAllowed" },
+                            { "checkboxid", "isStudentAllowed" },
+                            { "disabled", !showAllowStudentRegistration },
+                            { "onclick", "showParentConsent(this);"},
+                            { "required", false }
+                          });
+                    }
+                </div>
+            </div>
+
+            <div class="form-group hidden" id="parentConsent">
+                <label class="col-md-3 control-label">
                     Requires Parental Consent
                 </label>
                 <div class="col-md-9" @if (!showAllowStudentRegistration){ <text> onclick="return showUpgradeMyPlan('@(allowStudentRegPackage.IsNotEmpty() ? allowStudentRegPackage.Name : "")',@(allowStudentRegPackage.IsNotEmpty() ? allowStudentRegPackage.ID.Value.ToString() : ""))" </text> }>
@@ -73,3 +94,16 @@
 
     </div>
 </div>
+
+<script>
+    function showParentConsent(e) {
+        var isStudentAllowed = $("#isStudentAllowed").is(":checked");
+        if (isStudentAllowed) {
+            $('#parentConsent').removeClass("hidden");
+        }
+        else {
+            $('#parentConsent').addClass("hidden");
+            $("#requiresparentalconsent").prop('checked', false);
+        }
+    }
+</script>

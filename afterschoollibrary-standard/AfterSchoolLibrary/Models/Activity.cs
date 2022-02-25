@@ -89,6 +89,10 @@ namespace AfterSchoolLibrary.Models
 		/// </summary>
 		public bool RequiresParentalConsent { get { return (bool)MDV["RequiresParentalConsent"].Value; } set { MDV["RequiresParentalConsent"].Value = value; } }
 		/// <summary>
+		/// let us know whether the student is allowed to register
+		/// </summary>
+		public bool IsAllowedStudentToRegister { get { return (bool)MDV["IsAllowedStudentToRegister"].Value; } set { MDV["IsAllowedStudentToRegister"].Value = value; } }
+		/// <summary>
 		/// Physical or Virtual
 		/// </summary>
 		public ActivityLocationType ActivityLocationTypeId { get { return (ActivityLocationType)MDV["ActivityLocationTypeId"].Value; } set { MDV["ActivityLocationTypeId"].Value = value; } }
@@ -147,6 +151,7 @@ namespace AfterSchoolLibrary.Models
 			this.ActivityTypeId = ActivityType.NotSet;
 			this.LeaderTypeId = ActivityLeaderType.NotSet;
 			this.RequiresParentalConsent = false;
+			this.IsAllowedStudentToRegister = false;
 			this.ActivityLocationTypeId = ActivityLocationType.NotSet;
 			this.HidePreciseLocation = false;
 			this.RegistrationFinalized = false;
@@ -199,6 +204,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "AccountActivityGroupId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "LeaderTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RequiresParentalConsent", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "IsAllowedStudentToRegister", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "ActivityLocationTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "VirtualLocationInfo", System.Data.SqlDbType.NVarChar , "1000");
 				_dp.Add(className, "HidePreciseLocation", System.Data.SqlDbType.Bit);
@@ -442,6 +448,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["RequiresParentalConsent"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsAllowedStudentToRegister"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
