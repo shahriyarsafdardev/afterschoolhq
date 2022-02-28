@@ -44,11 +44,6 @@
             }
         </div>
     </div>
-
-    if (neighborhoods.Count > 5)
-    {
-        <p onclick="return loadMore(this, 'list-neighborhoods', '@neighborhoods.Count')" class="show-more">Show more...</p>
-    }
     
     <div class="filter-end-line"></div>
 }
@@ -147,8 +142,6 @@
                 <label for="chk-services-@item.ToLower()" class="filter-body mobile-padding">@item</label>
             </div>
         }
-
-        <p onclick="return loadMore(this, 'list-services', '@services.Length')" class="show-more">Show more...</p>
     </div>
 </div>
 <div class="filter-end-line"></div>
@@ -165,8 +158,6 @@
                 <label for="chk-timing-@item.ToLower()" class="filter-body mobile-padding">@item</label>
             </div>
         }
-
-        <p onclick="return loadMore(this, 'list-timing', '@timing.Length')" class="show-more">Show more...</p>
     </div>
 </div>
 <div class="filter-end-line"></div>
@@ -273,8 +264,6 @@
                 <label for="chk-special-needs-@item.ToLower()" class="filter-body mobile-padding">@item</label>
             </div>
         }
-
-        <p onclick="return loadMore(this, 'list-special-needs', '@specialNeeds.Length')" class="show-more">Show more...</p>
     </div>
 </div>
 <div class="filter-end-line"></div>

@@ -11,8 +11,7 @@
     });
 
     loadFiltersAndInitiateSearch();
-    loadInitialTabs();
-    loadCheckboxs();
+    loadInitialTabs();    
 
     if (!isMobile) {
         $('#filters').show();
@@ -322,30 +321,6 @@ function formatContactPhoneForDirectory() {
         if (input.length > 6) { inputElement.value = `(${zip}) ${middle} ${last}`; } //(xxx) xxx xxxx
         else if (input.length > 3) { inputElement.value = `(${zip}) ${middle}`; }
         else if (input.length > 0) { inputElement.value = `(${zip}`; }
-    }
-}
-
-function loadCheckboxs() {
-    Array.from(
-        $("#list-services, #list-timing, #list-special-needs, #list-neighborhoods")
-    ).forEach(elem => {
-        $(elem).find(".am-checkbox").slice(5).hide();
-    });
-}
-
-function loadMore(element, listId, length) {
-    var listSelector = $(`#${listId} .am-checkbox`);
-    var isShowMore = $(element).text() == 'Show more...';
-
-    if (isShowMore) {
-        //..show more
-        $(element).text('Show less...');
-        listSelector.slice(0, length).slideDown();
-
-    } else {
-        //..hide
-        $(element).text('Show more...');
-        listSelector.slice(5).slideUp();
     }
 }
 
