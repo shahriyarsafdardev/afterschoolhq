@@ -294,8 +294,6 @@
                 }
             ];
 
-            // Create a new StyledMapType object, passing it the array of styles,
-            // as well as the name to be displayed on the map type control.
             var noPOIMapType = new google.maps.StyledMapType(noPOILabels,
                 { name: "Map" });
 
@@ -305,7 +303,10 @@
                 zoom: 10,
                 mapTypeControlOptions: {
                     mapTypeIds: [google.maps.MapTypeId.ROADMAP, 'no_poi']
-                }
+                },
+                disableDefaultUI: true,
+                scaleControl: true,
+                zoomControl: true
             });
 
             map.mapTypes.set('no_poi', noPOIMapType);
@@ -316,7 +317,6 @@
         function addMarkersOnMap(places) {
             for (i = 0; i < places.length; i++) {
                 if (places[i].Latitude != null && places[i].Longitude != "") {
-                    console.log(places[i].Latitude);
                     var newmarker = new google.maps.Marker({
                         position: new google.maps.LatLng(places[i].Latitude, places[i].Longitude),
                         map: map,
