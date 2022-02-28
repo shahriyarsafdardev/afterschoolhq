@@ -9,8 +9,8 @@
     var savedEmail = Model.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail)?.Value;
     var showStep1 = currentUser.IsEmpty() && savedEmail.IsBlank();
     var isDuringProfileSetup = currentUser.IsNotEmpty() || savedEmail.IsNotBlank();
-    var isStudentRegistrationEnabled = ViewBag.StudentRegistrationEnabled != null ? (bool)ViewBag.StudentRegistrationEnabled : false;
-    var cleverSsoEnabled = ViewBag.CleverSsoEnabled != null ? (bool)ViewBag.CleverSsoEnabled : false;
+    var isStudentRegistrationEnabled = ViewBag.StudentRegistrationEnabled != null && (bool)ViewBag.StudentRegistrationEnabled;
+    var cleverSsoEnabled = ViewBag.CleverSsoEnabled != null && (bool)ViewBag.CleverSsoEnabled;
 }
 
 @{
@@ -47,7 +47,6 @@
                 <div class="text-center reg-instructions">
                     <p> <strong> Sign Up / Sign in </strong></p>
                 </div>
-                <input type="hidden" id="isStudentRegistrationEnabled" name="isStudentRegistrationEnabled" value="@isStudentRegistrationEnabled.ToString()" />
                 <div>
                     <form class="form-horizontal" id="signup-form" method="post" action="@Url.Action("getstarted", "account")" onkeydown="return checkAndPostSignupForm(event, '@Json.Encode(showStep1)')">
 
@@ -81,8 +80,9 @@
                                 
                                 <div class="col-md-6 col-md-offset-3">
                                     <div class="padding-v-20">
-                                        <button type="button" id="btn-check-email" class="btn btn-register-primary btn-lg" onclick="return checkRegistrantEmail()">Next &raquo;</button>
-                                        <button type="button" id="btn-student-signup" class="showLoader btn btn-register-primary btn-lg hidden" style="background-color: #fff; color: #00ae85; border: 2px solid;" onclick="return studentSignup(event)">Sign Up As Student</button>
+                                        <button type="button" id="btn-check-email" class="btn btn-register-primary btn-lg" onclick="checkRegistrantEmail()">Next &raquo;</button>
+                                        <button type="button" id="btn-parent-signup" class="btn btn-register-primary btn-lg hidden" onclick="signupAsParent()">Sign Up as Parent</button>
+                                        <button type="button" id="btn-student-signup" class="btn btn-register-primary btn-lg hidden" style="background-color: #fff; color: #00ae85; border: 2px solid;" onclick="return studentSignup(event)">Sign Up As Student</button>
                                     </div>
                                 </div>
                                 <div class="clearfix"></div>
@@ -246,11 +246,6 @@
         var btnCheckEmail = $('#btn-check-email');
         var originalBtnText = btnCheckEmail.html();
 
-        if (btnCheckEmail.hasClass("newParentSignUp")) {
-            showSignUpForm(email);
-            return;
-        }
-
         btnCheckEmail.html('Checking...');
 
         $.get(
@@ -277,8 +272,7 @@
                         sendAccountConfirmation(email);
                     }
                     else if (!data.isInUse && !data.isRegistered) {
-                        var isStudentRegistrationEnabled = $("#isStudentRegistrationEnabled").val();
-                        if (isStudentRegistrationEnabled !== null && isStudentRegistrationEnabled.toLowerCase() == 'true') {
+                        if (@Json.Encode(isStudentRegistrationEnabled)) {
                            showStudentRegistration();
                         }
                         else {
@@ -292,6 +286,11 @@
                 }
             }
         );
+    }
+
+    function signupAsParent() {
+        showLoader();
+        showSignUpForm($('#email-check').val());
     }
 
     function studentSignup(event) {
@@ -317,9 +316,10 @@
         $('#@Model.Find(qvm => qvm.Question.QuestionTypeId == QuestionType.Email).Id').val(email);
         hideLoader();
     }
+
     function showStudentRegistration() {
-        $('#btn-check-email').html('Sign Up As Parent');
-        $('#btn-check-email').addClass("newParentSignUp");
+        $('#btn-check-email').addClass("hidden");
+        $('#btn-parent-signup').removeClass('hidden');
         $('#btn-student-signup').removeClass('hidden');
         $('#email-check').attr('disabled', 'disabled');
     }
