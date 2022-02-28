@@ -43,45 +43,44 @@
 
                 <% } %>
 
-
-                <% if(searchResult.IsELearningCenter) { %>
-
-                <div class="pull-right margin-l-10">
-                    <span class="badge badge-success profile-badge text-small">
-                        E-Learning Center
-                    </span>
-                </div>
-
-                <% } %>
-
             </div>
             <div class="panel-body" style="position: relative;">
 
                 <div class="text-wrap directory-panel-account-name">
-                    <h3 style="height: 51px; overflow-y: hidden;">
+                    <h3 style="overflow-y: hidden;" class="margin-bottom-zero">
                         <strong title="<%= searchResult.AccountName %>"><%= searchResult.AccountName %></strong>
                     </h3>
                 </div>
 
                 <div class="clearfix"></div>
                 <div class="text-wrap">
-                    <span class="text-medium-small directory-panel-profile-title">
-                        <%= searchResult.ProfileHeadline %>
-                    </span>
+                    <h4 class="margin-bottom-zero">
+                        <%= searchResult.Location %>
+                    </h4>
                 </div>
-
+                <div class="clearfix"></div>
                 <div class="text-wrap">
-                    <span class="text-medium-small">
-                            <% if(searchResult.IsRestrictByGrade) { %>
-                            <span class="">
-                                Grade: <%= searchResult.GradeStart %> - <%= searchResult.GradeEnd %>
-                            </span>
-                            <% } else { %>
-                            <span class="">
-                                Ages: <%= searchResult.AgeStart %> - <%= searchResult.AgeEnd %>
-                            </span>
-                            <% } %>
-                    </span>
+                    <% if(searchResult.IsRestrictByGrade) { %>
+                    <h4 class="">
+                        Grade: <%= searchResult.GradeStart %> - <%= searchResult.GradeEnd %>
+                    </h4>
+                    <% } else { %>
+                    <h4 class="">
+                        Ages: <%= searchResult.AgeStart %> - <%= searchResult.AgeEnd %>
+                    </h4>
+                    <% } %>
+                </div>
+                <div class="clearfix"></div>
+                <div class="text-wrap">
+                    <% if(searchResult.CostLow && searchResult.CostHigh) { %>
+                    <h4 class="">
+                        Cost: $<%= searchResult.CostLow %> - $<%= searchResult.CostHigh %>
+                    </h4>
+                    <% } else { %>
+                    <h4 class="">
+                        <br />
+                    </h4>
+                    <% } %>
                 </div>
 
                 <div class="clearfix"></div>
