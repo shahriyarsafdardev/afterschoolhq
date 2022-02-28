@@ -52,6 +52,9 @@ $(document).ready(function () {
                 flagHTML = 'Swahili';
                 break;
         }
+        else if (value == "sw") {
+            flagHTML = 'Swahili';
+        }
 
         $("#dropdownMenuButton").html(flagHTML);
         $(".selectedLang").removeClass('selectedLang');
