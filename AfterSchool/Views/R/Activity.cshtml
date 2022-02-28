@@ -330,12 +330,6 @@
 
 @{Html.RenderPartial("~/Views/Shared/Modals/_LeadForm.cshtml", Model.OwnerAccount);}
 
-
-@section header
-{
-    @{ Html.RenderPartial("~/Views/Shared/Registration/_ShareMetaTags.cshtml", new RegistrationHeaderViewModel(Model, accountProfile)); }
-}
-
 <script type="text/javascript">
     function hideActivityRibbon() {
         $('#footer-activity').fadeOut();

@@ -121,10 +121,3 @@
 @{Html.RenderPartial("~/Views/Shared/Modals/_LeadForm.cshtml", Model);}
 
 @{Html.RenderPartial("~/Views/Shared/Modals/_FirstTimeDemoOrgName.cshtml", Model);}
-
-
-@section header
-{
-    @{ Html.RenderPartial("~/Views/Shared/Registration/_ShareMetaTags.cshtml", new RegistrationHeaderViewModel(Model, accountProfile)); }
-
-}
