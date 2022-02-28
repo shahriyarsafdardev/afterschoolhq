@@ -2751,7 +2751,9 @@ namespace AfterSchoolLibrary.Services
                             response.AgeEnd = row["AgeEnd"].IsNotEmpty() ? row["AgeEnd"].ToString() : null;
                             response.GradeStart = row["GradeLevelStart"].IsNotEmpty() ? row["GradeLevelStart"].ToString() : null;
                             response.GradeEnd = row["GradeLevelEnd"].IsNotEmpty() ? row["GradeLevelEnd"].ToString() : null;
-                            
+                            response.CostLow = row["CostLow"].IsNotEmpty() ? row["CostLow"].ToString() : null;
+                            response.CostHigh = row["CostHigh"].IsNotEmpty() ? row["CostHigh"].ToString() : null;
+
                             response.Priority = row["Priority"].IsNotEmpty() ? Convert.ToInt32(row["Priority"]) : 0;
                             response.TotalDifference = accountDataTable.Columns.Contains("TotalDifference") && row["TotalDifference"].IsNotEmpty() ? Convert.ToDecimal(row["TotalDifference"]) : 0;
 
