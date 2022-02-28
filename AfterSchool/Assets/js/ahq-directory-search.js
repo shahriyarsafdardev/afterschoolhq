@@ -93,8 +93,7 @@ function prepareSearchParams() {
     //.. prepare params
     var mainUrl = '';
     var search = '';
-    var zip = 0;
-    var comma_delimited_neighborhoods = '';
+    var zip = 0;    
     var comma_delimited_grades = '';
     var comma_delimited_ages = '';
     var comma_delimited_gender = '';
@@ -120,13 +119,6 @@ function prepareSearchParams() {
     if (zip && zip.length > 0) {
         mainUrl += `zip_${zip},`;
     }
-
-    $('input:checkbox[name=neighborhoods]:checked').each(function () {
-        if (comma_delimited_neighborhoods.length > 0) {
-            comma_delimited_neighborhoods += ',';
-        }
-        comma_delimited_neighborhoods += $(this).val();
-    });
 
     $('input:checkbox[name=grades]:checked').each(function () {
         if (comma_delimited_grades.length > 0) {
@@ -198,10 +190,6 @@ function prepareSearchParams() {
         comma_delimited_special += $(this).val();
     });
 
-    if (comma_delimited_neighborhoods.length > 0) {
-        mainUrl += `${comma_delimited_neighborhoods},`;
-    }
-
     if (comma_delimited_grades.length > 0) {
         mainUrl += `${comma_delimited_grades},`;
     }
@@ -261,7 +249,6 @@ function prepareSearchParams() {
     // .. call api
     if (!isMobile || !isMobileFilterWindowOpened) {
         loadAccounts(search,
-            comma_delimited_neighborhoods,
             comma_delimited_grades,
             comma_delimited_ages,
             comma_delimited_gender,
@@ -356,7 +343,6 @@ function checkZip(value) {
 }
 
 function loadInitialTabs() {
-    loadTabs('neighborhoods');
     loadTabs('grades');
     loadTabs('ages');
     loadTabs('gender');
@@ -393,7 +379,6 @@ function getTagHtml(name) {
 }
 
 function resetTags() {
-    $('#tags-container-neighborhoods').html('');
     $('#tags-container-grades').html('');
     $('#tags-container-ages').html('');
     $('#tags-container-gender').html('');
@@ -474,7 +459,7 @@ function openSeeMorePanelsForSelectedCheckboxes() {
 
 function clearFilters() {
     //..clear all checkbox
-    $(`input:checkbox[name=neighborhoods],[name=grades],[name=ages],[name=gender],[name=services],[name=timing],[name=pricing],[name=cost],[name=starting],[name=other],[name=special-needs]`).prop('checked', false);
+    $(`input:checkbox[name=grades],[name=ages],[name=gender],[name=services],[name=timing],[name=pricing],[name=cost],[name=starting],[name=other],[name=special-needs]`).prop('checked', false);
 
     txtZip.val('');
     //..clear web link and hide clear filter link

@@ -186,7 +186,7 @@
             directoryPageLoad();
         })
 
-        function loadAccounts(search, neighborhoods, grades, ages, gender, services, timing, pricing, cost, starting, other, special, zip = 0) {
+        function loadAccounts(search, grades, ages, gender, services, timing, pricing, cost, starting, other, special, zip = 0) {
             if (inCallback) {
                 return false;
             }
@@ -199,7 +199,7 @@
             $.ajax({
                 type: "POST",
                 url: url,
-                data: { accountId: '@accountId', search, neighborhoods, grades, ages, gender, services, timing, pricing, cost, starting, other, special, zipcode: zip, pageNum: page },
+                data: { accountId: '@accountId', search, grades, ages, gender, services, timing, pricing, cost, starting, other, special, zipcode: zip, pageNum: page },
                 success: function (data) {
                     if (data && data.success == true) {
 

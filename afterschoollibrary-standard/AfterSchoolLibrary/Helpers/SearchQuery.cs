@@ -95,7 +95,6 @@ namespace AfterSchoolLibrary.Helpers
                             CONTAINS((properties.Value), @SearchTerm) OR
                             CONTAINS((loc.Address1, loc.Address2, loc.City, loc.State, loc.PostalCode, loc.Name, loc.StreetNumber, loc.StreetName, loc.Neighborhood, loc.County), @SearchTerm)
 					    )
-                    AND ((@Neighborhood IS NULL) OR loc.Neighborhood IN (SELECT value COLLATE Latin1_General_100_CI_AI FROM STRING_SPLIT(@Neighborhood, ',') WHERE RTRIM(value) <> ''))                    
                     AND ((@IsELearningCenter IS NULL) OR ap.IsELearningCenter = @IsELearningCenter)
                     AND ((@IsVirtualProgram IS NULL) OR ap.IsVirtualProgram = @IsVirtualProgram)
                     AND ((@IsOpenDuringCovid IS NULL) OR ap.IsOpenDuringCovid = @IsOpenDuringCovid)

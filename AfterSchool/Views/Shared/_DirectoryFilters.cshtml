@@ -1,5 +1,4 @@
 ﻿@{
-    var neighborhoods = ViewBag.Neighborhoods != null ? (List<string>)ViewBag.Neighborhoods : null;
     var grades = (List<GradeLevel>)ViewBag.Grades;
 
     var totalGradeCount = grades.Count;
@@ -27,26 +26,6 @@
     </div>    
 </div>
 <div class="filter-end-line"></div>
-
-@if (neighborhoods.IsNotEmpty() && neighborhoods.Count > 0)
-{
-    <div id="list-neighborhoods">
-        <h4 id="header-neighborhoods" class="filter-header accordion-toggle collapsed" data-toggle="collapse" isOpen="false" href="#collapse-neighborhoods" onclick="return loadTabs('neighborhoods')">Neighborhoods</h4>
-        <div id="tags-container-neighborhoods"></div>
-
-        <div id="collapse-neighborhoods" class="collapse">
-            @foreach (var item in neighborhoods)
-            {
-                <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
-                    <input id="chk-neighborhoods-@(item.ToLower())" name="neighborhoods" value="@(item.ToLower())" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-                    <label for="chk-neighborhoods-@(item.ToLower())" class="filter-body mobile-padding">@item</label>
-                </div>
-            }
-        </div>
-    </div>
-    
-    <div class="filter-end-line"></div>
-}
 
 <div>
     <h4 id="header-grades" class="filter-header accordion-toggle collapsed" data-toggle="collapse" isOpen="false" href="#collapse-grades" onclick="return loadTabs('grades')">
