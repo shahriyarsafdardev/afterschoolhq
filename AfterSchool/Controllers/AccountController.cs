@@ -288,7 +288,12 @@ namespace AfterSchool.Controllers
 
                 return HttpNotFound();
             }
-
+            var IsAllowedStudentToRegister = false;
+            if(participationObject.ObjectType == ParticipationObjectType.Activity)
+            {
+                var activity = Activity.LoadByActivityId(participationObject.ObjectID.Value, msgs);
+                IsAllowedStudentToRegister = activity?.IsAllowedStudentToRegister ?? false;
+            }
             // pre-load phone number
             if (SessionVariables.CurrentUser.IsNotEmpty())
                 qvms.Find(item => item.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value = SessionVariables.CurrentUser.Phone;
@@ -296,7 +301,7 @@ namespace AfterSchool.Controllers
             ViewBag.RegistrationAccount = registrationAccount;
             ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
             ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
-            ViewBag.StudentRegistrationEnabled = featureFlagRepository.IsEnabled("student-registration");
+            ViewBag.StudentRegistrationEnabled = featureFlagRepository.IsEnabled("student-registration") && IsAllowedStudentToRegister;
             ViewBag.Messages = msgs;
 
             return View(qvms);
