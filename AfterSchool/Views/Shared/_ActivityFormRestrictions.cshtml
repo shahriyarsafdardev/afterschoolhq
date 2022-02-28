@@ -26,7 +26,7 @@
                             { "checkboxname", "isStudentAllowed" },
                             { "checkboxid", "isStudentAllowed" },
                             { "disabled", !showAllowStudentRegistration },
-                            { "onclick", "showParentConsent(this);"},
+                            { "onclick", "showParentConsent();"},
                             { "required", false }
                           });
                     }
@@ -96,7 +96,7 @@
 </div>
 
 <script>
-    function showParentConsent(e) {
+    function showParentConsent() {
         var isStudentAllowed = $("#isStudentAllowed").is(":checked");
         if (isStudentAllowed) {
             $('#parentConsent').removeClass("hidden");
@@ -106,4 +106,7 @@
             $("#requiresparentalconsent").prop('checked', false);
         }
     }
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        showParentConsent();
+    });    
 </script>
