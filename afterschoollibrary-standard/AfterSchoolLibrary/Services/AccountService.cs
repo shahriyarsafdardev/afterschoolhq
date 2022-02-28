@@ -6,10 +6,9 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Billing;
-using Lob.Models;
 using AfterSchool.Models;
 using System.Data;
-using Twilio.Rest.Api.V2010.Account.Usage.Record;
+using System.Globalization;
 using AfterSchoolLibrary.Helpers;
 
 namespace AfterSchoolLibrary.Services
@@ -2771,8 +2770,8 @@ namespace AfterSchoolLibrary.Services
                             {
                                 //..Location, ProfileHeaderImageUrl
                                 var location = Location.Load(Convert.ToInt32(row["LocationId"]));
-                                response.Latitude = location.Latitude.IsNotEmpty() ? ToLatitudeLongitude(location.Latitude.Value) : "" ;
-                                response.Longitude = location.Longitude.IsNotEmpty() ? ToLatitudeLongitude(location.Longitude.Value) : "";
+                                response.Latitude = location.Latitude.IsNotEmpty() ? location.Latitude.Value.ToString(CultureInfo.InvariantCulture) : "" ;
+                                response.Longitude = location.Longitude.IsNotEmpty() ? location.Longitude.Value.ToString(CultureInfo.InvariantCulture) : "";
                                 response.Location = location.FormatCityState(false);
 
                                 if (response.ProfileHeaderImageUrl.IsEmpty())
@@ -2796,32 +2795,6 @@ namespace AfterSchoolLibrary.Services
             }
 
             return null;
-        }
-
-        public static string ToLatitudeLongitude(decimal? val)
-        {
-            var latLongFormatted = "";
-            var firstFiveDigits = val.IsNotEmpty() ? val.Value.ToString().Substring(0, 5) : "";
-
-            if(firstFiveDigits.IsNotEmpty())
-            {
-                if (firstFiveDigits.Contains("-"))
-                {
-                    if(firstFiveDigits.Contains("."))
-                        latLongFormatted = firstFiveDigits;
-                    else
-                        latLongFormatted = firstFiveDigits.Substring(0, 3) + "." + firstFiveDigits.Substring(3, 2);
-                }
-                else
-                {
-                    if (firstFiveDigits.Contains("."))
-                        latLongFormatted = firstFiveDigits;
-                    else
-                        latLongFormatted = firstFiveDigits.Substring(0, 2) + "." + firstFiveDigits.Substring(2, 2);
-                }
-            }
-
-            return latLongFormatted;
         }
 
         #endregion
