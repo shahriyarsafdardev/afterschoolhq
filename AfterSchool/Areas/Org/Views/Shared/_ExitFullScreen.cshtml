@@ -27,7 +27,7 @@
 }
 
 <div class="pull-right">
-    <a href="@(isClose ? "javascript:void(0)": fullscreenExitUrl)" class="btn btn-default" @(isClose ? "onclick=closeModal()": "") data-href="@fullscreenExitUrl">@Html.Raw(fullscreenExitText)</a>
+    <a href="@(isClose ? "javascript:void(0)": fullscreenExitUrl)" class="btn btn-default" @(isClose ? "onclick=showModal()": "") data-href="@fullscreenExitUrl">@Html.Raw(fullscreenExitText)</a>
 </div>
 
 <div id="confirmationModal" class="modal fade" role="dialog">
@@ -50,7 +50,7 @@
     </div>
 </div>
 <script language="javascript">
-    function closeModal() {
+    function showModal() {
         $("#confirmationModal").modal('show');
     }
 </script>
