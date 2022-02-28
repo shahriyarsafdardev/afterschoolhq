@@ -543,13 +543,9 @@ function toggleSideBar(element) {
 }
 
 function toggleMapView(element) {
-    var isMapViewEnabled = $(element).attr('isEnabled');
-    if (isMapViewEnabled === 'true') {
-        $(element).attr('isEnabled', false)
-        $("#map-view").css('flex', '0')
-
-    } else {
-        $(element).attr('isEnabled', true)
+    var isChecked = $(element).is(':checked')
+    if (isChecked)
         $("#map-view").css('flex', '0.5')
-    }
+    else
+        $("#map-view").css('flex', '0')
 }
