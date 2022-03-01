@@ -166,7 +166,13 @@ namespace AfterSchool.Models
                 if (participationObject.RegistrationPeriod.WillOpen(account))
                     return $"<span style=\"display:inline-block;\">Registration will open</span> <span style=\"display:inline-block;\">{participationObject.RegistrationPeriod.StartDateTime.ToShortDateString()} {participationObject.RegistrationPeriod.StartDateTime.Value.ToShortTimeString()}</span>";
                 else if (participationObject.RegistrationPeriod.IsOpen(account))
-                    return $"<span style=\"display:inline-block;\">Registration will close</span> <span style=\"display:inline-block;\">{participationObject.RegistrationPeriod.EndDateTime.ToShortDateString()} {participationObject.RegistrationPeriod.EndDateTime.Value.ToShortTimeString()}</span>";
+                {
+                    if (participationObject.IsContinousEnrollmentEnabled)
+                        return "<span style=\"display:inline-block;\">Registration will remain open</span>";
+                    else
+                        return $"<span style=\"display:inline-block;\">Registration will close</span> <span style=\"display:inline-block;\">{participationObject.RegistrationPeriod.EndDateTime.ToShortDateString()} {participationObject.RegistrationPeriod.EndDateTime.Value.ToShortTimeString()}</span>";
+                }
+
             }
             return "Registration is closed";
         }
