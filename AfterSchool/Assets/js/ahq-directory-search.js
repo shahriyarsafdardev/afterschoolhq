@@ -11,8 +11,7 @@
     });
 
     loadFiltersAndInitiateSearch();
-    loadInitialTabs();
-    loadCheckboxs();
+    loadInitialTabs();    
 
     if (!isMobile) {
         $('#filters').show();
@@ -325,30 +324,6 @@ function formatContactPhoneForDirectory() {
     }
 }
 
-function loadCheckboxs() {
-    Array.from(
-        $("#list-services, #list-timing, #list-special-needs, #list-neighborhoods")
-    ).forEach(elem => {
-        $(elem).find(".am-checkbox").slice(5).hide();
-    });
-}
-
-function loadMore(element, listId, length) {
-    var listSelector = $(`#${listId} .am-checkbox`);
-    var isShowMore = $(element).text() == 'Show more...';
-
-    if (isShowMore) {
-        //..show more
-        $(element).text('Show less...');
-        listSelector.slice(0, length).slideDown();
-
-    } else {
-        //..hide
-        $(element).text('Show more...');
-        listSelector.slice(5).slideUp();
-    }
-}
-
 function checkAndSearch(elem) {
     page = 0;
     prepareSearchParams()
@@ -543,13 +518,9 @@ function toggleSideBar(element) {
 }
 
 function toggleMapView(element) {
-    var isMapViewEnabled = $(element).attr('isEnabled');
-    if (isMapViewEnabled === 'true') {
-        $(element).attr('isEnabled', false)
-        $("#map-view").css('flex', '0')
-
-    } else {
-        $(element).attr('isEnabled', true)
+    var isChecked = $(element).is(':checked')
+    if (isChecked)
         $("#map-view").css('flex', '0.5')
-    }
+    else
+        $("#map-view").css('flex', '0')
 }
