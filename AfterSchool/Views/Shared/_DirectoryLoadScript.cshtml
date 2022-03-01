@@ -59,13 +59,14 @@
                     </h4>
                 </div>
                 <div class="clearfix"></div>
+                <br/>
                 <div class="text-wrap">
                     <% if(searchResult.IsRestrictByGrade) { %>
-                    <h4 class="">
+                    <h4 class="padding-top-10">
                         Grade: <%= searchResult.GradeStart %> - <%= searchResult.GradeEnd %>
                     </h4>
                     <% } else { %>
-                    <h4 class="">
+                    <h4 class="padding-top-10">
                         Ages: <%= searchResult.AgeStart %> - <%= searchResult.AgeEnd %>
                     </h4>
                     <% } %>
@@ -73,11 +74,11 @@
                 <div class="clearfix"></div>
                 <div class="text-wrap">
                     <% if(searchResult.CostLow && searchResult.CostHigh) { %>
-                    <h4 class="">
+                    <h4 class="margin-top-0">
                         Cost: $<%= searchResult.CostLow %> - $<%= searchResult.CostHigh %>
                     </h4>
                     <% } else { %>
-                    <h4 class="">
+                    <h4 class="margin-top-0">
                         <br />
                     </h4>
                     <% } %>
