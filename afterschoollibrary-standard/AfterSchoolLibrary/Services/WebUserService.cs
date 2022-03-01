@@ -609,6 +609,107 @@ namespace AfterSchoolLibrary.Services
             return account;
         }
 
+        public static Account AddNewStudentAccount(this WebUser user, UserType userType, bool isActive, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            Account account = null;
+
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    account = AccountService.CreateNew(
+                                    orgName: $"{user.LastName} Family",
+                                    email: user.Email,
+                                    phone: user.Phone,
+                                    isActive: isActive,
+                                    accountType: AccountType.Registrant,
+                                    accountOwner: userType == UserType.Owner ? user : null,
+                                    packageId: null,
+                                    packageBillingPeriod: null,
+                                    timeZone: null,
+                                    createWithStripe: true,
+                                    loggedInUser: loggedInUser,
+                                    isAfterSchool: isAfterSchool,
+                                    msgs: amsgs,
+                                    dc: adc);
+
+                    user.AddAccount(account, userType, loggedInUser, amsgs, adc);
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+
+            return account;
+        }
+
+        /// <summary>
+        /// For adding a payment account to a student/registrant/participant account
+        /// </summary>
+        /// <param name="accountOwner"></param>
+        /// <param name="firstName"></param>
+        /// <param name="lastName"></param>
+        /// <param name="email"></param>
+        /// <param name="isActive"></param>
+        /// <param name="packageId"></param>
+        /// <param name="packageBillingPeriod"></param>
+        /// <param name="isAfterSchool"></param>
+        /// <param name="loggedInUser"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        public static Account AddNewRegistrantAccountWithUserName(this WebUser user, UserType userType, string firstName, string lastName, string email,bool isActive, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            Account account = null;
+
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    account = AccountService.CreateNew(
+                                    orgName: $"{lastName} Family",
+                                    email: email,
+                                    phone: user.Phone,
+                                    isActive: isActive,
+                                    accountType: AccountType.Registrant,
+                                    accountOwner: userType == UserType.Owner ? user : null,
+                                    packageId: null,
+                                    packageBillingPeriod: null,
+                                    timeZone: null,
+                                    createWithStripe: true,
+                                    loggedInUser: loggedInUser,
+                                    isAfterSchool: isAfterSchool,
+                                    msgs: amsgs,
+                                    dc: adc);
+
+                    user.AddAccount(account, userType, loggedInUser, amsgs, adc);
+
+                    account.CreateRegistrant(
+                        firstName: firstName,
+                        lastName: lastName,
+                        email: email,
+                        registrantOwner: user,
+                        canBeAccessedBy: user.AsList(),
+                        registrantType: RegistrantType.Individual,
+                        isMaster: true,
+                        isParentOrGuardian: true,
+                        allowTextMessages: false,
+                        schoolLocationId: null,
+                        profileStatus: RegistrantProfileStatus.Started,
+                        loggedInUser: user,
+                        msgs: amsgs,
+                        dc: adc);
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+
+            return account;
+        }
+
         public static Account AddNewRegistrantAccount(this WebUser accountOwner, UserType userType, bool isActive, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return AddNewRegistrantAccount(accountOwner, userType, isActive, null, null, isAfterSchool, loggedInUser, msgs, dc);
@@ -757,6 +858,16 @@ namespace AfterSchoolLibrary.Services
 
                         if (account.StripeCustomerId.IsEmpty())
                             amsgs.AddRange(account.SaveWithStripe(dc));
+                    } 
+                    else {
+                        var awu = AccountWebUser.LoadByAccountIdByWebUserId(AccountId: account.ID.Value, WebUserId: user.ID.Value, msgs: amsgs, dc: adc);
+                        if (awu.IsNotEmpty() && user.IsActive && awu.IsActive && awu.UserTypeId == UserType.Owner && account.OwnerId != user.ID)
+                        {
+                            // this is parent completing it's signup
+                            // so we will update owner ship of account from student to parent
+                            account.OwnerId = user.ID.Value;
+                            amsgs.AddRange(account.Save(adc));
+                        }
                     }
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),

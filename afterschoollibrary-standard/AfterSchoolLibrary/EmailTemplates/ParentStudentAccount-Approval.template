@@ -1,0 +1,7 @@
+﻿<div>
+	<p>Hey @Model.ParentFirstName,</p>
+
+	<p>@Model.RegistrantFirstName has begun registration for @Model.ActivityUrl on AfterSchool HQ. To complete registration, they need your approval.</p>
+
+	<p>Please Login <a href="@Model.LoginUrl">@Model.LoginUrl</a> to review the activity and grant permission.</p>
+</div>
