@@ -133,7 +133,7 @@ namespace AfterSchoolLibrary.Services
         {
             get
             {
-                return new List<QuestionType> { QuestionType.Audio, QuestionType.Video, QuestionType.Photo, QuestionType.Emoji, QuestionType.Rating };
+                return new List<QuestionType> { QuestionType.Audio, QuestionType.Video, QuestionType.Photo, QuestionType.Emoji, QuestionType.Rating, QuestionType.FileUpload };
             }
         }
 

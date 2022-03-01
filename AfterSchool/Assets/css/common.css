@@ -417,6 +417,7 @@
     line-height: normal;
     letter-spacing: normal;
     color: #4a4a4a;
+    cursor: pointer;
 }
 
 .filter-footer-container {
