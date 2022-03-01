@@ -618,7 +618,7 @@ namespace AfterSchoolLibrary.Models
                                     .ToList();
 
             // check for dates where end time is less than start time
-            if (updatedInstances.Where(x => !x.GetDateRange().IsValid()).Any())
+            if (updatedInstances.Select(x => x.GetDateRange()).Any(x => !(x.StartDate <= x.EndDate)))
                 msgs.Add("You have dates where the end time is earlier than or equal to the start time", MessageType.UserError);
             
             // check for overlapping times 
@@ -633,8 +633,13 @@ namespace AfterSchoolLibrary.Models
             if (this.DaysOfTheWeek.IsNotBlank())
                 return this.DaysOfTheWeek.Split(',').ToIntegerArray().Select(x => (DayOfWeekASL)x).OrderBy(x => (int)x).ToList();
 
-            if (this.GetInstances(false, msgs, dc).IsNotEmpty())
-                return this.GetInstances(false, msgs, dc).Where(instance => instance.InstanceTypeId == InstanceType.InSession).Select(x => x.Day).Distinct().OrderBy(x => (int)x).ToList();
+            var instances = this.GetInstances(false, msgs, dc);
+            if (instances.IsNotEmpty())
+                return instances
+                    .Where(instance => instance.InstanceTypeId == InstanceType.InSession)
+                    .Select(x => x.Day).Distinct()
+                    .OrderBy(x => (int)x)
+                    .ToList();
 
             return new List<DayOfWeekASL>();
         }

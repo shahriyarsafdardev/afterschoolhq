@@ -164,9 +164,7 @@ namespace AfterSchool.Models
                 var account = participationObject.OwnerAccount;
 
                 if (participationObject.RegistrationPeriod.WillOpen(account))
-                {
                     return $"<span style=\"display:inline-block;\">Registration will open</span> <span style=\"display:inline-block;\">{participationObject.RegistrationPeriod.StartDateTime.ToShortDateString()} {participationObject.RegistrationPeriod.StartDateTime.Value.ToShortTimeString()}</span>";
-                }
                 else if (participationObject.RegistrationPeriod.IsOpen(account))
                 {
                     if (participationObject.IsContinousEnrollmentEnabled)
