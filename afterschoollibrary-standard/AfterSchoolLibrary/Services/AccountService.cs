@@ -10,6 +10,7 @@ using Lob.Models;
 using AfterSchool.Models;
 using System.Data;
 using Twilio.Rest.Api.V2010.Account.Usage.Record;
+using AfterSchoolLibrary.Helpers;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -1076,7 +1077,7 @@ namespace AfterSchoolLibrary.Services
                     awu.UserTypeId = ut;
                     amsgs.AddRange(awu.Save(adc));
 
-                    if (ut == UserType.Owner && account.OwnerId != user.ID)
+                    if (ut == UserType.Owner && account.OwnerId != user.ID && user.IsActive)
                     {
                         account.OwnerId = user.ID.Value;
                         amsgs.AddRange(account.Save(adc));
@@ -1215,6 +1216,20 @@ namespace AfterSchoolLibrary.Services
             if (msgs.HasErrors())
                 msgs.Add($"An invitation was not sent to {email.Trim()}, a system error has occurred", MessageType.UserError);
 
+            return user;
+        }
+
+        public static WebUser InviteParentUser(this Account account, string firstName, string lastName, string email, string phone, string message, UserType userType, bool canUseExistingUserAccount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var user = account.AddUser(firstName, lastName, email, phone, userType, canUseExistingUserAccount, loggedInUser, msgs, dc);
+
+            if (msgs.HasNoErrors())
+                msgs.AddRange(EmailHelper.SendParentAccountInvitedEmail(user.FirstName, loggedInUser.FirstName, user.GetInviteUrl(account), message, email));
+
+            if (msgs.HasErrors())
+                msgs.Add($"An invitation was not sent to {email.Trim()}, a system error has occurred", MessageType.UserError);
             return user;
         }
 
@@ -2430,6 +2445,20 @@ namespace AfterSchoolLibrary.Services
             return AccountRelationship.LoadByHostAccountIdByAccountTypes(hostAccount.ID.Value, accountTypes, msgs, dc)
                 .Select(accountRelationship => accountRelationship.GetVisitorAccount(msgs, dc))
                 .ToList();
+        }
+
+        public static bool CheckIfDirectoryAccount(Account account, SystemMessages msgs)
+        {
+            var isDirectoryAccount = false;
+            var visitorAccount = AccountRelationship.LoadByVisitorAccountId(account.ID.Value, msgs);
+            if (visitorAccount.IsNotEmpty() && visitorAccount.Count > 0)
+            {
+                var hostAccount = Account.Load(visitorAccount.FirstOrDefault().HostAccountId.Value, msgs);
+                if (hostAccount.IsNotEmpty() && hostAccount.AccountTypeId == global::AccountType.Directory)
+                    isDirectoryAccount = true;
+            }
+
+            return isDirectoryAccount;
         }
 
         public static List<Account> GetVisitorAccounts(this Account hostAccount, List<AccountType> accountTypes, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -4620,7 +4649,268 @@ namespace AfterSchoolLibrary.Services
                         activity.ProcessActivityPayouts(currentUser: loggedInUser, account: account, msgs: msgs, dc: dc);
                 }
             }
-        }        
+        }
+
+        #endregion
+
+        #region Student-Registration
+
+        public static (Account, WebUser, Registrant) ProcessStudentRegistration(string firstName, string lastName, string email, string phone, string password, int? schoolLocationId, bool allowTextMessages, bool isAfterSchool,
+            List<KeyValuePair<FormQuestion, string>> questionAnswerModel, Account parentAccount = null,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Account studentAccount = null;
+            WebUser studentUser = null;
+            Registrant studentRegistrant = null;
+
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    studentUser = WebUserService.CreateNewWithOptionalPhone(
+                        firstName: firstName,
+                        lastName: lastName,
+                        email: email,
+                        phone: phone,
+                        password: password,
+                        isActive: true,
+                        isRegistered: true,
+                        isVerified: false,
+                        allowTextMessages: allowTextMessages,
+                        loggedInUser: null,
+                        msgs: amsgs,
+                        dc: adc);
+
+                    if (amsgs.HasNoErrors() && studentUser.IsNotEmpty())
+                    {
+                        if (parentAccount.IsNotEmpty())
+                        {
+                            // create student registrant record
+                            studentRegistrant = parentAccount.CreateRegistrant(
+                                registrantOwner: studentUser,
+                                canBeAccessedBy: studentUser.AsList(),
+                                registrantType: RegistrantType.Individual,
+                                isMaster: true,
+                                isParentOrGuardian: false,
+                                allowTextMessages: false,
+                                schoolLocationId: schoolLocationId,
+                                profileStatus: RegistrantProfileStatus.Completed,
+                                loggedInUser: studentUser,
+                                msgs: amsgs,
+                                dc: adc);
+                        }
+                        else
+                        {
+                            // create account
+                            studentAccount = studentUser.AddNewStudentAccount(
+                            userType:  UserType.Owner,
+                            isActive: true,
+                            isAfterSchool: isAfterSchool,
+                            loggedInUser: studentUser,
+                            msgs: amsgs,
+                            dc: adc);
+
+                            if (amsgs.HasNoErrors() && studentAccount.IsNotEmpty())
+                            {
+                                // create student registrant record
+                                studentRegistrant = studentAccount.CreateRegistrant(
+                                    registrantOwner: studentUser,
+                                    canBeAccessedBy: studentUser.AsList(),
+                                    registrantType: RegistrantType.Individual,
+                                    isMaster: true,
+                                    isParentOrGuardian: false,
+                                    allowTextMessages: false,
+                                    schoolLocationId: schoolLocationId,
+                                    profileStatus: RegistrantProfileStatus.Completed,
+                                    loggedInUser: studentUser,
+                                    msgs: amsgs,
+                                    dc: adc);
+                            }
+                        }
+                        if (amsgs.HasNoErrors() && studentRegistrant.IsNotEmpty())
+                        {
+                            // add or update answer for registratnt
+                            questionAnswerModel.ForEach(qvm =>
+                            {
+                                studentRegistrant.AddOrUpdateAnswer(
+                                    answerText: qvm.Value,
+                                    question: qvm.Key,
+                                    loggedInUser: studentUser,
+                                    msgs: amsgs,
+                                    dc: adc);
+                            });
+                        }
+                    }                    
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc);
+
+            return (studentAccount, studentUser, studentRegistrant);
+        }
+
+        public static (WebUser, Registrant) ProcessParentRegistration(this Account studentAccount, string firstName, string lastName, string email, string browserUrl, bool allowTextMessages,
+            List<KeyValuePair<FormQuestion, string>> questionAnswerModel, WebUser studentUser,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            WebUser parentUser = null;
+            Registrant parentRegistrant = null;
+
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    // invite parent: 
+                    parentUser = studentAccount.InviteParentUser(
+                        firstName: firstName,
+                        lastName: lastName,
+                        email: email,
+                        phone: string.Empty,
+                        message: $"{studentUser.FirstName} has created an account on AfterSchool HQ to register for {browserUrl}.",
+                        userType: UserType.Owner,
+                        canUseExistingUserAccount: true,
+                        loggedInUser: studentUser,
+                        msgs: amsgs,
+                        dc: adc);
+
+                    if (amsgs.HasNoErrors() && parentUser.IsNotEmpty())
+                    {
+                        // Create parent registrant
+                        parentRegistrant = studentAccount.CreateRegistrant(
+                            firstName: parentUser.FirstName,
+                            lastName: parentUser.LastName,
+                            email: parentUser.Email,
+                            registrantOwner: parentUser,
+                            canBeAccessedBy: parentUser.AsList(),
+                            registrantType: RegistrantType.Individual,
+                            isMaster: true,
+                            isParentOrGuardian: true,
+                            allowTextMessages: allowTextMessages,
+                            schoolLocationId: null,
+                            profileStatus: RegistrantProfileStatus.Completed,
+                            loggedInUser: studentUser,
+                            msgs: amsgs,
+                            dc: adc);
+
+                        if (amsgs.HasNoErrors() && parentRegistrant.IsNotEmpty())
+                        {
+                            // add answers to student registrant record
+                            questionAnswerModel.ForEach(qvm => {
+                                parentRegistrant.AddOrUpdateAnswer(
+                                    answerText: qvm.Value,
+                                    question: qvm.Key,
+                                    loggedInUser: studentUser,
+                                    msgs: amsgs,
+                                    dc: adc);
+                            });
+                        }
+                    }
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc);
+
+            return (parentUser, parentRegistrant);
+        }
+
+        public static (Registration, Registrant) ProcessRegisterStudent(Account ownerAccount, Registrant registrant, 
+            List<KeyValuePair<FormQuestion, string>> questionAnswerModel, int? activityGroupId, int? accountActivityGroupId, int? periodId, List<FilesCollection> files,
+            WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Registration registration = null;
+            Registrant submittedRecord = null;
+
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    // account gets copy / snapshot of master registrant record
+                    // required in order to make sure registration data doesn't change as registrant changes information in master record.
+                    submittedRecord = registrant.SubmitRecordToAccount(
+                            ownerAccount: ownerAccount,
+                            loggedInUser: loggedInUser,
+                            msgs: amsgs,
+                            dc: adc);                    
+
+                    // Create Registration
+                    registration = submittedRecord.AddRegistration(
+                                    ownerAccountId: ownerAccount.ID.Value,
+                                    activityGroupId: activityGroupId,
+                                    accountActivityGroupId: accountActivityGroupId,
+                                    periodId: periodId,
+                                    completionStatus: RegistrationCompletionStatus.RequiresParentSignature,
+                                    loggedInUserId: loggedInUser.ID.Value,
+                                    msgs: amsgs,
+                                    dc: adc);
+
+                    if (questionAnswerModel.IsNotEmpty() && questionAnswerModel.Count > 0)
+                    {
+                        questionAnswerModel.Where(qvm => qvm.Key.QuestionDataTypeId != QuestionDataType.NotSet).ToList()
+                        .ForEach(qvm =>
+                        {
+                            registrant.AddOrUpdateAnswer(
+                                answerText: qvm.Value,
+                                question: qvm.Key,
+                                loggedInUser: loggedInUser,
+                                msgs: amsgs,
+                                dc: adc);
+                        });
+
+                        AddCustomQuestions(questionAnswerModel: questionAnswerModel, submittedRecord: submittedRecord, registration: registration, files: files, currentUser: loggedInUser, msgs: amsgs, dc: adc);
+                    }
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc);
+
+            return (registration, submittedRecord);
+        }
+
+        private static void AddCustomQuestions(List<KeyValuePair<FormQuestion, string>> questionAnswerModel, Registrant submittedRecord, Registration registration, List<FilesCollection> files, 
+            WebUser currentUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            // add custom answers to questions directly to this registration
+            questionAnswerModel.Where(qvm => qvm.Key.QuestionDataTypeId == QuestionDataType.NotSet)
+            .ToList()
+            .ForEach(qvm =>
+            {
+                if (qvm.Key.QuestionTypeId == QuestionType.FileUpload)
+                {
+                    var name = $"question-{(int)qvm.Key.ID}";
+                    if (files.IsNotEmpty() && files.Any(m => m.FileName == name) && files.Where(m => m.FileName == name).FirstOrDefault().ContentLength > 0)
+                    {
+                        var file = files.Where(m => m.FileName == name).FirstOrDefault();
+                        //5 MB = 5242880 Bytes
+                        //File uploaded here should be less than of 5MB
+                        if (file.ContentLength <= 5242880)
+                            submittedRecord.AddOrUpdateAnswer(
+                                file: file.InputStream,
+                                filename: file.FileName,
+                                question: qvm.Key,
+                                registrationId: registration.ID,
+                                loggedInUser: currentUser,
+                                msgs: msgs,
+                                dc: dc);
+                        else
+                            msgs.Add("Upload a file less than or equal to 5 megabytes", MessageType.UserError);
+                    }
+                }
+                else
+                    submittedRecord.AddOrUpdateAnswer(
+                        answerText: qvm.Value,
+                        question: qvm.Key,
+                        registrationId: registration?.ID,
+                        loggedInUser: currentUser,
+                        msgs: msgs,
+                        dc: dc);
+            });
+        }
 
         #endregion
     }

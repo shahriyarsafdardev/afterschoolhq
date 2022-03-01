@@ -133,7 +133,7 @@ namespace AfterSchoolLibrary.Services
         {
             get
             {
-                return new List<QuestionType> { QuestionType.Audio, QuestionType.Video, QuestionType.Photo, QuestionType.Emoji, QuestionType.Rating };
+                return new List<QuestionType> { QuestionType.Audio, QuestionType.Video, QuestionType.Photo, QuestionType.Emoji, QuestionType.Rating, QuestionType.FileUpload };
             }
         }
 
@@ -755,6 +755,37 @@ namespace AfterSchoolLibrary.Services
             QuestionDataType.RegistrantTShirtSize,
             QuestionDataType.RegistrantWorkPhone,
             QuestionDataType.RegistrantHomePhone,
+            QuestionDataType.RegistrantParentRelationship,
+            QuestionDataType.RegistrantEmployer
+        };
+
+        public static List<QuestionDataType> QuestionsToNotIncludeInStudentRegistrationPanel() => new List<QuestionDataType>()
+        {
+            QuestionDataType.RegistrantHomePhone,
+            QuestionDataType.RegistrantWorkPhone,
+            QuestionDataType.RegistrantDateOfBirth,
+            QuestionDataType.RegistrantGender,
+            QuestionDataType.RegistrantEthnicityUsFed,
+            QuestionDataType.RegistrantRaceUsFed,
+            QuestionDataType.RegistrantTShirtSize,
+            QuestionDataType.RegistrantOrganization,
+            QuestionDataType.RegistrantParentRelationship,
+            QuestionDataType.RegistrantEmployer
+        };
+
+        public static List<QuestionDataType> QuestionsToNotIncludeInStudentRegistrationParentPanel() => new List<QuestionDataType>()
+        {
+            QuestionDataType.RegistrantMiddleName,
+            QuestionDataType.RegistrantHomePhone,
+            QuestionDataType.RegistrantWorkPhone,
+            QuestionDataType.RegistrantMobilePhone,
+            QuestionDataType.RegistrantDateOfBirth,
+            QuestionDataType.RegistrantGrade,
+            QuestionDataType.RegistrantGender,
+            QuestionDataType.RegistrantEthnicityUsFed,
+            QuestionDataType.RegistrantRaceUsFed,
+            QuestionDataType.RegistrantTShirtSize,
+            QuestionDataType.RegistrantOrganization,
             QuestionDataType.RegistrantParentRelationship,
             QuestionDataType.RegistrantEmployer
         };

@@ -18,288 +18,252 @@
 </div>
 
 <div>
-    <h4 class="filter-header">Find programs nearby</h4>    
-    <div class="input-group" style="width: 300px;">        
-        <input id="txtZipCode" type="text" class="form-control" name="zipcode" style="height: 35px;" placeholder="Enter your Zip Code" />
-        <div class="input-group-addon" style="cursor: pointer;" onclick="return validatePostalCodeAndSearch();">
-            <span class="input-group-text" style="font-size: 12px;">Update Results</span>
+    <h4 class="filter-header">Find programs nearby</h4>
+    <div class="input-group has-search" style="width: 250px;">
+        <input id="txtZipCode" type="text" class="form-control" name="zipcode" placeholder="Enter your school or Zip Code" />
+        <div id="divValidatePostalCode" class="input-group-addon" onclick="return validatePostalCodeAndSearch();">
+            <span class="input-group-text" style="font-size: 12px;">Update</span>
         </div>
-    </div>
-    
-    <div class="clearfix"></div>
+    </div>    
 </div>
+<div class="filter-end-line"></div>
 
 @if (neighborhoods.IsNotEmpty() && neighborhoods.Count > 0)
 {
     <div id="list-neighborhoods">
-        <h4 class="filter-header">Neighborhoods</h4>
+        <h4 id="header-neighborhoods" class="filter-header accordion-toggle collapsed" data-toggle="collapse" isOpen="false" href="#collapse-neighborhoods" onclick="return loadTabs('neighborhoods')">Neighborhoods</h4>
+        <div id="tags-container-neighborhoods"></div>
 
-        @foreach (var item in neighborhoods)
-        {
-            <div class="am-checkbox" style="padding: 3px 0;">
-                <input id="chk-neighborhoods-@(item.ToLower())" name="neighborhoods" value="@(item.ToLower())" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-                <label for="chk-neighborhoods-@(item.ToLower())" class="margin-h-10 mobile-padding">@item</label>
-            </div>
-        }
+        <div id="collapse-neighborhoods" class="collapse">
+            @foreach (var item in neighborhoods)
+            {
+                <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
+                    <input id="chk-neighborhoods-@(item.ToLower())" name="neighborhoods" value="@(item.ToLower())" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+                    <label for="chk-neighborhoods-@(item.ToLower())" class="filter-body mobile-padding">@item</label>
+                </div>
+            }
+        </div>
     </div>
-
-    if (neighborhoods.Count > 5)
-    {
-        <p onclick="return loadMore(this, 'list-neighborhoods', '@neighborhoods.Count')" class="show-more">Show more...</p>
-    }
-
-    <div class="clearfix"></div>
-
+    
+    <div class="filter-end-line"></div>
 }
 
 <div>
-    <h4 class="filter-header">Grades</h4>
+    <h4 id="header-grades" class="filter-header accordion-toggle collapsed" data-toggle="collapse" isOpen="false" href="#collapse-grades" onclick="return loadTabs('grades')">
+        Grades
+    </h4>
+    <div id="tags-container-grades"></div>
 
-    <div class="col-md-6 col-sm-6 col-xs-6 no-padding">
-        @foreach (var item in grades.Take(firstHalf))
-        {
-            <div class="am-checkbox" style="padding: 3px 0;">
-                <input id="chk-grades-@(item.ID)" name="grades" value="@(item.Name.ToLower().Replace(" ", "_"))" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-                <label for="chk-grades-@(item.ID)" class="margin-h-10 mobile-padding">@item.Name</label>
-            </div>
-        }
-    </div>
-
-    <div class="col-md-6 col-sm-6 col-xs-6 no-padding">
-        @foreach (var item in grades.Skip(firstHalf).Take(secondHalf))
-        {
-            <div class="am-checkbox" style="padding: 3px 0;">
-                <input id="chk-grades-@(item.ID)" name="grades" value="@(item.Name.ToLower().Replace(" ", "_"))" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-                <label for="chk-grades-@(item.ID)" class="margin-h-10 mobile-padding">@item.Name</label>
-            </div>
-        }
-    </div>
-</div>
-<div class="clearfix"></div>
-
-<div>
-    <h4 class="filter-header">Ages</h4>
-
-    <div class="col-md-6 col-sm-6 col-xs-6 no-padding">
-        <div class="am-checkbox" style="padding: 3px 0;">
-            <input id="chk-ages-1" name="ages" value="0_4" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-            <label for="chk-ages-1" class="margin-h-10 mobile-padding">0 - 4 yrs</label>
-        </div>
-        <div class="am-checkbox" style="padding: 3px 0;">
-            <input id="chk-ages-2" name="ages" value="5_9" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-            <label for="chk-ages-2" class="margin-h-10 mobile-padding">5 - 9 yrs</label>
-        </div>
-    </div>
-
-    <div class="col-md-6 col-sm-6 col-xs-6 no-padding">
-        <div class="am-checkbox" style="padding: 3px 0;">
-            <input id="chk-ages-3" name="ages" value="10_14" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-            <label for="chk-ages-3" class="margin-h-10 mobile-padding">10 - 14 yrs</label>
-        </div>
-        <div class="am-checkbox" style="padding: 3px 0;">
-            <input id="chk-ages-4" name="ages" value="15_18" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-            <label for="chk-ages-4" class="margin-h-10 mobile-padding">15 - 18 yrs</label>
-        </div>
-    </div>
-</div>
-<div class="clearfix"></div>
-
-<div>
-    <h4 class="filter-header"> Gender Restrictions</h4>
-
-    @foreach (GenderRestrictionType item in System.Enum.GetValues(typeof(GenderRestrictionType)))
-    {
-        if (item != GenderRestrictionType.None)
-        {
-            <div class="am-checkbox" style="padding: 3px 0;">
-                <input id="chk-gender-@((int)item)" name="gender" value="@(item.ToString().ToLower())" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-                <label for="chk-gender-@((int)item)" class="margin-h-10 mobile-padding"> @item.ToString().SplitByUpperCase() </label>
-            </div>
-        }
-    }
-</div>
-<div class="clearfix"></div>
-
-<div id="list-services">
-    <h4 class="filter-header">Services Offered</h4>
-
-    @foreach (var item in services.OrderBy(m => m))
-    {
-        <div class="am-checkbox" style="padding: 3px 0;">
-            <input id="chk-services-@item.ToLower()" name="services" value="@item" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-            <label for="chk-services-@item.ToLower()" class="margin-h-10 mobile-padding">@item</label>
-        </div>
-    }
-
-    <p onclick="return loadMore(this, 'list-services', '@services.Length')" class="show-more">Show more...</p>
-
-</div>
-<div class="clearfix"></div>
-
-
-<div id="list-timing">
-    <h4 class="filter-header">Timing</h4>
-
-    @foreach (var item in timing)
-    {
-        <div class="am-checkbox" style="padding: 3px 0;">
-            <input id="chk-timing-@item.ToLower()" name="timing" value="@item" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-            <label for="chk-timing-@item.ToLower()" class="margin-h-10 mobile-padding">@item</label>
-        </div>
-    }
-
-    <p onclick="return loadMore(this, 'list-timing', '@timing.Length')" class="show-more">Show more...</p>
-
-</div>
-<div class="clearfix"></div>
-
-<div>
-    <h4 class="filter-header">Cost</h4>
-
-    <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-cost-1" name="cost" value="cost_free" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-        <label for="chk-cost-1" class="margin-h-10 mobile-padding">Free</label>
-    </div>
-
-    <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-cost-2" name="cost" value="cost_0_50" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-        <label for="chk-cost-2" class="margin-h-10 mobile-padding">Less than $50</label>
-    </div>
-
-    <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-cost-3" name="cost" value="cost_50_150" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-        <label for="chk-cost-3" class="margin-h-10 mobile-padding">Between $50 and $150</label>
-    </div>
-
-    <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-cost-4" name="cost" value="cost_150_above" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-        <label for="chk-cost-4" class="margin-h-10 mobile-padding">$150 and Above</label>
-    </div>
-</div>
-<div class="clearfix"></div>
-
-<div id="list-pricing">
-    <h4 class="filter-header">Pricing options</h4>
-
-    @foreach (var item in pricingOptions.OrderBy(m => m))
-    {
-        <div class="am-checkbox" style="padding: 3px 0;">
-            <input id="chk-pricing-@item.ToLower()" name="pricing" value="@item" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-            <label for="chk-pricing-@item.ToLower()" class="margin-h-10 mobile-padding">@item</label>
-        </div>
-    }
-
-</div>
-<div class="clearfix"></div>
-
-<div>
-    <h4 class="filter-header">Starts in</h4>
-
-    <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-startingIn-1" name="starting" value="starting_0_7" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-        <label for="chk-startingIn-1" class="margin-h-10 mobile-padding">1 Week or less</label>
-    </div>
-
-    <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-startingIn-2" name="starting" value="starting_7_28" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-        <label for="chk-startingIn-2" class="margin-h-10 mobile-padding">1 to 4 weeks</label>
-    </div>
-
-    <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-startingIn-3" name="starting" value="starting_30_90" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-        <label for="chk-startingIn-3" class="margin-h-10 mobile-padding">30 - 90 days</label>
-    </div>
-</div>
-<div class="clearfix"></div>
-
-<div>
-    <h4 class="filter-header">Other</h4>
-
-    <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-other-1" name="other" value="e_learning" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-        <label for="chk-other-1" class="margin-h-10 mobile-padding">E-learning center</label>
-    </div>
-
-    <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-other-2" name="other" value="virtual_programming" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-        <label for="chk-other-2" class="margin-h-10 mobile-padding">Virtual Programming</label>
-    </div>
-
-    <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-other-3" name="other" value="covid_protections" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-        <label for="chk-other-3" class="margin-h-10 mobile-padding">COVID Protections</label>
-    </div>
-</div>
-<div class="clearfix"></div>
-
-<div id="list-special-needs">
-    <h4 class="filter-header">Special Needs</h4>
-
-    @foreach (var item in specialNeeds)
-    {
-        <div class="am-checkbox" style="padding: 3px 0;">
-            <input id="chk-special-needs-@item.ToLower()" name="special-needs" value="@item" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-            <label for="chk-special-needs-@item.ToLower()" class="margin-h-10 mobile-padding">@item</label>
-        </div>
-    }
-
-    <p onclick="return loadMore(this, 'list-special-needs', '@specialNeeds.Length')" class="show-more">Show more...</p>
-</div>
-<div class="clearfix"></div>
-
-<script type="text/javascript">
-    PageEvent.add(PageEvent.AFTER_INIT, function () {
-        Array.from(
-            $("#list-services, #list-timing, #list-special-needs, #list-neighborhoods")
-        ).forEach(elem => {
-            $(elem).find(".am-checkbox").slice(5).hide();
-        });
-    });
-
-    function loadMore(element, listId, length) {
-        var listSelector = $(`#${listId} .am-checkbox`);
-        var isShowMore = $(element).text() == 'Show more...';
-
-        if (isShowMore) {
-            //..show more
-            $(element).text('Show less...');
-            listSelector.slice(0, length).slideDown();
-
-        } else {
-            //..hide
-            $(element).text('Show more...');
-            listSelector.slice(5).slideUp();
-        }
-    }
-
-    function checkAndSearch(elem) {
-        page = 0;
-        prepareSearchParams()
-    }
-
-    function validatePostalCodeAndSearch() {
-        var isValid = checkZip($('#txtZipCode').val());
-        if (isValid) {
-            if (isMobile && isMobileFilterWindowOpened) {
-                mobileFilter();
+    <div id="collapse-grades" class="collapse">
+        <div class="col-md-6 col-sm-6 col-xs-6 no-padding">
+            @foreach (var item in grades.Take(firstHalf))
+            {
+                <div class="am-checkbox am-filter-checkbox am-generic-checkbox" style="">
+                    <input id="chk-grades-@(item.ID)" name="grades" value="@(item.Name.ToLower().Replace(" ", "_"))" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+                    <label for="chk-grades-@(item.ID)" class="filter-body mobile-padding">@item.Name</label>
+                </div>
             }
+        </div>
 
-            page = 0;
-            return prepareSearchParams(true);
-        } else {
-            Notifications.showBar({
-                title: 'Error',
-                message: 'Postal code is not in a proper format.',
-                success: false
-            });
+        <div class="col-md-6 col-sm-6 col-xs-6 no-padding">
+            @foreach (var item in grades.Skip(firstHalf).Take(secondHalf))
+            {
+                <div class="am-checkbox am-filter-checkbox am-generic-checkbox" style="">
+                    <input id="chk-grades-@(item.ID)" name="grades" value="@(item.Name.ToLower().Replace(" ", "_"))" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+                    <label for="chk-grades-@(item.ID)" class="filter-body mobile-padding">@item.Name</label>
+                </div>
+            }
+        </div>
+        <div class="clearfix"></div>
+    </div>
+</div>
+<div class="filter-end-line"></div>
+
+<div>
+    <h4 id="header-ages" class="filter-header accordion-toggle collapsed" data-toggle="collapse" isOpen="false" href="#collapse-ages" onclick="return loadTabs('ages')">Ages</h4>
+    <div id="tags-container-ages"></div>
+
+    <div id="collapse-ages" class="collapse">
+        <div class="col-md-6 col-sm-6 col-xs-6 no-padding">
+            <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
+                <input id="chk-ages-1" name="ages" value="0_4" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+                <label for="chk-ages-1" class="filter-body mobile-padding">0 - 4 yrs</label>
+            </div>
+            <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
+                <input id="chk-ages-2" name="ages" value="5_9" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+                <label for="chk-ages-2" class="filter-body mobile-padding">5 - 9 yrs</label>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-sm-6 col-xs-6 no-padding">
+            <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
+                <input id="chk-ages-3" name="ages" value="10_14" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+                <label for="chk-ages-3" class="filter-body mobile-padding">10 - 14 yrs</label>
+            </div>
+            <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
+                <input id="chk-ages-4" name="ages" value="15_18" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+                <label for="chk-ages-4" class="filter-body mobile-padding">15 - 18 yrs</label>
+            </div>
+        </div>
+
+        <div class="clearfix"></div>
+    </div>
+</div>
+<div class="filter-end-line"></div>
+
+<div class="form-group">
+    <h4 id="header-gender" class="filter-header accordion-toggle collapsed" data-toggle="collapse" isOpen="false" href="#collapse-genders" onclick="return loadTabs('gender')"> Gender Restrictions</h4>
+    <div id="tags-container-gender"></div>
+
+    <div id="collapse-genders" class="collapse">
+        @foreach (GenderRestrictionType item in System.Enum.GetValues(typeof(GenderRestrictionType)))
+        {
+            if (item != GenderRestrictionType.None)
+            {
+                <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
+                    <input id="chk-gender-@((int)item)" name="gender" value="@(item.ToString().ToLower())" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+                    <label for="chk-gender-@((int)item)" class="filter-body mobile-padding"> @item.ToString().SplitByUpperCase() </label>
+                </div>
+            }
         }
-    }
+    </div>
+</div>
+<div class="filter-end-line"></div>
 
-    function checkZip(value) {
-        //.. this is global regex to verify/sanity check postal code format but this is not or validating zip code precisly per country.
-        //.. https://stackoverflow.com/a/7185241/5816119
-        //.. (in order) US, IN, UK
-        var zipCodePatternList = [/^\d{5}([\-]?\d{4})?$/, /^\d{6}$/, /^(GIR|[A-Z]\d[A-Z\d]??|[A-Z]{2}\d[A-Z\d]??)[ ]??(\d[A-Z]{2})$/]
-        return zipCodePatternList.some(function (rx) { return rx.test(value); });
-    }
-</script>
+<div id="list-services" class="form-group">
+    <h4 id="header-services" class="filter-header accordion-toggle collapsed" data-toggle="collapse" isOpen="false" href="#collapse-services-offered" onclick="return loadTabs('services')">Services Offered</h4>
+    <div id="tags-container-services"></div>
+
+    <div id="collapse-services-offered" class="collapse">
+        @foreach (var item in services.OrderBy(m => m))
+        {
+            <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
+                <input id="chk-services-@item.ToLower()" name="services" value="@item" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+                <label for="chk-services-@item.ToLower()" class="filter-body mobile-padding">@item</label>
+            </div>
+        }
+    </div>
+</div>
+<div class="filter-end-line"></div>
+
+<div id="list-timing" class="form-group">
+    <h4 id="header-timing" class="filter-header accordion-toggle collapsed" data-toggle="collapse" isOpen="false" href="#collapse-timing" onclick="return loadTabs('timing')">Timing</h4>
+    <div id="tags-container-timing"></div>
+
+    <div id="collapse-timing" class="collapse">
+        @foreach (var item in timing)
+        {
+            <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
+                <input id="chk-timing-@item.ToLower()" name="timing" value="@item" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+                <label for="chk-timing-@item.ToLower()" class="filter-body mobile-padding">@item</label>
+            </div>
+        }
+    </div>
+</div>
+<div class="filter-end-line"></div>
+
+<div class="form-group">
+    <h4 id="header-cost" class="filter-header accordion-toggle collapsed" data-toggle="collapse" isOpen="false" href="#collapse-cost" onclick="return loadTabs('cost')">Cost</h4>
+    <div id="tags-container-cost"></div>
+
+    <div id="collapse-cost" class="collapse">
+        <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
+            <input id="chk-cost-1" name="cost" value="cost_free" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+            <label for="chk-cost-1" class="filter-body mobile-padding">Free</label>
+        </div>
+
+        <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
+            <input id="chk-cost-2" name="cost" value="cost_0_50" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+            <label for="chk-cost-2" class="filter-body mobile-padding">Less than $50</label>
+        </div>
+
+        <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
+            <input id="chk-cost-3" name="cost" value="cost_50_150" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+            <label for="chk-cost-3" class="filter-body mobile-padding">Between $50 and $150</label>
+        </div>
+
+        <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
+            <input id="chk-cost-4" name="cost" value="cost_150_above" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+            <label for="chk-cost-4" class="filter-body mobile-padding">$150 and Above</label>
+        </div>
+    </div>
+</div>
+<div class="filter-end-line"></div>
+
+<div id="list-pricing" class="form-group">
+    <h4 id="header-pricing" class="filter-header accordion-toggle collapsed" data-toggle="collapse" isOpen="false" href="#collapse-pricing" onclick="return loadTabs('pricing')">Pricing options</h4>
+    <div id="tags-container-pricing"></div>
+
+    <div id="collapse-pricing" class="collapse">
+        @foreach (var item in pricingOptions.OrderBy(m => m))
+        {
+            <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
+                <input id="chk-pricing-@item.ToLower()" name="pricing" value="@item" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+                <label for="chk-pricing-@item.ToLower()" class="filter-body mobile-padding">@item</label>
+            </div>
+        }
+    </div>
+</div>
+<div class="filter-end-line"></div>
+
+<div class="form-group">
+    <h4 id="header-starting" class="filter-header accordion-toggle collapsed" data-toggle="collapse" isOpen="false" href="#collapse-starts-in" onclick="return loadTabs('starting')">Starts in</h4>
+    <div id="tags-container-starting"></div>
+
+    <div id="collapse-starts-in" class="collapse">
+        <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
+            <input id="chk-startingIn-1" name="starting" value="starting_0_7" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+            <label for="chk-startingIn-1" class="filter-body mobile-padding">1 Week or less</label>
+        </div>
+
+        <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
+            <input id="chk-startingIn-2" name="starting" value="starting_7_28" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+            <label for="chk-startingIn-2" class="filter-body mobile-padding">1 to 4 weeks</label>
+        </div>
+
+        <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
+            <input id="chk-startingIn-3" name="starting" value="starting_30_90" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+            <label for="chk-startingIn-3" class="filter-body mobile-padding">30 - 90 days</label>
+        </div>
+    </div>
+</div>
+<div class="filter-end-line"></div>
+
+<div class="form-group">
+    <h4 id="header-other" class="filter-header accordion-toggle collapsed" data-toggle="collapse" isOpen="false" href="#collapse-other" onclick="return loadTabs('other')">Other</h4>
+    <div id="tags-container-other"></div>
+
+    <div id="collapse-other" class="collapse">
+        <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
+            <input id="chk-other-1" name="other" value="e_learning" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+            <label for="chk-other-1" class="filter-body mobile-padding">E-learning center</label>
+        </div>
+
+        <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
+            <input id="chk-other-2" name="other" value="virtual_programming" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+            <label for="chk-other-2" class="filter-body mobile-padding">Virtual Programming</label>
+        </div>
+
+        <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
+            <input id="chk-other-3" name="other" value="covid_protections" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+            <label for="chk-other-3" class="filter-body mobile-padding">COVID Protections</label>
+        </div>
+    </div>
+</div>
+<div class="filter-end-line"></div>
+
+<div id="list-special-needs" class="form-group">
+    <h4 id="header-special-needs" class="filter-header accordion-toggle collapsed" data-toggle="collapse" isOpen="false" href="#collapse-special-needs" onclick="return loadTabs('special-needs')">Special Needs</h4>
+    <div id="tags-container-special-needs"></div>
+
+    <div id="collapse-special-needs" class="collapse">
+        @foreach (var item in specialNeeds)
+        {
+            <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
+                <input id="chk-special-needs-@item.ToLower()" name="special-needs" value="@item" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+                <label for="chk-special-needs-@item.ToLower()" class="filter-body mobile-padding">@item</label>
+            </div>
+        }
+    </div>
+</div>
+<div class="filter-end-line"></div>

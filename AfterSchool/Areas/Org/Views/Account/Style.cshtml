@@ -13,6 +13,9 @@
     var headerImageUrl = (string)ViewBag.HeaderImageUrl;
     var grades = (List<GradeLevel>)ViewBag.Grades;
 
+    var costLow = (string)ViewBag.CostLow;
+    var costHigh = (string)ViewBag.CostHigh;
+
     var programCategories = (List<AccountProperty>)ViewBag.Classifications;
     var softSkills = (List<AccountProperty>)ViewBag.SoftSkills;
     var academicSubjects = (List<AccountProperty>)ViewBag.AcademicSubjects;
@@ -21,14 +24,21 @@
     var timesOffered = (List<AccountProperty>)ViewBag.TimesOffered;
     var pricingOptions = (List<AccountProperty>)ViewBag.PricingOptions;
     var specialNeedsOfferings = (List<AccountProperty>)ViewBag.SpecialNeedsOfferings;
+    var programsAllDayDuringWorkWeek = (List<AccountProperty>)ViewBag.ProgramsAllDayDuringWorkWeek;
+    var isProgramsAllDayDuringWorkWeek = false;
+    var programsAllDayDuringWorkWeekCaptured = programsAllDayDuringWorkWeek.IsNotEmpty() && programsAllDayDuringWorkWeek.Any();
+    if (programsAllDayDuringWorkWeekCaptured)
+    {
+        isProgramsAllDayDuringWorkWeek = programsAllDayDuringWorkWeek.FirstOrDefault()?.Value == "1";
+    }
     var isFullScreen = (bool)ViewBag.IsFullScreen;
     var formAction = Url.Action("style", "account", new { isfullscreen = Request["isfullscreen"], returnurl = Request["returnurl"] });
     var exitText = "Back to My Profile &raquo;";
-
     if (isFullScreen)
     {
         Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
     }
+    var isDirectoryAccountProvider = (bool)ViewBag.IsDirectoryAccountProvider;
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -165,96 +175,123 @@
                         <div class="panel-heading text-center-sm">
                             Additional Details
                         </div>
+                        <div class="panel-body mobile-padding-zero">
 
-                        @{
-                            Html.RenderPartial(
-                                "~/Views/Shared/_RestrictBySelection.cshtml",
-                                null,
-                                new ViewDataDictionary() { 
-                                    { "minGradeLevelId", Model.GradeLevelStart }, 
-                                    { "MaxGradeLevelId", Model.GradeLevelEnd }, 
-                                    { "grades", grades }, { "ageStart", Model.AgeStart }, 
-                                    { "ageEnd", Model.AgeEnd }, 
-                                    { "restrictbygrade", Model.RestrictByGrade() } }
-                                );
-                        }
+                            @{
+                                Html.RenderPartial(
+                                    "~/Views/Shared/_RestrictBySelection.cshtml",
+                                    null,
+                                    new ViewDataDictionary() {
+                                        { "minGradeLevelId", Model.GradeLevelStart },
+                                        { "MaxGradeLevelId", Model.GradeLevelEnd },
+                                        { "grades", grades }, { "ageStart", Model.AgeStart },
+                                        { "ageEnd", Model.AgeEnd },
+                                        { "restrictbygrade", Model.RestrictByGrade() } }
+                                    );
+                            }
 
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">My program is designed for</label>
-                            <div class="col-md-9">
-                                <div class="am-radio">
-                                    <input type="radio"
-                                           name="genderrestriction"
-                                           id="genderrestriction-@((int)GenderRestrictionType.None)"
-                                           value="@((int)GenderRestrictionType.None)"
-                                           @(Model.GenderRestriction == GenderRestrictionType.None ? "checked=\"checked\"" : "") />
-                                    <label for="genderrestriction-@((int)GenderRestrictionType.None)">All Genders</label>
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">My program is designed for</label>
+                                <div class="col-md-9">
+                                    <div class="am-radio">
+                                        <input type="radio"
+                                               name="genderrestriction"
+                                               id="genderrestriction-@((int)GenderRestrictionType.None)"
+                                               value="@((int)GenderRestrictionType.None)"
+                                               @(Model.GenderRestriction == GenderRestrictionType.None ? "checked=\"checked\"" : "") />
+                                        <label for="genderrestriction-@((int)GenderRestrictionType.None)">All Genders</label>
+                                    </div>
+                                    <div class="am-radio">
+                                        <input type="radio"
+                                               name="genderrestriction"
+                                               id="genderrestriction-@((int)GenderRestrictionType.MaleOnly)"
+                                               value="@((int)GenderRestrictionType.MaleOnly)"
+                                               @(Model.GenderRestriction == GenderRestrictionType.MaleOnly ? "checked=\"checked\"" : "") />
+                                        <label for="genderrestriction-@((int)GenderRestrictionType.MaleOnly)">Boys</label>
+                                    </div>
+                                    <div class="am-radio">
+                                        <input type="radio"
+                                               name="genderrestriction"
+                                               id="genderrestriction-@((int)GenderRestrictionType.FemaleOnly)"
+                                               value="@((int)GenderRestrictionType.FemaleOnly)"
+                                               @(Model.GenderRestriction == GenderRestrictionType.FemaleOnly ? "checked=\"checked\"" : "") />
+                                        <label for="genderrestriction-@((int)GenderRestrictionType.FemaleOnly)">Girls</label>
+                                    </div>
                                 </div>
-                                <div class="am-radio">
-                                    <input type="radio"
-                                           name="genderrestriction"
-                                           id="genderrestriction-@((int)GenderRestrictionType.MaleOnly)"
-                                           value="@((int)GenderRestrictionType.MaleOnly)"
-                                           @(Model.GenderRestriction == GenderRestrictionType.MaleOnly ? "checked=\"checked\"" : "") />
-                                    <label for="genderrestriction-@((int)GenderRestrictionType.MaleOnly)">Boys</label>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    Price range of activities offered
+                                </label>
+                                <div class="col-md-9">
+                                    <div class="">
+                                        <div class="col-md-5 col-xs-12 padding-0">
+                                            <div class="input-group">
+                                                <span class="input-group-addon">$</span>
+                                                <input id="costlow" name="costlow" class="form-control" type="number" required="required" value="@costLow" onclick="this.select()" step=".01" onblur="checkLowHighValue()" style="height: 44px;">
+                                            </div>
+                                        </div>
+                                        <p class="col-md-2 col-xs-12 margin-v-10 desktop-text-center" style="font-size: 16px;">
+                                            To
+                                        </p>
+                                        <div class="col-md-5 col-xs-12 padding-0">
+                                            <div class="input-group">
+                                                <span class="input-group-addon">$</span>
+                                                <input id="costhigh" name="costhigh" class="form-control" type="number" required="required" value="@costHigh" onclick="this.select()" step=".01" onblur="checkLowHighValue()" style="height: 44px;">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12 padding-0 text-muted margin-t-10" style="font-style:italic">If all of your programs are free enter 0 into both fields</div>
+                                    </div>
                                 </div>
-                                <div class="am-radio">
-                                    <input type="radio"
-                                           name="genderrestriction"
-                                           id="genderrestriction-@((int)GenderRestrictionType.FemaleOnly)"
-                                           value="@((int)GenderRestrictionType.FemaleOnly)"
-                                           @(Model.GenderRestriction == GenderRestrictionType.FemaleOnly ? "checked=\"checked\"" : "") />
-                                    <label for="genderrestriction-@((int)GenderRestrictionType.FemaleOnly)">Girls</label>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    Providing services during COVID?
+                                </label>
+                                <div class="col-md-9">
+                                    @{ Html.RenderPartial(
+                                                  "~/Views/Shared/_SwitchButton.cshtml",
+                                                  Model.IsOpenDuringCovid,
+                                                  new ViewDataDictionary() { { "checkboxname", "opencovid" }, { "checkboxid", "opencovid" } });
+                                    }
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">
-                                Providing services during COVID?
-                            </label>
-                            <div class="col-md-9">
-                                @{ Html.RenderPartial(
-                                             "~/Views/Shared/_SwitchButton.cshtml",
-                                             Model.IsOpenDuringCovid,
-                                             new ViewDataDictionary() { { "checkboxname", "opencovid" }, { "checkboxid", "opencovid" } });
-                                }
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    Are you offering virtual programs?
+                                </label>
+                                <div class="col-md-9">
+                                    @{ Html.RenderPartial(
+                                                 "~/Views/Shared/_SwitchButton.cshtml",
+                                                 Model.IsVirtualProgram,
+                                                 new ViewDataDictionary() { { "checkboxname", "virtualprogram" }, { "checkboxid", "virtualprogram" } });
+                                    }
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">
-                                Are you offering virtual programs?
-                            </label>
-                            <div class="col-md-9">
-                                @{ Html.RenderPartial(
-                                             "~/Views/Shared/_SwitchButton.cshtml",
-                                             Model.IsVirtualProgram,
-                                             new ViewDataDictionary() { { "checkboxname", "virtualprogram" }, { "checkboxid", "virtualprogram" } });
-                                }
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    Are you an E-Learning Center?
+                                </label>
+                                <div class="col-md-9">
+                                    @{ Html.RenderPartial(
+                                                 "~/Views/Shared/_SwitchButton.cshtml",
+                                                 Model.IsELearningCenter,
+                                                 new ViewDataDictionary() { { "checkboxname", "elearningcenter" }, { "checkboxid", "elearningcenter" } });
+                                    }
+                                    <p class="text-muted">You host/care for students to assist e-learning during the school day</p>
+                                </div>
                             </div>
+
+                            @if (!isFullScreen)
+                            {
+                                @SubmitButtons()
+                            }
+
                         </div>
-
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">
-                                Are you an E-Learning Center?
-                            </label>
-                            <div class="col-md-9">
-                                @{ Html.RenderPartial(
-                                             "~/Views/Shared/_SwitchButton.cshtml",
-                                             Model.IsELearningCenter,
-                                             new ViewDataDictionary() { { "checkboxname", "elearningcenter" }, { "checkboxid", "elearningcenter" } });
-                                }
-                                <p class="text-muted">You host/care for students to assist e-learning during the school day</p>
-                            </div>
-                        </div>
-
-                        @if (!isFullScreen)
-                        {
-                            @SubmitButtons()
-                        }
-
-                    </div>
                     </div>
 
                     <!-- Photos -->
@@ -415,6 +452,21 @@
                                 </div>
                             </div>
 
+                            <div class="form-group">
+                                <label class="col-md-3 control-label"> Do Any Of Your Programs Run All Day During the Work Week?</label>
+
+                                <div class="col-md-9">
+                                    <div class="am-radio inline">
+                                        <input type="radio" id="programsalldayduringworkweek-yes" name="programsalldayduringworkweek" class="form-control onboarding-input" value="1"/>
+                                        <label for="programsalldayduringworkweek-yes">YES</label>
+                                    </div>
+                                    <div class="am-radio inline">
+                                        <input type="radio" id="programsalldayduringworkweek-no" name="programsalldayduringworkweek" class="form-control onboarding-input" value="0"/>
+                                        <label for="programsalldayduringworkweek-no">NO</label>
+                                    </div>
+                                </div>
+                            </div>
+
                             @if (!isFullScreen)
                             {
                                 @SubmitButtons()
@@ -549,6 +601,59 @@
                             Website &amp; Social Links
                         </div>
                         <div class="panel-body mobile-padding-zero">
+
+                            @if (isDirectoryAccountProvider)
+                            {
+                                <div class="form-group">
+                                    <label class="col-md-3 control-label">
+                                        I am using Afterschool Hq to collect registrations
+                                    </label>
+
+                                    <div class="col-md-9">
+                                        <div class="am-radio inline">
+                                            <input type="radio" id="collectregistration-yes" name="collectregistration" class="form-control onboarding-input" value="1" @(Model.RegistrationUrl.IsNotEmpty() ? "" : "checked") onchange="valueChanged()" />
+                                            <label for="collectregistration-yes">Yes</label>
+                                        </div>
+                                        <div class="am-radio inline">
+                                            <input type="radio" id="collectregistration-no" name="collectregistration" class="form-control onboarding-input no" value="0" @(Model.RegistrationUrl.IsNotEmpty() ? "checked" : "") onchange="valueChanged()" />
+                                            <label for="collectregistration-no">No</label>
+                                        </div>
+
+                                        <p class="text-muted"><em>To give parents the best experience we recommend using Afterschool HQ to register</em></p>
+
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group @(Model.RegistrationUrl.IsNotEmpty() ? "": "hide")" id="regUrlDiv">
+                                    <label class="col-md-3 control-label">
+                                        Registration or learn more url
+                                    </label>
+                                    <div class="col-md-9">
+                                        <input type="text" class="form-control"  name="registrationurl" id="registrationurl" onblur="makeRadioRequired()" placeholder="https://your-website.com/register" title="This link will be displayed in a button on your Provider Profile for parents to access." value="@Model.RegistrationUrl" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group @(Model.ButtonText.IsNotEmpty() ? "": "hide")" id="btnTxtDiv">
+                                    <label class="col-md-3 control-label">
+                                        Button text
+                                    </label>
+
+                                    <div class="col-md-9">
+                                        <div class="am-radio inline">
+                                            <input type="radio" id="buttontext-register" name="buttontext" class="custom-radio-btn-required form-control onboarding-input" value="register" @(Model.ButtonText == "register" ? "checked" : "") @(Model.ButtonText.IsNotEmpty() ? "required" : "")/>
+                                            <label for="buttontext-register">Register</label>
+                                        </div>
+                                        <div class="am-radio inline">
+                                            <input type="radio" id="buttontext-learnmore" name="buttontext" class="custom-radio-btn-required form-control onboarding-input" value="learnmore" @(Model.ButtonText == "learnmore" ? "checked" : "") />
+                                            <label for="buttontext-learnmore">Learn More</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            }
+
                             <div class="form-group">
                                 <label class="col-md-3 control-label">
                                     Website Url
@@ -735,7 +840,37 @@
         $('#teachingmethods').tagsinput({
             maxTags: 3
         });
-
+        function checkLowHighValue() {
+            var costLow = $("#costlow").val();
+            var costHigh = $("#costhigh").val();
+            if (costLow != "" && costHigh != "") {
+                $("#costlow").val(parseFloat(costLow).toFixed(2));
+                $("#costhigh").val(parseFloat(costHigh).toFixed(2));
+                if (parseFloat(costLow) > parseFloat(costHigh)) {
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: 'Please make the low cost range value less than high cost.',
+                        success: false
+                    });
+                    $('#costlow').attr('style', 'height: 44px; border: 1px solid red');
+                    $('#costhigh').attr('style', 'height: 44px; border: 1px solid red');
+                    $('.register-continue').attr('disabled', "disabled");
+                    return false;
+                }
+                else {
+                    $('#costlow').attr('style', 'height: 44px;');
+                    $('#costhigh').attr('style', 'height: 44px;');
+                    $('.register-continue').removeAttr('disabled');
+                    return true;
+                }
+            }
+            else if (costLow != "") {
+                $("#costlow").val(parseFloat(costLow).toFixed(2));
+            }
+            else if (costHigh != "") {
+                $("#costhigh").val(parseFloat(costHigh).toFixed(2));
+            }
+        }
 
         $('#txtVideoUrl').blur(function () {
             var url = $('#txtVideoUrl').val();
@@ -755,6 +890,27 @@
                 }
             }
         });
+
+        function valueChanged() {
+            if ($('.no').is(":checked")) {
+                $("#regUrlDiv").removeClass('hide');
+                $("#btnTxtDiv").removeClass('hide');
+            }
+            else {
+                $("#regUrlDiv").addClass('hide');
+                $("#btnTxtDiv").addClass('hide');
+            }
+        }
+
+        function makeRadioRequired() {
+            var registrationUrl = $("#registrationurl").val();
+            if (registrationUrl != null && registrationUrl != "") {
+                $("#buttontext-register").attr('required', 'required');
+            }
+            else {
+                $("#buttontext-register").removeAttr('required');
+            }
+        }
 
         function validateYouTubeVideoUrl(url) {
             var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
@@ -777,6 +933,21 @@
 
             return false;
         }
+
+        function setFormValuesOnLoad() {
+            if (!@programsAllDayDuringWorkWeekCaptured.ToJSON())
+                return;
+            if (@isProgramsAllDayDuringWorkWeek.ToJSON())
+                $('#programsalldayduringworkweek-yes').attr("checked", true);
+            else
+                $('#programsalldayduringworkweek-no').attr("checked", true);
+        }
+
+        PageEvent.add(PageEvent.AFTER_INIT, function()
+            {
+                setFormValuesOnLoad();
+            }
+        );
     </script>
 
 }

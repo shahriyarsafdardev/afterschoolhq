@@ -22,6 +22,20 @@ namespace AfterSchool.Models
 
             return account;
         }
+        public static Account GetParentAccount(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var id = (string)HttpContext.Current.Session["ParentAccount"];
+            Account account = null;
+
+            if (id.IsNotEmpty())
+                account = Account.Load(id.ToInteger(), msgs, dc);
+            else if (CookieVariables.ParentAccount.IsGuid())
+                account = Account.LoadByUid(CookieVariables.ParentAccount.ToGuid(), msgs, dc);
+
+            SessionVariables.ParentAccount = account;
+
+            return account;
+        }
         public static UserType GetAccountUserType(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             UserType usertype = UserType.NotSet;

@@ -77,6 +77,24 @@ namespace AfterSchool.Models
             }
         }
 
+        public static Account ParentAccount
+        {
+            get
+            {
+                return SessionHelper.GetParentAccount();
+            }
+            set
+            {
+                if (value.IsNotEmpty())
+                    SessionHelper.AddToSession("ParentAccount", value.ID.Value.ToString());
+                else
+                {
+                    SessionHelper.RemoveFromSession("ParentAccount");
+                    CookieVariables.ParentAccount = null;
+                }
+            }
+        }
+
         public static UserType AccountUserType
         {
             get
