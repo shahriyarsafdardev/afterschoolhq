@@ -7,7 +7,7 @@
 
     var services = AfterSchoolLibrary.Helpers.ProfileHelper.ServicesOfferings;
     var timing = AfterSchoolLibrary.Helpers.ProfileHelper.OfferingTimes;
-    var pricingOptions = AfterSchoolLibrary.Helpers.ProfileHelper.PricingOptions;
+    var pricingOptions = AfterSchoolLibrary.Helpers.ProfileHelper.PricingOptionsWithoutFreeActivities;
     var specialNeeds = AfterSchoolLibrary.Helpers.ProfileHelper.SpecialNeedsOfferings;
 }
 
@@ -152,18 +152,28 @@
         </div>
 
         <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
-            <input id="chk-cost-2" name="cost" value="cost_0_50" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-            <label for="chk-cost-2" class="filter-body mobile-padding">Less than $50</label>
+            <input id="chk-cost-2" name="cost" value="cost_1_20" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+            <label for="chk-cost-2" class="filter-body mobile-padding">$1 - $20</label>
         </div>
 
         <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
-            <input id="chk-cost-3" name="cost" value="cost_50_150" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-            <label for="chk-cost-3" class="filter-body mobile-padding">Between $50 and $150</label>
+            <input id="chk-cost-3" name="cost" value="cost_21_50" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+            <label for="chk-cost-3" class="filter-body mobile-padding">$21 - $50</label>
         </div>
 
         <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
-            <input id="chk-cost-4" name="cost" value="cost_150_above" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-            <label for="chk-cost-4" class="filter-body mobile-padding">$150 and Above</label>
+            <input id="chk-cost-4" name="cost" value="cost_51_100" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+            <label for="chk-cost-4" class="filter-body mobile-padding">$51 - $100</label>
+        </div>
+
+        <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
+            <input id="chk-cost-5" name="cost" value="cost_101_200" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+            <label for="chk-cost-5" class="filter-body mobile-padding">$101 - $200</label>
+        </div>
+
+        <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
+            <input id="chk-cost-6" name="cost" value="cost_201_above" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+            <label for="chk-cost-6" class="filter-body mobile-padding">$201 and Above</label>
         </div>
     </div>
 </div>
