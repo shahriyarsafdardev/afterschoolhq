@@ -1082,6 +1082,7 @@ namespace AfterSchool.Controllers
                     case QuestionDataType.RegistrantLastName:
                     case QuestionDataType.RegistrantEmail:
                     case QuestionDataType.RegistrantGrade:
+                    case QuestionDataType.RegistrantDateOfBirth:
                         question.IsRequired = true;
                         break;
                 }
@@ -1162,6 +1163,7 @@ namespace AfterSchool.Controllers
             var currentUser = SessionVariables.CurrentUser;
             var participationObject = GetParticipationObjectFromCart();
             var questions = StudentRegistrationViewBag(msgs);
+            var parentQuestions = StudentRegistrationParentViewBag(msgs);
 
             if (currentUser.IsEmpty())
                 ValidateStudentRegistrationPasswords(password: password1, confirmPassword: password2, msgs: msgs);
@@ -1176,6 +1178,7 @@ namespace AfterSchool.Controllers
                 var lastName = qvms?.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName)?.Value.Split(',')?[0];
                 var email = qvms?.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail)?.Value.Split(',')?[0];
                 var phone = qvms?.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone)?.Value;
+                var dob = qvms?.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantDateOfBirth)?.Value;
                 var parentFirstName = qvms?.Last(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName)?.Value.Split(',')?[1];
                 var parentLastName = qvms?.Last(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName)?.Value.Split(',')?[1];
                 var parentEmail = qvms?.Last(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail)?.Value.Split(',')?[1];
@@ -1263,6 +1266,9 @@ namespace AfterSchool.Controllers
             ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
             ViewBag.Messages = msgs;
             ViewBag.ParticipationObject = participationObject;
+            ViewBag.ParentQuestions = GetParentQuestionAnswerViewModel(qvms, ViewBag.ParentQuestions);
+            qvms = GetQuestionAnswerViewModel(qvms);
+            
 
             return View(qvms);
         }
@@ -1338,6 +1344,45 @@ namespace AfterSchool.Controllers
                 }
             }
             return model;
+        }
+
+        private List<FormQuestionViewModel> GetQuestionAnswerViewModel(List<FormQuestionViewModel> qvms, bool isParent = false)
+        {            
+            foreach (var qvm in qvms)
+            {
+                switch (qvm.Question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantFirstName:
+                    case QuestionDataType.RegistrantLastName:
+                    case QuestionDataType.RegistrantEmail:
+                            qvm.Value = !isParent ? qvm.Value?.Split(',')?[0].Trim() : qvm.Value?.Split(',')?[1].Trim();
+                            break;
+                }                
+            }
+            return qvms;
+        }
+
+        private List<FormQuestionViewModel> GetParentQuestionAnswerViewModel(List<FormQuestionViewModel> qvms, List<FormQuestionViewModel> parentQuestions)
+        {
+            var parentFirstName = qvms?.Last(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName)?.Value.Split(',')?[1];
+            var parentLastName = qvms?.Last(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName)?.Value.Split(',')?[1];
+            var parentEmail = qvms?.Last(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail)?.Value.Split(',')?[1];
+            for (int i = 0; i < parentQuestions.Count; i++)
+            {
+                switch (parentQuestions[i].Question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantFirstName:
+                        parentQuestions[i].Value = parentFirstName;
+                        break;
+                    case QuestionDataType.RegistrantLastName:
+                        parentQuestions[i].Value = parentLastName;
+                        break;
+                    case QuestionDataType.RegistrantEmail:
+                        parentQuestions[i].Value = parentEmail;
+                        break;
+                }
+            }           
+            return parentQuestions;
         }
 
         #endregion

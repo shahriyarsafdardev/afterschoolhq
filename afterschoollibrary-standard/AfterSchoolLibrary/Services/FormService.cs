@@ -763,7 +763,6 @@ namespace AfterSchoolLibrary.Services
         {
             QuestionDataType.RegistrantHomePhone,
             QuestionDataType.RegistrantWorkPhone,
-            QuestionDataType.RegistrantDateOfBirth,
             QuestionDataType.RegistrantGender,
             QuestionDataType.RegistrantEthnicityUsFed,
             QuestionDataType.RegistrantRaceUsFed,
