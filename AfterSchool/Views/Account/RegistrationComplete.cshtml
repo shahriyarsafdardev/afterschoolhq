@@ -21,31 +21,32 @@
 }
 
 <div>
-    <div class="col-md-6 col-md-offset-3 text-center">
+    <div class="text-center">
         <div class="panel">
             <div class="panel-body">
+                <div class="col-md-8 col-md-offset-2">
 
-                <h1>Registration Complete!</h1>
+                    <h1>Registration Complete!</h1>
 
-                <div class="reg-ul">
-                    <p>
-                        <span>You have reserved a spot in <strong>@participationObject.Name</strong>. Your registration will be complete once your parent or guardian accepts their invitation and enters the required information.</span>
+                    <div class="reg-ul">
+                        <p>
+                            <span>You have reserved a spot in <strong>@participationObject.Name</strong>. Your registration will be confirmed once your parent or guardian accepts their invitation and enters the required information.</span>
+                    </div>
+
+                    <div class="margin-v-10">
+                        <div class="col-md-6 col-md-offset-3">
+                            <a href="@Url.Action("index", "home", new { area = "user" })" onclick="return showLoader()"
+                               class="@(assignmentType != RegistrationAssignmentType.Interested ? "btn btn-xl btn-register-primary btn-register-xl" : "")">View Account</a>
+                        </div>
+                    </div>
+
+                    <div class="margin-v-10">
+                        <div class="col-md-6 col-md-offset-3">
+                            <a href="@participationObject.GetHomePageUrl()" onclick="return showLoader()"
+                               class="@(assignmentType != RegistrationAssignmentType.Interested ? "btn btn-xl btn-register-primary btn-register-xl" : "")">Register for Another Activity</a>
+                        </div>
+                    </div>
                 </div>
-
-                <div class="margin-v-10">
-                    <div class="col-md-6 col-md-offset-3">
-                        <a href="@Url.Action("index", "home", new { area = "user" })" onclick="return showLoader()"
-                           class="@(assignmentType != RegistrationAssignmentType.Interested ? "btn btn-xl btn-register-primary btn-register-xl" : "")">View Account</a>
-                    </div>                    
-                </div>
-
-                <div class="margin-v-10">
-                    <div class="col-md-6 col-md-offset-3">
-                        <a href="@participationObject.GetHomePageUrl()" onclick="return showLoader()"
-                           class="@(assignmentType != RegistrationAssignmentType.Interested ? "btn btn-xl btn-register-primary btn-register-xl" : "")">Register for Another Activity</a>
-                    </div>                    
-                </div>
-
             </div>
         </div>
 

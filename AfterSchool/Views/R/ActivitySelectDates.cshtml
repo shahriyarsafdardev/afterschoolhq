@@ -6,16 +6,6 @@
     var account = (Account)ViewBag.Account;
     var msgs = (SystemMessages)ViewBag.Messages;
     var accountProfile = (AccountProfile)ViewBag.AccountProfile;
-    var currentAccount = SessionVariables.CurrentAccount;
-    var currentUser = SessionVariables.CurrentUser;
-
-    var isAccountAndLoggedInUserIsOwner = Model.IsNotEmpty() &&
-        Model.OwnerAccount.IsNotEmpty() &&
-        currentAccount.IsNotEmpty() &&
-        currentUser.IsNotEmpty() &&
-        (currentAccount.ID == Model.OwnerAccount.ID) &&
-        (currentUser.HasAccessTo(Model.OwnerAccount));
-
 }
 <style>
     .disabled {
@@ -90,11 +80,6 @@
         </div>
     </div>
 </div>
-
-@section header
-{
-    @{ Html.RenderPartial("~/Views/Shared/Registration/_ShareMetaTags.cshtml", new RegistrationHeaderViewModel(Model, accountProfile)); }
-}
 
 <script type="text/javascript">
     function hideActivityRibbon() {
