@@ -16,7 +16,7 @@
                 <label class="col-md-3 control-label">
                     Allow Students To Register
                 </label>
-                <div class="col-md-9" @if (!showAllowStudentRegistration){ <text> onclick="return showUpgradeMyPlan('@(allowStudentRegPackage.IsNotEmpty() ? allowStudentRegPackage.Name : "")',@(allowStudentRegPackage.IsNotEmpty() ? allowStudentRegPackage.ID.Value.ToString() : ""))" </text> }>
+                <div class="col-md-9">
                     @{
                         Html.RenderPartial(
                           "~/Views/Shared/_SwitchButton.cshtml",
