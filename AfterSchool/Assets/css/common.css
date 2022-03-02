@@ -10,6 +10,9 @@
     padding: 5px;
 }
 
+.mr-3 {
+    padding-right: 15px;
+}
 .p-b-5 {
     padding-bottom: 5px;
 }
@@ -29,7 +32,10 @@
 .no-padding {
     padding: 0;
 }
-
+.sticky-bottom{
+    position: sticky;
+    bottom: 0;
+}
 .overlay {
     position: absolute;
     top: 0;
@@ -1531,7 +1537,7 @@
 }
 
 .filter-end-line {
-    margin: 18px 0 10px -15px;
+    margin: 18px 0px 10px -15px;
     border: solid 1px #f2f2f5;
 }
 
@@ -1581,6 +1587,8 @@
 
 .directory-search-container {
     background-color: #f8f8f8;
+    height: calc(100vh - 83px);
+    overflow: auto;
 }
 
 .directory-search-input {
