@@ -1,5 +1,9 @@
 ﻿function googleTranslateElementInit() {
-    new google.translate.TranslateElement({ pageLanguage: 'en', includedLanguages: 'en,es,fr', layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL }, 'google_translate_element');
+    new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        includedLanguages: 'en,es,fr,ht,sw',
+        layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL
+    }, 'google_translate_element');
 }
 
 function triggerHtmlEvent(element, eventName) {
@@ -14,14 +18,17 @@ function triggerHtmlEvent(element, eventName) {
         element.fireEvent('on' + event.eventType, event);
     }
 }
+
 $(document).ready(function () {
     $(document).on('click', '.languageOption', function () {
         var value = $(this).attr("data-lang");
-        setFlagHTML(value);
+        setCurrentLanguage(value);
 
         localStorage.setItem('languageSelected', value);
 
-        setTimeout(function () { updateLanguage(value); }, 1000);
+        setTimeout(function () {
+            updateLanguage(value);
+        }, 1000);
     })
 
     checkLocalStorage();
@@ -29,44 +36,61 @@ $(document).ready(function () {
     function checkLocalStorage() {
         var checkLocalStorage = localStorage.getItem('languageSelected');
         if (checkLocalStorage) {
-            setTimeout(function () { updateLanguage(checkLocalStorage); }, 1000);
-            setFlagHTML(checkLocalStorage);
+            setTimeout(function () {
+                updateLanguage(checkLocalStorage);
+            }, 1000);
+            setCurrentLanguage(checkLocalStorage);
         }
     }
 
-    function setFlagHTML(value) {
+    function setCurrentLanguage(languageCode) {
 
-        var flagHTML = 'English';
-        if (value == "es") {
-            flagHTML = 'Espanol';
-        }
-        else if (value == "fr") {
-            flagHTML = 'French';
+        var currentLanguage = 'English';
+
+        switch (languageCode) {
+            case "es":
+                currentLanguage = 'Español';
+                break;
+            case "fr":
+                currentLanguage = 'Français';
+                break;
+            case "ht":
+                currentLanguage = 'Kreyòl ayisyen';
+                break;
+            case "sw":
+                currentLanguage = 'Kiswahili';
+                break;
         }
 
-        $("#dropdownMenuButton").html(flagHTML);
+        $("#dropdownMenuButton").html(currentLanguage);
         $(".selectedLang").removeClass('selectedLang');
         $(".languageOption").addClass('notSelectedLang');
-        $('*[data-lang="' + value + '"]').removeClass('notSelectedLang').addClass('selectedLang');
+        $('*[data-lang="' + languageCode + '"]').removeClass('notSelectedLang').addClass('selectedLang');
     }
 
-    function updateLanguage(value) {
+    function updateLanguage(languageCode) {
         var selectIndex = 0;
         var a = document.querySelector("#google_translate_element select");
-        switch (value) {
+        switch (languageCode) {
             case "en":
                 selectIndex = 0;
                 break;
             case "es":
-                selectIndex = 2;
+                selectIndex = 3;
                 break;
             case "fr":
                 selectIndex = 1;
                 break;
+            case "ht":
+                selectIndex = 2;
+                break;
+            case "sw":
+                selectIndex = 4;
+                break;
         }
         a.selectedIndex = selectIndex;
         a.dispatchEvent(new Event('change'));
-        if (value == "en") {
+        if (languageCode === "en") {
             localStorage.removeItem('languageSelected');
             window.location.reload();
         }

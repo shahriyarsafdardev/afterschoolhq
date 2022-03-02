@@ -1,0 +1,193 @@
+﻿@model List<FormQuestionViewModel>
+@{
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+    ViewBag.Title = "Student Registration";
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
+    var registrationAccount = (Account)ViewBag.RegistrationAccount;
+    var currentUser = SessionVariables.CurrentUser;
+    var savedEmail = Model.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail)?.Value;
+    var showStep1 = currentUser.IsEmpty() && savedEmail.IsBlank();
+    var isDuringProfileSetup = currentUser.IsNotEmpty() || savedEmail.IsNotBlank();
+    var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
+    var parentQuestions = (List<FormQuestionViewModel>)ViewBag.ParentQuestions;
+}
+
+@{
+    Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs);
+}
+
+@{
+    Html.RenderPartial(
+        "~/Views/Shared/Registration/_AccountTopBar.cshtml",
+        SessionVariables.RegistrationStartPageAccount ?? registrationAccount,
+        new ViewDataDictionary()
+        {
+            { "ParticipationObject", participationObject },
+            { "isDuringProfileSetup", isDuringProfileSetup },
+            { "CleverSsoEnabled", cleverSsoEnabled }
+        });
+}
+
+@{
+    Html.RenderPartial(
+        "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
+        new RegistrationHeaderViewModel(participationObject, true),
+        new ViewDataDictionary()
+        {
+            { "hidebuttons", true }
+        });
+}
+
+<div>
+    <div class="col-md-12">
+        <div class="panel">
+            <div class="panel-body">
+
+                <br />
+                <div class="text-center reg-instructions">
+                    <p><strong>Please enter your information below to begin registration.</strong></p>
+                </div>
+                <br /><br />
+
+                <div>
+                    <form class="form-horizontal" id="signup-form" method="post" action="@Url.Action("StudentRegistration", "account")">
+
+                        <div class="row" id="email-check-container">
+
+                            <div>
+                                <p class="text-center reg-login new-account" style="color: #00c5a3; font-weight: bold;">
+                                    Personal Information
+                                </p>
+                                <input type="hidden" id="regaccount" name="regaccount" value="@registrationAccount.Uid" />
+                            </div>
+
+                            @foreach (var qvm in Model.Where(qvm => !qvm.Hide && qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation &&
+                                qvm.Question.QuestionDataTypeId.In(new List<QuestionDataType>() {
+                                    QuestionDataType.RegistrantFirstName, QuestionDataType.RegistrantLastName, QuestionDataType.RegistrantMiddleName, QuestionDataType.RegistrantEmail
+                                })))
+                            {
+                                Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
+                            }
+
+                            <div class="form-group">
+                                <label for="password1" class="control-label col-md-3">
+                                    Password <span class="text-danger">*</span>
+                                </label>
+                                <div class="col-md-6">
+                                    <input id="password1" name="password1" type="password" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="password1" class="control-label col-md-3">
+                                    Verify Password <span class="text-danger">*</span>
+                                </label>
+                                <div class="col-md-6">
+                                    <input id="password2" name="password2" type="password" class="form-control" />
+                                </div>
+                            </div>
+
+                            @foreach (var qvm in Model.Where(qvm => !qvm.Hide &&
+                                qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation &&
+                                qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantGrade))
+                            {
+                                Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
+                            }
+
+                            @foreach (var qvm in Model.Where(qvm => !qvm.Hide &&
+                                qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation &&
+                                qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone))
+                            {
+                                Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
+
+                                <div class="row">
+                                    <div class="col-md-6 col-md-offset-3">
+                                        <div class="am-checkbox am-checkbox-updated">
+                                            <input type="checkbox" id="textnotifications" name="textnotifications" value="1" @(UILabel.CheckAllowTextMessage(currentUser) ? " checked=\"checked\" " : "") />
+                                            <label for="textnotifications">
+                                                I would like to receive text notifications from my school or provider through AHQ.
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="clearfix"></div>
+                            <br /><br />
+
+                            <div>
+                                <p class="text-center reg-login new-account" style="color: #00c5a3; font-weight: bold;">
+                                    Invite Parent or Guardian
+                                </p>
+                            </div>
+
+                            <div class="text-center parent-instructions" style="font-weight: bold; color: gray;">
+                                <p>Your parent or guardian will confirm additional details required by schools and providers.</p>
+                            </div>
+
+                            @foreach (var qvm in parentQuestions)
+                            {
+                                Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
+                            }
+
+                            <div class="col-md-6 col-md-offset-3 parent-instructions" style="color: gray; font-size: 13px;">
+                                <p>This should not be the same email used in the previous step.</p>
+                            </div>
+                            <br /> <br /> <br />
+
+                            <div class="row">
+                                <div class="col-md-6 col-md-offset-3">
+                                    <div class="am-checkbox am-checkbox-updated" onclick="return enableContinue()">
+                                        <input type="checkbox" id="chkTerms" name="agree" value="1" @(Request["agree"] == "1" ? " checked=\"checked\" " : "") />
+                                        <label for="chkTerms" style="font-weight: bold;">
+                                            I agree with the <a href="@Url.Action("tos", "legal")" target="_blank" style="color: #00a38a;">Terms and Conditions</a>.
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 col-md-offset-3">
+                                    <div class="am-checkbox am-checkbox-updated" onclick="return enableContinue()">
+                                        <input type="checkbox" id="chkIsStudent" name="isStudent" value="1" @(UILabel.CheckAllowTextMessage(currentUser) ? " checked=\"checked\" " : "") />
+                                        <label for="chkIsStudent" style="font-weight: bold;">
+                                            I am a student (if you are a parent, <a href="@Url.Action("", "")" target="_blank" style="text-decoration: underline;">click here</a>)
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+
+                            <div class="padding-v-20">
+                                <div class="col-md-6 col-md-offset-3">
+                                    <button type="submit" id="btn-create-account" class="btn btn-register-primary btn-lg" onclick="return showLoader()" disabled> Create Account & Continue </button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $("input", "#signup-form").eq(4).val(localStorage.getItem('studentRegisterEmail')).attr('readonly', 'readonly');
+
+        enableContinue();
+    });
+
+    function enableContinue() {
+        var isTermsAccepted = $('#chkTerms').prop('checked');
+        var isStudent = $('#chkIsStudent').prop('checked');
+
+        if (isStudent && isTermsAccepted) {
+            $('#btn-create-account').removeAttr('disabled')
+        } else {
+            $('#btn-create-account').attr('disabled', 'disabled')
+        }
+    }
+</script >
