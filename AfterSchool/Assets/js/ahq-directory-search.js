@@ -2,10 +2,11 @@
     // we need to show the filter button, once js will get loaded, to avoid any js related error
     $("#img-mobile-filter").removeClass("hide");
 
-    $(window).scroll(function () {
+    $("#search-container").scroll(function () {
         if (isReachedScrollEnd == false &&
             isMobileFilterWindowOpened == false &&
-            $(window).scrollTop() >= $('#search-container').offset().top + $('#search-container').outerHeight() - window.innerHeight) {
+            ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight)) {
+            console.log(isReachedScrollEnd + " isReachedScrollEnd");
             loadFiltersAndInitiateSearch();
         }
     });

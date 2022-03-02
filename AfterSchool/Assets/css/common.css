@@ -13,6 +13,7 @@
 .mr-3 {
     padding-right: 15px;
 }
+
 .p-b-5 {
     padding-bottom: 5px;
 }
@@ -32,10 +33,12 @@
 .no-padding {
     padding: 0;
 }
-.sticky-bottom{
+
+.sticky-bottom {
     position: sticky;
     bottom: 0;
 }
+
 .overlay {
     position: absolute;
     top: 0;
@@ -1566,15 +1569,6 @@
 
 .flex-1 {
     flex: 1;
-}
-
-.directory-filters {
-    display: none;
-    padding-right: 0;
-    padding-bottom: 120px;
-    padding-top: 10px;
-    background-color: #fff;
-    max-width: 300px;
 }
 
 .directory-sidebar-arrow {
