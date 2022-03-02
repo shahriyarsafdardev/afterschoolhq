@@ -1,41 +1,56 @@
 ﻿@{
-    string primaryColor = this.ViewData.ContainsKey("primaryColor") && this.ViewData["primaryColor"] != null ? this.ViewData["primaryColor"].ToString() : string.Empty;
-    string website = this.ViewData.ContainsKey("website") && this.ViewData["website"] != null ? this.ViewData["website"].ToString() : string.Empty;
-    string logoUrl = this.ViewData.ContainsKey("logoUrl") && this.ViewData["logoUrl"] != null ? this.ViewData["logoUrl"].ToString() : string.Empty;
+    var primaryColor = ViewData.ContainsKey("primaryColor") && ViewData["primaryColor"] != null ? ViewData["primaryColor"].ToString() : string.Empty;
+    var website = ViewData.ContainsKey("website") && ViewData["website"] != null ? ViewData["website"].ToString() : string.Empty;
+    var logoUrl = ViewData.ContainsKey("logoUrl") && ViewData["logoUrl"] != null ? ViewData["logoUrl"].ToString() : string.Empty;
 }
 
 <style>
-    .directory-header-border-bottom {
+    .directory-header {
+        background: white;
         border-bottom: 2px solid @primaryColor;
+        padding: 5px 40px;
+    }
+    
+    .directory-header img {
+        width: 110px;
     }
 
-    .directory-logo-size {
-        height: 55px;
+    .filter {
+        height: 38px;
+        margin-top: 10px;
+    }
+
+    .directory-filter-symbol {
+        padding: 0;
+        text-align: center;
+    }
+
+    .directory-filter-symbol img {
+        cursor: pointer;
     }
 </style>
 
-<div class="visible-lg visible-md row">
-    <div class="directory-header-logo directory-header-border-bottom" style="padding: 5px 30px;">
-        <a href=@(website.IsNotEmpty() ? website : "")>
-            <img src="@logoUrl" class="directory-logo-size" />
-        </a>
-    </div>
-</div>
+<header class="visible-lg visible-md row directory-header">
+    <a href=@(website.IsNotEmpty() ? website : "")>
+        <img src="@logoUrl" alt="AfterSchool HQ - Your home for afterschool experiences"/>
+    </a>
+</header>
 
-<div class="visible-sm visible-xs bg-color directory-header-border-bottom">
-    <div class="directory-header-logo col-xs-10" style="padding: 10px 5px;">
-        <a href=@(website.IsNotEmpty() ? website : "")>
-            <img src="@logoUrl" class="directory-logo-size" />
-        </a>
+<header class="visible-sm visible-xs bg-color">
+    <div class="col-xs-10">
+        <div class="form-group has-feedback has-search" style="margin-top: 10px;">
+            <span class="glyphicon glyphicon-search form-control-feedback" style="top: -3px;"></span>
+            <input id="txtSearch-mobile" name="search" type="text" class="form-control" placeholder="Search For Programs" onkeyup="waitAndFilterSearch()">
+        </div>
     </div>
     <div class="col-xs-2 directory-filter-symbol">
-        <img id="img-mobile-filter" src="~/img/filter.png" class="filter hide" isOpen="0" onclick="return mobileFilter()" />
+        <img id="img-mobile-filter" src="~/img/filter.svg" class="filter hide" isOpen="0" onclick="mobileFilter()" alt="Show or hide filters"/>
     </div>
 
     <div class="clearfix"></div>
     <div id="mobile-filter-footer" class="filter-footer-container">
-        <button type="button" class="btn btn-default btn-lg btn-center btn-apply-filter-mobile" onclick="return applyMobileFilter()">Apply Filters</button>
+        <button type="button" class="btn btn-default btn-lg btn-center btn-apply-filter-mobile" onclick="applyMobileFilter()">Apply Filters</button>
     </div>
 
     <div class="clearfix"></div>
-</div>
+</header>
