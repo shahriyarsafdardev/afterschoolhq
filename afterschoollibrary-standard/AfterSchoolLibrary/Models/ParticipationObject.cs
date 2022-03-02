@@ -62,6 +62,7 @@ namespace AfterSchoolLibrary.Models
         public bool HidePreciseLocation { get; set; }
         public bool IsPublished { get; set; }
         public int? RegistrationCutoffHours { get; set; }
+        public bool IsContinousEnrollmentEnabled { get; set; }
 
         public ParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -133,6 +134,7 @@ namespace AfterSchoolLibrary.Models
             AgeEnd = activity.AgeEnd;
             IsPublished = activity.IsPublished;
             RegistrationCutoffHours = activity.RegistrationCutoffHours;
+            IsContinousEnrollmentEnabled = activity.IsContinuousEnrollment;
 
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {

@@ -776,6 +776,7 @@
     <Content Include="Assets\css\survey.css" />
     <Content Include="Assets\js\ahq-directory-map.js" />
     <Content Include="Assets\js\ahq-directory-search.js" />
+    <Content Include="Assets\img\alert-2.svg"/>
     <Content Include="Assets\js\ahq-profiles.js" />
     <Content Include="Assets\js\underscore-min.js" />
     <Content Include="Assets\lib\customTableSorter.js" />
@@ -803,6 +804,7 @@
     <Content Include="img\billy2.png" />
     <Content Include="img\darye.png" />
     <Content Include="img\fee.png" />
+    <Content Include="img\filter.svg"/>
     <Content Include="img\frank-mckenna-LhOjrOlcLx4-unsplash.jpg" />
     <Content Include="img\gabriel-baranski-vGICUyYW2CE-unsplash.jpg" />
     <Content Include="img\handshake-icon.png" />
@@ -1957,7 +1959,7 @@
     <Content Include="Views\Account\RegistrationComplete.cshtml" />
     <Content Include="Views\Shared\_ISYPIntroModal.cshtml" />
     <Content Include="Views\Shared\_DirectoryContactUs.cshtml" />
-    <Content Include="Views\Shared\_DirectoryMobileSearch.cshtml" />
+    <Content Include="Views\Shared\_DirectoryHeader.cshtml" />
     <Content Include="Views\Shared\_DirectoryLoadScript.cshtml" />
   </ItemGroup>
   <ItemGroup>
