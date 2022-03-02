@@ -599,6 +599,18 @@ namespace AfterSchoolLibrary.Models
             return true;
         }
 
+        public bool IsStudentAgeInRange(string DoB)
+        {
+            if (!AgeStart.HasValue && !AgeEnd.HasValue)
+                return false;
+            var AgeInYear = DoB.ToDateTime().GetAgeInYears();
+
+            if (AgeInYear >= AgeStart && AgeInYear <= AgeEnd)
+                return true;
+            else
+                return false;
+        }
+
         public bool RestrictByGrade()
         {
             if (IsActivity())

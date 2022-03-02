@@ -1168,7 +1168,7 @@ namespace AfterSchool.Controllers
             if (currentUser.IsEmpty())
                 ValidateStudentRegistrationPasswords(password: password1, confirmPassword: password2, msgs: msgs);
 
-            ValidateStudentRegistrationQuestions(questions: questions, msgs: msgs);
+            ValidateStudentRegistrationQuestions(questions: questions, msgs: msgs, participationObject);
             ValidateStudentConfirmation(agree: agree, isStudent: isStudent, msgs: msgs);
 
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
@@ -1273,7 +1273,7 @@ namespace AfterSchool.Controllers
             return View(qvms);
         }
 
-        private void ValidateStudentRegistrationQuestions(List<FormQuestion> questions, SystemMessages msgs)
+        private void ValidateStudentRegistrationQuestions(List<FormQuestion> questions, SystemMessages msgs, ParticipationObject participationObject)
         {
             questions.ForEach(question =>
             {
@@ -1281,6 +1281,9 @@ namespace AfterSchool.Controllers
 
                 if (question.IsRequired && answer.IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
+
+                if (question.QuestionDataTypeId == QuestionDataType.RegistrantDateOfBirth && answer.IsNotEmpty() && !participationObject.IsStudentAgeInRange(answer))
+                    msgs.Add($"Given age is not eligible.", MessageType.UserError);
 
                 if (question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone && answer.IsNotEmpty())
                 {
