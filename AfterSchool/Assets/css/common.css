@@ -1735,6 +1735,15 @@
     height: 75px;
 }
 
+.font-style-italic{
+    font-style:italic;
+}
+
+.alert-image-style {
+    width: 16px;
+    margin-right: 5px;
+}
+
 .padding-top-10{
     padding-top: 10px !important
 }
