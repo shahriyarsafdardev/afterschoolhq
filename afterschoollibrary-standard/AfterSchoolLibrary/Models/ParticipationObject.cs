@@ -550,66 +550,60 @@ namespace AfterSchoolLibrary.Models
 
         public bool IsStudentGradeInRange(Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            var registrantGradeLevelAnswer = registrant.GetAnswer(QuestionDataType.RegistrantGrade, msgs, dc);
+            if (registrantGradeLevelAnswer.Text.IsNotEmpty())
+                return IsGradeInRange(registrantGradeLevelAnswer.Text);
+            return false;
+        }
+        public bool IsGradeInRange(string answer, DatabaseConnection dc = null, SystemMessages msgs = null)
+        {
             if (!MinGradeId.HasValue && !MaxGradeId.HasValue)
                 return true;
 
             var gradeLevels = GradeLevel.Load(msgs: msgs, dc: dc).OrderBy(gradeLevel => gradeLevel.ID).ToList();
-            var registrantGradeLevelAnswer = registrant.GetAnswer(QuestionDataType.RegistrantGrade, msgs, dc);
-            
-            if (registrantGradeLevelAnswer.Text.IsNotEmpty())
-            {
-                if (!MinGradeId.HasValue)
-                    MinGradeId = gradeLevels.First().ID;
+            if (!MinGradeId.HasValue)
+                MinGradeId = gradeLevels.First().ID;
 
-                if (!MaxGradeId.HasValue)
-                    MaxGradeId = gradeLevels.Last().ID;
+            if (!MaxGradeId.HasValue)
+                MaxGradeId = gradeLevels.Last().ID;
 
-                var registrantGradeLevel = gradeLevels.FirstOrDefault(gradeLevel => gradeLevel.VerifyGradeLevel(registrantGradeLevelAnswer));
+            var registrantGradeLevel = gradeLevels.FirstOrDefault(gradeLevel => gradeLevel.VerifyGradeLevel(answer));
 
-                if (registrantGradeLevel.IsNotEmpty() && 
-                    registrantGradeLevel.ID.IsNotEmpty() && 
-                    registrantGradeLevel.ID.Value.IsInRange(MinGradeId.Value, MaxGradeId.Value))
-                    return true;
-            }
+            if (registrantGradeLevel.IsNotEmpty() && registrantGradeLevel.ID.IsNotEmpty() && registrantGradeLevel.ID.Value.IsInRange(MinGradeId.Value, MaxGradeId.Value))
+                return true;
 
             return false;
         }
 
+      
+
         public bool IsStudentAgeInRange(Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var registrantDOB = registrant.GetAnswer(QuestionDataType.RegistrantDateOfBirth, msgs, dc)?.Text.ToDateTime();
+
+            return IsAgeInRange(registrantDOB, msgs);
+        }
+        public bool IsAgeInRange(DateTime? DoB, SystemMessages msgs = null)
         {
             if (!AgeStart.HasValue && !AgeEnd.HasValue)
                 return true;
 
-            var registrantDOB = registrant.GetAnswer(QuestionDataType.RegistrantDateOfBirth, msgs, dc)?.Text.ToDateTime();
-
-            if (!registrantDOB.HasValue)
+            if (!DoB.HasValue)
             {
                 msgs.Add("Missing registrant date of birth", MessageType.UserError);
                 return false;
             }
 
-            var registrantAge = registrantDOB.Value.GetAgeInYears();
+            var registrantAge = DoB.Value.GetAgeInYears();
 
             if (registrantAge < AgeStart)
                 return false;
-                
+
             if (registrantAge > AgeEnd)
-                return false;       
+                return false;
 
             return true;
-        }
-
-        public bool IsStudentAgeInRange(string DoB)
-        {
-            if (!AgeStart.HasValue && !AgeEnd.HasValue)
-                return false;
-            var AgeInYear = DoB.ToDateTime().GetAgeInYears();
-
-            if (AgeInYear >= AgeStart && AgeInYear <= AgeEnd)
-                return true;
-            else
-                return false;
-        }
+        }       
 
         public bool RestrictByGrade()
         {

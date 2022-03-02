@@ -21,5 +21,17 @@ namespace AfterSchoolLibrary.Services
 
             return gradeLevel.Name.ToLower() == registrantGradeLevel.ToLower().Trim() || gradeLevel.Abbreviation.ToLower() == registrantGradeLevel.ToLower().Trim();
         }
+
+        public static bool VerifyGradeLevel(this GradeLevel gradeLevel, string answer)
+        {
+            var registrantGradeLevel = answer;
+            if (Helpers.Utilities.IsAlreadyJsonString(answer))
+            {
+                var data = Helpers.Utilities.GetKeyValuePairs(answer);
+                registrantGradeLevel = data.First().value;
+            }
+
+            return gradeLevel.Name.ToLower() == registrantGradeLevel.ToLower().Trim() || gradeLevel.Abbreviation.ToLower() == registrantGradeLevel.ToLower().Trim();
+        }
     }
 }
