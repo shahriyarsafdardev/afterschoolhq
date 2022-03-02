@@ -140,50 +140,50 @@
                     </p>
                 }
 
-                <div>
-                    @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsOpenDuringCovid)
-                    {
-                        <span class="profile-badge badge badge-darkgray profile-badge text-small">
-                            <icon class="s7-clock"></icon>
-                            Open During COVID
-                        </span>
-                    }
-                    @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsVirtualProgram)
-                    {
-                        <span class="profile-badge badge badge-darkgray profile-badge text-small">
-                            <icon class="s7-monitor"></icon>
-                            Virtual
-                        </span>
-                    }
-                    @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsELearningCenter)
-                    {
-                        <span class="profile-badge badge badge-darkgray profile-badge text-small">
-                            <icon class="s7-clock"></icon>
-                            E-Learning Center
-                        </span>
-                    }
-                    @if (Model.Followers > 0)
-                    {
-                        <span class="profile-badge badge badge-darkgray profile-badge text-small">
-                            <icon class="s7-user"></icon>
-                            @Model.FollowersFormatted follower@(Model.Followers == 1 ? "" : "s")
-                        </span>
-                    }
-                    @if (Model.NumberOfHoursEnrolled > 0)
-                    {
-                        <span class="profile-badge badge badge-darkgray profile-badge text-small">
-                            <icon class="s7-clock"></icon>
-                            @Model.NumberOfHoursEnrolledFormatted hrs of education provided
-                        </span>
-                    }
-                    @if (Model.NumberOfStudentsServed > 0)
-                    {
-                        <span class="profile-badge badge badge-darkgray profile-badge text-small">
-                            <icon class="s7-study"></icon>
-                            @Model.NumberOfStudentsServedFormatted students served
-                        </span>
-                    }
-                </div>
+            <div>
+                @if (Model.NumberOfStudentsServed > 0)
+                {
+                    <span class="">
+                        <icon class="s7-study"></icon>
+                        @Model.NumberOfStudentsServedFormatted students served
+                    </span>
+                }
+                @if (Model.NumberOfHoursEnrolled > 0)
+                {
+                    <span class="">
+                        <img src="~/img/icon-clock.png" />
+                        @Model.NumberOfHoursEnrolledFormatted hrs of education provided
+                    </span>
+                }
+                @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsOpenDuringCovid)
+                {
+                    <span class="">
+                        <icon class="s7-clock"></icon>
+                        Open During COVID
+                    </span>
+                }
+                @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsVirtualProgram)
+                {
+                    <span class="">
+                        <icon class="s7-monitor"></icon>
+                        Virtual
+                    </span>
+                }
+                @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsELearningCenter)
+                {
+                    <span class="">
+                        <icon class="s7-clock"></icon>
+                        E-Learning Center
+                    </span>
+                }
+                @if (Model.Followers > 0)
+                {
+                    <span class="">
+                        <icon class="s7-user"></icon>
+                        @Model.FollowersFormatted follower@(Model.Followers == 1 ? "" : "s")
+                    </span>
+                }
+            </div>
 
             </div>
 
