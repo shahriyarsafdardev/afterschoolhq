@@ -42,8 +42,18 @@ namespace AfterSchool.Areas.Org.Controllers
                 return RedirectToAction("getstarted");                      
 
             
-             var actions = WebSessionAction.LoadByAccountId(
+             var actions = WebSessionAction.LoadByAccountIdWithActionType(
                 account.ID.Value,
+                new List<WebSessionActionType>()
+                {
+                    WebSessionActionType.Published,
+                    WebSessionActionType.Registered,
+                    WebSessionActionType.Paid,
+                    WebSessionActionType.Refunded,
+                    WebSessionActionType.ManuallyPaid,
+                    WebSessionActionType.ManuallyRefunded,
+                    WebSessionActionType.ManuallyRegistered,
+                },
                 0,
                 10,
                 msgs);

@@ -359,6 +359,32 @@ namespace AfterSchoolLibrary.Models
 		}
 
 
+		public static List<WebSessionAction> LoadByAccountIdWithActionType(int AccountId, List<WebSessionActionType> actionTypes, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			var objType = new List<ObjectType>(){
+				ObjectType.Activity,
+				ObjectType.Transaction,
+				ObjectType.Registrant
+			};
+
+			dq.Connection = dc;
+
+			dq.Criterias.Add(ObjectMap["ObjectTypeId"], objType.Select(x => (int)x).ToList(), BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.In);
+
+			dq.SelectRange.Start = start;
+			dq.SelectRange.Length = length;
+			dq.OrderBys.Add(ObjectMap["CreateDate"], OrderByDirectionEnum.Descending);
+
+			if (actionTypes != null && actionTypes.Any())
+			{
+				dq.Criterias.Add(ObjectMap["ActionTypeId"], actionTypes.Select(x => (int)x).ToList(), BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.In);
+			}
+
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+
 		public static List<WebSessionAction> LoadByAccountIdActivityIdWithActionType(int activityId, int AccountId, List<WebSessionActionType> actionTypes, int? start, int? length,  SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
