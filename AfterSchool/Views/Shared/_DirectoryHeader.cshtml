@@ -1,0 +1,41 @@
+﻿@{
+    string primaryColor = this.ViewData.ContainsKey("primaryColor") && this.ViewData["primaryColor"] != null ? this.ViewData["primaryColor"].ToString() : string.Empty;
+    string website = this.ViewData.ContainsKey("website") && this.ViewData["website"] != null ? this.ViewData["website"].ToString() : string.Empty;
+    string logoUrl = this.ViewData.ContainsKey("logoUrl") && this.ViewData["logoUrl"] != null ? this.ViewData["logoUrl"].ToString() : string.Empty;
+}
+
+<style>
+    .directory-header-border-bottom {
+        border-bottom: 2px solid @primaryColor;
+    }
+
+    .directory-logo-size {
+        height: 55px;
+    }
+</style>
+
+<div class="visible-lg visible-md row">
+    <div class="directory-header-logo directory-header-border-bottom" style="padding: 5px 30px;">
+        <a href=@(website.IsNotEmpty() ? website : "")>
+            <img src="@logoUrl" class="directory-logo-size" />
+        </a>
+    </div>
+</div>
+
+<div class="visible-sm visible-xs bg-color directory-header-border-bottom">
+    <div class="directory-header-logo col-xs-10" style="padding: 10px 5px;">
+        <a href=@(website.IsNotEmpty() ? website : "")>
+            <img src="@logoUrl" class="directory-logo-size" />
+        </a>
+    </div>
+    <div class="col-xs-2 directory-filter-symbol">
+        <img id="img-mobile-filter" src="~/img/filter.png" class="filter hide" isOpen="0" onclick="return mobileFilter()" />
+    </div>
+
+    <div class="clearfix"></div>
+    <div id="mobile-filter-footer" class="filter-footer-container">
+        <button type="button" class="btn btn-default btn-lg btn-center btn-apply-filter-mobile" onclick="return applyMobileFilter()">Apply Filters</button>
+    </div>
+
+    <div class="clearfix"></div>
+</div>

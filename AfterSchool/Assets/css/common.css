@@ -389,8 +389,12 @@
     border-color: #c3eae0;
 }
 
+.directory-header-logo {
+    min-height: 100%;
+    background: white;
+}
 
-.header-logo > img {
+.directory-header-logo > img {
     width: 250px;
     max-width: 400px;
     display: block;
@@ -440,7 +444,7 @@
 
 .filter {
     width: 47px;
-    margin-top: 10px;
+    margin-top: 20px;
 }
 
 .bg-color {
@@ -465,6 +469,16 @@
 
 .footer-extended {
     background: #212a2d
+}
+
+.btn-apply-filter-mobile {
+    border-color: steelblue;
+    color: blue;
+}
+
+.directory-filter-symbol {
+    padding: 0;
+    text-align: center;
 }
 
 .profile-badge-updated {

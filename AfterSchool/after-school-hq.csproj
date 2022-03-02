@@ -1956,7 +1956,7 @@
     <Content Include="Views\Account\RegistrationComplete.cshtml" />
     <Content Include="Views\Shared\_ISYPIntroModal.cshtml" />
     <Content Include="Views\Shared\_DirectoryContactUs.cshtml" />
-    <Content Include="Views\Shared\_DirectoryMobileSearch.cshtml" />
+    <Content Include="Views\Shared\_DirectoryHeader.cshtml" />
     <Content Include="Views\Shared\_DirectoryLoadScript.cshtml" />
   </ItemGroup>
   <ItemGroup>
