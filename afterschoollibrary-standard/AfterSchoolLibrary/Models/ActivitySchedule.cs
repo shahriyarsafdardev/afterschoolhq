@@ -413,6 +413,9 @@ namespace AfterSchoolLibrary.Models
             var startDate = period.EndDateTime.Value.Date.FirstDateOfWeek().AddWeeks(1);
             var endDate = period.EndDateTime.Value.Date.FirstDateOfWeek().AddWeeks(9);
 
+            if(activity.IsContinuousEnrollment)
+                startDate = period.StartDateTime.Value.FirstDateOfWeek().AddWeeks(1);
+
             if (activity.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
             {
                 startDate = DateTime.UtcNow.Date.AddDays(1);
