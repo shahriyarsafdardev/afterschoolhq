@@ -1,12 +1,12 @@
 ﻿@{
-    var accountUniqueName = (string)ViewBag.AccountUniqueName;
-    var msgs = (SystemMessages)ViewBag.Messages;
+    var accountUniqueName = (string) ViewBag.AccountUniqueName;
+    var msgs = (SystemMessages) ViewBag.Messages;
     var accountId = ViewBag.AccountId != null ? Convert.ToInt32(ViewBag.AccountId) : 0;
-    var primaryColor = (string)ViewBag.PrimaryColor;
-    var logoUrl = (string)ViewBag.LogoUrl;
-    var headerImageUrl = (string)ViewBag.HeaderImageUrl;
+    var primaryColor = (string) ViewBag.PrimaryColor;
+    var logoUrl = (string) ViewBag.LogoUrl;
+    var headerImageUrl = (string) ViewBag.HeaderImageUrl;
     var joiningUrl = $@"/join{accountUniqueName}.html";
-    var website = (string)ViewBag.Website;
+    var website = (string) ViewBag.Website;
 
     if (!logoUrl.IsNotEmpty())
     {
@@ -25,20 +25,12 @@
         ViewBag.AccountProfile = AccountProfile.LoadByAccountId(accountId);
     }
 
-    Layout = "~/Views/Shared/_LayoutRegistration.cshtml"; }
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+}
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
 <style>
-    .search-bg {
-        background-image: linear-gradient(rgba(0, 0, 0, .8), rgba(0, 0, 0, .8)), url( @headerImageUrl ) !important;
-        background-repeat: no-repeat !important;
-        background-size: cover !important;
-        background-position: center !important;
-        justify-content: center !important;
-        align-items: center !important;
-    }
-
     .join-directory-btn {
         color: white !important;
         min-width: 180px;
@@ -89,31 +81,12 @@
         border-color: @primaryColor;
     }
 
-    .fa-question-circle:before {
-        content: "\f059";
-    }
-
 </style>
 
-<div class="visible-lg visible-md">
-    <div class="row" style="border-bottom: 2px solid @primaryColor;">
-        <div class="@(headerImageUrl.IsNotEmpty() ? "search-bg" : "")" style="min-height: 100%; background: white; padding: 35px 20px;">
-            <div class="reg-header-overlay col-md-12">
-                <div class="col-lg-3 col-md-3 header-logo" style="margin-top: -25px;">
-                    <a href=@(website.IsNotEmpty() ? website : "")>
-                        <img src="@logoUrl" style="width: 110px;" />
-                    </a>
+@{ Html.RenderPartial("~/Views/Shared/_DirectoryHeader.cshtml", null, new ViewDataDictionary {{"primaryColor", primaryColor}, {"website", website}, {"logoUrl", logoUrl}}); }
 
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-@{ Html.RenderPartial("~/Views/Shared/_DirectoryMobileSearch.cshtml"); }
-
-<div id="main-view-container" class="display-flex">
-    <div id="list-view" class="flex-1">
+<div id="main-view-container" class="display-flex" style="overflow: hidden;">
+    <div id="list-view" class="flex-1" style="display: flex; height: 100vh;">
         <div id="filters" class="col-md-3 directory-filters">
             <span class="primary-color directory-sidebar-arrow" isOpen="true" onclick="return toggleSideBar(this)">
                 <i id="search-sidebar-arrow" class="fa fa-chevron-circle-left" aria-hidden="true"></i>
@@ -122,7 +95,7 @@
             @{ Html.RenderPartial("~/Views/Shared/_DirectoryFilters.cshtml"); }
         </div>
 
-        <div id="search-container" class="directory-search-container col-md-9 pt-20 pb-20">
+        <div id="search-container" class="directory-search-container col-md-9 pt-20 pb-20" style="overflow-y:scroll">
 
             <div class="col-lg-9 col-md-9">
                 <div class="form-group has-feedback has-search" style="margin-left: 20px;">
@@ -132,7 +105,7 @@
             </div>
 
             <div class="am-checkbox am-generic-checkbox col-lg-3 col-md-3">
-                <input id="chk-map-view" name="show-map" checked="checked" value="1" type="checkbox" class="schedulerepeat-checkbox" onclick="return toggleMapView(this)" />
+                <input id="chk-map-view" name="show-map" checked="checked" value="1" type="checkbox" class="schedulerepeat-checkbox" onclick="return toggleMapView(this)"/>
                 <label for="chk-map-view" class="margin-h-10 mobile-padding font-weight-bold">Show Map</label>
             </div>
             <div class="clearfix"></div>
@@ -146,7 +119,7 @@
                 <img src="~/img/lod_bg.gif">
             </div>
 
-            <div id="notification-contact-us" class="text-center">
+            <div id="notification-contact-us" class="text-center sticky-bottom">
                 <button class="btn btn-contact-us" style="border: 3px solid @primaryColor;" type="button" data-toggle="modal" data-target="#ContactUsModal">
                     Can't find what you are looking for?
                     <span class="contactSpan">CONTACT US</span>
@@ -156,7 +129,9 @@
         </div>
     </div>
 
-    <div id="map-view"></div>
+    <div id="map-view">
+        <div id="map" style="height: 100%;"></div>
+    </div>
 </div>
 
 <div class="clearfix"></div>
@@ -169,7 +144,10 @@
 
 @section Scripts
 {
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBq47Ro2O69sQhVLEW4_2L0ClOBSW_Srmc&libraries=places"></script>
+
     <script src="~/Assets/js/ahq-directory-search.js"></script>
+    <script src="~/Assets/js/ahq-directory-map.js"></script>
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <script type="text/javascript">
 
@@ -186,8 +164,10 @@
                 showModalIsyp();
                 @(CookieVariables.ShowISYPModal = "false")
             }
+            $("body").attr('style', 'overflow: hidden;');
 
             directoryPageLoad();
+            initMap();
         })
 
         function loadAccounts(search, enroll_today, grades, ages, gender, services, timing, pricing, cost, starting, other, special, zip = 0) {
@@ -199,7 +179,7 @@
             showProgressBar();
             inCallback = true;
 
-            var url = '@Url.Action("GetAccounts", "Search", new { Area = "" })';
+            var url = '@Url.Action("GetAccounts", "Search", new {Area = ""})';
             $.ajax({
                 type: "POST",
                 url: url,
@@ -233,6 +213,11 @@
 
                         $('#notification-contact-us').show();
                         $('.directory-search-no-result').html('');
+                        if (data.data.length > 0) {
+                            setTimeout(function () {
+                                addMarkersOnMap(data.data);
+                            }, 1000)
+                        }
                     }
                     else {
                         if (data && data.status == 'error') {
