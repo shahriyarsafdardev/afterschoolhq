@@ -1573,10 +1573,10 @@
 
 .directory-sidebar-arrow {
     font-size: 22px;
-    position: absolute;
-    right: -7px;
+    position: fixed;
     z-index: 9999;
     cursor: pointer;
+    margin-top: -18px;
 }
 
 .directory-search-container {
@@ -1762,10 +1762,10 @@
 }
 
 .directory-filters {
-    display: none;
+    overflow-y:auto;
     padding-right: 0;
     padding-bottom: 120px;
-    padding-top: 10px;
+    padding-top: 20px;
     background-color: #fff;
 }
 

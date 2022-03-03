@@ -478,6 +478,7 @@ function resetFlags() {
 }
 
 function toggleSideBar(element) {
+    toggleFilterOverflow();
     var isOpen = $(element).attr('isOpen');
     if (isOpen === 'true') {
         $(element).attr('isOpen', false)
@@ -500,4 +501,13 @@ function toggleMapView(element) {
         $("#map-view").css('flex', '0.5')
     else
         $("#map-view").css('flex', '0')
+}
+
+function toggleFilterOverflow() {
+    var isOpen = $('#directory-sidebar-icon').attr('isOpen')
+    if (isOpen === 'true') {
+        $('#filters').css('overflow-y', 'hidden');
+    } else {
+        $('#filters').css('overflow-y', 'auto');        
+    }
 }
