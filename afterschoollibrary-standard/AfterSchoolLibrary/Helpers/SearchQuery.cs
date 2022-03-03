@@ -5,7 +5,7 @@ namespace AfterSchoolLibrary.Helpers
 {
     public static class SearchQuery
     {
-        public static string LoadAccountSearchQuery(string cost, string starting, decimal distance, int PageNum, int PageSize = 9, bool searchHostAccount = false)
+        public static string LoadAccountSearchQuery(string enroll_today, string cost, string starting, decimal distance, int PageNum, int PageSize = 9, bool searchHostAccount = false)
         {
             var sql = $@"
             IF(OBJECT_ID('tempdb..#temp_accounts_1') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_1 END
@@ -41,7 +41,8 @@ namespace AfterSchoolLibrary.Helpers
                     CASE WHEN CAST(GETDATE() as date) BETWEEN CAST(rp.StartDateTime as date) AND CAST(rp.EndDateTime as date) THEN 1 ELSE 0 END as IsAccountNowEnrolling
                 FROM 
                     Account a ";
-            if (searchHostAccount)
+            
+			if (searchHostAccount)
             {
                 sql += $@"
                     INNER JOIN AccountRelationship ar ON a.ID = ar.VisitorAccountId ";
@@ -139,7 +140,12 @@ namespace AfterSchoolLibrary.Helpers
                 sql += $@")";
             }
 
-            if (starting.IsNotEmpty())
+			if (enroll_today.IsNotEmpty() && enroll_today.Contains("enroll"))
+				sql += $@"
+                    AND CAST(GETDATE() as date) BETWEEN CAST(rp.StartDateTime as date) AND CAST(rp.EndDateTime as date)
+					   ";
+
+			if (starting.IsNotEmpty())
             {
                 sql += $@"
                     AND ((@Starting IS NULL)";

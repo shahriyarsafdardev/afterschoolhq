@@ -27,7 +27,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public JsonResult GetAccounts(string accountId, string search, string grades, string ages, string gender, string services, 
+        public JsonResult GetAccounts(string accountId, string search, string enroll_today, string grades, string ages, string gender, string services, 
             string timing, string pricing, string cost, string starting, string other, string special, decimal zipcode, int pageNum = 0)
         {
             var msgs = new SystemMessages();
@@ -42,7 +42,7 @@ namespace AfterSchool.Controllers
             if (showDistance)
                 distance = GetDistanceFromOrigin(zipcode);
 
-            var searchedAccounts = AccountService.SearchDirectoryAccounts(accountId.ToInteger(), search, parsedGrade, parsedAge, parsedGender, services, timing, pricing, cost, starting, other, special, distance, pageNum, pageSize, msgs: msgs);
+            var searchedAccounts = AccountService.SearchDirectoryAccounts(accountId.ToInteger(), search, enroll_today, parsedGrade, parsedAge, parsedGender, services, timing, pricing, cost, starting, other, special, distance, pageNum, pageSize, msgs: msgs);
 
             if (searchedAccounts.IsNotEmpty() && searchedAccounts.Any())
             {
