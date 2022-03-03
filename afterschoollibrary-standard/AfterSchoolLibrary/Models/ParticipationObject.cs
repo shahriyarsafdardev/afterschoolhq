@@ -582,6 +582,7 @@ namespace AfterSchoolLibrary.Models
 
             return IsAgeInRange(registrantDOB, msgs);
         }
+
         public bool IsAgeInRange(DateTime? dateOfBirth, SystemMessages msgs = null)
         {
             if (!AgeStart.HasValue && !AgeEnd.HasValue)
