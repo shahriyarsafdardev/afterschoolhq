@@ -389,28 +389,12 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 if (msgs.HasNoErrors())
                 {
-                    SaveRefundLog(currentAccount, WebSessionActionType.ManuallyRefunded, amount, transaction, msgs);
+                    SessionVariables.WebSession.SaveRefundLog(currentAccount, SessionVariables.CurrentUser, WebSessionActionType.ManuallyRefunded, amount, transaction, msgs);
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
                 }
             }
 
             return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
-        }
-
-        public void SaveRefundLog(Account currentAccount, WebSessionActionType webSessionActionType, string amount, Transaction transaction, SystemMessages msgs)
-        {
-            var activityId = ActivityPayment.LoadByTransactionIdByIsDeleted(transaction.ID.Value, false, msgs)?.FirstOrDefault()?.ParticipationObjectId.Value;
-            var activity = Activity.Load(activityId.Value, msgs);
-
-            SessionVariables.WebSession.LogActivity(
-                      account: currentAccount,
-                      actor: SessionVariables.CurrentUser,
-                      actionType: webSessionActionType,
-                      objectType: ObjectType.Activity,
-                      objectId: activity.ID.Value,
-                      objectText: webSessionActionType == WebSessionActionType.ManuallyRefunded ? " request of " + amount : " of amount "+ amount,
-                      indirectObjectId: transaction.ID.Value
-            );
         }
 
 
@@ -451,7 +435,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (msgs.HasNoErrors())
                 {
                     var transaction = Transaction.Load(request.TransactionId.Value, msgs);
-                    SaveRefundLog(currentAccount, WebSessionActionType.Refunded, request.Amount.ToCurrency(), transaction, msgs);
+                    // SessionSaveRefundLog(currentAccount, WebSessionActionType.Refunded, request.Amount.ToCurrency(), transaction, msgs);
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
                 }
             }

@@ -237,7 +237,11 @@ namespace AfterSchool.Areas.Admin.Controllers
                 }
 
                 if (msgs.HasNoErrors())
+                {
+                    SessionVariables.WebSession.SaveRefundLog(SessionVariables.CurrentAccount, SessionVariables.CurrentUser, WebSessionActionType.ManuallyRefunded, , transaction, msgs);
                     return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+                }
+                    
             }
 
 
