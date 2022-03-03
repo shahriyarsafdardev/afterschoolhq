@@ -582,18 +582,18 @@ namespace AfterSchoolLibrary.Models
 
             return IsAgeInRange(registrantDOB, msgs);
         }
-        public bool IsAgeInRange(DateTime? DoB, SystemMessages msgs = null)
+        public bool IsAgeInRange(DateTime? dateOfBirth, SystemMessages msgs = null)
         {
             if (!AgeStart.HasValue && !AgeEnd.HasValue)
                 return true;
 
-            if (!DoB.HasValue)
+            if (!dateOfBirth.HasValue)
             {
                 msgs.Add("Missing registrant date of birth", MessageType.UserError);
                 return false;
             }
 
-            var registrantAge = DoB.Value.GetAgeInYears();
+            var registrantAge = dateOfBirth.Value.GetAgeInYears();
 
             if (registrantAge < AgeStart)
                 return false;
