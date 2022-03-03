@@ -1283,10 +1283,10 @@ namespace AfterSchool.Controllers
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
 
                 if (question.QuestionDataTypeId == QuestionDataType.RegistrantDateOfBirth && answer.IsNotEmpty() && !participationObject.IsAgeInRange(answer.ToDateTime()))
-                    msgs.Add($"Age must be between {participationObject.AgeStart} and {participationObject.AgeEnd}", MessageType.UserError);
+                    msgs.Add($"Age must be between {participationObject.AgeStart} and {participationObject.AgeEnd}.", MessageType.UserError);
 
                 if (question.QuestionDataTypeId == QuestionDataType.RegistrantGrade && answer.IsNotEmpty() && !participationObject.IsGradeInRange(answer))
-                    msgs.Add($"Grade must be between {participationObject.MinGradeId} and {participationObject.MaxGradeId}", MessageType.UserError);
+                    msgs.Add($"Grade must be between {participationObject.GetMinGradeLevel(msgs)} and {participationObject.GetMaxGradeLevel(msgs)}.", MessageType.UserError);
 
                 if (question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone && answer.IsNotEmpty())
                 {
