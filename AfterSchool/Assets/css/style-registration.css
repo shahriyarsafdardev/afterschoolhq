@@ -40,15 +40,16 @@ body.registration {
 .logo-wrapper {
     padding: 10px;
     border-radius: 5px;
-    width: 190px;
-    max-height: 190px;
-    margin: 25px auto;
+    max-height: 200px;
+    margin: 5px auto;
 }
 
     .logo-wrapper > img {
         display: block;
         margin: auto;
         width: 100%;
+        object-fit: contain;
+        max-height: 200px;
     }
 
 .reg-header-overlay {
@@ -78,6 +79,12 @@ body.registration {
     }
 }
 
+@media screen and (max-width: 600px) {
+    .icon-span-mobile {
+        display: block;
+        margin-top: 10px;
+    }
+}
 .reg-header .dropdown-menu {
     padding: 10px;
     font-size: 1.10em;
@@ -95,12 +102,13 @@ body.registration {
     }
 
 .activity-title {
-    font-size: 4em;
+    font-size: 30px;
+    letter-spacing: 1.78px;
 }
 
 .reg-header-headline {
-    font-size: 2em;
-    line-height: 1.25em;
+    font-size: 22px;
+    margin-top: 20px;
 }
 
 .filter-bar {
