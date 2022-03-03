@@ -555,7 +555,8 @@ namespace AfterSchoolLibrary.Models
                 return IsGradeInRange(registrantGradeLevelAnswer.Text);
             return false;
         }
-        public bool IsGradeInRange(string answer, DatabaseConnection dc = null, SystemMessages msgs = null)
+
+        public bool IsGradeInRange(string answer, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!MinGradeId.HasValue && !MaxGradeId.HasValue)
                 return true;
@@ -573,9 +574,7 @@ namespace AfterSchoolLibrary.Models
                 return true;
 
             return false;
-        }
-
-      
+        }      
 
         public bool IsStudentAgeInRange(Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
         {

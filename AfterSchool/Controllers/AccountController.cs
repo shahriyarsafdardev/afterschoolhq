@@ -1168,7 +1168,7 @@ namespace AfterSchool.Controllers
             if (currentUser.IsEmpty())
                 ValidateStudentRegistrationPasswords(password: password1, confirmPassword: password2, msgs: msgs);
 
-            ValidateStudentRegistrationQuestions(questions: questions, msgs: msgs, participationObject);
+            ValidateStudentRegistrationQuestions(questions: questions, participationObject, msgs: msgs);
             ValidateStudentConfirmation(agree: agree, isStudent: isStudent, msgs: msgs);
 
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
@@ -1273,7 +1273,7 @@ namespace AfterSchool.Controllers
             return View(qvms);
         }
 
-        private void ValidateStudentRegistrationQuestions(List<FormQuestion> questions, SystemMessages msgs, ParticipationObject participationObject)
+        private void ValidateStudentRegistrationQuestions(List<FormQuestion> questions, ParticipationObject participationObject, SystemMessages msgs)
         {
             questions.ForEach(question =>
             {
