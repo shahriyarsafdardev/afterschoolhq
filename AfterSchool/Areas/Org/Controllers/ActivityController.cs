@@ -35,12 +35,25 @@ namespace AfterSchool.Areas.Org.Controllers
             if (activity.IsEmpty())
                 return HttpNotFound();
 
-            var actions = WebSessionAction.LoadByAccountIdActivityId(
-                activity.ID.Value,
-                currentAccount.ID.Value,
-                0,
-                15,
-                msgs);
+        var actions = WebSessionAction.LoadByAccountIdActivityIdWithActionType(
+            activity.ID.Value,
+            currentAccount.ID.Value,
+			new List<WebSessionActionType>()
+			{
+				WebSessionActionType.Published,
+				WebSessionActionType.Registered,
+				WebSessionActionType.Paid,
+				WebSessionActionType.Refunded,
+				WebSessionActionType.ManuallyPaid,
+				WebSessionActionType.ManuallyRefunded,
+				WebSessionActionType.ManuallyRegistered,
+                WebSessionActionType.Requested,
+                WebSessionActionType.Denied,
+                WebSessionActionType.Approved
+			},
+			0,
+            15,
+            msgs);
 
             ViewBag.ParticipationObject = activity.GetParticipationObject(msgs);
             ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
@@ -2495,9 +2508,21 @@ namespace AfterSchool.Areas.Org.Controllers
                     msgs: msgs
                 );
 
-                if (msgs.HasNoErrors())
-                    msgs.Add("Payment has been added", MessageType.Success);
-            }
+				if (msgs.HasNoErrors())
+				{
+					msgs.Add("Payment has been added", MessageType.Success);
+
+					SessionVariables.WebSession.LogActivity(
+					 account: currentAccount,
+					 actor: SessionVariables.CurrentUser,
+					 actionType: WebSessionActionType.ManuallyPaid,
+					 objectType: ObjectType.Activity,
+					 objectId: activity.ID.Value,
+					 objectText: " of amount " + amountpaid
+					);
+				}
+				
+		}
 
             ViewBag.Messages = msgs;
             ViewBag.AttachedCoupons = GetAttachedCoupons(registrantActivity, msgs);
@@ -3185,8 +3210,18 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.QuestionViewModels = qvms;
 
-            if (msgs.HasNoErrors())
-                return RedirectToAction("registrants", new {id = activity.Uid});
+		if (msgs.HasNoErrors())
+        {
+			SessionVariables.WebSession.LogActivity(
+				account: currentAccount,
+				actor: SessionVariables.CurrentUser,
+				actionType: WebSessionActionType.ManuallyRegistered,
+				objectType: ObjectType.Activity,
+				objectId: activity.ID.Value,
+				objectText: "Student for activity "+ activity.Name
+		   );
+		   return RedirectToAction("registrants", new { id = activity.Uid });
+        }
 
             return View(activity);
         }

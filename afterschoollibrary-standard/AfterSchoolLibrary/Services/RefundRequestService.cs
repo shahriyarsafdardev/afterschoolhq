@@ -2,8 +2,7 @@
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System;
-using System.Collections.Generic;
-using System.Text;
+
 
 namespace AfterSchoolLibrary.Services
 {
@@ -47,10 +46,11 @@ namespace AfterSchoolLibrary.Services
             return request.GetTransaction(msgs, dc).IsAmountRefundable(request.Amount.Value, true, msgs, dc);
         }
 
-        public static bool ApproveAndProcessRequest(this RefundRequest request, bool allowFullRefundAmount, bool refundCCFees, bool refundConvenienceFees, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Transaction ApproveAndProcessRequest(this RefundRequest request, bool allowFullRefundAmount, bool refundCCFees, bool refundConvenienceFees, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var transaction = request.GetTransaction(msgs, dc);
-
+            Transaction refund = new Transaction();
+            
             if (transaction.IsNotEmpty() && !transaction.IsDeleted)
                 Database.ExecuteTransaction
                 (
@@ -75,7 +75,7 @@ namespace AfterSchoolLibrary.Services
                             }
                         }
 
-                        var refund = transaction.Refund(
+                        refund = transaction.Refund(
                                         refundAmount, 
                                         allowFullRefundAmount, 
                                         convenienceFee,
@@ -96,7 +96,7 @@ namespace AfterSchoolLibrary.Services
             else
                 msgs.Add("Invalid transaction", MessageType.UserError);
 
-            return msgs.HasNoErrors();
+            return refund;
         }
 
         public static void DenyRequestAsProvider(this RefundRequest request, string reason, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
