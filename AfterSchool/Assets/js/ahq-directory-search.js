@@ -6,7 +6,6 @@
         if (isReachedScrollEnd == false &&
             isMobileFilterWindowOpened == false &&
             ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight)) {
-            console.log(isReachedScrollEnd + " isReachedScrollEnd");
             loadFiltersAndInitiateSearch();
         }
     });
