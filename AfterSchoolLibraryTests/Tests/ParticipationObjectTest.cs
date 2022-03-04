@@ -230,30 +230,25 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         [Theory(DisplayName = "IsGradeInRangeTest")]
-        [InlineData(4, 10, "[{\"Key\":\"2nd\",\"Value\":\"2nd\"}]")]
-        [InlineData(1, 10, "[{\"Key\":\"2nd\",\"Value\":\"2nd\"}]")]
-        public void IsGradeInRangeTest(int gradeStart, int gradeEnd, string answer)
+        [InlineData(false, "5th", "10th", "[{\"Key\":\"2nd\",\"Value\":\"2nd\"}]")]
+        [InlineData(true, "5th", "10th", "[{\"Key\":\"7th\",\"Value\":\"7th\"}]")]
+        public void IsGradeInRangeTest(bool inRange, string gradeStartLevel, string gradeEndLevel, string answer)
         {
             // Arrange
-            Activity.GradeLevelStart = gradeStart;
-            Activity.GradeLevelEnd = gradeEnd;
+            var grades = GradeLevel.Load(null, null, null, msgs, dc);
+            Activity.GradeLevelStart = grades.Where(x => x.Abbreviation.Contains(gradeStartLevel)).FirstOrDefault().ID;
+            Activity.GradeLevelEnd = grades.Where(x => x.Abbreviation.Contains(gradeEndLevel)).FirstOrDefault().ID;
             var participationObject = Activity.GetParticipationObject(msgs, dc);
 
             // Act
             var isInRange = participationObject.IsGradeInRange(answer, msgs, dc);
 
             // Assert
-            ///////Assert.True(msgs.HasNoErrors());
-            //Assert.True(isInRange);
-            if (gradeStart.Equals(4))
-            {
-                Assert.False(isInRange);
-            }
-            else
-            {
+            if (inRange)
                 Assert.True(isInRange);
-            }
-
+            else
+                Assert.False(isInRange);
+            
         }
 
         [Theory(DisplayName = "IsAgeInRangeTest")]

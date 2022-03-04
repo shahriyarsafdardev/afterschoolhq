@@ -552,7 +552,7 @@ namespace AfterSchoolLibrary.Models
         {
             var registrantGradeLevelAnswer = registrant.GetAnswer(QuestionDataType.RegistrantGrade, msgs, dc);
             if (registrantGradeLevelAnswer.Text.IsNotEmpty())
-                return IsGradeInRange(registrantGradeLevelAnswer.Text);
+                return IsGradeInRange(registrantGradeLevelAnswer.Text,msgs,dc);
             return false;
         }
 
@@ -561,7 +561,7 @@ namespace AfterSchoolLibrary.Models
             if (!MinGradeId.HasValue && !MaxGradeId.HasValue)
                 return true;
 
-            var gradeLevels = GradeLevel.Load(msgs: msgs, dc: dc).OrderBy(gradeLevel => gradeLevel.ID).ToList();
+            var gradeLevels = GradeLevel.Load(null, null, null, msgs: msgs, dc: dc).OrderBy(gradeLevel => gradeLevel.ID).ToList();
             if (!MinGradeId.HasValue)
                 MinGradeId = gradeLevels.First().ID;
 
