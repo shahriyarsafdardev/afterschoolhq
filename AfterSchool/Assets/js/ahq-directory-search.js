@@ -247,6 +247,7 @@ function prepareSearchParams() {
 
     if (mainUrl) {
         WebPage.addHash(encodeURI(mainUrl));
+        deleteAllMarkersOnMap();
         $('#clear-filters').show();
     } else {
         WebPage.addHash('');
@@ -257,7 +258,6 @@ function prepareSearchParams() {
     document.documentElement.scrollTop = page == 0 ? 0 : scr;
 
     openSeeMorePanelsForSelectedCheckboxes();
-
     // .. call api
     if (!isMobile || !isMobileFilterWindowOpened) {
         loadAccounts(search,
@@ -280,7 +280,6 @@ function prepareSearchParams() {
 function loadFiltersAndInitiateSearch() {
     var hashUrl = WebPage.getHash();
     var filters = hashUrl.split(',');
-
     _.each(filters, function (filter) {
         if (filter.indexOf('search_') == 0) {
             $(`input[name="search"]`).val(filter.split('_')[1]);
@@ -488,7 +487,7 @@ function clearFilters() {
     } else {
         $('#txtSearch').val('');
     }
-
+    deleteAllMarkersOnMap();
     resetTags();
     resetFlags();
     loadAccounts();
