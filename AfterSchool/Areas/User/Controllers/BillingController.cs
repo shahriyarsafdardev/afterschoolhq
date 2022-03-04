@@ -94,12 +94,17 @@ namespace AfterSchool.Areas.User.Controllers
             if (uid.IsGuid() && amount.IsNumber())
             {
                 var transaction = Transaction.LoadByUid(uid.ToGuid(), msgs);
-
+                var refundRequest = new RefundRequest();
                 if (transaction.IsNotEmpty())
-                    transaction.RequestRefund(amount.ToDecimal(), RefundRequestStatus.RequestedByParent, reason, SessionVariables.CurrentUser, msgs);
+                    refundRequest = transaction.RequestRefund(amount.ToDecimal(), RefundRequestStatus.RequestedByParent, reason, SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
-                    return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                {
+                    SessionVariables.WebSession.LogRefundRequestUpdate(SessionVariables.CurrentAccount, SessionVariables.CurrentUser,
+                        WebSessionActionType.Requested, refundRequest.Amount.ToCurrency(), refundRequest, msgs);
+                    return new JsonResult
+                        { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                }
 
             }
 

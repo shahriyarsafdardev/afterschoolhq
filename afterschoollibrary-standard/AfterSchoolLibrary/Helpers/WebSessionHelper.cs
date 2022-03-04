@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using BasicLibrary;
 
 namespace AfterSchoolLibrary.Helpers
 {
@@ -24,7 +25,7 @@ namespace AfterSchoolLibrary.Helpers
 
         private static string ReplaceParams(string template, Dictionary<string, string> formatParams)
         {
-            return formatParams.Aggregate(template, (args, pair) => args.Replace($"{{{pair.Key}}}", pair.Value));
+            return formatParams.Aggregate(template, (args, pair) => args.Replace($"{{{pair.Key}}}", pair.Key == "actionType" ? pair.Value.SplitByUpperCase() : pair.Value));
         }
 
         private static Dictionary<string, string> FormatTemplate(string template, Dictionary<string, string> formatParams)
@@ -41,8 +42,8 @@ namespace AfterSchoolLibrary.Helpers
             var formatParams = new Dictionary<string, string>
             {
                 { "actorName", actorName },
-                { "actionType", actionType.ToString() },
-                { "objectType", objectType.ToString() },
+                { "actionType", actionType.ToString().SplitByUpperCase() },
+                { "objectType", objectType.ToString().SplitByUpperCase() },
                 {"objectText", objectText }
             };
 
@@ -58,8 +59,9 @@ namespace AfterSchoolLibrary.Helpers
                     return FormatTemplate(actorActionOfObjectTemplate, formatParams);
 
                 case WebSessionActionType.Refunded:
-                    var actorWasActionObjectTextFormat = "{actorName} was {actionType} {objectText}";
-                    return FormatTemplate(actorWasActionObjectTextFormat, formatParams);
+                case WebSessionActionType.ManuallyRefunded:
+                    var actorHasActionObjectTextFormat = "{actorName} has {actionType} {objectText}";
+                    return FormatTemplate(actorHasActionObjectTextFormat, formatParams);
 
                 case WebSessionActionType.Requested:
                     if (objectType == ObjectType.RefundRequest)
@@ -89,6 +91,8 @@ namespace AfterSchoolLibrary.Helpers
                     return FormatTemplate(actorActionObjectToTemplate, formatParams);
 
                 case WebSessionActionType.Registered:
+                case WebSessionActionType.ManuallyRegistered:
+                case WebSessionActionType.ManuallyPaid:
                 case WebSessionActionType.Paid:
                     var actorActionObjectTextTemplate = "{actorName} {actionType} {objectText} ";
                     return FormatTemplate(actorActionObjectTextTemplate, formatParams);
@@ -106,9 +110,6 @@ namespace AfterSchoolLibrary.Helpers
                  *  case WebSessionActionType.Unpublished:
                  *  case WebSessionActionType.Sent:
                  *  case WebSessionActionType.Archived:
-                 *  case WebSessionActionType.ManuallyRegistered:
-                 *  case WebSessionActionType.ManuallyPaid:
-                 *  case WebSessionActionType.ManuallyRefunded:
                  *  case WebSessionActionType.Approved:
                  *  case WebSessionActionType.Verified:
                  *  case WebSessionActionType.Viewed:
@@ -145,7 +146,7 @@ namespace AfterSchoolLibrary.Helpers
         {
             var formatParams = new Dictionary<string, string>
             {
-                { "indirectObjectType", indirectObjectType.ToString() },
+                { "indirectObjectType", indirectObjectType.ToString().SplitByUpperCase() },
                 { "indirectObjectText", indirectObjectText }
             };
 
@@ -225,7 +226,7 @@ namespace AfterSchoolLibrary.Helpers
                 //  case WebSessionActionType.Shared:
                 //  case WebSessionActionType.Contacted:
                 default:
-                    var actorActionObjectTypeTextTemplate = " {indirectObjectType} {indirectObjectText";
+                    var actorActionObjectTypeTextTemplate = " {indirectObjectType} {indirectObjectText}";
                     return AppendFormatTemplate(actionStringDict, actorActionObjectTypeTextTemplate, formatParams);
             }
         }
