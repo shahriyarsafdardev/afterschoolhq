@@ -25,6 +25,8 @@ namespace AfterSchool.Models
 
         public int Priority { get; set; }
         public decimal TotalDifference { get; set; }
+        public string Latitude { get; set; }
+        public string Longitude { get; set; }
         public string CostLow { get; set; }
         public string CostHigh { get; set; }
     }

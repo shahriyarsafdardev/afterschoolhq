@@ -6,10 +6,9 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Billing;
-using Lob.Models;
 using AfterSchool.Models;
 using System.Data;
-using Twilio.Rest.Api.V2010.Account.Usage.Record;
+using System.Globalization;
 using AfterSchoolLibrary.Helpers;
 
 namespace AfterSchoolLibrary.Services
@@ -2773,6 +2772,8 @@ namespace AfterSchoolLibrary.Services
                             {
                                 //..Location, ProfileHeaderImageUrl
                                 var location = Location.Load(Convert.ToInt32(row["LocationId"]));
+                                response.Latitude = location.Latitude.IsNotEmpty() ? location.Latitude.Value.ToString(CultureInfo.InvariantCulture) : "" ;
+                                response.Longitude = location.Longitude.IsNotEmpty() ? location.Longitude.Value.ToString(CultureInfo.InvariantCulture) : "";
                                 response.Location = location.FormatCityState(false);
 
                                 if (response.ProfileHeaderImageUrl.IsEmpty())
