@@ -539,11 +539,11 @@ namespace AfterSchool.Controllers
             SessionVariables.WebSession.LogActivity(
                  request: Request,
                  actor: SessionVariables.CurrentUser,
-                 account: SessionVariables.CurrentAccount,
-                 actionType: WebSessionActionType.Navigated,
+                 account: id.IsNotEmpty() ? Account.Load(id.ToInteger()) : SessionVariables.CurrentAccount,
+                 actionType: WebSessionActionType.Viewed,
                  objectType: ObjectType.DirectoryAccount,
                  objectId: id.IsNotEmpty() ? id.ToInteger(): new int(),
-                 objectText: "moved to url " + url + " using button "+ buttonText
+                 objectText: "has moved to url " + url + " using button "+ buttonText
              );
 
             return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);

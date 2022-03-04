@@ -574,3 +574,13 @@ body.registration {
     width: 80px;
     text-align: center;
 }
+
+svg {
+    width: 16px;
+    height: 16px;
+    position: relative;
+    top: 4px;
+}
+svg path, svg polygon{
+    fill:white
+}

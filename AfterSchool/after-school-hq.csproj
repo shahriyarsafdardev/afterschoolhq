@@ -776,7 +776,7 @@
     <Content Include="Assets\css\survey.css" />
     <Content Include="Assets\js\ahq-directory-map.js" />
     <Content Include="Assets\js\ahq-directory-search.js" />
-    <Content Include="Assets\img\alert-2.svg"/>
+    <Content Include="Assets\img\alert-2.svg" />
     <Content Include="Assets\js\ahq-profiles.js" />
     <Content Include="Assets\js\underscore-min.js" />
     <Content Include="Assets\lib\customTableSorter.js" />
@@ -802,13 +802,9 @@
     <Content Include="img\banner-classroom.jpg" />
     <Content Include="img\BCALogo.jpg" />
     <Content Include="img\billy2.png" />
-    <Content Include="img\icon-clock.png" />
-    <Content Include="img\icon-graduation-cap.png" />
-    <Content Include="img\icon-credit-card.png" />
     <Content Include="img\darye.png" />
-    <Content Include="img\icon-envelope.png" />
     <Content Include="img\fee.png" />
-    <Content Include="img\filter.svg"/>
+    <Content Include="img\filter.svg" />
     <Content Include="img\frank-mckenna-LhOjrOlcLx4-unsplash.jpg" />
     <Content Include="img\gabriel-baranski-vGICUyYW2CE-unsplash.jpg" />
     <Content Include="img\handshake-icon.png" />
@@ -857,13 +853,10 @@
     <Content Include="img\Screen Shot 2020-09-23 at 4.17.41 PM.png" />
     <Content Include="img\Screen Shot 2020-10-06 at 11.52.42 AM.png" />
     <Content Include="img\search.png" />
-    <Content Include="img\icon-share.png" />
     <Content Include="img\smiling-group.png" />
     <Content Include="img\sophie.png" />
     <Content Include="img\texture-fabric.png" />
     <Content Include="img\texture-geometry-shapes.png" />
-    <Content Include="img\icon-user-add.png" />
-    <Content Include="img\icon-user.png" />
     <Content Include="index-profiles.html" />
     <Content Include="index.html" />
     <Content Include="joinips.html" />
