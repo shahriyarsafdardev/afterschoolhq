@@ -729,7 +729,7 @@ namespace AfterSchoolLibrary.Services
                 ActivityTypeId = activity.ActivityTypeId,
                 LocationId = activity.LocationId,
                 RequiresParentalConsent = activity.RequiresParentalConsent,
-                IsAllowedStudentToRegister = activity.IsAllowedStudentToRegister,
+                IsStudentAllowedToRegister = activity.IsStudentAllowedToRegister,
                 InstructorId = activity.InstructorId,
                 IsInviteOnly = activity.IsInviteOnly,
                 ActivityLocationTypeId = activity.ActivityLocationTypeId,
@@ -1064,7 +1064,7 @@ namespace AfterSchoolLibrary.Services
                 activity.RequiresParentalConsent = (bool)requiresparentalconsent.ToString().ToBoolean();
 
             if (isStudentAllowed.IsNumber())
-                activity.IsAllowedStudentToRegister = (bool)isStudentAllowed.ToString().ToBoolean();
+                activity.IsStudentAllowedToRegister = (bool)isStudentAllowed.ToString().ToBoolean();
 
             if (contactname.IsNotEmpty())
                 activity.ContactName = contactname.ToString().IfBlank("").MaxChars(50);

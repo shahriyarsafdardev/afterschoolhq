@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using System.Data;
 using System.Collections;
 
 namespace AfterSchoolLibrary.Models
@@ -85,13 +82,13 @@ namespace AfterSchoolLibrary.Models
 		/// </summary>
 		public ActivityLeaderType LeaderTypeId { get { return (ActivityLeaderType)MDV["LeaderTypeId"].Value; } set { MDV["LeaderTypeId"].Value = value; } }
 		/// <summary>
-		/// let us know whether the parent needs to consent
+		/// Indicates whether parental consent is required
 		/// </summary>
 		public bool RequiresParentalConsent { get { return (bool)MDV["RequiresParentalConsent"].Value; } set { MDV["RequiresParentalConsent"].Value = value; } }
 		/// <summary>
-		/// let us know whether the student is allowed to register
+		/// Indicates whether a student is allowed to register
 		/// </summary>
-		public bool IsAllowedStudentToRegister { get { return (bool)MDV["IsAllowedStudentToRegister"].Value; } set { MDV["IsAllowedStudentToRegister"].Value = value; } }
+		public bool IsStudentAllowedToRegister { get { return (bool)MDV["IsStudentAllowedToRegister"].Value; } set { MDV["IsStudentAllowedToRegister"].Value = value; } }
 		/// <summary>
 		/// Physical or Virtual
 		/// </summary>
@@ -151,7 +148,7 @@ namespace AfterSchoolLibrary.Models
 			this.ActivityTypeId = ActivityType.NotSet;
 			this.LeaderTypeId = ActivityLeaderType.NotSet;
 			this.RequiresParentalConsent = false;
-			this.IsAllowedStudentToRegister = false;
+			this.IsStudentAllowedToRegister = false;
 			this.ActivityLocationTypeId = ActivityLocationType.NotSet;
 			this.HidePreciseLocation = false;
 			this.RegistrationFinalized = false;
@@ -204,7 +201,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "AccountActivityGroupId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "LeaderTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RequiresParentalConsent", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "IsAllowedStudentToRegister", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "IsStudentAllowedToRegister", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "ActivityLocationTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "VirtualLocationInfo", System.Data.SqlDbType.NVarChar , "1000");
 				_dp.Add(className, "HidePreciseLocation", System.Data.SqlDbType.Bit);
@@ -451,7 +448,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["IsAllowedStudentToRegister"]);
+			dps.Add(ObjectMap["IsStudentAllowedToRegister"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -557,14 +554,6 @@ namespace AfterSchoolLibrary.Models
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-		}
-
-		public static Activity LoadByActivityId(int ActivityId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-		{
-			var dq = DatabaseQuery;
-			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["ID"], ActivityId);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
 		public static List<Activity> LoadByActivityGroupIdByAccountId(int ActivityGroupId, int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)

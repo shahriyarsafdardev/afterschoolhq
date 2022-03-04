@@ -219,7 +219,7 @@ namespace AfterSchoolLibrary.Models
 			Activity.Update(new Hashtable(){{"ActivityTypeId",0}}, new Hashtable(){{"ActivityTypeId", DBNull.Value}}, Activity.ObjectMap, dc);
 			Activity.Update(new Hashtable(){{"LeaderTypeId",0}}, new Hashtable(){{"LeaderTypeId", DBNull.Value}}, Activity.ObjectMap, dc);
 			Activity.Update(new Hashtable(){{"RequiresParentalConsent",false}}, new Hashtable(){{"RequiresParentalConsent", DBNull.Value}}, Activity.ObjectMap, dc);
-			Activity.Update(new Hashtable(){{"IsAllowedStudentToRegister",false}}, new Hashtable(){{"IsAllowedStudentToRegister", DBNull.Value}}, Activity.ObjectMap, dc);
+			Activity.Update(new Hashtable(){{"IsStudentAllowedToRegister",false}}, new Hashtable(){{"IsStudentAllowedToRegister", DBNull.Value}}, Activity.ObjectMap, dc);
 			Activity.Update(new Hashtable(){{"ActivityLocationTypeId",0}}, new Hashtable(){{"ActivityLocationTypeId", DBNull.Value}}, Activity.ObjectMap, dc);
 			Activity.Update(new Hashtable(){{"HidePreciseLocation",false}}, new Hashtable(){{"HidePreciseLocation", DBNull.Value}}, Activity.ObjectMap, dc);
 			Activity.Update(new Hashtable(){{"RegistrationFinalized",false}}, new Hashtable(){{"RegistrationFinalized", DBNull.Value}}, Activity.ObjectMap, dc);

@@ -94,7 +94,8 @@ property: ActivityTypeId, ActivityType, Int, required
 property: DateSubmittedToActivityGroup, DateTime?, DateTime, , Used to track when a team has been submitted to a league
 property: AccountActivityGroupId, int?, Int, , When a activity is part of a league that is from an external source (such as a team) then it should be linked to the account version of that league
 property: LeaderTypeId, ActivityLeaderType, Int, , Track what kind of leader it is - internal or external
-property: RequiresParentalConsent, bool, Bit, , let us know whether the parent needs to consent
+property: RequiresParentalConsent, bool, Bit, , Indicates whether parental consent is required
+property: IsStudentAllowedToRegister, bool, Bit, , Indicates whether a student is allowed to register
 property: ActivityLocationTypeId, ActivityLocationType, Int, , Physical or Virtual
 property: VirtualLocationInfo, string, NVarChar "1000", , Link for virtual class
 property: HidePreciseLocation, bool, Bit, , If true then don't want to add a pin for the exact location

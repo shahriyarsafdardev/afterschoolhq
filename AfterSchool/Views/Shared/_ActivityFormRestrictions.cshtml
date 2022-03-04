@@ -2,7 +2,6 @@
 @{
     var grades = GradeLevel.Load();
     var showAllowStudentRegistration = SessionVariables.AccountPackage.HasFeature(FeatureType.AllowStudentRegistration);
-    var allowStudentRegPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowStudentRegistration);
 }
 <div class="panel panel-default panel-small-padding">
     <div class="panel-heading activity-heading">
@@ -19,16 +18,16 @@
                 <div class="col-md-9">
                     @{
                         Html.RenderPartial(
-                          "~/Views/Shared/_SwitchButton.cshtml",
-                          Model.IsAllowedStudentToRegister,
-                          new ViewDataDictionary()
-                          {
-                            { "checkboxname", "isStudentAllowed" },
-                            { "checkboxid", "isStudentAllowed" },
-                            { "disabled", !showAllowStudentRegistration },
-                            { "onclick", "showParentConsent();"},
-                            { "required", false }
-                          });
+                            "~/Views/Shared/_SwitchButton.cshtml",
+                            Model.IsStudentAllowedToRegister,
+                            new ViewDataDictionary
+                            {
+                                {"checkboxname", "isStudentAllowed"},
+                                {"checkboxid", "isStudentAllowed"},
+                                {"disabled", false},
+                                {"onclick", "showParentConsent();"},
+                                {"required", false}
+                            });
                     }
                 </div>
             </div>
@@ -37,24 +36,24 @@
                 <label class="col-md-3 control-label">
                     Requires Parental Consent
                 </label>
-                <div class="col-md-9" @if (!showAllowStudentRegistration){ <text> onclick="return showUpgradeMyPlan('@(allowStudentRegPackage.IsNotEmpty() ? allowStudentRegPackage.Name : "")',@(allowStudentRegPackage.IsNotEmpty() ? allowStudentRegPackage.ID.Value.ToString() : ""))" </text> }>
+                <div class="col-md-9">
                     @{
                         Html.RenderPartial(
-                          "~/Views/Shared/_SwitchButton.cshtml",
-                          Model.RequiresParentalConsent,
-                          new ViewDataDictionary()
-                          {
-                            { "checkboxname", "requiresparentalconsent" },
-                            { "checkboxid", "requiresparentalconsent" },
-                            { "disabled", !showAllowStudentRegistration }
-                          });
+                            "~/Views/Shared/_SwitchButton.cshtml",
+                            Model.RequiresParentalConsent,
+                            new ViewDataDictionary
+                            {
+                                {"checkboxname", "requiresparentalconsent"},
+                                {"checkboxid", "requiresparentalconsent"},
+                                {"disabled", false}
+                            });
                     }
                 </div>
             </div>
         }
         else
         {
-            <input type="hidden" value="true" name="requiresparentalconsent" id="requiresparentalconsent" />
+            <input type="hidden" value="true" name="requiresparentalconsent" id="requiresparentalconsent"/>
         }
 
         <div class="form-group">
@@ -63,14 +62,14 @@
             </label>
             <div class="col-md-9 margin-left">
                 <div class="am-radio inline">
-                    @foreach (GenderRestrictionType item in System.Enum.GetValues(typeof(GenderRestrictionType)))
+                    @foreach (GenderRestrictionType item in Enum.GetValues(typeof(GenderRestrictionType)))
                     {
                         <input type="radio"
                                name="genderrestrictions"
-                               id="genderrestrictions-@((int)item)"
+                               id="genderrestrictions-@((int) item)"
                                @(Model.GenderRestriction == item ? " checked=\"checked\" " : "")
-                               value="@((int)item)" />
-                        <label for="genderrestrictions-@((int)item)" class="margin-h-10">
+                               value="@((int) item)"/>
+                        <label for="genderrestrictions-@((int) item)" class="margin-h-10">
                             @item.ToString().SplitByUpperCase()
                         </label>
                     }
@@ -82,14 +81,16 @@
             Html.RenderPartial(
                 "~/Views/Shared/_RestrictBySelection.cshtml",
                 null,
-                new ViewDataDictionary() { 
-                    { "minGradeLevelId", Model.GradeLevelStart }, 
-                    { "MaxGradeLevelId", Model.GradeLevelEnd }, 
-                    { "grades", grades }, 
-                    { "ageStart", Model.AgeStart }, 
-                    { "ageEnd", Model.AgeEnd }, 
-                    { "restrictbygrade", Model.RestrictByGrade() } }
-                );
+                new ViewDataDictionary
+                {
+                    {"minGradeLevelId", Model.GradeLevelStart},
+                    {"MaxGradeLevelId", Model.GradeLevelEnd},
+                    {"grades", grades},
+                    {"ageStart", Model.AgeStart},
+                    {"ageEnd", Model.AgeEnd},
+                    {"restrictbygrade", Model.RestrictByGrade()}
+                }
+            );
         }
 
     </div>
@@ -103,7 +104,7 @@
         }
         else {
             $('#parentConsent').addClass("hidden");
-            $("#requiresparentalconsent").prop('checked', false);
+            $("#requiresparentalconsent").prop('checked', true);
         }
     }
     PageEvent.add(PageEvent.AFTER_INIT, function () {
