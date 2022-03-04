@@ -389,7 +389,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 if (msgs.HasNoErrors())
                 {
-                    SessionVariables.WebSession.SaveRefundLog(currentAccount, SessionVariables.CurrentUser, WebSessionActionType.ManuallyRefunded, amount, transaction, msgs);
+                    SessionVariables.WebSession.LogRefundCompleted(currentAccount, SessionVariables.CurrentUser, WebSessionActionType.ManuallyRefunded, amount, transaction, msgs);
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
                 }
             }
@@ -407,12 +407,17 @@ namespace AfterSchool.Areas.Org.Controllers
             if (uid.IsGuid() && amount.IsNumber())
             {
                 var transaction = currentAccount.GetBillerTransaction(uid.ToGuid(), msgs);
-
+                RefundRequest refundRequest = new RefundRequest();
+                
                 if (transaction.IsNotEmpty())
-                    transaction.RequestRefund(amount.ToDecimal(), RefundRequestStatus.RequestedByProvider, reason, SessionVariables.CurrentUser, msgs);
+                    refundRequest = transaction.RequestRefund(amount.ToDecimal(), RefundRequestStatus.RequestedByProvider, reason, SessionVariables.CurrentUser, msgs);
 
-                if (msgs.HasNoErrors())
+                if (msgs.HasNoErrors() && refundRequest.IsNotEmpty())
+                {
+                    SessionVariables.WebSession.LogRefundRequestUpdate(currentAccount, SessionVariables.CurrentUser, WebSessionActionType.Requested, refundRequest.Amount.ToCurrency(), refundRequest, msgs);
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                }
+
 
             }
 
@@ -434,8 +439,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 if (msgs.HasNoErrors())
                 {
-                    var transaction = Transaction.Load(request.TransactionId.Value, msgs);
-                    // SessionSaveRefundLog(currentAccount, WebSessionActionType.Refunded, request.Amount.ToCurrency(), transaction, msgs);
+                    SessionVariables.WebSession.LogRefundRequestUpdate(SessionVariables.CurrentAccount, SessionVariables.CurrentUser, WebSessionActionType.Approved, request.Amount.ToCurrency(), request, msgs);
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
                 }
             }
@@ -458,8 +462,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 if (msgs.HasNoErrors())
                 {
-                    var transaction = Transaction.Load(request.TransactionId.Value, msgs);
-                    SaveRefundLog(currentAccount, WebSessionActionType.ManuallyRefunded, request.Amount.ToCurrency(), transaction, msgs);
+                    SessionVariables.WebSession.LogRefundRequestUpdate(SessionVariables.CurrentAccount, SessionVariables.CurrentUser, WebSessionActionType.Approved, request.Amount.ToCurrency(), request, msgs);
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
                 }
             }
@@ -481,7 +484,11 @@ namespace AfterSchool.Areas.Org.Controllers
                     request.DenyRequestAsProvider(reason, SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
+                {
+                    SessionVariables.WebSession.LogRefundRequestUpdate(SessionVariables.CurrentAccount, SessionVariables.CurrentUser, WebSessionActionType.Denied, request.Amount.ToCurrency(), request, msgs);
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                }
+
 
             }
 

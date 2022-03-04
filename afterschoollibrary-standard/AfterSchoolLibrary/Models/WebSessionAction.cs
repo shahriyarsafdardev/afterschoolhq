@@ -365,7 +365,8 @@ namespace AfterSchoolLibrary.Models
 			var objType = new List<ObjectType>(){
 				ObjectType.Activity,
 				ObjectType.Transaction,
-				ObjectType.Registrant
+				ObjectType.Registrant,
+				ObjectType.RefundRequest
 			};
 
 			dq.Connection = dc;

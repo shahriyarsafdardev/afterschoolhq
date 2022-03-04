@@ -42,8 +42,8 @@ namespace AfterSchoolLibrary.Helpers
             var formatParams = new Dictionary<string, string>
             {
                 { "actorName", actorName },
-                { "actionType", actionType.ToString() },
-                { "objectType", objectType.ToString() },
+                { "actionType", actionType.ToString().SplitByUpperCase() },
+                { "objectType", objectType.ToString().SplitByUpperCase() },
                 {"objectText", objectText }
             };
 
@@ -60,8 +60,8 @@ namespace AfterSchoolLibrary.Helpers
 
                 case WebSessionActionType.Refunded:
                 case WebSessionActionType.ManuallyRefunded:
-                    var actorWasActionObjectTextFormat = "{actorName} was {actionType} {objectText}";
-                    return FormatTemplate(actorWasActionObjectTextFormat, formatParams);
+                    var actorHasActionObjectTextFormat = "{actorName} has {actionType} {objectText}";
+                    return FormatTemplate(actorHasActionObjectTextFormat, formatParams);
 
                 case WebSessionActionType.Requested:
                     if (objectType == ObjectType.RefundRequest)
@@ -146,7 +146,7 @@ namespace AfterSchoolLibrary.Helpers
         {
             var formatParams = new Dictionary<string, string>
             {
-                { "indirectObjectType", indirectObjectType.ToString() },
+                { "indirectObjectType", indirectObjectType.ToString().SplitByUpperCase() },
                 { "indirectObjectText", indirectObjectText }
             };
 
@@ -226,7 +226,7 @@ namespace AfterSchoolLibrary.Helpers
                 //  case WebSessionActionType.Shared:
                 //  case WebSessionActionType.Contacted:
                 default:
-                    var actorActionObjectTypeTextTemplate = " {indirectObjectType} {indirectObjectText";
+                    var actorActionObjectTypeTextTemplate = " {indirectObjectType} {indirectObjectText}";
                     return AppendFormatTemplate(actionStringDict, actorActionObjectTypeTextTemplate, formatParams);
             }
         }

@@ -133,7 +133,7 @@ namespace AfterSchool.Models
             msgs.AddRange(action.Save(dc));
         }
         
-        public static void SaveRefundLog(this WebSession webSession, Account currentAccount, WebUser currentUser, WebSessionActionType webSessionActionType, string amount, Transaction transaction, SystemMessages msgs)
+        public static void LogRefundCompleted(this WebSession webSession, Account currentAccount, WebUser currentUser, WebSessionActionType webSessionActionType, string amount, Transaction transaction, SystemMessages msgs)
         {
             var activityId = ActivityPayment.LoadByTransactionIdByIsDeleted(transaction.ID.Value, false, msgs)?.FirstOrDefault()?.ParticipationObjectId.Value;
             var activity = Activity.Load(activityId.Value, msgs);
@@ -148,6 +148,20 @@ namespace AfterSchool.Models
                 indirectObjectId: activity.ID.Value,
                 indirectObjectText: activity.Name,
                 indirectObjectType: ObjectType.Activity
+            );
+        }
+
+        public static void LogRefundRequestUpdate(this WebSession webSession, Account currentAccount,
+            WebUser currentUser, WebSessionActionType webSessionActionType, string amount, RefundRequest refundRequest,
+            SystemMessages msgs)
+        {
+            webSession.LogActivity(
+                account: currentAccount,
+                actor: currentUser,
+                actionType: webSessionActionType,
+                objectType: ObjectType.RefundRequest,
+                objectId: refundRequest.ID.Value,
+                objectText: amount
             );
         }
     }

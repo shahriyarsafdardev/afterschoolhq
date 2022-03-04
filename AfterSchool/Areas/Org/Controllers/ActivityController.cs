@@ -47,6 +47,9 @@ namespace AfterSchool.Areas.Org.Controllers
 				WebSessionActionType.ManuallyPaid,
 				WebSessionActionType.ManuallyRefunded,
 				WebSessionActionType.ManuallyRegistered,
+                WebSessionActionType.Requested,
+                WebSessionActionType.Denied,
+                WebSessionActionType.Approved
 			},
 			0,
             15,

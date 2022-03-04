@@ -207,7 +207,8 @@ namespace AfterSchool.Areas.Admin.Controllers
             if (id.IsGuid())
             {
                 var transaction = Transaction.LoadByUid(id.ToGuid(), msgs);
-
+                Transaction refund = new Transaction();
+                
                 if (request.IsNotEmpty())
                 {
                     if (request.IsGuid())
@@ -217,7 +218,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                         var refundConvenienceFees = refundcf.IsBoolean() && refundcf.ToBoolean();
 
                         if (refundRequest.IsNotEmpty() && refundRequest.CanRefundAmountRequested(msgs))
-                            refundRequest.ApproveAndProcessRequest(
+                            refund = refundRequest.ApproveAndProcessRequest(
                                 true, 
                                 refundCreditFees, 
                                 refundConvenienceFees,
@@ -231,14 +232,14 @@ namespace AfterSchool.Areas.Admin.Controllers
                 else
                 {
                     if (transaction.IsNotEmpty() && !transaction.HasRefunds())
-                        transaction.RefundPayerFullAmount(SessionVariables.CurrentUser, msgs);
+                        refund = transaction.RefundPayerFullAmount(SessionVariables.CurrentUser, msgs);
                     else
                         msgs.Add("Invalid Request", MessageType.UserError);
                 }
 
                 if (msgs.HasNoErrors())
                 {
-                    SessionVariables.WebSession.SaveRefundLog(SessionVariables.CurrentAccount, SessionVariables.CurrentUser, WebSessionActionType.ManuallyRefunded, , transaction, msgs);
+                    SessionVariables.WebSession.LogRefundCompleted(SessionVariables.CurrentAccount, SessionVariables.CurrentUser, WebSessionActionType.Refunded, refund.Amount.ToCurrency(), transaction, msgs);
                     return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
                 }
                     
@@ -261,7 +262,11 @@ namespace AfterSchool.Areas.Admin.Controllers
                     request.DenyRequestAsAHQ(null, SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
+                {
+                    SessionVariables.WebSession.LogRefundRequestUpdate(SessionVariables.CurrentAccount, SessionVariables.CurrentUser, WebSessionActionType.Denied, request.Amount.ToCurrency(), request, msgs);
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                }
+
 
             }
 
