@@ -729,6 +729,7 @@ namespace AfterSchoolLibrary.Services
                 ActivityTypeId = activity.ActivityTypeId,
                 LocationId = activity.LocationId,
                 RequiresParentalConsent = activity.RequiresParentalConsent,
+                IsStudentAllowedToRegister = activity.IsStudentAllowedToRegister,
                 InstructorId = activity.InstructorId,
                 IsInviteOnly = activity.IsInviteOnly,
                 ActivityLocationTypeId = activity.ActivityLocationTypeId,
@@ -852,6 +853,7 @@ namespace AfterSchoolLibrary.Services
             var form = values.GetValueOrDefault("form");
             var alloworganization = values.GetValueOrDefault("alloworganization");
             var requiresparentalconsent = values.GetValueOrDefault("requiresparentalconsent");
+            var isStudentAllowed = values.GetValueOrDefault("isStudentAllowed");
             var agestart = values.GetValueOrDefault("agestart");
             var ageend = values.GetValueOrDefault("ageend");
             var gradestart = values.GetValueOrDefault("gradestart");
@@ -1060,6 +1062,9 @@ namespace AfterSchoolLibrary.Services
 
             if (requiresparentalconsent.IsNumber())
                 activity.RequiresParentalConsent = (bool)requiresparentalconsent.ToString().ToBoolean();
+
+            if (isStudentAllowed.IsNumber())
+                activity.IsStudentAllowedToRegister = (bool)isStudentAllowed.ToString().ToBoolean();
 
             if (contactname.IsNotEmpty())
                 activity.ContactName = contactname.ToString().IfBlank("").MaxChars(50);

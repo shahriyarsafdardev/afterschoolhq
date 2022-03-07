@@ -72,7 +72,7 @@
 
     .am-generic-checkbox input[type="checkbox"] + label::before {
         border: solid 1px @primaryColor !important;
-        margin: 0 10px 0 0 !important;
+        margin: 0px 5px -2px 0 !important;
     }
 
     .am-generic-checkbox input[type="checkbox"]:checked + label::before {
@@ -80,32 +80,33 @@
         color: white;
         border-color: @primaryColor;
     }
-    .gmnoprint > div:first-child {
-        top: -100px !important
+
+    .checkbox-show-map input[type="checkbox"] + label::before {
+        border: solid 1px @primaryColor !important;
+        margin: 0px 5px 0px 0 !important;
     }
 
-    .directory-filters {
-        display: none;
-        padding-right: 0;
-        padding-bottom: 120px;
-        padding-top: 10px;
-        background-color: #fff;
+    .checkbox-show-map input[type="checkbox"]:checked + label::before {
+        background-color: @primaryColor;
+        color: white;
+        border-color: @primaryColor;
     }
+
 </style>
 
 @{ Html.RenderPartial("~/Views/Shared/_DirectoryHeader.cshtml", null, new ViewDataDictionary {{"primaryColor", primaryColor}, {"website", website}, {"logoUrl", logoUrl}}); }
 
-<div id="main-view-container" class="display-flex" style="overflow: hidden;">
-    <div id="list-view" class="flex-1" style="display: flex; height: 100vh;">
-        <div id="filters" class="col-md-3 directory-filters" style="overflow-y:auto">
-            <span class="primary-color directory-sidebar-arrow" isOpen="true" onclick="return toggleSideBar(this)">
+<div id="main-view-container" class="display-flex">
+    <div id="list-view" class="directory-list-view">
+        <div id="filters" class="col-md-3 directory-filters">
+            <span id="directory-sidebar-icon" class="primary-color directory-sidebar-arrow" isOpen="true" onclick="return toggleSideBar(this)">
                 <i id="search-sidebar-arrow" class="fa fa-chevron-circle-left" aria-hidden="true"></i>
             </span>
 
             @{ Html.RenderPartial("~/Views/Shared/_DirectoryFilters.cshtml"); }
         </div>
 
-        <div id="search-container" class="directory-search-container col-md-9 pt-20 pb-20" style="overflow-y:scroll">
+        <div id="search-container" class="directory-search-container">
 
             <div class="col-lg-9 col-md-9">
                 <div class="form-group has-feedback has-search" style="margin-left: 20px;">
@@ -114,8 +115,8 @@
                 </div>
             </div>
 
-            <div class="am-checkbox am-generic-checkbox col-lg-3 col-md-3">
-                <input id="chk-map-view" name="show-map" checked="checked" value="1" type="checkbox" class="schedulerepeat-checkbox" onclick="return toggleMapView(this)"/>
+            <div class="am-checkbox checkbox-show-map col-lg-3 col-md-3">
+                <input id="chk-map-view" name="show-map" checked="checked" value="1" type="checkbox" class="schedulerepeat-checkbox" onclick="return toggleMapView(this)" />
                 <label for="chk-map-view" class="margin-h-10 mobile-padding font-weight-bold">Show Map</label>
             </div>
             <div class="clearfix"></div>
@@ -180,7 +181,7 @@
             initMap();
         })
 
-        function loadAccounts(search, neighborhoods, grades, ages, gender, services, timing, pricing, cost, starting, other, special, zip = 0) {
+        function loadAccounts(search, enroll_today, grades, ages, gender, services, timing, pricing, cost, starting, other, special, zip = 0) {
             if (inCallback) {
                 return false;
             }
@@ -192,7 +193,7 @@
             $.ajax({
                 type: "POST",
                 url: url,
-                data: { accountId: '@accountId', search, neighborhoods, grades, ages, gender, services, timing, pricing, cost, starting, other, special, zipcode: zip, pageNum: page },
+                data: { accountId: '@accountId', enroll_today, search, grades, ages, gender, services, timing, pricing, cost, starting, other, special, zipcode: zip, pageNum: page },
                 success: function (data) {
                     if (data && data.success == true) {
 
@@ -265,6 +266,11 @@
                 }
             });
         }
+
+        $(".am-filter-checkbox span").click(function (e) {
+            e.stopPropagation();
+            return false;
+        });
 
     </script>
 }
