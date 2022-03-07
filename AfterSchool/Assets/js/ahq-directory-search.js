@@ -482,25 +482,22 @@ function toggleSideBar(element) {
     var isOpen = $(element).attr('isOpen');
     if (isOpen === 'true') {
         $(element).attr('isOpen', false)
-        $('#search-sidebar-arrow').removeClass('fa-chevron-circle-left').addClass('fa-chevron-circle-right');
-        $("#filters").animate({
-            width: '0px'
-        });
-    } else {
+        $('#search-sidebar-arrow').removeClass('fa-chevron-circle-left').addClass('fa-chevron-circle-right');        
+        $("#filters").removeClass('directory-filters-open').addClass('directory-filters-close');
+    }
+    else {
         $(element).attr('isOpen', true)
         $('#search-sidebar-arrow').removeClass('fa-chevron-circle-right').addClass('fa-chevron-circle-left');
-        $("#filters").animate({
-            width: '25%'
-        });
+        $("#filters").removeClass('directory-filters-close').addClass('directory-filters-open');
     }
 }
 
 function toggleMapView(element) {
     var isChecked = $(element).is(':checked')
     if (isChecked)
-        $("#map-view").css('flex', '0.5')
+        $("#map-view").removeClass('flex-close').addClass('flex-open');
     else
-        $("#map-view").css('flex', '0')
+        $("#map-view").removeClass('flex-open').addClass('flex-close');
 }
 
 function toggleFilterOverflow() {
