@@ -22,6 +22,10 @@ function initMap() {
 
     map.mapTypes.set('no_poi', noPOIMapType);
     map.setMapTypeId('no_poi');
+
+    google.maps.event.addListener(map, 'click', function () {
+        removeIcons();
+    });
 }
 
 function addMarkersOnMap(places) {
@@ -36,11 +40,29 @@ function addMarkersOnMap(places) {
             newmarker['infowindow'] = new google.maps.InfoWindow({
                 content: places[i].AccountName
             });
+            google.maps.event.addListener(map, 'click', function () {
+                newmarker['infowindow'].close();
+            });
             google.maps.event.addListener(newmarker, 'click', function () {
+                removeIcons();
                 this['infowindow'].open(map, this);
+                this.setIcon('https://www.google.com/mapfiles/marker_green.png');
+                var mainDiv = $("div").find(`[name='${this['infowindow'].content}']`);
+                $("#directory-panel", mainDiv).attr('style', 'border: 5px solid red;');
+                $('#search-container').animate({
+                    scrollTop: parseInt($("#directory-panel", mainDiv).offset().top) + 50
+                }, 500);
             });
 
             marker.push(newmarker);
         }
     }
+}
+
+function removeIcons() {
+    for (var j = 0; j < marker.length; j++) {
+        marker[j].setIcon("../img/red-icon-map.png");
+        marker[j]['infowindow'].close();
+    }
+    $(".participation-object div").removeAttr('style');
 }
