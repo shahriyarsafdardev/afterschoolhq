@@ -1,5 +1,4 @@
 ﻿@{
-    var neighborhoods = ViewBag.Neighborhoods != null ? (List<string>)ViewBag.Neighborhoods : null;
     var grades = (List<GradeLevel>)ViewBag.Grades;
 
     var totalGradeCount = grades.Count;
@@ -8,7 +7,7 @@
 
     var services = AfterSchoolLibrary.Helpers.ProfileHelper.ServicesOfferings;
     var timing = AfterSchoolLibrary.Helpers.ProfileHelper.OfferingTimes;
-    var pricingOptions = AfterSchoolLibrary.Helpers.ProfileHelper.PricingOptions;
+    var pricingOptions = AfterSchoolLibrary.Helpers.ProfileHelper.PricingOptionsWithoutFreeActivities;
     var specialNeeds = AfterSchoolLibrary.Helpers.ProfileHelper.SpecialNeedsOfferings;
 }
 
@@ -24,29 +23,22 @@
         <div id="divValidatePostalCode" class="input-group-addon" onclick="return validatePostalCodeAndSearch();">
             <span class="input-group-text" style="font-size: 12px;">Update</span>
         </div>
-    </div>    
+    </div>
 </div>
 <div class="filter-end-line"></div>
 
-@if (neighborhoods.IsNotEmpty() && neighborhoods.Count > 0)
-{
-    <div id="list-neighborhoods">
-        <h4 id="header-neighborhoods" class="filter-header accordion-toggle collapsed" data-toggle="collapse" isOpen="false" href="#collapse-neighborhoods" onclick="return loadTabs('neighborhoods')">Neighborhoods</h4>
-        <div id="tags-container-neighborhoods"></div>
-
-        <div id="collapse-neighborhoods" class="collapse">
-            @foreach (var item in neighborhoods)
-            {
-                <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
-                    <input id="chk-neighborhoods-@(item.ToLower())" name="neighborhoods" value="@(item.ToLower())" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-                    <label for="chk-neighborhoods-@(item.ToLower())" class="filter-body mobile-padding">@item</label>
-                </div>
-            }
-        </div>
-    </div>
-    
-    <div class="filter-end-line"></div>
-}
+<div>
+    <div class="am-checkbox am-filter-checkbox am-generic-checkbox no-padding">
+        <input id="chk-enrolling-now" name="enrolling-now" value="enroll" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+        <label for="chk-enrolling-now" class="filter-body mobile-padding">
+            Enroll today via AHQ
+            <span style="cursor: auto;" title="This filter will only display providers who are currently using AfterShool HQ to accept registrations.">
+                <i class="fa fa-question-circle" style="font-size: 14px; margin-left: 3px; margin-bottom: -2px;"></i>
+            </span>
+        </label>
+    </div>  
+</div>
+<div class="filter-end-line"></div>
 
 <div>
     <h4 id="header-grades" class="filter-header accordion-toggle collapsed" data-toggle="collapse" isOpen="false" href="#collapse-grades" onclick="return loadTabs('grades')">
@@ -173,18 +165,28 @@
         </div>
 
         <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
-            <input id="chk-cost-2" name="cost" value="cost_0_50" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-            <label for="chk-cost-2" class="filter-body mobile-padding">Less than $50</label>
+            <input id="chk-cost-2" name="cost" value="cost_1_20" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+            <label for="chk-cost-2" class="filter-body mobile-padding">$1 - $20</label>
         </div>
 
         <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
-            <input id="chk-cost-3" name="cost" value="cost_50_150" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-            <label for="chk-cost-3" class="filter-body mobile-padding">Between $50 and $150</label>
+            <input id="chk-cost-3" name="cost" value="cost_21_50" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+            <label for="chk-cost-3" class="filter-body mobile-padding">$21 - $50</label>
         </div>
 
         <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
-            <input id="chk-cost-4" name="cost" value="cost_150_above" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
-            <label for="chk-cost-4" class="filter-body mobile-padding">$150 and Above</label>
+            <input id="chk-cost-4" name="cost" value="cost_51_100" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+            <label for="chk-cost-4" class="filter-body mobile-padding">$51 - $100</label>
+        </div>
+
+        <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
+            <input id="chk-cost-5" name="cost" value="cost_101_200" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+            <label for="chk-cost-5" class="filter-body mobile-padding">$101 - $200</label>
+        </div>
+
+        <div class="am-checkbox am-filter-checkbox am-generic-checkbox">
+            <input id="chk-cost-6" name="cost" value="cost_201_above" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
+            <label for="chk-cost-6" class="filter-body mobile-padding">$201 and Above</label>
         </div>
     </div>
 </div>
