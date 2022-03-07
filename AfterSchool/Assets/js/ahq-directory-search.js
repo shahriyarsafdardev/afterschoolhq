@@ -6,7 +6,6 @@
         if (isReachedScrollEnd == false &&
             isMobileFilterWindowOpened == false &&
             ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight)) {
-            console.log(isReachedScrollEnd + " isReachedScrollEnd");
             loadFiltersAndInitiateSearch();
         }
     });
@@ -248,6 +247,7 @@ function prepareSearchParams() {
 
     if (mainUrl) {
         WebPage.addHash(encodeURI(mainUrl));
+        deleteAllMarkersOnMap();
         $('#clear-filters').show();
     } else {
         WebPage.addHash('');
@@ -279,7 +279,6 @@ function prepareSearchParams() {
 function loadFiltersAndInitiateSearch() {
     var hashUrl = WebPage.getHash();
     var filters = hashUrl.split(',');
-
     _.each(filters, function (filter) {
         if (filter.indexOf('search_') == 0) {
             $(`input[name="search"]`).val(filter.split('_')[1]);
@@ -354,7 +353,7 @@ function checkZip(value) {
     return zipCodePatternList.some(function (rx) { return rx.test(value); });
 }
 
-function loadInitialTabs() {    
+function loadInitialTabs() {
     loadTabs('grades');
     loadTabs('ages');
     loadTabs('gender');
@@ -465,7 +464,7 @@ function clearFilters() {
     } else {
         $('#txtSearch').val('');
     }
-
+    deleteAllMarkersOnMap();
     resetTags();
     resetFlags();
     loadAccounts();
@@ -482,7 +481,7 @@ function toggleSideBar(element) {
     var isOpen = $(element).attr('isOpen');
     if (isOpen === 'true') {
         $(element).attr('isOpen', false)
-        $('#search-sidebar-arrow').removeClass('fa-chevron-circle-left').addClass('fa-chevron-circle-right');        
+        $('#search-sidebar-arrow').removeClass('fa-chevron-circle-left').addClass('fa-chevron-circle-right');
         $("#filters").removeClass('directory-filters-open').addClass('directory-filters-close');
     }
     else {
@@ -505,6 +504,6 @@ function toggleFilterOverflow() {
     if (isOpen === 'true') {
         $('#filters').css('overflow-y', 'hidden');
     } else {
-        $('#filters').css('overflow-y', 'auto');        
+        $('#filters').css('overflow-y', 'auto');
     }
 }
