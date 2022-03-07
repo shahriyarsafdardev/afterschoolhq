@@ -95,7 +95,7 @@ function prepareSearchParams() {
     var mainUrl = '';
     var search = '';
     var zip = 0;
-    var comma_delimited_neighborhoods = '';
+    var comma_delimited_enroll_today = '';
     var comma_delimited_grades = '';
     var comma_delimited_ages = '';
     var comma_delimited_gender = '';
@@ -122,11 +122,11 @@ function prepareSearchParams() {
         mainUrl += `zip_${zip},`;
     }
 
-    $('input:checkbox[name=neighborhoods]:checked').each(function () {
-        if (comma_delimited_neighborhoods.length > 0) {
-            comma_delimited_neighborhoods += ',';
+    $('input:checkbox[name=enrolling-now]:checked').each(function () {
+        if (comma_delimited_enroll_today.length > 0) {
+            comma_delimited_enroll_today += ',';
         }
-        comma_delimited_neighborhoods += $(this).val();
+        comma_delimited_enroll_today += $(this).val();
     });
 
     $('input:checkbox[name=grades]:checked').each(function () {
@@ -199,8 +199,8 @@ function prepareSearchParams() {
         comma_delimited_special += $(this).val();
     });
 
-    if (comma_delimited_neighborhoods.length > 0) {
-        mainUrl += `${comma_delimited_neighborhoods},`;
+    if (comma_delimited_enroll_today.length > 0) {
+        mainUrl += `${comma_delimited_enroll_today},`;
     }
 
     if (comma_delimited_grades.length > 0) {
@@ -257,12 +257,10 @@ function prepareSearchParams() {
     //..scroll to last known position, because location.href scrolls to top
     document.documentElement.scrollTop = page == 0 ? 0 : scr;
 
-    openSeeMorePanelsForSelectedCheckboxes();
-
     // .. call api
     if (!isMobile || !isMobileFilterWindowOpened) {
         loadAccounts(search,
-            comma_delimited_neighborhoods,
+            comma_delimited_enroll_today,
             comma_delimited_grades,
             comma_delimited_ages,
             comma_delimited_gender,
@@ -356,8 +354,7 @@ function checkZip(value) {
     return zipCodePatternList.some(function (rx) { return rx.test(value); });
 }
 
-function loadInitialTabs() {
-    loadTabs('neighborhoods');
+function loadInitialTabs() {    
     loadTabs('grades');
     loadTabs('ages');
     loadTabs('gender');
@@ -394,7 +391,6 @@ function getTagHtml(name) {
 }
 
 function resetTags() {
-    $('#tags-container-neighborhoods').html('');
     $('#tags-container-grades').html('');
     $('#tags-container-ages').html('');
     $('#tags-container-gender').html('');
@@ -453,29 +449,9 @@ function applyMobileFilter() {
     }
 }
 
-function openSeeMorePanelsForSelectedCheckboxes() {
-    var hashUrl = WebPage.getHash();
-    var filters = hashUrl.split(',');
-
-    _.each(filters, function (filter) {
-        if (filter.indexOf('search_') != 0 && filter.indexOf('zip_') != 0) {
-            var inputToCheck = $(`input[value="${decodeURIComponent(filter.trim())}"]`);
-
-            if (inputToCheck && inputToCheck.length > 0) {
-
-                //..if checkbox is hidden, open that panel
-                var showMoreElement = inputToCheck.parent().siblings('p');
-                if (showMoreElement && showMoreElement.length > 0 && showMoreElement.text() == 'Show more...') {
-                    $(showMoreElement).click();
-                }
-            }
-        }
-    });
-}
-
 function clearFilters() {
     //..clear all checkbox
-    $(`input:checkbox[name=neighborhoods],[name=grades],[name=ages],[name=gender],[name=services],[name=timing],[name=pricing],[name=cost],[name=starting],[name=other],[name=special-needs]`).prop('checked', false);
+    $(`input:checkbox[name=enrolling-now],[name=grades],[name=ages],[name=gender],[name=services],[name=timing],[name=pricing],[name=cost],[name=starting],[name=other],[name=special-needs]`).prop('checked', false);
 
     txtZip.val('');
     //..clear web link and hide clear filter link
@@ -502,6 +478,7 @@ function resetFlags() {
 }
 
 function toggleSideBar(element) {
+    toggleFilterOverflow();
     var isOpen = $(element).attr('isOpen');
     if (isOpen === 'true') {
         $(element).attr('isOpen', false)
@@ -524,4 +501,13 @@ function toggleMapView(element) {
         $("#map-view").css('flex', '0.5')
     else
         $("#map-view").css('flex', '0')
+}
+
+function toggleFilterOverflow() {
+    var isOpen = $('#directory-sidebar-icon').attr('isOpen')
+    if (isOpen === 'true') {
+        $('#filters').css('overflow-y', 'hidden');
+    } else {
+        $('#filters').css('overflow-y', 'auto');        
+    }
 }
