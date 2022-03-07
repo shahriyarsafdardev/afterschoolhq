@@ -568,11 +568,15 @@ body.registration {
 }
 
 .language-select {
-    float: right;
     top: 10px;
-    position: relative;
+    align-content: end;
+    display: flex;
     margin-right: 15px;
     border-radius: 5px;
+}
+.flex-div {
+    display: flex !important;
+    align-items: center;
 }
 
 .language-select .ddlOptions {

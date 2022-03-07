@@ -30,8 +30,8 @@
     }
 </style>
 
-<header class="visible-lg visible-md row directory-header">
-    <a href=@(website.IsNotEmpty() ? website : "")>
+<header class="visible-lg visible-md row directory-header flex-div ">
+    <a style="flex: 1;" href=@(website.IsNotEmpty() ? website : "") >
         <img src="@logoUrl" alt="AfterSchool HQ - Your home for afterschool experiences" />
     </a>
     <div class="language-select" style="background-color: @primaryColor">
