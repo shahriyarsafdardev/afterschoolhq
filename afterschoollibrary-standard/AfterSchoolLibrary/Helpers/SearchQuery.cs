@@ -120,22 +120,22 @@ namespace AfterSchoolLibrary.Helpers
                     AND ((@Cost IS NULL)";
 
                 if (cost.Contains("cost_free"))
-                    sql += $@" OR COALESCE(ap.CostLow, 0) = 0 or COALESCE(ap.CostHigh, 0) = 0"; 
+                    sql += $@" OR COALESCE(ap.CostLow, 0) = 0";
 
                 if (cost.Contains("cost_1_20"))
-                    sql += $@" OR CostLow between 1 AND 20 or CostHigh between 1 AND 20";
+                    sql += $@" OR (CostLow <= 20 and CostHigh > 0)";
 
 				if (cost.Contains("cost_21_50"))
-					sql += $@" OR CostLow between 21 AND 50 or CostHigh between 21 AND 50";
+					sql += $@" OR (CostLow <= 50 and CostHigh > 20)";
 
 				if (cost.Contains("cost_51_100"))
-					sql += $@" OR CostLow between 51 AND 100 or CostHigh between 51 AND 100";
+					sql += $@" OR (CostLow <= 100 and CostHigh > 50)";
 
 				if (cost.Contains("cost_101_200"))
-					sql += $@" OR CostLow between 101 AND 200 or CostHigh between 101 AND 200";
+					sql += $@" OR (CostLow <= 200 and CostHigh > 100)";
 
                 if (cost.Contains("cost_201_above"))
-                    sql += $@" OR CostLow > 201 or CostHigh > 201";
+                    sql += $@" OR CostHigh > 200";
 
                 sql += $@")";
             }

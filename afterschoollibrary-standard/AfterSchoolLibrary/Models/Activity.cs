@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using System.Data;
 using System.Collections;
 
 namespace AfterSchoolLibrary.Models
@@ -85,9 +82,13 @@ namespace AfterSchoolLibrary.Models
 		/// </summary>
 		public ActivityLeaderType LeaderTypeId { get { return (ActivityLeaderType)MDV["LeaderTypeId"].Value; } set { MDV["LeaderTypeId"].Value = value; } }
 		/// <summary>
-		/// let us know whether the parent needs to consent
+		/// Indicates whether parental consent is required
 		/// </summary>
 		public bool RequiresParentalConsent { get { return (bool)MDV["RequiresParentalConsent"].Value; } set { MDV["RequiresParentalConsent"].Value = value; } }
+		/// <summary>
+		/// Indicates whether a student is allowed to register
+		/// </summary>
+		public bool IsStudentAllowedToRegister { get { return (bool)MDV["IsStudentAllowedToRegister"].Value; } set { MDV["IsStudentAllowedToRegister"].Value = value; } }
 		/// <summary>
 		/// Physical or Virtual
 		/// </summary>
@@ -147,6 +148,7 @@ namespace AfterSchoolLibrary.Models
 			this.ActivityTypeId = ActivityType.NotSet;
 			this.LeaderTypeId = ActivityLeaderType.NotSet;
 			this.RequiresParentalConsent = false;
+			this.IsStudentAllowedToRegister = false;
 			this.ActivityLocationTypeId = ActivityLocationType.NotSet;
 			this.HidePreciseLocation = false;
 			this.RegistrationFinalized = false;
@@ -199,6 +201,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "AccountActivityGroupId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "LeaderTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RequiresParentalConsent", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "IsStudentAllowedToRegister", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "ActivityLocationTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "VirtualLocationInfo", System.Data.SqlDbType.NVarChar , "1000");
 				_dp.Add(className, "HidePreciseLocation", System.Data.SqlDbType.Bit);
@@ -442,6 +445,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["RequiresParentalConsent"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsStudentAllowedToRegister"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();

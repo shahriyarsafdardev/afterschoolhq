@@ -39,5 +39,6 @@ public enum WebSessionActionType
 	BrowsedAllActivities,
 	Added,
 	Removed,
-	ManualAHQPayout
+	ManualAHQPayout,
+	Denied
 }
