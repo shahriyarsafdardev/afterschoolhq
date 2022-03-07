@@ -1587,6 +1587,7 @@
     padding: 15px;
     overflow-y: auto;
     float: none;
+    flex-grow: 1;
 }
 
 .directory-search-input {
