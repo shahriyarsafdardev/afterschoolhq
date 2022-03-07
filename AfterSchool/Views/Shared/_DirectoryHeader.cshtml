@@ -32,8 +32,11 @@
 
 <header class="visible-lg visible-md row directory-header">
     <a href=@(website.IsNotEmpty() ? website : "")>
-        <img src="@logoUrl" alt="AfterSchool HQ - Your home for afterschool experiences"/>
+        <img src="@logoUrl" alt="AfterSchool HQ - Your home for afterschool experiences" />
     </a>
+    <div class="language-select" style="background-color: @primaryColor">
+       @Html.Partial("_GoogleTranslateDropDown")
+    </div>
 </header>
 
 <header class="visible-sm visible-xs bg-color">

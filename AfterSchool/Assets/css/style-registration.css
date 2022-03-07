@@ -566,3 +566,15 @@ body.registration {
     width: 80px;
     text-align: center;
 }
+
+.language-select {
+    float: right;
+    top: 10px;
+    position: relative;
+    margin-right: 15px;
+    border-radius: 5px;
+}
+
+.language-select .ddlOptions {
+    left: -85px !important;
+}
