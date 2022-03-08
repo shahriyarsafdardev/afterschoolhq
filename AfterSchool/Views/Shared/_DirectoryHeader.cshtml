@@ -19,11 +19,10 @@
 </header>
 
 <header class="visible-sm visible-xs bg-color">
-    <div class="col-xs-10">
-        <div class="form-group has-feedback has-search" style="margin-top: 10px;">
-            <span class="glyphicon glyphicon-search form-control-feedback" style="top: -3px;"></span>
-            <input id="txtSearch-mobile" name="search" type="text" class="form-control" placeholder="Search For Programs" onkeyup="waitAndFilterSearch()">
-        </div>
+    <div class="col-xs-10" style="padding: 10px;">
+        <a href=@(website.IsNotEmpty() ? website : "")>
+            <img src="@logoUrl" alt="AfterSchool HQ - Your home for afterschool experiences" style="height: 55px;" />
+        </a>
     </div>
     <div class="col-xs-2 directory-filter-symbol">
         <img id="img-mobile-filter" src="~/img/filter.svg" class="filter hide" isOpen="0" onclick="mobileFilter()" alt="Show or hide filters"/>

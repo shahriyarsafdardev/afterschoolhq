@@ -5,8 +5,8 @@
     $("#search-container").scroll(function () {
         if (isReachedScrollEnd == false &&
             isMobileFilterWindowOpened == false &&
-            ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight)) {
-            console.log(isReachedScrollEnd + " isReachedScrollEnd");
+            ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight))
+        {
             loadFiltersAndInitiateSearch();
         }
     });
@@ -16,6 +16,8 @@
 
     if (!isMobile) {
         $('#filters').show();
+        $('#container-show-map-chk').show();
+        $('#map-view').show();
     }
 
     formatContactPhoneForDirectory();
