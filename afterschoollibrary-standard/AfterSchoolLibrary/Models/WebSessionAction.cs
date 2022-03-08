@@ -370,7 +370,7 @@ namespace AfterSchoolLibrary.Models
 			};
 
 			dq.Connection = dc;
-
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
 			dq.Criterias.Add(ObjectMap["ObjectTypeId"], objType.Select(x => (int)x).ToList(), BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.In);
 
 			dq.SelectRange.Start = start;
