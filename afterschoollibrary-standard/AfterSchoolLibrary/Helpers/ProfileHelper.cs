@@ -30,6 +30,14 @@ namespace AfterSchoolLibrary.Helpers
             }
         }
 
+        public static string[] PricingOptionsWithoutFreeActivities
+        {
+            get
+            {
+                return new string[] { "Scholarships available", "Payment Plans available" };
+            }
+        }
+
         public static string[] SpecialNeedsOfferings
         {
             get

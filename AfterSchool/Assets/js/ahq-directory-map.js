@@ -66,3 +66,10 @@ function removeIcons() {
     }
     $(".participation-object div").removeAttr('style');
 }
+
+function deleteAllMarkersOnMap() {
+    for (var i = 0; i < marker.length; i++) {
+        marker[i].setMap(null);
+    }
+    marker = [];
+}
