@@ -605,7 +605,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 //.. send support email to AHQ just to notifiy the team that a profile completed.
                 EmailHelper.SendEmail(
-                    "testyopmail.com",
+                    AfterSchoolLibrary.Helpers.Email.AppCustomersEmailAddress,
                     $"AHQ Profile Completed - {account.Name}",
                     $"<p>Organization: {account.Name}<br />Name: {currentUser.FirstName} {currentUser.LastName}<br />Email: {currentUser.Email}<br />Profile Link: {account.HomePageUrl}<br />How did you hear about us: {currentUser.HowHearAboutUs} <br />Location: {profile.GetLocation(msgs) ?? account.GetDefaultLocation(msgs)}</p>",
                     true);
