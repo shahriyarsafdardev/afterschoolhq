@@ -40,18 +40,26 @@ function addMarkersOnMap(places) {
             newmarker['infowindow'] = new google.maps.InfoWindow({
                 content: places[i].AccountName
             });
+
+            google.maps.event.addListener(newmarker['infowindow'], 'closeclick', function () {
+                removeIcons();
+            });
+
             google.maps.event.addListener(map, 'click', function () {
                 newmarker['infowindow'].close();
             });
             google.maps.event.addListener(newmarker, 'click', function () {
                 removeIcons();
                 this['infowindow'].open(map, this);
-                this.setIcon('https://www.google.com/mapfiles/marker_green.png');
+                this.setIcon('../img/red-map-icon-large.png');
                 var mainDiv = $("div").find(`[name='${this['infowindow'].content}']`);
-                $("#directory-panel", mainDiv).attr('style', 'border: 5px solid red;');
-                $('#search-container').animate({
-                    scrollTop: parseInt($("#directory-panel", mainDiv).offset().top) + 50
-                }, 500);
+                $("#directory-panel", mainDiv).addClass('primary-color-border');
+                var container = $("#search-container");
+                var element = $(mainDiv);
+                var height = container.height() / 2;
+                var elementTop = element.position().top;
+                var position = container.scrollTop() + elementTop - height;
+                container.animate({ scrollTop: position });
             });
 
             marker.push(newmarker);
@@ -64,7 +72,7 @@ function removeIcons() {
         marker[j].setIcon("../img/red-icon-map.png");
         marker[j]['infowindow'].close();
     }
-    $(".participation-object div").removeAttr('style');
+    $(".participation-object div").removeClass('primary-color-border');
 }
 
 function deleteAllMarkersOnMap() {
