@@ -2716,13 +2716,13 @@ namespace AfterSchoolLibrary.Services
                     dc);
         }
 
-        public static List<SearchDirectoryResponse> SearchDirectoryAccounts(int hostAccountId, string search, string neighborhoods, string grades, 
+        public static List<SearchDirectoryResponse> SearchDirectoryAccounts(int hostAccountId, string search, string enroll_today, string grades,
             string ages, string gender, string services, string timing, string pricing, string cost, string starting, string other, string specialNeeds, decimal distance, int PageNum, int PageSize,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             try
             {
-                var accountDataTable = Account.SearchVisitorAccountsByHostAccount(hostAccountId, search, neighborhoods, grades, ages, gender, services, timing, pricing, cost, starting, other, specialNeeds, distance, PageNum, PageSize, msgs: msgs);
+                var accountDataTable = Account.SearchVisitorAccountsByHostAccount(hostAccountId, search, enroll_today, grades, ages, gender, services, timing, pricing, cost, starting, other, specialNeeds, distance, PageNum, PageSize, msgs: msgs);
                                 
                 if (accountDataTable.IsNotEmpty() && accountDataTable.Rows.Any())
                 {
