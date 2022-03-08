@@ -4687,6 +4687,8 @@ namespace AfterSchoolLibrary.Services
                     {
                         if (parentAccount.IsNotEmpty())
                         {
+                            parentAccount.AddUser(studentUser, UserType.Student, studentUser, amsgs, adc);
+
                             // create student registrant record
                             studentRegistrant = parentAccount.CreateRegistrant(
                                 registrantOwner: studentUser,
