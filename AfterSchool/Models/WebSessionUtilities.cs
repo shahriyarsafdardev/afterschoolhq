@@ -91,7 +91,7 @@ namespace AfterSchool.Models
             //..actor	action		    Object		            ObjectType	        IndirectObjectId
             //..Bharat  Navigated to    FIRST SAMUEL CHURCH(W)  DirectoryAccount   ISYP
 
-            string actorName = (actor.IsNotEmpty() ? actor.FullName : "Someone");
+            string actorName = (actor.IsNotEmpty() ? actor.DisplayName : "Someone");
 
             var actionStringDict = AfterSchoolLibrary.Helpers.WebSessionHelper.GetActionString(objectType, actorName, actionType, objectText, indirectObjectType, indirectObjectText);
 
@@ -131,6 +131,38 @@ namespace AfterSchool.Models
             action.CreatedBy = actor?.ID.Value;
 
             msgs.AddRange(action.Save(dc));
+        }
+        
+        public static void LogRefundCompleted(this WebSession webSession, Account currentAccount, WebUser currentUser, WebSessionActionType webSessionActionType, string amount, Transaction transaction, SystemMessages msgs)
+        {
+            var activityId = ActivityPayment.LoadByTransactionIdByIsDeleted(transaction.ID.Value, false, msgs)?.FirstOrDefault()?.ParticipationObjectId.Value;
+            var activity = Activity.Load(activityId.Value, msgs);
+
+            webSession.LogActivity(
+                account: currentAccount,
+                actor: currentUser,
+                actionType: webSessionActionType,
+                objectType: ObjectType.Transaction,
+                objectId: transaction.ID.Value,
+                objectText: amount,
+                indirectObjectId: activity.ID.Value,
+                indirectObjectText: activity.Name,
+                indirectObjectType: ObjectType.Activity
+            );
+        }
+
+        public static void LogRefundRequestUpdate(this WebSession webSession, Account currentAccount,
+            WebUser currentUser, WebSessionActionType webSessionActionType, string amount, RefundRequest refundRequest,
+            SystemMessages msgs)
+        {
+            webSession.LogActivity(
+                account: currentAccount,
+                actor: currentUser,
+                actionType: webSessionActionType,
+                objectType: ObjectType.RefundRequest,
+                objectId: refundRequest.ID.Value,
+                objectText: amount
+            );
         }
     }
 }

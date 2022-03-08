@@ -364,7 +364,7 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-        public static Account LoadByIsAdminAccount(bool IsAdminAccount, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static Account LoadByIsAdminAccount(bool IsAdminAccount, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
@@ -1090,18 +1090,17 @@ namespace AfterSchoolLibrary.Models
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static DataTable SearchVisitorAccountsByHostAccount(int hostAccountId, string search, string neighborhoods, string grades, string ages, string gender,
+        public static DataTable SearchVisitorAccountsByHostAccount(int hostAccountId, string search, string enroll_today, string grades, string ages, string gender,
             string services, string timing, string pricing, string cost, string starting, string other, string specialNeeds, decimal distance, int PageNum, int PageSize,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             using (var connection = new Microsoft.Data.SqlClient.SqlConnection(Utilities.ConnectionString))
             {
-                var sql = Helpers.SearchQuery.LoadAccountSearchQuery(cost, starting, distance, PageNum, PageSize, hostAccountId > 0);            
+                var sql = Helpers.SearchQuery.LoadAccountSearchQuery(enroll_today, cost, starting, distance, PageNum, PageSize, hostAccountId > 0);            
 
                 var command = new Microsoft.Data.SqlClient.SqlCommand(sql, connection);
                 command.Parameters.AddWithValue("@AccountId", hostAccountId <= 0 ? Convert.DBNull : hostAccountId);
                 command.Parameters.AddWithValue("@SearchTerm", search.IsNotBlank() ? $"\"*{search}*\"" : $"\"\"");
-                command.Parameters.AddWithValue("@Neighborhood", neighborhoods.IsNotEmpty() ? neighborhoods : Convert.DBNull);
                 command.Parameters.AddWithValue("@Grades", grades.IsNotEmpty() ? grades : Convert.DBNull);
                 command.Parameters.AddWithValue("@Age", ages.IsNotEmpty() ? ages : Convert.DBNull);
                 command.Parameters.AddWithValue("@Gender", gender.IsNotEmpty() ? gender : Convert.DBNull);

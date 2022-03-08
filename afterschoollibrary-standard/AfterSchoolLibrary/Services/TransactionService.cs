@@ -604,7 +604,7 @@ namespace AfterSchoolLibrary.Services
             if (msgs.HasNoErrors())
                 Helpers.EmailHelper.SendRefundRequestToProvider(request, loggedInUser, msgs, dc);
 
-            return null;
+            return request;
         }
 
         public static Transaction Refund(this Transaction transaction, decimal refundAmount, bool allowFullAmountRefund, decimal? convenienceFeeAmount, decimal? paymentTypeFeeAmount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
