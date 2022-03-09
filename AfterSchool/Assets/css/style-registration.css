@@ -103,13 +103,24 @@ body.registration {
 
 .activity-title {
     font-size: 30px;
-    letter-spacing: 1.78px;
+    letter-spacing: normal;
+    font-weight: 500;
+    text-transform: uppercase
 }
 
 .reg-header-headline {
     font-size: 22px;
     margin-top: 20px;
+    font-weight:300
 }
+
+.activity-account-name {
+    color: #f2f2f5;
+    font-size: 14px;
+}
+    .activity-account-name:hover, .activity-account-name:active, .activity-account-name:focus {
+        color: #f2f2f5;
+    }
 
 .filter-bar {
     background: #fff;
@@ -583,4 +594,33 @@ svg {
 }
 svg path, svg polygon{
     fill:white
+}
+.reg-icon-container svg {
+    margin-right: 5px;
+}
+
+@media (max-width:760px) {
+    .activity-title{
+        text-align:center;
+    }
+    .activity-account-name {
+        position: relative;
+        top: 15px;
+    }
+    svg {
+        width: 22px;
+        height: 22px;
+    }
+    .reg-header{
+        padding:20px 20px
+    }
+    .reg-icon-container {
+        display: table;
+    }
+    .reg-icon-container div {
+        display: table-footer-group;
+    }
+    .reg-icon-container p {
+        display: flex;
+    }
 }

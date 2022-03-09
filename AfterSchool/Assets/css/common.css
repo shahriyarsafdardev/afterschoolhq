@@ -1771,8 +1771,10 @@
     margin-right: 5px;
 }
 
-.icon-span{
-    margin-right:35px;
+.icon-span {
+    margin-right: 35px;
+    white-space: nowrap;
+    font-size: 14px;
 }
 
 .btn-view-all {

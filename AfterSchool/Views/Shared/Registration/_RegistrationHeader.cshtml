@@ -112,7 +112,12 @@
             }
 
         <div class="col-lg-@midColSpan col-md-6 col-sm-12">
-
+            @if (Model.Account.Name != Model.Title && Model.AccountProfile?.Title != Model.Title)
+            {
+                <a href="/@Model.Account.Name" class="text-medium-small notranslate activity-account-name">
+                    @Model.Account.Name
+                </a>
+            }
 
             <h1 class="activity-title notranslate">
                 <span>@Html.Raw(Model.Title)</span>
@@ -126,76 +131,70 @@
                 }
             </h1>
 
-            @if (Model.Account.Name != Model.Title && Model.AccountProfile?.Title != Model.Title)
-            {
-                <p class="text-medium-small notranslate">
-                    @Model.Account.Name
-                </p>
-            }
 
-
-            <div>
-                @if (Model.NumberOfHoursEnrolled > 0)
-                {
-                <span class="icon-span icon-span-mobile">
-                    <svg xmlns="http://www.w3.org/2000/svg" id="Outline" viewBox="0 0 24 24" width="512" height="512"><path d="M12,0A12,12,0,1,0,24,12,12.013,12.013,0,0,0,12,0Zm0,22A10,10,0,1,1,22,12,10.011,10.011,0,0,1,12,22Z" /><path d="M12,6a1,1,0,0,0-1,1v4.325L7.629,13.437a1,1,0,0,0,1.062,1.7l3.84-2.4A1,1,0,0,0,13,11.879V7A1,1,0,0,0,12,6Z" /></svg>
-                    @Model.NumberOfHoursEnrolledFormatted hrs of education provided
-                </span>
-                }
-                @if (Model.NumberOfStudentsServed > 0)
-                {
-                    <span class="icon-span icon-span-mobile">
-                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve" width="512" height="512">
+            <div class="reg-icon-container">
+                <div>
+                    @if (Model.NumberOfHoursEnrolled > 0)
+                    {
+                        <span class="icon-span icon-span-mobile" title="@Model.NumberOfHoursEnrolledFormatted hrs of education provided">
+                            <svg xmlns="http://www.w3.org/2000/svg" id="Outline" viewBox="0 0 24 24" width="512" height="512"><path d="M12,0A12,12,0,1,0,24,12,12.013,12.013,0,0,0,12,0Zm0,22A10,10,0,1,1,22,12,10.011,10.011,0,0,1,12,22Z" /><path d="M12,6a1,1,0,0,0-1,1v4.325L7.629,13.437a1,1,0,0,0,1.062,1.7l3.84-2.4A1,1,0,0,0,13,11.879V7A1,1,0,0,0,12,6Z" /></svg>
+                            @Model.NumberOfHoursEnrolledFormatted hrs of education provided
+                        </span>
+                    }
+                    @if (Model.NumberOfStudentsServed > 0)
+                    {
+                        <span class="icon-span icon-span-mobile" title="@Model.NumberOfStudentsServedFormatted students served">
+                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve" width="512" height="512">
                             <path d="M470.549,111.573L313.237,36.629c-34.628-20.684-77.728-21.051-112.704-0.96L41.451,111.573  c-0.597,0.299-1.216,0.619-1.792,0.96c-37.752,21.586-50.858,69.689-29.272,107.441c7.317,12.798,18.08,23.284,31.064,30.266  l43.883,20.907V375.68c0.026,46.743,30.441,88.039,75.072,101.931c31.059,8.985,63.264,13.384,95.595,13.056  c32.326,0.362,64.531-4,95.595-12.949c44.631-13.891,75.046-55.188,75.072-101.931V271.104l42.667-20.395v175.957  c0,11.782,9.551,21.333,21.333,21.333c11.782,0,21.333-9.551,21.333-21.333v-256C512.143,145.615,492.363,122.473,470.549,111.573z   M384,375.787c0.011,27.959-18.129,52.69-44.8,61.077c-27.046,7.728-55.073,11.479-83.2,11.136  c-28.127,0.343-56.154-3.408-83.2-11.136c-26.671-8.388-44.811-33.118-44.8-61.077v-84.309l70.763,33.707  c17.46,10.368,37.401,15.816,57.707,15.765c19.328,0.137,38.331-4.98,54.976-14.805L384,291.477V375.787z M452.267,211.733  l-160.896,76.8c-22.434,13.063-50.241,12.693-72.32-0.96l-157.419-74.88c-17.547-9.462-24.101-31.357-14.639-48.903  c3.2-5.934,7.998-10.853,13.85-14.201l159.893-76.373c22.441-13.034,50.233-12.665,72.32,0.96l157.312,74.944  c11.569,6.424,18.807,18.555,18.965,31.787C469.354,193.441,462.9,205.097,452.267,211.733L452.267,211.733z" />
-                        </svg>
-                        @Model.NumberOfStudentsServedFormatted students served
-                    </span>
-                }
-                @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsOpenDuringCovid)
+                            </svg>
+                            @Model.NumberOfStudentsServedFormatted students served
+                        </span>
+                    }
+                    @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsOpenDuringCovid)
+                    {
+                        <span class="icon-span icon-span-mobile" title="Open During COVID">
+                            <svg xmlns="http://www.w3.org/2000/svg" id="Outline" viewBox="0 0 24 24" width="512" height="512"><path d="M12,0A12,12,0,1,0,24,12,12.013,12.013,0,0,0,12,0Zm0,22A10,10,0,1,1,22,12,10.011,10.011,0,0,1,12,22Z" /><path d="M12,6a1,1,0,0,0-1,1v4.325L7.629,13.437a1,1,0,0,0,1.062,1.7l3.84-2.4A1,1,0,0,0,13,11.879V7A1,1,0,0,0,12,6Z" /></svg>
+                            Open During COVID
+                        </span>
+                    }
+                    @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsVirtualProgram)
+                    {
+                        <span class="icon-span icon-span-mobile" title="Virtual">
+                            <icon class="s7-monitor registration-page-icon"></icon>
+                            Virtual
+                        </span>
+                    }
+                    @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsELearningCenter)
+                    {
+                        <span class="icon-span icon-span-mobile" title="E-Learning Center">
+                            <svg xmlns="http://www.w3.org/2000/svg" id="Outline" viewBox="0 0 24 24" width="512" height="512"><path d="M12,0A12,12,0,1,0,24,12,12.013,12.013,0,0,0,12,0Zm0,22A10,10,0,1,1,22,12,10.011,10.011,0,0,1,12,22Z" /><path d="M12,6a1,1,0,0,0-1,1v4.325L7.629,13.437a1,1,0,0,0,1.062,1.7l3.84-2.4A1,1,0,0,0,13,11.879V7A1,1,0,0,0,12,6Z" /></svg>
+                            E-Learning Center
+                        </span>
+                    }
+                    @if (Model.Followers > 0)
+                    {
+                        <span class="icon-span icon-span-mobile" title=" @Model.FollowersFormatted follower@(Model.Followers == 1 ? "" : "s")">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512"><g id="_01_align_center" data-name="01 align center"><path d="M21,24H19V18.957A2.96,2.96,0,0,0,16.043,16H7.957A2.96,2.96,0,0,0,5,18.957V24H3V18.957A4.963,4.963,0,0,1,7.957,14h8.086A4.963,4.963,0,0,1,21,18.957Z" /><path d="M12,12a6,6,0,1,1,6-6A6.006,6.006,0,0,1,12,12ZM12,2a4,4,0,1,0,4,4A4,4,0,0,0,12,2Z" /></g></svg>
+                            @Model.FollowersFormatted follower@(Model.Followers == 1 ? "" : "s")
+                        </span>
+                    }
+                </div>
+
+
+                @if (Model.Headline.IsNotEmpty())
                 {
-                    <span class="icon-span icon-span-mobile">
-                        <svg xmlns="http://www.w3.org/2000/svg" id="Outline" viewBox="0 0 24 24" width="512" height="512"><path d="M12,0A12,12,0,1,0,24,12,12.013,12.013,0,0,0,12,0Zm0,22A10,10,0,1,1,22,12,10.011,10.011,0,0,1,12,22Z" /><path d="M12,6a1,1,0,0,0-1,1v4.325L7.629,13.437a1,1,0,0,0,1.062,1.7l3.84-2.4A1,1,0,0,0,13,11.879V7A1,1,0,0,0,12,6Z" /></svg>
-                        Open During COVID
-                    </span>
-                }
-                @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsVirtualProgram)
-                {
-                    <span class="icon-span icon-span-mobile">
-                        <icon class="s7-monitor registration-page-icon"></icon>
-                        Virtual
-                    </span>
-                }
-                @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsELearningCenter)
-                {
-                    <span class="icon-span icon-span-mobile">
-                        <svg xmlns="http://www.w3.org/2000/svg" id="Outline" viewBox="0 0 24 24" width="512" height="512"><path d="M12,0A12,12,0,1,0,24,12,12.013,12.013,0,0,0,12,0Zm0,22A10,10,0,1,1,22,12,10.011,10.011,0,0,1,12,22Z" /><path d="M12,6a1,1,0,0,0-1,1v4.325L7.629,13.437a1,1,0,0,0,1.062,1.7l3.84-2.4A1,1,0,0,0,13,11.879V7A1,1,0,0,0,12,6Z" /></svg>
-                        E-Learning Center
-                    </span>
-                }
-                @if (Model.Followers > 0)
-                {
-                    <span class="icon-span icon-span-mobile">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512"><g id="_01_align_center" data-name="01 align center"><path d="M21,24H19V18.957A2.96,2.96,0,0,0,16.043,16H7.957A2.96,2.96,0,0,0,5,18.957V24H3V18.957A4.963,4.963,0,0,1,7.957,14h8.086A4.963,4.963,0,0,1,21,18.957Z" /><path d="M12,12a6,6,0,1,1,6-6A6.006,6.006,0,0,1,12,12ZM12,2a4,4,0,1,0,4,4A4,4,0,0,0,12,2Z" /></g></svg>
-                        @Model.FollowersFormatted follower@(Model.Followers == 1 ? "" : "s")
-                    </span>
+                    <p class="reg-header-headline">
+                        @Model.Headline
+                    </p>
                 }
             </div>
-
-
-            @if (Model.Headline.IsNotEmpty())
-            {
-                <p class="reg-header-headline">
-                    @Model.Headline
-                </p>
-            }
-
         </div>
 
             @if (!hideButtons)
             {
 
                 <div class="col-lg-3 col-md-6 col-sm-12">
-                    <div class="padding-v-20 text-center">
+                    <div class="padding-v-20 text-center" id="activityHeaderbtns">
                         <div>@RenderViewActivitiesButton(isInEditMode)</div>
                         <div style="margin-top:10px">
                             @if (!Model.Account.IsClaimed)
@@ -204,17 +203,17 @@
                                     <i class="icon icon-left s7-door-lock"></i>
                                 </span>
                             }
-                            <span class="icon-span @(!isFollowing ? "" : "hide")" id="btn-follow" style="cursor:pointer" onclick="follow()">
+                            <span class="icon-span @(!isFollowing ? "" : "hide")" id="btn-follow" style="cursor:pointer" onclick="follow()" title="Follow">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512"><g id="_01_align_center" data-name="01 align center"><path d="M9,12A6,6,0,1,0,3,6,6.006,6.006,0,0,0,9,12ZM9,2A4,4,0,1,1,5,6,4,4,0,0,1,9,2Z" /><polygon points="21 10 21 7 19 7 19 10 16 10 16 12 19 12 19 15 21 15 21 12 24 12 24 10 21 10" /><path d="M13.043,14H4.957A4.963,4.963,0,0,0,0,18.957V24H2V18.957A2.96,2.96,0,0,1,4.957,16h8.086A2.96,2.96,0,0,1,16,18.957V24h2V18.957A4.963,4.963,0,0,0,13.043,14Z" /></g></svg>
                             </span>
-                            <span class="icon-span @(!isFollowing ? "hide" : "")" id="btn-unfollow" style="cursor:pointer" onclick="unfollow()">
+                            <span class="icon-span @(!isFollowing ? "hide" : "")" id="btn-unfollow" style="cursor:pointer" onclick="unfollow()" title="Unfollow">
                                 <svg id="Layer_1" height="512" viewBox="0 0 24 24" width="512" xmlns="http://www.w3.org/2000/svg" data-name="Layer 1"><path d="m24 12h-8v-2h8zm-9.026-6a6 6 0 1 0 -6 6 6.006 6.006 0 0 0 6-6zm-2 0a4 4 0 1 1 -4-4 4 4 0 0 1 4 4zm5.026 13a5.006 5.006 0 0 0 -5-5h-8a5.006 5.006 0 0 0 -5 5v5h2v-5a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v5h2z" /></svg>
                             </span>
-                            <span class="icon-span btn-share" style="cursor:pointer">
+                            <span class="icon-span btn-share" style="cursor:pointer" title="Share">
                                 <svg xmlns="http://www.w3.org/2000/svg" id="Outline" viewBox="0 0 24 24" width="512" height="512"><path d="M19.333,14.667a4.66,4.66,0,0,0-3.839,2.024L8.985,13.752a4.574,4.574,0,0,0,.005-3.488l6.5-2.954a4.66,4.66,0,1,0-.827-2.643,4.633,4.633,0,0,0,.08.786L7.833,8.593a4.668,4.668,0,1,0-.015,6.827l6.928,3.128a4.736,4.736,0,0,0-.079.785,4.667,4.667,0,1,0,4.666-4.666ZM19.333,2a2.667,2.667,0,1,1-2.666,2.667A2.669,2.669,0,0,1,19.333,2ZM4.667,14.667A2.667,2.667,0,1,1,7.333,12,2.67,2.67,0,0,1,4.667,14.667ZM19.333,22A2.667,2.667,0,1,1,22,19.333,2.669,2.669,0,0,1,19.333,22Z" /></svg>
                             </span>
                             @RenderMakeAPaymentButton(currentUser)
-                            <span class="icon-span" style="cursor:pointer" onclick="@(Model.Account.ContactFormId.HasValue ? "location.href='"+@Model.Account.ContactUrl+"'" : "resetContactProviderForm()")">
+                            <span class="icon-span" title="Contact" style="cursor:pointer" onclick="@(Model.Account.ContactFormId.HasValue ? "location.href='"+@Model.Account.ContactUrl+"'" : "resetContactProviderForm()")">
                                 <svg xmlns="http://www.w3.org/2000/svg" id="Outline" viewBox="0 0 24 24" width="512" height="512"><path d="M19,1H5A5.006,5.006,0,0,0,0,6V18a5.006,5.006,0,0,0,5,5H19a5.006,5.006,0,0,0,5-5V6A5.006,5.006,0,0,0,19,1ZM5,3H19a3,3,0,0,1,2.78,1.887l-7.658,7.659a3.007,3.007,0,0,1-4.244,0L2.22,4.887A3,3,0,0,1,5,3ZM19,21H5a3,3,0,0,1-3-3V7.5L8.464,13.96a5.007,5.007,0,0,0,7.072,0L22,7.5V18A3,3,0,0,1,19,21Z"/></svg>
                             </span>
                         </div>
@@ -543,13 +542,13 @@
                 payUrl = Url.Action("confirm", "signup", new { id = currentUser.Uid, returnurl = payUrl });
             }
 
-            <span class="icon-span" style="cursor:pointer" onclick="location.href='@payUrl'">
+            <span class="icon-span" style="cursor:pointer" onclick="location.href='@payUrl'" title="Make payment">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512"><g id="_01_align_center" data-name="01 align center"><circle cx="5.5" cy="15.5" r="1.5"/><path d="M21,3H3A3,3,0,0,0,0,6V21H24V6A3,3,0,0,0,21,3ZM3,5H21a1,1,0,0,1,1,1V8H2V6A1,1,0,0,1,3,5ZM2,19V10H22v9Z"/></g></svg>
             </span>
         }
         else
         {
-            <span class="icon-span" style="cursor:pointer" onclick="setLoginRedirect('@Model.Account.PayUrl', true)">
+            <span class="icon-span" style="cursor:pointer" onclick="setLoginRedirect('@Model.Account.PayUrl', true)" title="Make payment">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512"><g id="_01_align_center" data-name="01 align center"><circle cx="5.5" cy="15.5" r="1.5"/><path d="M21,3H3A3,3,0,0,0,0,6V21H24V6A3,3,0,0,0,21,3ZM3,5H21a1,1,0,0,1,1,1V8H2V6A1,1,0,0,1,3,5ZM2,19V10H22v9Z"/></g></svg>
             </span>
         }
@@ -558,7 +557,7 @@
     {
         var redirectUrl = Url.Action("paymentsoptions", "account", new { area = "org", isfullscreen = 1, source = "profile" });
 
-        <span class="icon-span" style="cursor:pointer" onclick="location.href='@Url.Action("switch", "logout", new { id = Model.Account.Uid, redirectUrl = redirectUrl })'">
+        <span class="icon-span" style="cursor:pointer" onclick="location.href='@Url.Action("switch", "logout", new { id = Model.Account.Uid, redirectUrl = redirectUrl })'" title="Make payment">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512"><g id="_01_align_center" data-name="01 align center"><circle cx="5.5" cy="15.5" r="1.5"/><path d="M21,3H3A3,3,0,0,0,0,6V21H24V6A3,3,0,0,0,21,3ZM3,5H21a1,1,0,0,1,1,1V8H2V6A1,1,0,0,1,3,5ZM2,19V10H22v9Z"/></g></svg>
         </span>
     }
