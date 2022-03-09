@@ -607,7 +607,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 EmailHelper.SendEmail(
                     AfterSchoolLibrary.Helpers.Email.AppCustomersEmailAddress,
                     $"AHQ Profile Completed - {account.Name}",
-                    $"<p>Organization: {account.Name}<br />Name: {currentUser.FirstName} {currentUser.LastName}<br />Email: {currentUser.Email}<br />Profile Link: {account.HomePageUrl}<br />How did you hear about us: {currentUser.HowHearAboutUs} <br />Location: {profile.GetLocation(msgs) ?? account.GetDefaultLocation(msgs)}</p>",
+                    $"<p>Organization: {account.Name}<br />Main Contact Name: {currentUser.FirstName} {currentUser.LastName}<br />Email: {currentUser.Email}<br />Profile Link: {account.HomePageUrl}<br />How did you hear about us: {currentUser.HowHearAboutUs} <br />Location: {profile.GetLocation(msgs) ?? account.GetDefaultLocation(msgs)}</p>",
                     true);
 
                 var user = account.GetAccountOwner(msgs);
