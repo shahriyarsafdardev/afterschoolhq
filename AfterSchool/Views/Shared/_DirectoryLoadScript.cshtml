@@ -55,7 +55,11 @@
                 <div class="clearfix"></div>
                 <div class="text-wrap">
                     <h4 class="margin-bottom-zero font-weight-500">
-                        <%= searchResult.Location %>
+                        <% if(searchResult.Location) { %>
+                            <%= searchResult.Location %>
+                        <% } else { %>
+                            <br />
+                        <% } %>
                     </h4>
                 </div>
                 <div class="clearfix"></div>
@@ -73,15 +77,13 @@
                 </div>
                 <div class="clearfix"></div>
                 <div class="text-wrap">
-                    <% if(searchResult.CostLow && searchResult.CostHigh) { %>
                     <h4 class="margin-top-0 font-weight-500">
+                        <% if(searchResult.CostLow && searchResult.CostHigh) { %>
                         Cost: $<%= searchResult.CostLow %> - $<%= searchResult.CostHigh %>
+                        <% } else { %>
+                            <br />
+                        <% } %>
                     </h4>
-                    <% } else { %>
-                    <h4 class="margin-top-0">
-                        <br />
-                    </h4>
-                    <% } %>
                 </div>
 
                 <div class="clearfix"></div>
