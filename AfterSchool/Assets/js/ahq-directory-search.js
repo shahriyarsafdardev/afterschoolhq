@@ -5,7 +5,7 @@
     $("#search-container").scroll(function () {
         if (isReachedScrollEnd == false &&
             isMobileFilterWindowOpened == false &&
-            ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight)) {
+            (($(this).scrollTop() + $(this).innerHeight() + 1) >= $(this)[0].scrollHeight)) { //+1 to adjust height because of contact us button at bottom
             loadFiltersAndInitiateSearch();
         }
     });
