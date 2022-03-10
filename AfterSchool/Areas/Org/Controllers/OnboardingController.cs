@@ -595,6 +595,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var account = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
+            var hostAccounts = account.GetHostAccounts();
+            var hostAccountString = string.Join(",", hostAccounts?.Select(hostAccount => hostAccount.Name) ?? Array.Empty<string>());
 
             HandleTempMessages(msgs);
 
@@ -607,7 +609,14 @@ namespace AfterSchool.Areas.Org.Controllers
                 EmailHelper.SendEmail(
                     AfterSchoolLibrary.Helpers.Email.AppCustomersEmailAddress,
                     $"AHQ Profile Completed - {account.Name}",
-                    $"<p>Organization: {account.Name}<br />Main Contact Name: {currentUser.FirstName} {currentUser.LastName}<br />Email: {currentUser.Email}<br />Profile Link: {account.HomePageUrl}<br />How did you hear about us: {currentUser.HowHearAboutUs} <br />Location: {profile.GetLocation(msgs) ?? account.GetDefaultLocation(msgs)}</p>",
+                    $"<p>Organization: {account.Name}<br />" +
+                    $"Main Contact Name: {currentUser.FirstName} {currentUser.LastName}<br />" +
+                    $"Email: {currentUser.Email}<br />" +
+                    $"Profile Link: {account.HomePageUrl}<br />" +
+                    $"How did you hear about us: {currentUser.HowHearAboutUs} <br />" +
+                    $"Location: {profile.GetLocation(msgs) ?? account.GetDefaultLocation(msgs)}<br />" +
+                    $"Host Account(s): {hostAccountString}" +
+                    $"</p>",
                     true);
 
                 var user = account.GetAccountOwner(msgs);
