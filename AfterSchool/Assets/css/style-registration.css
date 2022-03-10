@@ -566,3 +566,19 @@ body.registration {
     width: 80px;
     text-align: center;
 }
+
+.language-select {
+    top: 10px;
+    align-content: end;
+    display: flex;
+    margin-right: 15px;
+    border-radius: 5px;
+}
+.flex-div {
+    display: flex !important;
+    align-items: center;
+}
+
+.language-select .ddlOptions {
+    left: -85px !important;
+}
