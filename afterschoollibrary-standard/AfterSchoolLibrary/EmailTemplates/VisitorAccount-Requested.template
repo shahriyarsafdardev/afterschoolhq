@@ -11,7 +11,7 @@
     Please <a href="@Model.LoginLink">login to your account</a> in order to approve or deny this request.
   </p>
   <p>
-    Tnanks!, <br />
+    Thanks!, <br />
     @Model.ProductName
   </p>
 </div>
