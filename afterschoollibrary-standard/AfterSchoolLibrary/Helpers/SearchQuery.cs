@@ -26,6 +26,8 @@ namespace AfterSchoolLibrary.Helpers
                     a.Uid as AccountUid, 
                     a.Name as AccountName,                    
                     a.UniqueName as AccountUniqueName,
+                    ap.CostLow, 
+					ap.CostHigh,
                     ap.IsOpenDuringCovid,
 					ap.IsELearningCenter,
                     ap.IsVirtualProgram,
@@ -176,7 +178,7 @@ namespace AfterSchoolLibrary.Helpers
 			FROM (
 				--accounts with distance radius of 5 miles
 				SELECT DISTINCT 
-					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+					AccountId, AccountUid, AccountName, AccountUniqueName, CostLow, CostHigh, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
 					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, TotalDifference, 1 as Priority
 				FROM #temp_accounts_1 
 				WHERE 
@@ -186,7 +188,7 @@ namespace AfterSchoolLibrary.Helpers
 
 				--accounts with distance radius of 5-10 miles
 				SELECT DISTINCT 
-					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+					AccountId, AccountUid, AccountName, AccountUniqueName, CostLow, CostHigh, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
 					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, TotalDifference, 2 as Priority
 				FROM #temp_accounts_1 
 				WHERE 
@@ -196,7 +198,7 @@ namespace AfterSchoolLibrary.Helpers
 
 				--accounts with distance radius of 10-25 miles
 				SELECT DISTINCT 
-					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+					AccountId, AccountUid, AccountName, AccountUniqueName, CostLow, CostHigh, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
 					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, TotalDifference, 3 as Priority
 				FROM #temp_accounts_1 
 				WHERE 
@@ -206,7 +208,7 @@ namespace AfterSchoolLibrary.Helpers
 
 				--all other accounts
 				SELECT DISTINCT 
-					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+					AccountId, AccountUid, AccountName, AccountUniqueName, CostLow, CostHigh, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
 					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, TotalDifference, 4 as Priority
 				FROM #temp_accounts_1 
 				WHERE 
@@ -214,7 +216,7 @@ namespace AfterSchoolLibrary.Helpers
 			) as filteredData							
 
 			SELECT 
-				AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+				AccountId, AccountUid, AccountName, AccountUniqueName, CostLow, CostHigh, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
 				IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, TotalDifference, Priority
 			FROM #temp_accounts_2
 			ORDER BY Priority asc, TotalDifference asc
@@ -236,7 +238,7 @@ namespace AfterSchoolLibrary.Helpers
 								SELECT *
 								INTO #temp_accounts_2
 								FROM (SELECT DISTINCT 
-												AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+												AccountId, AccountUid, AccountName, AccountUniqueName, CostLow, CostHigh, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
 												IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 1 as Priority
 												From #temp_accounts_1 
 										Where IsAccountNowEnrolling = 1 AND HeaderImage is not null AND (Headline is not null AND Headline != '')
@@ -244,7 +246,7 @@ namespace AfterSchoolLibrary.Helpers
 										) as filteredData
 									
 								SELECT DISTINCT
-									AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+									AccountId, AccountUid, AccountName, AccountUniqueName, CostLow, CostHigh, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
 									IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, Priority
 								FROM #temp_accounts_2
 								ORDER BY Priority asc
@@ -258,7 +260,7 @@ namespace AfterSchoolLibrary.Helpers
 							INTO #temp_accounts_3
 							FROM(
 								 SELECT DISTINCT 
-											AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+											AccountId, AccountUid, AccountName, AccountUniqueName, CostLow, CostHigh, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
 											IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 1 as Priority
 											From #temp_accounts_1 
 									Where IsAccountNowEnrolling = 1 AND HeaderImage is not null AND (Headline is not null AND Headline != '')		
@@ -266,7 +268,7 @@ namespace AfterSchoolLibrary.Helpers
 								 UNION ALL				
 								 
 								 SELECT DISTINCT 
-											AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+											AccountId, AccountUid, AccountName, AccountUniqueName, CostLow, CostHigh, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
 											IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 2 as Priority
 											From #temp_accounts_1 
 									Where IsAccountNowEnrolling = 1 AND HeaderImage is not null AND (Headline is null or Headline = '')	
@@ -274,7 +276,7 @@ namespace AfterSchoolLibrary.Helpers
 									) as filteredData
 
                           		SELECT DISTINCT
-									AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+									AccountId, AccountUid, AccountName, AccountUniqueName, CostLow, CostHigh, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
 									IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, Priority
 								FROM #temp_accounts_3
 								ORDER BY Priority asc
@@ -287,13 +289,13 @@ namespace AfterSchoolLibrary.Helpers
 							INTO #temp_accounts_4
 							FROM(
 								SELECT DISTINCT 
-													AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+													AccountId, AccountUid, AccountName, AccountUniqueName, CostLow, CostHigh, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
 													IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 1 as Priority
 													From #temp_accounts_1 
 								   Where IsAccountNowEnrolling = 1 AND HeaderImage is not null AND (Headline is not null AND Headline != '')	
 								 UNION ALL		
 								 SELECT DISTINCT 
-											AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+											AccountId, AccountUid, AccountName, AccountUniqueName,  CostLow, CostHigh, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
 											IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 2 as Priority
 											From #temp_accounts_1 
 									Where IsAccountNowEnrolling = 1 AND HeaderImage is null AND (Headline is not null AND Headline != '')								
@@ -302,7 +304,7 @@ namespace AfterSchoolLibrary.Helpers
 							  ) as filteredData
 
 							   SELECT DISTINCT
-									AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+									AccountId, AccountUid, AccountName, AccountUniqueName, CostLow, CostHigh, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
 									IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, Priority
 								FROM #temp_accounts_4
 								ORDER BY Priority asc
@@ -314,7 +316,7 @@ namespace AfterSchoolLibrary.Helpers
 								SELECT *
 								INTO #temp_accounts_5
 								FROM(SELECT DISTINCT 
-												AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+												AccountId, AccountUid, AccountName, AccountUniqueName, CostLow, CostHigh, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
 												IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 1 as Priority
 												From #temp_accounts_1 
 										Where IsAccountNowEnrolling = 1 
@@ -323,7 +325,7 @@ namespace AfterSchoolLibrary.Helpers
 										) as filteredData
 
 								SELECT DISTINCT
-									AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+									AccountId, AccountUid, AccountName, AccountUniqueName, CostLow, CostHigh, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
 									IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, Priority
 								FROM #temp_accounts_5
 								ORDER BY Priority asc
@@ -336,7 +338,7 @@ namespace AfterSchoolLibrary.Helpers
 					SELECT * INTO #temp_accounts_6 FROM
 				    (  --accounts with current activities or now enrolling and has headerimage and has headline
 					SELECT DISTINCT 
-						AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+						AccountId, AccountUid, AccountName, AccountUniqueName, CostLow, CostHigh, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
 						IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 1 as Priority
 					FROM #temp_accounts_1 
 					WHERE 
@@ -345,7 +347,7 @@ namespace AfterSchoolLibrary.Helpers
 
 					-- accounts with now enrolling and has headerimage but not headline
 					SELECT DISTINCT 
-						AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+						AccountId, AccountUid, AccountName, AccountUniqueName, CostLow, CostHigh, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
 						IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 2 as Priority
 					FROM #temp_accounts_1 
 					WHERE 
@@ -354,7 +356,7 @@ namespace AfterSchoolLibrary.Helpers
 
 					-- accounts  with now enrolling and has no headerimage but headline
 					SELECT DISTINCT 
-						AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+						AccountId, AccountUid, AccountName, AccountUniqueName, CostLow, CostHigh, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
 						IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 3 as Priority
 					FROM #temp_accounts_1 
 					WHERE 
@@ -364,7 +366,7 @@ namespace AfterSchoolLibrary.Helpers
 
 					-- accounts  with now enrolling but without headerimage and headline
 					SELECT DISTINCT 
-						AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+						AccountId, AccountUid, AccountName, AccountUniqueName, CostLow, CostHigh, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
 						IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 4 as Priority
 					FROM #temp_accounts_1 
 					WHERE 
@@ -375,7 +377,7 @@ namespace AfterSchoolLibrary.Helpers
 
 					-- all other accounts
 					SELECT DISTINCT 
-						AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, 0 as IsAccountNowEnrolling, IsELearningCenter, 
+						AccountId, AccountUid, AccountName, AccountUniqueName, CostLow, CostHigh, IsOpenDuringCovid, 0 as IsAccountNowEnrolling, IsELearningCenter, 
 						IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 5 as Priority
 					FROM #temp_accounts_1
 					WHERE
@@ -387,7 +389,7 @@ namespace AfterSchoolLibrary.Helpers
 				 ) as Filterdata
 
 				 SELECT DISTINCT
-								AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+								AccountId, AccountUid, AccountName, AccountUniqueName, CostLow, CostHigh, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
 								IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, Priority
 							FROM #temp_accounts_6
 							ORDER BY Priority asc
