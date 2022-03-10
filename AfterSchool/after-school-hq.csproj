@@ -776,7 +776,7 @@
     <Content Include="Assets\css\survey.css" />
     <Content Include="Assets\js\ahq-directory-map.js" />
     <Content Include="Assets\js\ahq-directory-search.js" />
-    <Content Include="Assets\img\alert-2.svg"/>
+    <Content Include="Assets\img\alert-2.svg" />
     <Content Include="Assets\js\ahq-profiles.js" />
     <Content Include="Assets\js\underscore-min.js" />
     <Content Include="Assets\lib\customTableSorter.js" />
@@ -804,7 +804,7 @@
     <Content Include="img\billy2.png" />
     <Content Include="img\darye.png" />
     <Content Include="img\fee.png" />
-    <Content Include="img\filter.svg"/>
+    <Content Include="img\filter.svg" />
     <Content Include="img\frank-mckenna-LhOjrOlcLx4-unsplash.jpg" />
     <Content Include="img\gabriel-baranski-vGICUyYW2CE-unsplash.jpg" />
     <Content Include="img\handshake-icon.png" />
@@ -845,6 +845,7 @@
     <Content Include="img\pencil-banner.jpg" />
     <Content Include="img\provider-icon.png" />
     <Content Include="img\red-icon-map.png" />
+    <Content Include="img\red-map-icon-large.png" />
     <Content Include="img\san.png" />
     <Content Include="img\Screen Shot 2020-08-25 at 2.36.03 PM-1.png" />
     <Content Include="img\Screen Shot 2020-08-25 at 2.36.03 PM.png" />
