@@ -114,7 +114,7 @@
         <div class="col-lg-@midColSpan col-md-6 col-sm-12">
             @if (Model.Account.Name != Model.Title && Model.AccountProfile?.Title != Model.Title)
             {
-                <a href="/@Model.Account.Name" class="text-medium-small notranslate activity-account-name">
+                <a href="@Model.Account.HomePageUrl" class="text-medium-small notranslate activity-account-name">
                     @Model.Account.Name
                 </a>
             }
@@ -196,7 +196,7 @@
                 <div class="col-lg-3 col-md-6 col-sm-12">
                     <div class="padding-v-20 text-center" id="activityHeaderbtns">
                         <div>@RenderViewActivitiesButton(isInEditMode)</div>
-                        <div style="margin-top:10px">
+                        <div style="margin-top:10px" class="icons-div">
                             @if (!Model.Account.IsClaimed)
                             {
                                 <span id="model-claim" class="icon-span" data-modal="modal-claim-profile" onclick="resetClaimForm()">

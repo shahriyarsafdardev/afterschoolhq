@@ -544,7 +544,7 @@ body.registration {
 
 @media screen and (max-width: 375px) {
     .participation-object-detail {
-        padding: 0px;
+        padding: 50px 10px;
     }
 
         .participation-object-detail > .panel {
@@ -553,10 +553,8 @@ body.registration {
         }
 
     .panel:first-of-type {
-        margin-left: -15px;
-        margin-right: -15px;
         margin-top: 0px;
-        margin-bottom: 0px;
+        margin-bottom: 10px;
     }
 }
 
@@ -597,6 +595,9 @@ svg path, svg polygon{
 }
 .reg-icon-container svg {
     margin-right: 5px;
+}
+.icons-div span.icon-span:last-child{
+    margin-right:0 !important;
 }
 
 @media (max-width:760px) {
