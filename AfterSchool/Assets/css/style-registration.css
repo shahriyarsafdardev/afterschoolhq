@@ -601,8 +601,8 @@ svg path, svg polygon{
 }
 
 .old-font-icons {
-    font-size: 20px;
-    top: 5px;
+    font-size: 17px;
+    top: 3px;
     position: relative;
     font-weight: bolder;
 }
@@ -610,6 +610,10 @@ svg path, svg polygon{
 @media (max-width:760px) {
     .activity-title{
         text-align:center;
+    }
+    .old-font-icons {
+        font-size: 20px;
+        top: 5px;
     }
     .activity-account-name {
         position: relative;
