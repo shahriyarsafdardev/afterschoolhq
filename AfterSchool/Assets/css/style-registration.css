@@ -600,6 +600,13 @@ svg path, svg polygon{
     margin-right:0 !important;
 }
 
+.old-font-icons {
+    font-size: 20px;
+    top: 5px;
+    position: relative;
+    font-weight: bolder;
+}
+
 @media (max-width:760px) {
     .activity-title{
         text-align:center;
