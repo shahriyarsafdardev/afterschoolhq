@@ -13,11 +13,11 @@
     }
 </style>
 
-<header class="visible-lg visible-md directory-header flex-div">
+<header class="visible-lg visible-md directory-header">
     <a href=@(website.IsNotEmpty() ? website : "")>
         <img src="@logoUrl" alt="AfterSchool HQ - Your home for afterschool experiences"/>
     </a>
-    <div class="language-select" style="background-color: @primaryColor">
+    <div class="language-select pull-right" style="background-color: @primaryColor">
         @Html.Partial("_GoogleTranslateDropDown")
     </div>
 </header>
