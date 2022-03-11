@@ -1,5 +1,4 @@
-﻿
-/* Registration Browse*/
+﻿/* Registration Browse*/
 
 body.registration {
     background-color: #f7f7f7;
@@ -19,9 +18,9 @@ body.registration {
     padding: 90px 20px;
     background: #00d7bb; /* Old browsers */
     background: -moz-linear-gradient(top, #00d7bb 0%, #00ae85 100%); /* FF3.6-15 */
-    background: -webkit-linear-gradient(top, #00d7bb 0%,#00ae85 100%); /* Chrome10-25,Safari5.1-6 */
-    background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url(/assets/img/student-hands.png); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00d7bb', endColorstr='#00ae85',GradientType=0 ); /* IE6-9 */
+    background: -webkit-linear-gradient(top, #00d7bb 0%, #00ae85 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url(/assets/img/student-hands.png); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#00d7bb', endColorstr='#00ae85', GradientType=0); /* IE6-9 */
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
@@ -44,13 +43,13 @@ body.registration {
     margin: 5px auto;
 }
 
-    .logo-wrapper > img {
-        display: block;
-        margin: auto;
-        width: 100%;
-        object-fit: contain;
-        max-height: 200px;
-    }
+.logo-wrapper > img {
+    display: block;
+    margin: auto;
+    width: 100%;
+    object-fit: contain;
+    max-height: 200px;
+}
 
 .reg-header-overlay {
 }
@@ -85,6 +84,7 @@ body.registration {
         margin-top: 10px;
     }
 }
+
 .reg-header .dropdown-menu {
     padding: 10px;
     font-size: 1.10em;
@@ -96,10 +96,10 @@ body.registration {
     text-align: center;
 }
 
-    .reg-header .dropdown-menu > a {
-        color: #fff;
-        text-align: center;
-    }
+.reg-header .dropdown-menu > a {
+    color: #fff;
+    text-align: center;
+}
 
 .activity-title {
     font-size: 30px;
@@ -111,16 +111,17 @@ body.registration {
 .reg-header-headline {
     font-size: 22px;
     margin-top: 20px;
-    font-weight:300
+    font-weight: 300
 }
 
 .activity-account-name {
     color: #f2f2f5;
     font-size: 14px;
 }
-    .activity-account-name:hover, .activity-account-name:active, .activity-account-name:focus {
-        color: #f2f2f5;
-    }
+
+.activity-account-name:hover, .activity-account-name:active, .activity-account-name:focus {
+    color: #f2f2f5;
+}
 
 .filter-bar {
     background: #fff;
@@ -141,9 +142,9 @@ body.registration {
     border: 2px solid #eaeaea;
 }
 
-    .search-field:hover {
-        color: #00ae85;
-    }
+.search-field:hover {
+    color: #00ae85;
+}
 
 .reg-form-control {
     border-radius: 10px;
@@ -207,15 +208,15 @@ body.registration {
     font-size: 1.15em;
 }
 
-    .activity-detail-block h3 {
-        display: block;
-        margin-bottom: 10px;
-        font-weight: 500;
-    }
+.activity-detail-block h3 {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
 
-    .activity-detail-block img {
-        max-width: 100%;
-    }
+.activity-detail-block img {
+    max-width: 100%;
+}
 
 .seats-remaining {
     color: #d0021b;
@@ -239,20 +240,19 @@ body.registration {
     border: none;
 }
 
-    .btn-register:hover, .btn-register-default:hover {
-        /* background: #139476; */
-        background-color: #444;
-        color: #fff;
-        transition: all 0.3s;
-    }
+.btn-register:hover, .btn-register-default:hover {
+    /* background: #139476; */
+    background-color: #444;
+    color: #fff;
+    transition: all 0.3s;
+}
 
-    .btn-register:active, .btn-register-default:active {
-        /* background: #139476; */
-        background-color: #444;
-        color: #fff;
-        transition: all 0.3s;
-    }
-
+.btn-register:active, .btn-register-default:active {
+    /* background: #139476; */
+    background-color: #444;
+    color: #fff;
+    transition: all 0.3s;
+}
 
 .btn-register-primary {
     background-color: #00ae85;
@@ -269,32 +269,31 @@ body.registration {
     border: none;
 }
 
-    .btn-register-primary:hover {
-        background: #139476;
-        color: #fff;
-        transition: all 0.3s;
-    }
+.btn-register-primary:hover {
+    background: #139476;
+    color: #fff;
+    transition: all 0.3s;
+}
 
-    .btn-register-primary:active {
-        background: #139476;
-        color: #fff;
-        transition: all 0.3s;
-    }
+.btn-register-primary:active {
+    background: #139476;
+    color: #fff;
+    transition: all 0.3s;
+}
 
 .btn-register[disabled], .btn-register-default[disabled] {
     background: #9a9a9a;
 }
 
-    .btn-register[disabled]:hover, .btn-register-default[disabled]:hover {
-        background: #9a9a9a;
-        color: #fff;
-        transition: all 0.3s;
-    }
+.btn-register[disabled]:hover, .btn-register-default[disabled]:hover {
+    background: #9a9a9a;
+    color: #fff;
+    transition: all 0.3s;
+}
 
 .btn-register-default {
     background: #333;
 }
-
 
 .btn-header-action {
     background-color: #00AE83;
@@ -311,17 +310,17 @@ body.registration {
     border: none;
 }
 
-    .btn-header-action:hover {
-        background-color: #444;
-        color: #fff;
-        transition: all 0.3s;
-    }
+.btn-header-action:hover {
+    background-color: #444;
+    color: #fff;
+    transition: all 0.3s;
+}
 
-    .btn-header-action:active {
-        background-color: #444;
-        color: #fff;
-        transition: all 0.3s;
-    }
+.btn-header-action:active {
+    background-color: #444;
+    color: #fff;
+    transition: all 0.3s;
+}
 
 .btn-header-action-callout {
     background-color: #ed4b4b;
@@ -338,17 +337,17 @@ body.registration {
     border: none;
 }
 
-    .btn-header-action-callout:hover {
-        background-color: #444;
-        color: #fff;
-        transition: all 0.3s;
-    }
+.btn-header-action-callout:hover {
+    background-color: #444;
+    color: #fff;
+    transition: all 0.3s;
+}
 
-    .btn-header-action-callout:active {
-        background-color: #444;
-        color: #fff;
-        transition: all 0.3s;
-    }
+.btn-header-action-callout:active {
+    background-color: #444;
+    color: #fff;
+    transition: all 0.3s;
+}
 
 .btn-waitlist {
     background: #ffad49;
@@ -364,11 +363,11 @@ body.registration {
     transition: all 0.3s;
 }
 
-    .btn-waitlist:hover {
-        background: #e59b41;
-        color: #fff;
-        transition: all 0.3s;
-    }
+.btn-waitlist:hover {
+    background: #e59b41;
+    color: #fff;
+    transition: all 0.3s;
+}
 
 .btn-register-xl {
     font-size: 11px;
@@ -388,63 +387,61 @@ body.registration {
     border-radius: 10px;
 }
 
-    .participation-object > .panel > .panel-h3 {
-        background-color: #e7e7e7;
-        height: 70px;
-    }
+.participation-object > .panel > .panel-h3 {
+    background-color: #e7e7e7;
+    height: 70px;
+}
 
-        .participation-object > .panel > .panel-h3 > h3 {
-            vertical-align: middle;
-            display: table-cell;
-            width: 100%;
-            height: 70px;
-            padding-right: 20px;
-            color: #555;
-            font-size: 20px;
-        }
+.participation-object > .panel > .panel-h3 > h3 {
+    vertical-align: middle;
+    display: table-cell;
+    width: 100%;
+    height: 70px;
+    padding-right: 20px;
+    color: #555;
+    font-size: 20px;
+}
 
-    .participation-object > .panel > .panel-footer {
-        position: absolute;
-        bottom: 0;
-        width: 100%;
-    }
+.participation-object > .panel > .panel-footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
 
 .participation-object-add > .panel {
     background-color: #2f3c40; /*#264770; /* #212a2d;*/
 }
 
-    .participation-object-add > .panel > .panel-body {
-    }
-
-
+.participation-object-add > .panel > .panel-body {
+}
 
 .participation-object-wide > .panel {
     position: relative;
     border-radius: 10px;
 }
 
-    .participation-object-wide > .panel .panel-h3 {
-        padding-left: 0px;
-        padding-top: 10px;
-    }
+.participation-object-wide > .panel .panel-h3 {
+    padding-left: 0px;
+    padding-top: 10px;
+}
 
-        .participation-object-wide > .panel .panel-h3 > h3 {
-            color: #555;
-            font-size: 1.10em;
-            margin-top: 0px;
-        }
+.participation-object-wide > .panel .panel-h3 > h3 {
+    color: #555;
+    font-size: 1.10em;
+    margin-top: 0px;
+}
 
-        .participation-object-wide > .panel .panel-h3 > p {
-            color: #999;
-            font-size: .4em;
-            margin-bottom: 0px;
-        }
+.participation-object-wide > .panel .panel-h3 > p {
+    color: #999;
+    font-size: .4em;
+    margin-bottom: 0px;
+}
 
-    .participation-object-wide > .panel > .panel-footer {
-        position: absolute;
-        bottom: 0;
-        width: 100%;
-    }
+.participation-object-wide > .panel > .panel-footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
 
 .registration-titlebar .org-logo-container {
     max-width: 900px;
@@ -507,24 +504,24 @@ body.registration {
     width: 90%;
 }
 
-    .registration-titlebar .org-title-area .org-title {
-        position: relative;
-        margin-bottom: 15px;
-        color: #fff;
-        font-size: 3em;
-    }
+.registration-titlebar .org-title-area .org-title {
+    position: relative;
+    margin-bottom: 15px;
+    color: #fff;
+    font-size: 3em;
+}
 
-    .registration-titlebar .org-title-area .org-description {
-        position: relative;
-        color: #ededed;
-    }
+.registration-titlebar .org-title-area .org-description {
+    position: relative;
+    color: #ededed;
+}
 
 .registration-titlebar .orghome-filters {
     padding: 10px;
     background-color: #fff;
     position: relative;
     top: 50px;
-    box-shadow: rgba(150,150,150,.4) 0px 3px 10px;
+    box-shadow: rgba(150, 150, 150, .4) 0px 3px 10px;
 }
 
 .activity-seats-left {
@@ -537,20 +534,20 @@ body.registration {
     margin-top: -50px;
 }
 
-    .participation-object-detail > .panel {
-        border-radius: 10px;
-        overflow: hidden;
-    }
+.participation-object-detail > .panel {
+    border-radius: 10px;
+    overflow: hidden;
+}
 
 @media screen and (max-width: 375px) {
     .participation-object-detail {
         padding: 50px 10px;
     }
 
-        .participation-object-detail > .panel {
-            margin: 0px;
-            border-radius: 0px;
-        }
+    .participation-object-detail > .panel {
+        margin: 0px;
+        border-radius: 0px;
+    }
 
     .panel:first-of-type {
         margin-top: 0px;
@@ -568,9 +565,9 @@ body.registration {
     padding: 20px;
 }
 
-    .firsttime-information h2 {
-        font-weight: bold;
-    }
+.firsttime-information h2 {
+    font-weight: bold;
+}
 
 .am-checkbox input[type="checkbox"]:checked + label:before, .am-radio input[type="checkbox"]:checked + label:before, .am-checkbox input[type="radio"]:checked + label:before, .am-radio input[type="radio"]:checked + label:before {
     content: "\e6cd";
@@ -589,15 +586,15 @@ svg {
     height: 16px;
     position: relative;
     top: 4px;
+    fill: white;
 }
-svg path, svg polygon{
-    fill:white
-}
+
 .reg-icon-container svg {
     margin-right: 5px;
 }
-.icons-div span.icon-span:last-child{
-    margin-right:0 !important;
+
+.icons-div span.icon-span:last-child {
+    margin-right: 0 !important;
 }
 
 .old-font-icons {
@@ -607,31 +604,38 @@ svg path, svg polygon{
     font-weight: bolder;
 }
 
-@media (max-width:760px) {
-    .activity-title{
-        text-align:center;
+@media (max-width: 760px) {
+    .activity-title {
+        text-align: center;
     }
+
     .old-font-icons {
         font-size: 20px;
         top: 5px;
     }
+
     .activity-account-name {
         position: relative;
         top: 15px;
     }
+
     svg {
         width: 22px;
         height: 22px;
     }
-    .reg-header{
-        padding:20px 20px
+
+    .reg-header {
+        padding: 20px 20px
     }
+
     .reg-icon-container {
         display: table;
     }
+
     .reg-icon-container div {
         display: table-footer-group;
     }
+
     .reg-icon-container p {
         display: flex;
     }
@@ -644,6 +648,7 @@ svg path, svg polygon{
     margin-right: 15px;
     border-radius: 5px;
 }
+
 .flex-div {
     display: flex !important;
     align-items: center;
