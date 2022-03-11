@@ -68,7 +68,7 @@ namespace AfterSchool.Models
             }
 
             //LogActivity with websession id
-            if (webSession.IsNotEmpty() && account.IsNotEmpty())
+            if (webSession.IsNotEmpty())
                 LogActivity(
                     webSession,
                     account,

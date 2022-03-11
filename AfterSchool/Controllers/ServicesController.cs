@@ -534,6 +534,23 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
+        public ActionResult AddLogForUrlClick(string url, string buttonText, string id)
+        {
+            SessionVariables.WebSession.LogActivity(
+                 request: Request,
+                 actor: SessionVariables.CurrentUser,
+                 account: id.IsNotEmpty() ? Account.Load(id.ToInteger()) : SessionVariables.CurrentAccount,
+                 actionType: WebSessionActionType.Viewed,
+                 objectType: ObjectType.DirectoryAccount,
+                 objectId: id.IsNotEmpty() ? id.ToInteger(): new int(),
+                 objectText: "has moved to url " + url + " using button "+ buttonText
+             );
+
+            return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+        }
+
+
+        [HttpGet]
         public ActionResult Unfollow(string id)
         {
             if (!IsRequestFromApp())

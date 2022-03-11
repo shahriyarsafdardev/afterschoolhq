@@ -1772,6 +1772,23 @@
     margin-right: 5px;
 }
 
+.registration-page-icon {
+    width: 20px;
+    margin-right: 5px;
+}
+
+.icon-span {
+    margin-right: 35px;
+    white-space: nowrap;
+    font-size: 14px;
+}
+
+.btn-view-all {
+    background-color: #fff !important;
+    color: black !important;
+    border-radius: 5px !important;
+}
+
 .directory-filters {
     overflow-y: auto;
     padding-right: 0;
