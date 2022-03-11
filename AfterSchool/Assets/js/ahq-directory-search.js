@@ -5,6 +5,7 @@
     $("#search-container").scroll(function () {
         if (isReachedScrollEnd == false &&
             isMobileFilterWindowOpened == false &&
+            //(($(this).scrollTop() + $(this).innerHeight() + 1) >= $(this)[0].scrollHeight)) { //+1 to adjust height because of contact us button at bottom
             ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight))
         {
             loadFiltersAndInitiateSearch();
@@ -250,6 +251,7 @@ function prepareSearchParams() {
 
     if (mainUrl) {
         WebPage.addHash(encodeURI(mainUrl));
+        deleteAllMarkersOnMap();
         $('#clear-filters').show();
     } else {
         WebPage.addHash('');
@@ -281,7 +283,6 @@ function prepareSearchParams() {
 function loadFiltersAndInitiateSearch() {
     var hashUrl = WebPage.getHash();
     var filters = hashUrl.split(',');
-
     _.each(filters, function (filter) {
         if (filter.indexOf('search_') == 0) {
             $(`input[name="search"]`).val(filter.split('_')[1]);
@@ -356,7 +357,7 @@ function checkZip(value) {
     return zipCodePatternList.some(function (rx) { return rx.test(value); });
 }
 
-function loadInitialTabs() {    
+function loadInitialTabs() {
     loadTabs('grades');
     loadTabs('ages');
     loadTabs('gender');
@@ -381,22 +382,24 @@ function loadTabs(name) {
 
         var tags = '';
         $('input:checkbox[name=' + name + ']:checked').each(function () {
-            tags += getTagHtml($(this).val());
+            tags += getTagHtml(name, $(this).attr('valueForFilter'), $(this).parent().text().trim());
         });
 
         $('#tags-container-' + name).html(tags).show();
     }
 }
 
-function getTagHtml(name) {
-    return '<span class="badge badge-success text-small primary-bg-color directory-badge">' + name + '</span>';
+function getTagHtml(tagContainer, id, lable) {
+    var containerName = tagContainer.replaceAll(' ', '').toLowerCase();    
+    return `<span class="badge-identity-` + containerName + `-` + id + ` badge badge-pill badge-success text-small primary-bg-color directory-badge">` + lable +
+        `<button type="button" class="close" data-dismiss="alert" aria-label="Close" onclick='return clearSpecificFilter("` + containerName + `", "` + id +`")'><i class="remove glyphicon glyphicon-remove-circle glyphicon-white"></i></button></span>`;
 }
 
 function resetTags() {
     $('#tags-container-grades').html('');
     $('#tags-container-ages').html('');
     $('#tags-container-gender').html('');
-    $('#tags-container-services').html('');
+    $('#tags-container-services').html(''); 
     $('#tags-container-timing').html('');
     $('#tags-container-cost').html('');
     $('#tags-container-pricing').html('');
@@ -468,9 +471,33 @@ function clearFilters() {
         $('#txtSearch').val('');
     }
 
+    deleteAllMarkersOnMap();
     resetTags();
     resetFlags();
     loadAccounts();
+}
+
+function clearSpecificFilter(tagContainer, name) {
+    if (tagContainer !== '' && name != '') {
+        $(`input:checkbox[name=` + tagContainer + `][valueforfilter=` + name + `]`).prop('checked', false);
+        $(`.badge-identity-` + tagContainer + `-` + name).remove();
+
+        removeSpecificFilterFromUrl(name);
+        resetFlags();
+        prepareSearchParams();
+    }    
+}
+
+function removeSpecificFilterFromUrl(name) {
+    var hashUrl = WebPage.getHash();
+    var filters = hashUrl.split(',');    
+    _.each(filters, function (filter) {
+        if (filter.toLowerCase().indexOf(name.trim().toLowerCase()) == 0) {
+            hashUrl = hashUrl.replace(filter + ',', '')
+        }
+    });
+
+    WebPage.addHash(encodeURI(hashUrl));
 }
 
 function resetFlags() {
@@ -484,7 +511,7 @@ function toggleSideBar(element) {
     var isOpen = $(element).attr('isOpen');
     if (isOpen === 'true') {
         $(element).attr('isOpen', false)
-        $('#search-sidebar-arrow').removeClass('fa-chevron-circle-left').addClass('fa-chevron-circle-right');        
+        $('#search-sidebar-arrow').removeClass('fa-chevron-circle-left').addClass('fa-chevron-circle-right');
         $("#filters").removeClass('directory-filters-open').addClass('directory-filters-close');
     }
     else {
@@ -507,6 +534,6 @@ function toggleFilterOverflow() {
     if (isOpen === 'true') {
         $('#filters').css('overflow-y', 'hidden');
     } else {
-        $('#filters').css('overflow-y', 'auto');        
+        $('#filters').css('overflow-y', 'auto');
     }
 }

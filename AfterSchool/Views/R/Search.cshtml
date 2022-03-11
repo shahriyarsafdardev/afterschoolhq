@@ -58,6 +58,9 @@
         border-color: @primaryColor;
         color: white;
     }
+    .primary-color-border{
+        border: 5px solid @primaryColor;
+    }
 
     .primary-color {
         color: @primaryColor;
@@ -92,7 +95,25 @@
         color: white;
         border-color: @primaryColor;
     }
+    .gmnoprint > div:first-child {
+        top: -100px !important /*move map zoom-in/out button in viewport*/
+    }
 
+    .badge .close {
+        font-size: 12px;
+        position: absolute;
+        color: black;
+        opacity: 0.6;
+        margin-top: -10px;
+    }
+
+    .close:hover, .close:focus {
+        color: #000000;
+        text-decoration: none;
+        cursor: pointer;
+        opacity: 1.5 !important;
+        filter: alpha(opacity=50);
+    }
 </style>
 
 @{ Html.RenderPartial("~/Views/Shared/_DirectoryHeader.cshtml", null, new ViewDataDictionary { { "primaryColor", primaryColor }, { "website", website }, { "logoUrl", logoUrl } }); }
@@ -140,7 +161,6 @@
             showLoader();
             showProgressBar();
             inCallback = true;
-
             var url = '@Url.Action("GetAccounts", "Search", new {Area = ""})';
             $.ajax({
                 type: "POST",

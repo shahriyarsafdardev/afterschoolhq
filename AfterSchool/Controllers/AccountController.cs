@@ -281,12 +281,19 @@ namespace AfterSchool.Controllers
                 registrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
 
             // no activity is selected
-            if (participationObject.IsEmpty())
+            if (participationObject.IsEmpty() || !participationObject.ObjectID.HasValue)
             {
                 if (SessionVariables.RegistrationStartPageAccount.IsNotEmpty() || registrationAccount.IsNotEmpty())
                     return Redirect(SessionVariables.RegistrationStartPageAccount?.HomePageUrl ?? registrationAccount?.HomePageUrl);
 
                 return HttpNotFound();
+            }
+
+            var isStudentAllowedToRegister = false;
+            if (participationObject.ObjectType == ParticipationObjectType.Activity)
+            {
+                var activity = Activity.Load(participationObject.ObjectID.Value, msgs);
+                isStudentAllowedToRegister = activity?.IsStudentAllowedToRegister ?? false;
             }
 
             // pre-load phone number
@@ -296,7 +303,7 @@ namespace AfterSchool.Controllers
             ViewBag.RegistrationAccount = registrationAccount;
             ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
             ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
-            ViewBag.StudentRegistrationEnabled = featureFlagRepository.IsEnabled("student-registration");
+            ViewBag.StudentRegistrationEnabled = featureFlagRepository.IsEnabled("student-registration") && isStudentAllowedToRegister;
             ViewBag.Messages = msgs;
 
             return View(qvms);

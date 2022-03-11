@@ -33,10 +33,10 @@ property: LastActivity, DateTime?, DateTime
 property: VerifiedAccount, bool, Bit
 property: IsRegistered, bool, Bit
 property: DefaultAccountId, int?, Int
-property: HowHearAboutUs, string, NVarChar "500"
 property: AllowTextMessages, bool, Bit
 property: CleverUserId, string, NVarChar "100"
 property: CleverUserName, string, NVarChar "100"
+property: HowHearAboutUs, string, NVarChar "500"
 loadmethod: Uid
 loadmethod: Uid|IsActive
 loadmethod: IsActive, List<>
@@ -94,7 +94,8 @@ property: ActivityTypeId, ActivityType, Int, required
 property: DateSubmittedToActivityGroup, DateTime?, DateTime, , Used to track when a team has been submitted to a league
 property: AccountActivityGroupId, int?, Int, , When a activity is part of a league that is from an external source (such as a team) then it should be linked to the account version of that league
 property: LeaderTypeId, ActivityLeaderType, Int, , Track what kind of leader it is - internal or external
-property: RequiresParentalConsent, bool, Bit, , let us know whether the parent needs to consent
+property: RequiresParentalConsent, bool, Bit, , Indicates whether parental consent is required
+property: IsStudentAllowedToRegister, bool, Bit, , Indicates whether a student is allowed to register
 property: ActivityLocationTypeId, ActivityLocationType, Int, , Physical or Virtual
 property: VirtualLocationInfo, string, NVarChar "1000", , Link for virtual class
 property: HidePreciseLocation, bool, Bit, , If true then don't want to add a pin for the exact location
@@ -2002,7 +2003,7 @@ values: NotSet, New, InProgress, Completed
 [begin]
 type: Enum
 name: WebSessionActionType
-values: NotSet, Created, Updated, Published, Unpublished, Sent, BeganRegistration, Registered, Paid, Refunded, Requested, Invited, Archived, Deleted, ManuallyRegistered, ManuallyPaid, ManuallyRefunded, Approved, Verified, Viewed, Moved, Navigated, Searched, Paged, Connected, SignedUp, LoggedIn, LoggedOut, Copied, Restored, Browsed, Followed, Unfollowed, Shared, Contacted, Interested, BrowsedAllActivities, Added, Removed, ManualAHQPayout
+values: NotSet, Created, Updated, Published, Unpublished, Sent, BeganRegistration, Registered, Paid, Refunded, Requested, Invited, Archived, Deleted, ManuallyRegistered, ManuallyPaid, ManuallyRefunded, Approved, Verified, Viewed, Moved, Navigated, Searched, Paged, Connected, SignedUp, LoggedIn, LoggedOut, Copied, Restored, Browsed, Followed, Unfollowed, Shared, Contacted, Interested, BrowsedAllActivities, Added, Removed, ManualAHQPayout, Denied
 [end]
 
 [begin]
@@ -2068,13 +2069,13 @@ values: NotSet, TextBox, TextArea, RadioList, CheckboxList, Checkbox, DropDownLi
 [begin]
 type: Enum
 name: QuestionGroupDataType
-values: NotSet, Custom, PersonalInformation, ContactInformation, HomeAddress, Parent1Information, Parent1Address, Parent2Information, Parent2Address, EmergencyContact1, EmergencyContact2, HealthInformation, OrganizationInformation, OrganizationContact, RegistrantInterestInformation
+values: NotSet, Custom, PersonalInformation, ContactInformation, HomeAddress, Parent1Information, Parent1Address, Parent2Information, Parent2Address, EmergencyContact1, EmergencyContact2, HealthInformation, OrganizationInformation, OrganizationContact, RegistrantInterestInformation, EmergencyContact3
 [end]
 
 [begin]
 type: Enum
 name: QuestionDataType
-values: NotSet, RegistrantFirstName, RegistrantLastName, RegistrantEmail, RegistrantDateOfBirth, RegistrantPhone1, RegistrantPhoneType1, RegistrantPhone2, RegistrantPhoneType2, RegistrantAddress1, RegistrantAddress2, RegistrantCity, RegistrantState, RegistrantPostalCode, Parent1FirstName, Parent1LastName, Parent1Email, Parent1Phone1, Parent1PhoneType1, Parent1Phone2, Parent1PhoneType2, Parent1Address1, Parent1Address2, Parent1City, Parent1State, Parent1PostalCode, Parent2FirstName, Parent2LastName, Parent2Email, Parent2Phone1, Parent2PhoneType1, Parent2Phone2, Parent2PhoneType2, Parent2Address1, Parent2Address2, Parent2City, Parent2State, Parent2PostalCode, EmergencyContact1FirstName, EmergencyContact1LastName, EmergencyContact1Phone, EmergencyContact2FirstName, EmergencyContact2LastName, EmergencyContact2Phone, RegistrantGrade, RegistrantGender, RegistrantEthnicity, RegistrantOrganization, RegistrantDoctorName, RegistrantDoctorPhone, RegistrantAllergies, RegistrantMedicalConditions, RegistrantImmunizations, RegistrantPreferredHospital, OrganizationName, OrganizationAddress1, OrganizationAddress2, OrganizationCity, OrganizationState, OrganizationPostalCode, OrganizationContactFirstName, OrganizationContactLastName, OrganizationContactEmail, OrganizationContactPhone, OrganizationContactPhoneType, RegistrantTShirtSize, RegistrantMobilePhone, RegistrantWorkPhone, RegistrantHomePhone, Parent1MobilePhone, Parent1WorkPhone, Parent1HomePhone, Parent2MobilePhone, Parent2WorkPhone, Parent2HomePhone, RegistrantMedications, RegistrantChild1Grade, RegistrantChild2Grade, RegistrantChild3Grade, RegistrantChild4Grade, RegistrantChild5Grade
+values: NotSet, RegistrantFirstName, RegistrantLastName, RegistrantEmail, RegistrantDateOfBirth, RegistrantPhone1, RegistrantPhoneType1, RegistrantPhone2, RegistrantPhoneType2, RegistrantAddress1, RegistrantAddress2, RegistrantCity, RegistrantState, RegistrantPostalCode, Parent1FirstName, Parent1LastName, Parent1Email, Parent1Phone1, Parent1PhoneType1, Parent1Phone2, Parent1PhoneType2, Parent1Address1, Parent1Address2, Parent1City, Parent1State, Parent1PostalCode, Parent2FirstName, Parent2LastName, Parent2Email, Parent2Phone1, Parent2PhoneType1, Parent2Phone2, Parent2PhoneType2, Parent2Address1, Parent2Address2, Parent2City, Parent2State, Parent2PostalCode, EmergencyContact1FirstName, EmergencyContact1LastName, EmergencyContact1Phone, EmergencyContact2FirstName, EmergencyContact2LastName, EmergencyContact2Phone, RegistrantGrade, RegistrantGender, RegistrantEthnicity, RegistrantOrganization, RegistrantDoctorName, RegistrantDoctorPhone, RegistrantAllergies, RegistrantMedicalConditions, RegistrantImmunizations, RegistrantPreferredHospital, OrganizationName, OrganizationAddress1, OrganizationAddress2, OrganizationCity, OrganizationState, OrganizationPostalCode, OrganizationContactFirstName, OrganizationContactLastName, OrganizationContactEmail, OrganizationContactPhone, OrganizationContactPhoneType, RegistrantTShirtSize, RegistrantMobilePhone, RegistrantWorkPhone, RegistrantHomePhone, Parent1MobilePhone, Parent1WorkPhone, Parent1HomePhone, Parent2MobilePhone, Parent2WorkPhone, Parent2HomePhone, RegistrantMedications, RegistrantChild1Grade, RegistrantChild2Grade, RegistrantChild3Grade, RegistrantChild4Grade, RegistrantChild5Grade, RegistrantMiddleName, RegistrantRaceUsFed, RegistrantEthnicityUsFed, Parent1MiddleName, Parent1RelationshipToRegistrant, Parent1Employer, Parent2MiddleName, Parent2RelationshipToRegistrant, Parent2Employer, EmergencyContact1Phone2, EmergencyContact1Phone3, EmergencyContact1RelationshipToRegistrant, EmergencyContact2Phone2, EmergencyContact2Phone3, EmergencyContact2RelationshipToRegistrant, EmergencyContact3FirstName, EmergencyContact3LastName, EmergencyContact3Phone, EmergencyContact3Phone2, EmergencyContact3Phone3, EmergencyContact3RelationshipToRegistrant, RegistrantEmployer, RegistrantParentRelationship
 [end]
 
 [begin]
