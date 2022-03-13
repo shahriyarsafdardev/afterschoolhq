@@ -1,6 +1,6 @@
 ﻿function directoryPageLoad() {
     // we need to show the filter button, once js will get loaded, to avoid any js related error
-    $("#img-mobile-filter").removeClass("hide");
+    //$("#img-mobile-filter").removeClass("hide");
 
     $("#search-container").scroll(function () {
         if (isReachedScrollEnd == false &&
@@ -15,10 +15,12 @@
     loadFiltersAndInitiateSearch();
     loadInitialTabs();    
 
-    if (!isMobile) {
+    if (isMobile) {
+        $('#container-show-filter-button').show();
+    } else {
         $('#filters').show();
         $('#container-show-map-chk').show();
-        $('#map-view').show();
+        $('#map-view').show();        
     }
 
     formatContactPhoneForDirectory();
@@ -409,7 +411,7 @@ function resetTags() {
 }
 
 function mobileFilter() {
-    var isOpen = $('#img-mobile-filter').attr('isOpen');
+    var isOpen = $('#btn-mobile-filter').attr('isOpen');
     if (isOpen == '0') {
         $('#filters').show();
         $('#mobile-filter-footer').show();
@@ -417,7 +419,7 @@ function mobileFilter() {
         $('#search-result').hide();
         $('#footerShowHide').hide();
 
-        $('#img-mobile-filter').attr('isOpen', "1");
+        $('#btn-mobile-filter').attr('isOpen', "1");
         isMobileFilterWindowOpened = true;
     }
     else {
@@ -425,7 +427,7 @@ function mobileFilter() {
         $('#mobile-filter-footer').hide();
         $('#search-result').show();
         $('#footerShowHide').show();
-        $('#img-mobile-filter').attr('isOpen', "0");
+        $('#btn-mobile-filter').attr('isOpen', "0");
         isMobileFilterWindowOpened = false;
     }
 }

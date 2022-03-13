@@ -1813,9 +1813,10 @@
     width: 110px;
 }
 
-.filter {
-    height: 38px;
-    margin-top: 10px;
+.directory-filter-icon-mobile {
+    height: 20px;
+    margin-right: 5px;
+    margin-top: -2px;
 }
 
 .directory-filter-symbol {
