@@ -40,11 +40,12 @@
 
                     @{
                         Html.RenderPartial(
-                            "~/Views/Shared/_ActivityFormSchedule.cshtml", 
-                            (ActivitySchedule)ViewBag.Schedule, 
-                            new ViewDataDictionary() { 
+                            "~/Views/Shared/_ActivityFormSchedule.cshtml",
+                            (ActivitySchedule)ViewBag.Schedule,
+                            new ViewDataDictionary() {
                                 { "ActivityType", (int)Model.ActivityTypeId },
-                                { "hasSchedule", hasSchedule }
+                                { "hasSchedule", hasSchedule },
+                                { "isContinousEnrollmentEnabled", Model.IsContinuousEnrollment}
                             });
                     }
 

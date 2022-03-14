@@ -6,10 +6,9 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Billing;
-using Lob.Models;
 using AfterSchool.Models;
 using System.Data;
-using Twilio.Rest.Api.V2010.Account.Usage.Record;
+using System.Globalization;
 using AfterSchoolLibrary.Helpers;
 
 namespace AfterSchoolLibrary.Services
@@ -2717,13 +2716,13 @@ namespace AfterSchoolLibrary.Services
                     dc);
         }
 
-        public static List<SearchDirectoryResponse> SearchDirectoryAccounts(int hostAccountId, string search, string neighborhoods, string grades, 
+        public static List<SearchDirectoryResponse> SearchDirectoryAccounts(int hostAccountId, string search, string enroll_today, string grades,
             string ages, string gender, string services, string timing, string pricing, string cost, string starting, string other, string specialNeeds, decimal distance, int PageNum, int PageSize,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             try
             {
-                var accountDataTable = Account.SearchVisitorAccountsByHostAccount(hostAccountId, search, neighborhoods, grades, ages, gender, services, timing, pricing, cost, starting, other, specialNeeds, distance, PageNum, PageSize, msgs: msgs);
+                var accountDataTable = Account.SearchVisitorAccountsByHostAccount(hostAccountId, search, enroll_today, grades, ages, gender, services, timing, pricing, cost, starting, other, specialNeeds, distance, PageNum, PageSize, msgs: msgs);
                                 
                 if (accountDataTable.IsNotEmpty() && accountDataTable.Rows.Any())
                 {
@@ -2751,7 +2750,9 @@ namespace AfterSchoolLibrary.Services
                             response.AgeEnd = row["AgeEnd"].IsNotEmpty() ? row["AgeEnd"].ToString() : null;
                             response.GradeStart = row["GradeLevelStart"].IsNotEmpty() ? row["GradeLevelStart"].ToString() : null;
                             response.GradeEnd = row["GradeLevelEnd"].IsNotEmpty() ? row["GradeLevelEnd"].ToString() : null;
-                            
+                            response.CostLow = row["CostLow"].IsNotEmpty() ? row["CostLow"].ToString() : null;
+                            response.CostHigh = row["CostHigh"].IsNotEmpty() ? row["CostHigh"].ToString() : null;
+
                             response.Priority = row["Priority"].IsNotEmpty() ? Convert.ToInt32(row["Priority"]) : 0;
                             response.TotalDifference = accountDataTable.Columns.Contains("TotalDifference") && row["TotalDifference"].IsNotEmpty() ? Convert.ToDecimal(row["TotalDifference"]) : 0;
 
@@ -2771,6 +2772,8 @@ namespace AfterSchoolLibrary.Services
                             {
                                 //..Location, ProfileHeaderImageUrl
                                 var location = Location.Load(Convert.ToInt32(row["LocationId"]));
+                                response.Latitude = location.Latitude.IsNotEmpty() ? location.Latitude.Value.ToString(CultureInfo.InvariantCulture) : "" ;
+                                response.Longitude = location.Longitude.IsNotEmpty() ? location.Longitude.Value.ToString(CultureInfo.InvariantCulture) : "";
                                 response.Location = location.FormatCityState(false);
 
                                 if (response.ProfileHeaderImageUrl.IsEmpty())
@@ -4686,6 +4689,8 @@ namespace AfterSchoolLibrary.Services
                     {
                         if (parentAccount.IsNotEmpty())
                         {
+                            parentAccount.AddUser(studentUser, UserType.Student, studentUser, amsgs, adc);
+
                             // create student registrant record
                             studentRegistrant = parentAccount.CreateRegistrant(
                                 registrantOwner: studentUser,

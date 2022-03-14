@@ -774,8 +774,19 @@
     <Content Include="Assets\css\media_sm.css" />
     <Content Include="Assets\css\media_xs.css" />
     <Content Include="Assets\css\survey.css" />
+    <Content Include="Assets\img\credit-card.svg" />
+    <Content Include="Assets\img\envelope.svg" />
+    <Content Include="Assets\img\share.svg" />
+    <Content Include="Assets\img\user-remove.svg" />
+    <Content Include="Assets\img\user-add.svg" />
+    <Content Include="Assets\img\clock.svg" />
+    <Content Include="Assets\img\graduation-cap.svg" />
+    <Content Include="Assets\img\user.svg" />
+    <Content Include="Assets\js\ahq-directory-map.js" />
     <Content Include="Assets\js\ahq-directory-search.js" />
+    <Content Include="Assets\img\alert-2.svg" />
     <Content Include="Assets\js\ahq-profiles.js" />
+    <Content Include="Assets\js\google-translate.js" />
     <Content Include="Assets\js\underscore-min.js" />
     <Content Include="Assets\lib\customTableSorter.js" />
     <Content Include="case-study-cfi70.html" />
@@ -802,6 +813,7 @@
     <Content Include="img\billy2.png" />
     <Content Include="img\darye.png" />
     <Content Include="img\fee.png" />
+    <Content Include="img\filter.svg" />
     <Content Include="img\frank-mckenna-LhOjrOlcLx4-unsplash.jpg" />
     <Content Include="img\gabriel-baranski-vGICUyYW2CE-unsplash.jpg" />
     <Content Include="img\handshake-icon.png" />
@@ -841,6 +853,8 @@
     <Content Include="img\parent-icon.png" />
     <Content Include="img\pencil-banner.jpg" />
     <Content Include="img\provider-icon.png" />
+    <Content Include="img\red-icon-map.png" />
+    <Content Include="img\red-map-icon-large.png" />
     <Content Include="img\san.png" />
     <Content Include="img\Screen Shot 2020-08-25 at 2.36.03 PM-1.png" />
     <Content Include="img\Screen Shot 2020-08-25 at 2.36.03 PM.png" />
@@ -860,7 +874,6 @@
     <Content Include="iyi-providers.html" />
     <Content Include="js\blocs.min.js" />
     <Content Include="js\bootstrap.bundle.min.js" />
-    <Content Include="js\googleTranslateJs.js" />
     <Content Include="js\jquery-3.5.1.min.js" />
     <Content Include="js\lazysizes.min.js" />
     <Content Include="js\scrollFX.js" />
@@ -1955,7 +1968,7 @@
     <Content Include="Views\Account\RegistrationComplete.cshtml" />
     <Content Include="Views\Shared\_ISYPIntroModal.cshtml" />
     <Content Include="Views\Shared\_DirectoryContactUs.cshtml" />
-    <Content Include="Views\Shared\_DirectoryMobileSearch.cshtml" />
+    <Content Include="Views\Shared\_DirectoryHeader.cshtml" />
     <Content Include="Views\Shared\_DirectoryLoadScript.cshtml" />
   </ItemGroup>
   <ItemGroup>

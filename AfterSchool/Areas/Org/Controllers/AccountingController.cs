@@ -388,11 +388,15 @@ namespace AfterSchool.Areas.Org.Controllers
                     transaction.ManualRefund(amount.ToDecimal(), SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
+                {
+                    SessionVariables.WebSession.LogRefundCompleted(currentAccount, SessionVariables.CurrentUser, WebSessionActionType.ManuallyRefunded, amount, transaction, msgs);
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                }
             }
 
             return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
         }
+
 
         [HttpPost]
         public ActionResult RequestRefund(string uid, string amount, string reason)
@@ -403,12 +407,18 @@ namespace AfterSchool.Areas.Org.Controllers
             if (uid.IsGuid() && amount.IsNumber())
             {
                 var transaction = currentAccount.GetBillerTransaction(uid.ToGuid(), msgs);
-
+                RefundRequest refundRequest = new RefundRequest();
+                
                 if (transaction.IsNotEmpty())
-                    transaction.RequestRefund(amount.ToDecimal(), RefundRequestStatus.RequestedByProvider, reason, SessionVariables.CurrentUser, msgs);
+                    refundRequest = transaction.RequestRefund(amount.ToDecimal(), RefundRequestStatus.RequestedByProvider, reason, SessionVariables.CurrentUser, msgs);
 
-                if (msgs.HasNoErrors())
+                if (msgs.HasNoErrors() && refundRequest.IsNotEmpty())
+                {
+                    SessionVariables.WebSession.LogRefundRequestUpdate(currentAccount, SessionVariables.CurrentUser, WebSessionActionType.Requested, refundRequest.Amount.ToCurrency(), refundRequest, msgs);
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                }
+
+
             }
 
             return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
@@ -428,7 +438,10 @@ namespace AfterSchool.Areas.Org.Controllers
                     request.ApproveRequestAsProvider(null, SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
+                {
+                    SessionVariables.WebSession.LogRefundRequestUpdate(SessionVariables.CurrentAccount, SessionVariables.CurrentUser, WebSessionActionType.Approved, request.Amount.ToCurrency(), request, msgs);
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                }
             }
 
             return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
@@ -448,7 +461,10 @@ namespace AfterSchool.Areas.Org.Controllers
                     request.UpdateStatus(RefundRequestStatus.ApprovedManualRefund, SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
+                {
+                    SessionVariables.WebSession.LogRefundRequestUpdate(SessionVariables.CurrentAccount, SessionVariables.CurrentUser, WebSessionActionType.Approved, request.Amount.ToCurrency(), request, msgs);
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                }
             }
 
             return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
@@ -468,7 +484,11 @@ namespace AfterSchool.Areas.Org.Controllers
                     request.DenyRequestAsProvider(reason, SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
+                {
+                    SessionVariables.WebSession.LogRefundRequestUpdate(SessionVariables.CurrentAccount, SessionVariables.CurrentUser, WebSessionActionType.Denied, request.Amount.ToCurrency(), request, msgs);
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                }
+
 
             }
 

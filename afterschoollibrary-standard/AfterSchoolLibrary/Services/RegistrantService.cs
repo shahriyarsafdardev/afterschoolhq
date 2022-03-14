@@ -1254,9 +1254,7 @@ namespace AfterSchoolLibrary.Services
 
             var submittedRecordRA = ras.FirstOrDefault(ra => ra.ParticipationObjectId == participationObject.ObjectID && ra.ParticipationObjectTypeId == participationObject.ObjectType);
             
-            var registration = new Registration();
-
-            if (submittedRecordRA.IsNotEmpty())
+            if (submittedRecordRA.IsNotEmpty() && submittedRecordRA.RegistrationId.IsNotEmpty())
                 return (
                     submittedRecords.First(child => child.ID == submittedRecordRA.RegistrantId), 
                     Registration.Load(submittedRecordRA.RegistrationId.Value, msgs, dc)
