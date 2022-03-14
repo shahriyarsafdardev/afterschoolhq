@@ -64,7 +64,7 @@
 
                             @foreach (var qvm in Model.Where(qvm => !qvm.Hide && qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation &&
                                 qvm.Question.QuestionDataTypeId.In(new List<QuestionDataType>() {
-                                    QuestionDataType.RegistrantFirstName, QuestionDataType.RegistrantLastName, QuestionDataType.RegistrantMiddleName, QuestionDataType.RegistrantEmail
+                                    QuestionDataType.RegistrantFirstName, QuestionDataType.RegistrantLastName, QuestionDataType.RegistrantMiddleName, QuestionDataType.RegistrantEmail, QuestionDataType.RegistrantDateOfBirth
                                 })))
                             {
                                 Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
