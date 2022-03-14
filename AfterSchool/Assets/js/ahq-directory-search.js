@@ -111,13 +111,8 @@ function prepareSearchParams() {
     var comma_delimited_starting = '';
     var comma_delimited_other = '';
     var comma_delimited_special = '';
-
-    if (isMobile) {
-        search = txtSearchMobile.val();
-    } else {
-        search = txtSearch.val();
-    }
-
+    
+    search = txtSearch.val();
     if (search && search.length > 0) {
         mainUrl += `search_${search},`;
     }
@@ -413,23 +408,35 @@ function resetTags() {
 function mobileFilter() {
     var isOpen = $('#btn-mobile-filter').attr('isOpen');
     if (isOpen == '0') {
-        $('#filters').show();
-        $('#mobile-filter-footer').show();
-
-        $('#search-result').hide();
-        $('#footerShowHide').hide();
-
-        $('#btn-mobile-filter').attr('isOpen', "1");
-        isMobileFilterWindowOpened = true;
+        showMobileFilters();        
     }
     else {
-        $('#filters').hide();
-        $('#mobile-filter-footer').hide();
-        $('#search-result').show();
-        $('#footerShowHide').show();
-        $('#btn-mobile-filter').attr('isOpen', "0");
-        isMobileFilterWindowOpened = false;
+        hideMobileView();
     }
+}
+
+function showMobileFilters() {    
+    $('#filters').addClass('mobile-fitler-window');
+    $('#filters').show();
+    $('#search-container').hide();
+    $('#mobile-filter-footer').show();
+    $('#footerShowHide').hide();
+    $('#directory-sidebar-icon').hide();
+
+    $('#btn-mobile-filter').attr('isOpen', "1");
+    isMobileFilterWindowOpened = true;    
+}
+
+function hideMobileView() {
+    $('#filters').removeClass('mobile-fitler-window');
+    $('#filters').hide();
+    $('#search-container').show();
+    $('#mobile-filter-footer').hide();
+    $('#footerShowHide').show();
+    $('#directory-sidebar-icon').show();
+
+    $('#btn-mobile-filter').attr('isOpen', "0");
+    isMobileFilterWindowOpened = false;
 }
 
 function applyMobileFilter() {
