@@ -34,11 +34,4 @@
             Model,
             new ViewDataDictionary() { { "DisplayCheckoutPrice", true } });
     }
-
-    if (Model.CostDescription.IsNotEmpty())
-    {
-        <p class="padding-v-10">
-            @Model.CostDescription
-        </p>
-    }
 }
