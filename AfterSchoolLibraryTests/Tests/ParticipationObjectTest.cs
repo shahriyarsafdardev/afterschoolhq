@@ -244,38 +244,27 @@ namespace AfterSchoolLibraryTests.Tests
             var isInRange = participationObject.IsGradeInRange(answer, msgs, dc);
 
             // Assert
-            if (inRange)
-                Assert.True(isInRange);
-            else
-                Assert.False(isInRange);
+            Assert.Equal(inRange, isInRange);
             
         }
 
         [Theory(DisplayName = "IsAgeInRangeTest")]
-        [InlineData(5, 15, "06/10/2020")]
-        [InlineData(8, 16, "06/10/2013")]
-        public void IsAgeInRangeTest(int ageStart, int ageEnd, string dob)
+        [InlineData(5, 15, true)]
+        [InlineData(8, 16, false)]
+        public void IsAgeInRangeTest(int ageStart, int ageEnd, bool expectedInRange)
         {
             //Arrange
-            Activity.GradeLevelStart = 1;
-            Activity.GradeLevelEnd = 12;
             var participationObject = Activity.GetParticipationObject(msgs, dc);
             participationObject.AgeStart = ageStart;
             participationObject.AgeEnd = ageEnd;
+            var dob = DateTime.Now.AddYears(-6);
 
             // Act
-            var isInRange = participationObject.IsAgeInRange(dob.ToDateTime());
+            var isInRange = participationObject.IsAgeInRange(dob);
 
             // Assert
-            if (dob.Equals("06/10/2020"))
-            {
-                Assert.False(isInRange);
-            }
-            else
-            {
-                Assert.True(isInRange);
-            }
-
+            Assert.Equal(expectedInRange, isInRange);
+            
         }
     }
 }

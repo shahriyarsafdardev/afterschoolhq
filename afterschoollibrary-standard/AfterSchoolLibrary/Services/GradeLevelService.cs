@@ -12,22 +12,15 @@ namespace AfterSchoolLibrary.Services
     {
         public static bool VerifyGradeLevel(this GradeLevel gradeLevel, FormQuestionAnswer formQuestionAnswer)
         {
-            var registrantGradeLevel = formQuestionAnswer.Text;
-            if (Helpers.Utilities.IsAlreadyJsonString(formQuestionAnswer.Text))
-            {
-                var data = Helpers.Utilities.GetKeyValuePairs(formQuestionAnswer.Text);
-                registrantGradeLevel = data.First().value;
-            }
-
-            return gradeLevel.Name.ToLower() == registrantGradeLevel.ToLower().Trim() || gradeLevel.Abbreviation.ToLower() == registrantGradeLevel.ToLower().Trim();
+            return VerifyGradeLevel(gradeLevel, formQuestionAnswer.Text); 
         }
 
         public static bool VerifyGradeLevel(this GradeLevel gradeLevel, string answer)
         {
             var registrantGradeLevel = answer;
-            if (Helpers.Utilities.IsAlreadyJsonString(answer))
+            if (Helpers.Utilities.IsAlreadyJsonString(registrantGradeLevel))
             {
-                var data = Helpers.Utilities.GetKeyValuePairs(answer);
+                var data = Helpers.Utilities.GetKeyValuePairs(registrantGradeLevel);
                 registrantGradeLevel = data.First().value;
             }
 
