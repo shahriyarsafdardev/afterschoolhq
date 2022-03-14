@@ -125,7 +125,7 @@
 }
 
 .manager-name {
-    font-family: Montserrat;
+    font-family: Montserrat, sans-serif;
     font-size: 18px;
     font-weight: bold;
     font-stretch: normal;
@@ -136,7 +136,7 @@
 }
 
 .manager-position {
-    font-family: Montserrat;
+    font-family: Montserrat, sans-serif;
     font-size: 14px;
     font-weight: normal;
     font-stretch: normal;
@@ -147,7 +147,7 @@
 }
 
 .welcome-text {
-    font-family: Montserrat;
+    font-family: Montserrat, sans-serif;
     font-size: 25px;
     font-weight: bold;
     font-stretch: normal;
@@ -159,7 +159,7 @@
 }
 
 .common-font {
-    font-family: Montserrat;
+    font-family: Montserrat, sans-serif;
     font-weight: normal;
     font-stretch: normal;
     font-style: normal;
@@ -745,7 +745,7 @@
     width: 65px;
     height: 13px;
     margin: 0 8px 5px;
-    font-family: Montserrat;
+    font-family: Montserrat, sans-serif;
     font-size: 10px;
     font-weight: normal;
     font-stretch: normal;
@@ -870,7 +870,6 @@
     width: 1.5em;
     height: 1.5em;
     color: #363839;
-    border: 1px solid #bdc1c6;
     border-radius: 4px;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -957,7 +956,7 @@
     padding: 12px 83px 12px 19px;
     border: solid 1px #b2b2b4;
     background-color: #ffffff;
-    font-family: Montserrat;
+    font-family: Montserrat, sans-serif;
     font-size: 18px;
     font-weight: 300;
     color: #282828;
@@ -1256,7 +1255,7 @@
 }
 
 .thought-header-1 {
-    font-family: Montserrat;
+    font-family: Montserrat, sans-serif;
     font-size: 28px;
     font-weight: 600;
     font-stretch: normal;
@@ -1268,7 +1267,7 @@
 }
 
 .thought-header-2 {
-    font-family: Montserrat;
+    font-family: Montserrat, sans-serif;
     font-size: 24px;
     font-weight: normal;
     font-stretch: normal;
@@ -1280,7 +1279,7 @@
 }
 
 .thought-header-3 {
-    font-family: Montserrat;
+    font-family: Montserrat, sans-serif;
     font-size: 18px;
     font-weight: 300;
     font-stretch: normal;
@@ -1292,7 +1291,7 @@
 }
 
 .form-login-sign {
-    font-family: Montserrat;
+    font-family: Montserrat, sans-serif;
     font-size: 16px;
     font-weight: 300;
     font-stretch: normal;
@@ -1304,7 +1303,7 @@
 }
 
 .form-login-welcome {
-    font-family: Montserrat;
+    font-family: Montserrat, sans-serif;
     font-size: 24px;
     font-weight: 600;
     font-stretch: normal;
@@ -1372,7 +1371,7 @@
 
 .btn-reset-pass {
     border-radius: 6px;
-    font-family: Montserrat;
+    font-family: Montserrat, sans-serif;
     font-size: 18px;
     font-weight: normal;
     font-stretch: normal;
@@ -1384,7 +1383,7 @@
 }
 
 .span-notice-forgot-pass {
-    font-family: Montserrat;
+    font-family: Montserrat, sans-serif;
     font-weight: 300;
     font-stretch: normal;
     font-style: italic;
@@ -1404,7 +1403,7 @@
 }
 
 .reset-pass-completed-msg-1 {
-    font-family: Montserrat;
+    font-family: Montserrat, sans-serif;
     font-size: 20px;
     font-weight: 300;
     font-stretch: normal;
@@ -1417,7 +1416,7 @@
 }
 
 .reset-pass-completed-msg-2 {
-    font-family: Montserrat;
+    font-family: Montserrat, sans-serif;
     font-size: 16px;
     font-weight: 300;
     font-stretch: normal;
@@ -1487,8 +1486,7 @@
     bottom: 20px;
     margin: 0 auto;
     color: #fff;
-    font-size: 10px;
-    font-family: Montserrat;
+    font-family: Montserrat, sans-serif;
     font-size: 12px;
     font-weight: 300;
     font-stretch: normal;
