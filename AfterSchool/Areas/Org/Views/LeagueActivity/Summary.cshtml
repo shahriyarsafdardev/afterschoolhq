@@ -1,17 +1,10 @@
 ﻿@model Activity
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
-    var actions = (List<WebSessionAction>)ViewBag.Actions;
     var registrants = Model.GetRegistrantActivities();
     decimal totalPaid = 0;
     int registrantCount = registrants.Sum(x => x.TotalSeats);
     int waitingListCount = Model.WaitingListSeats ?? 0;
-    //int waitingListCount = registrants.Sum(x => x.NumberOfWaitingListSeats.Value);
-
-    //if (registrants.Where(x => x.GetAmountPaid() > 0).Count() > 0)
-    //{
-    //    totalPaid = registrants.Where(x => x.DatePaid.HasValue).Sum(x => x.AmountPaid.Value);
-    //}
     totalPaid = registrants.Sum(x => x.GetAmountPaid());
 
     var dates = registrants.Select(x => SessionVariables.CurrentAccount.ConvertToAccountTimeZone(x.CreateDate.Value).ToShortDateString()).Distinct();
@@ -114,11 +107,6 @@
                     }
 
                 </div>
-
-                <div class="col-md-4">
-                    @{ Html.RenderPartial("_Actions", actions, new ViewDataDictionary() { { "account", SessionVariables.CurrentAccount } }); }
-                </div>
-
             </div>
         </div>
     </div>

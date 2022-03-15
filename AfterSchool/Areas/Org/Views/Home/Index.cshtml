@@ -1,7 +1,6 @@
 ﻿@model Account
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
-    var actions = (List<WebSessionAction>)ViewBag.Actions;
     var registrations = (List<Registration>)ViewBag.CurrentRegistrations;
     var totalPaid = (decimal)ViewBag.TotalPaid;
     int registrationCount = (int)ViewBag.RegistrationCount;
@@ -33,7 +32,7 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            Welcome @SessionVariables.CurrentUser.FirstName!
+            Welcome @SessionVariables.CurrentUser.FirstName
 
             @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.ActivitiesEdit))
              {
@@ -186,11 +185,6 @@
                         }
 
                     </div>
-
-                    <div class="col-lg-4 col-md-12">
-                        @{ Html.RenderPartial("_Actions", actions, new ViewDataDictionary() { { "account", SessionVariables.CurrentAccount } }); }
-                    </div>
-
                 </div>
             }
             

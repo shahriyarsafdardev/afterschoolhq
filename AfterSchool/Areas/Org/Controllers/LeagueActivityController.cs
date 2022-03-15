@@ -30,11 +30,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
 
             var activity = currentAccount.GetActivity(id.ToGuid());
-            var actions = WebSessionAction.LoadByActivityGroupId(activity.ID.Value, SessionVariables.CurrentAccount.ID.Value, 0, 15, msgs);
 
             ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
-            ViewBag.Actions = actions;
             return View(activity);
         }
 

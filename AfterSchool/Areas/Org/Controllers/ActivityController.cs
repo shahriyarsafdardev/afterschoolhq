@@ -35,29 +35,8 @@ namespace AfterSchool.Areas.Org.Controllers
             if (activity.IsEmpty())
                 return HttpNotFound();
 
-        var actions = WebSessionAction.LoadByAccountIdActivityIdWithActionType(
-            activity.ID.Value,
-            currentAccount.ID.Value,
-			new List<WebSessionActionType>()
-			{
-				WebSessionActionType.Published,
-				WebSessionActionType.Registered,
-				WebSessionActionType.Paid,
-				WebSessionActionType.Refunded,
-				WebSessionActionType.ManuallyPaid,
-				WebSessionActionType.ManuallyRefunded,
-				WebSessionActionType.ManuallyRegistered,
-                WebSessionActionType.Requested,
-                WebSessionActionType.Denied,
-                WebSessionActionType.Approved
-			},
-			0,
-            15,
-            msgs);
-
             ViewBag.ParticipationObject = activity.GetParticipationObject(msgs);
             ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
-            ViewBag.Actions = actions;
             ViewBag.Schedule = activity.GetSchedule(msgs);
             ViewBag.TotalPaid = activity.GetTotalAmountPaid(msgs);
             ViewBag.Messages = msgs;
