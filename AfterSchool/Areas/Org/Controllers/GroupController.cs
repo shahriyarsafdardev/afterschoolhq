@@ -72,10 +72,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var group = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
             var registrations = group.GetRegistrations(msgs: msgs);
-            var actions = WebSessionAction.LoadByActivityGroupId(group.ID.Value, currentAccount.ID.Value, 0, 15, msgs);
 
             ViewBag.Messages = msgs;
-            ViewBag.Actions = actions;
             ViewBag.Registrations = registrations;
             return View(group);
         }
