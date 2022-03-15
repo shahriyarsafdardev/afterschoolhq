@@ -323,7 +323,16 @@ function formatContactPhoneForDirectory() {
     }
 }
 
-function checkAndSearch(elem) {
+function checkAndSearch(elem) {   
+
+    if (isMobile) {
+        var name = $(elem).attr('name');
+        var filterValue = $(elem).attr('valueForFilter');
+        var lable = $(elem).parent().text().trim();
+        var tag = getTagHtml(name, filterValue, lable);
+        $('#tags-container-mobile-view').append(tag);
+    }
+
     page = 0;
     prepareSearchParams()
 }
@@ -355,40 +364,49 @@ function checkZip(value) {
 }
 
 function loadInitialTabs() {
-    loadTabs('grades');
-    loadTabs('ages');
-    loadTabs('gender');
-    loadTabs('services');
-    loadTabs('timing');
-    loadTabs('cost');
-    loadTabs('pricing');
-    loadTabs('starting');
-    loadTabs('other');
-    loadTabs('special-needs');
+    loadTabs('grades', 1);
+    loadTabs('ages', 1);
+    loadTabs('gender', 1);
+    loadTabs('services', 1);
+    loadTabs('timing', 1);
+    loadTabs('cost', 1);
+    loadTabs('pricing', 1);
+    loadTabs('starting', 1);
+    loadTabs('other', 1);
+    loadTabs('special-needs', 1);
+
+    if (isMobile) {
+        loadTabsForMobile();
+    }    
 }
 
-function loadTabs(name) {
+function loadTabs(name, pageInitialization) {
     var element = $('#header-' + name);
-    var isOpen = element.attr('isOpen');
-    if (isOpen === 'true') {
-        element.attr('isOpen', false);
-        $('#tags-container-' + name).hide();
-    }
-    else {
-        element.attr('isOpen', true);
-
+    var isOpen = element.attr('aria-expanded');
+    if (isOpen === 'true' || pageInitialization) {
         var tags = '';
         $('input:checkbox[name=' + name + ']:checked').each(function () {
             tags += getTagHtml(name, $(this).attr('valueForFilter'), $(this).parent().text().trim());
-        });
+        });        
 
-        $('#tags-container-' + name).html(tags).show();
+        $('#tags-container-' + name).html(tags).show();        
     }
+    else {
+        $('#tags-container-' + name).hide();
+    }
+}
+
+function loadTabsForMobile() {
+    var tags = '';
+    $('input:checkbox[name=grades]:checked,[name=ages]:checked,[name=gender]:checked,[name=services]:checked,[name=timing]:checked,[name=pricing]:checked,[name=cost]:checked,[name=starting]:checked,[name=other]:checked,[name=special-needs]:checked').each(function () {
+        tags += getTagHtml($(this).attr('name'), $(this).attr('valueForFilter'), $(this).parent().text().trim());
+    });
+    $('#tags-container-mobile-view').html('').append(tags);
 }
 
 function getTagHtml(tagContainer, id, lable) {
     var containerName = tagContainer.replaceAll(' ', '').toLowerCase();    
-    return `<span class="badge-identity-` + containerName + `-` + id + ` badge badge-pill badge-success text-small primary-bg-color directory-badge">` + lable +
+    return `<span class="badge-identity-` + containerName + `-` + id + ` badge badge-pill badge-success text-small primary-bg-color directory-badge margin-right-10px">` + lable +
         `<button type="button" class="close" data-dismiss="alert" aria-label="Close" onclick='return clearSpecificFilter("` + containerName + `", "` + id +`")'><i class="remove glyphicon glyphicon-remove-circle glyphicon-white"></i></button></span>`;
 }
 
@@ -403,6 +421,7 @@ function resetTags() {
     $('#tags-container-starting').html('');
     $('#tags-container-other').html('');
     $('#tags-container-special-needs').html('');
+    $('#tags-container-mobile-view').html('');
 }
 
 function mobileFilter() {
@@ -424,6 +443,7 @@ function showMobileFilters() {
     $('#directory-sidebar-icon').hide();
 
     $('#btn-mobile-filter').attr('isOpen', "1");
+    loadInitialTabs()
     isMobileFilterWindowOpened = true;    
 }
 

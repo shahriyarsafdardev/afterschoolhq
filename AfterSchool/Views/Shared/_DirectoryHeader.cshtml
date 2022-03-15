@@ -1,5 +1,5 @@
 ﻿@{
-    var primaryColor = ViewData.ContainsKey("primaryColor") && ViewData["primaryColor"] !=   ? ViewData["primaryColor"].ToString() : string.Empty;
+    var primaryColor = ViewData.ContainsKey("primaryColor") && ViewData["primaryColor"] != null ? ViewData["primaryColor"].ToString() : string.Empty;
     var website = ViewData.ContainsKey("website") && ViewData["website"] != null ? ViewData["website"].ToString() : string.Empty;
     var logoUrl = ViewData.ContainsKey("logoUrl") && ViewData["logoUrl"] != null ? ViewData["logoUrl"].ToString() : string.Empty;
 }
@@ -23,10 +23,14 @@
 </header>
 
 <header class="visible-sm visible-xs bg-color">
-    <div class="col-xs-10" style="padding: 10px;">
+    <div class="col-xs-6" style="padding: 10px;">
         <a href=@(website.IsNotEmpty() ? website : "")>
             <img src="@logoUrl" alt="AfterSchool HQ - Your home for afterschool experiences" style="height: 55px;" />
         </a>
+    </div>
+
+    <div class="language-select pull-right" style="background-color: @primaryColor; margin-top: 15px;">
+        @Html.Partial("_GoogleTranslateDropDown")
     </div>
 
     <div class="clearfix"></div>
