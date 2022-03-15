@@ -1901,7 +1901,6 @@
     <Content Include="Views\Shared\_Rollbar.cshtml" />
     <Content Include="Views\Shared\_RegActivitySchedule.cshtml" />
     <Content Include="Views\Shared\_ActivityScheduleHtml.cshtml" />
-    <Content Include="Views\AfterSchool\Index.cshtml" />
     <Content Include="Views\Shared\_LayoutPublic-AfterSchool.cshtml" />
     <Content Include="Views\Shared\_Modal.cshtml" />
     <Content Include="Views\SignUp\Confirm.cshtml" />
@@ -2088,7 +2087,6 @@
     <Folder Include="Areas\WebHooks\Views\Twilio\" />
     <Folder Include="Assets\img\psd" />
     <Folder Include="Uploads\" />
-    <Folder Include="Views\Home" />
     <Folder Include="Views\Indianapolis\" />
     <Folder Include="Views\Sitemap\" />
     <Folder Include="Views\User\" />
