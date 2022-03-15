@@ -835,9 +835,11 @@
     <Content Include="css\animate.min.css" />
     <Content Include="css\bootstrap.min.css" />
     <Content Include="css\ionicons.min.css" />
+    <Content Include="downloads\CFI70-CaseStudy.pdf" />
     <Content Include="eans.html" />
     <Content Include="esser.html" />
     <Content Include="fonts\ionicons.svg" />
+    <Content Include="home.html" />
     <Content Include="img\092515-SeattleHigh5-Globalist-JT006.jpg" />
     <Content Include="img\4k-wallpaper-adorable-blur-boy-1148998-small.jpg" />
     <Content Include="img\5e1cfc6e7fd5a.image.jpg" />
@@ -955,6 +957,7 @@
     <Content Include="img\welcome-back-arrow.png" />
     <Content Include="index-profiles.html" />
     <Content Include="index.html" />
+    <Content Include="ips.html" />
     <Content Include="joinips.html" />
     <Content Include="joinisyp.html" />
     <Content Include="iyi-providers.html" />
