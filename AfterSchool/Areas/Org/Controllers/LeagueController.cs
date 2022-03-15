@@ -125,9 +125,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 return RedirectToAction("publishwizard1", new { id = league.Uid });
 
             var registrations = aag.GetRegistrations();
-            var actions = WebSessionAction.LoadByActivityGroupId(league.ID.Value, SessionVariables.CurrentAccount.ID.Value, 0, 15, msgs);
             ViewBag.Messages = msgs;
-            ViewBag.Actions = actions;
             ViewBag.Registrations = registrations;
             ViewBag.AccountActivityGroup = aag;
             return View(league);

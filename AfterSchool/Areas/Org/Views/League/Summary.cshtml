@@ -1,13 +1,11 @@
 ﻿@model ActivityGroup
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
-    var actions = (List<WebSessionAction>)ViewBag.Actions;
     var registrations = (List<Registration>)ViewBag.Registrations;
     var aag = (AccountActivityGroup)ViewBag.AccountActivityGroup;
 
     decimal totalPaid = 0;
     int registrationCount = registrations.Count();
-    var activityCount = Model.GetActivityCount(null, Model.IsArchived, false, null);
 
     if (registrations.Where(x => x.DatePaid.HasValue).Any())
     {
@@ -15,9 +13,7 @@
     }
 
     var dates = registrations.OrderBy(x => x.CreateDate).Select(x => SessionVariables.CurrentAccount.ConvertToAccountTimeZone(x.CreateDate.Value).ToShortDateString()).Distinct();
-
-    var addUrl = Url.Action("editsetup", "leagueactivity", new { group = Model.Uid });
-} 
+}
 
 @{Html.RenderPartial("OrgAccountHeader");}
 
@@ -37,7 +33,7 @@
             {
                 <div class="widget">
                     <div class="widget-tile text-medium-small">
-                        <p>Welcome @SessionVariables.CurrentUser.FirstName!</p>
+                        <p>Welcome @SessionVariables.CurrentUser.FirstName</p>
                         <p>                            
                             <ol>
                                 <li><a href="@Url.Action("edit", "league", new { id = Model.Uid })">Setup final details</a> to enable parents to register</li>
@@ -74,7 +70,6 @@
                                 </div>
                                 <div class="icon"><span class="s7-cash"></span></div>
                             </div>
-
                         </div>
 
                         @if (registrationCount > 0)
@@ -92,16 +87,9 @@
 
                             </div>
                         }
-
                     </div>
-
-                    <div class="col-md-4">
-                        @{ Html.RenderPartial("_Actions", actions, new ViewDataDictionary() { { "account", SessionVariables.CurrentAccount } }); }
-                    </div>
-
                 </div>
             }
-
         </div>
     </div>
 </div>

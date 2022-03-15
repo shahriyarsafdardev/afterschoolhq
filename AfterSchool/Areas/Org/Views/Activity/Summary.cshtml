@@ -2,7 +2,6 @@
 @{
     var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
     var msgs = (SystemMessages)ViewBag.Messages;
-    var actions = (List<WebSessionAction>)ViewBag.Actions;
     var registrants = Model.GetRegistrantActivities();
     var schedule = (ActivitySchedule)ViewBag.Schedule;
     var totalPaid = (decimal)ViewBag.TotalPaid;
@@ -183,8 +182,6 @@
                             </div>
                         </div>
                     }
-
-                    @{ Html.RenderPartial("_Actions", actions, new ViewDataDictionary() { { "account", SessionVariables.CurrentAccount } }); }
                 </div>
 
             </div>

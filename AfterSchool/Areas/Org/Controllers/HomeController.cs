@@ -41,26 +41,6 @@ namespace AfterSchool.Areas.Org.Controllers
             if (account.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, null, null, null, null, null) == 0 && (account.AccountTypeId != AccountType.School || account.GetExternalLeagueInviteCount() == 0))
                 return RedirectToAction("getstarted");                      
 
-            
-             var actions = WebSessionAction.LoadByAccountIdWithActionType(
-                account.ID.Value,
-                new List<WebSessionActionType>()
-                {
-                    WebSessionActionType.Published,
-                    WebSessionActionType.Registered,
-                    WebSessionActionType.Paid,
-                    WebSessionActionType.Refunded,
-                    WebSessionActionType.ManuallyPaid,
-                    WebSessionActionType.ManuallyRefunded,
-                    WebSessionActionType.ManuallyRegistered,
-                    WebSessionActionType.Requested,
-                    WebSessionActionType.Denied,
-                    WebSessionActionType.Approved
-                },
-                0,
-                10,
-                msgs);
-
             var activityCount = account.GetActivityCount(
                 SessionVariables.AccountUserType,
                 currentUser,
@@ -77,7 +57,6 @@ namespace AfterSchool.Areas.Org.Controllers
             HandleTempMessages(msgs);
 
             ViewBag.Messages = msgs;
-            ViewBag.Actions = actions;
             ViewBag.HasVisitorAccountsToApprove = account.GetRequestedVisitorAccountsCount(msgs) > 0;
             ViewBag.HasOutstandingLeagueInvites = account.GetExternalLeagueInviteCount(msgs) > 0;
             ViewBag.TotalPaid = totalPaid;
