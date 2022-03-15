@@ -6,7 +6,7 @@
     var regHeaderStyle = "";
     var logoUrl = "";
     var isFollowing = false;
-    var midColSpan = 6;
+    var midColSpan = 7;
     var showFollow = false;
     var showUnfollow = true;
     var hideButtons = false;
@@ -72,10 +72,10 @@
 {
     if (currentUser.IsNotEmpty() && currentUser.HasAccessTo(Model.Account) && Request["edit"] == "1")
     {
-        var redirectUrl = $"{Url.Action("style", "account", new { area = "org", isfullscreen = 1, returnurl = Request.Url })}#{anchor}";
+        var redirectUrl = $"{Url.Action("style", "account", new {area = "org", isfullscreen = 1, returnurl = Request.Url})}#{anchor}";
 
         <span>
-            <a href="@Url.Action("switch", "logout", new { id = Model.Account.Uid, redirectUrl = redirectUrl })#@anchor"
+            <a href="@Url.Action("switch", "logout", new {id = Model.Account.Uid, redirectUrl = redirectUrl})#@anchor"
                class="btn btn-alt7 btn-sm">
                 Edit &raquo;
             </a>
@@ -88,7 +88,7 @@
     @if (!Model.Account.HasAccountProfile() && currentUser.IsNotEmpty() && currentUser.HasAccessTo(Model.Account))
     {
         <div class="profile-edit-bar text-center">
-            <a href="@Url.Action("style", "account", new { area = "org", isfullscreen = 1, returnurl = Request.Url })"
+            <a href="@Url.Action("style", "account", new {area = "org", isfullscreen = 1, returnurl = Request.Url})"
                class="btn btn-alt7 btn-lg btn-block">
                 Customize your Profile &raquo;
             </a>
@@ -106,19 +106,24 @@
             {
                 <div class="col-lg-2 col-md-12">
                     <div class="logo-wrapper">
-                        <img src="@logoUrl" onclick="location.href='@Model.Account.HomePageUrl'" class="pointer" />
+                        <img src="@logoUrl" onclick="location.href='@Model.Account.HomePageUrl'" class="pointer"/>
                     </div>
                 </div>
             }
 
             <div class="col-lg-@midColSpan col-md-6 col-sm-12">
-
+                @if (Model.Account.Name != Model.Title && Model.AccountProfile?.Title != Model.Title)
+                {
+                    <a href="@Model.Account.HomePageUrl" class="text-medium-small notranslate activity-account-name">
+                        @Model.Account.Name
+                    </a>
+                }
 
                 <h1 class="activity-title notranslate">
                     <span>@Html.Raw(Model.Title)</span>
                     @if (Model.SessionName.IsNotEmpty())
                     {
-                        @: - @(((ParticipationObject)ViewBag.Session).Name)
+                        @: - @(((ParticipationObject) ViewBag.Session).Name)
                     }
                     @if (Model.IsDemo)
                     {
@@ -126,146 +131,107 @@
                     }
                 </h1>
 
-                @if (Model.Account.Name != Model.Title && Model.AccountProfile?.Title != Model.Title)
-                {
-                    <p class="text-medium-small notranslate">
-                        @Model.Account.Name
-                    </p>
-                }
 
-                @if (Model.Headline.IsNotEmpty())
-                {
-                    <p class="reg-header-headline">
-                        @Model.Headline
-                    </p>
-                }
+                <div class="reg-icon-container">
+                    <div>
+                        @if (Model.NumberOfHoursEnrolled > 0)
+                        {
+                            <span class="icon-span icon-span-mobile" title="@Model.NumberOfHoursEnrolledFormatted hrs of education provided">
+                                <svg viewBox="0 0 24 24">
+                                    <use href="~/Assets/img/clock.svg#svg"></use>
+                                </svg>
+                                @Model.NumberOfHoursEnrolledFormatted hrs of education provided
+                            </span>
+                        }
+                        @if (Model.NumberOfStudentsServed > 0)
+                        {
+                            <span class="icon-span icon-span-mobile" title="@Model.NumberOfStudentsServedFormatted students served">
+                                <svg viewBox="0 0 512 512">
+                                    <use href="~/Assets/img/graduation-cap.svg#svg"></use>
+                                </svg>
+                                @Model.NumberOfStudentsServedFormatted students served
+                            </span>
+                        }
+                        @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsOpenDuringCovid)
+                        {
+                            <span class="icon-span icon-span-mobile" title="Open During COVID">
+                                <svg viewBox="0 0 24 24">
+                                    <use href="~/Assets/img/clock.svg#svg"></use>
+                                </svg>
+                                Open During COVID
+                            </span>
+                        }
+                        @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsVirtualProgram)
+                        {
+                            <span class="icon-span icon-span-mobile" title="Virtual">
+                                <icon class="s7-monitor registration-page-icon old-font-icons"></icon>
+                                Virtual
+                            </span>
+                        }
+                        @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsELearningCenter)
+                        {
+                            <span class="icon-span icon-span-mobile" title="E-Learning Center">
+                                <svg viewBox="0 0 24 24">
+                                    <use href="~/Assets/img/clock.svg#svg"></use>
+                                </svg>
+                                E-Learning Center
+                            </span>
+                        }
+                        @if (Model.Followers > 0)
+                        {
+                            <span class="icon-span icon-span-mobile" title=" @Model.FollowersFormatted follower@(Model.Followers == 1 ? "" : "s")">
+                                <svg viewBox="0 0 24 24">
+                                    <use href="~/Assets/img/user.svg#svg"></use>
+                                </svg>
+                                @Model.FollowersFormatted follower@(Model.Followers == 1 ? "" : "s")
+                            </span>
+                        }
+                    </div>
 
-                <div>
-                    @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsOpenDuringCovid)
+
+                    @if (Model.Headline.IsNotEmpty())
                     {
-                        <span class="profile-badge badge badge-darkgray profile-badge text-small">
-                            <icon class="s7-clock"></icon>
-                            Open During COVID
-                        </span>
-                    }
-                    @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsVirtualProgram)
-                    {
-                        <span class="profile-badge badge badge-darkgray profile-badge text-small">
-                            <icon class="s7-monitor"></icon>
-                            Virtual
-                        </span>
-                    }
-                    @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsELearningCenter)
-                    {
-                        <span class="profile-badge badge badge-darkgray profile-badge text-small">
-                            <icon class="s7-clock"></icon>
-                            E-Learning Center
-                        </span>
-                    }
-                    @if (Model.Followers > 0)
-                    {
-                        <span class="profile-badge badge badge-darkgray profile-badge text-small">
-                            <icon class="s7-user"></icon>
-                            @Model.FollowersFormatted follower@(Model.Followers == 1 ? "" : "s")
-                        </span>
-                    }
-                    @if (Model.NumberOfHoursEnrolled > 0)
-                    {
-                        <span class="profile-badge badge badge-darkgray profile-badge text-small">
-                            <icon class="s7-clock"></icon>
-                            @Model.NumberOfHoursEnrolledFormatted hrs of education provided
-                        </span>
-                    }
-                    @if (Model.NumberOfStudentsServed > 0)
-                    {
-                        <span class="profile-badge badge badge-darkgray profile-badge text-small">
-                            <icon class="s7-study"></icon>
-                            @Model.NumberOfStudentsServedFormatted students served
-                        </span>
+                        <p class="reg-header-headline">
+                            @Model.Headline
+                        </p>
                     }
                 </div>
-
             </div>
 
             @if (!hideButtons)
             {
-                var followButtonAttrs = $"class=\"btn btn-header-action transparent-bg {(isFollowing ? "hide" : "")} md-trigger\" data-modal=\"modal-login\" onclick=\"setLoginAction(function (callback) {{ follow(callback); }}, true)\" id=\"btn-follow\"";
-
-                if (currentUser.IsNotEmpty())
-                {
-                    followButtonAttrs = $"onclick=\"follow()\" class=\"transparent-bg btn btn-header-action {(isFollowing ? "hide" : "")}\" id=\"btn-follow\"";
-                }
-
-                <div class="col-lg-4 col-md-6 col-sm-12">
-                    <div class="padding-v-20 text-center">
-
-                        <div>
-                            <div class="btn-group @(!isFollowing ? "hide" : "")" style="width:100%;" id="btn-unfollow">
-                                <button class="btn btn-header-action dropdown-toggle transparent-bg" data-toggle="dropdown">
-                                    Following
-                                    <span class="caret"></span>
-                                </button>
-                                <div class="dropdown-menu pointer" style="width:100%;">
-                                    <button class="btn btn-header-action transparent-bg" onclick="unfollow()">
-                                        <span class="">Unfollow</span>
-                                    </button>
-                                </div>
-                            </div>
-                            <button @Html.Raw(followButtonAttrs)>
-                                <i class="icon icon-left s7-add-user"></i>
-                                Follow
-                            </button>
-                        </div>
-
-                        <button class="btn btn-header-action btn-share transparent-bg">
-                            <i class="icon icon-left s7-share"></i>
-                            Share
-                        </button>
-
-                        @if (Model.ParticipationObject.IsEmpty())
-                        {
-                            if (!Model.Account.IsClaimed)
+                <div class="col-lg-3 col-md-6 col-sm-12">
+                    <div class="padding-v-20 text-center" id="activityHeaderbtns">
+                        <div>@RenderViewActivitiesButton(isInEditMode)</div>
+                        <div style="margin-top:10px" class="icons-div">
+                            @if (!Model.Account.IsClaimed)
                             {
-                                <button id="model-claim" class="btn btn-header-action md-trigger btn-danger transparent-bg" data-modal="modal-claim-profile" onclick="resetClaimForm()">
+                                <span id="model-claim" class="icon-span" data-modal="modal-claim-profile" onclick="resetClaimForm()">
                                     <i class="icon icon-left s7-door-lock"></i>
-                                    <span class="">Claim Profile</span>
-                                </button>
+                                </span>
                             }
-
-                            if (Model.Account.ContactFormId.HasValue)
-                            {
-                                <a href="@Model.Account.ContactUrl" class="btn btn-header-action transparent-bg">
-                                    <i class="icon icon-left s7-mail"></i>
-                                    <span class="">Contact Us</span>
-                                </a>
-                            }
-                            else
-                            {
-                                <button class="btn btn-header-action md-trigger transparent-bg" data-modal="modal-contact-provider" onclick="resetContactProviderForm()">
-                                    <i class="icon icon-left s7-mail"></i>
-                                    <span class="">Contact Us</span>
-                                </button>
-                            }
-
-                            if (Model.Account.IsClaimed)
-                            {
-                                <div>
-                                    <div class="btn-group" style="width:100%;">
-                                        <button class="btn btn-header-action dropdown-toggle transparent-bg" data-toggle="dropdown">
-                                            <i class="s7-more"></i>
-                                            More
-                                            <span class="caret"></span>
-                                            <span class="sr-only">Toggle Dropdown</span>
-                                        </button>
-                                        <div class="dropdown-menu pointer" style="width:100%;">
-                                            @RenderViewActivitiesButton(isInEditMode)
-                                            @RenderMakeAPaymentButton(currentUser)
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-                        }
-
+                            <span class="icon-span @(!isFollowing ? "" : "hide")" id="btn-follow" style="cursor:pointer" onclick="follow()" title="Follow">
+                                <svg viewBox="0 0 24 24">
+                                    <use href="~/Assets/img/user-add.svg#svg"></use>
+                                </svg>
+                            </span>
+                            <span class="icon-span @(!isFollowing ? "hide" : "")" id="btn-unfollow" style="cursor:pointer" onclick="unfollow()" title="Unfollow">
+                                <svg viewBox="0 0 24 24">
+                                    <use href="~/Assets/img/user-remove.svg#svg"></use>
+                                </svg>
+                            </span>
+                            <span class="icon-span btn-share" style="cursor:pointer" title="Share">
+                                <svg viewBox="0 0 24 24">
+                                    <use href="~/Assets/img/share.svg#svg"></use>
+                                </svg>
+                            </span>
+                            @RenderMakeAPaymentButton(currentUser)
+                            <span class="icon-span" title="Contact" style="cursor:pointer" onclick="@(Model.Account.ContactFormId.HasValue ? "location.href='" + @Model.Account.ContactUrl + "'" : "resetContactProviderForm()")">
+                                <svg viewBox="0 0 24 24">
+                                    <use href="~/Assets/img/envelope.svg#svg"></use>
+                                </svg>
+                            </span>
+                        </div>
                     </div>
                     <div class="clearfix"></div>
                 </div>
@@ -291,13 +257,11 @@
             <div class="row">
                 <div class="col-md-12">
                     <div>
-                        @{ Html.RenderPartial(
-                                  "~/Views/Shared/Registration/_ShareLinks.cshtml",
-                                  new ViewDataDictionary() {
-                                   { "ShareObject", shareObject },
-                                   { "ShareUrl", shareUrl }
-}
-                           ); }
+                        @{ Html.RenderPartial("~/Views/Shared/Registration/_ShareLinks.cshtml", new ViewDataDictionary
+                           {
+                               {"ShareObject", shareObject},
+                               {"ShareUrl", shareUrl}
+                           }); }
                     </div>
                 </div>
             </div>
@@ -343,7 +307,7 @@
                             }
                         </div>
                         <div class="form-group claim-profile-submit text-center">
-                            <button type="button" id="btn-claim-profile" class="btn btn-primary btn-lg btn-block" onclick="claimProfile()">Claim Profile  &raquo;</button>
+                            <button type="button" id="btn-claim-profile" class="btn btn-primary btn-lg btn-block" onclick="claimProfile()">Claim Profile &raquo;</button>
                         </div>
                     </div>
                     <div id="claim-profile-done" class="hide">
@@ -542,6 +506,13 @@
         )
     }
 
+    function addLogAndRedirect(url,text) {
+        $.get('@Url.Action("addlogforurlclick", "services")?url=' + url+'&buttonText='+text+'&id=@Model.Account.ID', function (data) {
+                  window.location.href = url;
+        });
+
+    }
+
 </script>
 
 @helper RenderViewActivitiesButton(bool isInEditMode)
@@ -550,12 +521,22 @@
     {
         if (!isInEditMode || Model.Account.HasActivities())
         {
-            <button onclick="location.href='@Model.Account.BrowseUrl'" class="btn btn-header-action transparent-bg">
-                <i class="icon icon-left s7-gleam"></i>
-                <span class="">
-                    View @UILabel.ActivityLabel(ActivityType.Activity, true)
-                </span>
-            </button>
+            if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.RegistrationUrl.IsNotEmpty())
+            {
+                <button onclick="addLogAndRedirect('@Model.AccountProfile.RegistrationUrl', '@Model.AccountProfile.ButtonText')" class="btn btn-header-action btn-view-all">
+                    <span class="">
+                        @(Model.AccountProfile.ButtonText) <i class="fa fa-external-link"></i>
+                    </span>
+                </button>
+            }
+            else
+            {
+                <button onclick="location.href='@Model.Account.BrowseUrl'" class="btn btn-header-action btn-view-all">
+                    <span class="">
+                        View All @UILabel.ActivityLabel(ActivityType.Activity, true)
+                    </span>
+                </button>
+            }
         }
     }
 }
@@ -570,30 +551,32 @@
 
             if (!currentUser.IsActive)
             {
-                payUrl = Url.Action("confirm", "signup", new { id = currentUser.Uid, returnurl = payUrl });
+                payUrl = Url.Action("confirm", "signup", new {id = currentUser.Uid, returnurl = payUrl});
             }
 
-            <button onclick="location.href='@payUrl'" class="btn btn-header-action transparent-bg">
-                <i class="icon icon-left s7-credit"></i>
-                <span class="">Make A Payment</span>
-            </button>
+            <span class="icon-span" style="cursor:pointer" onclick="location.href='@payUrl'" title="Make payment">
+                <svg viewBox="0 0 24 24">
+                    <use href="~/Assets/img/credit-card.svg#svg"></use>
+                </svg>
+            </span>
         }
         else
         {
-            <button type="button" class="btn btn-header-action md-trigger transparent-bg" data-modal="modal-login" onclick="setLoginRedirect('@Model.Account.PayUrl', true)">
-                <i class="icon icon-left s7-credit"></i>
-                <span class="">Make A Payment</span>
-            </button>
+            <span class="icon-span" style="cursor:pointer" onclick="setLoginRedirect('@Model.Account.PayUrl', true)" title="Make payment">
+                <svg viewBox="0 0 24 24">
+                    <use href="~/Assets/img/credit-card.svg#svg"></use>
+                </svg>
+            </span>
         }
     }
     else if (currentUser.IsNotEmpty() && Model.Account.OwnerId == currentUser.ID && !Model.Account.CanProcessPayments())
     {
-        var redirectUrl = Url.Action("paymentsoptions", "account", new { area = "org", isfullscreen = 1, source = "profile" });
+        var redirectUrl = Url.Action("paymentsoptions", "account", new {area = "org", isfullscreen = 1, source = "profile"});
 
-        <a href="@Url.Action("switch", "logout", new { id = Model.Account.Uid, redirectUrl = redirectUrl })"
-           class="btn btn-header-action-callout">
-            <i class="icon icon-left s7-credit"></i>
-            Enable Payments
-        </a>
+        <span class="icon-span" style="cursor:pointer" onclick="location.href='@Url.Action("switch", "logout", new {id = Model.Account.Uid, redirectUrl = redirectUrl})'" title="Make payment">
+            <svg viewBox="0 0 24 24">
+                <use href="~/Assets/img/credit-card.svg#svg"></use>
+            </svg>
+        </span>
     }
 }

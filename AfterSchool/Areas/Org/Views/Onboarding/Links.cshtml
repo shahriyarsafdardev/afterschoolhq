@@ -13,6 +13,13 @@
     var isDirectoryAccountProvider = (bool)ViewBag.IsDirectoryAccountProvider;
 }
 
+<style>
+    .popover {
+        color: #494949;
+        font-family: 'Montserrat', sans-serif;
+    }
+</style>
+
 <div class="row main-content main-content-welcome-pages">
     <div class="welcome-box-width">
         <div class="welcome-outer-ring">
@@ -23,7 +30,7 @@
                 <form class="form form-horizontal" method="post" action="@Url.Action("links", "onboarding")">
 
                     @{ Html.RenderPartial("~/Views/Shared/_Loaders.cshtml",
-                                   new ViewDataDictionary() {
+                        new ViewDataDictionary() {
                                { "count", 6 },
                                { "activeDotNumber", 6 }
                        });
@@ -53,7 +60,9 @@
                         <div class="clearfix"></div>
 
                         <div class="col-md-12 onboarding-form-group @(profile.RegistrationUrl.IsNotEmpty() ? "": "hide")" id="regUrlDiv">
-                            <label class="onboarding-lable">REGISTRATION OR LEARN MORE URL <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="This link will be displayed in a button on your Provider Profile for parents to access." data-placement="top" style="font-size: 14px; color: #777;"></i></label>
+                            <label class="onboarding-lable">REGISTRATION OR LEARN MORE URL 
+                                <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="This link will be displayed in a button on your Provider Profile for parents to access." data-placement="top" style="font-size: 14px; color: #777;"></i>
+                            </label>
                             <input type="text" class="form-control onboarding-input" name="registrationurl" id="registrationurl" value="@profile.RegistrationUrl" placeholder="https://your-website.com/register" title="This link will be displayed in a button on your Provider Profile for parents to access." style="height: 44px;" onblur="makeRadioRequired()" />
                         </div>
                         <div class="clearfix"></div>

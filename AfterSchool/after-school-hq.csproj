@@ -774,6 +774,14 @@
     <Content Include="Assets\css\media_sm.css" />
     <Content Include="Assets\css\media_xs.css" />
     <Content Include="Assets\css\survey.css" />
+    <Content Include="Assets\img\credit-card.svg" />
+    <Content Include="Assets\img\envelope.svg" />
+    <Content Include="Assets\img\share.svg" />
+    <Content Include="Assets\img\user-remove.svg" />
+    <Content Include="Assets\img\user-add.svg" />
+    <Content Include="Assets\img\clock.svg" />
+    <Content Include="Assets\img\graduation-cap.svg" />
+    <Content Include="Assets\img\user.svg" />
     <Content Include="Assets\js\ahq-directory-map.js" />
     <Content Include="Assets\js\ahq-directory-search.js" />
     <Content Include="Assets\img\alert-2.svg" />
