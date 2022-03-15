@@ -926,14 +926,6 @@
     <Content Include="img\logo-vertical.png" />
     <Content Include="img\logo-white.png" />
     <Content Include="img\logo.png" />
-    <Content Include="img\man-with-backpack.jpg" />
-    <Content Include="img\mccoy-color-1.jpg" />
-    <Content Include="img\mccoy-color-2.jpg" />
-    <Content Include="img\mccoy-color.jpg" />
-    <Content Include="img\mccoy-header.png" />
-    <Content Include="img\mike-lee.png" />
-    <Content Include="img\musical-instruments-english.jpg" />
-    <Content Include="img\myIPS Logo.jpg" />
     <Content Include="img\parent-icon.png" />
     <Content Include="img\patricia-prudente-eo0VBI3Q8Ss-unsplash.jpg" />
     <Content Include="img\pencil-banner.jpg" />
@@ -942,14 +934,7 @@
     <Content Include="img\red-map-icon-large.png" />
     <Content Include="img\s-weinbrecht.png" />
     <Content Include="img\san.png" />
-    <Content Include="img\Screen Shot 2019-09-03 at 3.29.56 PM.png" />
-    <Content Include="img\Screen Shot 2019-09-03 at 3.31.16 PM.png" />
-    <Content Include="img\Screen Shot 2020-08-25 at 2.36.03 PM-1.png" />
-    <Content Include="img\Screen Shot 2020-08-25 at 2.36.03 PM.png" />
-    <Content Include="img\Screen Shot 2020-08-28 at 5.14.32 PM-1.png" />
-    <Content Include="img\Screen Shot 2020-08-28 at 5.14.32 PM.png" />
     <Content Include="img\Screen Shot 2020-09-23 at 4.17.41 PM.png" />
-    <Content Include="img\Screen Shot 2020-10-06 at 11.52.42 AM.png" />
     <Content Include="img\search.png" />
     <Content Include="img\smartmockups_kkzyv86k.jpg" />
     <Content Include="img\smiling-group.png" />
@@ -970,7 +955,6 @@
     <Content Include="img\welcome-back-arrow.png" />
     <Content Include="index-profiles.html" />
     <Content Include="index.html" />
-    <Content Include="ips.html" />
     <Content Include="joinips.html" />
     <Content Include="joinisyp.html" />
     <Content Include="iyi-providers.html" />
