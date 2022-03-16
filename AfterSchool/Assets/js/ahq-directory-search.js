@@ -17,6 +17,7 @@
 
     if (isMobile) {
         $('#container-show-filter-button').show();
+        $('#main-view-container').removeClass('display-fl');
     } else {
         $('#filters').show();
         $('#container-show-map-chk').show();
