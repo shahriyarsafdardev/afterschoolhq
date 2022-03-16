@@ -2750,8 +2750,8 @@ namespace AfterSchoolLibrary.Services
                             response.AgeEnd = row["AgeEnd"].IsNotEmpty() ? row["AgeEnd"].ToString() : null;
                             response.GradeStart = row["GradeLevelStart"].IsNotEmpty() ? row["GradeLevelStart"].ToString() : null;
                             response.GradeEnd = row["GradeLevelEnd"].IsNotEmpty() ? row["GradeLevelEnd"].ToString() : null;
-                            response.CostLow = row["CostLow"].IsNotEmpty() ? row["CostLow"].ToString() : null;
-                            response.CostHigh = row["CostHigh"].IsNotEmpty() ? row["CostHigh"].ToString() : null;
+                            response.CostLow = row["CostLow"].IsNotEmpty() ? GetCost(row["CostLow"].ToString()) : "Free";
+                            response.CostHigh = row["CostHigh"].IsNotEmpty() ? GetCost(row["CostHigh"].ToString()) : "Free";
 
                             response.Priority = row["Priority"].IsNotEmpty() ? Convert.ToInt32(row["Priority"]) : 0;
                             response.TotalDifference = accountDataTable.Columns.Contains("TotalDifference") && row["TotalDifference"].IsNotEmpty() ? Convert.ToDecimal(row["TotalDifference"]) : 0;
@@ -2797,6 +2797,15 @@ namespace AfterSchoolLibrary.Services
             }
 
             return null;
+        }
+
+        public static string GetCost(string value)
+        {
+            Decimal d = Convert.ToDecimal(value, CultureInfo.InvariantCulture);
+            if (d <= 0)
+                return "Free";
+            // represent Decimal with 2 digits after decimal point
+            return String.Format("${0}", d.ToString("F2"));
         }
 
         #endregion
