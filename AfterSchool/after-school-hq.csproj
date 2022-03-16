@@ -775,7 +775,9 @@
     <Content Include="Assets\css\media_xs.css" />
     <Content Include="Assets\css\survey.css" />
     <Content Include="Assets\img\envelope.svg" />
+    <Content Include="Assets\img\filter.svg" />
     <Content Include="Assets\img\share.svg" />
+    <Content Include="Assets\img\unlock.svg" />
     <Content Include="Assets\img\user-remove.svg" />
     <Content Include="Assets\img\user-add.svg" />
     <Content Include="Assets\img\clock.svg" />
@@ -812,7 +814,6 @@
     <Content Include="img\billy2.png" />
     <Content Include="img\darye.png" />
     <Content Include="img\fee.png" />
-    <Content Include="img\filter.svg" />
     <Content Include="img\frank-mckenna-LhOjrOlcLx4-unsplash.jpg" />
     <Content Include="img\gabriel-baranski-vGICUyYW2CE-unsplash.jpg" />
     <Content Include="img\handshake-icon.png" />
