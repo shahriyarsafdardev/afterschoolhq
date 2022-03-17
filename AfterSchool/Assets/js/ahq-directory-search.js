@@ -1,17 +1,17 @@
 ﻿function directoryPageLoad() {
-    // we need to show the filter button, once js will get loaded, to avoid any js related error    
+    // we need to show the filter button, once js will get loaded, to avoid any js related error
+    $("#img-mobile-filter").removeClass("hide");
 
     $("#search-container").scroll(function () {
-        if (isReachedScrollEnd == false && 
+        if (isReachedScrollEnd == false &&
             isMobileFilterWindowOpened == false &&
-            (($(this).scrollTop() + $(this).innerHeight() + 1) >= $(this)[0].scrollHeight)) //+1 to adjust height because of contact us button at bottom
-        { 
+            (($(this).scrollTop() + $(this).innerHeight() + 1) >= $(this)[0].scrollHeight)) { //+1 to adjust height because of contact us button at bottom
             loadFiltersAndInitiateSearch();
         }
     });
 
     loadFiltersAndInitiateSearch();
-    loadInitialTabs();    
+    loadInitialTabs();
 
     if (isMobile) {
         $('#container-show-filter-button').show();
@@ -26,13 +26,13 @@
 }
 
 function showModalIsyp() {
-    $('#modal-isyp-intro').addClass('md-show');
-    $('#blured-bg').addClass('blur-bg');
+    $('#modal-isyp-prompt').removeClass('display-none').addClass('display-block');
+    $('#modal-isyp-background').removeClass('display-none').addClass('display-block');
 }
 
 function closeModalIsyp() {
-    $('#modal-isyp-intro').removeClass('md-show');
-    $('#blured-bg').removeClass('blur-bg');
+    $('#modal-isyp-prompt').removeClass('display-block').addClass('display-none');
+    $('#modal-isyp-background').removeClass('display-block').addClass('display-none');
 }
 
 function submitContactForDirectory() {
@@ -70,8 +70,7 @@ function submitContactForDirectory() {
                     message: 'Your message has been sent.',
                     success: true
                 });
-            }
-            else {
+            } else {
                 var text = "";
                 for (var message of data.messages) {
                     text = text + message.Text;
@@ -110,8 +109,13 @@ function prepareSearchParams() {
     var comma_delimited_starting = '';
     var comma_delimited_other = '';
     var comma_delimited_special = '';
-    
-    search = txtSearch.val();
+
+    if (isMobile) {
+        search = txtSearchMobile.val();
+    } else {
+        search = txtSearch.val();
+    }
+
     if (search && search.length > 0) {
         mainUrl += `search_${search},`;
     }
@@ -316,9 +320,13 @@ function formatContactPhoneForDirectory() {
         var middle = input.substring(3, 6);
         var last = input.substring(6, 10);
 
-        if (input.length > 6) { inputElement.value = `(${zip}) ${middle} ${last}`; } //(xxx) xxx xxxx
-        else if (input.length > 3) { inputElement.value = `(${zip}) ${middle}`; }
-        else if (input.length > 0) { inputElement.value = `(${zip}`; }
+        if (input.length > 6) {
+            inputElement.value = `(${zip}) ${middle} ${last}`; //(xxx) xxx xxxx
+        } else if (input.length > 3) {
+            inputElement.value = `(${zip}) ${middle}`;
+        } else if (input.length > 0) {
+            inputElement.value = `(${zip}`;
+        }
     }
 }
 
@@ -359,7 +367,9 @@ function checkZip(value) {
     //.. https://stackoverflow.com/a/7185241/5816119
     //.. (in order) US, IN, UK
     var zipCodePatternList = [/^\d{5}([\-]?\d{4})?$/, /^\d{6}$/, /^(GIR|[A-Z]\d[A-Z\d]??|[A-Z]{2}\d[A-Z\d]??)[ ]??(\d[A-Z]{2})$/]
-    return zipCodePatternList.some(function (rx) { return rx.test(value); });
+    return zipCodePatternList.some(function (rx) {
+        return rx.test(value);
+    });
 }
 
 function loadInitialTabs() {
@@ -386,9 +396,9 @@ function loadTabs(name, pageInitialization) {
         var tags = '';
         $('input:checkbox[name=' + name + ']:checked').each(function () {
             tags += getTagHtml(name, $(this).attr('valueForFilter'), $(this).parent().text().trim());
-        });        
+        });
 
-        $('#tags-container-' + name).html(tags).show();        
+        $('#tags-container-' + name).html(tags).show();
     }
     else {
         $('#tags-container-' + name).hide();
@@ -406,21 +416,20 @@ function loadTabsForMobile() {
 function getTagHtml(tagContainer, id, lable) {
     var containerName = tagContainer.replaceAll(' ', '').toLowerCase();    
     return `<span class="badge-identity-` + containerName + `-` + id + ` badge badge-pill badge-success text-small primary-bg-color directory-badge margin-right-10px">` + lable +
-        `<button type="button" class="close" data-dismiss="alert" aria-label="Close" onclick='return clearSpecificFilter("` + containerName + `", "` + id +`")'><i class="remove glyphicon glyphicon-remove-circle glyphicon-white"></i></button></span>`;
+        `<button type="button" class="close" data-dismiss="alert" aria-label="Close" onclick='return clearSpecificFilter("` + containerName + `", "` + id + `")'><i class="remove glyphicon glyphicon-remove-circle glyphicon-white"></i></button></span>`;
 }
 
 function resetTags() {
     $('#tags-container-grades').html('');
     $('#tags-container-ages').html('');
     $('#tags-container-gender').html('');
-    $('#tags-container-services').html(''); 
+    $('#tags-container-services').html('');
     $('#tags-container-timing').html('');
     $('#tags-container-cost').html('');
     $('#tags-container-pricing').html('');
     $('#tags-container-starting').html('');
     $('#tags-container-other').html('');
     $('#tags-container-special-needs').html('');
-    $('#tags-container-mobile-view').html('');
 }
 
 function mobileFilter() {
@@ -484,7 +493,7 @@ function applyMobileFilter() {
 
 function clearFilters() {
     //..clear all checkbox
-    $(`input:checkbox[name=enrolling-now],[name=grades],[name=ages],[name=gender],[name=services],[name=timing],[name=pricing],[name=cost],[name=starting],[name=other],[name=special-needs]`).prop('checked', false);
+    $(`input:checkbox[name=enrolling-now], [name=grades], [name=ages], [name=gender], [name=services], [name=timing], [name=pricing], [name=cost], [name=starting], [name=other], [name=special-needs]`).prop('checked', false);
 
     txtZip.val('');
     //..clear web link and hide clear filter link
@@ -513,12 +522,12 @@ function clearSpecificFilter(tagContainer, name) {
         removeSpecificFilterFromUrl(name);
         resetFlags();
         prepareSearchParams();
-    }    
+    }
 }
 
 function removeSpecificFilterFromUrl(name) {
     var hashUrl = WebPage.getHash();
-    var filters = hashUrl.split(',');    
+    var filters = hashUrl.split(',');
     _.each(filters, function (filter) {
         if (filter.toLowerCase().indexOf(name.trim().toLowerCase()) == 0) {
             hashUrl = hashUrl.replace(filter + ',', '')
@@ -541,8 +550,7 @@ function toggleSideBar(element) {
         $(element).attr('isOpen', false)
         $('#search-sidebar-arrow').removeClass('fa-chevron-circle-left').addClass('fa-chevron-circle-right');
         $("#filters").removeClass('directory-filters-open').addClass('directory-filters-close');
-    }
-    else {
+    } else {
         $(element).attr('isOpen', true)
         $('#search-sidebar-arrow').removeClass('fa-chevron-circle-right').addClass('fa-chevron-circle-left');
         $("#filters").removeClass('directory-filters-close').addClass('directory-filters-open');
