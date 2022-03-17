@@ -524,7 +524,7 @@
             {
                 <button onclick="addLogAndRedirect('@Model.AccountProfile.RegistrationUrl', '@Model.AccountProfile.ButtonText')" class="btn btn-header-action btn-view-all">
                     <span class="">
-                        @(Model.AccountProfile.ButtonText) <i class="fa fa-external-link"></i>
+                        @(Model.AccountProfile.ButtonText == "learnmore" ? "Learn More" : "Register") <i class="fa fa-external-link"></i>
                     </span>
                 </button>
             }
