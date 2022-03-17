@@ -22,13 +22,7 @@
     </div>
 </header>
 
-<header class="visible-sm visible-xs bg-color">
-    <div class="col-xs-10">
-        <div class="form-group has-feedback has-search" style="margin-top: 10px;">
-            <span class="glyphicon glyphicon-search form-control-feedback" style="top: -3px;"></span>
-            <input id="txtSearch-mobile" name="search" type="text" class="form-control" placeholder="Search For Programs" onkeyup="waitAndFilterSearch()">
-        </div>
-    </div>
+<header class="visible-sm visible-xs bg-color">    
     <div class="col-xs-6" style="padding: 10px;">
         <a href=@(website.IsNotEmpty() ? website : "")>
             <img src="@logoUrl" alt="AfterSchool HQ - Your home for afterschool experiences" style="height: 55px;" />
