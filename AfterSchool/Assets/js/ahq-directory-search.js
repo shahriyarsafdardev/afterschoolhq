@@ -1,11 +1,11 @@
 ﻿function directoryPageLoad() {
-    // we need to show the filter button, once js will get loaded, to avoid any js related error
-    //$("#img-mobile-filter").removeClass("hide");
+    // we need to show the filter button, once js will get loaded, to avoid any js related error    
 
     $("#search-container").scroll(function () {
-        if (isReachedScrollEnd == false &&
+        if (isReachedScrollEnd == false && 
             isMobileFilterWindowOpened == false &&
-            (($(this).scrollTop() + $(this).innerHeight() + 1) >= $(this)[0].scrollHeight)) { //+1 to adjust height because of contact us button at bottom
+            (($(this).scrollTop() + $(this).innerHeight() + 1) >= $(this)[0].scrollHeight)) //+1 to adjust height because of contact us button at bottom
+        { 
             loadFiltersAndInitiateSearch();
         }
     });
