@@ -10,6 +10,39 @@
     var specialNeeds = AfterSchoolLibrary.Helpers.ProfileHelper.SpecialNeedsOfferings;
 }
 
+<style>
+    #enrollNow {
+        height: 20px;
+        position:relative
+    }
+
+    #enrollNow .tooltip-enroll-now {
+        display: none;
+        visibility: hidden;
+        position: absolute;
+        border: 1px solid black;
+        border-radius: 5px;
+        background-color: white;
+        width: 150px;
+        z-index: 99999;
+        right: 0;
+        font-size: larger;
+        font-family: 'Montserrat', sans-serif;
+        padding: 5px;
+    }
+
+    #enrollNow:hover .tooltip-enroll-now {
+        visibility: visible;
+        display: block;
+    }
+
+    #enrollNow:hover .tooltip-enroll-now a{
+        visibility: visible;
+        text-decoration:underline;
+        color:blue;
+    }    
+</style>
+
 <div style="text-align: center; text-decoration: underline;">
     <a id="clear-filters" href="#" style="display: none;" onclick="return clearFilters();">Clear Filters</a>
     <div class="clearfix"></div>
@@ -30,10 +63,12 @@
     <div class="am-checkbox am-filter-checkbox am-generic-checkbox no-padding">
         <input id="chk-enrolling-now" name="enrolling-now" value="enroll" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
         <label for="chk-enrolling-now" class="filter-body mobile-padding">
-            Enroll today via AHQ
-            <span style="cursor: auto;" title="This filter will only display providers who are currently using AfterShool HQ to accept registrations.">
-                <i class="fa fa-question-circle" style="font-size: 14px; margin-left: 3px; margin-bottom: -2px;"></i>
-            </span>
+            <span>Enroll today via AHQ</span>
+            <i id="enrollNow" class="fa fa-question-circle" style="font-size: 14px; margin-left: 3px; margin-bottom: -2px;">
+                <span class="tooltip-enroll-now">Only providers collecting registration via 
+                    <a href="/" target="_blank">AfterSchool HQ</a> will be shown.
+                </span>
+            </i>
         </label>
     </div>  
 </div>
