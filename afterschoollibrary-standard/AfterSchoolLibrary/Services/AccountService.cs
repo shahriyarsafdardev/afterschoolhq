@@ -2801,11 +2801,11 @@ namespace AfterSchoolLibrary.Services
 
         public static string GetCost(string value)
         {
-            Decimal d = Convert.ToDecimal(value, CultureInfo.InvariantCulture);
-            if (d <= 0)
+            Decimal costValue = Convert.ToDecimal(value, CultureInfo.InvariantCulture);
+            if (costValue <= 0)
                 return "Free";
             // represent Decimal with 2 digits after decimal point
-            return String.Format("${0}", d.ToString("F2"));
+            return String.Format("${0}", costValue.ToString("F2"));
         }
 
         #endregion
