@@ -14,9 +14,10 @@
     loadInitialTabs();
 
     if (isMobile) {
-        $('#container-show-filter-button').show();
+        $('#container-show-filter-button').removeClass('display-none').addClass('display-block');
         $('#main-view-container').removeClass('display-flex');
     } else {
+        $('#container-show-filter-button').removeClass('display-block').addClass('display-none');
         $('#filters').show();
         $('#container-show-map-chk').show();
         $('#map-view').show();        
@@ -109,12 +110,8 @@ function prepareSearchParams() {
     var comma_delimited_starting = '';
     var comma_delimited_other = '';
     var comma_delimited_special = '';
-
-    if (isMobile) {
-        search = txtSearchMobile.val();
-    } else {
-        search = txtSearch.val();
-    }
+    
+    search = txtSearch.val();
 
     if (search && search.length > 0) {
         mainUrl += `search_${search},`;
@@ -338,10 +335,10 @@ function checkAndSearch(elem) {
         var lable = $(elem).parent().text().trim();
         var tag = getTagHtml(name, filterValue, lable);
         $('#tags-container-mobile-view').append(tag);
+    } else {
+        page = 0;
+        prepareSearchParams()
     }
-
-    page = 0;
-    prepareSearchParams()
 }
 
 function validatePostalCodeAndSearch() {
@@ -443,7 +440,7 @@ function mobileFilter() {
 }
 
 function showMobileFilters() {    
-    $('#filters').addClass('mobile-fitler-window');
+    $('#filters').addClass('mobile-filter-window');
     $('#filters').show();
     $('#search-container').hide();
     $('#mobile-filter-footer').show();
@@ -456,7 +453,7 @@ function showMobileFilters() {
 }
 
 function hideMobileView() {
-    $('#filters').removeClass('mobile-fitler-window');
+    $('#filters').removeClass('mobile-filter-window');
     $('#filters').hide();
     $('#search-container').show();
     $('#mobile-filter-footer').hide();
