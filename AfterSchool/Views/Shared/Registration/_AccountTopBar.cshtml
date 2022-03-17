@@ -91,7 +91,6 @@
     }
 </style>
 
-<div class="blur-bg"></div>
 
 <div class="reg-login-bar">
     @if (Model.IsNotEmpty() && Model.ID.HasValue)
@@ -364,13 +363,11 @@
     function popOverButton() {
         if ($("#popover-container").hasClass("popover-setup")) {
             $("#popover-container").removeClass("popover-setup popover-active full-z-index");
-            $('.blur-bg').hide()
             $('body').removeClass('hidden-overflow');
             setOnboardingStepsAcknowledge();
         }
         else {
             $("#popover-container").addClass("popover-setup popover-active full-z-index");
-            $('.blur-bg').show();
             $('body').addClass('hidden-overflow');
             toggleList();
         }
