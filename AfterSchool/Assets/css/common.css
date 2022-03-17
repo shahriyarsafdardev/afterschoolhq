@@ -1555,15 +1555,6 @@
     margin-top: -18px;
 }
 
-.directory-search-container {
-    background-color: #f8f8f8;
-    height: calc(100vh - 83px);
-    padding: 15px;
-    overflow-y: auto;
-    float: none;
-    flex-grow: 1;
-}
-
 .directory-search-input {
     border-radius: 5px;
     padding-right: 32px;
@@ -1799,7 +1790,7 @@
 }
 
 .directory-filter-icon-mobile {
-    height: 20px;    
+    height: 20px;
     margin-top: -2px;
 }
 
