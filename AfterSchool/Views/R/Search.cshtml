@@ -1,12 +1,13 @@
 ﻿@{
-    var accountUniqueName = (string) ViewBag.AccountUniqueName;
-    var msgs = (SystemMessages) ViewBag.Messages;
+    var accountUniqueName = (string)ViewBag.AccountUniqueName;
+    var msgs = (SystemMessages)ViewBag.Messages;
     var accountId = ViewBag.AccountId != null ? Convert.ToInt32(ViewBag.AccountId) : 0;
-    var primaryColor = (string) ViewBag.PrimaryColor;
-    var logoUrl = (string) ViewBag.LogoUrl;
-    var headerImageUrl = (string) ViewBag.HeaderImageUrl;
+    var primaryColor = (string)ViewBag.PrimaryColor;
+    var logoUrl = (string)ViewBag.LogoUrl;
+    var headerImageUrl = (string)ViewBag.HeaderImageUrl;
     var joiningUrl = $@"/join{accountUniqueName}.html";
-    var website = (string) ViewBag.Website;
+    var website = (string)ViewBag.Website;
+    var grades = (List<GradeLevel>)ViewBag.Grades;
 
     if (!logoUrl.IsNotEmpty())
     {
@@ -115,58 +116,9 @@
     }
 </style>
 
-@{ Html.RenderPartial("~/Views/Shared/_DirectoryHeader.cshtml", null, new ViewDataDictionary {{"primaryColor", primaryColor}, {"website", website}, {"logoUrl", logoUrl}}); }
+@{ Html.RenderPartial("~/Views/Shared/_DirectoryHeader.cshtml", null, new ViewDataDictionary { { "primaryColor", primaryColor }, { "website", website }, { "logoUrl", logoUrl } }); }
 
-<div id="main-view-container" class="display-flex">
-    <div id="list-view" class="directory-list-view">
-        <div id="filters" class="col-md-3 directory-filters">
-            <span id="directory-sidebar-icon" class="primary-color directory-sidebar-arrow" isOpen="true" onclick="return toggleSideBar(this)">
-                <i id="search-sidebar-arrow" class="fa fa-chevron-circle-left" aria-hidden="true"></i>
-            </span>
-
-            @{ Html.RenderPartial("~/Views/Shared/_DirectoryFilters.cshtml"); }
-        </div>
-
-        <div id="search-container" class="directory-search-container">
-
-            <div class="col-lg-9 col-md-9">
-                <div class="form-group has-feedback has-search" style="margin-left: 20px;">
-                    <input id="txtSearch" name="search" type="text" class="form-control directory-search-input" placeholder="Search For Programs" onkeyup="return waitAndFilterSearch(this.value)">
-                    <span class="glyphicon glyphicon-search form-control-feedback directory-search-magnyfier-icon"></span>
-                </div>
-            </div>
-
-            <div class="am-checkbox checkbox-show-map col-lg-3 col-md-3">
-                <input id="chk-map-view" name="show-map" checked="checked" value="1" type="checkbox" class="schedulerepeat-checkbox" onclick="return toggleMapView(this)" />
-                <label for="chk-map-view" class="margin-h-10 mobile-padding font-weight-bold">Show Map</label>
-            </div>
-            <div class="clearfix"></div>
-
-            <div id="search-result" class="row"> </div>
-            <div class="clearfix"></div>
-
-            <div class="directory-search-no-result"></div>
-
-            <div id="ProgressBar">
-                <img src="~/img/lod_bg.gif">
-            </div>
-
-            <div id="notification-contact-us" class="text-center sticky-bottom">
-                <button class="btn btn-contact-us" style="border: 3px solid @primaryColor;" type="button" data-toggle="modal" data-target="#ContactUsModal">
-                    Can't find what you are looking for?
-                    <span class="contactSpan">CONTACT US</span>
-                </button>
-            </div>
-            <div class="clearfix"></div>
-        </div>
-    </div>
-
-    <div id="map-view">
-        <div id="map" style="height: 100%;"></div>
-    </div>
-</div>
-
-<div class="clearfix"></div>
+@{ Html.RenderPartial("~/Views/Shared/_DirectoryContainer.cshtml", null, new ViewDataDictionary { { "primaryColor", primaryColor }, { "grades", grades } }); }
 
 @{ Html.RenderPartial("~/Views/Shared/_ISYPIntroModal.cshtml", logoUrl); }
 
@@ -177,17 +129,15 @@
 @section Scripts
 {
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBq47Ro2O69sQhVLEW4_2L0ClOBSW_Srmc&libraries=places"></script>
-
     <script src="~/Assets/js/ahq-directory-search.js"></script>
     <script src="~/Assets/js/ahq-directory-map.js"></script>
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <script type="text/javascript">
 
         var delayTimer;
-        var txtSearch = $('#txtSearch');
-        var txtSearchMobile = $('#txtSearch-mobile');
+        var txtSearch = $('#txtSearch');        
         var txtZip = $('#txtZipCode');
-        var isMobile = window.innerWidth <= 768;
+        var isMobile = window.innerWidth <= 1080;
         var inCallback = false, page = 0, isReachedScrollEnd = false, isMobileFilterWindowOpened = false;
 
         $(document).ready(function () {
@@ -270,7 +220,7 @@
                         else if (data && data.status == "no-result" && page <= 0) {
                             $('#notification-contact-us').show();
                             $('#search-result').html('');
-                            $('.directory-search-no-result').html('<p>There are no activities that match this criteria. <br> To find more, remove filters or zoom out on the map.</p>');
+                            $('.directory-search-no-result').html('<p>There are no activities that match this criteria. <br> To find more, remove filters.</p>');
                             isReachedScrollEnd = true;
                             page = 0;
                         }

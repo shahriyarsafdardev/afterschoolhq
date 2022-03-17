@@ -105,9 +105,16 @@
     }
 
     .participation-object {
-        padding-top: 10px;
-        padding-bottom: 10px;
+        padding: 0 20px;
+        width: -webkit-fill-available;
+        width: -moz-available;
+        height: auto;
+        margin-bottom: 20px;
     }
+
+        .participation-object > .panel {
+            margin: 0 !important;
+        }
 
     .desc-mobile-width {
         width: 116px;

@@ -1555,15 +1555,6 @@
     margin-top: -18px;
 }
 
-.directory-search-container {
-    background-color: #f8f8f8;
-    height: calc(100vh - 83px);
-    padding: 15px;
-    overflow-y: auto;
-    float: none;
-    flex-grow: 1;
-}
-
 .directory-search-input {
     border-radius: 5px;
     padding-right: 32px;
@@ -1790,13 +1781,17 @@
     content: "\f059";
 }
 
+.fa-sliders-up:before {
+    content: "\f3f1";
+}
+
 .directory-header img {
     width: 110px;
 }
 
-.filter {
-    height: 38px;
-    margin-top: 10px;
+.directory-filter-icon-mobile {
+    height: 20px;
+    margin-top: -2px;
 }
 
 .directory-filter-symbol {
@@ -1818,4 +1813,15 @@
 
 .font-weight-500 {
     font-weight: 500
+}
+
+.mobile-filter-window {
+    max-width: 100% !important;
+    margin-bottom: 100px;
+    width: 100%;
+    padding-top: 0px !important;
+}
+
+.margin-right-10px {
+    margin-right: 10px;
 }

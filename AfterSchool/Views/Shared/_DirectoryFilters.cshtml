@@ -1,6 +1,5 @@
 ﻿@{
-    var grades = (List<GradeLevel>)ViewBag.Grades;
-
+    var grades = ViewData.ContainsKey("grades") && ViewData["grades"] != null ? (List<GradeLevel>)ViewData["grades"] : new List<GradeLevel>();
     var totalGradeCount = grades.Count;
     var firstHalf = totalGradeCount / 2;
     var secondHalf = totalGradeCount - firstHalf;
