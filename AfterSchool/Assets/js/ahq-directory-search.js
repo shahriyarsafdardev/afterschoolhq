@@ -11,7 +11,7 @@
     });
 
     loadFiltersAndInitiateSearch();
-    loadInitialTabs();    
+    loadInitialTabs();
 
     if (!isMobile) {
         $('#filters').show();
@@ -21,13 +21,13 @@
 }
 
 function showModalIsyp() {
-    $('#modal-isyp-intro').addClass('md-show');
-    $('#blured-bg').addClass('blur-bg');
+    $('#modal-isyp-prompt').removeClass('display-none').addClass('display-block');
+    $('#modal-isyp-background').removeClass('display-none').addClass('display-block');
 }
 
 function closeModalIsyp() {
-    $('#modal-isyp-intro').removeClass('md-show');
-    $('#blured-bg').removeClass('blur-bg');
+    $('#modal-isyp-prompt').removeClass('display-block').addClass('display-none');
+    $('#modal-isyp-background').removeClass('display-block').addClass('display-none');
 }
 
 function submitContactForDirectory() {
@@ -65,8 +65,7 @@ function submitContactForDirectory() {
                     message: 'Your message has been sent.',
                     success: true
                 });
-            }
-            else {
+            } else {
                 var text = "";
                 for (var message of data.messages) {
                     text = text + message.Text;
@@ -316,9 +315,13 @@ function formatContactPhoneForDirectory() {
         var middle = input.substring(3, 6);
         var last = input.substring(6, 10);
 
-        if (input.length > 6) { inputElement.value = `(${zip}) ${middle} ${last}`; } //(xxx) xxx xxxx
-        else if (input.length > 3) { inputElement.value = `(${zip}) ${middle}`; }
-        else if (input.length > 0) { inputElement.value = `(${zip}`; }
+        if (input.length > 6) {
+            inputElement.value = `(${zip}) ${middle} ${last}`; //(xxx) xxx xxxx
+        } else if (input.length > 3) {
+            inputElement.value = `(${zip}) ${middle}`;
+        } else if (input.length > 0) {
+            inputElement.value = `(${zip}`;
+        }
     }
 }
 
@@ -350,7 +353,9 @@ function checkZip(value) {
     //.. https://stackoverflow.com/a/7185241/5816119
     //.. (in order) US, IN, UK
     var zipCodePatternList = [/^\d{5}([\-]?\d{4})?$/, /^\d{6}$/, /^(GIR|[A-Z]\d[A-Z\d]??|[A-Z]{2}\d[A-Z\d]??)[ ]??(\d[A-Z]{2})$/]
-    return zipCodePatternList.some(function (rx) { return rx.test(value); });
+    return zipCodePatternList.some(function (rx) {
+        return rx.test(value);
+    });
 }
 
 function loadInitialTabs() {
@@ -372,8 +377,7 @@ function loadTabs(name) {
     if (isOpen === 'true') {
         element.attr('isOpen', false);
         $('#tags-container-' + name).hide();
-    }
-    else {
+    } else {
         element.attr('isOpen', true);
 
         var tags = '';
@@ -386,16 +390,16 @@ function loadTabs(name) {
 }
 
 function getTagHtml(tagContainer, id, lable) {
-    var containerName = tagContainer.replaceAll(' ', '').toLowerCase();    
+    var containerName = tagContainer.replaceAll(' ', '').toLowerCase();
     return `<span class="badge-identity-` + containerName + `-` + id + ` badge badge-pill badge-success text-small primary-bg-color directory-badge">` + lable +
-        `<button type="button" class="close" data-dismiss="alert" aria-label="Close" onclick='return clearSpecificFilter("` + containerName + `", "` + id +`")'><i class="remove glyphicon glyphicon-remove-circle glyphicon-white"></i></button></span>`;
+        `<button type="button" class="close" data-dismiss="alert" aria-label="Close" onclick='return clearSpecificFilter("` + containerName + `", "` + id + `")'><i class="remove glyphicon glyphicon-remove-circle glyphicon-white"></i></button></span>`;
 }
 
 function resetTags() {
     $('#tags-container-grades').html('');
     $('#tags-container-ages').html('');
     $('#tags-container-gender').html('');
-    $('#tags-container-services').html(''); 
+    $('#tags-container-services').html('');
     $('#tags-container-timing').html('');
     $('#tags-container-cost').html('');
     $('#tags-container-pricing').html('');
@@ -415,8 +419,7 @@ function mobileFilter() {
 
         $('#img-mobile-filter').attr('isOpen', "1");
         isMobileFilterWindowOpened = true;
-    }
-    else {
+    } else {
         $('#filters').hide();
         $('#mobile-filter-footer').hide();
         $('#search-result').show();
@@ -452,7 +455,7 @@ function applyMobileFilter() {
 
 function clearFilters() {
     //..clear all checkbox
-    $(`input:checkbox[name=enrolling-now],[name=grades],[name=ages],[name=gender],[name=services],[name=timing],[name=pricing],[name=cost],[name=starting],[name=other],[name=special-needs]`).prop('checked', false);
+    $(`input:checkbox[name=enrolling-now], [name=grades], [name=ages], [name=gender], [name=services], [name=timing], [name=pricing], [name=cost], [name=starting], [name=other], [name=special-needs]`).prop('checked', false);
 
     txtZip.val('');
     //..clear web link and hide clear filter link
@@ -481,12 +484,12 @@ function clearSpecificFilter(tagContainer, name) {
         removeSpecificFilterFromUrl(name);
         resetFlags();
         prepareSearchParams();
-    }    
+    }
 }
 
 function removeSpecificFilterFromUrl(name) {
     var hashUrl = WebPage.getHash();
-    var filters = hashUrl.split(',');    
+    var filters = hashUrl.split(',');
     _.each(filters, function (filter) {
         if (filter.toLowerCase().indexOf(name.trim().toLowerCase()) == 0) {
             hashUrl = hashUrl.replace(filter + ',', '')
@@ -509,8 +512,7 @@ function toggleSideBar(element) {
         $(element).attr('isOpen', false)
         $('#search-sidebar-arrow').removeClass('fa-chevron-circle-left').addClass('fa-chevron-circle-right');
         $("#filters").removeClass('directory-filters-open').addClass('directory-filters-close');
-    }
-    else {
+    } else {
         $(element).attr('isOpen', true)
         $('#search-sidebar-arrow').removeClass('fa-chevron-circle-right').addClass('fa-chevron-circle-left');
         $("#filters").removeClass('directory-filters-close').addClass('directory-filters-open');
