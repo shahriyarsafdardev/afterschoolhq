@@ -2,9 +2,9 @@
     // we need to show the filter button, once js will get loaded, to avoid any js related error
     $("#img-mobile-filter").removeClass("hide");
 
-    $("#search-container").scroll(function () {
-        if (isReachedScrollEnd == false &&
-            isMobileFilterWindowOpened == false &&
+    $("#results-container").scroll(function () {
+        if (!isReachedScrollEnd &&
+            !isMobileFilterWindowOpened &&
             (($(this).scrollTop() + $(this).innerHeight() + 1) >= $(this)[0].scrollHeight)) { //+1 to adjust height because of contact us button at bottom
             loadFiltersAndInitiateSearch();
         }
@@ -13,8 +13,14 @@
     loadFiltersAndInitiateSearch();
     loadInitialTabs();
 
-    if (!isMobile) {
+    if (isMobile) {
+        $('#container-show-filter-button').removeClass('display-none').addClass('display-block');
+        $('#main-view-container').removeClass('display-flex');
+    } else {
+        $('#container-show-filter-button').removeClass('display-block').addClass('display-none');
         $('#filters').show();
+        $('#container-show-map-chk').show();
+        $('#map-view').show();
     }
 
     formatContactPhoneForDirectory();
@@ -105,11 +111,7 @@ function prepareSearchParams() {
     var comma_delimited_other = '';
     var comma_delimited_special = '';
 
-    if (isMobile) {
-        search = txtSearchMobile.val();
-    } else {
-        search = txtSearch.val();
-    }
+    search = txtSearch.val();
 
     if (search && search.length > 0) {
         mainUrl += `search_${search},`;
@@ -326,8 +328,17 @@ function formatContactPhoneForDirectory() {
 }
 
 function checkAndSearch(elem) {
-    page = 0;
-    prepareSearchParams()
+
+    if (isMobile) {
+        var name = $(elem).attr('name');
+        var filterValue = $(elem).attr('valueForFilter');
+        var lable = $(elem).parent().text().trim();
+        var tag = getTagHtml(name, filterValue, lable);
+        $('#tags-container-mobile-view').append(tag);
+    } else {
+        page = 0;
+        prepareSearchParams()
+    }
 }
 
 function validatePostalCodeAndSearch() {
@@ -359,39 +370,48 @@ function checkZip(value) {
 }
 
 function loadInitialTabs() {
-    loadTabs('grades');
-    loadTabs('ages');
-    loadTabs('gender');
-    loadTabs('services');
-    loadTabs('timing');
-    loadTabs('cost');
-    loadTabs('pricing');
-    loadTabs('starting');
-    loadTabs('other');
-    loadTabs('special-needs');
+    loadTabs('grades', 1);
+    loadTabs('ages', 1);
+    loadTabs('gender', 1);
+    loadTabs('services', 1);
+    loadTabs('timing', 1);
+    loadTabs('cost', 1);
+    loadTabs('pricing', 1);
+    loadTabs('starting', 1);
+    loadTabs('other', 1);
+    loadTabs('special-needs', 1);
+
+    if (isMobile) {
+        loadTabsForMobile();
+    }
 }
 
-function loadTabs(name) {
+function loadTabs(name, pageInitialization) {
     var element = $('#header-' + name);
-    var isOpen = element.attr('isOpen');
-    if (isOpen === 'true') {
-        element.attr('isOpen', false);
-        $('#tags-container-' + name).hide();
-    } else {
-        element.attr('isOpen', true);
-
+    var isOpen = element.attr('aria-expanded');
+    if (isOpen === 'true' || pageInitialization) {
         var tags = '';
         $('input:checkbox[name=' + name + ']:checked').each(function () {
             tags += getTagHtml(name, $(this).attr('valueForFilter'), $(this).parent().text().trim());
         });
 
         $('#tags-container-' + name).html(tags).show();
+    } else {
+        $('#tags-container-' + name).hide();
     }
+}
+
+function loadTabsForMobile() {
+    var tags = '';
+    $('input:checkbox[name=grades]:checked,[name=ages]:checked,[name=gender]:checked,[name=services]:checked,[name=timing]:checked,[name=pricing]:checked,[name=cost]:checked,[name=starting]:checked,[name=other]:checked,[name=special-needs]:checked').each(function () {
+        tags += getTagHtml($(this).attr('name'), $(this).attr('valueForFilter'), $(this).parent().text().trim());
+    });
+    $('#tags-container-mobile-view').html('').append(tags);
 }
 
 function getTagHtml(tagContainer, id, lable) {
     var containerName = tagContainer.replaceAll(' ', '').toLowerCase();
-    return `<span class="badge-identity-` + containerName + `-` + id + ` badge badge-pill badge-success text-small primary-bg-color directory-badge">` + lable +
+    return `<span class="badge-identity-` + containerName + `-` + id + ` badge badge-pill badge-success text-small primary-bg-color directory-badge margin-right-10px">` + lable +
         `<button type="button" class="close" data-dismiss="alert" aria-label="Close" onclick='return clearSpecificFilter("` + containerName + `", "` + id + `")'><i class="remove glyphicon glyphicon-remove-circle glyphicon-white"></i></button></span>`;
 }
 
@@ -409,24 +429,35 @@ function resetTags() {
 }
 
 function mobileFilter() {
-    var isOpen = $('#img-mobile-filter').attr('isOpen');
+    var isOpen = $('#btn-mobile-filter').attr('isOpen');
     if (isOpen == '0') {
-        $('#filters').show();
-        $('#mobile-filter-footer').show();
-
-        $('#search-result').hide();
-        $('#footerShowHide').hide();
-
-        $('#img-mobile-filter').attr('isOpen', "1");
-        isMobileFilterWindowOpened = true;
+        showMobileFilters();
     } else {
-        $('#filters').hide();
-        $('#mobile-filter-footer').hide();
-        $('#search-result').show();
-        $('#footerShowHide').show();
-        $('#img-mobile-filter').attr('isOpen', "0");
-        isMobileFilterWindowOpened = false;
+        hideMobileView();
     }
+}
+
+function showMobileFilters() {
+    $('#filters').addClass('mobile-filter-window').show();
+    $('#search-and-results-container').hide();
+    $('#mobile-filter-footer').show();
+    $('#footerShowHide').hide();
+    $('#directory-sidebar-icon').hide();
+
+    $('#btn-mobile-filter').attr('isOpen', "1");
+    loadInitialTabs()
+    isMobileFilterWindowOpened = true;
+}
+
+function hideMobileView() {
+    $('#filters').removeClass('mobile-filter-window').hide();
+    $('#search-and-results-container').show();
+    $('#mobile-filter-footer').hide();
+    $('#footerShowHide').show();
+    $('#directory-sidebar-icon').show();
+
+    $('#btn-mobile-filter').attr('isOpen', "0");
+    isMobileFilterWindowOpened = false;
 }
 
 function applyMobileFilter() {

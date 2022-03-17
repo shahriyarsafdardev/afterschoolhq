@@ -776,6 +776,7 @@
     <Content Include="Assets\css\survey.css" />
     <Content Include="Assets\img\envelope.svg" />
     <Content Include="Assets\img\filter.svg" />
+    <Content Include="Assets\img\loading-spinner.gif" />
     <Content Include="Assets\img\share.svg" />
     <Content Include="Assets\img\unlock.svg" />
     <Content Include="Assets\img\user-remove.svg" />
@@ -1964,6 +1965,7 @@
     <Content Include="Views\Shared\_DirectoryContactUs.cshtml" />
     <Content Include="Views\Shared\_DirectoryHeader.cshtml" />
     <Content Include="Views\Shared\_DirectoryLoadScript.cshtml" />
+    <Content Include="Views\Shared\_DirectoryContainer.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
