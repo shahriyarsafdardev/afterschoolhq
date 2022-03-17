@@ -1824,13 +1824,16 @@
     content: "\f059";
 }
 
+.fa-sliders-up:before {
+    content: "\f3f1";
+}
+
 .directory-header img {
     width: 110px;
 }
 
 .directory-filter-icon-mobile {
-    height: 20px;
-    margin-right: 5px;
+    height: 20px;    
     margin-top: -2px;
 }
 
