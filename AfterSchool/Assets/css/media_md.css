@@ -116,4 +116,15 @@
     .clever-login-img {
         margin-top: 20px;
     }
+
+    .participation-object {
+        padding: 0 20px;
+        width: 400px;
+        height: auto;
+        margin-bottom: 20px;
+    }
+
+        .participation-object > .panel {
+            margin: 0 !important;
+        }
 }

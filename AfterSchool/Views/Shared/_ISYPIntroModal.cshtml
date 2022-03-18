@@ -1,34 +1,88 @@
 ﻿@model string
 
-<div>
-    <div id="blured-bg"></div>
-    <div class="modal-isyp-intro">
-        <div id="modal-isyp-intro" class="md-modal">
-            <div class="md-content modal-lg">
-                <div class="modal-header isyp-modal-header text-center">
-                    <img src="@Model" class="modal-isyp-logo" />
-                </div>
-                <div class="modal-body" style="color: black;">
-                    <h1 style="margin: 0; font-size: 24px">Learn, explore, and play this summer!</h1>
-                    <br />
-                    <div class="break-words" style="font-size: 13px">
-                        From sports to science to arts and culture, Indy Summer Youth Programs offer a wide variety of programs to ensure there’s something for everyone. 
-                        Many programs provide healthy meals 
-                        and snacks, 
-                        and free and low-cost enrollment options,
-                        as well as scholarships, are available to help cover the costs of attendance.  
-                        Find the right summer program for 
-                        your child.
-                    </div>
+<style>
+h1 {
+    font-size: 24px;
+    margin: 0 0 24px;
+}
 
-                    <div style="padding: 10px 15px; text-align: center;">
-                        <button class="btn btn-register btn-isyp-getstarted primary-bg-color primary-border-color" onclick="return closeModalIsyp();"> Get Started</button>
-                        <div class="clearfix"></div>
-                    </div>
-                    <div class="clearfix"></div>
-                </div>
-                <div class="clearfix"></div>
-            </div>
-        </div>
+p {
+    font-size: 14px;
+    margin: 0;
+}
+
+#modal-isyp-background {
+    background-color: white;
+    background-repeat: no-repeat;
+    height: 100%;
+    opacity: 0.7;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000000;
+}
+
+#modal-isyp-prompt {
+    backface-visibility: hidden;
+    background: white;
+    border-radius: 3px;
+    box-shadow: 0 4px 6px rgb(0 0 0 / 30%);
+    color: black;
+    left: 50%;
+    height: auto;
+    margin: 0 auto;
+    max-width: 630px;
+    min-width: 320px;
+    position: fixed;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    visibility: visible;
+    width: 100%;
+    z-index: 1000001;
+}
+
+.display-block {
+    display: block;
+}
+
+.display-none {
+    display: none;
+}
+
+.get-started-isyp-button {
+    display: block;
+    margin: 10px auto;
+    transition: none;
+    width: 180px;
+}
+
+.modal-isyp-content {
+    padding: 30px 20px;
+}
+</style>
+<style media="all and (min-width: 992px)">
+#modal-isyp-prompt {
+    max-width: 900px;
+    width: 900px;
+}
+</style>
+<div id="modal-isyp-background" class="display-none"></div>
+<div id="modal-isyp-prompt" class="display-none">
+    <div class="modal-header isyp-modal-header text-center">
+        <img src="@Model" class="modal-isyp-logo" alt="Indy Summer Youth Programs, Powered by AfterSchool HQ"/>
+    </div>
+    <div class="modal-isyp-content">
+        <h1>Learn, explore, and play this summer!</h1>
+        <p>
+            From sports to science to arts and culture, Indy Summer Youth Programs offer a wide variety of programs to
+            ensure there’s something for everyone. Many programs provide healthy meals and snacks, and free and low-cost
+            enrollment options, as well as scholarships, are available to help cover the costs of attendance. Find the
+            right summer program for your child.
+        </p>
+
+        <button class="btn btn-register get-started-isyp-button primary-bg-color primary-border-color"
+                onclick="closeModalIsyp()" type="button">
+            Get Started
+        </button>
     </div>
 </div>

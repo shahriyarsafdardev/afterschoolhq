@@ -4,13 +4,13 @@ var infowindow;
 var marker = [];
 
 function initMap() {
-    var noPOILabels = [{ featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] }];
-    var noPOIMapType = new google.maps.StyledMapType(noPOILabels, { name: "Map" });
+    var noPOILabels = [{featureType: "poi", elementType: "labels", stylers: [{visibility: "off"}]}];
+    var noPOIMapType = new google.maps.StyledMapType(noPOILabels, {name: "Map"});
     infowindow = new google.maps.InfoWindow();
 
     map = new google.maps.Map(document.getElementById("map"),
         {
-            center: { lat: 39.76, lng: -86.15 },
+            center: {lat: 39.76, lng: -86.15},
             zoom: 10,
             mapTypeControlOptions: {
                 mapTypeIds: [google.maps.MapTypeId.ROADMAP, 'no_poi']
@@ -54,12 +54,12 @@ function addMarkersOnMap(places) {
                 this.setIcon('../img/red-map-icon-large.png');
                 var mainDiv = $("div").find(`[name='${this['infowindow'].content}']`);
                 $("#directory-panel", mainDiv).addClass('primary-color-border');
-                var container = $("#search-container");
+                var container = $("#results-container");
                 var element = $(mainDiv);
                 var height = container.height() / 2;
                 var elementTop = element.position().top;
                 var position = container.scrollTop() + elementTop - height;
-                container.animate({ scrollTop: position });
+                container.animate({scrollTop: position});
             });
 
             marker.push(newmarker);
