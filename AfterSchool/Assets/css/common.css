@@ -683,18 +683,6 @@
     opacity: 1;
 }
 
-.blur-bg {
-    display: none;
-    background-color: White;
-    background-repeat: no-repeat;
-    height: 100%;
-    opacity: 0.5;
-    position: fixed;
-    top: 0;
-    width: 100%;
-    z-index: 1000000;
-}
-
 .popover-dropdown {
     float: left;
     margin: 2px 0 2px 0;
@@ -1549,24 +1537,6 @@
     font-weight: bold;
 }
 
-.blur-bg {
-    background-color: White;
-    background-repeat: no-repeat;
-    height: 100%;
-    opacity: 0.7;
-    position: fixed;
-    top: 0;
-    width: 100%;
-    z-index: 1000000;
-}
-.break-words {
-    display: inline-block;
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    -ms-word-break: break-all;
-    word-break: break-word;
-}
-
 .display-flex {
     display: flex;
 }
@@ -1583,15 +1553,6 @@
     z-index: 9999;
     cursor: pointer;
     margin-top: -18px;
-}
-
-.directory-search-container {
-    background-color: #f8f8f8;
-    height: calc(100vh - 83px);
-    padding: 15px;
-    overflow-y: auto;
-    float: none;
-    flex-grow: 1;
 }
 
 .directory-search-input {
@@ -1627,19 +1588,9 @@
     background: white;
 }
 
-.modal-isyp-intro {
-    position: fixed;
-    z-index: 1000001;
-}
-
 .modal-isyp-logo {
     width: 200px;
     margin-top: 40px;
-}
-
-.btn-isyp-getstarted {
-    width: 180px;
-    transition: none;
 }
 
 #txtZipCode, input::-webkit-input-placeholder {
@@ -1830,13 +1781,17 @@
     content: "\f059";
 }
 
+.fa-sliders-up:before {
+    content: "\f3f1";
+}
+
 .directory-header img {
     width: 110px;
 }
 
-.filter {
-    height: 38px;
-    margin-top: 10px;
+.directory-filter-icon-mobile {
+    height: 20px;
+    margin-top: -2px;
 }
 
 .directory-filter-symbol {
@@ -1848,13 +1803,25 @@
     cursor: pointer;
 }
 
-.padding-top-10{
+.padding-top-10 {
     padding-top: 10px !important
 }
-.margin-top-0{
+
+.margin-top-0 {
     margin-top: 0 !important
 }
 
 .font-weight-500 {
     font-weight: 500
+}
+
+.mobile-filter-window {
+    max-width: 100% !important;
+    margin-bottom: 100px;
+    width: 100%;
+    padding-top: 0px !important;
+}
+
+.margin-right-10px {
+    margin-right: 10px;
 }
