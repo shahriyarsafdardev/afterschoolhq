@@ -516,26 +516,24 @@
 
 @helper RenderViewActivitiesButton(bool isInEditMode)
 {
-    if (!Request.Url.ToString().IsSameAs(Model.Account.BrowseUrl))
+    if (Request.Url is null || Request.Url.ToString().IsSameAs(Model.Account.BrowseUrl)
+        || (isInEditMode && !Model.Account.HasActivities()))
     {
-        if (!isInEditMode || Model.Account.HasActivities())
-        {
-            if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.RegistrationUrl.IsNotEmpty())
-            {
-                <button onclick="addLogAndRedirect('@Model.AccountProfile.RegistrationUrl', '@Model.AccountProfile.ButtonText')" class="btn btn-header-action btn-view-all">
-                    <span class="">
-                        @(Model.AccountProfile.ButtonText == "learnmore" ? "Learn More" : "Register") <i class="fa fa-external-link"></i>
-                    </span>
-                </button>
-            }
-            else
-            {
-                <button onclick="location.href='@Model.Account.BrowseUrl'" class="btn btn-header-action btn-view-all">
-                    <span class="">
-                        View All @UILabel.ActivityLabel(ActivityType.Activity, true)
-                    </span>
-                </button>
-            }
-        }
+        return;
+    }
+    
+    if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.RegistrationUrl.IsNotEmpty())
+    {
+        <button onclick="addLogAndRedirect('@Model.AccountProfile.RegistrationUrl', '@Model.AccountProfile.ButtonText')"
+                class="btn btn-header-action btn-view-all" type="button">
+            @(Model.AccountProfile.ButtonText == "register" ? "Register" : "Learn More") <i class="fa fa-external-link"></i>
+        </button>
+    }
+    else
+    {
+        <button onclick="location.href='@Model.Account.BrowseUrl'" class="btn btn-header-action btn-view-all"
+                type="button">
+            View All @UILabel.ActivityLabel(ActivityType.Activity, true)
+        </button>
     }
 }
