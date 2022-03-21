@@ -11,7 +11,6 @@
     </style>
 
     <div id="<%= searchResult.AccountUid %>" name="<%= searchResult.AccountName %>" class="participation-object directory-search-panel-holder">
-
         <div id="directory-panel" class="panel" onclick="WebPage.navigateIframe('<%= searchResult.HomePageUrl %>?dir=@Model')">
             <div id="dynamicLogo-<%= searchResult.AccountUid %>" class="reg-header panel-tabs">
 
@@ -43,18 +42,47 @@
 
                 <% } %>
 
+                <div id="directory-location-badge-holder">
+                    <div class="padding-h-10">
+                        <span class="text-small">
+                            <%= searchResult.Location %>
+                        </span>
+                    </div>
+                </div>
+
             </div>
+
             <div class="panel-body" style="position: relative;">
 
+                <div class="directory-panel-age-and-grade">
+
+                    <div class="pull-left margin-l-5">
+                        <% if(searchResult.IsRestrictByGrade) { %>
+
+                        <span class="badge badge-gray profile-badge text-small">
+                            <%= searchResult.GradeStart %> - <%= searchResult.GradeEnd %> Grade
+                        </span>
+
+                        <% } else { %>
+
+                        <span class="badge badge-gray profile-badge text-small">
+                            Ages <%= searchResult.AgeStart %> - <%= searchResult.AgeEnd %>
+                        </span>
+
+                        <% } %>
+                    </div>
+
+                </div>
+
                 <div class="text-wrap directory-panel-account-name">
-                    <h3 style="" class="margin-bottom-zero">
+                    <h3 style="height: 51px; overflow-y: hidden;" class="margin-bottom-zero notranslate">                    
                         <strong title="<%= searchResult.AccountName %>"><%= searchResult.AccountName %></strong>
                     </h3>
                 </div>
 
                 <div class="clearfix"></div>
                 <div class="text-wrap">
-                    <h4 class="margin-bottom-zero font-weight-500">
+                    <h4 class="margin-bottom-zero font-weight-500 notranslate">
                         <% if(searchResult.Location) { %>
                             <%= searchResult.Location %>
                         <% } else { %>
@@ -88,12 +116,12 @@
                     </h4>
                 </div>
 
-                <div class="clearfix"></div>
-                <div class="margin-t-20">
-                    <a href="javascript:WebPage.navigateIframe('<%= searchResult.HomePageUrl %>?dir=@Model')" class="btn btn-register btn-block join-directory-btn">
-                        Learn More
-                    </a>
-                </div>
+            <div class="clearfix"></div>
+            <div class="margin-t-20">
+                <a href="javascript:WebPage.navigateIframe('<%= searchResult.HomePageUrl %>?dir=@Model')" class="btn btn-register btn-block join-directory-btn">
+                    Learn More
+                </a>
+            </div>
 
             </div>
         </div>

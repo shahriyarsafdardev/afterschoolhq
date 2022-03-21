@@ -4553,6 +4553,17 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
   border-bottom-left-radius: 0;
   border-top-left-radius: 0;
 }
+.green-outline .input-group-addon:first-child {
+  border-radius: 5px 0 0 5px;
+  color: #00c5a3;
+  border: solid 1px #00c5a3;
+  border-right: 0;
+}
+.green-outline .form-control {
+  border-radius: 0 5px 5px 0;
+  border: solid 1px #00c5a3;
+  border-left: 0;
+}
 .input-group-addon:last-child {
   border-left: 0;
 }

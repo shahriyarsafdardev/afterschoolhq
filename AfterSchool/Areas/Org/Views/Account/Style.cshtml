@@ -241,7 +241,7 @@
                                                 <input id="costhigh" name="costhigh" class="form-control" type="number" required="required" value="@costHigh" onclick="this.select()" step=".01" onblur="checkLowHighValue()" style="height: 44px;">
                                             </div>
                                         </div>
-                                        <div class="col-lg-12 padding-0 text-muted margin-t-10" style="font-style:italic">If all of your programs are free enter 0 into both fields</div>
+                                        <div class="col-lg-12 padding-0 text-muted margin-t-10" style="font-style:italic">If all of your programs are free, enter 0 into both fields.</div>
                                     </div>
                                 </div>
                             </div>
@@ -606,7 +606,7 @@
                             {
                                 <div class="form-group">
                                     <label class="col-md-3 control-label">
-                                        I am using Afterschool Hq to collect registrations
+                                        I am using AfterSchool HQ to collect registrations
                                     </label>
 
                                     <div class="col-md-9">
@@ -619,7 +619,7 @@
                                             <label for="collectregistration-no">No</label>
                                         </div>
 
-                                        <p class="text-muted"><em>To give parents the best experience we recommend using Afterschool HQ to register</em></p>
+                                        <p class="text-muted"><em>To give parents the best experience we recommend using AfterSchool HQ to register</em></p>
 
                                     </div>
                                 </div>
@@ -627,7 +627,7 @@
 
                                 <div class="form-group @(Model.RegistrationUrl.IsNotEmpty() ? "": "hide")" id="regUrlDiv">
                                     <label class="col-md-3 control-label">
-                                        Registration or learn more url
+                                        Registration or learn more URL
                                     </label>
                                     <div class="col-md-9">
                                         <input type="text" class="form-control"  name="registrationurl" id="registrationurl" onblur="makeRadioRequired()" placeholder="https://your-website.com/register" title="This link will be displayed in a button on your Provider Profile for parents to access." value="@Model.RegistrationUrl" />
