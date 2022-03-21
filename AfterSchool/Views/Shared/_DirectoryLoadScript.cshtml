@@ -106,10 +106,8 @@
                 <div class="clearfix"></div>
                 <div class="text-wrap">
                     <h4 class="margin-top-0 font-weight-500">
-                        <% if(searchResult.CostLow == "Free" && searchResult.CostHigh == "Free") { %>
-                        Cost: Free
-                        <% } else if(searchResult.CostLow && searchResult.CostHigh) { %>
-                        Cost: <%= searchResult.CostLow %> - <%= searchResult.CostHigh %>
+                        <% if (searchResult.CostRange) { %>
+                        Cost: <%= searchResult.CostRange %>
                         <% } else { %>
                         <br />
                         <% } %>

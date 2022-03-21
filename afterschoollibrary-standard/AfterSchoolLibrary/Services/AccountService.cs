@@ -2755,8 +2755,9 @@ namespace AfterSchoolLibrary.Services
                             response.AgeEnd = row["AgeEnd"].IsNotEmpty() ? row["AgeEnd"].ToString() : null;
                             response.GradeStart = row["GradeLevelStart"].IsNotEmpty() ? row["GradeLevelStart"].ToString() : null;
                             response.GradeEnd = row["GradeLevelEnd"].IsNotEmpty() ? row["GradeLevelEnd"].ToString() : null;
-                            response.CostLow = row["CostLow"].IsNotEmpty() ? GetCost(row["CostLow"].ToString()) : "Free";
-                            response.CostHigh = row["CostHigh"].IsNotEmpty() ? GetCost(row["CostHigh"].ToString()) : "Free";
+                            var costLow = row["CostLow"].IsNotEmpty() ? (decimal?)Convert.ToDecimal(row["CostLow"]) : null;
+                            var costHigh = row["CostHigh"].IsNotEmpty() ? (decimal?)Convert.ToDecimal(row["CostHigh"]) : null;
+                            response.CostRange = GetCostRangeString(costLow, costHigh);
 
                             response.Priority = row["Priority"].IsNotEmpty() ? Convert.ToInt32(row["Priority"]) : 0;
                             response.TotalDifference = accountDataTable.Columns.Contains("TotalDifference") && row["TotalDifference"].IsNotEmpty() ? Convert.ToDecimal(row["TotalDifference"]) : 0;
@@ -2804,15 +2805,28 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static string GetCost(string value)
+        public static string GetCostRangeString(decimal? costLow, decimal? costHigh)
         {
-            Decimal costValue = Convert.ToDecimal(value, CultureInfo.InvariantCulture);
-            if (costValue <= 0)
+            if (!costLow.HasValue || !costHigh.HasValue)
+            {
+                return string.Empty;
+            }
+            
+            if (costLow <= 0 && costHigh <= 0)
+            {
                 return "Free";
-            // represent Decimal with 2 digits after decimal point
-            return String.Format("${0}", costValue.ToString("F2"));
-        }
+            }
 
+            string ConvertToStringWithAppropriateDecimalPrecision(decimal cost)
+            {
+                var format = cost % 1 == 0 ? "C0" : "C2";
+                return cost.ToString(format, new CultureInfo("en-US"));
+            }
+            
+            var costLowString = costLow > 0 ? ConvertToStringWithAppropriateDecimalPrecision(costLow.Value) : "Free";
+            var costHighString = ConvertToStringWithAppropriateDecimalPrecision(costHigh.Value);
+            return $"{costLowString} – {costHighString}";
+        }
         #endregion
 
         #region ManageAfterSchool
