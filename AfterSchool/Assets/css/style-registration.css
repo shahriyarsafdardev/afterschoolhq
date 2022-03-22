@@ -531,7 +531,7 @@ body.registration {
 }
 
 .participation-object-detail {
-    margin-top: -50px;
+    margin-top: 24px;
 }
 
 .participation-object-detail > .panel {
@@ -540,17 +540,13 @@ body.registration {
 }
 
 @media screen and (max-width: 375px) {
-    .participation-object-detail {
-        padding: 50px 10px;
-    }
-
     .participation-object-detail > .panel {
-        margin: 0px;
-        border-radius: 0px;
+        margin: 0;
+        border-radius: 0;
     }
 
     .panel:first-of-type {
-        margin-top: 0px;
+        margin-top: 0;
         margin-bottom: 10px;
     }
 }

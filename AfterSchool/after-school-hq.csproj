@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\Microsoft.NET.Test.Sdk.16.2.0\build\net40\Microsoft.NET.Test.Sdk.props" Condition="Exists('..\packages\Microsoft.NET.Test.Sdk.16.2.0\build\net40\Microsoft.NET.Test.Sdk.props')" />
   <Import Project="..\packages\Microsoft.Net.Compilers.3.1.1\build\Microsoft.Net.Compilers.props" Condition="Exists('..\packages\Microsoft.Net.Compilers.3.1.1\build\Microsoft.Net.Compilers.props')" />
   <Import Project="..\packages\Microsoft.CodeCoverage.16.2.0\build\netstandard1.0\Microsoft.CodeCoverage.props" Condition="Exists('..\packages\Microsoft.CodeCoverage.16.2.0\build\netstandard1.0\Microsoft.CodeCoverage.props')" />
   <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
@@ -775,23 +774,35 @@
     <Content Include="Assets\css\media_sm.css" />
     <Content Include="Assets\css\media_xs.css" />
     <Content Include="Assets\css\survey.css" />
+    <Content Include="Assets\img\4k-wallpaper-adorable-blur-boy-1148998-small.jpg" />
+    <Content Include="Assets\img\ahq-logo-2-1-1.png" />
     <Content Include="Assets\img\AHQ-logo.png" />
+    <Content Include="Assets\img\arrow.png" />
     <Content Include="Assets\img\ashq-logo.png" />
+    <Content Include="Assets\img\clever-login.png" />
+    <Content Include="Assets\img\clever-signup.png" />
+    <Content Include="Assets\img\client_success_manager_color.jpeg" />
+    <Content Include="Assets\img\email-symbol.png" />
     <Content Include="Assets\img\envelope.svg" />
     <Content Include="Assets\img\filter.svg" />
+    <Content Include="Assets\img\image-3-1800x900-1.png" />
     <Content Include="Assets\img\loading-spinner.gif" />
     <Content Include="Assets\img\footer-icon.png" />
     <Content Include="Assets\img\form-sample.png" />
+    <Content Include="Assets\img\red-icon-map.png" />
+    <Content Include="Assets\img\red-map-icon-large.png" />
     <Content Include="Assets\img\reg-header.jpg" />
     <Content Include="Assets\img\share.svg" />
     <Content Include="Assets\img\spinner.gif" />
     <Content Include="Assets\img\student-hands.png" />
+    <Content Include="Assets\img\tempsnip.png" />
     <Content Include="Assets\img\unlock.svg" />
     <Content Include="Assets\img\user-remove.svg" />
     <Content Include="Assets\img\user-add.svg" />
     <Content Include="Assets\img\clock.svg" />
     <Content Include="Assets\img\graduation-cap.svg" />
     <Content Include="Assets\img\user.svg" />
+    <Content Include="Assets\img\welcome-back-arrow.png" />
     <Content Include="Assets\js\ahq-directory-map.js" />
     <Content Include="Assets\js\ahq-directory-search.js" />
     <Content Include="Assets\img\alert-2.svg" />
@@ -1381,7 +1392,6 @@
     <Content Include="img\092515-SeattleHigh5-Globalist-JT006.jpg" />
     <Content Include="img\4k-wallpaper-adorable-blur-boy-1148998-small.jpg" />
     <Content Include="img\5e1cfc6e7fd5a.image.jpg" />
-    <Content Include="img\800_5dbbb2351943c.jpg" />
     <Content Include="img\a-bekele.png" />
     <Content Include="img\adam-winger-jemgmDw4LJ4-unsplash.jpg" />
     <Content Include="img\ahq-activity-page.png" />
@@ -1394,24 +1404,15 @@
     <Content Include="img\AMA-Partial-White.png" />
     <Content Include="img\Apple-iMac.png" />
     <Content Include="img\Apple-Macbook-Pro-Space-Grey.png" />
-    <Content Include="img\Apple-Macbook-Space-Grey.png" />
-    <Content Include="img\arrow.png" />
-    <Content Include="img\background.gif" />
     <Content Include="img\banner-classroom.jpg" />
     <Content Include="img\BCALogo-1.jpg" />
     <Content Include="img\BCALogo.jpg" />
     <Content Include="img\billy2.png" />
     <Content Include="img\BlackProfessionalMen-Logo.jpg" />
-    <Content Include="img\clever-login.png" />
-    <Content Include="img\clever-signup.png" />
-    <Content Include="img\client_success_manager_color.jpeg" />
     <Content Include="img\clipboard.png" />
     <Content Include="img\cropped-isyp-big-sypf-blue-1.png" />
-    <Content Include="img\cropped-isyp-big-sypf-blue.png" />
     <Content Include="img\darye.png" />
     <Content Include="img\directory.svg" />
-    <Content Include="img\email-symbol.PNG" />
-    <Content Include="img\Endless River.jpg" />
     <Content Include="img\enrichment-club-page.png" />
     <Content Include="img\fee.png" />
     <Content Include="img\flourish.png" />
@@ -1419,7 +1420,6 @@
     <Content Include="img\frank-mckenna-LhOjrOlcLx4-unsplash.jpg" />
     <Content Include="img\gabriel-baranski-vGICUyYW2CE-unsplash.jpg" />
     <Content Include="img\girls-with-impact.png" />
-    <Content Include="img\handshake-icon.png" />
     <Content Include="img\helping.png" />
     <Content Include="img\ian-logo.png" />
     <Content Include="img\icon-attendance-1.png" />
@@ -1432,9 +1432,7 @@
     <Content Include="img\icon-family-1.png" />
     <Content Include="img\icon-farm.png" />
     <Content Include="img\icon-graduate-1.png" />
-    <Content Include="img\icon-handsreach.png" />
     <Content Include="img\icon-ideabubble-1.png" />
-    <Content Include="img\icon-ideagarden.png" />
     <Content Include="img\icon-martial-arts.png" />
     <Content Include="img\icon-reading.png" />
     <Content Include="img\icon-robotics.png" />
@@ -1456,10 +1454,8 @@
     <Content Include="img\IPS.png" />
     <Content Include="img\ISYP_PrimaryLogo_FC-1.png" />
     <Content Include="img\ISYP_PrimaryLogo_FC.png" />
-    <Content Include="img\IYI-logo_highres_opt.png" />
     <Content Include="img\lazyload-ph.png" />
     <Content Include="img\linkedin-sales-solutions-h448yp0t2qQ-unsplash.jpg" />
-    <Content Include="img\login-main.jpg" />
     <Content Include="img\logo-1.png" />
     <Content Include="img\logo-vertical.png" />
     <Content Include="img\logo-white.png" />
@@ -1468,16 +1464,11 @@
     <Content Include="img\mccoy-color-1.jpg" />
     <Content Include="img\mccoy-color-2.jpg" />
     <Content Include="img\mccoy-color.jpg" />
-    <Content Include="img\mccoy-header.png" />
     <Content Include="img\myIPS Logo.jpg" />
     <Content Include="img\onboarding-page.png" />
-    <Content Include="img\parent-icon.png" />
     <Content Include="img\patricia-prudente-eo0VBI3Q8Ss-unsplash.jpg" />
     <Content Include="img\pencil-banner.jpg" />
     <Content Include="img\placeholder-image.png" />
-    <Content Include="img\provider-icon.png" />
-    <Content Include="img\red-icon-map.png" />
-    <Content Include="img\red-map-icon-large.png" />
     <Content Include="img\s-weinbrecht.png" />
     <Content Include="img\san.png" />
     <Content Include="img\Screen Shot 2019-09-03 at 3.29.56 PM.png" />
@@ -1491,15 +1482,11 @@
     <Content Include="img\tatiana.png" />
     <Content Include="img\teacher.png" />
     <Content Include="img\team.svg" />
-    <Content Include="img\tempsnip.png" />
-    <Content Include="img\terricks-noah-jrxMnveNEg4-unsplash copy.jpg" />
     <Content Include="img\texture-fabric.png" />
     <Content Include="img\texture-geometry-shapes-2.png" />
-    <Content Include="img\texture-geometry-shapes.png" />
     <Content Include="img\v-hernly.png" />
     <Content Include="img\warning.png" />
     <Content Include="img\website.svg" />
-    <Content Include="img\welcome-back-arrow.png" />
     <Content Include="index-profiles.html" />
     <Content Include="index.html" />
     <Content Include="ips.html" />
@@ -2682,8 +2669,6 @@
     <Error Condition="!Exists('..\packages\Microsoft.CodeCoverage.16.2.0\build\netstandard1.0\Microsoft.CodeCoverage.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeCoverage.16.2.0\build\netstandard1.0\Microsoft.CodeCoverage.props'))" />
     <Error Condition="!Exists('..\packages\Microsoft.CodeCoverage.16.2.0\build\netstandard1.0\Microsoft.CodeCoverage.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeCoverage.16.2.0\build\netstandard1.0\Microsoft.CodeCoverage.targets'))" />
     <Error Condition="!Exists('..\packages\Microsoft.Net.Compilers.3.1.1\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Net.Compilers.3.1.1\build\Microsoft.Net.Compilers.props'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.NET.Test.Sdk.16.2.0\build\net40\Microsoft.NET.Test.Sdk.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.NET.Test.Sdk.16.2.0\build\net40\Microsoft.NET.Test.Sdk.props'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.NET.Test.Sdk.16.2.0\build\net40\Microsoft.NET.Test.Sdk.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.NET.Test.Sdk.16.2.0\build\net40\Microsoft.NET.Test.Sdk.targets'))" />
     <Error Condition="!Exists('..\packages\SQLitePCLRaw.lib.e_sqlite3.linux.1.1.7\build\net35\SQLitePCLRaw.lib.e_sqlite3.linux.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SQLitePCLRaw.lib.e_sqlite3.linux.1.1.7\build\net35\SQLitePCLRaw.lib.e_sqlite3.linux.targets'))" />
     <Error Condition="!Exists('..\packages\SQLitePCLRaw.lib.e_sqlite3.osx.1.1.7\build\net35\SQLitePCLRaw.lib.e_sqlite3.osx.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SQLitePCLRaw.lib.e_sqlite3.osx.1.1.7\build\net35\SQLitePCLRaw.lib.e_sqlite3.osx.targets'))" />
     <Error Condition="!Exists('..\packages\SQLitePCLRaw.lib.e_sqlite3.v110_xp.1.1.7\build\net35\SQLitePCLRaw.lib.e_sqlite3.v110_xp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SQLitePCLRaw.lib.e_sqlite3.v110_xp.1.1.7\build\net35\SQLitePCLRaw.lib.e_sqlite3.v110_xp.targets'))" />
@@ -2691,7 +2676,6 @@
   </Target>
   <Import Project="..\packages\NETStandard.Library.2.0.3\build\netstandard2.0\NETStandard.Library.targets" Condition="Exists('..\packages\NETStandard.Library.2.0.3\build\netstandard2.0\NETStandard.Library.targets')" />
   <Import Project="..\packages\Microsoft.CodeCoverage.16.2.0\build\netstandard1.0\Microsoft.CodeCoverage.targets" Condition="Exists('..\packages\Microsoft.CodeCoverage.16.2.0\build\netstandard1.0\Microsoft.CodeCoverage.targets')" />
-  <Import Project="..\packages\Microsoft.NET.Test.Sdk.16.2.0\build\net40\Microsoft.NET.Test.Sdk.targets" Condition="Exists('..\packages\Microsoft.NET.Test.Sdk.16.2.0\build\net40\Microsoft.NET.Test.Sdk.targets')" />
   <Import Project="..\packages\SQLitePCLRaw.lib.e_sqlite3.linux.1.1.7\build\net35\SQLitePCLRaw.lib.e_sqlite3.linux.targets" Condition="Exists('..\packages\SQLitePCLRaw.lib.e_sqlite3.linux.1.1.7\build\net35\SQLitePCLRaw.lib.e_sqlite3.linux.targets')" />
   <Import Project="..\packages\SQLitePCLRaw.lib.e_sqlite3.osx.1.1.7\build\net35\SQLitePCLRaw.lib.e_sqlite3.osx.targets" Condition="Exists('..\packages\SQLitePCLRaw.lib.e_sqlite3.osx.1.1.7\build\net35\SQLitePCLRaw.lib.e_sqlite3.osx.targets')" />
   <Import Project="..\packages\SQLitePCLRaw.lib.e_sqlite3.v110_xp.1.1.7\build\net35\SQLitePCLRaw.lib.e_sqlite3.v110_xp.targets" Condition="Exists('..\packages\SQLitePCLRaw.lib.e_sqlite3.v110_xp.1.1.7\build\net35\SQLitePCLRaw.lib.e_sqlite3.v110_xp.targets')" />

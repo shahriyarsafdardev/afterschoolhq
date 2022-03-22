@@ -11,6 +11,23 @@
         justify-content: space-between;
         padding: 5px 25px;
     }
+
+    .filter-footer-container {
+        position: fixed;
+        z-index: 999999;
+        background-color: white;
+        width: 100%;
+        bottom: 0;
+        padding: 12px 0;
+        border-top: 1px solid @primaryColor;
+        display: none;
+    }
+
+    .apply-filter-mobile-button {
+        border-color: @primaryColor;
+        border-radius: 5px;
+        color: @primaryColor;
+    }
 </style>
 
 <header class="visible-lg visible-md directory-header">
@@ -35,7 +52,7 @@
 
     <div class="clearfix"></div>
     <div id="mobile-filter-footer" class="filter-footer-container">
-        <button type="button" class="btn btn-default btn-lg btn-center btn-apply-filter-mobile" onclick="applyMobileFilter()">Apply Filters</button>
+        <button type="button" class="btn btn-default btn-center apply-filter-mobile-button" onclick="applyMobileFilter()">Apply Filters</button>
     </div>
 
     <div class="clearfix"></div>

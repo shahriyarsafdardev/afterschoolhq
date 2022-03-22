@@ -1,5 +1,5 @@
 ﻿/* Medium devices (landscape tablets, 768px to 1199px) */
-@media(min-width: 770px) and (max-width: 1199px) {
+@media (min-width: 770px) and (max-width: 1199px) {
 
     .hidden-md {
         display: none !important;
@@ -30,7 +30,7 @@
     }
 
     .margin-left {
-        margin-left:-10px;
+        margin-left: -10px;
     }
 
     .datetimepicker-mobile {
@@ -119,12 +119,11 @@
 
     .participation-object {
         padding: 0 20px;
-        width: 400px;
         height: auto;
         margin-bottom: 20px;
     }
 
-        .participation-object > .panel {
-            margin: 0 !important;
-        }
+    .participation-object > .panel {
+        margin: 0 !important;
+    }
 }

@@ -5,12 +5,12 @@
     }
 
     .mobile-padding-zero {
-        padding: 0!important;
+        padding: 0 !important;
     }
 
     .padding-lr-zero-sm {
-        padding-left: 0!important;
-        padding-right: 0!important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
     }
 
     .text-center-sm {
@@ -53,7 +53,7 @@
     }
 
     .text-center-sm {
-        text-align:center;
+        text-align: center;
     }
 
     .datetimepicker-mobile {
@@ -62,7 +62,7 @@
     }
 
     .margin-left-sm {
-        margin-left:10px;
+        margin-left: 10px;
     }
 
     .mobile-padding {
@@ -101,14 +101,13 @@
 
     .participation-object {
         padding: 0 20px;
-        width: 380px;
         height: auto;
         margin-bottom: 20px;
     }
 
-        .participation-object > .panel {
-            margin: 0 !important;
-        }
+    .participation-object > .panel {
+        margin: 0 !important;
+    }
 
     .activity-footer {
         position: fixed;
@@ -142,7 +141,7 @@
 }
 
 
-@media (max-width:700px) {
+@media (max-width: 700px) {
     .navTop > .nav-btn {
         display: inline-block;
         position: absolute;
@@ -150,23 +149,23 @@
         top: -35px;
     }
 
-        .navTop > .nav-btn > label {
-            display: inline-block;
-            width: 50px;
-            height: 50px;
-            padding: 15px 0 0 5px;
-        }
+    .navTop > .nav-btn > label {
+        display: inline-block;
+        width: 50px;
+        height: 50px;
+        padding: 15px 0 0 5px;
+    }
 
-            .navTop > .nav-btn > label:hover, .navTop#nav-check:checked ~ .nav-btn > label {
-                background-color: none;
-            }
+    .navTop > .nav-btn > label:hover, .navTop#nav-check:checked ~ .nav-btn > label {
+        background-color: none;
+    }
 
-            .navTop > .nav-btn > label > span {
-                display: block;
-                width: 25px;
-                height: 10px;
-                border-top: 2px solid #eee;
-            }
+    .navTop > .nav-btn > label > span {
+        display: block;
+        width: 25px;
+        height: 10px;
+        border-top: 2px solid #eee;
+    }
 
     .navTop > .nav-links {
         position: relative;
@@ -181,10 +180,10 @@
         box-shadow: 0 4px 13px 0 rgba(216, 216, 216, 0.5);
     }
 
-        .navTop > .nav-links > a {
-            display: block;
-            width: 100%;
-        }
+    .navTop > .nav-links > a {
+        display: block;
+        width: 100%;
+    }
 
     .navTop > #nav-check:not(:checked) ~ .nav-links {
         height: 0px;
