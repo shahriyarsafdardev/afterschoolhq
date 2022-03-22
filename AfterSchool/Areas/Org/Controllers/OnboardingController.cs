@@ -581,7 +581,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("Done");
+                return RedirectToAction("Done", new { accounttype = account.AccountTypeId.ToString() });
 
             ViewBag.IsDirectoryAccountProvider = AccountService.CheckIfDirectoryAccount(account, msgs);
             ViewBag.Messages = msgs;
