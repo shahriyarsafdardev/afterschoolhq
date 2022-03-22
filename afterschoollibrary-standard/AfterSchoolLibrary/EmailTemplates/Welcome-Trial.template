@@ -2,17 +2,17 @@
   <p>Hey @Model.FirstName,</p>
 
   <p>
-      We're so excited for you to try out @Model.ProductName! We want to make running your programs and activities easy. We want you to get back to what you truly love doing. Don't worry, we are here to help!
+      We're so excited for you to try out @Model.ProductName! It's our goal to make running your programs easy. We want you to get back to what you truly love doing. Don't worry, we are here to help!
   </p>
 
   <p>
-      We'll also be sending some emails your way to help you get the most out of @Model.ProductName during your trial. Thank you again for giving EnrollHQ a try.
+      We'll be sending some emails your way to help you get the most out of @Model.ProductName during your trial. Thank you again for giving AfterSchool HQ a try.
   </p>
   <p>
       We're excited to help you succeed and watch your students grow!
   </p>
   <p>
       Darye Henry<br />
-      Founder &amp; CEO
+      Co-Founder &amp; CEO
   </p>
 </div>

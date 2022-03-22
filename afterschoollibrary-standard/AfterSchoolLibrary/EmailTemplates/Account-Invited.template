@@ -4,7 +4,7 @@
   @Model.CustomMessage
 
   <p>
-      You've been invited to use @Model.ProductName! We want to make this experience the best you've had ever when managing your registrations for sports and extracurricular activities. 
+      You've been invited to use @Model.ProductName! We want to make this experience the best you've ever had when managing your registrations for sports and extracurricular activities. 
   </p>
 
   <p>

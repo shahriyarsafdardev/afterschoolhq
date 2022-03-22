@@ -11,7 +11,7 @@
 	<br/>
 	<p>
 		In order for your AfterSchoolHQ account to process payments, Stripe will need this information. <br/>
-		Please check the email address:  @Model.StripeAccountEmail for an email from Stripe to provide this information to Stripe. <br/>
+		Please check the email address:  @Model.StripeAccountEmail for an email from Stripe to provide this information. <br/>
 		If you do not recognize this email address, please contact us immediately by responding to this email.
 	</p>
 	<p>

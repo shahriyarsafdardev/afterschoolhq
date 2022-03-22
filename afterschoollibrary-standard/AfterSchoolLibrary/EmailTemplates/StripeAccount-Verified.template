@@ -6,7 +6,7 @@
   </p>
 
   <p>
-    Log into your account to starting accepting payments now: <a href="@Model.LoginLink">@Model.LoginLink</a>
+    Login to your account to start accepting payments now: <a href="@Model.LoginLink">@Model.LoginLink</a>
   </p>
   <p>
       Your @Model.ProductName Team

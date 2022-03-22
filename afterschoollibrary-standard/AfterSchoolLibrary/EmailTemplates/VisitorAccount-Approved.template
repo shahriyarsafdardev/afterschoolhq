@@ -6,7 +6,7 @@
   </p>
 
   <p>
-      Now when you create a new activity and select @Model.HostAccountName as your location, your activities will show up automatically on the @Model.HostAccountName page and parents can select and register their children for your activities.
+      Now, when you create a new activity and select @Model.HostAccountName as your location, your activities will show up automatically on the @Model.HostAccountName page and parents can select and register their children for your activities.
   </p>
 
   <p>

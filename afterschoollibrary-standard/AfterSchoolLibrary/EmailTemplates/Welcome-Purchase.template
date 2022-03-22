@@ -2,7 +2,7 @@
   <p>Hey @Model.FirstName,</p>
 
   <p>
-    We're excited to have you on board as a part of the @Model.ProductName community! We hope to make this your smoothest and most efficient experience enrolling students for your afterschool programs and activities.    
+    We're excited to have you on board as a part of the @Model.ProductName community! We hope to make this your smoothest and most efficient experience enrolling students for your after-school programs.    
   </p>
 
   <p>
@@ -13,7 +13,7 @@
   </p>
   <p>
       Darye Henry<br />
-      Founder &amp; CEO<br />
+      Co-Founder &amp; CEO<br />
       @Model.ProductName
   </p>
 </div>
