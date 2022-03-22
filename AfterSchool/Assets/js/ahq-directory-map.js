@@ -35,7 +35,7 @@ function addMarkersOnMap(places) {
                 position: new google.maps.LatLng(places[i].Latitude, places[i].Longitude),
                 map: map,
                 title: places[i].AccountName,
-                icon: '../img/red-icon-map.png'
+                icon: '../Assets/img/red-icon-map.png'
             });
             newmarker['infowindow'] = new google.maps.InfoWindow({
                 content: places[i].AccountName
@@ -51,7 +51,7 @@ function addMarkersOnMap(places) {
             google.maps.event.addListener(newmarker, 'click', function () {
                 removeIcons();
                 this['infowindow'].open(map, this);
-                this.setIcon('../img/red-map-icon-large.png');
+                this.setIcon('../Assets/img/red-map-icon-large.png');
                 var mainDiv = $("div").find(`[name='${this['infowindow'].content}']`);
                 $("#directory-panel", mainDiv).addClass('primary-color-border');
                 var container = $("#results-container");
@@ -69,7 +69,7 @@ function addMarkersOnMap(places) {
 
 function removeIcons() {
     for (var j = 0; j < marker.length; j++) {
-        marker[j].setIcon("../img/red-icon-map.png");
+        marker[j].setIcon("../Assets/img/red-icon-map.png");
         marker[j]['infowindow'].close();
     }
     $(".participation-object div").removeClass('primary-color-border');
