@@ -105,7 +105,7 @@
     }
 
     .participation-object {
-        padding: 0 20px;
+        padding: 0;
         width: -webkit-fill-available;
         width: -moz-available;
         height: auto;
@@ -134,11 +134,6 @@
         margin: 10px;
         font-weight: bold;
         border-radius: 7px;
-    }
-
-    .btn-contact-us {
-        padding: 13px 20px;
-        font-size: 11px;
     }
 
     .contactUsModal {

@@ -421,18 +421,6 @@
     cursor: pointer;
 }
 
-.filter-footer-container {
-    position: fixed;
-    z-index: 999999;
-    background-color: white;
-    width: 100%;
-    bottom: 0;
-    height: 100px;
-    padding-top: 24px;
-    border-top: 1px solid steelblue;
-    display: none;
-}
-
 .search-youth {
     float: left;
     font-size: 22px;
@@ -461,11 +449,6 @@
 
 .footer-extended {
     background: #212a2d
-}
-
-.btn-apply-filter-mobile {
-    border-color: steelblue;
-    color: blue;
 }
 
 .profile-badge-updated {
@@ -767,17 +750,6 @@
 
 .pb-20 {
     padding-bottom: 20px;
-}
-
-.btn-contact-us {
-    background-color: white;
-    border-radius: 5px;
-    padding: 13px 25px;
-}
-
-.contactSpan {
-    margin-left: 30px;
-    font-weight: bold;
 }
 
 .contactUsModal {
@@ -1792,15 +1764,6 @@
 .directory-filter-icon-mobile {
     height: 20px;
     margin-top: -2px;
-}
-
-.directory-filter-symbol {
-    padding: 0;
-    text-align: center;
-}
-
-.directory-filter-symbol img {
-    cursor: pointer;
 }
 
 .padding-top-10 {

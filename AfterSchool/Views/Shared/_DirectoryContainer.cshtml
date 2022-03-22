@@ -20,6 +20,61 @@
         padding: 0 15px 15px;
         width: 100%;
     }
+    
+    .search-input-and-button {
+        display: flex;
+        margin: 0 12px;
+    }
+    
+    .search-input {
+        flex: 1;
+        margin-bottom: 12px;
+    }
+
+    .directory-filter-symbol {
+        padding: 0;
+        text-align: center;
+    }
+
+    .directory-filter-symbol img {
+        cursor: pointer;
+    }
+    
+    #btn-mobile-filter {
+        border-radius: 5px;
+        font-weight: bold;
+        height: 37px;
+        margin-left: 3px;
+    }
+
+    #tags-container-mobile-view {
+        display: flex;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+        padding: 0 15px;
+        row-gap: 6px;
+    }
+
+    .contact-us-button {
+        background-color: white;
+        border: 3px solid @primaryColor;
+        border-radius: 5px;
+        box-shadow: 0 5px 10px 0 rgba(0, 0, 0, 0.15);
+        padding: 13px 25px;
+        white-space: normal;
+    }
+
+    .contactSpan {
+        font-weight: bold;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+</style>
+<style media="all and (max-width: 479px)">
+    .contact-us-button {
+        font-size: 11px;
+        padding: 13px 20px;
+    }
 </style>
 <div id="main-view-container" class="display-flex">
     <div id="list-view" class="directory-list-view">
@@ -35,29 +90,28 @@
         <div id="search-and-results-container">
 
             <div class="search-filter-and-map-heading">
-                <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9 mobile-padding-zero">
-                    <div class="has-feedback has-search" style="margin-bottom: 12px;">
+                <div class="search-input-and-button">
+                    <div class="has-feedback has-search search-input">
                         <input id="txtSearch" name="search" type="text" class="form-control directory-search-input" placeholder="Search For Programs" onkeyup="return waitAndFilterSearch(this.value)">
                         <span class="glyphicon glyphicon-search form-control-feedback directory-search-magnyfier-icon"></span>
                     </div>
-                </div>
 
-                <div id="container-show-filter-button" class="col-xs-3 directory-filter-symbol">
-                    <button id="btn-mobile-filter" class="btn btn-sm btn-default" isOpen="0" onclick="mobileFilter()" style="border-radius: 5px; height: 37px; width: 100%; margin-left: 3px; font-weight: bold;">
-                        <img src="~/Assets/img/filter.svg" class="directory-filter-icon-mobile" alt="Show or hide filters"/>
-                        Filter
-                    </button>
-                </div>
+                    <div id="container-show-filter-button" class="directory-filter-symbol">
+                        <button id="btn-mobile-filter" class="btn btn-sm btn-default" isOpen="0" onclick="mobileFilter()">
+                            <img src="~/Assets/img/filter.svg" class="directory-filter-icon-mobile" alt="Show or hide filters"/>
+                            Filter
+                        </button>
+                    </div>
 
-                <div id="container-show-map-chk" class="am-checkbox checkbox-show-map col-lg-3 col-md-3" style="display: none;">
-                    <input id="chk-map-view" name="show-map" checked="checked" value="1" type="checkbox" class="schedulerepeat-checkbox" onclick="return toggleMapView(this)"/>
-                    <label for="chk-map-view" class="margin-h-10 mobile-padding font-weight-bold">Show Map</label>
+                    <div id="container-show-map-chk" class="am-checkbox checkbox-show-map" style="display: none;">
+                        <input id="chk-map-view" name="show-map" checked="checked" value="1" type="checkbox" class="schedulerepeat-checkbox" onclick="return toggleMapView(this)"/>
+                        <label for="chk-map-view" class="margin-h-10 mobile-padding font-weight-bold">Show Map</label>
+                    </div>
                 </div>
+                <div class="clearfix"></div>
+                <div id="tags-container-mobile-view"></div>
             </div>
             <div id="results-container">
-                <div class="clearfix"></div>
-
-                <div id="tags-container-mobile-view" style="margin-bottom: 12px;"></div>
                 <div class="clearfix"></div>
 
                 <div id="search-result" class="row"> </div>
@@ -70,9 +124,9 @@
                 </div>
 
                 <div id="notification-contact-us" class="text-center sticky-bottom">
-                    <button class="btn btn-contact-us" style="border: 3px solid @primaryColor;" type="button" data-toggle="modal" data-target="#ContactUsModal">
+                    <button class="btn contact-us-button" type="button" data-toggle="modal" data-target="#ContactUsModal">
                         Can't find what you are looking for?
-                        <span class="contactSpan">CONTACT US</span>
+                        <span class="contactSpan">Contact Us</span>
                     </button>
                 </div>
                 <div class="clearfix"></div>
