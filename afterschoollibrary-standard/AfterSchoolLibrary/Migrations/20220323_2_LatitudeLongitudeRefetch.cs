@@ -13,7 +13,7 @@ using Location = AfterSchoolLibrary.Models.Location;
 
 namespace AfterSchoolLibrary.Migrations
 {
-    public class Migration_20220323_LatitudeLongitudeRefresh
+    public class Migration_20220323_2_LatitudeLongitudeRefetch
     {
         public static void Do(SystemMessages msgs, DatabaseConnection dc)
         {
@@ -21,15 +21,6 @@ namespace AfterSchoolLibrary.Migrations
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    var sql1 = "alter table Location alter column Latitude Decimal(12,7)";
-                    var sql2 = "alter table Location alter column Longitude Decimal(12,7)";
-                    var sql3 = "alter table Location alter column DistanceFromOrigin Decimal(10,5)";
-
-                    var dq = Location.get_DatabaseQuery(Location.ObjectMap);
-                    amsgs.AddRange(dq.ExecuteSql(sql1));
-                    amsgs.AddRange(dq.ExecuteSql(sql2));
-                    amsgs.AddRange(dq.ExecuteSql(sql3));
-
                     var key = ConfigurationManager.AppSettings["Google.AutoComplete.ApiKey"];
                     var locations = Models.Location.Load();
                     foreach (var item in locations.Where(m => m.GooglePlaceId.IsNotEmpty()))
@@ -50,7 +41,7 @@ namespace AfterSchoolLibrary.Migrations
                         item.Save(adc);
                     }
                 },
-                uniqueIdenfier: "Migration_20220323_LatitudeLongitudeRefresh",
+                uniqueIdenfier: "Migration_20220323_2_LatitudeLongitudeRefetch",
                 msgs: msgs,
                 dc: dc
             );
