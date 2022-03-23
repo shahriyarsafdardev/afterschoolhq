@@ -100,9 +100,10 @@ namespace AfterSchoolLibrary.Helpers
                     Migration_20220106_AddFeatureFlagTable.Do(amsgs, adc);
                     UpdateNameColumnFormQuestionGroup_20211119.Do(amsgs, adc);
                     
-                    Migration_20220202_SessionActionToWebSessionAction.Do(amsgs, adc);     
+                    // Migration_20220202_SessionActionToWebSessionAction.Do(amsgs, adc);     
                     Migration_20220214_UpdateActivityContinuousEnrollmentFlag.Do(amsgs, adc);
-                    Migration_20220323_LatitudeLongitudeRefresh.Do(amsgs, adc);
+                    Migration_20220323_1_LatitudeLongitudeAlterColumns.Do(amsgs, adc);
+                    Migration_20220323_2_LatitudeLongitudeRefetch.Do(amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs)
