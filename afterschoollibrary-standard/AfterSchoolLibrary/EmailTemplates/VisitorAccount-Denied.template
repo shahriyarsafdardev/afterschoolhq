@@ -6,7 +6,7 @@
   </p>
 
   <p>
-      If you have any questions about this you can follow up with your contact @Model.HostAccountName.
+      If you have any questions about this you can follow up with your contact at @Model.HostAccountName.
   </p>
   <p>
       @Model.ProductName

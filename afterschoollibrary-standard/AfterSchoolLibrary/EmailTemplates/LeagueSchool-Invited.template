@@ -10,7 +10,7 @@
     You will be able to start registering your students by @Model.RegistrationStartDate. All teams must be submitted by @Model.RegistrationEndDate.
   </p>
   <p>
-    In order to join this league and get started you will need to <a href="@Model.LoginLink">login to your @Model.ProductName dashboard</a>. There you will be able to allow parents to register for your students on your <a href="@Model.ActivityHomePage">Activity Home Page</a>
+    In order to join this league and get started you will need to <a href="@Model.LoginLink">login to your @Model.ProductName dashboard</a>. From your dashboard, you can enable parents to register for their children on your <a href="@Model.ActivityHomePage">Activity Home Page</a>
   </p>
 
   <p>

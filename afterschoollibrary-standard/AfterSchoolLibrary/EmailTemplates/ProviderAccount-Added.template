@@ -9,7 +9,7 @@
     <ul>
       <li>Spending less time dealing with flyers and paper forms</li>
       <li>Your activity being promoted to all parents and students at @Model.HostAccountName</li>
-      <li>Money is collected and deposited into your account faster than ever and you don't need to lift a finger</li>
+      <li>Money being collected and deposited into your account faster than ever (and you don't need to lift a finger!)</li>
     </ul>
     <strong>The amount you charge per registration for your activity will be deposited (or mailed) in full to you based on your preferences.</strong>
   </p>
@@ -17,14 +17,14 @@
   <p>
     <strong>Next Steps</strong>
     <ol>
-      <li>Check to make sure you activity shows properly here:  @Model.HomePageUrl</li>
+      <li>Check to make sure your activity shows properly here:  @Model.HomePageUrl</li>
       <li>View your detailed listing here: @Model.ActivityHomePageUrl</li>
-      <li>If you haven't setup your payment preferences do so here: @Model.GetStartedLink</li>
+      <li>If you haven't set up your payment preferences, do so here: @Model.GetStartedLink</li>
     </ol>
   </p>
 
   <p>
-    If you have any questions or concerns please contact our support team at <a href="mailto:@Model.SupporEmail">@Model.SupportEmail</a>
+    If you have any questions or concerns, please contact our support team at <a href="mailto:@Model.SupportEmail">@Model.SupportEmail</a>
   </p>
   
   <p>

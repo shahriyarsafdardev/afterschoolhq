@@ -766,6 +766,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="about.html" />
+    <Content Include="ahq-partners-with-mccoy.html" />
     <Content Include="Assets\css\common.css" />
     <Content Include="Assets\css\font-awesome-4.6.3\fonts\fontawesome-webfont.svg" />
     <Content Include="Assets\css\media_xl.css" />
@@ -1396,6 +1397,7 @@
     <Content Include="img\adam-winger-jemgmDw4LJ4-unsplash.jpg" />
     <Content Include="img\ahq-activity-page.png" />
     <Content Include="img\ahq-flight-logo%400-75x.png" />
+    <Content Include="img\ahq-logo-1.png" />
     <Content Include="img\ahq-logo-2-1-1.png" />
     <Content Include="img\ahq-logo.png" />
     <Content Include="img\allison.png" />
@@ -1503,6 +1505,7 @@
     <Content Include="joinmccoy.html" />
     <Content Include="mccoy.html" />
     <Content Include="new-programs.html" />
+    <Content Include="news.html" />
     <Content Include="parent-faq.html" />
     <Content Include="parents.html" />
     <Content Include="pdf\casestudy-ahq.pdf" />

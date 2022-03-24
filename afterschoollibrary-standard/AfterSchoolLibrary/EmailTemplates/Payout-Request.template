@@ -3,6 +3,6 @@
     @Model.AccountName has requested a payout for the amount of @Model.PayoutAmount. 
   </p>
   <p>
-    Please <a href="@Model.LoginLink">login</a> and review
+    Please <a href="@Model.LoginLink">login</a> and review.
   </p>
 </div>
