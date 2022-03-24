@@ -1,4 +1,5 @@
-﻿@model RegistrationHeaderViewModel
+﻿@using Utilities = AfterSchoolLibrary.Helpers.Utilities
+@model RegistrationHeaderViewModel
 
 @{
     var currentUser = SessionVariables.CurrentUser;
@@ -75,7 +76,7 @@
         var redirectUrl = $"{Url.Action("style", "account", new {area = "org", isfullscreen = 1, returnurl = Request.Url})}#{anchor}";
 
         <span>
-            <a href="@Url.Action("switch", "logout", new {id = Model.Account.Uid, redirectUrl = redirectUrl})#@anchor"
+            <a href="@Url.Action("switch", "logout", new {id = Model.Account.Uid, redirectUrl})#@anchor"
                class="btn btn-alt7 btn-sm">
                 Edit &raquo;
             </a>
@@ -225,7 +226,7 @@
                                     <use href="~/Assets/img/share.svg#svg"></use>
                                 </svg>
                             </span>
-                            <span class="icon-span" title="Contact" style="cursor:pointer" onclick="@(Model.Account.ContactFormId.HasValue ? "location.href='" + @Model.Account.ContactUrl + "'" : "resetContactProviderForm()")">
+                            <span class="icon-span" title="Contact" style="cursor:pointer" onclick="@(Model.Account.ContactFormId.HasValue ? "location.href='" + Model.Account.ContactUrl + "'" : "resetContactProviderForm()")">
                                 <svg viewBox="0 0 20 20">
                                     <use href="~/Assets/img/envelope.svg#svg"></use>
                                 </svg>
@@ -300,7 +301,7 @@
                             <input id="claim-phone" type="text" autocomplete="off" class="form-control" required>
                         </div>
                         <div class="form-group">
-                            @if (AfterSchoolLibrary.Helpers.Utilities.IsProduction || AfterSchoolLibrary.Helpers.Utilities.IsStaging)
+                            @if (Utilities.IsProduction || Utilities.IsStaging)
                             {
                                 Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "");
                             }
@@ -355,7 +356,7 @@
                             <input id="contact-phone" type="text" autocomplete="off" class="form-control">
                         </div>
                         <div class="form-group">
-                            @if (AfterSchoolLibrary.Helpers.Utilities.IsProduction || AfterSchoolLibrary.Helpers.Utilities.IsStaging)
+                            @if (Utilities.IsProduction || Utilities.IsStaging)
                             {
                                 Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "");
                             }
@@ -505,11 +506,14 @@
         )
     }
 
-    function addLogAndRedirect(url,text) {
-        $.get('@Url.Action("addlogforurlclick", "services")?url=' + url+'&buttonText='+text+'&id=@Model.Account.ID', function (data) {
-                  window.location.href = url;
+    function addLogAndRedirect(url, text) {
+        $.get(`@Url.Action("addlogforurlclick", "services")?url=${url}&buttonText=${text}&id=@Model.Account.ID`, (data) => {
+            if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
+                window.location.href = url;
+            } else {
+                window.location.href = '//' + url;
+            }
         });
-
     }
 
 </script>
@@ -521,7 +525,7 @@
     {
         return;
     }
-    
+
     if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.RegistrationUrl.IsNotEmpty())
     {
         <button onclick="addLogAndRedirect('@Model.AccountProfile.RegistrationUrl', '@Model.AccountProfile.ButtonText')"
