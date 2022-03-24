@@ -9,7 +9,7 @@
     You will directed to login to your @Model.ProductName account then automatically taken to the payment screen.
   </p>
   <p>
-    If you have any questions or concerns about your registration status or please contact @Model.ActivityContactName either by phone (@Model.ActivityContactPhone) or email (<a href="mailto:@Model.ActivityContactEmail">@Model.ActivityContactEmail</a>).
+    If you have any questions or concerns about your registration status, please contact @Model.ActivityContactName either by phone (@Model.ActivityContactPhone) or email (<a href="mailto:@Model.ActivityContactEmail">@Model.ActivityContactEmail</a>).
   </p>
   
   <p>

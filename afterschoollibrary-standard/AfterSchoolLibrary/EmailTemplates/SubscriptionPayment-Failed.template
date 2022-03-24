@@ -2,7 +2,7 @@
   <p>@Model.FirstName,</p>
 
   <p>
-    Unfortunately your @Model.Period payment in the amount of @Model.PaymentAmount for @Model.ActivityName failed.
+    This is an automated message to notify you that your @Model.Period payment in the amount of @Model.PaymentAmount for @Model.ActivityName failed.
   </p>
 
   <p>

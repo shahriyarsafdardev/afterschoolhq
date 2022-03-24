@@ -1,6 +1,6 @@
 ﻿<div>
   <p>
-    @Model.ContactName has submitted a contact form from your profile on @Model.ProductName. 
+    @Model.ContactName has submitted a contact form via your profile on @Model.ProductName. 
   </p>
   <p>
     Name: @Model.ContactName<br />
