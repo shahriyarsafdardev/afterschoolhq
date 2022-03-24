@@ -7,7 +7,7 @@
     <strong> @Model.RequestorFirstName (@Model.RequestorEmail) </strong> is requesting to claim your account on AfterSchool HQ. </p>
   <br />
   
-  <p> If this is you please click here <a href="@Model.ProfileClaimLink">Link</a> to claim your profile. </p>
+  <p> If this is you, please <a href="@Model.ProfileClaimLink">click here</a> to claim your profile. </p>
   <br />
   
   <p>If @Model.RequestorFirstName is someone you know, you can forward this email to them to complete the claim process. </p>

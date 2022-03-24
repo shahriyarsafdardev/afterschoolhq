@@ -11,7 +11,7 @@
   </p>
 
   <p>
-    If you have any questions or concerns please contact @Model.ProviderAccountName directly. If you need to dispute this claim, please contact @Model.ProductName Support via email at <a href="mailto:@Model.SupportEmail">@Model.SupportEmail</a>.
+    If you have any questions or concerns, please contact @Model.ProviderAccountName directly. If you need to dispute this claim, please contact @Model.ProductName Support via email at <a href="mailto:@Model.SupportEmail">@Model.SupportEmail</a>.
   </p>
   
   <p>
