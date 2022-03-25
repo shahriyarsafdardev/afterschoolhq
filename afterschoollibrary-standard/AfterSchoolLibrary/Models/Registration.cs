@@ -632,7 +632,7 @@ namespace AfterSchoolLibrary.Models
             whereClause += activityIdWhere.IsNotEmpty() ? (whereClause.IsNotEmpty() ? " and " : "") + activityIdWhere : "";
             whereClause += regStatusWhere.IsNotEmpty() ? (whereClause.IsNotEmpty() ? " and " : "") + regStatusWhere : "";
             whereClause = $@"where 
-                                --r2.AccountId = {accountId} and 
+                                r2.AccountId = {accountId} and 
                                 r2.CompletionStatusId in ({ValidCompletionStatus.Select(x => (int)x).ToStrings().ToStringList()})" +
                                 (whereClause.IsNotEmpty() ? $" and {whereClause}" : "");
 
@@ -661,7 +661,7 @@ namespace AfterSchoolLibrary.Models
                             Registrant reg on r.RegistrantId = reg.ID
                         where
 	                        r.FirstRegistrationId is null and
-                            --r.AccountId = {accountId} and
+                            r.AccountId = {accountId} and
 	                        r.ID in 
 	                        (
 		                        select 
