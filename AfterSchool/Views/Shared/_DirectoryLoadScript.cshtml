@@ -42,43 +42,13 @@
 
                 <% } %>
 
-                <div id="directory-location-badge-holder">
-                    <div class="padding-h-10">
-                        <span class="text-small">
-                            <%= searchResult.Location %>
-                        </span>
-                    </div>
-                </div>
-
             </div>
 
             <div class="panel-body" style="position: relative;">
 
-                <div class="directory-panel-age-and-grade">
-
-                    <div class="pull-left margin-l-5">
-                        <% if(searchResult.IsRestrictByGrade) { %>
-
-                        <span class="badge badge-gray profile-badge text-small">
-                            <%= searchResult.GradeStart %> - <%= searchResult.GradeEnd %> Grade
-                        </span>
-
-                        <% } else { %>
-
-                        <span class="badge badge-gray profile-badge text-small">
-                            Ages <%= searchResult.AgeStart %> - <%= searchResult.AgeEnd %>
-                        </span>
-
-                        <% } %>
-                    </div>
-
-                </div>
-
-                <div class="text-wrap directory-panel-account-name">
-                    <h3 style="height: 51px; overflow-y: hidden;" class="margin-bottom-zero notranslate">                    
-                        <strong title="<%= searchResult.AccountName %>"><%= searchResult.AccountName %></strong>
-                    </h3>
-                </div>
+                <h3 class="directory-panel-account-name notranslate" title="<%= searchResult.AccountName %>">                
+                    <%= searchResult.AccountName %>
+                </h3>
 
                 <div class="clearfix"></div>
                 <div class="text-wrap">
