@@ -11,7 +11,7 @@
     </style>
 
     <div id="<%= searchResult.AccountUid %>" name="<%= searchResult.AccountName %>" class="participation-object directory-search-panel-holder">
-        <div id="directory-panel" class="panel" onclick="WebPage.navigateIframe('<%= searchResult.HomePageUrl %>?dir=@Model')">
+        <div id="directory-panel" class="panel">
             <div id="dynamicLogo-<%= searchResult.AccountUid %>" class="reg-header panel-tabs">
 
                 <% if(showDistance) { %>
@@ -116,7 +116,7 @@
 
             <div class="clearfix"></div>
             <div class="margin-t-20">
-                <a href="javascript:WebPage.navigateIframe('<%= searchResult.HomePageUrl %>?dir=@Model')" class="btn btn-register btn-block join-directory-btn">
+                <a href="<%= searchResult.HomePageUrl %>?dir=@Model" class="btn btn-register btn-block join-directory-btn">
                     Learn More
                 </a>
             </div>
