@@ -1,11 +1,8 @@
-﻿using AfterSchoolLibrary.Models;
+﻿using System.Linq;
+using System.Web.Mvc;
+using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Web.Mvc;
 using static AfterSchoolLibrary.Helpers.GoogleGeoCode;
 
 namespace AfterSchool.Controllers
@@ -27,8 +24,10 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public JsonResult GetAccounts(string accountId, string search, string enroll_today, string grades, string ages, string gender, string services, 
-            string timing, string pricing, string cost, string starting, string other, string special, decimal zipcode, int pageNum = 0)
+        public JsonResult GetAccounts(string accountId, string search, string enroll_today, string grades, string ages,
+            string gender, string services,
+            string timing, string pricing, string cost, string starting, string other, string special, decimal zipcode,
+            int pageNum = 0)
         {
             var msgs = new SystemMessages();
 
@@ -36,27 +35,31 @@ namespace AfterSchool.Controllers
             var parsedAge = ParseAndLoadAge(ages);
             var parsedGender = ParseAndLoadGender(gender);
             var pageSize = 9;
-            decimal distance = 0;
+            var latitude = 0m;
+            var longitude = 0m;
             var showDistance = zipcode.IsNotEmpty() && zipcode > 0;
 
             if (showDistance)
-                distance = GetDistanceFromOrigin(zipcode);
+                (latitude, longitude) = GetLatitudeAndLongitude(zipcode);
 
-            var searchedAccounts = AccountService.SearchDirectoryAccounts(accountId.ToInteger(), search, enroll_today, parsedGrade, parsedAge, parsedGender, services, timing, pricing, cost, starting, other, special, distance, pageNum, pageSize, msgs: msgs);
+            var searchedAccounts = AccountService.SearchDirectoryAccounts(accountId.ToInteger(), search, enroll_today,
+                parsedGrade, parsedAge, parsedGender, services, timing, pricing, cost, starting, other, special, latitude, longitude, pageNum, pageSize, msgs);
 
             if (searchedAccounts.IsNotEmpty() && searchedAccounts.Any())
-            {
                 //.. call success and records found
-                return Json(new { success = true, status = "ok", data = searchedAccounts, pageNum, showDistance }, JsonRequestBehavior.AllowGet);
-            }
-            else if (msgs.IsNotEmpty() && msgs.Count > 0)
-            {
+                return Json(new {success = true, status = "ok", data = searchedAccounts, pageNum, showDistance},
+                    JsonRequestBehavior.AllowGet);
+            if (msgs.IsNotEmpty() && msgs.Count > 0)
                 //.. something went wrong, error occured
-                return Json(new { success = false, status = "error", data = msgs.ToList().Select(msg => new { msg.Text }), pageNum, showDistance }, JsonRequestBehavior.AllowGet);
-            }
+                return Json(
+                    new
+                    {
+                        success = false, status = "error", data = msgs.ToList().Select(msg => new {msg.Text}), pageNum,
+                        showDistance
+                    }, JsonRequestBehavior.AllowGet);
 
             //.. no result found
-            return Json(new { success = false, status = "no-result" }, JsonRequestBehavior.AllowGet);
+            return Json(new {success = false, status = "no-result"}, JsonRequestBehavior.AllowGet);
         }
 
         #region Private Methods
@@ -64,7 +67,7 @@ namespace AfterSchool.Controllers
         private static string ParseAndLoadGrade(string grades)
         {
             var gradeIds = "";
-            List<GradeLevel> ListGrades = GradeLevel.Load();
+            var ListGrades = GradeLevel.Load();
 
             if (grades.IsNotEmpty())
             {
@@ -88,7 +91,6 @@ namespace AfterSchool.Controllers
             {
                 var lstAges = ages.Split(',');
                 foreach (var item in lstAges)
-                {
                     if (item.Contains('_'))
                     {
                         var age = item.Split('_');
@@ -99,15 +101,10 @@ namespace AfterSchool.Controllers
                             var ageEnd = age[1];
 
                             if (ageStart.IsNotEmpty() && ageEnd.IsNotEmpty())
-                            {
-                                for (int i = ageStart.ToInteger(); i <= ageEnd.ToInteger(); i++)
-                                {
+                                for (var i = ageStart.ToInteger(); i <= ageEnd.ToInteger(); i++)
                                     ageIds += $"{i},";
-                                }
-                            }
                         }
                     }
-                }
             }
 
             return ageIds;
