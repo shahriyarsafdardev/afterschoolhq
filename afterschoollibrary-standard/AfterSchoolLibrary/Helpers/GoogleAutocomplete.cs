@@ -1,10 +1,9 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
+using Newtonsoft.Json;
 
 namespace AfterSchoolLibrary.Helpers
 {
@@ -108,6 +107,31 @@ namespace AfterSchoolLibrary.Helpers
 
     public class GoogleGeoCode
     {
+        public static decimal GetDistanceFromOrigin(decimal zipcode)
+        {
+            var (latitude, longitude) = GetLatitudeAndLongitude(zipcode);
+            var distanceFromOrigin =
+                DistanceAlgorithm.DistanceBetweenPlaces((double) longitude, (double) latitude, 0, 0);
+
+            return Convert.ToDecimal(distanceFromOrigin);
+        }
+
+        public static (decimal latitude, decimal longitude) GetLatitudeAndLongitude(decimal zipcode)
+        {
+            var key = ConfigurationManager.AppSettings["Google.AutoComplete.ApiKey"];
+            var client = new HttpClient();
+            var response =
+                client.GetStringAsync($"https://maps.googleapis.com/maps/api/geocode/json?key={key}&address={zipcode}");
+
+            //..Google geo code
+            var root = JsonConvert.DeserializeObject<Root>(response.Result);
+
+            var latitude = root.status == "OK" ? root.results?.FirstOrDefault()?.geometry?.location?.lat : 0;
+            var longitude = root.status == "OK" ? root.results?.FirstOrDefault()?.geometry?.location?.lng : 0;
+
+            return (Convert.ToDecimal(latitude.Value), Convert.ToDecimal(longitude.Value));
+        }
+
         public class AddressComponent
         {
             public string long_name { get; set; }
@@ -166,22 +190,6 @@ namespace AfterSchoolLibrary.Helpers
         {
             public List<Result> results { get; set; }
             public string status { get; set; }
-        }
-
-        public static decimal GetDistanceFromOrigin(decimal zipcode)
-        {
-            var key = ConfigurationManager.AppSettings["Google.AutoComplete.ApiKey"];
-            HttpClient client = new HttpClient();
-            var response = client.GetStringAsync($"https://maps.googleapis.com/maps/api/geocode/json?key={key}&address={zipcode}");
-
-            //..Google geo code
-            Root root = JsonConvert.DeserializeObject<Root>(response.Result);
-
-            var latitude = root.status == "OK" ? root.results?.FirstOrDefault()?.geometry?.location?.lat : 0;
-            var longitude = root.status == "OK" ? root.results?.FirstOrDefault()?.geometry?.location?.lng : 0;
-            var distanceFromOrigin = DistanceAlgorithm.DistanceBetweenPlaces(longitude.Value, latitude.Value, 0, 0);
-
-            return Convert.ToDecimal(distanceFromOrigin);
         }
     }
 }

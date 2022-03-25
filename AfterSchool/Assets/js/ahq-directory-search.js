@@ -91,7 +91,7 @@ function submitContactForDirectory() {
     return true;
 }
 
-function prepareSearchParams() {
+function prepareSearchParams(deleteAllMarkers = true) {
     //.. reset scroll flag
     isReachedScrollEnd = false;
 
@@ -248,7 +248,9 @@ function prepareSearchParams() {
 
     if (mainUrl) {
         WebPage.addHash(encodeURI(mainUrl));
-        deleteAllMarkersOnMap();
+        if (deleteAllMarkers) {
+            deleteAllMarkersOnMap();
+        }
         $('#clear-filters').show();
     } else {
         WebPage.addHash('');
@@ -294,7 +296,7 @@ function loadFiltersAndInitiateSearch() {
         }
     });
 
-    prepareSearchParams();
+    prepareSearchParams(false);
 }
 
 function waitAndFilterSearch(search) {
@@ -349,7 +351,7 @@ function validatePostalCodeAndSearch() {
         }
 
         page = 0;
-        return prepareSearchParams(true);
+        prepareSearchParams();
     } else {
         Notifications.showBar({
             title: 'Error',
@@ -467,7 +469,7 @@ function applyMobileFilter() {
         if (isValid) {
             mobileFilter();
             page = 0;
-            return prepareSearchParams(true);
+            prepareSearchParams();
         } else {
             $('#clear-filters').show();
 
