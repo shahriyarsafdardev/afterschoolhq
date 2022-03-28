@@ -365,6 +365,7 @@ function checkZip(value) {
     //.. this is global regex to verify/sanity check postal code format but this is not or validating zip code precisly per country.
     //.. https://stackoverflow.com/a/7185241/5816119
     //.. (in order) US, IN, UK
+    value = value.trim();
     var zipCodePatternList = [/^\d{5}([\-]?\d{4})?$/, /^\d{6}$/, /^(GIR|[A-Z]\d[A-Z\d]??|[A-Z]{2}\d[A-Z\d]??)[ ]??(\d[A-Z]{2})$/]
     return zipCodePatternList.some(function (rx) {
         return rx.test(value);

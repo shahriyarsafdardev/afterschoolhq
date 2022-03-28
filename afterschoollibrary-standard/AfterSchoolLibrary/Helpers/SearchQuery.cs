@@ -162,9 +162,12 @@ namespace AfterSchoolLibrary.Helpers
             }
 
             sql += $@"
-            ) AS fltData
-        
-            if ((Select DISTINCT Count(DISTINCT AccountId) FROM    #temp_accounts_1  Where IsAccountNowEnrolling = 1) > {(PageNum + 1) * PageSize})
+            ) AS fltData";
+
+            if (!latitude.IsNotEmpty() || !longitude.IsNotEmpty() || latitude == 0 || longitude == 0)
+            {
+	            sql += $@"
+			if ((Select DISTINCT Count(DISTINCT AccountId) FROM    #temp_accounts_1  Where IsAccountNowEnrolling = 1) > {(PageNum + 1) * PageSize})
 			   begin 
 				   if((Select DISTINCT Count(DISTINCT AccountId) FROM    #temp_accounts_1  Where IsAccountNowEnrolling = 1 AND HeaderImage is not null AND (Headline is not null AND Headline != '')) > 10)
 						begin
@@ -333,6 +336,7 @@ namespace AfterSchoolLibrary.Helpers
            
             
 			DROP TABLE #temp_accounts_1";
+            }
 
             sql += @"
             IF(OBJECT_ID('tempdb..#temp_accounts_2') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_2 END 
