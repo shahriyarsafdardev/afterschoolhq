@@ -338,7 +338,7 @@ namespace AfterSchoolLibrary.Services
                                 var activityForm = activity.GetActiveActivityForm(amsgs, adc);
                                 if (activityForm.IsEmpty())
                                 {
-                                    activity.AddFormAndActivitate(group.GetForm(amsgs, adc), loggedInUser.ID.IfEmpty(0), msgs: amsgs, dc: adc);
+                                    activity.AddFormAndActivate(group.GetForm(amsgs, adc), loggedInUser.ID.IfEmpty(0), msgs: amsgs, dc: adc);
                                 }
                                 else
                                 {

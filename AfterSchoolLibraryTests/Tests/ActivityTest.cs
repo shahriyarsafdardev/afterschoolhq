@@ -651,19 +651,6 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         [Fact]
-        public void CopyDefaultFormTest()
-        {
-            var accountOwner = WebUserFactory.Create(msgs, dc);
-            var account = AccountFactory.Create(accountOwner, msgs, dc);
-            var activity = ActivityFactory.Create(account, msgs, dc);
-            var form = FormFactory.Create(account, msgs, dc);
-            account.DefaultFormId = form.ID.Value;
-            account.Save(dc);
-
-            Assert.True(activity.CopyDefaultForm(accountOwner.ID.Value, dc).HasNoErrors());
-        }
-
-        [Fact]
         public void AddFormAndActivateTest()
         {
             var accountOwner = WebUserFactory.Create(msgs, dc);
@@ -671,7 +658,7 @@ namespace AfterSchoolLibraryTests.Tests
             var activity = ActivityFactory.Create(account, msgs, dc);
             var form = FormFactory.Create(account, msgs, dc);
 
-            Assert.NotNull(activity.AddFormAndActivitate(form, accountOwner.ID.Value, false, msgs, dc));
+            Assert.NotNull(activity.AddFormAndActivate(form, accountOwner.ID.Value, false, msgs, dc));
         }
 
         [Fact]
