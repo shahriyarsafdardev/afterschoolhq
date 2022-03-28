@@ -96,28 +96,26 @@ function prepareSearchParams(deleteAllMarkers = true) {
     isReachedScrollEnd = false;
 
     //.. prepare params
-    var mainUrl = '';
-    var search = '';
-    var zip = 0;
-    var comma_delimited_enroll_today = '';
-    var comma_delimited_grades = '';
-    var comma_delimited_ages = '';
-    var comma_delimited_gender = '';
-    var comma_delimited_services = '';
-    var comma_delimited_timing = '';
-    var comma_delimited_pricing = '';
-    var comma_delimited_cost = '';
-    var comma_delimited_starting = '';
-    var comma_delimited_other = '';
-    var comma_delimited_special = '';
+    let mainUrl = '';
+    let comma_delimited_enroll_today = '';
+    let comma_delimited_grades = '';
+    let comma_delimited_ages = '';
+    let comma_delimited_gender = '';
+    let comma_delimited_services = '';
+    let comma_delimited_timing = '';
+    let comma_delimited_pricing = '';
+    let comma_delimited_cost = '';
+    let comma_delimited_starting = '';
+    let comma_delimited_other = '';
+    let comma_delimited_special = '';
 
-    search = txtSearch.val();
+    let search = txtSearch.val();
 
     if (search && search.length > 0) {
         mainUrl += `search_${search},`;
     }
 
-    zip = txtZip.val() || 0;
+    let zip = txtZip.val() || '';
     if (zip && zip.length > 0) {
         mainUrl += `zip_${zip},`;
     }
@@ -243,8 +241,7 @@ function prepareSearchParams(deleteAllMarkers = true) {
         mainUrl += `${comma_delimited_special},`;
     }
 
-    //.. get current scrolltop
-    var scr = $(window).scrollTop();
+    let currentScrollTop = $(window).scrollTop();
 
     if (mainUrl) {
         WebPage.addHash(encodeURI(mainUrl));
@@ -258,7 +255,7 @@ function prepareSearchParams(deleteAllMarkers = true) {
     }
 
     //..scroll to last known position, because location.href scrolls to top
-    document.documentElement.scrollTop = page == 0 ? 0 : scr;
+    document.documentElement.scrollTop = page === 0 ? 0 : currentScrollTop;
 
     // .. call api
     if (!isMobile || !isMobileFilterWindowOpened) {
@@ -343,16 +340,19 @@ function checkAndSearch(elem) {
     }
 }
 
-function validatePostalCodeAndSearch() {
-    var isValid = checkZip($('#txtZipCode').val());
-    if (isValid) {
-        if (isMobile && isMobileFilterWindowOpened) {
-            mobileFilter();
-        }
+function validatePostalCodeAndApplyFiltersIfValid() {
+    if (isMobile)
+        return;
+    trimAndValidatePostalCode() && applySearchFilters();
+}
 
-        page = 0;
-        prepareSearchParams();
+function validatePostalCodeAndApplyFilters() {
+    if (trimAndValidatePostalCode()) {
+        applySearchFilters();
     } else {
+        if (isMobile) {
+            $('#clear-filters').show();
+        }
         Notifications.showBar({
             title: 'Error',
             message: 'Postal code is not in a proper format.',
@@ -361,12 +361,25 @@ function validatePostalCodeAndSearch() {
     }
 }
 
+function trimAndValidatePostalCode() {
+    $('#txtZipCode').val($('#txtZipCode').val().trim());
+    return checkZip($('#txtZipCode').val()) || $('#txtZipCode').val().length === 0;
+}
+
+function applySearchFilters() {
+    if (isMobile && isMobileFilterWindowOpened) {
+        mobileFilter();
+    }
+
+    page = 0;
+    prepareSearchParams();
+}
+
 function checkZip(value) {
     //.. this is global regex to verify/sanity check postal code format but this is not or validating zip code precisly per country.
     //.. https://stackoverflow.com/a/7185241/5816119
     //.. (in order) US, IN, UK
-    value = value.trim();
-    var zipCodePatternList = [/^\d{5}([\-]?\d{4})?$/, /^\d{6}$/, /^(GIR|[A-Z]\d[A-Z\d]??|[A-Z]{2}\d[A-Z\d]??)[ ]??(\d[A-Z]{2})$/]
+    var zipCodePatternList = [/^\d{5}(-?\d{4})?$/, /^\d{6}$/, /^(GIR|[A-Z]\d[A-Z\d]??|[A-Z]{2}\d[A-Z\d]??) ??(\d[A-Z]{2})$/]
     return zipCodePatternList.some(function (rx) {
         return rx.test(value);
     });
@@ -461,30 +474,6 @@ function hideMobileView() {
 
     $('#btn-mobile-filter').attr('isOpen', "0");
     isMobileFilterWindowOpened = false;
-}
-
-function applyMobileFilter() {
-    if (txtZip.val()?.length > 0) {
-        //.. validate postal code first
-        var isValid = checkZip($('#txtZipCode').val());
-        if (isValid) {
-            mobileFilter();
-            page = 0;
-            prepareSearchParams();
-        } else {
-            $('#clear-filters').show();
-
-            Notifications.showBar({
-                title: 'Error',
-                message: 'Postal code is not in a proper format.',
-                success: false
-            });
-        }
-    } else {
-        mobileFilter();
-        page = 0;
-        prepareSearchParams();
-    }
 }
 
 function clearFilters() {
