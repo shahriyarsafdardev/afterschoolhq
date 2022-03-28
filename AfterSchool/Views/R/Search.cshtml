@@ -187,8 +187,7 @@
 
                         page++;
 
-                        if (data.data.length < 9) {
-                            //..page size is less then the default, then it means no more records present
+                        if (data.data.length === 0) {
                             isReachedScrollEnd = true;
                         }
 
