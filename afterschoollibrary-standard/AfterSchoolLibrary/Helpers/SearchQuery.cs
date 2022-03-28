@@ -161,10 +161,28 @@ namespace AfterSchoolLibrary.Helpers
                 sql += @")";
             }
 
+            sql += @"
+            ) AS fltData";
+
+            if (latitude.IsNotEmpty() && longitude.IsNotEmpty() && latitude != 0 && longitude != 0)
+            {
+                sql += $@"
+            
+	            SELECT 
+					DISTINCT AccountId, AccountUid, AccountName, AccountUniqueName, CostLow, CostHigh, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 0 as Priority, TotalDifference
+				FROM #temp_accounts_1
+				ORDER BY TotalDifference asc
+	            OFFSET {PageNum * PageSize} ROWS 
+				FETCH {(PageNum == 0 ? "first" : "next")} {PageSize} ROWS only;
+	            
+				DROP TABLE #temp_accounts_1";
+
+                return sql;
+            }
+
             sql += $@"
-            ) AS fltData
-        
-            if ((Select DISTINCT Count(DISTINCT AccountId) FROM    #temp_accounts_1  Where IsAccountNowEnrolling = 1) > {(PageNum + 1) * PageSize})
+			if ((Select DISTINCT Count(DISTINCT AccountId) FROM    #temp_accounts_1  Where IsAccountNowEnrolling = 1) > {(PageNum + 1) * PageSize})
 			   begin 
 				   if((Select DISTINCT Count(DISTINCT AccountId) FROM    #temp_accounts_1  Where IsAccountNowEnrolling = 1 AND HeaderImage is not null AND (Headline is not null AND Headline != '')) > 10)
 						begin
@@ -330,11 +348,7 @@ namespace AfterSchoolLibrary.Helpers
 		       FETCH {(PageNum == 0 ? "first" : "next")} {PageSize} ROWS only;
 		    end
 
-           
-            
-			DROP TABLE #temp_accounts_1";
-
-            sql += @"
+			DROP TABLE #temp_accounts_1
             IF(OBJECT_ID('tempdb..#temp_accounts_2') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_2 END 
 			IF(OBJECT_ID('tempdb..#temp_accounts_3') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_3 END
 			IF(OBJECT_ID('tempdb..#temp_accounts_4') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_4 END

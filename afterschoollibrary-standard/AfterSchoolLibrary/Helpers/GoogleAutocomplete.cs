@@ -107,21 +107,12 @@ namespace AfterSchoolLibrary.Helpers
 
     public class GoogleGeoCode
     {
-        public static decimal GetDistanceFromOrigin(decimal zipcode)
-        {
-            var (latitude, longitude) = GetLatitudeAndLongitude(zipcode);
-            var distanceFromOrigin =
-                DistanceAlgorithm.DistanceBetweenPlaces((double) longitude, (double) latitude, 0, 0);
-
-            return Convert.ToDecimal(distanceFromOrigin);
-        }
-
-        public static (decimal latitude, decimal longitude) GetLatitudeAndLongitude(decimal zipcode)
+        public static (decimal latitude, decimal longitude) GetLatitudeAndLongitude(string zipcode)
         {
             var key = ConfigurationManager.AppSettings["Google.AutoComplete.ApiKey"];
             var client = new HttpClient();
-            var response =
-                client.GetStringAsync($"https://maps.googleapis.com/maps/api/geocode/json?key={key}&address={zipcode}");
+            var response = client.GetStringAsync(
+                $"https://maps.googleapis.com/maps/api/geocode/json?key={key}&address=zip%20code%20{zipcode}");
 
             //..Google geo code
             var root = JsonConvert.DeserializeObject<Root>(response.Result);

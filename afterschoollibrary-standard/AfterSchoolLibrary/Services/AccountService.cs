@@ -3121,99 +3121,95 @@ namespace AfterSchoolLibrary.Services
                     grades, ages, gender, services, timing, pricing, cost, starting, other, specialNeeds, latitude,
                     longitude, PageNum, PageSize, msgs: msgs);
 
-                if (accountDataTable.IsNotEmpty() && accountDataTable.Rows.Any())
+                if (!accountDataTable.IsNotEmpty() || !accountDataTable.Rows.Any())
                 {
-                    List<SearchDirectoryResponse> ListResponse = new List<SearchDirectoryResponse>();
-                    foreach (DataRow row in accountDataTable.Rows)
+                    return new List<SearchDirectoryResponse>();
+                }
+
+                var listResponse = new List<SearchDirectoryResponse>();
+                foreach (DataRow row in accountDataTable.Rows)
+                {
+                    if (!row.IsNotEmpty())
                     {
-                        if (row.IsNotEmpty())
-                        {
-                            var response = new SearchDirectoryResponse();
-
-                            // ..account
-                            response.AccountName = row["AccountName"].IsNotEmpty() ? row["AccountName"].ToString() : "";
-                            response.AccountUid = new Guid(row["AccountUid"].ToString());
-                            response.HomePageUrl = $"{Utilities.BaseUrl()}/{row["AccountUniqueName"]}";
-
-                            //.. account profile  
-                            response.IsOpenDuringCovid = row["IsOpenDuringCovid"].IsNotEmpty()
-                                ? Convert.ToBoolean(row["IsOpenDuringCovid"])
-                                : false;
-                            response.IsELearningCenter = row["IsELearningCenter"].IsNotEmpty()
-                                ? Convert.ToBoolean(row["IsELearningCenter"])
-                                : false;
-                            response.IsAccountNowEnrolling = row["IsAccountNowEnrolling"].IsNotEmpty()
-                                ? Convert.ToBoolean(row["IsAccountNowEnrolling"])
-                                : false;
-                            response.IsVirtualProgram = row["IsVirtualProgram"].IsNotEmpty()
-                                ? Convert.ToBoolean(row["IsVirtualProgram"])
-                                : false;
-
-                            response.ProfileHeadline = row["Headline"].IsNotEmpty()
-                                ? row["Headline"].ToString().MaxChars(70, "...")
-                                : "";
-                            response.IsRestrictByGrade = row["AgeStart"].IsEmpty();
-                            response.AgeStart = row["AgeStart"].IsNotEmpty() ? row["AgeStart"].ToString() : null;
-                            response.AgeEnd = row["AgeEnd"].IsNotEmpty() ? row["AgeEnd"].ToString() : null;
-                            response.GradeStart = row["GradeLevelStart"].IsNotEmpty()
-                                ? row["GradeLevelStart"].ToString()
-                                : null;
-                            response.GradeEnd = row["GradeLevelEnd"].IsNotEmpty()
-                                ? row["GradeLevelEnd"].ToString()
-                                : null;
-                            var costLow = row["CostLow"].IsNotEmpty()
-                                ? (decimal?) Convert.ToDecimal(row["CostLow"])
-                                : null;
-                            var costHigh = row["CostHigh"].IsNotEmpty()
-                                ? (decimal?) Convert.ToDecimal(row["CostHigh"])
-                                : null;
-                            response.CostRange = GetCostRangeString(costLow, costHigh);
-
-                            response.Priority = row["Priority"].IsNotEmpty() ? Convert.ToInt32(row["Priority"]) : 0;
-                            response.TotalDifference =
-                                accountDataTable.Columns.Contains("TotalDifference") &&
-                                row["TotalDifference"].IsNotEmpty()
-                                    ? Convert.ToDecimal(row["TotalDifference"])
-                                    : 0;
-
-                            var accountId = row["AccountId"].IsNotEmpty() ? Convert.ToInt32(row["AccountId"]) : 0;
-                            var headerImageUrl = row["HeaderImage"].IsNotEmpty() ? row["HeaderImage"].ToString() : "";
-                            var logo = row["Logo"].IsNotEmpty() ? row["Logo"].ToString() : "";
-                            //.. reverted photos logic as we will use logo instead. part of AC for https://app.clickup.com/t/nv068a
-                            //..var photos = AccountProperty.LoadByAccountIdByAccountPropertyTypeId(accountId, AccountPropertyType.Photo, msgs, dc);
-                            var ah = Utilities.GetNewAmazonHelper();
-
-                            if (headerImageUrl.IsNotBlank())
-                                response.ProfileHeaderImageUrl = ah.GetFileLink(headerImageUrl, true, null, true);
-                            else if (logo.IsNotBlank())
-                                response.ProfileHeaderImageUrl = ah.GetFileLink(logo, true, null, true);
-
-                            if (row["LocationId"].IsNotEmpty())
-                            {
-                                //..Location, ProfileHeaderImageUrl
-                                var location = Location.Load(Convert.ToInt32(row["LocationId"]));
-                                response.Latitude = location.Latitude.IsNotEmpty()
-                                    ? location.Latitude.Value.ToString(CultureInfo.InvariantCulture)
-                                    : "";
-                                response.Longitude = location.Longitude.IsNotEmpty()
-                                    ? location.Longitude.Value.ToString(CultureInfo.InvariantCulture)
-                                    : "";
-                                response.Location = location.FormatCityState(false);
-
-                                if (response.ProfileHeaderImageUrl.IsEmpty())
-                                    response.ProfileHeaderImageUrl =
-                                        LocationService.GetGoogleMapsImageUrl(location, 1500, 600);
-                            }
-
-                            ListResponse.Add(response);
-                        }
+                        continue;
                     }
 
-                    if (latitude.IsNotEmpty() && latitude != 0 && longitude.IsNotEmpty() && longitude != 0)
-                        return ListResponse.DistinctBy(m => m.AccountName).ToList();
-                    else
-                        return ListResponse.OrderBy(m => m.Priority).ThenBy(m => Guid.NewGuid()).ToList();
+                    var costLow = row["CostLow"].IsNotEmpty()
+                        ? (decimal?) Convert.ToDecimal(row["CostLow"])
+                        : null;
+                    var costHigh = row["CostHigh"].IsNotEmpty()
+                        ? (decimal?) Convert.ToDecimal(row["CostHigh"])
+                        : null;
+
+                    var response = new SearchDirectoryResponse
+                    {
+                        // ..account
+                        AccountName = row["AccountName"].IsNotEmpty() ? row["AccountName"].ToString() : "",
+                        AccountUid = new Guid(row["AccountUid"].ToString()),
+                        HomePageUrl = $"{Utilities.BaseUrl()}/{row["AccountUniqueName"]}",
+                        //.. account profile  
+                        IsOpenDuringCovid = row["IsOpenDuringCovid"].IsNotEmpty() &&
+                                            Convert.ToBoolean(row["IsOpenDuringCovid"]),
+                        IsELearningCenter = row["IsELearningCenter"].IsNotEmpty() &&
+                                            Convert.ToBoolean(row["IsELearningCenter"]),
+                        IsAccountNowEnrolling = row["IsAccountNowEnrolling"].IsNotEmpty() &&
+                                                Convert.ToBoolean(row["IsAccountNowEnrolling"]),
+                        IsVirtualProgram = row["IsVirtualProgram"].IsNotEmpty() &&
+                                           Convert.ToBoolean(row["IsVirtualProgram"]),
+                        ProfileHeadline = row["Headline"].IsNotEmpty()
+                            ? row["Headline"].ToString().MaxChars(70, "...")
+                            : "",
+                        IsRestrictByGrade = row["AgeStart"].IsEmpty(),
+                        AgeStart = row["AgeStart"].IsNotEmpty() ? row["AgeStart"].ToString() : null,
+                        AgeEnd = row["AgeEnd"].IsNotEmpty() ? row["AgeEnd"].ToString() : null,
+                        GradeStart = row["GradeLevelStart"].IsNotEmpty()
+                            ? row["GradeLevelStart"].ToString()
+                            : null,
+                        GradeEnd = row["GradeLevelEnd"].IsNotEmpty()
+                            ? row["GradeLevelEnd"].ToString()
+                            : null,
+                        CostRange = GetCostRangeString(costLow, costHigh),
+                        Priority = row["Priority"].IsNotEmpty() ? Convert.ToInt32(row["Priority"]) : 0,
+                        TotalDifference = accountDataTable.Columns.Contains("TotalDifference") &&
+                                          row["TotalDifference"].IsNotEmpty()
+                            ? Convert.ToDecimal(row["TotalDifference"])
+                            : 0
+                    };
+
+                    var headerImageUrl = row["HeaderImage"].IsNotEmpty() ? row["HeaderImage"].ToString() : "";
+                    var logo = row["Logo"].IsNotEmpty() ? row["Logo"].ToString() : "";
+                    //.. reverted photos logic as we will use logo instead. part of AC for https://app.clickup.com/t/nv068a
+                    //..var photos = AccountProperty.LoadByAccountIdByAccountPropertyTypeId(accountId, AccountPropertyType.Photo, msgs, dc);
+                    var ah = Utilities.GetNewAmazonHelper();
+
+                    if (headerImageUrl.IsNotBlank())
+                        response.ProfileHeaderImageUrl = ah.GetFileLink(headerImageUrl, true, null, true);
+                    else if (logo.IsNotBlank())
+                        response.ProfileHeaderImageUrl = ah.GetFileLink(logo, true, null, true);
+
+                    if (row["LocationId"].IsNotEmpty())
+                    {
+                        //..Location, ProfileHeaderImageUrl
+                        var location = Location.Load(Convert.ToInt32(row["LocationId"]));
+                        response.Latitude = location.Latitude.IsNotEmpty()
+                            ? location.Latitude.Value.ToString(CultureInfo.InvariantCulture)
+                            : "";
+                        response.Longitude = location.Longitude.IsNotEmpty()
+                            ? location.Longitude.Value.ToString(CultureInfo.InvariantCulture)
+                            : "";
+                        response.Location = location.FormatCityState(false);
+
+                        if (response.ProfileHeaderImageUrl.IsEmpty())
+                            response.ProfileHeaderImageUrl = location.GetGoogleMapsImageUrl(1500, 600);
+                    }
+
+                    listResponse.Add(response);
                 }
+
+                if (latitude.IsNotEmpty() && latitude != 0 && longitude.IsNotEmpty() && longitude != 0)
+                    return listResponse.DistinctBy(m => m.AccountName).ToList();
+
+                return listResponse.OrderBy(m => m.Priority).ThenBy(m => Guid.NewGuid()).ToList();
             }
             catch (Exception ex)
             {
