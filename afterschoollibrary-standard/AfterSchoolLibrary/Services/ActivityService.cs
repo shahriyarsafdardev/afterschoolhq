@@ -579,7 +579,7 @@ namespace AfterSchoolLibrary.Services
                         if (formToUse.IsEmpty())
                             formToUse = account.GetDefaultForm(msgs, adc);
 
-                        copy.AddFormAndActivitate(formToUse, loggedInUserId, false, amsgs, dc: adc);
+                        copy.AddFormAndActivate(formToUse, loggedInUserId, false, amsgs, dc: adc);
                     }
                     //copy form completely
                     else
@@ -591,7 +591,7 @@ namespace AfterSchoolLibrary.Services
                             formToCopy = account.GetDefaultForm(amsgs, adc);
 
                         var newForm = formToCopy.Copy(loggedInUserId, copy.AccountId.Value, FormType.NotSet, null, amsgs, dc: adc);
-                        copy.AddFormAndActivitate(newForm, loggedInUserId, false, amsgs, dc: adc);
+                        copy.AddFormAndActivate(newForm, loggedInUserId, false, amsgs, dc: adc);
                     }
 
                     // copy team and permissions
@@ -742,24 +742,7 @@ namespace AfterSchoolLibrary.Services
             };
         }
 
-        public static SystemMessages CopyDefaultForm(this Activity activity, int loggedInUserId, DatabaseConnection dc = null)
-        {
-            SystemMessages msgs = new SystemMessages();
-            if (activity.GetActiveForm(dc: dc).IsEmpty())
-            {
-                var account = activity.GetAccount(dc: dc);
-                var formToCopy = account.GetDefaultForm(dc: dc);
-                var newForm = formToCopy.Copy(loggedInUserId, activity.AccountId.Value, FormType.Registration, null, msgs, dc: dc);
-                var af = activity.AddFormAndActivitate(newForm, loggedInUserId, false, msgs, dc: dc);
-
-                account.DefaultFormId = af.FormId;
-                msgs.AddRange(account.Save(dc: dc));
-            }
-
-            return msgs;
-        }
-
-        public static ActivityForm AddFormAndActivitate(this Activity activity, Form form, int loggedInUserId, bool isPublished = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static ActivityForm AddFormAndActivate(this Activity activity, Form form, int loggedInUserId, bool isPublished = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -1883,7 +1866,7 @@ namespace AfterSchoolLibrary.Services
                 if (newForm.IsNotEmpty())
                 {
                     //link form to activity
-                    activity.AddFormAndActivitate(newForm, loggedInUserId, isPublished, msgs, dc: dc);
+                    activity.AddFormAndActivate(newForm, loggedInUserId, isPublished, msgs, dc: dc);
                 }
             }
 
