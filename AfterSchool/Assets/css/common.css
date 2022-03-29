@@ -1644,7 +1644,6 @@
 }
 
 .directory-search-panel-holder {
-    height: 460px;
     margin-bottom: 10px;
     width: 350px;
 }
@@ -1749,10 +1748,6 @@
 .directory-filter-icon-mobile {
     height: 20px;
     margin-top: -2px;
-}
-
-.padding-top-10 {
-    padding-top: 10px !important
 }
 
 .margin-top-0 {
