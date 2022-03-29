@@ -226,7 +226,7 @@
                                     <use href="~/Assets/img/share.svg#svg"></use>
                                 </svg>
                             </span>
-                            <span class="icon-span" title="Contact" style="cursor:pointer" onclick="@(Model.Account.ContactFormId.HasValue ? "location.href='" + Model.Account.ContactUrl + "'" : "resetContactProviderForm()")">
+                            <span class="icon-span" title="Contact" style="cursor:pointer" data-modal="modal-contact-provider" onclick="@(Model.Account.ContactFormId.HasValue ? "location.href='" + Model.Account.ContactUrl + "'" : "resetContactProviderForm()")">
                                 <svg viewBox="0 0 20 20">
                                     <use href="~/Assets/img/envelope.svg#svg"></use>
                                 </svg>
@@ -329,7 +329,7 @@
     <div class="md-content">
         <div class="modal-body">
             <div class="row">
-                <button type="button" data-dismiss="modal" id="modal-share-close" aria-hidden="true" class="close md-close">
+                <button type="button" data-dismiss="modal" id="modal-contact-provider-close" aria-hidden="true" class="close md-close" onclick="closeContactProvider()">
                     <i class="s7-close text-medium"></i>
                 </button>
             </div>
@@ -356,10 +356,11 @@
                             <input id="contact-phone" type="text" autocomplete="off" class="form-control">
                         </div>
                         <div class="form-group">
-                            @if (Utilities.IsProduction || Utilities.IsStaging)
-                            {
-                                Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "");
-                            }
+                            <label>Message</label>
+                            <textarea id="contact-message" type="text" autocomplete="off" class="form-control"></textarea>
+                        </div>
+                        <div class="form-group">
+                            @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", ""); }
                         </div>
                         <div class="form-group contact-provider-submit text-center">
                             <button type="button" id="btn-contact-provider" class="btn btn-primary btn-lg btn-block" onclick="contactProvider()">Submit &raquo;</button>
@@ -369,7 +370,7 @@
                         <h2>Thank you!</h2>
                         <p>Your information has been submitted. Someone will be in touch with you shortly.</p>
                         <p>
-                            <button type="button" data-dismiss="modal" id="modal-share-close" class="btn btn-primary btn-lg btn-block md-close">
+                            <button type="button" data-dismiss="modal" id="close-modal-contact-provider" class="btn btn-primary btn-lg btn-block md-close" onclick="closeContactProvider()">
                                 Close
                             </button>
                         </p>
@@ -469,6 +470,7 @@
     }
 
     function resetContactProviderForm() {
+        $('#modal-contact-provider').addClass("md-show");
         $('#contact-provider-form').removeClass('hide');
         $('#contact-provider-done').addClass('hide');
 
@@ -476,13 +478,16 @@
         $('#contact-lastname').val('');
         $('#contact-email').val('');
         $('#contact-phone').val('');
-
-        AHQRecaptcha.reset('contact-form-recaptcha');
+        $('#contact-message').val('');
+    }
+    
+    function closeContactProvider() {
+        $('#modal-contact-provider').removeClass('md-show');
     }
 
     function contactProvider() {
 
-        params = 'profile=@Model.Account.Uid&firstname=' + encodeURIComponent($('#contact-firstname').val()) + '&lastname=' + encodeURIComponent($('#contact-lastname').val()) + '&email=' + encodeURIComponent($('#contact-email').val()) + '&phone=' + encodeURIComponent($('#contact-phone').val()) + '&g_recaptcha_response=' + AHQRecaptcha.getToken('contact-form-recaptcha');
+        params = 'profile=@Model.Account.Uid&firstname=' + encodeURIComponent($('#contact-firstname').val()) + '&lastname=' + encodeURIComponent($('#contact-lastname').val()) + '&email=' + encodeURIComponent($('#contact-email').val()) + '&phone=' + encodeURIComponent($('#contact-phone').val())+ '&message=' + encodeURIComponent($('#contact-message').val()) + '&g_recaptcha_response=' + AHQRecaptcha.getToken('contact-form-recaptcha');
 
         $('#btn-contact-provider').html('Submitting...');
         $('#btn-contact-provider').prop('disabled', true);

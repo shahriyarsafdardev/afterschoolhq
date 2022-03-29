@@ -7,6 +7,10 @@
     Email: @Model.ContactEmail<br />
     Phone: @Model.ContactPhone
   </p>
+  
+  <p>
+    @Model.Message
+  </p>
 
   @Model.ClaimProfileDetails
 
