@@ -487,7 +487,7 @@
 
     function contactProvider() {
 
-        params = 'profile=@Model.Account.Uid&firstname=' + encodeURIComponent($('#contact-firstname').val()) + '&lastname=' + encodeURIComponent($('#contact-lastname').val()) + '&email=' + encodeURIComponent($('#contact-email').val()) + '&phone=' + encodeURIComponent($('#contact-phone').val())+ '&message=' + encodeURIComponent($('#contact-message').val()) + '&g_recaptcha_response=' + AHQRecaptcha.getToken('contact-form-recaptcha');
+        params = 'profile=@Model.Account.Uid&firstname=' + encodeURIComponent($('#contact-firstname').val()) + '&lastname=' + encodeURIComponent($('#contact-lastname').val()) + '&email=' + encodeURIComponent($('#contact-email').val()) + '&phone=' + encodeURIComponent($('#contact-phone').val())+ '&message=' + encodeURIComponent($('#contact-message').val()) + '&g_recaptcha_response=' + $('#g-recaptcha-response').val();
 
         $('#btn-contact-provider').html('Submitting...');
         $('#btn-contact-provider').prop('disabled', true);
