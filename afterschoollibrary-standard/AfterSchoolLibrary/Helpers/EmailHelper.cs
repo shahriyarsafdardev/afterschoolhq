@@ -271,7 +271,7 @@ namespace AfterSchoolLibrary.Helpers
                 emailTemplateId: SendGridHelper.GetGenericTemplateId()));
         }
 
-        public static void SendContactProviderEmail(Account account, Registrant contact, SystemMessages msgs)
+        public static void SendContactProviderEmail(Account account, Registrant contact, string message, SystemMessages msgs)
         {
             var claimProfileDetails = "";
 
@@ -284,14 +284,15 @@ namespace AfterSchoolLibrary.Helpers
                 { "ContactEmail",  contact.Email},
                 { "ContactPhone", contact.Phone },
                 { "ClaimProfileDetails", claimProfileDetails },
-                { "ProductName", Utilities.AppName() }
+                { "ProductName", Utilities.AppName() },
+                { "Message", message}
             };
 
             var subject = $"{contact.Name} has submitted a contact form from {Utilities.AppName()}";
             var body = ProcessTemplate(
                 EmailTemplates.ContactForm_Submitted,
                 model,
-                "ContactForm_Submitted",
+                "ContactForm_Submitted-1.0",
                 msgs);
 
             // SEND EMAILS

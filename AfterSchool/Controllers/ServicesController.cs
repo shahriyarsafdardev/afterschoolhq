@@ -418,7 +418,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult ContactProvider(string profile, string firstname, string lastname, string email, string phone, string g_recaptcha_response)
+        public ActionResult ContactProvider(string profile, string firstname, string lastname, string email, string phone, string message, string g_recaptcha_response)
         {
             if (!IsRequestFromApp())
                 return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
@@ -476,7 +476,7 @@ namespace AfterSchool.Controllers
                             objectText: account?.Name
                         );
                         
-                        EmailHelper.SendContactProviderEmail(account, contact, msgs);
+                        EmailHelper.SendContactProviderEmail(account, contact, message, msgs);
                     }
                 }
 
