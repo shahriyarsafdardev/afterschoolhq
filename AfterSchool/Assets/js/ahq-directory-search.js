@@ -326,14 +326,17 @@ function formatContactPhoneForDirectory() {
     }
 }
 
-function checkAndSearch(elem) {
-
+function checkAndSearch(elem, label) {
+    
     if (isMobile) {
-        var name = $(elem).attr('name');
+        var name = $(elem).attr('name').replaceAll(' ', '').toLowerCase();
         var filterValue = $(elem).attr('valueForFilter');
-        var lable = $(elem).parent().text().trim();
-        var tag = getTagHtml(name, filterValue, lable);
-        $('#tags-container-mobile-view').append(tag);
+        if(!$(elem).is(":checked")) {
+            clearSpecificFilter(name, filterValue)
+        } else {
+            var tag = getTagHtml(name, filterValue, label);
+            $('#tags-container-mobile-view').append(tag);
+        }
     } else {
         page = 0;
         prepareSearchParams()
@@ -425,9 +428,8 @@ function loadTabsForMobile() {
     $('#tags-container-mobile-view').html('').append(tags);
 }
 
-function getTagHtml(tagContainer, id, lable) {
-    var containerName = tagContainer.replaceAll(' ', '').toLowerCase();
-    return `<span class="badge-identity-` + containerName + `-` + id + ` badge badge-pill badge-success text-small primary-bg-color directory-badge margin-right-10px">` + lable +
+function getTagHtml(containerName, id, label) {
+    return `<span class="badge-identity-` + containerName + `-` + id + ` badge badge-pill badge-success text-small primary-bg-color directory-badge margin-right-10px">` + label +
         `<button type="button" class="close" data-dismiss="alert" aria-label="Close" onclick='return clearSpecificFilter("` + containerName + `", "` + id + `")'><i class="remove glyphicon glyphicon-remove-circle glyphicon-white"></i></button></span>`;
 }
 
@@ -500,7 +502,7 @@ function clearFilters() {
 }
 
 function clearSpecificFilter(tagContainer, name) {
-    if (tagContainer !== '' && name != '') {
+    if (tagContainer !== '' && name !== '') {
         $(`input:checkbox[name=` + tagContainer + `][valueforfilter=` + name + `]`).prop('checked', false);
         $(`.badge-identity-` + tagContainer + `-` + name).remove();
 
