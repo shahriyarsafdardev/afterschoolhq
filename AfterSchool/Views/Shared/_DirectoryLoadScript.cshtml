@@ -1,5 +1,20 @@
 ﻿@model string 
 
+<style>
+    .additional-card-information {
+        font-size: 17px;
+        font-weight: 300;
+        height: 53px;
+        list-style: none;
+        margin-top: 16px;
+        padding: 0;
+    }
+
+    .additional-card-information li {
+        margin-bottom: 2px;
+    }
+</style>
+
 <script id="script-search-result-list" type="text/template">
 
     <% _.each(response, function(searchResult){ %>
@@ -50,46 +65,27 @@
                     <%= searchResult.AccountName %>
                 </h3>
 
-                <div class="clearfix"></div>
-                <div class="text-wrap">
-                    <h4 class="margin-bottom-zero font-weight-500 notranslate">
-                        <% if(searchResult.Location) { %>
-                            <%= searchResult.Location %>
-                        <% } else { %>
-                            <br />
-                        <% } %>
-                    </h4>
-                </div>
-                <div class="clearfix"></div>
-                <br/>
-                <div class="text-wrap">
-                    <% if(searchResult.IsRestrictByGrade) { %>
-                    <h4 class="padding-top-10 font-weight-500">
-                        Grade: <%= searchResult.GradeStart %> - <%= searchResult.GradeEnd %>
-                    </h4>
+                <h4 class="margin-bottom-zero font-weight-500 notranslate">
+                    <% if(searchResult.Location) { %>
+                        <%= searchResult.Location %>
                     <% } else { %>
-                    <h4 class="padding-top-10 font-weight-500">
-                        Ages: <%= searchResult.AgeStart %> - <%= searchResult.AgeEnd %>
-                    </h4>
-                    <% } %>
-                </div>
-                <div class="clearfix"></div>
-                <div class="text-wrap">
-                    <h4 class="margin-top-0 font-weight-500">
-                        <% if (searchResult.CostRange) { %>
-                        Cost: <%= searchResult.CostRange %>
-                        <% } else { %>
                         <br />
-                        <% } %>
-                    </h4>
-                </div>
+                    <% } %>
+                </h4>
+                <ul class="additional-card-information">
+                    <% if(searchResult.IsRestrictByGrade) { %>
+                        <li>Grade: <%= searchResult.GradeStart %> – <%= searchResult.GradeEnd %></li>
+                    <% } else { %>
+                        <li>Ages: <%= searchResult.AgeStart %> – <%= searchResult.AgeEnd %></li>
+                    <% } %>
+                    <% if (searchResult.CostRange) { %>
+                        <li>Cost: <%= searchResult.CostRange %></li>
+                    <% } %>
+                </ul>
 
-            <div class="clearfix"></div>
-            <div class="margin-t-20">
                 <a href="<%= searchResult.HomePageUrl %>?dir=@Model" class="btn btn-register btn-block join-directory-btn">
                     Learn More
                 </a>
-            </div>
 
             </div>
         </div>

@@ -85,10 +85,6 @@ namespace AfterSchool.Areas.Org.Controllers
             if (name.IsEmpty() && qg.IsBlank())
                 msgs.Add("Name is required", MessageType.UserError);
 
-            if (description.IsEmpty() && qg.IsBlank() && false)
-                msgs.Add("Description is required", MessageType.UserError);
-
-
             if (id.ToInteger() == 0)
             {
                 if (copyfrom.IsNumber())
