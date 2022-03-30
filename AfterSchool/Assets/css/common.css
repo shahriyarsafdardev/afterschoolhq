@@ -37,7 +37,7 @@
 .sticky-bottom {
     position: sticky;
     position: -webkit-sticky;
-    bottom: 0;
+    bottom: 1px;
 }
 
 .overlay {
