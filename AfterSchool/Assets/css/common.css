@@ -36,6 +36,7 @@
 
 .sticky-bottom {
     position: sticky;
+    position: -webkit-sticky;
     bottom: 0;
 }
 
