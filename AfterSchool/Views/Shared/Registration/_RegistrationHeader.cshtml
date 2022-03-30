@@ -1,5 +1,4 @@
-﻿@using Utilities = AfterSchoolLibrary.Helpers.Utilities
-@model RegistrationHeaderViewModel
+﻿@model RegistrationHeaderViewModel
 
 @{
     var currentUser = SessionVariables.CurrentUser;
@@ -257,11 +256,12 @@
             <div class="row">
                 <div class="col-md-12">
                     <div>
-                        @{ Html.RenderPartial("~/Views/Shared/Registration/_ShareLinks.cshtml", new ViewDataDictionary
-                           {
-                               {"ShareObject", shareObject},
-                               {"ShareUrl", shareUrl}
-                           }); }
+                        @{
+                            Html.RenderPartial("~/Views/Shared/Registration/_ShareLinks.cshtml", new ViewDataDictionary
+                            {
+                                {"ShareObject", shareObject}, {"ShareUrl", shareUrl},
+                            });
+                        }
                     </div>
                 </div>
             </div>
@@ -301,10 +301,7 @@
                             <input id="claim-phone" type="text" autocomplete="off" class="form-control" required>
                         </div>
                         <div class="form-group">
-                            @if (Utilities.IsProduction || Utilities.IsStaging)
-                            {
-                                Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "");
-                            }
+                            @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "claim-form-recaptcha"); }
                         </div>
                         <div class="form-group claim-profile-submit text-center">
                             <button type="button" id="btn-claim-profile" class="btn btn-primary btn-lg btn-block" onclick="claimProfile()">Claim Profile &raquo;</button>
@@ -360,7 +357,7 @@
                             <textarea id="contact-message" type="text" autocomplete="off" class="form-control"></textarea>
                         </div>
                         <div class="form-group">
-                            @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", ""); }
+                            @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "contact-form-recaptcha"); }
                         </div>
                         <div class="form-group contact-provider-submit text-center">
                             <button type="button" id="btn-contact-provider" class="btn btn-primary btn-lg btn-block" onclick="contactProvider()">Submit &raquo;</button>
@@ -479,6 +476,8 @@
         $('#contact-email').val('');
         $('#contact-phone').val('');
         $('#contact-message').val('');
+
+        AHQRecaptcha.reset('contact-form-recaptcha');
     }
     
     function closeContactProvider() {
@@ -486,8 +485,12 @@
     }
 
     function contactProvider() {
-
-        params = 'profile=@Model.Account.Uid&firstname=' + encodeURIComponent($('#contact-firstname').val()) + '&lastname=' + encodeURIComponent($('#contact-lastname').val()) + '&email=' + encodeURIComponent($('#contact-email').val()) + '&phone=' + encodeURIComponent($('#contact-phone').val())+ '&message=' + encodeURIComponent($('#contact-message').val()) + '&g_recaptcha_response=' + $('#g-recaptcha-response').val();
+        let params = 'profile=@Model.Account.Uid&firstname=' + encodeURIComponent($('#contact-firstname').val())
+            + '&lastname=' + encodeURIComponent($('#contact-lastname').val())
+            + '&email=' + encodeURIComponent($('#contact-email').val())
+            + '&phone=' + encodeURIComponent($('#contact-phone').val())
+            + '&message=' + encodeURIComponent($('#contact-message').val())
+            + '&g_recaptcha_response=' + AHQRecaptcha.getToken('contact-form-recaptcha');
 
         $('#btn-contact-provider').html('Submitting...');
         $('#btn-contact-provider').prop('disabled', true);
