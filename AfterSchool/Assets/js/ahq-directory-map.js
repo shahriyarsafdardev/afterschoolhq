@@ -1,11 +1,11 @@
-﻿var map;
-var service;
-var infowindow;
-var marker = [];
+﻿let map;
+let service;
+let infowindow;
+let marker = [];
 
 function initMap() {
-    var noPOILabels = [{featureType: "poi", elementType: "labels", stylers: [{visibility: "off"}]}];
-    var noPOIMapType = new google.maps.StyledMapType(noPOILabels, {name: "Map"});
+    let noPOILabels = [{featureType: "poi", elementType: "labels", stylers: [{visibility: "off"}]}];
+    let noPOIMapType = new google.maps.StyledMapType(noPOILabels, {name: "Map"});
     infowindow = new google.maps.InfoWindow();
 
     map = new google.maps.Map(document.getElementById("map"),
@@ -29,9 +29,9 @@ function initMap() {
 }
 
 function addMarkersOnMap(places) {
-    for (i = 0; i < places.length; i++) {
-        if (places[i].Latitude != null && places[i].Longitude != "") {
-            var newmarker = new google.maps.Marker({
+    for (let i = 0; i < places.length; i++) {
+        if (places[i].Latitude != null && places[i].Longitude !== "") {
+            let newmarker = new google.maps.Marker({
                 position: new google.maps.LatLng(places[i].Latitude, places[i].Longitude),
                 map: map,
                 title: places[i].AccountName,
@@ -52,13 +52,13 @@ function addMarkersOnMap(places) {
                 removeIcons();
                 this['infowindow'].open(map, this);
                 this.setIcon('../Assets/img/red-map-icon-large.png');
-                var mainDiv = $("div").find(`[name='${this['infowindow'].content}']`);
+                let mainDiv = $("div").find(`[name='${this['infowindow'].content}']`);
                 $("#directory-panel", mainDiv).addClass('primary-color-border');
-                var container = $("#results-container");
-                var element = $(mainDiv);
-                var height = container.height() / 2;
-                var elementTop = element.position().top;
-                var position = container.scrollTop() + elementTop - height;
+                let container = $("#results-container");
+                let element = $(mainDiv);
+                let height = container.height() / 2;
+                let elementTop = element.position().top;
+                let position = container.scrollTop() + elementTop - height;
                 container.animate({scrollTop: position});
             });
 
@@ -68,7 +68,7 @@ function addMarkersOnMap(places) {
 }
 
 function removeIcons() {
-    for (var j = 0; j < marker.length; j++) {
+    for (let j = 0; j < marker.length; j++) {
         marker[j].setIcon("../Assets/img/red-icon-map.png");
         marker[j]['infowindow'].close();
     }
@@ -76,7 +76,7 @@ function removeIcons() {
 }
 
 function deleteAllMarkersOnMap() {
-    for (var i = 0; i < marker.length; i++) {
+    for (let i = 0; i < marker.length; i++) {
         marker[i].setMap(null);
     }
     marker = [];

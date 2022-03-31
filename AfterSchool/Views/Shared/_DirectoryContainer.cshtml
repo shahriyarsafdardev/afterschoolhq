@@ -6,7 +6,9 @@
 <style>
     #search-and-results-container {
         background-color: #f8f8f8;
-        flex-grow: 1;
+        display: flex;
+        flex: 1;
+        flex-direction: column;
         float: none;
     }
     
@@ -15,7 +17,6 @@
     }
     
     #results-container {
-        height: calc(100vh - 148px);
         overflow-y: auto;
         padding: 0 15px 15px;
         width: 100%;
@@ -60,14 +61,40 @@
         border: 3px solid @primaryColor;
         border-radius: 5px;
         box-shadow: 0 5px 10px 0 rgba(0, 0, 0, 0.15);
+        column-gap: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin: 0 auto;
         padding: 13px 25px;
         white-space: normal;
     }
 
-    .contactSpan {
+    .contact-us-call-to-action-span {
         font-weight: bold;
         text-transform: uppercase;
         white-space: nowrap;
+    }
+
+    .directory-filters {
+        overflow-y: auto;
+        padding: 20px 0 50px 15px;
+        background-color: #fff;
+        display: block;
+        min-width: 300px;
+        max-width: 300px;
+    }
+
+    .directory-filters-close {
+        width: 0;
+        min-width: 0;
+        transition: all .6s ease;
+    }
+
+    .directory-filters-open {
+        width: 300px;
+        min-width: 300px;
+        transition: all .6s ease;
     }
 </style>
 <style media="all and (max-width: 479px)">
@@ -76,61 +103,59 @@
         padding: 13px 20px;
     }
 </style>
-<div id="main-view-container" class="display-flex">
-    <div id="list-view" class="directory-list-view">
-        <div id="filters" class="col-md-3 directory-filters" style="display: none;">
-            <span id="directory-sidebar-icon" class="primary-color directory-sidebar-arrow" isOpen="true" onclick="return toggleSideBar(this)">
-                <i id="search-sidebar-arrow" class="fa fa-chevron-circle-left" aria-hidden="true"></i>
-            </span>
+<div id="main-view-container" style="display: flex; flex: 1; overflow: hidden;">
+    <div id="filters" class="directory-filters" style="display: none;">
+        <span id="directory-sidebar-icon" class="primary-color directory-sidebar-arrow" isOpen="true" onclick="return toggleSideBar(this)">
+            <i id="search-sidebar-arrow" class="fa fa-chevron-circle-left" aria-hidden="true"></i>
+        </span>
 
-            @{ Html.RenderPartial("~/Views/Shared/_DirectoryFilters.cshtml", null, new ViewDataDictionary {{"grades", grades}}); }
+        @{ Html.RenderPartial("~/Views/Shared/_DirectoryFilters.cshtml", null, new ViewDataDictionary {{"grades", grades}}); }
 
-        </div>
+    </div>
 
-        <div id="search-and-results-container">
+    <div id="search-and-results-container">
 
-            <div class="search-filter-and-map-heading">
-                <div class="search-input-and-button">
-                    <div class="has-feedback has-search search-input">
-                        <input id="txtSearch" name="search" type="text" class="form-control directory-search-input" placeholder="Search For Programs" onkeyup="return waitAndFilterSearch(this.value)">
-                        <span class="glyphicon glyphicon-search form-control-feedback directory-search-magnyfier-icon"></span>
-                    </div>
-
-                    <div id="container-show-filter-button" class="directory-filter-symbol">
-                        <button id="btn-mobile-filter" class="btn btn-sm btn-default" isOpen="0" onclick="mobileFilter()">
-                            <img src="~/Assets/img/filter.svg" class="directory-filter-icon-mobile" alt="Show or hide filters"/>
-                            Filter
-                        </button>
-                    </div>
-
-                    <div id="container-show-map-chk" class="am-checkbox checkbox-show-map" style="display: none;">
-                        <input id="chk-map-view" name="show-map" checked="checked" value="1" type="checkbox" class="schedulerepeat-checkbox" onclick="return toggleMapView(this)"/>
-                        <label for="chk-map-view" class="margin-h-10 mobile-padding font-weight-bold">Show Map</label>
-                    </div>
-                </div>
-                <div class="clearfix"></div>
-                <div id="tags-container-mobile-view"></div>
-            </div>
-            <div id="results-container">
-                <div class="clearfix"></div>
-
-                <div id="search-result" class="row"> </div>
-                <div class="clearfix"></div>
-
-                <div class="directory-search-no-result"></div>
-
-                <div id="ProgressBar">
-                    <img src="~/Assets/img/loading-spinner.gif" alt="Loading more results">
+        <div class="search-filter-and-map-heading">
+            <div class="search-input-and-button">
+                <div class="has-feedback has-search search-input">
+                    <input id="txtSearch" name="search" type="text" class="form-control directory-search-input" placeholder="Search For Programs" onkeyup="return waitAndFilterSearch(this.value)">
+                    <span class="glyphicon glyphicon-search form-control-feedback directory-search-magnyfier-icon"></span>
                 </div>
 
-                <div id="notification-contact-us" class="text-center sticky-bottom">
-                    <button class="btn contact-us-button" type="button" data-toggle="modal" data-target="#ContactUsModal">
-                        Need help finding something?
-                        <span class="contactSpan">Contact Us</span>
+                <div id="container-show-filter-button" class="directory-filter-symbol">
+                    <button id="btn-mobile-filter" class="btn btn-sm btn-default" isOpen="0" onclick="mobileFilter()">
+                        <img src="~/Assets/img/filter.svg" class="directory-filter-icon-mobile" alt="Show or hide filters"/>
+                        Filter
                     </button>
                 </div>
-                <div class="clearfix"></div>
+
+                <div id="container-show-map-chk" class="am-checkbox checkbox-show-map" style="display: none;">
+                    <input id="chk-map-view" name="show-map" checked="checked" value="1" type="checkbox" class="schedulerepeat-checkbox" onclick="return toggleMapView(this)"/>
+                    <label for="chk-map-view" class="margin-h-10 mobile-padding font-weight-bold">Show Map</label>
+                </div>
             </div>
+            <div class="clearfix"></div>
+            <div id="tags-container-mobile-view"></div>
+        </div>
+        <div id="results-container">
+            <div class="clearfix"></div>
+
+            <div id="search-result" class="row"> </div>
+            <div class="clearfix"></div>
+
+            <div class="directory-search-no-result"></div>
+
+            <div id="ProgressBar">
+                <img src="~/Assets/img/loading-spinner.gif" alt="Loading more results">
+            </div>
+
+            <div id="notification-contact-us" class="text-center sticky-bottom">
+                <button class="btn contact-us-button" type="button" data-toggle="modal" data-target="#ContactUsModal">
+                    <span>Need help finding something?</span>
+                    <span class="contact-us-call-to-action-span">Contact Us</span>
+                </button>
+            </div>
+            <div class="clearfix"></div>
         </div>
     </div>
 
@@ -138,5 +163,3 @@
         <div id="map" style="height: 100%;"></div>
     </div>
 </div>
-
-<div class="clearfix"></div>
