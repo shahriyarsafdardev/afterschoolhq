@@ -1514,12 +1514,6 @@
     display: flex;
 }
 
-.directory-list-view {
-    flex: 1.2;
-    display: flex;
-    height: 100vh;
-}
-
 .directory-sidebar-arrow {
     font-size: 22px;
     position: fixed;
@@ -1699,29 +1693,6 @@
     background-color: #fff !important;
     color: black !important;
     border-radius: 5px !important;
-}
-
-.directory-filters {
-    overflow-y: auto;
-    padding-right: 0;
-    padding-bottom: 120px;
-    padding-top: 20px;
-    background-color: #fff;
-    display: block;
-    min-width: 300px;
-    max-width: 300px;
-}
-
-.directory-filters-close {
-    width: 0px;
-    min-width: 0px;
-    transition: all .6s ease;
-}
-
-.directory-filters-open {
-    width: 300px;
-    min-width: 300px;
-    transition: all .6s ease;
 }
 
 .flex-open {
