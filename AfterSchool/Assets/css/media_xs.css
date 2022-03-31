@@ -59,7 +59,7 @@
 
     .text-center-sm {
         text-align: center;
-    }  
+    }
 
     .datetimepicker-mobile {
         padding-left: 0 !important;
@@ -112,9 +112,9 @@
         margin-bottom: 20px;
     }
 
-        .participation-object > .panel {
-            margin: 0 !important;
-        }
+    .participation-object > .panel {
+        margin: 0 !important;
+    }
 
     .desc-mobile-width {
         width: 116px;
@@ -137,7 +137,7 @@
     }
 
     .contactUsModal {
-        padding: 30px 60px;
+        padding: 30px 20px;
     }
 
     .Contactmodaldialog {

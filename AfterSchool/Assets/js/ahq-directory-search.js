@@ -327,11 +327,10 @@ function formatContactPhoneForDirectory() {
 }
 
 function checkAndSearch(elem, label) {
-    
     if (isMobile) {
         var name = $(elem).attr('name').replaceAll(' ', '').toLowerCase();
         var filterValue = $(elem).attr('valueForFilter');
-        if(!$(elem).is(":checked")) {
+        if (!$(elem).is(":checked")) {
             clearSpecificFilter(name, filterValue)
         } else {
             var tag = getTagHtml(name, filterValue, label);
@@ -479,8 +478,8 @@ function hideMobileView() {
 }
 
 function clearFilters() {
-    //..clear all checkbox
     $(`input:checkbox[name=enrolling-now], [name=grades], [name=ages], [name=gender], [name=services], [name=timing], [name=pricing], [name=cost], [name=starting], [name=other], [name=special-needs]`).prop('checked', false);
+    $('[class^=badge-identity-]').remove();
 
     txtZip.val('');
     //..clear web link and hide clear filter link
