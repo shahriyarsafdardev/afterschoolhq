@@ -95,9 +95,6 @@
         color: white;
         border-color: @primaryColor;
     }
-    .gmnoprint > div:first-child {
-        top: -100px !important /*move map zoom-in/out button in viewport*/
-    }
 
     .badge .close {
         font-size: 12px;
@@ -114,12 +111,21 @@
         opacity: 1.5 !important;
         filter: alpha(opacity=50);
     }
+
+    .search-container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        position: fixed;
+        width: 100%;
+    }
 </style>
 
-@{ Html.RenderPartial("~/Views/Shared/_DirectoryHeader.cshtml", null, new ViewDataDictionary {{"primaryColor", primaryColor}, {"website", website}, {"logoUrl", logoUrl}}); }
+<div class="search-container">
+    @{ Html.RenderPartial("~/Views/Shared/_DirectoryHeader.cshtml", null, new ViewDataDictionary {{"primaryColor", primaryColor}, {"website", website}, {"logoUrl", logoUrl}}); }
 
-@{ Html.RenderPartial("~/Views/Shared/_DirectoryContainer.cshtml", null, new ViewDataDictionary {{"primaryColor", primaryColor}, {"grades", grades}}); }
-
+    @{ Html.RenderPartial("~/Views/Shared/_DirectoryContainer.cshtml", null, new ViewDataDictionary {{"primaryColor", primaryColor}, {"grades", grades}}); }
+</div>
 @{ Html.RenderPartial("~/Views/Shared/_ISYPIntroModal.cshtml", logoUrl); }
 
 @{ Html.RenderPartial("~/Views/Shared/_DirectoryContactUs.cshtml"); }
