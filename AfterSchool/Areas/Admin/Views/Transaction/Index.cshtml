@@ -155,6 +155,7 @@
                             <th class="text-center">Trans Fee</th>
                             <th class="text-center">Stripe Fee</th>
                             <th class="text-center">Payout Amount</th>
+                            <th class="text-center">AHQ Payout Amount</th>
                             <th class="text-center">Status</th>
                             <th class="text-center">Type</th>
                             <th class="text-center">Stripe ID</th>
@@ -194,6 +195,9 @@
                                     </td>
                                     @if (transaction.PaymentSourceTypeId == PaymentSourceType.AfterSchoolPlatform)
                                     {
+                                        var stripeFee = transaction.GetStripeFee();
+                                        var billerPayoutAmount = (transaction.Amount ?? 0m) - transaction.GetFees();
+                                        var ahqPayoutAmount = payerAmount - billerPayoutAmount - stripeFee;
                                         if (transaction.IsCharge())
                                         {
                                             <td class="text-center">
@@ -203,11 +207,13 @@
                                                 @transaction.PaymentTypeFeeCharged.ToCurrency()
                                             </td>
                                             <td class="text-center">
-                                                @transaction.GetStripeFee().ToCurrency()
+                                                @stripeFee.ToCurrency()
                                             </td>
                                             <td class="text-center">
-                                                @* BILLER PAYOUT AMOUNT NEED TO REVIEW EXISTING METHODS *@
-                                                @((transaction.Amount.Value - transaction.GetFees()).ToCurrency())
+                                                @billerPayoutAmount.ToCurrency()
+                                            </td>
+                                            <td class="text-center">
+                                                @ahqPayoutAmount.ToCurrency()
                                             </td>
                                             <td class="text-center">
                                                 @if (transaction.HasRefunds())
@@ -229,10 +235,13 @@
                                                 -@transaction.PaymentTypeFeeCharged.ToCurrency()
                                             </td>
                                             <td class="text-center">
-                                                - @* NEED TO CALCULATE THIS, but can figure out later *@
+                                                - @* NEED TO CALCULATE Stripe Fee, but can figure out later *@
                                             </td>
                                             <td class="text-center">
                                                 -@transaction.GetBillerPayout().ToCurrency()
+                                            </td>
+                                            <td class="text-center">
+                                                - @* NEED TO CALCULATE AHQ Payout Amount, but can figure out later *@
                                             </td>
                                             <td class="text-center">
                                                 @if (transaction.HasRefunds())
@@ -252,10 +261,12 @@
                                             <td class="text-center">-</td>
                                             <td class="text-center">-</td>
                                             <td class="text-center">-</td>
+                                            <td class="text-center">-</td>
                                         }
                                     }
                                     else
                                     {
+                                        <td class="text-center">-</td>
                                         <td class="text-center">-</td>
                                         <td class="text-center">-</td>
                                         <td class="text-center">-</td>
