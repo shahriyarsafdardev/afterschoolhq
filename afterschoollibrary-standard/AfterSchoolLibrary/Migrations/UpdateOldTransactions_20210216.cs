@@ -22,7 +22,7 @@ namespace AfterSchoolLibrary.Migrations
                 {
                     decimal paymentTypeFeeCharged = 0M;
                     //(Platform Flat fee +(Cost * Platform Percent fee)) -Stripe Fee) = Convenience Fee
-                    transaction.ConvenienceFeeCharged = (transaction.PlatformFlatFee.IfEmpty(0) + (transaction.Amount.IfEmpty(0) * transaction.PlatformPercentFee.IfEmpty(0))) - StripeHelper.GetStripeFee(transaction.Amount.IfEmpty(0), transaction.GetBillerAccount(amsgs, adc).IsCreditCardFeeTakenOutOfCost);
+                    transaction.ConvenienceFeeCharged = (transaction.PlatformFlatFee.IfEmpty(0) + (transaction.Amount.IfEmpty(0) * transaction.PlatformPercentFee.IfEmpty(0))) - StripeHelper.CalculateStripeFee(transaction.Amount.IfEmpty(0), transaction.GetBillerAccount(amsgs, adc).IsCreditCardFeeTakenOutOfCost);
                     var cost = transaction.Amount.IfEmpty(0) + transaction.ConvenienceFeeCharged.IfEmpty(0);
 
                         if (cost <= 0 || transaction.PlatformFlatFee.IsEmpty() || transaction.PlatformPercentFee.IsEmpty())

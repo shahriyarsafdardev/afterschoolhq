@@ -18,7 +18,7 @@ namespace AfterSchoolLibrary.Billing
                 return 0;
 
             // Because stripe will take their charge out of the total charge with the convenience fee
-            var stripeFee = StripeHelper.GetStripeFee(cost, billingAccount.IsCreditCardFeeTakenOutOfCost);
+            var stripeFee = StripeHelper.CalculateStripeFee(cost, billingAccount.IsCreditCardFeeTakenOutOfCost);
 
             // always round up to nearest dollar or .5
             // result should always be 3.50 or 4.00 or 2.50 or 3.00, etc.
@@ -51,21 +51,6 @@ namespace AfterSchoolLibrary.Billing
                 finalFee = Math.Ceiling(fee);
 
             return (finalFee - .01M).KeepInRange(0.49M, 9.99M) + (Math.Ceiling(cost) - cost);
-        }
-
-        public static decimal GetTotalFees(decimal cost, Account billingAccount)
-        {
-            return GetConvenienceFee(cost, billingAccount) + GetCreditCardFee(cost, billingAccount);
-        }
-
-        public static decimal GetCostWithConvenienceFee(decimal cost, Account billingAccount)
-        {
-            return cost + GetConvenienceFee(cost, billingAccount);
-        }
-
-        public static decimal GetFinalTotalCost(decimal cost, Account billingAccount)
-        {
-            return cost + GetTotalFees(cost, billingAccount);
         }
     }
 }

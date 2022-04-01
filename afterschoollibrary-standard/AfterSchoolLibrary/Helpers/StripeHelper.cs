@@ -27,20 +27,20 @@ namespace AfterSchoolLibrary.Billing
         public const decimal StripeFlatFee = .3M;
         public const decimal StripeBankPercentFee = .008M;
 
-        public static decimal GetStripeFee(decimal cost, bool feeTakenOutOfCost)
+        public static decimal CalculateStripeFee(decimal cost, bool feeTakenOutOfCost)
         {
-            if (feeTakenOutOfCost)
-                return (cost * StripePercentFee) + StripeFlatFee;
-
-            return ((cost + StripeFlatFee) / (1 - StripePercentFee)) - cost;
+            var fee = feeTakenOutOfCost
+                ? cost * StripePercentFee + StripeFlatFee
+                : (cost + StripeFlatFee) / (1 - StripePercentFee) - cost;
+            return Math.Round(fee, 2, MidpointRounding.AwayFromZero);
         }
 
-        public static decimal GetStripeAchFee(decimal cost, bool feeTakenOutOfCost)
+        public static decimal CalculateStripeAchFee(decimal cost, bool feeTakenOutOfCost)
         {
-            if (feeTakenOutOfCost)
-                return cost * StripeBankPercentFee;
-
-            return (cost / (1 - StripeBankPercentFee)) - cost;
+            var fee = feeTakenOutOfCost
+                ? cost * StripeBankPercentFee
+                : (cost / (1 - StripeBankPercentFee)) - cost;
+            return Math.Round(fee, 2, MidpointRounding.AwayFromZero);
         }
 
         public static string SecretKey
