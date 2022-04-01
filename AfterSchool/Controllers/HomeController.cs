@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
-using BasicLibrary;
 using AfterSchoolLibrary.Models;
 using AfterSchool.Models;
 
@@ -14,22 +11,20 @@ namespace AfterSchool.Controllers
         // GET: Home
         public ActionResult Index()
         {
-            if (Models.Utilities.IsAfterSchool())
+            if (Utilities.IsAfterSchool())
             {
                 return Redirect("/");
             }
-            else
-            {
-                var packages = Package.LoadByIsActiveByIsAfterSchool(true, false);
-                ViewBag.Packages = packages;
-                ViewBag.FeatureTypes = new List<FeatureType>() { FeatureType.AcceptPayments, FeatureType.Activities, FeatureType.TeamAccounts };
-            }
+
+            var packages = Package.LoadByIsActiveByIsAfterSchool(true, false);
+            ViewBag.Packages = packages;
+            ViewBag.FeatureTypes = new List<FeatureType>() { FeatureType.AcceptPayments, FeatureType.Activities, FeatureType.TeamAccounts };
 
             return View();
         }
         public ActionResult ASHQ()
         {
-            Models.Utilities.SetAfterSchool(true);
+            Utilities.SetAfterSchool(true);
             var package = Package.LoadByIsActiveByIsAfterSchool(true, true).FirstOrDefault();
             ViewBag.Package = package;
             return View();
