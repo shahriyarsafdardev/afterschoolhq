@@ -1,15 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Net;
-using System.IO;
-using System.Collections;
-using BasicLibrary;
-using AfterSchoolLibrary;
-using Amazon.DynamoDBv2.Model;
-
-namespace AfterSchool.Models
+﻿namespace AfterSchool.Models
 {
     public class Utilities
     {
@@ -29,7 +18,7 @@ namespace AfterSchool.Models
 
         public static void SetAfterSchool(bool isAfterSchool)
         {
-            SessionVariables.IsAfterSchool = true;
+            SessionVariables.IsAfterSchool = isAfterSchool;
         }
     }
 }

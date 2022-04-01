@@ -1,27 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using BasicLibrary;
 using System.Web.Script.Serialization;
-using System.Xml;
-using System.Xml.Serialization;
-using AfterSchoolLibrary;
 using AfterSchoolLibrary.Services;
-using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
-using Amazon.DynamoDBv2;
 
 namespace AfterSchool.Models
 {
-    public class BaseController : System.Web.Mvc.Controller
+    public class BaseController : Controller
     {
-        public BaseController()
-        {
-
-        }
-
         protected bool IsRequestFromApp()
         {
             if (Request.Headers["Origin"].IsNotEmpty() || Request.Headers["Referer"].IsNotEmpty())
