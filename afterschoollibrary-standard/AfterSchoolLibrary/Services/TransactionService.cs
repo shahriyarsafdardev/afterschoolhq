@@ -862,10 +862,10 @@ namespace AfterSchoolLibrary.Services
             if (transaction.IsCharge() && transaction.PaymentSourceTypeId == PaymentSourceType.AfterSchoolPlatform)
             {
                 if (transaction.PaymentTypeId == PaymentType.CreditCard)
-                    return StripeHelper.GetStripeFee(transaction.GetPayerAmount(), true);
+                    return StripeHelper.CalculateStripeFee(transaction.GetPayerAmount(), true);
                 
                 if (transaction.PaymentTypeId == PaymentType.ACH)
-                    return StripeHelper.GetStripeAchFee(transaction.GetPayerAmount(), true);
+                    return StripeHelper.CalculateStripeAchFee(transaction.GetPayerAmount(), true);
             }
 
             return 0;

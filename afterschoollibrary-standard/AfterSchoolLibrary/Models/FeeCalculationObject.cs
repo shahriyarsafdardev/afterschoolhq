@@ -108,7 +108,7 @@ namespace AfterSchoolLibrary.Models
             if (!IsConvenienceFeeTakenOutOfCost)
                 costWithConvenienceFee += GetConvenienceFee();
 
-            var stripeFee = StripeHelper.GetStripeFee(costWithConvenienceFee, IsPaymentTypeFeeTakenOutOfCost);
+            var stripeFee = StripeHelper.CalculateStripeFee(costWithConvenienceFee, IsPaymentTypeFeeTakenOutOfCost);
 
             // always round up to nearest dollar or .5
             // result should always be 3.50 or 4.00 or 2.50 or 3.00, etc.
