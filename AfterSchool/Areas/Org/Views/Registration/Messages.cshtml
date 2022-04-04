@@ -1,9 +1,7 @@
 ﻿@model List<ActivityMessage>
 @{
     ViewBag.Title = $"Messages - {SessionVariables.CurrentAccount.Name}";
-    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
-    var showTextMessaging = SessionVariables.AccountPackage.HasFeature(FeatureType.TextMessaging);
-    var textMessagingPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.TextMessaging);
+    var msgs = (SystemMessages)ViewBag.Messages;
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -19,16 +17,7 @@
             Messages
         </div>
         <div class="panel-body">            
-            
-            @if (showTextMessaging)
-            {
-                <button class="btn btn-link" onclick="toggleFilter()">Send New Message</button>
-            } 
-            else
-            {
-                <button class="btn btn-link" onclick="return showUpgradeMyPlan('@(textMessagingPackage.Name)',@(textMessagingPackage.ID))">Send New Message</button>
-            }
-
+            <button class="btn btn-link" onclick="toggleFilter()">Send New Message</button>
             <div class="panel panel-default panel-borders hide" id="student-filter">
 
                 <div class="panel-body">
@@ -39,14 +28,7 @@
 
                     <div class="row">
                         <div class="col-md-12">
-                            @if (showTextMessaging)
-                            {
-                                <button class="btn btn-primary btn-lg" onclick="sendMessages()">Send Messages &raquo;</button>
-                            } else
-                            {
-                                <button class="btn btn-primary btn-lg" onclick="return showUpgradeMyPlan('@(textMessagingPackage.Name)',@(textMessagingPackage.ID))">Send Messages &raquo;</button>
-                            }
-
+                            <button class="btn btn-primary btn-lg" onclick="sendMessages()">Send Messages &raquo;</button>
                         </div>
                     </div>
                 </div>
@@ -71,14 +53,6 @@
 @section scripts
 {
     <script>
-
-        $(document).ready(function () {
-            var flag = '@showTextMessaging';
-            if (flag && flag.toLowerCase() == 'false') {
-                showUpgradeMyPlan('@(textMessagingPackage.Name)',@(textMessagingPackage.ID));
-            }
-        });
-
         function sendMessages() {
             location.href = `@Url.Action("messageadd", "registration")?${getQuery()}&${getActivityOrGroup()}${getFilterQuestionQS()}&${getRegStatus()}&${getAssignmentType()}`;
         }

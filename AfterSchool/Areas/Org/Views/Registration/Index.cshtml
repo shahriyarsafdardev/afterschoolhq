@@ -1,11 +1,7 @@
 ﻿@model List<Registration>
 @{ 
     var msgs = (SystemMessages)ViewBag.Messages;
-    var activities = (List<Activity>)ViewBag.Activities;
-    var groups = (List<ActivityGroup>)ViewBag.Groups;
     var paging = (PagingModel)ViewBag.PagingModel;
-    var questions = (List<FormQuestion>)ViewBag.Questions;
-    var questionGroups = (List<FormQuestionGroup>)ViewBag.QuestionGroups;
     var studentCRMEnabled = SessionVariables.CurrentAccount.HasFeature(FeatureType.StudentCRM);
     var studentCRMPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.StudentCRM);
  }
