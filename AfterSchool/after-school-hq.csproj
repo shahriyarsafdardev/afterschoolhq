@@ -2193,9 +2193,7 @@
     <Content Include="Areas\Org\Views\Form\Index.cshtml" />
     <Content Include="Areas\Org\Views\Form\Edit.cshtml" />
     <Content Include="Areas\Org\Views\Activity\EditSchedule.cshtml" />
-    <Content Include="Areas\Org\Views\Registrant\Index.cshtml" />
     <Content Include="Areas\Org\Views\Home\Index.cshtml" />
-    <Content Include="Areas\Org\Views\Registrant\Edit.cshtml" />
     <Content Include="Assets\css\style.less" />
     <Content Include="Assets\css\includes\bootstrap-variables.less" />
     <Content Include="Assets\css\includes\bootstrap\accordions.less" />
@@ -2287,17 +2285,11 @@
     <Content Include="Assets\ionicons\fonts\ionicons.woff" />
     <Content Include="Areas\Org\Views\Activity\EditRestrictions.cshtml" />
     <Content Include="Areas\Org\Views\Account\Features.cshtml" />
-    <Content Include="Areas\Org\Views\Period\Index.cshtml" />
-    <Content Include="Areas\Org\Views\Period\Edit.cshtml" />
     <Content Include="Areas\Org\Views\Registration\Index.cshtml" />
     <Content Include="Areas\Org\Views\Registration\Edit.cshtml" />
-    <Content Include="Areas\Org\Views\Period\Summary.cshtml" />
     <Content Include="Areas\Org\Views\Shared\_RegistrationPeriodHeader.cshtml" />
-    <Content Include="Areas\Org\Views\Period\Registrations.cshtml" />
     <Content Include="Areas\Org\Views\Shared\_Registrations.cshtml" />
     <Content Include="Areas\Org\Views\Shared\_RegistrationPeriodTitle.cshtml" />
-    <Content Include="Areas\Org\Views\Period\Placement.cshtml" />
-    <Content Include="Areas\Org\Views\Period\Activities.cshtml" />
     <Content Include="Areas\Org\Views\Group\Activities.cshtml" />
     <Content Include="Areas\Org\Views\Group\Edit.cshtml" />
     <Content Include="Areas\Org\Views\Group\Index.cshtml" />
@@ -2601,6 +2593,8 @@
     <Folder Include="Areas\Admin\Views\StripeHooks\" />
     <Folder Include="Areas\District\Models\" />
     <Folder Include="Areas\Org\Models\" />
+    <Folder Include="Areas\Org\Views\Period" />
+    <Folder Include="Areas\Org\Views\Registrant" />
     <Folder Include="Areas\StripeHooks\Models\" />
     <Folder Include="Areas\StripeHooks\Views\Shared\" />
     <Folder Include="Areas\StripeHooks\Views\Test\" />

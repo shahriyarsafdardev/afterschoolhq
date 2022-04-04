@@ -1,51 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using BasicLibrary;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using System.Web.Mvc;
-using Microsoft.EntityFrameworkCore.Update;
 
 namespace AfterSchool.Models
 {
     public class BaseLoggedInController : BaseController
     {
-        private List<AccountType> AllowedAccountTypes { get; set; }
+        private List<AccountType> AllowedAccountTypes { get; }
 
         public BaseLoggedInController(List<AccountType> allowedAccountTypes)
         {
-            this.AllowedAccountTypes = allowedAccountTypes;
+            AllowedAccountTypes = allowedAccountTypes;
         }
 
         protected override void Initialize(System.Web.Routing.RequestContext requestContext)
         {
             base.Initialize(requestContext);
 
-            var msgs = new SystemMessages();
+            if (SessionVariables.CurrentUser.IsEmpty()) return;
 
-            if (SessionVariables.CurrentUser.IsEmpty())
-            {
-                WebUser user = null;
-                Account Account = null;
+            SessionVariables.CurrentUser.UpdateLastActivity(new SystemMessages());
 
-                // Auto login
-                if (!user.IsEmpty() && !Account.IsEmpty())
-                {
-                    SessionVariables.CurrentUser = user;
-                    SessionVariables.CurrentAccount = Account;
-                    SessionVariables.AccountUserType = user.GetUserType(Account);
-                }
-            }
-
-            if (SessionVariables.CurrentUser.IsNotEmpty())
-            {
-                SessionVariables.CurrentUser.UpdateLastActivity(msgs);
-
-                if (SessionVariables.CurrentAccount.IsEmpty())
-                    BaseLoggedInController.CheckAccount(requestContext.HttpContext.Request);
-            }
+            if (SessionVariables.CurrentAccount.IsEmpty())
+                CheckAccount(requestContext.HttpContext.Request);
         }
 
         private bool HasAccess()
@@ -78,39 +59,30 @@ namespace AfterSchool.Models
             base.OnActionExecuting(filterContext);
         }
 
-        protected override void OnActionExecuted(ActionExecutedContext filterContext)
+        protected static SystemMessages CheckAccount(HttpRequestBase request)
         {
-            base.OnActionExecuted(filterContext);
-        }
+            var msgs = new SystemMessages();
+            if (!request.QueryString["Account"].IsNumber()) return msgs;
 
-        protected static SystemMessages CheckAccount(HttpRequestBase Request)
-        {
-            SystemMessages msgs = new SystemMessages();
-            if (Request.QueryString["Account"].IsNumber())
-            {
-                msgs.Add("Got Account in QS and it is a number: " + Request.QueryString["Account"], MessageType.Notice);
+            msgs.Add("Got Account in QS and it is a number: " + request.QueryString["Account"], MessageType.Notice);
 
-                int AccountId = Request.QueryString["Account"].ToInteger();
-                if (SessionVariables.CurrentAccount.IsEmpty() || AccountId != SessionVariables.CurrentAccount.ID.Value)
-                {
-                    msgs.Add("Checking if a member of this Account: " + AccountId + " " + SessionVariables.CurrentUser.ID.Value, MessageType.Notice);
+            var accountId = request.QueryString["Account"].ToInteger();
 
-                    AccountWebUser gwu = AccountWebUser.LoadByAccountIdByWebUserId(AccountId, SessionVariables.CurrentUser.ID.Value, null);
-                    if (!gwu.IsEmpty())
-                    {
-                        msgs.Add("GWU is not empty: " + gwu.ID.Value, MessageType.Notice);
-                        SessionVariables.CurrentAccount = Account.Load(AccountId, null);
+            if (!SessionVariables.CurrentAccount.IsEmpty() && accountId == SessionVariables.CurrentAccount.ID.Value) return msgs;
 
-                        if (!SessionVariables.CurrentAccount.IsEmpty())
-                        {
-                            SessionVariables.AccountUserType = SessionVariables.CurrentUser.GetUserType(SessionVariables.CurrentAccount);
-                            msgs.Add("Account is not empty: " + SessionVariables.CurrentAccount.ID.Value, MessageType.Notice);
-                        }
-                    }
-                }
+            msgs.Add("Checking if a member of this Account: " + accountId + " " + SessionVariables.CurrentUser.ID.Value, MessageType.Notice);
 
-                //AfterSchoolLibrary.RebornMail.Send(new System.Net.Mail.MailMessage(AfterSchoolLibrary.Helpers.Email.AppEmailAddress, "darye@reborncode.com", "Testing Account", msgs.RenderMessageList(MessageOutputType.Html)));
-            }
+            var gwu = AccountWebUser.LoadByAccountIdByWebUserId(accountId, SessionVariables.CurrentUser.ID.Value, null);
+
+            if (gwu.IsEmpty()) return msgs;
+
+            msgs.Add("GWU is not empty: " + gwu.ID.Value, MessageType.Notice);
+            SessionVariables.CurrentAccount = Account.Load(accountId, null);
+
+            if (SessionVariables.CurrentAccount.IsEmpty()) return msgs;
+
+            SessionVariables.AccountUserType = SessionVariables.CurrentUser.GetUserType(SessionVariables.CurrentAccount);
+            msgs.Add("Account is not empty: " + SessionVariables.CurrentAccount.ID.Value, MessageType.Notice);
 
             return msgs;
         }

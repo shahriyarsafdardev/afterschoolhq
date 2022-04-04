@@ -22,7 +22,7 @@ namespace AfterSchool.Areas.Org.Controllers
 {
     public class ActivityController : BaseLoggedInController
     {
-        public ActivityController() : base(AccountService.ProviderAccountTypes.ToList())
+        public ActivityController() : base(AccountService.OrganizationAccountTypes)
         {
         }
 
