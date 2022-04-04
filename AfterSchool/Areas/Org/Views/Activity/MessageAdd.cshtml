@@ -8,13 +8,17 @@
     var registrantsPerColumn = Math.Ceiling(registrants.Count / 3.0).ToInteger();
 
     var accountPackage = SessionVariables.AccountPackage;
-    var maxTextCount = accountPackage.HasFeature(FeatureType.TextMessaging) ? (int)accountPackage.GetFeature(FeatureType.TextMessaging).Max.Value : 0;
+    var maxTextCount = accountPackage.HasFeature(FeatureType.TextMessaging)
+        ? (int)accountPackage.GetFeature(FeatureType.TextMessaging).Max.Value
+        : 0;
     var currentTextCount = ViewBag.TextCount != null ? (int)ViewBag.TextCount : 0;
-    var textQuotaExceeded = currentTextCount >= maxTextCount ? true : false;
+    var textQuotaExceeded = currentTextCount >= maxTextCount;
 
-    var maxEmailCount = accountPackage.HasFeature(FeatureType.EmailMessaging) ? (int)accountPackage.GetFeature(FeatureType.EmailMessaging).Max.Value : 0;
+    var maxEmailCount = accountPackage.HasFeature(FeatureType.EmailMessaging)
+        ? (int)accountPackage.GetFeature(FeatureType.EmailMessaging).Max.Value
+        : 0;
     var currentEmailCount = ViewBag.EmailCount != null ? (int)ViewBag.EmailCount : 0;
-    var emailQuotaExceeded = currentEmailCount >= maxEmailCount ? true : false;
+    var emailQuotaExceeded = currentEmailCount >= maxEmailCount;
     var emailMessagingPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.EmailMessaging);
     var textMessagingPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.TextMessaging);
 }

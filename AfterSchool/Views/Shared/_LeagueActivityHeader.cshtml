@@ -42,14 +42,8 @@
 
             @if(Model.IsPublished || registrantCount > 0)
             {   
-                if (SessionVariables.AccountPackage.HasFeature(FeatureType.Attendance))
-                {
-                    <a href="@Url.Action("attendance", "leagueactivity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "attendance" ? "-active" : "")"><i class="s7-check"></i> Attendance</a>
-                }
-                if (SessionVariables.AccountPackage.HasFeature(FeatureType.EmailMessaging))
-                {
-                    <a href="@Url.Action("messages", "leagueactivity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")"><i class="s7-mail"></i> Messaging</a>
-                }
+                <a href="@Url.Action("attendance", "leagueactivity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "attendance" ? "-active" : "")"><i class="s7-check"></i> Attendance</a>
+                <a href="@Url.Action("messages", "leagueactivity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")"><i class="s7-mail"></i> Messaging</a>
             }
             @if (isActivityLeader)
             {
@@ -87,15 +81,8 @@
                 @if (Model.IsPublished || registrantCount > 0)
                 {
                     <option value="@Url.Action("registrants", "leagueactivity", new { id = Model.Uid })">@UILabel.RegistrantLabel(true)</option>
-
-                    if (SessionVariables.AccountPackage.HasFeature(FeatureType.Attendance))
-                    {
-                        <option value="@Url.Action("attendance", "leagueactivity", new { id = Model.Uid })">Attendance</option>
-                    }
-                    if (SessionVariables.AccountPackage.HasFeature(FeatureType.EmailMessaging))
-                    {
-                        <option value="@Url.Action("messages", "leagueactivity", new { id = Model.Uid })">Messaging</option>
-                    }
+                    <option value="@Url.Action("attendance", "leagueactivity", new { id = Model.Uid })">Attendance</option>
+                    <option value="@Url.Action("messages", "leagueactivity", new { id = Model.Uid })">Messaging</option>
                 }
                 @if (isActivityLeader)
                 {

@@ -25,11 +25,6 @@
     {
         isFullScreen = (bool)ViewBag.IsFullScreen;
     }
-
-    var showAttendance = SessionVariables.AccountPackage.HasFeature(FeatureType.Attendance);
-    var messagingPackage = PackageService.GetPackageWithAnyFeaturesLowestPrice(new List<FeatureType>() { FeatureType.EmailMessaging, FeatureType.TextMessaging });
-    var attendancePackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.Attendance);
-    var emailPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.EmailMessaging);
 }
 
 @if (Model?.ID.GetValueOrDefault(0) > 0 && !isFullScreen)
@@ -49,26 +44,10 @@
 
                 if (Model.HasSchedule && Model.ActivityTypeId.NotIn(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
                 {
-                    if (showAttendance)
-                    {
-                        <a href="@Url.Action("attendance", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "attendance" ? "-active" : "")"><i class="s7-check"></i> Attendance</a>
-                    }
-                    else
-                    {
-                        <a href="#" class="btn btn-alt6@(actionName == "attendance" ? "-active" : "")" onclick="return showUpgradeMyPlan('@(attendancePackage.Name)',@(attendancePackage.ID))">
-                            <i class="s7-check"></i> Attendance
-                        </a>
-                    }
+                    <a href="@Url.Action("attendance", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "attendance" ? "-active" : "")"><i class="s7-check"></i> Attendance</a>
                 }
-
-                if (SessionVariables.AccountPackage.HasFeature(FeatureType.EmailMessaging) || SessionVariables.AccountPackage.HasFeature(FeatureType.TextMessaging))
-                {
-                    <a href="@Url.Action("messages", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")"><i class="s7-mail"></i> Messaging</a>
-                }
-                else
-                {
-                    <a href="#" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")" onclick="return showUpgradeMyPlan('@(messagingPackage.Name)', @(messagingPackage.ID))"><i class="s7-mail"></i> Messaging</a>
-                }
+                
+                <a href="@Url.Action("messages", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")"><i class="s7-mail"></i> Messaging</a>
             }
 
             @if (isActivityLeader)
@@ -116,24 +95,10 @@
 
                     if (Model.HasSchedule && Model.ActivityTypeId.NotIn(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
                     {
-                        if (showAttendance)
-                        {
-                            <option value="@Url.Action("attendance", "activity", new { id = Model.Uid })">Attendance</option>
-                        }
-                        else
-                        {
-                            <option packagename="@(attendancePackage.Name)" packageid="@(attendancePackage.ID)" value="#" onclick="return showUpgradeMyPlan('@(attendancePackage.Name)',@(attendancePackage.ID)))">Attendance</option>
-                        }
+                        <option value="@Url.Action("attendance", "activity", new { id = Model.Uid })">Attendance</option>
                     }
-
-                    if (SessionVariables.AccountPackage.HasFeature(FeatureType.EmailMessaging))
-                    {
-                        <option value="@Url.Action("messages", "activity", new { id = Model.Uid })">Messaging</option>
-                    }
-                    else
-                    {
-                        <option packagename="@(emailPackage.Name)" packageid="@(emailPackage.ID)" value="#">Messaging</option>
-                    }
+                    
+                    <option value="@Url.Action("messages", "activity", new { id = Model.Uid })">Messaging</option>
                 }
                 <option value="@Url.Action("surveys", "activity", new { id = Model.Uid })">Surveys</option>
 

@@ -30,12 +30,12 @@ namespace AfterSchoolLibraryTests.Tests
         public void CreateNewTest()
         {
             var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
-            var accountOwner = Factories.WebUserFactory.CreateWithEmail("test@test.com", msgs, dc);
+            var accountOwner = Factories.WebUserFactory.CreateWithEmail($"don+{DateTime.Now.Ticks}@example.com", msgs, dc);
             var package = Factories.PackageFactory.Create(msgs, dc);
             var account = AccountService.CreateNew(
-                orgName: "test org",
+                orgName: $"test org{DateTime.Now.Ticks}",
                 email: accountOwner.Email,
-                phone: "123-123-1234",
+                phone: $"317-555-{(DateTime.Now.Ticks % 10000):0000}",
                 isActive: false,
                 accountType: AccountType.School,
                 accountOwner: accountOwner,

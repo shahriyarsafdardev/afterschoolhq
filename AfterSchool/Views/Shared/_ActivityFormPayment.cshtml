@@ -20,8 +20,6 @@
 
     var showAllowPaymentPlans = accountPackage.HasFeature(FeatureType.AllowPaymentPlans);
     var showAllowPaymentPlansPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowPaymentPlans);
-
-    var allowAttendance = accountPackage.HasFeature(FeatureType.Attendance);
 }
 
 <div class="panel panel-default panel-small-padding">
@@ -390,40 +388,23 @@
         });
 
         $('#haspostpayplan').change(function (cb) {
-           @if (!allowAttendance)
-           {
-              <text>
-                if (this.checked) {
-                    showUpgradeMyPlan('@(showAllowPaymentPlansPackage.Name)', '@(showAllowPaymentPlansPackage.ID)');
-                            $(this).removeAttr('checked'); //don't allow checkbox
-                }
-              </text>
-           }
-           else
-           {
-              <text>
-                 setPostPayPlanSection();
-              </text>
-           }
-
-
+            setPostPayPlanSection();
         });
 
         $('#do-parents-pay-yes').click(function () {
             showTuitionCosts();
-        })
+        });
 
         $('#do-parents-pay-no').click(function () {
             showTuitionCosts();
             $('#cost').val(0);
-        })
+        });
 
         $('#postpayplanperiod').change(function () {
             var updatedBillingPeriod = $('#postpayplanperiod :selected').text();
             $('#pricetoparent-postpaybillingperiod').text(updatedBillingPeriod.toLowerCase());
             $('#postpayprepaybillingperiod').text(updatedBillingPeriod);
-
-        })
+        });
 
         if ('@Model.IsFree' == '@false') {
             $('#do-parents-pay-yes').prop('checked', true);
