@@ -14,7 +14,7 @@ namespace AfterSchool.Areas.Org.Controllers
 {
     public class ContactController : BaseLoggedInController
     {
-        public ContactController() : base(AccountService.ProviderAccountTypes.ToList())
+        public ContactController() : base(AccountService.OrganizationAccountTypes)
         {
 
         }

@@ -13,7 +13,7 @@ namespace AfterSchool.Areas.Org.Controllers
     {
         private readonly IFeatureFlagRepository featureFlagRepository;
 
-        public UserController(IFeatureFlagRepository featureFlagRepository) : base(AccountService.ProviderAccountTypes.ToList())
+        public UserController(IFeatureFlagRepository featureFlagRepository) : base(AccountService.OrganizationAccountTypes)
         {
             this.featureFlagRepository = featureFlagRepository;
         }

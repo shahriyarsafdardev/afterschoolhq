@@ -9,7 +9,7 @@ namespace AfterSchool.Areas.Org.Controllers
 {
     public class ScheduleController : BaseLoggedInController
     {
-        public ScheduleController() : base(AccountService.ProviderAccountTypes.ToList())
+        public ScheduleController() : base(AccountService.OrganizationAccountTypes)
         {
         }
 

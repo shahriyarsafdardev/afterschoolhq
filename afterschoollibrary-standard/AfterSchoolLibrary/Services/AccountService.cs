@@ -686,7 +686,7 @@ namespace AfterSchoolLibrary.Services
         {
             get
             {
-                return new UserType[]
+                return new[]
                 {
                     UserType.Administrator, UserType.Owner, UserType.SuperAdmin, UserType.Treasurer,
                     UserType.TechSupport
@@ -698,7 +698,7 @@ namespace AfterSchoolLibrary.Services
         {
             get
             {
-                return new AccountType[]
+                return new[]
                 {
                     AccountType.Teacher, AccountType.ActivityProvider, AccountType.Business,
                     AccountType.CommunityCenter, AccountType.School, AccountType.Church
@@ -706,28 +706,22 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-        public static AccountType[] ProviderAccountTypesAndNotSet
-        {
-            get
-            {
-                return new AccountType[]
-                {
-                    AccountType.NotSet, AccountType.Teacher, AccountType.ActivityProvider, AccountType.Business,
-                    AccountType.CommunityCenter, AccountType.School, AccountType.Church
-                };
-            }
-        }
+        public static List<AccountType> OrganizationAccountTypes =>
+            new List<AccountType>(ProviderAccountTypes) { AccountType.Directory };
+
+        public static List<AccountType> OrganizationAccountTypesAndNotSet =>
+            new List<AccountType>(OrganizationAccountTypes) { AccountType.NotSet };
 
         public static AccountType[] IndividualProviderAccountTypes
         {
-            get { return new AccountType[] {AccountType.Teacher, AccountType.ActivityProvider, AccountType.Business}; }
+            get { return new[] {AccountType.Teacher, AccountType.ActivityProvider, AccountType.Business}; }
         }
 
         public static AccountType[] LocationProviderAccountTypes
         {
             get
             {
-                return new AccountType[]
+                return new[]
                     {AccountType.CommunityCenter, AccountType.School, AccountType.Church, AccountType.Directory};
             }
         }
@@ -736,7 +730,7 @@ namespace AfterSchoolLibrary.Services
         {
             get
             {
-                return new AccountType[]
+                return new[]
                 {
                     AccountType.Teacher, AccountType.ActivityProvider, AccountType.Business,
                     AccountType.CommunityCenter, AccountType.School, AccountType.Church, AccountType.Registrant,
@@ -2265,7 +2259,7 @@ namespace AfterSchoolLibrary.Services
             var uniqueName = origUniqueName;
             var duplicate = Account.LoadByUniqueName(uniqueName, msgs, dc);
             var count = 1;
-            var reservedUniqueNames = new string[]
+            var reservedUniqueNames = new[]
             {
                 "demo", "about", "copyright", "index", "parents", "privacy", "providers", "schools", "tos", "account",
                 "afterschool", "db", "faq", "home", "legal", "login", "logout", "oauth", "r", "reg", "services",

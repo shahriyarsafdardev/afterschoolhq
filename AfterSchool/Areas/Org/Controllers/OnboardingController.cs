@@ -16,7 +16,7 @@ namespace AfterSchool.Areas.Org.Controllers
 {
     public class OnboardingController : BaseLoggedInController
     {
-        public OnboardingController() : base(AccountService.ProviderAccountTypesAndNotSet.ToList())
+        public OnboardingController() : base(AccountService.OrganizationAccountTypesAndNotSet.ToList())
         {
 
         }

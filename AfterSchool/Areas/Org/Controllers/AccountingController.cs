@@ -15,7 +15,7 @@ namespace AfterSchool.Areas.Org.Controllers
 {
     public class AccountingController : BaseLoggedInController
     {
-        public AccountingController() : base(AccountService.ProviderAccountTypes.ToList())
+        public AccountingController() : base(AccountService.OrganizationAccountTypes)
         {
         }
 
