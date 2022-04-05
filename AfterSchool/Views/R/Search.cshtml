@@ -187,7 +187,7 @@
                 url: url,
                 data: { accountId: '@accountId', enroll_today, search, grades, ages, gender, services, timing, pricing, cost, starting, other, special, zipcode: zip, address,  pageNum: page },
                 success: function (data) {
-                    if (data && data.success == true) {
+                    if (data && data.success === true) {
 
                         //.. prepare source and template
                         var source = $("#script-search-result-list").html();
@@ -199,7 +199,7 @@
                             showDistance: data.showDistance
                         });
 
-                        if (data.pageNum == 0) {
+                        if (data.pageNum === 0) {
                             //..first page, so update whole page
                             $('#search-result').html(compiledHtml);
                         } else {
@@ -221,7 +221,7 @@
                         }
                     }
                     else {
-                        if (data && data.status == 'error') {
+                        if (data && data.status === 'error') {
                             $('#notification-contact-us').show();
                             $('#search-result').html('');
 
@@ -237,7 +237,7 @@
                                 success: false
                             });
                         }
-                        else if (data && data.status == "no-result" && page <= 0) {
+                        else if (data && data.status === "no-result" && page <= 0) {
                             $('#notification-contact-us').show();
                             $('#search-result').html('');
                             $('.directory-search-no-result').html('<p>There are no activities that match this criteria. <br> To find more, remove filters.</p>');
