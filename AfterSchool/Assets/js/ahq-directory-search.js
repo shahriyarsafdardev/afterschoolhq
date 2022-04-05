@@ -115,10 +115,17 @@ function prepareSearchParams(deleteAllMarkers = true) {
         mainUrl += `search_${search},`;
     }
 
+    let {address, zipcode} = $('#ipsSchools option:selected').data();
     let zip = txtZip.val() || '';
     if (zip && zip.length > 0) {
         mainUrl += `zip_${zip},`;
     }
+    
+    if (!zip) {
+        zip = zipcode;
+        mainUrl += `zip_${zip},`;
+    }
+    
 
     $('input:checkbox[name=enrolling-now]:checked').each(function () {
         if (comma_delimited_enroll_today.length > 0) {
@@ -271,7 +278,8 @@ function prepareSearchParams(deleteAllMarkers = true) {
             comma_delimited_starting,
             comma_delimited_other,
             comma_delimited_special,
-            zip
+            zip,
+            address
         );
     }
 }
@@ -562,5 +570,7 @@ function toggleFilterOverflow() {
 
 function searchBySchool() {
     let {address, zipcode} = $('#ipsSchools option:selected').data();
+    txtZip.val('');
     console.log(address, zipcode);
+    prepareSearchParams();
 }

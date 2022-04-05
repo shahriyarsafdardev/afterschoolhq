@@ -90,12 +90,6 @@
         "ZipCode": "46202"
     },
     {
-        "School": "Christel House Schools @ Manual High School",
-        "AHQ Profile": "",
-        "Address": "2405 Madison Avenue",
-        "ZipCode": "46225"
-    },
-    {
         "School": "Daniel Webster School 46",
         "AHQ Profile": "https://afterschoolhq.com/DanielWebsterSchool46/browse",
         "Address": "1450 South Reisner Street",

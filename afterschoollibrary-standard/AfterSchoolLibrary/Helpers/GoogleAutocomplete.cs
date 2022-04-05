@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Net.Http;
+using System.Web;
+using BasicLibrary;
 using Newtonsoft.Json;
 
 namespace AfterSchoolLibrary.Helpers
@@ -107,12 +109,15 @@ namespace AfterSchoolLibrary.Helpers
 
     public class GoogleGeoCode
     {
-        public static (decimal latitude, decimal longitude) GetLatitudeAndLongitude(string zipcode)
+        public static (decimal latitude, decimal longitude) GetLatitudeAndLongitude(string zipcode, string address)
         {
             var key = ConfigurationManager.AppSettings["Google.AutoComplete.ApiKey"];
             var client = new HttpClient();
+            var searchString = address.IsNotEmpty()
+                ? $"address={HttpUtility.UrlEncode(address)}&components=postal_code:{zipcode.UrlEncode()}"
+                : $"address=zip%20code%20{zipcode.UrlEncode()}";
             var response = client.GetStringAsync(
-                $"https://maps.googleapis.com/maps/api/geocode/json?key={key}&address=zip%20code%20{zipcode}");
+                $"https://maps.googleapis.com/maps/api/geocode/json?key={key}&{searchString}");
 
             //..Google geo code
             var root = JsonConvert.DeserializeObject<Root>(response.Result);

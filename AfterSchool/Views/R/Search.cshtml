@@ -159,6 +159,7 @@
         }
         
         $(document).ready(function () {
+            console.log("documentReady");
             var isIsyp =  @Json.Encode(accountUniqueName.ToUpper().Contains("ISYP")) && @Json.Encode(CookieVariables.ShowISYPModal.IsBlank());
             if (isIsyp) {
                 showModalIsyp();
@@ -166,12 +167,13 @@
             }
             $("body").attr('style', 'overflow: hidden;');
             
+            loadIpsSchools();
             directoryPageLoad();
             initMap();
-            loadIpsSchools();
+
         })
 
-        function loadAccounts(search, enroll_today, grades, ages, gender, services, timing, pricing, cost, starting, other, special, zip) {
+        function loadAccounts(search, enroll_today, grades, ages, gender, services, timing, pricing, cost, starting, other, special, zip, address) {
             if (inCallback) {
                 return false;
             }
@@ -183,7 +185,7 @@
             $.ajax({
                 type: "POST",
                 url: url,
-                data: { accountId: '@accountId', enroll_today, search, grades, ages, gender, services, timing, pricing, cost, starting, other, special, zipcode: zip, pageNum: page },
+                data: { accountId: '@accountId', enroll_today, search, grades, ages, gender, services, timing, pricing, cost, starting, other, special, zipcode: zip, address,  pageNum: page },
                 success: function (data) {
                     if (data && data.success == true) {
 
