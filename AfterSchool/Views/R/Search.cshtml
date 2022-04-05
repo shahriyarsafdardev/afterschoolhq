@@ -150,7 +150,7 @@
         function loadIpsSchools() {
             console.log("loadIPsSchools")
             ipsSchoolList.forEach( school => {
-                console.log("append school");
+                addMarker(school.Latitude, school.Longitude, school.School, schoolMarkers)
                 let option = $('<option>', {text: school.School});
                 option.attr('data-address', school.Address);
                 option.attr('data-zipCode', school.ZipCode);
@@ -167,10 +167,9 @@
             }
             $("body").attr('style', 'overflow: hidden;');
             
+            initMap();
             loadIpsSchools();
             directoryPageLoad();
-            initMap();
-
         })
 
         function loadAccounts(search, enroll_today, grades, ages, gender, services, timing, pricing, cost, starting, other, special, zip, address) {

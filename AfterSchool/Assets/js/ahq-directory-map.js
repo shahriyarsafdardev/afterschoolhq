@@ -2,6 +2,7 @@
 let service;
 let infowindow;
 let marker = [];
+let schoolMarkers = [];
 
 function initMap() {
     let noPOILabels = [{featureType: "poi", elementType: "labels", stylers: [{visibility: "off"}]}];
@@ -30,40 +31,44 @@ function initMap() {
 
 function addMarkersOnMap(places) {
     for (let i = 0; i < places.length; i++) {
-        if (places[i].Latitude != null && places[i].Longitude !== "") {
-            let newmarker = new google.maps.Marker({
-                position: new google.maps.LatLng(places[i].Latitude, places[i].Longitude),
-                map: map,
-                title: places[i].AccountName,
-                icon: '../Assets/img/red-icon-map.png'
-            });
-            newmarker['infowindow'] = new google.maps.InfoWindow({
-                content: places[i].AccountName
-            });
+        addMarker(places[i].Latitude, places[i].Longitude, places[i].AccountName, marker)
+    }
+}
 
-            google.maps.event.addListener(newmarker['infowindow'], 'closeclick', function () {
-                removeIcons();
-            });
+function addMarker(lat, long, accountName, markerList) {
+    if (lat != null && long !== "") {
+        let newmarker = new google.maps.Marker({
+            position: new google.maps.LatLng(lat, long),
+            map: map,
+            title: accountName,
+            icon: '../Assets/img/red-icon-map.png'
+        });
+        newmarker['infowindow'] = new google.maps.InfoWindow({
+            content: accountName
+        });
 
-            google.maps.event.addListener(map, 'click', function () {
-                newmarker['infowindow'].close();
-            });
-            google.maps.event.addListener(newmarker, 'click', function () {
-                removeIcons();
-                this['infowindow'].open(map, this);
-                this.setIcon('../Assets/img/red-map-icon-large.png');
-                let mainDiv = $("div").find(`[name='${this['infowindow'].content}']`);
-                $("#directory-panel", mainDiv).addClass('primary-color-border');
-                let container = $("#results-container");
-                let element = $(mainDiv);
-                let height = container.height() / 2;
-                let elementTop = element.position().top;
-                let position = container.scrollTop() + elementTop - height;
-                container.animate({scrollTop: position});
-            });
+        google.maps.event.addListener(newmarker['infowindow'], 'closeclick', function () {
+            removeIcons();
+        });
 
-            marker.push(newmarker);
-        }
+        google.maps.event.addListener(map, 'click', function () {
+            newmarker['infowindow'].close();
+        });
+        google.maps.event.addListener(newmarker, 'click', function () {
+            removeIcons();
+            this['infowindow'].open(map, this);
+            this.setIcon('../Assets/img/red-map-icon-large.png');
+            let mainDiv = $("div").find(`[name='${this['infowindow'].content}']`);
+            $("#directory-panel", mainDiv).addClass('primary-color-border');
+            let container = $("#results-container");
+            let element = $(mainDiv);
+            let height = container.height() / 2;
+            let elementTop = element.position().top;
+            let position = container.scrollTop() + elementTop - height;
+            container.animate({scrollTop: position});
+        });
+
+        markerList.push(newmarker);
     }
 }
 
