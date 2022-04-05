@@ -559,3 +559,9 @@ function toggleFilterOverflow() {
         $('#filters').css('overflow-y', 'auto');
     }
 }
+
+function searchBySchool() {
+    let [address, zipcode] = $('#ipsSchools').selected().value.split(',');
+    
+    
+}

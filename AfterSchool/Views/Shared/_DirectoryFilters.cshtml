@@ -61,6 +61,12 @@
 <div class="filter-end-line"></div>
 
 <div>
+    <h4> Select Your school</h4>
+    <select id="ipsSchools" onchange="searchBySchool(this)">
+    </select>
+</div>
+
+<div>
     <div class="am-checkbox am-filter-checkbox am-generic-checkbox no-padding">
         <input id="chk-enrolling-now" name="enrolling-now" value="enroll" valueforfilter="enroll" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this, 'Enroll via AHQ')"/>
         <label for="chk-enrolling-now" class="filter-body mobile-padding">

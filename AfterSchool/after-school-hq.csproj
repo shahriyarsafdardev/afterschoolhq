@@ -830,6 +830,7 @@
     <Content Include="Assets\js\app-ui-notifications.js" />
     <Content Include="Assets\js\cube.js" />
     <Content Include="Assets\js\google-translate.js" />
+    <Content Include="Assets\js\ips-school-list.js" />
     <Content Include="Assets\js\jquery.easing.1.3.min.js" />
     <Content Include="Assets\js\jquery.stellar.min.js" />
     <Content Include="Assets\js\retina-1.1.0.min.js" />

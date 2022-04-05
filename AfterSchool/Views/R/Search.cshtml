@@ -137,6 +137,7 @@
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBq47Ro2O69sQhVLEW4_2L0ClOBSW_Srmc&libraries=places"></script>
     <script src="~/Assets/js/ahq-directory-search.js"></script>
     <script src="~/Assets/js/ahq-directory-map.js"></script>
+    <script src="~/Assets/js/ips-school-list.js"></script>
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <script type="text/javascript">
 
@@ -146,6 +147,17 @@
         var isMobile = window.innerWidth <= 1080;
         var inCallback = false, page = 0, isReachedScrollEnd = false, isMobileFilterWindowOpened = false;
 
+        function loadIpsSchools() {
+            console.log("loadIPsSchools")
+            ipsSchoolList.forEach( school => {
+                console.log("append school");
+                $('#ipsSchools').append($('<option>', {
+                                    value: school.ADDRESS,
+                                    text: school.School
+                                }));
+            });
+        }
+        
         $(document).ready(function () {
             var isIsyp =  @Json.Encode(accountUniqueName.ToUpper().Contains("ISYP")) && @Json.Encode(CookieVariables.ShowISYPModal.IsBlank());
             if (isIsyp) {
@@ -153,9 +165,10 @@
                 @(CookieVariables.ShowISYPModal = "false")
             }
             $("body").attr('style', 'overflow: hidden;');
-
+            
             directoryPageLoad();
             initMap();
+            loadIpsSchools();
         })
 
         function loadAccounts(search, enroll_today, grades, ages, gender, services, timing, pricing, cost, starting, other, special, zip) {
