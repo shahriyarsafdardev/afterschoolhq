@@ -47,7 +47,16 @@ namespace AfterSchool.Controllers
 
             if (searchedAccounts.IsNotEmpty() && searchedAccounts.Any())
                 //.. call success and records found
-                return Json(new {success = true, status = "ok", data = searchedAccounts, pageNum, showDistance},
+                return Json(new
+                    {
+                        success = true,
+                        status = "ok",
+                        data = searchedAccounts,
+                        pageNum,
+                        showDistance,
+                        latitude,
+                        longitude,
+                    },
                     JsonRequestBehavior.AllowGet);
             if (msgs.IsNotEmpty() && msgs.Count > 0)
                 //.. something went wrong, error occured
