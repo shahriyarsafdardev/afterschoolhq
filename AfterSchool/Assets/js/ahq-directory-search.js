@@ -561,7 +561,6 @@ function toggleFilterOverflow() {
 }
 
 function searchBySchool() {
-    let [address, zipcode] = $('#ipsSchools').selected().value.split(',');
-    
-    
+    let {address, zipcode} = $('#ipsSchools option:selected').data();
+    console.log(address, zipcode);
 }
