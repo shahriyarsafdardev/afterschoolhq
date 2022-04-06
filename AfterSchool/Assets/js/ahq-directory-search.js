@@ -352,6 +352,9 @@ function checkAndSearch(elem, label) {
 }
 
 function validatePostalCodeAndApplyFiltersIfValid() {
+    if ($('#txtZipCode').val().trim().length > 0) {
+        resetIpsSchoolDropDownSelection();
+    }
     if (isMobile)
         return;
     trimAndValidatePostalCode() && applySearchFilters();
@@ -495,7 +498,7 @@ function clearFilters() {
     WebPage.addHash('');
     $('#clear-filters').hide();
 
-    $('#ipsSchools').val('');
+    resetIpsSchoolDropDownSelection();
 
     //..refresh accounts
     if (isMobile) {
@@ -509,6 +512,10 @@ function clearFilters() {
     resetTags();
     resetFlags();
     loadAccounts();
+}
+
+function resetIpsSchoolDropDownSelection() {
+    $('#ipsSchools').val('');
 }
 
 function clearSpecificFilter(tagContainer, name) {
@@ -573,6 +580,9 @@ function toggleFilterOverflow() {
 
 function searchBySchool() {
     txtZip.val('');
+    if (isMobile)
+        return;
+
     let {latitude, longitude} = $('#ipsSchools option:selected').data();
     if (latitude && longitude) {
         setMapCenter(latitude, longitude);
