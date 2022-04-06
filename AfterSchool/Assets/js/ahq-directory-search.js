@@ -574,6 +574,8 @@ function toggleFilterOverflow() {
 function searchBySchool() {
     txtZip.val('');
     let {latitude, longitude} = $('#ipsSchools option:selected').data();
-    setMapCenter(latitude, longitude);
+    if (latitude && longitude) {
+        setMapCenter(latitude, longitude);
+    }
     applySearchFilters();
 }

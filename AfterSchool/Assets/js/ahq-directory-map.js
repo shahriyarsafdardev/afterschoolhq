@@ -90,11 +90,10 @@ function closeInfoWindows() {
         marker['infowindow'].close();
     }
     for (let schoolMarker of schoolMarkers) {
-        let markerIcon = {
+        schoolMarker.setIcon({
             url: '../Assets/img/school-map-icon.svg',
             scaledSize: new google.maps.Size(20, 20)
-        }
-        schoolMarker.setIcon(markerIcon);
+        });
         schoolMarker['infowindow'].close();
     }
     $(".participation-object div").removeClass('primary-color-border');
