@@ -109,7 +109,7 @@ namespace AfterSchoolLibrary.Helpers
 
     public class GoogleGeoCode
     {
-        public static (decimal latitude, decimal longitude) GetLatitudeAndLongitude(string zipcode, string address)
+        public static (decimal latitude, decimal longitude) GetLatitudeAndLongitude(string zipcode, string address = "")
         {
             var key = ConfigurationManager.AppSettings["Google.AutoComplete.ApiKey"];
             var client = new HttpClient();

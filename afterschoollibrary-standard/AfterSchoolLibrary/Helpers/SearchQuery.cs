@@ -4,8 +4,8 @@ namespace AfterSchoolLibrary.Helpers
 {
     public static class SearchQuery
     {
-        public static string LoadAccountSearchQuery(string enroll_today, string cost, string starting,
-            decimal latitude, decimal longitude, int PageNum, int PageSize = 9, bool searchHostAccount = false)
+        public static string LoadAccountSearchQuery(string enrollToday, string cost, string starting,
+            decimal? latitude, decimal? longitude, int PageNum, int PageSize = 9, bool searchHostAccount = false)
         {
             var sql = @"
             IF(OBJECT_ID('tempdb..#temp_accounts_1') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_1 END
@@ -39,7 +39,7 @@ namespace AfterSchoolLibrary.Helpers
 					ap.AgeEnd,
 					glStart.Abbreviation as GradeLevelStart,
 					glEnd.Abbreviation as GradeLevelEnd,
-                    {(latitude.IsNotEmpty() && longitude.IsNotEmpty() && latitude != 0 && longitude != 0 ? "geography::Point(@Latitude, @Longitude, 4326).STDistance(geography::Point(loc.Latitude, loc.Longitude, 4326))/1609.34 as TotalDifference," : "0 as TotalDifference,")}
+                    {(latitude.HasValue && longitude.HasValue ? "geography::Point(@Latitude, @Longitude, 4326).STDistance(geography::Point(loc.Latitude, loc.Longitude, 4326))/1609.34 as TotalDifference," : "0 as TotalDifference,")}
                     CASE WHEN CAST(GETDATE() as date) BETWEEN CAST(rp.StartDateTime as date) AND CAST(rp.EndDateTime as date) THEN 1 ELSE 0 END as IsAccountNowEnrolling
                 FROM 
                     Account a ";
@@ -136,7 +136,7 @@ namespace AfterSchoolLibrary.Helpers
                 sql += @")";
             }
 
-            if (enroll_today.IsNotEmpty() && enroll_today.Contains("enroll"))
+            if (enrollToday.IsNotEmpty() && enrollToday.Contains("enroll"))
                 sql += @"
                     AND CAST(GETDATE() as date) BETWEEN CAST(rp.StartDateTime as date) AND CAST(rp.EndDateTime as date)
 					   ";
@@ -164,7 +164,7 @@ namespace AfterSchoolLibrary.Helpers
             sql += @"
             ) AS fltData";
 
-            if (latitude.IsNotEmpty() && longitude.IsNotEmpty() && latitude != 0 && longitude != 0)
+            if (latitude.HasValue && longitude.HasValue)
             {
                 sql += $@"
             

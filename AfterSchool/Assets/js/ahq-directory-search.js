@@ -97,17 +97,17 @@ function prepareSearchParams(deleteAllMarkers = true) {
 
     //.. prepare params
     let mainUrl = '';
-    let comma_delimited_enroll_today = '';
-    let comma_delimited_grades = '';
-    let comma_delimited_ages = '';
-    let comma_delimited_gender = '';
-    let comma_delimited_services = '';
-    let comma_delimited_timing = '';
-    let comma_delimited_pricing = '';
-    let comma_delimited_cost = '';
-    let comma_delimited_starting = '';
-    let comma_delimited_other = '';
-    let comma_delimited_special = '';
+    let commaDelimitedEnrollToday = '';
+    let commaDelimitedGrades = '';
+    let commaDelimitedAges = '';
+    let commaDelimitedGender = '';
+    let commaDelimitedServices = '';
+    let commaDelimitedTiming = '';
+    let commaDelimitedPricing = '';
+    let commaDelimitedCost = '';
+    let commaDelimitedStarting = '';
+    let commaDelimitedOther = '';
+    let commaDelimitedSpecial = '';
 
     let search = txtSearch.val();
 
@@ -115,136 +115,137 @@ function prepareSearchParams(deleteAllMarkers = true) {
         mainUrl += `search_${search},`;
     }
 
-    let {address, zipcode} = $('#ipsSchools option:selected').data();
-    let zip = txtZip.val() || '';
-
-    if (!zip && zipcode) {
-        zip = zipcode.toString().padStart(5, '0');
+    let latitude, longitude = undefined;
+    let zipCode = txtZip.val() || '';
+    if (!zipCode) {
+        ({latitude, longitude, zipCode} = $('#ipsSchools option:selected').data());
+        if (zipCode) {
+            zipCode = zipCode.toString().padStart(5, '0');
+        }
     }
-    if (zip && zip.length > 0) {
-        mainUrl += `zip_${zip},`;
+    if (zipCode && zipCode.length > 0) {
+        mainUrl += `zip_${zipCode},`;
     }
-
 
     $('input:checkbox[name=enrolling-now]:checked').each(function () {
-        if (comma_delimited_enroll_today.length > 0) {
-            comma_delimited_enroll_today += ',';
+        if (commaDelimitedEnrollToday.length > 0) {
+            commaDelimitedEnrollToday += ',';
         }
-        comma_delimited_enroll_today += $(this).val();
+        commaDelimitedEnrollToday += $(this).val();
     });
 
     $('input:checkbox[name=grades]:checked').each(function () {
-        if (comma_delimited_grades.length > 0) {
-            comma_delimited_grades += ',';
+        if (commaDelimitedGrades.length > 0) {
+            commaDelimitedGrades += ',';
         }
-        comma_delimited_grades += $(this).val();
+        commaDelimitedGrades += $(this).val();
     });
 
     $('input:checkbox[name=ages]:checked').each(function () {
-        if (comma_delimited_ages.length > 0) {
-            comma_delimited_ages += ',';
+        if (commaDelimitedAges.length > 0) {
+            commaDelimitedAges += ',';
         }
-        comma_delimited_ages += $(this).val();
+        commaDelimitedAges += $(this).val();
     });
 
     $('input:checkbox[name=gender]:checked').each(function () {
-        if (comma_delimited_gender.length > 0) {
-            comma_delimited_gender += ',';
+        if (commaDelimitedGender.length > 0) {
+            commaDelimitedGender += ',';
         }
-        comma_delimited_gender += $(this).val();
+        commaDelimitedGender += $(this).val();
     });
 
     $('input:checkbox[name=services]:checked').each(function () {
-        if (comma_delimited_services.length > 0) {
-            comma_delimited_services += ',';
+        if (commaDelimitedServices.length > 0) {
+            commaDelimitedServices += ',';
         }
-        comma_delimited_services += $(this).val();
+        commaDelimitedServices += $(this).val();
     });
 
     $('input:checkbox[name=timing]:checked').each(function () {
-        if (comma_delimited_timing.length > 0) {
-            comma_delimited_timing += ',';
+        if (commaDelimitedTiming.length > 0) {
+            commaDelimitedTiming += ',';
         }
-        comma_delimited_timing += $(this).val();
+        commaDelimitedTiming += $(this).val();
     });
 
     $('input:checkbox[name=pricing]:checked').each(function () {
-        if (comma_delimited_pricing.length > 0) {
-            comma_delimited_pricing += ',';
+        if (commaDelimitedPricing.length > 0) {
+            commaDelimitedPricing += ',';
         }
-        comma_delimited_pricing += $(this).val();
+        commaDelimitedPricing += $(this).val();
     });
 
     $('input:checkbox[name=cost]:checked').each(function () {
-        if (comma_delimited_cost.length > 0) {
-            comma_delimited_cost += ',';
+        if (commaDelimitedCost.length > 0) {
+            commaDelimitedCost += ',';
         }
-        comma_delimited_cost += $(this).val();
+        commaDelimitedCost += $(this).val();
     });
 
     $('input:checkbox[name=starting]:checked').each(function () {
-        if (comma_delimited_starting.length > 0) {
-            comma_delimited_starting += ',';
+        if (commaDelimitedStarting.length > 0) {
+            commaDelimitedStarting += ',';
         }
-        comma_delimited_starting += $(this).val();
+        commaDelimitedStarting += $(this).val();
     });
 
     $('input:checkbox[name=other]:checked').each(function () {
-        if (comma_delimited_other.length > 0) {
-            comma_delimited_other += ',';
+        if (commaDelimitedOther.length > 0) {
+            commaDelimitedOther += ',';
         }
-        comma_delimited_other += $(this).val();
+        commaDelimitedOther += $(this).val();
     });
 
     $('input:checkbox[name=special-needs]:checked').each(function () {
-        if (comma_delimited_special.length > 0) {
-            comma_delimited_special += ',';
+        if (commaDelimitedSpecial.length > 0) {
+            commaDelimitedSpecial += ',';
         }
-        comma_delimited_special += $(this).val();
+        commaDelimitedSpecial += $(this).val();
     });
 
-    if (comma_delimited_enroll_today.length > 0) {
-        mainUrl += `${comma_delimited_enroll_today},`;
+    if (commaDelimitedEnrollToday.length > 0) {
+        mainUrl += `${commaDelimitedEnrollToday},`;
     }
 
-    if (comma_delimited_grades.length > 0) {
-        mainUrl += `${comma_delimited_grades},`;
+    if (commaDelimitedGrades.length > 0) {
+        mainUrl += `${commaDelimitedGrades},`;
     }
 
-    if (comma_delimited_ages.length > 0) {
-        mainUrl += `${comma_delimited_ages},`;
+    if (commaDelimitedAges.length > 0) {
+        mainUrl += `${commaDelimitedAges},`;
     }
 
-    if (comma_delimited_gender.length > 0) {
-        mainUrl += `${comma_delimited_gender},`;
+    if (commaDelimitedGender.length > 0) {
+        mainUrl += `${commaDelimitedGender},`;
     }
 
-    if (comma_delimited_services.length > 0) {
-        mainUrl += `${comma_delimited_services},`;
+    if (commaDelimitedServices.length > 0) {
+        mainUrl += `${commaDelimitedServices},`;
     }
 
-    if (comma_delimited_timing.length > 0) {
-        mainUrl += `${comma_delimited_timing},`;
+    if (commaDelimitedTiming.length > 0) {
+        mainUrl += `${commaDelimitedTiming},`;
     }
 
-    if (comma_delimited_pricing.length > 0) {
-        mainUrl += `${comma_delimited_pricing},`;
+    if (commaDelimitedPricing.length > 0) {
+        mainUrl += `${commaDelimitedPricing},`;
     }
 
-    if (comma_delimited_cost.length > 0) {
-        mainUrl += `${comma_delimited_cost},`;
+    if (commaDelimitedCost.length > 0) {
+        mainUrl += `${commaDelimitedCost},`;
     }
 
-    if (comma_delimited_starting.length > 0) {
-        mainUrl += `${comma_delimited_starting},`;
+    if (commaDelimitedStarting.length > 0) {
+        mainUrl += `${commaDelimitedStarting},`;
     }
 
-    if (comma_delimited_other.length > 0) {
-        mainUrl += `${comma_delimited_other},`;
+    if (commaDelimitedOther.length > 0) {
+        mainUrl += `${commaDelimitedOther},`;
     }
 
-    if (comma_delimited_special.length > 0) {
-        mainUrl += `${comma_delimited_special},`;
+    if (commaDelimitedSpecial.length > 0) {
+        mainUrl += `${commaDelimitedSpecial},`;
     }
 
     let currentScrollTop = $(window).scrollTop();
@@ -266,19 +267,20 @@ function prepareSearchParams(deleteAllMarkers = true) {
     // .. call api
     if (!isMobile || !isMobileFilterWindowOpened) {
         loadAccounts(search,
-            comma_delimited_enroll_today,
-            comma_delimited_grades,
-            comma_delimited_ages,
-            comma_delimited_gender,
-            comma_delimited_services,
-            comma_delimited_timing,
-            comma_delimited_pricing,
-            comma_delimited_cost,
-            comma_delimited_starting,
-            comma_delimited_other,
-            comma_delimited_special,
-            zip,
-            address
+            commaDelimitedEnrollToday,
+            commaDelimitedGrades,
+            commaDelimitedAges,
+            commaDelimitedGender,
+            commaDelimitedServices,
+            commaDelimitedTiming,
+            commaDelimitedPricing,
+            commaDelimitedCost,
+            commaDelimitedStarting,
+            commaDelimitedOther,
+            commaDelimitedSpecial,
+            zipCode,
+            latitude,
+            longitude
         );
     }
 }
