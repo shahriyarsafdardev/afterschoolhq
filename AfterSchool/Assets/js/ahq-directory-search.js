@@ -118,9 +118,12 @@ function prepareSearchParams(deleteAllMarkers = true) {
     let latitude, longitude = undefined;
     let zipCode = txtZip.val() || '';
     if (!zipCode) {
-        ({latitude, longitude, zipCode} = $('#ipsSchools option:selected').data());
-        if (zipCode) {
-            zipCode = zipCode.toString().padStart(5, '0');
+        let selectedSchoolData = $('#ipsSchools option:selected').data();
+        if(selectedSchoolData) {
+            ({latitude, longitude, zipCode} = selectedSchoolData);
+            if (zipCode) {
+                zipCode = zipCode.toString().padStart(5, '0');
+            }
         }
     }
     if (zipCode && zipCode.length > 0) {

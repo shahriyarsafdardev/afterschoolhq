@@ -159,15 +159,20 @@
         }
         
         $(document).ready(function () {
-            var isIsyp =  @Json.Encode(accountUniqueName.ToUpper().Contains("ISYP")) && @Json.Encode(CookieVariables.ShowISYPModal.IsBlank());
+            initMap();
+            var isIsyp =  @Json.Encode(accountUniqueName.ToUpper().Contains("ISYP"))
+             
             if (isIsyp) {
-                showModalIsyp();
-                @(CookieVariables.ShowISYPModal = "false")
+                if (@Json.Encode(CookieVariables.ShowISYPModal.IsBlank()))
+                {
+                    showModalIsyp();
+                    @(CookieVariables.ShowISYPModal = "false")
+                }
+ 
+                loadIpsSchools();
             }
             $("body").attr('style', 'overflow: hidden;');
             
-            initMap();
-            loadIpsSchools();
             directoryPageLoad();
         })
 
