@@ -791,9 +791,10 @@
     <Content Include="Assets\img\loading-spinner.gif" />
     <Content Include="Assets\img\footer-icon.png" />
     <Content Include="Assets\img\form-sample.png" />
-    <Content Include="Assets\img\red-icon-map.png" />
     <Content Include="Assets\img\red-map-icon-large.png" />
+    <Content Include="Assets\img\red-map-icon.png" />
     <Content Include="Assets\img\reg-header.jpg" />
+    <Content Include="Assets\img\school-map-icon.svg" />
     <Content Include="Assets\img\share.svg" />
     <Content Include="Assets\img\spinner.gif" />
     <Content Include="Assets\img\student-hands.png" />

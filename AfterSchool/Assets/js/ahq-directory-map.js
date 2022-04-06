@@ -1,7 +1,7 @@
 ﻿let map;
 let service;
 let infowindow;
-let marker = [];
+let markerList = [];
 let schoolMarkers = [];
 
 function initMap() {
@@ -25,64 +25,88 @@ function initMap() {
     map.setMapTypeId('no_poi');
 
     google.maps.event.addListener(map, 'click', function () {
-        removeIcons();
+        closeInfoWindows();
     });
 }
 
 function addMarkersOnMap(places) {
     for (let i = 0; i < places.length; i++) {
-        addMarker(places[i].Latitude, places[i].Longitude, places[i].AccountName, marker)
+        addMarker(places[i].Latitude, places[i].Longitude, places[i].AccountName, false);
     }
 }
 
-function addMarker(lat, long, accountName, markerList) {
-    if (lat != null && long !== "") {
-        let newmarker = new google.maps.Marker({
-            position: new google.maps.LatLng(lat, long),
-            map: map,
-            title: accountName,
-            icon: '../Assets/img/red-icon-map.png'
-        });
-        newmarker['infowindow'] = new google.maps.InfoWindow({
-            content: accountName
-        });
-
-        google.maps.event.addListener(newmarker['infowindow'], 'closeclick', function () {
-            removeIcons();
-        });
-
-        google.maps.event.addListener(map, 'click', function () {
-            newmarker['infowindow'].close();
-        });
-        google.maps.event.addListener(newmarker, 'click', function () {
-            removeIcons();
-            this['infowindow'].open(map, this);
-            this.setIcon('../Assets/img/red-map-icon-large.png');
-            let mainDiv = $("div").find(`[name='${this['infowindow'].content}']`);
-            $("#directory-panel", mainDiv).addClass('primary-color-border');
-            let container = $("#results-container");
-            let element = $(mainDiv);
-            let height = container.height() / 2;
-            let elementTop = element.position().top;
-            let position = container.scrollTop() + elementTop - height;
-            container.animate({scrollTop: position});
-        });
-
-        markerList.push(newmarker);
+function addMarker(latitude, longitude, accountName, isSchool) {
+    if (!latitude || !longitude) {
+        return;
     }
+
+    let newMarker = new google.maps.Marker({
+        position: new google.maps.LatLng(latitude, longitude),
+        map: map,
+        title: accountName,
+        icon: isSchool
+            ? {url: '../Assets/img/school-map-icon.svg', scaledSize: new google.maps.Size(20, 20)}
+            : '../Assets/img/red-map-icon.png',
+    });
+    newMarker['infowindow'] = new google.maps.InfoWindow({
+        content: accountName
+    });
+
+    google.maps.event.addListener(newMarker['infowindow'], 'closeclick', function () {
+        closeInfoWindows();
+    });
+    google.maps.event.addListener(map, 'click', function () {
+        newMarker['infowindow'].close();
+    });
+    google.maps.event.addListener(newMarker, 'click', function () {
+        closeInfoWindows();
+
+        this['infowindow'].open(map, this);
+        this.setIcon(isSchool
+            ? {url: '../Assets/img/school-map-icon.svg', scaledSize: new google.maps.Size(32, 32)}
+            : '../Assets/img/red-map-icon-large.png');
+
+        if (isSchool)
+            return;
+        let mainDiv = $("div").find(`[name='${this['infowindow'].content}']`);
+        $("#directory-panel", mainDiv).addClass('primary-color-border');
+        let container = $("#results-container");
+        let element = $(mainDiv);
+        let height = container.height() / 2;
+        let elementTop = element.position().top;
+        let position = container.scrollTop() + elementTop - height;
+        container.animate({scrollTop: position});
+    });
+
+    if (isSchool)
+        schoolMarkers.push(newMarker);
+    else
+        markerList.push(newMarker);
 }
 
-function removeIcons() {
-    for (let j = 0; j < marker.length; j++) {
-        marker[j].setIcon("../Assets/img/red-icon-map.png");
-        marker[j]['infowindow'].close();
+function closeInfoWindows() {
+    for (let marker of markerList) {
+        marker.setIcon("../Assets/img/red-map-icon.png");
+        marker['infowindow'].close();
+    }
+    for (let schoolMarker of schoolMarkers) {
+        let markerIcon = {
+            url: '../Assets/img/school-map-icon.svg',
+            scaledSize: new google.maps.Size(20, 20)
+        }
+        schoolMarker.setIcon(markerIcon);
+        schoolMarker['infowindow'].close();
     }
     $(".participation-object div").removeClass('primary-color-border');
 }
 
 function deleteAllMarkersOnMap() {
-    for (let i = 0; i < marker.length; i++) {
-        marker[i].setMap(null);
+    for (let i = 0; i < markerList.length; i++) {
+        markerList[i].setMap(null);
     }
-    marker = [];
+    markerList = [];
+}
+
+function setMapCenter(latitude, longitude) {
+    map.panTo(new google.maps.LatLng(latitude, longitude));
 }

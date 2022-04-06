@@ -149,7 +149,7 @@
 
         function loadIpsSchools() {
             ipsSchoolList.forEach( school => {
-                addMarker(school.Latitude, school.Longitude, school.School, schoolMarkers)
+                addMarker(school.Latitude, school.Longitude, school.School, true);
                 let option = $('<option>', {text: school.School});
                 option.attr('data-latitude', school.Latitude);
                 option.attr('data-longitude', school.Longitude);
