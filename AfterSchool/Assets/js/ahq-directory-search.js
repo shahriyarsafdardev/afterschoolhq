@@ -495,6 +495,8 @@ function clearFilters() {
     WebPage.addHash('');
     $('#clear-filters').hide();
 
+    $('#ipsSchools').val('');
+
     //..refresh accounts
     if (isMobile) {
         mobileFilter();
