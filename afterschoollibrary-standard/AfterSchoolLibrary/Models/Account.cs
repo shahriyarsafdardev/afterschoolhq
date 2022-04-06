@@ -1168,7 +1168,7 @@ namespace AfterSchoolLibrary.Models
         /// </summary>
         /// <param name="hostAccountId">Parent account id</param>
         /// <param name="search">Search would be string like m, which will be resulted into '"m*"' for full text sql</param>
-        /// <param name="enroll_today"></param>
+        /// <param name="enrollToday"></param>
         /// <param name="grades"></param>
         /// <param name="ages"></param>
         /// <param name="gender"></param>
@@ -1188,16 +1188,14 @@ namespace AfterSchoolLibrary.Models
         /// <param name="neighborhoods"></param>
         /// <param name="currentRowNumber">while user scroll, this will be updated and considered as page size</param>
         /// <returns></returns>
-        public static DataTable SearchVisitorAccountsByHostAccount(int hostAccountId, string search,
-            string enroll_today, string grades, string ages, string gender,
-            string services, string timing, string pricing, string cost, string starting, string other,
-            string specialNeeds, decimal latitude, decimal longitude,
-            int PageNum, int PageSize,
-            SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static DataTable SearchVisitorAccountsByHostAccount(int hostAccountId, string search, string enrollToday,
+            string grades, string ages, string gender, string services, string timing, string pricing, string cost,
+            string starting, string other, string specialNeeds, decimal? latitude, decimal? longitude, int PageNum,
+            int PageSize, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             using (var connection = new SqlConnection(BasicLibrary.Utilities.ConnectionString))
             {
-                var sql = SearchQuery.LoadAccountSearchQuery(enroll_today, cost, starting, latitude, longitude, PageNum,
+                var sql = SearchQuery.LoadAccountSearchQuery(enrollToday, cost, starting, latitude, longitude, PageNum,
                     PageSize, hostAccountId > 0);
 
                 var command = new SqlCommand(sql, connection);
@@ -1220,13 +1218,9 @@ namespace AfterSchoolLibrary.Models
                 command.Parameters.AddWithValue("@SpecialNeeds",
                     specialNeeds.IsNotEmpty() ? specialNeeds : Convert.DBNull);
                 command.Parameters.AddWithValue("@Latitude",
-                    latitude.IsNotEmpty() && longitude.IsNotEmpty() && latitude != 0 && longitude != 0
-                        ? latitude
-                        : Convert.DBNull);
+                    latitude.HasValue && longitude.HasValue ? latitude.Value : Convert.DBNull);
                 command.Parameters.AddWithValue("@Longitude",
-                    latitude.IsNotEmpty() && longitude.IsNotEmpty() && latitude != 0 && longitude != 0
-                        ? longitude
-                        : Convert.DBNull);
+                    latitude.HasValue && longitude.HasValue ? longitude.Value : Convert.DBNull);
 
                 try
                 {

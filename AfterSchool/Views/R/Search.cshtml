@@ -137,6 +137,7 @@
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBq47Ro2O69sQhVLEW4_2L0ClOBSW_Srmc&libraries=places"></script>
     <script src="~/Assets/js/ahq-directory-search.js"></script>
     <script src="~/Assets/js/ahq-directory-map.js"></script>
+    <script src="~/Assets/js/ips-school-list.js"></script>
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <script type="text/javascript">
 
@@ -146,6 +147,17 @@
         var isMobile = window.innerWidth <= 1080;
         var inCallback = false, page = 0, isReachedScrollEnd = false, isMobileFilterWindowOpened = false;
 
+        function loadIpsSchools() {
+            ipsSchoolList.forEach( school => {
+                addMarker(school.Latitude, school.Longitude, school.School, true);
+                let option = $('<option>', {text: school.School});
+                option.attr('data-latitude', school.Latitude);
+                option.attr('data-longitude', school.Longitude);
+                option.attr('data-zip-code', school.ZipCode);
+                $('#ipsSchools').append(option);
+            });
+        }
+        
         $(document).ready(function () {
             var isIsyp =  @Json.Encode(accountUniqueName.ToUpper().Contains("ISYP")) && @Json.Encode(CookieVariables.ShowISYPModal.IsBlank());
             if (isIsyp) {
@@ -153,12 +165,15 @@
                 @(CookieVariables.ShowISYPModal = "false")
             }
             $("body").attr('style', 'overflow: hidden;');
-
-            directoryPageLoad();
+            
             initMap();
+            loadIpsSchools();
+            directoryPageLoad();
         })
 
-        function loadAccounts(search, enroll_today, grades, ages, gender, services, timing, pricing, cost, starting, other, special, zip) {
+        function loadAccounts(search, enrollToday, grades, ages, gender, services, timing, pricing, cost, starting,
+            other, special, zipCode, latitude, longitude) {
+
             if (inCallback) {
                 return false;
             }
@@ -166,25 +181,26 @@
             showLoader();
             showProgressBar();
             inCallback = true;
-            var url = '@Url.Action("GetAccounts", "Search", new {Area = ""})';
+            let url = '@Url.Action("GetAccounts", "Search", new {Area = ""})';
             $.ajax({
                 type: "POST",
                 url: url,
-                data: { accountId: '@accountId', enroll_today, search, grades, ages, gender, services, timing, pricing, cost, starting, other, special, zipcode: zip, pageNum: page },
+                data: { accountId: '@accountId', enrollToday, search, grades, ages, gender, services, timing, pricing,
+                    cost, starting, other, special, zipCode, latitude, longitude, pageNum: page },
                 success: function (data) {
-                    if (data && data.success == true) {
+                    if (data && data.success === true) {
 
                         //.. prepare source and template
-                        var source = $("#script-search-result-list").html();
-                        var compiled = _.template(source);
+                        let source = $("#script-search-result-list").html();
+                        let compiled = _.template(source);
 
                         //.. format data as JSON and combine with template
-                        var compiledHtml = compiled({
+                        let compiledHtml = compiled({
                             response: data.data,
                             showDistance: data.showDistance
                         });
 
-                        if (data.pageNum == 0) {
+                        if (data.pageNum === 0) {
                             //..first page, so update whole page
                             $('#search-result').html(compiledHtml);
                         } else {
@@ -206,7 +222,7 @@
                         }
                     }
                     else {
-                        if (data && data.status == 'error') {
+                        if (data && data.status === 'error') {
                             $('#notification-contact-us').show();
                             $('#search-result').html('');
 
@@ -222,7 +238,7 @@
                                 success: false
                             });
                         }
-                        else if (data && data.status == "no-result" && page <= 0) {
+                        else if (data && data.status === "no-result" && page <= 0) {
                             $('#notification-contact-us').show();
                             $('#search-result').html('');
                             $('.directory-search-no-result').html('<p>There are no activities that match this criteria. <br> To find more, remove filters.</p>');

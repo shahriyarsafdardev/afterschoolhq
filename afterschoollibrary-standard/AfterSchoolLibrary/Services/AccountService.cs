@@ -202,7 +202,7 @@ namespace AfterSchoolLibrary.Services
                         Body = body,
                         SendToStaff = sendToStaff,
                         CreateDate = DateTime.UtcNow,
-                        CreatedBy = loggedInUserId
+                        CreatedBy = loggedInUserId,
                     };
                     amsgs.AddRange(am.Save(adc));
 
@@ -497,19 +497,19 @@ namespace AfterSchoolLibrary.Services
         public static int GetActivityCount(this Account account, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            return Activity.GetCount(new Hashtable() {{"AccountId", account.ID.Value}}, msgs, dc);
+            return Activity.GetCount(new Hashtable {{"AccountId", account.ID.Value}}, msgs, dc);
         }
 
         public static int GetExternallyProvidedActivityCount(this Account account, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             return Activity.GetCount(
-                new Hashtable()
+                new Hashtable
                 {
                     {"ProviderAccountId", account.ID.Value},
                     {"IsPublished", true},
                     {"IsDeleted", false},
-                    {"isArchived", false}
+                    {"isArchived", false},
                 },
                 msgs,
                 dc);
@@ -519,12 +519,12 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc = null)
         {
             return Activity.Load(
-                new Hashtable()
+                new Hashtable
                 {
                     {"ProviderAccountId", account.ID.Value},
                     {"IsPublished", true},
                     {"IsDeleted", false},
-                    {"isArchived", false}
+                    {"isArchived", false},
                 },
                 null,
                 null,
@@ -535,12 +535,12 @@ namespace AfterSchoolLibrary.Services
         public static int GetActiveAndPublishedActivityCount(this Account account, bool includeExternallyPublished,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var count = Activity.GetCount(new Hashtable()
+            var count = Activity.GetCount(new Hashtable
             {
                 {"AccountId", account.ID.Value},
                 {"IsPublished", true},
                 {"IsDeleted", false},
-                {"isArchived", false}
+                {"isArchived", false},
             }, msgs, dc);
 
             if (includeExternallyPublished)
@@ -552,35 +552,35 @@ namespace AfterSchoolLibrary.Services
         public static int GetActiveAndNonPublishedActivityCount(this Account account, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            return Activity.GetCount(new Hashtable()
+            return Activity.GetCount(new Hashtable
             {
                 {"AccountId", account.ID.Value},
                 {"IsPublished", false},
                 {"IsDeleted", false},
-                {"isArchived", false}
+                {"isArchived", false},
             }, msgs, dc) + Activity.GetCountByProviderAccountId(account.ID.Value, msgs, dc);
         }
 
         public static int GetActiveActivityCount(this Account account, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            return Activity.GetCount(new Hashtable()
+            return Activity.GetCount(new Hashtable
             {
                 {"AccountId", account.ID.Value},
                 {"IsDeleted", false},
-                {"isArchived", false}
+                {"isArchived", false},
             }, msgs, dc) + Activity.GetCountByProviderAccountId(account.ID.Value, msgs, dc);
         }
 
         public static List<Activity> GetAllActiveAndNonPublishedActivities(this Account account,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Activity.Load(new Hashtable()
+            return Activity.Load(new Hashtable
             {
                 {"AccountId", account.ID.Value},
                 {"IsPublished", false},
                 {"IsDeleted", false},
-                {"isArchived", false}
+                {"isArchived", false},
             }, null, null, msgs, dc);
         }
 
@@ -689,7 +689,7 @@ namespace AfterSchoolLibrary.Services
                 return new[]
                 {
                     UserType.Administrator, UserType.Owner, UserType.SuperAdmin, UserType.Treasurer,
-                    UserType.TechSupport
+                    UserType.TechSupport,
                 };
             }
         }
@@ -701,16 +701,16 @@ namespace AfterSchoolLibrary.Services
                 return new[]
                 {
                     AccountType.Teacher, AccountType.ActivityProvider, AccountType.Business,
-                    AccountType.CommunityCenter, AccountType.School, AccountType.Church
+                    AccountType.CommunityCenter, AccountType.School, AccountType.Church,
                 };
             }
         }
 
         public static List<AccountType> OrganizationAccountTypes =>
-            new List<AccountType>(ProviderAccountTypes) { AccountType.Directory };
+            new List<AccountType>(ProviderAccountTypes) {AccountType.Directory};
 
         public static List<AccountType> OrganizationAccountTypesAndNotSet =>
-            new List<AccountType>(OrganizationAccountTypes) { AccountType.NotSet };
+            new List<AccountType>(OrganizationAccountTypes) {AccountType.NotSet};
 
         public static AccountType[] IndividualProviderAccountTypes
         {
@@ -734,7 +734,7 @@ namespace AfterSchoolLibrary.Services
                 {
                     AccountType.Teacher, AccountType.ActivityProvider, AccountType.Business,
                     AccountType.CommunityCenter, AccountType.School, AccountType.Church, AccountType.Registrant,
-                    AccountType.SchoolDistrict
+                    AccountType.SchoolDistrict,
                 };
             }
         }
@@ -787,7 +787,7 @@ namespace AfterSchoolLibrary.Services
 
         public static int GetContactListCount(this Account account, DatabaseConnection dc = null)
         {
-            return ContactList.GetCount(criterias: new Hashtable() {{"AccountId", account.ID.Value}}, dc: dc);
+            return ContactList.GetCount(criterias: new Hashtable {{"AccountId", account.ID.Value}}, dc: dc);
         }
 
         public static bool DoesContactExist(this Account account, string firstName, string lastName, string email,
@@ -895,12 +895,12 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc = null)
         {
             return ActivityGroup.GetCount(
-                new Hashtable()
+                new Hashtable
                 {
                     {"AccountId", account.ID.Value},
                     {"ActivityGroupTypeId", (int) ActivityGroupType.Session},
                     {"IsArchived", IsArchived},
-                    {"IsDeleted", false}
+                    {"IsDeleted", false},
                 },
                 msgs: msgs,
                 dc: dc);
@@ -938,7 +938,7 @@ namespace AfterSchoolLibrary.Services
         public static int GetRegistrationPeriodCount(this Account account, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            return RegistrationPeriod.GetCount(new Hashtable() {{"AccountId", account.ID.Value}}, msgs, dc);
+            return RegistrationPeriod.GetCount(new Hashtable {{"AccountId", account.ID.Value}}, msgs, dc);
         }
 
         public static List<RegistrationPeriod> GetRegistrationPeriodsByGroupId(this Account account, int id,
@@ -1054,7 +1054,7 @@ namespace AfterSchoolLibrary.Services
         public static bool HasAccountPackage(this Account account, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            return AccountPackage.GetCount(new Hashtable() {{"AccountId", account.ID.Value}}, msgs, dc) > 0;
+            return AccountPackage.GetCount(new Hashtable {{"AccountId", account.ID.Value}}, msgs, dc) > 0;
         }
 
         public static List<AccountPackageFeature> GetAccountPackageFeatures(this Account account,
@@ -1150,11 +1150,11 @@ namespace AfterSchoolLibrary.Services
         public static int GetMemberCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return AccountWebUser.GetCount(
-                new Hashtable()
+                new Hashtable
                 {
                     {"AccountId", account.ID},
                     {"IsDeleted", false},
-                    {"IsGhostAccount", false}
+                    {"IsGhostAccount", false},
                 },
                 msgs,
                 dc);
@@ -1164,12 +1164,12 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc = null)
         {
             return AccountWebUser.GetCount(
-                new Hashtable()
+                new Hashtable
                 {
                     {"AccountId", account.ID},
                     {"IsActive", true},
                     {"IsDeleted", false},
-                    {"IsGhostAccount", false}
+                    {"IsGhostAccount", false},
                 },
                 msgs,
                 dc);
@@ -1332,7 +1332,7 @@ namespace AfterSchoolLibrary.Services
                                 IsRegistered = isRegistered,
                                 VerifiedAccount = isVerified,
                                 Uid = Guid.NewGuid(),
-                                Username = WebUserService.GenerateUsername(firstName, lastName, amsgs, adc)
+                                Username = WebUserService.GenerateUsername(firstName, lastName, amsgs, adc),
                             };
 
                             if (!password.IsEmpty())
@@ -1439,7 +1439,7 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc = null)
         {
             return AccountWebUser.GetCount(
-                new Hashtable() {{"AccountId", account.ID.Value}, {"UserTypeId", (int) userType}}, msgs, dc) > 0;
+                new Hashtable {{"AccountId", account.ID.Value}, {"UserTypeId", (int) userType}}, msgs, dc) > 0;
         }
 
         #endregion
@@ -1763,7 +1763,7 @@ namespace AfterSchoolLibrary.Services
                 CreateDate = DateTime.UtcNow,
                 LastModifiedDate = DateTime.UtcNow,
                 CreatedBy = loggedInUserId,
-                LastModifiedBy = loggedInUserId
+                LastModifiedBy = loggedInUserId,
             };
             msgs.AddRange(registrant.Save(dc: dc));
 
@@ -1778,7 +1778,7 @@ namespace AfterSchoolLibrary.Services
 
         public static int GetRegistrantActivityCount(this Account account, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.GetCount(new Hashtable() {{"ActivityAccountId", account.ID.Value}});
+            return RegistrantActivity.GetCount(new Hashtable {{"ActivityAccountId", account.ID.Value}});
         }
 
         public static Registrant GetRegistrant(this Account account, Guid Uid, SystemMessages msgs = null,
@@ -1971,10 +1971,10 @@ namespace AfterSchoolLibrary.Services
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Registration.Load(
-                new Hashtable()
+                new Hashtable
                 {
                     {"AccountId", account.ID.Value},
-                    {"CompletionStatusId", Registration.ValidCompletionStatus}
+                    {"CompletionStatusId", Registration.ValidCompletionStatus},
                 },
                 start,
                 length,
@@ -1986,10 +1986,10 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc = null)
         {
             return Registration.GetCount(
-                new Hashtable()
+                new Hashtable
                 {
                     {"AccountId", account.ID.Value},
-                    {"CompletionStatusId", RegistrationCompletionStatus.Completed}
+                    {"CompletionStatusId", RegistrationCompletionStatus.Completed},
                 },
                 msgs: msgs,
                 dc: dc);
@@ -2226,11 +2226,11 @@ namespace AfterSchoolLibrary.Services
         public static ActivityForm GetDefaultActivityForm(this Account account, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            return new ActivityForm()
+            return new ActivityForm
             {
                 FormId = account.GetDefaultForm(msgs, dc).ID,
                 IsActive = true,
-                AccountId = account.ID
+                AccountId = account.ID,
             };
         }
 
@@ -2263,7 +2263,7 @@ namespace AfterSchoolLibrary.Services
             {
                 "demo", "about", "copyright", "index", "parents", "privacy", "providers", "schools", "tos", "account",
                 "afterschool", "db", "faq", "home", "legal", "login", "logout", "oauth", "r", "reg", "services",
-                "signup"
+                "signup",
             };
 
             while ((duplicate.IsNotEmpty() && duplicate.ID != accountId) ||
@@ -2554,7 +2554,7 @@ namespace AfterSchoolLibrary.Services
                 GradeLevelEnd = profile?.GradeLevelEnd,
                 GenderRestriction = profile.IsNotEmpty() ? profile.GenderRestriction : GenderRestrictionType.None,
                 AgeStart = profile?.AgeStart,
-                AgeEnd = profile?.AgeEnd
+                AgeEnd = profile?.AgeEnd,
             };
         }
 
@@ -2577,14 +2577,14 @@ namespace AfterSchoolLibrary.Services
 
         public static RegistrationPeriod GetDefaultNewRegistrationPeriod(this Account account)
         {
-            return new RegistrationPeriod()
+            return new RegistrationPeriod
             {
                 ID = 0,
                 StartDateTime = $"{account.ConvertToAccountTimeZone(DateTime.UtcNow).ToShortDateString()} {"8:00 AM"}"
                     .ToDateTime(),
                 EndDateTime =
                     $"{account.ConvertToAccountTimeZone(DateTime.UtcNow).AddWeeks(1).ToShortDateString()} {"12:00 AM"}"
-                        .ToDateTime()
+                        .ToDateTime(),
             };
         }
 
@@ -2742,7 +2742,7 @@ namespace AfterSchoolLibrary.Services
         public static Account CreateNewEmptyAccount(WebUser accountOwner, WebUser loggedInUser, SystemMessages msgs,
             DatabaseConnection dc)
         {
-            var account = new Account()
+            var account = new Account
             {
                 Name = $"{loggedInUser.FirstName}'s Enrichment Club",
                 IsAfterSchool = true,
@@ -2851,10 +2851,10 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc = null)
         {
             return AccountRelationship.GetCount(
-                new Hashtable()
+                new Hashtable
                 {
                     {"HostAccountId", hostAccount.ID.Value},
-                    {"ApprovalStatusId", (int) ApprovalStatus.Requested}
+                    {"ApprovalStatusId", (int) ApprovalStatus.Requested},
                 },
                 msgs,
                 dc);
@@ -3103,15 +3103,13 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static List<SearchDirectoryResponse> SearchDirectoryAccounts(int hostAccountId, string search,
-            string enroll_today, string grades,
-            string ages, string gender, string services, string timing, string pricing, string cost, string starting,
-            string other, string specialNeeds, decimal latitude, decimal longitude,
-            int PageNum, int PageSize,
-            SystemMessages msgs = null, DatabaseConnection dc = null)
+            string enrollToday, string grades, string ages, string gender, string services, string timing,
+            string pricing, string cost, string starting, string other, string specialNeeds, decimal? latitude,
+            decimal? longitude, int PageNum, int PageSize, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             try
             {
-                var accountDataTable = Account.SearchVisitorAccountsByHostAccount(hostAccountId, search, enroll_today,
+                var accountDataTable = Account.SearchVisitorAccountsByHostAccount(hostAccountId, search, enrollToday,
                     grades, ages, gender, services, timing, pricing, cost, starting, other, specialNeeds, latitude,
                     longitude, PageNum, PageSize, msgs: msgs);
 
@@ -3167,7 +3165,7 @@ namespace AfterSchoolLibrary.Services
                         TotalDifference = accountDataTable.Columns.Contains("TotalDifference") &&
                                           row["TotalDifference"].IsNotEmpty()
                             ? Convert.ToDecimal(row["TotalDifference"])
-                            : 0
+                            : 0,
                     };
 
                     var headerImageUrl = row["HeaderImage"].IsNotEmpty() ? row["HeaderImage"].ToString() : "";
@@ -3207,7 +3205,7 @@ namespace AfterSchoolLibrary.Services
             }
             catch (Exception ex)
             {
-                msgs.Add(new SystemMessage() {Exception = ex, Text = ex.Message, MessageType = MessageType.Error});
+                msgs.Add(new SystemMessage {Exception = ex, Text = ex.Message, MessageType = MessageType.Error});
                 Utilities.SystemErrorLog(ex);
             }
 
@@ -3318,7 +3316,7 @@ namespace AfterSchoolLibrary.Services
                 msgs: msgs,
                 dc: dc);
 
-            account.SetDefaultLocation(defaultLocation, new WebUser() {ID = 0}, msgs, dc);
+            account.SetDefaultLocation(defaultLocation, new WebUser {ID = 0}, msgs, dc);
 
             return msgs;
         }
@@ -3414,7 +3412,7 @@ namespace AfterSchoolLibrary.Services
                 LastModifiedDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                IsDeleted = false
+                IsDeleted = false,
             };
             msgs.AddRange(registrant.Save(dc));
 
@@ -3461,7 +3459,7 @@ namespace AfterSchoolLibrary.Services
                         FirstName = firstName,
                         LastName = lastName,
                         Email = email,
-                        IsDeleted = false
+                        IsDeleted = false,
                     };
                     amsgs.AddRange(registrant.Save(adc));
 
@@ -3848,7 +3846,7 @@ namespace AfterSchoolLibrary.Services
                 totalAmount: amount,
                 description: checkoutObject.Description,
                 statementDescriptor: $"{billingAccount.Name}",
-                metaData: new Dictionary<string, string>()
+                metaData: new Dictionary<string, string>
                 {
                     {"ActivityUid", checkoutObject.ParticipationObject?.Uid.ToString()},
                     {"BillingAccountUid", billingAccount.Uid.ToString()},
@@ -3857,7 +3855,7 @@ namespace AfterSchoolLibrary.Services
                     {"CreditCardFeePayer", checkoutObject.CreditCardFeePayer?.Uid.ToString()},
                     {"ConvenienceFeePayer", checkoutObject.ConvenienceFeePayer?.Uid.ToString()},
                     {"PurchasedBy", checkoutObject.MasterRegistrant?.DisplayName},
-                    {"BilledBy", billingAccount.Name}
+                    {"BilledBy", billingAccount.Name},
                 },
                 msgs: msgs
             );
@@ -4408,7 +4406,7 @@ namespace AfterSchoolLibrary.Services
                         {
                             CreateDate = DateTime.UtcNow,
                             CreatedBy = loggedInUser.ID,
-                            AccountId = account.ID
+                            AccountId = account.ID,
                         };
 
                     checkAccount.LegalEntityTypeId = legalEntityType;
@@ -4465,7 +4463,7 @@ namespace AfterSchoolLibrary.Services
                         {
                             CreateDate = DateTime.UtcNow,
                             CreatedBy = loggedInUser.ID,
-                            AccountId = account.ID
+                            AccountId = account.ID,
                         };
 
                     bankAccount.BankAccountTypeId = bankAccountType;
@@ -4499,7 +4497,7 @@ namespace AfterSchoolLibrary.Services
             if (!account.HasAccountOwner || !account.GetAccountOwner(msgs, dc).VerifiedAccount)
                 return false;
 
-            var paymentFeatures = new List<FeatureType>()
+            var paymentFeatures = new List<FeatureType>
                 {FeatureType.UseStripeConnectedAccount, FeatureType.AcceptPayments};
 
             if (account.HasAccountPackageFeatures(paymentFeatures, msgs, dc))
@@ -4691,12 +4689,12 @@ namespace AfterSchoolLibrary.Services
 
             if (account.StripeUserId.IsNotEmpty())
             {
-                var metaData = new Dictionary<string, string>()
+                var metaData = new Dictionary<string, string>
                 {
                     {"AccountUid", account.Uid.ToString()},
                     {"RequestedBy", requestor.Uid.ToString()},
                     {"ApprovedBy", loggedInUser.Uid.ToString()},
-                    {"DateRequested", payout.DateRequested.ToShortDateTimeString()}
+                    {"DateRequested", payout.DateRequested.ToShortDateTimeString()},
                 };
 
                 StripeHelper.CreateTransfer(
@@ -4917,11 +4915,11 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc = null)
         {
             return ActivityGroup.GetCount(
-                new Hashtable()
+                new Hashtable
                 {
                     {"AccountId", account.ID.Value},
                     {"ActivityGroupTypeId", (int) ActivityGroupType.League},
-                    {"IsArchived", IsArchived}
+                    {"IsArchived", IsArchived},
                 },
                 msgs: msgs,
                 dc: dc);
@@ -4968,10 +4966,10 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc = null)
         {
             return AccountActivityGroup.GetCount(
-                new Hashtable()
+                new Hashtable
                 {
                     {"AccountId", account.ID.Value},
-                    {"ActivityGroupIsArchived", false}
+                    {"ActivityGroupIsArchived", false},
                 },
                 msgs,
                 dc);
@@ -4981,10 +4979,10 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc = null)
         {
             return AccountActivityGroup.GetCount(
-                new Hashtable()
+                new Hashtable
                 {
                     {"AccountId", account.ID.Value},
-                    {"InviteStatusId", (int) InviteStatus.Invited}
+                    {"InviteStatusId", (int) InviteStatus.Invited},
                 },
                 msgs,
                 dc);
@@ -5039,7 +5037,7 @@ namespace AfterSchoolLibrary.Services
         public static bool IsProviderForOtherAccounts(this Account account, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            return Activity.GetCount(new Hashtable() {{"ProviderAccountId", account.ID.Value}}, msgs, dc) > 0;
+            return Activity.GetCount(new Hashtable {{"ProviderAccountId", account.ID.Value}}, msgs, dc) > 0;
         }
 
         public static bool IsNewProviderForOtherAccounts(this Account account, SystemMessages msgs = null,

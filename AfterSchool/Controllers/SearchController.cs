@@ -24,30 +24,38 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public JsonResult GetAccounts(string accountId, string search, string enroll_today, string grades, string ages,
-            string gender, string services,
-            string timing, string pricing, string cost, string starting, string other, string special, string zipcode,
-            int pageNum = 0)
+        public JsonResult GetAccounts(string accountId, string search, string enrollToday, string grades, string ages,
+            string gender, string services, string timing, string pricing, string cost, string starting, string other,
+            string special, string zipCode, decimal? latitude, decimal? longitude, int pageNum = 0)
         {
+            const int pageSize = 9;
+
             var msgs = new SystemMessages();
 
             var parsedGrade = ParseAndLoadGrade(grades);
             var parsedAge = ParseAndLoadAge(ages);
             var parsedGender = ParseAndLoadGender(gender);
-            var pageSize = 9;
-            var latitude = 0m;
-            var longitude = 0m;
-            var showDistance = zipcode.IsNotEmpty();
+            var showDistance = zipCode.IsNotEmpty();
 
-            if (showDistance)
-                (latitude, longitude) = GetLatitudeAndLongitude(zipcode);
+            if (showDistance && !latitude.HasValue && !longitude.HasValue)
+                (latitude, longitude) = GetLatitudeAndLongitude(zipCode);
 
-            var searchedAccounts = AccountService.SearchDirectoryAccounts(accountId.ToInteger(), search, enroll_today,
-                parsedGrade, parsedAge, parsedGender, services, timing, pricing, cost, starting, other, special, latitude, longitude, pageNum, pageSize, msgs);
+            var searchedAccounts = AccountService.SearchDirectoryAccounts(accountId.ToInteger(), search, enrollToday,
+                parsedGrade, parsedAge, parsedGender, services, timing, pricing, cost, starting, other, special,
+                latitude, longitude, pageNum, pageSize, msgs);
 
             if (searchedAccounts.IsNotEmpty() && searchedAccounts.Any())
                 //.. call success and records found
-                return Json(new {success = true, status = "ok", data = searchedAccounts, pageNum, showDistance},
+                return Json(new
+                    {
+                        success = true,
+                        status = "ok",
+                        data = searchedAccounts,
+                        pageNum,
+                        showDistance,
+                        latitude,
+                        longitude,
+                    },
                     JsonRequestBehavior.AllowGet);
             if (msgs.IsNotEmpty() && msgs.Count > 0)
                 //.. something went wrong, error occured
@@ -55,7 +63,7 @@ namespace AfterSchool.Controllers
                     new
                     {
                         success = false, status = "error", data = msgs.ToList().Select(msg => new {msg.Text}), pageNum,
-                        showDistance
+                        showDistance,
                     }, JsonRequestBehavior.AllowGet);
 
             //.. no result found
