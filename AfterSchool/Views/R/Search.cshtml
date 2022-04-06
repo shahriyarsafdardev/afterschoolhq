@@ -181,7 +181,7 @@
             showLoader();
             showProgressBar();
             inCallback = true;
-            let url = '@Url.Action("GetAccounts", "Search", new {Area = ""})';
+            let url = '@Url.Action("GetAccounts", "Search", new { Area = "" })';
             $.ajax({
                 type: "POST",
                 url: url,
@@ -252,6 +252,14 @@
                     }
 
                     inCallback = false;
+                    
+                    // if no scrollbar keep loading accounts
+                    if (data.data 
+                        && data.data.length > 0 
+                        && $('#results-container').get(0).scrollHeight <= $('#results-container').get(0).clientHeight ) {
+                         loadFiltersAndInitiateSearch();
+                    }
+                                               
                     hideLoader();
                     hideProgressBar();
                     return false;
