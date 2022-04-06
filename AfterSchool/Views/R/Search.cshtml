@@ -159,15 +159,20 @@
         }
         
         $(document).ready(function () {
-            var isIsyp =  @Json.Encode(accountUniqueName.ToUpper().Contains("ISYP")) && @Json.Encode(CookieVariables.ShowISYPModal.IsBlank());
+            initMap();
+            var isIsyp =  @Json.Encode(accountUniqueName.ToUpper().Contains("ISYP"))
+             
             if (isIsyp) {
-                showModalIsyp();
-                @(CookieVariables.ShowISYPModal = "false")
+                if (@Json.Encode(CookieVariables.ShowISYPModal.IsBlank()))
+                {
+                    showModalIsyp();
+                    @(CookieVariables.ShowISYPModal = "false")
+                }
+ 
+                loadIpsSchools();
             }
             $("body").attr('style', 'overflow: hidden;');
             
-            initMap();
-            loadIpsSchools();
             directoryPageLoad();
         })
 
@@ -181,7 +186,7 @@
             showLoader();
             showProgressBar();
             inCallback = true;
-            let url = '@Url.Action("GetAccounts", "Search", new { Area = "" })';
+            let url = '@Url.Action("GetAccounts", "Search", new {Area = ""})';
             $.ajax({
                 type: "POST",
                 url: url,
@@ -199,6 +204,10 @@
                             response: data.data,
                             showDistance: data.showDistance
                         });
+                        
+                        if (data.showDistance) {
+                            setMapCenter(data.latitude, data.longitude);
+                        }
 
                         if (data.pageNum === 0) {
                             //..first page, so update whole page

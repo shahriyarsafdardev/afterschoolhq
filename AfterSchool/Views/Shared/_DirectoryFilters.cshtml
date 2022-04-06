@@ -61,15 +61,15 @@
             <span class="input-group-text" style="font-size: 12px;">Update</span>
         </div>
     </div>
+    @if (Request.Url.ToString().ToUpper().Contains("ISYP"))
+    {
+        <select id="ipsSchools" onchange="searchBySchool()" style="margin-top: 8px">
+            <option value="">Select a school</option>
+        </select>
+    }
+
 </div>
 <div class="filter-end-line"></div>
-
-<div>
-    <h4>Select your school</h4>
-    <select id="ipsSchools" onchange="searchBySchool()">
-        <option value="">Select a school</option>
-    </select>
-</div>
 
 <div>
     <div class="am-checkbox am-filter-checkbox am-generic-checkbox no-padding">
