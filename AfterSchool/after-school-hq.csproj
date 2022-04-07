@@ -767,6 +767,7 @@
   <ItemGroup>
     <Content Include="about.html" />
     <Content Include="ahq-partners-with-mccoy.html" />
+    <Content Include="Areas\Org\Views\Onboarding\FreeTrial.cshtml" />
     <Content Include="Areas\Org\Views\Shared\_RegistrationForm.cshtml" />
     <Content Include="Assets\css\common.css" />
     <Content Include="Assets\css\font-awesome-4.6.3\fonts\fontawesome-webfont.svg" />
@@ -787,6 +788,7 @@
     <Content Include="Assets\img\email-symbol.png" />
     <Content Include="Assets\img\envelope.svg" />
     <Content Include="Assets\img\filter.svg" />
+    <Content Include="Assets\img\green-check-box.svg" />
     <Content Include="Assets\img\image-3-1800x900-1.png" />
     <Content Include="Assets\img\loading-spinner.gif" />
     <Content Include="Assets\img\footer-icon.png" />
@@ -799,6 +801,7 @@
     <Content Include="Assets\img\spinner.gif" />
     <Content Include="Assets\img\student-hands.png" />
     <Content Include="Assets\img\tempsnip.png" />
+    <Content Include="Assets\img\thumbs-up.svg" />
     <Content Include="Assets\img\unlock.svg" />
     <Content Include="Assets\img\user-remove.svg" />
     <Content Include="Assets\img\user-add.svg" />
