@@ -552,7 +552,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Registration Deleted", MessageType.Success);
                 TempData["msgs"] = msgs;
 
-                if (returnurl.IsNotEmpty() && returnurl.Contains("registrants") && activityUid.IsNotEmpty())
+                if (returnurl.IsNotEmpty() && returnurl.Contains("registrant") && activityUid.IsNotEmpty())
                     return RedirectToAction("registrants", "activity", new { id = activityUid, atype = "" });
 
                 if (returnurl.IsNotEmpty())
