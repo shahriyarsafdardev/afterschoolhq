@@ -1,0 +1,102 @@
+﻿@model Account
+@{ Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml"; }
+
+<style>
+    .free-trial-border {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 10px;
+        margin: 25px;
+        box-shadow: 0 2px 9px 5px rgb(0 0 0 / 20%);
+        border-radius: 8px;
+        background: linear-gradient(6deg, #08ecc0, transparent);
+    }
+    
+    .free-trial-main {
+        background: white;
+        width:  100%;
+        border-radius: 6px;
+        padding: 50px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-size: 18px;
+        font-weight: 300;
+        text-align: center;
+        color: #282828;
+    }
+    
+    .thumbs-up {
+        width: 87px;
+        height: 100px;
+        object-fit: contain;
+    }
+    
+    .lets-get-started {
+        font-size: 30px;
+        font-weight: bold;
+    }
+    
+    .free-trial-p {
+      margin:  25px;
+    }
+    
+    .feature-list {
+        column-count: 2;
+        list-style-type: none;
+        padding: 0;
+        margin:  20px;
+        text-align: left;
+    }
+    
+    .feature-list li {
+        background-image: url("../../../../Assets/img/green-check-box.svg");
+        background-repeat: no-repeat;
+        padding-left: 30px;
+        margin-bottom: 10px;
+        
+    }
+    
+    .free-trial-continue {
+        padding: 15px 104px;
+        border-radius: 6px;
+        border-color: transparent;
+        background-color: #00c5a3;
+        color:  white;
+        margin:  20px;
+    }
+    
+    
+</style>
+
+<div class="free-trial-border">
+    <div class="free-trial-main">
+        <img class="thumbs-up" src="~/Assets/img/thumbs-up.svg" alt="thumbs up"/>
+        <h3 class="lets-get-started">Let’s get started!</h3>
+        <p class="free-trial-p">
+            Starting now, you will be able to get the most of AfterSchool HQ
+            <strong>free</strong> 
+            for 14 days. In addition to features available with our free tier, you will have access to:
+        </p>
+        <ul class="feature-list">
+            <li>Custom Forms</li>
+            <li>Data Exporting</li>
+            <li>Student CRM</li>
+            <li>Attendance Tracking</li>
+            <li>Text Messaging</li>
+            <li>Unlimited Activities</li>
+        </ul>
+        <p class="free-trial-p">
+            We start everyone with out 14-day free trial so you can get a feel for what you need out of AfterSchool HQ.
+            We will only collect your payment information when the trial is complete.
+        </p>
+        <p class="free-trial-p">
+            We just need to ask a few more questions to get you all set up.
+        </p>
+        <button class="free-trial-continue">
+            Continue
+        </button>
+    </div>
+</div>

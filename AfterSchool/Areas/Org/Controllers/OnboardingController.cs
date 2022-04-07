@@ -644,5 +644,12 @@ namespace AfterSchool.Areas.Org.Controllers
 
             return View(account);
         }
+
+        [HttpGet]
+        public ActionResult FreeTrial()
+        {
+            var account = SessionVariables.CurrentAccount;
+            return View(account);
+        }
     }
 }
