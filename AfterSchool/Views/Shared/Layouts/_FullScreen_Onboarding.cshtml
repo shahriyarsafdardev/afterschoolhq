@@ -9,71 +9,71 @@
     <meta name="keywords" content="app, responsive, jquery, bootstrap, dashboard, admin">
     <title>@UILabel.ProductName()</title>
 
-    @{Html.RenderPartial("~/Views/Shared/_HeadIncludes.cshtml");}
-    @{Html.RenderPartial("~/Views/Shared/_ZendeskWidget.cshtml");}
-    @{Html.RenderPartial("~/Views/Shared/JavascriptIncludes/_QuillEditorScripts.cshtml");}
+    @{ Html.RenderPartial("~/Views/Shared/_HeadIncludes.cshtml"); }
+    @{ Html.RenderPartial("~/Views/Shared/_ZendeskWidget.cshtml"); }
+    @{ Html.RenderPartial("~/Views/Shared/JavascriptIncludes/_QuillEditorScripts.cshtml"); }
 
-    @RenderSection("head", required: false)
+    @RenderSection("head", false)
 
 </head>
 <body>
-    <div class="am-wrapper notopmenu">
-        <!-- Main section-->
-        <div id="app-body" class="am-content-full" style="background-color: #00517c;">
-            @RenderBody()
-        </div>
-
-        <style>
-            .overlay {
-                width: 100%; /*only for full screen*/
-            }
-        </style>
-        @{Html.RenderPartial("~/Views/Shared/_UpgradePlan.cshtml");}
+<div class="am-wrapper notopmenu" style="background-color: #00517c;">
+    <!-- Main section-->
+    <div id="app-body" class="am-content-full">
+        @RenderBody()
     </div>
 
-    @{Html.RenderPartial("~/Views/Shared/_JavascriptIncludes.cshtml");}
+    <style>
+        .overlay {
+            width: 100%; /*only for full screen*/
+        }
+    </style>
+    @{ Html.RenderPartial("~/Views/Shared/_UpgradePlan.cshtml"); }
+</div>
 
-    @RenderSection("scripts", required: false)
+@{ Html.RenderPartial("~/Views/Shared/_JavascriptIncludes.cshtml"); }
 
-    <script>
-        $(document).ready(function () {
+@RenderSection("scripts", false)
 
-            $('.am-content-full').css({
-                'min-height': $(window).height(),
-            });
+<script>
+    $(document).ready(function () {
 
-            $('form').submit(function () {
-                $(this).find('button[type="submit"]').prop('disabled', true);
-                $(this).find('button[type="submit"]').html('...');
-                $('#modal-saving').removeClass('hide');
-            });
-
-            $('a').click(function () {
-                if ($(this).attr('href') && $(this).attr('href') != "#" && $(this).attr('href').indexOf('javascript:') == -1 && $(this).attr('target') != "_blank") {
-                    $('#modal-saving').removeClass('hide');
-                }
-            });
+        $('.am-content-full').css({
+            'min-height': $(window).height(),
         });
-    </script>
+
+        $('form').submit(function () {
+            $(this).find('button[type="submit"]').prop('disabled', true);
+            $(this).find('button[type="submit"]').html('...');
+            $('#modal-saving').removeClass('hide');
+        });
+
+        $('a').click(function () {
+            if ($(this).attr('href') && $(this).attr('href') != "#" && $(this).attr('href').indexOf('javascript:') == -1 && $(this).attr('target') != "_blank") {
+                $('#modal-saving').removeClass('hide');
+            }
+        });
+    });
+</script>
 
 
-    <div id="modal-saving"
-         class="hide"
-         style="position: fixed; width: 250px; height: 65px; top: 10px; right: 10px; padding: 0px; margin: 0px; background-color: #333; color: #eee; border-radius: 10px;">
-        <h3 class="text-center">Loading...</h3>
-    </div>
+<div id="modal-saving"
+     class="hide"
+     style="position: fixed; width: 250px; height: 65px; top: 10px; right: 10px; padding: 0px; margin: 0px; background-color: #333; color: #eee; border-radius: 10px;">
+    <h3 class="text-center">Loading...</h3>
+</div>
 
-    <div id="modal-saving-1" class="md-modal modal-container modal-full-color modal-full-color-success modal-effect-8" style="perspective: 1300px;">
-        <div class="modal-content">
-            <div class="modal-body">
-                <div style="background-image: url(/assets/img/spinner.gif); background-position: center; width: 600px; height: 300px;">
-                </div>
-                <div class="text-center hide">
-                    <h3 id="saving-text">Saving...</h3>
-                </div>
+<div id="modal-saving-1" class="md-modal modal-container modal-full-color modal-full-color-success modal-effect-8" style="perspective: 1300px;">
+    <div class="modal-content">
+        <div class="modal-body">
+            <div style="background-image: url(../../../assets/img/spinner.gif); background-position: center; width: 600px; height: 300px;">
+            </div>
+            <div class="text-center hide">
+                <h3 id="saving-text">Saving...</h3>
             </div>
         </div>
     </div>
+</div>
 
 </body>
 </html>
