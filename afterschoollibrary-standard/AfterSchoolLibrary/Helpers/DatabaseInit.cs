@@ -8,7 +8,8 @@ namespace AfterSchoolLibrary.Helpers
 {
     public class DatabaseInit
     {
-        public static SystemMessages InitDatabase(string adminEmail = null, string adminPassword = null, string adminPhone = null,
+        public static SystemMessages InitDatabase(string adminEmail = null, string adminPassword = null,
+            string adminPhone = null,
             bool skipTableCreation = false, string accountName = "First Group")
         {
             var msgs = new SystemMessages();
@@ -31,7 +32,8 @@ namespace AfterSchoolLibrary.Helpers
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     if (WebUser.GetCount() == 0)
-                        amsgs.AddRange(AccountService.CreateAfterSchoolAccount(adminEmail, adminPassword, adminPhone, accountName, adc));
+                        amsgs.AddRange(AccountService.CreateAfterSchoolAccount(adminEmail, adminPassword, adminPhone,
+                            accountName, adc));
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs)
@@ -99,11 +101,12 @@ namespace AfterSchoolLibrary.Helpers
 
                     Migration_20220106_AddFeatureFlagTable.Do(amsgs, adc);
                     UpdateNameColumnFormQuestionGroup_20211119.Do(amsgs, adc);
-                    
+
                     // Migration_20220202_SessionActionToWebSessionAction.Do(amsgs, adc);     
                     Migration_20220214_UpdateActivityContinuousEnrollmentFlag.Do(amsgs, adc);
                     Migration_20220323_1_LatitudeLongitudeAlterColumns.Do(amsgs, adc);
                     Migration_20220323_2_LatitudeLongitudeRefetch.Do(amsgs, adc);
+                    Migration_20220407_SetActivityRegistrantIsDeleted.Do(amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs)
