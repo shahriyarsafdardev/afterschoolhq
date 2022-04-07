@@ -272,6 +272,7 @@ namespace AfterSchoolLibrary.Models
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ParticipationObjectId"], ParticipationObjectId);
 			dq.Criterias.Add(ObjectMap["ParticipationObjectTypeId"], ParticipationObjectTypeId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], false);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
