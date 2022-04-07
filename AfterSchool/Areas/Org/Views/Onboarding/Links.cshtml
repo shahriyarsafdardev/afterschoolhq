@@ -1,7 +1,7 @@
 ﻿@model Account
-@{ 
+@{
     Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml";
-    var msgs = (SystemMessages)ViewBag.Messages;
+    var msgs = (SystemMessages) ViewBag.Messages;
     var profile = Model.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
     var website = profile.IsNotEmpty() ? profile.Website ?? Request["website"] : "";
     var twitter = profile.IsNotEmpty() ? profile.TwitterUrl ?? Request["twitter"] : "";
@@ -10,7 +10,7 @@
     var youtube = profile.IsNotEmpty() ? profile.YouTube ?? Request["youtube"] : "";
     var linkedin = profile.IsNotEmpty() ? profile.LinkedIn ?? Request["linkedin"] : "";
     var calendar = profile.IsNotEmpty() ? profile.CalendarBookingLink ?? Request["calendar"] : "";
-    var isDirectoryAccountProvider = (bool)ViewBag.IsDirectoryAccountProvider;
+    var isIsypAccount = (bool) ViewBag.IsIsypAccount;
 }
 
 <style>
@@ -30,17 +30,17 @@
                 <form class="form form-horizontal" method="post" action="@Url.Action("links", "onboarding")">
 
                     @{ Html.RenderPartial("~/Views/Shared/_Loaders.cshtml",
-                        new ViewDataDictionary() {
-                               { "count", 6 },
-                               { "activeDotNumber", 6 }
-                       });
-                    }
+                           new ViewDataDictionary
+                           {
+                               {"count", 6},
+                               {"activeDotNumber", 6},
+                           }); }
 
                     <div class="col-md-12 onboarding-form-group">
                         <h1 class="text-center register-thankyou-2">Get connected with parents.</h1>
                     </div>
 
-                    @if (isDirectoryAccountProvider)
+                    @if (isIsypAccount)
                     {
                         <div class="col-md-12 onboarding-form-group">
                             <label class="onboarding-lable"> I AM USING AFTERSCHOOL HQ TO COLLECT REGISTRATIONS</label>
@@ -48,35 +48,36 @@
                             <div class="clearfix"></div>
                             <div class="pull-left col-md-12" style="padding: 0;">
                                 <div class="am-radio inline">
-                                    <input type="radio" id="collectregistration-yes" name="collectregistration" class="form-control onboarding-input" value="1" checked @(profile.RegistrationUrl.IsNotEmpty() ? "" : "checked") onchange="valueChanged()" />
+                                    <input type="radio" id="collectregistration-yes" name="collectregistration" class="form-control onboarding-input" value="1" checked @(profile.RegistrationUrl.IsNotEmpty() ? "" : "checked") onchange="valueChanged()"/>
                                     <label for="collectregistration-yes">YES</label>
                                 </div>
                                 <div class="am-radio inline">
-                                    <input type="radio" id="collectregistration-no" name="collectregistration" class="form-control onboarding-input no" value="0" @(profile.RegistrationUrl.IsNotEmpty() ? "checked" : "") onchange="valueChanged()" />
+                                    <input type="radio" id="collectregistration-no" name="collectregistration" class="form-control onboarding-input no" value="0" @(profile.RegistrationUrl.IsNotEmpty() ? "checked" : "") onchange="valueChanged()"/>
                                     <label for="collectregistration-no">NO</label>
                                 </div>
                             </div>
                         </div>
                         <div class="clearfix"></div>
 
-                        <div class="col-md-12 onboarding-form-group @(profile.RegistrationUrl.IsNotEmpty() ? "": "hide")" id="regUrlDiv">
-                            <label class="onboarding-lable">REGISTRATION OR LEARN MORE URL 
+                        <div class="col-md-12 onboarding-form-group @(profile.RegistrationUrl.IsNotEmpty() ? "" : "hide")" id="regUrlDiv">
+                            <label class="onboarding-lable">
+                                REGISTRATION OR LEARN MORE URL
                                 <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="This link will be displayed in a button on your Provider Profile for parents to access." data-placement="top" style="font-size: 14px; color: #777;"></i>
                             </label>
-                            <input type="text" class="form-control onboarding-input" name="registrationurl" id="registrationurl" value="@profile.RegistrationUrl" placeholder="https://your-website.com/register" title="This link will be displayed in a button on your Provider Profile for parents to access." style="height: 44px;" onblur="makeRadioRequired()" />
+                            <input type="text" class="form-control onboarding-input" name="registrationurl" id="registrationurl" value="@profile.RegistrationUrl" placeholder="https://your-website.com/register" title="This link will be displayed in a button on your Provider Profile for parents to access." style="height: 44px;" onblur="makeRadioRequired()"/>
                         </div>
                         <div class="clearfix"></div>
 
-                        <div class="col-md-12 onboarding-form-group @(profile.ButtonText.IsNotEmpty() ? "": "hide")" id="btnTxtDiv">
+                        <div class="col-md-12 onboarding-form-group @(profile.ButtonText.IsNotEmpty() ? "" : "hide")" id="btnTxtDiv">
                             <label class="onboarding-lable">BUTTON TEXT</label>
                             <div class="clearfix"></div>
                             <div class="pull-left col-md-12" style="padding: 0;">
                                 <div class="am-radio inline">
-                                    <input type="radio" id="buttontext-register" name="buttontext" class="custom-radio-btn-required form-control onboarding-input" value="register" @(profile.ButtonText == "register" ? "checked" : "") @(profile.ButtonText.IsNotEmpty() ? "required" : "") />
+                                    <input type="radio" id="buttontext-register" name="buttontext" class="custom-radio-btn-required form-control onboarding-input" value="register" @(profile.ButtonText == "register" ? "checked" : "") @(profile.ButtonText.IsNotEmpty() ? "required" : "")/>
                                     <label for="buttontext-register">Register</label>
                                 </div>
                                 <div class="am-radio inline">
-                                    <input type="radio" id="buttontext-learnmore" name="buttontext" class="custom-radio-btn-required form-control onboarding-input" value="learnmore" @(profile.ButtonText == "learnmore" ? "checked" : "")  />
+                                    <input type="radio" id="buttontext-learnmore" name="buttontext" class="custom-radio-btn-required form-control onboarding-input" value="learnmore" @(profile.ButtonText == "learnmore" ? "checked" : "")/>
                                     <label for="buttontext-learnmore">Learn More</label>
                                 </div>
                             </div>
@@ -86,28 +87,30 @@
                     }
                     <div class="col-md-12 onboarding-form-group">
                         <label class="onboarding-lable">WEBSITE URL</label>
-                        <input type="text" class="form-control onboarding-input" name="website" id="website" value="@website" placeholder="https://your-website.com" style="height: 44px;" />
+                        <input type="text" class="form-control onboarding-input" name="website" id="website" value="@website" placeholder="https://your-website.com" style="height: 44px;"/>
                     </div>
                     <div class="clearfix"></div>
                     <div class="col-md-12 onboarding-form-group">
                         <label class="onboarding-lable">FACEBOOK PAGE URL</label>
-                        <input type="text" class="form-control onboarding-input" name="facebook" id="facebook" value="@facebook" placeholder="https://facebook.com/your-page" style="height: 44px;" />
+                        <input type="text" class="form-control onboarding-input" name="facebook" id="facebook" value="@facebook" placeholder="https://facebook.com/your-page" style="height: 44px;"/>
                     </div>
 
                     <div class="clearfix"></div>
                     <div class="col-md-12 onboarding-form-group">
                         <label class="onboarding-lable">INSTAGRAM HANDLE</label>
-                        <input type="text" class="form-control onboarding-input" name="instagram" id="instagram" value="@instagram" placeholder="@("@your_instagram_handle")" style="height: 44px;" />
+                        <input type="text" class="form-control onboarding-input" name="instagram" id="instagram" value="@instagram" placeholder="@("@your_instagram_handle")" style="height: 44px;"/>
                     </div>
 
 
                     <div class="clearfix"></div>
                     <div class="col-md-12 onboarding-form-group">
-                        <br />
-                        <span><a id="btn-onboarding-advanced-settings" href="#" onclick="return showAdvancedSettings(this)" class="pointer">Show More Options</a></span>
+                        <br/>
+                        <span>
+                            <a id="btn-onboarding-advanced-settings" href="#" onclick="return showAdvancedSettings(this)" class="pointer">Show More Options</a>
+                        </span>
 
                         <div class="visible-lg">
-                            <br />
+                            <br/>
                         </div>
                     </div>
 
@@ -115,45 +118,45 @@
                         <div class="clearfix"></div>
                         <div class="col-md-12 onboarding-form-group">
                             <label class="onboarding-lable">TWITTER HANDLE</label>
-                            <input type="text" class="form-control onboarding-input" name="twitter" id="twitter" value="@twitter" placeholder="@("@your_twitter_handle")" style="height: 44px;" />
+                            <input type="text" class="form-control onboarding-input" name="twitter" id="twitter" value="@twitter" placeholder="@("@your_twitter_handle")" style="height: 44px;"/>
                         </div>
 
 
                         <div class="clearfix"></div>
                         <div class="col-md-12 onboarding-form-group">
                             <label class="onboarding-lable">YOUTUBE URL</label>
-                            <input type="text" class="form-control onboarding-input" name="youtube" id="youtube" value="@youtube" placeholder="https://youtube.com/your-page" style="height: 44px;" />
+                            <input type="text" class="form-control onboarding-input" name="youtube" id="youtube" value="@youtube" placeholder="https://youtube.com/your-page" style="height: 44px;"/>
                         </div>
 
                         <div class="clearfix"></div>
                         <div class="col-md-12 onboarding-form-group">
                             <label class="onboarding-lable">LINKEDIN URL</label>
-                            <input type="text" class="form-control onboarding-input" name="linkedin" id="linkedin" value="@linkedin" placeholder="https://linkedin.com/your-page" style="height: 44px;" />
+                            <input type="text" class="form-control onboarding-input" name="linkedin" id="linkedin" value="@linkedin" placeholder="https://linkedin.com/your-page" style="height: 44px;"/>
                         </div>
 
                         <div class="clearfix"></div>
                         <div class="col-md-12 onboarding-form-group">
                             <label class="onboarding-lable">APPOINTMENT BOOKING LINK</label>
-                            <input type="text" class="form-control onboarding-input" name="calendar" id="calendar" value="@calendar" placeholder="https://calendly.com/your-page" style="height: 44px;" />
+                            <input type="text" class="form-control onboarding-input" name="calendar" id="calendar" value="@calendar" placeholder="https://calendly.com/your-page" style="height: 44px;"/>
                         </div>
-                     </div>
+                    </div>
                     <div class="clearfix"></div>
                     <div class="visible-sm visible-xs margin-v-30">
-                          <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right col-xs-12 register-continue">Save and Continue</button>
-                          <div class="clearfix"></div>
-                          <div class="text-center margin-v-30">
-                              <a href="@Url.Action("servicesoffered", "onboarding")" class="text-muted">Back</a>
-                          </div>
-                     </div>
+                        <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right col-xs-12 register-continue">Save and Continue</button>
+                        <div class="clearfix"></div>
+                        <div class="text-center margin-v-30">
+                            <a href="@Url.Action("servicesoffered", "onboarding")" class="text-muted">Back</a>
+                        </div>
+                    </div>
 
                     <div class="visible-md visible-lg margin-v-30">
-                          <a href="@Url.Action("servicesoffered", "onboarding")" class="process-back">
-                              <img src="~/Assets/img/welcome-back-arrow.png" />
-                          </a>
-                          <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right register-continue">Save and Continue</button>
-                     </div>
+                        <a href="@Url.Action("servicesoffered", "onboarding")" class="process-back">
+                            <img src="~/Assets/img/welcome-back-arrow.png"/>
+                        </a>
+                        <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right register-continue">Save and Continue</button>
+                    </div>
 
-                     <div class="clearfix"></div>
+                    <div class="clearfix"></div>
 
                 </form>
             </div>

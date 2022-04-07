@@ -2790,7 +2790,7 @@ namespace AfterSchoolLibrary.Services
                 .ToList();
         }
 
-        public static bool CheckIfDirectoryAccount(Account account, SystemMessages msgs)
+        public static bool CheckIfIsypAccount(Account account, SystemMessages msgs)
         {
             if (account.ID == null)
             {
@@ -2806,7 +2806,9 @@ namespace AfterSchoolLibrary.Services
             return accountRelationships
                 .Where(ar => ar.HostAccountId != null)
                 .Select(ar => Account.Load(ar.HostAccountId.Value, msgs))
-                .Any(hostAccount => hostAccount.IsNotEmpty() && hostAccount.AccountTypeId == AccountType.Directory);
+                .Any(hostAccount => hostAccount.IsNotEmpty()
+                                    && hostAccount.Name.Equals("ISYP", StringComparison.OrdinalIgnoreCase)
+                                    && hostAccount.AccountTypeId == AccountType.Directory);
         }
 
         public static List<Account> GetVisitorAccounts(this Account hostAccount, List<AccountType> accountTypes,
