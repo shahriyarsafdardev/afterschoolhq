@@ -5,7 +5,6 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Web;
 using Emmersion.InfluxDB;
-using Newtonsoft.Json;
 using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
 
 namespace AfterSchool
@@ -15,8 +14,6 @@ namespace AfterSchool
     {
         private readonly IInfluxRecorder _influxRecorder;
         private readonly AppFunc _next;
-        private const bool WriteAllSerializedData = false;
-        private const bool WriteAllProblemsToFile = true;
 
         public RecordControllerActionsToInfluxMiddleware(AppFunc next, IInfluxRecorder influxRecorder)
         {
@@ -24,7 +21,6 @@ namespace AfterSchool
             _influxRecorder = influxRecorder;
         }
 
-        // ReSharper disable once UnusedMember.Global
         public async Task Invoke(IDictionary<string, object> environment)
         {
             var stopwatch = Stopwatch.StartNew();
@@ -36,30 +32,19 @@ namespace AfterSchool
             {
                 try
                 {
-                    await SendDataToInflux(environment, stopwatch);
+                    stopwatch.Stop();
+                    var elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
+                    SendDataToInflux(environment, elapsedMilliseconds);
                 }
                 catch (Exception ex)
                 {
-                    try
-                    {
-                        if (WriteAllProblemsToFile) await WriteProblemsToFile(ex.ToString());
-                    }
-                    catch (Exception ex2)
-                    {
-                        Console.WriteLine(ex2);
-                    }
+                    Console.WriteLine(ex);
                 }
             }
         }
 
-        private async Task SendDataToInflux(IDictionary<string, object> environment, Stopwatch stopwatch)
+        private void SendDataToInflux(IDictionary<string, object> environment, long elapsedMilliseconds)
         {
-            stopwatch.Stop();
-
-            var elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
-
-            if (WriteAllSerializedData) await SerializeDataAndWriteToFile(environment, elapsedMilliseconds);
-
             var httpContext = (HttpContextBase) environment["System.Web.HttpContextBase"];
             var httpContextResponse = httpContext.Response;
             var httpContextRequest = httpContext.Request;
@@ -92,40 +77,11 @@ namespace AfterSchool
                         new Tag("Controller", controller),
                         new Tag("Controller-Action", controllerAction),
                         new Tag("Url-Referrer", urlReferrer),
-                        new Tag("User-Agent", userAgent)
+                        new Tag("User-Agent", userAgent),
                     }
-                )
+                ),
             };
             _influxRecorder.Record(points);
-        }
-
-        private static async Task SerializeDataAndWriteToFile(IDictionary<string, object> environment,
-            long elapsedMilliseconds)
-        {
-            var jsonSerializerSettings = new JsonSerializerSettings
-            {
-                Error = (_, err) => err.ErrorContext.Handled = true
-            };
-
-            environment.Add("Timestamp", DateTimeOffset.UtcNow);
-            environment.Add("ElapsedMilliseconds", elapsedMilliseconds);
-            var json = JsonConvert.SerializeObject(environment, jsonSerializerSettings);
-            Console.WriteLine(json);
-
-            var filePath = $@"C:\code\jsonLogs\allJsonData-{DateTime.UtcNow:yyyyMMdd-HHmmss}.json";
-            using (var streamWriter = File.CreateText(filePath))
-            {
-                await streamWriter.WriteLineAsync(json);
-            }
-        }
-
-        private static async Task WriteProblemsToFile(string exceptionString)
-        {
-            var filePath = $@"C:\code\problems\newProblem-{DateTime.UtcNow:yyyyMMdd-HHmmss}.json";
-            using (var streamWriter = File.CreateText(filePath))
-            {
-                await streamWriter.WriteLineAsync(exceptionString);
-            }
         }
     }
 

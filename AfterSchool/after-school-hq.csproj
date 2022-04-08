@@ -2614,10 +2614,6 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Emmersion.InfluxDB\Emmersion.InfluxDB\Emmersion.InfluxDB.csproj">
-      <Project>{df50e2fa-2751-42e2-9593-0aefdbb7648a}</Project>
-      <Name>Emmersion.InfluxDB</Name>
-    </ProjectReference>
     <ProjectReference Include="..\afterschoollibrary-standard\AfterSchoolLibrary\AfterSchoolLibrary.csproj">
       <Project>{28324f6a-2cc5-4afb-90e2-5325c95c3b90}</Project>
       <Name>AfterSchoolLibrary</Name>
@@ -2625,6 +2621,10 @@
     <ProjectReference Include="..\basiclibrary-standard\BasicLibrary\BasicLibrary.vbproj">
       <Project>{2e3fc14d-bba7-4ee5-810c-96d7d84401b5}</Project>
       <Name>BasicLibrary</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Emmersion.InfluxDB\Emmersion.InfluxDB\Emmersion.InfluxDB.csproj">
+      <Project>{adf12b53-03ce-4060-a61f-9880ac6cb15e}</Project>
+      <Name>Emmersion.InfluxDB</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
