@@ -1,37 +1,43 @@
 ﻿@model Account
 @{
     ViewBag.Title = Model.Name;
-    var showThirdPartOptions = ViewBag.ShowThirdPartOptions;
+    var showThirdPartyOptions = ViewBag.ShowThirdPartyOptions;
     var msgs = (SystemMessages) ViewBag.Messages;
 }
 
 
 <style>
     .select-instructions {
+        font-size:  16px;
+        margin-bottom: 32px;
         text-align: center;
     }
     
     .team-invite-form {
-            display: grid;
-            grid-template-columns: 1fr 2fr 2fr;
-            row-gap:  10px;
-            column-gap:  20px;
-            max-width: 800px;
-            margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 2fr 2fr;
+        row-gap:  10px;
+        column-gap:  20px;
+        max-width: 800px;
+        margin: 0 auto;
     }
     input[type="radio"] {
-      display: none;
+        display: none;
     }
-    input[type="radio"] + label {
-      /* style passive state as you like */
-      border: 2px solid #e7e7e7;
-      padding: 10px;
-      cursor: pointer;
+    input[type="radio"] + label, .third-party-options {
+        border: 2px solid #e7e7e7;
+        padding: 10px;
+        cursor: pointer;
+    }
+    
+    .third-party-options,
+    .third-party-options:hover,
+    .third-party-options:visited {
+        color: #555555;
     }
     
     input[type="radio"]:checked + label {
-      /* style checked state as you like */
-      border: 2px solid #00c5a3;
+        border: 2px solid #00c5a3;
     }
     
     .grid-col-2 {
@@ -45,15 +51,15 @@
     }
     
     .light-p {
-     color: #b2b2b4;
+        color: #b2b2b4;
     }
     
     .hide-until-button-selected {
-        display:  none;
+        display: none;
     }
     
     .text-input-border {
-        border:  solid 2px #e7e7e7;
+        border: solid 2px #e7e7e7;
     }
     .message-text-area {
         height: 100px;
@@ -112,30 +118,28 @@
                     <h3>@UserType.Instructor.ToString()</h3>
                     <p>Full access to information pertaining to their own activities, <em>excluding</em> financials.</p>
                 </label>
-                <label class="control-label">
-                    <span>Provider</span>
-                    <p class="light-p">Payments from registration go to the provider</p>
-                </label>
-                <input type="radio" name="usertype" id="usertype5" required value="@((int) UserType.Instructor)">
-                @if (showThirdPartOptions)
+                @if (showThirdPartyOptions)
                 {
-                    <label for="usertype5">
+                    <label class="control-label">
+                        <span>Provider</span>
+                        <p class="light-p">Payments from registration go to the provider</p>
+                    </label>
+                    <a class="third-party-options" href="@Url.Action("visitors", "account")" target="_blank">
                         <h3>Third-Party Organization <img class="expand-svg" src="~/Assets/img/expand.svg" alt="External"/></h3>
                         <p>
                             Full access to information pertaining to their own activities.
                             They <em>are not</em> employed by your organization.
                         </p>
-                    </label>
-                    <input type="radio" name="usertype" id="usertype6" required value="@((int) UserType.Treasurer)">
-                    <label for="usertype6">
+                    </a>
+                    <a class="third-party-options" href="@Url.Action("visitors", "account")" target="_blank">
                         <h3>Paid Instructor <img class="expand-svg" src="~/Assets/img/expand.svg" alt="External"/></h3>
                         <p>
                             Full access to information pertaining to their own activities.
                             They <em>are</em> employed by your organization.
                         </p>
-                    </label>
+                    </a>
                 }
-                
+
                 <label class="control-label hide-until-button-selected">Emails</label>
                 <input type="text" class="grid-col-2 hide-until-button-selected text-input-border" id="emails" name="emails" value="@ViewBag.Emails" onfocus="this.select()" required placeholder="name@domain.com, name2@domain.com"/>
                 <label class="control-label hide-until-button-selected">Message <em>(Optional)</em></label>
