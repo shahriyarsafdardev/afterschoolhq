@@ -89,28 +89,12 @@ namespace AfterSchool
     {
         public void Debug(string message)
         {
-            WriteProblemsToFile("DEBUG", message);
+            Console.WriteLine(message);
         }
 
         public void Error(string message, Exception exception)
         {
-            WriteProblemsToFile("ERROR", message + Environment.NewLine + message);
-        }
-
-        private static void WriteProblemsToFile(string type, string exceptionString)
-        {
-            try
-            {
-                var filePath = $@"C:\code\problems\{type}-{DateTime.UtcNow:yyyyMMdd-HHmmss}.json";
-                using (var streamWriter = File.CreateText(filePath))
-                {
-                    streamWriter.WriteLine(exceptionString);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
+            Console.WriteLine(message + Environment.NewLine + exception);
         }
     }
 
