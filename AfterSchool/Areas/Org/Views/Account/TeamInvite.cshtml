@@ -1,6 +1,7 @@
 ﻿@model Account
 @{
     ViewBag.Title = Model.Name;
+    var showThirdPartOptions = ViewBag.ShowThirdPartOptions;
     var msgs = (SystemMessages) ViewBag.Messages;
 }
 
@@ -66,6 +67,11 @@
     .send-invite-div {
         text-align: right;
     }
+    
+    .expand-svg {
+        height: 10px;
+        width: 10px;
+    } 
 </style>
 
 @{ Html.RenderPartial("OrgAccountHeader", Model.ID.ToString()); }
@@ -111,22 +117,25 @@
                     <p class="light-p">Payments from registration go to the provider</p>
                 </label>
                 <input type="radio" name="usertype" id="usertype5" required value="@((int) UserType.Instructor)">
-                <label for="usertype5">
-                    <h3>Third-Party Organization <img src="~/Assets/img/expand.svg" alt="External"/></h3>
-                    <p>
-                        Full access to information pertaining to their own activities.
-                        They <em>are not</em> employed by your organization.
-                    </p>
-                </label>
-                <input type="radio" name="usertype" id="usertype6" required value="@((int) UserType.Treasurer)">
-                <label for="usertype6">
-                    <h3>Paid Instructor <img src="~/Assets/img/expand.svg" alt="External"/></h3>
-                    <p>
-                        Full access to information pertaining to their own activities.
-                        They <em>are</em> employed by your organization.
-                    </p>
-                </label>
-
+                @if (showThirdPartOptions)
+                {
+                    <label for="usertype5">
+                        <h3>Third-Party Organization <img class="expand-svg" src="~/Assets/img/expand.svg" alt="External"/></h3>
+                        <p>
+                            Full access to information pertaining to their own activities.
+                            They <em>are not</em> employed by your organization.
+                        </p>
+                    </label>
+                    <input type="radio" name="usertype" id="usertype6" required value="@((int) UserType.Treasurer)">
+                    <label for="usertype6">
+                        <h3>Paid Instructor <img class="expand-svg" src="~/Assets/img/expand.svg" alt="External"/></h3>
+                        <p>
+                            Full access to information pertaining to their own activities.
+                            They <em>are</em> employed by your organization.
+                        </p>
+                    </label>
+                }
+                
                 <label class="control-label hide-until-button-selected">Emails</label>
                 <input type="text" class="grid-col-2 hide-until-button-selected text-input-border" id="emails" name="emails" value="@ViewBag.Emails" onfocus="this.select()" required placeholder="name@domain.com, name2@domain.com"/>
                 <label class="control-label hide-until-button-selected">Message <em>(Optional)</em></label>
