@@ -685,6 +685,8 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             ViewBag.Messages = new SystemMessages();
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.ShowThirdPartyOptions =
+                false; //SessionVariables.CurrentAccount?.AccountTypeId is AccountType.School;
             return View(SessionVariables.CurrentAccount);
         }
 
@@ -931,7 +933,9 @@ namespace AfterSchool.Areas.Org.Controllers
                             {
                                 var sectionName = Request.Params["name-0"];
                                 var questionGroupExists = FormQuestionGroup.Exists(
-                                    criterias: new Hashtable {{"Name", sectionName}, {"FormId", form.ID}, {"IsDeleted", false}}, msgs: amsgs,
+                                    criterias: new Hashtable
+                                        {{"Name", sectionName}, {"FormId", form.ID}, {"IsDeleted", false}},
+                                    msgs: amsgs,
                                     dc: adc);
 
                                 if (!questionGroupExists)
@@ -957,7 +961,8 @@ namespace AfterSchool.Areas.Org.Controllers
                                 {
                                     questionGroup = FormQuestionGroup
                                         .Load(
-                                            criterias: new Hashtable {{"Name", sectionName}, {"FormId", form.ID}, {"IsDeleted", false}},
+                                            criterias: new Hashtable
+                                                {{"Name", sectionName}, {"FormId", form.ID}, {"IsDeleted", false}},
                                             msgs: amsgs, dc: adc)?.FirstOrDefault();
                                 }
                             }
