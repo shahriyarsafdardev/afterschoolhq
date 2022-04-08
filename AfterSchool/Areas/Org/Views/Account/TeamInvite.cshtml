@@ -4,6 +4,70 @@
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
 }
 
+
+<style>
+    .select-instructions {
+        text-align: center;
+    }
+    
+    .team-invite-form {
+            display: grid;
+            grid-template-columns: 1fr 2fr 2fr;
+            row-gap:  10px;
+            column-gap:  20px;
+            max-width: 800px;
+            margin: 0 auto;
+    }
+    input[type="radio"] {
+      display: none;
+    }
+    input[type="radio"] + label {
+      /* style passive state as you like */
+      border: 2px solid #e7e7e7;
+      padding: 10px;
+      cursor: pointer;
+    }
+    
+    input[type="radio"]:checked + label {
+      /* style checked state as you like */
+      border: 2px solid #00c5a3;
+    }
+    
+    .grid-col-2 {
+        grid-column-end: span 2;
+    }
+    
+    h3 {
+        font-size: 14px;
+        font-weight: bold;
+        margin-top: 0;
+    }
+    
+    .light-p {
+     color: #b2b2b4;
+    }
+    
+    .hide-until-button-selected {
+        display:  none;
+    }
+    
+    .text-input-border {
+        border:  solid 2px #e7e7e7;
+    }
+    .message-text-area {
+        height: 100px;
+        resize: none;
+        margin-bottom: 15px;
+    }
+    .cancel-button {
+        margin: auto 0;
+    }
+    
+    .send-invite-div {
+        text-align: right;
+    }
+</style>
+
 @{Html.RenderPartial("OrgAccountHeader", Model.ID.ToString());}
 
 <div class="main-content">
@@ -15,58 +79,66 @@
             <i class="s7-users"></i> Invite Team Members
         </div>
         <div class="panel-body">
-            
-            <form method="post" action="@Url.Action("teaminvite", "account")" class="form-horizontal">
-
-                <div class="form-group">
-                    <label class="col-sm-3 control-label">Account Type</label>
-                    <div class="col-sm-6">
-
-                        <div class="am-radio inline">
-                            <input type="radio" name="usertype" id="usertype1" required value="@((int)UserType.Administrator)">
-                            <label for="usertype1">@UserType.Administrator.ToString()</label>
-                        </div>
-                        <div class="am-radio inline">
-                            <input type="radio" name="usertype" id="usertype2" required value="@((int)UserType.ProgramDirector)">
-                            <label for="usertype2">@UserType.ProgramDirector.ToString().SplitByUpperCase()</label>
-                        </div>
-                        <div class="am-radio inline">
-                            <input type="radio" name="usertype" id="usertype3" required value="@((int)UserType.Instructor)">
-                            <label for="usertype3">@UserType.Instructor.ToString()</label>
-                        </div>
-                        <div class="am-radio inline">
-                            <input type="radio" name="usertype" id="usertype4" required value="@((int)UserType.Treasurer)">
-                            <label for="usertype4">@UserType.Treasurer.ToString()</label>
-                        </div>
-
-                    </div>
+            <p class="select-instructions">Select the level of permission you would like to grant the invitee. This can be changed at a later date.</p>
+            <form method="post" action="@Url.Action("teaminvite", "account")" class="form-horizontal team-invite-form">
+                <label class="control-label">Administrative</label>
+                <input type="radio" name="usertype" id="usertype1" required value="@((int)UserType.Administrator)">
+                <label for="usertype1">
+                    <h3>@UserType.Administrator.ToString()</h3> 
+                    <p>Full access to your account, including financials, activities, and student information.</p>
+                </label>
+                <input type="radio" name="usertype" id="usertype2" required value="@((int)UserType.Treasurer)">
+                <label for="usertype2">
+                    <h3>@UserType.Treasurer.ToString()</h3>
+                    <p>Access to all financial information, but will <em>not</em> see student or activity information.</p>
+                </label>
+                <label class="control-label">
+                    <span>School-Sponsored</span>
+                    <p class="light-p">Payments from registration go to the organization</p>
+                </label>
+                <input type="radio" name="usertype" id="usertype3" required value="@((int)UserType.ProgramDirector)">
+                <label for="usertype3">
+                    <h3>@UserType.ProgramDirector.ToString().SplitByUpperCase()</h3>
+                    <p>Full access to information pertaining to their own activities.</p>
+                </label>
+                <input type="radio" name="usertype" id="usertype4" required value="@((int)UserType.Instructor)">
+                <label for="usertype4">
+                    <h3>@UserType.Instructor.ToString()</h3>
+                    <p>Full access to information pertaining to their own activities, <em>excluding</em> financials.</p>
+                </label>
+                <label class="control-label">
+                    <span>Provider</span>
+                    <p class="light-p">Payments from registration go to the provider</p>
+                </label>
+                <input type="radio" name="usertype" id="usertype5" required value="@((int)UserType.Instructor)">
+                <label for="usertype5">
+                    <h3>Third-Party Organization</h3>
+                    <p>
+                        Full access to information pertaining to their own activities. 
+                        They <em>are not</em> employed by your organization.
+                    </p>
+                </label>
+                <input type="radio" name="usertype" id="usertype6" required value="@((int)UserType.Treasurer)">
+                <label for="usertype6">
+                    <h3>Paid Instructor</h3>
+                    <p>
+                        Full access to information pertaining to their own activities. 
+                        They <em>are</em> employed by your organization.
+                    </p>
+                </label>
+                
+                <label class="control-label hide-until-button-selected">Emails</label>
+                <input type="text" class="grid-col-2 hide-until-button-selected text-input-border" id="emails" name="emails" value="@ViewBag.Emails" onfocus="this.select()" required placeholder="name@domain.com, name2@domain.com" />
+                <label class="control-label hide-until-button-selected">Message <em>(Optional)</em></label>
+                <textarea class="grid-col-2 hide-until-button-selected message-text-area text-input-border" id="message" name="message" onfocus="this.select()">@ViewBag.InviteMessage</textarea>
+                <label class="control-label"></label>
+                <a href="@Url.Action("team", "account")" class="text-muted cancel-button">
+                    Cancel
+                </a>
+                <div class="send-invite-div hide-until-button-selected">
+                    <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">Send Invite</button>
                 </div>
 
-                <div class="form-group">
-                    <label class="col-sm-3 control-label">Emails</label>
-                    <div class="col-sm-6">
-                        <input type="text" class="form-control" id="emails" name="emails" value="@ViewBag.Emails" onfocus="this.select()" required placeholder="name@domain.com, name2@domain.com" />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label">Message</label>
-                    <div class="col-sm-6">
-                        <textarea class="form-control" id="message" name="message" onfocus="this.select()">@ViewBag.InviteMessage</textarea>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label"></label>
-                    <div class="col-sm-6">
-                        <div class="pull-right">
-                            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">Invite Team Members &raquo;</button>
-                        </div>
-                        <div class="pull-left">
-                            <a href="@Url.Action("team", "account")" class="text-muted">
-                                Cancel
-                            </a>
-                        </div>
-                    </div>
-                </div>
             </form>
         </div>
 
@@ -86,6 +158,11 @@
                 }
             })
             
+            $("input:radio").on('click', () => {
+                console.log("account type picked");
+                $(".hide-until-button-selected").removeClass("hide-until-button-selected");
+            })
         })
+       
     </script>
 }
