@@ -787,6 +787,7 @@
     <Content Include="Assets\img\client_success_manager_color.jpeg" />
     <Content Include="Assets\img\email-symbol.png" />
     <Content Include="Assets\img\envelope.svg" />
+    <Content Include="Assets\img\expand.svg" />
     <Content Include="Assets\img\filter.svg" />
     <Content Include="Assets\img\green-check-box.svg" />
     <Content Include="Assets\img\image-3-1800x900-1.png" />

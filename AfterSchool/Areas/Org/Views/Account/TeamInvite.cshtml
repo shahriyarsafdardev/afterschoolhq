@@ -1,7 +1,7 @@
 ﻿@model Account
 @{
     ViewBag.Title = Model.Name;
-    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+    var msgs = (SystemMessages) ViewBag.Messages;
 }
 
 
@@ -68,7 +68,7 @@
     }
 </style>
 
-@{Html.RenderPartial("OrgAccountHeader", Model.ID.ToString());}
+@{ Html.RenderPartial("OrgAccountHeader", Model.ID.ToString()); }
 
 <div class="main-content">
 
@@ -82,12 +82,12 @@
             <p class="select-instructions">Select the level of permission you would like to grant the invitee. This can be changed at a later date.</p>
             <form method="post" action="@Url.Action("teaminvite", "account")" class="form-horizontal team-invite-form">
                 <label class="control-label">Administrative</label>
-                <input type="radio" name="usertype" id="usertype1" required value="@((int)UserType.Administrator)">
+                <input type="radio" name="usertype" id="usertype1" required value="@((int) UserType.Administrator)">
                 <label for="usertype1">
-                    <h3>@UserType.Administrator.ToString()</h3> 
+                    <h3>@UserType.Administrator.ToString()</h3>
                     <p>Full access to your account, including financials, activities, and student information.</p>
                 </label>
-                <input type="radio" name="usertype" id="usertype2" required value="@((int)UserType.Treasurer)">
+                <input type="radio" name="usertype" id="usertype2" required value="@((int) UserType.Treasurer)">
                 <label for="usertype2">
                     <h3>@UserType.Treasurer.ToString()</h3>
                     <p>Access to all financial information, but will <em>not</em> see student or activity information.</p>
@@ -96,12 +96,12 @@
                     <span>School-Sponsored</span>
                     <p class="light-p">Payments from registration go to the organization</p>
                 </label>
-                <input type="radio" name="usertype" id="usertype3" required value="@((int)UserType.ProgramDirector)">
+                <input type="radio" name="usertype" id="usertype3" required value="@((int) UserType.ProgramDirector)">
                 <label for="usertype3">
                     <h3>@UserType.ProgramDirector.ToString().SplitByUpperCase()</h3>
                     <p>Full access to information pertaining to their own activities.</p>
                 </label>
-                <input type="radio" name="usertype" id="usertype4" required value="@((int)UserType.Instructor)">
+                <input type="radio" name="usertype" id="usertype4" required value="@((int) UserType.Instructor)">
                 <label for="usertype4">
                     <h3>@UserType.Instructor.ToString()</h3>
                     <p>Full access to information pertaining to their own activities, <em>excluding</em> financials.</p>
@@ -110,25 +110,25 @@
                     <span>Provider</span>
                     <p class="light-p">Payments from registration go to the provider</p>
                 </label>
-                <input type="radio" name="usertype" id="usertype5" required value="@((int)UserType.Instructor)">
+                <input type="radio" name="usertype" id="usertype5" required value="@((int) UserType.Instructor)">
                 <label for="usertype5">
-                    <h3>Third-Party Organization</h3>
+                    <h3>Third-Party Organization <img src="~/Assets/img/expand.svg" alt="External"/></h3>
                     <p>
-                        Full access to information pertaining to their own activities. 
+                        Full access to information pertaining to their own activities.
                         They <em>are not</em> employed by your organization.
                     </p>
                 </label>
-                <input type="radio" name="usertype" id="usertype6" required value="@((int)UserType.Treasurer)">
+                <input type="radio" name="usertype" id="usertype6" required value="@((int) UserType.Treasurer)">
                 <label for="usertype6">
-                    <h3>Paid Instructor</h3>
+                    <h3>Paid Instructor <img src="~/Assets/img/expand.svg" alt="External"/></h3>
                     <p>
-                        Full access to information pertaining to their own activities. 
+                        Full access to information pertaining to their own activities.
                         They <em>are</em> employed by your organization.
                     </p>
                 </label>
-                
+
                 <label class="control-label hide-until-button-selected">Emails</label>
-                <input type="text" class="grid-col-2 hide-until-button-selected text-input-border" id="emails" name="emails" value="@ViewBag.Emails" onfocus="this.select()" required placeholder="name@domain.com, name2@domain.com" />
+                <input type="text" class="grid-col-2 hide-until-button-selected text-input-border" id="emails" name="emails" value="@ViewBag.Emails" onfocus="this.select()" required placeholder="name@domain.com, name2@domain.com"/>
                 <label class="control-label hide-until-button-selected">Message <em>(Optional)</em></label>
                 <textarea class="grid-col-2 hide-until-button-selected message-text-area text-input-border" id="message" name="message" onfocus="this.select()">@ViewBag.InviteMessage</textarea>
                 <label class="control-label"></label>
