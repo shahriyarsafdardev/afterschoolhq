@@ -14,11 +14,19 @@ using System.Net.Mail;
 using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary;
 using System.Configuration;
+using AfterSchoolLibrary.FeatureFlag;
 
 namespace AfterSchool.Controllers
 {
   public class SignUpController : BaseController
   {
+    private readonly IFeatureFlagRepository featureFlagRepository;
+
+    public SignUpController(IFeatureFlagRepository featureFlagRepository)
+    {
+      this.featureFlagRepository = featureFlagRepository;
+    }
+    
     [HttpGet]
     public ActionResult Index(string invite, bool isrequestonlyaccess = false)
     {
@@ -257,8 +265,10 @@ namespace AfterSchool.Controllers
       {
         if (model.SignupType == SignUpType.Teacher1099)
           return RedirectToAction("paymentsoptions", "account", new { area = "org", isfullscreen = 1, signuptype = (int)model.SignupType });
-
-        return RedirectToAction("index", "onboarding", new { area = "org", showGettingStarted = true });
+        
+        return featureFlagRepository.IsEnabled("free-trial") ? 
+          RedirectToAction("freetrial", "onboarding", new { area = "org" }) : 
+          RedirectToAction("index", "onboarding", new { area = "org", showGettingStarted = true });
       }
 
 

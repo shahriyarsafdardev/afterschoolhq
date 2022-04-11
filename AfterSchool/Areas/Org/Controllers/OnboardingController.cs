@@ -3,6 +3,7 @@ using System.Linq;
 using System.Web.Mvc;
 using AfterSchool.Models;
 using AfterSchoolLibrary;
+using AfterSchoolLibrary.FeatureFlag;
 using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
@@ -15,14 +16,19 @@ namespace AfterSchool.Areas.Org.Controllers
 {
     public class OnboardingController : BaseLoggedInController
     {
-        public OnboardingController() : base(AccountService.OrganizationAccountTypesAndNotSet.ToList())
+        private readonly IFeatureFlagRepository featureFlagRepository;
+        public OnboardingController(IFeatureFlagRepository featureFlagRepository) : base(AccountService.OrganizationAccountTypesAndNotSet.ToList())
         {
+            this.featureFlagRepository = featureFlagRepository;
         }
 
         // GET: Org/Onboarding
         [HttpGet]
         public ActionResult Index(bool showGettingStarted = false)
         {
+            if (featureFlagRepository.IsEnabled("free-trial"))
+                return RedirectToAction("FreeTrial");
+            
             if (showGettingStarted)
                 return RedirectToAction("GettingStarted");
 
