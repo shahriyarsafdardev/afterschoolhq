@@ -70,6 +70,9 @@
         margin:  20px;
     }
     
+    .free-trial-continue:hover {
+        color:  white;
+    }
     
 </style>
 
@@ -97,8 +100,8 @@
         <p class="free-trial-p">
             We just need to ask a few more questions to get you all set up.
         </p>
-        <button class="free-trial-continue">
+        <a class="free-trial-continue" href="@Url.Action("programinfo", "onboarding", new { area = "org" })">
             Continue
-        </button>
+        </a>
     </div>
 </div>
