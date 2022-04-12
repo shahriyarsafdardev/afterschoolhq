@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Web.Mvc;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
@@ -46,10 +47,10 @@ namespace AfterSchool.Controllers
                 parsedGrade, parsedAge, parsedGender, services, timing, pricing, cost, starting, other, special,
                 latitude, longitude, pageNum, pageSize, msgs);
 
-            var objectText = new
+            var searchList = new List<string>
             {
-                search, 
-                enrollToday, 
+                search,
+                enrollToday,
                 grades,
                 ages,
                 gender,
@@ -60,23 +61,45 @@ namespace AfterSchool.Controllers
                 starting,
                 other,
                 special,
-                lat = latitude.ToString(),
-                lon = longitude.ToString()
+                latitude.ToString(),
+                longitude.ToString()
             };
+
+            if (pageNum == 0 && searchList.Any(x => x.IsNotEmpty()))
+            {
+                var objectText = new
+                {
+                    search, 
+                    enrollToday, 
+                    grades,
+                    ages,
+                    gender,
+                    services,
+                    timing,
+                    pricing,
+                    cost,
+                    starting,
+                    other,
+                    special,
+                    lat = latitude.ToString(),
+                    lon = longitude.ToString()
+                };
             
-            WebSessionUtilities.SaveLog(
-                SessionVariables.CurrentUser,
-                SessionVariables.WebSession.ID.Value,
-                "",
-                JsonConvert.SerializeObject(objectText),
-                accountId.ToInteger(), 
-                WebSessionActionType.Searched, 
-                ObjectType.Account, 
-                ObjectType.NotSet, 
-                accountId.ToInteger(),
-                null,
-                msgs, 
-                null);
+                WebSessionUtilities.SaveLog(
+                    SessionVariables.CurrentUser,
+                    SessionVariables.WebSession.ID.Value,
+                    "",
+                    JsonConvert.SerializeObject(objectText),
+                    accountId.ToInteger(), 
+                    WebSessionActionType.Searched, 
+                    ObjectType.Account, 
+                    ObjectType.NotSet, 
+                    accountId.ToInteger(),
+                    null,
+                    msgs, 
+                    null);
+            }
+            
             
             if (searchedAccounts.IsNotEmpty() && searchedAccounts.Any())
                 //.. call success and records found
