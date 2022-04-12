@@ -1704,7 +1704,8 @@ namespace AfterSchoolLibrary.Helpers
                 subject,
                 body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool),
-                ccEmail: new EmailAddress(Email.AppSupportEmailAddress)
+                ccEmail: new EmailAddress(Email.AppSupportEmailAddress),
+                replyTo: new EmailAddress(Email.AppSupportEmailAddress)
             );
 
             msgs.AddRange(mailMsgs);
