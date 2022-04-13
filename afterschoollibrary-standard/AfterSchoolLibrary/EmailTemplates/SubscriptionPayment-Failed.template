@@ -6,7 +6,7 @@
   </p>
 
   <p>
-   Please login to your account to update your payment details <a href="@Model.LoginLink">@Model.LoginLink</a>
+    To update your payment details, please respond to this email or contact our support team by emailing <a href="mailto:support@afterschoolhq.com">support@afterschoolhq.com</a>. 
   </p>
   <p>
     Your @Model.AccountName Team
