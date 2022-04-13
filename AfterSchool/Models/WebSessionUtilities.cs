@@ -88,7 +88,7 @@ namespace AfterSchool.Models
             int? indirectObjectId = null, string indirectObjectText = "",
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            LogActivity(webSession, account.ID, actor, actionType, objectType, indirectObjectType, objectId, objectText, indirectObjectId, indirectObjectText, msgs, dc);
+            LogActivity(webSession, account?.ID, actor, actionType, objectType, indirectObjectType, objectId, objectText, indirectObjectId, indirectObjectText, msgs, dc);
         }
 
         public static void LogActivity(this WebSession webSession, int? accountId, WebUser actor, WebSessionActionType actionType,
