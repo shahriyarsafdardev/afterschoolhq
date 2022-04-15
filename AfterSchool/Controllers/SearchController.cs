@@ -61,8 +61,8 @@ namespace AfterSchool.Controllers
                 starting,
                 other,
                 special,
-                latitude.ToString(),
-                longitude.ToString()
+                latitude?.ToString(),
+                longitude?.ToString()
             };
 
             if (pageNum == 0 && searchList.Any(x => x.IsNotEmpty()))
@@ -81,10 +81,14 @@ namespace AfterSchool.Controllers
                     starting,
                     other,
                     special,
-                    lat = latitude.ToString(),
-                    lon = longitude.ToString()
+                    lat = latitude?.ToString(),
+                    lon = longitude?.ToString()
                 };
-            
+                if (SessionVariables.WebSession.IsEmpty())
+                {
+                    WebSessionUtilities.InitializeWebSession(Request, SessionVariables.CurrentUser, SessionVariables.CurrentAccount);
+                }
+                
                 WebSessionUtilities.SaveLog(
                     SessionVariables.CurrentUser,
                     SessionVariables.WebSession.ID.Value,
