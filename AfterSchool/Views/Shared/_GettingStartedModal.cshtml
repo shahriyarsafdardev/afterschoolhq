@@ -73,7 +73,7 @@
 
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         if (currentLevel === isEmailToBeValidated) {
-            $('#modal-accept-payment-done').modal({
+            $('#modal-email-confirmation').modal({
                 backdrop: 'static'
             });
         } else if (currentLevel === isActivityToBePublished) {
