@@ -779,6 +779,10 @@ namespace AfterSchoolLibrary.Models
         public static int LoadTotalMinutesEnrolled(int? accountId, DateTime? startDateTime, DateTime? endDateTime,
             SystemMessages msgs, DatabaseConnection dc = null)
         {
+            // The query is causing long load times. It needs to be optimized.
+            // As a quick fix to help customers, short-circuit and return nothing.
+            return 0;
+            
             var dq = DatabaseQuery;
             dq.Connection = dc;
 
