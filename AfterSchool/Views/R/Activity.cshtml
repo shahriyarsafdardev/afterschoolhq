@@ -1,15 +1,16 @@
-﻿@model ParticipationObject
+﻿@using AfterSchoolLibrary.Helpers.GoogleHelper
+@model ParticipationObject
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = Model.Name;
 
-    var account = (Account)ViewBag.Account;
-    var msgs = (SystemMessages)ViewBag.Messages;
-    var session = (ParticipationObject)ViewBag.Session;
+    var account = (Account) ViewBag.Account;
+    var msgs = (SystemMessages) ViewBag.Messages;
+    var session = (ParticipationObject) ViewBag.Session;
     var showLocation = false;
     var hidePreciseLocation = false;
-    var accountProfile = (AccountProfile)ViewBag.AccountProfile;
-    var canPublishActivity = (bool)ViewBag.CanPublishActivity;
+    var accountProfile = (AccountProfile) ViewBag.AccountProfile;
+    var canPublishActivity = (bool) ViewBag.CanPublishActivity;
     var instruction = "";
     var currentAccount = SessionVariables.CurrentAccount;
     var currentUser = SessionVariables.CurrentUser;
@@ -42,13 +43,13 @@
             showLocation = true;
         }
     }
-    
+
     var isAccountAndLoggedInUserIsOwner = Model.IsNotEmpty() &&
-        Model.OwnerAccount.IsNotEmpty() &&
-        currentAccount.IsNotEmpty() &&
-        currentUser.IsNotEmpty() &&
-        (currentAccount.ID == Model.OwnerAccount.ID) &&
-        (currentUser.HasAccessTo(Model.OwnerAccount));
+                                          Model.OwnerAccount.IsNotEmpty() &&
+                                          currentAccount.IsNotEmpty() &&
+                                          currentUser.IsNotEmpty() &&
+                                          currentAccount.ID == Model.OwnerAccount.ID &&
+                                          currentUser.HasAccessTo(Model.OwnerAccount);
 
     var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
 }
@@ -59,14 +60,14 @@
     }
 </style>
 @{
-    Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", account, new ViewDataDictionary()
+    Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", account, new ViewDataDictionary
     {
-        { "LoginReturnUrl", Model.GetHomePageUrl() },
-        { "CanPublishActivity", ViewBag.CanPublishActivity },
-        { "ParticipationObject", Model },
-        { "Session", session },
-        { "CleverSsoEnabled", cleverSsoEnabled },
-        { "InsideActDetails", Model.Name}
+        {"LoginReturnUrl", Model.GetHomePageUrl()},
+        {"CanPublishActivity", ViewBag.CanPublishActivity},
+        {"ParticipationObject", Model},
+        {"Session", session},
+        {"CleverSsoEnabled", cleverSsoEnabled},
+        {"InsideActDetails", Model.Name},
     });
 }
 
@@ -75,252 +76,269 @@
 @{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, accountProfile)); }
 
 <div>
-    <div class="col-lg-10 col-lg-offset-1 col-md-12 participation-object participation-object-detail"
-         id="@Model.Uid"
-         mingrade="@Model.MinGradeId"
-         maxgrade="@Model.MaxGradeId"
-         mingradetext="@(Model.GetMinGradeLevel()?.Name)"
-         maxgradetext="@(Model.GetMaxGradeLevel()?.Name)"
-         hasseatsremaining="@Model.HasSeatsAvailable().ToString().ToLower()"
-         haswaitinglistremaining="@Model.HasWaitingListSeatsAvailable().ToString().ToLower()"
-         days="@ParticipationObjectUI.PrintDaysOfWeekList(Model)"
-         location="@(Model.Location?.FormatAddress(false))"
-         gender="@((int)Model.GenderRestriction)"
-         name="@Model.Name">
+<div class="col-lg-10 col-lg-offset-1 col-md-12 participation-object participation-object-detail"
+     id="@Model.Uid"
+     mingrade="@Model.MinGradeId"
+     maxgrade="@Model.MaxGradeId"
+     mingradetext="@(Model.GetMinGradeLevel()?.Name)"
+     maxgradetext="@(Model.GetMaxGradeLevel()?.Name)"
+     hasseatsremaining="@Model.HasSeatsAvailable().ToString().ToLower()"
+     haswaitinglistremaining="@Model.HasWaitingListSeatsAvailable().ToString().ToLower()"
+     days="@ParticipationObjectUI.PrintDaysOfWeekList(Model)"
+     location="@(Model.Location?.FormatAddress(false))"
+     gender="@((int) Model.GenderRestriction)"
+     name="@Model.Name">
 
-        <div class="panel panel-alt6">
-            <div class="panel-heading">
-                <div class="row">
-                    <div class="col-lg-8 col-md-12">
-                        <h3 class="text-center">
-                            @if (Model.Schedule.IsNotEmpty())
-                            {
-                                <span>
-                                    @ParticipationObjectUI.PrintDaysOfWeekOrStartDate(Model) &bull;
-                                </span>
-                            }
+<div class="panel panel-alt6">
+    <div class="panel-heading">
+        <div class="row">
+            <div class="col-lg-8 col-md-12">
+                <h3 class="text-center">
+                    @if (Model.Schedule.IsNotEmpty())
+                    {
+                        <span>
+                            @ParticipationObjectUI.PrintDaysOfWeekOrStartDate(Model) &bull;
+                        </span>
+                    }
 
-                            @if (!Model.ActivityType.HasValue || Model.ActivityType.Value.NotIn(new ActivityType[] { ActivityType.PermissionSlip, ActivityType.FieldTrip }))
-                            {
-                                <span>
-                                    @ParticipationObjectUI.PrintAgeGradeRestrictions(Model)  &bull;
-                                </span>
-                            }
+                    @if (!Model.ActivityType.HasValue || Model.ActivityType.Value.NotIn(new[] {ActivityType.PermissionSlip, ActivityType.FieldTrip}))
+                    {
+                        <span>
+                            @ParticipationObjectUI.PrintAgeGradeRestrictions(Model) &bull;
+                        </span>
+                    }
 
-                            @ParticipationObjectUI.PrintGenderRestrictions(Model)
-                        </h3>
-                    </div>
-                    <div class="col-lg-4 col-md-12">
-                        @{
-                            Html.RenderPartial(
-                               "~/Views/Shared/Registration/_RegisterButton.cshtml",
-                               Model,
-                               new ViewDataDictionary()
-                               {
-                                   { "condensed", true },
-                                   { "canRegisterFor", ViewBag.CanRegisterFor },
-                                   { "session", session },
-                                   { "accountprofile", ViewBag.AccountProfile }
-               }
-                            );
-                        }
-                    </div>
-                </div>
+                    @ParticipationObjectUI.PrintGenderRestrictions(Model)
+                </h3>
             </div>
-            <div class="panel-body">
-
-                <div class="row">
-                    <div class="col-lg-8 col-md-12">
-
-                        <div class="activity-detail-block">
-                            <h3>Description</h3>
-                            @Html.Raw(Model.Details)
-                        </div>
-
-                    </div>
-                    <div class="col-lg-4 col-md-12">
-
-                        @if (instruction.IsNotEmpty())
+            <div class="col-lg-4 col-md-12">
+                @{
+                    Html.RenderPartial(
+                        "~/Views/Shared/Registration/_RegisterButton.cshtml",
+                        Model,
+                        new ViewDataDictionary
                         {
-                            <div class="activity-detail-block">
-                                <h3>@instruction</h3>
-                            </div>
+                            {"condensed", true},
+                            {"canRegisterFor", ViewBag.CanRegisterFor},
+                            {"session", session},
+                            {"accountprofile", ViewBag.AccountProfile},
                         }
-
-                        <div class="activity-detail-block">
-                            @{ Html.RenderPartial("~/Views/Shared/ParticipationObject/_PaymentInfo.cshtml", Model); }
-
-
-                            @if (Model.IsActivityGroup() && Model.GetActivityGroup().IsInviteOnly)
-                            {
-                                <div class="activity-detail-block">
-                                    <strong>Registration unavailable: Requires Invite to Register</strong>
-                                </div>
-                            }
-
-                            @if (Model.Schedule.IsNotEmpty() || Model.StartDate.HasValue)
-                            {
-                                <div class="activity-detail-block">
-                                    <h3>Schedule</h3>
-
-                                    @if (Model.Schedule.IsNotEmpty() && Model.Schedule.RepeatsWeekly && !Model.Schedule.IsOngoing)
-                                    { 
-                                        if (Model.StartDate.HasValue && (!Model.EndDate.HasValue || Model.StartDate.Value.Date != Model.EndDate.Value.Date))
-                                        {
-                                            <p>
-                                                Starts: <strong>@Model.StartDate.Value.ToLongDateString()</strong><br />
-
-                                                @if (Model.EndDate.HasValue)
-                                                {
-                                                    <span>
-                                                        Ends: <strong>@Model.EndDate.Value.ToLongDateString()</strong>
-                                                    </span>
-                                                }
-                                            </p>
-                                        }
-                                    }
-
-                                    @if (Model.Schedule.IsNotEmpty())
-                                    {
-                                        <p>
-                                            @{ Html.RenderPartial("_ActivityScheduleHtml", Model.Schedule); }
-                                        </p>
-                                    }
-
-                                    @if (Model.IsPublished && Model.CanRegisterPerClass)
-                                    {
-                                        <p>
-                                            <a href="@Model.GetActivityDateSelectionUrl()">Select Dates to Register &raquo;</a>
-                                        </p>
-                                    }
-                                </div>
-                            }
-
-                            <div class="activity-detail-block">
-                                <h3>Contact</h3>
-                                <p>
-                                    @Model.ContactName.IfEmpty(Model.OwnerAccount.Name)<br />
-                                    @if (Model.ContactPhone.IfEmpty(Model.OwnerAccount.Phone).IsNotBlank())
-                                    {
-                                        <span>@Model.ContactPhone.IfEmpty(Model.OwnerAccount.Phone)</span><br />
-                                    }
-                                    <a href="mailto:@Model.ContactEmail.IfEmpty(Model.OwnerAccount.Email)">Send Email</a><br />
-                                </p>
-                            </div>
-
-                            @if (Model.RequiresParentalConsent)
-                            {
-                                <div class="activity-detail-block">
-                                    <strong>Requires Parental Consent</strong>
-                                </div>
-                            }
-
-                            @if (Model.OwnerAccount.IsNotEmpty() && Model.OwnerAccount.TimeZone.IsNotEmpty())
-                            {
-                                <div class="activity-detail-block">
-                                    <strong>All times are in @Model.OwnerAccount.TimeZone</strong>
-                                </div>
-                            }
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="margin-b-20">
-                        &nbsp;
-                    </div>
-
-                    <hr />
-                </div>
-
-                @if (showLocation)
-                {
-                    <div class="margin-t-20">
-                        <div class="col-md-12">
-                            <div class="activity-detail-block">
-                                <div class="row">
-                                    <div>
-                                        <h3>Location</h3>
-                                    </div>
-                                    <div>
-                                        @if (hidePreciseLocation)
-                                        {
-                                            <p> @Model.Location.City, @Model.Location.State @Model.Location.PostalCode @Model.Location.Country </p>
-                                        }
-                                        else
-                                        {
-                                            <p>
-                                                @ParticipationObjectUI.PrintLocation(Model)
-                                            </p>
-                                            if (Model.LocationDetails.IsNotEmpty())
-                                            {
-                                                @:@Html.Raw(Model.LocationDetails)
-                                            }
-                                        }
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div style="position: relative; margin-left: -20px; margin-right: -20px">
-                            <iframe width="100%" height="300" frameborder="0" style="border:0"
-                                    src="https://www.google.com/maps/embed/v1/place?q=@Url.Encode(hidePreciseLocation ? $"{Model.Location.FormatImpreciseAddress()}" : $"{Model.Location.FormatAddressWithoutName()}")&key=@AfterSchoolLibrary.Helpers.GoogleHelper.Maps.ApiKey" allowfullscreen></iframe>
-                        </div>
-
-                    </div>
+                        );
                 }
-
-                <div class="row">
-                    <div class="col-md-8 col-md-offset-2">
-                        <div class="margin-v-30">
-                            @{ Html.RenderPartial("~/Views/Shared/Registration/_RegisterButton.cshtml", Model); }
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="panel-footer">
-                <p class="text-center">
-                    @Html.Raw(ParticipationObjectUI.PrintRegistrationPeriod(Model))
-                </p>
             </div>
         </div>
     </div>
+    <div class="panel-body">
+
+        <div class="row">
+            <div class="col-lg-8 col-md-12">
+
+                <div class="activity-detail-block">
+                    <h3>Description</h3>
+                    @Html.Raw(Model.Details)
+                </div>
+
+            </div>
+            <div class="col-lg-4 col-md-12">
+
+                @if (instruction.IsNotEmpty())
+                {
+                    <div class="activity-detail-block">
+                        <h3>@instruction</h3>
+                    </div>
+                }
+
+                <div class="activity-detail-block">
+                    @{ Html.RenderPartial("~/Views/Shared/ParticipationObject/_PaymentInfo.cshtml", Model); }
+
+                    @if (Model.IsActivityGroup() && Model.GetActivityGroup().IsInviteOnly)
+                    {
+                        <div class="activity-detail-block">
+                            <strong>Registration unavailable: Requires Invite to Register</strong>
+                        </div>
+                    }
+
+                    @if (Model.Schedule.IsNotEmpty() || Model.StartDate.HasValue)
+                    {
+                        <div class="activity-detail-block">
+                            <h3>Schedule</h3>
+
+                            @if (Model.Schedule.IsNotEmpty() && Model.Schedule.RepeatsWeekly && !Model.Schedule.IsOngoing)
+                            {
+                                if (Model.StartDate.HasValue && (!Model.EndDate.HasValue || Model.StartDate.Value.Date != Model.EndDate.Value.Date))
+                                {
+                                    <p>
+                                        Starts: <strong>@Model.StartDate.Value.ToLongDateString()</strong><br/>
+
+                                        @if (Model.EndDate.HasValue)
+                                        {
+                                            <span>
+                                                Ends: <strong>@Model.EndDate.Value.ToLongDateString()</strong>
+                                            </span>
+                                        }
+                                    </p>
+                                }
+                            }
+
+                            @if (Model.Schedule.IsNotEmpty())
+                            {
+                                <p>
+                                    @{ Html.RenderPartial("_ActivityScheduleHtml", Model.Schedule); }
+                                </p>
+                            }
+
+                            @if (Model.IsPublished && Model.CanRegisterPerClass)
+                            {
+                                <p>
+                                    <a href="@Model.GetActivityDateSelectionUrl()">Select Dates to Register &raquo;</a>
+                                </p>
+                            }
+                        </div>
+                    }
+
+                    <div class="activity-detail-block">
+                        <h3>Contact</h3>
+                        <p>
+                            @Model.ContactName.IfEmpty(Model.OwnerAccount.Name)<br/>
+                            @if (Model.ContactPhone.IfEmpty(Model.OwnerAccount.Phone).IsNotBlank())
+                            {
+                                <span>@Model.ContactPhone.IfEmpty(Model.OwnerAccount.Phone)</span>
+                                <br/>
+                            }
+                            <a href="mailto:@Model.ContactEmail.IfEmpty(Model.OwnerAccount.Email)">Send Email</a><br/>
+                        </p>
+                    </div>
+
+                    @if (Model.RequiresParentalConsent)
+                    {
+                        <div class="activity-detail-block">
+                            <strong>Requires Parental Consent</strong>
+                        </div>
+                    }
+
+                    @if (Model.OwnerAccount.IsNotEmpty() && Model.OwnerAccount.TimeZone.IsNotEmpty())
+                    {
+                        <div class="activity-detail-block">
+                            <strong>All times are in @Model.OwnerAccount.TimeZone</strong>
+                        </div>
+                    }
+                </div>
+
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="margin-b-20">
+                &nbsp;
+            </div>
+
+            <hr/>
+        </div>
+
+        @if (showLocation)
+        {
+            <div class="margin-t-20">
+                <div class="col-md-12">
+                    <div class="activity-detail-block">
+                        <div class="row">
+                            <div>
+                                <h3>Location</h3>
+                            </div>
+                            <div>
+                                @if (hidePreciseLocation)
+                                {
+                                    <p> @Model.Location.City, @Model.Location.State @Model.Location.PostalCode @Model.Location.Country </p>
+                                }
+                                else
+                                {
+                                    <p>
+                                        @ParticipationObjectUI.PrintLocation(Model)
+                                    </p>
+                                    if (Model.LocationDetails.IsNotEmpty())
+                                    {
+                                        @:@Html.Raw(Model.LocationDetails)
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="position: relative; margin-left: -20px; margin-right: -20px">
+                    <iframe width="100%" height="300" frameborder="0" style="border:0"
+                            src="https://www.google.com/maps/embed/v1/place?q=@Url.Encode(hidePreciseLocation ? $"{Model.Location.FormatImpreciseAddress()}" : $"{Model.Location.FormatAddressWithoutName()}")&key=@Maps.ApiKey" allowfullscreen>
+                    </iframe>
+                </div>
+
+            </div>
+        }
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <div class="margin-v-30">
+                    @{ Html.RenderPartial("~/Views/Shared/Registration/_RegisterButton.cshtml", Model); }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel-footer">
+        <p class="text-center">
+            @Html.Raw(ParticipationObjectUI.PrintRegistrationPeriod(Model))
+        </p>
+    </div>
+</div>
+</div>
 </div>
 
 @if (isAccountAndLoggedInUserIsOwner)
 {
-<div id="footer-activity" class="activity-footer text-center hide">
-    <span class="span-upgrade-modal-close" onclick="return hideActivityRibbon()">X</span>
-    @if (Model.IsPublished)
-    {
-        <button class="btn btn-default btn-activity-footer btn-share">Share</button>
-        <a href="@Url.Action("editsetup", "activity", new { id = Model.Uid, area = "org" })" class="btn btn-default btn-activity-footer">Edit Activity</a>
-    }
-    else
-    {
-        <button class="btn btn-default btn-activity-footer" disabled>Share</button>
-        <a href="@Url.Action("editsetup", "activity", new { id = Model.Uid, area = "org" })" class="btn btn-default btn-activity-footer">Return to Edit</a>
-
-        if (Model.IsPublished)
+    <div class="activity-footer text-center hide" id="footer-activity">
+        <button aria-label="Close" class="span-upgrade-modal-close" onclick="hideActivityRibbon()"
+                style="background: transparent; border: transparent; top: 0; width: auto" type="button">
+            <span aria-hidden="true" style="font-size: 28px">&times;</span>
+        </button>
+        @if (Model.IsPublished)
         {
-            <a href="@Url.Action("unpublish", "activity", new { id = Model.Uid, isFromActivityHome = true, area = "org" })" class="btn btn-default btn-activity-footer">Unpublish</a>
+            <button class="btn btn-default btn-activity-footer btn-share" type="button">Share</button>
+            <a class="btn btn-default btn-activity-footer"
+               href="@Url.Action("editsetup", "activity", new {id = Model.Uid, area = "org"})">
+                Edit Activity
+            </a>
         }
         else
         {
-            if (canPublishActivity)
+            <button class="btn btn-default btn-activity-footer" disabled type="button">Share</button>
+            <a class="btn btn-default btn-activity-footer"
+               href="@Url.Action("editsetup", "activity", new {id = Model.Uid, area = "org"})">
+                Return to Edit
+            </a>
+            if (Model.IsPublished)
             {
-                <a href="@Url.Action("publish", "activity", new { id = Model.Uid, isFromActivityHome = true, area = "org" })" class="btn btn-default btn-activity-footer">Publish</a>
+                <a class="btn btn-default btn-activity-footer"
+                   href="@Url.Action("unpublish", "activity", new {id = Model.Uid, isFromActivityHome = true, area = "org"})">
+                    Unpublish
+                </a>
             }
             else
             {
-                <a href="@Url.Action("requesttopublish", "activity", new { id = Model.Uid, isFromActivityHome = true, area = "org" })" class="btn btn-default btn-activity-footer">Request to Publish</a>
+                if (canPublishActivity)
+                {
+                    <a class="btn btn-default btn-activity-footer"
+                       href="@Url.Action("publish", "activity", new {id = Model.Uid, isFromActivityHome = true, area = "org"})">
+                        Publish
+                    </a>
+                }
+                else
+                {
+                    <a
+                        class="btn btn-default btn-activity-footer"
+                        href="@Url.Action("requesttopublish", "activity", new {id = Model.Uid, isFromActivityHome = true, area = "org"})">
+                        Request to Publish
+                    </a>
+                }
             }
         }
-    }
-
-</div>
-
-    Html.RenderPartial("~/Views/Shared/_GettingStartedModal.cshtml", Model.OwnerAccount, new ViewDataDictionary() { { "ActivityUid", Model.Uid }, { "IsActivityFree", Model.IsFree } });
+    </div>
+    Html.RenderPartial("~/Views/Shared/_GettingStartedModal.cshtml", Model.OwnerAccount, new ViewDataDictionary {{"ActivityUid", Model.Uid}, {"IsActivityFree", Model.IsFree}});
 }
 
 @if (session.IsNotEmpty())
@@ -328,10 +346,10 @@
     Html.RenderPartial("~/Views/Shared/Registration/_BrowseCart.cshtml", session);
 }
 
-@{Html.RenderPartial("~/Views/Shared/Modals/_LeadForm.cshtml", Model.OwnerAccount);}
+@{ Html.RenderPartial("~/Views/Shared/Modals/_LeadForm.cshtml", Model.OwnerAccount); }
 
 <script type="text/javascript">
     function hideActivityRibbon() {
         $('#footer-activity').fadeOut();
-    };
+    }
 </script>

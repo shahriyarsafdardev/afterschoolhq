@@ -1,36 +1,36 @@
-﻿@model Account
+﻿@using AfterSchoolLibrary.Helpers.GoogleHelper
+@model Account
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = Model.Name;
 
-    var msgs = (SystemMessages)ViewBag.Messages;
-    var accountProfile = (AccountProfile)ViewBag.AccountProfile;
-    var location = (Location)ViewBag.Location;
-    var awards = (List<AccountProperty>)ViewBag.Awards;
-    var certifications = (List<AccountProperty>)ViewBag.Certifications;
-    var photos = (List<AccountProperty>)ViewBag.Photos;
-    var gradeLevelStart = (GradeLevel)ViewBag.GradeLevelStart;
-    var gradeLevelEnd = (GradeLevel)ViewBag.GradeLevelEnd;
-    var ageStart = (int?)ViewBag.AgeStart;
-    var ageEnd = (int?)ViewBag.AgeEnd;
-    var restrictByGrade = (bool)ViewBag.RestrictByGrade;
-    var genderrestriction = (string)ViewBag.GenderRestriction;
-    var participationObjects = (List<ParticipationObject>)ViewBag.ParticipationObjects;
-    var takeActivities = 3;
-    var locations = (List<Location>)ViewBag.Locations;
-    var accountProperties = (List<AccountProperty>)ViewBag.AccountProperties;
+    var msgs = (SystemMessages) ViewBag.Messages;
+    var accountProfile = (AccountProfile) ViewBag.AccountProfile;
+    var location = (Location) ViewBag.Location;
+    var awards = (List<AccountProperty>) ViewBag.Awards;
+    var certifications = (List<AccountProperty>) ViewBag.Certifications;
+    var photos = (List<AccountProperty>) ViewBag.Photos;
+    var gradeLevelStart = (GradeLevel) ViewBag.GradeLevelStart;
+    var gradeLevelEnd = (GradeLevel) ViewBag.GradeLevelEnd;
+    var ageStart = (int?) ViewBag.AgeStart;
+    var ageEnd = (int?) ViewBag.AgeEnd;
+    var restrictByGrade = (bool) ViewBag.RestrictByGrade;
+    var genderRestriction = (string) ViewBag.GenderRestriction;
+    var participationObjects = (List<ParticipationObject>) ViewBag.ParticipationObjects;
+    const int takeActivities = 3;
+    var accountProperties = (List<AccountProperty>) ViewBag.AccountProperties;
     var isInEditMode = SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.HasAccessTo(Model) && Request["edit"] == "1";
 
-    var skillAndMethodTypes = new AccountPropertyType[] { AccountPropertyType.SoftSkills, AccountPropertyType.TeachingMethods, AccountPropertyType.AcademicSubjects, AccountPropertyType.Classifications };
-    var serviceTypes = new AccountPropertyType[] { AccountPropertyType.ServiceOffered, AccountPropertyType.TimeOffered, AccountPropertyType.PricingOption };
-    var specialNeedsTypes = new AccountPropertyType[] { AccountPropertyType.SpecialNeedsOffering };
+    var skillAndMethodTypes = new[] {AccountPropertyType.SoftSkills, AccountPropertyType.TeachingMethods, AccountPropertyType.AcademicSubjects, AccountPropertyType.Classifications};
+    var serviceTypes = new[] {AccountPropertyType.ServiceOffered, AccountPropertyType.TimeOffered, AccountPropertyType.PricingOption};
+    var specialNeedsTypes = new[] {AccountPropertyType.SpecialNeedsOffering};
 
     var skillsAndMethods = accountProperties.Where(item => item.AccountPropertyTypeId.In(skillAndMethodTypes));
     var servicesOffered = accountProperties.Where(item => item.AccountPropertyTypeId.In(serviceTypes));
     var specialNeedsOffered = accountProperties.Where(item => item.AccountPropertyTypeId.In(specialNeedsTypes));
     var showPhotoGallery = photos.Any() || isInEditMode;
-    var isOnboadingCompleted = AccountService.IsOnboardingCompleted(SessionVariables.CurrentAccount, msgs);
-    var currentLevel = AccountService.OnboardingCompletionStatus(Model);
+    var isOnboardingCompleted = SessionVariables.CurrentAccount.IsOnboardingCompleted(msgs);
+    var currentLevel = Model.OnboardingCompletionStatus();
     var isStripeIntegrated = TempData["IsStripeIntegrated"] != null;
     var firstActivity = Model.GetActivities(msgs)?.FirstOrDefault();
     var isExternallyProvidedActivity = false;
@@ -44,10 +44,10 @@
     }
 
     var isAccountAndLoggedInUserIsOwner = SessionVariables.CurrentAccount.IsNotEmpty() &&
-        SessionVariables.CurrentUser.IsNotEmpty() &&
-        (SessionVariables.CurrentAccount.ID == Model.ID) &&
-        (SessionVariables.CurrentUser.HasAccessTo(Model));
-    var onboardingStepsAcknowledged = (bool)CookieVariables.OnboardingStepsAcknowledged.IsNotEmpty() ? CookieVariables.OnboardingStepsAcknowledged.ToBoolean() : false;
+                                          SessionVariables.CurrentUser.IsNotEmpty() &&
+                                          SessionVariables.CurrentAccount.ID == Model.ID &&
+                                          SessionVariables.CurrentUser.HasAccessTo(Model);
+    var onboardingStepsAcknowledged = CookieVariables.OnboardingStepsAcknowledged.IsNotEmpty() && CookieVariables.OnboardingStepsAcknowledged.ToBoolean();
 
 }
 
@@ -62,37 +62,37 @@
         display: none;
     }
 
-        .iframe-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
+    .iframe-container iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
 
 </style>
 
 @{
-    Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", Model, new ViewDataDictionary()
+    Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", Model, new ViewDataDictionary
     {
-        { "LoginReturnUrl", Model.HomePageUrl },
-        { "IsAccount", true },
-        { "CleverSsoEnabled", cleverSsoEnabled }
+        {"LoginReturnUrl", Model.HomePageUrl},
+        {"IsAccount", true},
+        {"CleverSsoEnabled", cleverSsoEnabled},
     });
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, (AccountProfile)ViewBag.AccountProfile)); }
+@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, (AccountProfile) ViewBag.AccountProfile)); }
 
-@helper renderEditButtion(Account account, string anchor, string buttonText = "Edit")
+@helper RenderEditButton(Account account, string anchor, string buttonText = "Edit")
 {
     if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.HasAccessTo(Model) && Request["edit"] == "1")
     {
-        var redirectUrl = $"{Url.Action("style", "account", new { area = "org", isfullscreen = 1, returnurl = Request.Url, type = (int)ActivityType.Activity })}#{anchor}";
+        var redirectUrl = $"{Url.Action("style", "account", new {area = "org", isfullscreen = 1, returnurl = Request.Url, type = (int) ActivityType.Activity})}#{anchor}";
 
         <span>
-            <a href="@Url.Action("switch", "logout", new { id = account.Uid, redirectUrl = redirectUrl })#@anchor"
+            <a href="@Url.Action("switch", "logout", new {id = account.Uid, redirectUrl})#@anchor"
                class="btn btn-alt7 btn-sm">
                 @buttonText &raquo;
             </a>
@@ -100,9 +100,9 @@
     }
 }
 
-@helper renderAccountProperties(IEnumerable<AccountProperty> accountProperties, int propertiesPerCol)
+@helper RenderAccountProperties(IEnumerable<AccountProperty> accountProperties, int propertiesPerCol)
 {
-    for (int i = 0; i < 3; i++)
+    for (var i = 0; i < 3; i++)
     {
         <div class="col-md-4">
             @foreach (var property in accountProperties.OrderBy(x => x.Value).Skip(i * propertiesPerCol).ToList().Take(propertiesPerCol))
@@ -156,383 +156,383 @@
 }
 
 <div>
-    <div class="col-md-12 col-lg-10 col-lg-offset-1 participation-object participation-object-detail">
+<div class="col-md-12 col-lg-10 col-lg-offset-1 participation-object participation-object-detail">
 
-        <div class="panel panel-alt6">
-            <div class="panel-heading" style="width: 100%;">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <h3 class="text-center">
-                            @if (restrictByGrade)
-                            {
-                                if (gradeLevelStart.IsNotEmpty() && gradeLevelEnd.IsNotEmpty())
-                                {
-                                    <span>Serving @gradeLevelStart.Name - @gradeLevelEnd.Name Grade &bull; @genderrestriction</span>
-                                    @renderEditButtion(Model, "grades")
-                                }
-                            }
-                            else
-                            {
-                                if (ageStart.IsNotEmpty() && ageEnd.IsNotEmpty())
-                                {
-                                    <span>Serving Ages @ageStart - @ageEnd &bull; @genderrestriction</span>
-                                    @renderEditButtion(Model, "grades")
-                                }
-                            }
+<div class="panel panel-alt6">
+<div class="panel-heading" style="width: 100%;">
+    <div class="row">
+        <div class="col-lg-12">
+            <h3 class="text-center">
+                @if (restrictByGrade)
+                {
+                    if (gradeLevelStart.IsNotEmpty() && gradeLevelEnd.IsNotEmpty())
+                    {
+                        <span>Serving @gradeLevelStart.Name - @gradeLevelEnd.Name Grade &bull; @genderRestriction</span>
+                        @RenderEditButton(Model, "grades")
+                    }
+                }
+                else
+                {
+                    if (ageStart.IsNotEmpty() && ageEnd.IsNotEmpty())
+                    {
+                        <span>Serving Ages @ageStart - @ageEnd &bull; @genderRestriction</span>
+                        @RenderEditButton(Model, "grades")
+                    }
+                }
 
-                        </h3>
+            </h3>
+        </div>
+    </div>
+</div>
+<div class="panel-body">
+
+@if (participationObjects.Any() || isInEditMode)
+{
+    <div>
+
+        @if (participationObjects.Any())
+        {
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="activity-detail-block">
+                        <div class="pull-left">
+                            <h2>@UILabel.ActivityLabel(ActivityType.Activity, true)</h2>
+                        </div>
+                        <div class="pull-right padding-v-20">
+                            <a href="@Model.BrowseUrl">
+                                View All &raquo;
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="panel-body">
+        }
 
-                @if (participationObjects.Any() || isInEditMode)
-                {
-                    <div>
+        @if (isInEditMode)
+        {
+            var redirectUrl = Url.Action("editsetup", "activity", new {area = "org", isnew = 1, source = "profile", type = (int) ActivityType.Activity});
 
-                        @if (participationObjects.Any())
-                        {
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <div class="activity-detail-block">
-                                        <div class="pull-left">
-                                            <h2>@UILabel.ActivityLabel(ActivityType.Activity, true)</h2>
-                                        </div>
-                                        <div class="pull-right padding-v-20">
-                                            <a href="@Model.BrowseUrl">
-                                                View All &raquo;
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        }
-
-                        @if (isInEditMode)
-                        {
-                            var redirectUrl = Url.Action("editsetup", "activity", new { area = "org", isnew = 1, source = "profile", type = (int)ActivityType.Activity });
-
-                            <div class="row">
-                                <div style="position: relative;">
-                                    <span>
-                                        <a href="@Url.Action("switch", "logout", new { id = Model.Uid, redirectUrl = redirectUrl })"
-                                           class="btn btn-alt7 btn-sm">
-                                            Add New Activity &raquo;
-                                        </a>
-                                    </span>
-                                </div>
-                            </div>
-                        }
-
-                        <div class="row">
-                            <div style="position: relative; margin-left: -20px; margin-right: -20px;">
-                                @foreach (var item in participationObjects.Take(takeActivities))
-                                {
-                                    Html.RenderPartial("~/Views/Shared/Registration/_BrowseParticipationObjectWide.cshtml", item);
-                                }
-                            </div>
-                        </div>
-
-                        @if (participationObjects.Count > takeActivities)
-                        {
-                            <div class="row">
-                                <div class="col-md-4 col-md-offset-4">
-                                    <a href="@Model.BrowseUrl" class="btn btn-register">
-                                        View More Activities &raquo;
-                                    </a>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                }
-
-                <div class="margin-t-20">
-                    @if (showPhotoGallery)
-                    {
-                        <div class="row">
-                            <div style="position: relative;">
-                                @renderEditButtion(Model, "photos", "Edit Photo Gallery")
-                            </div>
-                        </div>
-                    }
-
-                    <div id="frameContainer" class="row iframe-container">
-                        <iframe id="frameVideoUrl" frameborder="0" allowfullscreen></iframe>
-                    </div>
-
-                    @if (showPhotoGallery)
-                    {
-                        <div class="row">
-                            <div style="position: relative; margin-left: -20px; margin-right: -20px;">
-                                @{ Html.RenderPartial("~/Views/Shared/Registration/_ProfilePhotoGallery.cshtml", photos); };
-                            </div>
-                        </div>
-                    }
+            <div class="row">
+                <div style="position: relative;">
+                    <span>
+                        <a href="@Url.Action("switch", "logout", new {id = Model.Uid, redirectUrl})"
+                           class="btn btn-alt7 btn-sm">
+                            Add New Activity &raquo;
+                        </a>
+                    </span>
                 </div>
-
-                @if (servicesOffered.Any() || isInEditMode)
-                {
-                    <div class="margin-t-20">
-                        <div class="row padding-h-30">
-                            <div class="activity-detail-block">
-                                <h2>Services Offered @renderEditButtion(Model, "services", "Edit")</h2>
-                            </div>
-
-                            @renderAccountProperties(servicesOffered, Math.Ceiling(servicesOffered.Count() / 3.0).ToInteger())
-
-                        </div>
-                    </div>
-
-                    <div class="margin-v-40">
-                        <hr style="border-color: #efefef;" />
-                    </div>
-                }
-
-                @if (skillsAndMethods.Any() || isInEditMode)
-                {
-                    <div class="margin-t-20">
-                        <div class="row padding-h-30">
-                            <div class="activity-detail-block">
-                                <h2>Skills &amp; Teaching Methods @renderEditButtion(Model, "services")</h2>
-                            </div>
-
-                            @renderAccountProperties(skillsAndMethods, Math.Ceiling(skillsAndMethods.Count() / 3.0).ToInteger())
-
-                        </div>
-                    </div>
-
-                    <div class="margin-v-40">
-                        <hr style="border-color: #efefef;" />
-                    </div>
-                }
-
-                @if (specialNeedsOffered.Any() || isInEditMode)
-                {
-                    <div class="margin-t-20">
-                        <div class="row padding-h-30">
-                            <div class="activity-detail-block">
-                                <h2>Special Needs Offerings @renderEditButtion(Model, "services")</h2>
-                            </div>
-
-                            @renderAccountProperties(specialNeedsOffered, Math.Ceiling(specialNeedsOffered.Count() / 3.0).ToInteger())
-
-                        </div>
-                    </div>
-
-                    <div class="margin-v-40">
-                        <hr style="border-color: #efefef;" />
-                    </div>
-                }
-
-                @if (awards.Any() || certifications.Any() || isInEditMode)
-                {
-                    <div class="margin-t-20">
-                        <div class="row padding-h-20">
-
-                            @if (awards.Any() || isInEditMode)
-                            {
-                                <div class="col-md-6 col-sm-12">
-
-                                    <h2>Awards @renderEditButtion(Model, "awards")</h2>
-
-                                    @foreach (var award in awards.Where(x => x.Value.IsNotEmpty()))
-                                    {
-                                        <p class="activity-detail-block">
-                                            <i class="s7-medal text-warning icon-large"></i>
-                                            <span class="text-medium-small">@award.Value</span>
-                                        </p>
-                                    }
-
-                                </div>
-                            }
-
-                            @if (certifications.Any() || isInEditMode)
-                            {
-                                <div class="col-md-6 col-sm-12">
-                                    <h2>Certifications @renderEditButtion(Model, "certifications")</h2>
-
-                                    @foreach (var certification in certifications.Where(x => x.Value.IsNotEmpty()))
-                                    {
-                                        <p class="activity-detail-block">
-                                            <i class="s7-star text-warning icon-large" style="padding-top: 20px;"></i>
-                                            <span class="text-medium-small" style="margin-top: -30px;">@certification.Value</span>
-                                        </p>
-                                    }
-
-                                </div>
-                            }
-
-                        </div>
-                    </div>
-
-                }
-
-                @if (accountProfile.About.IsNotBlank() || isInEditMode)
-                {
-                    <div class="margin-t-20">
-                        <div class="row padding-h-30">
-                            <h2>About @renderEditButtion(Model, "profileabout")</h2>
-                            <div class="activity-detail-block">
-                                @Html.Raw(accountProfile.About)
-                            </div>
-                        </div>
-                    </div>
-                }
-
-                @if (location.IsNotEmpty())
-                {
-                    // var locationsQuery = locations.Select(l => Url.Encode(l.GetAddress())).ToStringList(",");
-
-                    <div class="margin-t-20">
-                        <div class="row padding-h-30">
-                            <div class="col-md-12">
-                                <div class="activity-detail-block">
-                                    <div class="row">
-                                        <div>
-                                            <h2>Location @renderEditButtion(Model, "contactinfo")</h2>
-                                        </div>
-                                        <div>
-                                            <p class="notranslate">
-                                                @ParticipationObjectUI.PrintLocation(location)
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="height: 400px;">
-                        <div style="position: relative; margin-left: -20px; margin-right: -20px">
-                            <iframe width="100%"
-                                    height="300"
-                                    frameborder="0"
-                                    style="border:0"
-                                    src="https://www.google.com/maps/embed/v1/place?q=@Url.Encode(location.FormatAddressWithoutName())&key=@AfterSchoolLibrary.Helpers.GoogleHelper.Maps.ApiKey"
-                                    allowfullscreen></iframe>
-                        </div>
-                    </div>
-                }
-
             </div>
-            <div class="panel-footer">
-                <div class="col-md-12 text-center">
-                    <div class="padding-v-20 padding-h-30">
+        }
 
-                        @renderEditButtion(Model, "links")
+        <div class="row">
+            <div style="position: relative; margin-left: -20px; margin-right: -20px;">
+                @foreach (var item in participationObjects.Take(takeActivities))
+                {
+                    Html.RenderPartial("~/Views/Shared/Registration/_BrowseParticipationObjectWide.cshtml", item);
+                }
+            </div>
+        </div>
 
-                        @if (accountProfile.ProfilePhone.IsNotBlank())
-                        {
-                            <div class="footer-social-icon">
-                                <a href="tel:@accountProfile.ProfilePhone"
-                                   target="_blank"
-                                   class="icon-xlarge margin-h-30"
-                                   style="text-decoration: none;">
-                                    <i class="ion-android-phone-portrait"></i>
-                                </a>
-                            </div>
-                        }
-                        @if (accountProfile.Website.IsNotBlank())
-                        {
-                            <div class="footer-social-icon">
-                                <a href="@(accountProfile.Website.StartsWith("http") ? "" : "https://")@accountProfile.Website"
-                                   target="_blank"
-                                   class="icon-xlarge margin-h-30"
-                                   style="text-decoration: none;">
-                                    <i class="ion-ios-world-outline"></i>
-                                </a>
-                            </div>
-                        }
-                        @if (accountProfile.ProfileEmail.IsNotBlank())
-                        {
-                            <div class="footer-social-icon">
-                                <a href="mailto:@accountProfile.ProfileEmail"
-                                   target="_blank"
-                                   class="icon-xlarge margin-h-30"
-                                   style="text-decoration: none;">
-                                    <i class="ion-ios-email-outline"></i>
-                                </a>
-                            </div>
-                        }
-                        @if (accountProfile.Twitter.IsNotEmpty())
-                        {
-                            <div class="footer-social-icon">
-                                <a href="@accountProfile.TwitterUrl"
-                                   target="_blank"
-                                   class="icon-xlarge margin-h-30"
-                                   style="text-decoration: none;">
-                                    <i class="ion-social-twitter-outline"></i>
-                                </a>
-                            </div>
-                        }
-                        @if (accountProfile.Instagram.IsNotEmpty())
-                        {
-                            <div class="footer-social-icon">
-                                <a href="@accountProfile.InstagramUrl"
-                                   target="_blank"
-                                   class="icon-xlarge margin-h-30"
-                                   style="text-decoration: none;">
-                                    <i class="ion-social-instagram-outline"></i>
-                                </a>
-                            </div>
-                        }
-                        @if (accountProfile.Facebook.IsNotEmpty())
-                        {
-                            <div class="footer-social-icon">
-                                <a href="@accountProfile.Facebook"
-                                   target="_blank"
-                                   class="icon-xlarge margin-h-30"
-                                   style="text-decoration: none;">
-                                    <i class="ion-social-facebook-outline"></i>
-                                </a>
-                            </div>
-                        }
-                        @if (accountProfile.YouTube.IsNotEmpty())
-                        {
-                            <div class="footer-social-icon">
-                                <a href="@accountProfile.YouTube"
-                                   target="_blank"
-                                   class="icon-xlarge margin-h-30"
-                                   style="text-decoration: none;">
-                                    <i class="ion-social-youtube-outline"></i>
-                                </a>
-                            </div>
-                        }
-                        @if (accountProfile.LinkedIn.IsNotEmpty())
-                        {
-                            <div class="footer-social-icon">
-                                <a href="@accountProfile.LinkedIn"
-                                   target="_blank"
-                                   class="icon-xlarge margin-h-30"
-                                   style="text-decoration: none;">
-                                    <i class="ion-social-linkedin-outline"></i>
-                                </a>
-                            </div>
-                        }
-                        @if (accountProfile.CalendarBookingLink.IsNotEmpty())
-                        {
-                            <div class="footer-social-icon">
-                                <a href="@accountProfile.CalendarBookingLink"
-                                   target="_blank"
-                                   class="icon-xlarge margin-h-30"
-                                   style="text-decoration: none;">
-                                    <i class="ion-ios-calendar-outline"></i>
-                                </a>
-                            </div>
-                        }
+        @if (participationObjects.Count > takeActivities)
+        {
+            <div class="row">
+                <div class="col-md-4 col-md-offset-4">
+                    <a href="@Model.BrowseUrl" class="btn btn-register">
+                        View More Activities &raquo;
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<div class="margin-t-20">
+    @if (showPhotoGallery)
+    {
+        <div class="row">
+            <div style="position: relative;">
+                @RenderEditButton(Model, "photos", "Edit Photo Gallery")
+            </div>
+        </div>
+    }
+
+    <div id="frameContainer" class="row iframe-container">
+        <iframe id="frameVideoUrl" frameborder="0" allowfullscreen></iframe>
+    </div>
+
+    @if (showPhotoGallery)
+    {
+        <div class="row">
+            <div style="position: relative; margin-left: -20px; margin-right: -20px;">
+                @{ Html.RenderPartial("~/Views/Shared/Registration/_ProfilePhotoGallery.cshtml", photos); }
+            </div>
+        </div>
+    }
+</div>
+
+@if (servicesOffered.Any() || isInEditMode)
+{
+    <div class="margin-t-20">
+        <div class="row padding-h-30">
+            <div class="activity-detail-block">
+                <h2>Services Offered @RenderEditButton(Model, "services")</h2>
+            </div>
+
+            @RenderAccountProperties(servicesOffered, Math.Ceiling(servicesOffered.Count() / 3.0).ToInteger())
+
+        </div>
+    </div>
+
+    <div class="margin-v-40">
+        <hr style="border-color: #efefef;"/>
+    </div>
+}
+
+@if (skillsAndMethods.Any() || isInEditMode)
+{
+    <div class="margin-t-20">
+        <div class="row padding-h-30">
+            <div class="activity-detail-block">
+                <h2>Skills &amp; Teaching Methods @RenderEditButton(Model, "services")</h2>
+            </div>
+
+            @RenderAccountProperties(skillsAndMethods, Math.Ceiling(skillsAndMethods.Count() / 3.0).ToInteger())
+
+        </div>
+    </div>
+
+    <div class="margin-v-40">
+        <hr style="border-color: #efefef;"/>
+    </div>
+}
+
+@if (specialNeedsOffered.Any() || isInEditMode)
+{
+    <div class="margin-t-20">
+        <div class="row padding-h-30">
+            <div class="activity-detail-block">
+                <h2>Special Needs Offerings @RenderEditButton(Model, "services")</h2>
+            </div>
+
+            @RenderAccountProperties(specialNeedsOffered, Math.Ceiling(specialNeedsOffered.Count() / 3.0).ToInteger())
+
+        </div>
+    </div>
+
+    <div class="margin-v-40">
+        <hr style="border-color: #efefef;"/>
+    </div>
+}
+
+@if (awards.Any() || certifications.Any() || isInEditMode)
+{
+    <div class="margin-t-20">
+        <div class="row padding-h-20">
+
+            @if (awards.Any() || isInEditMode)
+            {
+                <div class="col-md-6 col-sm-12">
+
+                    <h2>Awards @RenderEditButton(Model, "awards")</h2>
+
+                    @foreach (var award in awards.Where(x => x.Value.IsNotEmpty()))
+                    {
+                        <p class="activity-detail-block">
+                            <i class="s7-medal text-warning icon-large"></i>
+                            <span class="text-medium-small">@award.Value</span>
+                        </p>
+                    }
+
+                </div>
+            }
+
+            @if (certifications.Any() || isInEditMode)
+            {
+                <div class="col-md-6 col-sm-12">
+                    <h2>Certifications @RenderEditButton(Model, "certifications")</h2>
+
+                    @foreach (var certification in certifications.Where(x => x.Value.IsNotEmpty()))
+                    {
+                        <p class="activity-detail-block">
+                            <i class="s7-star text-warning icon-large" style="padding-top: 20px;"></i>
+                            <span class="text-medium-small" style="margin-top: -30px;">@certification.Value</span>
+                        </p>
+                    }
+
+                </div>
+            }
+
+        </div>
+    </div>
+}
+
+@if (accountProfile.About.IsNotBlank() || isInEditMode)
+{
+    <div class="margin-t-20">
+        <div class="row padding-h-30">
+            <h2>About @RenderEditButton(Model, "profileabout")</h2>
+            <div class="activity-detail-block">
+                @Html.Raw(accountProfile.About)
+            </div>
+        </div>
+    </div>
+}
+
+@if (location.IsNotEmpty())
+{
+    // var locationsQuery = locations.Select(l => Url.Encode(l.GetAddress())).ToStringList(",");
+
+    <div class="margin-t-20">
+        <div class="row padding-h-30">
+            <div class="col-md-12">
+                <div class="activity-detail-block">
+                    <div class="row">
+                        <div>
+                            <h2>Location @RenderEditButton(Model, "contactinfo")</h2>
+                        </div>
+                        <div>
+                            <p class="notranslate">
+                                @ParticipationObjectUI.PrintLocation(location)
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <div style="height: 400px;">
+        <div style="position: relative; margin-left: -20px; margin-right: -20px">
+            <iframe width="100%"
+                    height="300"
+                    frameborder="0"
+                    style="border:0"
+                    src="https://www.google.com/maps/embed/v1/place?q=@Url.Encode(location.FormatAddressWithoutName())&key=@Maps.ApiKey"
+                    allowfullscreen>
+            </iframe>
+        </div>
+    </div>
+}
+
+</div>
+<div class="panel-footer">
+    <div class="col-md-12 text-center">
+        <div class="padding-v-20 padding-h-30">
+
+            @RenderEditButton(Model, "links")
+
+            @if (accountProfile.ProfilePhone.IsNotBlank())
+            {
+                <div class="footer-social-icon">
+                    <a href="tel:@accountProfile.ProfilePhone"
+                       target="_blank"
+                       class="icon-xlarge margin-h-30"
+                       style="text-decoration: none;">
+                        <i class="ion-android-phone-portrait"></i>
+                    </a>
+                </div>
+            }
+            @if (accountProfile.Website.IsNotBlank())
+            {
+                <div class="footer-social-icon">
+                    <a href="@(accountProfile.Website.StartsWith("http") ? "" : "https://")@accountProfile.Website"
+                       target="_blank"
+                       class="icon-xlarge margin-h-30"
+                       style="text-decoration: none;">
+                        <i class="ion-ios-world-outline"></i>
+                    </a>
+                </div>
+            }
+            @if (accountProfile.ProfileEmail.IsNotBlank())
+            {
+                <div class="footer-social-icon">
+                    <a href="mailto:@accountProfile.ProfileEmail"
+                       target="_blank"
+                       class="icon-xlarge margin-h-30"
+                       style="text-decoration: none;">
+                        <i class="ion-ios-email-outline"></i>
+                    </a>
+                </div>
+            }
+            @if (accountProfile.Twitter.IsNotEmpty())
+            {
+                <div class="footer-social-icon">
+                    <a href="@accountProfile.TwitterUrl"
+                       target="_blank"
+                       class="icon-xlarge margin-h-30"
+                       style="text-decoration: none;">
+                        <i class="ion-social-twitter-outline"></i>
+                    </a>
+                </div>
+            }
+            @if (accountProfile.Instagram.IsNotEmpty())
+            {
+                <div class="footer-social-icon">
+                    <a href="@accountProfile.InstagramUrl"
+                       target="_blank"
+                       class="icon-xlarge margin-h-30"
+                       style="text-decoration: none;">
+                        <i class="ion-social-instagram-outline"></i>
+                    </a>
+                </div>
+            }
+            @if (accountProfile.Facebook.IsNotEmpty())
+            {
+                <div class="footer-social-icon">
+                    <a href="@accountProfile.Facebook"
+                       target="_blank"
+                       class="icon-xlarge margin-h-30"
+                       style="text-decoration: none;">
+                        <i class="ion-social-facebook-outline"></i>
+                    </a>
+                </div>
+            }
+            @if (accountProfile.YouTube.IsNotEmpty())
+            {
+                <div class="footer-social-icon">
+                    <a href="@accountProfile.YouTube"
+                       target="_blank"
+                       class="icon-xlarge margin-h-30"
+                       style="text-decoration: none;">
+                        <i class="ion-social-youtube-outline"></i>
+                    </a>
+                </div>
+            }
+            @if (accountProfile.LinkedIn.IsNotEmpty())
+            {
+                <div class="footer-social-icon">
+                    <a href="@accountProfile.LinkedIn"
+                       target="_blank"
+                       class="icon-xlarge margin-h-30"
+                       style="text-decoration: none;">
+                        <i class="ion-social-linkedin-outline"></i>
+                    </a>
+                </div>
+            }
+            @if (accountProfile.CalendarBookingLink.IsNotEmpty())
+            {
+                <div class="footer-social-icon">
+                    <a href="@accountProfile.CalendarBookingLink"
+                       target="_blank"
+                       class="icon-xlarge margin-h-30"
+                       style="text-decoration: none;">
+                        <i class="ion-ios-calendar-outline"></i>
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+</div>
+</div>
 </div>
 
 @if (isAccountAndLoggedInUserIsOwner)
 {
     <div id="footer-account" class="activity-footer text-center hide">
         <span class="span-upgrade-modal-close" onclick="return hideActivityRibbon()">X</span>
-        <a href="@Url.Action("style", "account", new { id = Model.Uid, area = "org" })" class="btn btn-default btn-activity-footer">Edit Profile</a>
-        <a href="@Url.Action("editsetup", "activity", new { isnew = 1, type = (int)ActivityType.Activity, area = "org", source = Request["source"]})" class="btn btn-default btn-activity-footer">Add Activity</a>
+        <a href="@Url.Action("style", "account", new {id = Model.Uid, area = "org"})" class="btn btn-default btn-activity-footer">Edit Profile</a>
+        <a href="@Url.Action("editsetup", "activity", new {isnew = 1, type = (int) ActivityType.Activity, area = "org", source = Request["source"]})" class="btn btn-default btn-activity-footer">Add Activity</a>
     </div>
 
     if (!onboardingStepsAcknowledged)
@@ -549,21 +549,21 @@
     }
 
     <div id="modal-payment-confirmation-accountView" class="hide">
-        @{ Html.RenderPartial("~/Views/Shared/_ModalPaymentConfirmation.cshtml", Model); };
+        @{ Html.RenderPartial("~/Views/Shared/_ModalPaymentConfirmation.cshtml", Model); }
     </div>
 
-    <div id="modal-acceptpayment-done" class="modal fade" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content modal-min-width modal-box">
+    <div id="modal-accept-payment-done" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-min-width" role="document">
+            <div class="modal-content modal-box">
                 <div class="modal-body account-getting-started-padding">
-                    <div onclick="return $('#modal-acceptpayment-done').modal('hide');">
+                    <div onclick="return $('#modal-accept-payment-done').modal('hide');">
                         <a class="close close-icon-position">
                             <span aria-hidden="true">&times;</span>
                         </a>
                     </div>
 
                     <div class="text-center">
-                        <img src="~/Assets/img/email-symbol.png" />
+                        <img src="~/Assets/img/email-symbol.png"/>
                     </div>
                     <div id="modal-email-confirmation-text" class="modal-box-body">
                         Account setup complete!
@@ -572,14 +572,14 @@
 
                         @if (isExternallyProvidedActivity)
                         {
-                            <a href="#" class="btn btn-primary btn-free-profile" style="padding: 12px 20px;" onclick="return $('#modal-acceptpayment-done').modal('hide');">View Profile</a>
+                            <a href="#" class="btn btn-primary btn-free-profile" style="padding: 12px 20px;" onclick="$('#modal-accept-payment-done').modal('hide')">View Profile</a>
                         }
                         else
                         {
-                            <a href="#" class="btn btn-primary btn-free-profile" style="padding: 12px 20px;" onclick="return hideAcceptPaymentModal()">View Activity</a>
+                            <a href="#" class="btn btn-primary btn-free-profile" style="padding: 12px 20px;" onclick="hideAcceptPaymentModal()">View Activity</a>
                             <div class="clearfix"></div>
-                            <br />
-                            <a href="@Url.Action("editsetup", "activity", new { id = firstActivity?.Uid, area = "org" })" class="view-activity-text">Return to activity draft</a>
+                            <br/>
+                            <a href="@Url.Action("editsetup", "activity", new {id = firstActivity?.Uid, area = "org"})" class="view-activity-text">Return to activity draft</a>
                         }
                     </div>
                 </div>
@@ -591,17 +591,17 @@
 <script type="text/javascript">
     PageEvent.add(PageEvent.AFTER_INIT, function () {
 
-        var currentLevel = @Json.Encode(currentLevel);
-        var isOnboadingCompleted = @Json.Encode(isOnboadingCompleted);
-        var isProcessCompleted = @Json.Encode(GettingStartedOptions.ProcessCompleted);
-        var isStripeIntegrated = @Json.Encode(isStripeIntegrated);
+        let currentLevel = @Json.Encode(currentLevel);
+        let isOnboardingCompleted = @Json.Encode(isOnboardingCompleted);
+        let isProcessCompleted = @Json.Encode(GettingStartedOptions.ProcessCompleted);
+        let isStripeIntegrated = @Json.Encode(isStripeIntegrated);
 
-        if (currentLevel == isProcessCompleted && isStripeIntegrated) {
-            $('#modal-acceptpayment-done').modal({
+        if (currentLevel === isProcessCompleted && isStripeIntegrated) {
+            $('#modal-accept-payment-done').modal({
                 backdrop: 'static'
             });
         }
-        else if (!isOnboadingCompleted) {
+        else if (!isOnboardingCompleted) {
             //.. show getting started modal options if user misses any of that option
             $('#modal-getting-started').modal({
                 backdrop: 'static'
@@ -609,19 +609,19 @@
         }
 
         //$('#btn-welcome-user').click(); leaving out of this release, needs more design
-        var url = new URL(window.location.href);
-        var claimprofile = url.searchParams.get("claimprofile");
-        if (claimprofile) {
+        let url = new URL(window.location.href);
+        let claimProfile = url.searchParams.get("claimprofile");
+        if (claimProfile) {
             $('#model-claim').click();
         }
     });
 
     function hideActivityRibbon() {
         $('#footer-account').fadeOut();
-    };
+    }
 
     function hideAcceptPaymentModal() {
-        $('#modal-acceptpayment-done').modal('hide');
+        $('#modal-accept-payment-done').modal('hide');
     }
 
     function LoadPaymentModal() {
@@ -636,26 +636,26 @@
     }
 
     (function () {
-        var url = '@accountProfile.VideoUrl';
+        let url = '@accountProfile.VideoUrl';
         if (url) {
-            var isVimeoVideo = checkVideoPlatform(url);
+            let isVimeoVideo = checkVideoPlatform(url);
             if (isVimeoVideo) {
-                var id = validateVimeoUrl(url);
+                let id = validateVimeoUrl(url);
                 if (id) {
-                    var player = document.getElementById("frameVideoUrl");
+                    let player = document.getElementById("frameVideoUrl");
                     player.src = "https://player.vimeo.com/video/" + id;
 
-                    var container = document.getElementById("frameContainer");
+                    let container = document.getElementById("frameContainer");
                     container.style.display = 'block';
                 }
             }
             else {
-                var id = validateYouTubeVideoUrl(url);
+                let id = validateYouTubeVideoUrl(url);
                 if (id) {
-                    var player = document.getElementById("frameVideoUrl");
+                    let player = document.getElementById("frameVideoUrl");
                     player.src = "https://www.youtube.com/embed/" + id;
 
-                    var container = document.getElementById("frameContainer");
+                    let container = document.getElementById("frameContainer");
                     container.style.display = 'block';
                 }
             }
@@ -663,18 +663,14 @@
     })();
 
     function checkVideoPlatform(url) {
-        if (url && url.toLowerCase().includes('vimeo')) {
-            return true;
-        }
-
-        return false;
+        return url && url.toLowerCase().includes('vimeo');
     }
 
     function validateYouTubeVideoUrl(url) {
-        var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-        var match = url.match(regExp);
+        let regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        let match = url.match(regExp);
 
-        if (match && match[2] && match[2].length == 11) {
+        if (match && match[2] && match[2].length === 11) {
             return match[2];
         }
 
@@ -682,8 +678,8 @@
     }
 
     function validateVimeoUrl(url) {
-        var regExp = /(http|https)?:\/\/(www\.)?vimeo.com\/(?:channels\/(?:\w+\/)?|groups\/([^\/]*)\/videos\/|)(\d+)(?:|\/\?)/;
-        var match = url.match(regExp);
+        let regExp = /(http|https)?:\/\/(www\.)?vimeo.com\/(?:channels\/(?:\w+\/)?|groups\/([^\/]*)\/videos\/|)(\d+)(?:|\/\?)/;
+        let match = url.match(regExp);
 
         if (match && match[4] && match[4].length >= 6) {
             return match[4];
