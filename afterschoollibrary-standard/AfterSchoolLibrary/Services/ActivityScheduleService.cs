@@ -1,15 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using AfterSchoolLibrary.Models;
 
 namespace AfterSchoolLibrary.Services
 {
     public static class ActivityScheduleService
     {
-        public static ActivitySchedule SetupSchedule(int accountId, int scheduleId, string scheduleName, string details, string repeatsweekly, string isongoing, string startdate, string enddate, string dailystarttime, string dailyendtime, List<ActivityInstance> scheduledates, List<DateTime> scheduledatesclosed, string daysOfTheWeek, Account account, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public static ActivitySchedule SetupSchedule(int accountId, int scheduleId, string scheduleName, string details,
+            string repeatsweekly, string isongoing, string startdate, string enddate, string dailystarttime,
+            string dailyendtime, List<ActivityInstance> scheduledates, List<DateTime> scheduledatesclosed,
+            string daysOfTheWeek, Account account, int? activityGroupId, int loggedInUserId, SystemMessages msgs,
+            DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             ActivitySchedule schedule = null;
@@ -45,75 +49,75 @@ namespace AfterSchoolLibrary.Services
                 // otherwise user may have multiple activities with the same schedule so we cannot update directly on the activity
                 //if (account.HasFeature(FeatureType.ManageActivityGroups, dc: dc) == false)
                 //{
-                    msgs.AddRange(schedule.UpdateScheduleAndInstances(
-                        schedule.Name,
-                        schedule.ScheduleDetails,
-                        repeatsweekly.ToBoolean(),
-                        isongoing.ToBoolean(),
-                        startdate.ToDateTime(),
-                        enddate.ToDateTime(),
-                        dailystarttime.ToDateTime(),
-                        dailyendtime.ToDateTime(),
-                        scheduledates,
-                        scheduledatesclosed,
-                        daysOfTheWeek,
-                        loggedInUserId,
-                        dc));
+                msgs.AddRange(schedule.UpdateScheduleAndInstances(
+                    schedule.Name,
+                    schedule.ScheduleDetails,
+                    repeatsweekly.ToBoolean(),
+                    isongoing.ToBoolean(),
+                    startdate.ToDateTime(),
+                    enddate.ToDateTime(),
+                    dailystarttime.ToDateTime(),
+                    dailyendtime.ToDateTime(),
+                    scheduledates,
+                    scheduledatesclosed,
+                    daysOfTheWeek,
+                    loggedInUserId,
+                    dc));
                 //}
             }
 
             return schedule;
         }
 
-        public static ActivitySchedule CreateNew(string scheduleName, string details, bool repeatsWeekly, bool isongoing, DateTime? startDate, DateTime? endDate, DateTime? dailyStartTime, DateTime? dailyEndTime, List<ActivityInstance> scheduleDates, List<DateTime> scheduleDatesClosed, string daysOfTheWeek, int accountId, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public static ActivitySchedule CreateNew(string scheduleName, string details, bool repeatsWeekly,
+            bool isongoing, DateTime? startDate, DateTime? endDate, DateTime? dailyStartTime, DateTime? dailyEndTime,
+            List<ActivityInstance> scheduleDates, List<DateTime> scheduleDatesClosed, string daysOfTheWeek,
+            int accountId, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
+            Extensions.ValidateStartAndEndDateWithTime(startDate.ToShortDateString(),
+                dailyStartTime.ToShortTimeString(), endDate.ToShortDateString(), dailyEndTime.ToShortTimeString(),
+                msgs);
+
+            if (msgs.HasErrors()) return null;
+
             ActivitySchedule schedule = null;
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    schedule = new ActivitySchedule
+                    {
+                        Name = scheduleName,
+                        ScheduleDetails = details.IfBlank("").MaxChars(4000),
+                        AccountId = accountId,
+                        RepeatsWeekly = repeatsWeekly,
+                        IsOngoing = isongoing,
+                        StartDate = startDate,
+                        EndDate = endDate,
+                        DailyStartTime = dailyStartTime,
+                        DailyEndTime = dailyEndTime,
+                        DaysOfTheWeek = daysOfTheWeek,
+                        CreateDate = DateTime.UtcNow,
+                        LastModifiedDate = DateTime.UtcNow,
+                        CreatedBy = loggedInUserId,
+                        LastModifiedBy = loggedInUserId,
+                        ActivityGroupId = activityGroupId,
+                    };
+                    amsgs.AddRange(schedule.Save(adc));
 
-            Extensions.ValidateStartAndEndDateWithTime(startDate.ToShortDateString(), dailyStartTime.ToShortTimeString(), endDate.ToShortDateString(), dailyEndTime.ToShortTimeString(), msgs);
-
-            if(msgs.HasNoErrors())
-                Database.ExecuteTransaction(
-                   action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                   {
-                       schedule = new ActivitySchedule
-                       {
-                           Name = scheduleName,
-                           ScheduleDetails = details.IfBlank("").MaxChars(4000),
-                           AccountId = accountId,
-                           RepeatsWeekly = repeatsWeekly,
-                           IsOngoing = isongoing,
-                           StartDate = startDate,
-                           EndDate = endDate,
-                           DailyStartTime = dailyStartTime,
-                           DailyEndTime = dailyEndTime,
-                           DaysOfTheWeek = daysOfTheWeek,
-                           CreateDate = DateTime.UtcNow,
-                           LastModifiedDate = DateTime.UtcNow,
-                           CreatedBy = loggedInUserId,
-                           LastModifiedBy = loggedInUserId,
-                           ActivityGroupId = activityGroupId
-                       };
-                       amsgs.AddRange(schedule.Save(adc));
-
-                       amsgs.AddRange(schedule.UpdateInstances(scheduleDates, scheduleDatesClosed, loggedInUserId, adc));                   
-                   },
-                   onSuccess: (SystemMessages successMsgs) =>
-                   {
-                       msgs.AddRange(successMsgs);
-                   },
-                   onFailure: (SystemMessages failureMsgs) =>
-                   {
-                       msgs.AddRange(failureMsgs);
-                   },
-                   dc: dc
-               );
-
+                    amsgs.AddRange(
+                        schedule.UpdateInstances(scheduleDates, scheduleDatesClosed, loggedInUserId, adc));
+                },
+                onSuccess: (SystemMessages successMsgs) => { msgs.AddRange(successMsgs); },
+                onFailure: (SystemMessages failureMsgs) => { msgs.AddRange(failureMsgs); },
+                dc: dc
+            );
             return schedule;
         }
 
-        public static bool IsEndingInTwoDays(this ActivitySchedule schedule, Account ownerAccount = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool IsEndingInTwoDays(this ActivitySchedule schedule, Account ownerAccount = null,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (schedule.IsNotEmpty())
             {
@@ -124,7 +128,8 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
-        public static List<DateTime> GetNextInstances(this ActivitySchedule schedule, int numberOfInstances, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<DateTime> GetNextInstances(this ActivitySchedule schedule, int numberOfInstances,
+            ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (participationObject.IsActivity())
                 return schedule.GetNextInstances(numberOfInstances, participationObject.GetActivity(), msgs, dc);
@@ -132,16 +137,18 @@ namespace AfterSchoolLibrary.Services
             return new List<DateTime>();
         }
 
-        public static List<DateTime> GetNextInstances(this ActivitySchedule schedule, int numberOfInstances, Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<DateTime> GetNextInstances(this ActivitySchedule schedule, int numberOfInstances,
+            Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dates = new List<DateTime>();
-            var account = schedule.GetAccount(msgs, dc);            
+            var account = schedule.GetAccount(msgs, dc);
             var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
 
             if (schedule.IsOngoing && schedule.GetDaysOfTheWeek(msgs, dc).Any())
             {
                 var referenceDate = now;
-                var outOfSession = schedule.GetOutSessionInstances(msgs, dc).Where(instance => instance.StartDateTime.Value.IsAfter(referenceDate));
+                var outOfSession = schedule.GetOutSessionInstances(msgs, dc)
+                    .Where(instance => instance.StartDateTime.Value.IsAfter(referenceDate));
                 var cutoffHours = 0;
 
                 if (activity.RegistrationCutoffHours.HasValue)
@@ -161,21 +168,23 @@ namespace AfterSchoolLibrary.Services
                         nextDay = day;
                         break;
                     }
-                };
+                }
 
                 for (var i = 0; i < numberOfInstances; i++)
                 {
-                    var nextDayAsInt = (int)nextDay;
+                    var nextDayAsInt = (int) nextDay;
 
-                    if (nextDayAsInt < (int)currentDayOfTheWeek)
+                    if (nextDayAsInt < (int) currentDayOfTheWeek)
                         nextDayAsInt += 7; // add a week
 
-                    var daysToAdd = nextDayAsInt - (int)currentDayOfTheWeek;
+                    var daysToAdd = nextDayAsInt - (int) currentDayOfTheWeek;
 
                     var dateToAdd = referenceDate.AddDays(daysToAdd);
 
-                    if (!dateToAdd.Date.In(outOfSession.Select(x => x.StartDateTime.Value.Date)) && dateToAdd.AddHours(cutoffHours * -1).IsAfter(now))
-                        dates.Add($"{dateToAdd.ToShortDateString()} {schedule.DailyStartTime.ToShortTimeString()}".ToDateTime());
+                    if (!dateToAdd.Date.In(outOfSession.Select(x => x.StartDateTime.Value.Date)) &&
+                        dateToAdd.AddHours(cutoffHours * -1).IsAfter(now))
+                        dates.Add($"{dateToAdd.ToShortDateString()} {schedule.DailyStartTime.ToShortTimeString()}"
+                            .ToDateTime());
                     else
                         i--; // don't increment
 
@@ -187,27 +196,28 @@ namespace AfterSchoolLibrary.Services
                     referenceDate = dateToAdd.AddDays(1);
                     currentDayOfTheWeek = referenceDate.DayOfWeek;
                 }
-
             }
             else
             {
                 dates.AddRange(schedule.GetInSessionInstances(msgs, dc)
-                                .Where(x => x.StartDateTime.Value.Date.IsOnOrAfter(now.Date))
-                                .Take(numberOfInstances)
-                                .Select(x => x.StartDateTime.Value));
-
+                    .Where(x => x.StartDateTime.Value.Date.IsOnOrAfter(now.Date))
+                    .Take(numberOfInstances)
+                    .Select(x => x.StartDateTime.Value));
             }
 
             return dates;
         }
 
-        public static ActivityInstance AddInstance(this ActivitySchedule schedule, DateTime startDate, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static ActivityInstance AddInstance(this ActivitySchedule schedule, DateTime startDate,
+            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var instance = new ActivityInstance()
             {
                 ActivityScheduleId = schedule.ID,
-                StartDateTime = $"{startDate.Date.ToShortDateString()} {schedule.DailyStartTime.ToShortTimeString()}".ToDateTime(),
-                EndDateTime = $"{startDate.Date.ToShortDateString()} {schedule.DailyEndTime.ToShortTimeString()}".ToDateTime(),
+                StartDateTime = $"{startDate.Date.ToShortDateString()} {schedule.DailyStartTime.ToShortTimeString()}"
+                    .ToDateTime(),
+                EndDateTime = $"{startDate.Date.ToShortDateString()} {schedule.DailyEndTime.ToShortTimeString()}"
+                    .ToDateTime(),
                 InstanceTypeId = InstanceType.InSession,
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser.ID.IfEmpty(0),
@@ -220,24 +230,26 @@ namespace AfterSchoolLibrary.Services
 
             return instance;
         }
-        public static List<ActivityInstance> RemoveOutOfSessionInstances(this List<ActivityInstance> instances, ActivitySchedule schedule, SystemMessages msgs = null, DatabaseConnection dc = null)
+
+        public static List<ActivityInstance> RemoveOutOfSessionInstances(this List<ActivityInstance> instances,
+            ActivitySchedule schedule, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var outOfSessionInstances = schedule?.GetOutSessionInstances(msgs, dc);
 
             if (outOfSessionInstances?.Any() == true)
             {
-                var overlappingiInstances = instances.Where(m =>
-                                                outOfSessionInstances.Any(t =>
-                                                    t.Day == m.Day &&
-                                                    t.StartDateTime.ToShortDateString() == m.StartDateTime.ToShortDateString() &&
-                                                    t.EndDateTime.ToShortDateString() == m.EndDateTime.ToShortDateString()
-                                                    )
-                                                );
+                var overlappingInstances = instances.Where(m =>
+                    outOfSessionInstances.Any(t =>
+                        t.Day == m.Day &&
+                        t.StartDateTime.ToShortDateString() == m.StartDateTime.ToShortDateString() &&
+                        t.EndDateTime.ToShortDateString() == m.EndDateTime.ToShortDateString()
+                    )
+                );
 
-                if (overlappingiInstances?.Any() == true)
-                    instances.RemoveAll(m => overlappingiInstances.Any(t => t.ID == m.ID));
+                if (overlappingInstances?.Any() == true)
+                    instances.RemoveAll(m => overlappingInstances.Any(t => t.ID == m.ID));
             }
-            
+
             return instances;
         }
     }
