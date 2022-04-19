@@ -1,100 +1,98 @@
 ﻿@model Account
 @{
-    var account = SessionVariables.CurrentAccount;
-    var currentUser = SessionVariables.CurrentUser;
-    var supportEmail = AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress;
-    var supportEmailHref = $"mailto:{supportEmail}";
     var accountOwner = Model.GetAccountOwner();
-    var activityUid = (Guid)ViewBag.ActivityUid;
-    var currentLevel = AccountService.OnboardingCompletionStatus(Model);
+    var activityUid = (Guid) ViewBag.ActivityUid;
+    var currentLevel = Model.OnboardingCompletionStatus();
     var isStripeIntegrated = TempData["IsStripeIntegrated"] != null;
-    var IsActivityFree = (bool)ViewBag.IsActivityFree;
-    var currentUrl = Request.Url.ToString();
+    var isActivityFree = (bool) ViewBag.IsActivityFree;
+    var currentUrl = Request.Url?.ToString();
 }
 
-<div id="modal-email-confirmation" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content modal-min-width modal-box">
-            <div class="modal-body account-getting-started-padding">
-                <div onclick="return $('#modal-email-confirmation').modal('hide');">
-                    <a class="close close-icon-position">
-                        <span aria-hidden="true">&times;</span>
-                    </a>
-                </div>
-                <div class="text-center">
-                    <img src="~/Assets/img/email-symbol.png" />
-                </div>
-                <div id="modal-email-confirmation-text" class="modal-box-body">
-                    Before we publish your activity lets confirm your email.
-                </div>
-                <div id="modal-email-confirmation-btn" class="margin-v-30 text-center">
-                    <a href="#" class="btn btn-primary btn-free-profile" onclick="return resendValidationEmail()">Re-send verification email</a>
-                </div>
+<div class="modal fade" id="modal-email-confirmation" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-min-width" role="document">
+        <div class="modal-content modal-box">
+            <div class="modal-body account-getting-started-padding" style="text-align: center">
+                <button aria-label="Close" class="close close-icon-position"
+                        onclick="$('#modal-email-confirmation').modal('hide')" type="button">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <img alt="Email verification" src="~/Assets/img/email-symbol.png" style="text-align: center"/>
+                <p class="modal-box-body" id="modal-email-confirmation-text">
+                    Before we publish your activity, let's confirm your email.
+                </p>
+                <button class="margin-v-30 text-center btn btn-primary btn-free-profile"
+                        id="modal-email-confirmation-btn" onclick="resendValidationEmail()" type="button">
+                    Re-send verification email
+                </button>
+                <p class="modal-box-body" id="modal-email-confirmation-sent" style="display: none">
+                    An email has been sent to <span style="color: #00b492;">@accountOwner.Email</span>
+                </p>
+                <p class="modal-box-body" id="modal-email-confirmation-follow-steps" style="display: none">
+                    Please check your inbox for next steps.
+                </p>
             </div>
         </div>
     </div>
 </div>
 
-@{ Html.RenderPartial("~/Views/Shared/_ModalPaymentConfirmation.cshtml", Model, new ViewDataDictionary() { { "ActivityUid", activityUid } }); };
+@{ Html.RenderPartial("~/Views/Shared/_ModalPaymentConfirmation.cshtml", Model, new ViewDataDictionary {{"ActivityUid", activityUid}}); }
 
-<div id="modal-acceptpayment-done" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content modal-min-width modal-box">
-            <div class="modal-body account-getting-started-padding">
-                <div onclick="return $('#modal-acceptpayment-done').modal('hide');">
-                    <a class="close close-icon-position">
-                        <span aria-hidden="true">&times;</span>
+<div id="modal-accept-payment-done" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-min-width" role="document">
+        <div class="modal-content modal-box">
+            <div class="modal-body account-getting-started-padding" style="text-align: center">
+                <button aria-label="Click" class="close close-icon-position"
+                        onclick="$('#modal-accept-payment-done').modal('hide')" type="button">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <img src="~/Assets/img/email-symbol.png" alt="Complete"/>
+                <p class="modal-box-body">Account setup complete!</p>
+                <button class="btn btn-primary btn-free-profile" onclick="$('#modal-accept-payment-done').modal('hide')"
+                        style="padding: 12px 20px;">
+                    Continue
+                </button>
+                <p style="margin-top: 16px">
+                    <a class="view-activity-text"
+                       href="@Url.Action("editsetup", "activity", new {id = activityUid, area = "org"})">
+                        Return to edit activity
                     </a>
-                </div>
-
-                <div class="text-center">
-                    <img src="~/Assets/img/email-symbol.png" />
-                </div>
-                <div id="modal-email-confirmation-text" class="modal-box-body">
-                    Account setup complete!
-                </div>
-                <div id="modal-email-confirmation-btn" class="margin-v-30 text-center">
-                    <a href="#" class="btn btn-primary btn-free-profile" style="padding: 12px 20px;"  onclick="location.reload()">Continue</a>
-                    <div class="clearfix"></div>
-                    <br />
-                    <a href="@Url.Action("editsetup", "activity", new { id = activityUid, area = "org" })" class="view-activity-text">Return to edit activity</a>
-                </div>
+                </p>
             </div>
         </div>
     </div>
 </div>
 
 <script type="text/javascript">
-    var currentLevel = @Json.Encode(currentLevel);
-    var isEmailToBeValidated = @Json.Encode(GettingStartedOptions.ValidateEmail);
-    var isActivityToBePublished = @Json.Encode(GettingStartedOptions.PublishActivity);
-    var isPaymentSetupToBeDone = @Json.Encode(GettingStartedOptions.AcceptPayments);
-    var isProcessCompleted = @Json.Encode(GettingStartedOptions.ProcessCompleted);
-    var isStripeIntegrated = @Json.Encode(isStripeIntegrated);
-    var isfreeActivity = @Json.Encode(IsActivityFree);
+    let currentLevel = @Json.Encode(currentLevel);
+    let isEmailToBeValidated = @Json.Encode(GettingStartedOptions.ValidateEmail);
+    let isActivityToBePublished = @Json.Encode(GettingStartedOptions.PublishActivity);
+    let isPaymentSetupToBeDone = @Json.Encode(GettingStartedOptions.AcceptPayments);
+    let isProcessCompleted = @Json.Encode(GettingStartedOptions.ProcessCompleted);
+    let isStripeIntegrated = @Json.Encode(isStripeIntegrated);
+    let isActivityFreeJson = @Json.Encode(isActivityFree);
 
     PageEvent.add(PageEvent.AFTER_INIT, function () {
-        if (currentLevel == isEmailToBeValidated) {
+        if (currentLevel === isEmailToBeValidated) {
             $('#modal-email-confirmation').modal({
                 backdrop: 'static'
             });
-        } else if (currentLevel == isActivityToBePublished) {
+        } else if (currentLevel === isActivityToBePublished) {
             $('#footer-activity').removeClass('hide');
         }
         // we do not need to show payment modal, if activity is Free
-        else if (currentLevel == isPaymentSetupToBeDone) {
-            if (!isfreeActivity) {
+        else if (currentLevel === isPaymentSetupToBeDone) {
+            if (!isActivityFreeJson) {
                 $('#modal-payment-confirmation').modal({
                     backdrop: 'static'
                 });
             } else if (@activityUid.IsNotEmpty().ToString().ToLower()) {
                 $('#footer-activity').removeClass('hide');
             }
-        } else if (currentLevel == isProcessCompleted && isStripeIntegrated) {
-            $('#modal-acceptpayment-done').modal({
+        } else if (currentLevel === isProcessCompleted && isStripeIntegrated) {
+            $('#modal-accept-payment-done').modal({
                 backdrop: 'static'
             });
-        } else if (currentLevel == isProcessCompleted) {
+        } else if (currentLevel === isProcessCompleted) {
             $('#footer-activity').removeClass('hide');
         }
 
@@ -105,7 +103,7 @@
     });
 
     function updateButtonClasses() {
-        var screen = $(window);
+        let screen = $(window);
         if (screen.width() <= 768) {
             $('#link-dd').removeClass('btn btn-alt5').addClass('mobile-payment-btn');
             $('#link-check').removeClass('btn btn-default').addClass('mobile-payment-btn');
@@ -117,8 +115,8 @@
 
     function resendValidationEmail() {
         AccountSetup.sendVerificationEmail('@currentUrl');
-        $('#modal-email-confirmation-text').html('An email has been sent to <span style="color: #00b492;">@accountOwner.Email</span> Please check your inbox for next steps.');
-        $('#modal-email-confirmation-btn').hide();
+        $('#modal-email-confirmation-text, #modal-email-confirmation-btn').hide();
+        $('#modal-email-confirmation-sent, #modal-email-confirmation-follow-steps').show();
         $('#footer-activity').removeClass('hide');
     }
 </script>
