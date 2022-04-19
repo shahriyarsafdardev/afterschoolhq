@@ -1816,6 +1816,9 @@ namespace AfterSchoolLibrary.Services
                 case "HAST":
                     return TimeZoneInfo.ConvertTimeFromUtc(dt,
                         TimeZoneInfo.FindSystemTimeZoneById("Hawaiian Standard Time"));
+                case "AST":
+                    return TimeZoneInfo.ConvertTimeFromUtc(dt,
+                        TimeZoneInfo.FindSystemTimeZoneById("Arab Standard Time"));
                 default:
                     return dt;
             }
@@ -1843,6 +1846,9 @@ namespace AfterSchoolLibrary.Services
                 case "HAST":
                     return TimeZoneInfo.ConvertTimeToUtc(dt,
                         TimeZoneInfo.FindSystemTimeZoneById("Hawaiian Standard Time"));
+                case "AST":
+                    return TimeZoneInfo.ConvertTimeToUtc(dt,
+                        TimeZoneInfo.FindSystemTimeZoneById("Arab Standard Time"));
                 default:
                     return dt;
             }
