@@ -685,7 +685,13 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             ViewBag.Messages = new SystemMessages();
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.ShowThirdPartyOptions = SessionVariables.CurrentAccount?.AccountTypeId is AccountType.School;
+            ViewBag.ShowThirdPartyOptions = SessionVariables.CurrentAccount.AccountTypeId switch
+            {
+                AccountType.School => true,
+                AccountType.CommunityCenter => true,
+                AccountType.Church => true,
+                _ => false,
+            };
             return View(SessionVariables.CurrentAccount);
         }
 
