@@ -95,7 +95,13 @@
             <i class="s7-users"></i> Invite Team Members
         </div>
         <div class="panel-body">
-            <p class="select-instructions">Select the level of permission you would like to grant the invitee. This can be changed at a later date.</p>
+            <p class="select-instructions">
+                Select the level of permission you would like to grant the invitee. 
+                This can be changed at a later date.
+                <br/>
+                If you have any questions about different account types, please contact 
+                <a href="mailto:@(AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress)">support</a>. 
+            </p>
             <form method="post" action="@Url.Action("teaminvite", "account")" class="form-horizontal team-invite-form">
                 @if (isLocationBasedProvider)
                 {
