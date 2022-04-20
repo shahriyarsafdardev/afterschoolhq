@@ -25,7 +25,7 @@ namespace AfterSchoolLibrary.Migrations
 
                         foreach (var package in packagesToUpdate)
                         {
-                            PackageFeatureService.AddPackageFeature(PackageId: package.ID, featureTypeId: FeatureType.ManageCoupons, maxValue: 1, loggedInUser: loggedInUser, msgs: amsgs, dc: adc);
+                            PackageFeatureService.AddPackageFeature(PackageId: package.ID, featureTypeId: FeatureType.ManageCoupons, maxValue: 1, loggedInUser: loggedInUser.ID.Value, msgs: amsgs, dc: adc);
                         }
                     }
                 },

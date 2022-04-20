@@ -36,5 +36,6 @@ public enum FeatureType
 	ManageCoupons,
 	Teacher1099,
 	Survey,
-	ManualStripePayouts
+	ManualStripePayouts,
+	FreeActivityLimit
 }

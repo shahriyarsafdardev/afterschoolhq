@@ -148,16 +148,6 @@ namespace AfterSchool.Models
                 msgs.AddRange(setupMsgs);
             }
 
-           
-            //if (activity.HasSubscriptionPlan && !activity.HasSchedule && !activity.GetSchedule(msgs).IsOngoing)
-            //    scheduleMessages.Add("Schedule Meeting Dates/Times", MessageType.UserError);
-
-            //if (scheduleMessages.HasErrors())
-            //{
-            //    scheduleMessages.Insert(0, new SystemMessage($"<a href=\"/org/activity/editschedule/{activity.Uid}\" class=\"publish-error-title\">Schedule</a>", MessageType.UserError));
-            //    msgs.AddRange(scheduleMessages);
-            //}
-
             if (BasicLibrary.Utilities.RemoveHTMLAndEntities(activity.Details).IsBlank())
                 detailMsgs.Add("Description", MessageType.UserError);
 
@@ -181,18 +171,6 @@ namespace AfterSchool.Models
                 contactMsgs.Insert(0, new SystemMessage($"<a href=\"/org/activity/editcontact/{activity.Uid}\" class=\"publish-error-title\">Contact Information</a>", MessageType.UserError));
                 msgs.AddRange(contactMsgs);
             }
-
-            //if (activity.ActivityTypeId.NotIn(new List<ActivityType>() { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
-            //{
-            //    if (!activity.LocationId.HasValue)
-            //        locationMsgs.Add("Activity Location", MessageType.UserError);
-
-            //    if (locationMsgs.HasErrors())
-            //    {
-            //        locationMsgs.Insert(0, new SystemMessage($"<a href=\"/org/activity/editlocation/{activity.Uid}\" class=\"publish-error-title\">Location</a>", MessageType.UserError));
-            //        msgs.AddRange(locationMsgs);
-            //    }
-            //}
 
             if (paymentMsgs.HasErrors())
             {
@@ -227,6 +205,13 @@ namespace AfterSchool.Models
             if (activity.IsGroupArchived)
                 archiveMsgs.Add($"<a href=\"/org/group/restore/{activity.GetActivityGroup().Uid}\">Restore {activity.GetActivityGroup().Name}</a>. It is currently archived", MessageType.Error);
 
+            var account = activity.GetAccount(msgs, dc);
+      
+            if (activity.CostPerRegistrant <= 0 && !account.CanPublishFreeActivity(msgs, dc) )
+            {
+                msgs.Add($"<a href=\"/org/activity/editcost/{activity.Uid}\" class=\"publish-error-title\">You've reached your limit on free activities</a>", MessageType.UserError);
+            }
+            
             msgs.AddRange(activity.IsPaymentMethodAddedForExternalAccount(SessionVariables.CurrentAccount, msg, dc));
 
             if (archiveMsgs.HasErrors())
