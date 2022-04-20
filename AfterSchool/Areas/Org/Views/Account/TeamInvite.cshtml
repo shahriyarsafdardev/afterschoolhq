@@ -1,7 +1,7 @@
 ﻿@model Account
 @{
     ViewBag.Title = Model.Name;
-    var showThirdPartyOptions = ViewBag.ShowThirdPartyOptions;
+    var isLocationBasedProvider = ViewBag.IsLocationBasedProvider;
     var msgs = (SystemMessages) ViewBag.Messages;
 }
 
@@ -78,6 +78,10 @@
         height: 10px;
         width: 10px;
     } 
+
+    .first-option-in-row {
+        grid-column: 2;
+    }
 </style>
 
 @{ Html.RenderPartial("OrgAccountHeader", Model.ID.ToString()); }
@@ -93,9 +97,12 @@
         <div class="panel-body">
             <p class="select-instructions">Select the level of permission you would like to grant the invitee. This can be changed at a later date.</p>
             <form method="post" action="@Url.Action("teaminvite", "account")" class="form-horizontal team-invite-form">
-                <label class="control-label">Administrative</label>
+                @if (isLocationBasedProvider)
+                {
+                    <label class="control-label">Administrative</label>
+                }
                 <input type="radio" name="usertype" id="usertype1" required value="@((int) UserType.Administrator)">
-                <label for="usertype1">
+                <label for="usertype1" class="first-option-in-row">
                     <h3>@UserType.Administrator.ToString()</h3>
                     <p>Full access to your account, including financials, activities, and student information.</p>
                 </label>
@@ -104,12 +111,15 @@
                     <h3>@UserType.Treasurer.ToString()</h3>
                     <p>Access to all financial information, but will <em>not</em> see student or activity information.</p>
                 </label>
-                <label class="control-label">
-                    <span>School-Sponsored</span>
-                    <p class="light-p">Payments from registration go to the organization</p>
-                </label>
+                @if (isLocationBasedProvider)
+                {
+                    <label class="control-label">
+                        <span>@(Model.AccountTypeId.ToString().SplitByUpperCase())-Sponsored</span>
+                        <p class="light-p">Payments from registration go to the organization</p>
+                    </label>
+                }
                 <input type="radio" name="usertype" id="usertype3" required value="@((int) UserType.ProgramDirector)">
-                <label for="usertype3">
+                <label for="usertype3" class="first-option-in-row">
                     <h3>@UserType.ProgramDirector.ToString().SplitByUpperCase()</h3>
                     <p>Full access to information pertaining to their own activities.</p>
                 </label>
@@ -118,7 +128,7 @@
                     <h3>@UserType.Instructor.ToString()</h3>
                     <p>Full access to information pertaining to their own activities, <em>excluding</em> financials.</p>
                 </label>
-                @if (showThirdPartyOptions)
+                @if (isLocationBasedProvider)
                 {
                     <label class="control-label">
                         <span>Provider</span>
