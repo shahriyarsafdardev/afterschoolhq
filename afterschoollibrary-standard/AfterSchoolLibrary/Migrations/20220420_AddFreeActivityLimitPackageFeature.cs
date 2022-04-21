@@ -20,7 +20,7 @@ namespace AfterSchoolLibrary.Migrations
                     var packages = Package.Load(msgs: msgs, dc: dc);
                     packages.ForEach(package =>
                     {
-                        var maxValue = package.Price > 0 ? Int32.MaxValue : 0;
+                        var maxValue = package.Price > 0 ? decimal.MaxValue : 0;
                         
                         PackageFeatureService.AddPackageFeature(
                             package.ID.Value,
@@ -33,7 +33,7 @@ namespace AfterSchoolLibrary.Migrations
                     var accountPackages = AccountPackage.Load(msgs: msgs, dc: dc);
                     accountPackages.ForEach(accountPackage =>
                     {
-                        accountPackage.AddOrUpdatePackageFeature(FeatureType.FreeActivityLimit, Int32.MaxValue, 0, msgs, dc);
+                        accountPackage.AddOrUpdatePackageFeature(FeatureType.FreeActivityLimit, decimal.MaxValue, 0, msgs, dc);
                     });
                     
                 },
