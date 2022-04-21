@@ -1,19 +1,20 @@
-﻿@{ 
-    var accountProfile = (AccountProfile)ViewBag.AccountProfile ?? new AccountProfile();
+﻿@using Utilities = AfterSchoolLibrary.Helpers.Utilities
+@{
+    var accountProfile = (AccountProfile) ViewBag.AccountProfile ?? new AccountProfile();
     var account = accountProfile?.GetAccount();
     var author = account?.Name;
     var description = accountProfile?.Headline;
-    var propertyTypes = new List<AccountPropertyType>() { AccountPropertyType.AcademicSubjects, AccountPropertyType.Classifications, AccountPropertyType.PricingOption, AccountPropertyType.ServiceOffered, AccountPropertyType.SoftSkills, AccountPropertyType.TeachingMethods, AccountPropertyType.TimeOffered };
+    var propertyTypes = new List<AccountPropertyType> {AccountPropertyType.AcademicSubjects, AccountPropertyType.Classifications, AccountPropertyType.PricingOption, AccountPropertyType.ServiceOffered, AccountPropertyType.SoftSkills, AccountPropertyType.TeachingMethods, AccountPropertyType.TimeOffered};
     var keywords = account?.GetAccountProperties(propertyTypes).Select(x => x.Value).ToStringList(", ");
     var shortHomePageUrl = account?.ShortHomePageUrl;
     var site = UILabel.ProductName();
 
-    var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
+    var ah = Utilities.GetNewAmazonHelper();
     string logoUrl = null;
 
     if (accountProfile.Logo.IsNotBlank())
     {
-        logoUrl = ah.GetFileLink(accountProfile.Logo, true, null, true);
+        logoUrl = ah.GetFileLink(accountProfile.Logo, null, true);
     }
 }
 
@@ -43,16 +44,16 @@
 
     <title>@ViewBag.Title - @site</title>
 
-    @{Html.RenderPartial("~/Views/Shared/_HeadIncludes.cshtml");}
-    @{Html.RenderPartial("~/Views/Shared/_ZendeskWidget.cshtml");}
+    @{ Html.RenderPartial("~/Views/Shared/_HeadIncludes.cshtml"); }
+    @{ Html.RenderPartial("~/Views/Shared/_ZendeskWidget.cshtml"); }
 
-    <link href="~/Assets/css/style-registration.css?v=1.02" type="text/css" rel="stylesheet" />
+    <link href="~/Assets/css/style-registration.css?v=1.02" type="text/css" rel="stylesheet"/>
 
-    @{Html.RenderPartial("~/Views/Shared/Registration/_CustomStyle.cshtml", accountProfile);}
+    @{ Html.RenderPartial("~/Views/Shared/Registration/_CustomStyle.cshtml", accountProfile); }
 
     @*@Html.Raw(SessionVariables.CurrentAccount?.GetAccountProperty(AccountPropertyType.FacebookAdPixel)?.Value)*@
-    @RenderSection("fbadevents", required: false)
-    @RenderSection("header", required: false)
+    @RenderSection("fbadevents", false)
+    @RenderSection("header", false)
 
     <style>
         .layout-footer a {
@@ -62,37 +63,45 @@
             font-family: 'Montserrat', sans-serif;
         }
     </style>
-    <link href="~/Content/googleTranslate.css" rel="stylesheet" />
+    <link href="~/Content/googleTranslate.css" rel="stylesheet"/>
 </head>
 
 
 <body class="registration">
-    <div class="am-wrapper notopmenu am-nosidebar-left">
-        <div class="am-content">
-            @RenderBody()
+<div class="am-wrapper notopmenu am-nosidebar-left">
+    <div class="am-content">
+        @RenderBody()
+    </div>
+</div>
+
+<div id="footerShowHide" class="layout-footer text-center">
+    <div class="container-footer footer-extended">
+        <div class="row" style="padding: 20px">
+            <ul class="list-inline last-icon-ul">
+                <li>
+                    <a href="https://afterschoolhq.com/?utm_source=app&utm_medium=registration" target="_blank">AfterSchool HQ was created</a>
+                </li>
+                <li>
+                    <a href="https://afterschoolhq.com/?utm_source=app&utm_medium=registration" target="_blank">
+                        <img src="/assets/img/footer-copy-right-img.png" style="max-width: 60px">
+                    </a>
+                </li>
+                <li>
+                    <a href="https://afterschoolhq.com/?utm_source=app&utm_medium=registration" target="_blank">with love in Fishers, IN.</a>
+                </li>
+            </ul>
         </div>
     </div>
+</div>
 
-    <div id="footerShowHide" class="layout-footer text-center">
-        <div class="container-footer footer-extended">
-            <div class="row" style="padding: 20px">
-                <ul class="list-inline last-icon-ul">
-                    <li><a href="https://afterschoolhq.com/?utm_source=app&utm_medium=registration" target="_blank">AfterSchool HQ was created</a></li>
-                    <li><a href="https://afterschoolhq.com/?utm_source=app&utm_medium=registration" target="_blank"><img src="/assets/img/footer-copy-right-img.png" style="max-width: 60px"></a></li>
-                    <li><a href="https://afterschoolhq.com/?utm_source=app&utm_medium=registration" target="_blank">with love in Fishers, IN.</a></li>
-                </ul>
-            </div>
-        </div>
-    </div>
+@{ Html.RenderPartial("~/Views/Shared/_JavascriptIncludes.cshtml"); }
 
-    @{Html.RenderPartial("~/Views/Shared/_JavascriptIncludes.cshtml");}
+@RenderSection("scripts", false)
+<script src="~/Assets/js/google-translate.js"></script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-    @RenderSection("scripts", required: false)
-    <script src="~/Assets/js/google-translate.js"></script>
-    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-
-    <div id="modal-saving" class="hide" style="position: fixed; width: 250px; height: 65px; top: 10px; right: 10px; padding: 0px; margin: 0px; background-color: white; color: black; border-radius: 10px; border: 1px solid;">
-        <h3 class="text-center">Loading...</h3>
-    </div>
+<div id="modal-saving" class="hide" style="position: fixed; width: 250px; height: 65px; top: 10px; right: 10px; padding: 0px; margin: 0px; background-color: white; color: black; border-radius: 10px; border: 1px solid;">
+    <h3 class="text-center">Loading...</h3>
+</div>
 </body>
 </html>

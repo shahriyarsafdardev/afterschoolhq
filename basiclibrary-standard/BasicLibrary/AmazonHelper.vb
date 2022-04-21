@@ -12,8 +12,9 @@ Public Class AmazonHelper
     Private Property SecretAccessKeyId As String
     Private Property BucketName As String
     Private Property RegionEndPoint As RegionEndpoint
-    
-    Private Shared Function ValidateCertificate(sender As Object, certificate As X509Certificate, chain As X509Chain, errors As SslPolicyErrors)
+
+    Private Shared Function ValidateCertificate(sender As Object, certificate As X509Certificate, chain As X509Chain,
+                                                errors As SslPolicyErrors)
         If certificate.Subject = "CN=*.s3.amazonaws.com, O=Amazon.com Inc., L=Seattle, S=Washington, C=US" Then
             Return True
         Else
@@ -25,19 +26,22 @@ Public Class AmazonHelper
         Return New AmazonS3Client(AccessKeyId, SecretAccessKeyId, RegionEndPoint)
     End Function
 
-    Public Sub New(bucketName As String, accessKeyId As String, secretAccessKeyId As String, regionEndPoint As RegionEndpoint)
+    Public Sub New(bucketName As String, accessKeyId As String, secretAccessKeyId As String,
+                   regionEndPoint As RegionEndpoint)
         Me.BucketName = bucketName
         Me.AccessKeyId = accessKeyId
         Me.SecretAccessKeyId = secretAccessKeyId
         Me.RegionEndPoint = regionEndPoint
     End Sub
 
-    Public Function AddFile(fromFileLocation As String, amazonLocation As String, makePublic As Boolean) As SystemMessages
+    Public Function AddFile(fromFileLocation As String, amazonLocation As String, makePublic As Boolean) _
+        As SystemMessages
 
         Dim msgs = New SystemMessages()
         Try
 
-            ServicePointManager.ServerCertificateValidationCallback = New RemoteCertificateValidationCallback(AddressOf ValidateCertificate)
+            ServicePointManager.ServerCertificateValidationCallback =
+                New RemoteCertificateValidationCallback(AddressOf ValidateCertificate)
 
             Dim client As New AmazonS3Client(AccessKeyId, SecretAccessKeyId)
 
@@ -97,7 +101,8 @@ Public Class AmazonHelper
         Dim msgs = New SystemMessages()
         Try
 
-            ServicePointManager.ServerCertificateValidationCallback = New RemoteCertificateValidationCallback(AddressOf ValidateCertificate)
+            ServicePointManager.ServerCertificateValidationCallback =
+                New RemoteCertificateValidationCallback(AddressOf ValidateCertificate)
 
             Dim client As AmazonS3Client = GetS3Client()
 
@@ -125,7 +130,8 @@ Public Class AmazonHelper
         Return msgs
     End Function
 
-    Public Function GetFileLink(amazonLocation As String, Optional ByVal useHttps As Boolean = False, Optional ByVal expirationDate As Date? = Nothing, Optional isPublic As Boolean = False) As String
+    Public Function GetFileLink(amazonLocation As String, Optional ByVal expirationDate As Date? = Nothing,
+                                Optional isPublic As Boolean = True) As String
         Dim msgs = New SystemMessages()
         Dim link = ""
 
@@ -142,10 +148,7 @@ Public Class AmazonHelper
                 request.BucketName = BucketName
                 request.Key = amazonLocation
                 request.Expires = expirationDate
-                request.Protocol = Protocol.HTTP
-                If useHttps Then
-                    request.Protocol = Protocol.HTTPS
-                End If
+                request.Protocol = Protocol.HTTPS
                 link = client.GetPreSignedURL(request)
 
                 If isPublic Then

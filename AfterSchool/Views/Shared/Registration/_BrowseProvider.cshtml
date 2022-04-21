@@ -1,4 +1,5 @@
-﻿@model AccountProfile
+﻿@using Utilities = AfterSchoolLibrary.Helpers.Utilities
+@model AccountProfile
 @{
     var account = Model.GetAccount();
     var profileHeaderImageUrl = Model.GetHeaderImageUrl();
@@ -14,19 +15,19 @@
 
     if (photos.Any() && profileHeaderImageUrl.IsBlank())
     {
-        var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
-        profileHeaderImageUrl = ah.GetFileLink(photos.First().Value, true, null, true);
+        var ah = Utilities.GetNewAmazonHelper();
+        profileHeaderImageUrl = ah.GetFileLink(photos.First().Value, null, true);
     }
 
     if (profileHeaderImageUrl.IsBlank() && location.IsNotEmpty())
     {
-        profileHeaderImageUrl = LocationService.GetGoogleMapsImageUrl(location, 1500, 600);
+        profileHeaderImageUrl = location.GetGoogleMapsImageUrl(1500, 600);
     }
 }
 
 <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4 pointer"
      onclick="WebPage.navigateIframe('@(account?.HomePageUrl)')"
-     id="@(account?.Uid)"     
+     id="@(account?.Uid)"
      name="@(account?.Name)">
 
     <div class="panel" style="overflow: hidden;">

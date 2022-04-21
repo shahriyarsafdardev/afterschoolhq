@@ -394,7 +394,7 @@ namespace AfterSchoolLibrary.Models
         public static string GetFileDownloadLink(string amazonFileLocation)
         {
             var ah = Helpers.Utilities.GetNewAmazonHelper();
-            return ah.GetFileLink(amazonFileLocation, true, DateTime.UtcNow.AddMinutes(30), false);
+            return ah.GetFileLink(amazonFileLocation, DateTime.UtcNow.AddMinutes(30), false);
         }
 
         #endregion

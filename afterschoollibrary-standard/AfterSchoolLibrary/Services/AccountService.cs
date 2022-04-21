@@ -140,6 +140,16 @@ namespace AfterSchoolLibrary.Services
 
         #endregion
 
+        public static bool CanPublishFreeActivity(this Account account, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var freeActivityLimit = account.GetActiveAccountPackage(msgs, dc)
+                .GetFeature(FeatureType.FreeActivityLimit)?.Max.Value;
+            var numberOfPublishedActivities = account.GetPublishedActivities(msgs, dc).Count;
+
+            return freeActivityLimit.IsNotEmpty() && (
+                freeActivityLimit == Int32.MaxValue || freeActivityLimit > numberOfPublishedActivities);
+        }
+
         #region ActivitySchedule
 
         public static ActivitySchedule GetActivitySchedule(this Account account, int Id, SystemMessages msgs = null,
@@ -3183,9 +3193,9 @@ namespace AfterSchoolLibrary.Services
                     var ah = Utilities.GetNewAmazonHelper();
 
                     if (headerImageUrl.IsNotBlank())
-                        response.ProfileHeaderImageUrl = ah.GetFileLink(headerImageUrl, true, null, true);
+                        response.ProfileHeaderImageUrl = ah.GetFileLink(headerImageUrl, null, true);
                     else if (logo.IsNotBlank())
-                        response.ProfileHeaderImageUrl = ah.GetFileLink(logo, true, null, true);
+                        response.ProfileHeaderImageUrl = ah.GetFileLink(logo, null, true);
 
                     if (row["LocationId"].IsNotEmpty())
                     {
@@ -5566,15 +5576,5 @@ namespace AfterSchoolLibrary.Services
         }
 
         #endregion
-        
-        public static bool CanPublishFreeActivity(this Account account, SystemMessages msgs, DatabaseConnection dc)
-        {
-            var freeActivityLimit = account.GetActiveAccountPackage(msgs, dc)
-                .GetFeature(FeatureType.FreeActivityLimit)?.Max.Value;
-            var numberOfPublishedActivities = account.GetPublishedActivities(msgs, dc).Count;
-
-            return freeActivityLimit.IsNotEmpty() && (
-                freeActivityLimit == Int32.MaxValue || freeActivityLimit > numberOfPublishedActivities);
-        }
     }
 }

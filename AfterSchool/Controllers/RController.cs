@@ -1,14 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Web.Mvc;
-using BasicLibrary;
-using AfterSchoolLibrary;
-using AfterSchoolLibrary.Services;
-using AfterSchool.Models;
-using AfterSchoolLibrary.Models;
-using System;
 using System.Text.RegularExpressions;
+using System.Web.Mvc;
+using AfterSchool.Models;
+using AfterSchoolLibrary;
 using AfterSchoolLibrary.FeatureFlag;
+using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Services;
+using BasicLibrary;
+using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Controllers
 {
@@ -28,8 +29,8 @@ namespace AfterSchool.Controllers
         }
 
         /// <summary>
-        /// Used to know where to direct someone if there is an error or lack of information
-        /// the question is where did they start and how do we get them back there?
+        ///     Used to know where to direct someone if there is an error or lack of information
+        ///     the question is where did they start and how do we get them back there?
         /// </summary>
         /// <param name="account"></param>
         private void SetRegistrationStartPage(Account account, bool forceReset = false)
@@ -63,24 +64,25 @@ namespace AfterSchool.Controllers
                     return HttpNotFound();
 
                 var profile = account.GetAccountProfile(msgs);
-                var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
+                var ah = Utilities.GetNewAmazonHelper();
                 var regStartPageAccount = account;
 
                 if (dir.IsNotEmpty())
                 {
                     var directoryAccount = AfterSchoolLibrary.Models.Account.LoadByUniqueName(dir, msgs);
-                    if (directoryAccount.IsNotEmpty() && directoryAccount.AccountTypeId.In(new List<AccountType>() { AccountType.Directory, AccountType.SchoolDistrict }))
+                    if (directoryAccount.IsNotEmpty() && directoryAccount.AccountTypeId.In(new List<AccountType>
+                            {AccountType.Directory, AccountType.SchoolDistrict}))
                     {
                         regStartPageAccount = directoryAccount;
 
                         // LOG: Someone Viewed Account AccountName from Directory DirectoryAccountName
                         // pass in the SessionVariables.WebSession object instead of trying to pass the ID
                         SessionVariables.WebSession.LogActivity(
-                            request: Request,
-                            actor: currentUser,
-                            account: directoryAccount,
-                            actionType: WebSessionActionType.Viewed,
-                            objectType: ObjectType.DirectoryAccount,
+                            Request,
+                            currentUser,
+                            directoryAccount,
+                            WebSessionActionType.Viewed,
+                            ObjectType.DirectoryAccount,
                             objectId: account.ID,
                             objectText: account.Name,
                             indirectObjectId: directoryAccount.ID,
@@ -89,15 +91,16 @@ namespace AfterSchool.Controllers
                     }
                 }
 
-                if (SessionVariables.RegistrationStartPageAccount.IsEmpty() || SessionVariables.RegistrationStartPageAccount.AccountTypeId != AccountType.Directory)
+                if (SessionVariables.RegistrationStartPageAccount.IsEmpty() ||
+                    SessionVariables.RegistrationStartPageAccount.AccountTypeId != AccountType.Directory)
                 {
                     RestartRegistrationSession();
                     SetRegistrationStartPage(regStartPageAccount, true);
                 }
 
-                if (account.AccountTypeId.In(new List<AccountType>() { AccountType.Directory, AccountType.SchoolDistrict }))
+                if (account.AccountTypeId.In(new List<AccountType> {AccountType.Directory, AccountType.SchoolDistrict}))
                 {
-                    var neighborhoodList = Location.LoadNeighborhoodsByHostAccount(hostAccountId: account.ID.Value, msgs: msgs).ToList();
+                    var neighborhoodList = Location.LoadNeighborhoodsByHostAccount(account.ID.Value, msgs).ToList();
 
                     ViewBag.Messages = msgs;
                     ViewBag.Neighborhoods = neighborhoodList;
@@ -110,10 +113,10 @@ namespace AfterSchool.Controllers
                         ViewBag.PrimaryColor = profile.PrimaryColor;
 
                         if (profile.Logo.IsNotBlank())
-                            ViewBag.LogoUrl = ah.GetFileLink(profile.Logo, true, null, true);
+                            ViewBag.LogoUrl = ah.GetFileLink(profile.Logo, null, true);
 
                         if (profile.HeaderImage.IsNotBlank())
-                            ViewBag.HeaderImageUrl = ah.GetFileLink(profile.HeaderImage, true, null, true);
+                            ViewBag.HeaderImageUrl = ah.GetFileLink(profile.HeaderImage, null, true);
 
                         if (profile.Website.IsNotBlank())
                             ViewBag.Website = profile.Website;
@@ -121,11 +124,11 @@ namespace AfterSchool.Controllers
 
                     // LOG: Someone Viewed Directory Account DirectoryName
                     SessionVariables.WebSession.LogActivity(
-                        request: Request,
-                        actor: currentUser,
-                        account: currentAccount,
-                        actionType: WebSessionActionType.Viewed,
-                        objectType: ObjectType.DirectoryAccount,
+                        Request,
+                        currentUser,
+                        currentAccount,
+                        WebSessionActionType.Viewed,
+                        ObjectType.DirectoryAccount,
                         objectId: account.ID,
                         objectText: account.Name
                     );
@@ -136,13 +139,13 @@ namespace AfterSchool.Controllers
                 if (dir.IsEmpty())
                     // LOG: Somone Viewed Account AccountName
                     SessionVariables.WebSession.LogActivity(
-                       request: Request,                       
-                       actor: currentUser,
-                       account: currentAccount,
-                       objectId: account.ID,
-                       objectText: account.Name,
-                       actionType: WebSessionActionType.Viewed,
-                       objectType: ObjectType.Account
+                        Request,
+                        currentUser,
+                        currentAccount,
+                        objectId: account.ID,
+                        objectText: account.Name,
+                        actionType: WebSessionActionType.Viewed,
+                        objectType: ObjectType.Account
                     );
 
                 if (profile.IsEmpty())
@@ -150,7 +153,7 @@ namespace AfterSchool.Controllers
 
                 var photos = profile.GetPhotos(msgs);
 
-                photos.ForEach(photo => photo.Value = ah.GetFileLink(photo.Value, true, null, true));
+                photos.ForEach(photo => photo.Value = ah.GetFileLink(photo.Value, null, true));
 
                 ViewBag.AccountProfile = profile;
                 ViewBag.Location = profile.GetLocation(msgs) ?? account.GetDefaultLocation(msgs);
@@ -165,27 +168,28 @@ namespace AfterSchool.Controllers
                 ViewBag.RestrictByGrade = profile.RestrictByGrade();
                 ViewBag.Messages = msgs;
                 ViewBag.ParticipationObjects = GetParticipationObjects(account, msgs)
-                                                .Where(po => po.RegistrationPeriod.IsOpen(account, msgs) || po.RegistrationPeriod.WillOpen(account, msgs))
-                                                .ToList();
+                    .Where(po =>
+                        po.RegistrationPeriod.IsOpen(account, msgs) || po.RegistrationPeriod.WillOpen(account, msgs))
+                    .ToList();
                 ViewBag.Locations = account.GetAllAvailableLocations(msgs);
                 ViewBag.AccountProperties = account.GetAccountProperties(
-                                                new List<AccountPropertyType>()
-                                                {
-                                                AccountPropertyType.AcademicSubjects,
-                                                AccountPropertyType.Classifications,
-                                                AccountPropertyType.ServiceOffered,
-                                                AccountPropertyType.SoftSkills,
-                                                AccountPropertyType.TeachingMethods,
-                                                AccountPropertyType.TimeOffered,
-                                                AccountPropertyType.SpecialNeedsOffering,
-                                                AccountPropertyType.PricingOption,
-                                                }, msgs);
+                    new List<AccountPropertyType>
+                    {
+                        AccountPropertyType.AcademicSubjects,
+                        AccountPropertyType.Classifications,
+                        AccountPropertyType.ServiceOffered,
+                        AccountPropertyType.SoftSkills,
+                        AccountPropertyType.TeachingMethods,
+                        AccountPropertyType.TimeOffered,
+                        AccountPropertyType.SpecialNeedsOffering,
+                        AccountPropertyType.PricingOption,
+                    }, msgs);
             }
             catch (Exception ex)
             {
                 msgs.Add(accountname, MessageType.Notice);
-                msgs.Add(new SystemMessage() { Exception = ex, Text = ex.Message, MessageType = MessageType.Error });
-                AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(msgs);
+                msgs.Add(new SystemMessage {Exception = ex, Text = ex.Message, MessageType = MessageType.Error});
+                Utilities.SystemErrorLog(msgs);
             }
 
             ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
@@ -199,11 +203,11 @@ namespace AfterSchool.Controllers
             participationObjects.AddRange(account.GetPublishedParticipationObjects(msgs));
 
             return participationObjects
-                        .Where(po => (!po.IsActivity() || !po.GetActivity().ActivityGroupId.HasValue) && !po.IsInviteOnly)
-                        .OrderBy(po => po.RegistrationPeriod.IsClosed(account, msgs))
-                        .ThenBy(po => po.RegistrationPeriod.WillOpen(account, msgs))
-                        .ThenBy(po => po.RegistrationPeriod.IsOpen(account, msgs))
-                        .ToList();
+                .Where(po => (!po.IsActivity() || !po.GetActivity().ActivityGroupId.HasValue) && !po.IsInviteOnly)
+                .OrderBy(po => po.RegistrationPeriod.IsClosed(account, msgs))
+                .ThenBy(po => po.RegistrationPeriod.WillOpen(account, msgs))
+                .ThenBy(po => po.RegistrationPeriod.IsOpen(account, msgs))
+                .ToList();
         }
 
 
@@ -236,21 +240,23 @@ namespace AfterSchool.Controllers
                 participationObjects = GetParticipationObjects(account, msgs);
 
                 locations.AddRange(account.GetAllAvailableLocations(msgs));
-                locations.AddRange(participationObjects.Where(po => po.Location.IsNotEmpty()).Select(po => po.Location));
+                locations.AddRange(participationObjects.Where(po => po.Location.IsNotEmpty())
+                    .Select(po => po.Location));
 
                 regOpened = participationObjects.Where(po => po.RegistrationPeriod.IsOpen(account, msgs)).ToList();
                 regWillOpen = participationObjects.Where(po => po.RegistrationPeriod.WillOpen(account, msgs)).ToList();
-                regClosed = participationObjects.Where(po => po.NotIn(regWillOpen) && po.RegistrationPeriod.IsClosed(account, msgs)).ToList();
+                regClosed = participationObjects
+                    .Where(po => po.NotIn(regWillOpen) && po.RegistrationPeriod.IsClosed(account, msgs)).ToList();
 
                 // LOG: Someone Browsed Account AccountName's Programs
                 SessionVariables.WebSession.LogActivity(
-                    account: account,
-                    actor: SessionVariables.CurrentUser,
-                    actionType: WebSessionActionType.BrowsedAllActivities,
-                    objectType: ObjectType.Account,
+                    account,
+                    SessionVariables.CurrentUser,
+                    WebSessionActionType.BrowsedAllActivities,
+                    ObjectType.Account,
                     objectId: account.ID,
                     objectText: account.Name
-                 );
+                );
 
                 featuredProviders = account.GetApprovedVisitorAccounts(msgs);
             }
@@ -262,7 +268,8 @@ namespace AfterSchool.Controllers
                 var accountUniqueName = "";
                 (accountname, accountUniqueName) = GetDemoAccountDetails(accountname);
 
-                ParticipationObject.GenerateDemoObjects(ref account, participationObjects, locations, accountname, accountUniqueName, grades);
+                ParticipationObject.GenerateDemoObjects(ref account, participationObjects, locations, accountname,
+                    accountUniqueName, grades);
                 participationObjects = participationObjects.Take(11).ToList();
 
                 regOpened = participationObjects;
@@ -295,14 +302,13 @@ namespace AfterSchool.Controllers
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
 
 
-
             if (account.IsEmpty())
                 return HttpNotFound();
 
             if (!account.ContactFormId.HasValue)
                 return Redirect(account.HomePageUrl);
 
-            return RedirectToAction("contact", "account", new { area = "", regaccount = account.Uid });
+            return RedirectToAction("contact", "account", new {area = "", regaccount = account.Uid});
         }
 
         public ActionResult Pay(string accountname)
@@ -322,7 +328,8 @@ namespace AfterSchool.Controllers
                 return Redirect(account.HomePageUrl);
 
             if (!currentUser.IsRegistered)
-                return Redirect(Url.Action("confirm", "signup", new { id = currentUser.Uid, returnurl = account.PayUrl }));
+                return Redirect(Url.Action("confirm", "signup",
+                    new {id = currentUser.Uid, returnurl = account.PayUrl}));
 
             if (currentAccount.AccountTypeId != AccountType.Registrant)
             {
@@ -331,7 +338,8 @@ namespace AfterSchool.Controllers
 
                 // if no parent account, then create one real quick
                 if (registrantAccount.IsEmpty())
-                    registrantAccount = currentUser.AddNewRegistrantAccount(UserType.Owner, true, true, currentUser, msgs);
+                    registrantAccount =
+                        currentUser.AddNewRegistrantAccount(UserType.Owner, true, true, currentUser, msgs);
 
                 var masterRegistrant = currentUser.GetMasterRegistrant(msgs);
 
@@ -366,7 +374,7 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             HandleTempMessages(msgs);
 
-            ParticipationObject participationObject = null;            
+            ParticipationObject participationObject = null;
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
             var canPublishActivity = false;
             var accountProfile = account?.GetAccountProfile(msgs);
@@ -379,8 +387,12 @@ namespace AfterSchool.Controllers
                 if (account.IsDeleted)
                     return HttpNotFound();
 
-                var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
-                if (!activity.IsPublished && (currentUser.IsEmpty() || currentUser.IsNotEmpty() && !currentUser.HasAccessToActivity(activity, msgs)))
+                var activity =
+                    AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value,
+                        msgs);
+                if (!activity.IsPublished && (currentUser.IsEmpty() ||
+                                              (currentUser.IsNotEmpty() &&
+                                               !currentUser.HasAccessToActivity(activity, msgs))))
                     return Redirect(account.HomePageUrl);
 
                 if (activity.IsEmpty())
@@ -394,22 +406,24 @@ namespace AfterSchool.Controllers
                     AddNoCacheHeaders();
                 }
 
-                
+
                 if (currentUser.IsNotEmpty() && currentAccount.IsNotEmpty())
                     canPublishActivity = currentUser.CanPublishActivity(currentAccount, activity, msgs);
             }
             else
+            {
                 return HttpNotFound();
+            }
 
-            RestartRegistrationSession(clearCart: session.IsEmpty());
-            SetRegistrationStartPage(account);            
+            RestartRegistrationSession(session.IsEmpty());
+            SetRegistrationStartPage(account);
 
             // LOG: Someone Viewed ParticipationObjectType ParticipationObjectName by Account AccountName
             SessionVariables.WebSession.LogActivity(
-                account: account,
-                actor: SessionVariables.CurrentUser,
-                actionType: WebSessionActionType.Viewed,
-                objectType: participationObject.GetWebSessionObjectType(),
+                account,
+                SessionVariables.CurrentUser,
+                WebSessionActionType.Viewed,
+                participationObject.GetWebSessionObjectType(),
                 objectId: participationObject.ObjectID.Value,
                 objectText: participationObject.Name,
                 indirectObjectType: ObjectType.Account,
@@ -442,7 +456,8 @@ namespace AfterSchool.Controllers
             if (account.IsEmpty() || account.IsDeleted)
                 return HttpNotFound();
 
-            var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
+            var activity =
+                AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
 
             if (activity.IsEmpty())
                 return HttpNotFound();
@@ -472,7 +487,8 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult SelectDates(string accountname, string activitytype, string activityname, string reg, string post)
+        public ActionResult SelectDates(string accountname, string activitytype, string activityname, string reg,
+            string post)
         {
             if (isUnsupportedBrowser())
                 return RedirectUnsupportedBrowser();
@@ -483,7 +499,8 @@ namespace AfterSchool.Controllers
             if (account.IsEmpty() || account.IsDeleted)
                 return HttpNotFound();
 
-            var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
+            var activity =
+                AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
 
             if (activity.IsEmpty())
                 return HttpNotFound();
@@ -491,7 +508,8 @@ namespace AfterSchool.Controllers
             var participationObject = activity.GetParticipationObject(msgs);
             var dateFields = Request.Params.Filter("date-");
 
-            var selectedDates = dateFields.Cast<string>().Select(x => dateFields[x]).Select(x => x.ToDateTime()).ToList();
+            var selectedDates = dateFields.Cast<string>().Select(x => dateFields[x]).Select(x => x.ToDateTime())
+                .ToList();
 
             return RedirectToRegistration(account, participationObject, reg, selectedDates, msgs);
         }
@@ -534,16 +552,16 @@ namespace AfterSchool.Controllers
 
             // LOG: Somone Viewed Session SessionName by Account AccountName
             SessionVariables.WebSession.LogActivity(
-                account: account,
-                actor: SessionVariables.CurrentUser,
-                actionType: WebSessionActionType.Viewed,
-                objectType: participationObject.GetWebSessionObjectType(),
+                account,
+                SessionVariables.CurrentUser,
+                WebSessionActionType.Viewed,
+                participationObject.GetWebSessionObjectType(),
                 objectId: participationObject.ObjectID.Value,
                 objectText: sessionname,
                 indirectObjectType: ObjectType.Account,
                 indirectObjectId: participationObject.OwnerAccount.ID.Value,
                 indirectObjectText: participationObject.OwnerAccount.Name
-             );
+            );
 
             return View("activity", participationObject);
         }
@@ -597,16 +615,16 @@ namespace AfterSchool.Controllers
 
             // LOG: Somone Viewed League LeagueName by Account AccountName
             SessionVariables.WebSession.LogActivity(
-                account: account,
-                actor: SessionVariables.CurrentUser,
-                actionType: WebSessionActionType.Viewed,
-                objectType: participationObject.GetWebSessionObjectType(),
+                account,
+                SessionVariables.CurrentUser,
+                WebSessionActionType.Viewed,
+                participationObject.GetWebSessionObjectType(),
                 objectId: participationObject.ObjectID.Value,
                 objectText: leaguename,
                 indirectObjectType: ObjectType.Account,
                 indirectObjectId: participationObject.OwnerAccount.ID.Value,
                 indirectObjectText: participationObject.OwnerAccount.Name
-             );
+            );
 
             return View("activity", participationObject);
         }
@@ -623,7 +641,8 @@ namespace AfterSchool.Controllers
             if (account.IsEmpty() || account.IsDeleted)
                 return HttpNotFound();
 
-            var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
+            var activity =
+                AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
 
             if (activity.IsEmpty())
                 return HttpNotFound();
@@ -645,7 +664,8 @@ namespace AfterSchool.Controllers
             if (account.IsEmpty() || account.IsDeleted)
                 return HttpNotFound();
 
-            var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
+            var activity =
+                AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
 
             if (activity.IsEmpty())
                 return HttpNotFound();
@@ -697,7 +717,9 @@ namespace AfterSchool.Controllers
 
             LoadSessionInvite(session, invite, decline, msgs);
 
-            var canRegisterFor = !session.IsInviteOnly || (SessionVariables.SessionInvite.IsGuid() && session.IsInvited(SessionVariables.SessionInvite.ToGuid(), msgs));
+            var canRegisterFor = !session.IsInviteOnly || (SessionVariables.SessionInvite.IsGuid() &&
+                                                           session.IsInvited(SessionVariables.SessionInvite.ToGuid(),
+                                                               msgs));
 
             if (!canRegisterFor)
                 return Redirect(session.HomePageUrl);
@@ -739,7 +761,8 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
-        public ActionResult RegisterLeague(string accountname, string activitygrouptype, string externalaccountname, string group, string reg)
+        public ActionResult RegisterLeague(string accountname, string activitygrouptype, string externalaccountname,
+            string group, string reg)
         {
             if (isUnsupportedBrowser())
                 return RedirectUnsupportedBrowser();
@@ -779,7 +802,8 @@ namespace AfterSchool.Controllers
             return RedirectToRegistration(account, participationObject, reg, null, msgs);
         }
 
-        private ActionResult RedirectToRegistration(Account account, ParticipationObject participationObject, string reg, List<DateTime> selectedDates, SystemMessages msgs)
+        private ActionResult RedirectToRegistration(Account account, ParticipationObject participationObject,
+            string reg, List<DateTime> selectedDates, SystemMessages msgs)
         {
             SetRegistrationStartPage(account);
 
@@ -798,7 +822,7 @@ namespace AfterSchool.Controllers
                 SessionVariables.CurrentRegistrant = Registrant.LoadByUid(reg.ToGuid(), msgs);
 
             if (SessionVariables.CurrentRegistrant.IsEmpty())
-                return RedirectToAction("getstarted", "account", new { area = "", regaccount = account.Uid });
+                return RedirectToAction("getstarted", "account", new {area = "", regaccount = account.Uid});
 
             var masterRegistrant = SessionVariables.CurrentUser.GetMasterRegistrant();
 
@@ -806,24 +830,25 @@ namespace AfterSchool.Controllers
             {
                 // LOG: Somone Began Registration for ParticipationObjectType ParticipationObjectName by Account AccountName
                 SessionVariables.WebSession.LogActivity(
-                    account: account,
-                    actor: SessionVariables.CurrentUser,
-                    actionType: WebSessionActionType.BeganRegistration,
-                    objectType: participationObject.GetWebSessionObjectType(),
+                    account,
+                    SessionVariables.CurrentUser,
+                    WebSessionActionType.BeganRegistration,
+                    participationObject.GetWebSessionObjectType(),
                     objectId: participationObject.ObjectID.Value,
                     objectText: participationObject.Name,
                     indirectObjectType: ObjectType.Account,
                     indirectObjectId: participationObject.OwnerAccount.ID.Value,
                     indirectObjectText: participationObject.OwnerAccount.Name
-                 );
+                );
 
-                return RedirectToAction("register", "account", new { area = "", regaccount = account.Uid });
-
+                return RedirectToAction("register", "account", new {area = "", regaccount = account.Uid});
             }
 
-            return RedirectToAction("registerstudent", "account", new { area = "", regaccount = account.Uid });
+            return RedirectToAction("registerstudent", "account", new {area = "", regaccount = account.Uid});
         }
-        private ActionResult RedirectToInterested(Account account, ParticipationObject participationObject, SystemMessages msgs)
+
+        private ActionResult RedirectToInterested(Account account, ParticipationObject participationObject,
+            SystemMessages msgs)
         {
             SetRegistrationStartPage(account);
 
@@ -838,7 +863,7 @@ namespace AfterSchool.Controllers
 
             SessionVariables.Cart.AddCartItem(participationObject, null, msgs);
 
-            return RedirectToAction("interested", "account", new { area = "", regaccount = account.Uid });
+            return RedirectToAction("interested", "account", new {area = "", regaccount = account.Uid});
         }
 
         private void LoadSessionInvite(ActivityGroup session, string invite, string decline, SystemMessages msgs)
@@ -863,7 +888,8 @@ namespace AfterSchool.Controllers
             }
             else
             {
-                var reg = new Regex(BasicLibrary.Utilities.UrlFriendlyRegEx, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                var reg = new Regex(BasicLibrary.Utilities.UrlFriendlyRegEx,
+                    RegexOptions.IgnoreCase | RegexOptions.Singleline);
                 accountName = accountName.SplitByUpperCase();
                 accountUniqueName = reg.Replace(accountName.GetMaxWords(25), "");
             }

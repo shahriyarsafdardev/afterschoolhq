@@ -17,7 +17,9 @@ namespace AfterSchool.Areas.Org.Controllers
     public class OnboardingController : BaseLoggedInController
     {
         private readonly IFeatureFlagRepository featureFlagRepository;
-        public OnboardingController(IFeatureFlagRepository featureFlagRepository) : base(AccountService.OrganizationAccountTypesAndNotSet.ToList())
+
+        public OnboardingController(IFeatureFlagRepository featureFlagRepository) : base(
+            AccountService.OrganizationAccountTypesAndNotSet.ToList())
         {
             this.featureFlagRepository = featureFlagRepository;
         }
@@ -28,7 +30,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             if (featureFlagRepository.IsEnabled("free-trial"))
                 return RedirectToAction("FreeTrial");
-            
+
             if (showGettingStarted)
                 return RedirectToAction("GettingStarted");
 
@@ -369,10 +371,10 @@ namespace AfterSchool.Areas.Org.Controllers
             HandleTempMessages(msgs);
 
             if (profile.Logo.IsNotBlank())
-                ViewBag.LogoUrl = ah.GetFileLink(profile.Logo, true, null, true);
+                ViewBag.LogoUrl = ah.GetFileLink(profile.Logo, null, true);
 
             if (profile.HeaderImage.IsNotBlank())
-                ViewBag.HeaderImageUrl = ah.GetFileLink(profile.HeaderImage, true, null, true);
+                ViewBag.HeaderImageUrl = ah.GetFileLink(profile.HeaderImage, null, true);
 
             ViewBag.Messages = msgs;
             return View(account);

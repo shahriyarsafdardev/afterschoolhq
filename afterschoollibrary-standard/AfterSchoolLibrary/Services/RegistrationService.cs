@@ -401,7 +401,7 @@ namespace AfterSchoolLibrary.Services
             string amazonLocation = $"{account.Uid.ToString()}/{Guid.NewGuid().ToString()}/{filename}";
             msgs.AddRange(ah.AddFile(ms, amazonLocation, true));
 
-            return ah.GetFileLink(amazonLocation, true, null, true);
+            return ah.GetFileLink(amazonLocation, null, true);
         }
 
         public static string ExportCSV(List<Registration> registrations, Account account, RegistrationReportType reportType, RegistrationStatus registrationStatus, List<int> participationObjectIds, ParticipationObjectType participationObjectType, List<RegistrationAssignmentType> assignmentTypes, SystemMessages msgs = null, DatabaseConnection dc = null)

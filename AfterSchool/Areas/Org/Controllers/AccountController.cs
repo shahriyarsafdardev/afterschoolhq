@@ -1231,12 +1231,12 @@ namespace AfterSchool.Areas.Org.Controllers
             var ah = Utilities.GetNewAmazonHelper();
 
             if (profile.Logo.IsNotBlank())
-                ViewBag.LogoUrl = ah.GetFileLink(profile.Logo, true, null, true);
+                ViewBag.LogoUrl = ah.GetFileLink(profile.Logo, null, true);
 
             if (profile.HeaderImage.IsNotBlank())
-                ViewBag.HeaderImageUrl = ah.GetFileLink(profile.HeaderImage, true, null, true);
+                ViewBag.HeaderImageUrl = ah.GetFileLink(profile.HeaderImage, null, true);
 
-            photos.ForEach(photo => photo.Value = ah.GetFileLink(photo.Value, true, null, true));
+            photos.ForEach(photo => photo.Value = ah.GetFileLink(photo.Value, null, true));
 
             ViewBag.Account = account;
             ViewBag.Location = profile.GetLocation(msgs);
