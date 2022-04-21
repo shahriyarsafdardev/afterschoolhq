@@ -607,7 +607,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (mustRequestToPublish)
                 msgs.Add("You do not have permissions to publish", MessageType.UserError);
-
+            
+            msgs.AddRange(activity.GetItemsRequiredToPublish(msgs));
+            
             if (msgs.HasNoErrors())
             {
                 BeforePublish(activity, msgs);
@@ -670,7 +672,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
             ViewBag.Messages = msgs;
 
-            if (isFromActivityHome)
+            if (isFromActivityHome && msgs.HasNoErrors())
                 return Redirect(activity.ShortHomePageUrl);
 
             return View("publishdetail", activity);
