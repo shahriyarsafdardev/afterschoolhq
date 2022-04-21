@@ -109,6 +109,7 @@ namespace AfterSchoolLibrary.Helpers
                     Migration_20220407_SetActivityRegistrantIsDeleted.Do(amsgs, adc);
                     Migration_20220411_AddFreeTrialFeatureFlag.Do(amsgs, adc);
                     Migration_20220412_IncreaseWebSessionActionActionStringColumnSize.Do(amsgs, adc);
+                    Migration_20220420_AddFreeActivityLimitPackageFeature.Do(amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs)

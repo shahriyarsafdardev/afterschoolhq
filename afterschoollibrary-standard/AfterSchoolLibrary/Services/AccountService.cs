@@ -5566,5 +5566,15 @@ namespace AfterSchoolLibrary.Services
         }
 
         #endregion
+        
+        public static bool CanPublishFreeActivity(this Account account, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var freeActivityLimit = account.GetActiveAccountPackage(msgs, dc)
+                .GetFeature(FeatureType.FreeActivityLimit)?.Max.Value;
+            var numberOfPublishedActivities = account.GetPublishedActivities(msgs, dc).Count;
+
+            return freeActivityLimit.IsNotEmpty() && (
+                freeActivityLimit == Int32.MaxValue || freeActivityLimit > numberOfPublishedActivities);
+        }
     }
 }

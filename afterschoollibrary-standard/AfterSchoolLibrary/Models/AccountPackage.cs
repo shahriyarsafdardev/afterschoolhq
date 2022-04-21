@@ -270,23 +270,30 @@ namespace AfterSchoolLibrary.Models
 
         public AccountPackageFeature AddOrUpdatePackageFeature(FeatureType featureTypeId, decimal maxValue, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var apf = AccountPackageFeature.LoadByAccountPackageIdByFeatureTypeId(this.ID.Value, featureTypeId, msgs, dc);
+	        return AddOrUpdatePackageFeature(featureTypeId, maxValue, loggedInUser?.ID.IfEmpty(0), msgs, dc);
+        }
 
-            if (apf.IsEmpty())
-            {
-                apf = new AccountPackageFeature();
-                apf.AccountPackageId = this.ID;
-                apf.FeatureTypeId = featureTypeId;
-                apf.CreateDate = DateTime.UtcNow;
-                apf.CreatedBy = loggedInUser?.ID.IfEmpty(0);
-            }
+        public AccountPackageFeature AddOrUpdatePackageFeature(FeatureType featureTypeId, decimal maxValue,
+	        int? lastModifiedById,
+	        SystemMessages msgs, DatabaseConnection dc)
+        {
+	        var apf = Models.AccountPackageFeature.LoadByAccountPackageIdByFeatureTypeId(this.ID.Value, featureTypeId, msgs, dc);
 
-            apf.Max = maxValue;
-            apf.LastModifiedDate = DateTime.UtcNow;
-            apf.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
-            msgs.AddRange(apf.Save(dc: dc));
+	        if (apf.IsEmpty())
+	        {
+		        apf = new AccountPackageFeature();
+		        apf.AccountPackageId = this.ID;
+		        apf.FeatureTypeId = featureTypeId;
+		        apf.CreateDate = DateTime.UtcNow;
+		        apf.CreatedBy = lastModifiedById;
+	        }
 
-            return apf;
+	        apf.Max = maxValue;
+	        apf.LastModifiedDate = DateTime.UtcNow;
+	        apf.LastModifiedBy = lastModifiedById;
+	        msgs.AddRange(apf.Save(dc: dc));
+
+	        return apf;
         }
 
         public Package ToPackage()

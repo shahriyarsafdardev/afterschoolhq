@@ -162,7 +162,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                 msgs.AddRange(packageFeature.Save());
             }
             else
-                packageFeature = PackageFeatureService.AddPackageFeature(packageId, featureTypeId.ToEnum<FeatureType>(), featureValue, currentUser, msgs);
+                packageFeature = PackageFeatureService.AddPackageFeature(packageId, featureTypeId.ToEnum<FeatureType>(), featureValue, currentUser.ID.Value, msgs);
 
             packageFeature.ResetAllAccountFeaturesToPackageFeature(
                 accountTypeIdList, 

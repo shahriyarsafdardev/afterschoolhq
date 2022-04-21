@@ -28,22 +28,30 @@
     </div>
 
     <div class="panel-body">
-
-        <div class="form-group">
-            <label class="col-sm-3 control-label" for="do-parents-pay">
-                Do parents pay? <span class="text-danger">*</span>
-            </label>
-            <div class="col-sm-9">
-                <div class="am-radio inline">
-                    <input type="radio" class="form-control" name="doparentspay" id="do-parents-pay-no" required @(Model.IsFree ? "checked=\"checked\"" : "") />
-                    <label for="do-parents-pay-no">No</label>
-                </div>
-                <div class="am-radio inline">
-                    <input type="radio" class="form-control" name="doparentspay" id="do-parents-pay-yes" required />
-                    <label for="do-parents-pay-yes">Yes</label>
+        @if (Model.IsPublished)
+        {
+            <p>Cost cannot be changed while activity is published and accepting registrations.</p>
+            <a href="@Url.Action("PublishDetail", "Activity", new { id = Model.Uid.ToString()})">Unpublish your activity here first. </a>
+        }
+        else
+        {
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="do-parents-pay">
+                    Do parents pay? <span class="text-danger">*</span>
+                </label>
+                <div class="col-sm-9">
+                    <div class="am-radio inline">
+                        <input type="radio" class="form-control" name="doparentspay" id="do-parents-pay-no" required @(Model.IsFree ? "checked=\"checked\"" : "") />
+                        <label for="do-parents-pay-no">No</label>
+                    </div>
+                    <div class="am-radio inline">
+                        <input type="radio" class="form-control" name="doparentspay" id="do-parents-pay-yes" required />
+                        <label for="do-parents-pay-yes">Yes</label>
+                    </div>
                 </div>
             </div>
-        </div>
+        }
+        
 
         <div id="tuition-costs" class="hide">
 
