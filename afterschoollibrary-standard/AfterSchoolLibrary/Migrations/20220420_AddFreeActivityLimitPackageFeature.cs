@@ -21,7 +21,7 @@ namespace AfterSchoolLibrary.Migrations
                     var maximumDecimalValueForDatabasePrecision = 99999999.99m;
                     packages.ForEach(package =>
                     {
-                        var maxValue = package.Price > 0 ? maximumDecimalValueForDatabasePrecision : 0;
+                        var maxValue = package.Price > 0 ? maximumDecimalValueForDatabasePrecision : 6;
                         
                         PackageFeatureService.AddPackageFeature(
                             package.ID.Value,

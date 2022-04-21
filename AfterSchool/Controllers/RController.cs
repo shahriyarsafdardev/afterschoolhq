@@ -394,7 +394,8 @@ namespace AfterSchool.Controllers
                     AddNoCacheHeaders();
                 }
 
-                if (currentUser.IsNotEmpty() && currentAccount.IsNotEmpty())
+                msgs.AddRange(activity.GetItemsRequiredToPublish(msgs));
+                if (currentUser.IsNotEmpty() && currentAccount.IsNotEmpty() && msgs.HasNoErrors())
                     canPublishActivity = currentUser.CanPublishActivity(currentAccount, activity, msgs);
             }
             else
