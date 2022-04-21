@@ -348,7 +348,7 @@ namespace AfterSchoolLibrary.Services
             if (body.IsBlank())
                 body = "";
 
-            body += $"<p>Here is your {uiActivityLabel} report: <a href=\"{fileLink}\">{fileLink}</a></p>{(Helpers.Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "student_report"))}";
+            body += $"<p>Here is your {uiActivityLabel} report: <a href=\"{fileLink}\" target=\"_blank\" clicktracking=\"off\">{fileLink}</a></p>{(Helpers.Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "student_report"))}";
 
             var emailList = new List<string>();
 
@@ -401,7 +401,7 @@ namespace AfterSchoolLibrary.Services
             string amazonLocation = $"{account.Uid.ToString()}/{Guid.NewGuid().ToString()}/{filename}";
             msgs.AddRange(ah.AddFile(ms, amazonLocation, true));
 
-            return ah.GetFileLink(amazonLocation, false, null, true);
+            return ah.GetFileLink(amazonLocation, true, null, true);
         }
 
         public static string ExportCSV(List<Registration> registrations, Account account, RegistrationReportType reportType, RegistrationStatus registrationStatus, List<int> participationObjectIds, ParticipationObjectType participationObjectType, List<RegistrationAssignmentType> assignmentTypes, SystemMessages msgs = null, DatabaseConnection dc = null)
