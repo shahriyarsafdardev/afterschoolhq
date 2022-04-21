@@ -18,9 +18,10 @@ namespace AfterSchoolLibrary.Migrations
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     var packages = Package.Load(msgs: msgs, dc: dc);
+                    var maximumDecimalValueForDatabasePrecision = 99999999.99m;
                     packages.ForEach(package =>
                     {
-                        var maxValue = package.Price > 0 ? decimal.MaxValue : 0;
+                        var maxValue = package.Price > 0 ? maximumDecimalValueForDatabasePrecision : 0;
                         
                         PackageFeatureService.AddPackageFeature(
                             package.ID.Value,
@@ -33,7 +34,8 @@ namespace AfterSchoolLibrary.Migrations
                     var accountPackages = AccountPackage.Load(msgs: msgs, dc: dc);
                     accountPackages.ForEach(accountPackage =>
                     {
-                        accountPackage.AddOrUpdatePackageFeature(FeatureType.FreeActivityLimit, decimal.MaxValue, 0, msgs, dc);
+                        accountPackage.AddOrUpdatePackageFeature(FeatureType.FreeActivityLimit,
+                            maximumDecimalValueForDatabasePrecision, 0, msgs, dc);
                     });
                     
                 },
