@@ -5,11 +5,15 @@ namespace AfterSchoolLibrary.Tests
 {
     public class RegistrationServiceTests
     {
-        [TestCase("registrations.csv", "registrations.csv")]
+        [TestCase("$email-th/is report!", "email-this report.csv")]
+        [TestCase("new.report.csv", "new.report.csv")]
+        [TestCase("numbers.csv", "numbers.csv")]
+        [TestCase("attendance", "attendance.csv")]
         [TestCase("", "registrations.csv")]
-        public void FormatFilenameTests(string input, string expected)
+        [TestCase("new.csv.report", "new.csv.report.csv")]
+        public void CreateRegistrationsCsvFilenameTests(string input, string expected)
         {
-            var actual = RegistrationService.FormatFilename(input);
+            var actual = RegistrationService.CreateRegistrationsCsvFilename(input);
             Assert.That(actual, Is.EqualTo(expected));
         }
     }
