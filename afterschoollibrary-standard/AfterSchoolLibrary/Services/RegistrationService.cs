@@ -425,8 +425,8 @@ namespace AfterSchoolLibrary.Services
                         $"{account.Name} via {Utilities.AppName(account.IsAfterSchool)}"
                     ),
                     toEmail: new EmailAddress(email),
-                    subject,
-                    body,
+                    subject: subject,
+                    body: body,
                     emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool),
                     attachmentByteData: byteData,
                     attachmentFilename: filename
