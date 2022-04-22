@@ -12,7 +12,8 @@ namespace AfterSchoolLibraryTests.Factories
             {
                 ParticipationObjectId = activity.ID,
                 ParticipationObjectTypeId = ParticipationObjectType.Activity,
-                RegistrantId = registrant.ID
+                RegistrantId = registrant.ID,
+                IsDeleted = false
             };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;

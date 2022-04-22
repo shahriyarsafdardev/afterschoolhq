@@ -73,11 +73,9 @@ namespace AfterSchoolLibraryTests.Tests
             var account = AccountFactory.Create(user, msgs, dc: dc);
             var activity = ActivityFactory.Create(account, msgs, dc: dc);
             var registrant = RegistrantFactory.Create(msgs, dc: dc);
-            var registrantActivity = RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
-            
-            var list = RegistrantActivity.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc);
+            RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
 
-            Assert.Single(list);
+            Assert.Single(RegistrantActivity.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc));
         }
 
         /// <summary>
