@@ -16,7 +16,7 @@
     if (photos.Any() && profileHeaderImageUrl.IsBlank())
     {
         var ah = Utilities.GetNewAmazonHelper();
-        profileHeaderImageUrl = ah.GetFileLink(photos.First().Value, null, true);
+        profileHeaderImageUrl = ah.GetFileLink(photos.First().Value);
     }
 
     if (profileHeaderImageUrl.IsBlank() && location.IsNotEmpty())

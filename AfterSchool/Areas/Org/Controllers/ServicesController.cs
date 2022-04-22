@@ -598,7 +598,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 if (msgs.HasNoErrors())
                 {
-                    var url = ah.GetFileLink(amazonLocation, null, true);
+                    var url = ah.GetFileLink(amazonLocation);
 
                     return Json(new
                     {

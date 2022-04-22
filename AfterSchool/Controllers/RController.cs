@@ -113,10 +113,10 @@ namespace AfterSchool.Controllers
                         ViewBag.PrimaryColor = profile.PrimaryColor;
 
                         if (profile.Logo.IsNotBlank())
-                            ViewBag.LogoUrl = ah.GetFileLink(profile.Logo, null, true);
+                            ViewBag.LogoUrl = ah.GetFileLink(profile.Logo);
 
                         if (profile.HeaderImage.IsNotBlank())
-                            ViewBag.HeaderImageUrl = ah.GetFileLink(profile.HeaderImage, null, true);
+                            ViewBag.HeaderImageUrl = ah.GetFileLink(profile.HeaderImage);
 
                         if (profile.Website.IsNotBlank())
                             ViewBag.Website = profile.Website;
@@ -153,7 +153,7 @@ namespace AfterSchool.Controllers
 
                 var photos = profile.GetPhotos(msgs);
 
-                photos.ForEach(photo => photo.Value = ah.GetFileLink(photo.Value, null, true));
+                photos.ForEach(photo => photo.Value = ah.GetFileLink(photo.Value));
 
                 ViewBag.AccountProfile = profile;
                 ViewBag.Location = profile.GetLocation(msgs) ?? account.GetDefaultLocation(msgs);

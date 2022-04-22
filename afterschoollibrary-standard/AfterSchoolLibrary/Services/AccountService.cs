@@ -3193,9 +3193,9 @@ namespace AfterSchoolLibrary.Services
                     var ah = Utilities.GetNewAmazonHelper();
 
                     if (headerImageUrl.IsNotBlank())
-                        response.ProfileHeaderImageUrl = ah.GetFileLink(headerImageUrl, null, true);
+                        response.ProfileHeaderImageUrl = ah.GetFileLink(headerImageUrl);
                     else if (logo.IsNotBlank())
-                        response.ProfileHeaderImageUrl = ah.GetFileLink(logo, null, true);
+                        response.ProfileHeaderImageUrl = ah.GetFileLink(logo);
 
                     if (row["LocationId"].IsNotEmpty())
                     {

@@ -96,7 +96,7 @@ namespace AfterSchoolLibrary.Services
         public static string GetHeaderImageUrl(this AccountProfile profile, SystemMessages msgs = null)
         {
             if (profile.HeaderImage.IsNotBlank())
-                return Utilities.GetNewAmazonHelper().GetFileLink(profile.HeaderImage, null, true);
+                return Utilities.GetNewAmazonHelper().GetFileLink(profile.HeaderImage);
 
             return null;
         }
@@ -104,7 +104,7 @@ namespace AfterSchoolLibrary.Services
         public static string GetLogoUrl(this AccountProfile profile, SystemMessages msgs = null)
         {
             if (profile.Logo.IsNotBlank())
-                return Utilities.GetNewAmazonHelper().GetFileLink(profile.Logo, null, true);
+                return Utilities.GetNewAmazonHelper().GetFileLink(profile.Logo);
 
             return null;
         }
