@@ -386,7 +386,8 @@ namespace AfterSchoolLibrary.Services
                 dc);
             var csvByteData = Encoding.UTF8.GetBytes(csvText);
 
-            EmailCsv(account, emails, subject, body, uiActivityLabel, FormatFilename(filename), msgs, csvByteData);
+            EmailCsv(account, emails, subject, body, uiActivityLabel, CreateRegistrationsCsvFilename(filename), msgs,
+                csvByteData);
 
             return msgs;
         }
@@ -434,18 +435,14 @@ namespace AfterSchoolLibrary.Services
             });
         }
 
-        internal static string FormatFilename(string filename)
+        internal static string CreateRegistrationsCsvFilename(string userProposedFilename)
         {
-            if (!filename.IsNotEmpty())
+            if (userProposedFilename.IsEmpty())
                 return "registrations.csv";
 
-            filename = new Regex(BasicLibrary.Utilities.NoAlphaNumericCharactersRegEx)
-                .Replace(filename, "");
+            var newFilename = new Regex(@"[^\w_\-. ]").Replace(userProposedFilename, string.Empty);
 
-            if (!filename.Contains(".csv"))
-                filename += ".csv";
-
-            return filename;
+            return newFilename.EndsWith(".csv") ? newFilename : newFilename + ".csv";
         }
 
         private static string ExportCsvText(List<Registration> registrations, Account account,
