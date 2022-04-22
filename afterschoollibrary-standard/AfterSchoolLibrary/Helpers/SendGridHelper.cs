@@ -61,16 +61,52 @@ namespace AfterSchoolLibrary
             var msgs = new SystemMessages();
 
             var sg = new SendGridClient(SendGridApiKey);
-            // var content = new Content("text/html", body);
 
             if (!Utilities.IsProduction)
                 subject = $"{Utilities.Environment} ENV: {subject}";
 
             var mail = MailHelper.CreateSingleEmail(fromEmail, toEmail, subject, null, body);
+
             mail.ReplyTo = replyTo;
             mail.TemplateId = emailTemplateId ?? EnrollHQGenericTemplateId;
             if (ccEmail != null)
                 mail.AddCc(ccEmail);
+
+            var task = Task.Run(async () => await sg.SendEmailAsync(mail));
+            task.Wait();
+
+            dynamic response = task.Result;
+            if (response.StatusCode != HttpStatusCode.Accepted)
+                msgs.Add(response.Body.ReadAsStringAsync().Result, MessageType.Error);
+
+            return msgs;
+        }
+
+        public static SystemMessages SendMailWithAttachments(EmailAddress fromEmail, EmailAddress toEmail,
+            string subject, string body, string emailTemplateId, byte[] attachmentByteData, string attachmentFilename)
+        {
+            var msgs = new SystemMessages();
+
+            var sg = new SendGridClient(SendGridApiKey);
+
+            if (!Utilities.IsProduction)
+                subject = $"{Utilities.Environment} ENV: {subject}";
+
+            var mail = MailHelper.CreateSingleEmail(fromEmail, toEmail, subject, null, body);
+
+            if (attachmentByteData != null)
+                mail.Attachments = new List<Attachment>
+                {
+                    new Attachment
+                    {
+                        Content = Convert.ToBase64String(attachmentByteData),
+                        Filename = attachmentFilename ?? "registrations.csv",
+                        Type = "text/csv",
+                        Disposition = "attachment",
+                    },
+                };
+
+            mail.TemplateId = emailTemplateId ?? EnrollHQGenericTemplateId;
 
             var task = Task.Run(async () => await sg.SendEmailAsync(mail));
             task.Wait();

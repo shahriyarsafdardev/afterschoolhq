@@ -713,7 +713,7 @@ namespace AfterSchoolLibrary.Models
             return msgs;
         }
 
-        public static SystemMessages CheckForOverlappingTimes(IReadOnlyList<DateRange> dateRanges)
+        internal static SystemMessages CheckForOverlappingTimes(IReadOnlyList<DateRange> dateRanges)
         {
             var msgs = new SystemMessages();
             if (HasOverlappingDates(dateRanges))

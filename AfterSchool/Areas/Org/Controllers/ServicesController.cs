@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using System.Web;
 using System.Web.Mvc;
-using BasicLibrary;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
+using BasicLibrary;
 using BasicLibrary.DataAccess;
-using System.Web;
+using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -15,7 +15,6 @@ namespace AfterSchool.Areas.Org.Controllers
     {
         public ServicesController() : base(AccountService.OrganizationAccountTypes)
         {
-
         }
 
         [HttpGet]
@@ -34,10 +33,10 @@ namespace AfterSchool.Areas.Org.Controllers
                 var currentAccount = SessionVariables.CurrentAccount;
                 var activity = Activity.LoadByUidByAccountId(activityUid.ToGuid(), currentAccount.ID.Value, msgs);
                 var calcObject = new FeeCalculationObject(
-                                    cost.ToDecimal(), 
-                                    currentAccount, 
-                                    activity, 
-                                    takenOutOfCost.IsBoolean() ? takenOutOfCost.ToBoolean() : new bool?());
+                    cost.ToDecimal(),
+                    currentAccount,
+                    activity,
+                    takenOutOfCost.IsBoolean() ? takenOutOfCost.ToBoolean() : new bool?());
                 var priceToParent = calcObject.GetCostWithConvenienceFee();
                 var amountToProvider = calcObject.GetAmountToProvider();
 
@@ -46,11 +45,11 @@ namespace AfterSchool.Areas.Org.Controllers
                     status = "ok",
                     priceToParent = priceToParent,
                     amountToProvider = amountToProvider,
-                    messages = msgs
+                    messages = msgs,
                 }, JsonRequestBehavior.AllowGet);
             }
 
-            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+            return Json(new {status = "error", messages = msgs}, JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost]
@@ -75,11 +74,11 @@ namespace AfterSchool.Areas.Org.Controllers
                     return Json(new
                     {
                         status = "ok",
-                        messages = msgs
+                        messages = msgs,
                     }, JsonRequestBehavior.AllowGet);
             }
 
-            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+            return Json(new {status = "error", messages = msgs}, JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost]
@@ -104,11 +103,11 @@ namespace AfterSchool.Areas.Org.Controllers
                     return Json(new
                     {
                         status = "ok",
-                        messages = msgs
+                        messages = msgs,
                     }, JsonRequestBehavior.AllowGet);
             }
 
-            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+            return Json(new {status = "error", messages = msgs}, JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost]
@@ -127,15 +126,17 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var emailText = $"{ SessionVariables.CurrentUser.FirstName} has invited you to setup the payment account for {SessionVariables.CurrentAccount.Name} in {UILabel.ProductName()}. This will enable us to send registration money to your account.";
+                var emailText =
+                    $"{SessionVariables.CurrentUser.FirstName} has invited you to setup the payment account for {SessionVariables.CurrentAccount.Name} in {UILabel.ProductName()}. This will enable us to send registration money to your account.";
 
-                SessionVariables.CurrentAccount.InviteUser(firstname, lastname, email, null, emailText, UserType.Treasurer, SessionVariables.CurrentUser, msgs);
+                SessionVariables.CurrentAccount.InviteUser(firstname, lastname, email, null, emailText,
+                    UserType.Treasurer, SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
-                    return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+                    return Json(new {status = "ok"}, JsonRequestBehavior.AllowGet);
             }
 
-            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+            return Json(new {status = "error", messages = msgs}, JsonRequestBehavior.AllowGet);
         }
 
         [HttpGet]
@@ -144,17 +145,17 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
             var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
-                activity.ID.Value, 
-                ParticipationObjectType.Activity, 
+                activity.ID.Value,
+                ParticipationObjectType.Activity,
                 registrant.ToInteger(), msgs);
-            var newAssignmentType = (RegistrationAssignmentType)assignmenttype.ToInteger();
+            var newAssignmentType = (RegistrationAssignmentType) assignmenttype.ToInteger();
 
             if (ra.IsNotEmpty())
             {
                 Database.ExecuteTransaction
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                    {   
+                    {
                         var reg = ra.ToRegistrant();
                         reg.AddOrUpdateParticipationObject(
                             ra.RegistrationId.Value,
@@ -170,13 +171,11 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         // TODO: may change assignment to pending reserved if the user is unpaid, and then auto-send the invoice
                         // For now won't do that.
-
-                       
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         msgs.AddRange(smsgs);
-                        WriteOutput(new { status = "ok" }, ResponseType.JSON);
+                        WriteOutput(new {status = "ok"}, ResponseType.JSON);
                     },
                     onFailure: (SystemMessages fmsgs) =>
                     {
@@ -203,16 +202,16 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (id.IsGuid())
             {
-                var activity = Activity.LoadByUid(id.ToGuid(),msgs);
+                var activity = Activity.LoadByUid(id.ToGuid(), msgs);
                 if (activity.IsNotEmpty())
                 {
-
                     var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
                         activity.ID.Value,
                         ParticipationObjectType.Activity,
                         registrant.ToInteger(), msgs);
                     var assignmentType = ra.AssignmentTypeId;
-                    var reservedTypes = new RegistrationAssignmentType[] { RegistrationAssignmentType.Reserved, RegistrationAssignmentType.ReservedPendingPayment };
+                    var reservedTypes = new RegistrationAssignmentType[]
+                        {RegistrationAssignmentType.Reserved, RegistrationAssignmentType.ReservedPendingPayment};
 
                     if (ra.IsNotEmpty())
                     {
@@ -236,7 +235,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         msgs.AddRange(ra.SendPaymentReminder());
 
-                        WriteOutput(new { status = "ok", AssignmentType = (int)assignmentType }, ResponseType.JSON);
+                        WriteOutput(new {status = "ok", AssignmentType = (int) assignmentType}, ResponseType.JSON);
                     }
                     else
                     {
@@ -247,7 +246,6 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     msgs.Add("Invalid data", MessageType.UserError);
                 }
-            
             }
             else
             {
@@ -270,14 +268,17 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (SessionVariables.CurrentAccount.IsNotEmpty() && id.IsInteger())
             {
-                var schedule = ActivitySchedule.LoadByIdByAccountId(id.ToInteger(), SessionVariables.CurrentAccount.ID.Value, msgs);
+                var schedule =
+                    ActivitySchedule.LoadByIdByAccountId(id.ToInteger(), SessionVariables.CurrentAccount.ID.Value,
+                        msgs);
 
                 if (schedule.IsEmpty())
                     msgs.Add("Invalid data", MessageType.ApiUsageError);
                 else
                 {
                     var activities = schedule.GetActivities();
-                    WriteOutput(new { status = "ok", activities = activities.Select(x => new { x.ID, x.Name }) }, ResponseType.JSON);
+                    WriteOutput(new {status = "ok", activities = activities.Select(x => new {x.ID, x.Name})},
+                        ResponseType.JSON);
                 }
             }
             else
@@ -311,7 +312,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        var schedule = ActivitySchedule.LoadByIdByAccountId(id.ToInteger(), currentAccount.ID.Value, amsgs, adc);
+                        var schedule =
+                            ActivitySchedule.LoadByIdByAccountId(id.ToInteger(), currentAccount.ID.Value, amsgs, adc);
                         var currentActivities = schedule.GetActivities(amsgs, adc);
                         var activities = schedule.GetActivityGroup(amsgs, adc).GetActivities(amsgs, adc);
 
@@ -328,10 +330,10 @@ namespace AfterSchool.Areas.Org.Controllers
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         msgs.AddRange(smsgs);
-                        WriteOutput(new { status = "ok" }, ResponseType.JSON);
+                        WriteOutput(new {status = "ok"}, ResponseType.JSON);
                     },
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                    onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
                 );
             }
             else
@@ -353,10 +355,13 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (id.IsGuid() && schedule.IsInteger())
             {
-                var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
-                var sched = ActivitySchedule.LoadByIdByAccountId(schedule.ToInteger(), SessionVariables.CurrentAccount.ID.Value, msgs);
+                var activity =
+                    Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+                var sched = ActivitySchedule.LoadByIdByAccountId(schedule.ToInteger(),
+                    SessionVariables.CurrentAccount.ID.Value, msgs);
 
-                if (activity.AccountId != SessionVariables.CurrentAccount.ID || sched.AccountId != SessionVariables.CurrentAccount.ID)
+                if (activity.AccountId != SessionVariables.CurrentAccount.ID ||
+                    sched.AccountId != SessionVariables.CurrentAccount.ID)
                     msgs.Add("Invalid data", MessageType.ApiUsageError);
 
                 if (msgs.HasNoErrors())
@@ -366,10 +371,10 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Invalid data", MessageType.ApiUsageError);
 
             if (msgs.HasNoErrors())
-                WriteOutput(new { status = "ok" }, ResponseType.JSON);
+                WriteOutput(new {status = "ok"}, ResponseType.JSON);
             else
                 HandleErrors(msgs, ResponseType.JSON);
-            
+
             Response.End();
 
             return View();
@@ -396,7 +401,9 @@ namespace AfterSchool.Areas.Org.Controllers
                     msgs.AddRange(contactList.AddContact(registrant.ID.Value, SessionVariables.CurrentUser.ID.Value));
                     if (msgs.HasNoErrors())
                     {
-                        WriteOutput(new { status = "ok", contactName = registrant.DisplayName, listName = contactList.Name }, ResponseType.JSON);
+                        WriteOutput(
+                            new {status = "ok", contactName = registrant.DisplayName, listName = contactList.Name},
+                            ResponseType.JSON);
                     }
                 }
                 else
@@ -409,6 +416,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 HandleErrors(msgs, ResponseType.JSON);
             }
+
             Response.End();
 
             return View();
@@ -432,10 +440,13 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 if (contactList.AccountId == SessionVariables.CurrentAccount.ID.Value)
                 {
-                    msgs.AddRange(contactList.RemoveContact(registrant.ID.Value, SessionVariables.CurrentUser.ID.Value));
+                    msgs.AddRange(contactList.RemoveContact(registrant.ID.Value,
+                        SessionVariables.CurrentUser.ID.Value));
                     if (msgs.HasNoErrors())
                     {
-                        WriteOutput(new { status = "ok", contactName = registrant.DisplayName, listName = contactList.Name }, ResponseType.JSON);
+                        WriteOutput(
+                            new {status = "ok", contactName = registrant.DisplayName, listName = contactList.Name},
+                            ResponseType.JSON);
                     }
                 }
                 else
@@ -448,6 +459,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 HandleErrors(msgs, ResponseType.JSON);
             }
+
             Response.End();
 
             return View();
@@ -467,16 +479,17 @@ namespace AfterSchool.Areas.Org.Controllers
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
                         contact = Registrant.LoadByUid(id.ToGuid(), dc: adc);
-                        if (contact.IsNotEmpty() && contact.AccountId == SessionVariables.CurrentAccount.ID && contact.IsContactOnly)
+                        if (contact.IsNotEmpty() && contact.AccountId == SessionVariables.CurrentAccount.ID &&
+                            contact.IsContactOnly)
                         {
                             var rags = RegistrantActivityGroup.LoadByRegistrantId(contact.ID.Value, dc: adc);
-                            foreach(var rag in rags)
+                            foreach (var rag in rags)
                             {
                                 amsgs.AddRange(rag.Delete(adc));
                             }
 
                             var ras = RegistrantActivity.LoadByRegistrantId(contact.ID.Value, dc: adc);
-                            foreach(var ra in ras)
+                            foreach (var ra in ras)
                             {
                                 amsgs.AddRange(ra.Delete(adc));
                             }
@@ -486,14 +499,10 @@ namespace AfterSchool.Areas.Org.Controllers
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
-                        WriteOutput(new { status = "ok", contactName = contact.DisplayName }, ResponseType.JSON);
+                        WriteOutput(new {status = "ok", contactName = contact.DisplayName}, ResponseType.JSON);
                     },
-                    onFailure: (SystemMessages fmsgs) =>
-                    {
-                        msgs.AddRange(fmsgs);
-                    }
+                    onFailure: (SystemMessages fmsgs) => { msgs.AddRange(fmsgs); }
                 );
-                
             }
             else
             {
@@ -521,7 +530,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             Response.Clear();
-            WriteOutput(new { status = "ok", answers = list }, ResponseType.JSON);
+            WriteOutput(new {status = "ok", answers = list}, ResponseType.JSON);
             Response.End();
 
             return View();
@@ -531,7 +540,12 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var activity = Activity.LoadByUid(id.ToGuid());
             Response.Clear();
-            WriteOutput(new { status = "ok", days = activity.GetDaysOfTheWeek().Select(x => new { Value = (int)x, Text = x.ToString() }) }, ResponseType.JSON);
+            WriteOutput(
+                new
+                {
+                    status = "ok",
+                    days = activity.GetDaysOfTheWeek().Select(x => new {Value = (int) x, Text = x.ToString()}),
+                }, ResponseType.JSON);
             Response.End();
 
             return View();
@@ -551,10 +565,11 @@ namespace AfterSchool.Areas.Org.Controllers
 
         public ActionResult SendVerificationEmail(string redirectUrl)
         {
-            var msgs = SessionVariables.CurrentUser.SendVerificationEmail(redirectUrl, SessionVariables.IsAfterSchool.Value);
+            var msgs = SessionVariables.CurrentUser.SendVerificationEmail(redirectUrl,
+                SessionVariables.IsAfterSchool.Value);
 
             Response.Clear();
-            WriteOutput(new { status = "ok", messages = msgs }, ResponseType.JSON);
+            WriteOutput(new {status = "ok", messages = msgs}, ResponseType.JSON);
             Response.End();
 
             return View();
@@ -564,11 +579,11 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult UploadFile(HttpPostedFileBase file)
         {
             var msgs = new SystemMessages();
-            var allowedFiles = new string[] { ".png", ".jpg", ".jpeg" };
+            var allowedFiles = new string[] {".png", ".jpg", ".jpeg"};
 
             if (file.IsEmpty() || file.ContentLength == 0 ||
-                    !file.FileName.ToLower().Contains(allowedFiles) ||
-                    file.ContentLength > AfterSchoolLibrary.Helpers.Utilities.ImageUploadMaxBytes)
+                !file.FileName.ToLower().Contains(allowedFiles) ||
+                file.ContentLength > Utilities.ImageUploadMaxBytes)
                 msgs.Add("Please upload a valid jpg or png file, must be less than 4MB", MessageType.UserError);
 
             if (msgs.HasNoErrors())
@@ -576,24 +591,24 @@ namespace AfterSchool.Areas.Org.Controllers
                 var account = SessionVariables.CurrentAccount;
                 var filename = file.FileName;
                 var stream = file.InputStream;
-                var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
+                var ah = Utilities.GetNewAmazonHelper();
                 var amazonLocation = $"{account.UniqueName}/files/{filename}";
 
                 msgs.AddRange(ah.AddFile(stream, amazonLocation, true));
 
                 if (msgs.HasNoErrors())
                 {
-                    var url = ah.GetFileLink(amazonLocation, !AfterSchoolLibrary.Helpers.Utilities.IsLocalHost, null, true);
+                    var url = ah.GetFileLink(amazonLocation);
 
                     return Json(new
                     {
                         status = "ok",
-                        url
+                        url,
                     }, JsonRequestBehavior.AllowGet);
                 }
             }
 
-            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+            return Json(new {status = "error", messages = msgs}, JsonRequestBehavior.AllowGet);
         }
     }
 }

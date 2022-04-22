@@ -899,13 +899,11 @@ namespace AfterSchool.Areas.Org.Controllers
             if (id.ToInteger() == 0)
             {
                 if (copyfrom.IsNumber())
-                    form = currentAccount.GetForm(copyfrom.ToInteger(), msgs)?
-                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, (FormType) formtype.ToInteger(), null,
-                            msgs, null);
+                    form = currentAccount.GetForm(copyfrom.ToInteger(), msgs)?.Copy(currentUser.ID.Value,
+                        currentAccount.ID.Value, (FormType) formtype.ToInteger(), null, msgs);
                 else
-                    form = currentAccount.GetDefaultForm(msgs)?
-                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, (FormType) formtype.ToInteger(), null,
-                            msgs, null);
+                    form = currentAccount.GetDefaultForm(msgs)?.Copy(currentUser.ID.Value, currentAccount.ID.Value,
+                        (FormType) formtype.ToInteger(), null, msgs);
             }
             else
                 form = currentAccount.GetForm(id.ToInteger(), msgs);
@@ -1231,12 +1229,12 @@ namespace AfterSchool.Areas.Org.Controllers
             var ah = Utilities.GetNewAmazonHelper();
 
             if (profile.Logo.IsNotBlank())
-                ViewBag.LogoUrl = ah.GetFileLink(profile.Logo, true, null, true);
+                ViewBag.LogoUrl = ah.GetFileLink(profile.Logo);
 
             if (profile.HeaderImage.IsNotBlank())
-                ViewBag.HeaderImageUrl = ah.GetFileLink(profile.HeaderImage, true, null, true);
+                ViewBag.HeaderImageUrl = ah.GetFileLink(profile.HeaderImage);
 
-            photos.ForEach(photo => photo.Value = ah.GetFileLink(photo.Value, true, null, true));
+            photos.ForEach(photo => photo.Value = ah.GetFileLink(photo.Value));
 
             ViewBag.Account = account;
             ViewBag.Location = profile.GetLocation(msgs);

@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.IO;
 using System.Linq;
-using System.Net;
 using System.Text;
 using System.Web.Mvc;
 using AfterSchool.Models;
@@ -607,9 +605,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (mustRequestToPublish)
                 msgs.Add("You do not have permissions to publish", MessageType.UserError);
-            
+
             msgs.AddRange(activity.GetItemsRequiredToPublish(msgs));
-            
+
             if (msgs.HasNoErrors())
             {
                 BeforePublish(activity, msgs);
@@ -3311,26 +3309,14 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(activity);
         }
 
-        public FileResult ExportCSV(int id)
+        public FileResult ExportCsv(int surveyRequestId)
         {
             var msgs = new SystemMessages();
-            var currentAccount = SessionVariables.CurrentAccount;
 
-            var fileLink =
-                SurveyRequestService.ExportSurveyRequestToCSV(id, currentAccount.ID.Value, "ExportCSV", msgs);
+            var csv = SurveyRequestService.ExportSurveyRequestToCsvText(surveyRequestId, msgs);
+            var fileData = Encoding.UTF8.GetBytes(csv);
 
-            if (!Directory.Exists(Server.MapPath("~/Uploads")))
-                Directory.CreateDirectory(Server.MapPath("~/Uploads"));
-
-            var filePath = Server.MapPath("~/Uploads/" + Guid.NewGuid() + "ExportSurvey.csv");
-
-            var client = new WebClient();
-            client.DownloadFile(fileLink, filePath);
-            byte[] filedata = System.IO.File.ReadAllBytes(filePath);
-            client.Dispose();
-
-            BackgroundJob.Enqueue(() => SurveyRequestService.DeleteCSVFile(filePath));
-            return File(filedata, "application/octet-stream", "ExportSurvey.csv");
+            return File(fileData, "application/octet-stream", "ExportSurvey.csv");
         }
 
         [HttpGet]

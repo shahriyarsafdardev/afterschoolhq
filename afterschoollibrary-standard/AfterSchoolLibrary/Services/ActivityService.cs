@@ -8,7 +8,6 @@ using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using SendGrid.Helpers.Mail;
-using Activity = AfterSchoolLibrary.Models.Activity;
 using Email = AfterSchoolLibrary.Helpers.Email;
 using Match = AfterSchoolLibrary.Models.Match;
 using Utilities = BasicLibrary.Utilities;
@@ -2721,11 +2720,11 @@ namespace AfterSchoolLibrary.Services
             var activity = Activity.Load(activityId, msgs, dc);
             var registrants = activity.GetRegistrants(msgs, dc);
 
-            string subject = $"{activity.Name} Registration Summary Report";
-            string body =
+            var subject = $"{activity.Name} Registration Summary Report";
+            var body =
                 $"<p>{activity.ContactName},</p><p>Here's your registration summary report for <strong>{activity.Name}</strong>. You have <strong>{registrants.Count.ToString()}</strong> registrations.</p>";
 
-            msgs.AddRange(RegistrationService.EmailCSVReport(
+            msgs.AddRange(RegistrationService.EmailCsvReport(
                 activity.GetAccount(msgs, dc).ID.Value,
                 null,
                 null,

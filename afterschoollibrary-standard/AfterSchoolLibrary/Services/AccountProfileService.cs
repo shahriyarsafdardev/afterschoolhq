@@ -1,17 +1,19 @@
-﻿using AfterSchoolLibrary.Models;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.IO;
+using System.Linq;
+using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Collections.Specialized;
-using System.Linq;
+using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchoolLibrary.Services
 {
     public static class AccountProfileService
     {
-        public static AccountProfile CreateNewAccountProfile(Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static AccountProfile CreateNewAccountProfile(Account account, WebUser loggedInUser, SystemMessages msgs,
+            DatabaseConnection dc = null)
         {
             var profile = new AccountProfile()
             {
@@ -19,7 +21,7 @@ namespace AfterSchoolLibrary.Services
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedDate = DateTime.UtcNow,
-                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),   
+                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
                 Title = account.Name,
             };
 
@@ -28,9 +30,10 @@ namespace AfterSchoolLibrary.Services
             return profile;
         }
 
-        public static void UploadLogo(this AccountProfile profile, Account account, System.IO.Stream stream, string filename, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void UploadLogo(this AccountProfile profile, Account account, Stream stream, string filename,
+            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var ah = Helpers.Utilities.GetNewAmazonHelper();
+            var ah = Utilities.GetNewAmazonHelper();
             var amazonLocation = $"{account.UniqueName}/logo/{filename}";
             msgs.AddRange(ah.AddFile(stream, amazonLocation, true));
 
@@ -43,7 +46,8 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-        public static Account GetAccount(this AccountProfile profile, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Account GetAccount(this AccountProfile profile, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             if (profile.AccountId.HasValue)
                 return Account.Load(profile.AccountId.Value, msgs, dc);
@@ -51,9 +55,10 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static void UploadHeaderImage(this AccountProfile profile, Account account, System.IO.Stream stream, string filename, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void UploadHeaderImage(this AccountProfile profile, Account account, Stream stream,
+            string filename, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var ah = Helpers.Utilities.GetNewAmazonHelper();
+            var ah = Utilities.GetNewAmazonHelper();
             var amazonLocation = BuildAmazonLocation(account, "headerimage", filename);
             msgs.AddRange(ah.AddFile(stream, amazonLocation, true));
 
@@ -66,9 +71,10 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-        public static void UploadGalleryPhoto(this AccountProfile profile, Account account, System.IO.Stream stream, string filename, string photoId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void UploadGalleryPhoto(this AccountProfile profile, Account account, Stream stream,
+            string filename, string photoId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var ah = Helpers.Utilities.GetNewAmazonHelper();
+            var ah = Utilities.GetNewAmazonHelper();
             var amazonLocation = BuildAmazonLocation(account, "photos", filename);
             msgs.AddRange(ah.AddFile(stream, amazonLocation, true));
 
@@ -77,20 +83,20 @@ namespace AfterSchoolLibrary.Services
                 if (photoId.IsNotEmpty())
                     UpdateProperty(photoId.ToInteger(), amazonLocation, loggedInUser, msgs, dc);
                 else
-                    profile.AddProperty(amazonLocation, AccountPropertyType.Photo, loggedInUser, msgs, dc);                
+                    profile.AddProperty(amazonLocation, AccountPropertyType.Photo, loggedInUser, msgs, dc);
             }
         }
 
         private static string BuildAmazonLocation(Account account, string folder, string filename)
         {
-            var ah = Helpers.Utilities.GetNewAmazonHelper();
+            var ah = Utilities.GetNewAmazonHelper();
             return $"{account.UniqueName}/{folder}/{filename}";
         }
 
         public static string GetHeaderImageUrl(this AccountProfile profile, SystemMessages msgs = null)
         {
             if (profile.HeaderImage.IsNotBlank())
-                return Helpers.Utilities.GetNewAmazonHelper().GetFileLink(profile.HeaderImage, true, null, true);
+                return Utilities.GetNewAmazonHelper().GetFileLink(profile.HeaderImage);
 
             return null;
         }
@@ -98,27 +104,46 @@ namespace AfterSchoolLibrary.Services
         public static string GetLogoUrl(this AccountProfile profile, SystemMessages msgs = null)
         {
             if (profile.Logo.IsNotBlank())
-                return Helpers.Utilities.GetNewAmazonHelper().GetFileLink(profile.Logo, true, null, true);
+                return Utilities.GetNewAmazonHelper().GetFileLink(profile.Logo);
 
             return null;
         }
 
-        public static List<AccountProperty> GetAwards(this AccountProfile profile, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<AccountProperty> GetAwards(this AccountProfile profile, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
-            return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(profile.AccountId.Value, AccountPropertyType.Award, msgs, dc);
+            return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(profile.AccountId.Value,
+                AccountPropertyType.Award, msgs, dc);
         }
 
-        public static List<AccountProperty> GetCertifications(this AccountProfile profile, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<AccountProperty> GetCertifications(this AccountProfile profile, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
-            return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(profile.AccountId.Value, AccountPropertyType.Certification, msgs, dc);
+            return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(profile.AccountId.Value,
+                AccountPropertyType.Certification, msgs, dc);
         }
 
-        public static List<AccountProperty> GetPhotos(this AccountProfile profile, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<AccountProperty> GetPhotos(this AccountProfile profile, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
-            return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(profile.AccountId.Value, AccountPropertyType.Photo, msgs, dc);
-        }       
+            return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(profile.AccountId.Value,
+                AccountPropertyType.Photo, msgs, dc);
+        }
 
-        public static void UpdateProfile(this AccountProfile profile, string title = null, string headline = null, string about = null, string registrationurl = null, string buttontext = null, string website = null, bool opencovid = false, bool elearningcenter = false, bool isvirtualprogram = false, string mingrade = null, string maxgrade = null, string agestart = null, string ageend = null, string costlow = null, string costhigh = null, string twitter = null, string facebook = null, string instagram = null, string linkedin = null, string youtube = null, string calendar = null, string genderrestriction = null, string profileemail = null, string profilephone = null, NameValueCollection savedAwards = null, NameValueCollection newAwards = null, NameValueCollection savedCertifications = null, NameValueCollection newCertifications = null, NameValueCollection servicesOffered = null, NameValueCollection timesOffered = null, NameValueCollection pricingOptions = null, NameValueCollection specialNeedsOfferings = null, string classifications = null, string softskills = null, string academicsubjects = null, string teachingmethods = null, string programsalldayduringworkweek = null, string ahqapproved = null, string videoUrl = null, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void UpdateProfile(this AccountProfile profile, string title = null, string headline = null,
+            string about = null, string registrationurl = null, string buttontext = null, string website = null,
+            bool opencovid = false, bool elearningcenter = false, bool isvirtualprogram = false, string mingrade = null,
+            string maxgrade = null, string agestart = null, string ageend = null, string costlow = null,
+            string costhigh = null, string twitter = null, string facebook = null, string instagram = null,
+            string linkedin = null, string youtube = null, string calendar = null, string genderrestriction = null,
+            string profileemail = null, string profilephone = null, NameValueCollection savedAwards = null,
+            NameValueCollection newAwards = null, NameValueCollection savedCertifications = null,
+            NameValueCollection newCertifications = null, NameValueCollection servicesOffered = null,
+            NameValueCollection timesOffered = null, NameValueCollection pricingOptions = null,
+            NameValueCollection specialNeedsOfferings = null, string classifications = null, string softskills = null,
+            string academicsubjects = null, string teachingmethods = null, string programsalldayduringworkweek = null,
+            string ahqapproved = null, string videoUrl = null, WebUser loggedInUser = null, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             var account = profile.GetAccount(msgs, dc);
 
@@ -176,7 +201,7 @@ namespace AfterSchoolLibrary.Services
                         profile.ProfilePhone = profilephone;
 
                     if (genderrestriction.IsInteger())
-                        profile.GenderRestriction = (GenderRestrictionType)genderrestriction.ToInteger();
+                        profile.GenderRestriction = (GenderRestrictionType) genderrestriction.ToInteger();
 
                     if (mingrade.IsInteger())
                     {
@@ -187,7 +212,6 @@ namespace AfterSchoolLibrary.Services
                             profile.GradeLevelStart = mingrade.ToInteger();
                             profile.AgeStart = null;
                         }
-
                     }
 
                     if (maxgrade.IsInteger())
@@ -210,7 +234,6 @@ namespace AfterSchoolLibrary.Services
                             profile.AgeStart = agestart.ToInteger();
                             profile.GradeLevelStart = null;
                         }
-
                     }
 
                     if (ageend.IsInteger())
@@ -222,7 +245,6 @@ namespace AfterSchoolLibrary.Services
                             profile.AgeEnd = ageend.ToInteger();
                             profile.GradeLevelEnd = null;
                         }
-
                     }
 
                     if (costhigh.IsNotEmpty())
@@ -253,45 +275,58 @@ namespace AfterSchoolLibrary.Services
                         profile.AddProperties(newAwards, AccountPropertyType.Award, loggedInUser, amsgs, adc);
 
                     if (newCertifications.IsNotEmpty())
-                        profile.AddProperties(newCertifications, AccountPropertyType.Certification, loggedInUser, amsgs, adc);
+                        profile.AddProperties(newCertifications, AccountPropertyType.Certification, loggedInUser, amsgs,
+                            adc);
 
                     if (servicesOffered.IsNotEmpty())
-                        profile.ManageProperties(servicesOffered, AccountPropertyType.ServiceOffered, loggedInUser, amsgs, adc);
+                        profile.ManageProperties(servicesOffered, AccountPropertyType.ServiceOffered, loggedInUser,
+                            amsgs, adc);
 
                     if (timesOffered.IsNotEmpty())
-                        profile.ManageProperties(timesOffered, AccountPropertyType.TimeOffered, loggedInUser, amsgs, adc);
+                        profile.ManageProperties(timesOffered, AccountPropertyType.TimeOffered, loggedInUser, amsgs,
+                            adc);
 
                     if (pricingOptions.IsNotEmpty())
-                        profile.ManageProperties(pricingOptions, AccountPropertyType.PricingOption, loggedInUser, amsgs, adc);
+                        profile.ManageProperties(pricingOptions, AccountPropertyType.PricingOption, loggedInUser, amsgs,
+                            adc);
 
                     if (specialNeedsOfferings.IsNotEmpty())
-                        profile.ManageProperties(specialNeedsOfferings, AccountPropertyType.SpecialNeedsOffering, loggedInUser, amsgs, adc);
-                                     
-                    profile.ManageProperties(classifications.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.Classifications, loggedInUser, amsgs, adc);
+                        profile.ManageProperties(specialNeedsOfferings, AccountPropertyType.SpecialNeedsOffering,
+                            loggedInUser, amsgs, adc);
+
+                    profile.ManageProperties(classifications.Split(',').Select(x => x.Trim().ToProperCase()),
+                        AccountPropertyType.Classifications, loggedInUser, amsgs, adc);
 
                     if (programsalldayduringworkweek.IsNotEmpty())
-                        profile.ManageProperties(programsalldayduringworkweek.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.ProgramsAllDayDuringWorkWeek, loggedInUser, msgs, dc);
+                        profile.ManageProperties(
+                            programsalldayduringworkweek.Split(',').Select(x => x.Trim().ToProperCase()),
+                            AccountPropertyType.ProgramsAllDayDuringWorkWeek, loggedInUser, msgs, dc);
 
-                    profile.ManageProperties(softskills.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.SoftSkills, loggedInUser, amsgs, adc);
+                    profile.ManageProperties(softskills.Split(',').Select(x => x.Trim().ToProperCase()),
+                        AccountPropertyType.SoftSkills, loggedInUser, amsgs, adc);
 
-                   
-                    profile.ManageProperties(academicsubjects.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.AcademicSubjects, loggedInUser, amsgs, adc);
 
-                    
-                    profile.ManageProperties(teachingmethods.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.TeachingMethods, loggedInUser, amsgs, adc);
+                    profile.ManageProperties(academicsubjects.Split(',').Select(x => x.Trim().ToProperCase()),
+                        AccountPropertyType.AcademicSubjects, loggedInUser, amsgs, adc);
+
+
+                    profile.ManageProperties(teachingmethods.Split(',').Select(x => x.Trim().ToProperCase()),
+                        AccountPropertyType.TeachingMethods, loggedInUser, amsgs, adc);
 
                     profile.LastModifiedBy = loggedInUser.ID.Value;
                     profile.LastModifiedDate = DateTime.UtcNow;
-
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
-        }             
-        
-        public static void UpdateProfileLinks(this AccountProfile profile, string website, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string registrationurl, string buttontext, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)        {
+        }
+
+        public static void UpdateProfileLinks(this AccountProfile profile, string website, string twitter,
+            string facebook, string instagram, string linkedin, string youtube, string calendar, string registrationurl,
+            string buttontext, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
             profile.Website = website.MaxChars(400);
             profile.Twitter = twitter;
             profile.Instagram = instagram;
@@ -306,7 +341,9 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(profile.Save(dc));
         }
 
-        public static void UpdateProfileContactinfo(this AccountProfile profile, WebUser loggedInUser, string profileemail = null, string profilephone = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void UpdateProfileContactinfo(this AccountProfile profile, WebUser loggedInUser,
+            string profileemail = null, string profilephone = null, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             profile.ProfileEmail = profileemail;
             profile.ProfilePhone = profilephone;
@@ -315,34 +352,50 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(profile.Save(dc));
         }
 
-        public static void UpdateProfileProgramInfo(this AccountProfile profile, string title = null, string headline = null, string genderrestriction = null, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {    
+        public static void UpdateProfileProgramInfo(this AccountProfile profile, string title = null,
+            string headline = null, string genderrestriction = null, WebUser loggedInUser = null,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
             profile.Title = title.MaxChars(50);
             profile.Headline = headline.MaxChars(400);
-            profile.GenderRestriction = (GenderRestrictionType)genderrestriction.ToInteger();
-            profile.LastModifiedBy = loggedInUser.ID.Value;
-            profile.LastModifiedDate = DateTime.UtcNow;
-            msgs.AddRange(profile.Save(dc));
-        }      
-
-        public static void UpdateProfileServicesOffered(this AccountProfile profile, string classifications = null, string softskills = null, NameValueCollection servicesOffered = null, NameValueCollection timesOffered = null, NameValueCollection pricingOptions = null, NameValueCollection specialNeedsOfferings = null, string academicsubjects = null, string teachingmethods = null, string programsalldayduringworkweek = null, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            profile.ManageProperties(servicesOffered, AccountPropertyType.ServiceOffered, loggedInUser, msgs, dc);            
-            profile.ManageProperties(timesOffered, AccountPropertyType.TimeOffered, loggedInUser, msgs, dc);
-            profile.ManageProperties(pricingOptions, AccountPropertyType.PricingOption, loggedInUser, msgs, dc);
-            profile.ManageProperties(specialNeedsOfferings, AccountPropertyType.SpecialNeedsOffering, loggedInUser, msgs, dc);
-            if (programsalldayduringworkweek.IsNotEmpty())
-                profile.ManageProperties(programsalldayduringworkweek.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.ProgramsAllDayDuringWorkWeek, loggedInUser, msgs, dc);
-            profile.ManageProperties(classifications.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.Classifications, loggedInUser, msgs, dc);
-            profile.ManageProperties(softskills.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.SoftSkills, loggedInUser, msgs, dc);
-            profile.ManageProperties(academicsubjects.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.AcademicSubjects, loggedInUser, msgs, dc);
-            profile.ManageProperties(teachingmethods.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.TeachingMethods, loggedInUser, msgs, dc);
+            profile.GenderRestriction = (GenderRestrictionType) genderrestriction.ToInteger();
             profile.LastModifiedBy = loggedInUser.ID.Value;
             profile.LastModifiedDate = DateTime.UtcNow;
             msgs.AddRange(profile.Save(dc));
         }
 
-        public static void UpdateProfileAdditionalInfo(this AccountProfile profile, string mingrade, string maxgrade, string agestart, string ageend, string costhigh, string costlow, bool opencovid = false, bool elearningcenter = false, bool isvirtualprogram = false, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void UpdateProfileServicesOffered(this AccountProfile profile, string classifications = null,
+            string softskills = null, NameValueCollection servicesOffered = null,
+            NameValueCollection timesOffered = null, NameValueCollection pricingOptions = null,
+            NameValueCollection specialNeedsOfferings = null, string academicsubjects = null,
+            string teachingmethods = null, string programsalldayduringworkweek = null, WebUser loggedInUser = null,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            profile.ManageProperties(servicesOffered, AccountPropertyType.ServiceOffered, loggedInUser, msgs, dc);
+            profile.ManageProperties(timesOffered, AccountPropertyType.TimeOffered, loggedInUser, msgs, dc);
+            profile.ManageProperties(pricingOptions, AccountPropertyType.PricingOption, loggedInUser, msgs, dc);
+            profile.ManageProperties(specialNeedsOfferings, AccountPropertyType.SpecialNeedsOffering, loggedInUser,
+                msgs, dc);
+            if (programsalldayduringworkweek.IsNotEmpty())
+                profile.ManageProperties(programsalldayduringworkweek.Split(',').Select(x => x.Trim().ToProperCase()),
+                    AccountPropertyType.ProgramsAllDayDuringWorkWeek, loggedInUser, msgs, dc);
+            profile.ManageProperties(classifications.Split(',').Select(x => x.Trim().ToProperCase()),
+                AccountPropertyType.Classifications, loggedInUser, msgs, dc);
+            profile.ManageProperties(softskills.Split(',').Select(x => x.Trim().ToProperCase()),
+                AccountPropertyType.SoftSkills, loggedInUser, msgs, dc);
+            profile.ManageProperties(academicsubjects.Split(',').Select(x => x.Trim().ToProperCase()),
+                AccountPropertyType.AcademicSubjects, loggedInUser, msgs, dc);
+            profile.ManageProperties(teachingmethods.Split(',').Select(x => x.Trim().ToProperCase()),
+                AccountPropertyType.TeachingMethods, loggedInUser, msgs, dc);
+            profile.LastModifiedBy = loggedInUser.ID.Value;
+            profile.LastModifiedDate = DateTime.UtcNow;
+            msgs.AddRange(profile.Save(dc));
+        }
+
+        public static void UpdateProfileAdditionalInfo(this AccountProfile profile, string mingrade, string maxgrade,
+            string agestart, string ageend, string costhigh, string costlow, bool opencovid = false,
+            bool elearningcenter = false, bool isvirtualprogram = false, WebUser loggedInUser = null,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             profile.GradeLevelStart = mingrade.IsInteger() ? mingrade.ToInteger() : new int?();
             profile.GradeLevelEnd = maxgrade.IsInteger() ? maxgrade.ToInteger() : new int?();
@@ -354,8 +407,8 @@ namespace AfterSchoolLibrary.Services
             profile.LastModifiedBy = loggedInUser.ID.Value;
             profile.LastModifiedDate = DateTime.UtcNow;
 
-            if(costhigh.IsNotEmpty())
-               profile.CostHigh = costhigh.ToDecimal();
+            if (costhigh.IsNotEmpty())
+                profile.CostHigh = costhigh.ToDecimal();
 
             if (costlow.IsNotEmpty())
                 profile.CostLow = costlow.ToDecimal();
@@ -363,11 +416,13 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(profile.Save(dc));
         }
 
-        public static void ManageProperties(this AccountProfile profile, IEnumerable<string> properties, AccountPropertyType propertyType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void ManageProperties(this AccountProfile profile, IEnumerable<string> properties,
+            AccountPropertyType propertyType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var existingProperties = profile.GetProperties(propertyType, msgs, dc);
 
-            existingProperties.ForEach(existingProperty => {
+            existingProperties.ForEach(existingProperty =>
+            {
                 if (existingProperty.Value.NotIn(properties))
                     msgs.AddRange(existingProperty.Delete(dc));
             });
@@ -375,7 +430,8 @@ namespace AfterSchoolLibrary.Services
             profile.AddProperties(properties, propertyType, loggedInUser, msgs, dc);
         }
 
-        public static void ManageProperties(this AccountProfile profile, NameValueCollection properties, AccountPropertyType propertyType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void ManageProperties(this AccountProfile profile, NameValueCollection properties,
+            AccountPropertyType propertyType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var existingProperties = profile.GetProperties(propertyType, msgs, dc);
             var newValues = new List<string>();
@@ -383,7 +439,8 @@ namespace AfterSchoolLibrary.Services
             foreach (var key in properties.AllKeys)
                 newValues.Add(properties[key]);
 
-            existingProperties.ForEach(existingProperty => {
+            existingProperties.ForEach(existingProperty =>
+            {
                 if (existingProperty.Value.NotIn(newValues))
                     msgs.AddRange(existingProperty.Delete(dc));
             });
@@ -391,28 +448,35 @@ namespace AfterSchoolLibrary.Services
             profile.AddProperties(properties, propertyType, loggedInUser, msgs, dc);
         }
 
-        public static List<AccountProperty> GetProperties(this AccountProfile profile, AccountPropertyType propertyType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<AccountProperty> GetProperties(this AccountProfile profile, AccountPropertyType propertyType,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(profile.AccountId.Value, propertyType, msgs, dc);
+            return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(profile.AccountId.Value, propertyType, msgs,
+                dc);
         }
 
-        public static void AddProperties(this AccountProfile profile, IEnumerable<string> properties, AccountPropertyType propertyType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void AddProperties(this AccountProfile profile, IEnumerable<string> properties,
+            AccountPropertyType propertyType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             foreach (var value in properties)
                 profile.AddProperty(value, propertyType, loggedInUser, msgs, dc);
         }
 
-        public static void AddProperties(this AccountProfile profile, NameValueCollection properties, AccountPropertyType propertyType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void AddProperties(this AccountProfile profile, NameValueCollection properties,
+            AccountPropertyType propertyType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             foreach (var key in properties.AllKeys)
                 profile.AddProperty(properties[key], propertyType, loggedInUser, msgs, dc);
         }
 
-        public static void AddProperty(this AccountProfile profile, string value, AccountPropertyType propertyType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void AddProperty(this AccountProfile profile, string value, AccountPropertyType propertyType,
+            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (value.IsNotEmpty())
             {
-                var property = AccountProperty.LoadByAccountIdByAccountPropertyTypeIdByValue(profile.AccountId.Value, propertyType, value, msgs, dc);
+                var property =
+                    AccountProperty.LoadByAccountIdByAccountPropertyTypeIdByValue(profile.AccountId.Value, propertyType,
+                        value, msgs, dc);
 
                 if (property.IsEmpty())
                 {
@@ -432,13 +496,15 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-        public static void UpdateProperties(NameValueCollection properties, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void UpdateProperties(NameValueCollection properties, WebUser loggedInUser, SystemMessages msgs,
+            DatabaseConnection dc = null)
         {
             foreach (var key in properties.AllKeys)
                 UpdateProperty(key.Split('-')[2].ToInteger(), properties[key], loggedInUser, msgs, dc);
         }
 
-        public static void UpdateProperty(int id, string value, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void UpdateProperty(int id, string value, WebUser loggedInUser, SystemMessages msgs,
+            DatabaseConnection dc = null)
         {
             var property = AccountProperty.Load(id, msgs, dc);
 
@@ -455,14 +521,16 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-        public static void RemoveProperty(this AccountProfile profile, int id, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void RemoveProperty(this AccountProfile profile, int id, SystemMessages msgs,
+            DatabaseConnection dc = null)
         {
             var property = AccountProperty.Load(id, msgs, dc);
             if (property != null)
                 msgs.AddRange(property.Delete(dc: dc));
         }
 
-        public static GradeLevel GetGradeLevelStart(this AccountProfile profile, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static GradeLevel GetGradeLevelStart(this AccountProfile profile, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             if (profile.GradeLevelStart.HasValue)
                 return GradeLevel.Load(profile.GradeLevelStart.Value, msgs, dc);
@@ -470,7 +538,8 @@ namespace AfterSchoolLibrary.Services
             return GradeLevel.Load(msgs: msgs, dc: dc).FirstOrDefault();
         }
 
-        public static GradeLevel GetGradeLevelEnd(this AccountProfile profile, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static GradeLevel GetGradeLevelEnd(this AccountProfile profile, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             if (profile.GradeLevelEnd.HasValue)
                 return GradeLevel.Load(profile.GradeLevelEnd.Value, msgs, dc);
@@ -478,7 +547,8 @@ namespace AfterSchoolLibrary.Services
             return GradeLevel.Load(msgs: msgs, dc: dc).LastOrDefault();
         }
 
-        public static Location GetLocation(this AccountProfile profile, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Location GetLocation(this AccountProfile profile, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             if (profile.LocationId.HasValue)
                 return Location.Load(profile.LocationId.Value, msgs, dc);
@@ -486,18 +556,23 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static Location AddNewLocation(this AccountProfile profile, string locationName, string streetNumber, string streetName, string address2, string neighborhood, string city, string county, string state, string postalCode, string country, 
+        public static Location AddNewLocation(this AccountProfile profile, string locationName, string streetNumber,
+            string streetName, string address2, string neighborhood, string city, string county, string state,
+            string postalCode, string country,
             string googlePlaceId, decimal latitude, decimal longitude,
             WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var location = LocationService.CreateOrUpdateFromGoogle(locationName, streetNumber, streetName, address2, neighborhood, city, county, state, postalCode, country, googlePlaceId, latitude, longitude, loggedInUser, msgs, dc);
+            var location = LocationService.CreateOrUpdateFromGoogle(locationName, streetNumber, streetName, address2,
+                neighborhood, city, county, state, postalCode, country, googlePlaceId, latitude, longitude,
+                loggedInUser, msgs, dc);
 
             profile.SetLocation(location, loggedInUser, msgs, dc);
 
             return location;
         }
 
-        public static void SetLocation(this AccountProfile profile, Location location, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void SetLocation(this AccountProfile profile, Location location, WebUser loggedInUser,
+            SystemMessages msgs, DatabaseConnection dc = null)
         {
             profile.LocationId = location.ID;
             profile.LastModifiedBy = loggedInUser?.ID;
@@ -540,6 +615,7 @@ namespace AfterSchoolLibrary.Services
                 case GenderRestrictionType.MaleOnly:
                     return "Boys";
             }
+
             return "Co-Ed";
         }
     }
