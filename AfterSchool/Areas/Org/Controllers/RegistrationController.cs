@@ -35,8 +35,8 @@ namespace AfterSchool.Areas.Org.Controllers
             if (rpp.IsNumber() && rpp.ToInteger() > 0)
                 recordsPerPage = rpp.ToInteger();
 
-            var (registrations, totalCount) = LoadSearch(activity, group, pageNumber, recordsPerPage, q, emailed,
-                question, regstatus, at, false, msgs);
+            var (registrations, totalCount) =
+                LoadSearch(activity, group, q, regstatus, at, false, msgs, pageNumber, recordsPerPage);
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
 
             if (emailed.IsBoolean() && emailed.ToBoolean())
@@ -659,28 +659,20 @@ namespace AfterSchool.Areas.Org.Controllers
                 ViewBag.ListUrl = Url.Action("index", "registration");
         }
 
-        private (List<Registration>, int) LoadSearch(string activity, string group, int? pageNumber,
-            int? recordsPerPage, string q, string emailed, string question, string regstatus, string at,
-            bool isReadOnly, SystemMessages msgs = null)
+        private (List<Registration>, int) LoadSearch(string activity, string group, string q,
+            string registrationStatusNumber, string at, bool isReadOnly, SystemMessages msgs = null,
+            int? pageNumber = null, int? recordsPerPage = null)
         {
             if (msgs.IsEmpty())
                 msgs = new SystemMessages();
 
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
-            var registrations = new List<Registration>();
-            var activities = new List<Activity>();
-            var groups = new List<ActivityGroup>();
             var selectedGroups = new List<ActivityGroup>();
             var selectedActivities = new List<Activity>();
             var start = recordsPerPage * (pageNumber - 1);
-            var length = recordsPerPage;
-            var totalCount = 0;
             var activityIds = new List<int>();
-            var groupIds = new List<int>();
-            var questionId = new int?();
-            var rats = new List<RegistrationAssignmentType>();
-            var registrationStatus = RegistrationStatus.NotSet;
+            var registrationAssignmentTypes = new List<RegistrationAssignmentType>();
 
             if (activity.IsNotEmpty())
             {
@@ -690,7 +682,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (group.IsNotEmpty())
             {
-                groupIds = group.Split(',').Select(x => x.ToInteger()).ToList();
+                var groupIds = group.Split(',').Select(x => x.ToInteger()).ToList();
                 selectedGroups = currentAccount.GetActivityGroups(groupIds, msgs);
                 selectedGroups.ForEach(x =>
                 {
@@ -699,63 +691,23 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (at.IsNumber())
-                rats.Add((RegistrationAssignmentType) at.ToInteger());
+                registrationAssignmentTypes.Add((RegistrationAssignmentType) at.ToInteger());
 
-            if (regstatus.IsNumber())
-                registrationStatus = (RegistrationStatus) regstatus.ToInteger();
+            var registrationStatus = int.TryParse(registrationStatusNumber, out var parsed)
+                ? (RegistrationStatus) parsed
+                : RegistrationStatus.NotSet;
 
-            //if (question.IsNumber())
-            //    questionId = question.ToInteger();
+            var registrations = currentAccount.SearchRegistrations(q, null, activityIds,
+                ParticipationObjectType.Activity, registrationStatus, registrationAssignmentTypes, start, recordsPerPage, msgs);
 
-            registrations = currentAccount.SearchRegistrations(
-                q,
-                questionId,
-                activityIds,
-                ParticipationObjectType.Activity,
-                registrationStatus,
-                rats,
-                start,
-                length,
-                msgs);
+            var totalCount = currentAccount.SearchRegistrationCount(q, null, activityIds,
+                ParticipationObjectType.Activity, registrationStatus, registrationAssignmentTypes, msgs);
 
-            totalCount = currentAccount.SearchRegistrationCount(
-                q,
-                questionId,
-                activityIds,
-                ParticipationObjectType.Activity,
-                registrationStatus,
-                rats,
-                msgs);
+            var activities = currentAccount
+                .GetActivities(UserType.Administrator, currentUser, null, null, false, false, null, msgs: msgs)
+                .OrderBy(x => x.Name).ToList();
 
-            activities = currentAccount.GetActivities(
-                    UserType.Administrator,
-                    currentUser,
-                    null,
-                    null,
-                    false,
-                    false,
-                    null,
-                    msgs: msgs)
-                .OrderBy(x => x.Name)
-                .ToList();
-
-            groups = currentAccount.GetActivityGroups(msgs);
-
-            //get all questions
-            //var activityForms = SessionVariables.CurrentAccount.GetActivityForms().Where(x => x.IsActive).ToList();
-            //var questions = FormQuestion.LoadByFormIdsByIsActive(activityForms.Select(x => x.FormId.Value).ToList(), true);
-            //var finalQuestions = new List<FormQuestion>();
-            //var finalQuestionGroups = new List<FormQuestionGroup>();
-
-            //finalQuestions.AddRange(questions.Where(x => x.QuestionDataTypeId != QuestionDataType.NotSet).DistinctBy(x => x.QuestionDataTypeId));
-            //finalQuestions.AddRange(questions.Where(x => x.QuestionDataTypeId == QuestionDataType.NotSet).DistinctBy(x => new { x.Text, x.FormQuestionGroupName }));
-
-            //var questionGroups = questions.Select(x => x.ToFormQuestionGroup()).ToList();
-            //finalQuestionGroups.AddRange(questionGroups.Where(x => x.QuestionGroupDataTypeId != QuestionGroupDataType.NotSet).DistinctBy(x => x.QuestionGroupDataTypeId));
-            //finalQuestionGroups.AddRange(questionGroups.Where(x => x.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet).DistinctBy(x => x.Name));
-
-            //ViewBag.Questions = finalQuestions;
-            //ViewBag.QuestionGroups = finalQuestionGroups;
+            var groups = currentAccount.GetActivityGroups(msgs);
 
             ViewBag.Activities = activities;
             ViewBag.Groups = groups;
@@ -786,7 +738,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activityMessages = currentAccount.GetActivityMessages(start, length, msgs);
             var totalCount = currentAccount.GetActivityMessageCount(msgs);
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
-            LoadSearch("", "", null, null, "", "", "", "", "", false, msgs);
+            LoadSearch(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, false, msgs);
 
             ViewBag.Messages = msgs;
             ViewBag.PagingModel = new PagingModel
@@ -819,8 +771,7 @@ namespace AfterSchool.Areas.Org.Controllers
             string question, string regstatus, string at)
         {
             var msgs = new SystemMessages();
-            var (registrations, totalCount) = LoadSearch(activity, group, null, null, q, emailed, question, regstatus,
-                at, true, msgs);
+            var (registrations, totalCount) = LoadSearch(activity, group, q, regstatus, at, true, msgs);
 
             ViewBag.Registrations = registrations;
             ViewBag.TotalCount = totalCount;
@@ -844,8 +795,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Message Body is required", MessageType.UserError);
 
             ActivityMessage am = null;
-            var (registrations, totalCount) = LoadSearch(activity, group, null, null, q, emailed, question, regstatus,
-                at, true, msgs);
+            var (registrations, totalCount) = LoadSearch(activity, group, q, regstatus, at, true, msgs);
 
             if (msgs.HasNoErrors())
             {
