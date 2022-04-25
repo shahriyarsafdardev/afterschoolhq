@@ -292,9 +292,8 @@
 @if (isAccountAndLoggedInUserIsOwner)
 {
     <div class="activity-footer text-center hide" id="footer-activity">
-        <button aria-label="Close" class="span-upgrade-modal-close" onclick="hideActivityRibbon()"
-                style="background: transparent; border: transparent; top: 0; width: auto" type="button">
-            <span aria-hidden="true" style="font-size: 28px">&times;</span>
+        <button aria-label="Close" class="modal-close-button" onclick="hideActivityRibbon()" type="button">
+            <span aria-hidden="true">&times;</span>
         </button>
         @if (Model.IsPublished)
         {
