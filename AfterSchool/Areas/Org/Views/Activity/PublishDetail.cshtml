@@ -1,12 +1,12 @@
 ﻿@model Activity
 @{
     ViewBag.Title = Model.AccountName;
-    var msgs = (SystemMessages)ViewBag.Messages;
+    var msgs = (SystemMessages) ViewBag.Messages;
     var publishMsgs = Model.GetItemsRequiredToPublish();
     var group = Model.GetActivityGroup();
     var showCopyWithStudents = "1";
-    var mustRequestToPublish = (bool)ViewBag.MustRequestToPublish;
-    var showCopyButton = (bool)ViewBag.ShowCopyButton;
+    var mustRequestToPublish = (bool) ViewBag.MustRequestToPublish;
+    var showCopyButton = (bool) ViewBag.ShowCopyButton;
     var showSetupPayments = Model.ProviderAccountId.IsEmpty() &&
                             !SessionVariables.CurrentAccount.CanReceivePaymentDeposits() &&
                             !SessionVariables.CurrentAccount.HasTreasurer() &&
@@ -20,9 +20,10 @@
 
     var publishUrl = "#";
     var btnDisabled = "disabled";
-    if (Model.IsPublishable && publishMsgs.Count == 0)
+    var isPublishable = Model.IsPublishable && publishMsgs.Count == 0;
+    if (isPublishable)
     {
-        publishUrl = Url.Action("publish", "activity", new { id = Model.Uid });
+        publishUrl = Url.Action("publish", "activity", new {id = Model.Uid});
         btnDisabled = "";
     }
 
@@ -30,7 +31,7 @@
 
     if (ViewBag.IsFullScreen != null)
     {
-        isFullScreen = (bool)ViewBag.IsFullScreen;
+        isFullScreen = (bool) ViewBag.IsFullScreen;
     }
 
     if (isFullScreen)
@@ -41,243 +42,251 @@
     var showAllowInvites = SessionVariables.AccountPackage.HasFeature(FeatureType.AllowInvites);
 }
 
-@{ Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
+@{ Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString()); }
 
 <div class="main-content">
 
-    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model); }
+@{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model); }
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name + " - Publish"); }
-        </div>
-        <div class="panel-body">
+<div class="panel panel-default">
+<div class="panel-heading">
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name + " - Publish"); }
+</div>
+<div class="panel-body">
 
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <div class="btn-group pull-right">
+<div class="panel panel-default">
+<div class="panel-heading">
+    <div class="btn-group pull-right">
 
-                        @if (!Model.ActivityGroupId.HasValue)
-                        {
-                            if (!showAllowInvites)
-                            {
-                                <a href="#" class="btn btn-default" onclick="return showUpgradeMyPlan('@(allowInvitesPackage.Name)', @(allowInvitesPackage.ID))" disabled="disabled">Invite Parents &raquo;</a>
-                            }
-                            else
-                            {
-                                <a href="@Url.Action("inviteto", "contact", new { id = Model.Uid, type = "activity" })" class="btn btn-default">Invite Parents &raquo;</a>
-                            }
-                        }
+        @if (!Model.ActivityGroupId.HasValue)
+        {
+            if (!showAllowInvites)
+            {
+                <a href="#" class="btn btn-default" onclick="return showUpgradeMyPlan('@(allowInvitesPackage.Name)', @(allowInvitesPackage.ID))" disabled="disabled">Invite Parents &raquo;</a>
+            }
+            else
+            {
+                <a href="@Url.Action("inviteto", "contact", new {id = Model.Uid, type = "activity"})" class="btn btn-default">Invite Parents &raquo;</a>
+            }
+        }
 
-                        @if (Model.IsPublishable && !mustRequestToPublish)
-                        {
-                            if (!Model.IsPublished)
-                            {
-                                <a href="@publishUrl" class="btn btn-success btn-space @btnDisabled">Publish Your @UILabel.ActivityLabel(Model.ActivityTypeId) <i class="s7-right-arrow"></i></a>
-                            }
-                            else
-                            {
-                                <button class="btn btn-link text-muted btn-space md-trigger" data-modal="modal-unpublish">Unpublish Your @UILabel.ActivityLabel(Model.ActivityTypeId) <i class="s7-right-arrow"></i></button>
-                            }
-                        }
-                        else if (!Model.IsPublished)
-                        {
-                            <a href="@Url.Action("requesttopublish", "activity", new { id = Model.Uid, isnew = Request["isnew"] })"
-                               class="btn btn-success btn-space
-                               @btnDisabled">
-                                Request to Publish Your @UILabel.ActivityLabel(Model.ActivityTypeId)
-                                <i class="s7-right-arrow"></i>
-                            </a>
-                        }
-                    </div>
-                    <div>
-                        Publish @UILabel.ActivityLabel(Model.ActivityTypeId)
-                    </div>
+        @if (Model.IsPublished)
+        {
+            <button class="btn btn-link text-muted btn-space md-trigger" data-modal="modal-unpublish">Unpublish Your @UILabel.ActivityLabel(Model.ActivityTypeId) <i class="s7-right-arrow"></i></button>
+        }
+        else if (mustRequestToPublish)
+        {
+            <a href="@Url.Action("requesttopublish", "activity", new {id = Model.Uid, isnew = Request["isnew"]})"
+               class="btn btn-success btn-space @btnDisabled">
+                Request to Publish Your @UILabel.ActivityLabel(Model.ActivityTypeId)
+                <i class="s7-right-arrow"></i>
+            </a>
+        }
+        else
+        {
+            <a href="@publishUrl" class="btn btn-success btn-space @btnDisabled">Publish Your @UILabel.ActivityLabel(Model.ActivityTypeId) <i class="s7-right-arrow"></i></a>
+        }
+    </div>
+    <div>
+        Publish @UILabel.ActivityLabel(Model.ActivityTypeId)
+    </div>
+</div>
+
+<div class="panel-body">
+
+    @if (showSetupPayments)
+    {
+        <div>
+            <div role="alert" class="alert alert-success alert-icon">
+                <div class="icon">
+                    <span class="s7-info"></span>
                 </div>
-
-                <div class="panel-body">
-
-                    @if (showSetupPayments)
-                    {
-                        <div>
-                            <div role="alert" class="alert alert-success alert-icon">
-                                <div class="icon">
-                                    <span class="s7-info"></span>
-                                </div>
-                                <div class="message">
-                                    <div class="col-md-4 col-md-offset-4">
-                                        <div class="text-medium-small padding-v-20">
-                                            <p>Parents can now pay for your activity online, but we don't have a way to send you money. </p>
-                                        </div>
-                                        <div class="padding-v-20">
-                                            <a href="@Url.Action("paymentsoptions", "account" , new { isnew = 1 })" class="btn btn-lg btn-primary btn-block">Setup your payments account &raquo;</a>
-                                        </div>
-                                        <div class="text-medium-small padding-v-20">
-                                            <p>Not the person who manages finances for your organization or program?</p>
-                                        </div>
-                                        <div class="text-medium-small padding-v-20">
-                                            <button class="btn btn-lg btn-default btn-block md-trigger" data-modal="modal-invite-treasurer">Invite whoever processes payments &raquo;</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                <div class="message">
+                    <div class="col-md-4 col-md-offset-4">
+                        <div class="text-medium-small padding-v-20">
+                            <p>Parents can now pay for your activity online, but we don't have a way to send you money. </p>
                         </div>
-                    }
-
-                    <div class="widget col-md-10 col-md-offset-1">
-                        <div class="widget-head">
-                            @if (Model.IsPublishable)
-                            {
-                                if (Model.IsPublished)
-                                {
-
-                                    <p class="text-success text-large">
-                                        <i class="s7-check-circle"></i>
-                                        Your @UILabel.ActivityLabel(Model.ActivityTypeId) is published
-                                    </p>
-                                }
-                                else
-                                {
-                                    <p class="text-warning text-large">
-                                        <i class="s7-next-2"></i>
-                                        Your @UILabel.ActivityLabel(Model.ActivityTypeId) is ready to publish
-                                    </p>
-                                }
-                            }
-                            else
-                            {
-                                <p class="text-danger text-large">
-                                    <i class="s7-close-circle"></i>
-                                    Your @UILabel.ActivityLabel(Model.ActivityTypeId) is <em>not</em> ready to publish
-                                </p>
-                            }
+                        <div class="padding-v-20">
+                            <a href="@Url.Action("paymentsoptions", "account", new {isnew = 1})" class="btn btn-lg btn-primary btn-block">Setup your payments account &raquo;</a>
                         </div>
-                        <div class="widget-tile">
-                            @if (!Model.IsPublishable || publishMsgs.Count > 0)
-                            {
-                                <h3>Please review the items below and save your updates in order to publish your registration form</h3>
-                                foreach (SystemMessage msg in publishMsgs)
-                                {
-                                    if (msg.Text.Contains("publish-error-title"))
-                                    {
-                                        <br />
-                                        <p>@Html.Raw(msg.Text) <i class="s7-link"></i></p>
-                                    }
-                                    else
-                                    {
-                                        @:&nbsp;&bull; @Html.Raw(msg.Text)<br />
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                <table class="table table-striped">
-                                    @if (!Model.IsInviteOnly)
-                                    {
-                                        <tr>
-                                            <td>Organization Home Page</td>
-                                            <td>
-                                                <input type="text" value="@SessionVariables.CurrentAccount.ShortHomePageUrl" id="account-reg-url" onclick="this.select()" class="form-control inline" />
-                                            </td>
-                                            <td>
-                                                <span onclick="WebPage.copySelection('@SessionVariables.CurrentAccount.ShortHomePageUrl', 'URL has been copied')" title="Copy Url">
-                                                    <i class="s7-copy-file icon-large text-success pointer"></i>
-                                                </span>
-                                                <a href="@SessionVariables.CurrentAccount.ShortHomePageUrl" target="_blank" title="View Page"><i class="s7-link icon-large"></i></a>
-                                            </td>
-                                        </tr>
-                                    }
-                                    @if (Model.IsPublished)
-                                    {
-                                        if (Model.ActivityGroupId.HasValue)
-                                        {
-                                            <tr>
-                                                <td>@UILabel.ActivityGroupLabel(group.ActivityGroupTypeId) URL</td>
-                                                <td>
-                                                    <input type="text" value="@group.ShortHomePageUrl" id="group-reg-url" onclick="this.select()" class="form-control" />
-                                                </td>
-                                                <td>
-                                                    <span onclick="WebPage.copySelection('@group.ShortHomePageUrl', 'URL has been copied')" title="Copy Url" class="pointer">
-                                                        <i class="s7-copy-file icon-large text-success pointer"></i>
-                                                    </span>
-                                                    <a href="@group.ShortHomePageUrl" target="_blank" title="View Page"><i class="s7-link icon-large"></i></a>
-                                                </td>
-                                            </tr>
-                                        }
-                                        else
-                                        {
-                                            <tr>
-                                                <td>@UILabel.ActivityLabel(Model.ActivityTypeId) URL</td>
-                                                <td>
-                                                    <input type="text" value="@Model.ShortHomePageUrl" id="activity-reg-url" onclick="this.select()" class="form-control" />
-                                                </td>
-                                                <td>
-                                                    <span onclick="WebPage.copySelection('@Model.ShortHomePageUrl', 'URL has been copied')" title="Copy Url">
-                                                        <i class="s7-copy-file icon-large text-success pointer"></i>
-                                                    </span>
-                                                    <a href="@Model.ShortHomePageUrl" target="_blank" title="View Page"><i class="s7-link icon-large"></i></a>
-                                                </td>
-                                            </tr>
-                                        }
-                                    }
-                                    @if (!Model.ActivityGroupId.HasValue && false)
-                                    {
-                                        <tr>
-                                            <td>Preview URL (do not share)</td>
-                                            <td>
-                                                <a href="@Model.PreviewUrl" target="_blank">@Model.PreviewUrl</a>
-                                                <a href="@Model.PreviewUrl" target="_blank"><i class="s7-link"></i></a>
-                                            </td>
-                                        </tr>
-                                    }
-                                </table>
-                            }
+                        <div class="text-medium-small padding-v-20">
+                            <p>Not the person who manages finances for your organization or program?</p>
                         </div>
-
-                        <div>
-                            <div class="col-lg-4">
-                                @if (Model.ActivityGroupId.HasValue)
-                                {
-                                    <a href="@Url.Action("activities", "group", new { id = Model.ActivityGroupUid })" class="btn btn-default btn-lg center-block text-limit">
-                                        <span>&laquo; Back to @group.Name</span>
-</a>
-                                }
-                                else
-                                {
-                                    <a href="@Url.Action("summary", "activity", new { id = Model.Uid })" class="btn btn-default btn-lg center-block">
-                                        View Summary
-                                    </a>
-                                }
-
-                            </div>
-                            <div class="col-lg-4">
-                                <a href="@Model.ShortHomePageUrl" class="btn btn-default btn-lg center-block" target="_blank">
-                                    <i class="s7-link"></i>
-                                    View Registration Page
-                                </a>
-                            </div>
-
-                            @if (showCopyButton)
-                            {
-                                <div class="col-lg-4">
-                                    <a onclick="ActivitySetup.setCopyActivity('@UI.JavascriptSafeString(Model.Name)', '@Url.Action("copy", "activity", new { id = Model.Uid.ToString(), isnew = 1, group?.Uid })')" class="btn btn-primary btn-lg center-block md-trigger" data-modal="modal-copy-activity">
-                                        <i class="s7-copy-file"></i>
-                                        Copy and Create New &raquo;
-                                    </a>
-                                </div>
-                            }
-
+                        <div class="text-medium-small padding-v-20">
+                            <button class="btn btn-lg btn-default btn-block md-trigger" data-modal="modal-invite-treasurer">Invite whoever processes payments &raquo;</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    }
+
+    <div class="widget col-md-10 col-md-offset-1">
+        <div class="widget-head">
+            @if (isPublishable)
+            {
+                if (Model.IsPublished)
+                {
+                    <p class="text-success text-large">
+                        <i class="s7-check-circle"></i>
+                        Your @UILabel.ActivityLabel(Model.ActivityTypeId) is published
+                    </p>
+                }
+                else
+                {
+                    <p class="text-warning text-large">
+                        <i class="s7-next-2"></i>
+                        Your @UILabel.ActivityLabel(Model.ActivityTypeId) is ready to publish
+                    </p>
+                }
+            }
+            else
+            {
+                <p class="text-danger text-large">
+                    <i class="s7-close-circle"></i>
+                    Your @UILabel.ActivityLabel(Model.ActivityTypeId) is <em>not</em> ready to publish
+                </p>
+            }
+        </div>
+        <div class="widget-tile">
+            @if (!isPublishable)
+            {
+                <h3>Please review the items below and save your updates in order to publish your registration form</h3>
+                foreach (SystemMessage msg in publishMsgs)
+                {
+                    if (msg.Text.Contains("publish-error-title"))
+                    {
+                        <p>
+                            @Html.Raw(msg.Text) <i class="s7-link"></i>
+                        </p>
+                    }
+                    else if (msg.Text.Contains("no-bullet"))
+                    {
+                        @Html.Raw(msg.Text)
+                    }
+                    else
+                    {
+                        @:&nbsp;&bull; @Html.Raw(msg.Text)<br/>
+                    }
+                }
+            }
+            else
+            {
+                <table class="table table-striped">
+                    @if (!Model.IsInviteOnly)
+                    {
+                        <tr>
+                            <td>Organization Home Page</td>
+                            <td>
+                                <input type="text" value="@SessionVariables.CurrentAccount.ShortHomePageUrl" id="account-reg-url" onclick="this.select()" class="form-control inline"/>
+                            </td>
+                            <td>
+                                <span onclick="WebPage.copySelection('@SessionVariables.CurrentAccount.ShortHomePageUrl', 'URL has been copied')" title="Copy Url">
+                                    <i class="s7-copy-file icon-large text-success pointer"></i>
+                                </span>
+                                <a href="@SessionVariables.CurrentAccount.ShortHomePageUrl" target="_blank" title="View Page">
+                                    <i class="s7-link icon-large"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                    @if (Model.IsPublished)
+                    {
+                        if (Model.ActivityGroupId.HasValue)
+                        {
+                            <tr>
+                                <td>@UILabel.ActivityGroupLabel(group.ActivityGroupTypeId) URL</td>
+                                <td>
+                                    <input type="text" value="@group.ShortHomePageUrl" id="group-reg-url" onclick="this.select()" class="form-control"/>
+                                </td>
+                                <td>
+                                    <span onclick="WebPage.copySelection('@group.ShortHomePageUrl', 'URL has been copied')" title="Copy Url" class="pointer">
+                                        <i class="s7-copy-file icon-large text-success pointer"></i>
+                                    </span>
+                                    <a href="@group.ShortHomePageUrl" target="_blank" title="View Page">
+                                        <i class="s7-link icon-large"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            <tr>
+                                <td>@UILabel.ActivityLabel(Model.ActivityTypeId) URL</td>
+                                <td>
+                                    <input type="text" value="@Model.ShortHomePageUrl" id="activity-reg-url" onclick="this.select()" class="form-control"/>
+                                </td>
+                                <td>
+                                    <span onclick="WebPage.copySelection('@Model.ShortHomePageUrl', 'URL has been copied')" title="Copy Url">
+                                        <i class="s7-copy-file icon-large text-success pointer"></i>
+                                    </span>
+                                    <a href="@Model.ShortHomePageUrl" target="_blank" title="View Page">
+                                        <i class="s7-link icon-large"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    @if (!Model.ActivityGroupId.HasValue && false)
+                    {
+                        <tr>
+                            <td>Preview URL (do not share)</td>
+                            <td>
+                                <a href="@Model.PreviewUrl" target="_blank">@Model.PreviewUrl</a>
+                                <a href="@Model.PreviewUrl" target="_blank">
+                                    <i class="s7-link"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </table>
+            }
+        </div>
+
+        <div>
+            <div class="col-lg-4">
+                @if (Model.ActivityGroupId.HasValue)
+                {
+                    <a href="@Url.Action("activities", "group", new {id = Model.ActivityGroupUid})" class="btn btn-default btn-lg center-block text-limit">
+                        <span>&laquo; Back to @group.Name</span>
+                    </a>
+                }
+                else
+                {
+                    <a href="@Url.Action("summary", "activity", new {id = Model.Uid})" class="btn btn-default btn-lg center-block">
+                        View Summary
+                    </a>
+                }
+
+            </div>
+            <div class="col-lg-4">
+                <a href="@Model.ShortHomePageUrl" class="btn btn-default btn-lg center-block" target="_blank">
+                    <i class="s7-link"></i>
+                    View Registration Page
+                </a>
+            </div>
+
+            @if (showCopyButton)
+            {
+                <div class="col-lg-4">
+                    <a onclick="ActivitySetup.setCopyActivity('@UI.JavascriptSafeString(Model.Name)', '@Url.Action("copy", "activity", new {id = Model.Uid.ToString(), isnew = 1, group?.Uid})')" class="btn btn-primary btn-lg center-block md-trigger" data-modal="modal-copy-activity">
+                        <i class="s7-copy-file"></i>
+                        Copy and Create New &raquo;
+                    </a>
+                </div>
+            }
+
+        </div>
     </div>
 </div>
+</div>
+</div>
+</div>
+</div>
 
-@{ Html.RenderPartial("_CopyActivityModal", Model.ActivityTypeId, new ViewDataDictionary() { { "ShowCopyWithStudents", showCopyWithStudents } }); }
+@{ Html.RenderPartial("_CopyActivityModal", Model.ActivityTypeId, new ViewDataDictionary {{"ShowCopyWithStudents", showCopyWithStudents}}); }
 
 @{ Html.RenderPartial("_ModalInviteTreasurer"); }
 
@@ -296,7 +305,7 @@
         </div>
         <div class="modal-footer">
             <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-            <a href="@Url.Action("unpublish", "activity", new { id = Model.Uid })" class="btn btn-primary">
+            <a href="@Url.Action("unpublish", "activity", new {id = Model.Uid})" class="btn btn-primary">
                 Unpublish @UILabel.ActivityLabel(Model.ActivityTypeId) &raquo;
             </a>
         </div>

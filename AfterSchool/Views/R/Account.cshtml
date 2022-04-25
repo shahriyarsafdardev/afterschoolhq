@@ -530,7 +530,9 @@
 @if (isAccountAndLoggedInUserIsOwner)
 {
     <div id="footer-account" class="activity-footer text-center hide">
-        <span class="span-upgrade-modal-close" onclick="return hideActivityRibbon()">X</span>
+        <button aria-label="Close" class="modal-close-button" onclick="hideActivityRibbon()" type="button">
+            <span aria-hidden="true">&times;</span>
+        </button>
         <a href="@Url.Action("style", "account", new {id = Model.Uid, area = "org"})" class="btn btn-default btn-activity-footer">Edit Profile</a>
         <a href="@Url.Action("editsetup", "activity", new {isnew = 1, type = (int) ActivityType.Activity, area = "org", source = Request["source"]})" class="btn btn-default btn-activity-footer">Add Activity</a>
     </div>

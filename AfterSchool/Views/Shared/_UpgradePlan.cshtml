@@ -1,43 +1,47 @@
 ﻿<div id="upgrade-my-plan">
     <div class="Container">
-        <span class="span-upgrade-modal-close" onclick="return hideUpgradeMyPlan()">X</span>
-        <h2 class="gain-access text-center" style="font-family: Montserrat"></h2>
+        <button aria-label="Close" class="modal-close-button" onclick="hideUpgradeMyPlan()" type="button">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <h2 class="gain-access text-center" style="font-family: Montserrat, sans-serif"></h2>
         <div class="clearfix"></div>
     </div>
     <div class="clearfix"></div>
 </div>
 
 <script type="text/javascript">
-    var featureId;
+    let featureId;
     function showUpgradeMyPlan(name, id, preventClose = false) {
         $('#app-body').addClass('overlay')
         $('#upgrade-my-plan').fadeIn();
 
         if (name)
-            $('.gain-access').html('Upgrade to ' + `${name}` +' to access this feature. <a href="#" class="btn btn-default btn-upgrade-plan btn-lg" style="font-family: Montserrat, sans-serif" onclick="return loadUpgradePage()">Upgrade My Plan</a>');
+            $('.gain-access').html(`Upgrade to ${name} to access this feature. <a href="#" class="btn btn-default btn-upgrade-plan btn-lg" style="font-family: Montserrat, sans-serif" onclick="return loadUpgradePage()">Upgrade My Plan</a>`);
   
-        if(id)
+        if (id)
             featureId = id;
 
-        if (name == '' || id == '') {
+        if (name === '' || id === '') {
             $('.gain-access').html('This feature is not accessible. contact admin for more information.');
         }
 
         if (preventClose)
-            $('.span-upgrade-modal-close').hide();
-
-    };
+            $('.modal-close-button').hide();
+    }
 
     function hideUpgradeMyPlan() {
         $('#app-body').removeClass('overlay')
         $('#upgrade-my-plan').fadeOut();
-    };
-
+    }
+    function setFeatureIdAndLoadUpgradePage(id) {
+        featureId = id;
+        loadUpgradePage();
+    }
     function loadUpgradePage() {
-        var url = '@Url.Action("newbilling", "account", new { Area = "org", ReturnUrl = "updateThisText"})'
+        let url = '@Url.Action("newbilling", "account", new {Area = "org", ReturnUrl = "updateThisText"})'
         url = url.replace("updateThisText", location.pathname);
         if (featureId)
-            url = url + `&featureId=${featureId}`;
+            url += `&featureId=${featureId}`;
 
         location.href = url;
     }
