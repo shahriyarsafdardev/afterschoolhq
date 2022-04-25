@@ -33,7 +33,10 @@
         $('#app-body').removeClass('overlay')
         $('#upgrade-my-plan').fadeOut();
     }
-
+    function setFeatureIdAndLoadUpgradePage(id) {
+        featureId = id;
+        loadUpgradePage();
+    }
     function loadUpgradePage() {
         let url = '@Url.Action("newbilling", "account", new {Area = "org", ReturnUrl = "updateThisText"})'
         url = url.replace("updateThisText", location.pathname);

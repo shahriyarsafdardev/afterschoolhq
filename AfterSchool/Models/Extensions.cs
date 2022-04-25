@@ -199,13 +199,17 @@ namespace AfterSchool.Models
 
             if (activity.CostPerRegistrant <= 0 && !account.CanPublishFreeActivity(msgs, dc))
             {
-                msgs.Add(
-                    $"<a href=\"/org/activity/editcost/{activity.Uid}\" class=\"publish-error-title\">You've reached your limit on free activities; click here to make this a paid activity</a>",
-                    MessageType.UserError);
                 var freeActivityLimitPackage =
                     PackageService.GetPackageWithFeatureLowestPrice(FeatureType.FreeActivityLimit);
+                var editCostLink =
+                    $"<a href=\"/org/activity/editcost/{activity.Uid}\">update pricing and payment for this activity</a>";
+                var upgradePackageLink =
+                    $"<a href=\"#\" onclick=\"setFeatureIdAndLoadUpgradePage('{freeActivityLimitPackage.ID}')\">upgrade your account for more free activities</a>";
+               
                 msgs.Add(
-                    $"<a href=\"#\" onclick=\"showUpgradeMyPlan('{freeActivityLimitPackage.Name}', '{freeActivityLimitPackage.ID}')\" class=\"publish-error-title\">You've reached your limit on free activities; click here to upgrade your account</a>",
+                    $"<p class=\"no-bullet\">You've reached your limit on free activities, please take one of the following actions:</p><ul>" +
+                    $"<li>{editCostLink}</li><li>{upgradePackageLink}</li>" +
+                    $"  </ul>",
                     MessageType.UserError);
             }
 

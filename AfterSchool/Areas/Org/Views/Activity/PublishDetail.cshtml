@@ -162,6 +162,10 @@
                             @Html.Raw(msg.Text) <i class="s7-link"></i>
                         </p>
                     }
+                    else if (msg.Text.Contains("no-bullet"))
+                    {
+                        @Html.Raw(msg.Text)
+                    }
                     else
                     {
                         @:&nbsp;&bull; @Html.Raw(msg.Text)<br/>
