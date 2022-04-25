@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.Collections.Specialized;
 using System.Linq;
 using AfterSchoolLibrary.Models;
@@ -21,15 +21,15 @@ namespace AfterSchool.Models
             return new FormQuestionViewModel(question);
         }
 
-        public static AddressViewModel ToAddressViewModel(this PaymentsEntityViewModel paymentsEntityVM)
+        public static AddressViewModel ToAddressViewModel(this PaymentsEntityViewModel paymentsEntityViewModel)
         {
             return new AddressViewModel
             {
-                Address1 = paymentsEntityVM.Address1,
-                Address2 = paymentsEntityVM.Address2,
-                City = paymentsEntityVM.City,
-                State = paymentsEntityVM.State,
-                PostalCode = paymentsEntityVM.PostalCode,
+                Address1 = paymentsEntityViewModel.Address1,
+                Address2 = paymentsEntityViewModel.Address2,
+                City = paymentsEntityViewModel.City,
+                State = paymentsEntityViewModel.State,
+                PostalCode = paymentsEntityViewModel.PostalCode,
             };
         }
 
@@ -45,22 +45,6 @@ namespace AfterSchool.Models
             };
         }
 
-        public static AddressViewModel ToAddressViewModel(this Activity activity)
-        {
-            var location = activity.GetLocation();
-            if (location.IsNotEmpty())
-                return new AddressViewModel
-                {
-                    Address1 = location.Address1,
-                    Address2 = location.Address2,
-                    City = location.City,
-                    State = location.State,
-                    PostalCode = location.PostalCode,
-                };
-
-            return new AddressViewModel();
-        }
-
         public static AddressViewModel ToAddressViewModel(this Location location)
         {
             return new AddressViewModel
@@ -70,18 +54,6 @@ namespace AfterSchool.Models
                 City = location.City,
                 State = location.State,
                 PostalCode = location.PostalCode,
-            };
-        }
-
-        public static AddressViewModel ToAddressViewModel(this Account account)
-        {
-            return new AddressViewModel
-            {
-                Address1 = account.Address1,
-                Address2 = account.Address2,
-                City = account.City,
-                State = account.State,
-                PostalCode = account.PostalCode,
             };
         }
 
@@ -112,7 +84,7 @@ namespace AfterSchool.Models
             };
         }
 
-        public static string ToString(this ActivitySchedule schedule)
+        public static string ToString(this ActivitySchedule _)
         {
             return "";
         }
@@ -122,10 +94,8 @@ namespace AfterSchool.Models
         {
             var msgs = new SystemMessages();
             var setupMsgs = new SystemMessages();
-            var scheduleMessages = new SystemMessages();
             var detailMsgs = new SystemMessages();
             var contactMsgs = new SystemMessages();
-            var locationMsgs = new SystemMessages();
             var paymentMsgs = new SystemMessages();
             var confirmationMsgs = new SystemMessages();
             var archiveMsgs = new SystemMessages();
@@ -261,10 +231,13 @@ namespace AfterSchool.Models
                 !account.CanReceivePaymentDeposits(msg, dc) &&
                 !activity.GetParticipationObject(msg, dc).IsExternalToAccount(account))
             {
-                var addPaymentMsgs = new SystemMessages();
-                addPaymentMsgs.Add(
-                    "<a href=\"/org/account/paymentsoptions\">Add Payment Method</a>. To accept payments",
-                    MessageType.Error);
+                var addPaymentMsgs = new SystemMessages
+                {
+                    {
+                        "<a href=\"/org/account/paymentsoptions\">Add Payment Method</a>. To accept payments",
+                        MessageType.Error
+                    },
+                };
                 msgs.AddRange(addPaymentMsgs);
             }
 
@@ -284,49 +257,12 @@ namespace AfterSchool.Models
                 msgs.Add($"Please <a href=\"/org/group/periods/{group.Uid}\">add a Sign Up Period</a>",
                     MessageType.Error);
 
-            if (group.GetActivities().Where(x => !x.ActivityScheduleId.HasValue).Any())
+            if (group.GetActivities().Any(x => !x.ActivityScheduleId.HasValue))
                 msgs.Add(
                     $"Please ensure all of your {UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()} <a href=\"/org/group/schedules/{group.Uid}\">have schedules</a>",
                     MessageType.Error);
 
             return msgs;
-        }
-
-        public static SystemMessages GetItemsRequiredToPublish(this AccountActivityGroup aag)
-        {
-            var msgs = new SystemMessages();
-
-            if (!aag.HasRegistrationPeriods())
-                msgs.Add(
-                    $"<a href=\"/org/league/periods/{aag.ActivityGroupUid}\">Create at least one {UILabel.RegistrationPeriodLabel()}</a> in order to publish",
-                    MessageType.UserError);
-
-            if (aag.FormId.IsEmpty())
-                msgs.Add(
-                    $"<a href=\"/org/league/edit/{aag.ActivityGroupUid}\">Select a registration form</a> in order to publish",
-                    MessageType.UserError);
-            if (aag.ContactName.IsEmpty())
-                msgs.Add(
-                    $"<a href=\"/org/league/edit/{aag.ActivityGroupUid}\">Contact Name</a> is required in order to publish",
-                    MessageType.UserError);
-            if (aag.ContactPhone.IsEmpty())
-                msgs.Add(
-                    $"<a href=\"/org/league/edit/{aag.ActivityGroupUid}\">Contact Phone</a> is required in order to publish",
-                    MessageType.UserError);
-            if (aag.ContactEmail.IsEmpty())
-                msgs.Add(
-                    $"<a href=\"/org/league/edit/{aag.ActivityGroupUid}\">Contact Email</a> is required in order to publish",
-                    MessageType.UserError);
-
-            return msgs;
-        }
-
-        public static string ToShortString(this List<GradeLevel> grades)
-        {
-            if (grades.Count > 1)
-                return grades.OrderBy(x => x.ID.Value).First().Abbreviation + " - " +
-                       grades.OrderBy(x => x.ID.Value).Last().Abbreviation + " Grade";
-            return grades.First().Abbreviation + " Grade";
         }
     }
 }
