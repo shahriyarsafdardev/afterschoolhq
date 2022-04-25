@@ -20,7 +20,8 @@
 
     var publishUrl = "#";
     var btnDisabled = "disabled";
-    if (Model.IsPublishable && publishMsgs.Count == 0)
+    var isPublishable = Model.IsPublishable && publishMsgs.Count == 0;
+    if (isPublishable)
     {
         publishUrl = Url.Action("publish", "activity", new { id = Model.Uid });
         btnDisabled = "";
@@ -71,25 +72,23 @@
                             }
                         }
 
-                        @if (Model.IsPublishable && !mustRequestToPublish)
+                
+                        @if (Model.IsPublished)
                         {
-                            if (!Model.IsPublished)
-                            {
-                                <a href="@publishUrl" class="btn btn-success btn-space @btnDisabled">Publish Your @UILabel.ActivityLabel(Model.ActivityTypeId) <i class="s7-right-arrow"></i></a>
-                            }
-                            else
-                            {
-                                <button class="btn btn-link text-muted btn-space md-trigger" data-modal="modal-unpublish">Unpublish Your @UILabel.ActivityLabel(Model.ActivityTypeId) <i class="s7-right-arrow"></i></button>
-                            }
+                            <button class="btn btn-link text-muted btn-space md-trigger" data-modal="modal-unpublish">Unpublish Your @UILabel.ActivityLabel(Model.ActivityTypeId) <i class="s7-right-arrow"></i></button>
                         }
-                        else if (!Model.IsPublished)
+                        else if (mustRequestToPublish)
                         {
                             <a href="@Url.Action("requesttopublish", "activity", new { id = Model.Uid, isnew = Request["isnew"] })"
                                class="btn btn-success btn-space
-                               @btnDisabled">
+                           @btnDisabled">
                                 Request to Publish Your @UILabel.ActivityLabel(Model.ActivityTypeId)
                                 <i class="s7-right-arrow"></i>
                             </a>
+                        }
+                        else
+                        {
+                            <a href="@publishUrl" class="btn btn-success btn-space @btnDisabled">Publish Your @UILabel.ActivityLabel(Model.ActivityTypeId) <i class="s7-right-arrow"></i></a>
                         }
                     </div>
                     <div>
@@ -128,7 +127,7 @@
 
                     <div class="widget col-md-10 col-md-offset-1">
                         <div class="widget-head">
-                            @if (Model.IsPublishable)
+                            @if (isPublishable)
                             {
                                 if (Model.IsPublished)
                                 {
@@ -155,7 +154,7 @@
                             }
                         </div>
                         <div class="widget-tile">
-                            @if (!Model.IsPublishable || publishMsgs.Count > 0)
+                            @if (!isPublishable)
                             {
                                 <h3>Please review the items below and save your updates in order to publish your registration form</h3>
                                 foreach (SystemMessage msg in publishMsgs)
