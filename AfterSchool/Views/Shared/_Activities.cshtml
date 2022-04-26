@@ -76,7 +76,7 @@
                 else
                 {
                     <p>
-                        You haven't created any @UILabel.ActivityLabel(activityType, true).ToLower() yet. In order to get started, <a href="#" onclick="return showUpgradeMyPlan('@(managePermissionSlipsPackage.Name)',@(managePermissionSlipsPackage.ID))"> Create your first @UILabel.ActivityLabel(activityType).ToLower()</a>.
+                        You haven't created any @UILabel.ActivityLabel(activityType, true).ToLower() yet. In order to get started, <a href="#" onclick="return showUpgradeMyPlan('@(managePermissionSlipsPackage?.Name)',@(managePermissionSlipsPackage?.ID))"> Create your first @UILabel.ActivityLabel(activityType).ToLower()</a>.
                     </p>
                     }
                 <p>&nbsp;</p>
@@ -86,7 +86,7 @@
                 }
                 else
                 {
-                    <a href="#" class="btn btn-primary btn-lg" onclick="return showUpgradeMyPlan('@(managePermissionSlipsPackage.Name)',@(managePermissionSlipsPackage.ID))"> Create Your First @UILabel.ActivityLabel(activityType) &raquo;</a>
+                    <a href="#" class="btn btn-primary btn-lg" onclick="return showUpgradeMyPlan('@(managePermissionSlipsPackage?.Name)',@(managePermissionSlipsPackage?.ID))"> Create Your First @UILabel.ActivityLabel(activityType) &raquo;</a>
                 }
             </div>
         </div>

@@ -7,7 +7,7 @@
     var paging = (PagingModel)ViewData["PagingModel"];
 
     var manageContactsEnabled = SessionVariables.CurrentAccount.HasFeature(FeatureType.ManageContacts);
-    var manageContactsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageContacts);
+    var manageContactsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageContacts, SessionVariables.AccountPackage);
     var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
 
     var previousLink = "#";

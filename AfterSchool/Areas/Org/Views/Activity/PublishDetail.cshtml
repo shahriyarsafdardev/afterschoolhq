@@ -11,7 +11,7 @@
                             !SessionVariables.CurrentAccount.CanReceivePaymentDeposits() &&
                             !SessionVariables.CurrentAccount.HasTreasurer() &&
                             !Model.IsFree;
-    var allowInvitesPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowInvites);
+    var allowInvitesPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowInvites, SessionVariables.AccountPackage);
 
     if (Request["isnew"] == "1")
     {
@@ -64,7 +64,7 @@
         {
             if (!showAllowInvites)
             {
-                <a href="#" class="btn btn-default" onclick="return showUpgradeMyPlan('@(allowInvitesPackage.Name)', @(allowInvitesPackage.ID))" disabled="disabled">Invite Parents &raquo;</a>
+                <a href="#" class="btn btn-default" onclick="return showUpgradeMyPlan('@(allowInvitesPackage?.Name)', @(allowInvitesPackage?.ID))" disabled="disabled">Invite Parents &raquo;</a>
             }
             else
             {

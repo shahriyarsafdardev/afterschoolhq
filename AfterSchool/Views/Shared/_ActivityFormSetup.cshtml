@@ -16,10 +16,10 @@
     var showManageForms = accountPackage.HasFeature(FeatureType.ManageForms);
     var maxFormCount = accountPackage.IsNotEmpty() ? (int)accountPackage.GetFeature(FeatureType.ManageForms).Max.Value : 0;
     var showManageFormFields = forms.Count >= maxFormCount ? false : true;
-    var allowInvitesPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowInvites);
-    var waitingListPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.WaitingList);
-    var manageFormsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageForms);
-    var allowAppilicationsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowApplications);
+    var allowInvitesPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowInvites, SessionVariables.AccountPackage);
+    var waitingListPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.WaitingList, SessionVariables.AccountPackage);
+    var manageFormsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageForms, SessionVariables.AccountPackage);
+    var allowAppilicationsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowApplications, SessionVariables.AccountPackage);
 
 }
 
@@ -74,7 +74,7 @@
                 <label class="col-sm-3 control-label">
                     Invite Only?
                 </label>
-                <div class="col-md-9" @if (!showInviteOnly) { <text> onclick="return showUpgradeMyPlan('@(allowInvitesPackage.Name)',@(allowInvitesPackage.ID))" </text> }>
+                <div class="col-md-9" @if (!showInviteOnly) { <text> onclick="return showUpgradeMyPlan('@(allowInvitesPackage?.Name)',@(allowInvitesPackage?.ID))" </text> }>
                     @{
                         Html.RenderPartial(
                           "~/Views/Shared/_SwitchButton.cshtml",
@@ -251,7 +251,7 @@
                                 Waiting List Seats <span class="text-danger">*</span>
                                 <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Can be any positive number" data-placement="top"></i>
                             </label>
-                            <div style="position:relative;" class="col-sm-9" @if (!showWaitingList) { <text> onclick="return showUpgradeMyPlan('@(waitingListPackage.Name)',@(waitingListPackage.ID))" </text> }>
+                            <div style="position:relative;" class="col-sm-9" @if (!showWaitingList) { <text> onclick="return showUpgradeMyPlan('@(waitingListPackage?.Name)',@(waitingListPackage?.ID))" </text> }>
                                 <input id="waitinglistseats" class="form-control" type="number" name="waitinglistseats" value="@Model.WaitingListSeats" required step="1"
                                        min="0"
                                        onfocus="this.select()"
@@ -288,7 +288,7 @@
                             }
                             else
                             {
-                                <a class="btn btn-block btn-link" href="#" onclick="return showUpgradeMyPlan('@(manageFormsPackage.Name)',@(manageFormsPackage.ID))">Edit Form</a>
+                                <a class="btn btn-block btn-link" href="#" onclick="return showUpgradeMyPlan('@(manageFormsPackage?.Name)',@(manageFormsPackage?.ID))">Edit Form</a>
                             }
                         </div>
                     </div>
@@ -300,7 +300,7 @@
                                 Registration Mode <span class="text-danger">*</span>
                             </label>
                             <div class="col-sm-9">
-                                <div class="am-radio inline" @if (!showAllowApplications) { <text> onclick="return showUpgradeMyPlan('@(allowAppilicationsPackage.Name)',@(allowAppilicationsPackage.ID))" </text> }>
+                                <div class="am-radio inline" @if (!showAllowApplications) { <text> onclick="return showUpgradeMyPlan('@(allowAppilicationsPackage?.Name)',@(allowAppilicationsPackage?.ID))" </text> }>
                                     @foreach (var item in Enum.GetValues(typeof(RegistrationMode)).Cast<RegistrationMode>().Where(x => x != RegistrationMode.NotSet))
                                     {
                                         <input type="radio" name="regmode" id="regmode-@item.ToString()" value="@((int)item)" class="regmode"
@@ -351,7 +351,7 @@
             @if(!showWaitingList)
             {
                  <text>
-                    showUpgradeMyPlan('@(waitingListPackage.Name)',@(waitingListPackage.ID))
+                    showUpgradeMyPlan('@(waitingListPackage?.Name)',@(waitingListPackage?.ID))
                  </text>
             }
 

@@ -26,8 +26,8 @@
     var accountPackage = SessionVariables.AccountPackage;
     var showAllowInvites = accountPackage.HasFeature(FeatureType.AllowInvites);
     var showStudentCRM = accountPackage.HasFeature(FeatureType.StudentCRM);
-    var allowInvitesPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowInvites);
-    var studentCRMPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.StudentCRM);
+    var allowInvitesPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowInvites, SessionVariables.AccountPackage);
+    var studentCRMPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.StudentCRM, SessionVariables.AccountPackage);
     var isReadOnlySeatStatus = (bool)ViewBag.IsReadOnlySeatStatus;
 }
 
@@ -181,7 +181,7 @@
                             }
                             else
                             {
-                                <a href="#" class="btn btn-default btn-space" onclick="return showUpgradeMyPlan('@(studentCRMPackage.Name)',@(studentCRMPackage.ID))" disabled="disabled">
+                                <a href="#" class="btn btn-default btn-space" onclick="return showUpgradeMyPlan('@(studentCRMPackage?.Name)',@(studentCRMPackage?.ID))" disabled="disabled">
                                     Add Student
                                 </a>
                             }
@@ -202,7 +202,7 @@
                             }
                             else
                             {
-                                <a href="#" class="btn btn-default btn-space" onclick="return showUpgradeMyPlan('@(allowInvitesPackage.Name)',@(allowInvitesPackage.ID))" disabled="disabled">
+                                <a href="#" class="btn btn-default btn-space" onclick="return showUpgradeMyPlan('@(allowInvitesPackage?.Name)',@(allowInvitesPackage?.ID))" disabled="disabled">
                                     Invite Contacts
                                 </a>
                             }

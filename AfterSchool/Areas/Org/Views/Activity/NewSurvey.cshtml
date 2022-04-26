@@ -3,7 +3,7 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var accountPackage = (AccountPackage)ViewData["AccountPackage"];
     var forms = (List<Form>)ViewBag.Forms;
-    var manageFormsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageForms);
+    var manageFormsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageForms, SessionVariables.AccountPackage);
     var maxFormCount = accountPackage.IsNotEmpty() ? (int)accountPackage.GetFeature(FeatureType.ManageForms).Max.Value : 0;
     var activeForm = (ActivityForm)ViewBag.ActiveForm;
     var showManageForms = accountPackage.HasFeature(FeatureType.ManageForms);

@@ -1619,9 +1619,13 @@ namespace AfterSchool.Areas.Org.Controllers
             var package = id.IsGuid() ? Package.LoadByUid(id.ToGuid(), msgs) : accountPackage?.ToPackage();
 
             Package suggestedPackage = null;
-
-            if (featureId.IsNotEmpty() && featureId.IsInteger())
-                suggestedPackage = Package.Load(featureId.ToInteger(), msgs);
+            
+            if (int.TryParse(featureId, out var featureIdNumber))
+            {
+                suggestedPackage =
+                    PackageService.GetPackageWithFeatureLowestPrice((FeatureType) featureIdNumber, accountPackage,
+                        msgs);
+            }
 
             ViewBag.SuggestedPackage = suggestedPackage;
             ViewBag.Package = package;

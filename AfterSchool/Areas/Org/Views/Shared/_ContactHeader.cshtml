@@ -1,7 +1,7 @@
 ﻿@{ 
     var actionName = ViewContext.RouteData.Values["action"].ToString().ToLower();
     var manageContacts = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageContacts);
-    var manageContactsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageContacts);
+    var manageContactsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageContacts, SessionVariables.AccountPackage);
 }
 
 <div class="btn-toolbar">
@@ -12,7 +12,7 @@
         }
         else
         {
-            <a href="#" class="btn btn-alt6@(actionName == "index" ? "-active" : "")" onclick="return showUpgradeMyPlan('@(manageContactsPackage?.Name)'S,@(manageContactsPackage?.ID))"><i class="s7-users"></i> Contacts</a>
+            <a href="#" class="btn btn-alt6@(actionName == "index" ? "-active" : "")" onclick="return showUpgradeMyPlan('@(manageContactsPackage?.Name)',@(manageContactsPackage?.ID))"><i class="s7-users"></i> Contacts</a>
         }
 
         <a href="@Url.Action("lists", "contact")" class="btn btn-alt6@(actionName == "lists" ? "-active" : "")"><i class="s7-lists"></i> Contact Lists</a>

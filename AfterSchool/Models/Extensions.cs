@@ -200,7 +200,7 @@ namespace AfterSchool.Models
             if (activity.CostPerRegistrant <= 0 && !account.CanPublishFreeActivity(msgs, dc))
             {
                 var freeActivityLimitPackage =
-                    PackageService.GetPackageWithFeatureLowestPrice(FeatureType.FreeActivityLimit);
+                    PackageService.GetPackageWithFeatureLowestPrice(FeatureType.FreeActivityLimit, SessionVariables.AccountPackage);
                 var editCostLink =
                     $"<a href=\"/org/activity/editcost/{activity.Uid}\">update pricing and payment for this activity</a>";
                 var upgradePackageLink =

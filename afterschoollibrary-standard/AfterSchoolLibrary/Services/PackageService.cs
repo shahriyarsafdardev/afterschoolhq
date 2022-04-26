@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using AfterSchoolLibrary.Models;
 
 namespace AfterSchoolLibrary.Services
 {
     public static class PackageService
-    {       
-        public static PackageFeature AddFeature(this Package package, FeatureType featureType, decimal maxValue, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+    {
+        public static PackageFeature AddFeature(this Package package, FeatureType featureType, decimal maxValue,
+            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var packageFeature = new PackageFeature()
+            var packageFeature = new PackageFeature
             {
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
@@ -22,21 +22,21 @@ namespace AfterSchoolLibrary.Services
                 LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedDate = DateTime.UtcNow,
                 Max = maxValue,
-                PackageId = package.ID
+                PackageId = package.ID,
             };
 
             msgs.AddRange(packageFeature.Save(dc));
 
             return packageFeature;
-
         }
 
 
-        public static Package CreateDefaultPackage(WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Package CreateDefaultPackage(WebUser loggedInUser, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var package = new Package()
+            var package = new Package
             {
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
@@ -48,20 +48,18 @@ namespace AfterSchoolLibrary.Services
                 LastModifiedDate = DateTime.UtcNow,
                 Name = "Standard Package",
                 Price = 0.ToDecimal(),
-                PricePerYear = 0.ToDecimal()               
+                PricePerYear = 0.ToDecimal(),
             };
 
             msgs.AddRange(package.SaveWithStripe(dc));
 
-            if (msgs.HasNoErrors())
-            {
-                msgs.AddRange(CreateDefaultPackageFeatures(package, loggedInUser, dc));
-            }
+            if (msgs.HasNoErrors()) msgs.AddRange(CreateDefaultPackageFeatures(package, loggedInUser, dc));
 
             return package;
         }
 
-        public static SystemMessages CreateDefaultPackageFeatures(Package package, WebUser loggedInUser, DatabaseConnection dc = null)
+        public static SystemMessages CreateDefaultPackageFeatures(Package package, WebUser loggedInUser,
+            DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
@@ -95,29 +93,78 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        private static Package GetFirstPackageWithFeatureFromPackages(FeatureType feature, List<Package> packages, SystemMessages msgs = null, DatabaseConnection dc = null)
+        private static Package GetFirstPackageWithFeatureFromPackages(FeatureType feature, List<Package> packages,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return packages.FirstOrDefault(package => package.HasFeature(feature, msgs, dc));
+        }
+
+        private static Package GetFirstPackageWithFeatureFromPackages(FeatureType feature,
+            List<PackageFeaturePrice> packageFeaturePrices)
+        {
+            return packageFeaturePrices.FirstOrDefault(package => package.FeatureTypeIds.Contains((int) feature))
+                ?.Package;
+        }
+
+        private static Package GetFirstPackageWithFeatureFromPackages(FeatureType feature, List<Package> packages,
+            int featureCount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             foreach (var package in packages)
-            {
-                if (package.HasFeature(feature, msgs, dc))
+                if (package.HasFeature(feature, msgs, dc) &&
+                    package.GetFeature(feature, msgs, dc).GetMaxValue() > featureCount)
                     return package;
-            }
             return null;
         }
 
-        private static Package GetFirstPackageWithFeatureFromPackages(FeatureType feature, List<Package> packages, int featureCount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Package GetPackageWithFeatureLowestPrice(FeatureType feature, AccountPackage accountPackage,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            foreach (var package in packages)
-            {
-                if (package.HasFeature(feature, msgs, dc) && package.GetFeature(feature, msgs, dc).GetMaxValue() > featureCount)
-                    return package;
-            }
-            return null;
+            var packages = Package.LoadByIsActive(true, msgs, dc);
+            var packageFeaturePrices = packages
+                .Where(package =>
+                    package.Price > 0
+                    && package.PricePerYear > 0
+                    && package.ID != accountPackage.PackageId
+                    && package.Price > accountPackage.Price)
+                .Select(package => new PackageFeaturePrice
+                {
+                    Package = package,
+                    FeatureTypeIds = package.GetFeatures(msgs, dc).Select(x => (int) x.FeatureTypeId).ToList(),
+                })
+                .OrderBy(p => p.Package.Price).ToList();
+
+            return GetPackageWithFeatureNextPriceTier(feature, accountPackage, packageFeaturePrices, msgs);
         }
 
-        public static Package GetPackageWithFeatureLowestPrice(FeatureType feature, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Package GetPackageWithFeatureNextPriceTier(FeatureType feature, AccountPackage accountPackage,
+            List<PackageFeaturePrice> packageFeaturePrices, SystemMessages msgs)
         {
-            var features = ((FeatureType[])Enum.GetValues(typeof(FeatureType))).ToList();
+            var features = ((FeatureType[]) Enum.GetValues(typeof(FeatureType))).ToList();
+
+            if (!feature.In(features))
+            {
+                msgs.Add("feature type does not exist", MessageType.Error);
+                return null;
+            }
+
+            var paidPackages = packageFeaturePrices
+                .Where(pfp =>
+                    pfp.Package.IsActive
+                    && pfp.Package.Price > 0
+                    && pfp.Package.PricePerYear > 0
+                    && pfp.Package.ID != accountPackage.PackageId
+                    && pfp.Package.Price > accountPackage.Price)
+                .OrderBy(p => p.Package.Price).ToList();
+
+            var packageWithFeature = GetFirstPackageWithFeatureFromPackages(feature, paidPackages);
+
+            return packageWithFeature.IsNotEmpty() ? packageWithFeature : null;
+        }
+
+        public static Package GetPackageWithFeatureMaximumAvailability(FeatureType feature, int featureCount,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var features = ((FeatureType[]) Enum.GetValues(typeof(FeatureType))).ToList();
             var packages = Package.LoadByIsActive(true, msgs, dc);
             var paidPackages = packages.Where(m => m.Price > 0 && m.PricePerYear > 0).OrderBy(p => p.Price).ToList();
 
@@ -127,26 +174,8 @@ namespace AfterSchoolLibrary.Services
                 return null;
             }
 
-            var packageWithFeature = GetFirstPackageWithFeatureFromPackages(feature, paidPackages, msgs , dc);
-
-            if (packageWithFeature.IsNotEmpty())
-                return packageWithFeature;
-
-            return null;
-        }
-        public static Package GetPackageWithFeatureMaximumAvailability(FeatureType feature, int featureCount, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var features = ((FeatureType[])Enum.GetValues(typeof(FeatureType))).ToList();
-            var packages = Package.LoadByIsActive(true, msgs, dc);
-            var paidPackages = packages.Where(m => m.Price > 0 && m.PricePerYear > 0).OrderBy(p => p.Price).ToList();
-
-            if (!feature.In(features))
-            {
-                msgs.Add("feature type does not exist", MessageType.Error);
-                return null;
-            }
-
-            var packageWithFeature = GetFirstPackageWithFeatureFromPackages(feature, paidPackages,featureCount, msgs, dc);
+            var packageWithFeature =
+                GetFirstPackageWithFeatureFromPackages(feature, paidPackages, featureCount, msgs, dc);
 
             if (packageWithFeature.IsNotEmpty())
                 return packageWithFeature;
@@ -154,13 +183,14 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static Package GetPackageWithAnyFeaturesLowestPrice(List<FeatureType> features, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Package GetPackageWithAnyFeaturesLowestPrice(List<FeatureType> features,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var allFeatures = ((FeatureType[])Enum.GetValues(typeof(FeatureType))).ToList();
+            var allFeatures = ((FeatureType[]) Enum.GetValues(typeof(FeatureType))).ToList();
             var packages = Package.LoadByIsActive(true, msgs, dc);
             packages.OrderBy(p => p.Price);
 
-            foreach (FeatureType feature in features)
+            foreach (var feature in features)
             {
                 if (!feature.In(allFeatures))
                 {
@@ -176,5 +206,11 @@ namespace AfterSchoolLibrary.Services
 
             return null;
         }
+    }
+
+    public class PackageFeaturePrice
+    {
+        public Package Package { get; set; }
+        public List<int> FeatureTypeIds { get; set; }
     }
 }

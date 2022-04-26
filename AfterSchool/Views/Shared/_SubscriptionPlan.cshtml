@@ -6,7 +6,7 @@
 
     var accountPackage = (AccountPackage)ViewBag.accountPackage;
     var showAllowSubscriptionPlans = accountPackage.HasFeature(FeatureType.AllowSubscriptionPlans);
-    var showAllowSubscriptionPlansPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowSubscriptionPlans);
+    var showAllowSubscriptionPlansPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowSubscriptionPlans, SessionVariables.AccountPackage);
 
     var lstPlanPaymentStartType = Model.HasSchedule ?
         Enum.GetValues(typeof(PlanPaymentStartType)).Cast<PlanPaymentStartType>().Except(new List<PlanPaymentStartType>() { PlanPaymentStartType.NotSet }) :
@@ -23,7 +23,7 @@
 
         <div class="row">
             <label class="col-sm-3 control-label">Subscription</label>
-            <div class="col-sm-1" @if (!showAllowSubscriptionPlans) { <text> onclick="return showUpgradeMyPlan('@(showAllowSubscriptionPlansPackage.Name)','@(showAllowSubscriptionPlansPackage.ID)')" </text> }>
+            <div class="col-sm-1" @if (!showAllowSubscriptionPlans) { <text> onclick="return showUpgradeMyPlan('@(showAllowSubscriptionPlansPackage?.Name)','@(showAllowSubscriptionPlansPackage?.ID)')" </text> }>
                 @{
                     Html.RenderPartial(
                       "~/Views/Shared/_SwitchButton.cshtml",

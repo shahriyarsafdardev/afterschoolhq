@@ -1,18 +1,18 @@
 ﻿@model List<Registration>
-@{ 
-    var msgs = (SystemMessages)ViewBag.Messages;
-    var paging = (PagingModel)ViewBag.PagingModel;
+@{
+    var msgs = (SystemMessages) ViewBag.Messages;
+    var paging = (PagingModel) ViewBag.PagingModel;
     var studentCRMEnabled = SessionVariables.CurrentAccount.HasFeature(FeatureType.StudentCRM);
-    var studentCRMPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.StudentCRM);
- }
+    var studentCRMPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.StudentCRM, SessionVariables.AccountPackage);
+}
 
-@{Html.RenderPartial("OrgAccountHeader");}
+@{ Html.RenderPartial("OrgAccountHeader"); }
 
 <div class="main-content">
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{Html.RenderPartial("_RegistrationHeader");}
+    @{ Html.RenderPartial("_RegistrationHeader"); }
 
     <div id="studentcrmcontainer" class="panel panel-default">
         <div class="panel-heading">
@@ -30,22 +30,23 @@
                 </div>
             </div>
 
-            @{ Html.RenderPartial("_Registrations", Model, new ViewDataDictionary() {
-                   { "NavAction", "index" },
-                   { "NavController", "registration" },
-                   { "NavId", "" },
-                   { "EditAction", "edit" },
-                   { "EditController", "registration" },
-                   { "Account", SessionVariables.CurrentAccount },
-                   { "Paging", paging },
-                   { "ReturnUrl", Url.Action("index", "registration") }
-                });}
+            @{ Html.RenderPartial("_Registrations", Model, new ViewDataDictionary
+               {
+                   {"NavAction", "index"},
+                   {"NavController", "registration"},
+                   {"NavId", ""},
+                   {"EditAction", "edit"},
+                   {"EditController", "registration"},
+                   {"Account", SessionVariables.CurrentAccount},
+                   {"Paging", paging},
+                   {"ReturnUrl", Url.Action("index", "registration")},
+               }); }
 
         </div>
     </div>
 </div>
 
-@{ Html.RenderPartial("_EmailRegistrationReportModal", SessionVariables.CurrentAccount, new ViewDataDictionary() { { "PostAction", "emailreport" }, { "PostController", "registration" }, { "PostId", "" } }); }
+@{ Html.RenderPartial("_EmailRegistrationReportModal", SessionVariables.CurrentAccount, new ViewDataDictionary {{"PostAction", "emailreport"}, {"PostController", "registration"}, {"PostId", ""}}); }
 
 @section scripts
 {
@@ -58,8 +59,7 @@
             $("#studentcrmcontainer").find("a").on("click", function (e) {
                 e.preventDefault();
             });
-            showUpgradeMyPlan('@(studentCRMPackage.Name)','@(studentCRMPackage.ID)',true)
-
+            showUpgradeMyPlan('@(studentCRMPackage?.Name)','@(studentCRMPackage?.ID)',true)
         }
     });
     </script>

@@ -19,8 +19,8 @@
         : 0;
     var currentEmailCount = ViewBag.EmailCount != null ? (int)ViewBag.EmailCount : 0;
     var emailQuotaExceeded = currentEmailCount >= maxEmailCount;
-    var emailMessagingPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.EmailMessaging);
-    var textMessagingPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.TextMessaging);
+    var emailMessagingPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.EmailMessaging, SessionVariables.AccountPackage);
+    var textMessagingPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.TextMessaging, SessionVariables.AccountPackage);
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
@@ -79,7 +79,7 @@
                                 </div>
                             } else
                             {
-                                 <div class="am-checkbox"  onclick="return showUpgradeMyPlan('@(emailMessagingPackage.Name)', @(emailMessagingPackage.ID))">
+                                 <div class="am-checkbox"  onclick="return showUpgradeMyPlan('@(emailMessagingPackage?.Name)', @(emailMessagingPackage?.ID))">
                                     <input type="checkbox" id="sendtostaff" name="sendtostaff" value="1" disabled="disabled" />
                                     <label for="sendtostaff">Send Email To Staff</label>
                                 </div>
@@ -96,7 +96,7 @@
                             }
                             else
                             {
-                                <div class="am-checkbox" onclick="return showUpgradeMyPlan('@(textMessagingPackage.Name)', @(textMessagingPackage.ID))">
+                                <div class="am-checkbox" onclick="return showUpgradeMyPlan('@(textMessagingPackage?.Name)', @(textMessagingPackage?.ID))">
                                     <input type="checkbox" id="sendtextmessages" name="sendtextmessages" value="0" disabled="disabled" />
                                     <label for="sendtextmessages">Send Text Messages</label>
                                 </div>

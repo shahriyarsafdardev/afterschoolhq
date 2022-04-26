@@ -5,7 +5,7 @@
     var accountPackage = (AccountPackage)ViewBag.AccountPackage;
     var members = (List<WebUser>)ViewBag.Members;
     var needToUpgrade = (bool)ViewBag.NeedToUpgrade;
-    var teamAccountsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.TeamAccounts);
+    var teamAccountsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.TeamAccounts, SessionVariables.AccountPackage);
 
     string accountId = Model.ID.ToString();
     string returnUrl = "";
@@ -62,7 +62,7 @@
                 }
                 else
                 {
-                     <a href="#" class="btn btn-primary" onclick="return showUpgradeMyPlan('@(teamAccountsPackage.Name)',@(teamAccountsPackage.ID));">
+                     <a href="#" class="btn btn-primary" onclick="return showUpgradeMyPlan('@(teamAccountsPackage?.Name)',@(teamAccountsPackage?.ID));">
                         <i class="icon icon-left s7-plus"></i>
                         Invite Team Member
                     </a>

@@ -59,7 +59,7 @@
     }
 
     var showAllowSubscriptionPlans = SessionVariables.AccountPackage.HasFeature(FeatureType.AllowSubscriptionPlans);
-    var allowSubscriptionPlansPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowSubscriptionPlans);
+    var allowSubscriptionPlansPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowSubscriptionPlans, SessionVariables.AccountPackage);
 }
 @if(isContinousEnrollmentEnabled)
 {
@@ -198,7 +198,7 @@
                             <label class="col-md-3 control-label">
                                 Is this an ongoing @UILabel.ActivityLabel(ActivityType.Activity).ToLower()? <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Ongoing @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() do not have an end date and allow parents to sign up their children for ongoing subscriptions." data-placement="top"></i>
                             </label>
-                            <div class="col-md-9 isongoing" @if (!showAllowSubscriptionPlans) { <text> onclick="return showUpgradeMyPlan('@(allowSubscriptionPlansPackage.Name)',@(allowSubscriptionPlansPackage.ID))"</text> }>
+                            <div class="col-md-9 isongoing" @if (!showAllowSubscriptionPlans) { <text> onclick="return showUpgradeMyPlan('@(allowSubscriptionPlansPackage?.Name)',@(allowSubscriptionPlansPackage?.ID))"</text> }>
                                 @{
                                     Html.RenderPartial(
                                         "~/Views/Shared/_SwitchButton.cshtml",

@@ -3,7 +3,7 @@
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var couponFeatureEnabled = SessionVariables.CurrentAccount.HasFeature(FeatureType.ManageCoupons);
-    var couponPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageCoupons);
+    var couponPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageCoupons, SessionVariables.AccountPackage);
 
 }
 

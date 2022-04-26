@@ -5,7 +5,7 @@
     var maxFormCount = accountPackage.IsNotEmpty() ? (int)accountPackage.GetFeature(FeatureType.ManageForms).Max.Value : 0;
     var currentFormCount = Model.Count;
     var showFormFields = currentFormCount >= maxFormCount ? false : true;
-    var showFormFieldsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageForms);
+    var showFormFieldsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageForms, SessionVariables.AccountPackage);
 }
 <input type="hidden" id="isSurveyForm" name="isSurveyForm" value="@ViewBag.FromSurvey" />
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -32,7 +32,7 @@
                 }
                 else
                 {
-                    <button class="btn btn-primary btn-space md-trigger" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage.Name)', @(showFormFieldsPackage.ID))">
+                    <button class="btn btn-primary btn-space md-trigger" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))">
                         <i class="icon icon-left s7-plus"></i>
                         Add Form
                     </button>
@@ -66,7 +66,7 @@
                         @if (maxFormCount == 0)
                         {
                             <tr>
-                                <td colspan="4">No forms available. Please <a href="#" class="md-trigger" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage.Name)', @(showFormFieldsPackage.ID))">upgrade your plan.</a></td>
+                                <td colspan="4">No forms available. Please <a href="#" class="md-trigger" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))">upgrade your plan.</a></td>
                             </tr>
                         }
                         else if (Model.Count > 0)
@@ -81,7 +81,7 @@
                                         }
                                         else
                                         {
-                                            <a href="#" class="btn btn-default btn-sm" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage.Name)', @(showFormFieldsPackage.ID))"><i class="icon icon-left s7-edit"></i> Edit</a>
+                                            <a href="#" class="btn btn-default btn-sm" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))"><i class="icon icon-left s7-edit"></i> Edit</a>
                                         }
 
                                     </td>
@@ -96,7 +96,7 @@
                                         }
                                         else
                                         {
-                                            <button class="btn btn-default btn-sm md-trigger" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage.Name)', @(showFormFieldsPackage.ID))">
+                                            <button class="btn btn-default btn-sm md-trigger" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))">
                                                 <i class="icon icon-left s7-copy-file"></i> Copy
                                             </button>
                                         }

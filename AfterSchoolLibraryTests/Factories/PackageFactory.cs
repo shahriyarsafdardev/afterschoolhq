@@ -10,7 +10,7 @@ namespace AfterSchoolLibraryTests.Factories
     {
         public static Package Create(SystemMessages msgs, DatabaseConnection dc)
         {
-            var obj = new Package()
+            var obj = new Package
             {
                 Name = "Package Test",
                 IsActive = true,
@@ -22,7 +22,7 @@ namespace AfterSchoolLibraryTests.Factories
         }
         public static Package Create(decimal pricePerMonth, decimal pricePerYear, SystemMessages msgs, DatabaseConnection dc)
         {
-            var obj = new Package()
+            var obj = new Package
             {
                 Name = "Package Test",
                 IsActive = true,
@@ -34,7 +34,7 @@ namespace AfterSchoolLibraryTests.Factories
         }
         public static Package CreateWithStripe(SystemMessages msgs, DatabaseConnection dc)
         {
-            var obj = new Package()
+            var obj = new Package
             {
                 Name = "Package Test",
                 IsActive = true,
@@ -47,7 +47,7 @@ namespace AfterSchoolLibraryTests.Factories
 
         public static Package CreateFreePackage(SystemMessages msgs, DatabaseConnection dc)
         {
-            var obj = new Package()
+            var obj = new Package
             {
                 Name = "Test Package Free",
                 IsActive = true,
@@ -95,7 +95,7 @@ namespace AfterSchoolLibraryTests.Factories
 
         public static Package CreateFreePackageWithFlatFee(SystemMessages msgs, DatabaseConnection dc)
         {
-            var obj = new Package()
+            var obj = new Package
             {
                 Name = "Test Package Free",
                 IsActive = true,
@@ -144,7 +144,7 @@ namespace AfterSchoolLibraryTests.Factories
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var package = new Package()
+            var package = new Package
             {
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
@@ -208,7 +208,7 @@ namespace AfterSchoolLibraryTests.Factories
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var packageFeature = new PackageFeature()
+            var packageFeature = new PackageFeature
             {
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
@@ -226,7 +226,7 @@ namespace AfterSchoolLibraryTests.Factories
 
         public static Package CreateFreePackageWithUseStripeConnectedAccount(SystemMessages msgs, DatabaseConnection dc)
         {
-            var obj = new Package()
+            var obj = new Package
             {
                 Name = "Test Package Free",
                 IsActive = true,
