@@ -766,6 +766,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="about.html" />
+    <Content Include="afterschoolhq-partners-with-ips.html" />
     <Content Include="ahq-partners-with-mccoy.html" />
     <Content Include="Areas\Org\Views\Onboarding\FreeTrial.cshtml" />
     <Content Include="Areas\Org\Views\Shared\_RegistrationForm.cshtml" />
