@@ -3,6 +3,7 @@ using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
 using System;
 using System.Linq;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchoolLibraryTests.Factories
 {
@@ -89,6 +90,7 @@ namespace AfterSchoolLibraryTests.Factories
             PackageFeatureFactory.Create(obj, FeatureType.ViewInsights, 1.ToDecimal(), msgs, dc);
             PackageFeatureFactory.Create(obj, FeatureType.WaitingList, 1.ToDecimal(), msgs, dc);
             PackageFeatureFactory.Create(obj, FeatureType.ManualStripePayouts, 1.ToDecimal(), msgs, dc);
+            PackageFeatureFactory.Create(obj, FeatureType.FreeActivityLimit, 1.ToDecimal(), msgs, dc);
 
             return obj;
         }

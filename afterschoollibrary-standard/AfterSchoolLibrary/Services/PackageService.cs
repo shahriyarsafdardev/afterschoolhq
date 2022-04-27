@@ -125,7 +125,7 @@ namespace AfterSchoolLibrary.Services
                     package.Price > 0
                     && package.PricePerYear > 0
                     && package.ID != accountPackage.PackageId
-                    && package.Price > accountPackage.Price)
+                    && ( package.Price > accountPackage.Price || package.PricePerYear > accountPackage.Price))
                 .Select(package => new PackageFeaturePrice
                 {
                     Package = package,

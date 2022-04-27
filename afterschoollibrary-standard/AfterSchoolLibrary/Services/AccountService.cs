@@ -138,17 +138,21 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
-        #endregion
-
         public static bool CanPublishFreeActivity(this Account account, SystemMessages msgs, DatabaseConnection dc)
         {
-            var freeActivityLimit = account.GetActiveAccountPackage(msgs, dc)
-                .GetFeature(FeatureType.FreeActivityLimit)?.Max.Value;
-            var numberOfPublishedActivities = account.GetPublishedActivities(msgs, dc).Count;
+            var freeActivityLimitPackageFeature =
+                account.GetAccountPackageFeature(FeatureType.FreeActivityLimit, msgs, dc);
+            var freeActivityLimit = freeActivityLimitPackageFeature?.Max.Value;
+            var numberOfPublishedActivities = account.GetPublishedActivities(msgs, dc)?
+                .Count(a => a.CostPerRegistrant == 0 &&
+                            (!a.HasSchedule || a.GetSchedule(msgs, dc).EndDate >= DateTime.Today));
 
             return freeActivityLimit.IsNotEmpty() && (
-                freeActivityLimit == Int32.MaxValue || freeActivityLimit > numberOfPublishedActivities);
+                freeActivityLimit == int.MaxValue || freeActivityLimit > numberOfPublishedActivities);
         }
+
+        #endregion
+
 
         #region ActivitySchedule
 
@@ -5546,9 +5550,9 @@ namespace AfterSchoolLibrary.Services
                     {
                         var name = $"question-{(int) qvm.Key.ID}";
                         if (files.IsNotEmpty() && files.Any(m => m.FileName == name) &&
-                            files.Where(m => m.FileName == name).FirstOrDefault().ContentLength > 0)
+                            files.FirstOrDefault(m => m.FileName == name).ContentLength > 0)
                         {
-                            var file = files.Where(m => m.FileName == name).FirstOrDefault();
+                            var file = files.FirstOrDefault(m => m.FileName == name);
                             //5 MB = 5242880 Bytes
                             //File uploaded here should be less than of 5MB
                             if (file.ContentLength <= 5242880)
