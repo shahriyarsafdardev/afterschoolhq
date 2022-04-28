@@ -166,11 +166,13 @@ body.registration {
 .reg-login-bar {
     min-height: 40px;
     background-color: rgba(47, 60, 64, 0.90);
+    display: flex;
+    align-items: center;
 }
 
 .reg-login-bar-title {
     color: #fff;
-    padding: 5px 0px 0px 10px;
+    padding-left: 10px;
 }
 
 .reg-login-bar-title-item {
