@@ -156,10 +156,6 @@
         padding: 15px 0 0 5px;
     }
 
-    .navTop > .nav-btn > label:hover, .navTop#nav-check:checked ~ .nav-btn > label {
-        background-color: none;
-    }
-
     .navTop > .nav-btn > label > span {
         display: block;
         width: 25px;
@@ -183,15 +179,6 @@
     .navTop > .nav-links > a {
         display: block;
         width: 100%;
-    }
-
-    .navTop > #nav-check:not(:checked) ~ .nav-links {
-        height: 0px;
-    }
-
-    .navTop > #nav-check:checked ~ .nav-links {
-        height: calc(50vh - 50px);
-        overflow-y: auto;
     }
 
     .navTop > .nav-links > a {
