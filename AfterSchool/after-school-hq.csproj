@@ -2515,7 +2515,6 @@
     <Content Include="Views\Shared\Modals\_LeadForm.cshtml" />
     <Content Include="Views\Shared\Registration\_BrowseFilterBar.cshtml" />
     <Content Include="Views\Shared\Registration\_BrowseRegistrationHeader.cshtml" />
-    <Content Include="Views\Shared\Registration\_BrowseParticipationObject.cshtml" />
     <Content Include="Views\Shared\Components\_LocationAddOrEdit.cshtml" />
     <Content Include="Views\Shared\Components\_ProviderAddOrEdit.cshtml" />
     <Content Include="Views\Shared\Components\_ProviderEdit.cshtml" />
