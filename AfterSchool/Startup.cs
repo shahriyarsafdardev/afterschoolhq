@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Web.Mvc;
 using AfterSchool;
@@ -7,6 +8,7 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using Emmersion.InfluxDB;
 using Hangfire;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Owin;
 using Owin;
@@ -17,6 +19,21 @@ namespace AfterSchool
 {
     public partial class Startup
     {
+        private readonly IConfigurationRoot _configurationRoot;
+
+        public Startup()
+        {
+            var localConfigOverridesPath =
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                    "afterschoolhq-overrides",
+                    "appsettings.json");
+            _configurationRoot = new ConfigurationBuilder()
+                .SetBasePath(Path.Combine(AppContext.BaseDirectory))
+                .AddJsonFile("appsettings.json", true)
+                .AddJsonFile(localConfigOverridesPath, true)
+                .Build();
+        }
+
         public void Configuration(IAppBuilder app)
         {
             app.MapSignalR();
@@ -49,7 +66,10 @@ namespace AfterSchool
                 .Where(t => typeof(IController).IsAssignableFrom(t)
                             || t.Name.EndsWith("Controller", StringComparison.OrdinalIgnoreCase)));
 
-            services.AddTransient<IInfluxSettings>(provider => new InfluxSettings("http://localhost", 8086, "local"));
+            services.AddTransient<IInfluxSettings>(provider => new InfluxSettings(
+                _configurationRoot.GetValue<string>("InfluxDB:Hostname"),
+                _configurationRoot.GetValue<int>("InfluxDB:Port"),
+                _configurationRoot.GetValue<string>("InfluxDB:DbName")));
             services.AddTransient<IInfluxLogger, InfluxLogger>();
             DependencyInjectionConfig.ConfigureServices(services);
         }
