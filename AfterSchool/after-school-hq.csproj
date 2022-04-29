@@ -160,8 +160,8 @@
     <Reference Include="Microsoft.Extensions.DependencyInjection, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Extensions.DependencyInjection.2.0.0\lib\netstandard2.0\Microsoft.Extensions.DependencyInjection.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Extensions.DependencyInjection.Abstractions.2.0.0\lib\netstandard2.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
+    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions, Version=5.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Extensions.DependencyInjection.Abstractions.5.0.0\lib\net461\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Extensions.FileProviders.Abstractions, Version=2.2.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Extensions.FileProviders.Abstractions.2.2.0\lib\netstandard2.0\Microsoft.Extensions.FileProviders.Abstractions.dll</HintPath>
@@ -692,6 +692,7 @@
     <Compile Include="Areas\WebHooks\Controllers\StripeController.cs" />
     <Compile Include="Areas\WebHooks\Controllers\TwilioController.cs" />
     <Compile Include="Areas\WebHooks\WebHooksAreaRegistration.cs" />
+    <Compile Include="RecordControllerActionsToInfluxMiddleware.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\AfterSchoolController.cs" />
     <Compile Include="Controllers\DbController.cs" />
@@ -2620,6 +2621,10 @@
     <ProjectReference Include="..\basiclibrary-standard\BasicLibrary\BasicLibrary.vbproj">
       <Project>{2e3fc14d-bba7-4ee5-810c-96d7d84401b5}</Project>
       <Name>BasicLibrary</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Emmersion.InfluxDB\Emmersion.InfluxDB\Emmersion.InfluxDB.csproj">
+      <Project>{adf12b53-03ce-4060-a61f-9880ac6cb15e}</Project>
+      <Name>Emmersion.InfluxDB</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

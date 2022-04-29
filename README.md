@@ -11,6 +11,8 @@
 
 ## SQL Server Installation and Setup
 
+### Manual setup
+
 - Install SQL Server Database
 - Do NOT do a `named instance` instead select `default instance`
 - Turn on Mixed Mode Authentication - required for the local app to access the database
@@ -21,6 +23,11 @@
 - Give it the password found in `Database.cs` for the local and test environments
 - Turn off the password policy
 - Select `User Mapping` in left menu, click on `AfterSchool` and `AfterSchoolTest`, check the `db owner` checkbox, save the user
+
+### Docker setup
+
+- Open a bash terminal in the root project directory and run `docker-compose up -d`.
+- Move bash terminal to `/scripts` directory and run `./initialize-sqlserver.sh`.
 
 ## Getting up and running
 
