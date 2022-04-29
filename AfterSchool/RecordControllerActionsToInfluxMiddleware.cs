@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Threading.Tasks;
 using System.Web;
 using Emmersion.InfluxDB;
@@ -30,16 +29,9 @@ namespace AfterSchool
             }
             finally
             {
-                try
-                {
-                    stopwatch.Stop();
-                    var elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
-                    SendDataToInflux(environment, elapsedMilliseconds);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex);
-                }
+                stopwatch.Stop();
+                var elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
+                SendDataToInflux(environment, elapsedMilliseconds);
             }
         }
 
@@ -68,7 +60,7 @@ namespace AfterSchool
                     "AfterSchool",
                     new[]
                     {
-                        new Field("Duration-Ms", elapsedMilliseconds)
+                        new Field("Duration-Ms", elapsedMilliseconds),
                     },
                     new[]
                     {
