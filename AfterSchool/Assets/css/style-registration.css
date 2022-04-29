@@ -168,6 +168,8 @@ body.registration {
     background-color: rgba(47, 60, 64, 0.90);
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
+    font-size: 15px
 }
 
 .reg-login-bar-title {
