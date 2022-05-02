@@ -300,8 +300,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.AccountPackage = accountPackage;
             ViewBag.Activities = finalActivities;
-            ViewBag.NeedToUpgrade = finalActivities.Count >=
-                                    accountPackage.GetFeature(FeatureType.Activities, msgs).GetMaxValue();
             ViewBag.HasArchivedActivities = group.GetActivityCount(null, true, false, null, msgs) > 0;
             ViewBag.Messages = msgs;
 

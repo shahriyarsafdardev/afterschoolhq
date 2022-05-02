@@ -1,9 +1,8 @@
-﻿using BasicLibrary;
-using BasicLibrary.DataAccess;
-using AfterSchoolLibrary.Models;
-using System;
+﻿using System;
 using System.Linq;
-using AfterSchoolLibrary.Services;
+using AfterSchoolLibrary.Models;
+using BasicLibrary;
+using BasicLibrary.DataAccess;
 
 namespace AfterSchoolLibraryTests.Factories
 {
@@ -18,21 +17,24 @@ namespace AfterSchoolLibraryTests.Factories
                 Price = 0.ToDecimal(),
                 PricePerYear = 0.ToDecimal(),
             };
-            msgs.AddRange(obj.Save(dc: dc));
+            msgs.AddRange(obj.Save(dc));
             return obj;
         }
-        public static Package Create(decimal pricePerMonth, decimal pricePerYear, SystemMessages msgs, DatabaseConnection dc)
+
+        public static Package Create(decimal pricePerMonth, decimal pricePerYear, SystemMessages msgs,
+            DatabaseConnection dc)
         {
             var obj = new Package
             {
                 Name = "Package Test",
                 IsActive = true,
                 Price = pricePerMonth,
-                PricePerYear = pricePerYear
+                PricePerYear = pricePerYear,
             };
-            msgs.AddRange(obj.Save(dc: dc));
+            msgs.AddRange(obj.Save(dc));
             return obj;
         }
+
         public static Package CreateWithStripe(SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new Package
@@ -40,9 +42,9 @@ namespace AfterSchoolLibraryTests.Factories
                 Name = "Package Test",
                 IsActive = true,
                 Price = 0.ToDecimal(),
-                PricePerYear = 0.ToDecimal()
+                PricePerYear = 0.ToDecimal(),
             };
-            msgs.AddRange(obj.SaveWithStripe(dc: dc));
+            msgs.AddRange(obj.SaveWithStripe(dc));
             return obj;
         }
 
@@ -55,11 +57,10 @@ namespace AfterSchoolLibraryTests.Factories
                 Price = 0.ToDecimal(),
                 PricePerYear = 0.ToDecimal(),
             };
-            msgs.AddRange(obj.Save(dc: dc));
+            msgs.AddRange(obj.Save(dc));
 
             PackageFeatureFactory.Create(obj, FeatureType.AcceptACH, 1.ToDecimal(), msgs, dc);
             PackageFeatureFactory.Create(obj, FeatureType.AcceptPayments, 1.ToDecimal(), msgs, dc);
-            PackageFeatureFactory.Create(obj, FeatureType.Activities, 1500.ToDecimal(), msgs, dc);
             PackageFeatureFactory.Create(obj, FeatureType.AllowApplications, 1.ToDecimal(), msgs, dc);
             PackageFeatureFactory.Create(obj, FeatureType.AllowInvites, 1.ToDecimal(), msgs, dc);
             PackageFeatureFactory.Create(obj, FeatureType.AllowPayLater, 1.ToDecimal(), msgs, dc);
@@ -104,11 +105,10 @@ namespace AfterSchoolLibraryTests.Factories
                 Price = 0.ToDecimal(),
                 PricePerYear = 0.ToDecimal(),
             };
-            msgs.AddRange(obj.Save(dc: dc));
+            msgs.AddRange(obj.Save(dc));
 
             PackageFeatureFactory.Create(obj, FeatureType.AcceptACH, 1.ToDecimal(), msgs, dc);
             PackageFeatureFactory.Create(obj, FeatureType.AcceptPayments, 1.ToDecimal(), msgs, dc);
-            PackageFeatureFactory.Create(obj, FeatureType.Activities, 1500.ToDecimal(), msgs, dc);
             PackageFeatureFactory.Create(obj, FeatureType.AllowApplications, 1.ToDecimal(), msgs, dc);
             PackageFeatureFactory.Create(obj, FeatureType.AllowInvites, 1.ToDecimal(), msgs, dc);
             PackageFeatureFactory.Create(obj, FeatureType.AllowPayLater, 1.ToDecimal(), msgs, dc);
@@ -142,7 +142,8 @@ namespace AfterSchoolLibraryTests.Factories
             return obj;
         }
 
-        public static Package CreatePackage(string Name, string Description, decimal price, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Package CreatePackage(string Name, string Description, decimal price, WebUser loggedInUser,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -158,7 +159,7 @@ namespace AfterSchoolLibraryTests.Factories
                 LastModifiedDate = DateTime.UtcNow,
                 Name = Name,
                 Price = price,
-                PricePerYear = price * 10
+                PricePerYear = price * 10,
             };
 
             msgs.AddRange(package.SaveWithStripe(dc));
@@ -169,36 +170,23 @@ namespace AfterSchoolLibraryTests.Factories
             return package;
         }
 
-        public static SystemMessages CreatePackageFeatures(Package package, WebUser loggedInUser, DatabaseConnection dc = null)
+        public static SystemMessages CreatePackageFeatures(Package package, WebUser loggedInUser,
+            DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
             foreach (var item in Enum.GetValues(typeof(FeatureType)).Cast<FeatureType>())
             {
-                var maxValue = 1.ToDecimal();
-
-                switch (item)
+                var maxValue = item switch
                 {
-                    case FeatureType.Activities:
-                        maxValue = 1000;
-                        break;
-                    case FeatureType.TrialDays:
-                        maxValue = 120;
-                        break;
-                    case FeatureType.TeamAccounts:
-                    case FeatureType.Participants:
-                        maxValue = 1000;
-                        break;
-                    case FeatureType.PaymentsPercentageFee:
-                        maxValue = .05.ToDecimal(); // means 5 percent
-                        break;
-                    case FeatureType.PaymentsPercentageFlatFee:
-                        maxValue = .99.ToDecimal();
-                        break;
-                    case FeatureType.ManagePermissionSlips:
-                        maxValue = 3;
-                        break;
-                }
+                    FeatureType.TrialDays => 120,
+                    FeatureType.TeamAccounts => 1000,
+                    FeatureType.Participants => 1000,
+                    FeatureType.PaymentsPercentageFee => .05m, // means 5 percent
+                    FeatureType.PaymentsPercentageFlatFee => .99m,
+                    FeatureType.ManagePermissionSlips => 3,
+                    _ => 1m,
+                };
 
                 AddFeature(package, item, maxValue, loggedInUser, msgs, dc);
             }
@@ -206,7 +194,8 @@ namespace AfterSchoolLibraryTests.Factories
             return msgs;
         }
 
-        public static PackageFeature AddFeature(Package package, FeatureType featureType, decimal maxValue, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static PackageFeature AddFeature(Package package, FeatureType featureType, decimal maxValue,
+            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -218,7 +207,7 @@ namespace AfterSchoolLibraryTests.Factories
                 LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedDate = DateTime.UtcNow,
                 Max = maxValue,
-                PackageId = package.ID
+                PackageId = package.ID,
             };
 
             msgs.AddRange(packageFeature.Save(dc));
@@ -235,11 +224,10 @@ namespace AfterSchoolLibraryTests.Factories
                 Price = 0.ToDecimal(),
                 PricePerYear = 0.ToDecimal(),
             };
-            msgs.AddRange(obj.Save(dc: dc));
+            msgs.AddRange(obj.Save(dc));
 
             PackageFeatureFactory.Create(obj, FeatureType.AcceptACH, 1.ToDecimal(), msgs, dc);
             PackageFeatureFactory.Create(obj, FeatureType.AcceptPayments, 1.ToDecimal(), msgs, dc);
-            PackageFeatureFactory.Create(obj, FeatureType.Activities, 1000.ToDecimal(), msgs, dc);
             PackageFeatureFactory.Create(obj, FeatureType.AllowApplications, 0.ToDecimal(), msgs, dc);
             PackageFeatureFactory.Create(obj, FeatureType.AllowInvites, 0.ToDecimal(), msgs, dc);
             PackageFeatureFactory.Create(obj, FeatureType.AllowPayLater, 0.ToDecimal(), msgs, dc);

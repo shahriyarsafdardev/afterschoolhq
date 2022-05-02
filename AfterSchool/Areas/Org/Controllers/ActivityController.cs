@@ -135,9 +135,6 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Groups = currentAccount.GetSessions(msgs);
             ViewBag.Group = activityGroup;
-            ViewBag.NeedToUpgrade = totalActivityCount >=
-                                    SessionVariables.AccountPackage.GetFeature(FeatureType.Activities, msgs)
-                                        .GetMaxValue();
             ViewBag.HasArchivedActivities = hasArchivedActivities;
             ViewBag.ActivityType = activityType;
             ViewBag.PagingModel = new PagingModel()

@@ -65,27 +65,15 @@ namespace AfterSchoolLibrary.Services
 
             foreach (var item in Enum.GetValues(typeof(FeatureType)).Cast<FeatureType>())
             {
-                var maxValue = 1.ToDecimal();
-
-                switch (item)
+                var maxValue = item switch
                 {
-                    case FeatureType.Activities:
-                        maxValue = 1000;
-                        break;
-                    case FeatureType.TrialDays:
-                        maxValue = 120;
-                        break;
-                    case FeatureType.TeamAccounts:
-                    case FeatureType.Participants:
-                        maxValue = 1000;
-                        break;
-                    case FeatureType.PaymentsPercentageFee:
-                        maxValue = .05.ToDecimal(); // means 5 percent
-                        break;
-                    case FeatureType.PaymentsPercentageFlatFee:
-                        maxValue = .99.ToDecimal();
-                        break;
-                }
+                    FeatureType.TrialDays => 120,
+                    FeatureType.TeamAccounts => 1000,
+                    FeatureType.Participants => 1000,
+                    FeatureType.PaymentsPercentageFee => .05m, // means 5 percent
+                    FeatureType.PaymentsPercentageFlatFee => .99m,
+                    _ => 1m,
+                };
 
                 package.AddFeature(item, maxValue, loggedInUser, msgs, dc);
             }
@@ -125,7 +113,7 @@ namespace AfterSchoolLibrary.Services
                     package.Price > 0
                     && package.PricePerYear > 0
                     && package.ID != accountPackage.PackageId
-                    && ( package.Price > accountPackage.Price || package.PricePerYear > accountPackage.Price))
+                    && (package.Price > accountPackage.Price || package.PricePerYear > accountPackage.Price))
                 .Select(package => new PackageFeaturePrice
                 {
                     Package = package,

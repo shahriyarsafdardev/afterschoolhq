@@ -3,7 +3,6 @@
     ViewBag.Title = "Activities";
     var msgs = (SystemMessages)ViewBag.Messages;
     var activities = (List<Activity>)ViewBag.Activities;
-    var needToUpgrade = (bool)ViewBag.NeedToUpgrade;
     var hasArchivedActivities = (bool)ViewBag.HasArchivedActivities;
 }
 
@@ -73,7 +72,7 @@
                             { "PagingModel", ViewBag.PagingModel },
                             { "ShowRegistrationPeriodFilter", false },
                             { "Group", Model },
-                            { "NeedToUpgrade", needToUpgrade },
+                            { "NeedToUpgrade", false },
                             { "HasArchivedActivities", hasArchivedActivities }
                            }
                        ); }

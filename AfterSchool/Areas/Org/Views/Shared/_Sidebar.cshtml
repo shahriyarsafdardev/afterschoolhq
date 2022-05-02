@@ -105,7 +105,7 @@
 
             @if (SessionVariables.CurrentAccount.AccountTypeId.In(AccountService.IndividualProviderAccountTypes))
             {
-                if (CanView(FeatureType.Activities, SessionVariables.AccountUserType, PermissionType.ActivitiesView))
+                if (CanView(SessionVariables.AccountUserType, PermissionType.ActivitiesView))
                 {
                     <li class="@activityactive">
                         <a href="@Url.Action("index", "activity", new { type = (int)ActivityType.Activity })"><i class="icon s7-gleam"></i> @UILabel.ActivityLabel(ActivityType.Activity, true)</a>
@@ -117,7 +117,7 @@
                 <li class="parent @activitycenteractive">
                     <a href="#"><i class="icon s7-gleam"></i> <span>Activity Center</span></a>
                     <ul class="sub-menu">
-                        @if (CanView(FeatureType.Activities, SessionVariables.AccountUserType, PermissionType.ActivitiesView))
+                        @if (CanView(SessionVariables.AccountUserType, PermissionType.ActivitiesView))
                         {
                             <li>
                                 <a href="@Url.Action("index", "activity", new { type = (int)ActivityType.Activity })"><i class="icon s7-gleam"></i> Extracurricular @UILabel.ActivityLabel(ActivityType.Activity, true)</a>
@@ -182,7 +182,7 @@
             {
                 <li class="@accountingactive"><a href="@Url.Action("index", "accounting")"><i class="icon s7-cash"></i> Accounting</a></li>
             }
-            @if (CanView(FeatureType.Activities, SessionVariables.AccountUserType, PermissionType.AccountSettingsView))
+            @if (CanView(SessionVariables.AccountUserType, PermissionType.AccountSettingsView))
             {
                 <li class=""><a href="@SessionVariables.CurrentAccount.HomePageUrl?edit=1"><i class="icon s7-browser"></i> Edit Profile</a></li>
             }
@@ -195,7 +195,7 @@
                     {
                         <li class="@teamactive"><a href="@Url.Action("team", "account")"><i class="icon s7-users"></i> Staff</a></li>
                     }
-                    @if (CanView(FeatureType.Activities, SessionVariables.AccountUserType, PermissionType.AccountSettingsView))
+                    @if (CanView(SessionVariables.AccountUserType, PermissionType.AccountSettingsView))
                     {
                         <li class="@accountactive"><a href="@Url.Action("edit", "account")"><i class="icon s7-edit"></i> Settings</a></li>
                     }

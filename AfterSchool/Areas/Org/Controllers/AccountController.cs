@@ -1764,46 +1764,6 @@ namespace AfterSchool.Areas.Org.Controllers
             }
         }
 
-        //[HttpPost]
-        //public ActionResult AddCard(string id, string stripetoken, string makeprimary)
-        //{
-        //    SystemMessages msgs = new SystemMessages();
-
-        //    var a = SessionVariables.CurrentAccount;
-        //    //msgs.AddRange(a.AddCreditCard(stripetoken, !makeprimary.IsEmpty(), SessionVariables.LoggedInUser));
-        //    //ViewBag.Cards = a.GetStripeCards();
-        //    ViewBag.Messages = msgs;
-        //    return View("Billing", a);
-        //}
-
-        [HttpGet]
-        public ActionResult Packages()
-        {
-            var msgs = new SystemMessages();
-            var currentAccount = SessionVariables.CurrentAccount;
-
-            ViewBag.Packages = Package.LoadByIsActive(true, msgs);
-            ViewBag.AccountPackage = currentAccount.GetActiveAccountPackage(msgs);
-            ViewBag.Messages = msgs;
-            return View(currentAccount);
-        }
-
-        [HttpGet]
-        public ActionResult SelectPackage(string id)
-        {
-            var msgs = new SystemMessages();
-            var currentAccount = SessionVariables.CurrentAccount;
-
-            currentAccount.AddPackage(id.ToInteger(), BillingPeriodType.Month, SessionVariables.LoggedInUser, msgs);
-
-            SessionVariables.AccountPackage = currentAccount.GetActiveAccountPackage(msgs);
-
-            ViewBag.Packages = Package.LoadByIsActive(true, msgs);
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Messages = msgs;
-            return View("Packages", currentAccount);
-        }
-
         public ActionResult OAuthStripe()
         {
             var currentAccount = SessionVariables.CurrentAccount;

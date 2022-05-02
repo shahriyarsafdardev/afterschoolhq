@@ -88,7 +88,6 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.Groups = currentAccount.GetSessions(msgs);
             ViewBag.Group = activityGroup;
-            ViewBag.NeedToUpgrade = totalActivityCount >= SessionVariables.AccountPackage.GetFeature(FeatureType.Activities).GetMaxValue();
             ViewBag.HasArchivedActivities = hasArchivedActivities;
 
             ViewBag.PagingModel = new PagingModel()

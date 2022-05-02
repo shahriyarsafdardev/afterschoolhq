@@ -2,7 +2,6 @@
 @{
     ViewBag.Title = SessionVariables.CurrentAccount.Name;
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
-    var needToUpgrade = (bool)ViewBag.NeedToUpgrade;
     var hasArchivedActivities = (bool)ViewBag.HasArchivedActivities;
 }
 
@@ -61,7 +60,7 @@
                             { "ShowRegistrationPeriodFilter", true },
                             { "Groups", ViewBag.Groups },
                             { "Group", ViewBag.Group },
-                            { "NeedToUpgrade", needToUpgrade },
+                            { "NeedToUpgrade", false },
                             { "HasArchivedActivities", hasArchivedActivities }
                            }
                        ); }

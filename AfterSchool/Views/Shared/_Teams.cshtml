@@ -1,31 +1,31 @@
 ﻿@model List<Activity>
 @{
-    var account = (Account)ViewData["Account"];
-    var accountPackage = (AccountPackage)ViewData["AccountPackage"];
-    var showRegistrationPeriodFilter = (bool)ViewData["ShowRegistrationPeriodFilter"];
-    var group = (ActivityGroup)ViewData["Group"];
-    var groups = (List<ActivityGroup>)ViewData["Groups"];
-    var needToUpgrade = (bool)ViewData["NeedToUpgrade"];
+    var account = (Account) ViewData["Account"];
+    var accountPackage = (AccountPackage) ViewData["AccountPackage"];
+    var showRegistrationPeriodFilter = (bool) ViewData["ShowRegistrationPeriodFilter"];
+    var group = (ActivityGroup) ViewData["Group"];
+    var groups = (List<ActivityGroup>) ViewData["Groups"];
+    var needToUpgrade = (bool) ViewData["NeedToUpgrade"];
 
-    var addUrl = Url.Action("editsetup", "activity", new { type = (int)ActivityType.Team });
+    var addUrl = Url.Action("editsetup", "activity", new {type = (int) ActivityType.Team});
     var pagingController = "activity";
     var pagingAction = "index";
     var id = "";
-    var currentListUrl = Url.Action("index", "activity", new { archive = 0 });
-    var archivedListUrl = Url.Action("index", "activity", new { archive = 1 });
-    var hasArchivedActivities = (bool)ViewData["HasArchivedActivities"];
+    var currentListUrl = Url.Action("index", "activity", new {archive = 0});
+    var archivedListUrl = Url.Action("index", "activity", new {archive = 1});
+    var hasArchivedActivities = (bool) ViewData["HasArchivedActivities"];
     var activityType = ActivityType.Activity;
 
-    var disableViewTeams = (bool)ViewData["disableViewTeam"].IsNotEmpty();
+    var disableViewTeams = ViewData["disableViewTeam"].IsNotEmpty();
 
     if (group.IsNotEmpty())
     {
-        addUrl = Url.Action("editsetup", "activity", new { group = group.Uid, type = (int)ActivityType.Team });
+        addUrl = Url.Action("editsetup", "activity", new {group = group.Uid, type = (int) ActivityType.Team});
         pagingController = "group";
         pagingAction = "activities";
         id = group.Uid.ToString();
-        currentListUrl = Url.Action("activities", "group", new { archive = 0 });
-        archivedListUrl = Url.Action("activities", "group", new { archive = 1 });
+        currentListUrl = Url.Action("activities", "group", new {archive = 0});
+        archivedListUrl = Url.Action("activities", "group", new {archive = 1});
     }
 
     var currentClass = "";
@@ -39,7 +39,7 @@
         currentClass = "text-bold";
     }
 
-    var paging = (PagingModel)ViewData["PagingModel"];
+    var paging = (PagingModel) ViewData["PagingModel"];
 }
 
 @if (Model.Count == 0 && group.IsEmpty() && !hasArchivedActivities)
@@ -49,7 +49,7 @@
             <h1>@account.Name @UILabel.ActivityLabel(activityType, true)</h1>
         </div>
         <div class="widget-tile">
-            <hr />
+            <hr/>
             <p>Welcome, @SessionVariables.CurrentUser.FirstName!</p>
             <p>You haven't created any @UILabel.ActivityLabel(activityType, true).ToLower()s yet. In order to get started, <a href="@addUrl">create your first @UILabel.ActivityLabel(activityType).ToLower()</a>.</p>
             <p>&nbsp;</p>
@@ -78,11 +78,6 @@ else
                     }
                 </select>
             </div>
-            <div class="col-md-4 hide">
-                <p class="text-bold pull-right">
-                    @Model.Count of @accountPackage.GetFeature(FeatureType.Activities).Max.Value @UILabel.ActivityLabel(activityType, true)
-                </p>
-            </div>
         </div>
         <p></p>
     }
@@ -92,7 +87,7 @@ else
             <div class="pull-right">
                 @if (hasArchivedActivities)
                 {
-                    <a href="@currentListUrl" class="@currentClass">Current</a> 
+                    <a href="@currentListUrl" class="@currentClass">Current</a>
                     <span>|</span>
                     <a href="@archivedListUrl" class="@archiveClass">Archived</a>
                 }
@@ -103,57 +98,59 @@ else
     <div class="table-responsive">
         <table class="table table-hover">
             <thead>
-                <tr>
-                    <th></th>
-                    <th>Team</th>
-                    <th class="text-center">Practice Schedule</th>
-                    <th class="text-center">Players</th>
-                    <th></th>
-                </tr>
+            <tr>
+                <th></th>
+                <th>Team</th>
+                <th class="text-center">Practice Schedule</th>
+                <th class="text-center">Players</th>
+                <th></th>
+            </tr>
             </thead>
             <tbody>
-                @if (Model.Count > 0)
+            @if (Model.Count > 0)
+            {
+                foreach (var activity in Model)
                 {
-                    foreach (Activity activity in Model)
-                    {
-                        var reservedTextClass = activity.IsFull() ? "text-danger text-bold" : "";
-                        var waitingTextClass = activity.IsWaitingListFull() ? "text-danger text-bold" : "";
+                    var reservedTextClass = activity.IsFull() ? "text-danger text-bold" : "";
+                    var waitingTextClass = activity.IsWaitingListFull() ? "text-danger text-bold" : "";
 
-                        <tr>
-                             @if (disableViewTeams)
-                             {
-                                 <td><a href="@Url.Action("teamdetails", "league", new { id = group.Uid, teamid = activity.Uid })" class="btn btn-default btn-sm">View</a></td>
-                                 <td> @activity.Name @(activity.ActivityGroupId.HasValue ? "- " + activity.ActivityGroupName : "")</td>
-                             }
-                             else
-                             {
-                                <td>
-                                    <a href="@Url.Action("summary", "activity", new { id = @activity.Uid })" class="btn btn-default btn-sm">View</a>
-                                </td>
-                                <td>
-                                    <a href="@Url.Action("summary", "activity", new { id = @activity.Uid })">
-                                        @activity.Name @(activity.ActivityGroupId.HasValue ? "- " + activity.ActivityGroupName : "")
-                                    </a>
-                                </td>
-                             }
-                            <td class="text-center">
-                                @if (activity.GetDaysOfTheWeek().Any())
-                                {
-                                    @:@activity.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().MaxChars(2)).ToStringList(", ")
-                                }
-                                else
-                                {
-                                    @:-
-                                }
+                    <tr>
+                        @if (disableViewTeams)
+                        {
+                            <td>
+                                <a href="@Url.Action("teamdetails", "league", new {id = group.Uid, teamid = activity.Uid})" class="btn btn-default btn-sm">View</a>
                             </td>
-                            
-                            <td class="text-center @reservedTextClass">
-                                @activity.GetRegistrantCountByAssignmentTypes(Registration.ReservedStatuses) / @activity.SeatsAvailable
+                            <td> @activity.Name @(activity.ActivityGroupId.HasValue ? "- " + activity.ActivityGroupName : "")</td>
+                        }
+                        else
+                        {
+                            <td>
+                                <a href="@Url.Action("summary", "activity", new {id = activity.Uid})" class="btn btn-default btn-sm">View</a>
                             </td>
-
-                            @if (!disableViewTeams)
+                            <td>
+                                <a href="@Url.Action("summary", "activity", new {id = activity.Uid})">
+                                    @activity.Name @(activity.ActivityGroupId.HasValue ? "- " + activity.ActivityGroupName : "")
+                                </a>
+                            </td>
+                        }
+                        <td class="text-center">
+                            @if (activity.GetDaysOfTheWeek().Any())
                             {
-                                <td>
+                                @:@activity.GetDaysOfTheWeek().OrderBy(x => (int) x).Select(x => x.ToString().MaxChars(2)).ToStringList(", ")
+                            }
+                            else
+                            {
+                                @:-
+                            }
+                        </td>
+
+                        <td class="text-center @reservedTextClass">
+                            @activity.GetRegistrantCountByAssignmentTypes(Registration.ReservedStatuses) / @activity.SeatsAvailable
+                        </td>
+
+                        @if (!disableViewTeams)
+                        {
+                            <td>
                                 <div class="btn-group pull-right">
 
                                     @if (activity.ActivityScheduleId.HasValue && false)
@@ -165,7 +162,7 @@ else
                                     }
 
                                     <button class="md-trigger btn btn-default btn-sm" data-modal="modal-copy"
-                                            onclick="setCopyActivity('@activity.Name', '@Url.Action("copy", "activity", new { id = activity.Uid.ToString() })')" @(needToUpgrade ? "disabled=\"disabled\"" : "")>
+                                            onclick="setCopyActivity('@activity.Name', '@Url.Action("copy", "activity", new {id = activity.Uid.ToString()})')" @(needToUpgrade ? "disabled=\"disabled\"" : "")>
                                         <i class="s7-copy-file"></i> Copy
                                     </button>
 
@@ -173,28 +170,32 @@ else
                                     {
                                         if (!activity.IsArchived)
                                         {
-                                            <button class="btn btn-default btn-sm md-trigger" data-modal="modal-archive" onclick="archiveActivity('@activity.Name', '@Url.Action("archive", "activity", new { id = activity.Uid.ToString() })')"><i class="s7-albums"></i> Archive</button>
+                                            <button class="btn btn-default btn-sm md-trigger" data-modal="modal-archive" onclick="archiveActivity('@activity.Name', '@Url.Action("archive", "activity", new {id = activity.Uid.ToString()})')"><i class="s7-albums"></i> Archive</button>
                                         }
                                         else
                                         {
-                                            <button class="btn btn-default btn-sm md-trigger" data-modal="modal-restore" onclick="restoreActivity('@activity.Name', '@Url.Action("restore", "activity", new { id = activity.Uid.ToString() })')"><i class="s7-albums"></i> Restore</button>
+                                            <button class="btn btn-default btn-sm md-trigger" data-modal="modal-restore" onclick="restoreActivity('@activity.Name', '@Url.Action("restore", "activity", new {id = activity.Uid.ToString()})')"><i class="s7-albums"></i> Restore</button>
                                         }
                                     }
 
-                                    <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteActivity('@activity.Name', '@Url.Action("delete", "activity", new { id = activity.Uid.ToString() })')"><span class="text-danger"><i class="s7-trash"></i></span></button>
+                                    <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteActivity('@activity.Name', '@Url.Action("delete", "activity", new {id = activity.Uid.ToString()})')">
+                                        <span class="text-danger">
+                                            <i class="s7-trash"></i>
+                                        </span>
+                                    </button>
                                 </div>
                             </td>
-                            }
-                            
-                        </tr>
-                    }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="8">No teams have been submitted yet.</td>
+                        }
+
                     </tr>
                 }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="8">No teams have been submitted yet.</td>
+                </tr>
+            }
             </tbody>
         </table>
     </div>
@@ -202,15 +203,14 @@ else
     Html.RenderPartial(
         "~/Views/Shared/_Paging.cshtml",
         paging,
-        new ViewDataDictionary()
+        new ViewDataDictionary
         {
-{ "id", id },
-{ "querystring", string.Format("archive={0}", Request["archive"]) },
-{ "action", pagingAction },
-{ "controller", pagingController }
+            {"id", id},
+            {"querystring", string.Format("archive={0}", Request["archive"])},
+            {"action", pagingAction},
+            {"controller", pagingController},
         }
-    );
-
+        );
 }
 
 @{ var schedules = account.GetActivitySchedules(); }
@@ -218,7 +218,9 @@ else
     <form id="form-schedule" action="" method="post">
         <div class="md-content">
             <div class="modal-header">
-                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">
+                    <i class="icon s7-close"></i>
+                </button>
                 <h3 class="modal-title">Edit Schedule - <span id="schedule-activity-name"></span></h3>
             </div>
             <div class="modal-body form">
@@ -235,7 +237,7 @@ else
             <div class="modal-footer">
                 <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
                 <button type="button" data-dismiss="modal" class="btn btn-primary md-close" onclick="updateSchedule()">Update Schedule &raquo;</button>
-                <input type="hidden" name="schedule-activity" id="schedule-activity" value="" />
+                <input type="hidden" name="schedule-activity" id="schedule-activity" value=""/>
             </div>
         </div>
     </form>
@@ -245,7 +247,9 @@ else
     <form id="form-offer" action="" method="post">
         <div class="md-content">
             <div class="modal-header">
-                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">
+                    <i class="icon s7-close"></i>
+                </button>
                 <h3 class="modal-title">Create New @UILabel.ActivityLabel(activityType) Offering</h3>
             </div>
             <div class="modal-body form">
@@ -269,7 +273,9 @@ else
     <form id="form-copy" action="" method="post">
         <div class="md-content">
             <div class="modal-header">
-                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">
+                    <i class="icon s7-close"></i>
+                </button>
                 <h3 class="modal-title">Copy @UILabel.ActivityLabel(activityType)</h3>
             </div>
             <div class="modal-body form">
@@ -292,12 +298,20 @@ else
 <div id="modal-delete" class="md-modal colored-header custom-width md-effect-9">
     <div class="md-content">
         <div class="modal-header">
-            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">
+                <i class="icon s7-close"></i>
+            </button>
             <h3 class="modal-title">Delete @UILabel.ActivityLabel(activityType)</h3>
         </div>
         <div class="modal-body form">
 
-            <p>Are you sure you want to delete <strong><span id="delete-activity-name"></span></strong>? </p><p>This action cannot be undone.</p>
+            <p>
+                Are you sure you want to delete
+                <strong>
+                    <span id="delete-activity-name"></span>
+                </strong>?
+            </p>
+            <p>This action cannot be undone.</p>
 
         </div>
         <div class="modal-footer">
@@ -310,12 +324,20 @@ else
 <div id="modal-archive" class="md-modal colored-header custom-width md-effect-9">
     <div class="md-content">
         <div class="modal-header">
-            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">
+                <i class="icon s7-close"></i>
+            </button>
             <h3 class="modal-title">Archive @UILabel.ActivityLabel(activityType)</h3>
         </div>
         <div class="modal-body form">
 
-            <p>Are you sure you want to archive <strong><span id="archive-activity-name"></span></strong>? </p><p>Archived @UILabel.ActivityLabel(activityType, true).ToLower() are automatically unpublished.</p>
+            <p>
+                Are you sure you want to archive
+                <strong>
+                    <span id="archive-activity-name"></span>
+                </strong>?
+            </p>
+            <p>Archived @UILabel.ActivityLabel(activityType, true).ToLower() are automatically unpublished.</p>
 
         </div>
         <div class="modal-footer">
@@ -328,12 +350,19 @@ else
 <div id="modal-restore" class="md-modal colored-header custom-width md-effect-9">
     <div class="md-content">
         <div class="modal-header">
-            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">
+                <i class="icon s7-close"></i>
+            </button>
             <h3 class="modal-title">Restore @UILabel.ActivityLabel(activityType)</h3>
         </div>
         <div class="modal-body form">
 
-            <p>Are you sure you want to restore <strong><span id="restore-activity-name"></span></strong>? </p>
+            <p>
+                Are you sure you want to restore
+                <strong>
+                    <span id="restore-activity-name"></span>
+                </strong>?
+            </p>
 
         </div>
         <div class="modal-footer">

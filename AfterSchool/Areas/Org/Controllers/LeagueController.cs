@@ -358,7 +358,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Activities = finalActivities;
-            ViewBag.NeedToUpgrade = finalActivities.Count >= SessionVariables.AccountPackage.GetFeature(FeatureType.Activities).GetMaxValue();
             ViewBag.Messages = msgs;
             ViewBag.HasArchivedActivities = accountActivityGroup.IsEmpty() ? group.GetActivityCount(null, true, false, null) > 0 : accountActivityGroup.GetActivityCount(null, true, false) > 0;
 
