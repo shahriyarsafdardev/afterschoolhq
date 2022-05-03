@@ -1,29 +1,26 @@
 ﻿@model Activity
 
 @{
-    var accountPackage = (AccountPackage)ViewData["AccountPackage"];
-    var forms = (List<Form>)ViewBag.Forms;
-    var group = (ActivityGroup)ViewBag.Group;
-    var periods = (List<RegistrationPeriod>)ViewBag.Periods;
-    var activePeriod = (RegistrationPeriod)ViewBag.ActivePeriod;
-    var activeForm = (ActivityForm)ViewBag.ActiveForm;
-    var isActivityLeader = (bool)ViewBag.IsActivityLeader;
-    var showRegistrationPeriodList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups);
-    var showSeats = Model.ActivityTypeId.NotIn(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip });
+    var accountPackage = (AccountPackage) ViewData["AccountPackage"];
+    var forms = (List<Form>) ViewBag.Forms;
+    var group = (ActivityGroup) ViewBag.Group;
+    var activePeriod = (RegistrationPeriod) ViewBag.ActivePeriod;
+    var activeForm = (ActivityForm) ViewBag.ActiveForm;
+    var showSeats = Model.ActivityTypeId.NotIn(new[] {ActivityType.FieldTrip, ActivityType.PermissionSlip});
     var showInviteOnly = accountPackage.HasFeature(FeatureType.AllowInvites);
     var showWaitingList = accountPackage.HasFeature(FeatureType.WaitingList);
     var showAllowApplications = accountPackage.HasFeature(FeatureType.AllowApplications);
     var showManageForms = accountPackage.HasFeature(FeatureType.ManageForms);
-    var maxFormCount = accountPackage.IsNotEmpty() ? (int)accountPackage.GetFeature(FeatureType.ManageForms).Max.Value : 0;
-    var showManageFormFields = forms.Count >= maxFormCount ? false : true;
+    var maxFormCount = accountPackage.IsNotEmpty() ? (int) accountPackage.GetFeature(FeatureType.ManageForms).Max.Value : 0;
+    var showManageFormFields = forms.Count < maxFormCount;
     var allowInvitesPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowInvites, SessionVariables.AccountPackage);
     var waitingListPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.WaitingList, SessionVariables.AccountPackage);
     var manageFormsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageForms, SessionVariables.AccountPackage);
-    var allowAppilicationsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowApplications, SessionVariables.AccountPackage);
+    var allowApplicationsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowApplications, SessionVariables.AccountPackage);
 
 }
 
-<input id="hdnAdvanceSettingToggle" type="hidden" name="isAdvanceSettingEnabled" />
+<input id="hdnAdvanceSettingToggle" type="hidden" name="isAdvanceSettingEnabled"/>
 <div class="panel panel-default margin-bottom-zero">
     <div class="panel-heading activity-heading">
         Settings
@@ -32,7 +29,7 @@
         <div class="form-group">
             <label class="col-sm-3 control-label">@UILabel.ActivityLabel(Model.ActivityTypeId) Name <span class="text-danger">*</span></label>
             <div class="col-sm-9">
-                <input id="name" class="form-control" type="text" name="name" value="@Model.Name" maxlength="75" required onfocus="this.select()" placeholder="Your @UILabel.ActivityLabel(Model.ActivityTypeId) Name (75 Characters)" />
+                <input id="name" class="form-control" type="text" name="name" value="@Model.Name" maxlength="75" required onfocus="this.select()" placeholder="Your @UILabel.ActivityLabel(Model.ActivityTypeId) Name (75 Characters)"/>
             </div>
         </div>
 
@@ -43,7 +40,7 @@
                     Total Available Seats <span class="text-danger">*</span>
                 </label>
                 <div class="col-sm-9">
-                    <input type="number" class="form-control" id="seatsavailable" name="seatsavailable" value="@Model.SeatsAvailable" onfocus="this.select()" required step="1" min="1" max="@accountPackage.GetFeature(FeatureType.Participants).Max.Value" />
+                    <input type="number" class="form-control" id="seatsavailable" name="seatsavailable" value="@Model.SeatsAvailable" onfocus="this.select()" required step="1" min="1" max="@accountPackage.GetFeature(FeatureType.Participants).Max.Value"/>
                     <p class="text-muted">
                         Must be a number between 1 and @accountPackage.GetFeature(FeatureType.Participants).Max.Value.ToString("#")
                     </p>
@@ -58,47 +55,52 @@
                         <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="If you have a mimimum amount of students to hold class, please set this value." data-placement="top"></i>
                     </label>
                     <div class="col-sm-9">
-                        <input type="number" class="form-control" id="minseatsrequired" name="minseatsrequired" value="@Model.MinSeatsRequired" onfocus="this.select()" step="1" min="1" />
+                        <input type="number" class="form-control" id="minseatsrequired" name="minseatsrequired" value="@Model.MinSeatsRequired" onfocus="this.select()" step="1" min="1"/>
                     </div>
                 </div>
             }
         }
         else
         {
-            <input type="hidden" name="seatsavailable" value="1000" />
+            <input type="hidden" name="seatsavailable" value="1000"/>
         }
 
-        @if (group.IsEmpty() && Model.ActivityTypeId.In(new ActivityType[] { ActivityType.Activity, ActivityType.LearningPod }))
+        @if (group.IsEmpty() && Model.ActivityTypeId.In(new[] {ActivityType.Activity, ActivityType.LearningPod}))
         {
             <div class="form-group">
                 <label class="col-sm-3 control-label">
                     Invite Only?
                 </label>
-                <div class="col-md-9" @if (!showInviteOnly) { <text> onclick="return showUpgradeMyPlan('@(allowInvitesPackage?.Name)',@(allowInvitesPackage?.ID))" </text> }>
+                <div class="col-md-9"
+                     @if (!showInviteOnly)
+                     {
+                         <text> onclick="return showUpgradeMyPlan('@(allowInvitesPackage?.Name)',@(allowInvitesPackage?.ID))" </text>
+                     }>
                     @{
                         Html.RenderPartial(
-                          "~/Views/Shared/_SwitchButton.cshtml",
-                          Model.IsInviteOnly,
-                          new ViewDataDictionary() {
-                                { "checkboxname", "inviteonly" },
-                                { "checkboxid", "inviteonly" },
-                                { "disabled", !showInviteOnly }
-                          });
+                            "~/Views/Shared/_SwitchButton.cshtml",
+                            Model.IsInviteOnly,
+                            new ViewDataDictionary
+                            {
+                                {"checkboxname", "inviteonly"},
+                                {"checkboxid", "inviteonly"},
+                                {"disabled", !showInviteOnly},
+                            });
                     }
                 </div>
             </div>
         }
-        else if (Model.ActivityTypeId.In(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
+        else if (Model.ActivityTypeId.In(new[] {ActivityType.FieldTrip, ActivityType.PermissionSlip}))
         {
-            <input type="hidden" name="inviteonly" id="inviteonly" value="1" />
+            <input type="hidden" name="inviteonly" id="inviteonly" value="1"/>
         }
         else
         {
-            <input type="hidden" name="inviteonly" id="inviteonly" value="0" />
+            <input type="hidden" name="inviteonly" id="inviteonly" value="0"/>
         }
 
-        <input type="hidden" name="type" value="@((int)Model.ActivityTypeId)" />
-        @if (Model.ActivityTypeId == ActivityType.Activity)
+        <input type="hidden" name="type" value="@((int) Model.ActivityTypeId)"/>
+        @if (Model.ActivityTypeId == ActivityType.Activity && group.IsEmpty())
         {
             <div class="form-group">
                 <label class="col-sm-3 control-label">
@@ -107,230 +109,253 @@
                 <div class="col-sm-9">
                     @{
                         Html.RenderPartial(
-                          "~/Views/Shared/_SwitchButton.cshtml",
-                          Model.IsContinuousEnrollment,
-                          new ViewDataDictionary()
-                          {
-                               { "checkboxname", "isContinuousEnrollmentEnabled" },
-                               { "checkboxid", "isContinuousEnrollmentEnabled" },
-                               { "disabled", false }
-                          });
+                            "~/Views/Shared/_SwitchButton.cshtml",
+                            Model.IsContinuousEnrollment,
+                            new ViewDataDictionary
+                            {
+                                {"checkboxname", "isContinuousEnrollmentEnabled"},
+                                {"checkboxid", "isContinuousEnrollmentEnabled"},
+                                {"disabled", false},
+                            });
                     }
                 </div>
             </div>
         }
 
-            @if (group.IsEmpty())
-            {
+        @if (group.IsEmpty())
+        {
+            <div class="form-group">
+                <label class="col-sm-3 control-label">Students can register for:</label>
+                <div class="col-sm-9">
+
+                    <div class="am-radio inline">
+                        <input type="radio" class="form-control costfrequencytype" name="costfrequencytype" id="costfrequencytype-@((int) ActivityCostFrequencyType.PerActivity)" required @(Model.CostFrequencyTypeId == ActivityCostFrequencyType.PerActivity ? "checked=\"checked\"" : "") value="@((int) ActivityCostFrequencyType.PerActivity)"/>
+                        <label for="costfrequencytype-@((int) ActivityCostFrequencyType.PerActivity)">The Entire Activity</label>
+                    </div>
+
+                    <div class="am-radio inline">
+                        <input type="radio" class="form-control costfrequencytype" name="costfrequencytype" id="costfrequencytype-@((int) ActivityCostFrequencyType.PerClass)" required @(Model.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass ? "checked=\"checked\"" : "") value="@((int) ActivityCostFrequencyType.PerClass)"/>
+                        <label for="costfrequencytype-@((int) ActivityCostFrequencyType.PerClass)">Individual Classes</label>
+                    </div>
+
+                    <p class="text-muted">
+                        This is used if you allow students to be registered for all classes in the activity or for each individual class.
+                    </p>
+
+                </div>
+            </div>
+
+            <div class="form-group hide" id="cutoffhours-container">
+                <label class="col-sm-3 control-label">Registration cut-off time</label>
+                <div class="col-sm-9">
+                    <div class="input-group input-group-lg xs-mb-15 col-sm-3">
+                        <input type="number"
+                               class="form-control"
+                               id="cutoffhours"
+                               name="cutoffhours"
+                               onfocus="this.select()"
+                               value="@(Model.RegistrationCutoffHours.HasValue ? Model.RegistrationCutoffHours.Value.ToString() : "2")"
+                               required
+                               min="0"
+                               step="1"/>
+                        <span class="input-group-addon">Hours</span>
+                    </div>
+                    <p class="text-muted">
+                        Registration cut-off time will prevent parents from registering a preset number of hours before the class start time.
+                    </p>
+                </div>
+            </div>
+
+            <div class="registrationperiod-container">
+
+                <input type="hidden" name="registrationperiod" id="registrationperiod" value="@activePeriod.ID"/>
+
+                <div class="form-group reg-period">
+                    <label class="col-sm-3 control-label">@UILabel.RegistrationPeriodLabel() Open <span class="text-danger">*</span></label>
+                    <div class="col-sm-5">
+                        @{
+                            Html.RenderPartial(
+                                "~/Views/Shared/Components/_Date.cshtml",
+                                new FormInputViewModel
+                                {
+                                    Id = "registrationopendate",
+                                    Name = "registrationopendate",
+                                    Value = activePeriod.StartDateTime.ToShortDateString(),
+                                });
+                        }
+                    </div>
+                    <div class="col-sm-4">
+
+                        @{
+                            Html.RenderPartial(
+                                "~/Views/Shared/_TimeSelect.cshtml",
+                                activePeriod.StartDateTime.Value,
+                                new ViewDataDictionary
+                                {
+                                    {"name", "registrationopentime"},
+                                    {"id", "registrationopentime"},
+                                    {"required", true},
+                                }
+                                );
+                        }
+
+                    </div>
+                </div>
+
+                <div class="form-group reg-period" id="signUpCloseDate" style="@(Model.IsContinuousEnrollment ? "display:none" : "")">
+                    <label class="col-sm-3 control-label">@UILabel.RegistrationPeriodLabel() Close <span class="text-danger">*</span></label>
+                    <div class="col-sm-5">
+                        @{
+                            Html.RenderPartial(
+                                "~/Views/Shared/Components/_Date.cshtml",
+                                new FormInputViewModel
+                                {
+                                    Id = "registrationclosedate",
+                                    Name = "registrationclosedate",
+                                    Value = activePeriod.EndDateTime.ToShortDateString(),
+                                }
+                                );
+                        }
+                    </div>
+                    <div class="col-sm-4">
+
+                        @{
+                            Html.RenderPartial(
+                                "~/Views/Shared/_TimeSelect.cshtml",
+                                activePeriod.EndDateTime.Value,
+                                new ViewDataDictionary
+                                {
+                                    {"name", "registrationclosetime"},
+                                    {"id", "registrationclosetime"},
+                                    {"required", true},
+                                }
+                                );
+                        }
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-md-offset-3 col-md-9 padding-v-20">
+                <span>
+                    <a onclick="ActivitySetup.showAdvancedSettings()" id="btn-advanced-settings" class="pointer">Show Advanced Settings</a>
+                </span>
+            </div>
+
+            <div class="advanced-settings hide">
+
+                @if (showSeats)
+                {
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">
+                            Waiting List Seats <span class="text-danger">*</span>
+                            <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Can be any positive number" data-placement="top"></i>
+                        </label>
+                        <div style="position:relative;" class="col-sm-9"
+                             @if (!showWaitingList)
+                             {
+                                 <text> onclick="return showUpgradeMyPlan('@(waitingListPackage?.Name)',@(waitingListPackage?.ID))" </text>
+                             }>
+                            <input id="waitinglistseats" class="form-control" type="number" name="waitinglistseats" value="@Model.WaitingListSeats" required step="1"
+                                   min="0"
+                                   onfocus="this.select()"
+                                   oninput="validity.valid||(value='');"
+                                   @if (!showWaitingList)
+                                   {
+                                       <text> disabled="disabled" </text>
+                                   }/>
+                            @if (!showWaitingList)
+                            {
+                                <div style="position:absolute; left:0; right:0; top:0; bottom:0; " id="waitingListDiv"></div>
+                            }
+                        </div>
+                    </div>
+                }
 
                 <div class="form-group">
-                    <label class="col-sm-3 control-label">Students can register for:</label>
-                    <div class="col-sm-9">
+                    <label class="col-md-3 control-label">
+                        Registration Form <span class="text-danger">*</span>
+                    </label>
+                    <div class="col-md-6"
+                         @if (!showManageForms)
+                         {
+                             <text> onclick="return showUpgradeMyPlan()" </text>
+                         }>
+                        <select name="form" id="form" class="form-control" @(activeForm.IsNotEmpty() && forms.Any(m => m.ID == activeForm.FormId) ? "required" : "")
+                                @if (!showManageForms)
+                                {
+                                    <text> disabled="disabled" </text>
+                                }>
+                            @*<option value="">Select Form...</option>*@
+                            @if (showManageFormFields)
+                            {
+                                <option value="0"> + New Form</option>
+                            }
 
-                        <div class="am-radio inline">
-                            <input type="radio" class="form-control costfrequencytype" name="costfrequencytype" id="costfrequencytype-@((int)ActivityCostFrequencyType.PerActivity)" required @(Model.CostFrequencyTypeId == ActivityCostFrequencyType.PerActivity ? "checked=\"checked\"" : "") value="@((int)ActivityCostFrequencyType.PerActivity)" />
-                            <label for="costfrequencytype-@((int)ActivityCostFrequencyType.PerActivity)">The Entire Activity</label>
-                        </div>
-
-                        <div class="am-radio inline">
-                            <input type="radio" class="form-control costfrequencytype" name="costfrequencytype" id="costfrequencytype-@((int)ActivityCostFrequencyType.PerClass)" required @(Model.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass ? "checked=\"checked\"" : "") value="@((int)ActivityCostFrequencyType.PerClass)" />
-                            <label for="costfrequencytype-@((int)ActivityCostFrequencyType.PerClass)">Individual Classes</label>
-                        </div>
-
-                        <p class="text-muted">
-                            This is used if you allow students to be registered for all classes in the activity or for each individual class.
-                        </p>
-
+                            @foreach (var form in forms)
+                            {
+                                <option value="@form.ID" @(activeForm?.FormId == form.ID ? "selected=\"selected\"" : "")>@form.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        @if (showManageForms)
+                        {
+                            <a id="editForm" class="btn btn-block btn-link" href="@Url.Action("editform", "account", new {id = activeForm?.ID})" target="_blank">Edit Form</a>
+                        }
+                        else
+                        {
+                            <a class="btn btn-block btn-link" href="#" onclick="return showUpgradeMyPlan('@(manageFormsPackage?.Name)',@(manageFormsPackage?.ID))">Edit Form</a>
+                        }
                     </div>
                 </div>
 
-                <div class="form-group hide" id="cutoffhours-container">
-                    <label class="col-sm-3 control-label">Registration cut-off time</label>
-                    <div class="col-sm-9">
-                        <div class="input-group input-group-lg xs-mb-15 col-sm-3">
-                            <input type="number"
-                                   class="form-control"
-                                   id="cutoffhours"
-                                   name="cutoffhours"
-                                   onfocus="this.select()"
-                                   value="@(Model.RegistrationCutoffHours.HasValue ? Model.RegistrationCutoffHours.Value.ToString() : "2")"
-                                   required
-                                   min="0"
-                                   step="1" />
-                            <span class="input-group-addon">Hours</span>
-                        </div>
-                        <p class="text-muted">
-                            Registration cut-off time will prevent parents from registering a preset number of hours before the class start time.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="registrationperiod-container">
-
-                    <input type="hidden" name="registrationperiod" id="registrationperiod" value="@activePeriod.ID" />
-
-
-                    <div class="form-group reg-period">
-                        <label class="col-sm-3 control-label">@UILabel.RegistrationPeriodLabel() Open <span class="text-danger">*</span></label>
-                        <div class="col-sm-5">
-                            @{
-                                Html.RenderPartial(
-                                    "~/Views/Shared/Components/_Date.cshtml",
-                                    new FormInputViewModel()
-                                    {
-                                        Id = "registrationopendate",
-                                        Name = "registrationopendate",
-                                        Value = activePeriod.StartDateTime.ToShortDateString()
-                                    }
-                                );
-                            }
-                        </div>
-                        <div class="col-sm-4">
-
-                            @{
-                                Html.RenderPartial(
-                                    "~/Views/Shared/_TimeSelect.cshtml",
-                                    activePeriod.StartDateTime.Value,
-                                    new ViewDataDictionary()
-                                    {
-                                          { "name", "registrationopentime" },
-                                          { "id", "registrationopentime" },
-                                          { "required", true }
-                                    }
-                                );
-                            }
-
-                        </div>
-                    </div>
-
-                    <div class="form-group reg-period" id="signUpCloseDate" style="@(Model.IsContinuousEnrollment ? "display:none" : "")">
-                        <label class="col-sm-3 control-label">@UILabel.RegistrationPeriodLabel() Close <span class="text-danger">*</span></label>
-                        <div class="col-sm-5">
-                            @{
-                                Html.RenderPartial(
-                                    "~/Views/Shared/Components/_Date.cshtml",
-                                    new FormInputViewModel()
-                                    {
-                                        Id = "registrationclosedate",
-                                        Name = "registrationclosedate",
-                                        Value = activePeriod.EndDateTime.ToShortDateString()
-                                    }
-                                );
-                            }
-                        </div>
-                        <div class="col-sm-4">
-
-                            @{
-                                Html.RenderPartial(
-                                    "~/Views/Shared/_TimeSelect.cshtml",
-                                    activePeriod.EndDateTime.Value,
-                                    new ViewDataDictionary()
-                                    {
-                                         { "name", "registrationclosetime" },
-                                         { "id", "registrationclosetime" },
-                                         { "required", true }
-                                    }
-                                );
-                            }
-
-                        </div>
-                    </div>
-
-                </div>
-
-                <div class="col-md-offset-3 col-md-9 padding-v-20">
-                    <span><a onclick="ActivitySetup.showAdvancedSettings()" id="btn-advanced-settings" class="pointer">Show Advanced Settings</a></span>
-                </div>
-
-                <div class="advanced-settings hide">
-
-                    @if (showSeats)
-                    {
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label">
-                                Waiting List Seats <span class="text-danger">*</span>
-                                <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Can be any positive number" data-placement="top"></i>
-                            </label>
-                            <div style="position:relative;" class="col-sm-9" @if (!showWaitingList) { <text> onclick="return showUpgradeMyPlan('@(waitingListPackage?.Name)',@(waitingListPackage?.ID))" </text> }>
-                                <input id="waitinglistseats" class="form-control" type="number" name="waitinglistseats" value="@Model.WaitingListSeats" required step="1"
-                                       min="0"
-                                       onfocus="this.select()"
-                                       oninput="validity.valid||(value='');"
-                                       @if (!showWaitingList) { <text> disabled="disabled" </text> } />
-                                @if (!showWaitingList)
-                                {<div style="position:absolute; left:0; right:0; top:0; bottom:0; " id="waitingListDiv"></div>}
-                            </div>
-                        </div>
-                    }
-
+                @if (Model.ActivityTypeId == ActivityType.Activity)
+                {
                     <div class="form-group">
-                        <label class="col-md-3 control-label">
-                            Registration Form <span class="text-danger">*</span>
+                        <label class="col-sm-3 control-label">
+                            Registration Mode <span class="text-danger">*</span>
                         </label>
-                        <div class="col-md-6" @if (!showManageForms) { <text> onclick="return showUpgradeMyPlan()" </text> }>
-                            <select name="form" id="form" class="form-control" @(activeForm.IsNotEmpty() && forms.Any(m => m.ID == activeForm.FormId) ? "required" : "") @if (!showManageForms) { <text> disabled="disabled" </text> }>
-                                @*<option value="">Select Form...</option>*@
-                                @if (showManageFormFields)
+                        <div class="col-sm-9">
+                            <div class="am-radio inline"
+                                 @if (!showAllowApplications)
+                                 {
+                                     <text> onclick="return showUpgradeMyPlan('@(allowApplicationsPackage?.Name)',@(allowApplicationsPackage?.ID))" </text>
+                                 }>
+                                @foreach (var item in Enum.GetValues(typeof(RegistrationMode)).Cast<RegistrationMode>().Where(x => x != RegistrationMode.NotSet))
                                 {
-                                    <option value="0"> + New Form</option>
+                                    <input type="radio" name="regmode" id="regmode-@item.ToString()" value="@((int) item)" class="regmode"
+                                           @(item == Model.RegistrationModeId ? "checked=\"checked\"" : "")
+                                           @if (!showAllowApplications)
+                                           {
+                                               <text> disabled="disabled" </text>
+                                           }/>
+                                    <label for="regmode-@item.ToString()" class="margin-h-10">@item.ToString()</label>
                                 }
-
-                                @foreach (var form in forms)
-                                {
-                                    <option value="@form.ID" @(activeForm?.FormId == form.ID ? "selected=\"selected\"" : "")>@form.Name</option>
-                                }
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            @if (showManageForms)
-                            {
-                                <a id="editForm" class="btn btn-block btn-link" href="@Url.Action("editform","account", new { id = activeForm?.ID })" target="_blank">Edit Form</a>
-                            }
-                            else
-                            {
-                                <a class="btn btn-block btn-link" href="#" onclick="return showUpgradeMyPlan('@(manageFormsPackage?.Name)',@(manageFormsPackage?.ID))">Edit Form</a>
-                            }
+                            </div>
+                            <p class="text-muted">
+                                <em>
+                                    <strong>Register Mode</strong> means a @UILabel.RegistrantLabel().ToLower() will be given a &lsquo;reserved&rsquo; seat on a first come first serve basis.<br/>
+                                    <strong>Apply Mode</strong> means a @UILabel.RegistrantLabel().ToLower() will only &lsquo;apply&rsquo; and will be given a reserved seat either via lottery or by being placed manually by you in a reserved seat.
+                                </em>
+                            </p>
                         </div>
                     </div>
-
-                    @if (Model.ActivityTypeId == ActivityType.Activity)
-                    {
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label">
-                                Registration Mode <span class="text-danger">*</span>
-                            </label>
-                            <div class="col-sm-9">
-                                <div class="am-radio inline" @if (!showAllowApplications) { <text> onclick="return showUpgradeMyPlan('@(allowAppilicationsPackage?.Name)',@(allowAppilicationsPackage?.ID))" </text> }>
-                                    @foreach (var item in Enum.GetValues(typeof(RegistrationMode)).Cast<RegistrationMode>().Where(x => x != RegistrationMode.NotSet))
-                                    {
-                                        <input type="radio" name="regmode" id="regmode-@item.ToString()" value="@((int)item)" class="regmode"
-                                               @(item == Model.RegistrationModeId ? "checked=\"checked\"" : "")
-                                               @if (!showAllowApplications) { <text> disabled="disabled" </text> } />
-                                        <label for="regmode-@item.ToString()" class="margin-h-10">@item.ToString()</label>
-                                    }
-                                </div>
-                                <p class="text-muted">
-                                    <em>
-                                        <strong>Register Mode</strong> means a @UILabel.RegistrantLabel().ToLower() will be given a &lsquo;reserved&rsquo; seat on a first come first serve basis.<br />
-                                        <strong>Apply Mode</strong> means a @UILabel.RegistrantLabel().ToLower() will only &lsquo;apply&rsquo; and will be given a reserved seat either via lottery or by being placed manually by you in a reserved seat.
-                                    </em>
-                                </p>
-                            </div>
-                        </div>
-                    }
-                    else
-                    {
-                        <input type="hidden" name="regmode" value="@((int)RegistrationMode.Register)" />
-                    }
-                </div>
-            }
-            else
-            {
-                <input type="hidden" name="group" value="@group.Uid" />
-                <input type="hidden" name="regmode" value="@((int)Model.RegistrationModeId)" />
-                <input type="hidden" name="form" value="@activeForm.FormId" />
-            }
-        </div>
+                }
+                else
+                {
+                    <input type="hidden" name="regmode" value="@((int) RegistrationMode.Register)"/>
+                }
+            </div>
+        }
+        else
+        {
+            <input type="hidden" name="group" value="@group.Uid"/>
+            <input type="hidden" name="regmode" value="@((int) Model.RegistrationModeId)"/>
+            <input type="hidden" name="form" value="@activeForm.FormId"/>
+        }
+    </div>
 </div>
 
 <script>
@@ -348,9 +373,9 @@
         });
 
         $("#waitingListDiv").on('click', function () {
-            @if(!showWaitingList)
+            @if (!showWaitingList)
             {
-                 <text>
+                <text>
                     showUpgradeMyPlan('@(waitingListPackage?.Name)',@(waitingListPackage?.ID))
                  </text>
             }
@@ -394,7 +419,7 @@
         return month + '/' + day + '/' + year;
     }
     function toggleCostFrequencyType(obj) {
-        if (obj.val() == '@((int)ActivityCostFrequencyType.PerClass)' && obj.is(':checked')) {
+        if (obj.val() == '@((int) ActivityCostFrequencyType.PerClass)' && obj.is(':checked')) {
             $('.regmode').prop('disabled', true);
             $('#regmode-@RegistrationMode.Register.ToString()').prop('checked', true);
             $('#cutoffhours-container').removeClass('hide');
