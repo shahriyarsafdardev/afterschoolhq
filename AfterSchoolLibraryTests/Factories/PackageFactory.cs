@@ -89,7 +89,6 @@ namespace AfterSchoolLibraryTests.Factories
             PackageFeatureFactory.Create(obj, FeatureType.TrialDays, 0.ToDecimal(), msgs, dc);
             PackageFeatureFactory.Create(obj, FeatureType.UseStripeConnectedAccount, 1.ToDecimal(), msgs, dc);
             PackageFeatureFactory.Create(obj, FeatureType.ViewInsights, 1.ToDecimal(), msgs, dc);
-            PackageFeatureFactory.Create(obj, FeatureType.WaitingList, 1.ToDecimal(), msgs, dc);
             PackageFeatureFactory.Create(obj, FeatureType.ManualStripePayouts, 1.ToDecimal(), msgs, dc);
             PackageFeatureFactory.Create(obj, FeatureType.FreeActivityLimit, 1.ToDecimal(), msgs, dc);
 
@@ -137,7 +136,6 @@ namespace AfterSchoolLibraryTests.Factories
             PackageFeatureFactory.Create(obj, FeatureType.TrialDays, 0.ToDecimal(), msgs, dc);
             PackageFeatureFactory.Create(obj, FeatureType.UseStripeConnectedAccount, 1.ToDecimal(), msgs, dc);
             PackageFeatureFactory.Create(obj, FeatureType.ViewInsights, 1.ToDecimal(), msgs, dc);
-            PackageFeatureFactory.Create(obj, FeatureType.WaitingList, 1.ToDecimal(), msgs, dc);
 
             return obj;
         }
@@ -256,7 +254,6 @@ namespace AfterSchoolLibraryTests.Factories
             PackageFeatureFactory.Create(obj, FeatureType.TrialDays, 0.ToDecimal(), msgs, dc);
             PackageFeatureFactory.Create(obj, FeatureType.UseStripeConnectedAccount, 1.ToDecimal(), msgs, dc);
             PackageFeatureFactory.Create(obj, FeatureType.ViewInsights, 0.ToDecimal(), msgs, dc);
-            PackageFeatureFactory.Create(obj, FeatureType.WaitingList, 1.ToDecimal(), msgs, dc);
 
             return obj;
         }

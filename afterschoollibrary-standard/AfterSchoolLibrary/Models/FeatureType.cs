@@ -6,7 +6,6 @@ public enum FeatureType
     EmailMessaging = 3,
     CustomUrl = 4,
     TeamAccounts = 5,
-    WaitingList = 6,
     ManageForms = 7,
     ManageLocations = 8,
     ManageActivityGroups = 9,

@@ -7,15 +7,8 @@
     var periods = (List<RegistrationPeriod>)ViewBag.Periods;
     var activePeriod = (RegistrationPeriod)ViewBag.ActivePeriod;
     var activeForm = (ActivityForm)ViewBag.ActiveForm;
-    var isActivityLeader = (bool)ViewBag.IsActivityLeader;
     var activityGroupType = group.ActivityGroupTypeId;
     var isExternalLeague = ViewBag.isExternalLeague ?? false;
-
-    var waitinglistdisabled = "";
-    if (!accountPackage.HasFeature(FeatureType.WaitingList))
-    {
-        waitinglistdisabled = " disabled=\"disabled\" ";
-    }
 
     var showRegistrationPeriodList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups);
 }
@@ -31,18 +24,6 @@
             </div>
         </div>
 
-        @*
-        <div class="form-group">
-            <label class="col-sm-3 control-label">
-                Description <span class="text-danger">*</span>
-                <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Description of the team" data-placement="top"></i>
-            </label>
-            <div class="col-sm-9">
-                <input type="text" class="form-control" id="description" name="description" value="@Model.Description" onfocus="this.select()" required placeholder="Description of the team" />
-            </div>
-        </div>
-        *@
-
         <div class="form-group">
             <label class="col-sm-3 control-label">
                 Max Number of Players <span class="text-danger">*</span>
@@ -54,87 +35,109 @@
         </div>
 
         @if (!isExternalLeague)
-    {
-        <div class="form-group">
-            <label class="col-sm-3 control-label">
-                Waiting List Seats <span class="text-danger">*</span>
-                <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Can be any positive number" data-placement="top"></i>
-            </label>
-            <div class="col-sm-9">
-                <input type="number" class="form-control" id="waitinglistseats" name="waitinglistseats" value="@Model.WaitingListSeats" onfocus="this.select()" required step="1" min="0" @waitinglistdisabled />
-            </div>
-        </div>
-}
-
-        @if (group.IsEmpty())
-    {
-        if (showRegistrationPeriodList)
         {
             <div class="form-group">
-                <label class="col-md-3 control-label">
-                    @UILabel.RegistrationPeriodLabel() <span class="text-danger">*</span>
-                    <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="The date range @UILabel.RegistrantLabel(true).ToLower() are able to register for your @UILabel.ActivityLabel(Model.ActivityTypeId).ToLower()" data-placement="top"></i>
+                <label class="col-sm-3 control-label">
+                    Waiting List Seats <span class="text-danger">*</span>
+                    <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Can be any positive number" data-placement="top"></i>
                 </label>
-                <div class="col-md-6">
-                    <select name="registrationperiod" id="registrationperiod" class="form-control" required>
-                        <option value="">Select @UILabel.RegistrationPeriodLabel()...</option>
-                        <option value="0"> + New @UILabel.RegistrationPeriodLabel()</option>
-                        @foreach (var period in periods)
-                    {
-                        <option value="@period.ID" @(activePeriod?.ID == period.ID ? " selected=\"selected\" " : "")>@period.Name</option>
-                }
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <a class="btn btn-block btn-link" href="@Url.Action("edit", "period", new { id = activePeriod?.ID })" id="editPeriod" target="_blank">
-                        Edit @UILabel.RegistrationPeriodLabel()
-                    </a>
+                <div class="col-sm-9">
+                    <input type="number" class="form-control" id="waitinglistseats" name="waitinglistseats" value="@Model.WaitingListSeats" onfocus="this.select()" required step="1" min="0" />
                 </div>
             </div>
-    }
-    else
-    {
-        <input type="hidden" name="registrationperiod" id="registrationperiod" value="@activePeriod.ID" />
-}
+        }
 
-    <div class="form-group reg-period hide">
-        <label class="col-sm-3 control-label">Registration Open Date &amp; Time <span class="text-danger">*</span></label>
-        <div class="col-sm-5">  
-            @{
-                Html.RenderPartial(
-                    "~/Views/Shared/Components/_Date.cshtml",
-                    new FormInputViewModel()
-                    {
-                        Id = "registrationopendate",
-                        Name = "registrationopendate",
-                        Value = activePeriod.StartDateTime.ToShortDateString()
-                    }
-                );
-            }
-
-            @if (accountPackage.HasFeature(FeatureType.ManageForms))
+        @if (group.IsEmpty())
+        {
+            if (showRegistrationPeriodList)
             {
                 <div class="form-group">
                     <label class="col-md-3 control-label">
-                        Registration Form <span class="text-danger">*</span>
+                        @UILabel.RegistrationPeriodLabel() <span class="text-danger">*</span>
+                        <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="The date range @UILabel.RegistrantLabel(true).ToLower() are able to register for your @UILabel.ActivityLabel(Model.ActivityTypeId).ToLower()" data-placement="top"></i>
                     </label>
                     <div class="col-md-6">
-                        <select name="form" id="form" class="form-control" required>
-                            <option value="">Select Form...</option>
-                            <option value="0"> + New Form</option>
-                            @foreach (var form in forms)
+                        <select name="registrationperiod" id="registrationperiod" class="form-control" required>
+                            <option value="">Select @UILabel.RegistrationPeriodLabel()...</option>
+                            <option value="0"> + New @UILabel.RegistrationPeriodLabel()</option>
+                            @foreach (var period in periods)
                             {
-                                <option value="@form.ID" @(activeForm?.FormId == form.ID ? " selected=\"selected\" " : "")>@form.Name</option>
+                                <option value="@period.ID" @(activePeriod?.ID == period.ID ? " selected=\"selected\" " : "")>@period.Name</option>
                             }
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <a class="btn btn-block btn-link" href="@Url.Action("edit","form", new { id = activeForm?.ID })" id="editForm" target="_blank">Edit Form</a>
+                        <a class="btn btn-block btn-link" href="@Url.Action("edit", "period", new { id = activePeriod?.ID })" id="editPeriod" target="_blank">
+                            Edit @UILabel.RegistrationPeriodLabel()
+                        </a>
                     </div>
                 </div>
             }
+            else
+            {
+                <input type="hidden" name="registrationperiod" id="registrationperiod" value="@activePeriod.ID" />
+            }
 
-            @if (SessionVariables.AccountPackage.HasFeature(FeatureType.AllowApplications))
+            <div class="form-group reg-period hide">
+                <label class="col-sm-3 control-label">Registration Open Date &amp; Time <span class="text-danger">*</span></label>
+                <div class="col-sm-5">  
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/Components/_Date.cshtml",
+                            new FormInputViewModel
+                            {
+                                Id = "registrationopendate",
+                                Name = "registrationopendate",
+                                Value = activePeriod.StartDateTime.ToShortDateString()
+                            }
+                        );
+                    }
+
+                    @if (accountPackage.HasFeature(FeatureType.ManageForms))
+                    {
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">
+                                Registration Form <span class="text-danger">*</span>
+                            </label>
+                            <div class="col-md-6">
+                                <select name="form" id="form" class="form-control" required>
+                                    <option value="">Select Form...</option>
+                                    <option value="0"> + New Form</option>
+                                    @foreach (var form in forms)
+                                    {
+                                        <option value="@form.ID" @(activeForm?.FormId == form.ID ? " selected=\"selected\" " : "")>@form.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <a class="btn btn-block btn-link" href="@Url.Action("edit","form", new { id = activeForm?.ID })" id="editForm" target="_blank">Edit Form</a>
+                            </div>
+                        </div>
+                    }
+
+                    @if (SessionVariables.AccountPackage.HasFeature(FeatureType.AllowApplications))
+                    {
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">
+                                Registration Mode <span class="text-danger">*</span>
+                                <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Set whether you want the @UILabel.RegistrantLabel() to automatically register or to apply for a seat" data-placement="top"></i>
+                            </label>
+                            <div class="col-sm-9">
+                                <div class="am-radio inline">
+                                    @foreach (var item in Enum.GetValues(typeof(RegistrationMode)).Cast<RegistrationMode>().Where(x => x != RegistrationMode.NotSet))
+                                    {
+                                        <input type="radio" name="regmode" id="regmode-@item.ToString()" value="@((int)item)" @(item == Model.RegistrationModeId ? "checked=\"checked\"" : "") />
+                                        <label for="regmode-@item.ToString()" class="margin-h-10">@item.ToString()</label>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                </div>
+            </div>
+
+            if (SessionVariables.AccountPackage.HasFeature(FeatureType.AllowApplications))
             {
                 <div class="form-group">
                     <label class="col-sm-3 control-label">
@@ -152,64 +155,16 @@
                     </div>
                 </div>
             }
-
-        </div>
-    </div>
-
-    @*if (!Model.IsChildActivity)
-    {
-
-        if (accountPackage.HasFeature(FeatureType.ManageForms))
-        {
-            <div class="form-group">
-                <label class="col-md-3 control-label">
-                    Registration Form <span class="text-danger">*</span>
-                </label>
-                <div class="col-md-6">
-                    <select name="form" id="form" class="form-control" required>
-                        <option value="">Select Form...</option>
-                        <option value="0"> + New Form</option>
-                        @foreach (var form in forms)
-                    {
-                        <option value="@form.ID" @(activeForm?.FormId == form.ID ? " selected=\"selected\" " : "")>@form.Name</option>
-                }
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <a class="btn btn-block btn-link" href="@Url.Action("edit","form", new { id = activeForm?.ID })" id="editForm" target="_blank">Edit Form</a>
-                </div>
-            </div>
-        }
-
-    }*@
-if (SessionVariables.AccountPackage.HasFeature(FeatureType.AllowApplications))
-{
-    <div class="form-group">
-        <label class="col-sm-3 control-label">
-            Registration Mode <span class="text-danger">*</span>
-            <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Set whether you want the @UILabel.RegistrantLabel() to automatically register or to apply for a seat" data-placement="top"></i>
-        </label>
-        <div class="col-sm-9">
-            <div class="am-radio inline">
-                @foreach (var item in Enum.GetValues(typeof(RegistrationMode)).Cast<RegistrationMode>().Where(x => x != RegistrationMode.NotSet))
+            else
             {
-                <input type="radio" name="regmode" id="regmode-@item.ToString()" value="@((int)item)" @(item == Model.RegistrationModeId ? "checked=\"checked\"" : "") />
-                <label for="regmode-@item.ToString()" class="margin-h-10">@item.ToString()</label>
-        }
-            </div>
-        </div>
-    </div>
-}
-else
-{
-    <input type="hidden" name="regmode" value="@((int)RegistrationMode.Register)" />
-}
+                <input type="hidden" name="regmode" value="@((int)RegistrationMode.Register)" />
+            }
 
-}
-else
-{
-    <input type="hidden" name="group" value="@group.Uid" />
-}
+        }
+        else
+        {
+            <input type="hidden" name="group" value="@group.Uid" />
+        }
     </div>   
 </div>
 

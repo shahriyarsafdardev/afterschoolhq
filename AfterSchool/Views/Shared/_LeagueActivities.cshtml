@@ -1,11 +1,9 @@
 ﻿@model List<Activity>
 @{
     var account = (Account)ViewData["Account"];
-    var accountPackage = (AccountPackage)ViewData["AccountPackage"];
     var showRegistrationPeriodFilter = (bool)ViewData["ShowRegistrationPeriodFilter"];
     var group = (ActivityGroup)ViewData["Group"];
     var groups = (List<ActivityGroup>)ViewData["Groups"];
-    var needToUpgrade = (bool)ViewData["NeedToUpgrade"];
 
     var addUrl = Url.Action("editsetup", "leagueactivity");
     var pagingController = "activity";
@@ -102,10 +100,7 @@ else
                     <th>@UILabel.ActivityLabel(activityType)</th>
                     <th class="text-center">Practice Days</th>
                     <th class="text-center">Reserved</th>
-                    @if (account.HasFeature(FeatureType.WaitingList))
-                    {
-                        <th class="text-center">Waiting List</th>
-                    }
+                    <th class="text-center">Waiting List</th>
                     <th></th>
                 </tr>
             </thead>
@@ -138,22 +133,19 @@ else
                                 @activity.GetRegistrantCountByAssignmentTypes(Registration.ReservedStatuses) / @activity.SeatsAvailable
                             </td>
 
-                            @if (account.HasFeature(FeatureType.WaitingList))
-                            {
-                                <td class="text-center @waitingTextClass">
-                                    @if (activity.WaitingListSeats.HasValue)
-                                    {
-                                        <span>
-                                            @activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.WaitingList) /
-                                            @activity.WaitingListSeats
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        @: -
-                                    }
-                                </td>
-                            }
+                            <td class="text-center @waitingTextClass">
+                                @if (activity.WaitingListSeats.HasValue)
+                                {
+                                    <span>
+                                        @activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.WaitingList) /
+                                        @activity.WaitingListSeats
+                                    </span>
+                                }
+                                else
+                                {
+                                    @: -
+                                }
+                            </td>
 
                             <td>
                                 <div class="btn-group pull-right">
