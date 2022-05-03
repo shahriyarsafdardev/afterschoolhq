@@ -670,6 +670,11 @@ namespace AfterSchoolLibrary.Services
                     activity.GetTeamMembers(amsgs, adc)
                         .ForEach(member => member.Copy(copy.ID.Value, loggedInUserId, amsgs, adc));
 
+                    if (!WebUser.Load(loggedInUserId, amsgs, adc).HasAccessToActivity(copy, amsgs, adc))
+                    {
+                        copy.AddTeamMember(loggedInUserId, true, loggedInUserId, amsgs, adc);
+                    }
+                    
                     if (includeSignUpPeriods)
                     {
                         var activePeriod = activity.GetActiveRegistrationPeriod(amsgs, adc);
