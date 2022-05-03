@@ -1,12 +1,10 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using System.Data;
-using System.Collections;
 
 namespace AfterSchoolLibrary.Models
 {
@@ -54,101 +52,101 @@ namespace AfterSchoolLibrary.Models
 
         public RegistrantActivity()
         {
-            this.Config(ObjectMap, DatabaseQuery, typeof(RegistrantActivity).Name, "ID");
-            this.LoadObjectValues(ObjectMap);
-			this.ParticipationObjectTypeId = ParticipationObjectType.NotSet;
-			this.Uid = Guid.NewGuid();
-			this.AssignmentTypeId = RegistrationAssignmentType.NotSet;
+            Config(ObjectMap, DatabaseQuery, typeof(RegistrantActivity).Name, "ID");
+            LoadObjectValues(ObjectMap);
+			ParticipationObjectTypeId = ParticipationObjectType.NotSet;
+			Uid = Guid.NewGuid();
+			AssignmentTypeId = RegistrationAssignmentType.NotSet;
 			
         }
 
-        public static BasicLibrary.DataAccess.DatabaseParameters ObjectMap
+        public static DatabaseParameters ObjectMap
         {
             get
             {
-                BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
+                DatabaseParameters _dp = new DatabaseParameters();
                 string className = typeof(RegistrantActivity).Name;
-                _dp = BasicObjectWithModified.get_BaseObjectMap(className);
-				_dp.Add(className, "RegistrantId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "ParticipationObjectTypeId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "ParticipationObjectId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "RegistrationId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
-				_dp.Add(className, "SeatIndex", System.Data.SqlDbType.Int);
-				_dp.Add(className, "WaitingListSeatIndex", System.Data.SqlDbType.Int);
-				_dp.Add(className, "ApplicationSeatIndex", System.Data.SqlDbType.Int);
-				_dp.Add(className, "PreferenceNumber", System.Data.SqlDbType.Int);
-				_dp.Add(className, "RegistrationPeriodId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "ActivityGroupId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "Rating", System.Data.SqlDbType.Int);
-				_dp.Add(className, "AssignmentTypeId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "AmountCharged", System.Data.SqlDbType.Money);
-				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "RegistrantEmail", typeof(Registrant).Name, "Email", System.Data.SqlDbType.NVarChar, "Registrant");
-				_dp.Add(className, "RegistrantFirstName", typeof(Registrant).Name, "FirstName", System.Data.SqlDbType.NVarChar, "Registrant");
-				_dp.Add(className, "RegistrantLastName", typeof(Registrant).Name, "LastName", System.Data.SqlDbType.NVarChar, "Registrant");
-				_dp.Add(className, "RegistrantUid", typeof(Registrant).Name, "Uid", System.Data.SqlDbType.UniqueIdentifier, "Registrant");
-				_dp.Add(className, "RegistrantPhone", typeof(Registrant).Name, "Phone", System.Data.SqlDbType.NVarChar, "Registrant");
-				_dp.Add(className, "RegistrantCompany", typeof(Registrant).Name, "Company", System.Data.SqlDbType.NVarChar, "Registrant");
-				_dp.Add(className, "RegistrantRegistrantTypeId", typeof(Registrant).Name, "RegistrantTypeId", System.Data.SqlDbType.Int, "Registrant");
-				_dp.Add(className, "RegistrantFirstRegistrantId", typeof(Registrant).Name, "FirstRegistrantId", System.Data.SqlDbType.Int, "Registrant");
+                _dp = get_BaseObjectMap(className);
+				_dp.Add(className, "RegistrantId", SqlDbType.Int);
+				_dp.Add(className, "ParticipationObjectTypeId", SqlDbType.Int);
+				_dp.Add(className, "ParticipationObjectId", SqlDbType.Int);
+				_dp.Add(className, "RegistrationId", SqlDbType.Int);
+				_dp.Add(className, "Uid", SqlDbType.UniqueIdentifier);
+				_dp.Add(className, "SeatIndex", SqlDbType.Int);
+				_dp.Add(className, "WaitingListSeatIndex", SqlDbType.Int);
+				_dp.Add(className, "ApplicationSeatIndex", SqlDbType.Int);
+				_dp.Add(className, "PreferenceNumber", SqlDbType.Int);
+				_dp.Add(className, "RegistrationPeriodId", SqlDbType.Int);
+				_dp.Add(className, "ActivityGroupId", SqlDbType.Int);
+				_dp.Add(className, "Rating", SqlDbType.Int);
+				_dp.Add(className, "AssignmentTypeId", SqlDbType.Int);
+				_dp.Add(className, "AmountCharged", SqlDbType.Money);
+				_dp.Add(className, "IsDeleted", SqlDbType.Bit);
+				_dp.Add(className, "RegistrantEmail", typeof(Registrant).Name, "Email", SqlDbType.NVarChar, "Registrant");
+				_dp.Add(className, "RegistrantFirstName", typeof(Registrant).Name, "FirstName", SqlDbType.NVarChar, "Registrant");
+				_dp.Add(className, "RegistrantLastName", typeof(Registrant).Name, "LastName", SqlDbType.NVarChar, "Registrant");
+				_dp.Add(className, "RegistrantUid", typeof(Registrant).Name, "Uid", SqlDbType.UniqueIdentifier, "Registrant");
+				_dp.Add(className, "RegistrantPhone", typeof(Registrant).Name, "Phone", SqlDbType.NVarChar, "Registrant");
+				_dp.Add(className, "RegistrantCompany", typeof(Registrant).Name, "Company", SqlDbType.NVarChar, "Registrant");
+				_dp.Add(className, "RegistrantRegistrantTypeId", typeof(Registrant).Name, "RegistrantTypeId", SqlDbType.Int, "Registrant");
+				_dp.Add(className, "RegistrantFirstRegistrantId", typeof(Registrant).Name, "FirstRegistrantId", SqlDbType.Int, "Registrant");
 				
                 return _dp;
             }
         }
 
-        public static RegistrantActivity LoadObject(System.Data.DataRow row)
+        public static RegistrantActivity LoadObject(DataRow row)
         {
             RegistrantActivity obj = new RegistrantActivity();
             obj.LoadObjectValues(ObjectMap, row);
             return obj;
         }
 
-        protected static BasicLibrary.DataAccess.DatabaseQuery DatabaseQuery
+        protected static DatabaseQuery DatabaseQuery
         {
             get
             {
-                BasicLibrary.DataAccess.DatabaseQuery dq = BaseObject.get_DatabaseQuery(ObjectMap, typeof(RegistrantActivity).Name);
-				dq.Joins.Add(Registrant.ObjectMap["ID"], RegistrantActivity.ObjectMap["RegistrantId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.InnerJoin, "Registrant");
+                DatabaseQuery dq = get_DatabaseQuery(ObjectMap, typeof(RegistrantActivity).Name);
+				dq.Joins.Add(Registrant.ObjectMap["ID"], ObjectMap["RegistrantId"], DatabaseJoinTypeEnum.InnerJoin, "Registrant");
 				
                 return dq;
             }
         }
 
-        public static RegistrantActivity Load(int id, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static RegistrantActivity Load(int id, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<RegistrantActivity> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<RegistrantActivity> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
 			dq.UseParameterizedQuery = false;
 			dq.SelectRange.Start = start;
 			dq.SelectRange.Length = length;
-            return RegistrantActivity.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            return RegistrantActivity.BaseGetCount(criterias, ObjectMap, dq, msgs);
+            return BaseGetCount(criterias, ObjectMap, dq, msgs);
         }
 
-		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public SystemMessages Save(DatabaseConnection dc = null)
         {
 			var msgs = new SystemMessages();
 
-			if (this.RegistrantId.IsEmpty())
+			if (RegistrantId.IsEmpty())
 				msgs.Add("RegistrantId is required on RegistrantActivity object", MessageType.Error);
-			if (this.ParticipationObjectTypeId.IsEmpty())
+			if (ParticipationObjectTypeId.IsEmpty())
 				msgs.Add("ParticipationObjectTypeId is required on RegistrantActivity object", MessageType.Error);
-			if (this.ParticipationObjectId.IsEmpty())
+			if (ParticipationObjectId.IsEmpty())
 				msgs.Add("ParticipationObjectId is required on RegistrantActivity object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
@@ -157,92 +155,92 @@ namespace AfterSchoolLibrary.Models
 			return msgs;
         }
 
-        public SystemMessages Delete(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public SystemMessages Delete(DatabaseConnection dc = null)
         {
             return base._Delete2(DatabaseQuery, dc, ObjectMap, typeof(RegistrantActivity).Name);
         }
 
-        public static SystemMessages Create(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static SystemMessages Create(DatabaseConnection dc = null)
         {
-            return BaseObject._Create(DatabaseQuery, dc, ObjectMap);
+            return _Create(DatabaseQuery, dc, ObjectMap);
         }
 
-        public static SystemMessages Alter(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static SystemMessages Alter(DatabaseConnection dc = null)
         {
             SystemMessages msgs = new SystemMessages();
-            BasicLibrary.DataAccess.DatabaseParameters dps;
+            DatabaseParameters dps;
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps = new DatabaseParameters();
 			dps.Add(ObjectMap["RegistrantId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps = new DatabaseParameters();
 			dps.Add(ObjectMap["ParticipationObjectTypeId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps = new DatabaseParameters();
 			dps.Add(ObjectMap["ParticipationObjectId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps = new DatabaseParameters();
 			dps.Add(ObjectMap["RegistrationId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps = new DatabaseParameters();
 			dps.Add(ObjectMap["Uid"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps = new DatabaseParameters();
 			dps.Add(ObjectMap["SeatIndex"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps = new DatabaseParameters();
 			dps.Add(ObjectMap["WaitingListSeatIndex"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps = new DatabaseParameters();
 			dps.Add(ObjectMap["ApplicationSeatIndex"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps = new DatabaseParameters();
 			dps.Add(ObjectMap["PreferenceNumber"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps = new DatabaseParameters();
 			dps.Add(ObjectMap["RegistrationPeriodId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps = new DatabaseParameters();
 			dps.Add(ObjectMap["ActivityGroupId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps = new DatabaseParameters();
 			dps.Add(ObjectMap["Rating"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps = new DatabaseParameters();
 			dps.Add(ObjectMap["AssignmentTypeId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps = new DatabaseParameters();
 			dps.Add(ObjectMap["AmountCharged"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps = new DatabaseParameters();
 			dps.Add(ObjectMap["IsDeleted"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
 			
 
             return msgs;
         }
 
-		public RegistrantActivity Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public RegistrantActivity Reload(SystemMessages msgs = null, DatabaseConnection dc = null)
 		{
-			return RegistrantActivity.Load(this.ID.Value, msgs, dc: dc);
+			return Load(ID.Value, msgs, dc: dc);
 		}
 		
-		public static List<RegistrantActivity> LoadByRegistrantId(int RegistrantId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<RegistrantActivity> LoadByRegistrantId(int RegistrantId, SystemMessages msgs = null, DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
@@ -250,7 +248,7 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<RegistrantActivity> LoadByRegistrationId(int RegistrationId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<RegistrantActivity> LoadByRegistrationId(int RegistrationId, SystemMessages msgs = null, DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
@@ -258,7 +256,7 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static RegistrantActivity LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static RegistrantActivity LoadByUid(Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
@@ -266,7 +264,7 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static List<RegistrantActivity> LoadByParticipationObject(int ParticipationObjectId, ParticipationObjectType ParticipationObjectTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<RegistrantActivity> LoadByParticipationObject(int ParticipationObjectId, ParticipationObjectType ParticipationObjectTypeId, SystemMessages msgs = null, DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
@@ -276,7 +274,7 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static RegistrantActivity LoadByParticipationObjectByRegistrant(int ParticipationObjectId, ParticipationObjectType ParticipationObjectTypeId, int RegistrantId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static RegistrantActivity LoadByParticipationObjectByRegistrant(int ParticipationObjectId, ParticipationObjectType ParticipationObjectTypeId, int RegistrantId, SystemMessages msgs = null, DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
@@ -296,10 +294,10 @@ namespace AfterSchoolLibrary.Models
         {
             get
             {
-                if (this.RegistrantRegistrantTypeId == RegistrantType.Individual)
-                    return BaseWebUser.BuildDisplayName(this.RegistrantFirstName, this.RegistrantLastName);
-                else if (this.RegistrantRegistrantTypeId == RegistrantType.Organization)
-                    return this.RegistrantCompany.ToProperCase();
+                if (RegistrantRegistrantTypeId == RegistrantType.Individual)
+                    return BaseWebUser.BuildDisplayName(RegistrantFirstName, RegistrantLastName);
+                if (RegistrantRegistrantTypeId == RegistrantType.Organization)
+	                return RegistrantCompany.ToProperCase();
 
                 return "";
             }
@@ -315,23 +313,23 @@ namespace AfterSchoolLibrary.Models
 
         public Registrant ToRegistrant()
         {
-            return new Registrant()
+            return new Registrant
             {
-                ID = this.RegistrantId,
-                FirstName = this.RegistrantFirstName,
-                LastName = this.RegistrantLastName,
-                Email = this.RegistrantEmail,
-                Uid = this.RegistrantUid,
-                Phone = this.RegistrantPhone,
-                Company = this.RegistrantCompany,
-                RegistrantTypeId = this.RegistrantRegistrantTypeId,
-                FirstRegistrantId = this.RegistrantFirstRegistrantId
+                ID = RegistrantId,
+                FirstName = RegistrantFirstName,
+                LastName = RegistrantLastName,
+                Email = RegistrantEmail,
+                Uid = RegistrantUid,
+                Phone = RegistrantPhone,
+                Company = RegistrantCompany,
+                RegistrantTypeId = RegistrantRegistrantTypeId,
+                FirstRegistrantId = RegistrantFirstRegistrantId
             };
         }
 
         public static List<RegistrantActivity> LoadByParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, int? start, int? length, DatabaseConnection dc = null)
         {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["participationObjectId"], participationObjectId);
             dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int)participationObjectType);
@@ -342,7 +340,7 @@ namespace AfterSchoolLibrary.Models
 
         public static int GetCountByParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, int AccountId, DatabaseConnection dc = null)
         {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["participationObjectId"], participationObjectId);
             dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int)participationObjectType);
@@ -351,7 +349,7 @@ namespace AfterSchoolLibrary.Models
 
         public static bool ExistsByParticipationObjectByRegistrant(int participationObjectId, ParticipationObjectType participationObjectType, int registrantId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["participationObjectId"], participationObjectId);
             dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int)participationObjectType);
@@ -361,7 +359,7 @@ namespace AfterSchoolLibrary.Models
 
         public static bool ExistsByParticipationObjectByRegistrants(int participationObjectId, ParticipationObjectType participationObjectType, List<int> registrantIds, List<RegistrationAssignmentType> assignmentTypes, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
             dq.Criterias.Add(ObjectMap["participationObjectId"], participationObjectId);
@@ -384,7 +382,7 @@ namespace AfterSchoolLibrary.Models
 
         public static bool ExistsByParticipationObjectsByRegistrants(List<ParticipationObject> participationObjects, List<int> registrantIds, List<RegistrationAssignmentType> assignmentTypes, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
 
@@ -418,9 +416,9 @@ namespace AfterSchoolLibrary.Models
             return dq.GetCount(msgs) > 0;
         }
 
-        public static List<RegistrantActivity> LoadByAccountId(int AccountId, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<RegistrantActivity> LoadByAccountId(int AccountId, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ActivityAccountId"], AccountId);
             dq.SelectRange.Start = start;
@@ -456,34 +454,50 @@ namespace AfterSchoolLibrary.Models
             if (registrationPeriodId.HasValue)
                 dq.Criterias.Add(ObjectMap["RegistrationPeriodId"], registrationPeriodId.Value);
 
+            dq.Criterias.Add(new DatabaseCriterias(LogicalOperatorType.Or)
+            {
+	            { ObjectMap["IsDeleted"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is },
+	            { ObjectMap["IsDeleted"], false }
+            });
+            
             return dq.GetCount(msgs);
         }
 
         public static int GetSeatCountByParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
             dq.Criterias.Add(ObjectMap["participationObjectId"], participationObjectId);
             dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int)participationObjectType);
+            dq.Criterias.Add(new DatabaseCriterias(LogicalOperatorType.Or)
+            {
+	            { ObjectMap["IsDeleted"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is },
+	            { ObjectMap["IsDeleted"], false }
+            });
 
             return dq.GetCount();
         }        
 
         public static int GetSeatCountByRegistrationPeriodId(int RegistrationPeriodId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
 
             dq.Criterias.Add(ObjectMap["RegistrationPeriodId"], RegistrationPeriodId);
+            dq.Criterias.Add(new DatabaseCriterias(LogicalOperatorType.Or)
+            {
+	            { ObjectMap["IsDeleted"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is },
+	            { ObjectMap["IsDeleted"], false }
+            });
 
             return dq.GetCount();
         }
 
         public static List<RegistrantActivity> LoadByRegistrationIds(List<int> RegistrationIds, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["RegistrationId"], RegistrationIds.ToArray(), DatabaseCriteriaOperatorEnum.In);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
@@ -491,7 +505,7 @@ namespace AfterSchoolLibrary.Models
 
         public static List<RegistrantActivity> LoadByRegistrantIds(List<int> registrantIds, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["RegistrantId"], registrantIds.ToArray(), DatabaseCriteriaOperatorEnum.In);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
@@ -508,39 +522,39 @@ namespace AfterSchoolLibrary.Models
 
         public bool IsForActivity()
         {
-            return this.ParticipationObjectTypeId == ParticipationObjectType.Activity;
+            return ParticipationObjectTypeId == ParticipationObjectType.Activity;
         }
 
         public bool IsForActivityGroup()
         {
-            return this.ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup;
+            return ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup;
         }
 
         public bool IsForAccountActivityGroup()
         {
-            return this.ParticipationObjectTypeId == ParticipationObjectType.AccountActivityGroup;
+            return ParticipationObjectTypeId == ParticipationObjectType.AccountActivityGroup;
         }
 
         public int? GetActivityId()
         {
-            if (this.ParticipationObjectTypeId == ParticipationObjectType.Activity)
-                return this.ParticipationObjectId;
+            if (ParticipationObjectTypeId == ParticipationObjectType.Activity)
+                return ParticipationObjectId;
 
             return null;
         }
 
         public int? GetActivityGroupId()
         {
-            if (this.ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup)
-                return this.ParticipationObjectId;
+            if (ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup)
+                return ParticipationObjectId;
 
             return null;
         }
 
         public int? GetAccountActivityGroupId()
         {
-            if (this.ParticipationObjectTypeId == ParticipationObjectType.AccountActivityGroup)
-                return this.ParticipationObjectId;
+            if (ParticipationObjectTypeId == ParticipationObjectType.AccountActivityGroup)
+                return ParticipationObjectId;
 
             return null;
         }

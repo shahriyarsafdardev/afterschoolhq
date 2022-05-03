@@ -2334,16 +2334,23 @@ namespace AfterSchoolLibrary.Services
         {
             var ras = new List<RegistrantActivity>();
 
+            var registrantAssigmentTypesToInclude = new List<RegistrationAssignmentType>
+            {
+                RegistrationAssignmentType.Applied,
+                RegistrationAssignmentType.Reserved,
+                RegistrationAssignmentType.WaitingList,
+                RegistrationAssignmentType.ReservedPendingPayment,
+                RegistrationAssignmentType.ReservedPendingParentalConsent,
+            };
+
             if (includeInvited)
                 ras = RegistrantActivity
                     .LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc).ToList();
             else
                 ras = RegistrantActivity
                     .LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc)
-                    .Where(x =>
-                        x.AssignmentTypeId != RegistrationAssignmentType.Invited &&
-                        x.AssignmentTypeId != RegistrationAssignmentType.Declined
-                    ).ToList();
+                    .Where(x => registrantAssigmentTypesToInclude.Contains(x.AssignmentTypeId))
+                    .ToList();
 
             return ras;
         }
