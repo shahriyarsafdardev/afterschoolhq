@@ -164,34 +164,6 @@ namespace AfterSchoolLibrary.Services
             return RegistrationAssignmentType.WaitingList;
         }
 
-        public static void ProcessInterestAssignment(Registration registration, ParticipationObject participationObject,
-            Registrant registrant, RegistrationPeriod period, WebUser loggedInUser, SystemMessages msgs,
-            DatabaseConnection dc = null)
-        {
-            // NOTE: getting only one activity per registration at the moment, 
-            // but could be problem in the future
-            var ra = registration.GetRegistrantActivities(msgs, dc)
-                .Where(x => x.ParticipationObjectId == participationObject.ObjectID &&
-                            x.ParticipationObjectTypeId == participationObject.ObjectType)
-                .FirstOrDefault();
-
-            var assignmentType = RegistrationAssignmentType.Interested;
-
-            // add or update the registrant for the activity
-            ra = registrant.AddOrUpdateParticipationObject(
-                registrationId: registration.ID.Value,
-                participationObjectId: participationObject.ObjectID.Value,
-                participationObjectType: participationObject.ObjectType,
-                assignmentType: assignmentType,
-                preferenceNumber: 1,
-                registrationPeriodId: period?.ID,
-                activityGroupId: participationObject.GetAnyRelatedActivityGroupId(),
-                amountCharged: 0,
-                loggedInUserId: loggedInUser.ID.IfEmpty(0),
-                msgs: msgs,
-                dc: dc);
-        }
-
         public static void ProcessRegistrationAssignment(CheckoutObject checkoutObject, WebUser loggedInUser,
             SystemMessages msgs, DatabaseConnection dc = null)
         {

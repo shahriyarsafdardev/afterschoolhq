@@ -1,22 +1,22 @@
 ﻿using System;
+using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Services;
+using AfterSchoolLibraryTests.Factories;
 using Xunit;
 using Xunit.Abstractions;
-using AfterSchoolLibrary.Models;
-using AfterSchoolLibraryTests.Factories;
-using AfterSchoolLibrary.Services;
 
 namespace AfterSchoolLibraryTests.Tests
 {
     public class RegistrantActivityServiceTest : BaseTest
     {
-        private WebUser user { get; set; }
-        private Account account { get; set; }
-
         public RegistrantActivityServiceTest(ITestOutputHelper output) : base(output)
         {
             user = WebUserFactory.Create(msgs, dc);
             account = AccountFactory.Create(user, msgs, dc);
         }
+
+        private WebUser user { get; }
+        private Account account { get; }
 
         [Fact]
         public void GetRegistrantActivityTest()
@@ -25,48 +25,59 @@ namespace AfterSchoolLibraryTests.Tests
             var activity = ActivityFactory.Create(account, msgs, dc);
             var registrant = RegistrantFactory.Create(msgs, dc);
             var registration = RegistrationFactory.Create(account, registrant, msgs, dc);
-            var actualRegistrantActivity = RegistrantActivityFactory.Create(activity, registrant, registration, msgs, dc);
+            var actualRegistrantActivity =
+                RegistrantActivityFactory.Create(activity, registrant, registration, msgs, dc);
 
             // Act    
-            var expectedRegistrantActivity = RegistrantActivityService.GetRegistrantActivity(actualRegistrantActivity.Uid, msgs, dc);
+            var expectedRegistrantActivity =
+                RegistrantActivityService.GetRegistrantActivity(actualRegistrantActivity.Uid, msgs, dc);
 
             // Assert
-            Assert.Equal(expected: expectedRegistrantActivity.ID, actual: actualRegistrantActivity.ID);
+            Assert.Equal(expectedRegistrantActivity.ID, actualRegistrantActivity.ID);
         }
 
         [Theory(DisplayName = "test cases for GetAmountPaidTest, GetAmountPaidByParent, GetIsProRatedFlagByParent")]
         [InlineData(100, 6, 4, 110, false)] //no pro-rate
-        [InlineData(100, 6, 4, 90, true)] //assume user joins mid-period and so as we have to keep pro-rated amount, its 94.3m(otherwise it would 100m)
-        public void ActivityPayemntRelatedTest(decimal amount, decimal convenienceFee, decimal paymentTypeFee, decimal amountPaidByParent, bool isAmountProRated = false)
+        [InlineData(100, 6, 4, 90,
+            true)] //assume user joins mid-period and so as we have to keep pro-rated amount, its 94.3m(otherwise it would 100m)
+        public void ActivityPayemntRelatedTest(decimal amount, decimal convenienceFee, decimal paymentTypeFee,
+            decimal amountPaidByParent, bool isAmountProRated = false)
         {
             try
             {
                 // Arrange
                 var billingAccountOwner = WebUserFactory.Create("Don", "John", "DonJohn@test.com", true, msgs, dc);
-                var billingAccount = AccountFactory.CreateWithFreePackage("Billing account", "BillingAccount@test.com", billingAccountOwner, AccountType.School, msgs, dc);
-                var purchasingAccountOwner = WebUserFactory.Create("Cristine", "Trump", "CristineTrump@test.com", true, msgs, dc);
-                var purchasingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", purchasingAccountOwner, AccountType.School, msgs, dc);
-                var activity = ActivityFactory.Create(billingAccount, msgs, dc: dc);
+                var billingAccount = AccountFactory.CreateWithFreePackage("Billing account", "BillingAccount@test.com",
+                    billingAccountOwner, AccountType.School, msgs, dc);
+                var purchasingAccountOwner =
+                    WebUserFactory.Create("Cristine", "Trump", "CristineTrump@test.com", true, msgs, dc);
+                var purchasingAccount = AccountFactory.CreateWithFreePackage("Purchasing account",
+                    "PurchasingAccount@test.com", purchasingAccountOwner, AccountType.School, msgs, dc);
+                var activity = ActivityFactory.Create(billingAccount, msgs, dc);
 
-                var registrant = RegistrantFactory.Create(billingAccount, isMaster: false, msgs, dc: dc);
+                var registrant = RegistrantFactory.Create(billingAccount, false, msgs, dc);
                 var registration = RegistrationFactory.Create(billingAccount, registrant, msgs, dc);
-                var registrantActivity = RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
+                var registrantActivity = RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
 
-                var subscriptionPlan = SubscriptionPlanFactory.Create(billingAccount, activity, SubscriptionPlanType.Subscription, amountPaidByParent, msgs, dc);
-                var purchase = PurchaseFactory.Create(purchasingAccount, amount, registrantId: registrant.ID.Value, registrationId: registration.ID.Value, msgs, dc); // check: we are inserting row amount here
-                var registrantSubscriptionPlan = RegistrantSubscriptionPlanFactory.Create(registrant, subscriptionPlan, purchase, amount: amount, convenienceFee: convenienceFee, paymentTypeFee: paymentTypeFee, msgs, dc);
+                var subscriptionPlan = SubscriptionPlanFactory.Create(billingAccount, activity,
+                    SubscriptionPlanType.Subscription, amountPaidByParent, msgs, dc);
+                var purchase = PurchaseFactory.Create(purchasingAccount, amount, registrant.ID.Value,
+                    registration.ID.Value, msgs, dc); // check: we are inserting row amount here
+                var registrantSubscriptionPlan = RegistrantSubscriptionPlanFactory.Create(registrant, subscriptionPlan,
+                    purchase, amount, convenienceFee, paymentTypeFee, msgs, dc);
 
                 // Act    
-                var activityPayment = ActivityPaymentFactory.Create(billingAccount, activity, registrant, registrantSubscriptionPlan, amount, amountPaidByParent, isAmountProRated, msgs, dc);
+                var activityPayment = ActivityPaymentFactory.Create(billingAccount, activity, registrant,
+                    registrantSubscriptionPlan, amount, amountPaidByParent, isAmountProRated, msgs, dc);
 
-                var activityPaymentAmount = RegistrantActivityService.GetAmountPaid(registrantActivity, msgs, dc);
-                var activityPaymentAmountPaidByParent = RegistrantActivityService.GetAmountPaidByParent(registrantActivity, msgs, dc);
-                var activityPaymentIsProRated = RegistrantActivityService.GetIsProRatedFlagByParent(registrantActivity, msgs, dc);
+                var activityPaymentAmount = registrantActivity.GetAmountPaid(msgs, dc);
+                var activityPaymentAmountPaidByParent = registrantActivity.GetAmountPaidByParent(msgs, dc);
+                var activityPaymentIsProRated = registrantActivity.GetIsProRatedFlagByParent(msgs, dc);
 
                 // Assert
-                Assert.Equal(expected: activityPaymentAmount, actual: activityPayment.Amount);
-                Assert.Equal(expected: activityPaymentAmountPaidByParent, actual: activityPayment.AmountPaidByParent);
-                Assert.Equal(expected: activityPaymentIsProRated, actual: activityPayment.IsProRated);
+                Assert.Equal(activityPaymentAmount, activityPayment.Amount);
+                Assert.Equal(activityPaymentAmountPaidByParent, activityPayment.AmountPaidByParent);
+                Assert.Equal(activityPaymentIsProRated, activityPayment.IsProRated);
 
                 Assert.True(msgs.HasNoErrors());
             }
@@ -74,7 +85,6 @@ namespace AfterSchoolLibraryTests.Tests
             {
                 Assert.False(false, ex.Message);
             }
-            
         }
 
 
@@ -87,7 +97,8 @@ namespace AfterSchoolLibraryTests.Tests
             var registration = RegistrationFactory.Create(account, registrant, msgs, dc);
             var registrantActivity = RegistrantActivityFactory.Create(activity, registrant, registration, msgs, dc);
 
-            foreach (RegistrationAssignmentType registrationAssignment in Enum.GetValues(typeof(RegistrationAssignmentType)))
+            foreach (RegistrationAssignmentType registrationAssignment in Enum.GetValues(
+                         typeof(RegistrationAssignmentType)))
             {
                 // Act
                 registrantActivity.AssignmentTypeId = registrationAssignment;
@@ -107,17 +118,15 @@ namespace AfterSchoolLibraryTests.Tests
                     case RegistrationAssignmentType.Invited:
                     case RegistrationAssignmentType.ReservedPendingPayment:
                     case RegistrationAssignmentType.ReservedPendingParentalConsent:
-                    case RegistrationAssignmentType.Interested:
                         Assert.True(registrantActivity.IsWithdrawEnabled());
                         break;
-                    
+
                     // Test should fail if values are added to the enum without updating tests
                     default:
                         Assert.True(false);
                         break;
                 }
             }
-
         }
 
         [Fact]
@@ -135,7 +144,6 @@ namespace AfterSchoolLibraryTests.Tests
             // Assert
             Assert.NotNull(registrantActivity);
             Assert.True(registrantActivity.IsDeleted);
-
         }
 
         [Fact]
@@ -147,7 +155,8 @@ namespace AfterSchoolLibraryTests.Tests
             var registration = RegistrationFactory.Create(account, registrant, msgs, dc);
             var registrantActivity = RegistrantActivityFactory.Create(activity, registrant, registration, msgs, dc);
 
-            foreach (RegistrationAssignmentType registrationAssignment in Enum.GetValues(typeof(RegistrationAssignmentType)))
+            foreach (RegistrationAssignmentType registrationAssignment in Enum.GetValues(
+                         typeof(RegistrationAssignmentType)))
             {
                 // Act
                 registrantActivity.AssignmentTypeId = registrationAssignment;
@@ -157,10 +166,9 @@ namespace AfterSchoolLibraryTests.Tests
                 {
                     case RegistrationAssignmentType.NotSet:
                     case RegistrationAssignmentType.Withdrawn:
-                    case RegistrationAssignmentType.Declined:                    
+                    case RegistrationAssignmentType.Declined:
                     case RegistrationAssignmentType.WaitingList:
                     case RegistrationAssignmentType.Invited:
-                    case RegistrationAssignmentType.Interested:
                         Assert.False(registrantActivity.IsSendInvoiceEnabled());
                         break;
 
@@ -177,7 +185,6 @@ namespace AfterSchoolLibraryTests.Tests
                         break;
                 }
             }
-
         }
 
         [Fact(DisplayName = "IsReservedRegistrationAssignmentTypeTest")]
@@ -187,15 +194,19 @@ namespace AfterSchoolLibraryTests.Tests
             var activity = ActivityFactory.Create(account, msgs, dc);
             var registrant = RegistrantFactory.Create(msgs, dc);
             var reservedRegistrantActivity = RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
-            var reservedPendingParentalConsentRegistrantActivity = RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
-            var reservedPendingPaymentRegistrantActivity = RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
+            var reservedPendingParentalConsentRegistrantActivity =
+                RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
+            var reservedPendingPaymentRegistrantActivity =
+                RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
             var notReservedRegistrantActivity = RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
 
 
             // Act
             reservedRegistrantActivity.AssignmentTypeId = RegistrationAssignmentType.Reserved;
-            reservedPendingParentalConsentRegistrantActivity.AssignmentTypeId = RegistrationAssignmentType.ReservedPendingParentalConsent;
-            reservedPendingPaymentRegistrantActivity.AssignmentTypeId = RegistrationAssignmentType.ReservedPendingPayment;
+            reservedPendingParentalConsentRegistrantActivity.AssignmentTypeId =
+                RegistrationAssignmentType.ReservedPendingParentalConsent;
+            reservedPendingPaymentRegistrantActivity.AssignmentTypeId =
+                RegistrationAssignmentType.ReservedPendingPayment;
             notReservedRegistrantActivity.AssignmentTypeId = RegistrationAssignmentType.NotSet;
 
             msgs.AddRange(reservedRegistrantActivity.Save(dc));
@@ -209,8 +220,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(reservedPendingParentalConsentRegistrantActivity.IsReservedRegistrationAssignmentType());
             Assert.True(reservedPendingPaymentRegistrantActivity.IsReservedRegistrationAssignmentType());
             Assert.False(notReservedRegistrantActivity.IsReservedRegistrationAssignmentType());
-
-
         }
     }
 }

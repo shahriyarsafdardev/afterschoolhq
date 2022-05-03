@@ -1,15 +1,16 @@
-﻿@{
+﻿@using Utilities = AfterSchoolLibrary.Helpers.Utilities
+@{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = "Thank you";
-    var msgs = (SystemMessages)ViewBag.Messages;
-    var account = (Account)ViewBag.Account;
-    var registration = (Registration)ViewBag.Registration;
-    var registrant = (Registrant)ViewBag.Registrant;
-    var isSelfRegistered = (bool)ViewBag.IsSelfRegistered;
-    var assignmentType = (RegistrationAssignmentType)ViewBag.AssignmentType;
-    var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
-    var profile = (AccountProfile)ViewBag.Profile;
-    var currentUser = (WebUser)ViewBag.CurrentUser;
+    var msgs = (SystemMessages) ViewBag.Messages;
+    var account = (Account) ViewBag.Account;
+    var registration = (Registration) ViewBag.Registration;
+    var registrant = (Registrant) ViewBag.Registrant;
+    var isSelfRegistered = (bool) ViewBag.IsSelfRegistered;
+    var assignmentType = (RegistrationAssignmentType) ViewBag.AssignmentType;
+    var participationObject = (ParticipationObject) ViewBag.ParticipationObject;
+    var profile = (AccountProfile) ViewBag.Profile;
+    var currentUser = (WebUser) ViewBag.CurrentUser;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -36,15 +37,13 @@
 
                         @if (assignmentType == RegistrationAssignmentType.Applied)
                         {
-                            <span><strong>applied</strong></span>
+                            <span>
+                                <strong>applied</strong>
+                            </span>
                         }
                         else if (assignmentType == RegistrationAssignmentType.WaitingList)
                         {
                             <span>been placed on the <strong>waiting list</strong></span>
-                        }
-                        else if (assignmentType == RegistrationAssignmentType.Interested)
-                        {
-                            <span>registered your interest</span>
                         }
                         else
                         {
@@ -55,87 +54,72 @@
                     @if (currentUser.IsRegistered)
                     {
                         <p>
-                            <a href="@Url.Action("index", "home", new { area = "user" })">View your account</a>
+                            <a href="@Url.Action("index", "home", new {area = "user"})">View your account</a>
                         </p>
                     }
                 </div>
 
-                @if (assignmentType == RegistrationAssignmentType.Interested && profile.IsNotEmpty() && profile.CalendarBookingLink.IsNotEmpty())
-                {
-                    <hr />
-                    <div>
-                        <p class="text-medium-small margin-v-20">
-                            Would you like to book an appointment to learn more about @participationObject.Name and/or @account.Name?
+                <div>
+                    @if (!currentUser.IsRegistered)
+                    {
+                        <hr/>
+                        <p>
+                            Thank you for your interest! We've helped thousands of parents find activities for their children and we'd love to do the same for you. Click the link below to join the @UILabel.ProductName() family.
                         </p>
                         <p>
-                            <a href="@profile.CalendarBookingLink" class="btn btn-xl btn-register-primary btn-register-xl" target="_blank">
-                                Book Appointment &raquo;
+                            <a href="@Utilities.CompleteSignUpUrl(currentUser.Uid)">
+                                Complete Account Sign Up &raquo;
                             </a>
                         </p>
-                    </div>
-                }
-
-            <div>
-                @if (!currentUser.IsRegistered)
-                {
-                    <hr />
-                    <p>
-                        Thank you for your interest! We've helped thousands of parents find activities for their children and we'd love to do the same for you.  Click the link below to join the @UILabel.ProductName() family.
-                    </p>
-                    <p>
-                        <a href="@AfterSchoolLibrary.Helpers.Utilities.CompleteSignUpUrl(currentUser.Uid)">
-                            Complete Account Sign Up &raquo;
-                        </a>
-                    </p>
-                }
-                else if (participationObject.IsInviteOnly)
-                {
-                    <hr />
-                    <div class="margin-v-20">
-                        <p>
-                            <a href="@participationObject.GetHomePageUrl()" class="@(assignmentType != RegistrationAssignmentType.Interested ? "btn btn-xl btn-register-primary btn-register-xl" : "")">Register another child</a>
-                        </p>
-                    </div>
-                }
-                else
-                {
-                    <hr />
-
-                    if (true)
-                    {
-                        Html.RenderPartial(
-                               "~/Views/Shared/Registration/_RegisterButton.cshtml",
-                               participationObject,
-                               new ViewDataDictionary()
-                               {
-                                { "anotherChild", true },
-                                { "condensed", true }
-                               });
                     }
+                    else if (participationObject.IsInviteOnly)
+                    {
+                        <hr/>
+                        <div class="margin-v-20">
+                            <p>
+                                <a href="@participationObject.GetHomePageUrl()" class="btn btn-xl btn-register-primary btn-register-xl">Register another child</a>
+                            </p>
+                        </div>
+                    }
+                    else
+                    {
+                        <hr/>
 
-                    <div class="margin-v-10">
-                        <p>
-                            <a href="@account.HomePageUrl" class="@(assignmentType != RegistrationAssignmentType.Interested ? "btn btn-xl btn-register-primary btn-register-xl" : "")">Find another activity</a>
-                        </p>
-                    </div>
-                }
-            </div>
+                        if (true)
+                        {
+                            Html.RenderPartial(
+                                "~/Views/Shared/Registration/_RegisterButton.cshtml",
+                                participationObject,
+                                new ViewDataDictionary
+                                {
+                                    {"anotherChild", true},
+                                    {"condensed", true},
+                                });
+                        }
+
+                        <div class="margin-v-10">
+                            <p>
+                                <a href="@account.HomePageUrl" class="btn btn-xl btn-register-primary btn-register-xl">Find another activity</a>
+                            </p>
+                        </div>
+                    }
+                </div>
 
             </div>
         </div>
 
         <div class="panel">
             <div class="panel-body">
-                
+
                 <div>
                     @{ Html.RenderPartial(
-                           "~/Views/Shared/Registration/_ShareLinks.cshtml", 
-                           new ViewDataDictionary() { 
-                               { "ShareObject", participationObject.Name }, 
-                               { "ShareUrl", participationObject.GetHomePageUrl() } 
+                           "~/Views/Shared/Registration/_ShareLinks.cshtml",
+                           new ViewDataDictionary
+                           {
+                               {"ShareObject", participationObject.Name},
+                               {"ShareUrl", participationObject.GetHomePageUrl()},
                            }
-                        ); 
-                    }
+                           ); }
                 </div>
 
             </div>

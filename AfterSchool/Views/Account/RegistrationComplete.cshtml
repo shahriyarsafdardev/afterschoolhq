@@ -1,10 +1,10 @@
 ﻿@{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = "Registration Complete";
-    var msgs = (SystemMessages)ViewBag.Messages;
-    var registrant = (Registrant)ViewBag.Registrant;
-    var assignmentType = (RegistrationAssignmentType)ViewBag.AssignmentType;
-    var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
+    var msgs = (SystemMessages) ViewBag.Messages;
+    var registrant = (Registrant) ViewBag.Registrant;
+    var assignmentType = (RegistrationAssignmentType) ViewBag.AssignmentType;
+    var participationObject = (ParticipationObject) ViewBag.ParticipationObject;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -15,8 +15,9 @@
     Html.RenderPartial(
         "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
         new RegistrationHeaderViewModel(participationObject, true),
-        new ViewDataDictionary() {
-            { "hidebuttons", true }
+        new ViewDataDictionary
+        {
+            {"hidebuttons", true},
         });
 }
 
@@ -30,20 +31,24 @@
 
                     <div class="reg-ul">
                         <p>
-                            <span>You have reserved a spot in <strong>@participationObject.Name</strong>. Your registration will be confirmed once your parent or guardian accepts their invitation and enters the required information.</span>
+                        <span>You have reserved a spot in <strong>@participationObject.Name</strong>. Your registration will be confirmed once your parent or guardian accepts their invitation and enters the required information.</span>
                     </div>
 
                     <div class="margin-v-10">
                         <div class="col-md-6 col-md-offset-3">
-                            <a href="@Url.Action("index", "home", new { area = "user" })" onclick="return showLoader()"
-                               class="@(assignmentType != RegistrationAssignmentType.Interested ? "btn btn-xl btn-register-primary btn-register-xl" : "")">View Account</a>
+                            <a href="@Url.Action("index", "home", new {area = "user"})" onclick="return showLoader()"
+                               class="btn btn-xl btn-register-primary btn-register-xl">
+                                View Account
+                            </a>
                         </div>
                     </div>
 
                     <div class="margin-v-10">
                         <div class="col-md-6 col-md-offset-3">
                             <a href="@participationObject.GetHomePageUrl()" onclick="return showLoader()"
-                               class="@(assignmentType != RegistrationAssignmentType.Interested ? "btn btn-xl btn-register-primary btn-register-xl" : "")">Register for Another Activity</a>
+                               class="btn btn-xl btn-register-primary btn-register-xl">
+                                Register for Another Activity
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -54,13 +59,14 @@
             <div class="panel-body">
 
                 <div>
-                    @{ 
+                    @{
                         Html.RenderPartial(
-                           "~/Views/Shared/Registration/_ShareLinks.cshtml",
-                           new ViewDataDictionary() {
-                               { "ShareObject", participationObject.Name },
-                               { "ShareUrl", participationObject.GetHomePageUrl() }
-                           });
+                            "~/Views/Shared/Registration/_ShareLinks.cshtml",
+                            new ViewDataDictionary
+                            {
+                                {"ShareObject", participationObject.Name},
+                                {"ShareUrl", participationObject.GetHomePageUrl()},
+                            });
                     }
                 </div>
 

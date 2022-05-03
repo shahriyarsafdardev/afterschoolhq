@@ -404,7 +404,7 @@ namespace AfterSchoolLibrary.Services
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var activity = new Activity()
+            var activity = new Activity
             {
                 Name = activityName,
                 // AcceptCreditCard = acceptCreditCard,
@@ -443,7 +443,7 @@ namespace AfterSchoolLibrary.Services
         public static ActivityPayment AddPayment(this Activity activity, decimal amount, Registrant registrant,
             WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var payment = new ActivityPayment()
+            var payment = new ActivityPayment
             {
                 ParticipationObjectId = activity.ID,
                 ParticipationObjectTypeId = ParticipationObjectType.Activity,
@@ -674,7 +674,7 @@ namespace AfterSchoolLibrary.Services
                     {
                         copy.AddTeamMember(loggedInUserId, true, loggedInUserId, amsgs, adc);
                     }
-                    
+
                     if (includeSignUpPeriods)
                     {
                         var activePeriod = activity.GetActiveRegistrationPeriod(amsgs, adc);
@@ -781,7 +781,7 @@ namespace AfterSchoolLibrary.Services
 
         private static Activity CopyFields(this Activity activity)
         {
-            return new Activity()
+            return new Activity
             {
                 AccountId = activity.AccountId,
                 ProviderAccountId = activity.ProviderAccountId,
@@ -1766,7 +1766,7 @@ namespace AfterSchoolLibrary.Services
                 googlePlaceId,
                 latitude,
                 longitude,
-                new WebUser() {ID = loggedInUserId},
+                new WebUser {ID = loggedInUserId},
                 msgs,
                 dc);
 
@@ -2342,8 +2342,7 @@ namespace AfterSchoolLibrary.Services
                     .LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc)
                     .Where(x =>
                         x.AssignmentTypeId != RegistrationAssignmentType.Invited &&
-                        x.AssignmentTypeId != RegistrationAssignmentType.Declined &&
-                        x.AssignmentTypeId != RegistrationAssignmentType.Interested
+                        x.AssignmentTypeId != RegistrationAssignmentType.Declined
                     ).ToList();
 
             return ras;
@@ -2502,7 +2501,7 @@ namespace AfterSchoolLibrary.Services
         public static int GetTotalAttendanceCount(this Activity activity, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            return Attendance.GetCount(new Hashtable() {{"ActivityId", activity.ID.Value}}, msgs, dc);
+            return Attendance.GetCount(new Hashtable {{"ActivityId", activity.ID.Value}}, msgs, dc);
         }
 
         public static List<ActivityRegistrationPeriod> GetActivityRegistrationPeriods(this Activity activity,
@@ -2676,11 +2675,11 @@ namespace AfterSchoolLibrary.Services
             switch (activity.GenderRestriction)
             {
                 case GenderRestrictionType.None:
-                    return new List<GenderType>() {GenderType.Female, GenderType.Male};
+                    return new List<GenderType> {GenderType.Female, GenderType.Male};
                 case GenderRestrictionType.MaleOnly:
-                    return new List<GenderType>() {GenderType.Male};
+                    return new List<GenderType> {GenderType.Male};
                 case GenderRestrictionType.FemaleOnly:
-                    return new List<GenderType>() {GenderType.Female};
+                    return new List<GenderType> {GenderType.Female};
             }
 
             return new List<GenderType>();
@@ -2861,7 +2860,7 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc = null)
         {
             return ActivityMessage.GetCount(
-                criterias: new Hashtable() {{"ActivityId", activity.ID.Value}},
+                criterias: new Hashtable {{"ActivityId", activity.ID.Value}},
                 msgs: msgs,
                 dc: dc);
         }
@@ -3052,7 +3051,7 @@ namespace AfterSchoolLibrary.Services
 
         public static List<RegistrationAssignmentType> GetRegistrationAssignmentTypes(this Activity activity)
         {
-            var dropdownOptions = new List<RegistrationAssignmentType>()
+            var dropdownOptions = new List<RegistrationAssignmentType>
             {
                 RegistrationAssignmentType.Reserved,
                 RegistrationAssignmentType.WaitingList,
@@ -3061,7 +3060,6 @@ namespace AfterSchoolLibrary.Services
                 RegistrationAssignmentType.Declined,
                 RegistrationAssignmentType.ReservedPendingPayment,
                 RegistrationAssignmentType.ReservedPendingParentalConsent,
-                RegistrationAssignmentType.Interested,
             };
 
             if (activity.ActivityTypeId == ActivityType.PermissionSlip)

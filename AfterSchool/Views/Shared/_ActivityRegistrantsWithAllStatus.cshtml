@@ -1,12 +1,13 @@
-﻿@model List<RegistrantActivity>
-@{ 
-    var account = (Account)ViewData["Account"];
-    var activity = (Activity)ViewData["Activity"];
+﻿@using Email = AfterSchoolLibrary.Helpers.Email
+@model List<RegistrantActivity>
+@{
+    var account = (Account) ViewData["Account"];
+    var activity = (Activity) ViewData["Activity"];
     var participationObject = activity.GetParticipationObject();
     var editaction = ViewData["EditAction"].ToString();
     var editcontroller = ViewData["EditController"].ToString();
-    var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
-    var isReadOnlySeatStatus = (bool)ViewData["IsReadOnlySeatStatus"].IsNotEmpty() && (bool)ViewData["IsReadOnlySeatStatus"];
+    var isTechSupport = SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
+    var isReadOnlySeatStatus = ViewData["IsReadOnlySeatStatus"].IsNotEmpty() && (bool) ViewData["IsReadOnlySeatStatus"];
 
     var reservedButPendingPayment = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment).ToList();
     var reservedPendingParentalConsent = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingParentalConsent).ToList();
@@ -14,7 +15,6 @@
     var waiting = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.WaitingList).ToList();
     var invited = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.Invited).ToList();
     var applied = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.Applied).ToList();
-    var interested = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.Interested).ToList();
     var withdrawn = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.Withdrawn).ToList();
     var declined = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.Declined).ToList();
 }
@@ -23,156 +23,150 @@
 @if (reservedButPendingPayment.IsNotEmpty() && reservedButPendingPayment.Count > 0)
 {
     Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
-      reservedButPendingPayment,
-      new ViewDataDictionary() {
-          { "Activity", activity },
-          { "Account", account },
-          { "EditAction", editaction },
-          { "EditController", editcontroller },
-          { "HeaderTitle", RegistrationAssignmentType.ReservedPendingPayment },
-          { "IsReadOnly", isReadOnlySeatStatus }
-      }
-    );
+        reservedButPendingPayment,
+        new ViewDataDictionary
+        {
+            {"Activity", activity},
+            {"Account", account},
+            {"EditAction", editaction},
+            {"EditController", editcontroller},
+            {"HeaderTitle", RegistrationAssignmentType.ReservedPendingPayment},
+            {"IsReadOnly", isReadOnlySeatStatus},
+        }
+        );
 }
 
 <div class="clearfix"></div>
 @if (reservedPendingParentalConsent.IsNotEmpty() && reservedPendingParentalConsent.Count > 0)
 {
     Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
-      reservedPendingParentalConsent,
-      new ViewDataDictionary() {
-          { "Activity", activity },
-          { "Account", account },
-          { "EditAction", editaction },
-          { "EditController", editcontroller },
-          { "HeaderTitle", RegistrationAssignmentType.ReservedPendingParentalConsent },
-          { "IsReadOnly", isReadOnlySeatStatus }
-      }
-    );
+        reservedPendingParentalConsent,
+        new ViewDataDictionary
+        {
+            {"Activity", activity},
+            {"Account", account},
+            {"EditAction", editaction},
+            {"EditController", editcontroller},
+            {"HeaderTitle", RegistrationAssignmentType.ReservedPendingParentalConsent},
+            {"IsReadOnly", isReadOnlySeatStatus},
+        }
+        );
 }
 
 <div class="clearfix"></div>
 @if (reserved.IsNotEmpty() && reserved.Count > 0)
 {
     Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
-      reserved,
-      new ViewDataDictionary() {
-          { "Activity", activity },
-          { "Account", account },
-          { "EditAction", editaction },
-          { "EditController", editcontroller },
-          { "HeaderTitle", RegistrationAssignmentType.Reserved },
-          { "IsReadOnly", isReadOnlySeatStatus }
-      }
-    );
+        reserved,
+        new ViewDataDictionary
+        {
+            {"Activity", activity},
+            {"Account", account},
+            {"EditAction", editaction},
+            {"EditController", editcontroller},
+            {"HeaderTitle", RegistrationAssignmentType.Reserved},
+            {"IsReadOnly", isReadOnlySeatStatus},
+        }
+        );
 }
 
 <div class="clearfix"></div>
 @if (waiting.IsNotEmpty() && waiting.Count > 0)
 {
     Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
-      waiting,
-      new ViewDataDictionary() {
-          { "Activity", activity },
-          { "Account", account },
-          { "EditAction", editaction },
-          { "EditController", editcontroller },
-          { "HeaderTitle", RegistrationAssignmentType.WaitingList },
-          { "IsReadOnly", isReadOnlySeatStatus }
-      }
-    );
+        waiting,
+        new ViewDataDictionary
+        {
+            {"Activity", activity},
+            {"Account", account},
+            {"EditAction", editaction},
+            {"EditController", editcontroller},
+            {"HeaderTitle", RegistrationAssignmentType.WaitingList},
+            {"IsReadOnly", isReadOnlySeatStatus},
+        }
+        );
 }
 
 <div class="clearfix"></div>
 @if (invited.IsNotEmpty() && invited.Count > 0)
 {
     Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
-      invited,
-      new ViewDataDictionary() {
-          { "Activity", activity },
-          { "Account", account },
-          { "EditAction", editaction },
-          { "EditController", editcontroller },
-          { "HeaderTitle", RegistrationAssignmentType.Invited },
-          { "IsReadOnly", isReadOnlySeatStatus }
-      }
-    );
+        invited,
+        new ViewDataDictionary
+        {
+            {"Activity", activity},
+            {"Account", account},
+            {"EditAction", editaction},
+            {"EditController", editcontroller},
+            {"HeaderTitle", RegistrationAssignmentType.Invited},
+            {"IsReadOnly", isReadOnlySeatStatus},
+        }
+        );
 }
 
 <div class="clearfix"></div>
 @if (applied.IsNotEmpty() && applied.Count > 0)
 {
     Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
-      applied,
-      new ViewDataDictionary() {
-          { "Activity", activity },
-          { "Account", account },
-          { "EditAction", editaction },
-          { "EditController", editcontroller },
-          { "HeaderTitle", RegistrationAssignmentType.Applied },
-          { "IsReadOnly", isReadOnlySeatStatus }
-      }
-    );
-}
-
-<div class="clearfix"></div>
-@if (interested.IsNotEmpty() && interested.Count > 0)
-{
-    Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
-      interested,
-      new ViewDataDictionary() {
-          { "Activity", activity },
-          { "Account", account },
-          { "EditAction", editaction },
-          { "EditController", editcontroller },
-          { "HeaderTitle", RegistrationAssignmentType.Interested },
-          { "IsReadOnly", isReadOnlySeatStatus }
-      }
-    );
+        applied,
+        new ViewDataDictionary
+        {
+            {"Activity", activity},
+            {"Account", account},
+            {"EditAction", editaction},
+            {"EditController", editcontroller},
+            {"HeaderTitle", RegistrationAssignmentType.Applied},
+            {"IsReadOnly", isReadOnlySeatStatus},
+        }
+        );
 }
 
 <div class="clearfix"></div>
 @if (withdrawn.IsNotEmpty() && withdrawn.Count > 0)
 {
     Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
-      withdrawn,
-      new ViewDataDictionary() {
-          { "Activity", activity },
-          { "Account", account },
-          { "EditAction", editaction },
-          { "EditController", editcontroller },
-          { "HeaderTitle", RegistrationAssignmentType.Withdrawn },
-          { "IsReadOnly", isReadOnlySeatStatus }
-      }
-    );
+        withdrawn,
+        new ViewDataDictionary
+        {
+            {"Activity", activity},
+            {"Account", account},
+            {"EditAction", editaction},
+            {"EditController", editcontroller},
+            {"HeaderTitle", RegistrationAssignmentType.Withdrawn},
+            {"IsReadOnly", isReadOnlySeatStatus},
+        }
+        );
 }
 
 <div class="clearfix"></div>
 @if (declined.IsNotEmpty() && declined.Count > 0)
 {
     Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
-      declined,
-      new ViewDataDictionary() {
-          { "Activity", activity },
-          { "Account", account },
-          { "EditAction", editaction },
-          { "EditController", editcontroller },
-          { "HeaderTitle", RegistrationAssignmentType.Declined },
-          { "IsReadOnly", isReadOnlySeatStatus }
-      }
-    );
+        declined,
+        new ViewDataDictionary
+        {
+            {"Activity", activity},
+            {"Account", account},
+            {"EditAction", editaction},
+            {"EditController", editcontroller},
+            {"HeaderTitle", RegistrationAssignmentType.Declined},
+            {"IsReadOnly", isReadOnlySeatStatus},
+        }
+        );
 }
 
 <div id="modal-waitinglist" class="md-modal colored-header custom-width md-effect-9">
     <form id="form-waitinglist" action="" method="post" class="form-inline">
         <div class="md-content">
             <div class="modal-header">
-                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">
+                    <i class="icon s7-close"></i>
+                </button>
                 <h3 class="modal-title">Manage <span id="registrant-name"></span> Waiting List</h3>
             </div>
             <div class="modal-body form">
                 <p>
-                    Move 
+                    Move
                     <select id="numbertomove" name="numbertomove" class="form-control"></select>
                     @UILabel.RegistrantLabel(true).ToLower()
                     <select id="movefromto" name="movefromto" class="form-control">
@@ -246,7 +240,7 @@
 
     function moveRegistrantAssignment2(registrant, registrantName, newAssignment, newAssignmentText) {
         $.get(
-            `@Url.Action("moveregistrantassignment", "services", new { id = activity.Uid })?registrant=${registrant}&assignmenttype=${newAssignment}`,
+            `@Url.Action("moveregistrantassignment", "services", new {id = activity.Uid})?registrant=${registrant}&assignmenttype=${newAssignment}`,
             function (data) {
                 if (data && data.status == 'ok') {
                     Notifications.showBar({
@@ -256,7 +250,7 @@
                 } else {
                     Notifications.showBar({
                         title: 'Error',
-                        message: `Error updating the seat for ${registrantName}. Please <a href="mailto:@AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress" class="white">contact support</a>.`
+                        message: `Error updating the seat for ${registrantName}. Please <a href="mailto:@Email.AppSupportEmailAddress" class="white">contact support</a>.`
                     });
                 }
             }
@@ -271,7 +265,7 @@
         $(obj).prop('disabled', true);
 
         $.get(
-            `@Url.Action("sendpaymentreminder", "services", new { id = activity.Uid })?registrant=${registrant}`,
+            `@Url.Action("sendpaymentreminder", "services", new {id = activity.Uid})?registrant=${registrant}`,
             function (data) {
                 if (data && data.status == 'ok') {
                     Notifications.showBar({
@@ -284,7 +278,7 @@
                 } else {
                     Notifications.showBar({
                         title: 'Error',
-                        message: `Error sending payment reminder email to ${registrantName}. Please <a href="mailto:@AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress" class="white">contact support</a>.`
+                        message: `Error sending payment reminder email to ${registrantName}. Please <a href="mailto:@Email.AppSupportEmailAddress" class="white">contact support</a>.`
                     });
                 }
                 $(obj).html('Send Invoice');
@@ -323,7 +317,7 @@
         if (participationObjectId && registrantId) {
             showLoader();
 
-            var url = '@Url.Action("WithdrawRegistrant", "Activity", new { Area = "Org" })';
+            var url = '@Url.Action("WithdrawRegistrant", "Activity", new {Area = "Org"})';
             $.ajax({
                 type: "POST",
                 url: url,
