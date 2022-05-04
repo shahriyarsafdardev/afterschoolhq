@@ -1090,6 +1090,7 @@ namespace AfterSchool.Controllers
                     case QuestionDataType.RegistrantEmail:
                     case QuestionDataType.RegistrantGrade:
                     case QuestionDataType.RegistrantDateOfBirth:
+                    case QuestionDataType.RegistrantGender:
                         question.IsRequired = true;
                         break;
                 }
@@ -1151,8 +1152,7 @@ namespace AfterSchool.Controllers
             }
 
             var questions = StudentRegistrationViewBag(msgs);
-            var parentQuestions = StudentRegistrationParentViewBag(msgs);
-
+            ViewBag.ParentQuestions = StudentRegistrationParentViewBag(msgs).Select(question => new FormQuestionViewModel(question)).ToList();
             ViewBag.RegistrationAccount = registrationAccount;
             ViewBag.ParticipationObject = participationObject;
             ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);

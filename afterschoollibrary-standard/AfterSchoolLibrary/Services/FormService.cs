@@ -1,15 +1,49 @@
 ﻿using System;
-using System.Collections.Generic;
-using BasicLibrary;
-using BasicLibrary.DataAccess;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using AfterSchoolLibrary.Models;
+using BasicLibrary;
+using BasicLibrary.DataAccess;
 
 namespace AfterSchoolLibrary.Services
 {
     public static class FormService
     {
+        private static List<QuestionType> SurveyOnlyQuestionTypes
+        {
+            get
+            {
+                return new List<QuestionType>
+                {
+                    QuestionType.Audio, QuestionType.Video, QuestionType.Photo, QuestionType.Emoji, QuestionType.Rating,
+                    QuestionType.FileUpload,
+                };
+            }
+        }
+
+        public static string RegistrantGrade =>
+            "Pre-K,K,1st,2nd,3rd,4th,5th,6th,7th,8th,9th,10th,11th,12th";
+
+        public static string RegistrantGender =>
+            "Male,Female,Other";
+
+        public static string RegistrantTShirtSize =>
+            "Youth XS,Youth S,Youth M,Youth L,Youth XL,Adult S,Adult M,Adult L,Adult XL,Adult 2XL, Adult 3XL";
+
+        public static string RegistrantRace =>
+            "American Indian or Alaska Native,Asian,Black or African American,Native Hawaiian or Other Pacific Islander,White,Two or More Races";
+
+        public static string RegistrantEthnicity =>
+            "Hispanic or Latino,Not Hispanic or Latino";
+
+        public static string RelationshipToRegistrantForEmergencyContactsList =>
+            "Father,Mother,Grandfather,Grandmother,Brother,Sister,Uncle,Aunt,Legal Guardian,Other";
+
+        //Created separate list from Emergency Contact, as later they can differ at any stage
+        public static string ParentRelationshipToRegistrant =>
+            "Father,Mother,Grandfather,Grandmother,Brother,Sister,Uncle,Aunt,Legal Guardian,Other";
+
         public static Form GetAdministratorAccountForm(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var administratorAccount = AccountService.GetAfterSchoolAccount(msgs, dc);
@@ -17,16 +51,17 @@ namespace AfterSchoolLibrary.Services
         }
 
         /// <summary>
-        /// get template from default afterschool account with ID = 1
+        ///     get template from default afterschool account with ID = 1
         /// </summary>
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static Form GetOrCreateAfterSchoolAccountTemplateForm(SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Form GetOrCreateAfterSchoolAccountTemplateForm(SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             var afterSchoolAccount = AccountService.GetAfterSchoolAccount(msgs, dc);
             return Form.GetLatestTemplateForm(accountId: afterSchoolAccount.ID.Value, msgs: msgs, dc: dc) ??
-                AddNewAfterSchoolDefaultForm(msgs, dc);
+                   AddNewAfterSchoolDefaultForm(msgs, dc);
         }
 
         public static Form AddNewAfterSchoolDefaultForm(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -34,7 +69,7 @@ namespace AfterSchoolLibrary.Services
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var account = AccountService.GetAfterSchoolAccount(msgs, dc);
-            var formCount = Form.GetCount(new Hashtable() { { "AccountId", account.ID } }, msgs, dc);
+            var formCount = Form.GetCount(new Hashtable {{"AccountId", account.ID}}, msgs, dc);
 
             var f = new Form
             {
@@ -44,7 +79,7 @@ namespace AfterSchoolLibrary.Services
                 LastModifiedBy = 0,
                 CreatedBy = 0,
                 Name = $"Default Form {(formCount + 1)}",
-                IsActive = true
+                IsActive = true,
             };
             msgs.AddRange(f.Save(dc));
 
@@ -69,13 +104,13 @@ namespace AfterSchoolLibrary.Services
             foreach (var question in questions)
             {
                 var group = FormQuestionGroup.Load(
-                    criterias: new Hashtable()
-                    {
-                        { "Name", question.GroupName },
-                        { "FormId", f.ID.Value }
-                    },
-                    msgs: msgs,
-                    dc: dc)
+                        criterias: new Hashtable
+                        {
+                            {"Name", question.GroupName},
+                            {"FormId", f.ID.Value},
+                        },
+                        msgs: msgs,
+                        dc: dc)
                     .FirstOrDefault();
 
                 if (group.IsEmpty())
@@ -90,14 +125,15 @@ namespace AfterSchoolLibrary.Services
                         LastModifiedDate = DateTime.UtcNow,
                         CreateDate = DateTime.UtcNow,
                         LastModifiedBy = 0,
-                        CreatedBy = 0
+                        CreatedBy = 0,
                     };
                     msgs.AddRange(group.Save(dc));
 
                     groupDisplayOrder++;
                 }
 
-                var q = FormQuestion.LoadByFormQuestionGroupIdByQuestionDataTypeId(group.ID.Value, question.QuestionDataTypeId, msgs, dc);
+                var q = FormQuestion.LoadByFormQuestionGroupIdByQuestionDataTypeId(group.ID.Value,
+                    question.QuestionDataTypeId, msgs, dc);
                 if (q.IsEmpty())
                 {
                     q = new FormQuestion();
@@ -123,71 +159,61 @@ namespace AfterSchoolLibrary.Services
             return f;
         }
 
-        private static List<QuestionType> SurveyOnlyQuestionTypes
-        {
-            get
-            {
-                return new List<QuestionType> { QuestionType.Audio, QuestionType.Video, QuestionType.Photo, QuestionType.Emoji, QuestionType.Rating, QuestionType.FileUpload };
-            }
-        }
-
         public static List<QuestionType> GetTypesUserCannotAdd(this Form form)
         {
-            var typesUserCannotAdd = new List<QuestionType>() { QuestionType.TextBlock, QuestionType.NotSet, QuestionType.RadioMatrix };
+            var typesUserCannotAdd = new List<QuestionType> {QuestionType.TextBlock, QuestionType.NotSet, QuestionType.RadioMatrix};
 
             if (form.FormTypeId != FormType.Survey)
-                 typesUserCannotAdd.AddRange(SurveyOnlyQuestionTypes);
+                typesUserCannotAdd.AddRange(SurveyOnlyQuestionTypes);
 
             return typesUserCannotAdd;
         }
 
         /// <summary>
-        /// get template from default afterschool account with ID = 1
+        ///     get template from default afterschool account with ID = 1
         /// </summary>
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static Form GetOrCreateAfterSchoolAccountInterestForm(SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Form GetOrCreateAfterSchoolAccountInterestForm(SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             var afterSchoolAccount = AccountService.GetAfterSchoolAccount(msgs, dc);
 
             if (afterSchoolAccount.InterestFormId.HasValue)
                 return Form.Load(afterSchoolAccount.InterestFormId.Value, msgs, dc);
-                                        
+
             return AddNewAfterSchoolInterestForm(msgs, dc);
         }
 
-        public static Form CreateBlankForm(Form form, int userId, int id, string name, string description, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Form CreateBlankForm(Form form, int userId, int id, string name, string description,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-               Database.ExecuteTransaction(
-                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    form = new Form
                     {
-                        form = new Form
-                        {
-                            Name = name,
-                            Description = description,
-                            LastModifiedDate = DateTime.UtcNow,
-                            CreateDate = DateTime.UtcNow,
-                            FormTypeId = FormType.Survey,
-                            LastModifiedBy = userId,
-                            CreatedBy = userId,
-                            AccountId = id,
-                            IsActive = true,
-                            Uid = Guid.NewGuid()
-                        };
-                        msgs.AddRange(form.Save(dc: dc));
-
-                    },
-                    onSuccess: (SystemMessages smsgs) =>
-                    {
-                        msgs.AddRange(smsgs);
-                        msgs.Add("Form Saved", MessageType.Success);
-                    },
-                    onFailure: (SystemMessages fmsgs) =>
-                    {
-                        msgs.AddRange(fmsgs);
-                    }
-                );
+                        Name = name,
+                        Description = description,
+                        LastModifiedDate = DateTime.UtcNow,
+                        CreateDate = DateTime.UtcNow,
+                        FormTypeId = FormType.Survey,
+                        LastModifiedBy = userId,
+                        CreatedBy = userId,
+                        AccountId = id,
+                        IsActive = true,
+                        Uid = Guid.NewGuid(),
+                    };
+                    msgs.AddRange(form.Save(dc: dc));
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+                    msgs.Add("Form Saved", MessageType.Success);
+                },
+                onFailure: (SystemMessages fmsgs) => { msgs.AddRange(fmsgs); }
+            );
 
             return form;
         }
@@ -197,7 +223,7 @@ namespace AfterSchoolLibrary.Services
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var account = AccountService.GetAfterSchoolAccount(msgs, dc);
-            var formCount = Form.GetCount(new Hashtable() { { "AccountId", account.ID } }, msgs, dc);
+            var formCount = Form.GetCount(new Hashtable {{"AccountId", account.ID}}, msgs, dc);
 
             var f = new Form
             {
@@ -207,7 +233,7 @@ namespace AfterSchoolLibrary.Services
                 LastModifiedBy = 0,
                 CreatedBy = 0,
                 Name = $"Interest Form {(formCount + 1)}",
-                IsActive = true
+                IsActive = true,
             };
             msgs.AddRange(f.Save(dc));
             msgs.AddRange(account.SetInterestForm(f, null, dc));
@@ -219,13 +245,13 @@ namespace AfterSchoolLibrary.Services
             questions.ForEach(question =>
             {
                 var group = FormQuestionGroup.Load(
-                    criterias: new Hashtable()
-                    {
-                        { "Name", question.GroupName },
-                        { "FormId", f.ID.Value }
-                    },
-                    msgs: msgs,
-                    dc: dc)
+                        criterias: new Hashtable
+                        {
+                            {"Name", question.GroupName},
+                            {"FormId", f.ID.Value},
+                        },
+                        msgs: msgs,
+                        dc: dc)
                     .FirstOrDefault();
 
                 if (group.IsEmpty())
@@ -240,14 +266,15 @@ namespace AfterSchoolLibrary.Services
                         LastModifiedDate = DateTime.UtcNow,
                         CreateDate = DateTime.UtcNow,
                         LastModifiedBy = 0,
-                        CreatedBy = 0
+                        CreatedBy = 0,
                     };
                     msgs.AddRange(group.Save(dc));
 
                     groupDisplayOrder++;
                 }
 
-                var q = FormQuestion.LoadByFormQuestionGroupIdByQuestionDataTypeId(group.ID.Value, question.QuestionDataTypeId, msgs, dc);
+                var q = FormQuestion.LoadByFormQuestionGroupIdByQuestionDataTypeId(group.ID.Value,
+                    question.QuestionDataTypeId, msgs, dc);
                 if (q.IsEmpty())
                 {
                     q = new FormQuestion
@@ -266,7 +293,7 @@ namespace AfterSchoolLibrary.Services
                         LastModifiedDate = DateTime.UtcNow,
                         CreateDate = DateTime.UtcNow,
                         LastModifiedBy = 0,
-                        CreatedBy = 0
+                        CreatedBy = 0,
                     };
                     msgs.AddRange(q.Save(dc));
 
@@ -283,12 +310,39 @@ namespace AfterSchoolLibrary.Services
             var groupType = QuestionGroupDataType.HealthInformation;
             var groupLabel = groupType.ToString().SplitByUpperCase();
 
-            qhs.Add(new QuestionHolder() { Text = "Doctor Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantDoctorName });
-            qhs.Add(new QuestionHolder() { Text = "Doctor Phone", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantDoctorPhone });
-            qhs.Add(new QuestionHolder() { Text = "Preferred Hospital (in case of emergency)", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantPreferredHospital });
-            qhs.Add(new QuestionHolder() { Text = "Allergies", IsActive = true, QuestionTypeId = QuestionType.TextArea, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantAllergies });
-            qhs.Add(new QuestionHolder() { Text = "Medical Conditions", IsActive = true, QuestionTypeId = QuestionType.TextArea, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantMedicalConditions });
-            qhs.Add(new QuestionHolder() { Text = "Are you up to date on Immunizations?", IsActive = true, QuestionTypeId = QuestionType.RadioList, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantImmunizations, Options = "Yes,No,Not Sure" });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Doctor Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantDoctorName,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Doctor Phone", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantDoctorPhone,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Preferred Hospital (in case of emergency)", IsActive = true,
+                QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.RegistrantPreferredHospital,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Allergies", IsActive = true, QuestionTypeId = QuestionType.TextArea, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantAllergies,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Medical Conditions", IsActive = true, QuestionTypeId = QuestionType.TextArea,
+                GroupName = groupLabel, QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.RegistrantMedicalConditions,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Are you up to date on Immunizations?", IsActive = true, QuestionTypeId = QuestionType.RadioList,
+                GroupName = groupLabel, QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.RegistrantImmunizations, Options = "Yes,No,Not Sure",
+            });
 
             return qhs;
         }
@@ -299,12 +353,43 @@ namespace AfterSchoolLibrary.Services
             var groupType = QuestionGroupDataType.EmergencyContact1;
             var groupLabel = groupType.ToString().SplitByUpperCase();
 
-            qhs.Add(new QuestionHolder() { Text = "First Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact1FirstName, IsRequired = true });
-            qhs.Add(new QuestionHolder() { Text = "Last Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact1LastName, IsRequired = true });
-            qhs.Add(new QuestionHolder() { Text = "Primary Phone", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact1Phone, IsRequired = true });
-            qhs.Add(new QuestionHolder() { Text = "Additional Phone 1", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact1Phone2 });
-            qhs.Add(new QuestionHolder() { Text = "Additional Phone 2", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact1Phone3 });
-            qhs.Add(new QuestionHolder() { Text = "Relationship To Registrant", IsActive = true, QuestionTypeId = QuestionType.DropDownList, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact1RelationshipToRegistrant, Options = RelationshipToRegistrantForEmergencyContactsList });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "First Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact1FirstName,
+                IsRequired = true,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Last Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact1LastName,
+                IsRequired = true,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Primary Phone", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact1Phone,
+                IsRequired = true,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Additional Phone 1", IsActive = true, QuestionTypeId = QuestionType.TextBox,
+                GroupName = groupLabel, QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.EmergencyContact1Phone2,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Additional Phone 2", IsActive = true, QuestionTypeId = QuestionType.TextBox,
+                GroupName = groupLabel, QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.EmergencyContact1Phone3,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Relationship To Registrant", IsActive = true, QuestionTypeId = QuestionType.DropDownList,
+                GroupName = groupLabel, QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.EmergencyContact1RelationshipToRegistrant,
+                Options = RelationshipToRegistrantForEmergencyContactsList,
+            });
 
             return qhs;
         }
@@ -315,12 +400,40 @@ namespace AfterSchoolLibrary.Services
             var groupType = QuestionGroupDataType.EmergencyContact2;
             var groupLabel = groupType.ToString().SplitByUpperCase();
 
-            qhs.Add(new QuestionHolder() { Text = "First Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact2FirstName });
-            qhs.Add(new QuestionHolder() { Text = "Last Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact2LastName });
-            qhs.Add(new QuestionHolder() { Text = "Primary Phone", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact2Phone });
-            qhs.Add(new QuestionHolder() { Text = "Additional Phone 1", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact2Phone2 });
-            qhs.Add(new QuestionHolder() { Text = "Additional Phone 2", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact2Phone3 });
-            qhs.Add(new QuestionHolder() { Text = "Relationship To Registrant", IsActive = true, QuestionTypeId = QuestionType.DropDownList, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact2RelationshipToRegistrant, Options = RelationshipToRegistrantForEmergencyContactsList });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "First Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact2FirstName,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Last Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact2LastName,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Primary Phone", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact2Phone,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Additional Phone 1", IsActive = true, QuestionTypeId = QuestionType.TextBox,
+                GroupName = groupLabel, QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.EmergencyContact2Phone2,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Additional Phone 2", IsActive = true, QuestionTypeId = QuestionType.TextBox,
+                GroupName = groupLabel, QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.EmergencyContact2Phone3,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Relationship To Registrant", IsActive = true, QuestionTypeId = QuestionType.DropDownList,
+                GroupName = groupLabel, QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.EmergencyContact2RelationshipToRegistrant,
+                Options = RelationshipToRegistrantForEmergencyContactsList,
+            });
 
             return qhs;
         }
@@ -331,12 +444,40 @@ namespace AfterSchoolLibrary.Services
             var groupType = QuestionGroupDataType.EmergencyContact3;
             var groupLabel = groupType.ToString().SplitByUpperCase();
 
-            qhs.Add(new QuestionHolder() { Text = "First Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact3FirstName });
-            qhs.Add(new QuestionHolder() { Text = "Last Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact3LastName });
-            qhs.Add(new QuestionHolder() { Text = "Primary Phone", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact3Phone });
-            qhs.Add(new QuestionHolder() { Text = "Additional Phone 1", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact3Phone2 });
-            qhs.Add(new QuestionHolder() { Text = "Additional Phone 2", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact3Phone3 });
-            qhs.Add(new QuestionHolder() { Text = "Relationship To Registrant", IsActive = true, QuestionTypeId = QuestionType.DropDownList, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact3RelationshipToRegistrant, Options = RelationshipToRegistrantForEmergencyContactsList });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "First Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact3FirstName,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Last Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact3LastName,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Primary Phone", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.EmergencyContact3Phone,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Additional Phone 1", IsActive = true, QuestionTypeId = QuestionType.TextBox,
+                GroupName = groupLabel, QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.EmergencyContact3Phone2,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Additional Phone 2", IsActive = true, QuestionTypeId = QuestionType.TextBox,
+                GroupName = groupLabel, QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.EmergencyContact3Phone3,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Relationship To Registrant", IsActive = true, QuestionTypeId = QuestionType.DropDownList,
+                GroupName = groupLabel, QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.EmergencyContact3RelationshipToRegistrant,
+                Options = RelationshipToRegistrantForEmergencyContactsList,
+            });
 
             return qhs;
         }
@@ -347,11 +488,32 @@ namespace AfterSchoolLibrary.Services
             var groupType = QuestionGroupDataType.Parent1Address;
             var groupLabel = "Parent/Guardian Address";
 
-            qhs.Add(new QuestionHolder() { Text = "Street Address", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1Address1 });
-            qhs.Add(new QuestionHolder() { Text = "Apt/Suite", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1Address2 });
-            qhs.Add(new QuestionHolder() { Text = "City", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1City });
-            qhs.Add(new QuestionHolder() { Text = "State", IsActive = true, QuestionTypeId = QuestionType.DropDownList, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, Options = QuestionHolder.StateList, QuestionDataTypeId = QuestionDataType.Parent1State });
-            qhs.Add(new QuestionHolder() { Text = "Zip Code", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1PostalCode });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Street Address", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1Address1,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Apt/Suite", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1Address2,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "City", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1City,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "State", IsActive = true, QuestionTypeId = QuestionType.DropDownList, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, Options = QuestionHolder.StateList,
+                QuestionDataTypeId = QuestionDataType.Parent1State,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Zip Code", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1PostalCode,
+            });
 
             return qhs;
         }
@@ -362,11 +524,32 @@ namespace AfterSchoolLibrary.Services
             var groupType = QuestionGroupDataType.Parent2Address;
             var groupLabel = "Additional Parent/Guardian Address";
 
-            qhs.Add(new QuestionHolder() { Text = "Street Address", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2Address1 });
-            qhs.Add(new QuestionHolder() { Text = "Apt/Suite", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2Address2 });
-            qhs.Add(new QuestionHolder() { Text = "City", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2City });
-            qhs.Add(new QuestionHolder() { Text = "State", IsActive = true, QuestionTypeId = QuestionType.DropDownList, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, Options = QuestionHolder.StateList, QuestionDataTypeId = QuestionDataType.Parent2State });
-            qhs.Add(new QuestionHolder() { Text = "Zip Code", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2PostalCode });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Street Address", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2Address1,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Apt/Suite", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2Address2,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "City", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2City,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "State", IsActive = true, QuestionTypeId = QuestionType.DropDownList, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, Options = QuestionHolder.StateList,
+                QuestionDataTypeId = QuestionDataType.Parent2State,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Zip Code", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2PostalCode,
+            });
             return qhs;
         }
 
@@ -376,17 +559,55 @@ namespace AfterSchoolLibrary.Services
             var groupType = QuestionGroupDataType.Parent1Information;
             var groupLabel = "Parent/Guardian Information";
 
-            qhs.Add(new QuestionHolder() { Text = "First Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1FirstName });
-            qhs.Add(new QuestionHolder() { Text = "Middle Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1MiddleName });
-            qhs.Add(new QuestionHolder() { Text = "Last Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1LastName });
-            qhs.Add(new QuestionHolder() { Text = "Email", IsActive = true, QuestionTypeId = QuestionType.Email, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1Email });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "First Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1FirstName,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Middle Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1MiddleName,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Last Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1LastName,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Email", IsActive = true, QuestionTypeId = QuestionType.Email, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1Email,
+            });
 
-            qhs.Add(new QuestionHolder() { Text = "Mobile Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1MobilePhone });
-            qhs.Add(new QuestionHolder() { Text = "Home Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1HomePhone });
-            qhs.Add(new QuestionHolder() { Text = "Work Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1WorkPhone });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Mobile Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1MobilePhone,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Home Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1HomePhone,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Work Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1WorkPhone,
+            });
 
-            qhs.Add(new QuestionHolder() { Text = "Relationship To Student", QuestionTypeId = QuestionType.DropDownList, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1RelationshipToRegistrant, Options = ParentRelationshipToRegistrant });
-            qhs.Add(new QuestionHolder() { Text = "Employer", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1Employer });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Relationship To Student", QuestionTypeId = QuestionType.DropDownList, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.Parent1RelationshipToRegistrant,
+                Options = ParentRelationshipToRegistrant,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Employer", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent1Employer,
+            });
 
             return qhs;
         }
@@ -397,17 +618,55 @@ namespace AfterSchoolLibrary.Services
             var groupType = QuestionGroupDataType.Parent2Information;
             var groupLabel = "Additional Parent/Guardian Information";
 
-            qhs.Add(new QuestionHolder() { Text = "First Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2FirstName });
-            qhs.Add(new QuestionHolder() { Text = "Middle Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2MiddleName });
-            qhs.Add(new QuestionHolder() { Text = "Last Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2LastName });
-            qhs.Add(new QuestionHolder() { Text = "Email", IsActive = true, QuestionTypeId = QuestionType.Email, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2Email });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "First Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2FirstName,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Middle Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2MiddleName,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Last Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2LastName,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Email", IsActive = true, QuestionTypeId = QuestionType.Email, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2Email,
+            });
 
-            qhs.Add(new QuestionHolder() { Text = "Mobile Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2MobilePhone });
-            qhs.Add(new QuestionHolder() { Text = "Home Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2HomePhone });
-            qhs.Add(new QuestionHolder() { Text = "Work Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2WorkPhone });
-            
-            qhs.Add(new QuestionHolder() { Text = "Relationship To Student", QuestionTypeId = QuestionType.DropDownList, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2RelationshipToRegistrant, Options = ParentRelationshipToRegistrant });
-            qhs.Add(new QuestionHolder() { Text = "Employer", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2Employer });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Mobile Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2MobilePhone,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Home Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2HomePhone,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Work Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2WorkPhone,
+            });
+
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Relationship To Student", QuestionTypeId = QuestionType.DropDownList, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.Parent2RelationshipToRegistrant,
+                Options = ParentRelationshipToRegistrant,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Employer", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.Parent2Employer,
+            });
 
             return qhs;
         }
@@ -418,11 +677,32 @@ namespace AfterSchoolLibrary.Services
             var groupLabel = "Student Home Address";
             var groupType = QuestionGroupDataType.HomeAddress;
 
-            qhs.Add(new QuestionHolder() { Text = "Street Address", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantAddress1 });
-            qhs.Add(new QuestionHolder() { Text = "Apt/Suite", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantAddress2 });
-            qhs.Add(new QuestionHolder() { Text = "City", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantCity });
-            qhs.Add(new QuestionHolder() { Text = "State", QuestionTypeId = QuestionType.DropDownList, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, Options = QuestionHolder.StateList, QuestionDataTypeId = QuestionDataType.RegistrantState });
-            qhs.Add(new QuestionHolder() { Text = "Zip Code", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantPostalCode });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Street Address", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantAddress1,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Apt/Suite", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantAddress2,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "City", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantCity,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "State", QuestionTypeId = QuestionType.DropDownList, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, Options = QuestionHolder.StateList,
+                QuestionDataTypeId = QuestionDataType.RegistrantState,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Zip Code", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantPostalCode,
+            });
 
             return qhs;
         }
@@ -433,8 +713,16 @@ namespace AfterSchoolLibrary.Services
             var groupLabel = "Student Contact Information";
             var groupType = QuestionGroupDataType.ContactInformation;
 
-            qhs.Add(new QuestionHolder() { Text = "Mobile Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantMobilePhone });
-            qhs.Add(new QuestionHolder() { Text = "Home Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantHomePhone });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Mobile Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantMobilePhone,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Home Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantHomePhone,
+            });
 
             //qhs.Add(new QuestionHolder() { Text = "Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantPhone1 });
             //qhs.Add(new QuestionHolder() { Text = "Phone Type", QuestionTypeId = QuestionType.RadioList, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantPhoneType1, Options = "Mobile, Home, Work" });
@@ -450,7 +738,7 @@ namespace AfterSchoolLibrary.Services
             var groupLabel = "Student Information";
             var groupType = QuestionGroupDataType.PersonalInformation;
 
-            qhs.Add(new QuestionHolder()
+            qhs.Add(new QuestionHolder
             {
                 Text = "First Name",
                 IsActive = true,
@@ -459,9 +747,9 @@ namespace AfterSchoolLibrary.Services
                 QuestionGroupDataTypeId = groupType,
                 GroupName = groupLabel,
                 IsLocked = true,
-                QuestionDataTypeId = QuestionDataType.RegistrantFirstName
+                QuestionDataTypeId = QuestionDataType.RegistrantFirstName,
             });
-            qhs.Add(new QuestionHolder()
+            qhs.Add(new QuestionHolder
             {
                 Text = "Middle Name",
                 IsActive = true,
@@ -470,9 +758,9 @@ namespace AfterSchoolLibrary.Services
                 QuestionGroupDataTypeId = groupType,
                 GroupName = groupLabel,
                 IsLocked = true,
-                QuestionDataTypeId = QuestionDataType.RegistrantMiddleName
+                QuestionDataTypeId = QuestionDataType.RegistrantMiddleName,
             });
-            qhs.Add(new QuestionHolder()
+            qhs.Add(new QuestionHolder
             {
                 Text = "Last Name",
                 IsActive = true,
@@ -481,9 +769,9 @@ namespace AfterSchoolLibrary.Services
                 QuestionGroupDataTypeId = groupType,
                 GroupName = groupLabel,
                 IsLocked = true,
-                QuestionDataTypeId = QuestionDataType.RegistrantLastName
+                QuestionDataTypeId = QuestionDataType.RegistrantLastName,
             });
-            qhs.Add(new QuestionHolder()
+            qhs.Add(new QuestionHolder
             {
                 Text = "Email",
                 IsActive = true,
@@ -492,30 +780,38 @@ namespace AfterSchoolLibrary.Services
                 QuestionGroupDataTypeId = groupType,
                 GroupName = groupLabel,
                 IsLocked = true,
-                QuestionDataTypeId = QuestionDataType.RegistrantEmail
+                QuestionDataTypeId = QuestionDataType.RegistrantEmail,
             });
-            qhs.Add(new QuestionHolder()
+            qhs.Add(new QuestionHolder
             {
                 Text = "Mobile Phone",
                 QuestionTypeId = QuestionType.TextBox,
                 GroupName = groupLabel,
                 QuestionGroupDataTypeId = groupType,
-                QuestionDataTypeId = QuestionDataType.RegistrantMobilePhone
+                QuestionDataTypeId = QuestionDataType.RegistrantMobilePhone,
             });
-            
-            qhs.Add(new QuestionHolder() { Text = "Home Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantHomePhone });
-            qhs.Add(new QuestionHolder() { Text = "Work Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantWorkPhone });
 
-            qhs.Add(new QuestionHolder()
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Home Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantHomePhone,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Work Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantWorkPhone,
+            });
+
+            qhs.Add(new QuestionHolder
             {
                 Text = "Date of Birth",
                 IsActive = true,
                 QuestionTypeId = QuestionType.Date,
                 GroupName = groupLabel,
                 QuestionGroupDataTypeId = groupType,
-                QuestionDataTypeId = QuestionDataType.RegistrantDateOfBirth
+                QuestionDataTypeId = QuestionDataType.RegistrantDateOfBirth,
             });
-            qhs.Add(new QuestionHolder()
+            qhs.Add(new QuestionHolder
             {
                 Text = "Grade",
                 IsActive = true,
@@ -523,9 +819,9 @@ namespace AfterSchoolLibrary.Services
                 GroupName = groupLabel,
                 QuestionGroupDataTypeId = groupType,
                 QuestionDataTypeId = QuestionDataType.RegistrantGrade,
-                Options = RegistrantGrade
+                Options = RegistrantGrade,
             });
-            qhs.Add(new QuestionHolder()
+            qhs.Add(new QuestionHolder
             {
                 Text = "Gender",
                 IsActive = true,
@@ -533,9 +829,9 @@ namespace AfterSchoolLibrary.Services
                 GroupName = groupLabel,
                 QuestionGroupDataTypeId = groupType,
                 QuestionDataTypeId = QuestionDataType.RegistrantGender,
-                Options = RegistrantGender
+                Options = RegistrantGender,
             });
-            qhs.Add(new QuestionHolder()
+            qhs.Add(new QuestionHolder
             {
                 Text = "Ethnicity",
                 IsActive = true,
@@ -544,9 +840,9 @@ namespace AfterSchoolLibrary.Services
                 GroupName = groupLabel,
                 QuestionGroupDataTypeId = groupType,
                 QuestionDataTypeId = QuestionDataType.RegistrantEthnicityUsFed,
-                Options = RegistrantEthnicity
+                Options = RegistrantEthnicity,
             });
-            qhs.Add(new QuestionHolder()
+            qhs.Add(new QuestionHolder
             {
                 Text = "Race",
                 IsActive = true,
@@ -555,9 +851,9 @@ namespace AfterSchoolLibrary.Services
                 GroupName = groupLabel,
                 QuestionGroupDataTypeId = groupType,
                 QuestionDataTypeId = QuestionDataType.RegistrantRaceUsFed,
-                Options = RegistrantRace
+                Options = RegistrantRace,
             });
-            qhs.Add(new QuestionHolder()
+            qhs.Add(new QuestionHolder
             {
                 Text = "T-Shirt Size",
                 IsActive = true,
@@ -565,33 +861,33 @@ namespace AfterSchoolLibrary.Services
                 GroupName = groupLabel,
                 QuestionGroupDataTypeId = groupType,
                 QuestionDataTypeId = QuestionDataType.RegistrantTShirtSize,
-                Options = RegistrantTShirtSize
+                Options = RegistrantTShirtSize,
             });
-            qhs.Add(new QuestionHolder()
+            qhs.Add(new QuestionHolder
             {
                 Text = "Organization",
                 QuestionTypeId = QuestionType.TextBox,
                 GroupName = groupLabel,
                 QuestionGroupDataTypeId = groupType,
                 IsLocked = false,
-                QuestionDataTypeId = QuestionDataType.RegistrantOrganization
+                QuestionDataTypeId = QuestionDataType.RegistrantOrganization,
             });
-            qhs.Add(new QuestionHolder()
-            { 
+            qhs.Add(new QuestionHolder
+            {
                 Text = "Relationship To Student",
-                QuestionTypeId = QuestionType.DropDownList, 
-                GroupName = groupLabel, 
-                QuestionGroupDataTypeId = groupType, 
-                QuestionDataTypeId = QuestionDataType.RegistrantParentRelationship, 
-                Options = ParentRelationshipToRegistrant 
+                QuestionTypeId = QuestionType.DropDownList,
+                GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.RegistrantParentRelationship,
+                Options = ParentRelationshipToRegistrant,
             });
-            qhs.Add(new QuestionHolder() 
+            qhs.Add(new QuestionHolder
             {
                 Text = "Employer",
-                QuestionTypeId = QuestionType.TextBox, 
-                GroupName = groupLabel, 
-                QuestionGroupDataTypeId = groupType, 
-                QuestionDataTypeId = QuestionDataType.RegistrantEmployer
+                QuestionTypeId = QuestionType.TextBox,
+                GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.RegistrantEmployer,
             });
 
             return qhs;
@@ -599,23 +895,99 @@ namespace AfterSchoolLibrary.Services
 
         private static void CreateOrganizationQuestionGroup()
         {
-            var questions = new List<QuestionHolder>()
-                {   
-
+            var questions = new List<QuestionHolder>
+            {
                 //organization
-                new QuestionHolder() { Text = "Organization Name", IsActive = true, IsRequired = true, IsLocked = true, QuestionTypeId = QuestionType.TextBox, GroupName = "Organization Information", QuestionGroupDataTypeId = QuestionGroupDataType.OrganizationInformation, QuestionDataTypeId = QuestionDataType.OrganizationName, RegistrantTypeId = RegistrantType.Organization },
-                new QuestionHolder() { Text = "Street Address", IsActive = true, IsRequired = true, QuestionTypeId = QuestionType.TextBox, GroupName = "Organization Information", QuestionGroupDataTypeId = QuestionGroupDataType.OrganizationInformation, QuestionDataTypeId = QuestionDataType.OrganizationAddress1, RegistrantTypeId = RegistrantType.Organization },
-                new QuestionHolder() { Text = "Suite", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = "Organization Information", QuestionGroupDataTypeId = QuestionGroupDataType.OrganizationInformation, QuestionDataTypeId = QuestionDataType.OrganizationAddress2, RegistrantTypeId = RegistrantType.Organization },
-                new QuestionHolder() { Text = "City", IsActive = true, IsRequired = true, QuestionTypeId = QuestionType.TextBox, GroupName = "Organization Information", QuestionGroupDataTypeId = QuestionGroupDataType.OrganizationInformation, QuestionDataTypeId = QuestionDataType.OrganizationCity, RegistrantTypeId = RegistrantType.Organization },
-                new QuestionHolder() { Text = "State", IsActive = true, IsRequired = true, QuestionTypeId = QuestionType.DropDownList, GroupName = "Organization Information", QuestionGroupDataTypeId = QuestionGroupDataType.OrganizationInformation, Options = QuestionHolder.StateList, QuestionDataTypeId = QuestionDataType.OrganizationState, RegistrantTypeId = RegistrantType.Organization },
-                new QuestionHolder() { Text = "Zip Code", IsActive = true, IsRequired = true, QuestionTypeId = QuestionType.TextBox, GroupName = "Organization Information", QuestionGroupDataTypeId = QuestionGroupDataType.OrganizationInformation, QuestionDataTypeId = QuestionDataType.OrganizationPostalCode, RegistrantTypeId = RegistrantType.Organization },
+                new QuestionHolder
+                {
+                    Text = "Organization Name", IsActive = true, IsRequired = true, IsLocked = true,
+                    QuestionTypeId = QuestionType.TextBox, GroupName = "Organization Information",
+                    QuestionGroupDataTypeId = QuestionGroupDataType.OrganizationInformation,
+                    QuestionDataTypeId = QuestionDataType.OrganizationName,
+                    RegistrantTypeId = RegistrantType.Organization,
+                },
+                new QuestionHolder
+                {
+                    Text = "Street Address", IsActive = true, IsRequired = true, QuestionTypeId = QuestionType.TextBox,
+                    GroupName = "Organization Information",
+                    QuestionGroupDataTypeId = QuestionGroupDataType.OrganizationInformation,
+                    QuestionDataTypeId = QuestionDataType.OrganizationAddress1,
+                    RegistrantTypeId = RegistrantType.Organization,
+                },
+                new QuestionHolder
+                {
+                    Text = "Suite", IsActive = true, QuestionTypeId = QuestionType.TextBox,
+                    GroupName = "Organization Information",
+                    QuestionGroupDataTypeId = QuestionGroupDataType.OrganizationInformation,
+                    QuestionDataTypeId = QuestionDataType.OrganizationAddress2,
+                    RegistrantTypeId = RegistrantType.Organization,
+                },
+                new QuestionHolder
+                {
+                    Text = "City", IsActive = true, IsRequired = true, QuestionTypeId = QuestionType.TextBox,
+                    GroupName = "Organization Information",
+                    QuestionGroupDataTypeId = QuestionGroupDataType.OrganizationInformation,
+                    QuestionDataTypeId = QuestionDataType.OrganizationCity,
+                    RegistrantTypeId = RegistrantType.Organization,
+                },
+                new QuestionHolder
+                {
+                    Text = "State", IsActive = true, IsRequired = true, QuestionTypeId = QuestionType.DropDownList,
+                    GroupName = "Organization Information",
+                    QuestionGroupDataTypeId = QuestionGroupDataType.OrganizationInformation,
+                    Options = QuestionHolder.StateList, QuestionDataTypeId = QuestionDataType.OrganizationState,
+                    RegistrantTypeId = RegistrantType.Organization,
+                },
+                new QuestionHolder
+                {
+                    Text = "Zip Code", IsActive = true, IsRequired = true, QuestionTypeId = QuestionType.TextBox,
+                    GroupName = "Organization Information",
+                    QuestionGroupDataTypeId = QuestionGroupDataType.OrganizationInformation,
+                    QuestionDataTypeId = QuestionDataType.OrganizationPostalCode,
+                    RegistrantTypeId = RegistrantType.Organization,
+                },
 
-                new QuestionHolder() { Text = "First Name", IsActive = true, IsRequired = true, IsLocked = true, QuestionTypeId = QuestionType.TextBox, GroupName = "Organization Contact", QuestionGroupDataTypeId = QuestionGroupDataType.ContactInformation, QuestionDataTypeId = QuestionDataType.OrganizationContactFirstName, RegistrantTypeId = RegistrantType.Organization },
-                new QuestionHolder() { Text = "Last Name", IsActive = true, IsRequired = true, IsLocked = true, QuestionTypeId = QuestionType.TextBox, GroupName = "Organization Contact", QuestionGroupDataTypeId = QuestionGroupDataType.ContactInformation, QuestionDataTypeId = QuestionDataType.OrganizationContactLastName, RegistrantTypeId = RegistrantType.Organization },
-                new QuestionHolder() { Text = "Email", IsActive = true, IsRequired = true, IsLocked = true, QuestionTypeId = QuestionType.TextBox, GroupName = "Organization Contact", QuestionGroupDataTypeId = QuestionGroupDataType.ContactInformation, QuestionDataTypeId = QuestionDataType.OrganizationContactEmail, RegistrantTypeId = RegistrantType.Organization },
-                new QuestionHolder() { Text = "Phone", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = "Organization Contact", QuestionGroupDataTypeId = QuestionGroupDataType.ContactInformation, QuestionDataTypeId = QuestionDataType.OrganizationContactPhone, RegistrantTypeId = RegistrantType.Organization },
-                new QuestionHolder() { Text = "Phone Type", IsActive = true, QuestionTypeId = QuestionType.RadioList, GroupName = "Organization Contact", QuestionGroupDataTypeId = QuestionGroupDataType.ContactInformation, QuestionDataTypeId = QuestionDataType.OrganizationContactPhoneType, Options = "Mobile, Home, Work", RegistrantTypeId = RegistrantType.Organization },
-                };
+                new QuestionHolder
+                {
+                    Text = "First Name", IsActive = true, IsRequired = true, IsLocked = true,
+                    QuestionTypeId = QuestionType.TextBox, GroupName = "Organization Contact",
+                    QuestionGroupDataTypeId = QuestionGroupDataType.ContactInformation,
+                    QuestionDataTypeId = QuestionDataType.OrganizationContactFirstName,
+                    RegistrantTypeId = RegistrantType.Organization,
+                },
+                new QuestionHolder
+                {
+                    Text = "Last Name", IsActive = true, IsRequired = true, IsLocked = true,
+                    QuestionTypeId = QuestionType.TextBox, GroupName = "Organization Contact",
+                    QuestionGroupDataTypeId = QuestionGroupDataType.ContactInformation,
+                    QuestionDataTypeId = QuestionDataType.OrganizationContactLastName,
+                    RegistrantTypeId = RegistrantType.Organization,
+                },
+                new QuestionHolder
+                {
+                    Text = "Email", IsActive = true, IsRequired = true, IsLocked = true,
+                    QuestionTypeId = QuestionType.TextBox, GroupName = "Organization Contact",
+                    QuestionGroupDataTypeId = QuestionGroupDataType.ContactInformation,
+                    QuestionDataTypeId = QuestionDataType.OrganizationContactEmail,
+                    RegistrantTypeId = RegistrantType.Organization,
+                },
+                new QuestionHolder
+                {
+                    Text = "Phone", IsActive = true, QuestionTypeId = QuestionType.TextBox,
+                    GroupName = "Organization Contact",
+                    QuestionGroupDataTypeId = QuestionGroupDataType.ContactInformation,
+                    QuestionDataTypeId = QuestionDataType.OrganizationContactPhone,
+                    RegistrantTypeId = RegistrantType.Organization,
+                },
+                new QuestionHolder
+                {
+                    Text = "Phone Type", IsActive = true, QuestionTypeId = QuestionType.RadioList,
+                    GroupName = "Organization Contact",
+                    QuestionGroupDataTypeId = QuestionGroupDataType.ContactInformation,
+                    QuestionDataTypeId = QuestionDataType.OrganizationContactPhoneType, Options = "Mobile, Home, Work",
+                    RegistrantTypeId = RegistrantType.Organization,
+                },
+            };
         }
 
         private static List<QuestionHolder> CreateParent1InterestGroup()
@@ -624,14 +996,30 @@ namespace AfterSchoolLibrary.Services
             var groupType = QuestionGroupDataType.RegistrantInterestInformation;
             var groupLabel = "Parent/Guardian Information";
 
-            qhs.Add(new QuestionHolder() { Text = "First Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantFirstName });
-            qhs.Add(new QuestionHolder() { Text = "Last Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantLastName });
-            qhs.Add(new QuestionHolder() { Text = "Email", IsActive = true, QuestionTypeId = QuestionType.Email, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantEmail });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "First Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantFirstName,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Last Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantLastName,
+            });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Email", IsActive = true, QuestionTypeId = QuestionType.Email, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantEmail,
+            });
 
-            qhs.Add(new QuestionHolder() { Text = "Mobile Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantMobilePhone });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Mobile Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantMobilePhone,
+            });
 
             var commonGradeOptions = "Pre-K,K,1st,2nd,3rd,4th,5th,6th,7th,8th,9th,10th,11th,12th";
-            qhs.Add(new QuestionHolder()
+            qhs.Add(new QuestionHolder
             {
                 Text = "Child 1 Grade",
                 QuestionTypeId = QuestionType.DropDownList,
@@ -640,7 +1028,7 @@ namespace AfterSchoolLibrary.Services
                 QuestionDataTypeId = QuestionDataType.RegistrantChild1Grade,
                 Options = commonGradeOptions,
             });
-            qhs.Add(new QuestionHolder()
+            qhs.Add(new QuestionHolder
             {
                 Text = "Child 2 Grade",
                 QuestionTypeId = QuestionType.DropDownList,
@@ -649,7 +1037,7 @@ namespace AfterSchoolLibrary.Services
                 QuestionDataTypeId = QuestionDataType.RegistrantChild2Grade,
                 Options = commonGradeOptions,
             });
-            qhs.Add(new QuestionHolder()
+            qhs.Add(new QuestionHolder
             {
                 Text = "Child 3 Grade",
                 QuestionTypeId = QuestionType.DropDownList,
@@ -658,7 +1046,7 @@ namespace AfterSchoolLibrary.Services
                 QuestionDataTypeId = QuestionDataType.RegistrantChild3Grade,
                 Options = commonGradeOptions,
             });
-            qhs.Add(new QuestionHolder()
+            qhs.Add(new QuestionHolder
             {
                 Text = "Child 4 Grade",
                 QuestionTypeId = QuestionType.DropDownList,
@@ -667,7 +1055,7 @@ namespace AfterSchoolLibrary.Services
                 QuestionDataTypeId = QuestionDataType.RegistrantChild4Grade,
                 Options = commonGradeOptions,
             });
-            qhs.Add(new QuestionHolder()
+            qhs.Add(new QuestionHolder
             {
                 Text = "Child 5 Grade",
                 QuestionTypeId = QuestionType.DropDownList,
@@ -682,121 +1070,73 @@ namespace AfterSchoolLibrary.Services
 
         public static SystemMessages PhoneValidation(string answer, FormQuestion question, SystemMessages msgs)
         {
-            if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+            if (answer.IsNotEmpty() && !answer.IsRegExMatch(Utilities.PhoneRegEx))
                 msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
 
             return msgs;
         }
 
-        public class QuestionHolder
+        public static List<QuestionDataType> QuestionsToNotIncludeInParentPanel() => new List<QuestionDataType>
         {
-            public string Text;
-            public bool IsLocked;
-            public bool IsActive;
-            public bool IsRequired;
-            public QuestionType QuestionTypeId;
-            public string GroupName;
-            public string Options;
-            public QuestionDataType QuestionDataTypeId;
-            public QuestionGroupDataType QuestionGroupDataTypeId;
-            public RegistrantType RegistrantTypeId;
-            public string Link;
+            QuestionDataType.RegistrantOrganization,
+            QuestionDataType.RegistrantGrade,
+            QuestionDataType.RegistrantGender,
+            QuestionDataType.RegistrantDateOfBirth,
+            QuestionDataType.RegistrantRaceUsFed,
+            QuestionDataType.RegistrantEthnicityUsFed,
+            QuestionDataType.RegistrantTShirtSize,
+            QuestionDataType.RegistrantWorkPhone,
+            QuestionDataType.RegistrantHomePhone,
+            QuestionDataType.RegistrantParentRelationship,
+            QuestionDataType.RegistrantEmployer,
+        };
 
-            public static string StateList
+        public static List<QuestionDataType> QuestionsToNotIncludeInStudentRegistrationPanel() =>
+            new List<QuestionDataType>
             {
-                get
-                {
-                    return BasicLibrary.Utilities.GetStateList();
-                }
-            }
+                QuestionDataType.RegistrantHomePhone,
+                QuestionDataType.RegistrantWorkPhone,
+                QuestionDataType.RegistrantEthnicityUsFed,
+                QuestionDataType.RegistrantRaceUsFed,
+                QuestionDataType.RegistrantTShirtSize,
+                QuestionDataType.RegistrantOrganization,
+                QuestionDataType.RegistrantParentRelationship,
+                QuestionDataType.RegistrantEmployer,
+            };
 
-            public QuestionHolder()
+        public static List<QuestionDataType> QuestionsToNotIncludeInStudentRegistrationParentPanel() =>
+            new List<QuestionDataType>
             {
-                RegistrantTypeId = RegistrantType.Individual;
-            }
-        }
+                QuestionDataType.RegistrantMiddleName,
+                QuestionDataType.RegistrantHomePhone,
+                QuestionDataType.RegistrantWorkPhone,
+                QuestionDataType.RegistrantMobilePhone,
+                QuestionDataType.RegistrantDateOfBirth,
+                QuestionDataType.RegistrantGrade,
+                QuestionDataType.RegistrantGender,
+                QuestionDataType.RegistrantEthnicityUsFed,
+                QuestionDataType.RegistrantRaceUsFed,
+                QuestionDataType.RegistrantTShirtSize,
+                QuestionDataType.RegistrantOrganization,
+                QuestionDataType.RegistrantParentRelationship,
+                QuestionDataType.RegistrantEmployer,
+            };
 
-        public static string RegistrantGrade =>
-            "Pre-K,K,1st,2nd,3rd,4th,5th,6th,7th,8th,9th,10th,11th,12th";
-
-        public static string RegistrantGender =>
-            "Male,Female,Other";
-
-        public static string RegistrantTShirtSize =>
-            "Youth XS,Youth S,Youth M,Youth L,Youth XL,Adult S,Adult M,Adult L,Adult XL,Adult 2XL, Adult 3XL";
-
-        public static string RegistrantRace =>
-            "American Indian or Alaska Native,Asian,Black or African American,Native Hawaiian or Other Pacific Islander,White,Two or More Races";
-
-        public static string RegistrantEthnicity => 
-            "Hispanic or Latino,Not Hispanic or Latino";           
-
-        public static string RelationshipToRegistrantForEmergencyContactsList =>
-            "Father,Mother,Grandfather,Grandmother,Brother,Sister,Uncle,Aunt,Legal Guardian,Other";
-
-        //Created separate list from Emergency Contact, as later they can differ at any stage
-        public static string ParentRelationshipToRegistrant =>
-            "Father,Mother,Grandfather,Grandmother,Brother,Sister,Uncle,Aunt,Legal Guardian,Other"; 
-                   
-        public static List<QuestionDataType> QuestionsToNotIncludeInParentPanel() => new List<QuestionDataType>() 
-        {
-            QuestionDataType.RegistrantOrganization,
-            QuestionDataType.RegistrantGrade,
-            QuestionDataType.RegistrantGender,
-            QuestionDataType.RegistrantDateOfBirth,
-            QuestionDataType.RegistrantRaceUsFed,
-            QuestionDataType.RegistrantEthnicityUsFed,
-            QuestionDataType.RegistrantTShirtSize,
-            QuestionDataType.RegistrantWorkPhone,
-            QuestionDataType.RegistrantHomePhone,
-            QuestionDataType.RegistrantParentRelationship,
-            QuestionDataType.RegistrantEmployer
-        };
-
-        public static List<QuestionDataType> QuestionsToNotIncludeInStudentRegistrationPanel() => new List<QuestionDataType>()
-        {
-            QuestionDataType.RegistrantHomePhone,
-            QuestionDataType.RegistrantWorkPhone,
-            QuestionDataType.RegistrantGender,
-            QuestionDataType.RegistrantEthnicityUsFed,
-            QuestionDataType.RegistrantRaceUsFed,
-            QuestionDataType.RegistrantTShirtSize,
-            QuestionDataType.RegistrantOrganization,
-            QuestionDataType.RegistrantParentRelationship,
-            QuestionDataType.RegistrantEmployer
-        };
-
-        public static List<QuestionDataType> QuestionsToNotIncludeInStudentRegistrationParentPanel() => new List<QuestionDataType>()
-        {
-            QuestionDataType.RegistrantMiddleName,
-            QuestionDataType.RegistrantHomePhone,
-            QuestionDataType.RegistrantWorkPhone,
-            QuestionDataType.RegistrantMobilePhone,
-            QuestionDataType.RegistrantDateOfBirth,
-            QuestionDataType.RegistrantGrade,
-            QuestionDataType.RegistrantGender,
-            QuestionDataType.RegistrantEthnicityUsFed,
-            QuestionDataType.RegistrantRaceUsFed,
-            QuestionDataType.RegistrantTShirtSize,
-            QuestionDataType.RegistrantOrganization,
-            QuestionDataType.RegistrantParentRelationship,
-            QuestionDataType.RegistrantEmployer
-        };
-
-        public static List<QuestionDataType> QuestionsToNotIncludeInAdditionalParentPanel() => new List<QuestionDataType>()
-        {
-            QuestionDataType.RegistrantOrganization,
-            QuestionDataType.RegistrantGrade,
-            QuestionDataType.RegistrantGender,
-            QuestionDataType.RegistrantDateOfBirth,
-            QuestionDataType.RegistrantRaceUsFed,
-            QuestionDataType.RegistrantEthnicityUsFed,
-            QuestionDataType.RegistrantTShirtSize
-        };
+        public static List<QuestionDataType> QuestionsToNotIncludeInAdditionalParentPanel() =>
+            new List<QuestionDataType>
+            {
+                QuestionDataType.RegistrantOrganization,
+                QuestionDataType.RegistrantGrade,
+                QuestionDataType.RegistrantGender,
+                QuestionDataType.RegistrantDateOfBirth,
+                QuestionDataType.RegistrantRaceUsFed,
+                QuestionDataType.RegistrantEthnicityUsFed,
+                QuestionDataType.RegistrantTShirtSize,
+            };
 
         public static List<QuestionDataType> QuestionsToNotIncludeInStudentPanel(bool isGradeIncluded)
         {
-            var list = new List<QuestionDataType>()
+            var list = new List<QuestionDataType>
             {
                 QuestionDataType.RegistrantOrganization,
                 QuestionDataType.RegistrantGender,
@@ -807,13 +1147,38 @@ namespace AfterSchoolLibrary.Services
                 QuestionDataType.RegistrantHomePhone,
                 QuestionDataType.RegistrantWorkPhone,
                 QuestionDataType.RegistrantParentRelationship,
-                QuestionDataType.RegistrantEmployer
+                QuestionDataType.RegistrantEmployer,
             };
 
             if (isGradeIncluded)
                 list.Add(QuestionDataType.RegistrantGrade);
 
             return list;
+        }
+
+        public class QuestionHolder
+        {
+            public string GroupName;
+            public bool IsActive;
+            public bool IsLocked;
+            public bool IsRequired;
+            public string Link;
+            public string Options;
+            public QuestionDataType QuestionDataTypeId;
+            public QuestionGroupDataType QuestionGroupDataTypeId;
+            public QuestionType QuestionTypeId;
+            public RegistrantType RegistrantTypeId;
+            public string Text;
+
+            public QuestionHolder()
+            {
+                RegistrantTypeId = RegistrantType.Individual;
+            }
+
+            public static string StateList
+            {
+                get { return Utilities.GetStateList(); }
+            }
         }
     }
 }
