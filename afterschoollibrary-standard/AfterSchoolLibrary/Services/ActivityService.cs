@@ -294,7 +294,7 @@ namespace AfterSchoolLibrary.Services
         public static Activity CreateNew(string activityName, ActivityType activityType, string activityDetails,
             int seatsAvailable, GenderRestrictionType genderRestriction,
             string contactName, string contactPhone, string contactEmail, decimal? costPerRegistrant,
-            string costDescription, bool acceptCreditCard, bool allowToPayLater, RegistrationMode registrationMode,
+            string costDescription, bool allowToPayLater, RegistrationMode registrationMode,
             int? accountId, int? scheduleId, int? locationId, string locationDetails, int? activityGroupId,
             int? minGradeLevelId, int? maxGradeLevelId, WebUser loggedInUser, SystemMessages msgs,
             DatabaseConnection dc = null)
