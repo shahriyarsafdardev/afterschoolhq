@@ -94,14 +94,12 @@ namespace AfterSchoolLibraryTests.Tests
                 activityType: ActivityType.Activity,
                 activityDetails: "<p>Here are some details</p>",
                 seatsAvailable: 100,
-                waitingListSeatsAvailable: 10,
                 genderRestriction: GenderRestrictionType.None,
                 contactName: "Test User",
                 contactPhone: "123-123-1234",
                 contactEmail: "dave@dave.com",
                 costPerRegistrant: 12,
                 costDescription: "Here is the main reason for the cost and what you get",
-                acceptCreditCard: false,
                 allowToPayLater: true,
                 registrationMode: RegistrationMode.Register,
                 accountId: ActivityOwnerAccount.ID,
@@ -111,7 +109,7 @@ namespace AfterSchoolLibraryTests.Tests
                 activityGroupId: activityGroup.ID,
                 minGradeLevelId: gradeLevels.First().ID,
                 maxGradeLevelId: gradeLevels.Last().ID,
-                loggedInUser: this.LoggedInUser,
+                loggedInUser: LoggedInUser,
                 msgs: msgs,
                 dc: dc
                 );
@@ -155,11 +153,11 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void IsValidActivityInstance()
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc);
-            var schedule = Factories.ActivityScheduleFactory.Create(account, msgs, dc);
-            var activity = Factories.ActivityFactory.Create(account, schedule, msgs, dc);
-            var activityInstance = Factories.ActivityInstanceFactory.Create(activity, schedule, msgs, dc);
+            var user = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(user, msgs, dc);
+            var schedule = ActivityScheduleFactory.Create(account, msgs, dc);
+            var activity = ActivityFactory.Create(account, schedule, msgs, dc);
+            var activityInstance = ActivityInstanceFactory.Create(activity, schedule, msgs, dc);
 
 
             Assert.True(activity.IsValidActivityInstance(activityInstance, msgs, dc));
@@ -172,12 +170,12 @@ namespace AfterSchoolLibraryTests.Tests
         public void IsNotValidActivityInstance()
         {
             // Arrange
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc);
-            var schedule = Factories.ActivityScheduleFactory.Create(account, msgs, dc);
-            var activity = Factories.ActivityFactory.Create(account, schedule, msgs, dc);
-            var wrongSchedule = Factories.ActivityScheduleFactory.Create(account, msgs, dc);
-            var activityInstance = Factories.ActivityInstanceFactory.Create(activity, schedule, msgs, dc);
+            var user = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(user, msgs, dc);
+            var schedule = ActivityScheduleFactory.Create(account, msgs, dc);
+            var activity = ActivityFactory.Create(account, schedule, msgs, dc);
+            var wrongSchedule = ActivityScheduleFactory.Create(account, msgs, dc);
+            var activityInstance = ActivityInstanceFactory.Create(activity, schedule, msgs, dc);
 
             // Act
             activityInstance.ActivityScheduleId = wrongSchedule.ID.Value;
@@ -210,7 +208,7 @@ namespace AfterSchoolLibraryTests.Tests
             var activity = ActivityFactory.Create(ActivityOwnerAccount, schedule, activityGroup, msgs, dc);
             var activityInstance = ActivityInstanceFactory.CreateWithInstanceType(activityGroup, schedule, dayOfMonth,dayOfMonth.AddDays(35),InstanceType.InSession, msgs, dc);
 
-            var (paymentStart, paymentEnd) = ActivityService.FinalizeStartAndEndDateForSubscription(activity, BillingPeriodType.Month, System.DayOfWeek.Monday, dayOfMonth, msgs, dc);
+            var (paymentStart, paymentEnd) = ActivityService.FinalizeStartAndEndDateForSubscription(activity, BillingPeriodType.Month, DayOfWeek.Monday, dayOfMonth, msgs, dc);
             Assert.True(paymentStart == dayOfMonth);
 
         }
@@ -227,7 +225,7 @@ namespace AfterSchoolLibraryTests.Tests
             var activity = ActivityFactory.Create(ActivityOwnerAccount, schedule, activityGroup, msgs, dc);
             var activityInstance = ActivityInstanceFactory.CreateWithInstanceType(activityGroup, schedule, dayOfMonth, dayOfMonth.AddDays(35), InstanceType.InSession, msgs, dc);
 
-            var (paymentStart, paymentEnd) = ActivityService.FinalizeStartAndEndDateForSubscription(activity, BillingPeriodType.Week, System.DayOfWeek.Monday, dayOfMonth, msgs,dc);
+            var (paymentStart, paymentEnd) = ActivityService.FinalizeStartAndEndDateForSubscription(activity, BillingPeriodType.Week, DayOfWeek.Monday, dayOfMonth, msgs,dc);
 
             Assert.True(paymentStart.HasValue && paymentEnd.HasValue);
         }
@@ -235,12 +233,12 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void GetProviderTest()
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc);
-            var schoolUser = Factories.WebUserFactory.Create(msgs, dc);
-            var schoolAccount = Factories.AccountFactory.Create(schoolUser, msgs, dc);
+            var user = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(user, msgs, dc);
+            var schoolUser = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolUser, msgs, dc);
 
-            var activity = Factories.ActivityFactory.Create(schoolAccount, msgs, dc);
+            var activity = ActivityFactory.Create(schoolAccount, msgs, dc);
             activity.SetProvider(account, schoolUser, msgs, dc);
 
             var provider = activity.GetProvider(msgs, dc);
@@ -253,12 +251,12 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void SetProviderTest()
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc);
-            var schoolUser = Factories.WebUserFactory.Create(msgs, dc);
-            var schoolAccount = Factories.AccountFactory.Create(schoolUser, msgs, dc);
+            var user = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(user, msgs, dc);
+            var schoolUser = WebUserFactory.Create(msgs, dc);
+            var schoolAccount = AccountFactory.Create(schoolUser, msgs, dc);
 
-            var activity = Factories.ActivityFactory.Create(schoolAccount, msgs, dc);
+            var activity = ActivityFactory.Create(schoolAccount, msgs, dc);
             activity.SetProvider(account, schoolUser, msgs, dc);
 
             Assert.Equal(activity.ProviderAccountId, account.ID);

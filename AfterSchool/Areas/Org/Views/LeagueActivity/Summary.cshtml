@@ -4,7 +4,7 @@
     var registrants = Model.GetRegistrantActivities();
     decimal totalPaid = 0;
     int registrantCount = registrants.Sum(x => x.TotalSeats);
-    int waitingListCount = Model.WaitingListSeats ?? 0;
+    int waitingListCount = Model.GetWaitingListSeatsTaken(msgs);
     totalPaid = registrants.Sum(x => x.GetAmountPaid());
 
     var dates = registrants.Select(x => SessionVariables.CurrentAccount.ConvertToAccountTimeZone(x.CreateDate.Value).ToShortDateString()).Distinct();

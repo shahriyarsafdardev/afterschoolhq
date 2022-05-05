@@ -37,7 +37,6 @@
             <select class="form-control reg-form-control" id="search-seatsfilled" name="search-seatsfilled">
                 <option value="">All Activities</option>
                 <option value="1">Has Seats Available</option>
-                <option value="2">Has Waiting List Available</option>
             </select>
         </div>
 
@@ -198,19 +197,9 @@
         if (seatsfilled != null && seatsfilled.length > 0) {
             searching = true;
             searchable.each(function () {
-                switch (seatsfilled) {
-                    case '1':
-                        if ($(this).attr('hasseatsremaining') != "true" && !$(this).hasClass('hide')) {
-                            $(this).addClass('hide');
-                            hiddenDivs++;
-                        }
-                        break;
-                    case '2':
-                        if ($(this).attr('haswaitinglistremaining') != "true" && !$(this).hasClass('hide')) {
-                            $(this).addClass('hide');
-                            hiddenDivs++;
-                        }
-                        break;
+                if ($(this).attr('hasseatsremaining') != "true" && !$(this).hasClass('hide')) {
+                    $(this).addClass('hide');
+                    hiddenDivs++;
                 }
             });
         }

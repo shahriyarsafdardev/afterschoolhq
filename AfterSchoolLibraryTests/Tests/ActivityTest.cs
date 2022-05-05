@@ -290,17 +290,6 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         [Fact]
-        public void isWaitingListFullTest()
-        {
-            var accountOwner = WebUserFactory.Create(msgs, dc);
-            var account = AccountFactory.Create(accountOwner, msgs, dc);
-            var activity = ActivityFactory.Create(account, 5, msgs, dc);
-            var registrant = RegistrantFactory.Create(msgs, dc);
-            RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
-            Assert.True(activity.IsWaitingListFull(dc: dc)); //0 open with 0 on waiting list means full
-        }
-
-        [Fact]
         public void GetTeamMembersTest()
         {
             var accountOwner = WebUserFactory.Create(msgs, dc);

@@ -129,11 +129,6 @@ namespace AfterSchoolLibrary.Services
             return activity.GetSeatsRemaining(dc: dc) == 0;
         }
 
-        public static bool IsWaitingListFull(this Activity activity, DatabaseConnection dc = null)
-        {
-            return activity.GetWaitingListSeatsRemaining(dc: dc) == 0;
-        }
-
         public static Location GetLocation(this Activity activity, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
@@ -242,17 +237,6 @@ namespace AfterSchoolLibrary.Services
             return activity.SeatsAvailable.Value;
         }
 
-        public static int GetWaitingListSeatsRemaining(this Activity activity, SystemMessages msgs = null,
-            DatabaseConnection dc = null)
-        {
-            var rtn = 0;
-            if (activity.WaitingListSeats.HasValue)
-                rtn = activity.WaitingListSeats.Value -
-                      activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.WaitingList, msgs, dc);
-
-            return Math.Max(0, rtn);
-        }
-
         public static SubscriptionPlan GetSubscriptionPlan(this Activity activity, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
@@ -307,95 +291,8 @@ namespace AfterSchoolLibrary.Services
                 .ToList();
         }
 
-        public static void CreateSampleActivity(Account account, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            var gradeLevels = GradeLevel.Load(msgs: msgs, dc: dc);
-
-            //var schedule = ActivityScheduleService.CreateNew(
-            //      scheduleName: "Sample Schedule",
-            //      details: "",
-            //      repeatsWeekly: true,
-            //      isongoing: false,
-            //      startDate: DateTime.UtcNow.AddWeeks(1),
-            //      endDate: DateTime.UtcNow.AddWeeks(5),
-            //      dailyStartTime: DateTime.UtcNow.Date.AddHours(15),
-            //      dailyEndTime: DateTime.UtcNow.Date.AddHours(17),
-            //      scheduleDates: null,
-            //      scheduleDatesClosed: null,
-            //      accountId: account.ID.Value,
-            //      activityGroupId: null,
-            //      loggedInUserId: 0,
-            //      msgs: msgs,
-            //      dc: dc
-            //    );
-
-            var locationName = "Sample Location";
-            var address1 = "1234 N AfterSchool Avenue";
-            var address2 = "Suite 1";
-            var city = "Fishers";
-            var state = "IN";
-            var postalCode = "46038";
-
-            Location location = null;
-            var locations = LocationService.LoadByAddress(
-                locationName,
-                address1,
-                address2,
-                city,
-                state,
-                postalCode,
-                msgs,
-                dc);
-
-            if (!locations.Any())
-            {
-                location = LocationService.CreateNew(
-                    locationName: locationName,
-                    address1: address1,
-                    address2: address2,
-                    city: city,
-                    state: state,
-                    postalCode: postalCode,
-                    country: "US",
-                    hostAccountId: account.ID.Value,
-                    locationType: LocationType.School,
-                    loggedInUser: null,
-                    msgs: msgs,
-                    dc: dc
-                );
-            }
-
-            CreateNew(
-                activityName: "Sample Chess Activity",
-                activityType: ActivityType.Activity,
-                activityDetails:
-                "<p>This activity starts with building leadership in each child that participates.</p><p>We build upon the confidence of your child to help him or her create strategies and </p>",
-                seatsAvailable: 100,
-                waitingListSeatsAvailable: 10,
-                genderRestriction: GenderRestrictionType.None,
-                contactName: "Test User",
-                contactPhone: "123-123-1234",
-                contactEmail: "dave@dave.com",
-                costPerRegistrant: 12,
-                costDescription: "Here is the main reason for the cost and what you get",
-                acceptCreditCard: false,
-                allowToPayLater: true,
-                registrationMode: RegistrationMode.Register,
-                accountId: account.ID,
-                scheduleId: null,
-                locationId: location.ID,
-                locationDetails: "<p>Please enter through the rear entrance of the school</p>",
-                activityGroupId: null,
-                minGradeLevelId: gradeLevels.First().ID,
-                maxGradeLevelId: gradeLevels.Last().ID,
-                loggedInUser: null,
-                msgs: msgs,
-                dc: dc
-            );
-        }
-
         public static Activity CreateNew(string activityName, ActivityType activityType, string activityDetails,
-            int seatsAvailable, int? waitingListSeatsAvailable, GenderRestrictionType genderRestriction,
+            int seatsAvailable, GenderRestrictionType genderRestriction,
             string contactName, string contactPhone, string contactEmail, decimal? costPerRegistrant,
             string costDescription, bool acceptCreditCard, bool allowToPayLater, RegistrationMode registrationMode,
             int? accountId, int? scheduleId, int? locationId, string locationDetails, int? activityGroupId,
@@ -407,7 +304,6 @@ namespace AfterSchoolLibrary.Services
             var activity = new Activity
             {
                 Name = activityName,
-                // AcceptCreditCard = acceptCreditCard,
                 AllowToPayLater = allowToPayLater,
                 AccountId = accountId,
                 GenderRestriction = genderRestriction,
@@ -429,7 +325,6 @@ namespace AfterSchoolLibrary.Services
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
                 RegistrationModeId = registrationMode,
                 SeatsAvailable = seatsAvailable,
-                WaitingListSeats = waitingListSeatsAvailable,
                 UniqueName = GenerateUniqueName(activityName, null, accountId, msgs, dc),
                 Details = activityDetails,
                 LocationDetails = locationDetails,
@@ -438,26 +333,6 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(activity.Save(dc));
 
             return activity;
-        }
-
-        public static ActivityPayment AddPayment(this Activity activity, decimal amount, Registrant registrant,
-            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            var payment = new ActivityPayment
-            {
-                ParticipationObjectId = activity.ID,
-                ParticipationObjectTypeId = ParticipationObjectType.Activity,
-                Amount = amount,
-                AmountPaidByParent = null,
-                RegistrantId = registrant.ID,
-                AccountId = activity.AccountId,
-                CreateDate = DateTime.UtcNow,
-                CreatedBy = loggedInUser?.ID.IfEmpty(0),
-                LastModifiedDate = DateTime.UtcNow,
-                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-            };
-            msgs.AddRange(payment.Save(dc));
-            return payment;
         }
 
         public static decimal GetTotalPaid(this Activity activity, SystemMessages msgs = null,
@@ -794,7 +669,6 @@ namespace AfterSchoolLibrary.Services
                 LocationDetails = activity.LocationDetails,
                 SeatsAvailable = activity.SeatsAvailable,
                 Uid = Guid.NewGuid(),
-                WaitingListSeats = activity.WaitingListSeats,
                 CostPerRegistrant = activity.CostPerRegistrant,
                 CostDescription = activity.CostDescription,
                 GenderRestriction = activity.GenderRestriction,
@@ -875,7 +749,6 @@ namespace AfterSchoolLibrary.Services
 
             var name = values.GetValueOrDefault("name");
             var seatsavailable = values.GetValueOrDefault("seatsavailable");
-            var waitinglistseats = values.GetValueOrDefault("waitinglistseats");
             var registrationperiod = values.GetValueOrDefault("registrationperiod");
             var registrationopendate = values.GetValueOrDefault("registrationopendate");
             var registrationopentime = values.GetValueOrDefault("registrationopentime");
@@ -1017,9 +890,6 @@ namespace AfterSchoolLibrary.Services
                         msgs.Add("Registration Close Date & Time is required", MessageType.UserError);
                 }
 
-                if (!waitinglistseats.IsNumber())
-                    waitinglistseats = "0";
-
                 //pre-load account info
                 if (contactphone.IsBlank())
                     contactphone = account.Phone;
@@ -1039,13 +909,6 @@ namespace AfterSchoolLibrary.Services
                 {
                     activity.SeatsAvailable = seatsavailable.ToString().ToInteger();
                 }
-
-                if (waitinglistseats.IsNumber() &&
-                    activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.WaitingList, msgs, dc) <=
-                    waitinglistseats.ToString().ToInteger())
-                {
-                    activity.WaitingListSeats = waitinglistseats.ToString().ToInteger();
-                }
             }
             else
             {
@@ -1055,7 +918,6 @@ namespace AfterSchoolLibrary.Services
                     CreateDate = DateTime.UtcNow,
                     CreatedBy = loggedInUserId,
                     SeatsAvailable = seatsavailable.ToString().ToInteger(),
-                    WaitingListSeats = waitinglistseats.ToString().ToInteger(),
                     AccountId = account.ID,
                     RequiresParentalConsent = true,
                     CostFrequencyTypeId = ActivityCostFrequencyType.PerActivity,

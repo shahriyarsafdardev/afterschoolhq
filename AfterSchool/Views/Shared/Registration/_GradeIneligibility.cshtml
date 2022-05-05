@@ -51,7 +51,7 @@
 
                 $('#ineligibile-activities').html('');
 
-                if (data && data.status == 'ok') {
+                if (data && data.status === 'ok') {
                     if (data.ineligibleActivities.length > 0) {
 
                         $('#ineligible-student').html(data.studentName);
@@ -71,7 +71,7 @@
                     } else {
 
                         if (statusUpdateId != null) {
-                            $('#' + statusUpdateId).html('Registering...');
+                            $('#' + statusUpdateId).html('One moment...');
                         }
 
                         if (continueUrl != null) {

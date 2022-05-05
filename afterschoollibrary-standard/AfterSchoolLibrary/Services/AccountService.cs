@@ -2562,7 +2562,6 @@ namespace AfterSchoolLibrary.Services
 
             return new Activity
             {
-                WaitingListSeats = 0,
                 SeatsAvailable = Math.Min(20,
                     account.GetActiveAccountPackage().GetFeature(FeatureType.Participants).Max.Value.ToInteger()),
                 CostPerRegistrant = 0,
@@ -2582,7 +2581,6 @@ namespace AfterSchoolLibrary.Services
         {
             return new ActivityGroup
             {
-                WaitingListSeats = 0,
                 SeatsAvailable = Math.Min(20,
                     account.GetActiveAccountPackage().GetFeature(FeatureType.Participants).Max.Value.ToInteger()),
                 Cost = 0,

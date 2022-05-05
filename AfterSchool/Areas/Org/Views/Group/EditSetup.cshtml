@@ -2,7 +2,6 @@
 @{
     ViewBag.Title = ((Account)ViewBag.Account).Name;
     var msgs = (SystemMessages)ViewBag.Messages;
-    var accountPackage = (AccountPackage)ViewBag.AccountPackage;
     var saveBtnWidth = 7;
     var title = Model.Name.IfBlank("New " + UILabel.ActivityGroupLabel(Model.ActivityGroupTypeId));
     var isFullScreen = (bool)ViewBag.IsFullScreen;

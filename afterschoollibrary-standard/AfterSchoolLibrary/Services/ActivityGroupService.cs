@@ -180,7 +180,6 @@ namespace AfterSchoolLibrary.Services
             var contactemail = values.GetValueOrDefault("contactemail");
             var contactphone = values.GetValueOrDefault("contactphone");
             var numberofseats = values.GetValueOrDefault("seatsavailable");
-            var numberofwaitinglistseats = values.GetValueOrDefault("waitinglistseats");
             var haspaymentplan = values.GetValueOrDefault("haspaymentplan");
             var paymentplancost = values.GetValueOrDefault("paymentplancost");
             var paymentplanperiod = values.GetValueOrDefault("paymentplanperiod");
@@ -263,9 +262,6 @@ namespace AfterSchoolLibrary.Services
 
             if (numberofseats.IsNumber())
                 group.SeatsAvailable = numberofseats.ToString().ToInteger();
-
-            if (numberofwaitinglistseats.IsNumber())
-                group.WaitingListSeats = numberofwaitinglistseats.ToString().ToInteger();
 
             if (cost.IsNumber())
                 group.Cost = cost.ToString().ToDecimal();
@@ -513,7 +509,6 @@ namespace AfterSchoolLibrary.Services
                         ContactName = activityGroup.ContactName,
                         ContactPhone = activityGroup.ContactPhone,
                         SeatsAvailable = activityGroup.SeatsAvailable,
-                        WaitingListSeats = activityGroup.WaitingListSeats,
                         Cost = activityGroup.Cost,
                         CostUnitTypeId = activityGroup.CostUnitTypeId,
                         AllowToPayLater = activityGroup.AllowToPayLater,
@@ -581,8 +576,7 @@ namespace AfterSchoolLibrary.Services
         public static SubscriptionPlan GetPaymentPlan(this ActivityGroup group, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return SubscriptionPlan.LoadActiveByParticipationObject(group.ID.Value, ParticipationObjectType.ActivityGroup, msgs, dc)
-                .Where(plan => plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && plan.IsActive)
-                .FirstOrDefault();
+                .FirstOrDefault(plan => plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && plan.IsActive);
         }
 
         public static RegistrationPeriod AddNewRegistrationPeriod(this ActivityGroup group, DateTime startDateTime, DateTime endDateTime, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -649,15 +643,6 @@ namespace AfterSchoolLibrary.Services
             var rtn = 0;
             if (group.SeatsAvailable.HasValue)
                 rtn = group.SeatsAvailable.Value - group.GetRegistrantCountByAssignmentTypes(Registration.ReservedStatuses, msgs, dc);
-
-            return Math.Max(0, rtn);
-        }
-
-        public static int GetWaitingListSeatsRemaining(this ActivityGroup group, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var rtn = 0;
-            if (group.WaitingListSeats.HasValue)
-                rtn = group.WaitingListSeats.Value - group.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.WaitingList, msgs, dc);
 
             return Math.Max(0, rtn);
         }

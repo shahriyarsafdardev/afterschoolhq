@@ -115,7 +115,6 @@ namespace AfterSchoolLibrary.Services
             SystemMessages msgs, DatabaseConnection dc = null)
         {
             var seatsAvailable = participationObject.SeatsRemaining;
-            var waitingListSeatsAvailable = participationObject.WaitingListSeatsRemaining;
             var isExistingAndIsPendingOrReserved =
                 ra.IsNotEmpty() && ra.AssignmentTypeId.In(Registration.ReservedStatuses);
 
@@ -149,9 +148,6 @@ namespace AfterSchoolLibrary.Services
 
                 return RegistrationAssignmentType.Reserved;
             }
-            // if there aren't any more seats available, but there's a waiting list
-            else if (!waitingListSeatsAvailable.HasValue || waitingListSeatsAvailable >= numberOfSeatsRequested)
-                return RegistrationAssignmentType.WaitingList;
 
             // this is probably temporary and will break if something else changes
             // assuming that for sessions there are no reserved seat setting saved

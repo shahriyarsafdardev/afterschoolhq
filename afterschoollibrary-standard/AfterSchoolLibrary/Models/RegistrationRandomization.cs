@@ -3,8 +3,6 @@ using BasicLibrary.DataAccess;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AfterSchoolLibrary.Services;
 
 namespace AfterSchoolLibrary.Models
@@ -53,7 +51,6 @@ namespace AfterSchoolLibrary.Models
     {
         public int ActivityId { get; set; }
         public int ReservedSeatsTaken { get; set; }
-        public int WaitingListSeatsTaken { get; set; }
         public List<DateRange> Dates { get; set; }
     }
 
@@ -170,9 +167,7 @@ namespace AfterSchoolLibrary.Models
                     }
 
                     var seatsTaken = activityAssignment.Assignments.Count() + ActivityDetails.Find(x => x.ActivityId == activity.ID).ReservedSeatsTaken;
-                    var wlSeatsTaken = activityAssignment.WaitingListAssignments.Count() + ActivityDetails.Find(x => x.ActivityId == activity.ID).WaitingListSeatsTaken;
                     var isFull = seatsTaken >= activity.SeatsAvailable.Value;
-                    var isWLFull = wlSeatsTaken >= activity.WaitingListSeats.Value;
                     var activityDates = this.ActivityDetails.Find(x => x.ActivityId == activity.ID).Dates;
                     var hasActivityDuringScheduleAlready = false;
 
@@ -194,7 +189,7 @@ namespace AfterSchoolLibrary.Models
                     }
                     // check waiting list and put the person on it, 
                     // unless they were placed in another activity for that same day with a higher preference number
-                    else if (!isWLFull && !hasActivityDuringScheduleAlready)
+                    else if (!hasActivityDuringScheduleAlready)
                     {
                         AddAssignment(ra, AssignmentType.WaitingList);
                     }
@@ -231,7 +226,6 @@ namespace AfterSchoolLibrary.Models
                     {
                         ActivityId = activity.ID.Value,
                         ReservedSeatsTaken = activity.GetSeatsTaken(msgs, dc),
-                        WaitingListSeatsTaken = activity.GetWaitingListSeatsTaken(msgs, dc),
                         Dates = activity.GetSchedule(msgs, dc).GetInstances(msgs: msgs, dc: dc).Select(x => new DateRange(x.StartDateTime.Value, x.EndDateTime.Value)).ToList()
             }
                 );

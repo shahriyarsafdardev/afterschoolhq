@@ -13,6 +13,11 @@
         registered = "Applied";
     }
 
+    if (participationObject.SeatsRemaining == 0)
+    {
+        register = "Join Waiting List";
+    }
+
     var disabledText = "";
     var btnText = "";
     var registerUrl = Url.Action("setstudent", "account", new { id = Model.Uid });

@@ -112,7 +112,6 @@ else
                 foreach (var activity in Model)
                 {
                     var reservedTextClass = activity.IsFull() ? "text-danger text-bold" : "";
-                    var waitingTextClass = activity.IsWaitingListFull() ? "text-danger text-bold" : "";
 
                     <tr>
                         @if (disableViewTeams)

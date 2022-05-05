@@ -49,7 +49,6 @@
      agestart="@Model.AgeStart"
      ageend="@Model.AgeEnd"
      hasseatsremaining="@Model.HasSeatsAvailable().ToString().ToLower()"
-     haswaitinglistremaining="@Model.HasWaitingListSeatsAvailable().ToString().ToLower()"
      days="@ParticipationObjectUI.PrintDaysOfWeekList(Model)"
      location="@(Model.Location?.FormatAddress(false))"
      gender="@((int)Model.GenderRestriction)"

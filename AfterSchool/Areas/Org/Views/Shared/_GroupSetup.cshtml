@@ -90,16 +90,6 @@
 
         <div class="advanced-settings hide">
 
-            <div class="form-group">
-                <label class="col-sm-3 control-label">
-                    Waiting List Seats <span class="text-danger">*</span>
-                    <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Can be any positive number" data-placement="top"></i>
-                </label>
-                <div class="col-sm-9">
-                    <input type="number" class="form-control" id="waitinglistseats" name="waitinglistseats" value="@Model.WaitingListSeats" onfocus="this.select()" required step="1" min="0" />
-                </div>
-            </div>
-
             @if (accountPackage.HasFeature(FeatureType.ManageForms))
             {
                 <div class="form-group">

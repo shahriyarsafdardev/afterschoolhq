@@ -38,7 +38,6 @@ namespace AfterSchoolLibrary.Models
         public bool IsRegistrationFree { get; set; }
         public Guid Uid { get; set; }
         public int? SeatsRemaining { get; set; }
-        public int? WaitingListSeatsRemaining { get; set; }
         public string Description { get; set; }
         public string ContactName { get; set; }
         public string ContactPhone { get; set; }
@@ -157,8 +156,7 @@ namespace AfterSchoolLibrary.Models
                     SeatsRemaining = activity.GetSeatsRemainingForNextDate(msgs, dc);
                 else
                     SeatsRemaining = activity.GetSeatsRemaining(msgs, dc);
-
-                WaitingListSeatsRemaining = activity.GetWaitingListSeatsRemaining(msgs, dc);
+                
                 RegistrationPeriod = activity.GetActiveRegistrationPeriod(msgs, dc);
                 Form = activity.GetActiveActivityForm(msgs, dc)?.GetForm(msgs, dc);
                 OwnerAccount = activity.GetAccount(msgs, dc);
@@ -211,7 +209,6 @@ namespace AfterSchoolLibrary.Models
                 OwnerAccount = activityGroup.GetAccount(msgs, dc);
                 Location = OwnerAccount.GetDefaultLocation(msgs, dc);
                 SeatsRemaining = activityGroup.GetSeatsRemaining(msgs, dc);
-                WaitingListSeatsRemaining = activityGroup.GetWaitingListSeatsRemaining(msgs, dc);
                 UseStripeConnectedAccount = PaymentAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
                 PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
                 SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
@@ -394,15 +391,6 @@ namespace AfterSchoolLibrary.Models
         public bool HasSeatsAvailable()
         {
             return !SeatsRemaining.HasValue || SeatsRemaining.Value > 0;
-        }
-        
-        /// <summary>
-        /// if waiting list has a value and the value is greater than zero
-        /// </summary>
-        /// <returns></returns>
-        public bool HasWaitingListSeatsAvailable()
-        {
-            return WaitingListSeatsRemaining.HasValue && WaitingListSeatsRemaining.Value > 0;
         }
 
         public string GetRegistrationThankYou(RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -1166,7 +1154,6 @@ namespace AfterSchoolLibrary.Models
                 participationObject.Location = locations.First();
                 participationObject.PaymentPlans = new List<SubscriptionPlan>();
                 participationObject.SubscriptionPlans = new List<SubscriptionPlan>();
-                participationObject.WaitingListSeatsRemaining = 10;
                 participationObject.RegistrationMode = RegistrationMode.Register;
                 participationObject.RegistrationPeriod = registrationPeriod;
                 participationObject.Uid = Guid.NewGuid();

@@ -185,7 +185,6 @@ else
                         foreach (Activity activity in Model)
                         {
                             var reservedTextClass = activity.IsFull() ? "text-danger text-bold" : "";
-                            var waitingTextClass = activity.IsWaitingListFull() ? "text-danger text-bold" : "";
                             var showLink = activity.BelongsTo(currentAccount);
 
                             <tr>

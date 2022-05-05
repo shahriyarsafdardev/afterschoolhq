@@ -90,7 +90,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Group = activityGroup;
             ViewBag.HasArchivedActivities = hasArchivedActivities;
 
-            ViewBag.PagingModel = new PagingModel()
+            ViewBag.PagingModel = new PagingModel
             {
                 TotalCount = totalActivityCount,
                 PageNumber = pageNumber,
@@ -189,12 +189,11 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditSetup(string id, string description, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd)
+        public ActionResult EditSetup(string id, string description, string name, string seatsavailable, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd)
         {
             var msgs = new SystemMessages();
             Activity activity = null;
             ActivityGroup activityGroup = null;
-            var vb = ViewBag;
             string accountActivityGroup = null;
 
             var currentAccount = SessionVariables.CurrentAccount;
@@ -206,11 +205,10 @@ namespace AfterSchool.Areas.Org.Controllers
                 accountActivityGroup = activityGroup.GetAccountActivityGroup(currentAccount).ID.Value.ToString();
             }
 
-            var values = new Dictionary<string, object>()
+            var values = new Dictionary<string, object>
             {
                 { "name", name },
                 { "seatsavailable", seatsavailable },
-                { "waitinglistseats", waitinglistseats },
                 { "registrationperiod", registrationperiod },
                 { "registrationopendate", registrationopendate },
                 { "registrationopentime", registrationopentime },
@@ -340,7 +338,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     }
                 }
 
-                var values = new Dictionary<string, object>()
+                var values = new Dictionary<string, object>
                 {
                     { "alloworganization", alloworganization.IfBlank("0")},
                     { "agestart", agerestrictions.IsNumber() ? agestart : "-1"},
@@ -411,7 +409,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentUser = SessionVariables.CurrentUser;
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
-            var values = new Dictionary<string, object>()
+            var values = new Dictionary<string, object>
             {
                 { "contactname", contactname},
                 { "contactphone", contactphone},
@@ -575,7 +573,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (activity.IsNotEmpty())
             {
-                var values = new Dictionary<string, object>()
+                var values = new Dictionary<string, object>
                 {
                     { "details", details},
                     { "scheduledetails", scheduledetails}
@@ -675,7 +673,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
                 outOfSessionDates = ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
 
-                var values = new Dictionary<string, object>()
+                var values = new Dictionary<string, object>
                 {
                     { "scheduledetails", scheduledetails},
                     { "days", days.Select(x => (int)x).ToStrings().ToStringList() },
@@ -767,7 +765,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (activity.IsNotEmpty())
             {
-                var values = new Dictionary<string, object>()
+                var values = new Dictionary<string, object>
                 {
                     { "location", location},
                     { "locationname", locationname},
@@ -846,7 +844,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (activity.IsNotEmpty())
             {
-                var values = new Dictionary<string, object>()
+                var values = new Dictionary<string, object>
                 {
                     { "cost", cost},
                     { "costdescription", costdescription},
@@ -914,7 +912,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (activity.IsNotEmpty())
             {
-                var values = new Dictionary<string, object>()
+                var values = new Dictionary<string, object>
                 {
                     { "registrationthankyouemail", registrationthankyouemail },
                     { "applicationthankyouemail", applicationthankyouemail }
@@ -1243,7 +1241,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var payment = new ActivityPayment()
+                var payment = new ActivityPayment
                 {
                     ParticipationObjectId = ra.ParticipationObjectId,
                     ParticipationObjectTypeId = ra.ParticipationObjectTypeId,

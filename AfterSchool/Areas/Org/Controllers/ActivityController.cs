@@ -1293,7 +1293,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats,
+        public ActionResult EditSetup(string id, string name, string seatsavailable,
             string registrationperiod, string registrationopendate, string registrationopentime,
             string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode,
             string group, string cmd, string type, string inviteonly, string minseatsrequired,
@@ -1346,7 +1346,6 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     {"name", name.MaxChars(75)},
                     {"seatsavailable", seatsavailable},
-                    {"waitinglistseats", waitinglistseats},
                     {"registrationperiod", registrationperiod},
                     {"registrationopendate", registrationopendate},
                     {"registrationopentime", registrationopentime},

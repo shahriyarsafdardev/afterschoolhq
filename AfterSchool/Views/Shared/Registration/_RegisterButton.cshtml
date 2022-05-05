@@ -179,11 +179,11 @@ else
         else
         {
             var anotherChildString = anotherChild ? $" for New Child" : "";
-
-            <a href="@(IsPublished? Model.GetRegistrationPageUrl().ToString(): "javascript:void(0)")" 
+            var buttonText = Model.SeatsRemaining == 0 ? "Join Waiting List" : Model.RegistrationMode.ToString();
+            <a href="@(IsPublished? Model.GetRegistrationPageUrl(): "javascript:void(0)")" 
                class="@(IsPublished?"":"disabled") btn btn-register btn-block" 
                @IsPublished>
-                @Model.RegistrationMode.ToString() @anotherChildString &raquo;
+                @buttonText @anotherChildString &raquo;
             </a>
         }
     }

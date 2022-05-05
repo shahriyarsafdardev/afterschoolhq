@@ -242,23 +242,6 @@
             </div>
 
             <div class="advanced-settings hide">
-
-                @if (showSeats)
-                {
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label">
-                            Waiting List Seats <span class="text-danger">*</span>
-                            <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Can be any positive number" data-placement="top"></i>
-                        </label>
-                        <div style="position:relative;" class="col-sm-9">
-                            <input id="waitinglistseats" class="form-control" type="number" name="waitinglistseats" value="@Model.WaitingListSeats" required step="1"
-                                   min="0"
-                                   onfocus="this.select()"
-                                   oninput="validity.valid||(value='');"/>
-                        </div>
-                    </div>
-                }
-
                 <div class="form-group">
                     <label class="col-md-3 control-label">
                         Registration Form <span class="text-danger">*</span>

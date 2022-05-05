@@ -110,7 +110,6 @@ else
                     foreach (Activity activity in Model)
                     {
                         var reservedTextClass = activity.IsFull() ? "text-danger text-bold" : "";
-                        var waitingTextClass = activity.IsWaitingListFull() ? "text-danger text-bold" : "";
 
                         <tr>
                             <td>
@@ -133,18 +132,10 @@ else
                                 @activity.GetRegistrantCountByAssignmentTypes(Registration.ReservedStatuses) / @activity.SeatsAvailable
                             </td>
 
-                            <td class="text-center @waitingTextClass">
-                                @if (activity.WaitingListSeats.HasValue)
-                                {
-                                    <span>
-                                        @activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.WaitingList) /
-                                        @activity.WaitingListSeats
-                                    </span>
-                                }
-                                else
-                                {
-                                    @: -
-                                }
+                            <td class="text-center">
+                                <span>
+                                    @activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.WaitingList)
+                                </span>
                             </td>
 
                             <td>

@@ -83,7 +83,6 @@
      mingradetext="@(Model.GetMinGradeLevel()?.Name)"
      maxgradetext="@(Model.GetMaxGradeLevel()?.Name)"
      hasseatsremaining="@Model.HasSeatsAvailable().ToString().ToLower()"
-     haswaitinglistremaining="@Model.HasWaitingListSeatsAvailable().ToString().ToLower()"
      days="@ParticipationObjectUI.PrintDaysOfWeekList(Model)"
      location="@(Model.Location?.FormatAddress(false))"
      gender="@((int) Model.GenderRestriction)"
