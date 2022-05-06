@@ -1287,7 +1287,7 @@ namespace AfterSchool.Areas.Org.Controllers
             string streetnumber,
             string streetname, string address2, string neighborhood, string city, string state, string postalcode,
             string county,
-            string country, string placeid, decimal latitude, decimal longitude, string opencovid,
+            string country, string placeid, decimal? latitude, decimal? longitude, string opencovid,
             string elearningcenter,
             string virtualprogram, string ahqapproved, string videoUrl, IEnumerable<HttpPostedFileBase> photos)
         {
@@ -1343,6 +1343,10 @@ namespace AfterSchool.Areas.Org.Controllers
             if (locationname.IsEmpty())
                 msgs.Add("Location is a required field.", MessageType.UserError);
 
+            if (latitude.IsEmpty() || longitude.IsEmpty())
+                msgs.Add("An error occurred saving location data, please check what was entered in the location field",
+                    MessageType.UserError);
+            
             //server side validation for photos count, which should not be more then 6
             var properties = profile.GetProperties(AccountPropertyType.Photo, msgs);
             var savedPhotos = properties != null ? properties.Count : 0;
@@ -1465,8 +1469,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     postalcode,
                     country,
                     placeid,
-                    latitude,
-                    longitude,
+                    latitude.Value,
+                    longitude.Value,
                     currentUser,
                     msgs);
             }
