@@ -425,7 +425,7 @@ namespace AfterSchoolLibraryTests.Tests
                             msgs: msgs,
                             dc: dc);
 
-            accountOwner.CompleteSignUp(account, "jeff", "gordon", "jeff@gordon.com", "1234", null, msgs, dc);
+            accountOwner.CompleteSignUp(account, "jeff", "gordon", "jeff@gordon.com", "1234", $"555555{(DateTime.Now.Ticks % 1000).ToString()}", null, msgs, dc);
 
             Assert.True(accountOwner.HasAccessTo(account, msgs, dc));
         }

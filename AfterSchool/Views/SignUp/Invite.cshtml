@@ -37,7 +37,7 @@
                         @Html.Raw(UI.RenderMessagesToHtml(msgs))
 
                         <form action="@Url.Action("invite", "signup", new { id = Model.InviteCodeToShare })" parsley-validate="" novalidate="" method="post" class="form-horizontal">
-                            @{ Html.RenderPartial("~/Views/Shared/Login/_SignUpForm.cshtml", user, new ViewDataDictionary() { { "showphone", true } }); }
+                            @{ Html.RenderPartial("~/Views/Shared/Login/_SignUpForm.cshtml", user); }
                         </form>
                     </div>
                 </div>

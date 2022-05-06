@@ -1,17 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
-using BasicLibrary;
-using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
+using AfterSchoolLibrary.Services;
+using BasicLibrary;
 
 namespace AfterSchool.Areas.User.Controllers
 {
     public class HomeController : BaseLoggedInController
     {
-        public HomeController() : base(new List<AccountType>() { AccountType.Registrant })
+        public HomeController() : base(new List<AccountType> {AccountType.Registrant})
         {
-
         }
 
         // GET: User/Home
@@ -21,7 +20,7 @@ namespace AfterSchool.Areas.User.Controllers
             var masterRegistrant = SessionVariables.CurrentUser.GetMasterRegistrant(msgs);
             var registrants = SessionVariables.CurrentUser.GetChildrenRegistrants(msgs);
 
-            if (!registrants.Any(registrant => registrant.ID == masterRegistrant.ID) && masterRegistrant.IsNotEmpty())
+            if (registrants.All(registrant => registrant.ID != masterRegistrant.ID) && masterRegistrant.IsNotEmpty())
                 registrants.Add(masterRegistrant);
 
             var registrantModel = registrants.PrepareRegistrantDetails(masterRegistrant, msgs);

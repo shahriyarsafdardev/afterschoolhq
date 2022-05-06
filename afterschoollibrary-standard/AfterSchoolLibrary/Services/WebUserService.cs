@@ -821,10 +821,14 @@ namespace AfterSchoolLibrary.Services
         /// <param name="lastName"></param>
         /// <param name="email"></param>
         /// <param name="password"></param>
+        /// <param name="phone"></param>
         /// <param name="loggedInUser"></param>
+        /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static void CompleteSignUp(this WebUser user, Account account, string firstName, string lastName, string email, string password, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void CompleteSignUp(this WebUser user, Account account, string firstName, string lastName,
+            string email, string password, string phone, WebUser loggedInUser, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -838,6 +842,7 @@ namespace AfterSchoolLibrary.Services
                     user.IsRegistered = true;
                     user.IsActive = true;
                     user.Password = WebUserService.EncryptPassword(password);
+                    user.Phone = phone;
                     user.LastModifiedDate = DateTime.UtcNow;
                     user.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
 

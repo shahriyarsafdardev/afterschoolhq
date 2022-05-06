@@ -1,9 +1,9 @@
 ﻿@model List<Registrant>
 @{
-    var msgs = (SystemMessages)ViewBag.Messages;
-    var activityInstances = (List<(ActivityInstance ActivityInstance, Registrant Registrant, int? ParticipationObjectId, ParticipationObjectType ParticipationObjectType)>)ViewBag.ActivityInstances;
-    var providers = (List<Account>)ViewBag.Providers;
-    var activitiesRequiringAttention = (List<RegistrantActivity>)ViewBag.ActivitiesRequiringAttention;
+    var msgs = (SystemMessages) ViewBag.Messages;
+    var activityInstances = (List<(ActivityInstance ActivityInstance, Registrant Registrant, int? ParticipationObjectId, ParticipationObjectType ParticipationObjectType)>) ViewBag.ActivityInstances;
+    var providers = (List<Account>) ViewBag.Providers;
+    var activitiesRequiringAttention = (List<RegistrantActivity>) ViewBag.ActivitiesRequiringAttention;
     var showToDos = activitiesRequiringAttention.Any() || Model.Any(registrant => registrant.ProfileStatusId != RegistrantProfileStatus.Completed);
     var showProviders = providers.Any();
     var showRightColumn = showToDos || showProviders;
@@ -16,7 +16,7 @@
     }
 }
 
-@{Html.RenderPartial("_UserAccountHeader");}
+@{ Html.RenderPartial("_UserAccountHeader"); }
 
 <div class="main-content">
 
@@ -66,5 +66,5 @@
 
 @section header
 {
-    <link href="~/Assets/css/style-registration.css?v=1.01" type="text/css" rel="stylesheet" />
+    <link href="~/Assets/css/style-registration.css?v=1.01" type="text/css" rel="stylesheet"/>
 }

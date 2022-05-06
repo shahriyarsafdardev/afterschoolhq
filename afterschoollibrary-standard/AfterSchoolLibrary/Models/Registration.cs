@@ -9,10 +9,10 @@ using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchoolLibrary.Models
 {
-	/// <summary>
-	///     The actual registration for a registrant. A registrant can have multiple registrations.
-	/// </summary>
-	public class Registration : BasicObjectWithModified
+    /// <summary>
+    ///     The actual registration for a registrant. A registrant can have multiple registrations.
+    /// </summary>
+    public class Registration : BasicObjectWithModified
     {
         #region "ClassGenerator"
 
@@ -639,7 +639,8 @@ namespace AfterSchoolLibrary.Models
         {
             var completionStatus = new List<int>
             {
-                (int) RegistrationCompletionStatus.Completed, (int) RegistrationCompletionStatus.RequiresParentSignature,
+                (int) RegistrationCompletionStatus.Completed,
+                (int) RegistrationCompletionStatus.RequiresParentSignature,
             };
 
             var dq = DatabaseQuery;
