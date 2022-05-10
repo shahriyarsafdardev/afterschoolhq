@@ -5510,22 +5510,28 @@ namespace AfterSchoolLibrary.Services
                         msgs: amsgs,
                         dc: adc);
 
-                    if (questionAnswerModel.IsNotEmpty() && questionAnswerModel.Count > 0)
-                    {
-                        questionAnswerModel.Where(qvm => qvm.Key.QuestionDataTypeId != QuestionDataType.NotSet).ToList()
-                            .ForEach(qvm =>
-                            {
-                                registrant.AddOrUpdateAnswer(
-                                    answerText: qvm.Value,
-                                    question: qvm.Key,
-                                    loggedInUser: loggedInUser,
-                                    msgs: amsgs,
-                                    dc: adc);
-                            });
+                    if (questionAnswerModel.IsEmpty() || questionAnswerModel.Count == 0) return;
 
-                        AddCustomQuestions(questionAnswerModel: questionAnswerModel, submittedRecord: submittedRecord,
-                            registration: registration, files: files, currentUser: loggedInUser, msgs: amsgs, dc: adc);
-                    }
+                    questionAnswerModel.Where(qvm => qvm.Key.QuestionDataTypeId != QuestionDataType.NotSet).ToList()
+                        .ForEach(qvm =>
+                        {
+                            registrant.AddOrUpdateAnswer(
+                                answerText: qvm.Value,
+                                question: qvm.Key,
+                                loggedInUser: loggedInUser,
+                                msgs: amsgs,
+                                dc: adc);
+                        });
+
+                    AddCustomQuestions(questionAnswerModel: questionAnswerModel, submittedRecord: submittedRecord,
+                        registration: registration, files: files, currentUser: loggedInUser, msgs: amsgs, dc: adc);
+
+                    registrant.CopyAnswersTo(
+                        submittedRecord,
+                        registration,
+                        loggedInUser,
+                        amsgs,
+                        adc);
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
