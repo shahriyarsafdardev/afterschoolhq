@@ -1364,7 +1364,6 @@
     <Content Include="Assets\lib\tinycolor\tinycolor-min.js" />
     <Content Include="Assets\tagsinput\tagsinput.css" />
     <Content Include="Assets\tagsinput\tagsinput.js" />
-    <Content Include="bpm-free-trial.html" />
     <Content Include="case-study-cfi70.html" />
     <Content Include="contact.html" />
     <Content Include="Content\Flags\spain.png" />
@@ -1428,7 +1427,6 @@
     <Content Include="img\enrichment-club-page.png" />
     <Content Include="img\fee.png" />
     <Content Include="img\flourish.png" />
-    <Content Include="img\Frame 1.png" />
     <Content Include="img\frank-mckenna-LhOjrOlcLx4-unsplash.jpg" />
     <Content Include="img\gabriel-baranski-vGICUyYW2CE-unsplash.jpg" />
     <Content Include="img\girls-with-impact.png" />
