@@ -347,59 +347,6 @@ namespace AfterSchool.Controllers
             return activity?.IsStudentAllowedToRegister ?? false;
         }
 
-        private List<FormQuestion> StudentRegistrationViewBag(SystemMessages msgs)
-        {
-            var form = FormService.GetAdministratorAccountForm(msgs);
-            var personalContactGroup = form.GetQuestionGroups(msgs)
-                .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
-            var questions = personalContactGroup.GetAllQuestions(msgs);
-            questions = questions.Where(question =>
-                    question.QuestionDataTypeId.NotIn(FormService.QuestionsToNotIncludeInStudentRegistrationPanel()))
-                .ToList();
-            questions.ForEach(question =>
-            {
-                switch (question.QuestionDataTypeId)
-                {
-                    case QuestionDataType.RegistrantFirstName:
-                    case QuestionDataType.RegistrantLastName:
-                    case QuestionDataType.RegistrantEmail:
-                    case QuestionDataType.RegistrantGrade:
-                    case QuestionDataType.RegistrantDateOfBirth:
-                    case QuestionDataType.RegistrantGender:
-                        question.IsRequired = true;
-                        break;
-                }
-            });
-            return questions;
-        }
-
-        private List<FormQuestion> StudentRegistrationParentViewBag(SystemMessages msgs)
-        {
-            var form = FormService.GetAdministratorAccountForm(msgs);
-            var personalContactGroup = form.GetQuestionGroups(msgs)
-                .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
-            var questions = personalContactGroup.GetAllQuestions(msgs);
-            questions = questions.Where(question =>
-                    question.QuestionDataTypeId.NotIn(
-                        FormService.QuestionsToNotIncludeInStudentRegistrationParentPanel()))
-                .ToList();
-            questions.ForEach(question =>
-            {
-                switch (question.QuestionDataTypeId)
-                {
-                    case QuestionDataType.RegistrantFirstName:
-                    case QuestionDataType.RegistrantLastName:
-                    case QuestionDataType.RegistrantEmail:
-                        question.IsRequired = true;
-                        question.Text = "Parent's " + question.Text;
-                        break;
-                }
-            });
-            ViewBag.ParentQuestions =
-                questions.Select(parentQuestion => new FormQuestionViewModel(parentQuestion)).ToList();
-            return questions;
-        }
-
         [HttpGet]
         public ActionResult GetStarted(string regaccount)
         {
@@ -1224,7 +1171,7 @@ namespace AfterSchool.Controllers
             });
             return questions;
         }
-        
+
         private List<FormQuestion> StudentRegistrationParentViewBag(SystemMessages msgs)
         {
             var form = FormService.GetAdministratorAccountForm(msgs);

@@ -354,8 +354,7 @@ namespace AfterSchoolLibrary.Services
                 dc);
             var csvByteData = Encoding.UTF8.GetBytes(csvText);
 
-            EmailCsv(account, emails, subject, body, uiActivityLabel, CreateRegistrationsCsvFilename(filename), msgs,
-                csvByteData);
+            EmailCsv(account, emails, subject, body, uiActivityLabel, CreateRegistrationsCsvFilename(filename), msgs, csvByteData);
 
             return msgs;
         }
@@ -784,9 +783,9 @@ namespace AfterSchoolLibrary.Services
                 foreach (var item in json)
                 {
                     if (str.IsNotEmpty())
-                        str = str + ", " + item.Value;
+                        str = str + ", " + item.value;
                     else
-                        str = item.Value;
+                        str = item.value;
                 }
 
                 row.Add(Convert.ToString(str));
