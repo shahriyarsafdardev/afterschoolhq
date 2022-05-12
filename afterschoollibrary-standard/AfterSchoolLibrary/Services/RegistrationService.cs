@@ -908,9 +908,8 @@ namespace AfterSchoolLibrary.Services
             ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return registration.GetRegistrantActivities(msgs, dc)
-                .Where(x => x.ParticipationObjectId == participationObject.ObjectID &&
-                            x.ParticipationObjectTypeId == participationObject.ObjectType)
-                .FirstOrDefault();
+                .FirstOrDefault(x => x.ParticipationObjectId == participationObject.ObjectID &&
+                                     x.ParticipationObjectTypeId == participationObject.ObjectType);
         }
 
         public static List<RegistrantActivity> GetRegistrantActivities(this Registration registration,
