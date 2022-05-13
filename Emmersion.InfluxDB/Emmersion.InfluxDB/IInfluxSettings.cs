@@ -17,6 +17,12 @@
         /// </summary>
         string DbName { get; }
 
+        string OrgName { get; }
+
+        string BucketName { get; }
+
+        string ApiToken { get; }
+
         /// <summary>
         ///     Typical value: 1
         /// </summary>

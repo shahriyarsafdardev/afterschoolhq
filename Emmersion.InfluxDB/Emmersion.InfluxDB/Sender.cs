@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 
 namespace Emmersion.InfluxDB
@@ -22,8 +23,13 @@ namespace Emmersion.InfluxDB
 
         public void SendPayload(string payload)
         {
-            var content = new StringContent(payload, Encoding.UTF8);
-            var message = new HttpRequestMessage(HttpMethod.Post, $"{settings.Hostname}:{settings.Port}/write?db={settings.DbName}") {Content = content};
+            var content = new StringContent(payload, Encoding.UTF8,"text/plain");
+            var message = new HttpRequestMessage(HttpMethod.Post,
+                    $"{settings.Hostname}:{settings.Port}/api/v2/write?org={settings.OrgName}&bucket={settings.BucketName}&precision=ns")
+                {Content = content};
+            message.Headers.Authorization = new AuthenticationHeaderValue("Token", settings.ApiToken);
+            message.Headers.Add("Accept", "application/json");
+          
 
             (int statusCode, string responseBody) response;
             try
@@ -36,9 +42,8 @@ namespace Emmersion.InfluxDB
             }
 
             if (response.statusCode != 204)
-            {
-                throw new Exception($"Failed to write metrics (influxUrl: {message.RequestUri}, response: {response.responseBody})");
-            }
+                throw new Exception(
+                    $"Failed to write metrics (influxUrl: {message.RequestUri}, response: {response.responseBody})");
         }
     }
 }
