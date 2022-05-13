@@ -25,7 +25,7 @@ namespace Emmersion.InfluxDB
         {
             var content = new StringContent(payload, Encoding.UTF8,"text/plain");
             var message = new HttpRequestMessage(HttpMethod.Post,
-                    $"{settings.Hostname}:{settings.Port}/api/v2/write?org={settings.OrgName}&bucket={settings.BucketName}&precision=ns")
+                    $"{settings.Hostname}/api/v2/write?org={settings.OrgName}&bucket={settings.BucketName}&precision=ns")
                 {Content = content};
             message.Headers.Authorization = new AuthenticationHeaderValue("Token", settings.ApiToken);
             message.Headers.Add("Accept", "application/json");
