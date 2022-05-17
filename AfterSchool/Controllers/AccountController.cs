@@ -259,7 +259,8 @@ namespace AfterSchool.Controllers
 
                 // if you have a completed parent profile
                 if (masterRegistrant.IsNotEmpty() &&
-                    masterRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed && !isInterestForm)
+                    masterRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed && !isInterestForm &&
+                    masterRegistrant.IsParentOrGuardian)
                     return RedirectToAction("select");
             }
 
@@ -355,12 +356,26 @@ namespace AfterSchool.Controllers
 
         [HttpPost]
         public ActionResult GetStarted(string regaccount, string password1, string password2, string agree,
-            string textnotifications, string isStudentRegistering)
+            string textnotifications)
         {
             var msgs = new SystemMessages();
             var participationObject = GetParticipationObjectFromCart();
             var qvms = GetQuestionsForParentRegistration(msgs);
             var currentUser = SessionVariables.CurrentUser;
+
+
+            if (!agree.IsBoolean())
+                msgs.Add("You must agree to the terms of service", MessageType.UserError);
+ 
+            // Add feature flag check here
+            var studentRegistrant = currentUser.GetMasterRegistrant(msgs);
+            if (msgs.HasNoErrors() && !studentRegistrant.IsParentOrGuardian)
+            {
+                SessionVariables.CurrentRegistrant = studentRegistrant;
+   
+                return RedirectToAction("RegisterStudent");
+            } 
+
 
             qvms.ForEach(qvm =>
             {
@@ -388,12 +403,6 @@ namespace AfterSchool.Controllers
                     msgs.Add("Passwords must match", MessageType.UserError);
                 if (Utilities.IsProduction)
                     msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
-            }
-
-            if (Utilities.IsProduction || Utilities.IsStaging)
-            {
-                if (!agree.IsBoolean())
-                    msgs.Add("You must agree to the terms of service", MessageType.UserError);
             }
 
             if (msgs.HasNoErrors())
@@ -538,7 +547,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult AddHomeAddress(string id, string isStudentRegistering)
+        public ActionResult AddHomeAddress(string id)
         {
             var msgs = new SystemMessages();
             var questions = AddHomeAddressViewBag(msgs);
@@ -1662,14 +1671,13 @@ namespace AfterSchool.Controllers
             if (masterRegistrant.ProfileStatusId == RegistrantProfileStatus.Started)
                 return RedirectToAction("getstarted");
 
-            // Case 2 - new Student Register witn New Parent Email
-            if (!masterRegistrant.IsParentOrGuardian &&
-                masterRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed)
-                return RedirectToAction("Home", "User");
-
-            // Case 1 - Parent Registration flow
             if (!masterRegistrant.IsParentOrGuardian)
             {
+                // Case 2 - new Student Register with New Parent Email
+                if (masterRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed)
+                    return RedirectToAction("Home", "User");
+
+                // Case 1 - Parent Registration flow
                 SessionVariables.CurrentRegistrant = masterRegistrant;
                 return RedirectToAction("registerstudent");
             }
@@ -2800,9 +2808,8 @@ namespace AfterSchool.Controllers
                                 currentUser,
                                 amsgs,
                                 adc);
-                        
-                      
-                        
+
+
                         if (amsgs.HasNoErrors() && participationObject.IsSession())
                             AddSessionActivitiesToRegistration(
                                 participationObject,
@@ -2819,7 +2826,8 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                if (registration.ID != null && participationObject.ObjectID != null && registration.RegistrationPeriodId != null && participationObject.Cost != null)
+                if (registration.ID != null && participationObject.ObjectID != null &&
+                    registration.RegistrationPeriodId != null && participationObject.Cost != null)
                     submittedRecord.AddOrUpdateParticipationObject(
                         registration.ID.Value,
                         participationObject.ObjectID.Value,
