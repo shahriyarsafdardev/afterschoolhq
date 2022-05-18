@@ -311,7 +311,7 @@ else if (currentUser.IsNotEmpty())
                     <a href="@Url.Action("switch", "logout", new {returnurl = returnUrl})" class="btn btn-link">Switch Accounts</a>
                 }
             }
-            <a href="@Url.Action("index", "logout", new {returnurl = returnUrl})" class="btn btn-link">Logout</a>
+            <a href="@Url.Action("index", "logout", new {returnurl = Context.Request.Path})" class="btn btn-link">Logout</a>
         }
         else
         {
