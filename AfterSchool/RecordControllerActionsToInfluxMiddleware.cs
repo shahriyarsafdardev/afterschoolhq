@@ -93,30 +93,17 @@ namespace AfterSchool
     public class InfluxSettings : IInfluxSettings
     {
         /// <summary>
-        ///     Constructor to set up values for an InfluxDB 1.* instance.
-        /// </summary>
-        public InfluxSettings(string hostname, int port, string dbName)
-        {
-            Hostname = hostname;
-            Port = port;
-            DbName = dbName;
-        }
-
-        /// <summary>
         ///     Constructor to set up values for an InfluxDB 2.* instance.
         /// </summary>
-        public InfluxSettings(string hostname, int port, string orgName, string bucketName, string apiToken)
+        public InfluxSettings(string hostname, string orgName, string bucketName, string apiToken)
         {
             Hostname = hostname;
-            Port = port;
             OrgName = orgName;
             BucketName = bucketName;
             ApiToken = apiToken;
         }
 
         public string Hostname { get; }
-        public int Port { get; }
-        public string DbName { get; }
         public string OrgName { get; }
         public string BucketName { get; }
         public string ApiToken { get; }

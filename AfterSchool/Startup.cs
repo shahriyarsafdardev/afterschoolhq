@@ -68,7 +68,6 @@ namespace AfterSchool
 
             services.AddTransient<IInfluxSettings>(provider => new InfluxSettings(
                 _configurationRoot.GetValue<string>("InfluxDB:Hostname"),
-                _configurationRoot.GetValue<int>("InfluxDB:Port"),
                 _configurationRoot.GetValue<string>("InfluxDB:OrgName"),
                 _configurationRoot.GetValue<string>("InfluxDB:BucketName"),
                 _configurationRoot.GetValue<string>("InfluxDB:ApiToken")));
