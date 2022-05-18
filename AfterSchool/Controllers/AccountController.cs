@@ -368,7 +368,7 @@ namespace AfterSchool.Controllers
                 msgs.Add("You must agree to the terms of service", MessageType.UserError);
  
             // Register as an existing student
-            if (featureFlagRepository.IsEnabled("stationudent-registration") && currentUser.IsNotEmpty())
+            if (featureFlagRepository.IsEnabled("student-registration") && currentUser.IsNotEmpty())
             {
                 var studentRegistrant = currentUser.GetMasterRegistrant(msgs);
                 if (msgs.HasNoErrors() && !studentRegistrant.IsParentOrGuardian)
