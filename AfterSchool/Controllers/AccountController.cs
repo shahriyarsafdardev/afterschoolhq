@@ -367,14 +367,18 @@ namespace AfterSchool.Controllers
             if (!agree.IsBoolean())
                 msgs.Add("You must agree to the terms of service", MessageType.UserError);
  
-            // Add feature flag check here
-            var studentRegistrant = currentUser.GetMasterRegistrant(msgs);
-            if (msgs.HasNoErrors() && !studentRegistrant.IsParentOrGuardian)
+            // Register as an existing student
+            if (featureFlagRepository.IsEnabled("stationudent-registration") && currentUser.IsNotEmpty())
             {
-                SessionVariables.CurrentRegistrant = studentRegistrant;
+                var studentRegistrant = currentUser.GetMasterRegistrant(msgs);
+                if (msgs.HasNoErrors() && !studentRegistrant.IsParentOrGuardian)
+                {
+                    SessionVariables.CurrentRegistrant = studentRegistrant;
    
-                return RedirectToAction("RegisterStudent");
-            } 
+                    return RedirectToAction("RegisterStudent");
+                } 
+            }
+           
 
 
             qvms.ForEach(qvm =>
