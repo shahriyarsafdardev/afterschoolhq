@@ -366,7 +366,7 @@ namespace AfterSchool.Controllers
 
             if (!agree.IsBoolean())
                 msgs.Add("You must agree to the terms of service", MessageType.UserError);
- 
+
             // Register as an existing student
             if (featureFlagRepository.IsEnabled("student-registration") && currentUser.IsNotEmpty())
             {
@@ -374,11 +374,10 @@ namespace AfterSchool.Controllers
                 if (msgs.HasNoErrors() && !studentRegistrant.IsParentOrGuardian)
                 {
                     SessionVariables.CurrentRegistrant = studentRegistrant;
-   
+
                     return RedirectToAction("RegisterStudent");
-                } 
+                }
             }
-           
 
 
             qvms.ForEach(qvm =>
@@ -2832,12 +2831,18 @@ namespace AfterSchool.Controllers
             {
                 if (registration.ID != null && participationObject.ObjectID != null &&
                     registration.RegistrationPeriodId != null && participationObject.Cost != null)
+                {
+                    var registrationAssignmentType = participationObject.RequiresParentalConsent
+                        ? RegistrationAssignmentType.ReservedPendingParentalConsent
+                        : RegistrationAssignmentType.Reserved;
                     submittedRecord.AddOrUpdateParticipationObject(
                         registration.ID.Value,
                         participationObject.ObjectID.Value,
                         participationObject.ObjectType,
-                        RegistrationAssignmentType.Reserved, registration.RegistrationPeriodId.Value, null,
+                        registrationAssignmentType, registration.RegistrationPeriodId.Value, null,
                         participationObject.Cost.Value, currentUser.ID.Value, msgs);
+                }
+
                 // LOG: Someone Registered RegistrantName for ParticipationObjectType ParticipationObjectName
                 SessionVariables.WebSession.LogActivity(
                     account: currentAccount,
