@@ -8,7 +8,8 @@ namespace AfterSchoolLibrary.Helpers
 {
     public class DatabaseInit
     {
-        public static SystemMessages InitDatabase(string adminEmail = null, string adminPassword = null,
+        public static SystemMessages InitDatabase(DatabaseCredentials databaseCredentials, string adminEmail = null,
+            string adminPassword = null,
             string adminPhone = null,
             bool skipTableCreation = false, string accountName = "First Group")
         {
@@ -16,7 +17,7 @@ namespace AfterSchoolLibrary.Helpers
 
             if (!skipTableCreation)
             {
-                var dc2 = new DatabaseConnection(Utilities.ConnectionString);
+                var dc2 = new DatabaseConnection(databaseCredentials.ConnectionString);
 
                 msgs.AddRange(Database.CreateTables(dc2));
                 msgs.AddRange(Database.AlterTables(dc2));

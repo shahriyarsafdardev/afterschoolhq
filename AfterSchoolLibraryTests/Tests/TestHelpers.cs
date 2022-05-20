@@ -1,4 +1,5 @@
-﻿using AfterSchoolLibrary.Models;
+﻿using System.Reflection;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchoolLibraryTests
 {
@@ -6,9 +7,7 @@ namespace AfterSchoolLibraryTests
     {
         public static DatabaseCredentials TestDatabaseCredentials()
         {
-            return System.Reflection.Assembly.GetExecutingAssembly().Location.ToLower().Contains("work")
-                ? Database.TestCredentials
-                : Database.LocalTestCredentials;
+            return new DatabaseCredentials("localhost", "AfterSchoolTest", "AfterSchoolUser", "Nj8Ed$wpLfJ");
         }
     }
 }

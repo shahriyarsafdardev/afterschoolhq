@@ -6,6 +6,7 @@ using AfterSchool;
 using AfterSchoolLibrary.FeatureFlag;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
+using BasicLibrary;
 using Emmersion.InfluxDB;
 using Hangfire;
 using Microsoft.Extensions.Configuration;
@@ -39,15 +40,19 @@ namespace AfterSchool
             app.MapSignalR();
             ConfigureAuth(app);
 
-            GlobalConfiguration.Configuration
-                .UseSqlServerStorage(Database.Credentials.ConnectionString);
-
             var services = new ServiceCollection();
             ConfigureServices(services);
             var resolver = new DefaultDependencyResolver(services.BuildServiceProvider());
             DependencyResolver.SetResolver(resolver);
 
-            app.Use<RecordControllerActionsToInfluxMiddleware>(resolver.GetService(typeof(IInfluxRecorder)));
+            var connectionString = resolver.GetService<DatabaseCredentials>().ConnectionString;
+            GlobalConfiguration.Configuration.UseSqlServerStorage(connectionString);
+            Utilities.ConnectionString = connectionString;
+            Database.ConnectionString = connectionString;
+
+            AppConfig.Init();
+
+            app.Use<RecordControllerActionsToInfluxMiddleware>(resolver.GetService<IInfluxRecorder>());
 
             app.UseHangfireDashboard();
             app.UseHangfireServer();
@@ -58,7 +63,11 @@ namespace AfterSchool
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddTransient(provider => Database.Credentials);
+            services.AddTransient(provider => new DatabaseCredentials(
+                _configurationRoot.GetValue<string>("SqlServer:ServerName"),
+                _configurationRoot.GetValue<string>("SqlServer:DatabaseName"),
+                _configurationRoot.GetValue<string>("SqlServer:UserName"),
+                _configurationRoot.GetValue<string>("SqlServer:Password")));
             services.AddTransient<IFeatureFlagRepository, FeatureFlagRepository>();
 
             services.AddControllersAsServices(typeof(Startup).Assembly.GetExportedTypes()

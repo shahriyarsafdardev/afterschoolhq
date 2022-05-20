@@ -5,21 +5,27 @@ using System.IO;
 using System.Net.Mail;
 using System.Text;
 using System.Web;
-using AfterSchoolLibrary.Models;
 using Amazon;
 using BasicLibrary;
 using Newtonsoft.Json;
 using Rollbar;
 using SendGrid.Helpers.Mail;
-using File = System.IO.File;
 
 namespace AfterSchoolLibrary.Helpers
 {
     public class Utilities
     {
-        public static int ImageUploadMaxBytes => 1024 * 1024 * 4;
+        public static string[] FullTextSearchWordsToIgnore =
+        {
+            "an", "and", "as", "at", "be", "by", "do", "for", "from", "if", "in", "is", "it", "of", "on", "or", "so",
+            "the", "to", "was",
+            "with",
+        };
 
-        public static string ConnectionString => Database.Credentials.ConnectionString;
+        private static string AppDocumentRoot;
+
+        private static byte[] _AppIV;
+        public static int ImageUploadMaxBytes => 1024 * 1024 * 4;
 
         public static string SurveyBaseUrl
         {
@@ -58,62 +64,7 @@ namespace AfterSchoolLibrary.Helpers
 
         public static bool IsLocalHost => !IsProduction && !IsStaging && !IsCI && !IsQA;
 
-        public static void SystemErrorLog(SystemMessages msgs)
-        {
-            RollbarLocator.RollbarInstance.Configure(new RollbarConfig(RollbarAccessToken)
-                { Environment = GetRollbarEnvironment() });
-            RollbarLocator.RollbarInstance.Error(msgs.RenderMessageList(MessageOutputType.Text));
-        }
-
-        public static void SystemErrorLog(Exception ex)
-        {
-            RollbarLocator.RollbarInstance.Configure(new RollbarConfig(RollbarAccessToken)
-                { Environment = GetRollbarEnvironment() });
-            RollbarLocator.RollbarInstance.Error(ex.Message + " - " + ex.InnerException + " - " + ex.StackTrace);
-        }
-
-        public static void SystemLog(SystemMessages msgs)
-        {
-            RollbarLocator.RollbarInstance.Configure(new RollbarConfig(RollbarAccessToken)
-                { Environment = GetRollbarEnvironment() });
-            RollbarLocator.RollbarInstance.Info(msgs.RenderMessageList(MessageOutputType.Text));
-        }
-
-        public static void SystemLog(string msg)
-        {
-            RollbarLocator.RollbarInstance.Configure(new RollbarConfig(RollbarAccessToken)
-                { Environment = GetRollbarEnvironment() });
-            RollbarLocator.RollbarInstance.Info(msg);
-        }
-
         public static string RollbarAccessToken => ConfigurationManager.AppSettings["Rollbar.AccessToken"];
-
-        public static string GetRollbarEnvironment()
-        {
-            if (IsProduction)
-            {
-                return "production";
-            }
-            if (IsStaging)
-            {
-                return "staging";
-            }
-            if (IsCI)
-            {
-                return "ci";
-            }
-            if (IsQA)
-            {
-                return "qa";
-            }
-            return "local";
-        }
-
-        public static string[] FullTextSearchWordsToIgnore =
-        {
-            "an", "and", "as", "at", "be", "by", "do", "for", "from", "if", "in", "is", "it", "of", "on", "or", "so", "the", "to", "was",
-            "with"
-        };
 
         public static string AppApiKey => MasterAPIKey;
 
@@ -147,11 +98,7 @@ namespace AfterSchoolLibrary.Helpers
         public static string ReCaptchaPrivateKey { get; set; }
         public static string ReCaptchaPublicKey { get; set; }
 
-        private static string AppDocumentRoot;
-
         public static byte[] AppAESKey { get; set; }
-
-        private static byte[] _AppIV;
 
         public static byte[] AppIV
         {
@@ -159,17 +106,11 @@ namespace AfterSchoolLibrary.Helpers
             {
                 if (_AppIV.IsEmpty())
                 {
-                    string filepath = AppDocumentRoot + "\\app\\";
-                    if (!Directory.Exists(filepath))
-                    {
-                        Directory.CreateDirectory(filepath);
-                    }
+                    var filepath = AppDocumentRoot + "\\app\\";
+                    if (!Directory.Exists(filepath)) Directory.CreateDirectory(filepath);
 
                     filepath += "appiv";
-                    if (!File.Exists(filepath))
-                    {
-                        File.WriteAllBytes(filepath, Encryption.GetNewIV());
-                    }
+                    if (!File.Exists(filepath)) File.WriteAllBytes(filepath, Encryption.GetNewIV());
 
                     _AppIV = File.ReadAllBytes(filepath);
                 }
@@ -200,6 +141,59 @@ namespace AfterSchoolLibrary.Helpers
             }
         }
 
+        public static string AppNameEnrollHQ { get; set; }
+        public static string AppNameAfterSchoolHQ { get; set; }
+
+        public static RegionEndpoint AmazonRegionEndPoint { get; set; }
+
+        public static string AmazonBucketName
+        {
+            get
+            {
+                if (IsLocalHost)
+                    return "afterschoolhq-local";
+
+                return ConfigurationManager.AppSettings["AmazonBucketName"];
+            }
+        }
+
+        public static void SystemErrorLog(SystemMessages msgs)
+        {
+            RollbarLocator.RollbarInstance.Configure(new RollbarConfig(RollbarAccessToken)
+                {Environment = GetRollbarEnvironment()});
+            RollbarLocator.RollbarInstance.Error(msgs.RenderMessageList(MessageOutputType.Text));
+        }
+
+        public static void SystemErrorLog(Exception ex)
+        {
+            RollbarLocator.RollbarInstance.Configure(new RollbarConfig(RollbarAccessToken)
+                {Environment = GetRollbarEnvironment()});
+            RollbarLocator.RollbarInstance.Error(ex.Message + " - " + ex.InnerException + " - " + ex.StackTrace);
+        }
+
+        public static void SystemLog(SystemMessages msgs)
+        {
+            RollbarLocator.RollbarInstance.Configure(new RollbarConfig(RollbarAccessToken)
+                {Environment = GetRollbarEnvironment()});
+            RollbarLocator.RollbarInstance.Info(msgs.RenderMessageList(MessageOutputType.Text));
+        }
+
+        public static void SystemLog(string msg)
+        {
+            RollbarLocator.RollbarInstance.Configure(new RollbarConfig(RollbarAccessToken)
+                {Environment = GetRollbarEnvironment()});
+            RollbarLocator.RollbarInstance.Info(msg);
+        }
+
+        public static string GetRollbarEnvironment()
+        {
+            if (IsProduction) return "production";
+            if (IsStaging) return "staging";
+            if (IsCI) return "ci";
+            if (IsQA) return "qa";
+            return "local";
+        }
+
         public static string ShortBaseUrl()
         {
             return $"http{(UseSSL() ? "s" : "")}://{ShortHostName}";
@@ -212,7 +206,8 @@ namespace AfterSchoolLibrary.Helpers
 
         public static string LoginUrl(string redirectUrl = null)
         {
-            return $"{BaseUrl()}/login{(redirectUrl.IsNotEmpty() ? $"?returnurl={HttpUtility.UrlEncode(redirectUrl)}" : "")}";
+            return
+                $"{BaseUrl()}/login{(redirectUrl.IsNotEmpty() ? $"?returnurl={HttpUtility.UrlEncode(redirectUrl)}" : "")}";
         }
 
         public static string CompleteSignUpUrl(Guid currentUserUid, string redirectUrl = null)
@@ -228,9 +223,6 @@ namespace AfterSchoolLibrary.Helpers
 
             return true;
         }
-
-        public static string AppNameEnrollHQ { get; set; }
-        public static string AppNameAfterSchoolHQ { get; set; }
 
         public static string AppName(bool isAfterSchool = true)
         {
@@ -272,19 +264,6 @@ namespace AfterSchoolLibrary.Helpers
                 AmazonRegionEndPoint);
         }
 
-        public static RegionEndpoint AmazonRegionEndPoint { get; set; }
-
-        public static string AmazonBucketName
-        {
-            get
-            {
-                if (IsLocalHost)
-                    return "afterschoolhq-local";
-
-                return ConfigurationManager.AppSettings["AmazonBucketName"];
-            }
-        }
-
         public static bool IsAlreadyJsonString(string s)
         {
             try
@@ -293,7 +272,7 @@ namespace AfterSchoolLibrary.Helpers
                     return false;
 
                 var stringInput = s.Trim();
-                if ((stringInput.StartsWith("{") && stringInput.EndsWith("}")))
+                if (stringInput.StartsWith("{") && stringInput.EndsWith("}"))
                     return true; //For json object
                 if (stringInput.StartsWith("[") && stringInput.EndsWith("]"))
                     return true; //For json array
@@ -314,7 +293,7 @@ namespace AfterSchoolLibrary.Helpers
                 return data;
 
             var stringInput = s.Trim();
-            if ((stringInput.StartsWith("{") && stringInput.EndsWith("}")))
+            if (stringInput.StartsWith("{") && stringInput.EndsWith("}"))
                 data.Add(JsonConvert.DeserializeObject<KeyValuePair>(s)); //For json object
             if (stringInput.StartsWith("[") && stringInput.EndsWith("]"))
                 data.AddRange(JsonConvert.DeserializeObject<List<KeyValuePair>>(s)); //For json array
@@ -325,6 +304,28 @@ namespace AfterSchoolLibrary.Helpers
 
     public class Email
     {
+        public static EmailAddress SendGridSupportEmailAddress => new EmailAddress(AppSupportEmailAddress);
+
+        public static string AppSupportEmailAddress =>
+            $"{(Utilities.IsProduction ? "support" : "dev")}@{ReplyHostName}";
+
+        public static string AppSalesEmailAddress => $"{(Utilities.IsProduction ? "sales" : "dev")}@{ReplyHostName}";
+
+
+        public static string AppNoReplyEmailAddress => $"noreply@{SenderHostName}";
+
+        public static string AppCustomersEmailAddress =>
+            $"{(Utilities.IsProduction ? "customers" : "dev")}@{ReplyHostName}";
+
+        public static string AppReplyAboveLineText => "--- Reply ABOVE THIS LINE to add a comment ---";
+
+        public static string AppReplyAboveLineTextFormatted =>
+            "<p style=\"font-size:9px;\">" + AppReplyAboveLineText + "</p><p></p>";
+
+        public static string ReplyHostName { get; set; }
+
+        public static string SenderHostName { get; set; }
+
         public static string BaseUrl()
         {
             return $"{Utilities.BaseUrl()}/";
@@ -345,17 +346,6 @@ namespace AfterSchoolLibrary.Helpers
             return new EmailAddress(AppNoReplyEmailAddress, Utilities.AppName(isAfterSchool));
         }
 
-        public static EmailAddress SendGridSupportEmailAddress => new EmailAddress(AppSupportEmailAddress);
-
-        public static string AppSupportEmailAddress => $"{(Utilities.IsProduction ? "support" : "dev")}@{ReplyHostName}";
-
-        public static string AppSalesEmailAddress => $"{(Utilities.IsProduction ? "sales" : "dev")}@{ReplyHostName}";
-
-
-        public static string AppNoReplyEmailAddress => $"noreply@{SenderHostName}";
-
-        public static string AppCustomersEmailAddress => $"{(Utilities.IsProduction ? "customers" : "dev")}@{ReplyHostName}";
-
         public static string AppEmailFromName(bool isAfterSchool)
         {
             return Utilities.AppName(isAfterSchool);
@@ -366,20 +356,13 @@ namespace AfterSchoolLibrary.Helpers
             return string.Format("<p>{0}<br /><a href=\"{1}\">{1}</a></p>", AppEmailFromName(isAfterSchool), BaseUrl());
         }
 
-        public static string GetAppSignature(bool isAfterSchool, string utm_campaign, string utm_source = "afterschoolhq",
+        public static string GetAppSignature(bool isAfterSchool, string utm_campaign,
+            string utm_source = "afterschoolhq",
             string utm_medium = "email")
         {
             return
                 $"<p>Powered by <a href=\"{BaseUrl()}?utm_source={utm_source}&utm_medium={utm_medium}&utm_campaign={utm_campaign}\">{AppEmailFromName(isAfterSchool)}</a></p>";
         }
-
-        public static string AppReplyAboveLineText => "--- Reply ABOVE THIS LINE to add a comment ---";
-
-        public static string AppReplyAboveLineTextFormatted => "<p style=\"font-size:9px;\">" + AppReplyAboveLineText + "</p><p></p>";
-
-        public static string ReplyHostName { get; set; }
-
-        public static string SenderHostName { get; set; }
     }
 
     public class KeyValuePair
@@ -390,8 +373,8 @@ namespace AfterSchoolLibrary.Helpers
 
     public class FilesCollection
     {
-        public int ContentLength { get;set; }
+        public int ContentLength { get; set; }
         public string FileName { get; set; }
-        public Stream InputStream { get;set;}        
+        public Stream InputStream { get; set; }
     }
 }

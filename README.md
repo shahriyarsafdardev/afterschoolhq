@@ -29,6 +29,29 @@
 - Open a bash terminal in the root project directory and run `docker-compose up -d`.
 - Move bash terminal to `/scripts` directory and run `./initialize-sqlserver.sh`.
 
+## Configure Local Connection Details
+
+- Create appsettings.json in `Users\{username}\afterschoolhq-overrides\`
+  - Default values:
+```
+{
+  "SqlServer": {
+    "ServerName": "localhost",
+    "DatabaseName": "AfterSchool",
+    "UserName": "AfterSchoolUser",
+    "Password": "Nj8Ed$wpLfJ"
+  },
+  "InfluxDB": {
+    "Hostname": "http://localhost:8086",
+    "OrgName":  "afterschoolhq",
+    "BucketName": "local",
+    "ApiToken": "See instructions below to setup api token"
+  }
+}
+```
+- [How to Setup Local Influx Api Token](https://docs.influxdata.com/influxdb/cloud/security/tokens/create-token/)
+
+
 ## Getting up and running
 
 - Open up the project using - `AfterSchoolHQ - Darye.sln`
