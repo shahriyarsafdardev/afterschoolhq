@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Net.Mail;
-using System.Text;
 using System.Web;
 using Amazon;
 using BasicLibrary;
@@ -66,13 +65,6 @@ namespace AfterSchoolLibrary.Helpers
 
         public static string RollbarAccessToken => ConfigurationManager.AppSettings["Rollbar.AccessToken"];
 
-        public static string AppApiKey => MasterAPIKey;
-
-        public static string AppApiSecret => MasterAPISecret;
-
-        public static string MasterAPIKey { get; set; }
-        public static string MasterAPISecret { get; set; }
-
         public static string AmazonAccessKeyId
         {
             get
@@ -92,30 +84,6 @@ namespace AfterSchoolLibrary.Helpers
                     return "rTkFaZuJ/65sc4QcpjA0tBNEaoIYOXCoUjvlVRBD";
 
                 return ConfigurationManager.AppSettings["AmazonSecretAccessKeyId"];
-            }
-        }
-
-        public static string ReCaptchaPrivateKey { get; set; }
-        public static string ReCaptchaPublicKey { get; set; }
-
-        public static byte[] AppAESKey { get; set; }
-
-        public static byte[] AppIV
-        {
-            get
-            {
-                if (_AppIV.IsEmpty())
-                {
-                    var filepath = AppDocumentRoot + "\\app\\";
-                    if (!Directory.Exists(filepath)) Directory.CreateDirectory(filepath);
-
-                    filepath += "appiv";
-                    if (!File.Exists(filepath)) File.WriteAllBytes(filepath, Encryption.GetNewIV());
-
-                    _AppIV = File.ReadAllBytes(filepath);
-                }
-
-                return _AppIV;
             }
         }
 
@@ -234,25 +202,13 @@ namespace AfterSchoolLibrary.Helpers
 
         public static void InitializeApp()
         {
-            // Utilities.UseSSL = true; //can put in a if statement depending on if is live, etc.
-            // AfterSchoolLibrary.Helpers.Utilities.AppName = "Enroll HQ"; //used in email signatures, etc
-            AppAESKey
-                = Encoding.UTF8.GetBytes(
-                    "9dj3nshcnshf73heydsg1nshdyciefh7"); //32 alphanumeric chars - only set once per app, never changed afterwards, required
-
-            MasterAPIKey = ""; //at least 45 random alphanumeric characters
-            MasterAPISecret = ""; //at least 65 random alphanumeric characters
-
             AmazonRegionEndPoint = RegionEndpoint.USEast2;
 
-            Email.ReplyHostName = "afterschoolhq.com"; // can be modified based on live/dev/test server
-            Email.SenderHostName = "afterschoolhq.com"; // can be modified based on live/dev/test server
+            Email.ReplyHostName = "afterschoolhq.com";
+            Email.SenderHostName = "afterschoolhq.com";
 
             AppNameAfterSchoolHQ = "AfterSchool HQ";
             AppNameEnrollHQ = "Enroll HQ";
-
-            ReCaptchaPrivateKey = "6Lfk694SAAAAAH5e3gWv3JckrYzz2scslo_rop6M"; //can be used as standard re-captcha
-            ReCaptchaPublicKey = "6Lfk694SAAAAAIrtt3Hwiz7j4emDRlYuLp73i9VY";
         }
 
         public static AmazonHelper GetNewAmazonHelper()

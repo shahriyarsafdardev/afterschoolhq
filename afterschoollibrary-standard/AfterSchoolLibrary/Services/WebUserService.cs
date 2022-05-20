@@ -21,11 +21,6 @@ namespace AfterSchoolLibrary.Services
             return BCrypt.Net.BCrypt.HashPassword(password, BCrypt.Net.BCrypt.GenerateSalt());
         }
 
-        public static string DecryptPassword(string password)
-        {
-            return Encryption.DecryptToString(Convert.FromBase64String(password), Helpers.Utilities.AppAESKey, Helpers.Utilities.AppIV);
-        }
-
         public static WebUser LoginByUsername(string username, string password, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return WebUser.LoadByUsername(username, true, msgs, dc).ReturnUserIfValidPassword(password);
