@@ -1367,7 +1367,7 @@ namespace AfterSchool.Controllers
                                     studentUser.FirstName, Utilities.LoginUrl(), parentWebUser.Email,
                                     participationObject?.GetBrowseUrl()));
 
-                            SessionVariables.CurrentUser = parentWebUser;
+                            SessionVariables.CurrentUser = studentUser;
                             SessionVariables.CurrentAccount = parentAccount;
                             SessionVariables.AccountUserType = parentWebUser.GetUserType(parentAccount, msgs);
                             SessionVariables.CurrentRegistrant = studentRegistrant;
