@@ -47,63 +47,63 @@ namespace AfterSchool.Controllers
                 parsedGrade, parsedAge, parsedGender, services, timing, pricing, cost, starting, other, special,
                 latitude, longitude, pageNum, pageSize, msgs);
 
-            var searchList = new List<string>
-            {
-                search,
-                enrollToday,
-                grades,
-                ages,
-                gender,
-                services,
-                timing,
-                pricing,
-                cost,
-                starting,
-                other,
-                special,
-                latitude?.ToString(),
-                longitude?.ToString()
-            };
-
-            if (pageNum == 0 && searchList.Any(x => x.IsNotEmpty()))
-            {
-                var objectText = new
-                {
-                    search, 
-                    enrollToday, 
-                    grades,
-                    ages,
-                    gender,
-                    services,
-                    timing,
-                    pricing,
-                    cost,
-                    starting,
-                    other,
-                    special,
-                    lat = latitude?.ToString(),
-                    lon = longitude?.ToString()
-                };
-                if (SessionVariables.WebSession.IsEmpty())
-                {
-                    SessionVariables.WebSession = WebSessionUtilities.InitializeWebSession(Request, SessionVariables.CurrentUser, SessionVariables.CurrentAccount);
-                }
-                
-                WebSessionUtilities.SaveLog(
-                    SessionVariables.CurrentUser,
-                    SessionVariables.WebSession.ID.Value,
-                    "",
-                    JsonConvert.SerializeObject(objectText),
-                    accountId.ToInteger(), 
-                    WebSessionActionType.Searched, 
-                    ObjectType.Account, 
-                    ObjectType.NotSet, 
-                    accountId.ToInteger(),
-                    null,
-                    msgs, 
-                    null);
-            }
-            
+            // var searchList = new List<string>
+            // {
+            //     search,
+            //     enrollToday,
+            //     grades,
+            //     ages,
+            //     gender,
+            //     services,
+            //     timing,
+            //     pricing,
+            //     cost,
+            //     starting,
+            //     other,
+            //     special,
+            //     latitude?.ToString(),
+            //     longitude?.ToString()
+            // };
+            //
+            // if (pageNum == 0 && searchList.Any(x => x.IsNotEmpty()))
+            // {
+            //     var objectText = new
+            //     {
+            //         search, 
+            //         enrollToday, 
+            //         grades,
+            //         ages,
+            //         gender,
+            //         services,
+            //         timing,
+            //         pricing,
+            //         cost,
+            //         starting,
+            //         other,
+            //         special,
+            //         lat = latitude?.ToString(),
+            //         lon = longitude?.ToString()
+            //     };
+            //     if (SessionVariables.WebSession.IsEmpty())
+            //     {
+            //         SessionVariables.WebSession = WebSessionUtilities.InitializeWebSession(Request, SessionVariables.CurrentUser, SessionVariables.CurrentAccount);
+            //     }
+            //     
+            //     WebSessionUtilities.SaveLog(
+            //         SessionVariables.CurrentUser,
+            //         SessionVariables.WebSession.ID.Value,
+            //         "",
+            //         JsonConvert.SerializeObject(objectText),
+            //         accountId.ToInteger(), 
+            //         WebSessionActionType.Searched, 
+            //         ObjectType.Account, 
+            //         ObjectType.NotSet, 
+            //         accountId.ToInteger(),
+            //         null,
+            //         msgs, 
+            //         null);
+            // }
+            //
             
             if (searchedAccounts.IsNotEmpty() && searchedAccounts.Any())
                 //.. call success and records found
