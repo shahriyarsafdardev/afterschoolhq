@@ -86,7 +86,7 @@ namespace AfterSchool.Controllers
                 };
                 if (SessionVariables.WebSession.IsEmpty())
                 {
-                    WebSessionUtilities.InitializeWebSession(Request, SessionVariables.CurrentUser, SessionVariables.CurrentAccount);
+                    SessionVariables.WebSession = WebSessionUtilities.InitializeWebSession(Request, SessionVariables.CurrentUser, SessionVariables.CurrentAccount);
                 }
                 
                 WebSessionUtilities.SaveLog(
