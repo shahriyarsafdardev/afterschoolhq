@@ -22,4 +22,4 @@ where Text like ',%'
 --from FormQuestionAnswer
 --where id = 1239571
 
-commit
+rollback
