@@ -47,6 +47,9 @@ namespace AfterSchool.Models
             var DoesTableExist = WebSession.DoesTableExists();
             if (DoesTableExist)
                 SessionVariables.WebSession = WebSessionUtilities.InitializeWebSession(Request, SessionVariables.LoggedInUser, SessionVariables.CurrentAccount);
+
+            HttpContext.Items["AccountId"] = SessionVariables.CurrentAccount?.ID;
+            HttpContext.Items["WebUserId"] = SessionVariables.CurrentUser?.ID;
         }
 
         protected bool IsLoggedIn()

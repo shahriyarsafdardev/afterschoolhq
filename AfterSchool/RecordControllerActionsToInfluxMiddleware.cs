@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using BasicLibrary;
 using Emmersion.InfluxDB;
 using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
 
@@ -38,21 +40,31 @@ namespace AfterSchool
         private void SendDataToInflux(IDictionary<string, object> environment, long elapsedMilliseconds)
         {
             var httpContext = (HttpContextBase) environment["System.Web.HttpContextBase"];
-            var httpContextResponse = httpContext.Response;
-            var httpContextRequest = httpContext.Request;
+            var response = httpContext.Response;
+            var request = httpContext.Request;
+            var routeData = request.RequestContext.RouteData;
 
-            var statusCode = httpContextResponse.Status;
-            var urlReferrer = httpContextRequest.UrlReferrer?.ToString();
-            if (string.IsNullOrEmpty(urlReferrer))
-                urlReferrer = "N/A";
-            var userAgent = httpContextRequest.UserAgent;
+            var ipAddress = string.IsNullOrEmpty(request.ServerVariables["HTTP_X_FORWARDED_FOR"])
+                ? request.ServerVariables["REMOTE_ADDR"]
+                : request.ServerVariables["HTTP_X_FORWARDED_FOR"].Split(',').FirstOrDefault()?.Trim();
+            if (ipAddress.IsEmpty()) ipAddress = "N/A";
 
-            var callTo = httpContextRequest.Path;
+            var accountId = httpContext.Items["AccountId"]?.ToString();
+            if (accountId.IsEmpty()) accountId = "N/A";
 
-            var routeData = httpContextRequest.RequestContext.RouteData;
+            var webUserId = httpContext.Items["WebUserId"]?.ToString();
+            if (webUserId.IsEmpty()) webUserId = "N/A";
 
+            var statusCode = response.Status;
+            var callTo = request.Path;
             var controller = routeData?.Values["controller"].ToString();
             var controllerAction = controller + "/" + routeData?.Values["action"];
+
+            var urlReferrer = request.UrlReferrer?.ToString();
+            if (string.IsNullOrEmpty(urlReferrer))
+                urlReferrer = "N/A";
+
+            var userAgent = request.UserAgent;
 
             var points = new[]
             {
@@ -61,6 +73,9 @@ namespace AfterSchool
                     new[]
                     {
                         new Field("Duration-Ms", elapsedMilliseconds),
+                        new Field("Ip-Address", ipAddress),
+                        new Field("Account-Id", accountId),
+                        new Field("Web-User-Id", webUserId),
                     },
                     new[]
                     {
