@@ -1,16 +1,18 @@
+@using Email = AfterSchoolLibrary.Helpers.Email
+@using Utilities = AfterSchoolLibrary.Helpers.Utilities
 @model List<FormQuestionViewModel>
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = "Get Started";
-    var msgs = (SystemMessages)ViewBag.Messages;
-    var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
-    var registrationAccount = (Account)ViewBag.RegistrationAccount;
+    var msgs = (SystemMessages) ViewBag.Messages;
+    var participationObject = (ParticipationObject) ViewBag.ParticipationObject;
+    var registrationAccount = (Account) ViewBag.RegistrationAccount;
     var currentUser = SessionVariables.CurrentUser;
     var savedEmail = Model.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail)?.Value;
     var showStep1 = currentUser.IsEmpty() && savedEmail.IsBlank();
     var isDuringProfileSetup = currentUser.IsNotEmpty() || savedEmail.IsNotBlank();
-    var isStudentRegistrationEnabled = ViewBag.StudentRegistrationEnabled != null && (bool)ViewBag.StudentRegistrationEnabled;
-    var cleverSsoEnabled = ViewBag.CleverSsoEnabled != null && (bool)ViewBag.CleverSsoEnabled;
+    var isStudentRegistrationEnabled = ViewBag.StudentRegistrationEnabled != null && (bool) ViewBag.StudentRegistrationEnabled;
+    var cleverSsoEnabled = ViewBag.CleverSsoEnabled != null && (bool) ViewBag.CleverSsoEnabled;
 }
 
 @{
@@ -21,11 +23,11 @@
     Html.RenderPartial(
         "~/Views/Shared/Registration/_AccountTopBar.cshtml",
         SessionVariables.RegistrationStartPageAccount ?? registrationAccount,
-        new ViewDataDictionary()
+        new ViewDataDictionary
         {
-            { "ParticipationObject", participationObject },
-            { "isDuringProfileSetup", isDuringProfileSetup },
-            { "CleverSsoEnabled", cleverSsoEnabled }
+            {"ParticipationObject", participationObject},
+            {"isDuringProfileSetup", isDuringProfileSetup},
+            {"CleverSsoEnabled", cleverSsoEnabled},
         });
 }
 
@@ -33,9 +35,9 @@
     Html.RenderPartial(
         "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
         new RegistrationHeaderViewModel(participationObject, true),
-        new ViewDataDictionary()
+        new ViewDataDictionary
         {
-            { "hidebuttons", true }
+            {"hidebuttons", true},
         });
 }
 
@@ -45,7 +47,7 @@
             <div class="panel-body">
 
                 <div class="text-center reg-instructions">
-                    <p> <strong> Sign Up / Sign in </strong></p>
+                    <p style="font-weight: bold">Sign Up / Sign In</p>
                 </div>
                 <div>
                     <form class="form-horizontal" id="signup-form" method="post" action="@Url.Action("getstarted", "account")" onkeydown="return checkAndPostSignupForm(event, '@Json.Encode(showStep1)')">
@@ -74,10 +76,10 @@
                                                class="form-control"
                                                onfocus="this.select()"
                                                required="required"
-                                               value="" />
+                                               value=""/>
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-md-6 col-md-offset-3">
                                     <div class="padding-v-20">
                                         <button type="button" id="btn-check-email" class="btn btn-register-primary btn-lg" onclick="checkRegistrantEmail()">Next &raquo;</button>
@@ -94,8 +96,8 @@
                                         </div>
                                         <div class="message">
                                             <p class="text-center text-medium-small">
-                                                We have sent you an email in order to complete your account and register. <br />
-                                                If you do not receive an email check your spam box. If you still cannot find it please contact us at <a href="@AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress">@AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress</a>
+                                                We have sent you an email in order to complete your account and register.<br/>
+                                                If you do not receive an email, check your spam box. If you still cannot find it, please contact us at <a href="@Email.AppSupportEmailAddress">@Email.AppSupportEmailAddress</a>
                                             </p>
                                         </div>
                                     </div>
@@ -131,7 +133,7 @@
                                     <div class="row">
                                         <div class="col-md-6 col-md-offset-3">
                                             <div class="am-checkbox text-center">
-                                                <input type="checkbox" id="textnotifications" name="textnotifications" value="1" @(UILabel.CheckAllowTextMessage(currentUser) ? " checked=\"checked\" " : "") />
+                                                <input type="checkbox" id="textnotifications" name="textnotifications" value="1" @(UILabel.CheckAllowTextMessage(currentUser) ? " checked=\"checked\" " : "")/>
                                                 <label for="textnotifications">
                                                     I would like to receive text messages about @(UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()).
                                                     Notifications may include information about attendance, reminders, and other important information.
@@ -149,7 +151,7 @@
                                         Password <span class="text-danger">*</span>
                                     </label>
                                     <div class="col-md-6">
-                                        <input type="password" class="form-control" id="password1" name="password1" />
+                                        <input type="password" class="form-control" id="password1" name="password1"/>
                                     </div>
                                 </div>
 
@@ -158,10 +160,10 @@
                                         Verify Password <span class="text-danger">*</span>
                                     </label>
                                     <div class="col-md-6">
-                                        <input type="password" class="form-control" id="password2" name="password2" />
+                                        <input type="password" class="form-control" id="password2" name="password2"/>
                                     </div>
                                 </div>
-                                if (AfterSchoolLibrary.Helpers.Utilities.IsProduction || AfterSchoolLibrary.Helpers.Utilities.IsStaging)
+                                if (Utilities.IsProduction)
                                 {
                                     <div class="row padding-v-20">
                                         <div class="form-group text-center">
@@ -176,7 +178,7 @@
                             <div class="row padding-v-20">
                                 <div class="col-md-6 col-md-offset-3">
                                     <div class="am-checkbox text-center">
-                                        <input type="checkbox" id="agree" name="agree" value="1" @(Request["agree"] == "1" ? " checked=\"checked\" " : "") />
+                                        <input type="checkbox" id="agree" name="agree" value="1" @(Request["agree"] == "1" ? " checked=\"checked\" " : "")/>
                                         <label for="agree">
                                             I agree to the <a href="@Url.Action("tos", "legal")" target="_blank">terms and conditions</a> of using @UILabel.ProductName()
                                         </label>
@@ -209,9 +211,9 @@
     Html.RenderPartial(
         "~/Views/Shared/Registration/_BrowseCart.cshtml",
         participationObject,
-        new ViewDataDictionary()
+        new ViewDataDictionary
         {
-            { "IsDuringCheckout", true }
+            {"IsDuringCheckout", true},
         });
 }
 
@@ -294,7 +296,7 @@
     function studentSignup(event) {
         event.preventDefault();
         showLoader();
-        var url = '@Url.Action("StudentRegistration", "Account", new { regaccount = Request["regaccount"] })';
+        let url = '@Url.Action("StudentRegistration", "Account", new {regaccount = Request["regaccount"]})';
         localStorage.setItem('studentRegisterEmail', $("#email-check").val());
         window.location.href = url;
     }
