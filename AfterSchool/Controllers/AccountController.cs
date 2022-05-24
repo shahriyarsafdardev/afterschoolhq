@@ -484,6 +484,7 @@ namespace AfterSchool.Controllers
 
             ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
             ViewBag.Messages = msgs;
+            ViewBag.ParticipationObject = participationObject;
 
             return View(qvms);
         }
