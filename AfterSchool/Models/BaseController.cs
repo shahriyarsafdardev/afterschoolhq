@@ -28,7 +28,7 @@ namespace AfterSchool.Models
                     origin.StartsWith("https://programs.indysummeryouthprograms.org") ||
                     origin.StartsWith("http://localhost:54849") ||
                     Account.LoadAllSubdomains().Contains(origin)
-                    )
+                   )
                 {
                     return true;
                 }
@@ -46,7 +46,8 @@ namespace AfterSchool.Models
             //check if db exisit then create session
             var DoesTableExist = WebSession.DoesTableExists();
             if (DoesTableExist)
-                SessionVariables.WebSession = WebSessionUtilities.InitializeWebSession(Request, SessionVariables.LoggedInUser, SessionVariables.CurrentAccount);
+                SessionVariables.WebSession = WebSessionUtilities.InitializeWebSession(Request,
+                    SessionVariables.LoggedInUser, SessionVariables.CurrentAccount);
 
             HttpContext.Items["AccountId"] = SessionVariables.CurrentAccount?.ID;
             HttpContext.Items["WebUserId"] = SessionVariables.CurrentUser?.ID;
@@ -67,7 +68,7 @@ namespace AfterSchool.Models
         {
             var subdomainAccount = Account.LoadBySubdomain(Request.Url.Host);
             if (subdomainAccount.IsNotEmpty() && Request.Url.AbsolutePath.IsEmpty())
-               Response.Redirect($"https://{Request.Url.Host}/{subdomainAccount.UniqueName}");
+                Response.Redirect($"https://{Request.Url.Host}/{subdomainAccount.UniqueName}");
         }
 
         protected void WriteOutput(object obj, ResponseType rt)
@@ -94,19 +95,19 @@ namespace AfterSchool.Models
 
                 foreach (SystemMessage msg in msgs)
                 {
-                    object message = new { text = msg.Text, type = msg.MessageType.ToString() };
+                    object message = new {text = msg.Text, type = msg.MessageType.ToString()};
                     switch (rt)
                     {
                         case ResponseType.JSON:
                             list.Add(message);
                             break;
                         case ResponseType.XML:
-                            list.Add(new { message = message });
+                            list.Add(new {message = message});
                             break;
                     }
                 }
 
-                object obj = new { status = "error", messages = list.ToArray() };
+                object obj = new {status = "error", messages = list.ToArray()};
                 switch (rt)
                 {
                     case ResponseType.JSON:
@@ -134,25 +135,25 @@ namespace AfterSchool.Models
                 switch (SessionVariables.CurrentAccount.AccountTypeId)
                 {
                     case AccountType.AfterSchool:
-                        return RedirectToAction("index", "account", new { area = "admin" });
+                        return RedirectToAction("index", "account", new {area = "admin"});
 
                     case AccountType.SchoolDistrict:
-                        return RedirectToAction("index", "home", new { area = "district" });
+                        return RedirectToAction("index", "home", new {area = "district"});
 
                     case AccountType.Registrant:
                         if (SessionVariables.Cart.IsNotEmpty())
-                            return RedirectToAction("select", "account", new { area = "" });
+                            return RedirectToAction("select", "account", new {area = ""});
                         else if (registrationAccount.IsNotEmpty())
                             return Redirect(registrationAccount.HomePageUrl);
                         else
-                            return RedirectToAction("index", "home", new { area = "user" });
+                            return RedirectToAction("index", "home", new {area = "user"});
 
                     default:
-                        return RedirectToAction("index", "home", new { area = "org" });
+                        return RedirectToAction("index", "home", new {area = "org"});
                 }
             }
 
-            return RedirectToAction("index", "login", new { area = "" });
+            return RedirectToAction("index", "login", new {area = ""});
         }
 
         protected void LoadSessionInfo(WebUser user, SystemMessages msgs = null)
@@ -170,7 +171,8 @@ namespace AfterSchool.Models
             LoadSessionInfo(user, account, doRememberMe, null, msgs);
         }
 
-        protected void LoadSessionInfo(WebUser user, Account account, bool doRememberMe, string source, SystemMessages msgs = null)
+        protected void LoadSessionInfo(WebUser user, Account account, bool doRememberMe, string source,
+            SystemMessages msgs = null)
         {
             SessionVariables.CurrentAccount = null;
             SessionVariables.CurrentUser = user;
@@ -265,7 +267,7 @@ namespace AfterSchool.Models
             if (returnUrl.IsNotEmpty() && !goToLoginScreenBeforeReturn)
                 return Redirect(returnUrl);
 
-            return RedirectToAction("index", "Login", new { returnurl = returnUrl, area = "" });
+            return RedirectToAction("index", "Login", new {returnurl = returnUrl, area = ""});
         }
 
         internal bool HandleInvite(string invite, Account currentAccount, WebUser currentUser, SystemMessages msgs)
@@ -302,7 +304,7 @@ namespace AfterSchool.Models
         internal void HandleTempMessages(SystemMessages msgs)
         {
             if (TempData.IsNotEmpty() && TempData["msgs"].IsNotEmpty())
-                msgs.AddRange((SystemMessages)TempData["msgs"]);
+                msgs.AddRange((SystemMessages) TempData["msgs"]);
         }
 
         internal void SetTempMessage(SystemMessages msgs) => TempData["msgs"] = msgs;
@@ -316,27 +318,27 @@ namespace AfterSchool.Models
             const string districtPath = "/district/";
             const string orgPath = "/org/";
 
-            if(returnUrl.IsNotEmpty())
+            if (returnUrl.IsNotEmpty())
             {
                 switch (account.AccountTypeId)
                 {
                     case AccountType.AfterSchool:
-                        if (!returnUrl.ToLower().Contains(new string[] { orgPath, registrantPath, districtPath }))
+                        if (!returnUrl.ToLower().Contains(new string[] {orgPath, registrantPath, districtPath}))
                             actionResult = Redirect(returnUrl);
                         break;
                     case AccountType.Registrant:
-                        if (!returnUrl.ToLower().Contains(new string[] { orgPath, adminPath, districtPath }))
+                        if (!returnUrl.ToLower().Contains(new string[] {orgPath, adminPath, districtPath}))
                             actionResult = Redirect(returnUrl);
                         break;
                     case AccountType.SchoolDistrict:
-                        if (!returnUrl.ToLower().Contains(new string[] { orgPath, adminPath, registrantPath }))
+                        if (!returnUrl.ToLower().Contains(new string[] {orgPath, adminPath, registrantPath}))
                             actionResult = Redirect(returnUrl);
                         break;
                     default:
-                        if (account.AccountTypeId.In(AccountService.ProviderAccountTypes) && !returnUrl.ToLower().Contains(new string[] { adminPath, registrantPath, districtPath }))
+                        if (account.AccountTypeId.In(AccountService.ProviderAccountTypes) && !returnUrl.ToLower()
+                                .Contains(new string[] {adminPath, registrantPath, districtPath}))
                             actionResult = Redirect(returnUrl);
                         break;
-
                 }
             }
 
@@ -362,7 +364,7 @@ namespace AfterSchool.Models
         {
             // store temp msgs
             SetTempMessage(msgs: msgs);
-            
+
             if (msgs.HasErrors())
                 AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(msgs); // log all error msgs 
         }
