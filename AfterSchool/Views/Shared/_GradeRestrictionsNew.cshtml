@@ -15,7 +15,7 @@
 }
 
 <div class="col-md-12 onboarding-form-group">
-    <label class="onboarding-lable">  GRADE RESTRICTIONS</label>
+    <label class="onboarding-label">  GRADE RESTRICTIONS</label>
 
     <div class=@(showToggle ? "col-md-1": "")>
         @{Html.RenderPartial("~/Views/Shared/_SwitchButton.cshtml", minGradeLevelId.HasValue || (showToggleUpdated && !showToggle), new ViewDataDictionary() {

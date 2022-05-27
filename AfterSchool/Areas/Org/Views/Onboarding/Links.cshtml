@@ -43,7 +43,7 @@
                     @if (isIsypAccount)
                     {
                         <div class="col-md-12 onboarding-form-group">
-                            <label class="onboarding-lable"> I AM USING AFTERSCHOOL HQ TO COLLECT REGISTRATIONS</label>
+                            <label class="onboarding-label"> I AM USING AFTERSCHOOL HQ TO COLLECT REGISTRATIONS</label>
                             <div class="text-muted margin-b-10" style="font-style:italic">To give parents the best experience we recommend using Afterschool HQ to register</div>
                             <div class="clearfix"></div>
                             <div class="pull-left col-md-12" style="padding: 0;">
@@ -60,7 +60,7 @@
                         <div class="clearfix"></div>
 
                         <div class="col-md-12 onboarding-form-group @(profile.RegistrationUrl.IsNotEmpty() ? "" : "hide")" id="regUrlDiv">
-                            <label class="onboarding-lable">
+                            <label class="onboarding-label">
                                 REGISTRATION OR LEARN MORE URL
                                 <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="This link will be displayed in a button on your Provider Profile for parents to access." data-placement="top" style="font-size: 14px; color: #777;"></i>
                             </label>
@@ -69,7 +69,7 @@
                         <div class="clearfix"></div>
 
                         <div class="col-md-12 onboarding-form-group @(profile.ButtonText.IsNotEmpty() ? "" : "hide")" id="btnTxtDiv">
-                            <label class="onboarding-lable">BUTTON TEXT</label>
+                            <label class="onboarding-label">BUTTON TEXT</label>
                             <div class="clearfix"></div>
                             <div class="pull-left col-md-12" style="padding: 0;">
                                 <div class="am-radio inline">
@@ -86,18 +86,18 @@
                         <div class="clearfix"></div>
                     }
                     <div class="col-md-12 onboarding-form-group">
-                        <label class="onboarding-lable">WEBSITE URL</label>
+                        <label class="onboarding-label">WEBSITE URL</label>
                         <input type="text" class="form-control onboarding-input" name="website" id="website" value="@website" placeholder="https://your-website.com" style="height: 44px;"/>
                     </div>
                     <div class="clearfix"></div>
                     <div class="col-md-12 onboarding-form-group">
-                        <label class="onboarding-lable">FACEBOOK PAGE URL</label>
+                        <label class="onboarding-label">FACEBOOK PAGE URL</label>
                         <input type="text" class="form-control onboarding-input" name="facebook" id="facebook" value="@facebook" placeholder="https://facebook.com/your-page" style="height: 44px;"/>
                     </div>
 
                     <div class="clearfix"></div>
                     <div class="col-md-12 onboarding-form-group">
-                        <label class="onboarding-lable">INSTAGRAM HANDLE</label>
+                        <label class="onboarding-label">INSTAGRAM HANDLE</label>
                         <input type="text" class="form-control onboarding-input" name="instagram" id="instagram" value="@instagram" placeholder="@("@your_instagram_handle")" style="height: 44px;"/>
                     </div>
 
@@ -117,26 +117,26 @@
                     <div class="onboarding-advanced-settings hide">
                         <div class="clearfix"></div>
                         <div class="col-md-12 onboarding-form-group">
-                            <label class="onboarding-lable">TWITTER HANDLE</label>
+                            <label class="onboarding-label">TWITTER HANDLE</label>
                             <input type="text" class="form-control onboarding-input" name="twitter" id="twitter" value="@twitter" placeholder="@("@your_twitter_handle")" style="height: 44px;"/>
                         </div>
 
 
                         <div class="clearfix"></div>
                         <div class="col-md-12 onboarding-form-group">
-                            <label class="onboarding-lable">YOUTUBE URL</label>
+                            <label class="onboarding-label">YOUTUBE URL</label>
                             <input type="text" class="form-control onboarding-input" name="youtube" id="youtube" value="@youtube" placeholder="https://youtube.com/your-page" style="height: 44px;"/>
                         </div>
 
                         <div class="clearfix"></div>
                         <div class="col-md-12 onboarding-form-group">
-                            <label class="onboarding-lable">LINKEDIN URL</label>
+                            <label class="onboarding-label">LINKEDIN URL</label>
                             <input type="text" class="form-control onboarding-input" name="linkedin" id="linkedin" value="@linkedin" placeholder="https://linkedin.com/your-page" style="height: 44px;"/>
                         </div>
 
                         <div class="clearfix"></div>
                         <div class="col-md-12 onboarding-form-group">
-                            <label class="onboarding-lable">APPOINTMENT BOOKING LINK</label>
+                            <label class="onboarding-label">APPOINTMENT BOOKING LINK</label>
                             <input type="text" class="form-control onboarding-input" name="calendar" id="calendar" value="@calendar" placeholder="https://calendly.com/your-page" style="height: 44px;"/>
                         </div>
                     </div>
