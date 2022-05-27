@@ -1,18 +1,18 @@
 @using Email = AfterSchoolLibrary.Helpers.Email
 @using Utilities = AfterSchoolLibrary.Helpers.Utilities
-@model List<FormQuestionViewModel>
+@model AfterSchool.Controllers.AccountController.GetStartedResult
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = "Get Started";
-    var msgs = (SystemMessages) ViewBag.Messages;
-    var participationObject = (ParticipationObject) ViewBag.ParticipationObject;
-    var registrationAccount = (Account) ViewBag.RegistrationAccount;
+    var msgs = Model.Messages;
+    var participationObject = Model.ParticipationObject;
+    var registrationAccount = Model.RegistrationAccount;
     var currentUser = SessionVariables.CurrentUser;
-    var savedEmail = Model.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail)?.Value;
+    var savedEmail = Model.FormQuestionViewModels.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail)?.Value;
     var showStep1 = currentUser.IsEmpty() && savedEmail.IsBlank();
     var isDuringProfileSetup = currentUser.IsNotEmpty() || savedEmail.IsNotBlank();
-    var isStudentRegistrationEnabled = ViewBag.StudentRegistrationEnabled != null && (bool) ViewBag.StudentRegistrationEnabled;
-    var cleverSsoEnabled = ViewBag.CleverSsoEnabled != null && (bool) ViewBag.CleverSsoEnabled;
+    var isStudentRegistrationEnabled = Model.StudentRegistrationEnabled;
+    var cleverSsoEnabled = Model.CleverSsoEnabled;
 }
 
 @{
@@ -124,7 +124,7 @@
                                 </div>
                             </div>
 
-                            @foreach (var qvm in Model.Where(qvm => !qvm.Hide))
+                            @foreach (var qvm in Model.FormQuestionViewModels.Where(qvm => !qvm.Hide))
                             {
                                 Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
 
@@ -302,7 +302,7 @@
     }
 
     function checkAndPostSignupForm(event, isFirstStep) {
-        if (isFirstStep && event.keyCode == 13) {
+        if (isFirstStep && event.keyCode === 13) {
             event.preventDefault();
             $('#btn-check-email').click();
             return false;
@@ -313,7 +313,7 @@
         // show sign up form
         $('#account-registration').removeClass('hide');
         $('#email-check-container').addClass('hide');
-        $('#@Model.Find(qvm => qvm.Question.QuestionTypeId == QuestionType.Email).Id').val(email);
+        $('#@Model.FormQuestionViewModels.Find(qvm => qvm.Question.QuestionTypeId == QuestionType.Email).Id').val(email);
         hideLoader();
     }
 

@@ -267,75 +267,6 @@ namespace AfterSchool.Controllers
             return null;
         }
 
-        private ActionResult AllPathsGetStarted(string regaccount, bool isStudentRegistration)
-        {
-            var msgs = new SystemMessages();
-
-            // handles admin accounts that have or need parent accounts
-            var redirectResult = HandleGetStartedAccountRedirect(false, msgs);
-            if (redirectResult.IsNotEmpty())
-                return redirectResult;
-
-            List<FormQuestionViewModel> studentQvm = null;
-            List<FormQuestionViewModel> parentQvm = null;
-            var participationObject = GetParticipationObjectFromCart();
-
-            Account registrationAccount = null;
-
-            if (regaccount.IsGuid())
-                registrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
-
-            // no activity is selected
-            if (participationObject.IsEmpty() || !participationObject.ObjectID.HasValue)
-            {
-                if (SessionVariables.RegistrationStartPageAccount.IsNotEmpty() || registrationAccount.IsNotEmpty())
-                    return Redirect(SessionVariables.RegistrationStartPageAccount?.HomePageUrl ??
-                                    registrationAccount?.HomePageUrl);
-
-                return HttpNotFound();
-            }
-
-            var isStudentRegistrationEnabled = featureFlagRepository.IsEnabled("student-registration");
-
-            if (isStudentRegistration)
-            {
-                if (!isStudentRegistrationEnabled)
-                    return RedirectToAction("getstarted", new {regaccount});
-
-                if (SessionVariables.CurrentUser.IsNotEmpty() &&
-                    SessionVariables.CurrentAccount.AccountTypeId == AccountType.Registrant)
-                    return RedirectToAction("select");
-
-                ViewBag.ParentQuestions = StudentRegistrationParentViewBag(msgs)
-                    .Select(question => new FormQuestionViewModel(question)).ToList();
-
-                var questions = StudentRegistrationViewBag(msgs);
-                studentQvm = questions.Select(question => new FormQuestionViewModel(question)).ToList();
-            }
-            else
-            {
-                parentQvm = GetQuestionsForParentRegistration(msgs);
-
-                var isStudentAllowedToRegister = DetermineIfStudentIsAllowedToRegister(participationObject, msgs);
-
-                // pre-load phone number
-                if (SessionVariables.CurrentUser.IsNotEmpty())
-                    parentQvm.Find(item => item.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone)
-                            .Value =
-                        SessionVariables.CurrentUser.Phone;
-
-                ViewBag.StudentRegistrationEnabled =
-                    isStudentRegistrationEnabled && isStudentAllowedToRegister;
-            }
-
-            ViewBag.ParticipationObject = participationObject;
-            ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
-            ViewBag.RegistrationAccount = registrationAccount;
-            ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
-            ViewBag.Messages = msgs;
-            return View(parentQvm ?? studentQvm);
-        }
-
         private static bool DetermineIfStudentIsAllowedToRegister(ParticipationObject participationObject,
             SystemMessages msgs)
         {
@@ -351,7 +282,71 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult GetStarted(string regaccount)
         {
-            return AllPathsGetStarted(regaccount, false);
+            var msgs = new SystemMessages();
+
+            // handles admin accounts that have or need parent accounts
+            var redirectResult = HandleGetStartedAccountRedirect(false, msgs);
+            if (redirectResult.IsNotEmpty())
+                return redirectResult;
+
+            var participationObject = GetParticipationObjectFromCart();
+
+            Account registrationAccount = null;
+
+            if (regaccount.IsGuid())
+                registrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
+
+            var noActivityIsSelected = participationObject.IsEmpty() || !participationObject.ObjectID.HasValue;
+            if (noActivityIsSelected)
+            {
+                if (SessionVariables.RegistrationStartPageAccount.IsNotEmpty() || registrationAccount.IsNotEmpty())
+                    return Redirect(SessionVariables.RegistrationStartPageAccount?.HomePageUrl ??
+                                    registrationAccount?.HomePageUrl);
+
+                return HttpNotFound();
+            }
+
+            var result = RetrieveValuesForAndAssembleGetStartedResult(msgs, participationObject, registrationAccount);
+            ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
+            return View(result);
+        }
+
+        private GetStartedResult RetrieveValuesForAndAssembleGetStartedResult(SystemMessages msgs,
+            ParticipationObject participationObject, Account registrationAccount)
+        {
+            var isStudentRegistrationEnabled = featureFlagRepository.IsEnabled("student-registration");
+
+            var questionsForParentRegistration = GetQuestionsForParentRegistration(msgs);
+
+            var isStudentAllowedToRegister = DetermineIfStudentIsAllowedToRegister(participationObject, msgs);
+
+            // pre-load phone number
+            if (SessionVariables.CurrentUser.IsNotEmpty())
+            {
+                questionsForParentRegistration.Find(item => item.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone)
+                    .Value = SessionVariables.CurrentUser.Phone;
+            }
+
+            var result = new GetStartedResult
+            {
+                StudentRegistrationEnabled = isStudentRegistrationEnabled && isStudentAllowedToRegister,
+                ParticipationObject = participationObject,
+                CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso"),
+                RegistrationAccount = registrationAccount,
+                Messages = msgs,
+                FormQuestionViewModels = questionsForParentRegistration,
+            };
+            return result;
+        }
+
+        public class GetStartedResult
+        {
+            public bool CleverSsoEnabled { get; set; }
+            public List<FormQuestionViewModel> FormQuestionViewModels { get; set; }
+            public SystemMessages Messages { get; set; }
+            public ParticipationObject ParticipationObject { get; set; }
+            public Account RegistrationAccount { get; set; }
+            public bool StudentRegistrationEnabled { get; set; }
         }
 
         [HttpPost]
