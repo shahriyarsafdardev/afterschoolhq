@@ -170,59 +170,23 @@ namespace AfterSchool.Controllers
 
         #region GetStartedParent
 
-        private List<FormQuestionViewModel> GetQuestionsForParentRegistration(SystemMessages msgs)
+        private static List<FormQuestion> GetAllQuestionsForQuestionGroup(SystemMessages msgs,
+            FormQuestionGroup questionGroup)
         {
-            var form = FormService.GetAdministratorAccountForm(msgs);
-            var personalContactGroup = form.GetQuestionGroups(msgs)
-                .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
-            var questions = personalContactGroup.GetAllQuestions(msgs);
+            return questionGroup.GetAllQuestions(msgs);
+        }
 
-            var nonIncludedQuestionsExistingUser = new List<QuestionDataType>()
-            {
-                QuestionDataType.RegistrantFirstName,
-                QuestionDataType.RegistrantLastName,
-                QuestionDataType.RegistrantEmail,
-                QuestionDataType.RegistrantMiddleName,
-                QuestionDataType.RegistrantMobilePhone,
-            };
+        private static List<FormQuestionGroup> GetQuestionGroups(SystemMessages msgs, Form form)
+        {
+            return form.GetQuestionGroups(msgs);
+        }
 
-            questions = questions.Where(question =>
-                question.QuestionDataTypeId.NotIn(FormService.QuestionsToNotIncludeInParentPanel())).ToList();
-
-            questions.ForEach(question =>
-            {
-                question.IsRequired = question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName
-                                      || question.QuestionDataTypeId == QuestionDataType.RegistrantLastName
-                                      || question.QuestionDataTypeId == QuestionDataType.RegistrantEmail
-                                      || question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone;
-            });
-
-            var qvms = questions.Select(question => new FormQuestionViewModel(question, Request.Params)).ToList();
-
-            if (SessionVariables.CurrentUser.IsEmpty())
-            {
-                return qvms;
-            }
-
-            qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value =
-                SessionVariables.CurrentUser.FirstName;
-            qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value =
-                SessionVariables.CurrentUser.LastName;
-            qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value =
-                SessionVariables.CurrentUser.Phone;
-            qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value =
-                SessionVariables.CurrentUser.Email;
-
-            qvms.ForEach(qvm =>
-            {
-                if (qvm.Question.QuestionDataTypeId.In(nonIncludedQuestionsExistingUser))
-                {
-                    qvm.Hide = true;
-                    qvm.Question.IsRequired = false;
-                }
-            });
-
-            return qvms;
+        private static Form LoadAdministratorDefaultForm(SystemMessages msgs)
+        {
+            var administratorAccount = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs).FirstOrDefault();
+            return administratorAccount?.DefaultFormId != null
+                ? Form.Load(administratorAccount.DefaultFormId.Value, msgs)
+                : null;
         }
 
         private ActionResult HandleGetStartedAccountRedirect(bool isInterestForm, SystemMessages msgs)
@@ -267,7 +231,7 @@ namespace AfterSchool.Controllers
             return null;
         }
 
-        private static bool DetermineIfStudentIsAllowedToRegister(ParticipationObject participationObject,
+        private static bool DetermineIfStudentIsAllowedToRegisterSelf(ParticipationObject participationObject,
             SystemMessages msgs)
         {
             if (participationObject.ObjectType != ParticipationObjectType.Activity)
@@ -306,37 +270,22 @@ namespace AfterSchool.Controllers
                 return HttpNotFound();
             }
 
-            var result = RetrieveValuesForAndAssembleGetStartedResult(msgs, participationObject, registrationAccount);
+            var questions = GetAllDefaultPersonalInformationQuestions(msgs);
+
+            var isAllowedToRegisterSelf = DetermineIfStudentIsAllowedToRegisterSelf(participationObject, msgs);
+            var getStartedAssembler = new GetStartedAssembler(featureFlagRepository);
+            var result = getStartedAssembler.AssembleGetStartedResult(msgs, participationObject, registrationAccount,
+                SessionVariables.CurrentUser, questions, isAllowedToRegisterSelf, Request.Params);
             ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
             return View(result);
         }
 
-        private GetStartedResult RetrieveValuesForAndAssembleGetStartedResult(SystemMessages msgs,
-            ParticipationObject participationObject, Account registrationAccount)
+        private static List<FormQuestion> GetAllDefaultPersonalInformationQuestions(SystemMessages msgs)
         {
-            var isStudentRegistrationEnabled = featureFlagRepository.IsEnabled("student-registration");
-
-            var questionsForParentRegistration = GetQuestionsForParentRegistration(msgs);
-
-            var isStudentAllowedToRegister = DetermineIfStudentIsAllowedToRegister(participationObject, msgs);
-
-            // pre-load phone number
-            if (SessionVariables.CurrentUser.IsNotEmpty())
-            {
-                questionsForParentRegistration.Find(item => item.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone)
-                    .Value = SessionVariables.CurrentUser.Phone;
-            }
-
-            var result = new GetStartedResult
-            {
-                StudentRegistrationEnabled = isStudentRegistrationEnabled && isStudentAllowedToRegister,
-                ParticipationObject = participationObject,
-                CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso"),
-                RegistrationAccount = registrationAccount,
-                Messages = msgs,
-                FormQuestionViewModels = questionsForParentRegistration,
-            };
-            return result;
+            var administratorDefaultForm = LoadAdministratorDefaultForm(msgs);
+            var personalContactGroup = GetQuestionGroups(msgs, administratorDefaultForm)
+                .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
+            return GetAllQuestionsForQuestionGroup(msgs, personalContactGroup);
         }
 
         public class GetStartedResult
@@ -350,14 +299,15 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult GetStarted(string regaccount, string password1, string password2, string agree,
-            string textnotifications)
+        public ActionResult GetStarted(string regaccount, string password1, string password2, string agree, string textnotifications)
         {
             var msgs = new SystemMessages();
             var participationObject = GetParticipationObjectFromCart();
-            var qvms = GetQuestionsForParentRegistration(msgs);
             var currentUser = SessionVariables.CurrentUser;
 
+            var allQuestionsForQuestionGroup = GetAllDefaultPersonalInformationQuestions(msgs);
+            var getStartedAssembler = new GetStartedAssembler(featureFlagRepository);
+            var qvms = getStartedAssembler.FilterAndTransformQuestionsForParentRegistration(currentUser, allQuestionsForQuestionGroup, Request.Params);
 
             if (!agree.IsBoolean())
                 msgs.Add("You must agree to the terms of service", MessageType.UserError);
@@ -477,11 +427,13 @@ namespace AfterSchool.Controllers
             if (msgs.HasNoErrors())
                 return RedirectToAction("addhomeaddress");
 
-            ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
-            ViewBag.Messages = msgs;
-            ViewBag.ParticipationObject = participationObject;
-
-            return View(qvms);
+            var result = new GetStartedResult
+            {
+                Messages = msgs,
+                CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso"),
+                ParticipationObject = participationObject,
+            };
+            return View(result);
         }
 
         #endregion
@@ -614,7 +566,7 @@ namespace AfterSchool.Controllers
             var questions = personalContactGroup.GetAllQuestions(msgs);
 
             questions = questions.Where(question =>
-                question.QuestionDataTypeId.NotIn(FormService.QuestionsToNotIncludeInAdditionalParentPanel())).ToList();
+                    question.QuestionDataTypeId.NotIn(FormConstants.QuestionsToNotIncludeInAdditionalParentPanel())).ToList();
 
             questions.ForEach(question =>
             {
@@ -1164,7 +1116,7 @@ namespace AfterSchool.Controllers
                 .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
             var questions = personalContactGroup.GetAllQuestions(msgs);
             questions = questions.Where(question =>
-                    question.QuestionDataTypeId.NotIn(FormService.QuestionsToNotIncludeInStudentRegistrationPanel()))
+                    question.QuestionDataTypeId.NotIn(FormConstants.QuestionsToNotIncludeInStudentRegistrationPanel()))
                 .ToList();
             questions.ForEach(question =>
             {
@@ -1191,7 +1143,7 @@ namespace AfterSchool.Controllers
             var questions = personalContactGroup.GetAllQuestions(msgs);
             questions = questions.Where(question =>
                     question.QuestionDataTypeId.NotIn(
-                        FormService.QuestionsToNotIncludeInStudentRegistrationParentPanel()))
+                        FormConstants.QuestionsToNotIncludeInStudentRegistrationParentPanel()))
                 .ToList();
             questions.ForEach(question =>
             {
@@ -2362,7 +2314,7 @@ namespace AfterSchool.Controllers
 
             questions = questions.Where(question =>
                 question.QuestionDataTypeId.NotIn(
-                    FormService.QuestionsToNotIncludeInStudentPanel(isGradeIncluded: false))).ToList();
+                    FormConstants.QuestionsToNotIncludeInStudentPanel(isGradeIncluded: false))).ToList();
 
             questions.ForEach(question =>
             {
@@ -2550,7 +2502,7 @@ namespace AfterSchool.Controllers
 
             questions = questions.Where(question =>
                 question.QuestionDataTypeId.NotIn(
-                    FormService.QuestionsToNotIncludeInStudentPanel(isGradeIncluded: true))).ToList();
+                    FormConstants.QuestionsToNotIncludeInStudentPanel(isGradeIncluded: true))).ToList();
 
             questions.ForEach(question =>
             {

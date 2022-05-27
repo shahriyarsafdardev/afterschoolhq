@@ -327,7 +327,7 @@ namespace AfterSchool.Areas.User.Controllers
                 .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
             var questions = questionGroup.GetAllQuestions(msgs);
 
-            questions = questions.Where(question => question.QuestionDataTypeId.NotIn(FormService.QuestionsToNotIncludeInParentPanel())).ToList();
+            questions = questions.Where(question => question.QuestionDataTypeId.NotIn(FormConstants.QuestionsToNotIncludeInParentPanel())).ToList();
 
             questions.ForEach(question =>
             {

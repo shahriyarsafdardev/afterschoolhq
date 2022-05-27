@@ -691,6 +691,7 @@
     <Compile Include="Areas\WebHooks\Controllers\StripeController.cs" />
     <Compile Include="Areas\WebHooks\Controllers\TwilioController.cs" />
     <Compile Include="Areas\WebHooks\WebHooksAreaRegistration.cs" />
+    <Compile Include="Controllers\GetStartedAssembler.cs" />
     <Compile Include="RecordControllerActionsToInfluxMiddleware.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\AfterSchoolController.cs" />
