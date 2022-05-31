@@ -1,6 +1,10 @@
 variables:
 - name: BuildParameters.solution
   value: AfterSchoolHQ - Darye.sln
+trigger:
+  branches:
+   include:
+     - refs/heads/main
 resources:
   repositories:
   - repository: self
