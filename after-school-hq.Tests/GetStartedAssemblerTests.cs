@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Reflection;
 using AfterSchool.Controllers;
 using AfterSchoolLibrary.FeatureFlag;
 using AfterSchoolLibrary.Models;
@@ -7,6 +8,7 @@ using ApprovalTests;
 using ApprovalTests.Reporters;
 using Moq;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using NUnit.Framework;
 
 namespace after_school_hq.Tests
@@ -24,7 +26,7 @@ namespace after_school_hq.Tests
                 FirstName = "Test",
                 LastName = "Testerson",
                 Phone = "404-555-1234",
-                Email = "test@example.com"
+                Email = "test@example.com",
             };
             var formQuestions = new List<FormQuestion>
             {
@@ -56,11 +58,33 @@ namespace after_school_hq.Tests
                 {
                     ID = 10,
                     Text = "Question to remove",
-                    QuestionDataTypeId = QuestionDataType.RegistrantGrade, 
-                }
+                    QuestionDataTypeId = QuestionDataType.RegistrantGrade,
+                },
             };
             var result = assembler.FilterAndTransformQuestionsForParentRegistration(user, formQuestions, new NameValueCollection());
-            Approvals.Verify(JsonConvert.SerializeObject(result, Formatting.Indented, new JsonSerializerSettings {Error = (sender, args) => args.ErrorContext.Handled = true}));
+            var json = JsonConvert.SerializeObject(result, Formatting.Indented, new JsonSerializerSettings
+            {
+                Error = (sender, args) => args.ErrorContext.Handled = true,
+                ContractResolver = new IgnorePropertiesResolver(new[] {"LastModifiedDate", "CreateDate", "Prop"}),
+            });
+            Approvals.Verify(json);
+        }
+    }
+
+    public class IgnorePropertiesResolver : DefaultContractResolver
+    {
+        private readonly HashSet<string> ignoreProps;
+
+        public IgnorePropertiesResolver(IEnumerable<string> propNamesToIgnore)
+        {
+            ignoreProps = new HashSet<string>(propNamesToIgnore);
+        }
+
+        protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
+        {
+            var property = base.CreateProperty(member, memberSerialization);
+            if (ignoreProps.Contains(property.PropertyName)) property.ShouldSerialize = _ => false;
+            return property;
         }
     }
 }
