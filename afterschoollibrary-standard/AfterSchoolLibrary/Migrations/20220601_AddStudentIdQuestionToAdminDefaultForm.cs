@@ -41,7 +41,7 @@ namespace AfterSchoolLibrary.Migrations
                                 QuestionTypeId = QuestionType.TextBox,
                                 Text = "Student ID"
                             };
-                            var atIndex = questionGroup.GetQuestionCount() + 1;
+                            var atIndex = questionGroup.GetQuestionCount(amsgs, adc) + 1;
                             questionGroup.AddQuestion(question, atIndex, adc);
                         });
                     }
