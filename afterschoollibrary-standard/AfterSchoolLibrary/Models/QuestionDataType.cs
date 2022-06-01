@@ -104,4 +104,5 @@ public enum QuestionDataType
 	EmergencyContact3RelationshipToRegistrant = 101,
 	RegistrantEmployer = 102,
 	RegistrantParentRelationship = 103,
+    StudentId = 104
 }

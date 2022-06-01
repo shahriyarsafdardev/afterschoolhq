@@ -1,213 +1,236 @@
-using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using System.Data;
-using System.Collections;
 
 namespace AfterSchoolLibrary.Models
 {
-	/// <summary>
-    /// Like a section of a form. A FormQuestionGroup contains many FormQuestions
+    /// <summary>
+    ///     Like a section of a form. A FormQuestionGroup contains many FormQuestions
     /// </summary>
-	
     public class FormQuestionGroup : BasicLookUpObject
     {
-		#region "ClassGenerator"
+        #region "ClassGenerator"
 
-		/// <summary>
-		/// Required.
-		/// </summary>
-		public int? FormId { get { return (int?)MDV["FormId"].Value; } set { MDV["FormId"].Value = value; } }
-		public int? DisplayOrder { get { return (int?)MDV["DisplayOrder"].Value; } set { MDV["DisplayOrder"].Value = value; } }
-		public RegistrantType RegistrantTypeId { get { return (RegistrantType)MDV["RegistrantTypeId"].Value; } set { MDV["RegistrantTypeId"].Value = value; } }
-		public QuestionGroupDataType QuestionGroupDataTypeId { get { return (QuestionGroupDataType)MDV["QuestionGroupDataTypeId"].Value; } set { MDV["QuestionGroupDataTypeId"].Value = value; } }
-		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
-		public bool IsDeleted { get { return (bool)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
-		
+        /// <summary>
+        ///     Required.
+        /// </summary>
+        public int? FormId
+        {
+            get => (int?) MDV["FormId"].Value;
+            set => MDV["FormId"].Value = value;
+        }
+
+        public int? DisplayOrder
+        {
+            get => (int?) MDV["DisplayOrder"].Value;
+            set => MDV["DisplayOrder"].Value = value;
+        }
+
+        public RegistrantType RegistrantTypeId
+        {
+            get => (RegistrantType) MDV["RegistrantTypeId"].Value;
+            set => MDV["RegistrantTypeId"].Value = value;
+        }
+
+        public QuestionGroupDataType QuestionGroupDataTypeId
+        {
+            get => (QuestionGroupDataType) MDV["QuestionGroupDataTypeId"].Value;
+            set => MDV["QuestionGroupDataTypeId"].Value = value;
+        }
+
+        public bool IsActive
+        {
+            get => (bool) MDV["IsActive"].Value;
+            set => MDV["IsActive"].Value = value;
+        }
+
+        public bool IsDeleted
+        {
+            get => (bool) MDV["IsDeleted"].Value;
+            set => MDV["IsDeleted"].Value = value;
+        }
+
 
         public FormQuestionGroup()
         {
-            this.Config(ObjectMap, DatabaseQuery, typeof(FormQuestionGroup).Name, "ID");
-            this.LoadObjectValues(ObjectMap);
-			this.RegistrantTypeId = RegistrantType.NotSet;
-			this.QuestionGroupDataTypeId = QuestionGroupDataType.NotSet;
-			this.IsActive = false;
-			this.IsDeleted = false;
-			
+            Config(ObjectMap, DatabaseQuery, typeof(FormQuestionGroup).Name, "ID");
+            LoadObjectValues(ObjectMap);
+            RegistrantTypeId = RegistrantType.NotSet;
+            QuestionGroupDataTypeId = QuestionGroupDataType.NotSet;
+            IsActive = false;
+            IsDeleted = false;
         }
 
-        public static BasicLibrary.DataAccess.DatabaseParameters ObjectMap
+        public static DatabaseParameters ObjectMap
         {
             get
             {
-                BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
-                string className = typeof(FormQuestionGroup).Name;
-                _dp = BasicLookUpObject.get_BaseObjectMap(className);
-				_dp.Add(className, "FormId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "DisplayOrder", System.Data.SqlDbType.Int);
-				_dp.Add(className, "RegistrantTypeId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "QuestionGroupDataTypeId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "IsActive", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
-				
+                var _dp = new DatabaseParameters();
+                var className = typeof(FormQuestionGroup).Name;
+                _dp = get_BaseObjectMap(className);
+                _dp.Add(className, "FormId", SqlDbType.Int);
+                _dp.Add(className, "DisplayOrder", SqlDbType.Int);
+                _dp.Add(className, "RegistrantTypeId", SqlDbType.Int);
+                _dp.Add(className, "QuestionGroupDataTypeId", SqlDbType.Int);
+                _dp.Add(className, "IsActive", SqlDbType.Bit);
+                _dp.Add(className, "IsDeleted", SqlDbType.Bit);
+
                 return _dp;
             }
         }
 
-        public static FormQuestionGroup LoadObject(System.Data.DataRow row)
+        public static FormQuestionGroup LoadObject(DataRow row)
         {
-            FormQuestionGroup obj = new FormQuestionGroup();
+            var obj = new FormQuestionGroup();
             obj.LoadObjectValues(ObjectMap, row);
             return obj;
         }
 
-        protected static BasicLibrary.DataAccess.DatabaseQuery DatabaseQuery
+        protected static DatabaseQuery DatabaseQuery
         {
             get
             {
-                BasicLibrary.DataAccess.DatabaseQuery dq = BaseObject.get_DatabaseQuery(ObjectMap, typeof(FormQuestionGroup).Name);
-				
+                var dq = get_DatabaseQuery(ObjectMap, typeof(FormQuestionGroup).Name);
+
                 return dq;
             }
         }
 
-        public static FormQuestionGroup Load(int id, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static FormQuestionGroup Load(int id, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<FormQuestionGroup> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<FormQuestionGroup> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            var dq = DatabaseQuery;
             dq.Connection = dc;
-			dq.UseParameterizedQuery = false;
-			dq.SelectRange.Start = start;
-			dq.SelectRange.Length = length;
-            return FormQuestionGroup.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+            dq.UseParameterizedQuery = false;
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+            return BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            var dq = DatabaseQuery;
             dq.Connection = dc;
-            return FormQuestionGroup.BaseGetCount(criterias, ObjectMap, dq, msgs);
+            return BaseGetCount(criterias, ObjectMap, dq, msgs);
         }
 
-		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public SystemMessages Save(DatabaseConnection dc = null)
         {
-			var msgs = new SystemMessages();
+            var msgs = new SystemMessages();
 
-			if (this.FormId.IsEmpty())
-				msgs.Add("FormId is required on FormQuestionGroup object", MessageType.Error);
-			
-			if (msgs.HasNoErrors())
-				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(FormQuestionGroup).Name));
+            if (FormId.IsEmpty())
+                msgs.Add("FormId is required on FormQuestionGroup object", MessageType.Error);
 
-			return msgs;
-        }
-
-        public SystemMessages Delete(BasicLibrary.DataAccess.DatabaseConnection dc = null)
-        {
-            return base._Delete2(DatabaseQuery, dc, ObjectMap, typeof(FormQuestionGroup).Name);
-        }
-
-        public static SystemMessages Create(BasicLibrary.DataAccess.DatabaseConnection dc = null)
-        {
-            return BaseObject._Create(DatabaseQuery, dc, ObjectMap);
-        }
-
-        public static SystemMessages Alter(BasicLibrary.DataAccess.DatabaseConnection dc = null)
-        {
-            SystemMessages msgs = new SystemMessages();
-            BasicLibrary.DataAccess.DatabaseParameters dps;
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["FormId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["DisplayOrder"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["RegistrantTypeId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["QuestionGroupDataTypeId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["IsActive"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["IsDeleted"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			
+            if (msgs.HasNoErrors())
+                msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(FormQuestionGroup).Name));
 
             return msgs;
         }
 
-		public FormQuestionGroup Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-		{
-			return FormQuestionGroup.Load(this.ID.Value, msgs, dc: dc);
-		}
-		
-		public static List<FormQuestionGroup> LoadByFormId(int FormId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-		{
-			var dq = DatabaseQuery;
-			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["FormId"], FormId);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-		}
+        public SystemMessages Delete(DatabaseConnection dc = null)
+        {
+            return base._Delete2(DatabaseQuery, dc, ObjectMap, typeof(FormQuestionGroup).Name);
+        }
 
-		public static List<FormQuestionGroup> LoadByFormIdByRegistrantTypeId(int FormId, RegistrantType RegistrantTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-		{
-			var dq = DatabaseQuery;
-			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["FormId"], FormId);
-			dq.Criterias.Add(ObjectMap["RegistrantTypeId"], RegistrantTypeId);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-		}
+        public static SystemMessages Create(DatabaseConnection dc = null)
+        {
+            return _Create(DatabaseQuery, dc, ObjectMap);
+        }
 
-		public static List<FormQuestionGroup> LoadByFormIdByIsDeleted(int FormId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-		{
-			var dq = DatabaseQuery;
-			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["FormId"], FormId);
-			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-		}
+        public static SystemMessages Alter(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            DatabaseParameters dps;
 
-		
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["FormId"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["DisplayOrder"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["RegistrantTypeId"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["QuestionGroupDataTypeId"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["IsActive"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["IsDeleted"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+
+            return msgs;
+        }
+
+        public FormQuestionGroup Reload(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Load(ID.Value, msgs, dc);
+        }
+
+        public static List<FormQuestionGroup> LoadByFormId(int FormId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["FormId"], FormId);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<FormQuestionGroup> LoadByFormIdByRegistrantTypeId(int FormId, RegistrantType RegistrantTypeId, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["FormId"], FormId);
+            dq.Criterias.Add(ObjectMap["RegistrantTypeId"], RegistrantTypeId);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<FormQuestionGroup> LoadByFormIdByIsDeleted(int FormId, bool IsDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["FormId"], FormId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
 
         #endregion
 
-		#region "UserDefined"
+        #region "UserDefined"
 
         public SystemMessages AddQuestion(FormQuestion question, int atIndex, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
-            var questions = this.GetAllQuestions(dc: dc).Where(x => x.DisplayOrder >= atIndex).OrderBy(x => x.DisplayOrder).ToList();
-            foreach(var item in questions)
+            var questions = GetAllQuestions(dc: dc).Where(x => x.DisplayOrder >= atIndex).OrderBy(x => x.DisplayOrder).ToList();
+            foreach (var item in questions)
             {
-                item.DisplayOrder = item.DisplayOrder + 1;
-                msgs.AddRange(item.Save(dc: dc));
+                item.DisplayOrder += 1;
+                msgs.AddRange(item.Save(dc));
             }
 
-            question.FormQuestionGroupId = this.ID;
+            question.FormQuestionGroupId = ID;
             question.DisplayOrder = atIndex;
-            msgs.AddRange(question.Save(dc: dc));
+            msgs.AddRange(question.Save(dc));
 
             return msgs;
         }
@@ -218,13 +241,13 @@ namespace AfterSchoolLibrary.Models
 
             question.FormQuestionGroupId = null;
             question.DisplayOrder = null;
-            msgs.AddRange(question.Save(dc: dc));
+            msgs.AddRange(question.Save(dc));
 
-            var questions = this.GetAllQuestions(dc: dc).OrderBy(x => x.DisplayOrder).ToList();
+            var questions = GetAllQuestions(dc: dc).OrderBy(x => x.DisplayOrder).ToList();
             for (var i = 0; i < questions.Count; i++)
             {
                 questions[i].DisplayOrder = i;
-                msgs.AddRange(questions[i].Save(dc: dc));
+                msgs.AddRange(questions[i].Save(dc));
             }
 
             return msgs;
@@ -232,41 +255,53 @@ namespace AfterSchoolLibrary.Models
 
         public List<FormQuestion> GetAllQuestions(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (this.ID.HasValue)
-                return FormQuestion.LoadByFormQuestionGroupIdByIsDeleted(this.ID.Value, false, msgs, dc).OrderBy(x => x.DisplayOrder).ToList();
+            if (ID.HasValue)
+                return FormQuestion.LoadByFormQuestionGroupIdByIsDeleted(ID.Value, false, msgs, dc).OrderBy(x => x.DisplayOrder).ToList();
 
             return new List<FormQuestion>();
         }
+
         public List<FormQuestion> GetActiveQuestions(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return FormQuestion.LoadByFormQuestionGroupIdByIsActive(this.ID.Value, true, msgs, dc).OrderBy(x => x.DisplayOrder).ToList();
+            return FormQuestion.LoadByFormQuestionGroupIdByIsActive(ID.Value, true, msgs, dc).OrderBy(x => x.DisplayOrder).ToList();
         }
+
         public int GetActiveQuestionCount(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return FormQuestion.GetCount(new Hashtable() { { "FormQuestionGroupId", this.ID.Value }, { "IsActive", true } }, msgs, dc);
+            return FormQuestion.GetCount(new Hashtable {{"FormQuestionGroupId", ID.Value}, {"IsActive", true}}, msgs, dc);
         }
+
         public int GetQuestionCount(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return FormQuestion.GetCount(new Hashtable() { { "FormQuestionGroupId", this.ID.Value } }, msgs, dc);
+            return FormQuestion.GetCount(new Hashtable {{"FormQuestionGroupId", ID.Value}}, msgs, dc);
         }
 
         public FormQuestionGroup Copy()
         {
-            FormQuestionGroup newGroup = new FormQuestionGroup();
-            newGroup.Name = this.Name;
-            newGroup.Description = this.Description;
-            newGroup.DisplayOrder = this.DisplayOrder;
-            newGroup.RegistrantTypeId = this.RegistrantTypeId;
-            newGroup.QuestionGroupDataTypeId = this.QuestionGroupDataTypeId;
+            var newGroup = new FormQuestionGroup();
+            newGroup.Name = Name;
+            newGroup.Description = Description;
+            newGroup.DisplayOrder = DisplayOrder;
+            newGroup.RegistrantTypeId = RegistrantTypeId;
+            newGroup.QuestionGroupDataTypeId = QuestionGroupDataTypeId;
             return newGroup;
         }
 
         public static bool Exists(Hashtable criterias = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return GetCount(
-                criterias: criterias,
-                msgs: msgs,
-                dc: dc) > 0;
+                criterias,
+                msgs,
+                dc) > 0;
+        }
+
+        public static List<FormQuestionGroup> LoadByQuestionGroupDataTypeId(int questionGroupDataTypeId, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["QuestionGroupDataTypeId"], questionGroupDataTypeId);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
         #endregion

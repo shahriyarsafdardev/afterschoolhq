@@ -116,6 +116,15 @@
                                 </div>
                             }
 
+                            @foreach (var qvm in Model.Where(qvm => !qvm.Hide && qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation &&
+                                                                    qvm.Question.QuestionDataTypeId.In(new List<QuestionDataType>
+                                                                    {
+                                                                        QuestionDataType.StudentId,
+                                                                    })))
+                            {
+                                Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
+                            }
+
                             <div class="clearfix"></div>
                             <br/><br/>
 
