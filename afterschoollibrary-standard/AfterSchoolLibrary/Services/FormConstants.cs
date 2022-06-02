@@ -17,6 +17,7 @@ namespace AfterSchoolLibrary.Services
             QuestionDataType.RegistrantHomePhone,
             QuestionDataType.RegistrantParentRelationship,
             QuestionDataType.RegistrantEmployer,
+            QuestionDataType.StudentId,
         };
 
         public static List<QuestionDataType> QuestionsToNotIncludeInStudentRegistrationPanel() =>

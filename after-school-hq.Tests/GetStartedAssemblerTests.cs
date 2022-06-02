@@ -60,6 +60,12 @@ namespace after_school_hq.Tests
                     Text = "Question to remove",
                     QuestionDataTypeId = QuestionDataType.RegistrantGrade,
                 },
+                new FormQuestion
+                {
+                    ID = 11,
+                    Text = "Student ID",
+                    QuestionDataTypeId = QuestionDataType.StudentId,
+                }
             };
             var result = assembler.FilterAndTransformQuestionsForParentRegistration(user, formQuestions, new NameValueCollection());
             var json = JsonConvert.SerializeObject(result, Formatting.Indented, new JsonSerializerSettings
