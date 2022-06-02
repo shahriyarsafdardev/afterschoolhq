@@ -1,9 +1,8 @@
-﻿using Xunit;
-using Xunit.Abstractions;
+﻿using System.Collections.Generic;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
-using System.Collections.Generic;
-using AfterSchoolLibraryTests.Factories;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -28,7 +27,7 @@ namespace AfterSchoolLibraryTests.Tests
         {
             // Arrange
             // Act
-            var form = FormService.AddNewAfterSchoolDefaultForm(msgs: msgs, dc: dc);
+            var form = FormService.AddNewAfterSchoolDefaultForm(msgs, dc);
 
             // Assert
             Assert.NotNull(form);
@@ -48,103 +47,113 @@ namespace AfterSchoolLibraryTests.Tests
             var fqs = form.GetAllQuestions(msgs, dc);
             Assert.NotNull(fqs);
             Assert.True(fqs.Count > 0);
-            
+
             // ec1
             // FirstName
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "First Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1FirstName, options: null, isRequired: true, isActive: true);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "First Name", QuestionType.TextBox, QuestionDataType.EmergencyContact1FirstName, null, true, true);
 
             // LastName
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "Last Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1LastName, options: null, isRequired: true, isActive: true);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "Last Name", QuestionType.TextBox, QuestionDataType.EmergencyContact1LastName, null, true, true);
 
             // Phone
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "Primary Phone", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1Phone, options: null, isRequired: true, isActive: true);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "Primary Phone", QuestionType.TextBox, QuestionDataType.EmergencyContact1Phone, null, true, true);
 
             // Phone2
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "Additional Phone 1", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1Phone2, options: null, isRequired: false, isActive: true);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "Additional Phone 1", QuestionType.TextBox, QuestionDataType.EmergencyContact1Phone2, null, false, true);
 
             // Phone3
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "Additional Phone 2", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1Phone3, options: null, isRequired: false, isActive: true);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "Additional Phone 2", QuestionType.TextBox, QuestionDataType.EmergencyContact1Phone3, null, false, true);
 
             // RelationshipToRegistrant
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "Relationship To Registrant", questionTyped: QuestionType.DropDownList, questionDataTypeId: QuestionDataType.EmergencyContact1RelationshipToRegistrant, options: FormService.RelationshipToRegistrantForEmergencyContactsList, isRequired: false, isActive: true);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "Relationship To Registrant", QuestionType.DropDownList,
+                QuestionDataType.EmergencyContact1RelationshipToRegistrant, FormService.RelationshipToRegistrantForEmergencyContactsList, false, true);
 
             // ec2
             // FirstName
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "First Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2FirstName, options: null, isRequired: false, isActive: true);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "First Name", QuestionType.TextBox, QuestionDataType.EmergencyContact2FirstName, null, false, true);
 
             // LastName
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "Last Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2LastName, options: null, isRequired: false, isActive: true);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "Last Name", QuestionType.TextBox, QuestionDataType.EmergencyContact2LastName, null, false, true);
 
             // Phone
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "Primary Phone", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2Phone, options: null, isRequired: false, isActive: true);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "Primary Phone", QuestionType.TextBox, QuestionDataType.EmergencyContact2Phone, null, false, true);
 
             // Phone2
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "Additional Phone 1", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2Phone2, options: null, isRequired: false, isActive: true);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "Additional Phone 1", QuestionType.TextBox, QuestionDataType.EmergencyContact2Phone2, null, false, true);
 
             // Phone3
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "Additional Phone 2", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2Phone3, options: null, isRequired: false, isActive: true);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "Additional Phone 2", QuestionType.TextBox, QuestionDataType.EmergencyContact2Phone3, null, false, true);
 
             // RelationshipToRegistrant
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "Relationship To Registrant", questionTyped: QuestionType.DropDownList, questionDataTypeId: QuestionDataType.EmergencyContact2RelationshipToRegistrant, options: FormService.RelationshipToRegistrantForEmergencyContactsList, isRequired: false, isActive: true);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "Relationship To Registrant", QuestionType.DropDownList,
+                QuestionDataType.EmergencyContact2RelationshipToRegistrant, FormService.RelationshipToRegistrantForEmergencyContactsList, false, true);
 
             // ec3
             // FirstName
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "First Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3FirstName, options: null, isRequired: false, isActive: true);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "First Name", QuestionType.TextBox, QuestionDataType.EmergencyContact3FirstName, null, false, true);
 
             // LastName
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "Last Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3LastName, options: null, isRequired: false, isActive: true);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "Last Name", QuestionType.TextBox, QuestionDataType.EmergencyContact3LastName, null, false, true);
 
             // Phone
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "Primary Phone", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3Phone, options: null, isRequired: false, isActive: true);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "Primary Phone", QuestionType.TextBox, QuestionDataType.EmergencyContact3Phone, null, false, true);
 
             // Phone2
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "Additional Phone 1", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3Phone2, options: null, isRequired: false, isActive: true);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "Additional Phone 1", QuestionType.TextBox, QuestionDataType.EmergencyContact3Phone2, null, false, true);
 
             // Phone3
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "Additional Phone 2", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3Phone3, options: null, isRequired: false, isActive: true);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "Additional Phone 2", QuestionType.TextBox, QuestionDataType.EmergencyContact3Phone3, null, false, true);
 
             // RelationshipToRegistrant
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "Relationship To Registrant", questionTyped: QuestionType.DropDownList, questionDataTypeId: QuestionDataType.EmergencyContact3RelationshipToRegistrant, options: FormService.RelationshipToRegistrantForEmergencyContactsList, isRequired: false, isActive: true);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "Relationship To Registrant", QuestionType.DropDownList,
+                QuestionDataType.EmergencyContact3RelationshipToRegistrant, FormService.RelationshipToRegistrantForEmergencyContactsList, false, true);
 
             // personal info
             // First Name
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "First Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.RegistrantFirstName, options: null, isRequired: true, isActive: true);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "First Name", QuestionType.TextBox, QuestionDataType.RegistrantFirstName, null, true, true);
 
             // Last Name
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "Last Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.RegistrantLastName, options: null, isRequired: true, isActive: true);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "Last Name", QuestionType.TextBox, QuestionDataType.RegistrantLastName, null, true, true);
 
             // Email
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "Email", questionTyped: QuestionType.Email, questionDataTypeId: QuestionDataType.RegistrantEmail, options: null, isRequired: true, isActive: true);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "Email", QuestionType.Email, QuestionDataType.RegistrantEmail, null, true, true);
 
             // Mobile Phone
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "Mobile Phone", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.RegistrantMobilePhone, options: null, isRequired: false, isActive: false);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "Mobile Phone", QuestionType.TextBox, QuestionDataType.RegistrantMobilePhone, null, false, false);
 
             // Home Phone
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "Home Phone", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.RegistrantHomePhone, options: null, isRequired: false, isActive: false);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "Home Phone", QuestionType.TextBox, QuestionDataType.RegistrantHomePhone, null, false, false);
 
             // Work Phone
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "Work Phone", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.RegistrantWorkPhone, options: null, isRequired: false, isActive: false);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "Work Phone", QuestionType.TextBox, QuestionDataType.RegistrantWorkPhone, null, false, false);
 
             // Date of Birth
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "Date of Birth", questionTyped: QuestionType.Date, questionDataTypeId: QuestionDataType.RegistrantDateOfBirth, options: null, isRequired: false, isActive: true);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "Date of Birth", QuestionType.Date, QuestionDataType.RegistrantDateOfBirth, null, false, true);
 
             // Grade
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "Grade", questionTyped: QuestionType.DropDownList, questionDataTypeId: QuestionDataType.RegistrantGrade, options: FormService.RegistrantGrade, isRequired: false, isActive: true);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "Grade", QuestionType.DropDownList, QuestionDataType.RegistrantGrade, FormService.RegistrantGrade, false,
+                true);
 
             // Gender
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "Gender", questionTyped: QuestionType.RadioList, questionDataTypeId: QuestionDataType.RegistrantGender, options: FormService.RegistrantGender, isRequired: false, isActive: true);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "Gender", QuestionType.RadioList, QuestionDataType.RegistrantGender, FormService.RegistrantGender, false,
+                true);
 
             // T-Shirt Size
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "T-Shirt Size", questionTyped: QuestionType.RadioList, questionDataTypeId: QuestionDataType.RegistrantTShirtSize, options: FormService.RegistrantTShirtSize, isRequired: false, isActive: true);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "T-Shirt Size", QuestionType.RadioList, QuestionDataType.RegistrantTShirtSize,
+                FormService.RegistrantTShirtSize, false, true);
 
             // Race
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "Race", questionTyped: QuestionType.DropDownList, questionDataTypeId: QuestionDataType.RegistrantRaceUsFed, options: FormService.RegistrantRace, isRequired: false, isActive: true);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "Race", QuestionType.DropDownList, QuestionDataType.RegistrantRaceUsFed, FormService.RegistrantRace, false,
+                true);
 
             // Ethnicity
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "Ethnicity", questionTyped: QuestionType.DropDownList, questionDataTypeId: QuestionDataType.RegistrantEthnicityUsFed, options: FormService.RegistrantEthnicity, isRequired: false, isActive: true);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "Ethnicity", QuestionType.DropDownList, QuestionDataType.RegistrantEthnicityUsFed,
+                FormService.RegistrantEthnicity, false, true);
 
             // Organization
-            ReviewQuestionsByQuestionDataTypeId(formQuestions: fqs, text: "Organization", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.RegistrantOrganization, options: null, isRequired: false, isActive: false);
+            ReviewQuestionsByQuestionDataTypeId(fqs, "Organization", QuestionType.TextBox, QuestionDataType.RegistrantOrganization, null, false, false);
+
+            ReviewQuestionsByQuestionDataTypeId(fqs, "Student ID", QuestionType.TextBox, QuestionDataType.StudentId, null, false, false);
         }
 
         [Fact]
@@ -158,12 +167,13 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.NotNull(qhs);
             Assert.True(qhs.Count == 6);
 
-            ReviewEachField(contact: qhs[0], text: "First Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1FirstName, options: null, isRequired: true, isActive: true);
-            ReviewEachField(contact: qhs[1], text: "Last Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1LastName, options: null, isRequired: true, isActive: true);
-            ReviewEachField(contact: qhs[2], text: "Primary Phone", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1Phone, options: null, isRequired: true, isActive: true);
-            ReviewEachField(contact: qhs[3], text: "Additional Phone 1", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1Phone2, options: null, isRequired: false, isActive: true);
-            ReviewEachField(contact: qhs[4], text: "Additional Phone 2", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact1Phone3, options: null, isRequired: false, isActive: true);
-            ReviewEachField(contact: qhs[5], text: "Relationship To Registrant", questionTyped: QuestionType.DropDownList, questionDataTypeId: QuestionDataType.EmergencyContact1RelationshipToRegistrant, options: FormService.RelationshipToRegistrantForEmergencyContactsList, isRequired: false, isActive: true);
+            ReviewEachField(qhs[0], "First Name", QuestionType.TextBox, QuestionDataType.EmergencyContact1FirstName, null, true, true);
+            ReviewEachField(qhs[1], "Last Name", QuestionType.TextBox, QuestionDataType.EmergencyContact1LastName, null, true, true);
+            ReviewEachField(qhs[2], "Primary Phone", QuestionType.TextBox, QuestionDataType.EmergencyContact1Phone, null, true, true);
+            ReviewEachField(qhs[3], "Additional Phone 1", QuestionType.TextBox, QuestionDataType.EmergencyContact1Phone2, null, false, true);
+            ReviewEachField(qhs[4], "Additional Phone 2", QuestionType.TextBox, QuestionDataType.EmergencyContact1Phone3, null, false, true);
+            ReviewEachField(qhs[5], "Relationship To Registrant", QuestionType.DropDownList, QuestionDataType.EmergencyContact1RelationshipToRegistrant,
+                FormService.RelationshipToRegistrantForEmergencyContactsList, false, true);
         }
 
         [Fact]
@@ -177,12 +187,13 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.NotNull(qhs);
             Assert.True(qhs.Count == 6);
 
-            ReviewEachField(contact: qhs[0], text: "First Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2FirstName, options: null, isRequired: false, isActive: true);
-            ReviewEachField(contact: qhs[1], text: "Last Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2LastName, options: null, isRequired: false, isActive: true);
-            ReviewEachField(contact: qhs[2], text: "Primary Phone", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2Phone, options: null, isRequired: false, isActive: true);
-            ReviewEachField(contact: qhs[3], text: "Additional Phone 1", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2Phone2, options: null, isRequired: false, isActive: true);
-            ReviewEachField(contact: qhs[4], text: "Additional Phone 2", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact2Phone3, options: null, isRequired: false, isActive: true);
-            ReviewEachField(contact: qhs[5], text: "Relationship To Registrant", questionTyped: QuestionType.DropDownList, questionDataTypeId: QuestionDataType.EmergencyContact2RelationshipToRegistrant, options: FormService.RelationshipToRegistrantForEmergencyContactsList, isRequired: false, isActive: true);
+            ReviewEachField(qhs[0], "First Name", QuestionType.TextBox, QuestionDataType.EmergencyContact2FirstName, null, false, true);
+            ReviewEachField(qhs[1], "Last Name", QuestionType.TextBox, QuestionDataType.EmergencyContact2LastName, null, false, true);
+            ReviewEachField(qhs[2], "Primary Phone", QuestionType.TextBox, QuestionDataType.EmergencyContact2Phone, null, false, true);
+            ReviewEachField(qhs[3], "Additional Phone 1", QuestionType.TextBox, QuestionDataType.EmergencyContact2Phone2, null, false, true);
+            ReviewEachField(qhs[4], "Additional Phone 2", QuestionType.TextBox, QuestionDataType.EmergencyContact2Phone3, null, false, true);
+            ReviewEachField(qhs[5], "Relationship To Registrant", QuestionType.DropDownList, QuestionDataType.EmergencyContact2RelationshipToRegistrant,
+                FormService.RelationshipToRegistrantForEmergencyContactsList, false, true);
         }
 
         [Fact]
@@ -196,12 +207,13 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.NotNull(qhs);
             Assert.True(qhs.Count == 6);
 
-            ReviewEachField(contact: qhs[0], text: "First Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3FirstName, options: null, isRequired: false, isActive: true);
-            ReviewEachField(contact: qhs[1], text: "Last Name", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3LastName, options: null, isRequired: false, isActive: true);
-            ReviewEachField(contact: qhs[2], text: "Primary Phone", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3Phone, options: null, isRequired: false, isActive: true);
-            ReviewEachField(contact: qhs[3], text: "Additional Phone 1", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3Phone2, options: null, isRequired: false, isActive: true);
-            ReviewEachField(contact: qhs[4], text: "Additional Phone 2", questionTyped: QuestionType.TextBox, questionDataTypeId: QuestionDataType.EmergencyContact3Phone3, options: null, isRequired: false, isActive: true);
-            ReviewEachField(contact: qhs[5], text: "Relationship To Registrant", questionTyped: QuestionType.DropDownList, questionDataTypeId: QuestionDataType.EmergencyContact3RelationshipToRegistrant, options: FormService.RelationshipToRegistrantForEmergencyContactsList, isRequired: false, isActive: true);
+            ReviewEachField(qhs[0], "First Name", QuestionType.TextBox, QuestionDataType.EmergencyContact3FirstName, null, false, true);
+            ReviewEachField(qhs[1], "Last Name", QuestionType.TextBox, QuestionDataType.EmergencyContact3LastName, null, false, true);
+            ReviewEachField(qhs[2], "Primary Phone", QuestionType.TextBox, QuestionDataType.EmergencyContact3Phone, null, false, true);
+            ReviewEachField(qhs[3], "Additional Phone 1", QuestionType.TextBox, QuestionDataType.EmergencyContact3Phone2, null, false, true);
+            ReviewEachField(qhs[4], "Additional Phone 2", QuestionType.TextBox, QuestionDataType.EmergencyContact3Phone3, null, false, true);
+            ReviewEachField(qhs[5], "Relationship To Registrant", QuestionType.DropDownList, QuestionDataType.EmergencyContact3RelationshipToRegistrant,
+                FormService.RelationshipToRegistrantForEmergencyContactsList, false, true);
         }
 
         [Fact(DisplayName = "Confirm that new form has both race and ethnicity")]
@@ -213,50 +225,12 @@ namespace AfterSchoolLibraryTests.Tests
             // Assert
             Assert.NotNull(qhs);
 
-            ReviewEachField(contact: qhs[10], text: "Ethnicity", questionTyped: QuestionType.DropDownList,
-                questionDataTypeId: QuestionDataType.RegistrantEthnicityUsFed, options: FormService.RegistrantEthnicity, isRequired: false, isActive: true);
+            ReviewEachField(qhs[10], "Ethnicity", QuestionType.DropDownList,
+                QuestionDataType.RegistrantEthnicityUsFed, FormService.RegistrantEthnicity, false, true);
 
-            ReviewEachField(contact: qhs[11], text: "Race", questionTyped: QuestionType.DropDownList,
-                questionDataTypeId: QuestionDataType.RegistrantRaceUsFed, options: FormService.RegistrantRace, isRequired: false, isActive: true);
+            ReviewEachField(qhs[11], "Race", QuestionType.DropDownList,
+                QuestionDataType.RegistrantRaceUsFed, FormService.RegistrantRace, false, true);
         }
-
-        #region Helpers
-
-        public static void ReviewQuestionsByQuestionDataTypeId(List<FormQuestion> formQuestions, string text, QuestionType questionTyped, QuestionDataType questionDataTypeId, string options, bool isRequired, bool isActive)
-        {
-            // Arrange
-            var question = formQuestions.Find(m => m.QuestionDataTypeId == questionDataTypeId);
-
-            // Assert
-            Assert.NotNull(question);
-            ReviewEachField(question: question, text: text, questionTyped: questionTyped, questionDataTypeId: questionDataTypeId, options: options, isRequired: isRequired, isActive: isActive);
-        }
-
-        public static void ReviewEachField(FormQuestion question, string text, QuestionType questionTyped, QuestionDataType questionDataTypeId, string options, bool isRequired, bool isActive)
-        {
-            // Assert
-            Assert.NotNull(question);
-            Assert.True(question.Text == text);
-            Assert.True(question.QuestionTypeId == questionTyped);
-            Assert.True(question.QuestionDataTypeId == questionDataTypeId);
-            Assert.True(question.IsRequired == isRequired);
-            Assert.True(question.IsActive == isActive);
-            Assert.True(question.Options == options);
-        }
-
-        public static void ReviewEachField(FormService.QuestionHolder contact,  string text, QuestionType questionTyped, QuestionDataType questionDataTypeId, string options, bool isRequired, bool isActive)
-        {
-            // Assert
-            Assert.NotNull(contact);
-            Assert.True(contact.Text == text);
-            Assert.True(contact.QuestionTypeId == questionTyped);
-            Assert.True(contact.QuestionDataTypeId == questionDataTypeId);
-            Assert.True(contact.IsRequired == isRequired);
-            Assert.True(contact.IsActive == isActive);
-            Assert.True(contact.Options == options);
-        }
-
-        #endregion
 
         [Theory]
         [InlineData("1234", 1)]
@@ -269,5 +243,46 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.Equal(msgs.Count, count);
         }
+
+        #region Helpers
+
+        public static void ReviewQuestionsByQuestionDataTypeId(List<FormQuestion> formQuestions, string text, QuestionType questionTyped,
+            QuestionDataType questionDataTypeId, string options, bool isRequired, bool isActive)
+        {
+            // Arrange
+            var question = formQuestions.Find(m => m.QuestionDataTypeId == questionDataTypeId);
+
+            // Assert
+            Assert.NotNull(question);
+            ReviewEachField(question, text, questionTyped, questionDataTypeId, options, isRequired, isActive);
+        }
+
+        public static void ReviewEachField(FormQuestion question, string text, QuestionType questionTyped, QuestionDataType questionDataTypeId, string options,
+            bool isRequired, bool isActive)
+        {
+            // Assert
+            Assert.NotNull(question);
+            Assert.True(question.Text == text);
+            Assert.True(question.QuestionTypeId == questionTyped);
+            Assert.True(question.QuestionDataTypeId == questionDataTypeId);
+            Assert.True(question.IsRequired == isRequired);
+            Assert.True(question.IsActive == isActive);
+            Assert.True(question.Options == options);
+        }
+
+        public static void ReviewEachField(FormService.QuestionHolder contact, string text, QuestionType questionTyped, QuestionDataType questionDataTypeId,
+            string options, bool isRequired, bool isActive)
+        {
+            // Assert
+            Assert.NotNull(contact);
+            Assert.True(contact.Text == text);
+            Assert.True(contact.QuestionTypeId == questionTyped);
+            Assert.True(contact.QuestionDataTypeId == questionDataTypeId);
+            Assert.True(contact.IsRequired == isRequired);
+            Assert.True(contact.IsActive == isActive);
+            Assert.True(contact.Options == options);
+        }
+
+        #endregion
     }
 }

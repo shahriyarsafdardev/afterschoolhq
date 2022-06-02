@@ -889,6 +889,14 @@ namespace AfterSchoolLibrary.Services
                 QuestionGroupDataTypeId = groupType,
                 QuestionDataTypeId = QuestionDataType.RegistrantEmployer,
             });
+            qhs.Add(new QuestionHolder
+            {
+                Text = "Student ID",
+                QuestionTypeId = QuestionType.TextBox,
+                GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.StudentId,
+            });
 
             return qhs;
         }
