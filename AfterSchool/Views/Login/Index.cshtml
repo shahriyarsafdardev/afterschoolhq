@@ -131,7 +131,7 @@
             <div class="form-group">
                 <label class="short-description"> Email </label>
                 <div class="input-group" style="width: 100%;">
-                    <input id="username-small-scrren" name="username" type="text" class="form-control txt-generic-login" required>
+                    <input id="username-small-screen" name="username" type="text" class="form-control txt-generic-login" required data-test="login-email">
                     <div class="input-group-email">
                         <button id="inputGroupEmailPrepend-small-scrren" type="button" class="btn btn-primary btn-sm btn-generic-login">
                             <img src="~/Assets/img/envelope.svg" alt="envelope" />
@@ -192,7 +192,7 @@
     function validateLogin(isMobile) {
         if (isMobile) {
 
-            var email = $('#username-small-scrren');
+            var email = $('#username-small-screen');
             var pass = $('#password-small-scrren');
             var isEmailValid = validateEmail(email.val());
             var isPassValid = pass.val() == '' ? false : true;
