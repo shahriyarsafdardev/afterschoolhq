@@ -396,6 +396,15 @@ namespace AfterSchoolLibrary.Models
 				msgs: msgs,
 				dc: dc) > 0;
 		}
+        
+        public static List<FormQuestion> LoadByQuestionDataTypeId(List<QuestionDataType> questionDataTypeIds, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["QuestionDataTypeId"], questionDataTypeIds, DatabaseCriteriaOperatorEnum.In);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
 
 		#endregion
     }

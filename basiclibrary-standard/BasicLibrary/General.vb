@@ -1189,7 +1189,7 @@ Public Class Utilities
     End Function
 
     Public Shared Function GetStateList() As String
-        Return "Alabama,Alaska,Arizona,Arkansas,California,Colorado,Connecticut,Delaware,Florida,Georgia,Hawaii,Idaho,Illinois,Indiana,Iowa,Kansas,Kentucky,Louisiana,Maine,Maryland,Massachusetts,Michigan,Minnesota,Mississippi,Missouri,Montana,Nebraska,Nevada,New Hampshire,New Jersey,New Mexico,New York,North Carolina,North Dakota,Ohio,Oklahoma,Oregon,Pennsylvania,Rhode Island,South Carolina,South Dakota,Tennessee,Texas,Utah,Vermont,Virginia,Washington,West Virginia,Wisconsin,Wyoming"
+        Return "Alabama,Alaska,Arizona,Arkansas,California,Colorado,Connecticut,Delaware,District of Columbia,Florida,Georgia,Hawaii,Idaho,Illinois,Indiana,Iowa,Kansas,Kentucky,Louisiana,Maine,Maryland,Massachusetts,Michigan,Minnesota,Mississippi,Missouri,Montana,Nebraska,Nevada,New Hampshire,New Jersey,New Mexico,New York,North Carolina,North Dakota,Ohio,Oklahoma,Oregon,Pennsylvania,Rhode Island,South Carolina,South Dakota,Tennessee,Texas,Utah,Vermont,Virginia,Washington,West Virginia,Wisconsin,Wyoming"
     End Function
 
     Public Shared Function GetStates() As List(Of State)
@@ -1202,6 +1202,7 @@ Public Class Utilities
         states.Add(New State("Colorado", "CO"))
         states.Add(New State("Connecticut", "CT"))
         states.Add(New State("Delaware", "DE"))
+        states.Add(New State("District of Columbia", "DC"))
         states.Add(New State("Florida", "FL"))
         states.Add(New State("Georgia", "GA"))
         states.Add(New State("Hawaii", "HI"))
