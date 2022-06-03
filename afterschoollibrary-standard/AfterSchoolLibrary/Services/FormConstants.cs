@@ -62,6 +62,7 @@ namespace AfterSchoolLibrary.Services
                 QuestionDataType.RegistrantRaceUsFed,
                 QuestionDataType.RegistrantEthnicityUsFed,
                 QuestionDataType.RegistrantTShirtSize,
+                QuestionDataType.StudentId,
             };
 
         public static List<QuestionDataType> QuestionsToNotIncludeInStudentPanel(bool isGradeIncluded)
