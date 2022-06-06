@@ -369,7 +369,7 @@ namespace AfterSchool.Controllers
 
                 Database.ExecuteTransaction
                 (
-                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    action: (amsgs, adc) =>
                     {
                         user = CreateOrUpdateUser(
                             currentUser,
@@ -414,25 +414,28 @@ namespace AfterSchool.Controllers
                         if (amsgs.HasNoErrors())
                             AddOrUpdateStandardAnswers(qvms, registrant, user, amsgs, adc);
                     },
-                    onSuccess: (SystemMessages smsgs) =>
+                    onSuccess: smsgs =>
                     {
                         msgs.AddRange(smsgs);
                         LoadSessionInfo(user, account);
                     },
-                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                    onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
+                    onFailure: failureMessages => msgs.AddRange(failureMessages),
+                    onException: exceptionMessages => Utilities.SystemErrorLog(exceptionMessages)
                 );
             }
 
             if (msgs.HasNoErrors())
                 return RedirectToAction("addhomeaddress");
+            
+            Account registrationAccount = null;
 
-            var result = new GetStartedResult
-            {
-                Messages = msgs,
-                CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso"),
-                ParticipationObject = participationObject,
-            };
+            if (regaccount.IsGuid())
+                registrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
+            var questions = GetAllDefaultPersonalInformationQuestions(msgs);
+            var isAllowedToRegisterSelf = DetermineIfStudentIsAllowedToRegisterSelf(participationObject, msgs);
+            var result = getStartedAssembler.AssembleGetStartedResult(msgs, participationObject, registrationAccount,
+                SessionVariables.CurrentUser, questions, isAllowedToRegisterSelf, Request.Params);
+            ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
             return View(result);
         }
 
