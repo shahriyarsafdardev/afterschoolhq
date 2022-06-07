@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Web;
 using System.Web.Mvc;
 using BasicLibrary;
-using System.Web.Script.Serialization;
 using AfterSchoolLibrary.Services;
 using AfterSchoolLibrary.Models;
 
@@ -77,8 +77,7 @@ namespace AfterSchool.Models
             {
                 case ResponseType.JSON:
                     Response.ContentType = "application/json";
-                    JavaScriptSerializer jsserializer = new JavaScriptSerializer();
-                    Response.Write(jsserializer.Serialize(obj));
+                    Response.Write(JsonSerializer.Serialize(obj));
                     break;
                 case ResponseType.XML:
                     Response.ContentType = "application/xml";
@@ -111,8 +110,7 @@ namespace AfterSchool.Models
                 switch (rt)
                 {
                     case ResponseType.JSON:
-                        JavaScriptSerializer jsserializer = new JavaScriptSerializer();
-                        Response.Write(jsserializer.Serialize(obj));
+                        Response.Write(JsonSerializer.Serialize(obj));
                         break;
                     case ResponseType.XML:
                         Response.Write(obj.ToXml().ToString());

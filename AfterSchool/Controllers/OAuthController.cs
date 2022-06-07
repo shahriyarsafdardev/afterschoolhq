@@ -2,13 +2,12 @@
 using System.Web.Mvc;
 using System.Net;
 using System.IO;
-using System.Web.Script.Serialization;
 using BasicLibrary;
 using AfterSchool.Models;
-using System.Linq;
 using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Services;
 using AfterSchoolLibrary.Models;
+using Newtonsoft.Json;
 
 namespace AfterSchool.Controllers
 {
@@ -53,8 +52,7 @@ namespace AfterSchool.Controllers
                     dataStream.Close();
                     response.Close();
 
-                    JavaScriptSerializer jsserializer = new JavaScriptSerializer();
-                    dynamic results = jsserializer.DeserializeObject(responseFromServer);
+                    dynamic results = JsonConvert.DeserializeObject(responseFromServer);
 
                     string token_type = results["token_type"];
                     string stripe_publishable_key = results["stripe_publishable_key"];

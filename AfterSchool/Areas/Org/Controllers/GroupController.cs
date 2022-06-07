@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Text.Json;
 using System.Web.Mvc;
-using System.Web.Script.Serialization;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
@@ -1064,9 +1064,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (step.IsNumber())
                 nextStep = step.ToInteger();
 
-            var registrantAssignments =
-                new JavaScriptSerializer {MaxJsonLength = 50000000}.Deserialize<List<RegistrantAssignment>>(
-                    assignmentsJSON);
+            var registrantAssignments = JsonSerializer.Deserialize<List<RegistrantAssignment>>(assignmentsJSON);
 
             group.RandomizePlacementApply(registrantAssignments, SessionVariables.CurrentUser, msgs);
 
