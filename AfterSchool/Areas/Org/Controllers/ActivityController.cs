@@ -383,11 +383,25 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var registrantActivities = activity.GetRegistrantActivities(msgs);
-
-            ViewBag.Messages = msgs;
-            ViewBag.RegistrantActivities = registrantActivities;
+            var isActivityLeader = IsActivityLeader(activity, msgs);
             
-            return View(activity);
+            var results = new PrintRegistrantsResults()
+            {
+                Activity = activity,
+                RegistrantActivities = registrantActivities,
+                Messages = msgs,
+                IsActivityLeader = isActivityLeader
+            };
+            
+            return View(results);
+        }
+
+        public class PrintRegistrantsResults
+        {
+            public Activity Activity { get; set; }
+            public List<RegistrantActivity> RegistrantActivities { get; set; }
+            public SystemMessages Messages { get; set; }
+            public bool IsActivityLeader { get; set; }
         }
 
         [HttpGet]

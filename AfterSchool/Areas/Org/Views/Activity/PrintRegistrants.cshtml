@@ -1,8 +1,8 @@
-@model Activity
+@model AfterSchool.Areas.Org.Controllers.ActivityController.PrintRegistrantsResults
 @{
-    ViewBag.Title = Model.Name;
-    var registrantActivities = (List<RegistrantActivity>)ViewBag.RegistrantActivities;
-    var msgs = (SystemMessages)ViewBag.Messages;
+    ViewBag.Title = Model.Activity.Name;
+    var registrantActivities = Model.RegistrantActivities;
+    var msgs = Model.Messages;
     Layout = "~/Views/Shared/Layouts/_PrintScreen.cshtml";
 }
 
@@ -31,7 +31,7 @@
                                 { "BackToListAction", "Registrants" },
                                 { "BackToListController", "Activity" },
                                 { "ShowPaymentForm", false },
-                                { "IsActivityLeader", ViewBag.IsActivityLeader },
+                                { "IsActivityLeader", Model.IsActivityLeader },
                                 { "IsPrintView", true },
                             }
                             );
