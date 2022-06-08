@@ -192,6 +192,10 @@
                             Send Registration Report
                         </a>
 
+                        <a href="@Url.Action("printregistrants", "activity" , new { id = Model.Uid })" class="btn btn-default btn-space" target="_blank">
+                            Print Registrations
+                        </a>
+
                         @if (activeRegistrationPeriod.IsNotEmpty())
                         {
                             if (showAllowInvites)

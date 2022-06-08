@@ -1,0 +1,59 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="/favicon.png">
+    <meta name="keywords" content="app, responsive, jquery, bootstrap, dashboard, admin">
+    <title>@UILabel.ProductName()</title>
+
+    @{Html.RenderPartial("~/Views/Shared/_HeadIncludes.cshtml");}
+
+    @RenderSection("head", required: false)
+
+</head>
+<body>
+    <div class="am-wrapper notopmenu">
+        <!-- Main section-->
+        <div id="app-body" class="am-content-full">
+            @RenderBody()
+        </div>
+
+        <style>
+            .overlay {
+                width: 100%; /*only for full screen*/
+            }
+        </style>
+        @{Html.RenderPartial("~/Views/Shared/_UpgradePlan.cshtml");}
+    </div>
+
+    @{Html.RenderPartial("~/Views/Shared/_JavascriptIncludes.cshtml");}
+
+    @RenderSection("scripts", required: false)
+
+    <script>
+        $(document).ready(function () {
+
+            $('.am-content-full').css({
+                'min-height': $(window).height(),
+                'background-color': '#fff'
+            });
+
+            $('form').submit(function () {
+                $(this).find('button[type="submit"]').prop('disabled', true);
+                $(this).find('button[type="submit"]').html('...');
+                $('#modal-saving').removeClass('hide');
+            });
+
+            $('a').click(function () {
+                if ($(this).attr('href') && $(this).attr('href') != "#" && $(this).attr('href').indexOf('javascript:') == -1 && $(this).attr('target') != "_blank") {
+                    $('#modal-saving').removeClass('hide');
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

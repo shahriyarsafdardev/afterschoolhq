@@ -1,12 +1,24 @@
 ﻿@model List<FormQuestionAnswer>
 @{ 
     var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
+
+    var isPrintView = false;
+    var tableCondensed = "";
+    if (ViewData["IsPrintView"].IsNotEmpty() && ViewData["IsPrintView"].ToString().IsBoolean())
+    {
+        isPrintView = ViewData["IsPrintView"].ToString().ToBoolean();
+    }
+
+    if (isPrintView)
+    {
+        tableCondensed = "table-condensed";
+    }
 }
 
 @foreach (var group in Model.Select(x => x.ToFormQuestionGroup()).DistinctBy(x => x.QuestionGroupDataTypeId).OrderBy(x => x.DisplayOrder))
 {
     <div class="table-responsive">
-        <table class="table table-striped">
+        <table class="table table-striped @tableCondensed">
             <thead>
                 <tr>
                     <th colspan="2">@group.Name</th>

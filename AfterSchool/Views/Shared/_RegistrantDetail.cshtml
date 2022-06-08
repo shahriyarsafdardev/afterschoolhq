@@ -14,9 +14,24 @@
     {
         isActivityLeader = (bool)ViewData["IsActivityLeader"];
     }
+
+    var isPrintView = false;
+    var tableCondensed = "";
+    if (ViewData["IsPrintView"].IsNotEmpty() && ViewData["IsPrintView"].ToString().IsBoolean())
+    {
+        isPrintView = ViewData["IsPrintView"].ToString().ToBoolean();
+    }
+
+    if (isPrintView)
+    {
+        tableCondensed = "table-condensed";
+    }
+    
 }
 <div class="panel panel-default">
-    <div class="panel-heading" style="margin:0">
+<div class="panel-heading" style="margin:0">
+    @if (!isPrintView)
+    {
         <div class="div-group pull-right">
             @if (activity.BelongsTo(account))
             {
@@ -26,135 +41,136 @@
             }
             <a href="@Url.Action(backtolistAction, backtolistController, new { id = activity.Uid })" class="btn btn-default">&laquo; Back to List</a>
         </div>
-        <div class="pull-left" style="margin-top: 10px;">@Model.RegistrantName</div>
-        <div style="clear:both"></div>
-    </div>
+    }
     
-    <div class="panel-body" style="padding:0">
+    <div class="pull-left" style="margin-top: 10px;">@Model.RegistrantName</div>
+    <div style="clear:both"></div>
+</div>
+    
+<div class="panel-body" style="padding:0">
+<div class="table-responsive">
+    <table class="table table-striped @tableCondensed">
+        <thead>
+        <tr>
+            <th colspan="2">Registration Data</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td width="33%" class="text-right">Registration Date/Time</td>
+            <td>@account.ConvertToAccountTimeZone(Model.CreateDate.Value).ToLongDateTimeString()</td>
+        </tr>
+        <tr>
+            <td width="33%" class="text-right">Status</td>
+            <td>@Model.AssignmentTypeId.ToString().SplitByUpperCase()</td>
+        </tr>
+        @if (registration.ESignature.IsNotEmpty())
+        {
+            <tr>
+                <td width="33%" class="text-right">E-Signature</td>
+                <td>@registration.ESignature</td>
+            </tr>
+        }
+        @if (registration.ESignatureIPAddress.IsNotEmpty())
+        {
+            <tr>
+                <td width="33%" class="text-right">IP Address</td>
+                <td>@registration.ESignatureIPAddress</td>
+            </tr>
+        }
+        @if (registration.ESignatureUserAgent.IsNotEmpty())
+        {
+            <tr>
+                <td width="33%" class="text-right">Browser Info</td>
+                <td>@registration.ESignatureUserAgent</td>
+            </tr>
+        }
+        </tbody>
 
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                Registration Data
-            </div>
-            <div class="panel-body" style="padding:0">
+    </table>
+</div>
+
+@{ Html.RenderPartial("~/Views/Shared/Registrant/_Answers.cshtml", answers, new ViewDataDictionary(){{ "IsPrintView", isPrintView}}); }
+
+@if (!activity.IsFree  && Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && !isPrintView)
+{
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            Payment Information
+        </div>
+        <div class="panel-body" style="padding:0">
+            <form id="form-add-payment" action="@Url.Action("AddPayment", "activity", new { id = Model.Uid })" method="post">
                 <div class="table-responsive">
                     <table class="table table-striped">
                         <tr>
-                            <td width="33%" class="text-right">Registration Date/Time</td>
-                            <td>@account.ConvertToAccountTimeZone(Model.CreateDate.Value).ToLongDateTimeString()</td>
+                            <td width="33%" class="text-right">
+                                Amount Paid
+                            </td>
+                            <td>
+                                <div class="col-md-6">
+                                    @Model.GetAmountPaid().ToCurrency()
+                                </div>
+                            </td>
                         </tr>
                         <tr>
-                            <td width="33%" class="text-right">Status</td>
-                            <td>@Model.AssignmentTypeId.ToString().SplitByUpperCase()</td>
+                            <td width="33%" class="text-right">Date Paid</td>
+                            <td>
+                                <div class="col-md-6">
+                                    @{
+                                        Html.RenderPartial(
+                                            "~/Views/Shared/Components/_Date.cshtml",
+                                            new FormInputViewModel()
+                                            {
+                                                Id = "datepaid",
+                                                Name = "datepaid",
+                                                Placeholder = "Date Paid",
+                                                Value = ""
+                                            }
+                                            );
+                                    }
+                                </div>
+                            </td>
                         </tr>
-                        @if (registration.ESignature.IsNotEmpty())
-                        {
-                            <tr>
-                                <td width="33%" class="text-right">E-Signature</td>
-                                <td>@registration.ESignature</td>
-                            </tr>
-                        }
-                        @if (registration.ESignatureIPAddress.IsNotEmpty())
-                        {
-                            <tr>
-                                <td width="33%" class="text-right">IP Address</td>
-                                <td>@registration.ESignatureIPAddress</td>
-                            </tr>
-                        }
-                        @if (registration.ESignatureUserAgent.IsNotEmpty())
-                        {
-                            <tr>
-                                <td width="33%" class="text-right">Browser Info</td>
-                                <td>@registration.ESignatureUserAgent</td>
-                            </tr>
-                        }
+                        <tr>
+                            <td class="text-right">Amount Paid</td>
+                            <td>
+                                <div class="col-md-6">
+                                    <div class="input-group input-group-lg xs-mb-15">
+                                        <span class="input-group-addon">$</span>
+                                        <input type="number" class="form-control" id="amountpaid" name="amountpaid" onfocus="this.select()" value="" min="0.00" step=".01" />
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-right">Payment Method</td>
+                            <td>
+                                <div class="col-md-6">
+                                    <select name="paymenttype" id="paymenttype" class="form-control">
+                                        <option value="">Select...</option>
+                                        @foreach (PaymentType type in System.Enum.GetValues(typeof(PaymentType)))
+                                        {
+                                            if (type != PaymentType.NotSet)
+                                            {
+                                                <option value="@((int)type)">@type.ToString().SplitByUpperCase()</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>
+                                <button id="btn-submit-payment" type="submit" class="btn btn-primary btn-lg">Add Payment</button>
+                            </td>
+                        </tr>
+
                     </table>
                 </div>
-
-                @{ Html.RenderPartial("~/Views/Shared/Registrant/_Answers.cshtml", answers); }
-
-            </div>
+            </form>
         </div>
-
-        @if (!activity.IsFree  && Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView))
-        {
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    Payment Information
-                </div>
-                <div class="panel-body" style="padding:0">
-                    <form id="form-add-payment" action="@Url.Action("AddPayment", "activity", new { id = Model.Uid })" method="post">
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <tr>
-                                    <td width="33%" class="text-right">
-                                        Amount Paid
-                                    </td>
-                                    <td>
-                                        <div class="col-md-6">
-                                            @Model.GetAmountPaid().ToCurrency()
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td width="33%" class="text-right">Date Paid</td>
-                                    <td>
-                                        <div class="col-md-6">
-                                            @{
-                                                Html.RenderPartial(
-                                                    "~/Views/Shared/Components/_Date.cshtml",
-                                                    new FormInputViewModel()
-                                                    {
-                                                        Id = "datepaid",
-                                                        Name = "datepaid",
-                                                        Placeholder = "Date Paid",
-                                                        Value = ""
-                                                    }
-                                                    );
-                                            }
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="text-right">Amount Paid</td>
-                                    <td>
-                                        <div class="col-md-6">
-                                            <div class="input-group input-group-lg xs-mb-15">
-                                                <span class="input-group-addon">$</span>
-                                                <input type="number" class="form-control" id="amountpaid" name="amountpaid" onfocus="this.select()" value="" min="0.00" step=".01" />
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="text-right">Payment Method</td>
-                                    <td>
-                                        <div class="col-md-6">
-                                            <select name="paymenttype" id="paymenttype" class="form-control">
-                                                <option value="">Select...</option>
-                                                @foreach (PaymentType type in System.Enum.GetValues(typeof(PaymentType)))
-                                                {
-                                                    if (type != PaymentType.NotSet)
-                                                    {
-                                                        <option value="@((int)type)">@type.ToString().SplitByUpperCase()</option>
-                                                    }
-                                                }
-                                            </select>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td></td>
-                                    <td>
-                                        <button id="btn-submit-payment" type="submit" class="btn btn-primary btn-lg">Add Payment</button>
-                                    </td>
-                                </tr>
-
-                            </table>
-                        </div>
-                    </form>
-                </div>
-            </div>
+    </div>
 
             @*<div class="panel panel-default">
                     <div class="panel-heading">
@@ -262,10 +278,9 @@
                         </form>
                     </div>
                 </div>*@
-        }
-    </div>
+}
 </div>
-
+</div>
 
 <script type="text/javascript">
     PageEvent.add(PageEvent.AFTER_INIT, function () {
@@ -294,3 +309,8 @@
     }
     
 </script>
+
+@if (isPrintView)
+{
+    <div style="page-break-after: always;"></div>
+}

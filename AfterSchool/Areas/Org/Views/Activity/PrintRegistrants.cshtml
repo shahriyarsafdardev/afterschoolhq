@@ -1,0 +1,43 @@
+@model AfterSchool.Areas.Org.Controllers.ActivityController.PrintRegistrantsResults
+@{
+    ViewBag.Title = Model.Activity.Name;
+    var registrantActivities = Model.RegistrantActivities;
+    var msgs = Model.Messages;
+    Layout = "~/Views/Shared/Layouts/_PrintScreen.cshtml";
+}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                 <button onclick="window.print()" class="btn btn-primary btn-space hidden-print">
+                     <i class="s7-print"></i> Print Registrations
+                </button>
+                 <button onclick="window.close()" class="btn btn-default btn-space hidden-print">
+                     <i class="s7-close-circle"></i> Close
+                </button>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+
+                    @foreach (var ra in registrantActivities)
+                    {
+                        Html.RenderPartial("~/Views/Shared/_RegistrantDetail.cshtml", ra,
+                            new ViewDataDictionary()
+                            {
+                                { "BackToListAction", "Registrants" },
+                                { "BackToListController", "Activity" },
+                                { "ShowPaymentForm", false },
+                                { "IsActivityLeader", Model.IsActivityLeader },
+                                { "IsPrintView", true },
+                            }
+                            );
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
