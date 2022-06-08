@@ -377,6 +377,20 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
+        public ActionResult PrintRegistrants(string id)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+            var registrantActivities = activity.GetRegistrantActivities(msgs);
+
+            ViewBag.Messages = msgs;
+            ViewBag.RegistrantActivities = registrantActivities;
+            
+            return View(activity);
+        }
+
+        [HttpGet]
         public ActionResult RegistrantDetail(string id)
         {
             if (id.IsEmpty() || id.IsNotGuid())

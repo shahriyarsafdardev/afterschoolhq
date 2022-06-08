@@ -769,6 +769,7 @@
     <Content Include="afterschoolhq-partners-with-ips.html" />
     <Content Include="ahq-partners-with-mccoy.html" />
     <Content Include="appsettings.json" />
+    <Content Include="Areas\Org\Views\Activity\PrintRegistrants.cshtml" />
     <Content Include="Areas\Org\Views\Onboarding\FreeTrial.cshtml" />
     <Content Include="Areas\Org\Views\Shared\_RegistrationForm.cshtml" />
     <Content Include="Assets\css\common.css" />
@@ -2118,6 +2119,7 @@
     <Content Include="Scripts\umd\popper-utils.min.js" />
     <Content Include="Scripts\umd\popper.js" />
     <Content Include="Scripts\umd\popper.min.js" />
+    <Content Include="Views\Shared\Layouts\_PrintScreen.cshtml" />
     <Content Include="Views\Shared\_Users.cshtml" />
     <Content Include="Areas\Admin\Views\Package\Index.cshtml" />
     <Content Include="Areas\Admin\Views\Package\Edit.cshtml" />
