@@ -282,12 +282,6 @@
 </div>
 </div>
 
-@if (isPrintView)
-{
-    <div style="page-break-after: always;">&nbsp;</div>
-}
-
-
 <script type="text/javascript">
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         $('input[name="couponApplyType"]').click(function () {
@@ -315,3 +309,8 @@
     }
     
 </script>
+
+@if (isPrintView)
+{
+    <div style="page-break-after: always;"></div>
+}
