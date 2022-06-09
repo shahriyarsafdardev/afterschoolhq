@@ -208,7 +208,7 @@ namespace AfterSchoolLibrary.Services
 
         public static void MoveMoneyInStripeToAHQBankAccount(this Payout payout, Account payoutAccount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            Billing.StripeHelper.CreatePayout(
+            new Billing.StripeHelper().CreatePayout(
                 amount: payout.Amount.Value,
                 externalAccountId: null,
                 connectedAccountId: null,

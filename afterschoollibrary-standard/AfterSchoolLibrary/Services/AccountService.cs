@@ -1489,7 +1489,8 @@ namespace AfterSchoolLibrary.Services
         public static void CompleteStripeConnect(this Account account, string code, WebUser loggedInUser,
             SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var token = StripeHelper.CompleteOAuthConnection(code, msgs);
+            var stripeHelper = new StripeHelper(StripeHelper.AHQSubsSecretKey);
+            var token = stripeHelper.CompleteOAuthConnection(code, msgs);
 
             account.StripePublishableKey = null;
             account.StripeAccessToken = null;
@@ -1512,7 +1513,7 @@ namespace AfterSchoolLibrary.Services
                     account.GetAccountPackageFeature(featureType: FeatureType.ManualStripePayouts, msgs: msgs, dc: dc);
                 if (isManualStripeEnabled.IsNotEmpty() && isManualStripeEnabled.Max > 0 &&
                     account.StripeUserId.IsNotEmpty())
-                    StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: account.StripeUserId,
+                    stripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: account.StripeUserId,
                         accountName: account.Name, payoutIntervalType: PayoutIntervalType.Manual, msgs: msgs);
             }
             else
@@ -1534,7 +1535,7 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(account.Save(dc));
 
             if (account.StripeUserId.IsNotEmpty())
-                StripeHelper.DeauthorizeOAuthConnection(account.StripeUserId, msgs);
+                new StripeHelper(StripeHelper.AHQSubsSecretKey).DeauthorizeOAuthConnection(account.StripeUserId, msgs);
         }
 
         public static SystemMessages SaveWithStripe(this Account account, DatabaseConnection dc = null)

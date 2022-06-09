@@ -333,10 +333,11 @@ namespace AfterSchoolLibrary.Models
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var product = StripeHelper.GetProduct(GetStripeProductId(), null, msgs);
+            var stripeHelper = new StripeHelper(StripeHelper.AHQSubsSecretKey);
+            var product = stripeHelper.GetProduct(GetStripeProductId(), null, msgs);
 
             if (product.IsEmpty())
-                product = StripeHelper.CreateProduct(
+                product = stripeHelper.CreateProduct(
                     GetStripeProductId(),
                     GetStripeProductName(),
                     $"{Utilities.AppName(IsAfterSchool)} - {Name}".MaxChars(22),
@@ -345,7 +346,7 @@ namespace AfterSchoolLibrary.Models
                     null,
                     msgs);
             else
-                product = StripeHelper.UpdateProduct(
+                product = stripeHelper.UpdateProduct(
                     GetStripeProductId(),
                     GetStripeProductName(),
                     $"{Utilities.AppName(IsAfterSchool)} - {Name}".MaxChars(22),
@@ -362,12 +363,13 @@ namespace AfterSchoolLibrary.Models
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             Price price = null;
+            var stripeHelper = new StripeHelper(StripeHelper.AHQSubsSecretKey);
 
             if (priceId.IsNotEmpty())
-                price = StripeHelper.GetPrice(priceId, msgs);
+                price = stripeHelper.GetPrice(priceId, msgs);
 
             if (price.IsEmpty())
-                price = StripeHelper.CreatePrice(
+                price = stripeHelper.CreatePrice(
                     productId,
                     amount * 100,
                     nickname,
@@ -387,11 +389,12 @@ namespace AfterSchoolLibrary.Models
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var plan = StripeHelper.GetPlan(GetStripePlanId(billingPeriodType), null, msgs);
+            var stripeHelper = new StripeHelper(StripeHelper.AHQSubsSecretKey);
+            var plan = stripeHelper.GetPlan(GetStripePlanId(billingPeriodType), null, msgs);
 
             if (plan.IsEmpty())
             {
-                plan = StripeHelper.CreatePlan(
+                plan = stripeHelper.CreatePlan(
                     product,
                     GetStripePlanId(billingPeriodType),
                     price,

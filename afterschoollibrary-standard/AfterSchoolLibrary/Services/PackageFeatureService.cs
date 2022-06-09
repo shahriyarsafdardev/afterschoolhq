@@ -128,12 +128,12 @@ namespace AfterSchoolLibrary.Services
 
                 if (packageFeature.FeatureTypeId == FeatureType.ManualStripePayouts && account.StripeUserId.IsNotEmpty())
                 {
+                    var stripeHelper = new StripeHelper(StripeHelper.AHQSubsSecretKey);
+                    
                     if (packageFeature.Max.Value > 0)
-                        StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: account.StripeUserId, accountName: account.Name,
-                            payoutIntervalType: PayoutIntervalType.Manual, msgs: msgs);
+                        stripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: account.StripeUserId, accountName: account.Name, payoutIntervalType: PayoutIntervalType.Manual, msgs: msgs);
                     else
-                        StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: account.StripeUserId, accountName: account.Name,
-                            payoutIntervalType: PayoutIntervalType.Daily, msgs: msgs);
+                        stripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: account.StripeUserId, accountName: account.Name, payoutIntervalType: PayoutIntervalType.Daily, msgs: msgs);
                 }
             }
         }

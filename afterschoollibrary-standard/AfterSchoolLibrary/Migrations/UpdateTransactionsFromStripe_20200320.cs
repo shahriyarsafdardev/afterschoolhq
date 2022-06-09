@@ -25,7 +25,8 @@ namespace AfterSchoolLibrary.Migrations
 
                     do
                     {
-                        charges = Billing.StripeHelper.GetCharges(lastObjectId, pageLimit, amsgs);
+                        var stripeHelper = new Billing.StripeHelper();
+                        charges = stripeHelper.GetCharges(lastObjectId, pageLimit, amsgs);
 
                         charges.ForEach(charge =>
                         {
@@ -35,8 +36,8 @@ namespace AfterSchoolLibrary.Migrations
 
                                 if (transaction.IsEmpty())
                                 {
-                                    var invoice = Billing.StripeHelper.GetInvoice(charge.InvoiceId, amsgs);
-                                    var subscription = Billing.StripeHelper.GetSubscription(invoice.SubscriptionId, null, amsgs);
+                                    var invoice = stripeHelper.GetInvoice(charge.InvoiceId, amsgs);
+                                    var subscription = stripeHelper.GetSubscription(invoice.SubscriptionId, null, amsgs);
 
                                     if (subscription.IsNotEmpty())
                                     {

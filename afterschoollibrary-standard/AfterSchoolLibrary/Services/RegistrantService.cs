@@ -220,7 +220,7 @@ namespace AfterSchoolLibrary.Services
                 // create the subscription on the stripe account (could be added to main account or connected account)
                 if (isSubscriptionRequired)
                 {
-                    var subscription = Billing.StripeHelper.CreateRegistrantSubscription(
+                    var subscription = new Billing.StripeHelper().CreateRegistrantSubscription(
                                     customerId: customer.Id,
                                     planId: plan.StripePlanId,
                                     isProrated: billingCycleAnchor.HasValue,
@@ -249,7 +249,7 @@ namespace AfterSchoolLibrary.Services
                         return;
 
                     if (plan.RegFeeAsDownPayment && submittedRecord.GetAmountPaid(msgs, dc) > 0)
-                        Billing.StripeHelper.CreateCustomerBalanceTransaction(
+                        new Billing.StripeHelper().CreateCustomerBalanceTransaction(
                             subscription.CustomerId,
                             participationObject.GetCheckoutCostWithConvenienceFee() * -1,
                             "Credit for registration fee payment",
@@ -462,7 +462,7 @@ namespace AfterSchoolLibrary.Services
                 individualCostWithFees += checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc);
 
             var couponValue = costWithAllFees - individualCostWithFees;
-            var coupon = Billing.StripeHelper.CreateCoupon(
+            var coupon = new Billing.StripeHelper().CreateCoupon(
                             couponName: $"{plan.StripePlanId}/{costWithAllFees.ToCurrency()}-{individualCostWithFees.ToCurrency()}/SplitFee",
                             discountValue: couponValue,
                             couponDuration: Billing.StripeCouponDuration.Forever,
@@ -493,7 +493,7 @@ namespace AfterSchoolLibrary.Services
                 var totalCost = plan.GetTotalCostWithFees(billingAccount, msgs, dc);
 
                 //need to add a coupon to subtract the credit card amount that is stored in the payment plan
-                var coupon = Billing.StripeHelper.CreateCoupon(
+                var coupon = new Billing.StripeHelper().CreateCoupon(
                                 couponName: $"{plan.StripePlanId}/{totalCost.ToCurrency()}-{ccFee.ToCurrency()}/ACH",
                                 discountValue: plan.GetCreditCardFee(billingAccount, msgs, dc),
                                 couponDuration: Billing.StripeCouponDuration.Forever,

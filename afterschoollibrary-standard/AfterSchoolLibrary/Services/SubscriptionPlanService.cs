@@ -191,14 +191,15 @@ namespace AfterSchoolLibrary.Services
         private static Stripe.Plan CreateOrUpdateStripePlan(this SubscriptionPlan subscriptionPlan, Stripe.Product product, Account account, Guid uid, string name, string stripeUserId, SystemMessages msgs, DatabaseConnection dc)
         {
             Stripe.Plan plan = null;
-
+            var stripeHelper = new Billing.StripeHelper();
+            
             if (subscriptionPlan.StripePlanId.IsNotEmpty())
             {
-                plan = Billing.StripeHelper.GetPlan(subscriptionPlan.StripePlanId, stripeUserId, msgs);
-                Billing.StripeHelper.UpdatePlan(subscriptionPlan.StripePlanId, plan.Nickname, plan.Active, stripeUserId, msgs);
+                plan = stripeHelper.GetPlan(subscriptionPlan.StripePlanId, stripeUserId, msgs);
+                stripeHelper.UpdatePlan(subscriptionPlan.StripePlanId, plan.Nickname, plan.Active, stripeUserId, msgs);
             }
             else
-                plan = Billing.StripeHelper.CreatePlan(
+                plan = stripeHelper.CreatePlan(
                     product,
                     null,
                     subscriptionPlan.GetTotalCostWithFees(account, msgs, dc),
@@ -220,10 +221,11 @@ namespace AfterSchoolLibrary.Services
 
         private static Stripe.Product GetOrCreateStripeProduct(this SubscriptionPlan subscriptionPlan, Account account, Guid uid, string name, string uniqueName, string stripeUserId, SystemMessages msgs)
         {
-            var product = Billing.StripeHelper.GetProduct(uid.ToString(), stripeUserId, msgs);
+            var stripeHelper = new Billing.StripeHelper();
+            var product = stripeHelper.GetProduct(uid.ToString(), stripeUserId, msgs);
 
             if (product.IsEmpty())
-                product = Billing.StripeHelper.CreateProduct(
+                product = stripeHelper.CreateProduct(
                     uid.ToString(),
                     name,
                     uniqueName,
@@ -327,7 +329,7 @@ namespace AfterSchoolLibrary.Services
                 //if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
                 //    stripeUserId = billingAccount.StripeUserId;
 
-                msgs.AddRange(Billing.StripeHelper.CancelSubscription(
+                msgs.AddRange(new Billing.StripeHelper().CancelSubscription(
                     rsp.StripeSubscriptionId,
                     stripeUserId
                 ));

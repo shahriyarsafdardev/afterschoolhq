@@ -394,7 +394,7 @@ namespace AfterSchoolLibrary.Models
             var msgs = CancelPackage(dc);
 
             if (StripeSubscriptionId.IsNotEmpty())
-                msgs.AddRange(StripeHelper.CancelSubscription(StripeSubscriptionId, null, cancelAtPeriodEnd));
+                msgs.AddRange(new StripeHelper(StripeHelper.AHQSubsSecretKey).CancelSubscription(StripeSubscriptionId, null, cancelAtPeriodEnd));
 
             return msgs;
         }
@@ -413,10 +413,12 @@ namespace AfterSchoolLibrary.Models
 
             if (!stripeCustomerId.IsEmpty())
             {
+                var stripeHelper = new StripeHelper(StripeHelper.AHQSubsSecretKey);
+                
                 // first time, may have payment info
                 if (StripeSubscriptionId.IsEmpty())
                 {
-                    var subscription = StripeHelper.CreatePackageSubscription(
+                    var subscription = stripeHelper.CreatePackageSubscription(
                         stripeCustomerId,
                         priceId, //TODO: dynamic price for subscription
                         null,
@@ -436,7 +438,7 @@ namespace AfterSchoolLibrary.Models
                 }
                 else
                 {
-                    StripeHelper.UpdatePackageSubscription(StripeSubscriptionId, priceId, msgs);
+                    stripeHelper.UpdatePackageSubscription(StripeSubscriptionId, priceId, msgs);
                 }
             }
 
