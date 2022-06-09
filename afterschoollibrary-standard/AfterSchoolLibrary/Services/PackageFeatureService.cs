@@ -128,7 +128,7 @@ namespace AfterSchoolLibrary.Services
 
                 if (packageFeature.FeatureTypeId == FeatureType.ManualStripePayouts && account.StripeUserId.IsNotEmpty())
                 {
-                    var stripeHelper = new StripeHelper(StripeHelper.AHQSubsSecretKey);
+                    var stripeHelper = new StripeHelper();
                     
                     if (packageFeature.Max.Value > 0)
                         stripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: account.StripeUserId, accountName: account.Name, payoutIntervalType: PayoutIntervalType.Manual, msgs: msgs);

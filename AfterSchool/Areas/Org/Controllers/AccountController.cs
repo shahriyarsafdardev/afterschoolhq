@@ -270,286 +270,6 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(model);
         }
 
-
-        [HttpGet]
-        public ActionResult BankSetup()
-        {
-            var msgs = new SystemMessages();
-            var currentAccount = SessionVariables.CurrentAccount;
-            var model = BankInfoViewModel.FromBankPaymentAccount(currentAccount.GetBankPaymentAccount(msgs) ??
-                                                                 new BankPaymentAccount());
-
-            ViewBag.Account = currentAccount;
-            ViewBag.IsFullScreen = GetIsFullScreen();
-            ViewBag.Messages = msgs;
-
-            return View(model);
-        }
-
-        [HttpPost]
-        public ActionResult BankSetup(BankInfoViewModel bankInfoVM)
-        {
-            var currentAccount = SessionVariables.CurrentAccount;
-            var msgs = new SystemMessages();
-
-            if (!bankInfoVM.BankAccountType.HasValue || bankInfoVM.BankAccountType.Value == BankAccountType.NotSet)
-                msgs.Add("Select the bank account type", MessageType.UserError);
-
-            if (bankInfoVM.BankName.IsEmpty())
-                msgs.Add("Bank Name is required", MessageType.UserError);
-
-            if (bankInfoVM.AccountHoldersName.IsEmpty())
-                msgs.Add("Account holder's name is required", MessageType.UserError);
-
-            if (bankInfoVM.RoutingNumber1.IsEmpty() || bankInfoVM.RoutingNumber1.Trim().Length != 9)
-                msgs.Add("Routing Number 1 is required", MessageType.UserError);
-
-            if (bankInfoVM.RoutingNumber2.IsEmpty() || bankInfoVM.RoutingNumber2.Trim().Length != 9)
-                msgs.Add("Routing Number 2 is required", MessageType.UserError);
-
-            if (bankInfoVM.RoutingNumber1 != bankInfoVM.RoutingNumber2)
-                msgs.Add("Routing Numbers must match", MessageType.UserError);
-
-            if (bankInfoVM.AccountNumber1.IsEmpty())
-                msgs.Add("Account Number 1 is required", MessageType.UserError);
-
-            if (bankInfoVM.AccountNumber2.IsEmpty())
-                msgs.Add("Account Number 2 is required", MessageType.UserError);
-
-            if (bankInfoVM.AccountNumber1 != bankInfoVM.AccountNumber2)
-                msgs.Add("Account Numbers must match", MessageType.UserError);
-
-            if (bankInfoVM.BankCountry.IsEmpty())
-                msgs.Add("Bank Country is required", MessageType.UserError);
-
-            if (msgs.HasNoErrors())
-                currentAccount.CreateOrUpdateBankPaymentAccount(
-                    bankInfoVM.BankName,
-                    bankInfoVM.BankAccountType.Value,
-                    bankInfoVM.RoutingNumber1,
-                    bankInfoVM.AccountNumber1,
-                    bankInfoVM.AccountHoldersName,
-                    bankInfoVM.BankCountry,
-                    SessionVariables.CurrentUser,
-                    msgs);
-
-            if (msgs.HasNoErrors() && Request["isnew"] == "1")
-                return RedirectToAction("paymentsdone", new {isnew = 1});
-
-            if (msgs.HasNoErrors())
-                bankInfoVM =
-                    BankInfoViewModel.FromBankPaymentAccount(currentAccount.GetBankPaymentAccount(msgs) ??
-                                                             new BankPaymentAccount());
-
-            ViewBag.Account = currentAccount;
-            ViewBag.IsFullScreen = GetIsFullScreen();
-            ViewBag.Messages = msgs;
-
-            return View(bankInfoVM);
-        }
-
-        [HttpGet]
-        public ActionResult PaymentsEntity()
-        {
-            //.. this view is depreciated and paymentsoptions is the right view
-            var currentAccount = SessionVariables.CurrentAccount;
-            var msgs = new SystemMessages();
-            var paymentsEntityVM =
-                PaymentsEntityViewModel.LoadFromStripeAccount(currentAccount.GetStripeConnectedAccount(msgs));
-
-            ViewBag.Messages = msgs;
-            ViewBag.Account = currentAccount;
-            ViewBag.IsFullScreen = GetIsFullScreen();
-            return View(paymentsEntityVM);
-        }
-
-        private void ValidateFile(HttpPostedFileBase file, SystemMessages msgs)
-        {
-            if (file.IsEmpty())
-                return;
-
-            if (file.ContentLength == 0 || (file.ContentType != "image/jpeg" && file.ContentType != "image/png"))
-                msgs.Add("A valid Driver's License or Passport is required as either a jpg or a png",
-                    MessageType.UserError);
-            else if (ByteSize.FromBytes(file.ContentLength).MegaBytes > 8)
-                msgs.Add("Your document must be less than 8 MBs", MessageType.UserError);
-        }
-
-        [HttpPost]
-        public ActionResult PaymentsEntity(PaymentsEntityViewModel paymentsEntityVM)
-        {
-            var msgs = new SystemMessages();
-            var account = SessionVariables.CurrentAccount;
-            var stripeAccount = account.GetStripeConnectedAccount(msgs);
-
-            if (paymentsEntityVM.BusinessType == LegalEntityType.NotSet)
-                msgs.Add("Please select your business type", MessageType.UserError);
-
-            if (paymentsEntityVM.BusinessType == LegalEntityType.Company)
-            {
-                if (paymentsEntityVM.BusinessName.IsEmpty())
-                    msgs.Add("Legal Business Name is required", MessageType.UserError);
-
-                if (paymentsEntityVM.EIN.IsEmpty())
-                    msgs.Add("Employer Identification Number is required", MessageType.UserError);
-
-                if (paymentsEntityVM.BusinessPhone.IsEmpty())
-                    msgs.Add("Business Phone is required", MessageType.UserError);
-            }
-
-            if (paymentsEntityVM.FirstName.IsEmpty())
-                msgs.Add("First Name is required", MessageType.UserError);
-
-            if (paymentsEntityVM.LastName.IsEmpty())
-                msgs.Add("Last Name is required", MessageType.UserError);
-
-            if (!paymentsEntityVM.DateOfBirth.HasValue)
-                msgs.Add("Date of Birth is required and must be a valid date", MessageType.UserError);
-
-            if (paymentsEntityVM.SSNLast4.IsEmpty() || !paymentsEntityVM.SSNLast4.IsNumber())
-                msgs.Add("SSN(last 4) is required", MessageType.UserError);
-
-            if (paymentsEntityVM.PersonalEmail.IsEmpty())
-                msgs.Add("Email is required", MessageType.UserError);
-
-            if (paymentsEntityVM.PersonalPhone.IsEmpty())
-                msgs.Add("Phone is required", MessageType.UserError);
-
-            if (paymentsEntityVM.Address1.IsEmpty())
-                msgs.Add("Address 1 is required", MessageType.UserError);
-
-            if (paymentsEntityVM.City.IsEmpty())
-                msgs.Add("City is required", MessageType.UserError);
-
-            if (paymentsEntityVM.State.IsEmpty())
-                msgs.Add("State is required", MessageType.UserError);
-
-            if (paymentsEntityVM.PostalCode.IsEmpty())
-                msgs.Add("Postal Code is required", MessageType.UserError);
-
-            if (!paymentsEntityVM.TOSAccept)
-                msgs.Add("You must agree to the terms of service", MessageType.UserError);
-
-            if (paymentsEntityVM.BusinessUrl.IsEmpty() && paymentsEntityVM.ProductDescription.IsEmpty())
-                msgs.Add("You must enter either a website or a Service Description", MessageType.UserError);
-
-            if (PaymentsEntityViewModel.LoadFromStripeAccount(stripeAccount).RequiresFullSSN.IsTrue() &&
-                paymentsEntityVM.SSN.IsEmpty())
-                msgs.Add("SSN is required", MessageType.UserError);
-
-            if (PaymentsEntityViewModel.LoadFromStripeAccount(stripeAccount).RequiresDocument.IsTrue())
-            {
-                if (Request.Files.Count < 2)
-                    msgs.Add("Please upload the front and back of your identification", MessageType.UserError);
-
-                ValidateFile(Request.Files[0], msgs);
-                ValidateFile(Request.Files[1], msgs);
-            }
-
-            if (paymentsEntityVM.TOSAccept)
-            {
-                paymentsEntityVM.TOSAcceptanceDate = DateTime.UtcNow;
-                paymentsEntityVM.TOSAcceptanceIP = Request.UserHostAddress;
-                paymentsEntityVM.TOSAcceptanceUserAgent = Request.UserAgent;
-            }
-
-            if (msgs.HasNoErrors())
-            {
-                if (PaymentsEntityViewModel.LoadFromStripeAccount(stripeAccount).RequiresDocument.IsTrue())
-                {
-                    var documentFront = StripeHelper.UploadFile(
-                        Request.Files[0].InputStream,
-                        Request.Files[0].FileName,
-                        StripeFilePurpose.IdentityDocument,
-                        msgs);
-
-                    var documentBack = StripeHelper.UploadFile(
-                        Request.Files[1].InputStream,
-                        Request.Files[1].FileName,
-                        StripeFilePurpose.IdentityDocument,
-                        msgs);
-
-                    paymentsEntityVM.DocumentFrontId = documentFront.Id;
-                    paymentsEntityVM.DocumentBackId = documentBack.Id;
-                }
-
-                if (account.StripeUserId.IsEmpty())
-                    account.CreateStripeCustomAccount(
-                        paymentsEntityVM.GetStripeAccountCreateOptions(account),
-                        msgs);
-                else
-                    account.UpdateStripeCustomAccount(
-                        paymentsEntityVM.GetStripeAccountUpdateOptions(account),
-                        msgs);
-            }
-
-            if (msgs.HasNoErrors())
-            {
-                msgs.Add("Your update information has been submitted.", MessageType.Success);
-
-                //if (startingStatus != stripeAccount.VerificationStatusId && stripeAccount.VerificationStatusId == StripeVerificationStatus.Verified)
-                //    BackgroundJob.Enqueue(() => SessionVariables.CurrentAccount.SendStripeAccountVerified(null));
-
-                if (paymentsEntityVM.BusinessType == LegalEntityType.Company && stripeAccount.ChargesEnabled)
-                    return RedirectToAction("paymentsbank", "account", new {isnew = Request["isnew"]});
-            }
-
-            var model = PaymentsEntityViewModel.LoadFromStripeAccount(account.GetStripeConnectedAccount(msgs));
-
-            ViewBag.Messages = msgs;
-            ViewBag.Account = account;
-            ViewBag.IsFullScreen = GetIsFullScreen();
-
-            return View(model);
-        }
-
-        [HttpGet]
-        public ActionResult PaymentsBank()
-        {
-            var account = SessionVariables.CurrentAccount;
-            var msgs = new SystemMessages();
-            var paymentsEntityVM = PaymentsEntityViewModel.LoadFromStripeAccount(account.GetStripeConnectedAccount(msgs));
-
-            ViewBag.Account = account;
-            ViewBag.Messages = msgs;
-            ViewBag.IsFullScreen = GetIsFullScreen();
-            return View(paymentsEntityVM);
-        }
-
-        [HttpPost]
-        public ActionResult PaymentsBank(PaymentsEntityViewModel paymentsEntityVM)
-        {
-            var account = SessionVariables.CurrentAccount;
-            var msgs = new SystemMessages();
-
-            if (paymentsEntityVM.BankRoutingNumber1.IsEmpty())
-                msgs.Add("Routing Number is required", MessageType.UserError);
-            if (paymentsEntityVM.BankRoutingNumber2.IsEmpty())
-                msgs.Add("Confirm Routing Number is required", MessageType.UserError);
-            if (paymentsEntityVM.BankRoutingNumber1 != paymentsEntityVM.BankRoutingNumber2)
-                msgs.Add("Routing Numbers must match", MessageType.UserError);
-
-            if (paymentsEntityVM.BankAccountNumber1.IsEmpty())
-                msgs.Add("Account Number is required", MessageType.UserError);
-            if (paymentsEntityVM.BankAccountNumber2.IsEmpty())
-                msgs.Add("Confirm Account Number is required", MessageType.UserError);
-            if (paymentsEntityVM.BankAccountNumber1 != paymentsEntityVM.BankAccountNumber2)
-                msgs.Add("Account Numbers must match", MessageType.UserError);
-
-            if (msgs.HasNoErrors())
-                account.UpdateStripeCustomAccount(
-                    paymentsEntityVM.GetStripeAccountUpdateOptions(account),
-                    msgs);
-
-            if (msgs.HasNoErrors() && Request["isnew"] == "1")
-                return RedirectToAction("PaymentsDone");
-
-            ViewBag.Account = account;
-            ViewBag.Messages = msgs;
-            ViewBag.IsFullScreen = GetIsFullScreen();
-            return View(paymentsEntityVM);
-        }
-
         [HttpGet]
         public ActionResult PaymentsDone(string id)
         {
@@ -1626,7 +1346,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         if (stripetoken.IsNotEmpty())
                             currentAccount.CreateStripeCardFromTokenAHQCustomer(stripetoken, customer, amsgs, adc);
                         else if (cardId.IsNotEmpty())
-                            currentAccount.UpdateStripeCard(cardId, customer, amsgs, adc);
+                            currentAccount.UpdateStripeCardAHQCustomer(cardId, customer, amsgs, adc);
 
                         if (amsgs.HasNoErrors())
                         {
@@ -1639,12 +1359,12 @@ namespace AfterSchool.Areas.Org.Controllers
                                     newlyAddedPackage.HasFeature(featureType: FeatureType.ManualStripePayouts,
                                         msgs: amsgs, dc: adc);
                                 if (manualStripePayouts)
-                                    StripeHelper.ToggleStripePayoutForConnectedAccount(
+                                    new StripeHelper().ToggleStripePayoutForConnectedAccount(
                                         customAccountsStripeUserId: currentAccount.StripeUserId,
                                         accountName: currentAccount.Name, payoutIntervalType: PayoutIntervalType.Manual,
                                         msgs: amsgs);
                                 else
-                                    StripeHelper.ToggleStripePayoutForConnectedAccount(
+                                    new StripeHelper().ToggleStripePayoutForConnectedAccount(
                                         customAccountsStripeUserId: currentAccount.StripeUserId,
                                         accountName: currentAccount.Name, payoutIntervalType: PayoutIntervalType.Daily,
                                         msgs: amsgs);
@@ -1750,7 +1470,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 var customer = currentAccount.GetStripeCustomer(msgs);
-                currentAccount.UpdateStripeCard(id, customer, msgs);
+                currentAccount.UpdateStripeCardAHQCustomer(id, customer, msgs);
             }
 
             ViewBag.BillingHistory = currentAccount.GetStripeBillingHistory(msgs);

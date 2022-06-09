@@ -265,7 +265,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
       else
         transactionFeePayer = billingAccount;
 
-      var charge = AfterSchoolLibrary.Billing.StripeHelper.GetCharge(stripeInvoice.ChargeId, msgs);
+      var charge = new StripeHelper().GetCharge(stripeInvoice.ChargeId, msgs);
       var amountRefunded = charge.IsNotEmpty() && charge.AmountRefunded.IsNotEmpty() ? charge.AmountRefunded : 0m;
       //we will need this logic to ensure we are adding pro-rated amount in ActivityPayment and RegistrantSubscriptionPlan
       var amountPaidByParent = stripeInvoice.AmountPaid > 0 ? ((decimal)stripeInvoice.AmountPaid / 100) : 0m;
@@ -315,7 +315,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         {
           msgs.Add($"Partial Refund: {amountRefunded}", MessageType.Notice);
 
-          var stripeRefunds = StripeHelper.GetRefunds(chargeId, msgs);
+          var stripeRefunds = new StripeHelper().GetRefunds(chargeId, msgs);
           stripeRefunds.ForEach(stripeRefund =>
           {
             if (stripeRefund.TransferReversal.IsEmpty())

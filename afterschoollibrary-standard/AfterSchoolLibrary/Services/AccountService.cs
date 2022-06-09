@@ -1550,6 +1550,14 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
+        public static void UpdateStripeChargesAndPayouts(this Account account, Stripe.Account stripeAccount,
+            SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            account.StripeChargesEnabled = stripeAccount.ChargesEnabled;
+            account.StripePayoutsEnabled = stripeAccount.PayoutsEnabled;
+            msgs.AddRange(account.Save(dc));
+        }
+
         public static Stripe.Account GetStripeConnectedAccount(this Account account, SystemMessages msgs)
         {
             if (account.HasStripeConnectedAccount)
