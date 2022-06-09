@@ -1,5 +1,6 @@
 ﻿@{
     var accountUniqueName = (string) ViewBag.AccountUniqueName;
+    var accountName = (string)ViewBag.AccountName;
     var msgs = (SystemMessages) ViewBag.Messages;
     var accountId = ViewBag.AccountId != null ? Convert.ToInt32(ViewBag.AccountId) : 0;
     var primaryColor = (string) ViewBag.PrimaryColor;
@@ -20,7 +21,7 @@
     }
 
     //.. data for layout
-    ViewBag.Title = accountUniqueName;
+    ViewBag.Title = accountName;
     if (accountId > 0)
     {
         ViewBag.AccountProfile = AccountProfile.LoadByAccountId(accountId);

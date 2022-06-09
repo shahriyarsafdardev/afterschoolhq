@@ -106,6 +106,7 @@ namespace AfterSchool.Controllers
                     ViewBag.Neighborhoods = neighborhoodList;
                     ViewBag.Grades = GradeLevel.Load();
                     ViewBag.AccountUniqueName = account.UniqueName;
+                    ViewBag.AccountName = account.Name;
                     ViewBag.AccountId = account.ID.ToString();
 
                     if (profile.IsNotEmpty())
