@@ -1,7 +1,9 @@
-﻿using System.Linq;
-using System.Collections;
-using BasicLibrary;
+﻿using System.Collections;
+using System.Configuration;
+using System.Linq;
+using System.Web;
 using AfterSchoolLibrary.Models;
+using BasicLibrary;
 
 namespace AfterSchool.Models
 {
@@ -14,6 +16,7 @@ namespace AfterSchool.Models
 
             return ActivityLabel(ActivityType.Activity, plural);
         }
+
         public static string ActivityLabel(ActivityType activityType = ActivityType.Activity, bool plural = false)
         {
             switch (activityType)
@@ -26,14 +29,18 @@ namespace AfterSchool.Models
                     return GetLabelConfigParam("PermissionSlip", plural);
                 case ActivityType.LearningPod:
                     return GetLabelConfigParam("LearningPod", plural);
+                case ActivityType.VolunteerOpportunity:
+                    return GetLabelConfigParam("VolunteerOpportunity", plural);
                 default:
                     return GetLabelConfigParam("Activity", plural);
             }
         }
+
         public static string RegistrantLabel(bool plural = false)
         {
             return GetLabelConfigParam("Registrant", plural);
         }
+
         public static string ActivityGroupLabel(ActivityGroupType groupType, bool plural = false)
         {
             if (groupType == ActivityGroupType.League)
@@ -41,14 +48,17 @@ namespace AfterSchool.Models
 
             return GetLabelConfigParam("ActivityGroup", plural);
         }
+
         public static string RegistrationPeriodLabel(bool plural = false)
         {
             return GetLabelConfigParam("RegistrationPeriod", plural);
         }
+
         public static string RegistrationPeriodAbbrLabel(bool plural = false)
         {
             return GetLabelConfigParam("RegistrationPeriodAbbr", plural);
         }
+
         public static string ProductName()
         {
             if (Utilities.IsAfterSchool())
@@ -56,14 +66,17 @@ namespace AfterSchool.Models
 
             return ProductNameEnrollHQ();
         }
+
         public static string ProductNameEnrollHQ()
         {
             return GetLabelConfigParam("ProductNameEnrollHQ");
         }
+
         public static string ProductNameAfterSchoolHQ()
         {
             return GetLabelConfigParam("ProductNameAfterSchoolHQ");
         }
+
         public static string ProductLogo()
         {
             if (Utilities.IsAfterSchool())
@@ -71,14 +84,17 @@ namespace AfterSchool.Models
 
             return ProductLogoEnrollHQ();
         }
+
         public static string ProductLogoEnrollHQ()
         {
             return GetLabelConfigParam("ProductLogoEnrollHQ");
         }
+
         public static string ProductLogoAfterSchoolHQ()
         {
             return GetLabelConfigParam("ProductLogoAfterSchoolHQ");
         }
+
         public static string ProductLogoInverse()
         {
             if (Utilities.IsAfterSchool())
@@ -86,10 +102,12 @@ namespace AfterSchool.Models
 
             return ProductLogoInverseEnrollHQ();
         }
+
         public static string ProductLogoInverseEnrollHQ()
         {
             return GetLabelConfigParam("ProductLogoInverseEnrollHQ");
         }
+
         public static string ProductLogoInverseAfterSchoolHQ()
         {
             return GetLabelConfigParam("ProductLogoInverseAfterSchoolHQ");
@@ -97,9 +115,9 @@ namespace AfterSchool.Models
 
         private static string GetLabelConfigParam(string name, bool plural = false)
         {
-            string key = name;
+            var key = name;
             if (plural) key = name + "_plural";
-            return ((Hashtable)System.Configuration.ConfigurationManager.GetSection("applabels"))[key].ToString();
+            return ((Hashtable) ConfigurationManager.GetSection("applabels"))[key].ToString();
         }
 
         public static string GetGradeDescription(string gradeText)
@@ -113,7 +131,6 @@ namespace AfterSchool.Models
             if (gradeValue == "Pre-K")
                 return "Pre-K";
             return gradeValue + " Grade";
-
         }
 
         public static string GetFormattedAnswer(string text)
@@ -127,14 +144,14 @@ namespace AfterSchool.Models
         public static string GetFormattedAnswerForArray(string text)
         {
             if (text.IsNotEmpty() && AfterSchoolLibrary.Helpers.Utilities.IsAlreadyJsonString(text))
-              return AfterSchoolLibrary.Helpers.Utilities.GetKeyValuePairs(text)?.Select(m => m.value)?.ToStringList(separator: ", ");
+                return AfterSchoolLibrary.Helpers.Utilities.GetKeyValuePairs(text)?.Select(m => m.value)?.ToStringList(", ");
 
             return text;
         }
 
         public static bool CheckAllowTextMessage(WebUser currentUser)
         {
-            return !currentUser.IsNotEmpty() || currentUser.AllowTextMessages && System.Web.HttpContext.Current.Request.HttpMethod.ToString() == "GET";
+            return !currentUser.IsNotEmpty() || (currentUser.AllowTextMessages && HttpContext.Current.Request.HttpMethod == "GET");
         }
 
         public static bool IsCurrentUserCleverIntegrated()

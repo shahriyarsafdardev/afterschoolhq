@@ -1,17 +1,17 @@
 ﻿@model string
 @{
     var fullscreenExitUrl = Model;
-    var fullscreenExitText = (string)ViewBag.FullscreenExitText;
+    var fullscreenExitText = (string) ViewData["FullscreenExitText"];
     var isClose = false;
 
     if (fullscreenExitUrl.IsBlank())
     {
-        fullscreenExitUrl = (string)ViewBag.FullScreenExitUrl;
+        fullscreenExitUrl = (string) ViewData["FullScreenExitUrl"];
     }
 
     if (Request["source"].IsNotEmpty())
     {
-        switch(Request["source"])
+        switch (Request["source"])
         {
             case "profile":
                 fullscreenExitUrl = $"{SessionVariables.CurrentAccount.HomePageUrl}?edit=1";
@@ -27,7 +27,7 @@
 }
 
 <div class="pull-right">
-    <a href="@(isClose ? "javascript:void(0)": fullscreenExitUrl)" class="btn btn-default" @(isClose ? "onclick = showLeaveActivityModal()": "") data-href="@fullscreenExitUrl">@Html.Raw(fullscreenExitText)</a>
+    <a href="@(isClose ? "javascript:void(0)" : fullscreenExitUrl)" class="btn btn-default" @(isClose ? "onclick = showLeaveActivityModal()" : "") data-href="@fullscreenExitUrl">@Html.Raw(fullscreenExitText)</a>
 </div>
 
 <div id="confirmationModal" class="modal fade" role="dialog">

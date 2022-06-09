@@ -1,11 +1,12 @@
-﻿@model Activity
+﻿@using AfterSchool.Helpers
+@model AfterSchool.Areas.Org.Controllers.EditSetupResult
 @{
-    ViewBag.Title = ((Account)ViewBag.Account).Name;
-    var msgs = (SystemMessages)ViewBag.Messages;
-    var accountPackage = (AccountPackage)ViewBag.AccountPackage;
-    var group = (ActivityGroup)ViewBag.Group;
-    var isFullScreen = (bool)ViewBag.IsFullScreen;    
-    var title = $"{(Model.ActivityGroupName.IsNotEmpty() ? $"{Model.ActivityGroupName} - " : "")}{Model.Name.IfBlank("New " + UILabel.ActivityLabel(Model.ActivityTypeId))}";    
+    ViewBag.Title = Model.Account.Name;
+    var msgs = Model.Messages;
+    var accountPackage = Model.AccountPackage;
+    var group = Model.Group;
+    var isFullScreen = Model.IsFullScreen;
+    var title = $"{(Model.Activity.ActivityGroupName.IsNotEmpty() ? $"{Model.Activity.ActivityGroupName} - " : "")}{Model.Activity.Name.IfBlank("New " + UILabel.ActivityLabel(Model.Activity.ActivityTypeId))}";
 
     if (isFullScreen)
     {
@@ -13,18 +14,18 @@
     }
 }
 
-@{ Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
+@{ Html.RenderPartial("OrgAccountHeader", Model.Activity.AccountId.ToString()); }
 
 <div class="main-content">
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model); }
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model.Activity); }
 
     <div class="panel panel-default margin-bottom-zero">
         <div class="panel-heading">
-            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", title); }
-            
+            @{ Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", title); }
+
             @if (isFullScreen)
             {
                 Html.RenderPartial("_ExitFullScreen", Request["returnurl"] ?? "");
@@ -33,22 +34,29 @@
         <div class="panel-body padding-lr-zero-sm">
 
             <div class="col-md-10 col-lg-9">
-                <form id="form1" method="post" action="@Url.Action("editsetup", "activity", new { id = Model.Uid, isnew = Request["isnew"], source = Request["source"] })" class="form-horizontal">
+                <form id="form1" method="post" action="@Url.Action("editsetup", "activity", new {id = Model.Activity.Uid, isnew = Request["isnew"], source = Request["source"]})" class="form-horizontal">
 
-                    @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButtonWithSetupValidation(Model, "editsetup", "next", true, true, Request))
+                    @Html.Raw(ActivitySetupHelper.NavButtonWithSetupValidation(Model.Activity, "editsetup", "next", true, true, Request))
 
-                    @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(true, false))
+                    @Html.Raw(ActivitySetupHelper.SaveButton(true, false))
 
-                    @{Html.RenderPartial("~/Views/Shared/_ActivityFormSetup.cshtml", Model);}
+                    @{ Html.RenderPartial("~/Views/Shared/_ActivityFormSetup.cshtml", Model.Activity, new ViewDataDictionary
+                       {
+                           {"AccountPackage", accountPackage},
+                           {"Forms", Model.Forms},
+                           {"Group", Model.Group},
+                           {"ActivePeriod", Model.ActivePeriod},
+                           {"ActiveForm", Model.ActiveForm},
+                       }); }
 
                     <div class="form-group">
 
                         <div class="col-sm-6 col-sm-offset-3">
-                            @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(false, false))
+                            @Html.Raw(ActivitySetupHelper.SaveButton(false, false))
                         </div>
 
                         <div class="col-sm-3">
-                            @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButtonWithSetupValidation(Model, "editsetup", "next", false, true, Request))
+                            @Html.Raw(ActivitySetupHelper.NavButtonWithSetupValidation(Model.Activity, "editsetup", "next", false, true, Request))
                         </div>
 
                     </div>
@@ -57,7 +65,7 @@
             </div>
 
             <div class="col-md-2 col-lg-3">
-                @{Html.RenderPartial("~/Views/Shared/_ActivityEditNav.cshtml", Model); }
+                @{ Html.RenderPartial("~/Views/Shared/_ActivityEditNav.cshtml", Model.Activity, new ViewDataDictionary {{"ActiveMenu", Model.ActiveMenu}}); }
             </div>
 
         </div>

@@ -1,7 +1,12 @@
 ﻿@model Activity
 @{
     var grades = GradeLevel.Load();
-    var showAllowStudentRegistration = SessionVariables.AccountPackage.HasFeature(FeatureType.AllowStudentRegistration);
+    var showAllowStudentRegistration = SessionVariables.AccountPackage.HasFeature(FeatureType.AllowStudentRegistration) && Model.ActivityTypeId.In(new ActivityType[] { 
+        ActivityType.Activity,
+        ActivityType.Team,
+        ActivityType.FieldTrip,
+        ActivityType.LearningPod,
+    }); 
 }
 <div class="panel panel-default panel-small-padding">
     <div class="panel-heading activity-heading">

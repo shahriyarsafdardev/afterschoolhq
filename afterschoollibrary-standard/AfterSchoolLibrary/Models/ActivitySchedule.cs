@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 
@@ -466,35 +465,6 @@ namespace AfterSchoolLibrary.Models
                         }).ToList());
 
             return schedule;
-        }
-
-        public static ActivitySchedule GetNewDefaultSchedule(Activity activity, SystemMessages msgs)
-        {
-            var period = ActivityService.GetActiveRegistrationPeriod(activity, msgs);
-
-            if (period.IsEmpty())
-                return GetNewDefaultSchedule();
-
-            var startDate = period.EndDateTime.Value.Date.FirstDateOfWeek().AddWeeks(1);
-            var endDate = period.EndDateTime.Value.Date.FirstDateOfWeek().AddWeeks(9);
-
-            if (activity.IsContinuousEnrollment)
-                startDate = period.StartDateTime.Value.FirstDateOfWeek().AddWeeks(1);
-
-            if (activity.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
-            {
-                startDate = DateTime.UtcNow.Date.AddDays(1);
-                endDate = startDate.AddWeeks(9);
-            }
-
-            return new ActivitySchedule
-            {
-                StartDate = startDate,
-                EndDate = endDate,
-                DailyStartTime = DateTime.UtcNow.Date.AddHours(15),
-                DailyEndTime = DateTime.UtcNow.Date.AddHours(17),
-                RepeatsWeekly = true,
-            };
         }
 
         // TODO: Save? what about instances that get added but aren't saved?

@@ -1,27 +1,26 @@
-﻿@{ 
+﻿@{
     var isFullScreen = false;
 
-    if (ViewBag.IsFullScreen != null)
+    if (ViewData["IsFullScreen"] != null)
     {
-        isFullScreen = (bool)ViewBag.IsFullScreen;
+        isFullScreen = (bool) ViewData["IsFullScreen"];
     }
 }
 
 @if (!isFullScreen)
 {
-
     if (SessionVariables.AccountPackage.IsNotEmpty())
     {
         if (SessionVariables.AccountPackage.IsDuringTrial)
         {
             <div class="trial-header text-center text-white bg-warning">
-                You have @SessionVariables.AccountPackage.TrialDaysRemaining day(s) remaining in your trial <a href="@Url.Action("newbilling", "account", new { id = SessionVariables.AccountPackage.PackageUid })" class="btn btn-alt5 margin-h-10">Purchase Now &raquo;</a>
+                You have @SessionVariables.AccountPackage.TrialDaysRemaining day(s) remaining in your trial <a href="@Url.Action("newbilling", "account", new {id = SessionVariables.AccountPackage.PackageUid})" class="btn btn-alt5 margin-h-10">Purchase Now &raquo;</a>
             </div>
         }
         else if (SessionVariables.AccountPackage.IsTrialExpired(SessionVariables.CurrentAccount))
         {
             <div class="trial-header text-center text-white bg-danger">
-                It looks like your trial has expired. <a href="@Url.Action("newbilling", "account", new { id = SessionVariables.AccountPackage.PackageUid })" class="btn btn-alt5 margin-h-10">Purchase Now &raquo;</a>
+                It looks like your trial has expired. <a href="@Url.Action("newbilling", "account", new {id = SessionVariables.AccountPackage.PackageUid})" class="btn btn-alt5 margin-h-10">Purchase Now &raquo;</a>
             </div>
         }
     }
@@ -47,9 +46,9 @@
             </div>
             <div class="col-md-2 col-md-offset-3">
                 <div class="pull-right padding-10">
-                    Logged in as: <a href="@Url.Action("edit", "user")">@SessionVariables.CurrentUser.DisplayName</a> <br />
+                    Logged in as: <a href="@Url.Action("edit", "user")">@SessionVariables.CurrentUser.DisplayName</a> <br/>
                 </div>
             </div>
-        </div>    
+        </div>
     </div>
 }

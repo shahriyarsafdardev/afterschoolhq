@@ -101,48 +101,6 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(finalActivities);
         }
 
-        private void LoadEditSetupViewBag(string id, string group)
-        {
-            var activity = new Activity();
-            var isLeader = true;
-            var activePeriod = new RegistrationPeriod();
-            ActivityGroup activityGroup = null;
-
-            if (id.IsGuid())
-            {
-                activity = Activity.LoadByUid(id.ToGuid());
-                isLeader = IsActivityLeader(activity);
-                activePeriod = activity.GetActiveRegistrationPeriod();
-                activityGroup = activity.GetActivityGroup();
-            }
-            else
-            {
-                activity = SessionVariables.CurrentAccount.GetDefaultNewActivity();
-
-                //this means a new activity is not being added to an existing enrollment group
-                if (!group.IsGuid())
-                {
-                    activePeriod = SessionVariables.CurrentAccount.GetDefaultNewRegistrationPeriod();
-                }
-                else
-                {
-                    activityGroup = ActivityGroup.LoadByUid(group.ToGuid());
-                }
-            }
-
-
-            ViewBag.Messages = new SystemMessages();
-            ViewBag.Account = SessionVariables.CurrentAccount;
-            ViewBag.IsActivityLeader = isLeader;
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.ActiveMenu = "EditSetup";
-            ViewBag.Forms = SessionVariables.CurrentAccount.GetForms().OrderBy(x => x.Name).ToList();
-            ViewBag.ActiveForm = activity.GetActiveActivityForm();
-            ViewBag.Periods = SessionVariables.CurrentAccount.GetRegistrationPeriods();
-            ViewBag.ActivePeriod = activePeriod;
-            ViewBag.Group = activityGroup;
-        }
-
         [HttpGet]
         public ActionResult EditSetup(string id, string group)
         {

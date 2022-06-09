@@ -1,10 +1,9 @@
-﻿@model Activity
+﻿@using AfterSchool.Helpers
+@model AfterSchool.Areas.Org.Controllers.EditScheduleResult
 @{
-    ViewBag.Title = ((Account)ViewBag.Account).Name;
-    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
-    var accountPackage = (AccountPackage)ViewBag.AccountPackage;
-    var activityId = (string)ViewBag.ActivityId;
-    var hasSchedule = Model.HasSchedule;
+    ViewBag.Title = Model.Account.Name;
+    var msgs = Model.Messages;
+    var hasSchedule = Model.Activity.HasSchedule;
 
     var fullscreen = Request["isnew"] == "1" && !Model.IsPublished;
     if (fullscreen)
@@ -13,48 +12,58 @@
     }
 }
 
-@{ Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
+@{ Html.RenderPartial("OrgAccountHeader", Model.Activity.AccountId.ToString(), new ViewDataDictionary
+   {
+       {"IsFullScreen", Model.IsFullScreen},
+   }); }
 
 <div class="main-content">
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model); }
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model.Activity, new ViewDataDictionary
+       {
+           {"IsActivityLeader", Model.IsActivityLeader},
+           {"IsFullScreen", Model.IsFullScreen},
+       }); }
 
     <div class="panel panel-default margin-bottom-zero">
         <div class="panel-heading">
-            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name); }
+            @{ Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Activity.Name); }
 
             @if (fullscreen)
             {
-                Html.RenderPartial("_ExitFullScreen", "");
+                Html.RenderPartial("_ExitFullScreen", Model.FullScreenExitUrl);
             }
         </div>
         <div class="panel-body padding-lr-zero-sm">
 
             <div class="col-md-10 col-lg-9">
-                <form id="form1" method="post" action="@Url.Action("editschedule", "activity", new { id = Model.Uid, isnew = Request["isnew"], source = Request["source"] })" class="form-horizontal">
+                <form id="form1" method="post" action="@Url.Action("editschedule", "activity", new {id = Model.Activity.Uid, isnew = Request["isnew"], source = Request["source"]})" class="form-horizontal">
 
-                    @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editschedule", "next", true, true, Request))
-                    @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(true, false))
+                    @Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editschedule", "next", true, true, Request))
+                    @Html.Raw(ActivitySetupHelper.SaveButton(true, false))
 
                     @{
                         Html.RenderPartial(
                             "~/Views/Shared/_ActivityFormSchedule.cshtml",
-                            (ActivitySchedule)ViewBag.Schedule,
-                            new ViewDataDictionary() {
-                                { "ActivityType", (int)Model.ActivityTypeId },
-                                { "hasSchedule", hasSchedule },
-                                { "isContinousEnrollmentEnabled", Model.IsContinuousEnrollment}
+                            Model.Schedule,
+                            new ViewDataDictionary
+                            {
+                                {"ActivityType", (int) Model.Activity.ActivityTypeId},
+                                {"hasSchedule", hasSchedule},
+                                {"isContinousEnrollmentEnabled", Model.Activity.IsContinuousEnrollment},
+                                {"Schedules", Model.Schedules},
+                                {"ActivityGroupType", null},
                             });
                     }
 
                     <div class="form-group">
                         <div class="col-sm-6 col-sm-offset-3">
-                            @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(false, false))
+                            @Html.Raw(ActivitySetupHelper.SaveButton(false, false))
                         </div>
                         <div class="col-sm-3">
-                            @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editschedule", "next", false, true, Request))
+                            @Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editschedule", "next", false, true, Request))
                         </div>
                     </div>
 
@@ -62,7 +71,10 @@
             </div>
 
             <div class="col-md-2 col-lg-3">
-                @{Html.RenderPartial("~/Views/Shared/_ActivityEditNav.cshtml", Model); }
+                @{ Html.RenderPartial("~/Views/Shared/_ActivityEditNav.cshtml", Model.Activity, new ViewDataDictionary
+                   {
+                       {"ActiveMenu", Model.ActiveMenu},
+                   }); }
             </div>
 
         </div>

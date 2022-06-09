@@ -2,7 +2,7 @@
 @{ 
     var isActive = Model.ID.HasValue && Model.ID.Value > 0;
     var isScheduleActive = Model.ID.HasValue && Model.ID.Value > 0;
-    var activeMenu = ViewBag.ActiveMenu.ToString().ToLower();
+    var activeMenu = ViewData["ActiveMenu"].ToString().ToLower();
 
     var editsetupactive = activeMenu == "editsetup" ? "active" : "";
     var editrestrictionsactive = activeMenu == "editrestrictions" ? "active" : "";

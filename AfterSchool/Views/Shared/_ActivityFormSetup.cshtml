@@ -2,10 +2,10 @@
 
 @{
     var accountPackage = (AccountPackage) ViewData["AccountPackage"];
-    var forms = (List<Form>) ViewBag.Forms;
-    var group = (ActivityGroup) ViewBag.Group;
-    var activePeriod = (RegistrationPeriod) ViewBag.ActivePeriod;
-    var activeForm = (ActivityForm) ViewBag.ActiveForm;
+    var forms = (List<Form>) ViewData["Forms"];
+    var group = (ActivityGroup) ViewData["Group"];
+    var activePeriod = (RegistrationPeriod) ViewData["ActivePeriod"];
+    var activeForm = (ActivityForm) ViewData["ActiveForm"];
     var showSeats = Model.ActivityTypeId.NotIn(new[] {ActivityType.FieldTrip, ActivityType.PermissionSlip});
     var showInviteOnly = accountPackage.HasFeature(FeatureType.AllowInvites);
     var showAllowApplications = accountPackage.HasFeature(FeatureType.AllowApplications);

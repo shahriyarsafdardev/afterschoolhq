@@ -36,4 +36,5 @@ public enum FeatureType
     Survey = 35,
     ManualStripePayouts = 36,
     FreeActivityLimit = 37,
+    ManageVolunteerOpportunities = 38,
 }

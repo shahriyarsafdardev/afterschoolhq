@@ -34,7 +34,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 return HttpNotFound();
 
             ViewBag.ParticipationObject = activity.GetParticipationObject(msgs);
-            ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
+            var currentUserIsActivityLeader = SessionVariables.CurrentUser.IsActivityLeader(activity, msgs);
+            ViewBag.IsActivityLeader = IsActivityLeader(activity, currentAccount, SessionVariables.AccountUserType, currentUserIsActivityLeader);
             ViewBag.Schedule = activity.GetSchedule(msgs);
             ViewBag.TotalPaid = activity.GetTotalAmountPaid(msgs);
             ViewBag.Messages = msgs;
@@ -137,7 +138,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Group = activityGroup;
             ViewBag.HasArchivedActivities = hasArchivedActivities;
             ViewBag.ActivityType = activityType;
-            ViewBag.PagingModel = new PagingModel()
+            ViewBag.PagingModel = new PagingModel
             {
                 TotalCount = totalActivityCount,
                 PageNumber = pageNumber,
@@ -190,7 +191,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msg.IsNotEmpty())
                 msgs.Add(msg, msg.ToLower().Contains("error") ? MessageType.UserError : MessageType.Success);
 
-            ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
+            var currentUserIsActivityLeader = SessionVariables.CurrentUser.IsActivityLeader(activity, msgs);
+            ViewBag.IsActivityLeader = IsActivityLeader(activity, SessionVariables.CurrentAccount, SessionVariables.AccountUserType,
+                currentUserIsActivityLeader);
             ViewBag.Registrants = ras;
             ViewBag.AssignmentType = rat;
             ViewBag.IsReadOnlySeatStatus = activity.GetParticipationObject(msgs)
@@ -383,25 +386,18 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var registrantActivities = activity.GetRegistrantActivities(msgs);
-            var isActivityLeader = IsActivityLeader(activity, msgs);
-            
-            var results = new PrintRegistrantsResults()
+            var currentUserIsActivityLeader = SessionVariables.CurrentUser.IsActivityLeader(activity, msgs);
+            var isActivityLeader = IsActivityLeader(activity, currentAccount, SessionVariables.AccountUserType, currentUserIsActivityLeader);
+
+            var results = new PrintRegistrantsResults
             {
                 Activity = activity,
                 RegistrantActivities = registrantActivities,
                 Messages = msgs,
-                IsActivityLeader = isActivityLeader
+                IsActivityLeader = isActivityLeader,
             };
-            
-            return View(results);
-        }
 
-        public class PrintRegistrantsResults
-        {
-            public Activity Activity { get; set; }
-            public List<RegistrantActivity> RegistrantActivities { get; set; }
-            public SystemMessages Messages { get; set; }
-            public bool IsActivityLeader { get; set; }
+            return View(results);
         }
 
         [HttpGet]
@@ -420,7 +416,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var activity = currentAccount.GetActivity(registrantActivity.ParticipationObjectId.Value, msgs);
 
-            ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
+            var currentUserIsActivityLeader = SessionVariables.CurrentUser.IsActivityLeader(activity, msgs);
+            ViewBag.IsActivityLeader = IsActivityLeader(activity, currentAccount, SessionVariables.AccountUserType, currentUserIsActivityLeader);
             ViewBag.AttachedCoupons = GetAttachedCoupons(registrantActivity, msgs);
             ViewBag.Messages = msgs;
 
@@ -457,7 +454,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 var purchaserAccount = masterRegistrant?.GetAccount(msgs);
 
                 AccountService.CreatePurchaseTransactionPayment(
-                    checkoutObject: new CheckoutObject()
+                    checkoutObject: new CheckoutObject
                     {
                         BillingAccount = currentAccount,
                         PayingAccount = purchaserAccount,
@@ -491,7 +488,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.AttachedCoupons = GetAttachedCoupons(registrantActivity, msgs);
-            ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
+            var currentUserIsActivityLeader = SessionVariables.CurrentUser.IsActivityLeader(activity, msgs);
+            ViewBag.IsActivityLeader = IsActivityLeader(activity, currentAccount, SessionVariables.AccountUserType, currentUserIsActivityLeader);
 
             return View("registrantdetail", registrantActivity);
         }
@@ -539,7 +537,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Expiration date must be in the future", MessageType.UserError);
 
             ViewBag.AttachedCoupons = GetAttachedCoupons(registrantActivity, msgs);
-            ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
+            var currentUserIsActivityLeader = SessionVariables.CurrentUser.IsActivityLeader(activity, msgs);
+            ViewBag.IsActivityLeader = IsActivityLeader(activity, SessionVariables.CurrentAccount, SessionVariables.AccountUserType,
+                currentUserIsActivityLeader);
             ViewBag.Messages = msgs;
 
             return View("RegistrantDetail", registrantActivity);
@@ -555,7 +555,8 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Account = currentAccount;
             ViewBag.MustRequestToPublish = MustRequestToPublish(activity, msgs);
             ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity, msgs);
-            ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
+            var currentUserIsActivityLeader = SessionVariables.CurrentUser.IsActivityLeader(activity, msgs);
+            ViewBag.IsActivityLeader = IsActivityLeader(activity, currentAccount, SessionVariables.AccountUserType, currentUserIsActivityLeader);
             ViewBag.Messages = msgs;
 
             return View(activity);
@@ -581,7 +582,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.MustRequestToPublish = MustRequestToPublish(activity, msgs);
             ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity, msgs);
-            ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
+            var currentUserIsActivityLeader = SessionVariables.CurrentUser.IsActivityLeader(activity, msgs);
+            ViewBag.IsActivityLeader = IsActivityLeader(activity, currentAccount, SessionVariables.AccountUserType, currentUserIsActivityLeader);
             ViewBag.IsFullScreen = isNewActivity;
             ViewBag.Messages = msgs;
             SetTempMessage(msgs);
@@ -692,7 +694,8 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IsFullScreen = Request["isnew"] == "1";
             ViewBag.MustRequestToPublish = mustRequestToPublish;
             ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity, msgs);
-            ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
+            ViewBag.IsActivityLeader =
+                IsActivityLeader(activity, currentAccount, SessionVariables.AccountUserType, currentUser.IsActivityLeader(activity, msgs));
             ViewBag.Messages = msgs;
 
             if (isFromActivityHome && msgs.HasNoErrors())
@@ -737,7 +740,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.MustRequestToPublish = mustRequestToPublish;
             ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity, msgs);
-            ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
+            ViewBag.IsActivityLeader =
+                IsActivityLeader(activity, currentAccount, SessionVariables.AccountUserType, currentUser.IsActivityLeader(activity, msgs));
             ViewBag.Messages = msgs;
 
             if (isFromActivityHome)
@@ -892,10 +896,11 @@ namespace AfterSchool.Areas.Org.Controllers
             var activityMessages = activity.GetMessages(start, length, msgs);
             var totalPages = Math.Ceiling(totalMessageCount.ToDouble() / recordsPerPage).ToInteger();
 
-            ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
+            var currentUserIsActivityLeader = SessionVariables.CurrentUser.IsActivityLeader(activity, msgs);
+            ViewBag.IsActivityLeader = IsActivityLeader(activity, currentAccount, SessionVariables.AccountUserType, currentUserIsActivityLeader);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.ActivityMessages = activityMessages;
-            ViewBag.PagingModel = new PagingModel()
+            ViewBag.PagingModel = new PagingModel
             {
                 TotalCount = totalMessageCount,
                 PageNumber = pageNumber,
@@ -915,7 +920,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var am = currentAccount.GetActivityMessage(id.ToGuid(), msgs);
             var activity = currentAccount.GetActivity(am.ActivityId.Value, msgs);
 
-            ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
+            var currentUserIsActivityLeader = SessionVariables.CurrentUser.IsActivityLeader(activity, msgs);
+            ViewBag.IsActivityLeader = IsActivityLeader(activity, currentAccount, SessionVariables.AccountUserType, currentUserIsActivityLeader);
             ViewBag.Registrants = am.GetActivityMessageRegistrants(msgs);
             ViewBag.Messages = msgs;
 
@@ -929,7 +935,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
-            ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
+            var currentUserIsActivityLeader = SessionVariables.CurrentUser.IsActivityLeader(activity, msgs);
+            ViewBag.IsActivityLeader = IsActivityLeader(activity, currentAccount, SessionVariables.AccountUserType, currentUserIsActivityLeader);
 
             var assignmentTypes = new RegistrationAssignmentType[]
             {
@@ -971,6 +978,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ActivityMessage am = null;
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
+            var currentUserIsActivityLeader = currentUser.IsActivityLeader(activity, msgs);
             if (msgs.HasNoErrors())
             {
                 var registrantIds = activity.GetRegistrants(true, msgs)
@@ -999,14 +1007,15 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         msgs.Add("Your message will been sent to the selected registrants", MessageType.Success);
                         ViewBag.Registrants = am.GetActivityMessageRegistrants(msgs);
-                        ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
+                        ViewBag.IsActivityLeader = IsActivityLeader(activity, currentAccount, SessionVariables.AccountUserType, currentUserIsActivityLeader);
                         ViewBag.Messages = msgs;
                         return View("messagedetail", am.Reload());
                     }
                 }
             }
 
-            ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
+            ViewBag.IsActivityLeader =
+                IsActivityLeader(activity, currentAccount, SessionVariables.AccountUserType, currentUserIsActivityLeader);
             ViewBag.Registrants = activity.GetRegistrants(msgs);
             ViewBag.Body = body;
             ViewBag.Messages = msgs;
@@ -1022,7 +1031,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             ViewBag.Users = currentAccount.GetUsers(msgs: msgs);
-            ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
+            var currentUserIsActivityLeader = SessionVariables.CurrentUser.IsActivityLeader(activity, msgs);
+            ViewBag.IsActivityLeader = IsActivityLeader(activity, currentAccount, SessionVariables.AccountUserType, currentUserIsActivityLeader);
             ViewBag.Messages = msgs;
 
             return View(activity);
@@ -1198,20 +1208,9 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(activity);
         }
 
-        private bool IsActivityLeader(Activity activity, SystemMessages msgs)
+        public static bool IsActivityLeader(Activity activity, Account currentAccount, UserType accountUserType, bool currentUserIsActivityLeader)
         {
-            if (msgs.IsEmpty())
-                msgs = new SystemMessages();
-
-            if (SessionVariables.CurrentAccount.ID == activity.AccountId)
-            {
-                if (SessionVariables.AccountUserType.In(AccountService.AdminUserTypes))
-                    return true;
-
-                return SessionVariables.CurrentUser.IsActivityLeader(activity, msgs);
-            }
-
-            return false;
+            return currentAccount.ID == activity.AccountId && (accountUserType.In(AccountService.AdminUserTypes) || currentUserIsActivityLeader);
         }
 
         private bool MustRequestToPublish(Activity activity, SystemMessages msgs)
@@ -1274,6 +1273,14 @@ namespace AfterSchool.Areas.Org.Controllers
             return Json(new {success = false}, JsonRequestBehavior.AllowGet);
         }
 
+        public class PrintRegistrantsResults
+        {
+            public Activity Activity { get; set; }
+            public List<RegistrantActivity> RegistrantActivities { get; set; }
+            public SystemMessages Messages { get; set; }
+            public bool IsActivityLeader { get; set; }
+        }
+
         #region Edit Activity
 
         [HttpGet]
@@ -1283,41 +1290,36 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             ActivityGroup activityGroup = null;
             Activity activity;
+            EditSetupResult result;
 
             if (id.IsGuid())
             {
                 activity = currentAccount.GetActivity(id.ToGuid(), msgs);
                 activityGroup = activity.GetActivityGroup(currentAccount.ID.Value, msgs);
+
+                result = GatherDataForAndAssembleEditSetupResult(activity, activityGroup, msgs, currentAccount, "EditSetup");
+                return View(result);
             }
-            else
+
+            activity = currentAccount.GetDefaultNewActivity();
+            activity.RegistrationModeId = RegistrationMode.Register;
+            activity.CostFrequencyTypeId = ActivityCostFrequencyType.PerActivity;
+
+            if (type.IsNotEmpty() && type.IsNumber())
+                activity.ActivityTypeId = type.ToInteger().ToEnum<ActivityType>();
+
+            if (activity.ActivityTypeId == ActivityType.LearningPod)
+                activity.IsInviteOnly = true;
+
+            //this means a new activity is being added to an existing enrollment group
+            if (group.IsGuid())
             {
-                activity = currentAccount.GetDefaultNewActivity();
-                activity.RegistrationModeId = RegistrationMode.Register;
-                activity.CostFrequencyTypeId = ActivityCostFrequencyType.PerActivity;
-
-                if (type.IsNotEmpty() && type.IsNumber())
-                    activity.ActivityTypeId = type.ToInteger().ToEnum<ActivityType>();
-
-                if (activity.ActivityTypeId == ActivityType.LearningPod)
-                    activity.IsInviteOnly = true;
-
-                //this means a new activity is being added to an existing enrollment group
-                if (group.IsGuid())
-                {
-                    activityGroup = currentAccount.GetActivityGroup(group.ToGuid(), msgs);
-                    activity.RegistrationModeId = activityGroup.RegistrationModeId;
-                }
+                activityGroup = currentAccount.GetActivityGroup(group.ToGuid(), msgs);
+                activity.RegistrationModeId = activityGroup.RegistrationModeId;
             }
 
-            LoadEditSetupViewBag(activity, activityGroup, msgs);
-
-            // we should default to have ContinuousEnrollment off
-            if (id.IsEmpty())
-                activity.IsContinuousEnrollment = false;
-
-            ViewBag.ActiveMenu = "EditSetup";
-
-            return View(activity);
+            result = GatherDataForAndAssembleEditSetupResult(activity, activityGroup, msgs, currentAccount, "EditSetup");
+            return View(result);
         }
 
         [HttpPost]
@@ -1330,6 +1332,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
+            var accountPackage = SessionVariables.AccountPackage;
             var msgs = new SystemMessages();
 
             Activity activity;
@@ -1368,160 +1371,160 @@ namespace AfterSchool.Areas.Org.Controllers
                 form = activeForm.FormId.Value.ToString();
             }
 
-            if (msgs.HasNoErrors())
+            if (msgs.HasErrors())
             {
-                var values = new Dictionary<string, object>()
-                {
-                    {"name", name.MaxChars(75)},
-                    {"seatsavailable", seatsavailable},
-                    {"registrationperiod", registrationperiod},
-                    {"registrationopendate", registrationopendate},
-                    {"registrationopentime", registrationopentime},
-                    {"registrationclosedate", registrationclosedate},
-                    {"registrationclosetime", registrationclosetime},
-                    {"timezone", timezone},
-                    {"form", form},
-                    {"regmode", regmode.IsNotEmpty() ? regmode : ((int) RegistrationMode.Register).ToString()},
-                    {"group", group},
-                    {"type", type},
-                    {"inviteonly", inviteonly.IsBoolean().ToString()},
-                    {"minseatsrequired", minseatsrequired},
-                    {"gradestart", activity.IsNotEmpty() ? activity.GradeLevelStart : defaultActivity.GradeLevelStart},
-                    {"gradeend", activity.IsNotEmpty() ? activity.GradeLevelEnd : defaultActivity.GradeLevelEnd},
-                    {
-                        "genderrestrictions",
-                        activity.IsNotEmpty() && activity.GenderRestriction.IsNotEmpty()
-                            ? (int) activity.GenderRestriction
-                            : (int) defaultActivity.GenderRestriction
-                    },
-                    {"agestart", activity.IsNotEmpty() ? activity.AgeStart : defaultActivity.AgeStart},
-                    {"ageend", activity.IsNotEmpty() ? activity.AgeEnd : defaultActivity.AgeEnd},
-                    {"costfrequencytype", costfrequencytype},
-                    {"cutoffhours", cutoffhours},
-                    {
-                        "isContinuousEnrollmentEnabled",
-                        isContinuousEnrollmentEnabled.IsNotEmpty() && isContinuousEnrollmentEnabled.ToBoolean()
-                    },
-                };
+                var result = GatherDataForAndAssembleEditSetupResult(activity, null, msgs, currentAccount, "EditSetup");
+                return View(result);
+            }
 
-                if (activity.IsNotEmpty())
+            var values = new Dictionary<string, object>
+            {
+                {"name", name.MaxChars(75)},
+                {"seatsavailable", seatsavailable},
+                {"registrationperiod", registrationperiod},
+                {"registrationopendate", registrationopendate},
+                {"registrationopentime", registrationopentime},
+                {"registrationclosedate", registrationclosedate},
+                {"registrationclosetime", registrationclosetime},
+                {"timezone", timezone},
+                {"form", form},
+                {"regmode", regmode.IsNotEmpty() ? regmode : ((int) RegistrationMode.Register).ToString()},
+                {"group", group},
+                {"type", type},
+                {"inviteonly", inviteonly.IsBoolean().ToString()},
+                {"minseatsrequired", minseatsrequired},
+                {"gradestart", activity.IsNotEmpty() ? activity.GradeLevelStart : defaultActivity.GradeLevelStart},
+                {"gradeend", activity.IsNotEmpty() ? activity.GradeLevelEnd : defaultActivity.GradeLevelEnd},
                 {
-                    activity = ActivityService.EditExisting(
-                        loggedInUserId: currentUser.ID.Value,
+                    "genderrestrictions",
+                    activity.IsNotEmpty() && activity.GenderRestriction.IsNotEmpty()
+                        ? (int) activity.GenderRestriction
+                        : (int) defaultActivity.GenderRestriction
+                },
+                {"agestart", activity.IsNotEmpty() ? activity.AgeStart : defaultActivity.AgeStart},
+                {"ageend", activity.IsNotEmpty() ? activity.AgeEnd : defaultActivity.AgeEnd},
+                {"costfrequencytype", costfrequencytype},
+                {"cutoffhours", cutoffhours},
+                {
+                    "isContinuousEnrollmentEnabled",
+                    isContinuousEnrollmentEnabled.IsNotEmpty() && isContinuousEnrollmentEnabled.ToBoolean()
+                },
+            };
+
+            if (activity.IsNotEmpty())
+            {
+                activity = ActivityService.EditExisting(
+                    loggedInUserId: currentUser.ID.Value,
+                    account: currentAccount,
+                    activityId: activity.ID.Value.ToString(),
+                    values: values,
+                    msgs: msgs
+                );
+                activityGroup = activity.GetActivityGroup(msgs);
+
+                // Show Success Message
+                // LOG: Someone Updated Activity ActivityName for Account AccountName
+                if (msgs.HasNoErrors())
+                {
+                    msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
+
+                    SessionVariables.WebSession.LogActivity(
                         account: currentAccount,
-                        activityId: activity.ID.Value.ToString(),
-                        values: values,
-                        msgs: msgs
+                        actor: currentUser,
+                        actionType: WebSessionActionType.Updated,
+                        objectType: ObjectType.Activity,
+                        objectId: activity.ID.Value,
+                        objectText: activity.Name,
+                        indirectObjectType: ObjectType.Account,
+                        indirectObjectId: currentAccount.ID.Value,
+                        indirectObjectText: currentAccount.Name
                     );
-                    activityGroup = activity.GetActivityGroup(msgs);
-
-                    // Show Success Message
-                    // LOG: Someone Updated Activity ActivityName for Account AccountName
-                    if (msgs.HasNoErrors())
-                    {
-                        msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-
-                        SessionVariables.WebSession.LogActivity(
-                            account: currentAccount,
-                            actor: currentUser,
-                            actionType: WebSessionActionType.Updated,
-                            objectType: ObjectType.Activity,
-                            objectId: activity.ID.Value,
-                            objectText: activity.Name,
-                            indirectObjectType: ObjectType.Account,
-                            indirectObjectId: currentAccount.ID.Value,
-                            indirectObjectText: currentAccount.Name
-                        );
-                    }
                 }
-                else
+            }
+            else
+            {
+                //create initial form for account
+                if (msgs.HasNoErrors() && !accountPackage.HasFeature(FeatureType.ManageForms, msgs))
                 {
-                    //create initial form for account
-                    if (msgs.HasNoErrors() &&
-                        !SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms, msgs))
-                    {
-                        var defaultForm = currentAccount.GetDefaultForm(msgs);
-                        var newForm = defaultForm.Copy(currentUser.ID.Value, currentAccount.ID.Value,
-                            FormType.Registration, (name + " form").MaxChars(100, "..."), msgs);
-                        if (msgs.HasNoErrors())
-                        {
-                            if (values.Any(m => m.Key == "form"))
-                                values["form"] = newForm.ID.Value.ToString();
-                            else
-                                values.Add("form", newForm.ID.Value.ToString());
-                        }
-                    }
-
-                    values.Add("registrationthankyouemail", "Thank you for registering.");
-                    values.Add("applicationthankyouemail", "Thank you for applying.");
-
-                    activity = ActivityService.CreateNew(
-                        loggedInUserId: currentUser.ID.Value,
-                        account: currentAccount,
-                        values: values,
-                        msgs: msgs
-                    );
-
-                    // Show Success Message
-                    // LOG: Someone Updated Activity ActivityName for Account AccountName
+                    var defaultForm = currentAccount.GetDefaultForm(msgs);
+                    var newForm = defaultForm.Copy(currentUser.ID.Value, currentAccount.ID.Value,
+                        FormType.Registration, (name + " form").MaxChars(100, "..."), msgs);
                     if (msgs.HasNoErrors())
                     {
-                        msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-
-                        SessionVariables.WebSession.LogActivity(
-                            account: currentAccount,
-                            actor: currentUser,
-                            actionType: WebSessionActionType.Created,
-                            objectType: ObjectType.Activity,
-                            objectId: activity.ID.Value,
-                            objectText: activity.Name,
-                            indirectObjectType: ObjectType.Account,
-                            indirectObjectId: currentAccount.ID.Value,
-                            indirectObjectText: currentAccount.Name
-                        );
+                        if (values.Any(m => m.Key == "form"))
+                            values["form"] = newForm.ID.Value.ToString();
+                        else
+                            values.Add("form", newForm.ID.Value.ToString());
                     }
                 }
 
-                if (group.IsGuid())
-                    activityGroup = currentAccount.GetActivityGroup(group.ToGuid(), msgs);
+                values.Add("registrationthankyouemail", "Thank you for registering.");
+                values.Add("applicationthankyouemail", "Thank you for applying.");
 
-                switch (cmd)
+                activity = ActivityService.CreateNew(
+                    loggedInUserId: currentUser.ID.Value,
+                    account: currentAccount,
+                    values: values,
+                    msgs: msgs
+                );
+
+                // Show Success Message
+                // LOG: Someone Updated Activity ActivityName for Account AccountName
+                if (msgs.HasNoErrors())
                 {
-                    case "next":
-                        switch (activity.ActivityTypeId)
-                        {
-                            case ActivityType.LearningPod:
-                            case ActivityType.Activity:
-                                LoadEditSetupViewBag(activity, activityGroup, msgs);
-                                ViewBag.ActiveMenu = "EditRestrictions";
-                                return View("EditRestrictions", activity);
+                    msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
 
-                            case ActivityType.FieldTrip:
-                            case ActivityType.Team:
-                                LoadEditScheduleViewBag(activity, activity.ActivityScheduleId?.ToString(), msgs);
-                                ViewBag.ActiveMenu = "EditSchedule";
-                                return View("editschedule", activity);
-
-                            case ActivityType.PermissionSlip:
-                                LoadEditSetupViewBag(activity, activityGroup, msgs);
-                                ViewBag.ActiveMenu = "EditDetails";
-                                return View("EditDetails", activity);
-                        }
-
-                        break;
+                    SessionVariables.WebSession.LogActivity(
+                        account: currentAccount,
+                        actor: currentUser,
+                        actionType: WebSessionActionType.Created,
+                        objectType: ObjectType.Activity,
+                        objectId: activity.ID.Value,
+                        objectText: activity.Name,
+                        indirectObjectType: ObjectType.Account,
+                        indirectObjectId: currentAccount.ID.Value,
+                        indirectObjectText: currentAccount.Name
+                    );
                 }
             }
 
-            LoadEditSetupViewBag(activity, activityGroup, msgs);
-            ViewBag.ActiveMenu = "EditSetup";
+            if (group.IsGuid())
+                activityGroup = currentAccount.GetActivityGroup(group.ToGuid(), msgs);
 
-            return View(activity);
+            var isNew = Request["isnew"] == "1";
+            var fullScreenExitUrl = GetFullScreenExitUrl(activity);
+            switch (cmd, activity.ActivityTypeId)
+            {
+                case ("next", ActivityType.LearningPod):
+                case ("next", ActivityType.Activity):
+                case ("next", ActivityType.VolunteerOpportunity):
+                    var editRestrictionsResult = new EditRestrictionsAssembler().AssembleEditRestrictionsResult(activity, msgs, currentAccount, isNew,
+                        fullScreenExitUrl);
+
+                    return View("EditRestrictions", editRestrictionsResult);
+
+                case ("next", ActivityType.FieldTrip):
+                case ("next", ActivityType.Team):
+                    var result = GatherDataForAndAssembleEditScheduleResult(activity, activity.ActivityScheduleId?.ToString(), msgs, currentAccount,
+                        currentUser);
+                    return View("EditSchedule", result);
+
+                case ("next", ActivityType.PermissionSlip):
+                    var isActivityLeader = IsActivityLeader(activity, currentAccount, SessionVariables.AccountUserType,
+                        currentUser.IsActivityLeader(activity, msgs));
+                    var editDetailsResult = new EditDetailsAssembler().AssembleEditDetailsResult(currentAccount, msgs, activity, fullScreenExitUrl,
+                        isActivityLeader, accountPackage, isNew);
+                    return View("EditDetails", editDetailsResult);
+
+                default:
+                    var resultDefault = GatherDataForAndAssembleEditSetupResult(activity, activityGroup, msgs, currentAccount, "EditSetup");
+                    return View(resultDefault);
+            }
         }
 
-        private void LoadEditSetupViewBag(Activity activity, ActivityGroup activityGroup, SystemMessages msgs)
+        private EditSetupResult GatherDataForAndAssembleEditSetupResult(Activity activity, ActivityGroup activityGroup, SystemMessages msgs,
+            Account currentAccount, string activeMenu)
         {
-            var currentAccount = SessionVariables.CurrentAccount;
-
             if (msgs.IsEmpty())
                 msgs = new SystemMessages();
 
@@ -1531,31 +1534,28 @@ namespace AfterSchool.Areas.Org.Controllers
             var activePeriod = activity.GetActiveRegistrationPeriod(msgs) ??
                                currentAccount.GetDefaultNewRegistrationPeriod();
 
-            periods.Add(activePeriod);
-            periods = periods.OrderBy(period => period.StartDateTime.Value).ToList();
-
-            ViewBag.Group = activityGroup;
-            ViewBag.Account = currentAccount;
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Forms = currentAccount.GetForms(msgs).OrderBy(x => x.Name).ToList();
-            ViewBag.Periods = periods;
-            ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
-            ViewBag.ActivePeriod = activePeriod;
-            ViewBag.ActiveForm = activeForm;
-            ViewBag.IsFullScreen = GetIsFullScreen(activity, activityGroup?.Uid.ToString());
-            ViewBag.Messages = msgs;
+            var currentUserIsActivityLeader = SessionVariables.CurrentUser.IsActivityLeader(activity, msgs);
+            var editSetupAssembler = new EditSetupAssembler();
+            var fullScreenExitUrl = GetFullScreenExitUrl(activity, activityGroup?.Uid.ToString());
+            var forms = currentAccount.GetForms(msgs);
+            return editSetupAssembler.AssembleEditSetupResult(activity, activityGroup, msgs, currentAccount, activeMenu, periods, activePeriod, activeForm,
+                SessionVariables.AccountPackage, SessionVariables.AccountUserType, currentUserIsActivityLeader, Request["isnew"] == "1", forms,
+                fullScreenExitUrl);
         }
 
-        private bool GetIsFullScreen(Activity activity, string groupUid = "")
+        public static bool GetIsFullScreen(Activity activity, bool isNew)
         {
-            ViewBag.FullScreenExitUrl = Url.Action("index", "activity", new {type = (int) activity.ActivityTypeId});
+            return isNew && !activity.IsPublished;
+        }
 
+        public string GetFullScreenExitUrl(Activity activity, string groupUid = "")
+        {
             if (groupUid.IsNotEmpty())
-                ViewBag.FullScreenExitUrl = Url.Action("activities", "group", new {id = groupUid});
-            else if (activity.ActivityGroupId.HasValue)
-                ViewBag.FullScreenExitUrl = Url.Action("activities", "group", new {id = activity.ActivityGroupUid});
+                return Url.Action("Activities", "Group", new {id = groupUid});
+            if (activity.ActivityGroupId.HasValue)
+                return Url.Action("Activities", "Group", new {id = activity.ActivityGroupUid});
 
-            return Request["isnew"] == "1" && !activity.IsPublished;
+            return Url.Action("index", "activity", new {type = (int) activity.ActivityTypeId});
         }
 
         [HttpGet]
@@ -1564,13 +1564,10 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
-
-            ViewBag.Messages = msgs;
-            ViewBag.Account = currentAccount;
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.ActiveMenu = "EditRestrictions";
-            ViewBag.IsFullScreen = GetIsFullScreen(activity);
-            return View(activity);
+            var fullScreenExitUrl = GetFullScreenExitUrl(activity);
+            var result = new EditRestrictionsAssembler().AssembleEditRestrictionsResult(activity, msgs, currentAccount, Request["isnew"] == "1",
+                fullScreenExitUrl);
+            return View(result);
         }
 
         [HttpPost]
@@ -1579,7 +1576,7 @@ namespace AfterSchool.Areas.Org.Controllers
             string genderrestrictions, string requiresparentalconsent, string isStudentAllowed, string cmd)
         {
             var msgs = new SystemMessages();
-            Activity activity = null;
+            Activity activity;
             var accountPackage = SessionVariables.AccountPackage;
             var currentUser = SessionVariables.CurrentUser;
             var currentAccount = SessionVariables.CurrentAccount;
@@ -1605,7 +1602,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     }
                 }
 
-                var values = new Dictionary<string, object>()
+                var values = new Dictionary<string, object>
                 {
                     {"alloworganization", alloworganization.IfBlank("0")},
                     {"agestart", agestart},
@@ -1645,30 +1642,29 @@ namespace AfterSchool.Areas.Org.Controllers
                 );
             }
 
-            ViewBag.Account = currentAccount;
-            ViewBag.AccountPackage = accountPackage;
 
             if (msgs.HasNoErrors())
             {
                 switch (cmd)
                 {
                     case "prev":
-                        ViewBag.ActiveMenu = "EditSetup";
-                        LoadEditSetupViewBag(activity, activity.GetActivityGroup(msgs), msgs);
-                        return View("EditSetup", activity);
+                        var editSetupResult =
+                            GatherDataForAndAssembleEditSetupResult(activity, activity.GetActivityGroup(msgs), msgs, currentAccount, "EditSetup");
+                        return View("EditSetup", editSetupResult);
                     case "next":
-                        ViewBag.ActiveMenu = "EditSchedule";
                         var scheduleId = activity.ActivityScheduleId?.ToString();
-                        LoadEditScheduleViewBag(activity, scheduleId, msgs);
-                        return View("EditSchedule", activity);
+                        var editScheduleResult = GatherDataForAndAssembleEditScheduleResult(activity, scheduleId, msgs, currentAccount, currentUser);
+                        return View("EditSchedule", editScheduleResult);
                 }
             }
 
-            ViewBag.IsFullScreen = GetIsFullScreen(activity);
-            ViewBag.ActiveMenu = "EditRestrictions";
-            ViewBag.Messages = msgs;
+            var isNew = Request["isnew"] == "1";
+            var fullScreenExitUrl = GetFullScreenExitUrl(activity);
 
-            return View(activity);
+            var editRestrictionsResult =
+                new EditRestrictionsAssembler().AssembleEditRestrictionsResult(activity, msgs, currentAccount, isNew, fullScreenExitUrl);
+
+            return View(editRestrictionsResult);
         }
 
         [HttpGet]
@@ -1682,7 +1678,8 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Instructors = currentAccount.GetUsers(msgs: msgs);
             ViewBag.ActiveMenu = "EditContact";
-            ViewBag.IsFullScreen = GetIsFullScreen(activity);
+            ViewBag.IsFullScreen = GetIsFullScreen(activity, Request["isnew"] == "1");
+            ViewBag.FullScreenExitUrl = GetFullScreenExitUrl(activity);
             ViewBag.Messages = msgs;
 
             return View(activity);
@@ -1750,30 +1747,34 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Account = currentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Instructors = currentAccount.GetUsers(msgs: msgs);
-            ViewBag.IsFullScreen = GetIsFullScreen(activity);
+            ViewBag.IsFullScreen = GetIsFullScreen(activity, Request["isnew"] == "1");
+            ViewBag.FullScreenExitUrl = GetFullScreenExitUrl(activity);
 
             if (msgs.HasNoErrors())
             {
                 if (beforeProviderAccountId != activity.ProviderAccountId)
                     ActivityService.NotifyProviderOfNewActivity(activity, currentUser, msgs);
 
-                switch (cmd)
+                switch (cmd, activity.ActivityTypeId)
                 {
-                    case "prev":
-                        ViewBag.ActiveMenu = "EditDetails";
-                        return View("EditDetails", activity);
-                    case "next":
-                        if (activity.ActivityTypeId.In(new[] {ActivityType.Activity, ActivityType.LearningPod}))
-                        {
-                            ViewBag.ActiveMenu = "EditLocation";
-                            return View("EditLocation", activity);
-                        }
-                        else
-                        {
-                            LoadEditCostViewBag(activity, msgs);
-                            ViewBag.ActiveMenu = "EditCost";
-                            return View("editcost", activity);
-                        }
+                    case ("prev", _):
+                        var accountPackage = SessionVariables.AccountPackage;
+                        var isNew = Request["isnew"] == "1";
+                        var isActivityLeader = IsActivityLeader(activity, currentAccount, SessionVariables.AccountUserType,
+                            currentUser.IsActivityLeader(activity, msgs));
+                        var fullScreenExitUrl = GetFullScreenExitUrl(activity);
+                        var editDetailsResult = new EditDetailsAssembler().AssembleEditDetailsResult(currentAccount, msgs, activity, fullScreenExitUrl,
+                            isActivityLeader, accountPackage, isNew);
+                        return View("EditDetails", editDetailsResult);
+                    case ("next", ActivityType.Activity):
+                    case ("next", ActivityType.LearningPod):
+                    case ("next", ActivityType.VolunteerOpportunity):
+                        ViewBag.ActiveMenu = "EditLocation";
+                        return View("EditLocation", activity);
+                    case ("next", _):
+                        LoadEditCostViewBag(activity, msgs);
+                        ViewBag.ActiveMenu = "EditCost";
+                        return View("editcost", activity);
                 }
             }
 
@@ -1787,15 +1788,14 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
-
-            ViewBag.Account = currentAccount;
-            ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.ActiveMenu = "EditDetails";
-            ViewBag.IsFullScreen = GetIsFullScreen(activity);
-            ViewBag.Messages = msgs;
-
-            return View(activity);
+            var currentUser = SessionVariables.CurrentUser;
+            var isActivityLeader = IsActivityLeader(activity, currentAccount, SessionVariables.AccountUserType, currentUser.IsActivityLeader(activity, msgs));
+            var accountPackage = SessionVariables.AccountPackage;
+            var isNew = Request["isnew"] == "1";
+            var fullScreenExitUrl = GetFullScreenExitUrl(activity);
+            var result = new EditDetailsAssembler().AssembleEditDetailsResult(currentAccount, msgs, activity, fullScreenExitUrl, isActivityLeader,
+                accountPackage, isNew);
+            return View(result);
         }
 
         [ValidateInput(false)]
@@ -1815,7 +1815,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             if (activity.IsNotEmpty())
             {
-                var values = new Dictionary<string, object>()
+                var values = new Dictionary<string, object>
                 {
                     {"details", details},
                     {"description", description},
@@ -1849,21 +1849,19 @@ namespace AfterSchool.Areas.Org.Controllers
                     msgs: msgs);
             }
 
-            ViewBag.Account = currentAccount;
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.IsFullScreen = GetIsFullScreen(activity);
-
             if (msgs.HasNoErrors())
             {
                 switch (cmd)
                 {
                     case "prev":
-                        ViewBag.ActiveMenu = "EditSchedule";
                         var scheduleId = activity.ActivityScheduleId?.ToString();
-                        LoadEditScheduleViewBag(activity, scheduleId, msgs);
-                        ViewBag.Messages = msgs;
-                        return View("EditSchedule", activity);
+                        var editScheduleResult = GatherDataForAndAssembleEditScheduleResult(activity, scheduleId, msgs, currentAccount, currentUser);
+                        return View("EditSchedule", editScheduleResult);
                     case "next":
+                        ViewBag.Account = currentAccount;
+                        ViewBag.AccountPackage = SessionVariables.AccountPackage;
+                        ViewBag.IsFullScreen = GetIsFullScreen(activity, Request["isnew"] == "1");
+                        ViewBag.FullScreenExitUrl = GetFullScreenExitUrl(activity);
                         ViewBag.ActiveMenu = "EditContact";
                         ViewBag.Instructors = currentAccount.GetUsers(msgs: msgs);
                         ViewBag.Messages = msgs;
@@ -1871,25 +1869,20 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
             }
 
-            ViewBag.ActiveMenu = "EditDetails";
-            ViewBag.Messages = msgs;
-            return View(activity);
+            var accountPackage = SessionVariables.AccountPackage;
+            var isNew = Request["isnew"] == "1";
+            var fullScreenExitUrl = GetFullScreenExitUrl(activity);
+            var isActivityLeader = IsActivityLeader(activity, currentAccount, SessionVariables.AccountUserType, currentUser.IsActivityLeader(activity, msgs));
+            var result = new EditDetailsAssembler().AssembleEditDetailsResult(currentAccount, msgs, activity, fullScreenExitUrl, isActivityLeader,
+                accountPackage, isNew);
+            return View(result);
         }
 
-        private void LoadEditScheduleViewBag(Activity activity, string scheduleId, SystemMessages msgs)
+        private EditScheduleResult GatherDataForAndAssembleEditScheduleResult(Activity activity, string scheduleId, SystemMessages msgs, Account currentAccount,
+            WebUser currentUser)
         {
-            var currentAccount = SessionVariables.CurrentAccount;
-
             if (msgs.IsEmpty())
                 msgs = new SystemMessages();
-
-            ViewBag.Account = currentAccount;
-            ViewBag.ActivityId = activity.Uid.ToString();
-            ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.ActiveMenu = "EditSchedule";
-            ViewBag.Schedules = currentAccount.GetActivitySchedules(msgs);
-            ViewBag.IsFullScreen = GetIsFullScreen(activity);
 
             ActivitySchedule schedule = null;
 
@@ -1903,25 +1896,27 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (schedule.IsEmpty())
                 schedule = activity.GetSchedule();
+            var activeRegistrationPeriod = activity.GetActiveRegistrationPeriod(msgs);
+            var schedules = currentAccount.GetActivitySchedules(msgs);
+            var currentUserIsActivityLeader = currentUser.IsActivityLeader(activity, msgs);
+            var accountUserType = SessionVariables.AccountUserType;
+            var isNew = Request["isnew"] == "1";
+            var fullScreenUrl = GetFullScreenExitUrl(activity);
 
-            if (schedule.IsEmpty())
-                schedule = ActivitySchedule.GetNewDefaultSchedule(activity, msgs);
-
-            ViewBag.Schedule = schedule;
-            ViewBag.ShowScheduleList =
-                SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups, msgs);
-            ViewBag.Messages = msgs;
+            return new EditScheduleAssembler().AssembleEditScheduleResult(schedule, activity, currentAccount, accountUserType, activeRegistrationPeriod,
+                currentUserIsActivityLeader, schedules, isNew, fullScreenUrl, msgs);
         }
 
         [HttpGet]
         public ActionResult EditSchedule(string id, string schedule)
         {
             var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
-            LoadEditScheduleViewBag(activity, schedule, msgs);
-            return View(activity);
+            var result = GatherDataForAndAssembleEditScheduleResult(activity, schedule, msgs, currentAccount, currentUser);
+            return View(result);
         }
 
         [HttpPost]
@@ -1988,7 +1983,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     if (msgs.HasNoErrors())
                     {
-                        values = new Dictionary<string, object>()
+                        values = new Dictionary<string, object>
                         {
                             {"scheduledetails", scheduledetails},
                             {"days", days.Select(x => (int) x).ToStrings().ToStringList()},
@@ -2036,7 +2031,6 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
             }
 
-
             // Show Success Message
             // LOG: Someone Updated Activity ActivityName for Account AccountName
             if (msgs.HasNoErrors())
@@ -2056,52 +2050,48 @@ namespace AfterSchool.Areas.Org.Controllers
                 );
             }
 
-            ActivitySchedule sched = null;
+            ActivitySchedule activitySchedule;
 
             if (msgs.HasNoErrors())
-                sched = activity.GetSchedule(msgs: msgs);
+                activitySchedule = activity.GetSchedule(msgs: msgs);
             else
-                sched = ActivitySchedule.GetNewDefaultSchedule(inSessionDates.Select(item => item.ToDateRange())
+                activitySchedule = ActivitySchedule.GetNewDefaultSchedule(inSessionDates.Select(item => item.ToDateRange())
                     .ToList());
-
-            ViewBag.Account = currentAccount;
-            ViewBag.AccountPackage = currentAccountPackage;
-            ViewBag.Schedule = sched;
-            ViewBag.Schedules = currentAccount.GetActivitySchedules(msgs);
-            ViewBag.ShowScheduleList = currentAccountPackage.HasFeature(FeatureType.ManageActivityGroups, msgs);
-            ViewBag.IsFullScreen = GetIsFullScreen(activity);
-            ViewBag.Messages = msgs;
 
             if (msgs.HasNoErrors())
             {
+                var isNew = Request["isnew"] == "1";
+                var fullScreenExitUrl = GetFullScreenExitUrl(activity);
+
                 switch (cmd)
                 {
                     case "prev":
-                        ViewBag.ActiveMenu = "EditRestrictions";
-                        return View("EditRestrictions", activity);
+                        var editRestrictionsResult =
+                            new EditRestrictionsAssembler().AssembleEditRestrictionsResult(activity, msgs, currentAccount, isNew, fullScreenExitUrl);
+                        return View("EditRestrictions", editRestrictionsResult);
+                    case "next" when activity.ActivityTypeId != ActivityType.Team:
+                        var isActivityLeader = IsActivityLeader(activity, currentAccount, SessionVariables.AccountUserType,
+                            currentUser.IsActivityLeader(activity, msgs));
+                        var editDetailsResult = new EditDetailsAssembler().AssembleEditDetailsResult(currentAccount, msgs, activity, fullScreenExitUrl,
+                            isActivityLeader, currentAccountPackage, isNew);
+                        return View("EditDetails", editDetailsResult);
                     case "next":
-                        if (activity.ActivityTypeId != ActivityType.Team)
-                        {
-                            ViewBag.ActiveMenu = "EditDetails";
-                            return View("EditDetails", activity);
-                        }
-                        else
-                        {
-                            ViewBag.ActiveMenu = "EditContact";
-                            ViewBag.Instructors = currentAccount.GetUsers(msgs: msgs);
-                            return View("editcontact", activity);
-                        }
+                        ViewBag.ActiveMenu = "EditContact";
+                        ViewBag.Instructors = currentAccount.GetUsers(msgs: msgs);
+                        ViewBag.Account = currentAccount;
+                        ViewBag.AccountPackage = currentAccountPackage;
+                        ViewBag.Schedule = activitySchedule;
+                        ViewBag.Schedules = currentAccount.GetActivitySchedules(msgs);
+                        ViewBag.ShowScheduleList = currentAccountPackage.HasFeature(FeatureType.ManageActivityGroups, msgs);
+                        ViewBag.IsFullScreen = GetIsFullScreen(activity, Request["isnew"] == "1");
+                        ViewBag.FullScreenExitUrl = GetFullScreenExitUrl(activity);
+                        ViewBag.Messages = msgs;
+                        return View("editcontact", activity);
                 }
             }
 
-            if (ViewBag.Schedule == null)
-                ViewBag.Schedule =
-                    ActivitySchedule.GetNewDefaultSchedule(inSessionDates.Select(item => item.ToDateRange()).ToList());
-
-            ViewBag.Messages = msgs;
-            ViewBag.ActiveMenu = "EditSchedule";
-            ViewBag.hasSchedule = hasschedule;
-            return View(activity);
+            var result = GatherDataForAndAssembleEditScheduleResult(activity, activitySchedule.ID?.ToString(), msgs, currentAccount, currentUser);
+            return View(result);
         }
 
         [HttpGet]
@@ -2112,10 +2102,13 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             ViewBag.Account = currentAccount;
-            ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
+            var currentUser = SessionVariables.CurrentUser;
+            ViewBag.IsActivityLeader =
+                IsActivityLeader(activity, currentAccount, SessionVariables.AccountUserType, currentUser.IsActivityLeader(activity, msgs));
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.ActiveMenu = "EditLocation";
-            ViewBag.IsFullScreen = GetIsFullScreen(activity);
+            ViewBag.IsFullScreen = GetIsFullScreen(activity, Request["isnew"] == "1");
+            ViewBag.FullScreenExitUrl = GetFullScreenExitUrl(activity);
             ViewBag.Messages = msgs;
 
             return View(activity);
@@ -2140,7 +2133,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (activity.IsNotEmpty() && msgs.HasNoErrors())
             {
-                var values = new Dictionary<string, object>()
+                var values = new Dictionary<string, object>
                 {
                     {"location", location},
                     {"locationname", locationname},
@@ -2196,7 +2189,8 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.Account = currentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.IsFullScreen = GetIsFullScreen(activity);
+            ViewBag.IsFullScreen = GetIsFullScreen(activity, Request["isnew"] == "1");
+            ViewBag.FullScreenExitUrl = GetFullScreenExitUrl(activity);
 
             if (msgs.HasNoErrors())
             {
@@ -2234,14 +2228,17 @@ namespace AfterSchool.Areas.Org.Controllers
 
 
             ViewBag.Account = currentAccount;
-            ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
+            var currentUser = SessionVariables.CurrentUser;
+            ViewBag.IsActivityLeader =
+                IsActivityLeader(activity, currentAccount, SessionVariables.AccountUserType, currentUser.IsActivityLeader(activity, msgs));
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.CanProcessPayments = canProcessPayments;
             ViewBag.PaymentPlan = activity.GetPaymentPlan(msgs);
             ViewBag.SubscriptionPlan = activity.GetSubscriptionPlan(msgs);
             ViewBag.PostPayPlan = activity.GetPostPayPlan(msgs);
             ViewBag.ActiveMenu = "EditCost";
-            ViewBag.IsFullScreen = GetIsFullScreen(activity);
+            ViewBag.IsFullScreen = GetIsFullScreen(activity, Request["isnew"] == "1");
+            ViewBag.FullScreenExitUrl = GetFullScreenExitUrl(activity);
             ViewBag.hasSchedule = activity.HasSchedule;
             ViewBag.Messages = msgs;
         }
@@ -2284,7 +2281,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (!cost.IsNumber())
                     cost = "0";
 
-                var values = new Dictionary<string, object>()
+                var values = new Dictionary<string, object>
                 {
                     {"cost", cost},
                     {"costdescription", costdescription},
@@ -2346,7 +2343,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Account = currentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.IsFullScreen = GetIsFullScreen(activity);
+            ViewBag.IsFullScreen = GetIsFullScreen(activity, Request["isnew"] == "1");
+            ViewBag.FullScreenExitUrl = GetFullScreenExitUrl(activity);
             ViewBag.Messages = msgs;
 
             if (msgs.HasNoErrors())
@@ -2379,10 +2377,13 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             ViewBag.Account = currentAccount;
-            ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
+            var currentUser = SessionVariables.CurrentUser;
+            ViewBag.IsActivityLeader =
+                IsActivityLeader(activity, currentAccount, SessionVariables.AccountUserType, currentUser.IsActivityLeader(activity, msgs));
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.ActiveMenu = "EditConfirmation";
-            ViewBag.IsFullScreen = GetIsFullScreen(activity);
+            ViewBag.IsFullScreen = GetIsFullScreen(activity, Request["isnew"] == "1");
+            ViewBag.FullScreenExitUrl = GetFullScreenExitUrl(activity);
             ViewBag.Messages = msgs;
 
             return View(activity);
@@ -2401,7 +2402,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (id.IsGuid())
             {
-                var values = new Dictionary<string, object>()
+                var values = new Dictionary<string, object>
                 {
                     {"registrationthankyouemail", registrationthankyouemail},
                     {"applicationthankyouemail", applicationthankyouemail},
@@ -2437,7 +2438,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Account = currentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.IsFullScreen = GetIsFullScreen(activity);
+            ViewBag.IsFullScreen = GetIsFullScreen(activity, Request["isnew"] == "1");
+            ViewBag.FullScreenExitUrl = GetFullScreenExitUrl(activity);
 
             if (msgs.HasNoErrors())
             {
@@ -2686,10 +2688,12 @@ namespace AfterSchool.Areas.Org.Controllers
                     totalPages = Math.Ceiling(totalAttendanceCount.ToDouble() / recordsPerPage).ToInteger();
             }
 
-            ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
+            var currentUser = SessionVariables.CurrentUser;
+            ViewBag.IsActivityLeader =
+                IsActivityLeader(activity, currentAccount, SessionVariables.AccountUserType, currentUser.IsActivityLeader(activity, msgs));
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Attendances = attendances;
-            ViewBag.PagingModel = new PagingModel()
+            ViewBag.PagingModel = new PagingModel
             {
                 TotalCount = totalAttendanceCount,
                 PageNumber = pageNumber,
@@ -2720,7 +2724,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.AttendanceRegistrants = attendanceRegistrants;
             ViewBag.Schedule = activitySchedule;
-            ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
+            ViewBag.IsActivityLeader =
+                IsActivityLeader(activity, currentAccount, SessionVariables.AccountUserType, currentUser.IsActivityLeader(activity, msgs));
             ViewBag.RegistrantActivities = activity.GetRegistrantActivities(msgs);
             ViewBag.Messages = msgs;
             return View(attendance);
@@ -2770,7 +2775,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.AttendanceRegistrants = GetAttendanceRegistrants(attendance, activity, activitySchedule, msgs);
             ViewBag.Schedule = activitySchedule;
-            ViewBag.IsActivityLeader = IsActivityLeader(activity, msgs);
+            var currentUser = SessionVariables.CurrentUser;
+            ViewBag.IsActivityLeader =
+                IsActivityLeader(activity, currentAccount, SessionVariables.AccountUserType, currentUser.IsActivityLeader(activity, msgs));
             ViewBag.RegistrantActivities = activity.GetRegistrantActivities(msgs);
             ViewBag.Messages = msgs;
 
@@ -3028,7 +3035,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                 overrideAmount = (costPerAttendance * attendanceDaysToCharge) - couponDiscount;
                             }
 
-                            checkoutObject = new CheckoutObject()
+                            checkoutObject = new CheckoutObject
                             {
                                 Coupon = coupon,
                                 OverrideAmount = overrideAmount,
@@ -3164,15 +3171,25 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var activityGroup = activity.GetActivityGroup(currentAccount.ID.Value, msgs);
-
-            LoadEditSetupViewBag(activity, activityGroup, msgs);
-
             var activityRegistrants = activity.GetRegistrantActivitiesForSurvey(msgs);
-            var studentList = activityRegistrants.Select(m => new SelectListItem()
+            var studentList = activityRegistrants.Select(m => new SelectListItem
             {
                 Text = m.RegistrantName,
                 Value = m.RegistrantId.Value.ToString(),
             });
+
+            var result = GatherDataForAndAssembleEditSetupResult(activity, activityGroup, msgs, SessionVariables.CurrentAccount, null);
+            ViewBag.Group = result.Group;
+            ViewBag.Account = result.Account;
+            ViewBag.AccountPackage = result.AccountPackage;
+            ViewBag.Forms = result.Forms;
+            ViewBag.Periods = result.Periods;
+            ViewBag.IsActivityLeader = result.IsActivityLeader;
+            ViewBag.ActivePeriod = result.ActivePeriod;
+            ViewBag.ActiveForm = result.ActiveForm;
+            ViewBag.IsFullScreen = result.IsFullScreen;
+            ViewBag.Messages = result.Messages;
+            ViewBag.FullScreenExitUrl = result.FullScreenExitUrl;
 
             ViewBag.Students = studentList.ToList();
             ViewBag.Messages = msgs;

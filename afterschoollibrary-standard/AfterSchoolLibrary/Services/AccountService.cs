@@ -2574,6 +2574,7 @@ namespace AfterSchoolLibrary.Services
                 GenderRestriction = profile.IsNotEmpty() ? profile.GenderRestriction : GenderRestrictionType.None,
                 AgeStart = profile?.AgeStart,
                 AgeEnd = profile?.AgeEnd,
+                IsContinuousEnrollment = false
             };
         }
 

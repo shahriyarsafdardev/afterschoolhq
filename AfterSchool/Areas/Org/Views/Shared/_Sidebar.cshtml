@@ -1,4 +1,4 @@
-@{ 
+@{
     var controller = ViewContext.RouteData.Values["controller"].ToString().ToLower();
     var action = ViewContext.RouteData.Values["action"].ToString().ToLower();
 
@@ -35,7 +35,7 @@
             break;
     }
 
-    switch(controller)
+    switch (controller)
     {
         case "home":
             homeactive = "active";
@@ -75,7 +75,6 @@
         case "accounting":
             accountingactive = "active";
             break;
-
     }
 }
 
@@ -98,123 +97,189 @@
 
         <ul class="sidebar-elements">
             <li>
-                <img src="/assets/img/footer-icon.png" class="side-menu-logo" />
+                <img src="/assets/img/footer-icon.png" class="side-menu-logo"/>
             </li>
 
-            <li class="@homeactive"><a href="@Url.Action("index", "home")"><i class="icon s7-home"></i><span>Home</span></a></li>
+            <li class="@homeactive">
+                <a href="@Url.Action("index", "home")">
+                    <i class="icon s7-home"></i><span>Home</span>
+                </a>
+            </li>
 
             @if (SessionVariables.CurrentAccount.AccountTypeId.In(AccountService.IndividualProviderAccountTypes))
             {
                 if (CanView(SessionVariables.AccountUserType, PermissionType.ActivitiesView))
                 {
                     <li class="@activityactive">
-                        <a href="@Url.Action("index", "activity", new { type = (int)ActivityType.Activity })"><i class="icon s7-gleam"></i> @UILabel.ActivityLabel(ActivityType.Activity, true)</a>
+                        <a href="@Url.Action("index", "activity", new {type = (int) ActivityType.Activity})">
+                            <i class="icon s7-gleam"></i> @UILabel.ActivityLabel(ActivityType.Activity, true)
+                        </a>
                     </li>
                 }
             }
             else
             {
                 <li class="parent @activitycenteractive">
-                    <a href="#"><i class="icon s7-gleam"></i> <span>Activity Center</span></a>
+                    <a href="#">
+                        <i class="icon s7-gleam"></i> <span>Activity Center</span>
+                    </a>
                     <ul class="sub-menu">
                         @if (CanView(SessionVariables.AccountUserType, PermissionType.ActivitiesView))
                         {
                             <li>
-                                <a href="@Url.Action("index", "activity", new { type = (int)ActivityType.Activity })"><i class="icon s7-gleam"></i> Extracurricular @UILabel.ActivityLabel(ActivityType.Activity, true)</a>
+                                <a href="@Url.Action("index", "activity", new {type = (int) ActivityType.Activity})"><i class="icon s7-gleam"></i> Extracurricular @UILabel.ActivityLabel(ActivityType.Activity, true)</a>
                             </li>
                         }
                         @if (CanView(FeatureType.ManageFieldTrips, SessionVariables.AccountUserType, PermissionType.FieldTripsView))
                         {
                             <li>
-                                <a href="@Url.Action("index", "activity", new { type = (int)ActivityType.FieldTrip })"><i class="icon s7-compass"></i> @UILabel.ActivityLabel(ActivityType.FieldTrip, true)</a>
+                                <a href="@Url.Action("index", "activity", new {type = (int) ActivityType.FieldTrip})">
+                                    <i class="icon s7-compass"></i> @UILabel.ActivityLabel(ActivityType.FieldTrip, true)
+                                </a>
                             </li>
                         }
                         @if (CanView(SessionVariables.AccountUserType, PermissionType.PermissionSlipsView))
                         {
                             <li>
-                                <a href="@Url.Action("index", "activity", new { type = (int)ActivityType.PermissionSlip })"><i class="icon s7-file"></i> @UILabel.ActivityLabel(ActivityType.PermissionSlip, true)</a>
+                                <a href="@Url.Action("index", "activity", new {type = (int) ActivityType.PermissionSlip})">
+                                    <i class="icon s7-file"></i> @UILabel.ActivityLabel(ActivityType.PermissionSlip, true)
+                                </a>
                             </li>
                         }
                         @if (CanView(FeatureType.ManageLearningPods, SessionVariables.AccountUserType, PermissionType.LearningPodsView))
                         {
                             <li>
-                                <a href="@Url.Action("index", "activity", new { type = (int)ActivityType.LearningPod })"><i class="icon s7-box2"></i> @UILabel.ActivityLabel(ActivityType.LearningPod, true)</a>
+                                <a href="@Url.Action("index", "activity", new {type = (int) ActivityType.LearningPod})">
+                                    <i class="icon s7-box2"></i> @UILabel.ActivityLabel(ActivityType.LearningPod, true)
+                                </a>
                             </li>
                         }
                         @if (CanView(FeatureType.ManageActivityGroups, SessionVariables.AccountUserType, PermissionType.SessionsView))
                         {
-                            <li class=""><a href="@Url.Action("index", "group")"><i class="icon s7-date"></i> @UILabel.ActivityGroupLabel(ActivityGroupType.Session, true)</a></li>
+                            <li class="">
+                                <a href="@Url.Action("index", "group")">
+                                    <i class="icon s7-date"></i> @UILabel.ActivityGroupLabel(ActivityGroupType.Session, true)
+                                </a>
+                            </li>
                         }
                         @if (CanView(FeatureType.ManageLeagues, SessionVariables.AccountUserType, PermissionType.LeaguesView))
                         {
-                            <li class=""><a href="@Url.Action("indexleague", "group")"><i class="icon s7-ball"></i> @UILabel.ActivityGroupLabel(ActivityGroupType.League, true)</a></li>
+                            <li class="">
+                                <a href="@Url.Action("indexleague", "group")">
+                                    <i class="icon s7-ball"></i> @UILabel.ActivityGroupLabel(ActivityGroupType.League, true)
+                                </a>
+                            </li>
                         }
 
                         @if (CanView(FeatureType.ManageExternalLeagues, SessionVariables.AccountUserType, PermissionType.LeaguesView))
                         {
-                            <li class=""><a href="@Url.Action("indexexternal", "league")"><i class="icon s7-ball"></i> @UILabel.ActivityGroupLabel(ActivityGroupType.League, true)</a></li>
+                            <li class="">
+                                <a href="@Url.Action("indexexternal", "league")">
+                                    <i class="icon s7-ball"></i> @UILabel.ActivityGroupLabel(ActivityGroupType.League, true)
+                                </a>
+                            </li>
+                        }
+
+                        @if (CanView(FeatureType.ManageVolunteerOpportunities, SessionVariables.AccountUserType, PermissionType.VolunteerOpportunitiesView))
+                        {
+                            <li>
+                                <a href="@Url.Action("index", "activity", new {type = (int) ActivityType.VolunteerOpportunity})">
+                                    <i class="icon s7-smile"></i> @UILabel.ActivityLabel(ActivityType.VolunteerOpportunity, true)
+                                </a>
+                            </li>
                         }
                     </ul>
                 </li>
             }
 
             <li class="parent @studentcontactmenuactive">
-                <a href="#"><i class="icon s7-id"></i> <span>Students & Contacts</span></a>
+                <a href="#">
+                    <i class="icon s7-id"></i> <span>Students & Contacts</span>
+                </a>
                 <ul class="sub-menu">
                     @if (CanView(SessionVariables.AccountUserType, PermissionType.StudentsView))
-                    {                        
-                        <li class="@registrationactive"><a href="@Url.Action("index", "registration")"><i class="icon s7-id"></i> @UILabel.RegistrantLabel(true)</a></li>
+                    {
+                        <li class="@registrationactive">
+                            <a href="@Url.Action("index", "registration")">
+                                <i class="icon s7-id"></i> @UILabel.RegistrantLabel(true)
+                            </a>
+                        </li>
                     }
 
                     @if (CanView(SessionVariables.AccountUserType, PermissionType.ContactsView))
                     {
-                        <li class="@contactactive"><a href="@Url.Action("index", "contact")"><i class="icon s7-notebook"></i> Contacts</a></li>
+                        <li class="@contactactive">
+                            <a href="@Url.Action("index", "contact")"><i class="icon s7-notebook"></i> Contacts</a>
+                        </li>
                     }
                 </ul>
             </li>
 
             @if (CanView(FeatureType.ManageForms, SessionVariables.AccountUserType, PermissionType.FormsView))
             {
-                <li class="@formactive hide"><a href="@Url.Action("index", "form")"><i class="icon s7-note2"></i> Forms</a></li>
+                <li class="@formactive hide">
+                    <a href="@Url.Action("index", "form")"><i class="icon s7-note2"></i> Forms</a>
+                </li>
             }
 
             @if (CanView(FeatureType.AcceptPayments, SessionVariables.AccountUserType, PermissionType.AccountingView))
             {
-                <li class="@accountingactive"><a href="@Url.Action("index", "accounting")"><i class="icon s7-cash"></i> Accounting</a></li>
+                <li class="@accountingactive">
+                    <a href="@Url.Action("index", "accounting")"><i class="icon s7-cash"></i> Accounting</a>
+                </li>
             }
             @if (CanView(SessionVariables.AccountUserType, PermissionType.AccountSettingsView))
             {
-                <li class=""><a href="@SessionVariables.CurrentAccount.HomePageUrl?edit=1"><i class="icon s7-browser"></i> Edit Profile</a></li>
+                <li class="">
+                    <a href="@SessionVariables.CurrentAccount.HomePageUrl?edit=1"><i class="icon s7-browser"></i> Edit Profile</a>
+                </li>
             }
 
             <li class="parent @accountsubmenuactive">
-                <a href="#"><i class="icon s7-settings"></i> <span>Account &amp; Settings</span></a>
+                <a href="#">
+                    <i class="icon s7-settings"></i> <span>Account &amp; Settings</span>
+                </a>
                 <ul class="sub-menu">
 
                     @if (CanView(FeatureType.TeamAccounts, SessionVariables.AccountUserType, PermissionType.TeamView))
                     {
-                        <li class="@teamactive"><a href="@Url.Action("team", "account")"><i class="icon s7-users"></i> Staff</a></li>
+                        <li class="@teamactive">
+                            <a href="@Url.Action("team", "account")"><i class="icon s7-users"></i> Staff</a>
+                        </li>
                     }
                     @if (CanView(SessionVariables.AccountUserType, PermissionType.AccountSettingsView))
                     {
-                        <li class="@accountactive"><a href="@Url.Action("edit", "account")"><i class="icon s7-edit"></i> Settings</a></li>
+                        <li class="@accountactive">
+                            <a href="@Url.Action("edit", "account")"><i class="icon s7-edit"></i> Settings</a>
+                        </li>
                     }
-                    <li class="@profileactive"><a href="@Url.Action("edit", "user")"><i class="icon s7-user"></i> <span>User Profile</span></a></li>
+                    <li class="@profileactive">
+                        <a href="@Url.Action("edit", "user")">
+                            <i class="icon s7-user"></i> <span>User Profile</span>
+                        </a>
+                    </li>
                     @if (SessionVariables.CurrentUser.HasMultipleAccounts())
                     {
                         var registrationAccount = SessionVariables.CurrentUser.GetRegistrantAccount();
                         if (registrationAccount.IsNotEmpty())
                         {
-                            <li class=""><a href="@Url.Action("select", "login", new { area = "", id = registrationAccount.Uid.ToString() })"><i class="icon s7-shuffle"></i> Switch to @registrationAccount.Name</a></li>
+                            <li class="">
+                                <a href="@Url.Action("select", "login", new {area = "", id = registrationAccount.Uid.ToString()})"><i class="icon s7-shuffle"></i> Switch to @registrationAccount.Name</a>
+                            </li>
                         }
                         else
                         {
-                            <li class=""><a href="@Url.Action("switch", "logout", new { area = "" })"><i class="icon s7-shuffle"></i> Switch Accounts</a></li>
+                            <li class="">
+                                <a href="@Url.Action("switch", "logout", new {area = ""})"><i class="icon s7-shuffle"></i> Switch Accounts</a>
+                            </li>
                         }
                     }
-                    <li class=""><a href="@Url.Action("index", "logout", new { area = "" })"><i class="icon s7-power"></i> Logout</a></li>
+                    <li class="">
+                        <a href="@Url.Action("index", "logout", new {area = ""})"><i class="icon s7-power"></i> Logout</a>
+                    </li>
                 </ul>
             </li>
-            <!--Sidebar bottom content-->
-</div>
+        </ul>
+        <!--Sidebar bottom content-->
+    </div>
 </div>
