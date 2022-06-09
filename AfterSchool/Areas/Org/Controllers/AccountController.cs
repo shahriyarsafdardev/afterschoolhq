@@ -355,7 +355,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
             var paymentsEntityVM =
-                PaymentsEntityViewModel.LoadFromStripeAccount(currentAccount.GetStripeCustomAccount(msgs));
+                PaymentsEntityViewModel.LoadFromStripeAccount(currentAccount.GetStripeConnectedAccount(msgs));
 
             ViewBag.Messages = msgs;
             ViewBag.Account = currentAccount;
@@ -380,7 +380,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
-            var stripeAccount = account.GetStripeCustomAccount(msgs);
+            var stripeAccount = account.GetStripeConnectedAccount(msgs);
 
             if (paymentsEntityVM.BusinessType == LegalEntityType.NotSet)
                 msgs.Add("Please select your business type", MessageType.UserError);
@@ -494,7 +494,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     return RedirectToAction("paymentsbank", "account", new {isnew = Request["isnew"]});
             }
 
-            var model = PaymentsEntityViewModel.LoadFromStripeAccount(account.GetStripeCustomAccount(msgs));
+            var model = PaymentsEntityViewModel.LoadFromStripeAccount(account.GetStripeConnectedAccount(msgs));
 
             ViewBag.Messages = msgs;
             ViewBag.Account = account;
@@ -508,7 +508,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var account = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
-            var paymentsEntityVM = PaymentsEntityViewModel.LoadFromStripeAccount(account.GetStripeCustomAccount(msgs));
+            var paymentsEntityVM = PaymentsEntityViewModel.LoadFromStripeAccount(account.GetStripeConnectedAccount(msgs));
 
             ViewBag.Account = account;
             ViewBag.Messages = msgs;
@@ -1624,7 +1624,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         customer = currentAccount.CreateStripeCustomer(amsgs, adc);
 
                         if (stripetoken.IsNotEmpty())
-                            currentAccount.CreateStripeCardFromToken(stripetoken, customer, amsgs, adc);
+                            currentAccount.CreateStripeCardFromTokenAHQCustomer(stripetoken, customer, amsgs, adc);
                         else if (cardId.IsNotEmpty())
                             currentAccount.UpdateStripeCard(cardId, customer, amsgs, adc);
 

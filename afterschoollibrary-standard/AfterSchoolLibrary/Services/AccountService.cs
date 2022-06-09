@@ -1489,7 +1489,7 @@ namespace AfterSchoolLibrary.Services
         public static void CompleteStripeConnect(this Account account, string code, WebUser loggedInUser,
             SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var stripeHelper = new StripeHelper(StripeHelper.AHQSubsSecretKey);
+            var stripeHelper = new StripeHelper();
             var token = stripeHelper.CompleteOAuthConnection(code, msgs);
 
             account.StripePublishableKey = null;
@@ -1535,7 +1535,7 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(account.Save(dc));
 
             if (account.StripeUserId.IsNotEmpty())
-                new StripeHelper(StripeHelper.AHQSubsSecretKey).DeauthorizeOAuthConnection(account.StripeUserId, msgs);
+                new StripeHelper().DeauthorizeOAuthConnection(account.StripeUserId, msgs);
         }
 
         public static SystemMessages SaveWithStripe(this Account account, DatabaseConnection dc = null)
@@ -1548,6 +1548,14 @@ namespace AfterSchoolLibrary.Services
                 account.CreateStripeCustomer(msgs, dc);
 
             return msgs;
+        }
+
+        public static Stripe.Account GetStripeConnectedAccount(this Account account, SystemMessages msgs)
+        {
+            if (account.HasStripeConnectedAccount)
+                return new StripeHelper().GetConnectedAccount(account.StripeUserId, msgs);
+
+            return null;
         }
 
         private static void SetStripeCustomer(this Account account, Customer customer, SystemMessages msgs = null,
@@ -3904,6 +3912,7 @@ namespace AfterSchoolLibrary.Services
 
         /// <summary>
         ///     returns stripe source id
+        ///     only for purchases during parent checkout
         /// </summary>
         /// <param name="fromAccount"></param>
         /// <param name="toAccount"></param>
@@ -3913,17 +3922,19 @@ namespace AfterSchoolLibrary.Services
         public static string CreateStripeSourceFromToken(this Account fromAccount, string stripeToken,
             Customer customer, SystemMessages msgs, DatabaseConnection dc = null)
         {
+            var stripeHelper = new StripeHelper();
+            
             // stripe stuff
             // create payment source if not already existent on the user
             if (customer.IsEmpty())
-                customer = StripeHelper.GetCustomer(fromAccount.StripeCustomerId, null, msgs);
+                customer = stripeHelper.GetCustomer(fromAccount.StripeCustomerId, null, msgs);
 
             if (stripeToken.IsNotEmpty())
             {
-                var source = StripeHelper.CreateCreditCardSource(stripeToken, msgs);
+                var source = stripeHelper.CreateCreditCardSource(stripeToken, msgs);
                 if (source.IsNotEmpty())
                 {
-                    StripeHelper.AttachSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null, msgs);
+                    stripeHelper.AttachSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null, msgs);
 
                     //set this source id to account, which will work as a default card
                     if (fromAccount.StripeDefaultCardId.IsEmpty())
@@ -3939,7 +3950,7 @@ namespace AfterSchoolLibrary.Services
             return customer.DefaultSourceId;
         }
 
-        public static string CreateStripeCardFromToken(this Account fromAccount, string stripeToken, Customer customer,
+        public static string CreateStripeCardFromTokenAHQCustomer(this Account fromAccount, string stripeToken, Customer customer,
             SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (stripeToken.IsEmpty())
@@ -3950,11 +3961,11 @@ namespace AfterSchoolLibrary.Services
 
             if (msgs.HasNoErrors())
             {
-                var card = StripeHelper.AddNewCardToCustomer(customer.Id, stripeToken, null, msgs);
+                var card = new StripeHelper(StripeHelper.AHQSubsSecretKey).AddNewCardToCustomer(customer.Id, stripeToken, null, msgs);
                 if (card.IsNotEmpty())
                 {
                     //set this card as default           
-                    UpdateStripeCard(fromAccount, card.Id, customer, msgs, dc);
+                    UpdateStripeCardAHQCustomer(fromAccount, card.Id, customer, msgs, dc);
                     return card.Id;
                 }
             }
@@ -3962,7 +3973,7 @@ namespace AfterSchoolLibrary.Services
             return customer.DefaultSourceId;
         }
 
-        public static void UpdateStripeCard(this Account fromAccount, string cardId, Customer customer,
+        public static void UpdateStripeCardAHQCustomer(this Account fromAccount, string cardId, Customer customer,
             SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (cardId.IsEmpty())
@@ -3973,7 +3984,7 @@ namespace AfterSchoolLibrary.Services
 
             if (msgs.HasNoErrors())
             {
-                StripeHelper.UpdateCustomerDefaultCard(customer.Id, null, cardId);
+                new StripeHelper(StripeHelper.AHQSubsSecretKey).UpdateCustomerDefaultCard(customer.Id, null, cardId);
 
                 //set this card id to account, which will work as a default card                
                 fromAccount.StripeDefaultCardId = cardId;
@@ -4645,7 +4656,7 @@ namespace AfterSchoolLibrary.Services
                     metaData: metaData,
                     msgs: msgs);
 
-                var stripeAccount = account.GetStripeCustomAccount(msgs);
+                var stripeAccount = account.GetStripeConnectedAccount(msgs);
 
                 var stripePayout = stripeHelper.CreatePayout(
                     amount: payout.Amount.Value,

@@ -439,7 +439,7 @@ namespace AfterSchoolLibraryTests.Tests
             var accountOwner = WebUserFactory.Create(msgs, dc);
             var account = AccountFactory.Create(accountOwner, msgs, dc);
             AccountFactory.CreateStripeAccountAndCustomer(account, msgs, dc);
-            var stripeAccount = account.GetStripeCustomAccount(msgs);
+            var stripeAccount = account.GetStripeConnectedAccount(msgs);
 
             stripeAccount.Requirements.CurrentlyDue.ForEach(field =>
             {
@@ -473,7 +473,7 @@ namespace AfterSchoolLibraryTests.Tests
             var stripeAccount = StripeHelper.CreateCustomAccount(createOptions, msgs);
             var accountCreator = StripeHelper.CreatePerson(stripeAccount.Id, personCreateOptions, msgs);
 
-            stripeAccount = StripeHelper.GetCustomAccount(stripeAccount.Id, msgs);
+            stripeAccount = StripeHelper.GetConnectedAccount(stripeAccount.Id, msgs);
             stripeAccount.Requirements.CurrentlyDue.ForEach(field =>
             {
                 switch (field)
@@ -3464,7 +3464,7 @@ namespace AfterSchoolLibraryTests.Tests
                 payout.StatementDescriptor);
 
             // verify status of stripe account
-            var stripeAccount = StripeHelper.GetCustomAccount(billingAccount.StripeUserId, msgs);
+            var stripeAccount = StripeHelper.GetConnectedAccount(billingAccount.StripeUserId, msgs);
             Assert.NotNull(stripeAccount);
             Assert.Equal(stripeAccount.Settings.Payouts.Schedule.Interval,
                 PayoutIntervalType.Manual.ToString().ToLower());

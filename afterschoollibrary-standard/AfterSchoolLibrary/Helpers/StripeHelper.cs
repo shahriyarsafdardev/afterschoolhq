@@ -92,7 +92,7 @@ namespace AfterSchoolLibrary.Billing
             return new AccountService(StripeClient);
         }
 
-        public Stripe.Account GetCustomAccount(string stripeAccountId, SystemMessages msgs)
+        public Stripe.Account GetConnectedAccount(string stripeAccountId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();            
 
