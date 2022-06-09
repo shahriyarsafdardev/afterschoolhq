@@ -1505,9 +1505,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 case ("next", ActivityType.FieldTrip):
                 case ("next", ActivityType.Team):
-                    var result = GatherDataForAndAssembleEditScheduleResult(activity, activity.ActivityScheduleId?.ToString(), msgs, currentAccount,
-                        currentUser);
-                    return View("EditSchedule", result);
+                    return GoToEditSchedule(activity, activity.ActivityScheduleId?.ToString(), msgs, currentAccount, currentUser);
 
                 case ("next", ActivityType.PermissionSlip):
                     var isActivityLeader = IsActivityLeader(activity, currentAccount, SessionVariables.AccountUserType,
@@ -1520,6 +1518,12 @@ namespace AfterSchool.Areas.Org.Controllers
                     var resultDefault = GatherDataForAndAssembleEditSetupResult(activity, activityGroup, msgs, currentAccount, "EditSetup");
                     return View(resultDefault);
             }
+        }
+
+        private ActionResult GoToEditSchedule(Activity activity, string scheduleId, SystemMessages msgs, Account currentAccount, WebUser currentUser)
+        {
+            var result = GatherDataForAndAssembleEditScheduleResult(activity, scheduleId, msgs, currentAccount, currentUser);
+            return View("EditSchedule", result);
         }
 
         private EditSetupResult GatherDataForAndAssembleEditSetupResult(Activity activity, ActivityGroup activityGroup, SystemMessages msgs,
@@ -1653,8 +1657,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         return View("EditSetup", editSetupResult);
                     case "next":
                         var scheduleId = activity.ActivityScheduleId?.ToString();
-                        var editScheduleResult = GatherDataForAndAssembleEditScheduleResult(activity, scheduleId, msgs, currentAccount, currentUser);
-                        return View("EditSchedule", editScheduleResult);
+                        return GoToEditSchedule(activity, scheduleId, msgs, currentAccount, currentUser);
                 }
             }
 
@@ -1855,8 +1858,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     case "prev":
                         var scheduleId = activity.ActivityScheduleId?.ToString();
-                        var editScheduleResult = GatherDataForAndAssembleEditScheduleResult(activity, scheduleId, msgs, currentAccount, currentUser);
-                        return View("EditSchedule", editScheduleResult);
+                        return GoToEditSchedule(activity, scheduleId, msgs, currentAccount, currentUser);
                     case "next":
                         ViewBag.Account = currentAccount;
                         ViewBag.AccountPackage = SessionVariables.AccountPackage;
@@ -1915,8 +1917,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
-            var result = GatherDataForAndAssembleEditScheduleResult(activity, schedule, msgs, currentAccount, currentUser);
-            return View(result);
+            return GoToEditSchedule(activity, schedule, msgs, currentAccount, currentUser);
         }
 
         [HttpPost]
@@ -2090,8 +2091,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
             }
 
-            var result = GatherDataForAndAssembleEditScheduleResult(activity, activitySchedule.ID?.ToString(), msgs, currentAccount, currentUser);
-            return View(result);
+            return GoToEditSchedule(activity, activitySchedule.ID?.ToString(), msgs, currentAccount, currentUser);
         }
 
         [HttpGet]

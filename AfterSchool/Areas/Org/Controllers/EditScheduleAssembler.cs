@@ -40,6 +40,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 FullScreenExitUrl = fullScreenUrl,
                 Schedule = schedule,
                 Messages = msgs,
+                Activity = activity,
             };
 
             return editScheduleResult;

@@ -70,6 +70,7 @@ namespace after_school_hq.Tests
             Assert.That(result.IsActivityLeader, Is.True);
 
             Assert.That(result.Messages, Is.SameAs(msgs));
+            Assert.That(result.Activity, Is.SameAs(activity));
         }
     }
 }

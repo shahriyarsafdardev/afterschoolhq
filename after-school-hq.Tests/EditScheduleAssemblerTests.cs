@@ -47,6 +47,7 @@ namespace after_school_hq.Tests
             Assert.That(result.ActiveMenu, Is.EqualTo("EditSchedule"));
             Assert.That(result.IsFullScreen, Is.True);
             Assert.That(result.Messages, Is.SameAs(msgs));
+            Assert.That(result.Activity, Is.SameAs(activity));
         }
     }
 }
