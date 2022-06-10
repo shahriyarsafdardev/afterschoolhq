@@ -31,7 +31,7 @@ namespace AfterSchoolLibrary.Migrations
                    });
 
                     // get all accounts with packages
-                    var accounts = Account.LoadByAccountTypeIds(AccountService.ProviderAccountTypes.ToList(), false, null, null, amsgs, adc);
+                    var accounts = Account.LoadByAccountTypeIds(FormConstants.ProviderAccountTypes.ToList(), false, null, null, amsgs, adc);
                     var webUser = WebUser.Load(1, amsgs, adc);
                     accounts.ForEach(account =>
                     {

@@ -13,7 +13,7 @@ namespace AfterSchool.Areas.Org.Controllers
 {
     public class ServicesController : BaseLoggedInController
     {
-        public ServicesController() : base(AccountService.OrganizationAccountTypes)
+        public ServicesController() : base(FormConstants.OrganizationAccountTypes)
         {
         }
 
@@ -497,10 +497,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             amsgs.AddRange(contact.Delete(adc));
                         }
                     },
-                    onSuccess: (SystemMessages smsgs) =>
-                    {
-                        WriteOutput(new {status = "ok", contactName = contact.DisplayName}, ResponseType.JSON);
-                    },
+                    onSuccess: (SystemMessages smsgs) => { WriteOutput(new {status = "ok", contactName = contact.DisplayName}, ResponseType.JSON); },
                     onFailure: (SystemMessages fmsgs) => { msgs.AddRange(fmsgs); }
                 );
             }

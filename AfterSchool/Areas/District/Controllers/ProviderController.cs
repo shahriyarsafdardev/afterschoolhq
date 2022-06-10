@@ -1,27 +1,24 @@
-﻿using AfterSchool.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
-using AfterSchoolLibrary;
+using AfterSchool.Models;
+using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using AfterSchoolLibrary.Services;
-using AfterSchoolLibrary.Models;
+using Utilities = BasicLibrary.Utilities;
 
 namespace AfterSchool.Areas.District.Controllers
 {
     public class ProviderController : BaseLoggedInController
     {
-        public ProviderController() : base(new List<AccountType> { AccountType.SchoolDistrict })
+        public ProviderController() : base(new List<AccountType> {AccountType.SchoolDistrict})
         {
-
         }
 
         // GET: District/School
         [HttpGet]
-
         public ActionResult Index(string pn, string rpp)
         {
             int pageNumber = 1;
@@ -36,8 +33,8 @@ namespace AfterSchool.Areas.District.Controllers
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
 
-            int count = SessionVariables.CurrentAccount.GetVisitorAccountsCount(AccountService.ProviderAccountTypes.ToList());
-            var visitorAccounts = SessionVariables.CurrentAccount.GetVisitorAccounts(AccountService.ProviderAccountTypes.ToList(), start, length);
+            int count = SessionVariables.CurrentAccount.GetVisitorAccountsCount(FormConstants.ProviderAccountTypes.ToList());
+            var visitorAccounts = SessionVariables.CurrentAccount.GetVisitorAccounts(FormConstants.ProviderAccountTypes.ToList(), start, length);
             var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
 
             ViewBag.Messages = new SystemMessages();
@@ -46,7 +43,7 @@ namespace AfterSchool.Areas.District.Controllers
                 TotalCount = count,
                 PageNumber = pageNumber,
                 RecordsPerPage = recordsPerPage,
-                TotalPages = totalPages
+                TotalPages = totalPages,
             };
             return View(visitorAccounts);
         }
@@ -70,7 +67,7 @@ namespace AfterSchool.Areas.District.Controllers
 
             if (email.IsEmpty())
                 msgs.Add("Email is required", MessageType.UserError);
-            else if (!email.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
+            else if (!email.IsRegExMatch(Utilities.EmailRegEx))
                 msgs.Add("Email must be valid", MessageType.UserError);
 
             if (firstname.IsEmpty())
@@ -123,10 +120,7 @@ namespace AfterSchool.Areas.District.Controllers
                         msgs.AddRange(smsgs);
                         msgs.AddRange(account.SendInvitedEmail(user, SessionVariables.CurrentUser, message));
                     },
-                    onFailure: (SystemMessages fmsgs) =>
-                    {
-                        msgs.AddRange(fmsgs);
-                    }
+                    onFailure: (SystemMessages fmsgs) => { msgs.AddRange(fmsgs); }
                 );
             }
 

@@ -2,7 +2,7 @@
 
 @{
     var actionName = ViewContext.RouteData.Values["action"].ToString().ToLower();
-    var isFullScreen = (bool?)ViewBag.IsFullScreen;
+    var isFullScreen = (bool?) ViewBag.IsFullScreen;
     var defaultPaymentsAction = "paymentsoptions";
 
     if (SessionVariables.CurrentAccount.CanReceiveACHDeposits())
@@ -22,7 +22,7 @@
             <a href="@Url.Action("style", "account")" class="btn btn-alt6@(actionName == "style" ? "-active" : "")">Profile Setup</a>
             <a href="@Url.Action("integrations", "account")" class="hide btn btn-alt6@(actionName == "integrations" ? "-active" : "")">Integrations</a>
             <a href="@Url.Action(defaultPaymentsAction, "account")" class="btn btn-alt6@(actionName == defaultPaymentsAction ? "-active" : "")">Accept Payments</a>
-            @if (SessionVariables.CurrentAccount.AccountTypeId.In(AccountService.LocationProviderAccountTypes))
+            @if (SessionVariables.CurrentAccount.AccountTypeId.In(FormConstants.LocationProviderAccountTypes))
             {
                 <a href="@Url.Action("visitors", "account")" class="btn btn-alt6@(actionName == "visitors" ? "-active" : "")">Providers</a>
             }
@@ -33,7 +33,7 @@
             <a href="@Url.Action("newbilling", "account")" class="btn btn-alt6@(actionName == "newbilling" ? "-active" : "")">Packages</a>
 
             <a href="@Url.Action("billing", "account")" class="btn btn-alt6@(actionName == "billing" ? "-active" : "")">Billing</a>
-            
+
             @if (SessionVariables.OriginalLoggedInUser.IsNotEmpty())
             {
                 <a href="@Url.Action("features", "account")" class="btn btn-alt6@(actionName == "features" ? "-active" : "")">Features</a>
@@ -52,7 +52,7 @@
                 @{
                     <option value="@Url.Action("billing", "account")">Billing</option>
 
-                    if (SessionVariables.CurrentAccount.AccountTypeId.In(AccountService.LocationProviderAccountTypes))
+                    if (SessionVariables.CurrentAccount.AccountTypeId.In(FormConstants.LocationProviderAccountTypes))
                     {
                         <option value="@Url.Action("visitors", "account")">Providers</option>
                     }

@@ -106,7 +106,7 @@
                 </a>
             </li>
 
-            @if (SessionVariables.CurrentAccount.AccountTypeId.In(AccountService.IndividualProviderAccountTypes))
+            @if (SessionVariables.CurrentAccount.AccountTypeId.In(FormConstants.IndividualProviderAccountTypes))
             {
                 if (CanView(SessionVariables.AccountUserType, PermissionType.ActivitiesView))
                 {

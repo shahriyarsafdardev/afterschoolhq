@@ -18,7 +18,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public EditRestrictionsResult AssembleEditRestrictionsResult(Activity activity, SystemMessages messages, Account currentAccount, bool isNew,
             string fullScreenExitUrl)
         {
-            var isFullScreen = ActivityController.GetIsFullScreen(activity, isNew);
+            var isFullScreen = EditHelpers.GetIsFullScreen(activity, isNew);
 
             return new EditRestrictionsResult
             {

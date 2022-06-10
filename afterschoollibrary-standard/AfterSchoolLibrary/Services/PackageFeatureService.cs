@@ -1,16 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using AfterSchoolLibrary.Billing;
+using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using AfterSchoolLibrary.Models;
-using System.Linq;
-using System.Collections.Generic;
-using AfterSchoolLibrary.Billing;
 
 namespace AfterSchoolLibrary.Services
 {
     public static class PackageFeatureService
     {
-        public static PackageFeature AddPackageFeature(int? PackageId, FeatureType featureTypeId, decimal maxValue, int loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static PackageFeature AddPackageFeature(int? PackageId, FeatureType featureTypeId, decimal maxValue, int loggedInUser, SystemMessages msgs,
+            DatabaseConnection dc = null)
         {
             var packageFeature = new PackageFeature();
 
@@ -26,20 +27,21 @@ namespace AfterSchoolLibrary.Services
             return packageFeature;
         }
 
-        public static void EnsureAllAccountsHavePackageFeature(this PackageFeature packageFeature, List<AccountType> accountTypes, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void EnsureAllAccountsHavePackageFeature(this PackageFeature packageFeature, List<AccountType> accountTypes, WebUser loggedInUser,
+            SystemMessages msgs, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    var accountCount = Account.GetSearchCount(null, AccountService.ProviderAccountTypes.ToList(), false, amsgs, adc);
+                    var accountCount = Account.GetSearchCount(null, FormConstants.ProviderAccountTypes.ToList(), false, amsgs, adc);
                     var totalProcessed = 0;
                     var pageSize = 50;
                     var start = 0;
 
-                    while(totalProcessed <= accountCount)
+                    while (totalProcessed <= accountCount)
                     {
-                        var accounts = Account.Search(null, AccountService.ProviderAccountTypes.ToList(), false, start, pageSize, amsgs, adc);
+                        var accounts = Account.Search(null, FormConstants.ProviderAccountTypes.ToList(), false, start, pageSize, amsgs, adc);
 
                         accounts.ForEach(account => packageFeature.EnsureAccountHasPackageFeature(account, accountTypes, loggedInUser, amsgs, adc));
 
@@ -52,10 +54,10 @@ namespace AfterSchoolLibrary.Services
                 onException: (SystemMessages emsgs) => msgs.AddRange(emsgs),
                 dc: dc
             );
-
         }
 
-        public static void EnsureAccountHasPackageFeature(this PackageFeature packageFeature, Account account, List<AccountType> accountTypes, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void EnsureAccountHasPackageFeature(this PackageFeature packageFeature, Account account, List<AccountType> accountTypes,
+            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (account.IsEmpty())
                 return;
@@ -70,7 +72,8 @@ namespace AfterSchoolLibrary.Services
                 account.AddOrUpdatePackageFeature(packageFeature.FeatureTypeId, packageFeature.Max.Value, loggedInUser, msgs, dc);
         }
 
-        public static void ResetAllAccountFeaturesToPackageFeature(this PackageFeature packageFeature, List<AccountType> accountTypes, bool resetIfAcctValueIsGreaterThan, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void ResetAllAccountFeaturesToPackageFeature(this PackageFeature packageFeature, List<AccountType> accountTypes,
+            bool resetIfAcctValueIsGreaterThan, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
             (
@@ -80,16 +83,16 @@ namespace AfterSchoolLibrary.Services
 
                     packageFeature.EnsureAllAccountsHavePackageFeature(accountTypes, loggedInUser, amsgs, adc);
 
-                    accountFeatures.ForEach(accountFeature => {
+                    accountFeatures.ForEach(accountFeature =>
+                    {
                         packageFeature.ResetAccountFeatureToPackageFeature(
                             accountFeature.GetAccount(amsgs, adc),
                             accountTypes,
-                            resetIfAcctValueIsGreaterThan, 
-                            loggedInUser, 
-                            amsgs, 
+                            resetIfAcctValueIsGreaterThan,
+                            loggedInUser,
+                            amsgs,
                             adc);
                     });
-
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
@@ -98,7 +101,8 @@ namespace AfterSchoolLibrary.Services
             );
         }
 
-        public static void ResetAccountFeatureToPackageFeature(this PackageFeature packageFeature, Account account, List<AccountType> accountTypes, bool resetIfAcctValueIsGreaterThan, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void ResetAccountFeatureToPackageFeature(this PackageFeature packageFeature, Account account, List<AccountType> accountTypes,
+            bool resetIfAcctValueIsGreaterThan, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (account.IsEmpty())
                 return;
@@ -125,9 +129,11 @@ namespace AfterSchoolLibrary.Services
                 if (packageFeature.FeatureTypeId == FeatureType.ManualStripePayouts && account.StripeUserId.IsNotEmpty())
                 {
                     if (packageFeature.Max.Value > 0)
-                        StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: account.StripeUserId, accountName: account.Name, payoutIntervalType: PayoutIntervalType.Manual, msgs: msgs);
+                        StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: account.StripeUserId, accountName: account.Name,
+                            payoutIntervalType: PayoutIntervalType.Manual, msgs: msgs);
                     else
-                        StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: account.StripeUserId, accountName: account.Name, payoutIntervalType: PayoutIntervalType.Daily, msgs: msgs);
+                        StripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: account.StripeUserId, accountName: account.Name,
+                            payoutIntervalType: PayoutIntervalType.Daily, msgs: msgs);
                 }
             }
         }

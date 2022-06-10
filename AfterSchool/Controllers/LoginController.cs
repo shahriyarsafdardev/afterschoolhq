@@ -1,12 +1,13 @@
 using System;
+using System.Linq;
 using System.Web.Mvc;
-using BasicLibrary;
-using BasicLibrary.DataAccess;
 using AfterSchool.Models;
+using AfterSchoolLibrary.FeatureFlag;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
-using System.Linq;
-using AfterSchoolLibrary.FeatureFlag;
+using BasicLibrary;
+using BasicLibrary.DataAccess;
+using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Controllers
 {
@@ -32,15 +33,15 @@ namespace AfterSchool.Controllers
             if (loggedInWithAnAccount && (regaccount.IsEmpty() || currentAccount.AccountTypeId == AccountType.Registrant))
             {
                 if (!currentUser.IsRegistered)
-                    return Redirect(AfterSchoolLibrary.Helpers.Utilities.CompleteSignUpUrl(currentUser.Uid, Request["returnurl"]));
+                    return Redirect(Utilities.CompleteSignUpUrl(currentUser.Uid, Request["returnurl"]));
 
                 if (invite.IsGuid())
                 {
                     if (currentUser.HasMultipleAccounts())
-                        return RedirectToAction("select", "login", new { returnurl = Request["returnurl"], invite });
+                        return RedirectToAction("select", "login", new {returnurl = Request["returnurl"], invite});
 
                     if (currentAccount.AccountTypeId == AccountType.Registrant)
-                        return RedirectToAction("welcome", "signup", new { returnurl = Request["returnurl"], invite });
+                        return RedirectToAction("welcome", "signup", new {returnurl = Request["returnurl"], invite});
                 }
 
                 HandleInvite(invite, currentAccount, currentUser, msgs);
@@ -81,7 +82,7 @@ namespace AfterSchool.Controllers
                 msgs.Add("Password is required", MessageType.UserError);
 
             WebUser user = null;
-            
+
             if (msgs.HasNoErrors())
             {
                 if (username.IsMatch(BasicLibrary.Utilities.EmailRegEx))
@@ -106,7 +107,7 @@ namespace AfterSchool.Controllers
 
                 // select account
                 if (currentAccount.IsEmpty())
-                    return RedirectToAction("select", "login", new {  returnurl, invite });
+                    return RedirectToAction("select", "login", new {returnurl, invite});
 
                 HandleInvite(invite, currentAccount, user, msgs);
 
@@ -149,7 +150,7 @@ namespace AfterSchool.Controllers
             }
             else
                 LoadSessionInfo(user, null, true, msgs);
-            
+
             ViewBag.Messages = msgs;
 
             if (msgs.HasNoErrors())
@@ -166,7 +167,7 @@ namespace AfterSchool.Controllers
                         account: currentAccount,
                         actor: user,
                         actionType: WebSessionActionType.LoggedIn
-                    );                
+                    );
 
                 return LoginRedirect(msgs: msgs);
             }
@@ -210,7 +211,7 @@ namespace AfterSchool.Controllers
             accounts = accounts.Where(x => x.IsActive == true && x.IsTest == false).ToList();
 
             if (invite.IsGuid())
-                accounts = accounts.Where(a => a.AccountTypeId.In(AccountService.ProviderAccountTypes)).ToList();
+                accounts = accounts.Where(a => a.AccountTypeId.In(FormConstants.ProviderAccountTypes)).ToList();
 
             ViewBag.Invite = invite;
             ViewBag.ReturnUrl = returnurl;
@@ -240,7 +241,7 @@ namespace AfterSchool.Controllers
 
                 if (user.IsNotEmpty())
                     msgs.AddRange(user.SendPasswordResetToken(SessionVariables.IsAfterSchool.Value));
-                
+
                 msgs.Add("If an account exists for your email address, you will receive an email momentarily to reset your password", MessageType.Success);
             }
 
@@ -250,7 +251,7 @@ namespace AfterSchool.Controllers
 
         [HttpPost]
         public JsonResult ResetPasswordJson(string email)
-        {            
+        {
             var msgs = new SystemMessages();
             WebUser user = null;
 
@@ -268,10 +269,10 @@ namespace AfterSchool.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return Json(new { success = true, status = "ok" }, JsonRequestBehavior.AllowGet);
+                return Json(new {success = true, status = "ok"}, JsonRequestBehavior.AllowGet);
 
             //.. something went wrong, error occured
-            return Json(new { success = false, status = "error", data = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
+            return Json(new {success = false, status = "error", data = msgs.ToList().Select(msg => new {msg.Text})}, JsonRequestBehavior.AllowGet);
         }
 
         [HttpGet]
@@ -318,15 +319,9 @@ namespace AfterSchool.Controllers
                         amsgs.AddRange(user.ChangePassword(password1, adc));
                         amsgs.AddRange(prt.Use(adc));
                     },
-                    onSuccess: (SystemMessages smsgs) =>
-                    {
-                        msgs.AddRange(smsgs);
-                    },
-                    onFailure: (SystemMessages fmsgs) =>
-                    {
-                        msgs.AddRange(fmsgs);
-                    }
-                );              
+                    onSuccess: (SystemMessages smsgs) => { msgs.AddRange(smsgs); },
+                    onFailure: (SystemMessages fmsgs) => { msgs.AddRange(fmsgs); }
+                );
             }
 
             ViewBag.Messages = msgs;
@@ -338,7 +333,7 @@ namespace AfterSchool.Controllers
         public ActionResult Authorize(string username, string password, string remember, string source)
         {
             if (!IsRequestFromApp())
-                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+                return Json(new {status = "error", messages = new SystemMessages()}, JsonRequestBehavior.AllowGet);
 
             var msgs = new SystemMessages();
             var isNewParentAccount = false;
@@ -367,9 +362,9 @@ namespace AfterSchool.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return Json(new { status = "ok", isNewParentAccount }, JsonRequestBehavior.DenyGet);
+                return Json(new {status = "ok", isNewParentAccount}, JsonRequestBehavior.DenyGet);
 
-            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.DenyGet);
+            return Json(new {status = "error", messages = msgs}, JsonRequestBehavior.DenyGet);
         }
 
         [HttpGet]
@@ -394,6 +389,5 @@ namespace AfterSchool.Controllers
 
             return RedirectToAction("Index");
         }
-
     }
 }

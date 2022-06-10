@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Linq;
 using System.Web.Mvc;
-using BasicLibrary;
-using AfterSchoolLibrary.Models;
-using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
 using AfterSchoolLibrary.FeatureFlag;
+using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Services;
+using BasicLibrary;
+using Utilities = BasicLibrary.Utilities;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -13,7 +14,7 @@ namespace AfterSchool.Areas.Org.Controllers
     {
         private readonly IFeatureFlagRepository featureFlagRepository;
 
-        public UserController(IFeatureFlagRepository featureFlagRepository) : base(AccountService.OrganizationAccountTypes)
+        public UserController(IFeatureFlagRepository featureFlagRepository) : base(FormConstants.OrganizationAccountTypes)
         {
             this.featureFlagRepository = featureFlagRepository;
         }
@@ -43,32 +44,16 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult Edit(string id, string firstname, string lastname, string email, string password1, string password2, string isactive)
         {
-            SystemMessages msgs = new SystemMessages();
+            var msgs = new SystemMessages();
 
-            if (firstname.IsEmpty())
-            {
-                msgs.Add("First Name is required", MessageType.UserError);
-            }
-            if (lastname.IsEmpty())
-            {
-                msgs.Add("Last Name is required", MessageType.UserError);
-            }
+            if (firstname.IsEmpty()) msgs.Add("First Name is required", MessageType.UserError);
+            if (lastname.IsEmpty()) msgs.Add("Last Name is required", MessageType.UserError);
             if (email.IsEmpty())
-            {
                 msgs.Add("Email is required", MessageType.UserError);
-            }
-            else if (!email.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
-            {
+            else if (!email.IsRegExMatch(Utilities.EmailRegEx))
                 msgs.Add("Email must be valid", MessageType.UserError);
-            }
-            else if (!SessionVariables.CurrentUser.CanEmailBeUsed(email, msgs))
-            {
-                msgs.Add("Email is already in use by another user", MessageType.UserError);
-            }
-            if ((!password1.IsEmpty() || !password2.IsEmpty()) && password1 != password2)
-            {
-                msgs.Add("Passwords must match", MessageType.UserError);
-            }
+            else if (!SessionVariables.CurrentUser.CanEmailBeUsed(email, msgs)) msgs.Add("Email is already in use by another user", MessageType.UserError);
+            if ((!password1.IsEmpty() || !password2.IsEmpty()) && password1 != password2) msgs.Add("Passwords must match", MessageType.UserError);
 
             if (msgs.HasNoErrors())
             {
@@ -80,10 +65,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 user.LastModifiedBy = SessionVariables.CurrentUser.ID;
                 // user.IsActive = !isactive.IsEmpty();
 
-                if (!password1.IsEmpty())
-                {
-                    user.Password = WebUserService.EncryptPassword(password1);
-                }
+                if (!password1.IsEmpty()) user.Password = WebUserService.EncryptPassword(password1);
 
                 msgs.AddRange(user.Save());
 
@@ -112,47 +94,31 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult Invite(string usertype, string emails, string message)
         {
-            SystemMessages msgs = new SystemMessages();
+            var msgs = new SystemMessages();
 
-            if (usertype.IsEmpty())
-            {
-                msgs.Add("Account type is required", MessageType.UserError);
-            }
+            if (usertype.IsEmpty()) msgs.Add("Account type is required", MessageType.UserError);
 
             if (emails.IsEmpty())
-            {
                 msgs.Add("Please enter at least one email address", MessageType.UserError);
-            }
             else
-            {
-                foreach (string email in emails.Split(',').Select(x => x.Trim()))
-                {
-                    if (!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
-                    {
+                foreach (var email in emails.Split(',').Select(x => x.Trim()))
+                    if (!email.IsMatch(Utilities.EmailRegEx))
                         msgs.Add(string.Format("{0} is not a valid email address", email), MessageType.UserError);
-                    }
-                }
-            }
 
             if (msgs.HasNoErrors())
             {
                 var a = SessionVariables.CurrentAccount;
-                var ut = (UserType)usertype.ToInteger();
+                var ut = (UserType) usertype.ToInteger();
 
-                foreach (string email in emails.Split(',').Select(x => x.Trim()))
-                {
+                foreach (var email in emails.Split(',').Select(x => x.Trim()))
                     a.InviteUser("", "", email, null, Request.Params["message"], ut, SessionVariables.CurrentUser, msgs);
-                }
             }
 
             if (msgs.HasNoErrors())
             {
                 msgs.Add("All invites have been sent", MessageType.Success);
 
-                if (Request["returnurl"].IsNotBlank())
-                {
-                    return Redirect(Request["returnurl"]);
-                }
+                if (Request["returnurl"].IsNotBlank()) return Redirect(Request["returnurl"]);
             }
 
             ViewBag.Messages = msgs;
@@ -168,14 +134,14 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Account not found.", MessageType.UserError);
 
             if (SessionVariables.CurrentUser.IsEmpty())
-                msgs.Add("User is not logged In.", MessageType.UserError);            
+                msgs.Add("User is not logged In.", MessageType.UserError);
 
             if (msgs.HasNoErrors())
             {
                 if (SessionVariables.CurrentUser.CleverUserId.IsEmpty())
                     msgs.Add($"Clever is already disconnected for {SessionVariables.CurrentUser.DisplayName}", MessageType.UserError);
                 else
-                    WebUserService.DisconnectCleverIdentity(SessionVariables.CurrentUser, msgs);               
+                    WebUserService.DisconnectCleverIdentity(SessionVariables.CurrentUser, msgs);
             }
 
             SetTempMessage(msgs);

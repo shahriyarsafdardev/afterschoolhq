@@ -666,7 +666,9 @@
     <Compile Include="Areas\District\DistrictAreaRegistration.cs" />
     <Compile Include="Areas\Org\Controllers\AccountController.cs" />
     <Compile Include="Areas\Org\Controllers\AccountingController.cs" />
+    <Compile Include="Areas\Org\Controllers\EditContactAssembler.cs" />
     <Compile Include="Areas\Org\Controllers\EditDetailsAssembler.cs" />
+    <Compile Include="Areas\Org\Controllers\EditHelpers.cs" />
     <Compile Include="Areas\Org\Controllers\EditRestrictionsAssembler.cs" />
     <Compile Include="Areas\Org\Controllers\EditScheduleAssembler.cs" />
     <Compile Include="Areas\Org\Controllers\EditSetupAssembler.cs" />

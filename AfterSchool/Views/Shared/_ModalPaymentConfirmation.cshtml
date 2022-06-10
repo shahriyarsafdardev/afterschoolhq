@@ -123,7 +123,7 @@
                                     </tr>
                                     <tr>
                                         <td>
-                                            @if (account.AccountTypeId.In(AccountService.LocationProviderAccountTypes))
+                                            @if (account.AccountTypeId.In(FormConstants.LocationProviderAccountTypes))
                                             {
                                                 if (account.GetCheckPaymentAccount().IsEmpty())
                                                 {

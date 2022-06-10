@@ -1,11 +1,11 @@
 ﻿@model Package
 @{
     ViewBag.Title = Model.Name;
-    var msgs = (SystemMessages)ViewBag.Messages;
-    string disableAttr = "";
-    string readonlyAttr = "";
-    var features = (List<PackageFeature>)ViewBag.Features;
-    var featureTypes = System.Enum.GetValues(typeof(FeatureType)).Cast<FeatureType>().OrderBy(x => x.ToString());
+    var msgs = (SystemMessages) ViewBag.Messages;
+    var disableAttr = "";
+    var readonlyAttr = "";
+    var features = (List<PackageFeature>) ViewBag.Features;
+    var featureTypes = Enum.GetValues(typeof(FeatureType)).Cast<FeatureType>().OrderBy(x => x.ToString());
 }
 
 <div class="page-head">
@@ -18,68 +18,68 @@
 
     <div class="panel panel-default">
         <div class="panel-body">
-            <form id="frmPackageFeatures" method="post" action="@Url.Action("edit", "package", new { id = @Model.ID })" class="form-horizontal">
+            <form id="frmPackageFeatures" method="post" action="@Url.Action("edit", "package", new {id = Model.ID})" class="form-horizontal">
 
                 <div class="form-group">
                     <label class="col-sm-3 control-label">Package Name</label>
                     <div class="col-sm-6">
-                        <input type="text" class="form-control" id="name" name="name" value="@Model.Name" onfocus="this.select()" required />
+                        <input type="text" class="form-control" id="name" name="name" value="@Model.Name" onfocus="this.select()" required/>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label class="col-sm-3 control-label">Price / Month</label>
                     <div class="col-sm-6">
-                        <input type="number" class="form-control" id="price" name="price" value="@Model.Price.IfEmpty(0).ToString("####.00")" onfocus="this.select()" step="any" required @readonlyAttr />
+                        <input type="number" class="form-control" id="price" name="price" value="@Model.Price.IfEmpty(0).ToString("####.00")" onfocus="this.select()" step="any" required @readonlyAttr/>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label class="col-sm-3 control-label">Price / Year</label>
                     <div class="col-sm-6">
-                        <input type="number" class="form-control" id="priceperyear" name="priceperyear" value="@Model.PricePerYear.IfEmpty(0).ToString("####.00")" onfocus="this.select()" step="any" required @readonlyAttr />
+                        <input type="number" class="form-control" id="priceperyear" name="priceperyear" value="@Model.PricePerYear.IfEmpty(0).ToString("####.00")" onfocus="this.select()" step="any" required @readonlyAttr/>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label class="col-sm-3 control-label">Is Active</label>
                     <div class="col-sm-6">
-                        @{Html.RenderPartial(
-                          "~/Views/Shared/_SwitchButton.cshtml",
-                          Model.IsActive,
-                          new ViewDataDictionary()
-                          {
-                                { "checkboxname", "isactive" },
-                                { "checkboxid", "isactive" }
-                          });}
+                        @{ Html.RenderPartial(
+                               "~/Views/Shared/_SwitchButton.cshtml",
+                               Model.IsActive,
+                               new ViewDataDictionary
+                               {
+                                   {"checkboxname", "isactive"},
+                                   {"checkboxid", "isactive"},
+                               }); }
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label class="col-sm-3 control-label">Is Popular</label>
                     <div class="col-sm-6">
-                        @{Html.RenderPartial(
-                          "~/Views/Shared/_SwitchButton.cshtml",
-                          Model.IsPopular,
-                          new ViewDataDictionary()
-                          {
-                            { "checkboxname", "ispopular" },
-                            { "checkboxid", "ispopular" }
-                          });}
+                        @{ Html.RenderPartial(
+                               "~/Views/Shared/_SwitchButton.cshtml",
+                               Model.IsPopular,
+                               new ViewDataDictionary
+                               {
+                                   {"checkboxname", "ispopular"},
+                                   {"checkboxid", "ispopular"},
+                               }); }
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label class="col-sm-3 control-label">For AfterSchoolHQ.com?</label>
                     <div class="col-sm-6">
-                        @{Html.RenderPartial(
-                          "~/Views/Shared/_SwitchButton.cshtml",
-                          Model.IsAfterSchool,
-                          new ViewDataDictionary()
-                          {
-                            { "checkboxname", "isafterschool" },
-                            { "checkboxid", "isafterschool" }
-                          });}
+                        @{ Html.RenderPartial(
+                               "~/Views/Shared/_SwitchButton.cshtml",
+                               Model.IsAfterSchool,
+                               new ViewDataDictionary
+                               {
+                                   {"checkboxname", "isafterschool"},
+                                   {"checkboxid", "isafterschool"},
+                               }); }
                     </div>
                 </div>
 
@@ -100,7 +100,7 @@
                     </div>
                 </div>
 
-                @foreach (FeatureType type in featureTypes)
+                @foreach (var type in featureTypes)
                 {
                     if (type == FeatureType.NotSet)
                     {
@@ -120,29 +120,29 @@
                         <div class="col-sm-8">
                             @if (Model.ID.HasValue)
                             {
-                                <button type="button" class="btn btn-default btn-sm md-trigger" data-modal="resetConfirmationModal" onclick="resetFeature(@((int)type), '@type', '@AccountService.IndividualProviderAccountTypes.Select(x => (int)x).ToStrings().ToStringList()', false, 'This will reset all accounts with the account type of @AccountService.IndividualProviderAccountTypes.Select(x => x.ToString()).ToStringList(", ", ", or ") where the account value is less than ' + document.getElementById('@type').value)">
+                                <button type="button" class="btn btn-default btn-sm md-trigger" data-modal="resetConfirmationModal" onclick="resetFeature(@((int) type), '@type', '@FormConstants.IndividualProviderAccountTypes.Select(x => (int) x).ToStrings().ToStringList()', false, 'This will reset all accounts with the account type of @FormConstants.IndividualProviderAccountTypes.Select(x => x.ToString()).ToStringList(", ", ", or ") where the account value is less than ' + document.getElementById('@type').value)">
                                     Reset Provider Accts (&lt;)
                                 </button>
-                                <button type="button" class="btn btn-default btn-sm md-trigger" data-modal="resetConfirmationModal" onclick="resetFeature(@((int)type), '@type', '@AccountService.IndividualProviderAccountTypes.Select(x => (int)x).ToStrings().ToStringList()', true, 'This will reset all accounts with the account type of @AccountService.IndividualProviderAccountTypes.Select(x => x.ToString()).ToStringList(", ", ", or ") to ' + document.getElementById('@type').value)">
+                                <button type="button" class="btn btn-default btn-sm md-trigger" data-modal="resetConfirmationModal" onclick="resetFeature(@((int) type), '@type', '@FormConstants.IndividualProviderAccountTypes.Select(x => (int) x).ToStrings().ToStringList()', true, 'This will reset all accounts with the account type of @FormConstants.IndividualProviderAccountTypes.Select(x => x.ToString()).ToStringList(", ", ", or ") to ' + document.getElementById('@type').value)">
                                     Reset Provider Accts (all)
                                 </button>
-                                <button type="button" class="btn btn-default btn-sm md-trigger" data-modal="resetConfirmationModal" onclick="resetFeature(@((int)type), '@type', '@AccountService.LocationProviderAccountTypes.Select(x => (int)x).ToStrings().ToStringList()', false, 'This will reset all accounts with the account type of @AccountService.LocationProviderAccountTypes.Select(x => x.ToString()).ToStringList(", ", ", or ") where the account value is less than ' + document.getElementById('@type').value)">
+                                <button type="button" class="btn btn-default btn-sm md-trigger" data-modal="resetConfirmationModal" onclick="resetFeature(@((int) type), '@type', '@FormConstants.LocationProviderAccountTypes.Select(x => (int) x).ToStrings().ToStringList()', false, 'This will reset all accounts with the account type of @FormConstants.LocationProviderAccountTypes.Select(x => x.ToString()).ToStringList(", ", ", or ") where the account value is less than ' + document.getElementById('@type').value)">
                                     Reset School Accts (&lt;)
                                 </button>
-                                <button type="button" class="btn btn-default btn-sm md-trigger" data-modal="resetConfirmationModal" onclick="resetFeature(@((int)type), '@type', '@AccountService.LocationProviderAccountTypes.Select(x => (int)x).ToStrings().ToStringList()', true, 'This will reset all accounts with the account type of @AccountService.LocationProviderAccountTypes.Select(x => x.ToString()).ToStringList(", ", ", or ") to ' + document.getElementById('@type').value)">
+                                <button type="button" class="btn btn-default btn-sm md-trigger" data-modal="resetConfirmationModal" onclick="resetFeature(@((int) type), '@type', '@FormConstants.LocationProviderAccountTypes.Select(x => (int) x).ToStrings().ToStringList()', true, 'This will reset all accounts with the account type of @FormConstants.LocationProviderAccountTypes.Select(x => x.ToString()).ToStringList(", ", ", or ") to ' + document.getElementById('@type').value)">
                                     Reset School Accts (all)
                                 </button>
-                                <button type="button" class="btn btn-default btn-sm md-trigger" data-modal="resetConfirmationModal" onclick="resetFeature(@((int)type), '@type', '@AccountService.ProviderAccountTypes.Select(x => (int)x).ToStrings().ToStringList()', false, 'This will reset all accounts with the account type of @AccountService.ProviderAccountTypes.Select(x => x.ToString()).ToStringList(", ", ", or ") where the account value is less than ' + document.getElementById('@type').value)">
+                                <button type="button" class="btn btn-default btn-sm md-trigger" data-modal="resetConfirmationModal" onclick="resetFeature(@((int) type), '@type', '@FormConstants.ProviderAccountTypes.Select(x => (int) x).ToStrings().ToStringList()', false, 'This will reset all accounts with the account type of @FormConstants.ProviderAccountTypes.Select(x => x.ToString()).ToStringList(", ", ", or ") where the account value is less than ' + document.getElementById('@type').value)">
                                     Reset All Accts (&lt;)
                                 </button>
-                                <button type="button" class="btn btn-default btn-sm md-trigger" data-modal="resetConfirmationModal" onclick="resetFeature(@((int)type), '@type', '@AccountService.ProviderAccountTypes.Select(x => (int)x).ToStrings().ToStringList()', true, 'This will reset all accounts with the account type of @AccountService.ProviderAccountTypes.Select(x => x.ToString()).ToStringList(", ", ", or ") to ' + document.getElementById('@type').value)">
+                                <button type="button" class="btn btn-default btn-sm md-trigger" data-modal="resetConfirmationModal" onclick="resetFeature(@((int) type), '@type', '@FormConstants.ProviderAccountTypes.Select(x => (int) x).ToStrings().ToStringList()', true, 'This will reset all accounts with the account type of @FormConstants.ProviderAccountTypes.Select(x => x.ToString()).ToStringList(", ", ", or ") to ' + document.getElementById('@type').value)">
                                     Reset All Accts (all)
                                 </button>
                             }
                         </div>
                     </div>
                 }
-                
+
                 <div class="form-group">
                     <label class="col-sm-3 control-label"></label>
                     <div class="col-sm-6">
@@ -153,31 +153,31 @@
                 </div>
             </form>
 
-            <form id="frmFeatureReset" method="post" action="@Url.Action("resetfeature", "package", new { id = @Model.ID })" class="form-horizontal">
+            <form id="frmFeatureReset" method="post" action="@Url.Action("resetfeature", "package", new {id = Model.ID})" class="form-horizontal">
 
-                <input type="hidden" name="packageId" id="packageId" value="@Model.ID" />
-                <input type="hidden" name="featureTypeId" id="featureTypeId" value="" />
-                <input type="hidden" name="featureValue" id="featureValue" value="" />
-                <input type="hidden" name="accountTypeIds" id="accountTypeIds" value="" />
-                <input type="hidden" name="resetIfAcctValueGreaterThan" id="resetIfAcctValueGreaterThan" value="" />
+                <input type="hidden" name="packageId" id="packageId" value="@Model.ID"/>
+                <input type="hidden" name="featureTypeId" id="featureTypeId" value=""/>
+                <input type="hidden" name="featureValue" id="featureValue" value=""/>
+                <input type="hidden" name="accountTypeIds" id="accountTypeIds" value=""/>
+                <input type="hidden" name="resetIfAcctValueGreaterThan" id="resetIfAcctValueGreaterThan" value=""/>
 
             </form>
         </div>
     </div>
 </div>
 
-@{  
+@{
     Html.RenderPartial(
-        "~/Views/Shared/_Modal.cshtml", 
-        new ModalViewModel() 
-        { 
+        "~/Views/Shared/_Modal.cshtml",
+        new ModalViewModel
+        {
             ActionButtonHtml = "Continue &gt; ",
             HtmlBody = "",
             Title = "Are you sure?",
             ActionButtonId = "resetConfirmationButton",
-            ID = "resetConfirmationModal"
+            ID = "resetConfirmationModal",
         }
-    ); 
+        );
 }
 
 

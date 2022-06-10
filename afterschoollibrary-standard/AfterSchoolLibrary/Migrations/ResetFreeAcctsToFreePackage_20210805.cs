@@ -22,7 +22,7 @@ namespace AfterSchoolLibrary.Migrations
                     freePackageFeatures.ForEach(packageFeature =>
                     {
                         var resetIfAcctValueIsGreaterThan = false;
-                        var accountTypes = AccountService.ProviderAccountTypes;
+                        var accountTypes = FormConstants.ProviderAccountTypes;
 
                         switch (packageFeature.FeatureTypeId)
                         {
@@ -32,7 +32,7 @@ namespace AfterSchoolLibrary.Migrations
 
                             case FeatureType.UseStripeConnectedAccount:
                                 resetIfAcctValueIsGreaterThan = true;
-                                accountTypes = AccountService.IndividualProviderAccountTypes;
+                                accountTypes = FormConstants.IndividualProviderAccountTypes;
                                 break;
                         }
 

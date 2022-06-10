@@ -16,7 +16,7 @@ namespace AfterSchool.Areas.Org.Controllers
 {
     public class GroupController : BaseLoggedInController
     {
-        public GroupController() : base(AccountService.ProviderAccountTypes.ToList())
+        public GroupController() : base(FormConstants.ProviderAccountTypes.ToList())
         {
         }
 

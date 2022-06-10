@@ -31,8 +31,8 @@ namespace AfterSchool.Areas.Org.Controllers
             periods.Add(activePeriod);
             periods = periods.OrderBy(period => period.StartDateTime.Value).ToList();
             var formsList = forms.OrderBy(x => x.Name).ToList();
-            var isActivityLeader = ActivityController.IsActivityLeader(activity, currentAccount, accountUserType, currentUserIsActivityLeader);
-            var isFullScreen = ActivityController.GetIsFullScreen(activity, isNew);
+            var isActivityLeader = EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, accountUserType, currentUserIsActivityLeader);
+            var isFullScreen = EditHelpers.GetIsFullScreen(activity, isNew);
 
             return new EditSetupResult
             {

@@ -1,7 +1,7 @@
 ﻿@model Activity
-@{ 
-    var instructors = (List<WebUser>)ViewBag.Instructors;
-    var leaderTypeExceptions = new List<ActivityLeaderType> { ActivityLeaderType.NotSet, ActivityLeaderType.Student };
+@{
+    var instructors = (List<WebUser>) ViewData["Instructors"];
+    var leaderTypeExceptions = new List<ActivityLeaderType> {ActivityLeaderType.NotSet, ActivityLeaderType.Student};
 }
 
 <div class="panel panel-default panel-small-padding">
@@ -17,7 +17,7 @@
                 <p>Information listed here will be published out for parents who are browsing and/or registering.</p>
             </div>
         </div>
-       
+
         <div>
             @if (SessionVariables.CurrentAccount.IsSchool && Model.ActivityTypeId == ActivityType.Activity)
             {
@@ -28,14 +28,14 @@
                             <option value="">Select...</option>
                             @foreach (var item in Enum.GetValues(typeof(ActivityLeaderType)).Cast<ActivityLeaderType>().Except(leaderTypeExceptions))
                             {
-                                var selected = (Model.LeaderTypeId == item) ? "selected=\"selected\"" : "";
+                                var selected = Model.LeaderTypeId == item ? "selected=\"selected\"" : "";
 
                                 if (!SessionVariables.CurrentAccount.IsSchool)
                                 {
                                     selected = item == ActivityLeaderType.StaffMember ? "selected=\"selected\"" : "";
                                 }
 
-                                <option value="@((int)item)" @selected>@item.ToString().SplitByUpperCase()</option>
+                                <option value="@((int) item)" @selected>@item.ToString().SplitByUpperCase()</option>
                             }
                         </select>
                     </div>
@@ -43,7 +43,7 @@
             }
             else
             {
-                <input type="hidden" name="leadertype" value="@ActivityLeaderType.StaffMember" />
+                <input type="hidden" name="leadertype" value="@ActivityLeaderType.StaffMember"/>
             }
 
             <div class="form-group advanced-settings hide">
@@ -55,14 +55,14 @@
             <div class="form-group">
                 <label class="col-md-3 control-label">Contact Name <span class="text-danger">*</span></label>
                 <div class="col-md-9">
-                    <input type="text" class="form-control" id="contactname" name="contactname" onfocus="this.select()" value="@Model.ContactName.IfBlank(SessionVariables.CurrentUser.DisplayName)" required />
+                    <input type="text" class="form-control" id="contactname" name="contactname" onfocus="this.select()" value="@Model.ContactName.IfBlank(SessionVariables.CurrentUser.DisplayName)" required/>
                 </div>
             </div>
 
             <div class="form-group">
                 <label class="col-md-3 control-label">Contact Phone <span class="text-danger">*</span></label>
                 <div class="col-md-9">
-                    <input type="text" class="form-control" id="contactphone" name="contactphone" onfocus="this.select()" value="@Model.ContactPhone.IfBlank(SessionVariables.CurrentUser.Phone)" required />
+                    <input type="text" class="form-control" id="contactphone" name="contactphone" onfocus="this.select()" value="@Model.ContactPhone.IfBlank(SessionVariables.CurrentUser.Phone)" required/>
                     <p class="text-muted hide">
                         <em>
                             For privacy purposes only @UILabel.RegistrantLabel(true).ToLower() who have registered will receive the contact phone number.
@@ -74,24 +74,24 @@
             <div class="form-group">
                 <label class="col-md-3 control-label">Contact Email <span class="text-danger">*</span></label>
                 <div class="col-md-9">
-                    <input type="email" class="form-control" id="contactemail" name="contactemail" onfocus="this.select()" value="@Model.ContactEmail.IfBlank(SessionVariables.CurrentUser.Email)" required />
+                    <input type="email" class="form-control" id="contactemail" name="contactemail" onfocus="this.select()" value="@Model.ContactEmail.IfBlank(SessionVariables.CurrentUser.Email)" required/>
                 </div>
             </div>
-        
+
         </div>
-                  
+
         <div id="provider-info" class="hide">
-            
+
             <div class="panel panel-default">
                 <div class="panel-heading">
                     External Provider Information
                 </div>
                 <div class="panel-body">
-                    @{ 
+                    @{
                         Html.RenderPartial(
-                            "~/Views/Shared/Components/_ProviderAddOrEdit.cshtml", 
-                            null, 
-                            new ViewDataDictionary() { { "ProviderAccountId", Model.ProviderAccountId } }); 
+                            "~/Views/Shared/Components/_ProviderAddOrEdit.cshtml",
+                            null,
+                            new ViewDataDictionary {{"ProviderAccountId", Model.ProviderAccountId}});
                     }
                 </div>
             </div>
@@ -103,7 +103,9 @@
 </div>
 
 <div class="col-md-offset-3 col-md-9 padding-v-20 hide" id="show-advanced-settings">
-    <span><a onclick="ActivitySetup.showAdvancedSettings()" id="btn-advanced-settings" class="pointer">Show Advanced Settings</a></span>
+    <span>
+        <a onclick="ActivitySetup.showAdvancedSettings()" id="btn-advanced-settings" class="pointer">Show Advanced Settings</a>
+    </span>
 </div>
 
 <div class="panel panel-default hide advanced-settings">
@@ -157,25 +159,25 @@
             <div class="form-group">
                 <label class="col-md-3 control-label">First Name</label>
                 <div class="col-md-9">
-                    <input type="text" class="form-control" id="instructorfirstname" name="instructorfirstname" onfocus="this.select()" value="@Request["instructorfirstname"]" />
+                    <input type="text" class="form-control" id="instructorfirstname" name="instructorfirstname" onfocus="this.select()" value="@Request["instructorfirstname"]"/>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-md-3 control-label">Last Name</label>
                 <div class="col-md-9">
-                    <input type="text" class="form-control" id="instructorlastname" name="instructorlastname" onfocus="this.select()" value="@Request["instructorlastname"]" />
+                    <input type="text" class="form-control" id="instructorlastname" name="instructorlastname" onfocus="this.select()" value="@Request["instructorlastname"]"/>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-md-3 control-label">Phone</label>
                 <div class="col-md-9">
-                    <input type="text" class="form-control" id="instructorphone" name="instructorphone" onfocus="this.select()" value="@Request["instructorphone"]" />
+                    <input type="text" class="form-control" id="instructorphone" name="instructorphone" onfocus="this.select()" value="@Request["instructorphone"]"/>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-md-3 control-label">Email</label>
                 <div class="col-md-9">
-                    <input type="text" class="form-control" id="instructoremail" name="instructoremail" onfocus="this.select()" value="@Request["instructoremail"]" />
+                    <input type="text" class="form-control" id="instructoremail" name="instructoremail" onfocus="this.select()" value="@Request["instructoremail"]"/>
                 </div>
             </div>
         </div>
@@ -183,7 +185,7 @@
 
 </div>
 
-@foreach(var instructor in instructors)
+@foreach (var instructor in instructors)
 {
     <div class="hide">
         <div id="instructor-@instructor.ID" name="@instructor.DisplayName" email="@instructor.Email" phone="@instructor.Phone"></div>
@@ -218,12 +220,12 @@
             showProviderInfo($(this));
         });
 
-        showShowAdvancedSettings(@((int)Model.LeaderTypeId));
+        showShowAdvancedSettings(@((int) Model.LeaderTypeId));
         showProviderInfo($('#leadertype'));
     });
 
     function showProviderInfo(obj) {
-        if (obj.val() == '@((int)ActivityLeaderType.ExternalProvider)') {
+        if (obj.val() == '@((int) ActivityLeaderType.ExternalProvider)') {
             $('#provider-info').removeClass('hide');
         } else {
             $('#provider-info').addClass('hide');
@@ -231,7 +233,7 @@
     }
 
     function showShowAdvancedSettings(leaderType) {
-        if (leaderType == '@((int)ActivityLeaderType.ExternalProvider)') {
+        if (leaderType == '@((int) ActivityLeaderType.ExternalProvider)') {
             $('#show-advanced-settings').addClass('hide');
             ActivitySetup.showAdvancedSettingsNo();
         } else {

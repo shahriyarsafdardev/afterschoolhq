@@ -22,7 +22,7 @@ namespace AfterSchool.Areas.Org.Controllers
 {
     public class AccountController : BaseLoggedInController
     {
-        public AccountController() : base(AccountService.OrganizationAccountTypes)
+        public AccountController() : base(FormConstants.OrganizationAccountTypes)
         {
         }
 
@@ -685,7 +685,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             ViewBag.Messages = new SystemMessages();
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.IsLocationBasedProvider = AccountService.LocationProviderAccountTypes
+            ViewBag.IsLocationBasedProvider = FormConstants.LocationProviderAccountTypes
                 .Contains(SessionVariables.CurrentAccount?.AccountTypeId ?? AccountType.NotSet);
             return View(SessionVariables.CurrentAccount);
         }
@@ -770,7 +770,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var awu = currentAccount.GetAccountWebUser(user.ID.Value, msgs);
 
             if (awu.IsNotEmpty() && currentUser.HasAccessTo(currentAccount, msgs) &&
-                accountUserType.In(AccountService.AdminUserTypes))
+                accountUserType.In(FormConstants.AdminUserTypes))
                 awu.MarkAsDeleted(currentUser, msgs);
 
             ViewBag.Messages = msgs;
@@ -1346,7 +1346,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (latitude.IsEmpty() || longitude.IsEmpty())
                 msgs.Add("An error occurred saving location data, please check what was entered in the location field",
                     MessageType.UserError);
-            
+
             //server side validation for photos count, which should not be more then 6
             var properties = profile.GetProperties(AccountPropertyType.Photo, msgs);
             var savedPhotos = properties != null ? properties.Count : 0;
@@ -1623,7 +1623,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var package = id.IsGuid() ? Package.LoadByUid(id.ToGuid(), msgs) : accountPackage?.ToPackage();
 
             Package suggestedPackage = null;
-            
+
             if (int.TryParse(featureId, out var featureIdNumber))
             {
                 suggestedPackage =

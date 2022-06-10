@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Web.Mvc;
-using BasicLibrary.DataAccess;
+using AfterSchool.Models;
+using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
-using AfterSchool.Models;
 using BasicLibrary;
-using System.Linq;
-using System.Net;
-using AfterSchoolLibrary.Billing;
-using AfterSchoolLibrary.Helpers;
+using BasicLibrary.DataAccess;
+using Utilities = BasicLibrary.Utilities;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
     public class AccountingController : BaseLoggedInController
     {
-        public AccountingController() : base(AccountService.OrganizationAccountTypes)
+        public AccountingController() : base(FormConstants.OrganizationAccountTypes)
         {
         }
 
@@ -37,19 +37,15 @@ namespace AfterSchool.Areas.Org.Controllers
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
 
-            var startDate = sdate.IsDateTime() ?
-                currentAccount.ConvertFromAccountTimeZone(sdate.ToDateTime()) :
-                new DateTime?();
-            var endDate = edate.IsDateTime() ?
-                currentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) :
-                new DateTime?();
+            var startDate = sdate.IsDateTime() ? currentAccount.ConvertFromAccountTimeZone(sdate.ToDateTime()) : new DateTime?();
+            var endDate = edate.IsDateTime() ? currentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) : new DateTime?();
 
             //PO filters
             List<(int ID, ParticipationObjectType ObjectType)> poFilter = null;
             if (!string.IsNullOrEmpty(poId) && !string.IsNullOrEmpty(poTypeId))
             {
                 poFilter = new List<(int ID, ParticipationObjectType ObjectType)>();
-                poFilter.Add((poId.ToInteger(), (ParticipationObjectType)poTypeId.ToInteger()));
+                poFilter.Add((poId.ToInteger(), (ParticipationObjectType) poTypeId.ToInteger()));
             }
 
             var totalTransactionCount = currentAccount.GetTransactionCount(q, startDate, endDate, poFilter, false, msgs);
@@ -77,10 +73,128 @@ namespace AfterSchool.Areas.Org.Controllers
                 TotalCount = totalTransactionCount,
                 PageNumber = pageNumber,
                 RecordsPerPage = recordsPerPage,
-                TotalPages = totalPages
+                TotalPages = totalPages,
             };
 
             return View(allTransactions);
+        }
+
+        public ActionResult DownloadCSV(string sdate, string edate, string poId, string poTypeId, string q)
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var startDate = sdate.IsDateTime() ? currentAccount.ConvertFromAccountTimeZone(sdate.ToDateTime()) : new DateTime?();
+            var endDate = edate.IsDateTime() ? currentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) : new DateTime?();
+
+            //PO filters
+            List<(int ID, ParticipationObjectType ObjectType)> poFilter = null;
+            if (!string.IsNullOrEmpty(poId) && !string.IsNullOrEmpty(poTypeId))
+            {
+                poFilter = new List<(int ID, ParticipationObjectType ObjectType)>();
+                poFilter.Add((poId.ToInteger(), (ParticipationObjectType) poTypeId.ToInteger()));
+            }
+
+            // transaction data
+            var billedTransactions = currentAccount.GetBilledTransactions(q, startDate, endDate, poFilter, false, null, null, msgs);
+            var paidTransactions = currentAccount.GetPaidTransactions(q, startDate, endDate, poFilter, false, null, null, msgs);
+            var allTransactions = billedTransactions.Concat(paidTransactions).ToList();
+
+            allTransactions.ForEach(transaction =>
+                transaction.CreateDate = currentAccount.ConvertToAccountTimeZone(transaction.CreateDate.Value)
+            );
+            // sort transactions
+            allTransactions = allTransactions.OrderByDescending(x => x.ID).ToList();
+
+            var table = new List<List<string>>();
+            var row = new List<string>();
+
+            row.Add("ID");
+            row.Add("CreatedOn");
+            row.Add("Payer");
+            row.Add("For");
+            row.Add("Item Description");
+            row.Add("Total Amount Paid");
+            row.Add("Platform Fee");
+            row.Add("Credit Card Fee");
+            row.Add("Your Amount");
+            row.Add("Status");
+            row.Add("Type");
+
+            table.Add(row);
+
+            foreach (var t in allTransactions)
+            {
+                var registrant = t.GetPurchase(msgs)?.GetRegistrant(msgs);
+                var participationObjects = t.GetParticipationObjects(msgs);
+                var description = participationObjects.DistinctBy(po => new {po.ObjectID, po.ObjectType}).Select(po => po.Name).ToStringList(", ");
+
+                row = new List<string>();
+                row.Add(t.GetTransactionNumber()); // ID
+                row.Add(t.CreateDate.ToShortDateTimeString()); // CreatedOn
+                row.Add(t.GetPayerAccount(msgs).Name); // Payer
+                row.Add(t.IsCharge() && registrant.IsNotEmpty() ? registrant.DisplayName : t.GetBillerAccount(msgs).Name); // For
+                row.Add(description.IsNotEmpty() ? description : t.Description); // Item Description
+                row.Add(t.GetPayerAmount().ToCurrency()); // Total Amount Paid
+                row.Add(t.ConvenienceFeeCharged.ToCurrency()); // Platform Fee
+                row.Add(t.PaymentTypeFeeCharged.ToCurrency()); // Credit Card Fee
+                row.Add(t.GetBillerPayout(msgs).ToCurrency()); // Your Amount
+                row.Add(t.GetStatus(msgs)); // Status
+                row.Add(t.PaymentTypeId.ToString().SplitByUpperCase()); // Type
+                table.Add(row);
+            }
+
+            ViewBag.Messages = msgs;
+
+            string csv = CsvFile.Create(table);
+
+            Response.Clear();
+            Response.AddHeader("Content-Type", Utilities.GetMimeType("csv"));
+            Response.AddHeader("Content-Disposition", "attachment; filename=transactions.csv");
+
+            byte[] filebytes = UTF8Encoding.UTF8.GetBytes(csv);
+            Response.AddHeader("Content-Length", filebytes.Length.ToString());
+            Response.BinaryWrite(filebytes);
+            Response.End();
+
+            return null;
+        }
+
+        [HttpGet]
+        public ActionResult CreateTransfer(string id)
+        {
+            var msgs = new SystemMessages();
+
+            if (id.IsGuid() && SessionVariables.AccountUserType == UserType.TechSupport)
+            {
+                var currentAccount = SessionVariables.CurrentAccount;
+                var currentUser = SessionVariables.CurrentUser;
+                var transaction = currentAccount.GetBillerTransaction(id.ToGuid(), msgs);
+
+                if (transaction.IsNotEmpty())
+                {
+                    var transfer = transaction.CreateStripeTransfer(currentUser, msgs);
+
+                    if (msgs.HasNoErrors() && transfer.IsNotEmpty())
+                        return Json(new {status = "ok"}, JsonRequestBehavior.AllowGet);
+                }
+            }
+
+            return Json(new {status = "error", messages = msgs.ToList().Select(msg => new {msg.Text})}, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public ActionResult GetStripeLoginLink(string id)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+
+            var loginLink = StripeHelper.CreateLoginLink(currentAccount.StripeUserId, $"{AfterSchoolLibrary.Helpers.Utilities.BaseUrl()}/org/accounting/",
+                msgs);
+
+            if (loginLink.IsNotEmpty())
+                return Json(new {status = "ok", link = loginLink.Url}, JsonRequestBehavior.AllowGet);
+
+            return Json(new {status = "error", messages = msgs.ToList().Select(msg => new {msg.Text})}, JsonRequestBehavior.AllowGet);
         }
 
         #region Payouts
@@ -102,12 +216,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
 
-            var startDate = sdate.IsDateTime() ?
-                currentAccount.ConvertFromAccountTimeZone(sdate.ToDateTime()) :
-                new DateTime?();
-            var endDate = edate.IsDateTime() ?
-                currentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) :
-                new DateTime?();
+            var startDate = sdate.IsDateTime() ? currentAccount.ConvertFromAccountTimeZone(sdate.ToDateTime()) : new DateTime?();
+            var endDate = edate.IsDateTime() ? currentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) : new DateTime?();
 
             var totalPayoutAmount = currentAccount.GetTotalPayoutAmount(null, PayoutStatus.Completed, startDate, endDate, msgs);
             var totalPayoutCount = currentAccount.GetPayoutCount(null, startDate, endDate, msgs);
@@ -133,7 +243,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 TotalCount = totalPayoutCount,
                 PageNumber = pageNumber,
                 RecordsPerPage = recordsPerPage,
-                TotalPages = totalPages
+                TotalPages = totalPages,
             };
 
             return View(payouts);
@@ -211,90 +321,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
         #endregion
 
-        public ActionResult DownloadCSV(string sdate, string edate, string poId, string poTypeId, string q)
-        {
-            var msgs = new SystemMessages();
-            var currentAccount = SessionVariables.CurrentAccount;
-            var startDate = sdate.IsDateTime() ?
-                currentAccount.ConvertFromAccountTimeZone(sdate.ToDateTime()) :
-                new DateTime?();
-            var endDate = edate.IsDateTime() ?
-                currentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) :
-                new DateTime?();
-
-            //PO filters
-            List<(int ID, ParticipationObjectType ObjectType)> poFilter = null;
-            if (!string.IsNullOrEmpty(poId) && !string.IsNullOrEmpty(poTypeId))
-            {
-                poFilter = new List<(int ID, ParticipationObjectType ObjectType)>();
-                poFilter.Add((poId.ToInteger(), (ParticipationObjectType)poTypeId.ToInteger()));
-            }
-
-            // transaction data
-            var billedTransactions = currentAccount.GetBilledTransactions(q, startDate, endDate, poFilter, false, null, null, msgs);
-            var paidTransactions = currentAccount.GetPaidTransactions(q, startDate, endDate, poFilter, false, null, null, msgs);
-            var allTransactions = billedTransactions.Concat(paidTransactions).ToList();
-
-            allTransactions.ForEach(transaction =>
-                transaction.CreateDate = currentAccount.ConvertToAccountTimeZone(transaction.CreateDate.Value)
-            );
-            // sort transactions
-            allTransactions = allTransactions.OrderByDescending(x => x.ID).ToList();
-
-            var table = new List<List<string>>();
-            var row = new List<string>();
-
-            row.Add("ID");
-            row.Add("CreatedOn");
-            row.Add("Payer");
-            row.Add("For");
-            row.Add("Item Description");
-            row.Add("Total Amount Paid");
-            row.Add("Platform Fee");
-            row.Add("Credit Card Fee");
-            row.Add("Your Amount");
-            row.Add("Status");
-            row.Add("Type");
-
-            table.Add(row);
-
-            foreach (var t in allTransactions)
-            {
-                var registrant = t.GetPurchase(msgs)?.GetRegistrant(msgs);
-                var participationObjects = t.GetParticipationObjects(msgs);
-                var description = participationObjects.DistinctBy(po => new { po.ObjectID, po.ObjectType }).Select(po => po.Name).ToStringList(", ");
-
-                row = new List<string>();
-                row.Add(t.GetTransactionNumber()); // ID
-                row.Add(t.CreateDate.ToShortDateTimeString()); // CreatedOn
-                row.Add(t.GetPayerAccount(msgs).Name);  // Payer
-                row.Add(t.IsCharge() && registrant.IsNotEmpty() ? registrant.DisplayName : t.GetBillerAccount(msgs).Name); // For
-                row.Add(description.IsNotEmpty() ? description : t.Description); // Item Description
-                row.Add(t.GetPayerAmount().ToCurrency()); // Total Amount Paid
-                row.Add(t.ConvenienceFeeCharged.ToCurrency()); // Platform Fee
-                row.Add(t.PaymentTypeFeeCharged.ToCurrency()); // Credit Card Fee
-                row.Add(t.GetBillerPayout(msgs).ToCurrency()); // Your Amount
-                row.Add(t.GetStatus(msgs)); // Status
-                row.Add(t.PaymentTypeId.ToString().SplitByUpperCase()); // Type
-                table.Add(row);
-            }
-
-            ViewBag.Messages = msgs;
-
-            string csv = CsvFile.Create(table);
-
-            Response.Clear();
-            Response.AddHeader("Content-Type", BasicLibrary.Utilities.GetMimeType("csv"));
-            Response.AddHeader("Content-Disposition", "attachment; filename=transactions.csv");
-
-            byte[] filebytes = System.Text.UTF8Encoding.UTF8.GetBytes(csv);
-            Response.AddHeader("Content-Length", filebytes.Length.ToString());
-            Response.BinaryWrite(filebytes);
-            Response.End();
-
-            return null;
-        }
-
         #region Subscriptions
 
         [HttpGet]
@@ -305,14 +331,11 @@ namespace AfterSchool.Areas.Org.Controllers
             var plans = currentAccount.GetSubscriptionPlans(msgs);
             var subscriptions = new List<RegistrantSubscriptionPlan>();
 
-            plans.ForEach(plan =>
-            {
-                subscriptions.AddRange(plan.GetRegistrantSubscriptionPlans(msgs));
-            });
+            plans.ForEach(plan => { subscriptions.AddRange(plan.GetRegistrantSubscriptionPlans(msgs)); });
 
             subscriptions = subscriptions.Where(subscription => subscription.CreateDate >= new DateTime(2019, 12, 1))
-                                .OrderByDescending(x => x.CreateDate.Value)
-                                .ToList();
+                .OrderByDescending(x => x.CreateDate.Value)
+                .ToList();
 
             ViewBag.Messages = msgs;
 
@@ -336,9 +359,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     registrant.WithdrawRegistration(
                         participationObjectId: po.ToInteger(),
-                        participationObjectType: (ParticipationObjectType)type.ToInteger(),
+                        participationObjectType: (ParticipationObjectType) type.ToInteger(),
                         loggedInUser: SessionVariables.CurrentUser,
-                        isCancelPayment : true,
+                        isCancelPayment: true,
                         isParent: false,
                         account: currentAccount,
                         msgs: msgs);
@@ -353,7 +376,6 @@ namespace AfterSchool.Areas.Org.Controllers
             return RedirectToAction("Subscriptions");
         }
 
-
         #endregion
 
         #region Refunds
@@ -362,7 +384,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult RefundRequests()
         {
             var currentAccount = SessionVariables.CurrentAccount;
-            var msgs = new SystemMessages();            
+            var msgs = new SystemMessages();
 
             ViewBag.AmountAvailableToRefund = currentAccount.GetMaxAmountAvailableForRefund(search: null, msgs: msgs);
             ViewBag.AmountRefunded = currentAccount.GetTotalAmountRefunded(search: null, msgs: msgs);
@@ -389,12 +411,13 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 if (msgs.HasNoErrors())
                 {
-                    SessionVariables.WebSession.LogRefundCompleted(currentAccount, SessionVariables.CurrentUser, WebSessionActionType.ManuallyRefunded, amount, transaction, msgs);
-                    return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                    SessionVariables.WebSession.LogRefundCompleted(currentAccount, SessionVariables.CurrentUser, WebSessionActionType.ManuallyRefunded, amount,
+                        transaction, msgs);
+                    return new JsonResult {Data = new {status = "ok"}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
                 }
             }
 
-            return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+            return new JsonResult {Data = new {status = "error", messages = msgs}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
         }
 
 
@@ -408,20 +431,20 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 var transaction = currentAccount.GetBillerTransaction(uid.ToGuid(), msgs);
                 RefundRequest refundRequest = new RefundRequest();
-                
+
                 if (transaction.IsNotEmpty())
-                    refundRequest = transaction.RequestRefund(amount.ToDecimal(), RefundRequestStatus.RequestedByProvider, reason, SessionVariables.CurrentUser, msgs);
+                    refundRequest = transaction.RequestRefund(amount.ToDecimal(), RefundRequestStatus.RequestedByProvider, reason, SessionVariables.CurrentUser,
+                        msgs);
 
                 if (msgs.HasNoErrors() && refundRequest.IsNotEmpty())
                 {
-                    SessionVariables.WebSession.LogRefundRequestUpdate(currentAccount, SessionVariables.CurrentUser, WebSessionActionType.Requested, refundRequest.Amount.ToCurrency(), refundRequest, msgs);
-                    return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                    SessionVariables.WebSession.LogRefundRequestUpdate(currentAccount, SessionVariables.CurrentUser, WebSessionActionType.Requested,
+                        refundRequest.Amount.ToCurrency(), refundRequest, msgs);
+                    return new JsonResult {Data = new {status = "ok"}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
                 }
-
-
             }
 
-            return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+            return new JsonResult {Data = new {status = "error", messages = msgs}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
         }
 
         [HttpGet]
@@ -439,12 +462,13 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 if (msgs.HasNoErrors())
                 {
-                    SessionVariables.WebSession.LogRefundRequestUpdate(SessionVariables.CurrentAccount, SessionVariables.CurrentUser, WebSessionActionType.Approved, request.Amount.ToCurrency(), request, msgs);
-                    return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                    SessionVariables.WebSession.LogRefundRequestUpdate(SessionVariables.CurrentAccount, SessionVariables.CurrentUser,
+                        WebSessionActionType.Approved, request.Amount.ToCurrency(), request, msgs);
+                    return new JsonResult {Data = new {status = "ok"}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
                 }
             }
 
-            return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+            return new JsonResult {Data = new {status = "error", messages = msgs}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
         }
 
         [HttpGet]
@@ -462,12 +486,13 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 if (msgs.HasNoErrors())
                 {
-                    SessionVariables.WebSession.LogRefundRequestUpdate(SessionVariables.CurrentAccount, SessionVariables.CurrentUser, WebSessionActionType.Approved, request.Amount.ToCurrency(), request, msgs);
-                    return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                    SessionVariables.WebSession.LogRefundRequestUpdate(SessionVariables.CurrentAccount, SessionVariables.CurrentUser,
+                        WebSessionActionType.Approved, request.Amount.ToCurrency(), request, msgs);
+                    return new JsonResult {Data = new {status = "ok"}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
                 }
             }
 
-            return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+            return new JsonResult {Data = new {status = "error", messages = msgs}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
         }
 
         [HttpPost]
@@ -485,19 +510,19 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 if (msgs.HasNoErrors())
                 {
-                    SessionVariables.WebSession.LogRefundRequestUpdate(SessionVariables.CurrentAccount, SessionVariables.CurrentUser, WebSessionActionType.Denied, request.Amount.ToCurrency(), request, msgs);
-                    return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                    SessionVariables.WebSession.LogRefundRequestUpdate(SessionVariables.CurrentAccount, SessionVariables.CurrentUser,
+                        WebSessionActionType.Denied, request.Amount.ToCurrency(), request, msgs);
+                    return new JsonResult {Data = new {status = "ok"}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
                 }
-
-
             }
 
-            return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+            return new JsonResult {Data = new {status = "error", messages = msgs}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
         }
 
         #endregion
 
         #region Coupons
+
         // GET: Org/Accounting/Coupon
         [HttpGet]
         public ActionResult Coupon()
@@ -536,7 +561,9 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var purchaseableObjectCoupons = PurchaseableObjectCoupon.LoadByCouponId(id);
             if (purchaseableObjectCoupons.Any())
-                return string.Join(",", purchaseableObjectCoupons.Where(m => m.PurchaseableObjectTypeId == PurchaseableObjectType.Activity).Select(m => m.PurchaseableObjectId).Distinct());
+                return string.Join(",",
+                    purchaseableObjectCoupons.Where(m => m.PurchaseableObjectTypeId == PurchaseableObjectType.Activity).Select(m => m.PurchaseableObjectId)
+                        .Distinct());
 
             return null;
         }
@@ -550,21 +577,22 @@ namespace AfterSchool.Areas.Org.Controllers
             try
             {
                 var activities = currentAccount.GetActivities(msgs)?
-                    .Where(activity => activity.IsOpenOrUpcoming(msgs) && !activity.IsFree && !activity.HasPostPayPlan(msgs) && !activity.HasSubscriptionPlan(msgs))
+                    .Where(activity => activity.IsOpenOrUpcoming(msgs) && !activity.IsFree && !activity.HasPostPayPlan(msgs) &&
+                                       !activity.HasSubscriptionPlan(msgs))
                     .Select(m => new ModalViewModel()
                     {
                         ID = m.ID.Value.ToString(),
-                        Title = m.Name
+                        Title = m.Name,
                     }).ToList();
 
                 if (msgs.HasNoErrors())
-                    return Json(new { success = true, status = "ok", data = activities }, JsonRequestBehavior.AllowGet);
+                    return Json(new {success = true, status = "ok", data = activities}, JsonRequestBehavior.AllowGet);
                 else
-                    return Json(new { success = false, status = "error", data = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
+                    return Json(new {success = false, status = "error", data = msgs.ToList().Select(msg => new {msg.Text})}, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, status = "error", data = ex.Message }, JsonRequestBehavior.AllowGet);
+                return Json(new {success = false, status = "error", data = ex.Message}, JsonRequestBehavior.AllowGet);
             }
         }
 
@@ -593,7 +621,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var applyType = Request.Form["applyType"];
 
             //..applyType applies to the registration fee or the subscription, payment plan, post pay plan.  but for now we are just having coupons be just for registration fees
-            applyType = Convert.ToString((int)CouponApplyType.RegistrationFee);
+            applyType = Convert.ToString((int) CouponApplyType.RegistrationFee);
 
             if (name.IsBlank())
                 msgs.Add("Name is required", MessageType.UserError);
@@ -633,10 +661,10 @@ namespace AfterSchool.Areas.Org.Controllers
                     ids = activityIds.Split(',').Select(p => Convert.ToInt32(p)).ToList();
 
                 Database.ExecuteTransaction(
-                   action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                   {
-                       // create new coupon
-                       coupon = currentAccount.CreateorUpdateCoupon(
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        // create new coupon
+                        coupon = currentAccount.CreateorUpdateCoupon(
                             coupon: coupon,
                             amount: amount.ToDecimal(),
                             expirationDate: hasExpirationDate ? expirationDate.ToDateTime() : new DateTime?(),
@@ -647,28 +675,28 @@ namespace AfterSchool.Areas.Org.Controllers
                             couponCode: couponCode,
                             name: name,
                             description: description.IsBlank() ? "" : description,
-                            couponDuration: AfterSchoolLibrary.Billing.StripeCouponDuration.Once, // TODO :  figure this out
+                            couponDuration: StripeCouponDuration.Once, // TODO :  figure this out
                             durationInMonths: null,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
                             dc: adc);
 
-                       //clear previous entries
-                       PurchaseableObjectCouponService.ClearPurchaseableObjectCoupons(coupon.ID.Value, amsgs, adc);
+                        //clear previous entries
+                        PurchaseableObjectCouponService.ClearPurchaseableObjectCoupons(coupon.ID.Value, amsgs, adc);
 
-                       //add newly selected activities
-                       if (ids.Any())
-                           PurchaseableObjectCouponService.InsertPurchaseableObjectCoupons(
-                               activityIds: ids,
-                               CouponId: coupon.ID.Value,
-                               loggedInUser: loggedInUser,
-                               msgs: amsgs,
-                               dc: adc);
-                   },
-                   onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
-                   onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                   onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(msgs)
-               );
+                        //add newly selected activities
+                        if (ids.Any())
+                            PurchaseableObjectCouponService.InsertPurchaseableObjectCoupons(
+                                activityIds: ids,
+                                CouponId: coupon.ID.Value,
+                                loggedInUser: loggedInUser,
+                                msgs: amsgs,
+                                dc: adc);
+                    },
+                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(msgs)
+                );
             }
 
             if (msgs.HasNoErrors())
@@ -692,49 +720,11 @@ namespace AfterSchool.Areas.Org.Controllers
                     MaxNumberOfUsesPerPerson = Convert.ToInt32(maxUsesPerPerson),
                     ExpirationDate = Convert.ToDateTime(expirationDate),
                     Amount = Convert.ToDecimal(amount),
-                    AmountTypeId = amountType.ToInteger().ToEnum<CouponAmountType>()
+                    AmountTypeId = amountType.ToInteger().ToEnum<CouponAmountType>(),
                 });
             }
         }
 
         #endregion
-
-        [HttpGet]
-        public ActionResult CreateTransfer(string id)
-        {
-            var msgs = new SystemMessages();
-
-            if (id.IsGuid() && SessionVariables.AccountUserType == UserType.TechSupport)
-            {
-                var currentAccount = SessionVariables.CurrentAccount;
-                var currentUser = SessionVariables.CurrentUser;
-                var transaction = currentAccount.GetBillerTransaction(id.ToGuid(), msgs);
-
-                if (transaction.IsNotEmpty())
-                {
-                    var transfer = transaction.CreateStripeTransfer(currentUser, msgs);
-
-                    if (msgs.HasNoErrors() && transfer.IsNotEmpty())
-                        return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
-                }
-            }
-
-            return Json(new { status = "error", messages = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
-        }
-
-        [HttpGet]
-        public ActionResult GetStripeLoginLink(string id)
-        {
-            var currentAccount = SessionVariables.CurrentAccount;
-            var msgs = new SystemMessages();
-
-            var loginLink = StripeHelper.CreateLoginLink(currentAccount.StripeUserId, $"{AfterSchoolLibrary.Helpers.Utilities.BaseUrl()}/org/accounting/", msgs);
-
-            if (loginLink.IsNotEmpty())
-                return Json(new { status = "ok", link = loginLink.Url }, JsonRequestBehavior.AllowGet);
-
-            return Json(new { status = "error", messages = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
-        }
-
     }
 }

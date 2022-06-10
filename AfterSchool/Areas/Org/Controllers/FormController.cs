@@ -1,22 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
-using BasicLibrary;
-using BasicLibrary.DataAccess;
-using AfterSchoolLibrary;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
+using BasicLibrary;
+using BasicLibrary.DataAccess;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
     public class FormController : BaseLoggedInController
     {
-        public FormController() : base(AccountService.OrganizationAccountTypes)
+        public FormController() : base(FormConstants.OrganizationAccountTypes)
         {
-
         }
 
         // GET: Org/Form
@@ -57,7 +54,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
                         FormId = form.ID,
                         RegistrantTypeId = RegistrantType.Individual,
-                        ID = 0
+                        ID = 0,
                     };
                 else
                     questionGroup = FormQuestionGroup.Load(qg.ToInteger());
@@ -128,7 +125,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                     FormId = form.ID,
                                     QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
                                     RegistrantTypeId = RegistrantType.Individual,
-                                    Name = Request.Params["name-0"]
+                                    Name = Request.Params["name-0"],
                                 };
                                 amsgs.AddRange(questionGroup.Save(adc));
                                 questions = new List<FormQuestion>();
@@ -162,16 +159,14 @@ namespace AfterSchool.Areas.Org.Controllers
                                         question.Description = Request.Params[$"description-{question.ID}"];
                                         question.Options = Request.Params[$"options-text-{question.ID}"];
                                         question.Link = Request.Params[$"link-text-{question.ID}"];
-                                       
-                                        question.QuestionTypeId = (QuestionType)Request.Params[$"questiontype-{question.ID}"].ToInteger();
-                                        
-                                        }
+
+                                        question.QuestionTypeId = (QuestionType) Request.Params[$"questiontype-{question.ID}"].ToInteger();
+                                    }
 
                                     question.LastModifiedBy = SessionVariables.CurrentUser.ID;
                                     question.LastModifiedDate = DateTime.UtcNow;
                                     amsgs.AddRange(question.Save(adc));
                                 }
-
                             });
 
                             // save new questions
@@ -192,13 +187,13 @@ namespace AfterSchool.Areas.Org.Controllers
                                         FormQuestionGroupId = questionGroup.ID,
                                         IsTemplate = false,
                                         QuestionDataTypeId = QuestionDataType.NotSet,
-                                        QuestionTypeId = (QuestionType)Request.Params[string.Format("new-questiontype-{0}", i)].ToInteger(),
+                                        QuestionTypeId = (QuestionType) Request.Params[string.Format("new-questiontype-{0}", i)].ToInteger(),
                                         Text = Request.Params[string.Format("new-text-{0}", i)],
                                         Options = Request.Params[string.Format("new-options-text-{0}", i)],
                                         Link = Request.Params[string.Format("new-link-text-{0}", i)],
                                         Description = Request.Params[string.Format("new-description-{0}", i)],
                                         IsActive = Request.Params[string.Format("new-active-{0}", i)].IsBoolean(),
-                                        IsRequired = Request.Params[string.Format("new-required-{0}", i)].IsBoolean()
+                                        IsRequired = Request.Params[string.Format("new-required-{0}", i)].IsBoolean(),
                                     };
                                     amsgs.AddRange(question.Save(adc));
                                 }
@@ -210,10 +205,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         msgs.AddRange(smsgs);
                         msgs.Add("Form Saved", MessageType.Success);
                     },
-                    onFailure: (SystemMessages fmsgs) =>
-                    {
-                        msgs.AddRange(fmsgs);
-                    }
+                    onFailure: (SystemMessages fmsgs) => { msgs.AddRange(fmsgs); }
                 );
             }
 
@@ -245,10 +237,10 @@ namespace AfterSchool.Areas.Org.Controllers
             switch (cmd)
             {
                 case "prev":
-                    if(currentIndex > 0) questionGroup = questionGroups[currentIndex - 1];
+                    if (currentIndex > 0) questionGroup = questionGroups[currentIndex - 1];
                     break;
                 case "next":
-                    if(currentIndex < questionGroups.Count - 1) questionGroup = questionGroups[currentIndex + 1];
+                    if (currentIndex < questionGroups.Count - 1) questionGroup = questionGroups[currentIndex + 1];
                     break;
             }
 

@@ -1,19 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.Web.Mvc;
-using BasicLibrary;
-using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
-using AfterSchoolLibrary.Models;
-using System;
-using System.Linq;
+using AfterSchoolLibrary.Services;
+using BasicLibrary;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
     public class HomeController : BaseLoggedInController
     {
-        public HomeController() : base(AccountService.OrganizationAccountTypes)
+        public HomeController() : base(FormConstants.OrganizationAccountTypes)
         {
-
         }
 
         // GET: Org/Home
@@ -26,7 +22,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
 
             // only redirect if onboarding steps haven't been acknowledged
-            if (account.CanReceivePaymentDeposits() && (CookieVariables.OnboardingStepsAcknowledged.IsEmpty() || !CookieVariables.OnboardingStepsAcknowledged.ToBoolean()))
+            if (account.CanReceivePaymentDeposits() &&
+                (CookieVariables.OnboardingStepsAcknowledged.IsEmpty() || !CookieVariables.OnboardingStepsAcknowledged.ToBoolean()))
                 CookieVariables.OnboardingStepsAcknowledged = true.ToString();
 
             if (account.OnboardingStepDone != OnboardingStepType.All)
@@ -38,8 +35,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (account.IsNewProviderForOtherAccounts())
                 return RedirectToAction("getstartedpayments", "account");
 
-            if (account.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, null, null, null, null, null) == 0 && (account.AccountTypeId != AccountType.School || account.GetExternalLeagueInviteCount() == 0))
-                return RedirectToAction("getstarted");                      
+            if (account.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, null, null, null, null, null) == 0 &&
+                (account.AccountTypeId != AccountType.School || account.GetExternalLeagueInviteCount() == 0))
+                return RedirectToAction("getstarted");
 
             var activityCount = account.GetActivityCount(
                 SessionVariables.AccountUserType,
@@ -51,8 +49,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 null,
                 msgs);
 
-            var totalPaid = account.GetTotalAmountBilledOut(search: null, paymentSourceType: PaymentSourceType.AfterSchoolPlatform, msgs: msgs) +
-                            account.GetTotalAmountBilledOut(search: null, paymentSourceType: PaymentSourceType.ManualProvider, msgs: msgs);
+            var totalPaid = account.GetTotalAmountBilledOut(null, PaymentSourceType.AfterSchoolPlatform, msgs: msgs) +
+                            account.GetTotalAmountBilledOut(null, PaymentSourceType.ManualProvider, msgs: msgs);
 
             HandleTempMessages(msgs);
 

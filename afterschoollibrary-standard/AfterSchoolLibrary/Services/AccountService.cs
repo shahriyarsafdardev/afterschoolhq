@@ -479,7 +479,7 @@ namespace AfterSchoolLibrary.Services
             ActivityType? activityType, bool? isArchived, bool? isDeleted, bool? ungroupedOnly, int? start = null,
             int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (user.IsEmpty() || userType.In(AdminUserTypes))
+            if (user.IsEmpty() || userType.In(FormConstants.AdminUserTypes))
                 return Activity.LoadByAccountId(account.ID.Value, null, null, activityType, isArchived, isDeleted,
                     ungroupedOnly, start, length, q, msgs, dc).ToList();
 
@@ -500,7 +500,7 @@ namespace AfterSchoolLibrary.Services
             ActivityType? activityType, bool? isArchived, bool? isDeleted, bool? ungroupedOnly,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (user.IsEmpty() || userType.In(AdminUserTypes))
+            if (user.IsEmpty() || userType.In(FormConstants.AdminUserTypes))
                 return Activity.GetCountByAccountId(account.ID.Value, q, null, activityType, isArchived, isDeleted,
                     ungroupedOnly, msgs, dc);
 
@@ -694,63 +694,6 @@ namespace AfterSchoolLibrary.Services
                 startingOptions.Add(GettingStartedOptions.AcceptPayments);
 
             return startingOptions;
-        }
-
-        public static UserType[] AdminUserTypes
-        {
-            get
-            {
-                return new[]
-                {
-                    UserType.Administrator, UserType.Owner, UserType.SuperAdmin, UserType.Treasurer,
-                    UserType.TechSupport,
-                };
-            }
-        }
-
-        public static AccountType[] ProviderAccountTypes
-        {
-            get
-            {
-                return new[]
-                {
-                    AccountType.Teacher, AccountType.ActivityProvider, AccountType.Business,
-                    AccountType.CommunityCenter, AccountType.School, AccountType.Church,
-                };
-            }
-        }
-
-        public static List<AccountType> OrganizationAccountTypes =>
-            new List<AccountType>(ProviderAccountTypes) {AccountType.Directory};
-
-        public static List<AccountType> OrganizationAccountTypesAndNotSet =>
-            new List<AccountType>(OrganizationAccountTypes) {AccountType.NotSet};
-
-        public static AccountType[] IndividualProviderAccountTypes
-        {
-            get { return new[] {AccountType.Teacher, AccountType.ActivityProvider, AccountType.Business}; }
-        }
-
-        public static AccountType[] LocationProviderAccountTypes
-        {
-            get
-            {
-                return new[]
-                    {AccountType.CommunityCenter, AccountType.School, AccountType.Church, AccountType.Directory};
-            }
-        }
-
-        public static AccountType[] CustomerAccountTypes
-        {
-            get
-            {
-                return new[]
-                {
-                    AccountType.Teacher, AccountType.ActivityProvider, AccountType.Business,
-                    AccountType.CommunityCenter, AccountType.School, AccountType.Church, AccountType.Registrant,
-                    AccountType.SchoolDistrict,
-                };
-            }
         }
 
         public static bool HasActivityPermissions(this Account account, Activity activity, SystemMessages msgs,
@@ -1150,7 +1093,7 @@ namespace AfterSchoolLibrary.Services
                 {
                     // return all accounts which are filtered by feature type
                     return Account.LoadByIdsByAccountTypes(ids: accountIds.Distinct().ToList(),
-                        accountTypes: ProviderAccountTypes.ToList(), msgs: msgs, dc: dc).ToList();
+                        accountTypes: FormConstants.ProviderAccountTypes.ToList(), msgs: msgs, dc: dc).ToList();
                 }
             }
 
@@ -2574,7 +2517,7 @@ namespace AfterSchoolLibrary.Services
                 GenderRestriction = profile.IsNotEmpty() ? profile.GenderRestriction : GenderRestrictionType.None,
                 AgeStart = profile?.AgeStart,
                 AgeEnd = profile?.AgeEnd,
-                IsContinuousEnrollment = false
+                IsContinuousEnrollment = false,
             };
         }
 

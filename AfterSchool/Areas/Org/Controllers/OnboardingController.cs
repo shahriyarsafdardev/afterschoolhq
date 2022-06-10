@@ -19,7 +19,7 @@ namespace AfterSchool.Areas.Org.Controllers
         private readonly IFeatureFlagRepository featureFlagRepository;
 
         public OnboardingController(IFeatureFlagRepository featureFlagRepository) : base(
-            AccountService.OrganizationAccountTypesAndNotSet.ToList())
+            FormConstants.OrganizationAccountTypesAndNotSet.ToList())
         {
             this.featureFlagRepository = featureFlagRepository;
         }

@@ -1,25 +1,23 @@
-﻿using Xunit;
-using Xunit.Abstractions;
+﻿using System.Collections.Generic;
+using System.Linq;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using AfterSchoolLibraryTests.Factories;
-using System.Collections.Generic;
-using BasicLibrary;
-using System;
-using System.Linq;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace AfterSchoolLibraryTests.Tests
 {
     public class PackageFeatureServiceTest : BaseTest
     {
-        private WebUser AccountOwner { get; set; }
-        private Account Account { get; set; }
-        private Package Package { get; set; }
-
         public PackageFeatureServiceTest(ITestOutputHelper output) : base(output)
         {
             Package = PackageFactory.CreateFreePackage(msgs, dc);
         }
+
+        private WebUser AccountOwner { get; set; }
+        private Account Account { get; set; }
+        private Package Package { get; }
 
         [Fact]
         public void EnsureAllAccountsHavePackageFeatureTest()
@@ -38,7 +36,7 @@ namespace AfterSchoolLibraryTests.Tests
             }
 
             var packageFeature = PackageFeature.LoadByPackageIdByFeatureTypeId(Package.ID.Value, featureToHave, msgs, dc);
-            packageFeature.EnsureAllAccountsHavePackageFeature(AccountService.ProviderAccountTypes.ToList(), new WebUser() { ID = 0 }, msgs, dc);
+            packageFeature.EnsureAllAccountsHavePackageFeature(FormConstants.ProviderAccountTypes.ToList(), new WebUser {ID = 0}, msgs, dc);
 
             foreach (var account in accounts)
             {
@@ -59,10 +57,10 @@ namespace AfterSchoolLibraryTests.Tests
 
             accountPackage.RemoveFeature(featureToHave, msgs, dc);
 
-            Assert.False(account.HasAccountPackageFeature(featureToHave, msgs, dc));            
+            Assert.False(account.HasAccountPackageFeature(featureToHave, msgs, dc));
 
             var packageFeature = PackageFeature.LoadByPackageIdByFeatureTypeId(Package.ID.Value, featureToHave, msgs, dc);
-            packageFeature.EnsureAccountHasPackageFeature(account, AccountService.ProviderAccountTypes.ToList(), accountOwner, msgs, dc);
+            packageFeature.EnsureAccountHasPackageFeature(account, FormConstants.ProviderAccountTypes.ToList(), accountOwner, msgs, dc);
 
             Assert.True(account.HasAccountPackageFeature(featureToHave, msgs, dc));
             Assert.Equal(packageFeature.Max, account.GetAccountPackageFeature(featureToHave, msgs, dc).Max);
@@ -91,7 +89,7 @@ namespace AfterSchoolLibraryTests.Tests
             }
 
             var packageFeature = PackageFeature.LoadByPackageIdByFeatureTypeId(Package.ID.Value, featureToHave, msgs, dc);
-            packageFeature.ResetAllAccountFeaturesToPackageFeature(AccountService.ProviderAccountTypes.ToList(), true, new WebUser() { ID = 0 }, msgs, dc);
+            packageFeature.ResetAllAccountFeaturesToPackageFeature(FormConstants.ProviderAccountTypes.ToList(), true, new WebUser {ID = 0}, msgs, dc);
 
             foreach (var account in accounts)
             {
@@ -99,10 +97,10 @@ namespace AfterSchoolLibraryTests.Tests
                 Assert.Equal(packageFeature.Max, account.GetAccountPackageFeature(featureToHave, msgs, dc).Max);
 
                 var accountPackage = account.GetActiveAccountPackage(msgs, dc);
-                accountPackage.AddOrUpdatePackageFeature(featureToHave2, featureToHave2Value, new WebUser() { ID = 0 }, msgs, dc);
+                accountPackage.AddOrUpdatePackageFeature(featureToHave2, featureToHave2Value, new WebUser {ID = 0}, msgs, dc);
             }
 
-            packageFeature.ResetAllAccountFeaturesToPackageFeature(AccountService.ProviderAccountTypes.ToList(), false, new WebUser() { ID = 0 }, msgs, dc);
+            packageFeature.ResetAllAccountFeaturesToPackageFeature(FormConstants.ProviderAccountTypes.ToList(), false, new WebUser {ID = 0}, msgs, dc);
 
             foreach (var account in accounts)
             {
@@ -128,19 +126,18 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.False(account.HasAccountPackageFeature(featureToHave, msgs, dc));
 
             var packageFeature = PackageFeature.LoadByPackageIdByFeatureTypeId(Package.ID.Value, featureToHave, msgs, dc);
-            packageFeature.ResetAccountFeatureToPackageFeature(account, AccountService.ProviderAccountTypes.ToList(), true, accountOwner, msgs, dc);
+            packageFeature.ResetAccountFeatureToPackageFeature(account, FormConstants.ProviderAccountTypes.ToList(), true, accountOwner, msgs, dc);
 
             Assert.True(account.HasAccountPackageFeature(featureToHave, msgs, dc));
             Assert.Equal(packageFeature.Max, account.GetAccountPackageFeature(featureToHave, msgs, dc).Max);
 
             accountPackage.AddOrUpdatePackageFeature(featureToHave2, featureToHave2Value, accountOwner, msgs, dc);
-            packageFeature.ResetAccountFeatureToPackageFeature(account, AccountService.ProviderAccountTypes.ToList(), false, accountOwner, msgs, dc);
+            packageFeature.ResetAccountFeatureToPackageFeature(account, FormConstants.ProviderAccountTypes.ToList(), false, accountOwner, msgs, dc);
 
             Assert.True(account.HasAccountPackageFeature(featureToHave2, msgs, dc));
             Assert.Equal(featureToHave2Value, account.GetAccountPackageFeature(featureToHave2, msgs, dc).Max);
 
             Assert.True(msgs.HasNoErrors());
         }
-
     }
 }

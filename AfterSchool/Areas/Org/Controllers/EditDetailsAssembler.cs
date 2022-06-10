@@ -20,8 +20,8 @@ namespace AfterSchool.Areas.Org.Controllers
         public EditDetailsResult AssembleEditDetailsResult(Account account, SystemMessages messages, Activity activity,
             string fullScreenExitUrl, bool isActivityLeader, AccountPackage accountPackage, bool isNew)
         {
-            var isFullScreen = ActivityController.GetIsFullScreen(activity, isNew);
-            
+            var isFullScreen = EditHelpers.GetIsFullScreen(activity, isNew);
+
             return new EditDetailsResult
             {
                 Account = account,
@@ -31,7 +31,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 FullScreenExitUrl = fullScreenExitUrl,
                 IsActivityLeader = isActivityLeader,
                 AccountPackage = accountPackage,
-                ActiveMenu = "EditDetails"
+                ActiveMenu = "EditDetails",
             };
         }
     }

@@ -1,23 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
-using BasicLibrary;
+using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
-using AfterSchool.Models;
-using System.Collections;
+using BasicLibrary;
 using BasicLibrary.DataAccess;
-using System.Web.WebPages;
+using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Areas.Admin.Controllers
 {
     public class AccountController : BaseLoggedInController
     {
-        public AccountController() : base(new List<AccountType> { AccountType.AfterSchool })
+        public AccountController() : base(new List<AccountType> {AccountType.AfterSchool})
         {
-
         }
 
         private List<Account> IndexViewBag(string pn, string rpp, string search, AccountType type, SystemMessages msgs = null)
@@ -35,13 +32,14 @@ namespace AfterSchool.Areas.Admin.Controllers
 
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
-            var accountTypes = AccountService.CustomerAccountTypes.ToList();
+            var accountTypes = FormConstants.CustomerAccountTypes.ToList();
 
             if (type != AccountType.NotSet)
                 accountTypes = type.AsList();
 
             var count = Account.GetSearchCount(search, accountTypes, false, msgs);
-            var accounts = Account.Search(search, accountTypes, isDeleted: false, OrderByProperty: "CreateDate", orderByDirection: OrderByDirectionEnum.Descending, start, length, msgs);
+            var accounts = Account.Search(search, accountTypes, isDeleted: false, OrderByProperty: "CreateDate",
+                orderByDirection: OrderByDirectionEnum.Descending, start, length, msgs);
             var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
 
             ViewBag.Messages = msgs;
@@ -50,7 +48,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                 TotalCount = count,
                 PageNumber = pageNumber,
                 RecordsPerPage = recordsPerPage,
-                TotalPages = totalPages
+                TotalPages = totalPages,
             };
 
             return accounts;
@@ -92,7 +90,8 @@ namespace AfterSchool.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public ActionResult Invite(string id, string orgname, string accounttype, string package, string billingperiod, string email, string claimemaildomain, string firstname, string lastname, string message, string isUnclaimed, string timezone, string istest)
+        public ActionResult Invite(string id, string orgname, string accounttype, string package, string billingperiod, string email, string claimemaildomain,
+            string firstname, string lastname, string message, string isUnclaimed, string timezone, string istest)
         {
             var msgs = new SystemMessages();
             var sendInvite = !isUnclaimed.IsNumber();
@@ -136,7 +135,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                         {
                             account.AddPackage(
                                 package.ToInteger(),
-                                (BillingPeriodType)billingperiod.ToInteger(),
+                                (BillingPeriodType) billingperiod.ToInteger(),
                                 currentUser,
                                 amsgs,
                                 adc
@@ -163,45 +162,45 @@ namespace AfterSchool.Areas.Admin.Controllers
                             if (sendInvite)
                             {
                                 user = WebUserService.InviteNew(
-                                        firstName: firstname,
-                                        lastName: lastname,
-                                        email: email,
-                                        loggedInUser: currentUser,
-                                        msgs: amsgs,
-                                        dc: adc);
+                                    firstName: firstname,
+                                    lastName: lastname,
+                                    email: email,
+                                    loggedInUser: currentUser,
+                                    msgs: amsgs,
+                                    dc: adc);
 
                                 account = user.AddNewAccount(
-                                            orgName: orgname,
-                                            claimemaildomain: claimemaildomain,
-                                            phone: null,
-                                            isActive: true,
-                                            accountType: (AccountType)accounttype.ToInteger(),
-                                            packageId: package.ToInteger(),
-                                            packageBillingPeriod: (BillingPeriodType)billingperiod.ToInteger(),
-                                            timeZone: timezone,
-                                            isAfterSchool: true,
-                                            loggedInUser: currentUser,
-                                            msgs: amsgs,
-                                            dc: adc);
+                                    orgName: orgname,
+                                    claimemaildomain: claimemaildomain,
+                                    phone: null,
+                                    isActive: true,
+                                    accountType: (AccountType) accounttype.ToInteger(),
+                                    packageId: package.ToInteger(),
+                                    packageBillingPeriod: (BillingPeriodType) billingperiod.ToInteger(),
+                                    timeZone: timezone,
+                                    isAfterSchool: true,
+                                    loggedInUser: currentUser,
+                                    msgs: amsgs,
+                                    dc: adc);
                             }
                             else
                             {
                                 account = AccountService.CreateNewUnclaimedAccount(
-                                            orgName: orgname,
-                                            email: null,
-                                            claimemaildomain: claimemaildomain,
-                                            phone: null,
-                                            isActive: true,
-                                            accountType: (AccountType)accounttype.ToInteger(),
-                                            accountOwner: currentUser,
-                                            packageId: package.ToInteger(),
-                                            packageBillingPeriod: (BillingPeriodType)billingperiod.ToInteger(),
-                                            timeZone: timezone,
-                                            loggedInUser: currentUser,
-                                            isAfterSchool: true,
-                                            createWithStripe: false,
-                                            msgs: amsgs,
-                                            dc: adc);
+                                    orgName: orgname,
+                                    email: null,
+                                    claimemaildomain: claimemaildomain,
+                                    phone: null,
+                                    isActive: true,
+                                    accountType: (AccountType) accounttype.ToInteger(),
+                                    accountOwner: currentUser,
+                                    packageId: package.ToInteger(),
+                                    packageBillingPeriod: (BillingPeriodType) billingperiod.ToInteger(),
+                                    timeZone: timezone,
+                                    loggedInUser: currentUser,
+                                    isAfterSchool: true,
+                                    createWithStripe: false,
+                                    msgs: amsgs,
+                                    dc: adc);
                             }
                         }
 
@@ -216,7 +215,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                             msgs.AddRange(account.SendInvitedEmail(user, SessionVariables.CurrentUser, message));
                     },
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                    onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
                 );
             }
 

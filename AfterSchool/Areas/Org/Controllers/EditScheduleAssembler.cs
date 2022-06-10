@@ -33,10 +33,10 @@ namespace AfterSchool.Areas.Org.Controllers
             var editScheduleResult = new EditScheduleResult
             {
                 Account = currentAccount,
-                IsActivityLeader = ActivityController.IsActivityLeader(activity, currentAccount, accountUserType, currentUserIsActivityLeader),
+                IsActivityLeader = EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, accountUserType, currentUserIsActivityLeader),
                 ActiveMenu = "EditSchedule",
                 Schedules = schedules,
-                IsFullScreen = ActivityController.GetIsFullScreen(activity, isNew),
+                IsFullScreen = EditHelpers.GetIsFullScreen(activity, isNew),
                 FullScreenExitUrl = fullScreenUrl,
                 Schedule = schedule,
                 Messages = msgs,

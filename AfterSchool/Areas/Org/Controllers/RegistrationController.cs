@@ -17,7 +17,7 @@ namespace AfterSchool.Areas.Org.Controllers
 {
     public class RegistrationController : BaseLoggedInController
     {
-        public RegistrationController() : base(AccountService.OrganizationAccountTypes)
+        public RegistrationController() : base(FormConstants.OrganizationAccountTypes)
         {
         }
 
@@ -684,10 +684,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 var groupIds = group.Split(',').Select(x => x.ToInteger()).ToList();
                 selectedGroups = currentAccount.GetActivityGroups(groupIds, msgs);
-                selectedGroups.ForEach(x =>
-                {
-                    activityIds.AddRange(x.GetActivities(null, false, false, null, null).Select(y => y.ID.Value));
-                });
+                selectedGroups.ForEach(x => { activityIds.AddRange(x.GetActivities(null, false, false, null, null).Select(y => y.ID.Value)); });
             }
 
             if (at.IsNumber())

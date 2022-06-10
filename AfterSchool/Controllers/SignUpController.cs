@@ -722,7 +722,7 @@ namespace AfterSchool.Controllers
             if (invitingAccount.IsEmpty())
                 msgs.Add("Invalid invite code", MessageType.UserError);
 
-            var accountTypesToAccept = AccountService.ProviderAccountTypes;
+            var accountTypesToAccept = FormConstants.ProviderAccountTypes;
 
             // auto accept invite of already logged in
             if (SessionVariables.CurrentUser.IsNotEmpty() &&
@@ -1145,7 +1145,7 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var accounts =
-                Account.FullTextSearch(search.Trim(), AccountService.ProviderAccountTypes.ToList(), 0, 10, msgs);
+                Account.FullTextSearch(search.Trim(), FormConstants.ProviderAccountTypes.ToList(), 0, 10, msgs);
 
             return Json(new
             {

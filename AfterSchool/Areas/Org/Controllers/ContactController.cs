@@ -1,22 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
-using BasicLibrary;
+using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
-using AfterSchool.Models;
+using BasicLibrary;
 using BasicLibrary.DataAccess;
+using CsvHelper;
+using CsvHelper.Configuration;
 using Hangfire;
+using Utilities = BasicLibrary.Utilities;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
     public class ContactController : BaseLoggedInController
     {
-        public ContactController() : base(AccountService.OrganizationAccountTypes)
+        public ContactController() : base(FormConstants.OrganizationAccountTypes)
         {
+        }
 
+        private string[] emailHeaders
+        {
+            get { return new string[] {"email", "emailaddr", "emailaddress"}; }
+        }
+
+        private string[] firstNameHeaders
+        {
+            get { return new string[] {"first", "fname", "firstname"}; }
+        }
+
+        private string[] lastNameHeaders
+        {
+            get { return new string[] {"last", "lname", "lastname"}; }
         }
 
         // GET: Org/Contact
@@ -30,6 +49,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 pageNumber = pn.ToInteger();
             }
+
             if (rpp.IsNumber() && rpp.ToInteger() > 0)
             {
                 recordsPerPage = rpp.ToInteger();
@@ -55,7 +75,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 TotalCount = totalCount,
                 PageNumber = pageNumber,
                 RecordsPerPage = recordsPerPage,
-                TotalPages = totalPages
+                TotalPages = totalPages,
             };
 
             return View(registrants);
@@ -92,7 +112,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             {
                                 msgs.Add("Please enter a list of emails separated by commas", MessageType.UserError);
                             }
-                            else if (emaillist.Split(',').Select(x => x.Trim()).Where(x => !x.IsMatch(BasicLibrary.Utilities.EmailRegEx)).Count() > 0)
+                            else if (emaillist.Split(',').Select(x => x.Trim()).Where(x => !x.IsMatch(Utilities.EmailRegEx)).Count() > 0)
                             {
                                 msgs.Add("Invalid email in list. Please ensure all emails are valid", MessageType.UserError);
                             }
@@ -129,7 +149,8 @@ namespace AfterSchool.Areas.Org.Controllers
                                     }
                                     else
                                     {
-                                        contactList = ContactList.CreateNew(listname, SessionVariables.CurrentAccount.ID.Value, SessionVariables.CurrentUser.ID.Value, amsgs, dc: adc);
+                                        contactList = ContactList.CreateNew(listname, SessionVariables.CurrentAccount.ID.Value,
+                                            SessionVariables.CurrentUser.ID.Value, amsgs, dc: adc);
                                     }
                                 }
 
@@ -167,13 +188,12 @@ namespace AfterSchool.Areas.Org.Controllers
                                             msgs.AddRange(AddContact(email, firstname, lastname, contactList, adc));
                                         }
                                     }
-
                                 }
                                 else
                                 {
                                     foreach (var email in importtext.Split(',').Select(x => x.Trim()).Where(x => x.IsNotBlank()).Distinct())
                                     {
-                                        amsgs.AddRange(AddContact(email, null, null, contactList, adc));                                       
+                                        amsgs.AddRange(AddContact(email, null, null, contactList, adc));
                                     }
                                 }
                             },
@@ -182,10 +202,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                 msgs.AddRange(smsgs);
                                 ViewBag.ContactList = contactList;
                             },
-                            onFailure: (SystemMessages fmsgs) =>
-                            {
-                                msgs.AddRange(fmsgs);
-                            }
+                            onFailure: (SystemMessages fmsgs) => { msgs.AddRange(fmsgs); }
                         );
 
                         if (msgs.HasErrors())
@@ -196,6 +213,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         {
                             ViewBag.Step = 3;
                         }
+
                         break;
                     case 1:
                     default:
@@ -211,11 +229,12 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             return contactList.AddContact(contact.ID.Value, SessionVariables.CurrentUser.ID.Value, dc: dc);
         }
+
         private SystemMessages AddContact(string email, string firstname, string lastname, ContactList contactList, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
-            if(firstname.IsBlank() && lastname.IsBlank() && email.IsBlank())
+            if (firstname.IsBlank() && lastname.IsBlank() && email.IsBlank())
             {
                 msgs.Add("Invalid contact row", MessageType.Error);
                 return msgs;
@@ -248,19 +267,16 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors() && contactList.IsNotEmpty())
             {
-                AddContact(contact, contactList, dc: dc);                
+                AddContact(contact, contactList, dc: dc);
             }
+
             return msgs;
         }
 
-        private string[] emailHeaders { get { return new string[] { "email", "emailaddr", "emailaddress" }; } }
-        private string[] firstNameHeaders { get { return new string[] { "first", "fname", "firstname" }; } }
-        private string[] lastNameHeaders { get { return new string[] { "last", "lname", "lastname" }; } }
-
         private string ProcessImport(HttpPostedFileBase importfile, SystemMessages msgs, SystemMessages validationMessages)
         {
-            var sr = new System.IO.StreamReader(importfile.InputStream);
-            var extension = System.IO.Path.GetExtension(importfile.FileName);
+            var sr = new StreamReader(importfile.InputStream);
+            var extension = Path.GetExtension(importfile.FileName);
 
             List<string> headers = new List<string>();
             var headersWithData = new List<string>();
@@ -269,10 +285,10 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (extension == ".csv")
             {
-                CsvHelper.CsvReader reader = new CsvHelper.CsvReader(sr);
+                CsvReader reader = new CsvReader(sr);
                 reader.Configuration.Delimiter = ",";
                 reader.Configuration.HasHeaderRecord = true;
-                reader.Configuration.TrimOptions = CsvHelper.Configuration.TrimOptions.Trim;
+                reader.Configuration.TrimOptions = TrimOptions.Trim;
                 reader.Read();
                 reader.ReadHeader();
 
@@ -291,10 +307,10 @@ namespace AfterSchool.Areas.Org.Controllers
                         var headerNoSpacesEtc = header.Replace("-", "").Replace(" ", "").Replace("_", "").ToLower();
 
                         if ((
-                                emailHeaders.Contains(headerNoSpacesEtc) || 
-                                firstNameHeaders.Contains(headerNoSpacesEtc) || 
+                                emailHeaders.Contains(headerNoSpacesEtc) ||
+                                firstNameHeaders.Contains(headerNoSpacesEtc) ||
                                 lastNameHeaders.Contains(headerNoSpacesEtc)
-                            ) && 
+                            ) &&
                             field.IsNotBlank())
                         {
                             row.Add(field);
@@ -308,6 +324,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     rows.Add(row);
                 }
             }
+
             var hasErrors = false;
 
             if (headersWithData.Count == 0)
@@ -346,10 +363,10 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         if (emailHeaders.Contains(headerName))
                         {
-                            if (field.IsBlank() || !field.IsMatch(BasicLibrary.Utilities.EmailRegEx))
+                            if (field.IsBlank() || !field.IsMatch(Utilities.EmailRegEx))
                             {
                                 hasErrors = true;
-                                validatedField.Messages.Add($"Row {(j+1)}: {field} must be a valid email address", MessageType.UserError);
+                                validatedField.Messages.Add($"Row {(j + 1)}: {field} must be a valid email address", MessageType.UserError);
                             }
                         }
                         else
@@ -360,16 +377,18 @@ namespace AfterSchool.Areas.Org.Controllers
                         validatedRow.Add(validatedField);
                         validationMessages.AddRange(validatedField.Messages);
                     }
+
                     validatedRows.Add(validatedRow);
                 }
             }
 
-            var csvString = new System.Text.StringBuilder();
+            var csvString = new StringBuilder();
             foreach (var header in headersWithData)
             {
                 csvString.Append(header);
                 csvString.Append(",");
             }
+
             csvString.Append("\n");
 
             foreach (var row in rows)
@@ -379,6 +398,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     csvString.Append(field);
                     csvString.Append(",");
                 }
+
                 csvString.Append("\n");
             }
 
@@ -416,6 +436,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 registrant = Registrant.LoadByUid(id.ToGuid());
             }
+
             ViewBag.Messages = new SystemMessages();
             return View(registrant);
         }
@@ -428,7 +449,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (id.IsGuid())
             {
-                if (email.IsEmpty() || !email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
+                if (email.IsEmpty() || !email.IsMatch(Utilities.EmailRegEx))
                 {
                     msgs.Add("Email is invalid", MessageType.UserError);
                 }
@@ -458,6 +479,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 pageNumber = pn.ToInteger();
             }
+
             if (rpp.IsNumber() && rpp.ToInteger() > 0)
             {
                 recordsPerPage = rpp.ToInteger();
@@ -479,7 +501,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 TotalCount = totalCount,
                 PageNumber = pageNumber,
                 RecordsPerPage = recordsPerPage,
-                TotalPages = totalPages
+                TotalPages = totalPages,
             };
 
             return View(lists);
@@ -492,7 +514,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (id.IsNumber())
             {
                 var list = ContactList.Load(id.ToInteger());
-                if(list.IsNotEmpty() && list.AccountId == SessionVariables.CurrentAccount.ID)
+                if (list.IsNotEmpty() && list.AccountId == SessionVariables.CurrentAccount.ID)
                 {
                     msgs.AddRange(list.Delete());
                 }
@@ -503,9 +525,8 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             return RedirectToAction("lists");
-         
         }
-        
+
         [HttpPost]
         public ActionResult ListEdit(string id, string list, string listname)
         {
@@ -537,9 +558,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (!lists.Any())
             {
                 if (ret == "1" && type == "activity")
-                    return Redirect(Url.Action("publishdetail", "activity", new { id }));
+                    return Redirect(Url.Action("publishdetail", "activity", new {id}));
 
-                return Redirect(Url.Action("add", "contact", new { returnUrl = Url.Action("inviteto", "contact", new { id, type }) }));
+                return Redirect(Url.Action("add", "contact", new {returnUrl = Url.Action("inviteto", "contact", new {id, type})}));
             }
 
             return View();
@@ -556,7 +577,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 case "activity":
                     activity = Activity.LoadByUid(id.ToGuid(), msgs);
-                    returnUrl = Url.Action("publishdetail", "activity", new { id });
+                    returnUrl = Url.Action("publishdetail", "activity", new {id});
 
                     break;
                 case "period":
@@ -566,13 +587,13 @@ namespace AfterSchool.Areas.Org.Controllers
                     if (period.ActivityGroupId.HasValue)
                     {
                         group = period.GetGroup(msgs);
-                        returnUrl = Url.Action("periods", "group", new { id = period.GetGroup().Uid });
+                        returnUrl = Url.Action("periods", "group", new {id = period.GetGroup().Uid});
                         activities.AddRange(period.GetGroup(msgs).GetActivities(null, false, false, null, null));
                     }
                     else
                     {
                         activity = period.GetActivities(msgs).FirstOrDefault();
-                        returnUrl = Url.Action("registrants", "activity", new { id = activity.Uid });
+                        returnUrl = Url.Action("registrants", "activity", new {id = activity.Uid});
                         activities.Add(activity);
                     }
 
@@ -618,7 +639,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     InviteContactList(list, invitemessage, period, activity, msgs);
 
-                    ViewBag.ReturnUrl = Url.Action("publishdetail", "activity", new { id });
+                    ViewBag.ReturnUrl = Url.Action("publishdetail", "activity", new {id});
 
                     break;
                 case "period":
@@ -629,19 +650,19 @@ namespace AfterSchool.Areas.Org.Controllers
                     {
                         group = period.GetGroup();
                         InviteContactList(list, invitemessage, period, group, msgs);
-                        ViewBag.ReturnUrl = Url.Action("periods", "group", new { id = group.Uid });
+                        ViewBag.ReturnUrl = Url.Action("periods", "group", new {id = group.Uid});
                     }
                     else
                     {
                         activity = period.GetActivities().FirstOrDefault();
                         msgs.AddRange(InviteContactList(list, invitemessage, period, activity));
-                        ViewBag.ReturnUrl = Url.Action("registrants", "activity", new { id = activity.Uid });
+                        ViewBag.ReturnUrl = Url.Action("registrants", "activity", new {id = activity.Uid});
                     }
 
                     break;
 
                 case "groupfromlists":
-                    
+
                     group = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
                     period = group.GetCurrentOrNextRegistrationPeriod(msgs);
 
@@ -742,6 +763,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 );
             }
         }
+
         private SystemMessages InviteContactList(string list, string invitemessage, RegistrationPeriod period, Activity activity)
         {
             var msgs = new SystemMessages();
@@ -779,12 +801,10 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         msgs.Add("Your invites will be sent shortly", MessageType.Success);
                     },
-                    onFailure: (SystemMessages fmsgs) =>
-                    {
-                        msgs.AddRange(fmsgs);
-                    }
+                    onFailure: (SystemMessages fmsgs) => { msgs.AddRange(fmsgs); }
                 );
             }
+
             return msgs;
         }
     }

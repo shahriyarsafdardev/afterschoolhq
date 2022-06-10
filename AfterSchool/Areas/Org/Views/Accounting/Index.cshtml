@@ -1,93 +1,93 @@
 ﻿@model List<Transaction>
 @{
-    var msgs = (SystemMessages)ViewBag.Messages;
+    var msgs = (SystemMessages) ViewBag.Messages;
     var account = SessionVariables.CurrentAccount;
     var useStripeConnectedAccount = account.HasFeature(FeatureType.UseStripeConnectedAccount);
-    var transactionCount = ((PagingModel)ViewBag.PagingModel).TotalCount;
-    var totalTransactionAmount = (decimal)ViewBag.TotalAmountPaid;
-    var totalAmountRefunded = (decimal)ViewBag.TotalAmountRefunded;
-    var totalAmountRefundedAHQ = (decimal)ViewBag.TotalAmountRefundedAHQ;
+    var transactionCount = ((PagingModel) ViewBag.PagingModel).TotalCount;
+    var totalTransactionAmount = (decimal) ViewBag.TotalAmountPaid;
+    var totalAmountRefunded = (decimal) ViewBag.TotalAmountRefunded;
+    var totalAmountRefundedAHQ = (decimal) ViewBag.TotalAmountRefundedAHQ;
     var avgTransactionAmount = transactionCount == 0 ? 0 : totalTransactionAmount / transactionCount;
-    var totalFees = (decimal)ViewBag.TotalFeesPaid;
-    var totalPaidOut = (decimal)ViewBag.TotalPaidOut;
-    var totalAvailableForPayout = (decimal)ViewBag.TotalAvailableForPayout;
+    var totalFees = (decimal) ViewBag.TotalFeesPaid;
+    var totalPaidOut = (decimal) ViewBag.TotalPaidOut;
+    var totalAvailableForPayout = (decimal) ViewBag.TotalAvailableForPayout;
 
     var isSearchResult = Request["sdate"].IsNotBlank() || Request["edate"].IsNotBlank() || Request["q"].IsNotBlank();
     var payoutMsg = account.HasStripeConnectedAccount ? "Pending Payout" : "Available for Payout";
-    var isSchoolAccount = account.AccountTypeId.In(AccountService.LocationProviderAccountTypes);
+    var isSchoolAccount = account.AccountTypeId.In(FormConstants.LocationProviderAccountTypes);
 }
 
-@{Html.RenderPartial("OrgAccountHeader");}
+@{ Html.RenderPartial("OrgAccountHeader"); }
 
 <div class="main-content">
 
-    @{ Html.RenderPartial("_AccountingHeader"); }
+@{ Html.RenderPartial("_AccountingHeader"); }
 
-    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    <div class="panel panel-default">
+<div class="panel panel-default">
 
-        <div class="panel-heading">
-            <i class="s7-note2"></i> Transactions
+<div class="panel-heading">
+    <i class="s7-note2"></i> Transactions
+</div>
+
+<div class="panel-body">
+
+<div class="row">
+
+    <div class="col-md-2">
+        @{
+            Html.RenderPartial(
+                "~/Views/Shared/Components/_Date.cshtml",
+                new FormInputViewModel
+                {
+                    Id = "startdate",
+                    Name = "startdate",
+                    Value = Request["sdate"],
+                    Placeholder = "From Date",
+                }
+                );
+        }
+    </div>
+    <div class="col-md-2">
+        @{
+            Html.RenderPartial(
+                "~/Views/Shared/Components/_Date.cshtml",
+                new FormInputViewModel
+                {
+                    Id = "enddate",
+                    Name = "enddate",
+                    Value = Request["edate"],
+                    Placeholder = "To Date",
+                }
+                );
+        }
+    </div>
+    <div class="col-md-2">
+        <div class="form-group">
+            <input type="text" class="form-control" id="search" value="@Request["q"]"/>
+
+            <select id="participationObjects" class="form-control hide">
+                <option data-type="" value="">Activities</option>
+                @foreach (var po in (List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)>) ViewBag.ParticipationObjects)
+                {
+                    var selected = "";
+                    if (po.ID.ToString() == Request["poid"] && ((int) po.ParticipationObjectTypeId).ToString() == Request["poTypeId"])
+                    {
+                        selected = "selected=\"selected\"";
+                    }
+                    <option value="@po.ID" data-type="@((int) po.ParticipationObjectTypeId)" @selected>@po.Name</option>
+                }
+            </select>
+
         </div>
+    </div>
+    <div class="col-md-4">
+        <button type="button" class="btn btn-primary btn-lg" onclick="search()">Search</button>
+        <button type="button" class="btn btn-primary btn-lg" onclick="DownloadToCSV()">Export To CSV</button>
+    </div>
 
-        <div class="panel-body">
-
-            <div class="row">
-
-                <div class="col-md-2">
-                    @{
-                        Html.RenderPartial(
-                            "~/Views/Shared/Components/_Date.cshtml",
-                            new FormInputViewModel()
-                            {
-                                Id = "startdate",
-                                Name = "startdate",
-                                Value = Request["sdate"],
-                                Placeholder = "From Date"
-                            }
-                        );
-                    }
-                </div>
-                <div class="col-md-2">
-                    @{
-                        Html.RenderPartial(
-                            "~/Views/Shared/Components/_Date.cshtml",
-                            new FormInputViewModel()
-                            {
-                                Id = "enddate",
-                                Name = "enddate",
-                                Value = Request["edate"],
-                                Placeholder = "To Date"
-                            }
-                        );
-                    }
-                </div>
-                <div class="col-md-2">
-                    <div class="form-group">
-                        <input type="text" class="form-control" id="search" value="@Request["q"]" />
-
-                        <select id="participationObjects" class="form-control hide">
-                            <option data-type="" value="">Activities</option>
-                            @foreach (var po in (List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)>)ViewBag.ParticipationObjects)
-                            {
-                                var selected = "";
-                                if (po.ID.ToString() == Request["poid"] && ((int)po.ParticipationObjectTypeId).ToString() == Request["poTypeId"])
-                                {
-                                    selected = "selected=\"selected\"";
-                                }
-                                <option value="@po.ID" data-type="@((int)po.ParticipationObjectTypeId)" @selected>@po.Name</option>
-                            }
-                        </select>
-
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <button type="button" class="btn btn-primary btn-lg" onclick="search()">Search</button>
-                    <button type="button" class="btn btn-primary btn-lg" onclick="DownloadToCSV()">Export To CSV</button>
-                </div>
-
-                <script>
+    <script>
                     function search() {
                         window.location.href = `@Url.Action("index", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}&q=${encodeURIComponent($('#search').val())}&poId=${encodeURIComponent($('#participationObjects').val())}&poTypeId=${encodeURIComponent($('#participationObjects option:selected').data('type'))}`;
                     }
@@ -96,307 +96,321 @@
                     }
 
                 </script>
+</div>
+
+<div class="row">
+    <div class="col-md-2">
+        <div class="widget widget-tile widget-bordered">
+            <div class="data-info">
+                <div data-toggle="counter" data-end="@transactionCount" id="transactionCount" data-decimals="0" data-suffix="" class="value">@transactionCount</div>
+                <div class="desc">Total Transactions</div>
             </div>
-
-            <div class="row">
-                <div class="col-md-2">
-                    <div class="widget widget-tile widget-bordered">
-                        <div class="data-info">
-                            <div data-toggle="counter" data-end="@transactionCount" id="transactionCount" data-decimals="0" data-suffix="" class="value">@transactionCount</div>
-                            <div class="desc">Total Transactions</div>
-                        </div>
-                        <div class="icon"><span class=""></span></div>
-                    </div>
-                </div>
-
-                <div class="col-md-2">
-                    <div class="widget widget-tile widget-bordered">
-                        <div class="data-info">
-                            <div data-toggle="counter" data-end="@avgTransactionAmount" id="avgTransactionAmount" data-decimals="2" data-suffix="" class="value">@avgTransactionAmount.ToCurrency()</div>
-                            <div class="desc">Avg Transaction Amt</div>
-                        </div>
-                        <div class="icon"><span class=""></span></div>
-                    </div>
-                </div>
-
-                <div class="col-md-2">
-                    <div class="widget widget-tile widget-bordered">
-                        <div class="data-info">
-                            <div data-toggle="counter" data-end="@totalTransactionAmount" id="totalTransactionAmount" data-decimals="2" data-suffix="" class="value">@totalTransactionAmount.ToCurrency()</div>
-                            <div class="desc">Total Sold &amp; Credits</div>
-                        </div>
-                        <div class="icon"><span class=""></span></div>
-                    </div>
-                </div>
-
-                <div class="col-md-2">
-                    <div class="widget widget-tile widget-bordered">
-                        <div class="data-info">
-                            <div data-toggle="counter" data-end="@totalAmountRefunded" id="totalAmountRefunded" data-decimals="2" data-suffix="" class="value">@totalAmountRefunded.ToCurrency()</div>
-                            <div class="desc">Total Refunds &amp; Debits</div>
-                        </div>
-                        <div class="icon"><span class=""></span></div>
-                    </div>
-                </div>
-
-                @if (!isSearchResult)
-                {
-                    <div class="col-md-2">
-                        <div class="widget widget-tile widget-bordered">
-                            <div class="data-info">
-                                <div data-toggle="counter" data-end="@totalPaidOut" id="totalPayout" data-decimals="2" data-suffix="" class="value">@totalPaidOut.ToCurrency()</div>
-                                <div class="desc">Total Paid Out</div>
-                            </div>
-                            <div class="icon"><span class=""></span></div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-2">
-                        <div class="widget widget-tile widget-bordered">
-                            <div class="data-info">
-                                <div data-toggle="counter" data-end="@totalAvailableForPayout" id="totalPayout" data-decimals="2" data-suffix="" class="value">@totalAvailableForPayout.ToCurrency()</div>
-                                <div class="desc">@payoutMsg</div>
-                            </div>
-                            <div class="icon"><span class=""></span></div>
-                        </div>
-                    </div>
-                }
+            <div class="icon">
+                <span class=""></span>
             </div>
-            
-            <div class="row">
-                <div class="col-md-12">
-                    @if (account.AccountTypeId.In(AccountService.LocationProviderAccountTypes))
-                    {
-                        <button class="btn btn-primary md-trigger" id="request-payout" disabled="disabled" onclick="return requestPayout()" data-modal="modal-payout-request">
-                            Request Payouts
-                        </button>
-                    }
-                    @if (account.HasStripeConnectedAccount)
-                    {
-                        <button class="btn btn-default" id="stripe-login-link" onclick="getStripeLoginLink()">
-                            Login to Stripe Dashboard
-                        </button>
-                    }
+        </div>
+    </div>
 
+    <div class="col-md-2">
+        <div class="widget widget-tile widget-bordered">
+            <div class="data-info">
+                <div data-toggle="counter" data-end="@avgTransactionAmount" id="avgTransactionAmount" data-decimals="2" data-suffix="" class="value">@avgTransactionAmount.ToCurrency()</div>
+                <div class="desc">Avg Transaction Amt</div>
+            </div>
+            <div class="icon">
+                <span class=""></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-2">
+        <div class="widget widget-tile widget-bordered">
+            <div class="data-info">
+                <div data-toggle="counter" data-end="@totalTransactionAmount" id="totalTransactionAmount" data-decimals="2" data-suffix="" class="value">@totalTransactionAmount.ToCurrency()</div>
+                <div class="desc">Total Sold &amp; Credits</div>
+            </div>
+            <div class="icon">
+                <span class=""></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-2">
+        <div class="widget widget-tile widget-bordered">
+            <div class="data-info">
+                <div data-toggle="counter" data-end="@totalAmountRefunded" id="totalAmountRefunded" data-decimals="2" data-suffix="" class="value">@totalAmountRefunded.ToCurrency()</div>
+                <div class="desc">Total Refunds &amp; Debits</div>
+            </div>
+            <div class="icon">
+                <span class=""></span>
+            </div>
+        </div>
+    </div>
+
+    @if (!isSearchResult)
+    {
+        <div class="col-md-2">
+            <div class="widget widget-tile widget-bordered">
+                <div class="data-info">
+                    <div data-toggle="counter" data-end="@totalPaidOut" id="totalPayout" data-decimals="2" data-suffix="" class="value">@totalPaidOut.ToCurrency()</div>
+                    <div class="desc">Total Paid Out</div>
+                </div>
+                <div class="icon">
+                    <span class=""></span>
                 </div>
             </div>
-            
-            <div class="table-responsive">
-                <table class="table table-hover table-condensed" id="transaction-table">
-                    <thead>
-                        <tr>
-                            <th>
-                                <span class="am-checkbox">
-                                    <input type="checkbox" id="selectAllTransaction" onchange="selectAllTransaction(this)" />
-                                    <label for="selectAllTransaction"></label>
-                                </span>
-                            </th>
-                            <th>ID</th>
-                            <th>Created On</th>
-                            <th>Payer</th>
-                            <th>For</th>
-                            <th>Item Description</th>
-                            <th class="text-center">Amount Paid</th>
-                            <th class="text-center">Fees</th>
-                            <th class="text-center">Your Amount</th>
-                            <th class="text-center">Status</th>
-                            <th class="text-center">Type</th>
-                            <th class="text-center">Refunds</th>
-                            @if (SessionVariables.AccountUserType == UserType.TechSupport)
-                            {
-                                <th class="text-center">Xfers</th>
-                            }
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (Model.Count > 0)
+        </div>
+
+        <div class="col-md-2">
+            <div class="widget widget-tile widget-bordered">
+                <div class="data-info">
+                    <div data-toggle="counter" data-end="@totalAvailableForPayout" id="totalPayout" data-decimals="2" data-suffix="" class="value">@totalAvailableForPayout.ToCurrency()</div>
+                    <div class="desc">@payoutMsg</div>
+                </div>
+                <div class="icon">
+                    <span class=""></span>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        @if (account.AccountTypeId.In(FormConstants.LocationProviderAccountTypes))
+        {
+            <button class="btn btn-primary md-trigger" id="request-payout" disabled="disabled" onclick="return requestPayout()" data-modal="modal-payout-request">
+                Request Payouts
+            </button>
+        }
+        @if (account.HasStripeConnectedAccount)
+        {
+            <button class="btn btn-default" id="stripe-login-link" onclick="getStripeLoginLink()">
+                Login to Stripe Dashboard
+            </button>
+        }
+
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover table-condensed" id="transaction-table">
+        <thead>
+        <tr>
+            <th>
+                <span class="am-checkbox">
+                    <input type="checkbox" id="selectAllTransaction" onchange="selectAllTransaction(this)"/>
+                    <label for="selectAllTransaction"></label>
+                </span>
+            </th>
+            <th>ID</th>
+            <th>Created On</th>
+            <th>Payer</th>
+            <th>For</th>
+            <th>Item Description</th>
+            <th class="text-center">Amount Paid</th>
+            <th class="text-center">Fees</th>
+            <th class="text-center">Your Amount</th>
+            <th class="text-center">Status</th>
+            <th class="text-center">Type</th>
+            <th class="text-center">Refunds</th>
+            @if (SessionVariables.AccountUserType == UserType.TechSupport)
+            {
+                <th class="text-center">Xfers</th>
+            }
+        </tr>
+        </thead>
+        <tbody>
+        @if (Model.Count > 0)
+        {
+            var useStripeConnect = account.HasFeature(FeatureType.UseStripeConnectedAccount);
+
+            foreach (var transaction in Model)
+            {
+                var registrant = transaction.GetPurchase()?.GetRegistrant();
+                var currentStatus = transaction.GetStatus();
+                var disableChk = !transaction.CanRequestPayout() ? "disabled" : "";
+                var enableTransfer = !transaction.UsedStripeConnect && !transaction.PayoutId.HasValue && useStripeConnect && account.StripePayoutsEnabled && !transaction.HasRefundsAHQ() && transaction.TransactionTypeId == TransactionType.Charge;
+
+                <tr id="@transaction.Uid">
+                    <td>
+                        <span class="am-checkbox">
+                            <input type="checkbox"
+                                   id="selectTransaction-@transaction.ID"
+                                   @disableChk
+                                   class="chkTransaction"
+                                   onchange="selectTransaction(@transaction.ID,this)"/>
+                            <label for="selectTransaction-@transaction.ID"></label>
+                        </span>
+                    </td>
+                    <td>
+                        @transaction.GetTransactionNumber()
+                    </td>
+                    <td>
+                        @transaction.CreateDate.ToShortDateTimeString()
+                    </td>
+                    <td>
+                        <span>@(transaction.GetPayerAccount()?.Name.IfEmpty("N/A"))</span>
+                    </td>
+                    <td>
+                        @if (transaction.IsCharge() && registrant.IsNotEmpty())
                         {
-                            var useStripeConnect = account.HasFeature(FeatureType.UseStripeConnectedAccount);
-
-                            foreach (var transaction in Model)
-                            {
-                                var registrant = transaction.GetPurchase()?.GetRegistrant();
-                                var currentStatus = transaction.GetStatus();
-                                var disableChk = !transaction.CanRequestPayout() ? "disabled" : "";
-                                var enableTransfer = !transaction.UsedStripeConnect && !transaction.PayoutId.HasValue && useStripeConnect && account.StripePayoutsEnabled && !transaction.HasRefundsAHQ() && transaction.TransactionTypeId == TransactionType.Charge;
-
-                                <tr id="@transaction.Uid">
-                                    <td>
-                                        <span class="am-checkbox">
-                                            <input type="checkbox"
-                                                   id="selectTransaction-@transaction.ID"
-                                                   @disableChk
-                                                   class="chkTransaction"
-                                                   onchange="selectTransaction(@transaction.ID,this)" />
-                                            <label for="selectTransaction-@transaction.ID"></label>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        @transaction.GetTransactionNumber()
-                                    </td>
-                                    <td>
-                                        @transaction.CreateDate.ToShortDateTimeString()
-                                    </td>
-                                    <td>
-                                        <span>@(transaction.GetPayerAccount()?.Name.IfEmpty("N/A"))</span> 
-                                    </td>
-                                    <td>
-                                        @if (transaction.IsCharge() && registrant.IsNotEmpty())
-                                        {
-                                            @registrant.DisplayName
-                                        }
-                                        else
-                                        {
-                                            @transaction.GetBillerAccount().Name
-                                        }
-                                    </td>
-                                    <td>
-                                        @transaction.Description
-                                    </td>
-                                    <td class="text-center">
-                                        @transaction.GetPayerAmount().ToCurrency()
-
-                                        @if (transaction.IsRefund() || transaction.IsDebit())
-                                        {
-                                            <i class="s7-back-2"></i>
-                                        }
-
-                                        @if (transaction.CouponId.IsNotEmpty() && transaction.CouponValue.IsNotEmpty())
-                                        {
-                                            <i class="s7-info icon-small" data-toggle="popover" data-trigger="hover" data-html="true" data-placement="top"
-                                               data-content="Coupon: @transaction.CouponValue.ToCurrency()">
-                                            </i>
-                                        }
-                                    </td>
-                                    <td class="text-center">
-                                        @if (transaction.IsCharge())
-                                        {
-                                            @transaction.GetFees().ToCurrency()
-
-                                            <i class="s7-info icon-small" data-toggle="popover" data-trigger="hover" data-html="true" data-content="Convenience Fees: @transaction.ConvenienceFeeCharged.ToCurrency() <br/> Credit Card Fees: @transaction.PaymentTypeFeeCharged.ToCurrency()" data-placement="top"></i>
-                                        }
-                                        else
-                                        {
-                                            @:-
-                                        }
-                                    </td>
-                                    <td class="text-center">
-                                        @if (transaction.IsCharge() || transaction.IsCredit())
-                                        {
-                                            @transaction.GetBillerPayout().ToCurrency()
-                                        }
-                                        else
-                                        {
-                                            @:-
-                                        }
-                                    </td>
-                                    <td class="text-center">
-                                        @currentStatus
-                                    </td>
-                                    <td class="text-center">
-                                        @if (transaction.PaymentTypeId == PaymentType.NotSet)
-                                        {
-                                            @:-
-                                        }
-                                        else
-                                        {
-                                            @transaction.PaymentTypeId.ToString().SplitByUpperCase()
-                                        }
-                                    </td>
-                                    <td class="text-center">
-                                        @if (transaction.IsCharge() && !transaction.IsTotallyRefunded(false))
-                                        {
-                                            var hasUnfulfilledRequest = transaction.HasUnfulfilledRefundRequests();
-                                            var disableRequest = hasUnfulfilledRequest || !transaction.CanRefundViaStripe();
-
-                                            <button onclick="requestRefund('@transaction.Uid', @transaction.GetRefundableAmount(isPartialRefundWithConvenienceFee: true).ToString("#.00"))"
-                                                    class="md-trigger btn btn-sm btn-default"
-                                                    data-modal="modal-request-refund"
-                                                    @(disableRequest ? "disabled=\"disabled\"" : "")>
-
-                                                @if (hasUnfulfilledRequest)
-                                                {
-                                                    if (transaction.HasManuallyApprovedRefundRequest())
-                                                    {
-                                                        @:Approved
-                                                    }
-                                                    else
-                                                    {
-                                                        @:Requested
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    @:Request
-                                                }
-
-                                            </button>
-
-                                            <button onclick="manualRefund('@transaction.Uid')"
-                                                    class="md-trigger btn btn-sm btn-default"
-                                                    data-modal="modal-manual-refund">
-                                                Manual
-                                            </button>
-                                        }
-                                    </td>
-
-                                    @if (SessionVariables.AccountUserType == UserType.TechSupport)
-                                    {
-                                        <td class="text-center">
-                                            @if (enableTransfer)
-                                            {
-                                                Html.RenderPartial("~/Views/Shared/Modals/_TransferModal-TransferButton.cshtml", transaction);
-                                            }
-                                        </td>
-                                    }
-                                </tr>
-                            }
+                            @registrant.DisplayName
                         }
                         else
                         {
-                            <tr>
-                                <td colspan="10">There are no transactions</td>
-                            </tr>
+                            @transaction.GetBillerAccount().Name
                         }
-                    </tbody>
-                </table>
-            </div>
+                    </td>
+                    <td>
+                        @transaction.Description
+                    </td>
+                    <td class="text-center">
+                        @transaction.GetPayerAmount().ToCurrency()
 
-            @{
-                Html.RenderPartial(
-                    "~/Views/Shared/_Paging.cshtml",
-                    (PagingModel)ViewBag.PagingModel,
-                    new ViewDataDictionary()
+                        @if (transaction.IsRefund() || transaction.IsDebit())
+                        {
+                            <i class="s7-back-2"></i>
+                        }
+
+                        @if (transaction.CouponId.IsNotEmpty() && transaction.CouponValue.IsNotEmpty())
+                        {
+                            <i class="s7-info icon-small" data-toggle="popover" data-trigger="hover" data-html="true" data-placement="top"
+                               data-content="Coupon: @transaction.CouponValue.ToCurrency()">
+                            </i>
+                        }
+                    </td>
+                    <td class="text-center">
+                        @if (transaction.IsCharge())
+                        {
+                            @transaction.GetFees().ToCurrency()
+
+                            <i class="s7-info icon-small" data-toggle="popover" data-trigger="hover" data-html="true" data-content="Convenience Fees: @transaction.ConvenienceFeeCharged.ToCurrency() <br/> Credit Card Fees: @transaction.PaymentTypeFeeCharged.ToCurrency()" data-placement="top"></i>
+                        }
+                        else
+                        {
+                            @:-
+                        }
+                    </td>
+                    <td class="text-center">
+                        @if (transaction.IsCharge() || transaction.IsCredit())
+                        {
+                            @transaction.GetBillerPayout().ToCurrency()
+                        }
+                        else
+                        {
+                            @:-
+                        }
+                    </td>
+                    <td class="text-center">
+                        @currentStatus
+                    </td>
+                    <td class="text-center">
+                        @if (transaction.PaymentTypeId == PaymentType.NotSet)
+                        {
+                            @:-
+                        }
+                        else
+                        {
+                            @transaction.PaymentTypeId.ToString().SplitByUpperCase()
+                        }
+                    </td>
+                    <td class="text-center">
+                        @if (transaction.IsCharge() && !transaction.IsTotallyRefunded(false))
+                        {
+                            var hasUnfulfilledRequest = transaction.HasUnfulfilledRefundRequests();
+                            var disableRequest = hasUnfulfilledRequest || !transaction.CanRefundViaStripe();
+
+                            <button onclick="requestRefund('@transaction.Uid', @transaction.GetRefundableAmount(isPartialRefundWithConvenienceFee: true).ToString("#.00"))"
+                                    class="md-trigger btn btn-sm btn-default"
+                                    data-modal="modal-request-refund"
+                                    @(disableRequest ? "disabled=\"disabled\"" : "")>
+
+                                @if (hasUnfulfilledRequest)
+                                {
+                                    if (transaction.HasManuallyApprovedRefundRequest())
+                                    {
+                                        @:Approved
+                                    }
+                                    else
+                                    {
+                                        @:Requested
+                                    }
+                                }
+                                else
+                                {
+                                    @:Request
+                                }
+
+                            </button>
+
+                            <button onclick="manualRefund('@transaction.Uid')"
+                                    class="md-trigger btn btn-sm btn-default"
+                                    data-modal="modal-manual-refund">
+                                Manual
+                            </button>
+                        }
+                    </td>
+
+                    @if (SessionVariables.AccountUserType == UserType.TechSupport)
                     {
-                    { "controller", "accounting" },
-                    { "action", "index" },
-                    { "querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}&poId={Request["poId"]}&poTypeId={Request["poTypeId"]}" }
-}
-                );
+                        <td class="text-center">
+                            @if (enableTransfer)
+                            {
+                                Html.RenderPartial("~/Views/Shared/Modals/_TransferModal-TransferButton.cshtml", transaction);
+                            }
+                        </td>
+                    }
+                </tr>
             }
-        </div>
-    </div>
+        }
+        else
+        {
+            <tr>
+                <td colspan="10">There are no transactions</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+@{
+    Html.RenderPartial(
+        "~/Views/Shared/_Paging.cshtml",
+        (PagingModel) ViewBag.PagingModel,
+        new ViewDataDictionary
+        {
+            {"controller", "accounting"},
+            {"action", "index"},
+            {"querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}&poId={Request["poId"]}&poTypeId={Request["poTypeId"]}"},
+        }
+        );
+}
+</div>
+</div>
 </div>
 
 <div id="modal-request-refund" class="md-modal colored-header custom-width md-effect-9">
 
     <div class="md-content">
         <div class="modal-header">
-            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">
+                <i class="icon s7-close"></i>
+            </button>
             <h3 class="modal-title">Request Refund</h3>
         </div>
         <div class="modal-body form">
             <div class="form-group">
-                <input type="number" id="refund-request-amount" class="form-control" placeholder="Refund Amount" required="required" max="" min="1" step=".01" />
+                <input type="number" id="refund-request-amount" class="form-control" placeholder="Refund Amount" required="required" max="" min="1" step=".01"/>
                 <p class="text-muted text-small" id="refund-request-notes">Please enter an amount between $1 and $<span class="refund-request-max-amount"></span></p>
             </div>
             <div class="form-group">
                 <label for="request-reason">Reason</label>
-                <input type="text" id="refund-reason" maxlength="100" class="form-control" oninput="enableRequestRefundButton()" />
+                <input type="text" id="refund-reason" maxlength="100" class="form-control" oninput="enableRequestRefundButton()"/>
                 <p class="text-muted text-small" id="refund-request-reason-notes">Please enter a reason</p>
             </div>
-            <input type="hidden" id="refund-request-transaction-uid" value="" />
-            <input type="hidden" id="refund-request-max-amount" value="" />
+            <input type="hidden" id="refund-request-transaction-uid" value=""/>
+            <input type="hidden" id="refund-request-max-amount" value=""/>
         </div>
         <div class="modal-footer">
             <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
@@ -409,15 +423,17 @@
 
     <div class="md-content">
         <div class="modal-header">
-            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">
+                <i class="icon s7-close"></i>
+            </button>
             <h3 class="modal-title">Enter Manual Refund Amount</h3>
         </div>
         <div class="modal-body form">
             <p>NOTE: This is for you to track refunds that you manually handled through your own means such as cash, check, PayPal, Venmo, CashApp, etc.</p>
             <div class="form-group">
-                <input type="number" id="manual-refund-amount" class="form-control" placeholder="Refund Amount" required="required" max="" min="1" step=".01" />
+                <input type="number" id="manual-refund-amount" class="form-control" placeholder="Refund Amount" required="required" max="" min="1" step=".01"/>
             </div>
-            <input type="hidden" id="manual-refund-transaction-uid" value="" />
+            <input type="hidden" id="manual-refund-transaction-uid" value=""/>
         </div>
         <div class="modal-footer">
             <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
@@ -426,20 +442,19 @@
     </div>
 </div>
 
-<form action="@Url.Action("RequestPayout","Accounting")" id="requestPayoutForm" method="post">
+<form action="@Url.Action("RequestPayout", "Accounting")" id="requestPayoutForm" method="post">
     @Html.Hidden("TransactionIds")
 </form>
 
 @{ Html.RenderPartial(
-        "~/Views/Shared/Modals/_TransferModal.cshtml",
-        null,
-        new ViewDataDictionary
-        {
-           { "controller", "accounting" },
-           { "action", "createtransfer" },
-           { "area", "org" }
-        });
-}
+       "~/Views/Shared/Modals/_TransferModal.cshtml",
+       null,
+       new ViewDataDictionary
+       {
+           {"controller", "accounting"},
+           {"action", "createtransfer"},
+           {"area", "org"},
+       }); }
 
 <script>
 

@@ -4,24 +4,49 @@ namespace AfterSchoolLibrary.Services
 {
     public static class FormConstants
     {
-        public static List<QuestionDataType> QuestionsToNotIncludeInParentPanel() => new List<QuestionDataType>
+        public static IReadOnlyList<UserType> AdminUserTypes =>
+            new[] {UserType.Administrator, UserType.Owner, UserType.SuperAdmin, UserType.Treasurer, UserType.TechSupport};
+
+        public static AccountType[] ProviderAccountTypes => new[]
+            {AccountType.Teacher, AccountType.ActivityProvider, AccountType.Business, AccountType.CommunityCenter, AccountType.School, AccountType.Church};
+
+        public static List<AccountType> OrganizationAccountTypes => new List<AccountType>(ProviderAccountTypes) {AccountType.Directory};
+
+        public static List<AccountType> OrganizationAccountTypesAndNotSet => new List<AccountType>(OrganizationAccountTypes) {AccountType.NotSet};
+
+        public static AccountType[] IndividualProviderAccountTypes => new[] {AccountType.Teacher, AccountType.ActivityProvider, AccountType.Business};
+
+        public static AccountType[] LocationProviderAccountTypes =>
+            new[] {AccountType.CommunityCenter, AccountType.School, AccountType.Church, AccountType.Directory};
+
+        public static AccountType[] CustomerAccountTypes => new[]
         {
-            QuestionDataType.RegistrantOrganization,
-            QuestionDataType.RegistrantGrade,
-            QuestionDataType.RegistrantGender,
-            QuestionDataType.RegistrantDateOfBirth,
-            QuestionDataType.RegistrantRaceUsFed,
-            QuestionDataType.RegistrantEthnicityUsFed,
-            QuestionDataType.RegistrantTShirtSize,
-            QuestionDataType.RegistrantWorkPhone,
-            QuestionDataType.RegistrantHomePhone,
-            QuestionDataType.RegistrantParentRelationship,
-            QuestionDataType.RegistrantEmployer,
-            QuestionDataType.StudentId,
+            AccountType.Teacher, AccountType.ActivityProvider, AccountType.Business, AccountType.CommunityCenter, AccountType.School, AccountType.Church,
+            AccountType.Registrant, AccountType.SchoolDistrict,
         };
 
-        public static List<QuestionDataType> QuestionsToNotIncludeInStudentRegistrationPanel() =>
-            new List<QuestionDataType>
+        public static List<QuestionDataType> QuestionsToNotIncludeInParentPanel()
+        {
+            return new List<QuestionDataType>
+            {
+                QuestionDataType.RegistrantOrganization,
+                QuestionDataType.RegistrantGrade,
+                QuestionDataType.RegistrantGender,
+                QuestionDataType.RegistrantDateOfBirth,
+                QuestionDataType.RegistrantRaceUsFed,
+                QuestionDataType.RegistrantEthnicityUsFed,
+                QuestionDataType.RegistrantTShirtSize,
+                QuestionDataType.RegistrantWorkPhone,
+                QuestionDataType.RegistrantHomePhone,
+                QuestionDataType.RegistrantParentRelationship,
+                QuestionDataType.RegistrantEmployer,
+                QuestionDataType.StudentId,
+            };
+        }
+
+        public static List<QuestionDataType> QuestionsToNotIncludeInStudentRegistrationPanel()
+        {
+            return new List<QuestionDataType>
             {
                 QuestionDataType.RegistrantHomePhone,
                 QuestionDataType.RegistrantWorkPhone,
@@ -32,9 +57,11 @@ namespace AfterSchoolLibrary.Services
                 QuestionDataType.RegistrantParentRelationship,
                 QuestionDataType.RegistrantEmployer,
             };
+        }
 
-        public static List<QuestionDataType> QuestionsToNotIncludeInStudentRegistrationParentPanel() =>
-            new List<QuestionDataType>
+        public static List<QuestionDataType> QuestionsToNotIncludeInStudentRegistrationParentPanel()
+        {
+            return new List<QuestionDataType>
             {
                 QuestionDataType.RegistrantMiddleName,
                 QuestionDataType.RegistrantHomePhone,
@@ -51,9 +78,11 @@ namespace AfterSchoolLibrary.Services
                 QuestionDataType.RegistrantEmployer,
                 QuestionDataType.StudentId,
             };
+        }
 
-        public static List<QuestionDataType> QuestionsToNotIncludeInAdditionalParentPanel() =>
-            new List<QuestionDataType>
+        public static List<QuestionDataType> QuestionsToNotIncludeInAdditionalParentPanel()
+        {
+            return new List<QuestionDataType>
             {
                 QuestionDataType.RegistrantOrganization,
                 QuestionDataType.RegistrantGrade,
@@ -64,6 +93,7 @@ namespace AfterSchoolLibrary.Services
                 QuestionDataType.RegistrantTShirtSize,
                 QuestionDataType.StudentId,
             };
+        }
 
         public static List<QuestionDataType> QuestionsToNotIncludeInStudentPanel(bool isGradeIncluded)
         {

@@ -3,14 +3,17 @@ using System.Linq;
 using System.Text.Json;
 using System.Web;
 using System.Web.Mvc;
-using BasicLibrary;
-using AfterSchoolLibrary.Services;
+using System.Web.Routing;
 using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Services;
+using BasicLibrary;
 
 namespace AfterSchool.Models
 {
     public class BaseController : Controller
     {
+        private const string UnsupportedBrowserPage = "/unsupportedbrowser.html";
+
         protected bool IsRequestFromApp()
         {
             if (Request.Headers["Origin"].IsNotEmpty() || Request.Headers["Referer"].IsNotEmpty())
@@ -29,15 +32,13 @@ namespace AfterSchool.Models
                     origin.StartsWith("http://localhost:54849") ||
                     Account.LoadAllSubdomains().Contains(origin)
                    )
-                {
                     return true;
-                }
             }
 
             return false;
         }
 
-        protected override void Initialize(System.Web.Routing.RequestContext requestContext)
+        protected override void Initialize(RequestContext requestContext)
         {
             base.Initialize(requestContext);
 
@@ -90,7 +91,7 @@ namespace AfterSchool.Models
         {
             if (msgs.HasErrors())
             {
-                List<object> list = new List<object>();
+                var list = new List<object>();
 
                 foreach (SystemMessage msg in msgs)
                 {
@@ -101,7 +102,7 @@ namespace AfterSchool.Models
                             list.Add(message);
                             break;
                         case ResponseType.XML:
-                            list.Add(new {message = message});
+                            list.Add(new {message});
                             break;
                     }
                 }
@@ -125,11 +126,8 @@ namespace AfterSchool.Models
                 TempData["msgs"] = msgs;
 
             if (SessionVariables.CurrentAccount.IsEmpty())
-            {
                 return RedirectToAction("select", "login");
-            }
-            else if (SessionVariables.CurrentUser.HasAccessTo(SessionVariables.CurrentAccount))
-            {
+            if (SessionVariables.CurrentUser.HasAccessTo(SessionVariables.CurrentAccount))
                 switch (SessionVariables.CurrentAccount.AccountTypeId)
                 {
                     case AccountType.AfterSchool:
@@ -141,15 +139,13 @@ namespace AfterSchool.Models
                     case AccountType.Registrant:
                         if (SessionVariables.Cart.IsNotEmpty())
                             return RedirectToAction("select", "account", new {area = ""});
-                        else if (registrationAccount.IsNotEmpty())
+                        if (registrationAccount.IsNotEmpty())
                             return Redirect(registrationAccount.HomePageUrl);
-                        else
-                            return RedirectToAction("index", "home", new {area = "user"});
+                        return RedirectToAction("index", "home", new {area = "user"});
 
                     default:
                         return RedirectToAction("index", "home", new {area = "org"});
                 }
-            }
 
             return RedirectToAction("index", "login", new {area = ""});
         }
@@ -305,11 +301,14 @@ namespace AfterSchool.Models
                 msgs.AddRange((SystemMessages) TempData["msgs"]);
         }
 
-        internal void SetTempMessage(SystemMessages msgs) => TempData["msgs"] = msgs;
+        internal void SetTempMessage(SystemMessages msgs)
+        {
+            TempData["msgs"] = msgs;
+        }
 
         internal ActionResult HandleRedirectAfterLogin(string returnUrl, SystemMessages msgs = null)
         {
-            ActionResult actionResult = LoginRedirect(msgs: msgs);
+            var actionResult = LoginRedirect(msgs: msgs);
             var account = SessionVariables.CurrentAccount;
             const string adminPath = "/admin/";
             const string registrantPath = "/user/";
@@ -317,28 +316,26 @@ namespace AfterSchool.Models
             const string orgPath = "/org/";
 
             if (returnUrl.IsNotEmpty())
-            {
                 switch (account.AccountTypeId)
                 {
                     case AccountType.AfterSchool:
-                        if (!returnUrl.ToLower().Contains(new string[] {orgPath, registrantPath, districtPath}))
+                        if (!returnUrl.ToLower().Contains(new[] {orgPath, registrantPath, districtPath}))
                             actionResult = Redirect(returnUrl);
                         break;
                     case AccountType.Registrant:
-                        if (!returnUrl.ToLower().Contains(new string[] {orgPath, adminPath, districtPath}))
+                        if (!returnUrl.ToLower().Contains(new[] {orgPath, adminPath, districtPath}))
                             actionResult = Redirect(returnUrl);
                         break;
                     case AccountType.SchoolDistrict:
-                        if (!returnUrl.ToLower().Contains(new string[] {orgPath, adminPath, registrantPath}))
+                        if (!returnUrl.ToLower().Contains(new[] {orgPath, adminPath, registrantPath}))
                             actionResult = Redirect(returnUrl);
                         break;
                     default:
-                        if (account.AccountTypeId.In(AccountService.ProviderAccountTypes) && !returnUrl.ToLower()
-                                .Contains(new string[] {adminPath, registrantPath, districtPath}))
+                        if (account.AccountTypeId.In(FormConstants.ProviderAccountTypes) && !returnUrl.ToLower()
+                                .Contains(new[] {adminPath, registrantPath, districtPath}))
                             actionResult = Redirect(returnUrl);
                         break;
                 }
-            }
 
             return actionResult;
         }
@@ -351,8 +348,6 @@ namespace AfterSchool.Models
             return false;
         }
 
-        private const string UnsupportedBrowserPage = "/unsupportedbrowser.html";
-
         internal ActionResult RedirectUnsupportedBrowser()
         {
             return Redirect(UnsupportedBrowserPage);
@@ -361,7 +356,7 @@ namespace AfterSchool.Models
         public void LoadTempMsgAndLogErrors(SystemMessages msgs = null)
         {
             // store temp msgs
-            SetTempMessage(msgs: msgs);
+            SetTempMessage(msgs);
 
             if (msgs.HasErrors())
                 AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(msgs); // log all error msgs 

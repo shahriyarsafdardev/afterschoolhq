@@ -97,7 +97,7 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var accounts =
-                Account.FullTextSearch(search.Trim(), AccountService.ProviderAccountTypes.ToList(), 0, 10, msgs);
+                Account.FullTextSearch(search.Trim(), FormConstants.ProviderAccountTypes.ToList(), 0, 10, msgs);
 
             return Json(new
             {
@@ -560,7 +560,7 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
 
             var profiles = AccountProfile.Search(
-                AccountService.CustomerAccountTypes,
+                FormConstants.CustomerAccountTypes,
                 null,
                 null,
                 null,

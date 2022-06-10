@@ -1,8 +1,8 @@
 ﻿@model Account
-@{ 
+@{
     var showAdd = !Model.ID.HasValue || (
         SessionVariables.CurrentUser.IsNotEmpty() &&
-        SessionVariables.CurrentAccount.AccountTypeId.In(AccountService.ProviderAccountTypes));
+        SessionVariables.CurrentAccount.AccountTypeId.In(FormConstants.ProviderAccountTypes));
 
     var addActivityUrl = "";
     var addText = $"Add {UILabel.ActivityLabel()}";
@@ -10,7 +10,7 @@
 
     if (showAdd)
     {
-        addActivityUrl = Url.Action("editsetup", "activity", new { isnew = 1, type = (int)ActivityType.Activity, Area = "org" });
+        addActivityUrl = Url.Action("editsetup", "activity", new {isnew = 1, type = (int) ActivityType.Activity, Area = "org"});
 
         if (!Model.ID.HasValue)
         {
