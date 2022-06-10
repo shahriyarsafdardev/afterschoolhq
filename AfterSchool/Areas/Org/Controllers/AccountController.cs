@@ -358,14 +358,12 @@ namespace AfterSchool.Areas.Org.Controllers
                                 var manualStripePayouts =
                                     accountPackage.HasFeature(featureType: FeatureType.ManualStripePayouts, msgs: amsgs,
                                         dc: adc);
-                                if (manualStripePayouts)
-                                    StripeHelper.ToggleStripePayoutForConnectedAccount(
-                                        customAccountsStripeUserId: currentAccount.StripeUserId, accountName: currentAccount.Name,
-                                        payoutIntervalType: PayoutIntervalType.Manual, msgs: amsgs);
-                                else
-                                    StripeHelper.ToggleStripePayoutForConnectedAccount(
-                                        customAccountsStripeUserId: currentAccount.StripeUserId, accountName: currentAccount.Name,
-                                        payoutIntervalType: PayoutIntervalType.Daily, msgs: amsgs);
+                                
+                                new StripeHelper().ToggleStripePayoutForConnectedAccount(
+                                    customAccountsStripeUserId: currentAccount.StripeUserId, 
+                                    accountName: currentAccount.Name,
+                                    payoutIntervalType: manualStripePayouts ? PayoutIntervalType.Manual : PayoutIntervalType.Daily, 
+                                    msgs: amsgs);
                             }
                             else if (accountFeature.FeatureTypeId == FeatureType.ManageVolunteerOpportunities)
                             {
@@ -1358,16 +1356,12 @@ namespace AfterSchool.Areas.Org.Controllers
                                 var manualStripePayouts =
                                     newlyAddedPackage.HasFeature(featureType: FeatureType.ManualStripePayouts,
                                         msgs: amsgs, dc: adc);
-                                if (manualStripePayouts)
-                                    new StripeHelper().ToggleStripePayoutForConnectedAccount(
-                                        customAccountsStripeUserId: currentAccount.StripeUserId,
-                                        accountName: currentAccount.Name, payoutIntervalType: PayoutIntervalType.Manual,
-                                        msgs: amsgs);
-                                else
-                                    new StripeHelper().ToggleStripePayoutForConnectedAccount(
-                                        customAccountsStripeUserId: currentAccount.StripeUserId,
-                                        accountName: currentAccount.Name, payoutIntervalType: PayoutIntervalType.Daily,
-                                        msgs: amsgs);
+                                
+                                new StripeHelper().ToggleStripePayoutForConnectedAccount(
+                                    customAccountsStripeUserId: currentAccount.StripeUserId,
+                                    accountName: currentAccount.Name, 
+                                    payoutIntervalType: manualStripePayouts ? PayoutIntervalType.Manual : PayoutIntervalType.Daily,
+                                    msgs: amsgs);
                             }
                         }
                     },

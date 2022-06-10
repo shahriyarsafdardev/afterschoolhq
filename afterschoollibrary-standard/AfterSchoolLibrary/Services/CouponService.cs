@@ -129,7 +129,7 @@ namespace AfterSchoolLibrary.Services
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var stripeCoupon = new Billing.StripeHelper().CreateCoupon(discountValue, stripeAccountId, coupon.AmountTypeId, couponDuration, durationInMonths, msgs);
+            var stripeCoupon = new StripeHelper().CreateCoupon(discountValue, stripeAccountId, coupon.AmountTypeId, couponDuration, durationInMonths, msgs);
 
             if (stripeCoupon.IsNotEmpty())
             {

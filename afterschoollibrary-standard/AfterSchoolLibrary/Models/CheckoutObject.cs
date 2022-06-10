@@ -590,11 +590,11 @@ namespace AfterSchoolLibrary.Models
                 return;
 
             if (BankAccountPurchaseObject?.PlaidPublicToken != null)
-                BankAccountPurchaseObject.StripeSourceId = PayingAccount.GetStripeSourceFromPlaidToken(
+                BankAccountPurchaseObject.StripeSourceId = PayingAccount.GetStripeSourceFromPlaidTokenAHQPlatform(
                                                             BankAccountPurchaseObject, 
                                                             msgs);
             else if (SavePaymentInfo || SubscriptionPlan.IsNotEmpty() || PostPayPlan.IsNotEmpty() || CreditCardPurchaseObject.StripeToken.IsNotEmpty())
-                CreditCardPurchaseObject.StripeSourceId = PayingAccount.GetStripeSourceFromToken(
+                CreditCardPurchaseObject.StripeSourceId = PayingAccount.GetStripeSourceFromTokenAHQPlatform(
                                                             BillingAccount,
                                                             CreditCardPurchaseObject.StripeToken, 
                                                             msgs);

@@ -3827,7 +3827,7 @@ namespace AfterSchoolLibrary.Services
                 .GetMaxValue();
         }
 
-        internal static string GetStripeSourceFromToken(this Account payingAccount, Account billingAccount,
+        internal static string GetStripeSourceFromTokenAHQPlatform(this Account payingAccount, Account billingAccount,
             string stripeToken, SystemMessages msgs = null)
         {
             var stripeHelper = new StripeHelper();
@@ -3838,7 +3838,7 @@ namespace AfterSchoolLibrary.Services
             return source.Id;
         }
 
-        internal static string GetStripeSourceFromPlaidToken(this Account fromAccount,
+        internal static string GetStripeSourceFromPlaidTokenAHQPlatform(this Account fromAccount,
             BankAccountPurchaseObject bankAccountPurchaseObject, SystemMessages msgs = null)
         {
             var plaidToken = PlaidHelper.GetPlaidToken(bankAccountPurchaseObject.PlaidPublicToken, msgs);
@@ -3928,46 +3928,6 @@ namespace AfterSchoolLibrary.Services
                 loggedInUser,
                 msgs,
                 dc);
-        }
-
-        /// <summary>
-        ///     returns stripe source id
-        ///     only for purchases during parent checkout
-        /// </summary>
-        /// <param name="fromAccount"></param>
-        /// <param name="toAccount"></param>
-        /// <param name="stripeToken"></param>
-        /// <param name="msgs"></param>
-        /// <returns></returns>
-        public static string CreateStripeSourceFromToken(this Account fromAccount, string stripeToken,
-            Customer customer, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            var stripeHelper = new StripeHelper();
-            
-            // stripe stuff
-            // create payment source if not already existent on the user
-            if (customer.IsEmpty())
-                customer = stripeHelper.GetCustomer(fromAccount.StripeCustomerId, null, msgs);
-
-            if (stripeToken.IsNotEmpty())
-            {
-                var source = stripeHelper.CreateCreditCardSource(stripeToken, msgs);
-                if (source.IsNotEmpty())
-                {
-                    stripeHelper.AttachSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null, msgs);
-
-                    //set this source id to account, which will work as a default card
-                    if (fromAccount.StripeDefaultCardId.IsEmpty())
-                    {
-                        fromAccount.StripeDefaultCardId = source.Id;
-                        msgs.AddRange(fromAccount.Save(dc));
-                    }
-
-                    return source.Id;
-                }
-            }
-
-            return customer.DefaultSourceId;
         }
 
         public static string CreateStripeCardFromTokenAHQCustomer(this Account fromAccount, string stripeToken, Customer customer,
@@ -4648,7 +4608,15 @@ namespace AfterSchoolLibrary.Services
 
             return Math.Round(feeAmount / totalCost, 4);
         }
-
+        
+        /// <summary>
+        /// FOR AHQ Platform Payouts Only
+        /// </summary>
+        /// <param name="account"></param>
+        /// <param name="payout"></param>
+        /// <param name="loggedInUser"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
         public static void SendStripePayout(this Account account, Payout payout, WebUser loggedInUser,
             SystemMessages msgs, DatabaseConnection dc = null)
         {
