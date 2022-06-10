@@ -127,7 +127,7 @@ namespace AfterSchoolLibrary.Services
                     dc);
 
                 if (packageFeature.FeatureTypeId == FeatureType.ManualStripePayouts && account.StripeUserId.IsNotEmpty())
-                    new StripeHelper().ToggleStripePayoutForConnectedAccount(
+                    StripeHelper.GetStripeHelperConnectAccount().ToggleStripePayoutForConnectedAccount(
                         customAccountsStripeUserId: account.StripeUserId, 
                         accountName: account.Name, 
                         payoutIntervalType: packageFeature.Max.Value > 0 ? PayoutIntervalType.Manual : PayoutIntervalType.Daily, 

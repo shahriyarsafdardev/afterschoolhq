@@ -3,6 +3,7 @@ using BasicLibrary.DataAccess;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.Services;
 
 namespace AfterSchoolLibrary.Models
@@ -584,19 +585,20 @@ namespace AfterSchoolLibrary.Models
             return _UseStripeConnectedAccount.Value;
         }
 
-        public void LoadStripeSource(SystemMessages msgs)
+        public void LoadStripeSource(StripeAccountType stripeAccountType, SystemMessages msgs)
         {
             if (StripeSourceId.IsNotEmpty())
                 return;
 
             if (BankAccountPurchaseObject?.PlaidPublicToken != null)
-                BankAccountPurchaseObject.StripeSourceId = PayingAccount.GetStripeSourceFromPlaidTokenAHQPlatform(
+                BankAccountPurchaseObject.StripeSourceId = PayingAccount.GetStripeSourceFromPlaidToken(
                                                             BankAccountPurchaseObject, 
+                                                            stripeAccountType,
                                                             msgs);
             else if (SavePaymentInfo || SubscriptionPlan.IsNotEmpty() || PostPayPlan.IsNotEmpty() || CreditCardPurchaseObject.StripeToken.IsNotEmpty())
-                CreditCardPurchaseObject.StripeSourceId = PayingAccount.GetStripeSourceFromTokenAHQPlatform(
-                                                            BillingAccount,
+                CreditCardPurchaseObject.StripeSourceId = PayingAccount.GetStripeSourceFromToken(
                                                             CreditCardPurchaseObject.StripeToken, 
+                                                            stripeAccountType,
                                                             msgs);
         }
 

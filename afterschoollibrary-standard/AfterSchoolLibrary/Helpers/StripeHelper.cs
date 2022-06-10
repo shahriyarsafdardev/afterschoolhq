@@ -71,6 +71,10 @@ namespace AfterSchoolLibrary.Billing
                     return AHQSubsTestPublishableKey;
             }
         }
+        
+        public static StripeHelper GetStripeHelperSubscriberAccount() => new StripeHelper(StripeHelper.AHQSubsSecretKey);
+        public static StripeHelper GetStripeHelperConnectAccount() => new StripeHelper(StripeHelper.SecretKey);
+        public static StripeHelper GetStripeHelper(StripeAccountType stripeAccountType) => stripeAccountType == StripeAccountType.SubscriberAccount ?  GetStripeHelperSubscriberAccount() : GetStripeHelperConnectAccount();
 
         private string StripeAccessToken { get; set; }
         private StripeClient StripeClient => new StripeClient(apiKey: StripeAccessToken);
@@ -2437,12 +2441,12 @@ namespace AfterSchoolLibrary.Billing
         TaxDocumentUserUpload
     }
 
-    enum StripeAccountType
+    public enum StripeAccountType
     {
-        Custom,
-        Standard,
+        SubscriberAccount,
+        ConnectAccount,
     }
-
+    
     enum StripeAccountHolderType
     {
         Individual,

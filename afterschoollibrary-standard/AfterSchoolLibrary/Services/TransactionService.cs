@@ -638,7 +638,7 @@ namespace AfterSchoolLibrary.Services
                     //.. lets say activity charge is 100$, and convenience charge is 6$, then parent pays 110$ (106$ + 4$ cc fee).
                     //.. so while refunding, parent can refund only 106$(cc fee is not refundable),
 
-                    var stripeHelper = new StripeHelper();
+                    var stripeHelper = StripeHelper.GetStripeHelperConnectAccount();
                     var stripeRefund = stripeHelper.CreateRefund(
                                     chargeId: transaction.StripeChargeOrRefundId,
                                     totalAmount: refundAmount,
@@ -800,7 +800,7 @@ namespace AfterSchoolLibrary.Services
         public static Stripe.Charge GetStripeCharge(this Transaction transaction, SystemMessages msgs)
         {
             if (transaction.TransactionTypeId == TransactionType.Charge)
-                return new StripeHelper().GetCharge(transaction.StripeChargeOrRefundId, msgs);
+                return StripeHelper.GetStripeHelperConnectAccount().GetCharge(transaction.StripeChargeOrRefundId, msgs);
 
             return null;
         }
@@ -835,7 +835,7 @@ namespace AfterSchoolLibrary.Services
 
             if (hasStripeUserId && !transaction.PayoutId.HasValue)
             {
-                var transfer = new StripeHelper().CreateTransfer(
+                var transfer = StripeHelper.GetStripeHelperConnectAccount().CreateTransfer(
                                 billerAmount,
                                 transaction.Description,
                                 transaction.Uid.ToString(),

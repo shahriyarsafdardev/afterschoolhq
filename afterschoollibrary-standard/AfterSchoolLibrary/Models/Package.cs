@@ -333,7 +333,7 @@ namespace AfterSchoolLibrary.Models
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var stripeHelper = new StripeHelper(StripeHelper.AHQSubsSecretKey);
+            var stripeHelper = StripeHelper.GetStripeHelperSubscriberAccount();
             var product = stripeHelper.GetProduct(GetStripeProductId(), null, msgs);
 
             if (product.IsEmpty())
@@ -363,7 +363,7 @@ namespace AfterSchoolLibrary.Models
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             Price price = null;
-            var stripeHelper = new StripeHelper(StripeHelper.AHQSubsSecretKey);
+            var stripeHelper = StripeHelper.GetStripeHelperSubscriberAccount();
 
             if (priceId.IsNotEmpty())
                 price = stripeHelper.GetPrice(priceId, msgs);

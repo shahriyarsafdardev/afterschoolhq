@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using AfterSchool.Assemblers;
 using AfterSchool.Helpers;
 using AfterSchool.Models;
+using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.FeatureFlag;
 using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
@@ -1801,8 +1802,8 @@ namespace AfterSchool.Controllers
                 participationObject.Cost = registrantActivity.AmountCharged;
 
             ViewBag.Registration = registration;
-            ViewBag.Sources = SessionVariables.CurrentAccount.GetStripeSourcesRegistrant(msgs);
-            ViewBag.BankAccounts = SessionVariables.CurrentAccount.GetStripeBankAccountsRegistrant(msgs);
+            ViewBag.Sources = SessionVariables.CurrentAccount.GetStripeSources(StripeAccountType.ConnectAccount, msgs);
+            ViewBag.BankAccounts = SessionVariables.CurrentAccount.GetStripeBankAccounts(StripeAccountType.ConnectAccount, msgs);
             ViewBag.Cart = SessionVariables.Cart;
             ViewBag.ParticipationObject = participationObject;
             ViewBag.Messages = msgs;

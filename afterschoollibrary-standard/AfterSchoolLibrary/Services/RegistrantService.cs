@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Collections;
 using Twilio.Rest.Api.V2010.Account;
 using System.Net;
+using AfterSchoolLibrary.Billing;
 using Newtonsoft.Json.Linq;
 using AfterSchoolLibrary.Helpers;
 
@@ -133,9 +134,9 @@ namespace AfterSchoolLibrary.Services
         private static (Stripe.Customer customer, string sourceId) GetCustomerAndSourceForSubscription(CheckoutObject checkoutObject, SystemMessages msgs)
         {           
             if (checkoutObject.StripeSourceId.IsEmpty())
-                checkoutObject.LoadStripeSource(msgs);
+                checkoutObject.LoadStripeSource(StripeAccountType.ConnectAccount, msgs);
 
-            return (checkoutObject.PayingAccount.GetStripeCustomerPlatform(msgs), checkoutObject.StripeSourceId);
+            return (checkoutObject.PayingAccount.GetStripeCustomer(StripeAccountType.ConnectAccount, msgs), checkoutObject.StripeSourceId);
         }
 
         public static void StartPaymentPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)

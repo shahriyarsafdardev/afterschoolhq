@@ -1242,9 +1242,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (packages.Count <= 0 || !packages.Any(m => !m.IsFree))
                 return RedirectToAction("NewBilling");
 
-            ViewBag.BillingHistory = currentAccount.GetStripeBillingHistoryAHQCustomer(msgs);
-            ViewBag.RefundHistory = currentAccount.GetStripeRefundHistoryAHQCustomer(msgs);
-            ViewBag.Cards = currentAccount.GetStripeCardsAHQCustomer(msgs);
+            ViewBag.BillingHistory = currentAccount.GetStripeBillingHistory(StripeAccountType.SubscriberAccount, msgs);
+            ViewBag.RefundHistory = currentAccount.GetStripeRefundHistory(StripeAccountType.SubscriberAccount, msgs);
+            ViewBag.Cards = currentAccount.GetStripeCards(StripeAccountType.SubscriberAccount, msgs);
             ViewBag.Messages = msgs;
 
             return View(currentAccount);
@@ -1339,12 +1339,12 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         package = Package.LoadByUid(selectedPackageArr[1].ToGuid(), amsgs, adc);
 
-                        customer = currentAccount.CreateStripeCustomerAHQ(amsgs, adc);
+                        customer = currentAccount.CreateStripeCustomer(StripeAccountType.SubscriberAccount, amsgs, adc);
 
                         if (stripetoken.IsNotEmpty())
-                            currentAccount.CreateStripeCardFromTokenAHQCustomer(stripetoken, customer, amsgs, adc);
+                            currentAccount.CreateStripeCardFromToken(stripetoken, customer, StripeAccountType.SubscriberAccount, amsgs, adc);
                         else if (cardId.IsNotEmpty())
-                            currentAccount.UpdateStripeCardAHQCustomer(cardId, customer, amsgs, adc);
+                            currentAccount.UpdateStripeCard(cardId, customer, StripeAccountType.SubscriberAccount, amsgs, adc);
 
                         if (amsgs.HasNoErrors())
                         {
@@ -1357,7 +1357,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                     newlyAddedPackage.HasFeature(featureType: FeatureType.ManualStripePayouts,
                                         msgs: amsgs, dc: adc);
                                 
-                                new StripeHelper().ToggleStripePayoutForConnectedAccount(
+                                StripeHelper.GetStripeHelperConnectAccount().ToggleStripePayoutForConnectedAccount(
                                     customAccountsStripeUserId: currentAccount.StripeUserId,
                                     accountName: currentAccount.Name, 
                                     payoutIntervalType: manualStripePayouts ? PayoutIntervalType.Manual : PayoutIntervalType.Daily,
@@ -1385,9 +1385,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                ViewBag.BillingHistory = currentAccount.GetStripeBillingHistoryAHQCustomer(msgs);
-                ViewBag.RefundHistory = currentAccount.GetStripeRefundHistoryAHQCustomer(msgs);
-                ViewBag.Cards = currentAccount.GetStripeCardsAHQCustomer(msgs);
+                ViewBag.BillingHistory = currentAccount.GetStripeBillingHistory(StripeAccountType.SubscriberAccount, msgs);
+                ViewBag.RefundHistory = currentAccount.GetStripeRefundHistory(StripeAccountType.SubscriberAccount, msgs);
+                ViewBag.Cards = currentAccount.GetStripeCards(StripeAccountType.SubscriberAccount, msgs);
                 ViewBag.Messages = msgs;
                 return View("Billing", currentAccount);
             }
@@ -1463,13 +1463,13 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var customer = currentAccount.GetStripeCustomerAHQCustomer(msgs);
-                currentAccount.UpdateStripeCardAHQCustomer(id, customer, msgs);
+                var customer = currentAccount.GetStripeCustomer(StripeAccountType.SubscriberAccount, msgs);
+                currentAccount.UpdateStripeCard(id, customer, StripeAccountType.SubscriberAccount, msgs);
             }
 
-            ViewBag.BillingHistory = currentAccount.GetStripeBillingHistoryAHQCustomer(msgs);
-            ViewBag.RefundHistory = currentAccount.GetStripeRefundHistoryAHQCustomer(msgs);
-            ViewBag.Cards = currentAccount.GetStripeCardsAHQCustomer(msgs);
+            ViewBag.BillingHistory = currentAccount.GetStripeBillingHistory(StripeAccountType.SubscriberAccount, msgs);
+            ViewBag.RefundHistory = currentAccount.GetStripeRefundHistory(StripeAccountType.SubscriberAccount, msgs);
+            ViewBag.Cards = currentAccount.GetStripeCards(StripeAccountType.SubscriberAccount, msgs);
             ViewBag.Messages = msgs;
 
             return View("Billing", currentAccount);

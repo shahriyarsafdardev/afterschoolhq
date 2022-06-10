@@ -599,8 +599,10 @@
                     <text>$("#NoAccountFoundPopup").modal('show');</text>
               }
         });
+        
         function validateEmailServerSide(value) {
-            if (validateEmail(value)) {
+            
+            if (value.length > 0 && validateEmail(value)) {
                 var dataToSend = JSON.stringify({ emailId: value });
                 $.ajax({
                     url: '/Signup/IsEmailAlreadyExists',

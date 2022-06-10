@@ -756,7 +756,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
 
-            var loginLink = new StripeHelper().CreateLoginLink(currentAccount.StripeUserId, $"{AfterSchoolLibrary.Helpers.Utilities.BaseUrl()}/org/accounting/", msgs);
+            var loginLink = StripeHelper.GetStripeHelperConnectAccount().CreateLoginLink(currentAccount.StripeUserId, $"{AfterSchoolLibrary.Helpers.Utilities.BaseUrl()}/org/accounting/", msgs);
 
             if (loginLink.IsNotEmpty())
                 return Json(new { status = "ok", link = loginLink.Url }, JsonRequestBehavior.AllowGet);

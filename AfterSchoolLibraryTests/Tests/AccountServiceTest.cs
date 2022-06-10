@@ -1905,7 +1905,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             var subscriptionPlan = SubscriptionPlanFactory.Create(billingAccount, activity,
                 SubscriptionPlanType.Subscription, amountPaidByParent, msgs, dc);
-            purchasingAccount.CreateStripeCustomerPlatform(msgs, dc);
+            purchasingAccount.CreateStripeCustomer(StripeAccountType.SubscriberAccount, msgs, dc);
 
             var purchase = PurchaseFactory.Create(purchasingAccount, amount, registrant.ID.Value, registration.ID.Value,
                 msgs, dc); // check: we are inserting row amount here
@@ -2026,10 +2026,10 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(activityPayment?.RegistrantId, registrant.ID.Value);
 
             //Stripe
-            var customer = purchasingAccount.GetStripeCustomerPlatform(msgs);
+            var customer = purchasingAccount.GetStripeCustomer(StripeAccountType.ConnectAccount, msgs);
             Assert.NotNull(customer);
 
-            var product = new StripeHelper().GetProduct(activity.Uid.ToString(), null, msgs);
+            var product = StripeHelper.GetStripeHelperConnectAccount().GetProduct(activity.Uid.ToString(), null, msgs);
             Assert.NotNull(product);
 
             Assert.True(msgs.HasNoErrors());
@@ -2169,7 +2169,7 @@ namespace AfterSchoolLibraryTests.Tests
                 stripePayoutsEnabled: true, stripeChargesEnabled: true, stripeUserId: "1", msgs: msgs, dc: dc);
 
             // Act
-            var stripeAccount = new StripeHelper().ToggleStripePayoutForConnectedAccount(billerAccount.StripeUserId,
+            var stripeAccount = StripeHelper.GetStripeHelperConnectAccount().ToggleStripePayoutForConnectedAccount(billerAccount.StripeUserId,
                 billerAccount.Name, PayoutIntervalType.Daily, msgs);
 
             // Assert

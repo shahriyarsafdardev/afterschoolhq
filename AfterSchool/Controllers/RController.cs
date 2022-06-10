@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using AfterSchool.Assemblers;
 using AfterSchool.Models;
 using AfterSchoolLibrary;
+using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.FeatureFlag;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
@@ -430,8 +431,8 @@ namespace AfterSchool.Controllers
                 return Redirect(account.PayUrl);
             }
 
-            ViewBag.Sources = currentAccount.GetStripeSourcesRegistrant(msgs);
-            ViewBag.BankAccounts = currentAccount.GetStripeBankAccountsRegistrant(msgs);
+            ViewBag.Sources = currentAccount.GetStripeSources(StripeAccountType.ConnectAccount, msgs);
+            ViewBag.BankAccounts = currentAccount.GetStripeBankAccounts(StripeAccountType.ConnectAccount, msgs);
             ViewBag.AccountProfile = account.GetAccountProfile(msgs);
             ViewBag.Messages = msgs;
             ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
