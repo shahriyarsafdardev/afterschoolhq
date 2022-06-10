@@ -23,7 +23,7 @@ namespace AfterSchool.Areas.Org.Controllers
     {
         public EditScheduleResult AssembleEditScheduleResult(ActivitySchedule schedule, Activity activity,
             Account currentAccount, UserType accountUserType, RegistrationPeriod activeRegistrationPeriod, bool currentUserIsActivityLeader,
-            List<ActivitySchedule> schedules, bool isNew, string fullScreenUrl, SystemMessages msgs)
+            List<ActivitySchedule> schedules, string isNew, string fullScreenUrl, SystemMessages msgs)
         {
             if (schedule.IsEmpty())
                 schedule = activeRegistrationPeriod.IsEmpty()
@@ -36,7 +36,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 IsActivityLeader = EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, accountUserType, currentUserIsActivityLeader),
                 ActiveMenu = "EditSchedule",
                 Schedules = schedules,
-                IsFullScreen = EditHelpers.GetIsFullScreen(activity, isNew),
+                IsFullScreen = EditHelpers.GetIsFullScreen(activity, isNew == "1"),
                 FullScreenExitUrl = fullScreenUrl,
                 Schedule = schedule,
                 Messages = msgs,

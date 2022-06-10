@@ -46,7 +46,6 @@ namespace after_school_hq.Tests
             AccountPackage accountPackage = null;
             var accountUserType = UserType.NotSet;
             var currentUserIsActivityLeader = true;
-            var isNew = true;
             var forms = new List<Form>
             {
                 new Form {Name = "Zebra"},
@@ -56,7 +55,7 @@ namespace after_school_hq.Tests
             var fullScreenExitUrl = string.Empty;
 
             var result = assembler.AssembleEditSetupResult(activity, activityGroup, msgs, currentAccount, activeMenu, periods, activePeriod, activeForm,
-                accountPackage, accountUserType, currentUserIsActivityLeader, isNew, forms, fullScreenExitUrl);
+                accountPackage, accountUserType, currentUserIsActivityLeader, "1", forms, fullScreenExitUrl);
 
             Assert.That(result.Periods, Has.Count.EqualTo(3));
             Assert.That(result.Periods[0].Name, Is.EqualTo("TwoDaysAgo"));

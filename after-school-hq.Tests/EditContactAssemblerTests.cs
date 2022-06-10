@@ -24,7 +24,7 @@ namespace after_school_hq.Tests
             var fullScreenExitUrl = string.Empty;
             var instructors = new List<WebUser>();
             var accountUserType = UserType.NotSet;
-            var result = assembler.AssembleEditContactResult(currentAccount, msgs, activity, true, fullScreenExitUrl, instructors, accountUserType, true);
+            var result = assembler.AssembleEditContactResult(currentAccount, msgs, activity, "1", fullScreenExitUrl, instructors, accountUserType, true);
 
             Assert.That(result.ActiveMenu, Is.EqualTo("EditContact"));
             Assert.That(result.IsFullScreen, Is.True);

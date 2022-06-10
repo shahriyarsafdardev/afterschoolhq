@@ -1,53 +1,59 @@
-﻿@model Activity
+﻿@model AfterSchool.Areas.Org.Controllers.EditConfirmationResult
 @{
-    ViewBag.Title = ((Account)ViewBag.Account).Name;
-    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
-    var accountPackage = (AccountPackage)ViewBag.AccountPackage;
-    var isFullScreen = (bool)ViewBag.IsFullScreen;
+    var msgs = Model.Messages;
+    var isFullScreen = Model.IsFullScreen;
     if (isFullScreen)
     {
         Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
     }
 }
 
-@{ Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
+@{ Html.RenderPartial("OrgAccountHeader", Model.Activity.AccountId.ToString(), new ViewDataDictionary
+   {
+       {"IsFullScreen", isFullScreen}
+   });}
 
 <div class="main-content">
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model); }
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model.Activity, new ViewDataDictionary
+       {
+           { "IsFullScreen", isFullScreen },
+           { "IsActivityLeader", Model.IsActivityLeader }
+       });
+    }
 
     <div class="panel panel-default margin-bottom-zero">
         <div class="panel-heading">
-            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name); }
+            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Activity.Name); }
 
             @if (isFullScreen)
             {
-                Html.RenderPartial("_ExitFullScreen", "");
+                Html.RenderPartial("_ExitFullScreen", Model.FullScreenExitUrl);
             }
         </div>
         <div class="panel-body padding-lr-zero-sm">
 
             <div class="col-md-10 col-lg-9">
-                <form id="form1" method="post" action="@Url.Action("editconfirmation", "activity", new { id = Model.Uid, isnew = Request["isnew"], source = Request["source"] })" class="form-horizontal">
+                <form id="form1" method="post" action="@Url.Action("editconfirmation", "activity", new { id = Model.Activity.Uid, isnew = Request["isnew"], source = Request["source"] })" class="form-horizontal">
 
-                    @if (!Model.IsPublished)
+                    @if (!Model.Activity.IsPublished)
                     {
-                        @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editconfirmation", "publish", true, true, Request))
+                        @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model.Activity, "editconfirmation", "publish", true, true, Request))
                     }
                     @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(true, false))
 
-                    @{Html.RenderPartial("~/Views/Shared/_ActivityFormConfirmation.cshtml", Model);}
+                    @{Html.RenderPartial("~/Views/Shared/_ActivityFormConfirmation.cshtml", Model.Activity);}
 
                     <div class="form-group">
-                        @if (!Model.IsPublished)
+                        @if (!Model.Activity.IsPublished)
                         {
                             <div class="col-sm-6 col-sm-offset-3">
                                 @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(false, false))
                             </div>
                             <div class="col-sm-3">
-                                @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editconfirmation", "publish", false, true, Request))
+                                @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model.Activity, "editconfirmation", "publish", false, true, Request))
                             </div>
                         }
                         else
@@ -62,7 +68,11 @@
             </div>
 
             <div class="col-md-2 col-lg-3">
-                @{Html.RenderPartial("~/Views/Shared/_ActivityEditNav.cshtml", Model); }
+                @{ Html.RenderPartial("~/Views/Shared/_ActivityEditNav.cshtml", Model.Activity, new ViewDataDictionary
+                   {
+                       { "ActiveMenu", "EditConfirmation" }
+                   });
+                }
             </div>
 
         </div>

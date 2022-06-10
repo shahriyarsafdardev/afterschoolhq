@@ -9,23 +9,26 @@
 
 @if (!isFullScreen)
 {
-    if (SessionVariables.AccountPackage.IsNotEmpty())
+    var currentAccount = SessionVariables.CurrentAccount;
+    var accountPackage = SessionVariables.AccountPackage;
+    if (accountPackage.IsNotEmpty())
     {
-        if (SessionVariables.AccountPackage.IsDuringTrial)
+        if (accountPackage.IsDuringTrial)
         {
             <div class="trial-header text-center text-white bg-warning">
-                You have @SessionVariables.AccountPackage.TrialDaysRemaining day(s) remaining in your trial <a href="@Url.Action("newbilling", "account", new {id = SessionVariables.AccountPackage.PackageUid})" class="btn btn-alt5 margin-h-10">Purchase Now &raquo;</a>
+                You have @accountPackage.TrialDaysRemaining day(s) remaining in your trial <a href="@Url.Action("newbilling", "account", new {id = accountPackage.PackageUid})" class="btn btn-alt5 margin-h-10">Purchase Now &raquo;</a>
             </div>
         }
-        else if (SessionVariables.AccountPackage.IsTrialExpired(SessionVariables.CurrentAccount))
+        else if (accountPackage.IsTrialExpired(currentAccount))
         {
             <div class="trial-header text-center text-white bg-danger">
-                It looks like your trial has expired. <a href="@Url.Action("newbilling", "account", new {id = SessionVariables.AccountPackage.PackageUid})" class="btn btn-alt5 margin-h-10">Purchase Now &raquo;</a>
+                It looks like your trial has expired. <a href="@Url.Action("newbilling", "account", new {id = accountPackage.PackageUid})" class="btn btn-alt5 margin-h-10">Purchase Now &raquo;</a>
             </div>
         }
     }
 
-    if (!SessionVariables.CurrentUser.VerifiedAccount)
+    var currentUser = SessionVariables.CurrentUser;
+    if (!currentUser.VerifiedAccount)
     {
         <div class="trial-header text-center text-white bg-danger">
             Please verify your email address in order to accept @UILabel.ActivityLabel().ToLower() registrations. <a href="javascript:AccountSetup.sendVerificationEmail('')" class="white">Resend Email Verification Email &raquo;</a>
@@ -36,17 +39,17 @@
         <div class="row">
             <div class="col-md-5">
                 <h2>
-                    @SessionVariables.CurrentAccount.Name
+                    @currentAccount.Name
                 </h2>
             </div>
             <div class="col-md-2">
-                <a href="@SessionVariables.CurrentAccount.ShortHomePageUrl" class="btn btn-primary">
+                <a href="@currentAccount.ShortHomePageUrl" class="btn btn-primary">
                     View Profile
                 </a>
             </div>
             <div class="col-md-2 col-md-offset-3">
                 <div class="pull-right padding-10">
-                    Logged in as: <a href="@Url.Action("edit", "user")">@SessionVariables.CurrentUser.DisplayName</a> <br/>
+                    Logged in as: <a href="@Url.Action("edit", "user")">@currentUser.DisplayName</a> <br/>
                 </div>
             </div>
         </div>

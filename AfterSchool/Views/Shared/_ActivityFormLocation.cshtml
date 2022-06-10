@@ -1,5 +1,5 @@
 ﻿@model Activity
-@{ var location = Model.GetLocation() ?? Model.GetAccount().GetAccountProfile()?.GetLocation() ?? new Location(); }
+@{ var location = ViewData["Location"]; }
 <div class="panel panel-default panel-small-padding">
     <div class="panel-heading activity-heading">
         Your Activity Location Information
@@ -15,31 +15,31 @@
                     <span>
                         <input type="radio"
                                name="activitylocationtype"
-                               id="activitylocationtype-@((int)ActivityLocationType.NotSet)"
-                               value="@((int)ActivityLocationType.NotSet)"
+                               id="activitylocationtype-@((int) ActivityLocationType.NotSet)"
+                               value="@((int) ActivityLocationType.NotSet)"
                                class="activitylocationtype"
-                               @(Model.ActivityLocationTypeId == ActivityLocationType.NotSet ? "checked=\"checked\"" : "") />
-                        <label for="activitylocationtype-@((int)ActivityLocationType.NotSet)">None</label>
+                               @(Model.ActivityLocationTypeId == ActivityLocationType.NotSet ? "checked=\"checked\"" : "")/>
+                        <label for="activitylocationtype-@((int) ActivityLocationType.NotSet)">None</label>
                         &nbsp;
                     </span>
                     <span>
                         <input type="radio"
                                name="activitylocationtype"
-                               id="activitylocationtype-@((int)ActivityLocationType.Physical)"
-                               value="@((int)ActivityLocationType.Physical)"
+                               id="activitylocationtype-@((int) ActivityLocationType.Physical)"
+                               value="@((int) ActivityLocationType.Physical)"
                                class="activitylocationtype"
-                               @(Model.ActivityLocationTypeId == ActivityLocationType.Physical ? "checked=\"checked\"" : "") />
-                        <label for="activitylocationtype-@((int)ActivityLocationType.Physical)">Physical</label>
+                               @(Model.ActivityLocationTypeId == ActivityLocationType.Physical ? "checked=\"checked\"" : "")/>
+                        <label for="activitylocationtype-@((int) ActivityLocationType.Physical)">Physical</label>
                         &nbsp;
                     </span>
                     <span>
                         <input type="radio"
                                name="activitylocationtype"
-                               id="activitylocationtype-@((int)ActivityLocationType.Virtual)"
-                               value="@((int)ActivityLocationType.Virtual)"
+                               id="activitylocationtype-@((int) ActivityLocationType.Virtual)"
+                               value="@((int) ActivityLocationType.Virtual)"
                                class="activitylocationtype"
-                               @(Model.ActivityLocationTypeId == ActivityLocationType.Virtual ? "checked=\"checked\"" : "") />
-                        <label for="activitylocationtype-@((int)ActivityLocationType.Virtual)">Virtual</label>
+                               @(Model.ActivityLocationTypeId == ActivityLocationType.Virtual ? "checked=\"checked\"" : "")/>
+                        <label for="activitylocationtype-@((int) ActivityLocationType.Virtual)">Virtual</label>
                         &nbsp;
                     </span>
                 </div>
@@ -63,9 +63,11 @@
                 </label>
                 <div class="col-sm-9">
                     @{ Html.RenderPartial("~/Views/Shared/_TextEditor.cshtml",
-                             Model.LocationDetails,
-                             new ViewDataDictionary() { { "name", "locationdetails" }, { "id", "locationdetails" } }); }
-                    <p class="text-muted"><em>Enter your room number or any special instructions or information about the location? Such as pick up or drop off locations?</em></p>
+                           Model.LocationDetails,
+                           new ViewDataDictionary {{"name", "locationdetails"}, {"id", "locationdetails"}}); }
+                    <p class="text-muted">
+                        <em>Enter your room number or any special instructions or information about the location? Such as pick up or drop off locations?</em>
+                    </p>
                 </div>
             </div>
 
@@ -77,7 +79,7 @@
                     @{ Html.RenderPartial(
                            "~/Views/Shared/_SwitchButton.cshtml",
                            Model.HidePreciseLocation,
-                           new ViewDataDictionary() { { "checkboxname", "hidepreciselocation" }, { "checkboxid", "chkHidePreciseLocation" } }); }
+                           new ViewDataDictionary {{"checkboxname", "hidepreciselocation"}, {"checkboxid", "chkHidePreciseLocation"}}); }
                 </div>
             </div>
 
@@ -105,12 +107,12 @@
             toggleLocationEdit($(this));
         });
 
-        if ($('#activitylocationtype-@((int)ActivityLocationType.Physical)').is(':checked')) {
-            toggleLocationEdit($('#activitylocationtype-@((int)ActivityLocationType.Physical)'));
+        if ($('#activitylocationtype-@((int) ActivityLocationType.Physical)').is(':checked')) {
+            toggleLocationEdit($('#activitylocationtype-@((int) ActivityLocationType.Physical)'));
         }
 
-        if ($('#activitylocationtype-@((int)ActivityLocationType.Virtual)').is(':checked')) {
-            toggleLocationEdit($('#activitylocationtype-@((int)ActivityLocationType.Virtual)'));
+        if ($('#activitylocationtype-@((int) ActivityLocationType.Virtual)').is(':checked')) {
+            toggleLocationEdit($('#activitylocationtype-@((int) ActivityLocationType.Virtual)'));
         }
 
     });
@@ -122,10 +124,10 @@
         $('.my-location').prop("required", false);
         $('#virtuallocation').prop("required", false);
 
-        if (obj.val() == '@((int)ActivityLocationType.Physical)') {
+        if (obj.val() == '@((int) ActivityLocationType.Physical)') {
             $('#physical-location').removeClass('hide');
             $('.my-location').prop("required", true);
-        } else if (obj.val() == '@((int)ActivityLocationType.Virtual)') {
+        } else if (obj.val() == '@((int) ActivityLocationType.Virtual)') {
             $('#virtual-location').removeClass('hide');
             $('#virtuallocation').prop("required", true);
         }

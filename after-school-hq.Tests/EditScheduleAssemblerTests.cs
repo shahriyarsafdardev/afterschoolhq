@@ -42,7 +42,7 @@ namespace after_school_hq.Tests
             var activeRegistrationPeriod = new RegistrationPeriod();
             var schedules = new List<ActivitySchedule>();
             var result = assembler.AssembleEditScheduleResult(schedule, activity, currentAccount, UserType.Instructor, activeRegistrationPeriod, false,
-                schedules, true, fullScreenExitUrl, msgs);
+                schedules, "1", fullScreenExitUrl, msgs);
 
             Assert.That(result.ActiveMenu, Is.EqualTo("EditSchedule"));
             Assert.That(result.IsFullScreen, Is.True);

@@ -18,10 +18,10 @@ namespace AfterSchool.Areas.Org.Controllers
 
     public class EditContactAssembler
     {
-        public EditContactResult AssembleEditContactResult(Account account, SystemMessages messages, Activity activity, bool isNew, string fullScreenExitUrl,
+        public EditContactResult AssembleEditContactResult(Account account, SystemMessages messages, Activity activity, string isNew, string fullScreenExitUrl,
             List<WebUser> instructors, UserType accountUserType, bool currentUserIsActivityLeader)
         {
-            var isFullScreen = EditHelpers.GetIsFullScreen(activity, isNew);
+            var isFullScreen = EditHelpers.GetIsFullScreen(activity, isNew == "1");
             var isActivityLeader = EditHelpers.IsActivityLeader(account.ID, activity.AccountId, accountUserType, currentUserIsActivityLeader);
             return new EditContactResult
             {

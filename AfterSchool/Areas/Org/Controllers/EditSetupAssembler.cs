@@ -26,13 +26,13 @@ namespace AfterSchool.Areas.Org.Controllers
     {
         public EditSetupResult AssembleEditSetupResult(Activity activity, ActivityGroup activityGroup, SystemMessages msgs, Account currentAccount,
             string activeMenu, List<RegistrationPeriod> periods, RegistrationPeriod activePeriod, ActivityForm activeForm, AccountPackage accountPackage,
-            UserType accountUserType, bool currentUserIsActivityLeader, bool isNew, IEnumerable<Form> forms, string fullScreenExitUrl)
+            UserType accountUserType, bool currentUserIsActivityLeader, string isNew, IEnumerable<Form> forms, string fullScreenExitUrl)
         {
             periods.Add(activePeriod);
             periods = periods.OrderBy(period => period.StartDateTime.Value).ToList();
             var formsList = forms.OrderBy(x => x.Name).ToList();
             var isActivityLeader = EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, accountUserType, currentUserIsActivityLeader);
-            var isFullScreen = EditHelpers.GetIsFullScreen(activity, isNew);
+            var isFullScreen = EditHelpers.GetIsFullScreen(activity, isNew == "1");
 
             return new EditSetupResult
             {

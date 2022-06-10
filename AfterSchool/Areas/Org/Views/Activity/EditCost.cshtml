@@ -1,64 +1,74 @@
-﻿@model Activity
+﻿@using AfterSchool.Helpers
+@model AfterSchool.Areas.Org.Controllers.EditCostResult
 @{
-    ViewBag.Title = ((Account)ViewBag.Account).Name;
-    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
-    var accountPackage = (AccountPackage)ViewBag.AccountPackage;
-    var activityTitle = $"{(Model.ActivityGroupName.IsNotEmpty() ? $"{Model.ActivityGroupName} - " : "")}{Model.Name}";
+    var msgs = Model.Messages;
+    var activityTitle = $"{(Model.Activity.ActivityGroupName.IsNotEmpty() ? $"{Model.Activity.ActivityGroupName} - " : "")}{Model.Activity.Name}";
 
-    var isFullScreen = (bool)ViewBag.IsFullScreen;
+    var isFullScreen = Model.IsFullScreen;
     if (isFullScreen)
     {
         Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
     }
 }
 
-@{ Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
+@{ Html.RenderPartial("OrgAccountHeader", Model.Activity.AccountId.ToString(), new ViewDataDictionary {{"IsFullScreen", Model.IsFullScreen}}); }
 
 <div class="main-content">
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model); }
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model.Activity, new ViewDataDictionary
+       {
+           {"IsActivityLeader", Model.IsActivityLeader},
+           {"IsFullScreen", Model.IsFullScreen},
+       }); }
 
     <div class="panel panel-default margin-bottom-zero">
         <div class="panel-heading">
-            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", activityTitle); }
+            @{ Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", activityTitle); }
 
             @if (isFullScreen)
             {
-                Html.RenderPartial("_ExitFullScreen", "");
+                Html.RenderPartial("_ExitFullScreen", Model.FullScreenExitUrl);
             }
         </div>
         <div class="panel-body padding-lr-zero-sm">
 
             <div class="col-md-10 col-lg-9">
-                <form id="form1" method="post" action="@Url.Action("editcost", "activity", new { id = Model.Uid, isnew = Request["isnew"], source = Request["source"] })" class="form-horizontal">
+                <form id="form1" method="post" action="@Url.Action("editcost", "activity", new {id = Model.Activity.Uid, isnew = Request["isnew"], source = Request["source"]})" class="form-horizontal">
 
-                    
-                    @if (!Model.ActivityGroupId.HasValue)
+
+                    @if (!Model.Activity.ActivityGroupId.HasValue)
                     {
-                        @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editcost", "next", true, true, Request))
+                        @Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editcost", "next", true, true, Request))
                     }
                     else
                     {
-                        @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editcost", "publish", true, true, Request))
+                        @Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editcost", "publish", true, true, Request))
                     }
-                    @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(true, false))
+                    @Html.Raw(ActivitySetupHelper.SaveButton(true, false))
 
-                    @{Html.RenderPartial("~/Views/Shared/_ActivityFormPayment.cshtml", Model);}
-                    
+                    @{ Html.RenderPartial("~/Views/Shared/_ActivityFormPayment.cshtml", Model.Activity, new ViewDataDictionary
+                       {
+                           {"SubscriptionPlan", Model.SubscriptionPlan},
+                           {"PaymentPlan", Model.PaymentPlan},
+                           {"PostPayPlan", Model.PostPayPlan},
+                           {"AccountPackage", Model.AccountPackage},
+                           {"hasSchedule", Model.Activity.HasSchedule},
+                       }); }
+
                     <div class="form-group">
                         <div class="col-sm-6 col-sm-offset-3">
-                            @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(false, false))
+                            @Html.Raw(ActivitySetupHelper.SaveButton(false, false))
                         </div>
                         <div class="col-sm-3">
-                            @if (!Model.ActivityGroupId.HasValue)
+                            @if (!Model.Activity.ActivityGroupId.HasValue)
                             {
-                                @:@Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editcost", "next", false, true, Request))
+                                @:@Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editcost", "next", false, true, Request))
                             }
                             else
                             {
-                                @:@Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editcost", "publish", false, true, Request))
+                                @:@Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editcost", "publish", false, true, Request))
                             }
                         </div>
 
@@ -68,7 +78,7 @@
             </div>
 
             <div class="col-md-2 col-lg-3">
-                @{Html.RenderPartial("~/Views/Shared/_ActivityEditNav.cshtml", Model); }
+                @{ Html.RenderPartial("~/Views/Shared/_ActivityEditNav.cshtml", Model.Activity, new ViewDataDictionary {{"ActiveMenu", "EditCost"}}); }
             </div>
 
         </div>
