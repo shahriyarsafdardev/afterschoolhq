@@ -1244,9 +1244,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (packages.Count <= 0 || !packages.Any(m => !m.IsFree))
                 return RedirectToAction("NewBilling");
 
-            ViewBag.BillingHistory = currentAccount.GetStripeBillingHistory(msgs);
-            ViewBag.RefundHistory = currentAccount.GetStripeRefundHistory(msgs);
-            ViewBag.Cards = currentAccount.GetStripeCards(msgs);
+            ViewBag.BillingHistory = currentAccount.GetStripeBillingHistoryAHQCustomer(msgs);
+            ViewBag.RefundHistory = currentAccount.GetStripeRefundHistoryAHQCustomer(msgs);
+            ViewBag.Cards = currentAccount.GetStripeCardsAHQCustomer(msgs);
             ViewBag.Messages = msgs;
 
             return View(currentAccount);
@@ -1341,7 +1341,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         package = Package.LoadByUid(selectedPackageArr[1].ToGuid(), amsgs, adc);
 
-                        customer = currentAccount.CreateStripeCustomer(amsgs, adc);
+                        customer = currentAccount.CreateStripeCustomerAHQ(amsgs, adc);
 
                         if (stripetoken.IsNotEmpty())
                             currentAccount.CreateStripeCardFromTokenAHQCustomer(stripetoken, customer, amsgs, adc);
@@ -1391,9 +1391,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                ViewBag.BillingHistory = currentAccount.GetStripeBillingHistory(msgs);
-                ViewBag.RefundHistory = currentAccount.GetStripeRefundHistory(msgs);
-                ViewBag.Cards = currentAccount.GetStripeCards(msgs);
+                ViewBag.BillingHistory = currentAccount.GetStripeBillingHistoryAHQCustomer(msgs);
+                ViewBag.RefundHistory = currentAccount.GetStripeRefundHistoryAHQCustomer(msgs);
+                ViewBag.Cards = currentAccount.GetStripeCardsAHQCustomer(msgs);
                 ViewBag.Messages = msgs;
                 return View("Billing", currentAccount);
             }
@@ -1469,13 +1469,13 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var customer = currentAccount.GetStripeCustomer(msgs);
+                var customer = currentAccount.GetStripeCustomerAHQCustomer(msgs);
                 currentAccount.UpdateStripeCardAHQCustomer(id, customer, msgs);
             }
 
-            ViewBag.BillingHistory = currentAccount.GetStripeBillingHistory(msgs);
-            ViewBag.RefundHistory = currentAccount.GetStripeRefundHistory(msgs);
-            ViewBag.Cards = currentAccount.GetStripeCards(msgs);
+            ViewBag.BillingHistory = currentAccount.GetStripeBillingHistoryAHQCustomer(msgs);
+            ViewBag.RefundHistory = currentAccount.GetStripeRefundHistoryAHQCustomer(msgs);
+            ViewBag.Cards = currentAccount.GetStripeCardsAHQCustomer(msgs);
             ViewBag.Messages = msgs;
 
             return View("Billing", currentAccount);

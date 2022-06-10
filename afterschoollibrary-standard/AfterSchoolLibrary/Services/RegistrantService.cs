@@ -135,7 +135,7 @@ namespace AfterSchoolLibrary.Services
             if (checkoutObject.StripeSourceId.IsEmpty())
                 checkoutObject.LoadStripeSource(msgs);
 
-            return (checkoutObject.PayingAccount.GetStripeCustomer(msgs), checkoutObject.StripeSourceId);
+            return (checkoutObject.PayingAccount.GetStripeCustomerPlatform(msgs), checkoutObject.StripeSourceId);
         }
 
         public static void StartPaymentPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)

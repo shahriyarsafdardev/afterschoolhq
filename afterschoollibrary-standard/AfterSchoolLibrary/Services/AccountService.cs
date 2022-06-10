@@ -1545,7 +1545,7 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(account.Save(dc: dc));
 
             if (msgs.HasNoErrors())
-                account.CreateStripeCustomer(msgs, dc);
+                account.CreateStripeCustomerAHQ(msgs, dc);
 
             return msgs;
         }
@@ -1573,13 +1573,25 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(account.Save(dc: dc));
         }
 
-        public static Customer CreateStripeCustomer(this Account account, SystemMessages msgs = null,
+        public static Customer CreateStripeCustomerAHQ(this Account account, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
+            return account.CreateStripeCustomer(new StripeHelper(StripeHelper.AHQSubsSecretKey), msgs, dc);
+        }
 
-            var stripeHelper = new StripeHelper(StripeHelper.AHQSubsSecretKey);
-            var customer = account.GetStripeCustomer(msgs);
+        public static Customer CreateStripeCustomerPlatform(this Account account, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            return account.CreateStripeCustomer(new StripeHelper(), msgs, dc);
+        }
+
+        private static Customer CreateStripeCustomer(this Account account, StripeHelper stripeHelper, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var customer = account.GetStripeCustomer(stripeHelper, msgs);
 
             if (customer.IsNotEmpty())
                 return stripeHelper.UpdateCustomer(customer.Id, account.Name, account.Email, null, msgs);
@@ -1590,58 +1602,48 @@ namespace AfterSchoolLibrary.Services
             return customer;
         }
 
-        public static Source GetStripeSource(this Account account, string sourceId, SystemMessages msgs = null)
+        public static List<Source> GetStripeSourcesRegistrant(this Account account, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            Source source = null;
-            var customer = account.GetStripeCustomer(msgs);
+            var customer = account.GetStripeCustomerPlatform(msgs);
 
             if (customer.IsNotEmpty())
-                source = new StripeHelper(StripeHelper.AHQSubsSecretKey).GetSource(sourceId, msgs);
-
-            return source;
-        }
-
-        public static List<Source> GetStripeSources(this Account account, SystemMessages msgs = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-            var customer = account.GetStripeCustomer(msgs);
-
-            if (customer.IsNotEmpty())
-                return new StripeHelper(StripeHelper.AHQSubsSecretKey).GetSources(customer.Id, msgs);
+                return new StripeHelper().GetSources(customer.Id, msgs);
 
             return new List<Source>();
         }
 
-        public static List<Card> GetStripeCards(this Account account, SystemMessages msgs = null)
+        public static List<Card> GetStripeCardsAHQCustomer(this Account account, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
-            var customer = account.GetStripeCustomer(msgs);
+            var stripeHelper = new StripeHelper(StripeHelper.AHQSubsSecretKey);
+
+            var customer = account.GetStripeCustomerAHQCustomer(msgs);
 
             if (customer.IsNotEmpty())
-                return new StripeHelper(StripeHelper.AHQSubsSecretKey).GetCards(customer.Id, msgs);
+                return stripeHelper.GetCards(customer.Id, msgs);
 
             return new List<Card>();
         }
 
-        public static List<BankAccount> GetStripeBankAccounts(this Account account, SystemMessages msgs = null)
+        public static List<BankAccount> GetStripeBankAccountsRegistrant(this Account account, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
-            var customer = account.GetStripeCustomer(msgs);
+
+            var customer = account.GetStripeCustomerPlatform(msgs);
 
             if (customer.IsNotEmpty())
-                return new StripeHelper(StripeHelper.AHQSubsSecretKey).GetBankAccounts(customer.Id, msgs);
+                return new StripeHelper().GetBankAccounts(customer.Id, msgs);
 
             return new List<BankAccount>();
         }
 
-        public static List<Charge> GetStripeBillingHistory(this Account account, SystemMessages msgs = null)
+        public static List<Charge> GetStripeBillingHistoryAHQCustomer(this Account account, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var charges = new List<Charge>();
-            var customer = account.GetStripeCustomer(msgs);
+            var customer = account.GetStripeCustomerAHQCustomer(msgs);
 
             if (customer.IsNotEmpty())
                 charges = new StripeHelper(StripeHelper.AHQSubsSecretKey).GetCharges(customer.Id, msgs);
@@ -1649,17 +1651,17 @@ namespace AfterSchoolLibrary.Services
             return charges;
         }
 
-        public static List<Refund> GetStripeRefundHistory(this Account account, SystemMessages msgs = null)
+        public static List<Refund> GetStripeRefundHistoryAHQCustomer(this Account account, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var refunds = new List<Refund>();
-            var customer = account.GetStripeCustomer(msgs);
+            var stripeHelper = new StripeHelper(StripeHelper.AHQSubsSecretKey);
+            var customer = account.GetStripeCustomerAHQCustomer(msgs);
 
             if (!customer.IsEmpty())
             {
-                var charges = account.GetStripeBillingHistory(msgs);
-                var stripeHelper = new StripeHelper(StripeHelper.AHQSubsSecretKey);
+                var charges = account.GetStripeBillingHistoryAHQCustomer(msgs);
                 
                 charges.ForEach(charge => refunds.AddRange(stripeHelper.GetRefunds(charge.Id, msgs)));
             }
@@ -1667,10 +1669,20 @@ namespace AfterSchoolLibrary.Services
             return refunds;
         }
 
-        public static Customer GetStripeCustomer(this Account account, SystemMessages msgs)
+        public static Customer GetStripeCustomerAHQCustomer(this Account account, SystemMessages msgs)
+        {
+            return account.GetStripeCustomer(new StripeHelper(StripeHelper.AHQSubsSecretKey), msgs);
+        }
+
+        public static Customer GetStripeCustomerPlatform(this Account account, SystemMessages msgs)
+        {
+            return account.GetStripeCustomer(new StripeHelper(), msgs);
+        }
+
+        private static Customer GetStripeCustomer(this Account account, StripeHelper stripeHelper, SystemMessages msgs)
         {
             if (account.StripeCustomerId.IsNotEmpty())
-                return new StripeHelper(StripeHelper.AHQSubsSecretKey).GetCustomer(account.StripeCustomerId, null, msgs);
+                return stripeHelper.GetCustomer(account.StripeCustomerId, null, msgs);
 
             return null;
         }

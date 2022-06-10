@@ -1801,8 +1801,8 @@ namespace AfterSchool.Controllers
                 participationObject.Cost = registrantActivity.AmountCharged;
 
             ViewBag.Registration = registration;
-            ViewBag.Sources = SessionVariables.CurrentAccount.GetStripeSources(msgs);
-            ViewBag.BankAccounts = SessionVariables.CurrentAccount.GetStripeBankAccounts(msgs);
+            ViewBag.Sources = SessionVariables.CurrentAccount.GetStripeSourcesRegistrant(msgs);
+            ViewBag.BankAccounts = SessionVariables.CurrentAccount.GetStripeBankAccountsRegistrant(msgs);
             ViewBag.Cart = SessionVariables.Cart;
             ViewBag.ParticipationObject = participationObject;
             ViewBag.Messages = msgs;

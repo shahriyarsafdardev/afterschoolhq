@@ -384,30 +384,6 @@ namespace AfterSchoolLibrary.Models
             return price;
         }
 
-        private Plan AddOrUpdateStripePlan(Stripe.Product product, decimal price, BillingPeriodType billingPeriodType,
-            SystemMessages msgs)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            var stripeHelper = new StripeHelper(StripeHelper.AHQSubsSecretKey);
-            var plan = stripeHelper.GetPlan(GetStripePlanId(billingPeriodType), null, msgs);
-
-            if (plan.IsEmpty())
-            {
-                plan = stripeHelper.CreatePlan(
-                    product,
-                    GetStripePlanId(billingPeriodType),
-                    price,
-                    billingPeriodType,
-                    GetStripePlanName(billingPeriodType),
-                    null,
-                    null,
-                    msgs);
-            }
-
-            return plan;
-        }
-
         public string GetStripePlanId(BillingPeriodType billingPeriodType)
         {
             return Uid + (billingPeriodType == BillingPeriodType.Year

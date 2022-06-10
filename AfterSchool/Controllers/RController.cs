@@ -430,8 +430,8 @@ namespace AfterSchool.Controllers
                 return Redirect(account.PayUrl);
             }
 
-            ViewBag.Sources = currentAccount.GetStripeSources(msgs);
-            ViewBag.BankAccounts = currentAccount.GetStripeBankAccounts(msgs);
+            ViewBag.Sources = currentAccount.GetStripeSourcesRegistrant(msgs);
+            ViewBag.BankAccounts = currentAccount.GetStripeBankAccountsRegistrant(msgs);
             ViewBag.AccountProfile = account.GetAccountProfile(msgs);
             ViewBag.Messages = msgs;
             ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");

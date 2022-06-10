@@ -17,12 +17,12 @@ namespace AfterSchoolLibraryTests.Tests
 
         private Stripe.Product CreateStripeProduct(string id)
         {
-            return StripeHelper.CreateProduct(id, "my product name", "this is the best product ever", true, null, null, msgs);
+            return new StripeHelper().CreateProduct(id, "my product name", "this is the best product ever", true, null, null, msgs);
         }
 
         private Stripe.Plan CreateStripePlan(Stripe.Product product, string id)
         {
-            return StripeHelper.CreatePlan(product, id, 35, BillingPeriodType.Month, "my plan nickname", null, null, msgs);
+            return new StripeHelper().CreatePlan(product, id, 35, BillingPeriodType.Month, "my plan nickname", null, null, msgs);
         }
 
         [Fact]
@@ -30,15 +30,15 @@ namespace AfterSchoolLibraryTests.Tests
         {
             var product = CreateStripeProduct(Guid.NewGuid().ToString());
             Assert.NotNull(product);
-            msgs.AddRange(StripeHelper.DeleteProduct(product.Id));
+            msgs.AddRange(new StripeHelper().DeleteProduct(product.Id));
         }
 
         [Fact]
         public void GetProductTest()
         {
             var product = CreateStripeProduct(Guid.NewGuid().ToString());
-            Assert.NotNull(StripeHelper.GetProduct(product.Id, null, msgs));
-            msgs.AddRange(StripeHelper.DeleteProduct(product.Id));
+            Assert.NotNull(new StripeHelper().GetProduct(product.Id, null, msgs));
+            msgs.AddRange(new StripeHelper().DeleteProduct(product.Id));
         }
 
         [Fact]
@@ -46,9 +46,9 @@ namespace AfterSchoolLibraryTests.Tests
         {
             var productId = Guid.NewGuid().ToString();
             var product = CreateStripeProduct(productId);
-            msgs.AddRange(StripeHelper.DeleteProduct(productId));
+            msgs.AddRange(new StripeHelper().DeleteProduct(productId));
 
-            Assert.Null(StripeHelper.GetProduct(productId, null, msgs));
+            Assert.Null(new StripeHelper().GetProduct(productId, null, msgs));
         }
 
         [Fact]
@@ -56,11 +56,11 @@ namespace AfterSchoolLibraryTests.Tests
         {
             var product = CreateStripeProduct(Guid.NewGuid().ToString());
             var newName = "my product name 2";
-            var product2 = StripeHelper.UpdateProduct(product.Id, newName, "this is the 2nd best product ever", false, null, msgs);
+            var product2 = new StripeHelper().UpdateProduct(product.Id, newName, "this is the 2nd best product ever", false, null, msgs);
 
             Assert.Equal(newName, product2.Name);
 
-            msgs.AddRange(StripeHelper.DeleteProduct(product.Id));
+            msgs.AddRange(new StripeHelper().DeleteProduct(product.Id));
         }
 
         [Fact]
@@ -69,8 +69,8 @@ namespace AfterSchoolLibraryTests.Tests
             var product = CreateStripeProduct(Guid.NewGuid().ToString());
             var plan = CreateStripePlan(product, Guid.NewGuid().ToString());
             Assert.NotNull(plan);
-            msgs.AddRange(StripeHelper.DeletePlan(plan.Id, null));
-            msgs.AddRange(StripeHelper.DeleteProduct(product.Id));
+            msgs.AddRange(new StripeHelper().DeletePlan(plan.Id, null));
+            msgs.AddRange(new StripeHelper().DeleteProduct(product.Id));
         }
 
         [Fact]
@@ -78,9 +78,9 @@ namespace AfterSchoolLibraryTests.Tests
         {
             var product = CreateStripeProduct(Guid.NewGuid().ToString());
             var plan = CreateStripePlan(product, Guid.NewGuid().ToString());
-            Assert.NotNull(StripeHelper.GetPlan(plan.Id, null, msgs));
-            msgs.AddRange(StripeHelper.DeletePlan(plan.Id, null));
-            msgs.AddRange(StripeHelper.DeleteProduct(product.Id));
+            Assert.NotNull(new StripeHelper().GetPlan(plan.Id, null, msgs));
+            msgs.AddRange(new StripeHelper().DeletePlan(plan.Id, null));
+            msgs.AddRange(new StripeHelper().DeleteProduct(product.Id));
         }
 
         [Fact]
@@ -90,12 +90,12 @@ namespace AfterSchoolLibraryTests.Tests
             var plan = CreateStripePlan(product, Guid.NewGuid().ToString());
             var updatedNickname = "my plan nickname 2";
 
-            var plan2 = StripeHelper.UpdatePlan(plan.Id, updatedNickname, false, null, msgs);
+            var plan2 = new StripeHelper().UpdatePlan(plan.Id, updatedNickname, false, null, msgs);
 
             Assert.Equal(updatedNickname, plan2.Nickname);
 
-            msgs.AddRange(StripeHelper.DeletePlan(plan.Id, null));
-            msgs.AddRange(StripeHelper.DeleteProduct(product.Id));
+            msgs.AddRange(new StripeHelper().DeletePlan(plan.Id, null));
+            msgs.AddRange(new StripeHelper().DeleteProduct(product.Id));
         }
 
         [Fact]
@@ -105,28 +105,28 @@ namespace AfterSchoolLibraryTests.Tests
             var product = CreateStripeProduct(Guid.NewGuid().ToString());
             var plan = CreateStripePlan(product, planId);
 
-            msgs.AddRange(StripeHelper.DeletePlan(planId, null));
+            msgs.AddRange(new StripeHelper().DeletePlan(planId, null));
 
-            Assert.Null(StripeHelper.GetPlan(planId, null, msgs));
+            Assert.Null(new StripeHelper().GetPlan(planId, null, msgs));
 
-            msgs.AddRange(StripeHelper.DeleteProduct(product.Id));
+            msgs.AddRange(new StripeHelper().DeleteProduct(product.Id));
         }
 
         [Fact]
         public void CreateCustomerTest()
         {
-            var customer = StripeHelper.CreateCustomer("This is my customer", "test@test.com", null, msgs);
+            var customer = new StripeHelper().CreateCustomer("This is my customer", "test@test.com", null, msgs);
             Assert.NotNull(customer);
-            msgs.AddRange(StripeHelper.DeleteCustomer(customer.Id, null));
+            msgs.AddRange(new StripeHelper().DeleteCustomer(customer.Id, null));
         }
 
         [Fact]
         public void DeleteCustomerTest()
         {
-            var customer = StripeHelper.CreateCustomer("This is my customer", "test@test.com", null, msgs);
-            msgs.AddRange(StripeHelper.DeleteCustomer(customer.Id, null));
+            var customer = new StripeHelper().CreateCustomer("This is my customer", "test@test.com", null, msgs);
+            msgs.AddRange(new StripeHelper().DeleteCustomer(customer.Id, null));
 
-            var customerReload = StripeHelper.GetCustomer(customer.Id, null, msgs);
+            var customerReload = new StripeHelper().GetCustomer(customer.Id, null, msgs);
 
             Assert.True((customerReload.Deleted.HasValue && customerReload.Deleted.Value));
         }
@@ -134,9 +134,9 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void GetCustomer()
         {
-            var customer = StripeHelper.CreateCustomer("This is my customer", "test@test.com", null, msgs);
-            Assert.NotNull(StripeHelper.GetCustomer(customer.Id, null, msgs));
-            msgs.AddRange(StripeHelper.DeleteCustomer(customer.Id, null));
+            var customer = new StripeHelper().CreateCustomer("This is my customer", "test@test.com", null, msgs);
+            Assert.NotNull(new StripeHelper().GetCustomer(customer.Id, null, msgs));
+            msgs.AddRange(new StripeHelper().DeleteCustomer(customer.Id, null));
         }
 
         [Fact(Skip = "Need to fix")]
@@ -157,13 +157,13 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void UpdateCustomerTest()
         {
-            var customer = StripeHelper.CreateCustomer("This is my customer", "test@test.com", null, msgs);
+            var customer = new StripeHelper().CreateCustomer("This is my customer", "test@test.com", null, msgs);
             var newDescription = "this is my new customer";
-            var customer2 = StripeHelper.UpdateCustomer(customer.Id, newDescription, "test@test.com", null, msgs);
+            var customer2 = new StripeHelper().UpdateCustomer(customer.Id, newDescription, "test@test.com", null, msgs);
 
             Assert.Equal(newDescription, customer2.Description);
 
-            msgs.AddRange(StripeHelper.DeleteCustomer(customer.Id, null));
+            msgs.AddRange(new StripeHelper().DeleteCustomer(customer.Id, null));
         }
 
         [Fact(Skip = "Need to fix")]
