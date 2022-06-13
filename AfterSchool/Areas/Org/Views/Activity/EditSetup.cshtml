@@ -40,14 +40,29 @@
 
                     @Html.Raw(ActivitySetupHelper.SaveButton(true, false))
 
-                    @{ Html.RenderPartial("~/Views/Shared/_ActivityFormSetup.cshtml", Model.Activity, new ViewDataDictionary
-                       {
-                           {"AccountPackage", accountPackage},
-                           {"Forms", Model.Forms},
-                           {"Group", Model.Group},
-                           {"ActivePeriod", Model.ActivePeriod},
-                           {"ActiveForm", Model.ActiveForm},
-                       }); }
+                    @{
+                        if (Model.Activity.ActivityTypeId == ActivityType.VolunteerOpportunity)
+                        {
+                            Html.RenderPartial("_VolunteerFormSetup", Model.Activity, new ViewDataDictionary
+                            {
+                                {"AccountPackage", accountPackage},
+                                {"Forms", Model.Forms},
+                                {"ActivePeriod", Model.ActivePeriod},
+                                {"ActiveForm", Model.ActiveForm},
+                            });
+                        }
+                        else
+                        {
+                            Html.RenderPartial("_ActivityFormSetup", Model.Activity, new ViewDataDictionary
+                            {
+                                {"AccountPackage", accountPackage},
+                                {"Forms", Model.Forms},
+                                {"Group", Model.Group},
+                                {"ActivePeriod", Model.ActivePeriod},
+                                {"ActiveForm", Model.ActiveForm},
+                            });
+                        }
+                    }
 
                     <div class="form-group">
 
@@ -74,11 +89,11 @@
 
 <script type="text/javascript">
     function validateSetup(flag, event, url) {        
-        var startDate = moment($('#registrationopendate').val());
-        var endDate = moment($('#registrationclosedate').val());
-        var beginningTime = moment($('#registrationopentime').val(), 'h:mma');
-        var endingTime = moment($('#registrationclosetime').val(), 'h:mma');
-        var isActivityGroup = @Json.Encode(group.IsNotEmpty());
+        let startDate = moment($('#registrationopendate').val());
+        let endDate = moment($('#registrationclosedate').val());
+        let beginningTime = moment($('#registrationopentime').val(), 'h:mma');
+        let endingTime = moment($('#registrationclosetime').val(), 'h:mma');
+        let isActivityGroup = @Json.Encode(group.IsNotEmpty());
 
         if (isActivityGroup)
             return ActivitySetup.navigateActivity(url);

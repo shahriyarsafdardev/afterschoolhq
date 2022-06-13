@@ -1,0 +1,231 @@
+﻿@model Activity
+@{
+    var accountPackage = (AccountPackage) ViewData["AccountPackage"];
+    var forms = (List<Form>) ViewData["Forms"];
+    var activePeriod = (RegistrationPeriod) ViewData["ActivePeriod"];
+    var activeForm = (ActivityForm) ViewData["ActiveForm"];
+    var maximumFormCount = accountPackage.GetFeature(FeatureType.ManageForms).Max ?? 0;
+    var canAddNewForm = forms.Count < maximumFormCount;
+    var maximumSeatsAvailable = (accountPackage.GetFeature(FeatureType.Participants).Max ?? 0).ToString("#");
+}
+
+<input id="hdnAdvanceSettingToggle" type="hidden" name="isAdvanceSettingEnabled"/>
+<div class="panel panel-default margin-bottom-zero">
+    <div class="panel-heading activity-heading">
+        Settings
+    </div>
+    <div class="panel-body padding-lr-zero-sm">
+        <div class="form-group">
+            <label class="col-sm-3 control-label">@UILabel.ActivityLabel(Model.ActivityTypeId) Name <span class="text-danger">*</span></label>
+            <div class="col-sm-9">
+                <input id="name" class="form-control" type="text" name="name" value="@Model.Name" maxlength="75" required onfocus="this.select()" placeholder="Your @UILabel.ActivityLabel(Model.ActivityTypeId) Name (75 Characters)"/>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label">
+                Number of Volunteers Required <span class="text-danger" aria-label="required">*</span>
+            </label>
+            <div class="col-sm-9">
+                <input type="number" class="form-control" id="seatsavailable" name="seatsavailable" value="@Model.SeatsAvailable" onfocus="this.select()" required step="1" min="1" max="@accountPackage.GetFeature(FeatureType.Participants).Max.Value"/>
+                <p class="text-muted">
+                    Must be a number between 1 and @maximumSeatsAvailable
+                </p>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label">
+                Invite Only?
+            </label>
+            <div class="col-md-9">
+                @{ Html.RenderPartial("_SwitchButton", Model.IsInviteOnly, new ViewDataDictionary
+                   {
+                       {"checkboxname", "inviteonly"},
+                       {"checkboxid", "inviteonly"},
+                       {"disabled", false},
+                   }); }
+            </div>
+        </div>
+
+        <input type="hidden" name="type" value="@((int) Model.ActivityTypeId)"/>
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label">
+                Continuous Enrollment? <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="With continuous enrollment, the sign up period stays open. This can be updated via settings." data-placement="top"></i>
+            </label>
+            <div class="col-sm-9">
+                @{ Html.RenderPartial("_SwitchButton", Model.IsContinuousEnrollment, new ViewDataDictionary
+                   {
+                       {"checkboxname", "isContinuousEnrollmentEnabled"},
+                       {"checkboxid", "isContinuousEnrollmentEnabled"},
+                       {"disabled", false},
+                   }); }
+            </div>
+        </div>
+
+        <input type="hidden" name="costfrequencytype" value="@((int) ActivityCostFrequencyType.PerClass)"/>
+
+        <div class="form-group" id="cutoffhours-container">
+            <label class="col-sm-3 control-label">Registration cut-off time</label>
+            <div class="col-sm-9">
+                <div class="input-group input-group-lg xs-mb-15 col-sm-3">
+                    <input type="number"
+                           class="form-control"
+                           id="cutoffhours"
+                           name="cutoffhours"
+                           onfocus="this.select()"
+                           value="@(Model.RegistrationCutoffHours.HasValue ? Model.RegistrationCutoffHours.Value.ToString() : "2")"
+                           required
+                           min="0"
+                           step="1"/>
+                    <span class="input-group-addon">Hours</span>
+                </div>
+                <p class="text-muted">
+                    Registration cut-off time will prevent volunteers from registering a preset number of hours before the start time.
+                </p>
+            </div>
+        </div>
+
+        <div class="registrationperiod-container">
+
+            <input type="hidden" name="registrationperiod" id="registrationperiod" value="@activePeriod.ID"/>
+
+            <div class="form-group reg-period">
+                <label class="col-sm-3 control-label">@UILabel.RegistrationPeriodLabel() Open <span class="text-danger">*</span></label>
+                <div class="col-sm-5">
+                    @{ Html.RenderPartial("Components/_Date", new FormInputViewModel
+                       {
+                           Id = "registrationopendate",
+                           Name = "registrationopendate",
+                           Value = activePeriod.StartDateTime.ToShortDateString(),
+                       }); }
+                </div>
+                <div class="col-sm-4">
+
+                    @{ Html.RenderPartial("_TimeSelect", activePeriod.StartDateTime.Value, new ViewDataDictionary
+                       {
+                           {"name", "registrationopentime"},
+                           {"id", "registrationopentime"},
+                           {"required", true},
+                       }); }
+
+                </div>
+            </div>
+
+            <div class="form-group reg-period" id="signUpCloseDate" style="@(Model.IsContinuousEnrollment ? "display:none" : "")">
+                <label class="col-sm-3 control-label">@UILabel.RegistrationPeriodLabel() Close <span class="text-danger">*</span></label>
+                <div class="col-sm-5">
+                    @{ Html.RenderPartial("Components/_Date", new FormInputViewModel
+                       {
+                           Id = "registrationclosedate",
+                           Name = "registrationclosedate",
+                           Value = activePeriod.EndDateTime.ToShortDateString(),
+                       }); }
+                </div>
+                <div class="col-sm-4">
+
+                    @{ Html.RenderPartial("_TimeSelect", activePeriod.EndDateTime.Value, new ViewDataDictionary
+                       {
+                           {"name", "registrationclosetime"},
+                           {"id", "registrationclosetime"},
+                           {"required", true},
+                       }); }
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-offset-3 col-md-9 padding-v-20">
+            <span>
+                <a onclick="ActivitySetup.showAdvancedSettings()" id="btn-advanced-settings" class="pointer">Show Advanced Settings</a>
+            </span>
+        </div>
+
+        <div class="advanced-settings hide">
+            <div class="form-group">
+                <label class="col-md-3 control-label">
+                    Registration Form <span class="text-danger">*</span>
+                </label>
+                <div class="col-md-6">
+                    <select name="form" id="form" class="form-control"
+                            @(activeForm.IsNotEmpty() && forms.Any(m => m.ID == activeForm.FormId) ? "required" : "")>
+                        @if (canAddNewForm)
+                        {
+                            <option value="0"> + New Form</option>
+                        }
+
+                        @foreach (var form in forms)
+                        {
+                            <option value="@form.ID" @(activeForm?.FormId == form.ID ? "selected=\"selected\"" : "")>@form.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <a id="editForm" class="btn btn-block btn-link" href="@Url.Action("FormEdit", "Account", new {id = activeForm?.ID})" target="_blank">Edit Form</a>
+                </div>
+            </div>
+
+            <input type="hidden" name="regmode" value="@((int) RegistrationMode.Register)"/>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+
+        $('#form').change(function () {
+            changeHrefAndVisibilityForEditFormLink();
+        });
+
+        changeHrefAndVisibilityForEditFormLink();
+
+        $('input[name=registrationclosedate],input[name=registrationopendate],#registrationopentime,#registrationclosetime').on('change', function () {
+            validateSetup(0, event);
+        });
+
+        isContinuousEnabled();
+
+        $("#isContinuousEnrollmentEnabled").on('change', function () {
+            isContinuousEnabled();
+        })
+    });
+
+    function isContinuousEnabled() {
+        if ($("#isContinuousEnrollmentEnabled").is(':checked')) {
+            $("#signUpCloseDate").hide();
+            let myDate = new Date();
+            myDate.setFullYear(myDate.getFullYear() + 10);
+            $('#registrationclosedate').val(getFormattedDate(myDate));
+        }
+        else {
+            $("#signUpCloseDate").show();
+            if ($('#name').val() === "") {
+                let myDate = new Date();
+                myDate.setDate(myDate.getDate() + 7);
+                $('#registrationclosedate').val(getFormattedDate(myDate));
+            }
+        }
+    }
+
+    function getFormattedDate(date) {
+        console.log(date);
+        let year = date.getFullYear();
+        let month = (1 + date.getMonth()).toString().padStart(2, '0');
+        let day = date.getDate().toString().padStart(2, '0');
+
+        return month + '/' + day + '/' + year;
+    }
+
+    function changeHrefAndVisibilityForEditFormLink() {
+        if ($('#form').val().length > 0 && $('#form').val() !== "0") {
+            $('#editForm').removeClass('hide');
+            $('#editForm').attr('href', '@Url.Action("formedit", "account")/' + $('#form').val());
+        } else {
+            $('#editForm').addClass('hide');
+        }
+    }
+
+</script>

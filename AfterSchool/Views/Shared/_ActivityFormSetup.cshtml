@@ -7,13 +7,9 @@
     var activePeriod = (RegistrationPeriod) ViewData["ActivePeriod"];
     var activeForm = (ActivityForm) ViewData["ActiveForm"];
     var showSeats = Model.ActivityTypeId.NotIn(new[] {ActivityType.FieldTrip, ActivityType.PermissionSlip});
-    var showInviteOnly = accountPackage.HasFeature(FeatureType.AllowInvites);
     var showAllowApplications = accountPackage.HasFeature(FeatureType.AllowApplications);
-    var showManageForms = accountPackage.HasFeature(FeatureType.ManageForms);
-    var maxFormCount = accountPackage.IsNotEmpty() ? (int) accountPackage.GetFeature(FeatureType.ManageForms).Max.Value : 0;
-    var showManageFormFields = forms.Count < maxFormCount;
-    var allowInvitesPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowInvites, SessionVariables.AccountPackage);
-    var manageFormsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageForms, SessionVariables.AccountPackage);
+    var maximumFormCount = accountPackage.GetFeature(FeatureType.ManageForms).Max ?? 0;
+    var canAddNewForm = forms.Count < maximumFormCount;
     var allowApplicationsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowApplications, SessionVariables.AccountPackage);
 
 }
@@ -69,22 +65,13 @@
                 <label class="col-sm-3 control-label">
                     Invite Only?
                 </label>
-                <div class="col-md-9"
-                     @if (!showInviteOnly)
-                     {
-                         <text> onclick="return showUpgradeMyPlan('@(allowInvitesPackage?.Name)',@(allowInvitesPackage?.ID))" </text>
-                     }>
-                    @{
-                        Html.RenderPartial(
-                            "~/Views/Shared/_SwitchButton.cshtml",
-                            Model.IsInviteOnly,
-                            new ViewDataDictionary
-                            {
-                                {"checkboxname", "inviteonly"},
-                                {"checkboxid", "inviteonly"},
-                                {"disabled", !showInviteOnly},
-                            });
-                    }
+                <div class="col-md-9">
+                    @{ Html.RenderPartial("_SwitchButton", Model.IsInviteOnly, new ViewDataDictionary
+                       {
+                           {"checkboxname", "inviteonly"},
+                           {"checkboxid", "inviteonly"},
+                           {"disabled", false},
+                       }); }
                 </div>
             </div>
         }
@@ -102,7 +89,9 @@
         {
             <div class="form-group">
                 <label class="col-sm-3 control-label">
-                    Continuous Enrollment? <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="With continuous enrollment, the sign up period stays open. This can be updated via settings." data-placement="top"></i>
+                    Continuous Enrollment? <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover"
+                                              data-content="With continuous enrollment, the sign up period stays open. This can be updated via settings."
+                                              data-placement="top"></i>
                 </label>
                 <div class="col-sm-9">
                     @{
@@ -127,7 +116,10 @@
                 <div class="col-sm-9">
 
                     <div class="am-radio inline">
-                        <input type="radio" class="form-control costfrequencytype" name="costfrequencytype" id="costfrequencytype-@((int) ActivityCostFrequencyType.PerActivity)" required @(Model.CostFrequencyTypeId == ActivityCostFrequencyType.PerActivity ? "checked=\"checked\"" : "") value="@((int) ActivityCostFrequencyType.PerActivity)"/>
+                        <input type="radio" class="form-control costfrequencytype" name="costfrequencytype"
+                               id="costfrequencytype-@((int) ActivityCostFrequencyType.PerActivity)" required
+                               @(Model.CostFrequencyTypeId == ActivityCostFrequencyType.PerActivity ? "checked=\"checked\"" : "")
+                               value="@((int) ActivityCostFrequencyType.PerActivity)"/>
                         <label for="costfrequencytype-@((int) ActivityCostFrequencyType.PerActivity)">The Entire Activity</label>
                     </div>
 
@@ -246,18 +238,9 @@
                     <label class="col-md-3 control-label">
                         Registration Form <span class="text-danger">*</span>
                     </label>
-                    <div class="col-md-6"
-                         @if (!showManageForms)
-                         {
-                             <text> onclick="return showUpgradeMyPlan()" </text>
-                         }>
-                        <select name="form" id="form" class="form-control" @(activeForm.IsNotEmpty() && forms.Any(m => m.ID == activeForm.FormId) ? "required" : "")
-                                @if (!showManageForms)
-                                {
-                                    <text> disabled="disabled" </text>
-                                }>
-                            @*<option value="">Select Form...</option>*@
-                            @if (showManageFormFields)
+                    <div class="col-md-6">
+                        <select name="form" id="form" class="form-control" @(activeForm.IsNotEmpty() && forms.Any(m => m.ID == activeForm.FormId) ? "required" : "")>
+                            @if (canAddNewForm)
                             {
                                 <option value="0"> + New Form</option>
                             }
@@ -269,14 +252,8 @@
                         </select>
                     </div>
                     <div class="col-md-3">
-                        @if (showManageForms)
-                        {
-                            <a id="editForm" class="btn btn-block btn-link" href="@Url.Action("editform", "account", new {id = activeForm?.ID})" target="_blank">Edit Form</a>
-                        }
-                        else
-                        {
-                            <a class="btn btn-block btn-link" href="#" onclick="return showUpgradeMyPlan('@(manageFormsPackage?.Name)',@(manageFormsPackage?.ID))">Edit Form</a>
-                        }
+
+                        <a id="editForm" class="btn btn-block btn-link" href="@Url.Action("FormEdit", "Account", new {id = activeForm?.ID})" target="_blank">Edit Form</a>
                     </div>
                 </div>
 
@@ -332,10 +309,10 @@
     PageEvent.add(PageEvent.AFTER_INIT, function () {
 
         $('#form').change(function () {
-            checkFormVal();
+            changeHrefAndVisibilityForEditFormLink();
         });
 
-        checkFormVal();
+        changeHrefAndVisibilityForEditFormLink();
 
         $('input[name=registrationclosedate],input[name=registrationopendate],#registrationopentime,#registrationclosetime').on('change', function () {
             validateSetup(0, event);
@@ -344,25 +321,25 @@
         $('.costfrequencytype').click(function () {
             toggleCostFrequencyType($(this));
         });
-        isContinousEnabled();
+        isContinuousEnabled();
         toggleCostFrequencyType($('#costfrequencytype-@((int) ActivityCostFrequencyType.PerClass)'));
 
         $("#isContinuousEnrollmentEnabled").on('change', function () {
-            isContinousEnabled();
+            isContinuousEnabled();
         })
     });
 
-    function isContinousEnabled() {
+    function isContinuousEnabled() {
         if ($("#isContinuousEnrollmentEnabled").is(':checked')) {
             $("#signUpCloseDate").hide();
-            var myDate = new Date();
+            let myDate = new Date();
             myDate.setFullYear(myDate.getFullYear() + 10);
             $('#registrationclosedate').val(getFormattedDate(myDate));
         }
         else {
             $("#signUpCloseDate").show();
-            if ($('#name').val() == "") {
-                var myDate = new Date();
+            if ($('#name').val() === "") {
+                let myDate = new Date();
                 myDate.setDate(myDate.getDate() + 7);
                 $('#registrationclosedate').val(getFormattedDate(myDate));
             }
@@ -378,7 +355,7 @@
         return month + '/' + day + '/' + year;
     }
     function toggleCostFrequencyType(obj) {
-        if (obj.val() == '@((int) ActivityCostFrequencyType.PerClass)' && obj.is(':checked')) {
+        if (obj.val() === '@((int) ActivityCostFrequencyType.PerClass)' && obj.is(':checked')) {
             $('.regmode').prop('disabled', true);
             $('#regmode-@RegistrationMode.Register.ToString()').prop('checked', true);
             $('#cutoffhours-container').removeClass('hide');
@@ -390,9 +367,8 @@
         }
     }
 
-
-    function checkFormVal() {
-        if ($('#form').val().length > 0 && $('#form').val() != "0") {
+    function changeHrefAndVisibilityForEditFormLink() {
+        if ($('#form').val().length > 0 && $('#form').val() !== "0") {
             $('#editForm').removeClass('hide');
             $('#editForm').attr('href', '@Url.Action("formedit", "account")/' + $('#form').val());
         } else {
