@@ -1511,6 +1511,7 @@ namespace AfterSchoolLibrary.Services
                 // set payout type to manual for this account if it has package with ManualStripePayouts
                 var isManualStripeEnabled =
                     account.GetAccountPackageFeature(featureType: FeatureType.ManualStripePayouts, msgs: msgs, dc: dc);
+                
                 if (isManualStripeEnabled.IsNotEmpty() && isManualStripeEnabled.Max > 0 &&
                     account.StripeUserId.IsNotEmpty())
                     stripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: account.StripeUserId,
