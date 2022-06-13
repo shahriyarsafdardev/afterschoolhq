@@ -14,9 +14,9 @@
     var activityMeetingVerbLabel = "meet";
     var forceNonRepeating = false;
     var hasScheduled = false;
-    var isContinousEnrollmentEnabled = ViewData["isContinousEnrollmentEnabled"] != null && String.Equals(ViewData["isContinousEnrollmentEnabled"], true) ? true : false;
+    var isContinuousEnrollmentEnabled = ViewData["isContinuousEnrollmentEnabled"] != null && String.Equals(ViewData["isContinuousEnrollmentEnabled"], true) ? true : false;
 
-    if (isContinousEnrollmentEnabled)
+    if (isContinuousEnrollmentEnabled)
     {
         Model.IsOngoing = true;
     }
@@ -61,7 +61,7 @@
     var showAllowSubscriptionPlans = SessionVariables.AccountPackage.HasFeature(FeatureType.AllowSubscriptionPlans);
     var allowSubscriptionPlansPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowSubscriptionPlans, SessionVariables.AccountPackage);
 }
-@if(isContinousEnrollmentEnabled)
+@if(isContinuousEnrollmentEnabled)
 {
     <style>
         .isongoing .switch-button input[type="checkbox"]:checked + span {
@@ -207,12 +207,12 @@
                                         {
                                             { "checkboxname", "isongoing" },
                                             { "checkboxid", "isongoing" },
-                                            { "disabled", isContinousEnrollmentEnabled ? true : !showAllowSubscriptionPlans }
+                                            { "disabled", isContinuousEnrollmentEnabled ? true : !showAllowSubscriptionPlans }
                                         }
                                     );
                                 }
 
-                                @if (isContinousEnrollmentEnabled)
+                                @if (isContinuousEnrollmentEnabled)
                                 {
                                 <p class="text-muted padding-v-10 font-style-italic">
                                     <img src="~/Assets/img/alert-2.svg" class="alert-image-style"> Activities must be listed as ongoing while Continuous enrollment is enabled.
@@ -249,7 +249,7 @@
                     <div class="am-checkbox display-days">
                         @foreach (DayOfWeekASL day in Enum.GetValues(typeof(DayOfWeekASL)).Cast<DayOfWeekASL>().Where(x => x != DayOfWeekASL.NotSet))
                         {
-                            <input type="checkbox" name="schedulerepeat-@((int)day)" id="schedulerepeat-@((int)day)" value="1" @(Model.GetDaysOfTheWeek().Contains(day) ? " checked=\"checked\" " : "") class="schedulerepeat-checkbox" />
+                            <input type="checkbox" name="schedulerepeat-@((int)day)" id="schedulerepeat-@((int)day)" value="1" @(daysOfTheWeek.Contains(day) ? " checked=\"checked\" " : "") class="schedulerepeat-checkbox" />
                             <label for="schedulerepeat-@((int)day)" class="margin-h-10 mobile-padding">@day.ToString().MaxChars(3)</label>
                         }
                     </div>
@@ -503,7 +503,7 @@
         $('#isongoing').change(function () {
             checkIsOnGoing();
         });
-         @if(isContinousEnrollmentEnabled)
+         @if(isContinuousEnrollmentEnabled)
          {
           <text>
             ActivitySetup.showAdvancedSettings()

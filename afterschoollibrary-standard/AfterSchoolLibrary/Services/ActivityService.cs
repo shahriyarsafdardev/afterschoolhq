@@ -748,111 +748,106 @@ namespace AfterSchoolLibrary.Services
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var name = values.GetValueOrDefault("name");
-            var seatsavailable = values.GetValueOrDefault("seatsavailable");
-            var registrationperiod = values.GetValueOrDefault("registrationperiod");
-            var registrationopendate = values.GetValueOrDefault("registrationopendate");
-            var registrationopentime = values.GetValueOrDefault("registrationopentime");
-            var registrationclosedate = values.GetValueOrDefault("registrationclosedate");
-            var registrationclosetime = values.GetValueOrDefault("registrationclosetime");
-            var leadertype = values.GetValueOrDefault("leadertype");
-            var timezone = values.GetValueOrDefault("timezone");
-            var contactname = values.GetValueOrDefault("contactname");
-            var contactphone = values.GetValueOrDefault("contactphone");
-            var contactemail = values.GetValueOrDefault("contactemail");
+            var seatsAvailable = values.GetValueOrDefault("seatsavailable");
+            var registrationPeriod = values.GetValueOrDefault("registrationperiod");
+            var registrationOpenDate = values.GetValueOrDefault("registrationopendate");
+            var registrationOpenTime = values.GetValueOrDefault("registrationopentime");
+            var registrationCloseDate = values.GetValueOrDefault("registrationclosedate");
+            var registrationCloseTime = values.GetValueOrDefault("registrationclosetime");
+            var leaderType = values.GetValueOrDefault("leadertype");
+            var contactName = values.GetValueOrDefault("contactname");
+            var contactPhone = values.GetValueOrDefault("contactphone");
+            var contactEmail = values.GetValueOrDefault("contactemail");
             var instructor = values.GetValueOrDefault("instructor");
-            var instructorfirstname = values.GetValueOrDefault("instructorfirstname");
-            var instructorlastname = values.GetValueOrDefault("instructorlastname");
-            var instructoremail = values.GetValueOrDefault("instructoremail");
-            var instructorphone = values.GetValueOrDefault("instructorphone");
+            var instructorFirstName = values.GetValueOrDefault("instructorfirstname");
+            var instructorLastName = values.GetValueOrDefault("instructorlastname");
+            var instructorEmail = values.GetValueOrDefault("instructoremail");
+            var instructorPhone = values.GetValueOrDefault("instructorphone");
             var details = values.GetValueOrDefault("details");
             var location = values.GetValueOrDefault("location");
-            var locationname = values.GetValueOrDefault("locationname");
-            var locationdetails = values.GetValueOrDefault("locationdetails");
-            var scheduledetails = values.GetValueOrDefault("scheduledetails");
+            var locationName = values.GetValueOrDefault("locationname");
+            var locationDetails = values.GetValueOrDefault("locationdetails");
+            var scheduleDetails = values.GetValueOrDefault("scheduledetails");
             var address1 = values.GetValueOrDefault("address1");
-            var streetnumber = values.GetValueOrDefault("streetnumber");
-            var streetname = values.GetValueOrDefault("streetname");
+            var streetNumber = values.GetValueOrDefault("streetnumber");
+            var streetName = values.GetValueOrDefault("streetname");
             var address2 = values.GetValueOrDefault("address2");
             var neighborhood = values.GetValueOrDefault("neighborhood");
             var city = values.GetValueOrDefault("city");
             var county = values.GetValueOrDefault("county");
             var state = values.GetValueOrDefault("state");
-            var postalcode = values.GetValueOrDefault("postalcode");
+            var postalCode = values.GetValueOrDefault("postalcode");
             var country = values.GetValueOrDefault("country");
-            var placeid = values.GetValueOrDefault("placeid");
+            var placeId = values.GetValueOrDefault("placeid");
             var latitude = values.GetValueOrDefault("latitude");
             var longitude = values.GetValueOrDefault("longitude");
-            var ismylocation = values.GetValueOrDefault("mylocation");
-            var locationtype = values.GetValueOrDefault("locationtype");
-            var activitylocationtype = values.GetValueOrDefault("activitylocationtype");
+            var isMyLocation = values.GetValueOrDefault("mylocation");
+            var locationType = values.GetValueOrDefault("locationtype");
+            var activityLocationType = values.GetValueOrDefault("activitylocationtype");
             var cost = values.GetValueOrDefault("cost");
-            var costdescription = values.GetValueOrDefault("costdescription");
-            var acceptpaypal = values.GetValueOrDefault("acceptpaypal");
-            var acceptcreditcard = values.GetValueOrDefault("acceptcreditcard");
-            var allowtopaylater = values.GetValueOrDefault("allowtopaylater");
+            var costDescription = values.GetValueOrDefault("costdescription");
+            var allowToPayLater = values.GetValueOrDefault("allowtopaylater");
             var form = values.GetValueOrDefault("form");
-            var alloworganization = values.GetValueOrDefault("alloworganization");
-            var requiresparentalconsent = values.GetValueOrDefault("requiresparentalconsent");
+            var requiresParentalConsent = values.GetValueOrDefault("requiresparentalconsent");
             var isStudentAllowed = values.GetValueOrDefault("isStudentAllowed");
-            var agestart = values.GetValueOrDefault("agestart");
-            var ageend = values.GetValueOrDefault("ageend");
-            var gradestart = values.GetValueOrDefault("gradestart");
-            var gradeend = values.GetValueOrDefault("gradeend");
-            var genderrestrictions = values.GetValueOrDefault("genderrestrictions");
-            var regmode = values.GetValueOrDefault("regmode");
+            var ageStart = values.GetValueOrDefault("agestart");
+            var ageEnd = values.GetValueOrDefault("ageend");
+            var gradeStart = values.GetValueOrDefault("gradestart");
+            var gradeEnd = values.GetValueOrDefault("gradeend");
+            var genderRestrictions = values.GetValueOrDefault("genderrestrictions");
+            var registrationMode = values.GetValueOrDefault("regmode");
             var days = values.GetValueOrDefault("days");
             var group = values.GetValueOrDefault("group");
-            var registrationthankyouemail = values.GetValueOrDefault("registrationthankyouemail");
-            var applicationthankyouemail = values.GetValueOrDefault("applicationthankyouemail");
-            var daysoftheweek = values.GetValueOrDefault("daysoftheweek");
-            var repeatsweekly = values.GetValueOrDefault("repeatsweekly");
-            var isongoing = values.GetValueOrDefault("isongoing");
-            var startdate = values.GetValueOrDefault("startdate");
-            var enddate = values.GetValueOrDefault("enddate");
-            var dailystarttime = values.GetValueOrDefault("dailystarttime");
-            var dailyendtime = values.GetValueOrDefault("dailyendtime");
-            var scheduledates = values.GetValueOrDefault("scheduledates");
-            var scheduledatesClosed = values.GetValueOrDefault("scheduledatesclosed");
+            var registrationThankYouEmail = values.GetValueOrDefault("registrationthankyouemail");
+            var applicationThankYouEmail = values.GetValueOrDefault("applicationthankyouemail");
+            var repeatsWeekly = values.GetValueOrDefault("repeatsweekly");
+            var isOngoing = values.GetValueOrDefault("isongoing");
+            var startDate = values.GetValueOrDefault("startdate");
+            var endDate = values.GetValueOrDefault("enddate");
+            var dailyStartTime = values.GetValueOrDefault("dailystarttime");
+            var dailyEndTime = values.GetValueOrDefault("dailyendtime");
+            var scheduleDates = values.GetValueOrDefault("scheduledates");
+            var scheduleDatesClosed = values.GetValueOrDefault("scheduledatesclosed");
             var schedule = values.GetValueOrDefault("schedule");
             var description = values.GetValueOrDefault("description");
-            var hassubscriptionplan = values.GetValueOrDefault("hassubscriptionplan");
-            var subscriptionplancost = values.GetValueOrDefault("subscriptionplancost");
-            var subscriptionplanperiod = values.GetValueOrDefault("subscriptionplanperiod");
+            var hasSubscriptionPlan = values.GetValueOrDefault("hassubscriptionplan");
+            var subscriptionPlanCost = values.GetValueOrDefault("subscriptionplancost");
+            var subscriptionPlanPeriod = values.GetValueOrDefault("subscriptionplanperiod");
             var subscriptionPlanPeriodNumber = values.GetValueOrDefault("subscriptionPlanPeriodNumber");
             var subscriptionPaymentStartType = values.GetValueOrDefault("subscriptionPaymentStartType");
             var subscriptionStartDate = values.GetValueOrDefault("subscriptionStartDate");
             var subscriptionEndDate = values.GetValueOrDefault("subscriptionEndDate");
-            var isongoingsubscription = values.GetValueOrDefault("isongoingsubscription");
-            var haspaymentplan = values.GetValueOrDefault("haspaymentplan");
-            var paymentplancost = values.GetValueOrDefault("paymentplancost");
-            var paymentplanperiod = values.GetValueOrDefault("paymentplanperiod");
-            var paymentplanperiodnumber = values.GetValueOrDefault("paymentplanperiodnumber");
-            var paymentplanpaymentstarttype = values.GetValueOrDefault("paymentplanpaymentstarttype");
-            var haspostpayplan = values.GetValueOrDefault("haspostpayplan");
-            var postpaycost = values.GetValueOrDefault("postpaycost");
-            var accountactivitygroup = values.GetValueOrDefault("accountactivitygroup");
+            var isOngoingSubscription = values.GetValueOrDefault("isongoingsubscription");
+            var hasPaymentPlan = values.GetValueOrDefault("haspaymentplan");
+            var paymentPlanCost = values.GetValueOrDefault("paymentplancost");
+            var paymentPlanPeriod = values.GetValueOrDefault("paymentplanperiod");
+            var paymentPlanPeriodNumber = values.GetValueOrDefault("paymentplanperiodnumber");
+            var paymentPlanPaymentStartType = values.GetValueOrDefault("paymentplanpaymentstarttype");
+            var hasPostPayPlan = values.GetValueOrDefault("haspostpayplan");
+            var postPayCost = values.GetValueOrDefault("postpaycost");
+            var accountActivityGroup = values.GetValueOrDefault("accountactivitygroup");
             var provider = values.GetValueOrDefault("provider");
-            var providername = values.GetValueOrDefault("providername");
-            var providerfirstname = values.GetValueOrDefault("providerfirstname");
-            var providerlastname = values.GetValueOrDefault("providerlastname");
-            var provideremail = values.GetValueOrDefault("provideremail");
-            var providerphone = values.GetValueOrDefault("providerphone");
+            var providerName = values.GetValueOrDefault("providername");
+            var providerFirstName = values.GetValueOrDefault("providerfirstname");
+            var providerLastName = values.GetValueOrDefault("providerlastname");
+            var providerEmail = values.GetValueOrDefault("provideremail");
+            var providerPhone = values.GetValueOrDefault("providerphone");
             var type = values.GetValueOrDefault("type");
-            var virtuallocation = values.GetValueOrDefault("virtuallocation");
-            var inviteonly = values.GetValueOrDefault("inviteonly");
-            var minseatsrequired = values.GetValueOrDefault("minseatsrequired");
-            var splitcostevenly = values.GetValueOrDefault("splitcostevenly");
-            var regfeedownpayment = values.GetValueOrDefault("regfeedownpayment");
-            var hidepreciselocation = values.GetValueOrDefault("hidepreciselocation");
-            var isparentpricecost = values.GetValueOrDefault("isparentpricecost");
-            var isparentpricepostpay = values.GetValueOrDefault("isparentpricepostpay");
-            var isparentpricepaymentplan = values.GetValueOrDefault("isparentpricepaymentplan");
-            var isparentpricesubscription = values.GetValueOrDefault("isparentpricesubscription");
-            var prepaidperiodspostpay = values.GetValueOrDefault("prepaidperiodspostpay");
-            var postpayplanperiod = values.GetValueOrDefault("postpayplanperiod");
-            var costfrequencytype = values.GetValueOrDefault("costfrequencytype");
-            var cutoffhours = values.GetValueOrDefault("cutoffhours");
-            var iscontinousenrollmentenabled = values.GetValueOrDefault("isContinuousEnrollmentEnabled");
+            var virtualLocation = values.GetValueOrDefault("virtuallocation");
+            var inviteOnly = values.GetValueOrDefault("inviteonly");
+            var minimumSeatsRequired = values.GetValueOrDefault("minseatsrequired");
+            var splitCostEvenly = values.GetValueOrDefault("splitcostevenly");
+            var registrationFeeDownPayment = values.GetValueOrDefault("regfeedownpayment");
+            var hidePreciseLocation = values.GetValueOrDefault("hidepreciselocation");
+            var isParentPriceCost = values.GetValueOrDefault("isparentpricecost");
+            var isParentPricePostPay = values.GetValueOrDefault("isparentpricepostpay");
+            var isParentPricePaymentPlan = values.GetValueOrDefault("isparentpricepaymentplan");
+            var isParentPriceSubscription = values.GetValueOrDefault("isparentpricesubscription");
+            var prepaidPeriodsPostPay = values.GetValueOrDefault("prepaidperiodspostpay");
+            var postPayPlanPeriod = values.GetValueOrDefault("postpayplanperiod");
+            var costFrequencyType = values.GetValueOrDefault("costfrequencytype");
+            var cutoffHours = values.GetValueOrDefault("cutoffhours");
+            var isContinuousEnrollmentEnabled = values.GetValueOrDefault("isContinuousEnrollmentEnabled");
 
             var activityType = ActivityType.NotSet;
 
@@ -866,7 +861,7 @@ namespace AfterSchoolLibrary.Services
 
                 if (activityType.NotIn(new List<ActivityType> {ActivityType.FieldTrip, ActivityType.PermissionSlip}))
                 {
-                    if (!seatsavailable.IsNumber())
+                    if (!seatsAvailable.IsNumber())
                     {
                         msgs.Add("Total Available Seats is required and must be greater than 0", MessageType.UserError);
                     }
@@ -874,40 +869,40 @@ namespace AfterSchoolLibrary.Services
                     {
                         var ap = account.GetActiveAccountPackage(msgs, dc);
                         var maxParticipants = ap.GetFeature(FeatureType.Participants, msgs, dc).Max.Value;
-                        if (maxParticipants < seatsavailable.ToString().ToInteger())
+                        if (maxParticipants < seatsAvailable.ToString().ToInteger())
                             msgs.Add(
                                 string.Format("Total Available Seats is required and must be less than or equal to {0}",
                                     maxParticipants), MessageType.UserError);
                     }
                 }
 
-                if (group.IsEmpty() && registrationperiod.ToString().ToInteger() > 0)
+                if (group.IsEmpty() && registrationPeriod.ToString().ToInteger() > 0)
                 {
-                    if (!$"{registrationopendate} {registrationopentime}".IsDateTime())
+                    if (!$"{registrationOpenDate} {registrationOpenTime}".IsDateTime())
                         msgs.Add("Registration Open Date & Time is required", MessageType.UserError);
 
-                    if (!$"{registrationclosedate} {registrationclosetime}".IsDateTime())
+                    if (!$"{registrationCloseDate} {registrationCloseTime}".IsDateTime())
                         msgs.Add("Registration Close Date & Time is required", MessageType.UserError);
                 }
 
                 //pre-load account info
-                if (contactphone.IsBlank())
-                    contactphone = account.Phone;
+                if (contactPhone.IsBlank())
+                    contactPhone = account.Phone;
 
                 if (cost.IsBlank())
                     cost = "0";
             }
 
-            Activity activity = null;
+            Activity activity;
 
             if (activityId.IsNotEmpty())
             {
                 activity = Activity.Load(activityId.ToInteger(), msgs, dc);
-                if (seatsavailable.IsNumber() &&
+                if (seatsAvailable.IsNumber() &&
                     activity.GetRegistrantCountByAssignmentTypes(Registration.ReservedStatuses, msgs, dc) <=
-                    seatsavailable.ToString().ToInteger())
+                    seatsAvailable.ToString().ToInteger())
                 {
-                    activity.SeatsAvailable = seatsavailable.ToString().ToInteger();
+                    activity.SeatsAvailable = seatsAvailable.ToString().ToInteger();
                 }
             }
             else
@@ -917,7 +912,7 @@ namespace AfterSchoolLibrary.Services
                     ActivityTypeId = activityType,
                     CreateDate = DateTime.UtcNow,
                     CreatedBy = loggedInUserId,
-                    SeatsAvailable = seatsavailable.ToString().ToInteger(),
+                    SeatsAvailable = seatsAvailable.ToString().ToInteger(),
                     AccountId = account.ID,
                     RequiresParentalConsent = true,
                     CostFrequencyTypeId = ActivityCostFrequencyType.PerActivity,
@@ -939,80 +934,80 @@ namespace AfterSchoolLibrary.Services
                 activity.UniqueName = GenerateUniqueName(name.ToString(), activity.ID, activity.AccountId, msgs, dc);
             }
 
-            if (agestart.IsNumber())
+            if (ageStart.IsNumber())
             {
-                if (agestart.ToString().ToInteger() < 0)
+                if (ageStart.ToString().ToInteger() < 0)
                     activity.AgeStart = null;
                 else
                 {
-                    activity.AgeStart = agestart.ToString().ToInteger();
+                    activity.AgeStart = ageStart.ToString().ToInteger();
                     activity.GradeLevelStart = null;
                 }
             }
 
-            if (iscontinousenrollmentenabled.IsNotEmpty())
-                activity.IsContinuousEnrollment = iscontinousenrollmentenabled.ToString().ToBoolean();
+            if (isContinuousEnrollmentEnabled.IsNotEmpty())
+                activity.IsContinuousEnrollment = isContinuousEnrollmentEnabled.ToString().ToBoolean();
 
-            if (ageend.IsNumber())
+            if (ageEnd.IsNumber())
             {
-                if (ageend.ToString().ToInteger() < 0)
+                if (ageEnd.ToString().ToInteger() < 0)
                     activity.AgeEnd = null;
                 else
                 {
-                    activity.AgeEnd = ageend.ToString().ToInteger();
+                    activity.AgeEnd = ageEnd.ToString().ToInteger();
                     activity.GradeLevelEnd = null;
                 }
             }
 
             List<int?> gradeLevels = GradeLevel.Load(msgs: msgs, dc: dc).Select(grade => grade.ID).ToList();
 
-            if (gradestart.IsNumber())
+            if (gradeStart.IsNumber())
             {
-                if (gradeLevels.Contains(gradestart.ToString().ToInteger()))
+                if (gradeLevels.Contains(gradeStart.ToString().ToInteger()))
                 {
-                    activity.GradeLevelStart = gradestart.ToString().ToInteger();
+                    activity.GradeLevelStart = gradeStart.ToString().ToInteger();
                     activity.AgeStart = null;
                 }
                 else
                     activity.GradeLevelStart = null;
             }
 
-            if (gradeend.IsNumber())
+            if (gradeEnd.IsNumber())
             {
-                if (gradeLevels.Contains(gradeend.ToString().ToInteger()))
+                if (gradeLevels.Contains(gradeEnd.ToString().ToInteger()))
                 {
-                    activity.GradeLevelEnd = gradeend.ToString().ToInteger();
+                    activity.GradeLevelEnd = gradeEnd.ToString().ToInteger();
                     activity.AgeEnd = null;
                 }
                 else
                     activity.GradeLevelEnd = null;
             }
 
-            if (minseatsrequired.IsNumber())
-                activity.MinSeatsRequired = minseatsrequired.ToString().ToInteger();
+            if (minimumSeatsRequired.IsNumber())
+                activity.MinSeatsRequired = minimumSeatsRequired.ToString().ToInteger();
 
-            if (genderrestrictions.IsNumber())
-                activity.GenderRestriction = (GenderRestrictionType) genderrestrictions.ToString().ToInteger();
+            if (genderRestrictions.IsNumber())
+                activity.GenderRestriction = (GenderRestrictionType) genderRestrictions.ToString().ToInteger();
 
-            if (requiresparentalconsent.IsNumber())
-                activity.RequiresParentalConsent = requiresparentalconsent.ToString().ToBoolean();
+            if (requiresParentalConsent.IsNumber())
+                activity.RequiresParentalConsent = requiresParentalConsent.ToString().ToBoolean();
 
             if (isStudentAllowed.IsNumber())
                 activity.IsStudentAllowedToRegister = isStudentAllowed.ToString().ToBoolean();
 
-            if (contactname.IsNotEmpty())
-                activity.ContactName = contactname.ToString().IfBlank("").MaxChars(50);
+            if (contactName.IsNotEmpty())
+                activity.ContactName = contactName.ToString().IfBlank("").MaxChars(50);
 
-            if (contactphone.IsNotEmpty())
+            if (contactPhone.IsNotEmpty())
             {
-                if (contactphone.ToString().IsPhone())
-                    activity.ContactPhone = contactphone.ToString().IfBlank("").MaxChars(50);
+                if (contactPhone.ToString().IsPhone())
+                    activity.ContactPhone = contactPhone.ToString().IfBlank("").MaxChars(50);
                 else
                     msgs.Add("Contact Phone must be a valid phone number", MessageType.UserError);
             }
 
-            if (contactemail.IsNotEmpty())
-                activity.ContactEmail = contactemail.ToString().IfBlank("").MaxChars(100);
+            if (contactEmail.IsNotEmpty())
+                activity.ContactEmail = contactEmail.ToString().IfBlank("").MaxChars(100);
 
             if (details.IsNotEmpty())
                 activity.Details = details.ToString().IfBlank("").MaxChars(4000);
@@ -1023,42 +1018,42 @@ namespace AfterSchoolLibrary.Services
             if (cost.IsNumber())
                 activity.CostPerRegistrant = cost.ToString().ToDecimal();
 
-            if (costdescription != null)
-                activity.CostDescription = costdescription.ToString().IfBlank("").MaxChars(1000);
+            if (costDescription != null)
+                activity.CostDescription = costDescription.ToString().IfBlank("").MaxChars(1000);
 
-            if (allowtopaylater.IsNotEmpty() && allowtopaylater.ToString().IsBoolean())
-                activity.AllowToPayLater = allowtopaylater.ToString().ToBoolean();
+            if (allowToPayLater.IsNotEmpty() && allowToPayLater.ToString().IsBoolean())
+                activity.AllowToPayLater = allowToPayLater.ToString().ToBoolean();
 
-            if (regmode.IsNumber())
-                activity.RegistrationModeId = (RegistrationMode) regmode.ToString().ToInteger();
+            if (registrationMode.IsNumber())
+                activity.RegistrationModeId = (RegistrationMode) registrationMode.ToString().ToInteger();
 
-            if (costfrequencytype.IsNumber())
-                activity.CostFrequencyTypeId = (ActivityCostFrequencyType) costfrequencytype.ToString().ToInteger();
+            if (costFrequencyType.IsNumber())
+                activity.CostFrequencyTypeId = (ActivityCostFrequencyType) costFrequencyType.ToString().ToInteger();
 
-            if (leadertype.IsNumber())
+            if (leaderType.IsNumber())
             {
-                var leaderType = (ActivityLeaderType) leadertype.ToString().ToInteger();
+                var leaderTypeId = (ActivityLeaderType) leaderType.ToString().ToInteger();
 
-                if (leaderType == ActivityLeaderType.NotSet)
+                if (leaderTypeId == ActivityLeaderType.NotSet)
                     msgs.Add("Led By is required", MessageType.UserError);
                 else
-                    activity.LeaderTypeId = leaderType;
+                    activity.LeaderTypeId = leaderTypeId;
             }
 
-            if (accountactivitygroup.IsNotEmpty())
-                activity.AccountActivityGroupId = accountactivitygroup.ToString().ToInteger();
+            if (accountActivityGroup.IsNotEmpty())
+                activity.AccountActivityGroupId = accountActivityGroup.ToString().ToInteger();
 
-            if (inviteonly != null)
-                activity.IsInviteOnly = inviteonly.ToString().ToBoolean();
+            if (inviteOnly != null)
+                activity.IsInviteOnly = inviteOnly.ToString().ToBoolean();
 
-            if (hidepreciselocation.IsNotEmpty() && hidepreciselocation.ToString().IsBoolean())
-                activity.HidePreciseLocation = hidepreciselocation.ToString().ToBoolean();
+            if (hidePreciseLocation.IsNotEmpty() && hidePreciseLocation.ToString().IsBoolean())
+                activity.HidePreciseLocation = hidePreciseLocation.ToString().ToBoolean();
 
-            if (isparentpricecost.IsNotEmpty() && isparentpricecost.ToString().IsBoolean())
-                activity.IsConvenienceFeeTakenOutOfCost = isparentpricecost.ToString().ToBoolean();
+            if (isParentPriceCost.IsNotEmpty() && isParentPriceCost.ToString().IsBoolean())
+                activity.IsConvenienceFeeTakenOutOfCost = isParentPriceCost.ToString().ToBoolean();
 
-            if (cutoffhours.IsNotEmpty() && cutoffhours.IsNumber())
-                activity.RegistrationCutoffHours = cutoffhours.ToString().ToInteger();
+            if (cutoffHours.IsNotEmpty() && cutoffHours.IsNumber())
+                activity.RegistrationCutoffHours = cutoffHours.ToString().ToInteger();
 
             if (msgs.HasNoErrors())
             {
@@ -1067,13 +1062,13 @@ namespace AfterSchoolLibrary.Services
                     {
                         if (!activity.ID.HasValue)
                         {
-                            if (contactname.IsEmpty())
+                            if (contactName.IsEmpty())
                                 activity.ContactName = account.GetAccountOwner(amsgs, adc).DisplayName;
 
-                            if (contactemail.IsEmpty())
+                            if (contactEmail.IsEmpty())
                                 activity.ContactEmail = account.Email;
 
-                            if (contactphone.IsEmpty())
+                            if (contactPhone.IsEmpty())
                                 activity.ContactPhone = account.Phone;
                         }
 
@@ -1103,13 +1098,13 @@ namespace AfterSchoolLibrary.Services
 
                         // skip if it is attached to a activity group
                         // create registration period if not created yet and there is no activitygroup (activity groups have their own registration period)
-                        if (!activity.ActivityGroupId.HasValue && amsgs.HasNoErrors() && registrationperiod.IsNumber())
+                        if (!activity.ActivityGroupId.HasValue && amsgs.HasNoErrors() && registrationPeriod.IsNumber())
                             amsgs.AddRange(activity.SetupRegistrationPeriods(
-                                registrationperiod.IfEmpty(""),
-                                registrationopendate.IfEmpty(""),
-                                registrationopentime.IfEmpty(""),
-                                registrationclosedate.IfEmpty(""),
-                                registrationclosetime.IfEmpty(""),
+                                registrationPeriod.IfEmpty(""),
+                                registrationOpenDate.IfEmpty(""),
+                                registrationOpenTime.IfEmpty(""),
+                                registrationCloseDate.IfEmpty(""),
+                                registrationCloseTime.IfEmpty(""),
                                 account,
                                 loggedInUserId,
                                 adc));
@@ -1119,19 +1114,19 @@ namespace AfterSchoolLibrary.Services
                             amsgs.AddRange(activity.SetupTeam(account, loggedInUserId, adc));
 
                         // setup schedule
-                        if (amsgs.HasNoErrors() && (schedule.IsNotEmpty() || scheduledates.IsNotEmpty()))
+                        if (amsgs.HasNoErrors() && (schedule.IsNotEmpty() || scheduleDates.IsNotEmpty()))
                             amsgs.AddRange(activity.SetupSchedule(
                                 account,
                                 schedule.IfEmpty(""),
-                                (List<ActivityInstance>) scheduledates,
-                                (List<DateTime>) scheduledatesClosed,
-                                scheduledetails.IfEmpty(""),
-                                repeatsweekly.IfEmpty(""),
-                                startdate.IfEmpty(""),
-                                enddate.IfEmpty(""),
-                                dailystarttime.IfEmpty(""),
-                                dailyendtime.IfEmpty(""),
-                                isongoing.IfEmpty(""),
+                                (List<ActivityInstance>) scheduleDates,
+                                (List<DateTime>) scheduleDatesClosed,
+                                scheduleDetails.IfEmpty(""),
+                                repeatsWeekly.IfEmpty(""),
+                                startDate.IfEmpty(""),
+                                endDate.IfEmpty(""),
+                                dailyStartTime.IfEmpty(""),
+                                dailyEndTime.IfEmpty(""),
+                                isOngoing.IfEmpty(""),
                                 days.IfEmpty(""),
                                 loggedInUserId,
                                 adc));
@@ -1139,8 +1134,8 @@ namespace AfterSchoolLibrary.Services
                         //setup initial activityProperties
                         if (amsgs.HasNoErrors())
                             amsgs.AddRange(activity.SetupActivityProperties(
-                                registrationthankyouemail.IfEmpty(null),
-                                applicationthankyouemail.IfEmpty(null),
+                                registrationThankYouEmail.IfEmpty(null),
+                                applicationThankYouEmail.IfEmpty(null),
                                 loggedInUserId,
                                 adc));
 
@@ -1148,53 +1143,53 @@ namespace AfterSchoolLibrary.Services
                             amsgs.AddRange(activity.SetupInstructor(
                                 account,
                                 instructor.IfEmpty(""),
-                                instructorfirstname.IfEmpty(""),
-                                instructorlastname.IfEmpty(""),
-                                instructoremail.IfEmpty(""),
-                                instructorphone.IfEmpty(""),
+                                instructorFirstName.IfEmpty(""),
+                                instructorLastName.IfEmpty(""),
+                                instructorEmail.IfEmpty(""),
+                                instructorPhone.IfEmpty(""),
                                 loggedInUserId,
                                 adc
                             ));
 
                         //setup location
-                        if (activitylocationtype.IsNotEmpty() && activitylocationtype.IsNumber())
+                        if (activityLocationType.IsNotEmpty() && activityLocationType.IsNumber())
                         {
-                            activity.ActivityLocationTypeId = activitylocationtype.ToString().ToInteger()
+                            activity.ActivityLocationTypeId = activityLocationType.ToString().ToInteger()
                                 .ToEnum<ActivityLocationType>();
 
                             if (activity.ActivityLocationTypeId == ActivityLocationType.Virtual)
-                                activity.VirtualLocationInfo = virtuallocation.ToString();
+                                activity.VirtualLocationInfo = virtualLocation.ToString();
 
                             if (amsgs.HasNoErrors())
                             {
                                 amsgs.AddRange(activity.Save(adc));
 
                                 if (activity.ActivityLocationTypeId == ActivityLocationType.Physical &&
-                                    amsgs.HasNoErrors() && (location.IsNotEmpty() || locationname.IsNotEmpty()))
+                                    amsgs.HasNoErrors() && (location.IsNotEmpty() || locationName.IsNotEmpty()))
                                 {
-                                    var hostAccountId = ismylocation.IfEmpty("").ToBoolean()
+                                    var hostAccountId = isMyLocation.IfEmpty("").ToBoolean()
                                         ? account.ID
                                         : new int?();
 
                                     amsgs.AddRange(activity.SetupLocation(
                                         location.IfEmpty(""),
-                                        locationname.IfEmpty(""),
+                                        locationName.IfEmpty(""),
                                         address1.IfEmpty(""),
-                                        streetnumber.IfEmpty(""),
-                                        streetname.IfEmpty(""),
+                                        streetNumber.IfEmpty(""),
+                                        streetName.IfEmpty(""),
                                         address2.IfEmpty(""),
                                         neighborhood.IfEmpty(""),
                                         city.IfEmpty(""),
                                         county.IfEmpty(""),
                                         state.IfEmpty(""),
-                                        postalcode.IfEmpty(""),
+                                        postalCode.IfEmpty(""),
                                         country.IfEmpty(""),
-                                        placeid.IfEmpty(""),
+                                        placeId.IfEmpty(""),
                                         latitude.IsNotEmpty() ? latitude.ToString().ToDecimal() : 0,
                                         longitude.IsNotEmpty() ? longitude.ToString().ToDecimal() : 0,
-                                        locationdetails.IfEmpty(""),
-                                        ismylocation.IfEmpty(""),
-                                        locationtype.IfEmpty(""),
+                                        locationDetails.IfEmpty(""),
+                                        isMyLocation.IfEmpty(""),
+                                        locationType.IfEmpty(""),
                                         loggedInUserId,
                                         adc));
 
@@ -1207,27 +1202,27 @@ namespace AfterSchoolLibrary.Services
 
                         //setup provider
                         if (amsgs.HasNoErrors() && activity.LeaderTypeId == ActivityLeaderType.ExternalProvider &&
-                            (provider.IsNumber() || providername.IsNotEmpty()))
+                            (provider.IsNumber() || providerName.IsNotEmpty()))
                             amsgs.AddRange(activity.SetupProvider(
                                 account,
                                 provider.IfEmpty(""),
-                                providername.IfEmpty(""),
-                                providerfirstname.IfEmpty(""),
-                                providerlastname.IfEmpty(""),
-                                provideremail.IfEmpty(""),
-                                providerphone.IfEmpty(""),
+                                providerName.IfEmpty(""),
+                                providerFirstName.IfEmpty(""),
+                                providerLastName.IfEmpty(""),
+                                providerEmail.IfEmpty(""),
+                                providerPhone.IfEmpty(""),
                                 loggedInUserId,
                                 adc));
 
                         //setup SubscriptionPlan
-                        if (amsgs.HasNoErrors() && hassubscriptionplan != null &&
-                            hassubscriptionplan.ToString().IsBoolean())
+                        if (amsgs.HasNoErrors() && hasSubscriptionPlan != null &&
+                            hasSubscriptionPlan.ToString().IsBoolean())
                         {
                             amsgs.AddRange(activity.SetupSubscriptionPlan(
                                 account,
-                                hassubscriptionplan.IfEmpty(""),
-                                subscriptionplancost.IfEmpty(""),
-                                subscriptionplanperiod.IfEmpty(""),
+                                hasSubscriptionPlan.IfEmpty(""),
+                                subscriptionPlanCost.IfEmpty(""),
+                                subscriptionPlanPeriod.IfEmpty(""),
                                 subscriptionPlanPeriodNumber.IfEmpty(""),
                                 subscriptionPaymentStartType.IfEmpty(""),
                                 subscriptionStartDate.IsNotEmpty()
@@ -1236,38 +1231,38 @@ namespace AfterSchoolLibrary.Services
                                 subscriptionEndDate.IsNotEmpty()
                                     ? Convert.ToDateTime(subscriptionEndDate)
                                     : (DateTime?) null,
-                                isongoingsubscription.IfEmpty(""),
-                                splitcostevenly.IfEmpty(""),
-                                regfeedownpayment.IfEmpty(""),
-                                isparentpricesubscription.IfEmpty("0"),
+                                isOngoingSubscription.IfEmpty(""),
+                                splitCostEvenly.IfEmpty(""),
+                                registrationFeeDownPayment.IfEmpty(""),
+                                isParentPriceSubscription.IfEmpty("0"),
                                 loggedInUserId,
                                 adc
                             ));
                         }
 
                         //setup PaymentPlan
-                        if (amsgs.HasNoErrors() && haspaymentplan != null && haspaymentplan.ToString().IsBoolean())
+                        if (amsgs.HasNoErrors() && hasPaymentPlan != null && hasPaymentPlan.ToString().IsBoolean())
                             amsgs.AddRange(activity.SetupPaymentPlan(
                                 account,
-                                haspaymentplan.IfEmpty(""),
-                                paymentplancost.IfEmpty(""),
-                                paymentplanperiod.IfEmpty(""),
-                                paymentplanperiodnumber.IfEmpty(""),
-                                paymentplanpaymentstarttype.IfEmpty(""),
-                                isparentpricepaymentplan.IfEmpty("0"),
+                                hasPaymentPlan.IfEmpty(""),
+                                paymentPlanCost.IfEmpty(""),
+                                paymentPlanPeriod.IfEmpty(""),
+                                paymentPlanPeriodNumber.IfEmpty(""),
+                                paymentPlanPaymentStartType.IfEmpty(""),
+                                isParentPricePaymentPlan.IfEmpty("0"),
                                 loggedInUserId,
                                 adc
                             ));
 
                         //setup PaymentPlan
-                        if (amsgs.HasNoErrors() && haspostpayplan != null && haspostpayplan.ToString().IsBoolean())
+                        if (amsgs.HasNoErrors() && hasPostPayPlan != null && hasPostPayPlan.ToString().IsBoolean())
                             amsgs.AddRange(activity.SetupPostPayPlan(
                                 account,
-                                haspostpayplan.IfEmpty(""),
-                                postpaycost.IfEmpty(""),
-                                isparentpricepostpay.IfEmpty("0"),
-                                prepaidperiodspostpay.IfEmpty(""),
-                                postpayplanperiod.IfEmpty(""),
+                                hasPostPayPlan.IfEmpty(""),
+                                postPayCost.IfEmpty(""),
+                                isParentPricePostPay.IfEmpty("0"),
+                                prepaidPeriodsPostPay.IfEmpty(""),
+                                postPayPlanPeriod.IfEmpty(""),
                                 loggedInUserId,
                                 adc
                             ));
