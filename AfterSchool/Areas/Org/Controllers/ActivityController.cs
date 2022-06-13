@@ -2036,17 +2036,18 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 if (cmd == "next")
                 {
-                    if (activity.ActivityTypeId != ActivityType.Team)
+                    switch (EditHelpers.GetNextScreenForActivityType(activity.ActivityTypeId, EditHelpers.EditSchedule))
                     {
-                        var isActivityLeader = EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, SessionVariables.AccountUserType,
-                            currentUser.IsActivityLeader(activity, msgs));
-                        var editDetailsResult = new EditDetailsAssembler().AssembleEditDetailsResult(currentAccount, msgs, activity, fullScreenExitUrl,
-                            isActivityLeader, currentAccountPackage, isNew);
-                        return View("EditDetails", editDetailsResult);
+                        case EditHelpers.EditDetails:
+                            var isActivityLeader = EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, SessionVariables.AccountUserType,
+                                currentUser.IsActivityLeader(activity, msgs));
+                            var editDetailsResult = new EditDetailsAssembler().AssembleEditDetailsResult(currentAccount, msgs, activity, fullScreenExitUrl,
+                                isActivityLeader, currentAccountPackage, isNew);
+                            return View("EditDetails", editDetailsResult);
+                        case EditHelpers.EditContact:
+                            var editContactResult = GatherDataForAndAssembleEditContactResult(id, currentUser, currentAccount, Request[IsNewRequest]);
+                            return View("editcontact", editContactResult);
                     }
-
-                    var editContactResult = GatherDataForAndAssembleEditContactResult(id, currentUser, currentAccount, Request[IsNewRequest]);
-                    return View("editcontact", editContactResult);
                 }
             }
 
@@ -2152,19 +2153,21 @@ namespace AfterSchool.Areas.Org.Controllers
             var isNew = Request[IsNewRequest];
             if (msgs.HasNoErrors() && cmd == "next")
             {
-                if (SessionVariables.AccountPackage.HasFeature(FeatureType.AcceptPayments))
+                switch (EditHelpers.GetNextScreenForActivityType(activity.ActivityTypeId, EditHelpers.EditLocation))
                 {
-                    var editCostResult = GatherDataForAndAssembleEditCostResult(activity, msgs, currentAccount, currentUser, isNew);
-                    return View("EditCost", editCostResult);
-                }
+                    case EditHelpers.EditCost:
+                        var editCostResult = GatherDataForAndAssembleEditCostResult(activity, msgs, currentAccount, currentUser, isNew);
+                        return View("EditCost", editCostResult);
 
-                var fullScreenExitUrl = GetFullScreenExitUrl(activity);
-                var accountUserType = SessionVariables.AccountUserType;
-                var currentUserIsActivityLeader = currentUser.IsActivityLeader(activity, msgs);
-                
-                var editConfirmationResult = new EditConfirmationAssembler().AssembleEditConfirmationResult(currentAccount, activity, accountUserType,
-                    currentUserIsActivityLeader, isNew, fullScreenExitUrl, msgs);
-                return View("EditConfirmation", editConfirmationResult);
+                    default:
+                        var fullScreenExitUrl = GetFullScreenExitUrl(activity);
+                        var accountUserType = SessionVariables.AccountUserType;
+                        var currentUserIsActivityLeader = currentUser.IsActivityLeader(activity, msgs);
+
+                        var editConfirmationResult = new EditConfirmationAssembler().AssembleEditConfirmationResult(currentAccount, activity, accountUserType,
+                            currentUserIsActivityLeader, isNew, fullScreenExitUrl, msgs);
+                        return View("EditConfirmation", editConfirmationResult);
+                }
             }
 
             var editLocationResult = GatherDataForAndAssembleEditLocationResult(id, isNew);
@@ -2295,7 +2298,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         var fullScreenExitUrl = GetFullScreenExitUrl(activity);
                         var accountUserType = SessionVariables.AccountUserType;
                         var currentUserIsActivityLeader = currentUser.IsActivityLeader(activity, msgs);
-                        
+
                         var editConfirmationResult = new EditConfirmationAssembler().AssembleEditConfirmationResult(currentAccount, activity, accountUserType,
                             currentUserIsActivityLeader, isNew, fullScreenExitUrl, msgs);
                         return View("EditConfirmation", editConfirmationResult);
@@ -2418,7 +2421,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var accountUserType = SessionVariables.AccountUserType;
             var currentUserIsActivityLeader = currentUser.IsActivityLeader(activity, msgs);
             var fullScreenExitUrl = GetFullScreenExitUrl(activity);
-            
+
             var result = new EditConfirmationAssembler().AssembleEditConfirmationResult(currentAccount, activity, accountUserType, currentUserIsActivityLeader,
                 isNew, fullScreenExitUrl, msgs);
             return View(result);
