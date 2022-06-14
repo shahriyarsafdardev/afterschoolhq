@@ -369,7 +369,7 @@
 
             var url = '@Url.Action("GetFeatures", "Account", new { Area = "Org" })';
             $.ajax({
-                type: "POST",
+                type: "GET",
                 url: url,
                 data: { id: packageId },
                 success: function (data) {

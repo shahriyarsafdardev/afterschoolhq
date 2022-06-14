@@ -1638,7 +1638,7 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(currentAccount);
         }
 
-        [HttpPost]
+        [HttpGet]
         public ActionResult GetFeatures(int id)
         {
             var msgs = new SystemMessages();
@@ -1648,32 +1648,55 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var features = PackageFeature.LoadByPackageId(id, msgs);
 
-            var featureTypeNotIn = new List<FeatureType>
-            {
-                FeatureType.NotSet,
-                FeatureType.CustomUrl,
-                FeatureType.ManageExternalLeagues,
-                FeatureType.ManageLeagues,
-                FeatureType.ManageLocations,
-                FeatureType.Participants,
-                FeatureType.PaymentsPercentageFee,
-                FeatureType.PaymentsPercentageFlatFee,
-                FeatureType.TrialDays,
-                FeatureType.UseStripeConnectedAccount,
-                FeatureType.ViewInsights,
-            };
-
-            var model = features.Where(m => m.FeatureTypeId.NotIn(featureTypeNotIn)).Select(m => new
-            {
-                type = (Enum.GetName(typeof(FeatureType), m.FeatureTypeId)).ToString().SplitByUpperCase(),
-                value = m.GetMaxValue(),
-            });
+            var model = PackageFeatureMapper.FilterAndMapPackageFeatures(features.Select(x => (x.FeatureTypeId, x.GetMaxValue())));
 
             if (model.Any())
                 return Json(new {success = true, status = "ok", data = model}, JsonRequestBehavior.AllowGet);
 
             return Json(new {success = false, status = "error", data = msgs.ToList().Select(msg => new {msg.Text})},
                 JsonRequestBehavior.AllowGet);
+        }
+
+        public static class PackageFeatureMapper
+        {
+            public static IEnumerable<PackageFeaturesPlanListing> FilterAndMapPackageFeatures(IEnumerable<(FeatureType type, decimal value)> features)
+            {
+                var featureTypesNotToIncludeInFeatureListing = new List<FeatureType>
+                {
+                    FeatureType.NotSet,
+                    FeatureType.CustomUrl,
+                    FeatureType.ManageExternalLeagues,
+                    FeatureType.ManageLeagues,
+                    FeatureType.ManageLocations,
+                    FeatureType.Participants,
+                    FeatureType.PaymentsPercentageFee,
+                    FeatureType.PaymentsPercentageFlatFee,
+                    FeatureType.TrialDays,
+                    FeatureType.UseStripeConnectedAccount,
+                    FeatureType.ViewInsights,
+                };
+
+                bool FeatureTypeHasNotBeenDeprecated(FeatureType featureType)
+                {
+                    return Enum.GetName(typeof(FeatureType), featureType) != null;
+                }
+
+                return features.Where(x => x.type.NotIn(featureTypesNotToIncludeInFeatureListing))
+                    .Where(x => FeatureTypeHasNotBeenDeprecated(x.type))
+                    .Select(x => new PackageFeaturesPlanListing((Enum.GetName(typeof(FeatureType), x.type)).ToString().SplitByUpperCase(), x.value));
+            }
+        }
+
+        public class PackageFeaturesPlanListing
+        {
+            public string type { get; }
+            public decimal value { get; }
+
+            public PackageFeaturesPlanListing(string type, decimal value)
+            {
+                this.type = type;
+                this.value = value;
+            }
         }
 
         [HttpPost]
