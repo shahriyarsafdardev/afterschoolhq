@@ -1,0 +1,28 @@
+﻿@model Activity
+<div class="panel panel-default panel-small-padding">
+    <div class="panel-heading activity-heading">
+        Restrictions
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <label class="col-md-3 control-label">
+                Gender Restrictions
+            </label>
+            <div class="col-md-9 margin-left">
+                <div class="am-radio inline">
+                    @foreach (GenderRestrictionType item in Enum.GetValues(typeof(GenderRestrictionType)))
+                    {
+                        <input type="radio"
+                               name="genderrestrictions"
+                               id="genderrestrictions-@((int) item)"
+                               @(Model.GenderRestriction == item ? " checked=\"checked\" " : "")
+                               value="@((int) item)"/>
+                        <label for="genderrestrictions-@((int) item)" class="margin-h-10">
+                            @item.ToString().SplitByUpperCase()
+                        </label>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

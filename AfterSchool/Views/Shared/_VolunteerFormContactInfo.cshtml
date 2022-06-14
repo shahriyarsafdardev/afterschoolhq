@@ -1,0 +1,42 @@
+﻿@model Activity
+
+<div class="panel panel-default panel-small-padding">
+
+    <div class="panel-heading activity-heading">
+        @UILabel.ActivityLabel(Model.ActivityTypeId) Contact
+    </div>
+
+    <div class="panel-body">
+
+        <div class="form-group">
+            <div class="col-md-9 col-md-offset-3">
+                <p>Information listed here will be published out for volunteers who are browsing and/or registering.</p>
+            </div>
+        </div>
+
+        <div>
+            <input type="hidden" name="leadertype" value="@ActivityLeaderType.StaffMember"/>
+
+            <div class="form-group">
+                <label class="col-md-3 control-label">Contact Name <span class="text-danger">*</span></label>
+                <div class="col-md-9">
+                    <input type="text" class="form-control" id="contactname" name="contactname" onfocus="this.select()" value="@Model.ContactName.IfBlank(SessionVariables.CurrentUser.DisplayName)" required/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-3 control-label">Contact Phone <span class="text-danger">*</span></label>
+                <div class="col-md-9">
+                    <input type="text" class="form-control" id="contactphone" name="contactphone" onfocus="this.select()" value="@Model.ContactPhone.IfBlank(SessionVariables.CurrentUser.Phone)" required/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-3 control-label">Contact Email <span class="text-danger">*</span></label>
+                <div class="col-md-9">
+                    <input type="email" class="form-control" id="contactemail" name="contactemail" onfocus="this.select()" value="@Model.ContactEmail.IfBlank(SessionVariables.CurrentUser.Email)" required/>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

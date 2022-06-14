@@ -45,17 +45,23 @@
                     @Html.Raw(ActivitySetupHelper.SaveButton(true, false))
 
                     @{
-                        Html.RenderPartial(
-                            "~/Views/Shared/_ActivityFormSchedule.cshtml",
-                            Model.Schedule,
-                            new ViewDataDictionary
+                        if (Model.Activity.ActivityTypeId == ActivityType.VolunteerOpportunity)
+                        {
+                            Html.RenderPartial("_VolunteerFormSchedule", Model.Schedule, new ViewDataDictionary
+                            {
+                                {"hasSchedule", hasSchedule},
+                                {"isContinuousEnrollmentEnabled", Model.Activity.IsContinuousEnrollment},
+                            });
+                        }
+                        else
+                        {
+                            Html.RenderPartial("_ActivityFormSchedule", Model.Schedule, new ViewDataDictionary
                             {
                                 {"ActivityType", (int) Model.Activity.ActivityTypeId},
                                 {"hasSchedule", hasSchedule},
                                 {"isContinuousEnrollmentEnabled", Model.Activity.IsContinuousEnrollment},
-                                {"Schedules", Model.Schedules},
-                                {"ActivityGroupType", null},
                             });
+                        }
                     }
 
                     <div class="form-group">

@@ -1,0 +1,447 @@
+﻿@model ActivitySchedule
+
+@{
+    var daysOfTheWeek = Model.GetDaysOfTheWeek();
+    var instances = Model.GetInstances();
+    var openInstances = instances.Where(instance => instance.InstanceTypeId == InstanceType.InSession).ToList();
+    var closedInstances = instances.Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession).ToList();
+
+    var isContinuousEnrollmentEnabled = ViewData["isContinuousEnrollmentEnabled"] != null && Equals(ViewData["isContinuousEnrollmentEnabled"], true);
+
+    if (isContinuousEnrollmentEnabled)
+    {
+        Model.IsOngoing = true;
+    }
+
+    var hasSchedule = ViewData["hasSchedule"] != null && Equals(ViewData["hasSchedule"], true);
+}
+@if (isContinuousEnrollmentEnabled)
+{
+    <style>
+        .isongoing .switch-button input[type="checkbox"]:checked + span {
+            background-color: #ababab;
+        }
+        .isongoing .switch-button input[type="checkbox"]:checked + span label{
+            border-color: #ababab;
+        }
+    </style>
+}
+<div class="panel panel-default panel-small-padding">
+<div class="panel-heading activity-heading">
+    Volunteer Opportunity Schedule Information
+</div>
+<div class="panel-body">
+    <div>
+        <input type="hidden" name="schedule" id="schedule" value="@Model.ID.IfEmpty(0)"/>
+
+        <div id="schedule-edit" class="">
+
+            <div class="form-group">
+                <label class="col-md-3 control-label">
+                    Has Schedule
+                </label>
+                <div class="col-md-1">
+                    @{ Html.RenderPartial("_SwitchButton", hasSchedule, new ViewDataDictionary
+                       {
+                           {"checkboxname", "hasschedule"},
+                           {"checkboxid", "hasschedule"},
+                           {"disabled", false},
+                       }); }
+                </div>
+            </div>
+
+            <div class="form-group has-schedule-switch hide">
+                <label class="col-md-3 control-label">
+                    Repeats Weekly?
+                </label>
+                <div class="col-md-1">
+                    @{ Html.RenderPartial("_SwitchButton", Model.RepeatsWeekly, new ViewDataDictionary
+                       {
+                           {"checkboxname", "repeatsweekly"},
+                           {"checkboxid", "repeatsweekly"},
+                           {"disabled", false},
+                       }); }
+                </div>
+            </div>
+            <div class="col-md-offset-3 col-md-9 padding-v-20 has-schedule-switch hide">
+                <span>
+                    <a onclick="ActivitySetup.showAdvancedSettings()" id="btn-advanced-settings" class="pointer">
+                        Show Advanced Settings
+                    </a>
+                </span>
+            </div>
+
+            <div class="hide advanced-settings">
+                <div class="form-group" id="ongoing-div">
+                    <label class="col-md-3 control-label">
+                        Is this an ongoing volunteer opportunity?
+                        <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover"
+                           data-content="Ongoing volunteer opportunities do not have an end date and allow parents to sign up their children for ongoing subscriptions."
+                           data-placement="top">
+                        </i>
+                    </label>
+                    <div class="col-md-9 isongoing">
+                        @{
+                            Html.RenderPartial("_SwitchButton", Model.IsOngoing, new ViewDataDictionary
+                            {
+                                {"checkboxname", "isongoing"},
+                                {"checkboxid", "isongoing"},
+                                {"disabled", isContinuousEnrollmentEnabled},
+                            });
+                        }
+
+                        @if (isContinuousEnrollmentEnabled)
+                        {
+                            <p class="text-muted padding-v-10 font-style-italic">
+                                <img src="~/Assets/img/alert-2.svg" class="alert-image-style" alt="alert"> Volunteer opportunities must be listed as ongoing while Continuous enrollment is enabled.
+                            </p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="panel panel-default has-schedule-switch hide">
+    <div class="panel-heading">
+        Enter your volunteer opportunity schedule
+    </div>
+</div>
+
+<div class="panel-body has-schedule-switch">
+
+    <div class="hide" id="dailyrepeat">
+
+        <div class="form-group">
+            <label class="col-md-3 control-label">
+                Day(s) of the week <span class="text-danger">*</span>
+            </label>
+            <div class="col-md-7">
+                <div class="am-checkbox display-days">
+                    @foreach (var day in Enum.GetValues(typeof(DayOfWeekASL)).Cast<DayOfWeekASL>().Where(x => x != DayOfWeekASL.NotSet))
+                    {
+                        <input type="checkbox" name="schedulerepeat-@((int) day)" id="schedulerepeat-@((int) day)" value="1" @(daysOfTheWeek.Contains(day) ? " checked=\"checked\" " : "") class="schedulerepeat-checkbox"/>
+                        <label for="schedulerepeat-@((int) day)" class="margin-h-10 mobile-padding">@day.ToString().MaxChars(3)</label>
+                    }
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="repeating-schedule" class="hide">
+        <div class="form-group">
+            <label class="col-md-3 control-label">
+                Start Date <span class="text-danger">*</span>
+            </label>
+            <div class="col-md-7">
+                @{ Html.RenderPartial("Components/_Date", new FormInputViewModel
+                   {
+                       Id = "startdate",
+                       Name = "startdate",
+                       Value = Model.StartDate.ToShortDateString(),
+                       Placeholder = "Start Date",
+                   }); }
+            </div>
+        </div>
+
+        <div class="form-group repeating-end-date">
+            <label class="col-md-3 control-label">
+                End Date <span class="text-danger">*</span>
+            </label>
+            <div class="col-md-7">
+                @{ Html.RenderPartial("Components/_Date", new FormInputViewModel
+                   {
+                       Id = "enddate",
+                       Name = "enddate",
+                       Value = Model.EndDate.ToShortDateString(),
+                       Placeholder = "End Date",
+                   }); }
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-md-3 control-label">
+                Volunteer Opportunity Start Time <span class="text-danger">*</span>
+            </label>
+            <div class="col-md-7">
+                @{ Html.RenderPartial("_TimeSelect", Model.DailyStartTime.Value, new ViewDataDictionary
+                   {
+                       {"name", "dailystarttime"},
+                       {"id", "dailystarttime"},
+                       {"required", true},
+                   }); }
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-md-3 control-label">
+                Volunteer Opportunity End Time <span class="text-danger">*</span>
+            </label>
+            <div class="col-md-7">
+                @{ Html.RenderPartial("_TimeSelect", Model.DailyEndTime.Value, new ViewDataDictionary
+                   {
+                       {"name", "dailyendtime"},
+                       {"id", "dailyendtime"},
+                       {"required", true},
+                   }); }
+            </div>
+        </div>
+    </div>
+
+    <div id="schedule-dates" class="hide">
+        @for (var i = 1; i <= 30; i++)
+        {
+            var startDate = DateTime.UtcNow;
+            var startTime = startDate.Date.AddHours(15);
+            var endTime = startDate.Date.AddHours(17);
+
+            if (openInstances.Count >= i)
+            {
+                var instance = openInstances[i - 1];
+                startDate = instance.StartDateTime.Value;
+                startTime = instance.StartDateTime.Value;
+                endTime = instance.EndDateTime.Value;
+            }
+
+            <div class="form-group hide schedule-date" id="schedule-date-@i">
+                <label class="col-md-3 control-label">
+                    Volunteer Opportunity @i
+                </label>
+                <div class="col-md-7">
+                    <table>
+                        <tr>
+                            <td>
+                                @{ Html.RenderPartial("~/Views/Shared/Components/_Date.cshtml", new FormInputViewModel
+                                   {
+                                       Id = "meeting-open-date-" + i,
+                                       Name = "meeting-open-date-" + i,
+                                       Value = startDate.ToShortDateString(),
+                                       Placeholder = "Date " + i,
+                                   }); }
+                            </td>
+                            <td>
+                                @{ Html.RenderPartial("_TimeSelect", startTime, new ViewDataDictionary
+                                   {
+                                       {"name", $"meeting-open-starttime-{i}"},
+                                       {"id", $"meeting-open-starttime-{i}"},
+                                       {"required", true},
+                                   }); }
+                            </td>
+                            <td>
+                                &nbsp;To&nbsp;
+                            </td>
+                            <td>
+                                @{ Html.RenderPartial("_TimeSelect", endTime, new ViewDataDictionary
+                                   {
+                                       {"name", $"meeting-open-endtime-{i}"},
+                                       {"id", $"meeting-open-endtime-{i}"},
+                                       {"required", true},
+                                   }); }
+                            </td>
+                            <td>
+                                &nbsp;
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-default" onclick="removeDate(@i)">Delete</button>
+                            </td>
+                        </tr>
+                    </table>
+
+                </div>
+            </div>
+            <input type="hidden" name="meeting-open-inuse-@i" id="meeting-open-inuse-@i" value="0"/>
+        }
+        <div class="col-md-7 col-md-offset-3">
+            <button type="button" class="btn btn-primary" onclick="showNextDate()">Add New Date</button>
+        </div>
+    </div>
+
+</div>
+
+
+<div class="panel panel-default has-schedule-switch hide">
+    <div class="panel-heading">
+        Enter any dates that you will not meet
+    </div>
+</div>
+
+<div class="panel-body has-schedule-switch hide">
+
+    <div id="schedule-closed-dates">
+
+        @for (var i = 1; i <= 30; i++)
+        {
+            var startDate = DateTime.UtcNow;
+
+            if (closedInstances.Count >= i)
+            {
+                var instance = closedInstances[i - 1];
+                startDate = instance.StartDateTime.Value;
+            }
+
+            <div class="form-group hide schedule-closed-date" id="schedule-closed-date-@i">
+                <label class="col-md-3 control-label">
+                    Date @i
+                </label>
+                <div class="col-md-7">
+                    <table>
+                        <tr>
+                            <td>
+                                @{ Html.RenderPartial("Components/_Date", new FormInputViewModel
+                                   {
+                                       Id = "meeting-closed-date-" + i,
+                                       Name = "meeting-closed-date-" + i,
+                                       Value = startDate.ToShortDateString(),
+                                       Placeholder = "Date " + i,
+                                   }); }
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-default" onclick="removeClosedDate(@i)">Delete</button>
+                            </td>
+                        </tr>
+                    </table>
+
+                </div>
+            </div>
+            <input type="hidden" name="meeting-closed-inuse-@i" id="meeting-closed-inuse-@i" value="0"/>
+        }
+        <div class="col-md-7 col-md-offset-3">
+            <button type="button" class="btn btn-primary" onclick="showNextClosedDate()">Add Date</button>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#repeatsweekly').click(function () {
+            checkRepeatsWeekly();
+        });
+        $('#isongoing').change(function () {
+            checkIsOnGoing();
+        });
+         @if (isContinuousEnrollmentEnabled)
+         {
+             <text>
+            ActivitySetup.showAdvancedSettings()
+          </text>
+         }
+        showClosedDates();
+        checkIsOnGoing();
+        checkRepeatsWeekly();
+
+        $('#schedule').change(function(){
+            if($(this).val() === '0') {
+                $('select[id^="meeting-open-starttime-"]').val('3:00 pm');
+                $('select[id^="meeting-open-endtime-"]').val('5:00 pm');
+                $('#dailystarttime').val('3:00 pm');
+                $('#dailyendtime').val('5:00 pm');
+                $('#startdate').val('@DateTime.UtcNow.ToShortDateString()');
+                $('#enddate').val('@DateTime.UtcNow.AddWeeks(1).ToShortDateString()');
+                $('.schedulerepeat-checkbox').prop('checked', false);
+                $('#scheduledetails-div').html('');
+                $('.schedule-date').addClass('hide');
+                showNextDate();
+            }
+        });
+
+        $('#hasschedule').click(function () {
+            checkHasSchedule();
+        });
+
+        checkHasSchedule();
+
+        $('input[name=startdate],input[name=enddate],#dailystarttime,#dailyendtime').on('change', function () {
+            validateSetup(0, event);
+        });
+    });
+
+    function checkHasSchedule() {
+        if ($('#hasschedule').is(':checked')) {
+            $('.has-schedule-switch').removeClass('hide');
+            $('#ongoing-div').removeClass('hide');
+        } else {
+            $('.has-schedule-switch').addClass('hide');
+            $('#ongoing-div').addClass('hide');
+        }
+    }
+
+    function removeDate(i){
+        $('#schedule-date-' + i).addClass('hide');
+        $('#meeting-open-inuse-' + i).val(0);
+    }
+    function removeClosedDate(i) {
+        $('#schedule-closed-date-' + i).addClass('hide');
+        $('#meeting-closed-inuse-' + i).val(0);
+    }
+
+    function showNextDate() {
+        let obj = $('.schedule-date.hide').first();
+        obj.removeClass('hide');
+        obj.next().val(1);
+    }
+
+    function showNextClosedDate() {
+        let obj = $('.schedule-closed-date.hide').first();
+        obj.removeClass('hide');
+        obj.next().val(1);
+    }
+
+    function showDates() {
+        @if (openInstances.Count > 0)
+        {
+            @: for(let i = 0; i < @openInstances.Count; i++){
+            @:  showNextDate();
+            @: }
+        }
+        else
+        {
+            @: showNextDate();
+        }
+    }
+
+    function showClosedDates() {
+        console.log('showcloseddates');
+        @if (closedInstances.Count > 0)
+        {
+            @: for(let i = 0; i < @closedInstances.Count; i++){
+            @:  showNextClosedDate();
+            @: }
+        }
+    }
+
+    function checkRepeatsWeekly() {
+        if ($('#repeatsweekly').is(':checked')) {
+            $('#dailyrepeat').removeClass('hide');
+            $('#repeating-schedule').removeClass('hide');
+            $('#requiresalldays-group').removeClass('hide');
+            $('#schedule-dates').addClass('hide');
+            $('#ongoing-div').removeClass('hide');
+            $('#btn-advanced-settings').removeClass('hide');
+        } else {
+            $('#dailyrepeat').addClass('hide');
+            $('#requiresalldays-group').addClass('hide');
+            $('#repeating-schedule').addClass('hide');
+            $('#schedule-dates').removeClass('hide');
+            $('#ongoing-div').addClass('hide');
+            $('#btn-advanced-settings').addClass('hide');
+
+            if ($('.schedule-date').length === $('.schedule-date.hide').length) {
+                showDates();
+            }
+        }
+    }
+
+    function checkIsOnGoing() {
+        if ($('#isongoing').is(':checked')) {
+            $('.repeating-end-date').addClass('hide');
+        } else {
+            $('.repeating-end-date').removeClass('hide');
+        }
+    }
+
+</script>

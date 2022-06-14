@@ -6,7 +6,7 @@
     var activeForm = (ActivityForm) ViewData["ActiveForm"];
     var maximumFormCount = accountPackage.GetFeature(FeatureType.ManageForms).Max ?? 0;
     var canAddNewForm = forms.Count < maximumFormCount;
-    var maximumSeatsAvailable = (accountPackage.GetFeature(FeatureType.Participants).Max ?? 0).ToString("#");
+    var maximumParticipantsPerActivity = accountPackage.GetFeature(FeatureType.Participants).Max ?? 0;
 }
 
 <input id="hdnAdvanceSettingToggle" type="hidden" name="isAdvanceSettingEnabled"/>
@@ -16,7 +16,7 @@
     </div>
     <div class="panel-body padding-lr-zero-sm">
         <div class="form-group">
-            <label class="col-sm-3 control-label">@UILabel.ActivityLabel(Model.ActivityTypeId) Name <span class="text-danger">*</span></label>
+            <label class="col-sm-3 control-label">@UILabel.ActivityLabel(Model.ActivityTypeId) Name <span class="text-danger" aria-hidden="true">*</span></label>
             <div class="col-sm-9">
                 <input id="name" class="form-control" type="text" name="name" value="@Model.Name" maxlength="75" required onfocus="this.select()" placeholder="Your @UILabel.ActivityLabel(Model.ActivityTypeId) Name (75 Characters)"/>
             </div>
@@ -24,12 +24,12 @@
 
         <div class="form-group">
             <label class="col-sm-3 control-label">
-                Number of Volunteers Required <span class="text-danger" aria-label="required">*</span>
+                Number of Volunteers Required <span class="text-danger" aria-hidden="true">*</span>
             </label>
             <div class="col-sm-9">
-                <input type="number" class="form-control" id="seatsavailable" name="seatsavailable" value="@Model.SeatsAvailable" onfocus="this.select()" required step="1" min="1" max="@accountPackage.GetFeature(FeatureType.Participants).Max.Value"/>
+                <input type="number" class="form-control" id="seatsavailable" name="seatsavailable" value="@Model.SeatsAvailable" onfocus="this.select()" required step="1" min="1" max="@maximumParticipantsPerActivity"/>
                 <p class="text-muted">
-                    Must be a number between 1 and @maximumSeatsAvailable
+                    Must be a number between 1 and @($"{maximumParticipantsPerActivity:#}")
                 </p>
             </div>
         </div>
@@ -92,7 +92,7 @@
             <input type="hidden" name="registrationperiod" id="registrationperiod" value="@activePeriod.ID"/>
 
             <div class="form-group reg-period">
-                <label class="col-sm-3 control-label">@UILabel.RegistrationPeriodLabel() Open <span class="text-danger">*</span></label>
+                <label class="col-sm-3 control-label">@UILabel.RegistrationPeriodLabel() Open <span class="text-danger" aria-hidden="true">*</span></label>
                 <div class="col-sm-5">
                     @{ Html.RenderPartial("Components/_Date", new FormInputViewModel
                        {
@@ -114,7 +114,7 @@
             </div>
 
             <div class="form-group reg-period" id="signUpCloseDate" style="@(Model.IsContinuousEnrollment ? "display:none" : "")">
-                <label class="col-sm-3 control-label">@UILabel.RegistrationPeriodLabel() Close <span class="text-danger">*</span></label>
+                <label class="col-sm-3 control-label">@UILabel.RegistrationPeriodLabel() Close <span class="text-danger" aria-hidden="true">*</span></label>
                 <div class="col-sm-5">
                     @{ Html.RenderPartial("Components/_Date", new FormInputViewModel
                        {
@@ -138,15 +138,13 @@
         </div>
 
         <div class="col-md-offset-3 col-md-9 padding-v-20">
-            <span>
-                <a onclick="ActivitySetup.showAdvancedSettings()" id="btn-advanced-settings" class="pointer">Show Advanced Settings</a>
-            </span>
+            <a onclick="ActivitySetup.showAdvancedSettings()" id="btn-advanced-settings" class="pointer">Show Advanced Settings</a>
         </div>
 
         <div class="advanced-settings hide">
             <div class="form-group">
                 <label class="col-md-3 control-label">
-                    Registration Form <span class="text-danger">*</span>
+                    Registration Form <span class="text-danger" aria-hidden="true">*</span>
                 </label>
                 <div class="col-md-6">
                     <select name="form" id="form" class="form-control"
@@ -211,7 +209,6 @@
     }
 
     function getFormattedDate(date) {
-        console.log(date);
         let year = date.getFullYear();
         let month = (1 + date.getMonth()).toString().padStart(2, '0');
         let day = date.getDate().toString().padStart(2, '0');

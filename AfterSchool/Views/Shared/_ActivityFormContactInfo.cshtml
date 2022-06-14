@@ -63,11 +63,6 @@
                 <label class="col-md-3 control-label">Contact Phone <span class="text-danger">*</span></label>
                 <div class="col-md-9">
                     <input type="text" class="form-control" id="contactphone" name="contactphone" onfocus="this.select()" value="@Model.ContactPhone.IfBlank(SessionVariables.CurrentUser.Phone)" required/>
-                    <p class="text-muted hide">
-                        <em>
-                            For privacy purposes only @UILabel.RegistrantLabel(true).ToLower() who have registered will receive the contact phone number.
-                        </em>
-                    </p>
                 </div>
             </div>
 

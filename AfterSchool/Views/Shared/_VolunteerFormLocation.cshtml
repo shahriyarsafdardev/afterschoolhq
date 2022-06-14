@@ -1,0 +1,140 @@
+﻿@model Activity
+@{ var location = ViewData["Location"]; }
+
+<style>
+    span > label {
+        margin-right:  15px;
+    }
+</style>
+
+<div class="panel panel-default panel-small-padding">
+    <div class="panel-heading activity-heading">
+        Your Volunteer Opportunity Location Information
+    </div>
+    <div class="panel-body">
+
+        <div class="form-group">
+            <label class="col-md-3 control-label">
+                Location
+            </label>
+            <div class="col-md-9">
+                <div class="am-radio">
+                    <span>
+                        <input type="radio"
+                               name="activitylocationtype"
+                               id="activitylocationtype-@((int) ActivityLocationType.NotSet)"
+                               value="@((int) ActivityLocationType.NotSet)"
+                               class="activitylocationtype"
+                               @(Model.ActivityLocationTypeId == ActivityLocationType.NotSet ? "checked=\"checked\"" : "")/>
+                        <label for="activitylocationtype-@((int) ActivityLocationType.NotSet)">None</label>
+                    </span>
+                    <span>
+                        <input type="radio"
+                               name="activitylocationtype"
+                               id="activitylocationtype-@((int) ActivityLocationType.Physical)"
+                               value="@((int) ActivityLocationType.Physical)"
+                               class="activitylocationtype"
+                               @(Model.ActivityLocationTypeId == ActivityLocationType.Physical ? "checked=\"checked\"" : "")/>
+                        <label for="activitylocationtype-@((int) ActivityLocationType.Physical)">Physical</label>
+                    </span>
+                    <span>
+                        <input type="radio"
+                               name="activitylocationtype"
+                               id="activitylocationtype-@((int) ActivityLocationType.Virtual)"
+                               value="@((int) ActivityLocationType.Virtual)"
+                               class="activitylocationtype"
+                               @(Model.ActivityLocationTypeId == ActivityLocationType.Virtual ? "checked=\"checked\"" : "")/>
+                        <label for="activitylocationtype-@((int) ActivityLocationType.Virtual)">Virtual</label>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div id="physical-location" class="hide">
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label">
+                    Volunteer Opportunity Location
+                </label>
+                <div class="col-sm-9">
+                    @{ Html.RenderPartial("Components/_GoogleLocationEdit", location); }
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label">
+                    Room Number / Specific Instructions
+                </label>
+                <div class="col-sm-9">
+                    @{ Html.RenderPartial("_TextEditor",
+                           Model.LocationDetails,
+                           new ViewDataDictionary {{"name", "locationdetails"}, {"id", "locationdetails"}}); }
+                    <p class="text-muted">
+                        <em>Enter your room number or any special instructions or information about the location?</em>
+                    </p>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label">
+                    Hide Exact Location
+                </label>
+                <div class="col-sm-9">
+                    @{ Html.RenderPartial(
+                           "_SwitchButton",
+                           Model.HidePreciseLocation,
+                           new ViewDataDictionary {{"checkboxname", "hidepreciselocation"}, {"checkboxid", "chkHidePreciseLocation"}}); }
+                </div>
+            </div>
+
+        </div>
+
+        <div id="virtual-location" class="hide">
+            <div class="form-group">
+                <label class="col-sm-3 control-label">Virtual Meeting Info</label>
+                <div class="col-sm-9">
+                    <textarea class="form-control" id="virtuallocation" name="virtuallocation" onfocus="this.select()" placeholder="">@Model.VirtualLocationInfo</textarea>
+                    <p class="text-muted">
+                        <em>This information only be shared with the volunteer once registration has been confirmed</em>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+
+        $('.activitylocationtype').click(function () {
+            toggleLocationEdit($(this));
+        });
+
+        if ($('#activitylocationtype-@((int) ActivityLocationType.Physical)').is(':checked')) {
+            toggleLocationEdit($('#activitylocationtype-@((int) ActivityLocationType.Physical)'));
+        }
+
+        if ($('#activitylocationtype-@((int) ActivityLocationType.Virtual)').is(':checked')) {
+            toggleLocationEdit($('#activitylocationtype-@((int) ActivityLocationType.Virtual)'));
+        }
+
+    });
+
+    function toggleLocationEdit(obj) {
+        $('#physical-location').addClass('hide');
+        $('#virtual-location').addClass('hide');
+
+        $('.my-location').prop("required", false);
+        $('#virtuallocation').prop("required", false);
+
+        if (obj.val() == '@((int) ActivityLocationType.Physical)') {
+            $('#physical-location').removeClass('hide');
+            $('.my-location').prop("required", true);
+        } else if (obj.val() == '@((int) ActivityLocationType.Virtual)') {
+            $('#virtual-location').removeClass('hide');
+            $('#virtuallocation').prop("required", true);
+        }
+    }
+
+</script>

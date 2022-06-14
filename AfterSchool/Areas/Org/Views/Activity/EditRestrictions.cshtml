@@ -43,7 +43,16 @@
                     @Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editrestrictions", "next", true, true, Request))
                     @Html.Raw(ActivitySetupHelper.SaveButton(true, false))
 
-                    @{ Html.RenderPartial("~/Views/Shared/_ActivityFormRestrictions.cshtml", Model.Activity); }
+                    @{
+                        if (Model.Activity.ActivityTypeId == ActivityType.VolunteerOpportunity)
+                        {
+                            Html.RenderPartial("~/Views/Shared/_VolunteerFormRestrictions.cshtml", Model.Activity);
+                        }
+                        else
+                        {
+                            Html.RenderPartial("~/Views/Shared/_ActivityFormRestrictions.cshtml", Model.Activity);
+                        }
+                    }
 
                     <div class="form-group">
                         <div class="col-sm-6 col-sm-offset-3">

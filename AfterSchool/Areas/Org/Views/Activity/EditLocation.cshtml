@@ -43,7 +43,16 @@
                     @Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editlocation", "next", true, true, Request))
                     @Html.Raw(ActivitySetupHelper.SaveButton(true, false))
 
-                    @{ Html.RenderPartial("~/Views/Shared/_ActivityFormLocation.cshtml", Model.Activity, new ViewDataDictionary {{"Location", Model.Location}}); }
+                    @{
+                        if (Model.Activity.ActivityTypeId == ActivityType.VolunteerOpportunity)
+                        {
+                            Html.RenderPartial("~/Views/Shared/_VolunteerFormLocation.cshtml", Model.Activity, new ViewDataDictionary {{"Location", Model.Location}});
+                        }
+                        else
+                        {
+                            Html.RenderPartial("~/Views/Shared/_ActivityFormLocation.cshtml", Model.Activity, new ViewDataDictionary {{"Location", Model.Location}});
+                        }
+                    }
 
                     <div class="form-group">
                         <div class="col-sm-6 col-sm-offset-3">

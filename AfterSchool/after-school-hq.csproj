@@ -2352,6 +2352,11 @@
     <Content Include="Scripts\jquery.validate.min.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
     <Content Include="Scripts\npm.js" />
+    <Content Include="Views\Shared\_VolunteerFormConfirmation.cshtml" />
+    <Content Include="Views\Shared\_VolunteerFormContactInfo.cshtml" />
+    <Content Include="Views\Shared\_VolunteerFormLocation.cshtml" />
+    <Content Include="Views\Shared\_VolunteerFormRestrictions.cshtml" />
+    <Content Include="Views\Shared\_VolunteerFormSchedule.cshtml" />
     <Content Include="Views\Shared\_VolunteerFormSetup.cshtml" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>

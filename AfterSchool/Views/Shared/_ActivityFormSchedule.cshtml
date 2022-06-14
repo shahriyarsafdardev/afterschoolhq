@@ -1,30 +1,26 @@
 ﻿@model ActivitySchedule
 
-@{ 
-    var schedules = (List<ActivitySchedule>)ViewData["Schedules"];
-    var showScheduleList = false; // (bool)ViewBag.ShowScheduleList;
+@{
     var daysOfTheWeek = Model.GetDaysOfTheWeek();
     var instances = Model.GetInstances();
     var openInstances = instances.Where(instance => instance.InstanceTypeId == InstanceType.InSession).ToList();
     var closedInstances = instances.Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession).ToList();
 
-    var activityGroupType = new ActivityGroupType?();
+    var activityGroupType = ViewData["ActivityGroupType"].IsNotEmpty() ? (ActivityGroupType?) (ActivityGroupType) ViewData["ActivityGroupType"].ToString().ToInteger() : null;
     var activityType = new ActivityType?();
     var activityMeetingLabel = "Activity";
     var activityMeetingVerbLabel = "meet";
     var forceNonRepeating = false;
-    var hasScheduled = false;
-    var isContinuousEnrollmentEnabled = ViewData["isContinuousEnrollmentEnabled"] != null && String.Equals(ViewData["isContinuousEnrollmentEnabled"], true) ? true : false;
+    var hasSchedule = false;
+    var isContinuousEnrollmentEnabled = ViewData["isContinuousEnrollmentEnabled"] != null && Equals(ViewData["isContinuousEnrollmentEnabled"], true);
 
     if (isContinuousEnrollmentEnabled)
     {
         Model.IsOngoing = true;
     }
 
-    if (ViewData["ActivityGroupType"].IsNotEmpty())
+    if (activityGroupType.HasValue)
     {
-        activityGroupType = (ActivityGroupType)ViewData["ActivityGroupType"].ToString().ToInteger();
-
         if (activityGroupType == ActivityGroupType.League)
         {
             activityMeetingLabel = "Game";
@@ -39,29 +35,30 @@
 
     if (ViewData["ActivityType"].IsNotEmpty())
     {
-        activityType = (ActivityType)ViewData["ActivityType"].ToString().ToInteger();
-        if (activityType == ActivityType.Team)
+        activityType = (ActivityType) ViewData["ActivityType"].ToString().ToInteger();
+        switch (activityType)
         {
-            activityMeetingLabel = "Practice";
-            activityMeetingVerbLabel = "practice";
-        }
-        else if (activityType == ActivityType.FieldTrip)
-        {
-            activityMeetingLabel = "Field Trip Date";
-            activityMeetingVerbLabel = "travel";
-            forceNonRepeating = true;
+            case ActivityType.Team:
+                activityMeetingLabel = "Practice";
+                activityMeetingVerbLabel = "practice";
+                break;
+            case ActivityType.FieldTrip:
+                activityMeetingLabel = "Field Trip Date";
+                activityMeetingVerbLabel = "travel";
+                forceNonRepeating = true;
+                break;
         }
     }
 
-    if(ViewData["hasSchedule"] != null && String.Equals(ViewData["hasSchedule"], true))
+    if (ViewData["hasSchedule"] != null && Equals(ViewData["hasSchedule"], true))
     {
-        hasScheduled = true;
+        hasSchedule = true;
     }
 
     var showAllowSubscriptionPlans = SessionVariables.AccountPackage.HasFeature(FeatureType.AllowSubscriptionPlans);
     var allowSubscriptionPlansPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowSubscriptionPlans, SessionVariables.AccountPackage);
 }
-@if(isContinuousEnrollmentEnabled)
+@if (isContinuousEnrollmentEnabled)
 {
     <style>
         .isongoing .switch-button input[type="checkbox"]:checked + span {
@@ -74,291 +71,318 @@
 }
 
 <div class="panel panel-default panel-small-padding">
-    <div class="panel-heading activity-heading">
-        @activityMeetingLabel Schedule Information 
-    </div>
-    <div class="panel-body">
-        <div>
+<div class="panel-heading activity-heading">
+    @activityMeetingLabel Schedule Information
+</div>
+<div class="panel-body">
+    <div>
+        <input type="hidden" name="schedule" id="schedule" value="@Model.ID.IfEmpty(0)"/>
 
-            @if (showScheduleList && false)
+        <div id="schedule-edit" class="">
+
+            <div class="form-group">
+                <label class="col-md-3 control-label">
+                    Has Schedule
+                </label>
+                <div class="col-md-1">
+                    @{ Html.RenderPartial("~/Views/Shared/_SwitchButton.cshtml", hasSchedule, new ViewDataDictionary
+                       {
+                           {"checkboxname", "hasschedule"},
+                           {"checkboxid", "hasschedule"},
+                           {"disabled", false},
+                       }); }
+                </div>
+            </div>
+
+            @if (!forceNonRepeating)
             {
-                <div class="form-group">
+                <div class="form-group has-schedule-switch hide">
                     <label class="col-md-3 control-label">
-                        Select Schedule
+                        Repeats Weekly?
                     </label>
-                    <div class="col-md-7">
-                        <select name="schedule" id="schedule" class="form-control" required>
-                            <option value="">Select Schedule...</option>
-                            <option value="0"> + New Schedule</option>
-                            @foreach (var item in schedules)
-                            {
-                                <option value="@item.ID" @(Model?.ID == item.ID ? " selected=\"selected\" " : "")>@item.Name</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <div id="copy-edit">
-                            <a class="btn btn-link" href="@Url.Action("edit", "schedule", new { id = Model?.ID })" id="editSchedule">
-                                Edit
-                            </a>
-                            |
-                            <a class="btn btn-link" href="@Url.Action("copy", "schedule", new { id = Model?.ID })" id="copySchedule">
-                                Copy
-                            </a>
-                        </div>
+                    <div class="col-md-1">
+                        @{ Html.RenderPartial("~/Views/Shared/_SwitchButton.cshtml", Model.RepeatsWeekly, new ViewDataDictionary
+                           {
+                               {"checkboxname", "repeatsweekly"},
+                               {"checkboxid", "repeatsweekly"},
+                               {"disabled", false},
+                           }); }
                     </div>
                 </div>
             }
             else
             {
-                <input type="hidden" name="schedule" id="schedule" value="@Model.ID.IfEmpty(0)" />
+                <input type="hidden" name="repeatsweekly" value=""/>
             }
 
-            <div id="schedule-edit" class="">
-
-                @*
-                    <div class="form-group hide">
-                        <label class="col-md-3 control-label">
-                            Additional Instructions
-                            <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Should @UILabel.RegistrantLabel(true).ToLower() arrive 15 mins early? Are there issues if the @UILabel.RegistrantLabel().ToLower() is late?" data-placement="top"></i>
-                        </label>
-                        <div class="col-md-7">
-                            @{ Html.RenderPartial(
-                                "~/Views/Shared/_TextEditor.cshtml",
-                                Model.ScheduleDetails,
-                                new ViewDataDictionary() {
-                                    { "required", true },
-                                    { "name", "scheduledetails" },
-                                    { "id", "scheduledetails" }
-                                }
-                                ); }
-                        </div>
-                    </div>
-                *@
-
-                <div class="form-group">
-                    <label class="col-md-3 control-label">
-                        Has Schedule
-                    </label>
-                    <div class="col-md-1">
-                        @{
-                            Html.RenderPartial(
-                              "~/Views/Shared/_SwitchButton.cshtml",
-                              hasScheduled,
-                              new ViewDataDictionary()
-                              {
-                                    { "checkboxname", "hasschedule" },
-                                    { "checkboxid", "hasschedule" },
-                                    { "disabled", false }
-                              }
-                            );
-                        }
-                    </div>
+            @if (!activityGroupType.HasValue && activityType == ActivityType.Activity)
+            {
+                <div class="col-md-offset-3 col-md-9 padding-v-20 has-schedule-switch hide">
+                    <span>
+                        <a onclick="ActivitySetup.showAdvancedSettings()" id="btn-advanced-settings" class="pointer">
+                            Show Advanced Settings
+                        </a>
+                    </span>
                 </div>
 
-                @if (!forceNonRepeating)
-                { 
-                    <div class="form-group has-schedule-switch hide">
+                <div class="hide advanced-settings">
+                    <div class="form-group" id="ongoing-div">
                         <label class="col-md-3 control-label">
-                            Repeats Weekly?
+                            Is this an ongoing @UILabel.ActivityLabel().ToLower()? <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Ongoing @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() do not have an end date and allow parents to sign up their children for ongoing subscriptions." data-placement="top"></i>
                         </label>
-                        <div class="col-md-1">
+                        <div class="col-md-9 isongoing"
+                             @if (!showAllowSubscriptionPlans)
+                             {
+                                 <text> onclick="showUpgradeMyPlan('@(allowSubscriptionPlansPackage?.Name)',@(allowSubscriptionPlansPackage?.ID))"</text>
+                             }>
                             @{
                                 Html.RenderPartial(
                                     "~/Views/Shared/_SwitchButton.cshtml",
-                                    Model.RepeatsWeekly,
-                                    new ViewDataDictionary()
+                                    Model.IsOngoing,
+                                    new ViewDataDictionary
                                     {
-                                        { "checkboxname", "repeatsweekly" },
-                                        { "checkboxid", "repeatsweekly" },
-                                        { "disabled", false }
+                                        {"checkboxname", "isongoing"},
+                                        {"checkboxid", "isongoing"},
+                                        {"disabled", isContinuousEnrollmentEnabled || !showAllowSubscriptionPlans},
                                     }
-                                );
-                            }
-                        </div>
-                    </div>
-                }
-                else
-                {
-                    <input type="hidden" name="repeatsweekly" value="" />
-                }
-
-                @if (!activityGroupType.HasValue && activityType == ActivityType.Activity)
-                {
-                    <div class="col-md-offset-3 col-md-9 padding-v-20 has-schedule-switch hide">
-                        <span>
-                            <a onclick="ActivitySetup.showAdvancedSettings()" id="btn-advanced-settings" class="pointer">
-                                Show Advanced Settings
-                            </a>
-                        </span>
-                    </div>
-
-                    <div class="hide advanced-settings">
-                        <div class="form-group" id="ongoing-div">
-                            <label class="col-md-3 control-label">
-                                Is this an ongoing @UILabel.ActivityLabel(ActivityType.Activity).ToLower()? <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Ongoing @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() do not have an end date and allow parents to sign up their children for ongoing subscriptions." data-placement="top"></i>
-                            </label>
-                            <div class="col-md-9 isongoing" @if (!showAllowSubscriptionPlans) { <text> onclick="return showUpgradeMyPlan('@(allowSubscriptionPlansPackage?.Name)',@(allowSubscriptionPlansPackage?.ID))"</text> }>
-                                @{
-                                    Html.RenderPartial(
-                                        "~/Views/Shared/_SwitchButton.cshtml",
-                                        Model.IsOngoing,
-                                        new ViewDataDictionary()
-                                        {
-                                            { "checkboxname", "isongoing" },
-                                            { "checkboxid", "isongoing" },
-                                            { "disabled", isContinuousEnrollmentEnabled ? true : !showAllowSubscriptionPlans }
-                                        }
                                     );
-                                }
+                            }
 
-                                @if (isContinuousEnrollmentEnabled)
-                                {
+                            @if (isContinuousEnrollmentEnabled)
+                            {
                                 <p class="text-muted padding-v-10 font-style-italic">
                                     <img src="~/Assets/img/alert-2.svg" class="alert-image-style"> Activities must be listed as ongoing while Continuous enrollment is enabled.
                                 </p>
-                                }
-                            </div>
+                            }
                         </div>
                     </div>
-                }
+                </div>
+            }
+        </div>
+    </div>
+
+</div>
+
+@if (!forceNonRepeating)
+{
+    <div class="panel panel-default has-schedule-switch hide">
+        <div class="panel-heading">
+            Enter your @activityMeetingLabel.ToLower() schedule
+        </div>
+    </div>
+}
+
+<div class="panel-body has-schedule-switch">
+
+    <div class="hide" id="dailyrepeat">
+
+        <div class="form-group">
+            <label class="col-md-3 control-label">
+                Day(s) of the week <span class="text-danger">*</span>
+            </label>
+            <div class="col-md-7">
+                <div class="am-checkbox display-days">
+                    @foreach (var day in Enum.GetValues(typeof(DayOfWeekASL)).Cast<DayOfWeekASL>().Where(x => x != DayOfWeekASL.NotSet))
+                    {
+                        <input type="checkbox" name="schedulerepeat-@((int) day)" id="schedulerepeat-@((int) day)" value="1" @(daysOfTheWeek.Contains(day) ? " checked=\"checked\" " : "") class="schedulerepeat-checkbox"/>
+                        <label for="schedulerepeat-@((int) day)" class="margin-h-10 mobile-padding">@day.ToString().MaxChars(3)</label>
+                    }
+                </div>
             </div>
         </div>
 
     </div>
 
-    
-    @if (!forceNonRepeating)
-    {
-        <div class="panel panel-default has-schedule-switch hide">
-            <div class="panel-heading">
-                Enter your @activityMeetingLabel.ToLower() schedule
-            </div>
-        </div>
-    }
-
-    <div class="panel-body has-schedule-switch">
-
-        <div class="hide" id="dailyrepeat">
-
-            <div class="form-group">
-                <label class="col-md-3 control-label">
-                    Day(s) of the week <span class="text-danger">*</span>
-                </label>
-                <div class="col-md-7">
-                    <div class="am-checkbox display-days">
-                        @foreach (DayOfWeekASL day in Enum.GetValues(typeof(DayOfWeekASL)).Cast<DayOfWeekASL>().Where(x => x != DayOfWeekASL.NotSet))
+    <div id="repeating-schedule" class="hide">
+        <div class="form-group">
+            <label class="col-md-3 control-label">
+                Start Date <span class="text-danger">*</span>
+            </label>
+            <div class="col-md-7">
+                @{
+                    Html.RenderPartial(
+                        "~/Views/Shared/Components/_Date.cshtml",
+                        new FormInputViewModel
                         {
-                            <input type="checkbox" name="schedulerepeat-@((int)day)" id="schedulerepeat-@((int)day)" value="1" @(daysOfTheWeek.Contains(day) ? " checked=\"checked\" " : "") class="schedulerepeat-checkbox" />
-                            <label for="schedulerepeat-@((int)day)" class="margin-h-10 mobile-padding">@day.ToString().MaxChars(3)</label>
+                            Id = "startdate",
+                            Name = "startdate",
+                            Value = Model.StartDate.ToShortDateString(),
+                            Placeholder = "Start Date",
                         }
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <div id="repeating-schedule" class="hide">
-            <div class="form-group">
-                <label class="col-md-3 control-label">
-                    Start Date <span class="text-danger">*</span>
-                </label>
-                <div class="col-md-7">
-                    @{
-                        Html.RenderPartial(
-                            "~/Views/Shared/Components/_Date.cshtml",
-                            new FormInputViewModel()
-                            {
-                                Id = "startdate",
-                                Name = "startdate",
-                                Value = Model.StartDate.ToShortDateString(),
-                                Placeholder = "Start Date"
-                            }
                         );
-                    }
-                </div>
-            </div>
-
-            <div class="form-group repeating-end-date">
-                <label class="col-md-3 control-label">
-                    End Date <span class="text-danger">*</span>
-                </label>
-                <div class="col-md-7">
-                    @{ 
-                        Html.RenderPartial(
-                            "~/Views/Shared/Components/_Date.cshtml",
-                            new FormInputViewModel()
-                            {
-                                Id = "enddate",
-                                Name = "enddate",
-                                Value = Model.EndDate.ToShortDateString(),
-                                Placeholder = "End Date"
-                            }
-                        ); 
-                    }
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="col-md-3 control-label">
-                    @activityMeetingLabel Start Time <span class="text-danger">*</span>
-                </label>
-                <div class="col-md-7">
-                    @{
-                        Html.RenderPartial(
-                            "~/Views/Shared/_TimeSelect.cshtml",
-                            Model.DailyStartTime,
-                            new ViewDataDictionary()
-                            {
-                                { "name", "dailystarttime" },
-                                { "id", "dailystarttime" },
-                                { "required", true }
-                            }
-                        );
-                    }
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="col-md-3 control-label">
-                    @activityMeetingLabel End Time <span class="text-danger">*</span>
-                </label>
-                <div class="col-md-7">
-                    @{
-                        Html.RenderPartial(
-                            "~/Views/Shared/_TimeSelect.cshtml",
-                            Model.DailyEndTime,
-                            new ViewDataDictionary()
-                            {
-                                { "name", "dailyendtime" },
-                                { "id", "dailyendtime" },
-                                { "required", true }
-                            }
-                        );
-                    }
-                </div>
+                }
             </div>
         </div>
 
-        <div id="schedule-dates" class="hide">
+        <div class="form-group repeating-end-date">
+            <label class="col-md-3 control-label">
+                End Date <span class="text-danger">*</span>
+            </label>
+            <div class="col-md-7">
+                @{
+                    Html.RenderPartial(
+                        "~/Views/Shared/Components/_Date.cshtml",
+                        new FormInputViewModel
+                        {
+                            Id = "enddate",
+                            Name = "enddate",
+                            Value = Model.EndDate.ToShortDateString(),
+                            Placeholder = "End Date",
+                        }
+                        );
+                }
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-md-3 control-label">
+                @activityMeetingLabel Start Time <span class="text-danger">*</span>
+            </label>
+            <div class="col-md-7">
+                @{ Html.RenderPartial("~/Views/Shared/_TimeSelect.cshtml", Model.DailyStartTime.Value, new ViewDataDictionary
+                   {
+                       {"name", "dailystarttime"},
+                       {"id", "dailystarttime"},
+                       {"required", true},
+                   }); }
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-md-3 control-label">
+                @activityMeetingLabel End Time <span class="text-danger">*</span>
+            </label>
+            <div class="col-md-7">
+                @{
+                    Html.RenderPartial(
+                        "~/Views/Shared/_TimeSelect.cshtml",
+                        Model.DailyEndTime.Value,
+                        new ViewDataDictionary
+                        {
+                            {"name", "dailyendtime"},
+                            {"id", "dailyendtime"},
+                            {"required", true},
+                        }
+                        );
+                }
+            </div>
+        </div>
+    </div>
+
+    <div id="schedule-dates" class="hide">
+        @for (var i = 1; i <= 30; i++)
+        {
+            var startDate = DateTime.UtcNow;
+            var startTime = startDate.Date.AddHours(15);
+            var endTime = startDate.Date.AddHours(17);
+
+            ActivityInstance instance = null;
+            if (openInstances.Count >= i)
+            {
+                instance = openInstances[i - 1];
+                startDate = instance.StartDateTime.Value;
+                startTime = instance.StartDateTime.Value;
+                endTime = instance.EndDateTime.Value;
+            }
+
+            <div class="form-group hide schedule-date" id="schedule-date-@i">
+                <label class="col-md-3 control-label">
+                    @activityMeetingLabel @i
+                </label>
+                <div class="col-md-7">
+                    <table>
+                        <tr>
+                            <td>
+                                @{
+                                    Html.RenderPartial(
+                                        "~/Views/Shared/Components/_Date.cshtml",
+                                        new FormInputViewModel
+                                        {
+                                            Id = "meeting-open-date-" + i,
+                                            Name = "meeting-open-date-" + i,
+                                            Value = startDate.ToShortDateString(),
+                                            Placeholder = "Date " + i,
+                                        }
+                                        );
+                                }
+                            </td>
+                            <td>
+                                @{
+                                    Html.RenderPartial(
+                                        "~/Views/Shared/_TimeSelect.cshtml",
+                                        startTime,
+                                        new ViewDataDictionary
+                                        {
+                                            {"name", string.Format("meeting-open-starttime-{0}", i)},
+                                            {"id", string.Format("meeting-open-starttime-{0}", i)},
+                                            {"required", true},
+                                        }
+                                        );
+                                }
+                            </td>
+                            <td>
+                                &nbsp;To&nbsp;
+                            </td>
+                            <td>
+                                @{
+                                    Html.RenderPartial(
+                                        "~/Views/Shared/_TimeSelect.cshtml",
+                                        endTime,
+                                        new ViewDataDictionary
+                                        {
+                                            {"name", string.Format("meeting-open-endtime-{0}", i)},
+                                            {"id", string.Format("meeting-open-endtime-{0}", i)},
+                                            {"required", true},
+                                        }
+                                        );
+                                }
+                            </td>
+                            <td>
+                                &nbsp;
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-default" onclick="removeDate(@i)">Delete</button>
+                            </td>
+                        </tr>
+                    </table>
+
+                </div>
+            </div>
+            <input type="hidden" name="meeting-open-inuse-@i" id="meeting-open-inuse-@i" value="0"/>
+        }
+        <div class="col-md-7 col-md-offset-3">
+            <button type="button" class="btn btn-primary" onclick="showNextDate()">Add New Date</button>
+        </div>
+    </div>
+
+</div>
+
+@if (!forceNonRepeating)
+{
+    <div class="panel panel-default has-schedule-switch hide">
+        <div class="panel-heading">
+            Enter any dates that you will not @activityMeetingVerbLabel
+        </div>
+    </div>
+
+    <div class="panel-body has-schedule-switch hide">
+
+        <div id="schedule-closed-dates">
+
             @for (var i = 1; i <= 30; i++)
             {
                 var startDate = DateTime.UtcNow;
-                var startTime = startDate.Date.AddHours(15);
-                var endTime = startDate.Date.AddHours(17);
 
                 ActivityInstance instance = null;
-                if (openInstances.Count >= i)
+                if (closedInstances.Count >= i)
                 {
-                    instance = openInstances[i - 1];
+                    instance = closedInstances[i - 1];
                     startDate = instance.StartDateTime.Value;
-                    startTime = instance.StartDateTime.Value;
-                    endTime = instance.EndDateTime.Value;
                 }
 
-                <div class="form-group hide schedule-date" id="schedule-date-@i">
+                <div class="form-group hide schedule-closed-date" id="schedule-closed-date-@i">
                     <label class="col-md-3 control-label">
-                        @activityMeetingLabel @i
+                        Date @i
                     </label>
                     <div class="col-md-7">
                         <table>
@@ -367,128 +391,33 @@
                                     @{
                                         Html.RenderPartial(
                                             "~/Views/Shared/Components/_Date.cshtml",
-                                            new FormInputViewModel()
+                                            new FormInputViewModel
                                             {
-                                                Id = "meeting-open-date-" + i,
-                                                Name = "meeting-open-date-" + i,
+                                                Id = "meeting-closed-date-" + i,
+                                                Name = "meeting-closed-date-" + i,
                                                 Value = startDate.ToShortDateString(),
-                                                Placeholder = "Date " + i
+                                                Placeholder = "Date " + i,
                                             }
-                                        );
-                                    }                                   
-                                </td>
-                                <td>
-                                    @{
-                                        Html.RenderPartial(
-                                            "~/Views/Shared/_TimeSelect.cshtml",
-                                            startTime,
-                                            new ViewDataDictionary()
-                                            {
-                                                { "name", string.Format("meeting-open-starttime-{0}", i) },
-                                                { "id", string.Format("meeting-open-starttime-{0}", i) },
-                                                { "required", true }
-                                            }
-                                        );
+                                            );
                                     }
                                 </td>
                                 <td>
-                                    &nbsp;To&nbsp;
-                                </td>
-                                <td>
-                                    @{
-                                        Html.RenderPartial(
-                                            "~/Views/Shared/_TimeSelect.cshtml",
-                                            endTime,
-                                            new ViewDataDictionary()
-                                            {
-                                                { "name", string.Format("meeting-open-endtime-{0}", i) },
-                                                { "id", string.Format("meeting-open-endtime-{0}", i) },
-                                                { "required", true }
-                                            }
-                                        );
-                                    }
-                                </td>
-                                <td>
-                                    &nbsp;
-                                </td>
-                                <td>
-                                    <button type="button" class="btn btn-default" onclick="removeDate(@i)">Delete</button>
+                                    <button type="button" class="btn btn-default" onclick="removeClosedDate(@i)">Delete</button>
                                 </td>
                             </tr>
                         </table>
 
                     </div>
                 </div>
-                <input type="hidden" name="meeting-open-inuse-@i" id="meeting-open-inuse-@i" value="0" />
+                <input type="hidden" name="meeting-closed-inuse-@i" id="meeting-closed-inuse-@i" value="0"/>
             }
             <div class="col-md-7 col-md-offset-3">
-                <button type="button" class="btn btn-primary" onclick="showNextDate()">Add New Date</button>
+                <button type="button" class="btn btn-primary" onclick="showNextClosedDate()">Add Date</button>
             </div>
         </div>
 
     </div>
-
-    @if (!forceNonRepeating)
-    {
-        <div class="panel panel-default has-schedule-switch hide">
-            <div class="panel-heading">
-                Enter any dates that you will not @activityMeetingVerbLabel
-            </div>
-        </div>
-
-        <div class="panel-body has-schedule-switch hide">
-
-            <div id="schedule-closed-dates">
-
-                @for (var i = 1; i <= 30; i++)
-                {
-                    var startDate = DateTime.UtcNow;
-
-                    ActivityInstance instance = null;
-                    if (closedInstances.Count >= i)
-                    {
-                        instance = closedInstances[i - 1];
-                        startDate = instance.StartDateTime.Value;
-                    }
-
-                    <div class="form-group hide schedule-closed-date" id="schedule-closed-date-@i">
-                        <label class="col-md-3 control-label">
-                            Date @i
-                        </label>
-                        <div class="col-md-7">
-                            <table>
-                                <tr>
-                                    <td>
-                                        @{
-                                            Html.RenderPartial(
-                                                "~/Views/Shared/Components/_Date.cshtml",
-                                                new FormInputViewModel()
-                                                {
-                                                    Id = "meeting-closed-date-" + i,
-                                                    Name = "meeting-closed-date-" + i,
-                                                    Value = startDate.ToShortDateString(),
-                                                    Placeholder = "Date " + i
-                                                }
-                                            );
-                                        }
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-default" onclick="removeClosedDate(@i)">Delete</button>
-                                    </td>
-                                </tr>
-                            </table>
-
-                        </div>
-                    </div>
-                    <input type="hidden" name="meeting-closed-inuse-@i" id="meeting-closed-inuse-@i" value="0" />
-                }
-                <div class="col-md-7 col-md-offset-3">
-                    <button type="button" class="btn btn-primary" onclick="showNextClosedDate()">Add Date</button>
-                </div>
-            </div>
-        
-        </div>
-    }
+}
 
 </div>
 
@@ -503,9 +432,9 @@
         $('#isongoing').change(function () {
             checkIsOnGoing();
         });
-         @if(isContinuousEnrollmentEnabled)
+         @if (isContinuousEnrollmentEnabled)
          {
-          <text>
+             <text>
             ActivitySetup.showAdvancedSettings()
           </text>
          }
@@ -515,7 +444,7 @@
         checkRepeatsWeekly();
 
         $('#schedule').change(function(){
-            if($(this).val() == '0') {
+            if($(this).val() === '0') {
                 $('select[id^="meeting-open-starttime-"]').val('3:00 pm');
                 $('select[id^="meeting-open-endtime-"]').val('5:00 pm');
                 $('#dailystarttime').val('3:00 pm');
@@ -550,31 +479,6 @@
         }
     }
 
-    @*
-    function checkScheduleVal() {
-        if ($('#schedule').val().length > 0) {
-            if ($('#schedule').val() != "0") {
-                //$('#schedule-edit').addClass('hide');
-                //$('#copy-edit').removeClass('hide');
-                //$('#editSchedule').attr('href', '@Url.Action("edit", "schedule")/' + $('#schedule').val() + '?activity=@activityId');
-                //$('#copySchedule').attr('href', '@Url.Action("copy", "schedule")/' + $('#schedule').val() + '?activity=@activityId');
-            } else {
-                //$('#schedule-edit').removeClass('hide');
-                //$('#copy-edit').addClass('hide');
-            }
-
-        } else {
-           // $('#schedule-edit').addClass('hide');
-            //$('#copy-edit').addClass('hide');
-        }
-
-        if ('@showScheduleList'.toLowerCase() == 'false') {
-            //$('#schedule-edit').removeClass('hide');
-        }
-    }
-    *@
-
-
     function removeDate(i){
         $('#schedule-date-' + i).addClass('hide');
         $('#meeting-open-inuse-' + i).val(0);
@@ -585,21 +489,21 @@
     }
 
     function showNextDate() {
-        var obj = $('.schedule-date.hide').first();
+        let obj = $('.schedule-date.hide').first();
         obj.removeClass('hide');
         obj.next().val(1);
     }
 
     function showNextClosedDate() {
-        var obj = $('.schedule-closed-date.hide').first();
+        let obj = $('.schedule-closed-date.hide').first();
         obj.removeClass('hide');
         obj.next().val(1);
     }
 
     function showDates() {
-        @if(openInstances.Count > 0)
+        @if (openInstances.Count > 0)
         {
-            @: for(var i = 0; i < @openInstances.Count; i++){
+            @: for(let i = 0; i < @openInstances.Count; i++){
             @:  showNextDate();
             @: }
         }
@@ -611,9 +515,9 @@
 
     function showClosedDates() {
         console.log('showcloseddates');
-        @if(closedInstances.Count > 0)
+        @if (closedInstances.Count > 0)
         {
-            @: for(var i = 0; i < @closedInstances.Count; i++){
+            @: for(let i = 0; i < @closedInstances.Count; i++){
             @:  showNextClosedDate();
             @: }
         }
@@ -635,7 +539,7 @@
             $('#ongoing-div').addClass('hide');
             $('#btn-advanced-settings').addClass('hide');
 
-            if ($('.schedule-date').length == $('.schedule-date.hide').length) {
+            if ($('.schedule-date').length === $('.schedule-date.hide').length) {
                 showDates();
             }
         }

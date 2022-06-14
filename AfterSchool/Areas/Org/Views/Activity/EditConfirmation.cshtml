@@ -1,4 +1,5 @@
-﻿@model AfterSchool.Areas.Org.Controllers.EditConfirmationResult
+﻿@using AfterSchool.Helpers
+@model AfterSchool.Areas.Org.Controllers.EditConfirmationResult
 @{
     var msgs = Model.Messages;
     var isFullScreen = Model.IsFullScreen;
@@ -10,8 +11,8 @@
 
 @{ Html.RenderPartial("OrgAccountHeader", Model.Activity.AccountId.ToString(), new ViewDataDictionary
    {
-       {"IsFullScreen", isFullScreen}
-   });}
+       {"IsFullScreen", isFullScreen},
+   }); }
 
 <div class="main-content">
 
@@ -19,14 +20,13 @@
 
     @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model.Activity, new ViewDataDictionary
        {
-           { "IsFullScreen", isFullScreen },
-           { "IsActivityLeader", Model.IsActivityLeader }
-       });
-    }
+           {"IsFullScreen", isFullScreen},
+           {"IsActivityLeader", Model.IsActivityLeader},
+       }); }
 
     <div class="panel panel-default margin-bottom-zero">
         <div class="panel-heading">
-            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Activity.Name); }
+            @{ Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Activity.Name); }
 
             @if (isFullScreen)
             {
@@ -36,30 +36,42 @@
         <div class="panel-body padding-lr-zero-sm">
 
             <div class="col-md-10 col-lg-9">
-                <form id="form1" method="post" action="@Url.Action("editconfirmation", "activity", new { id = Model.Activity.Uid, isnew = Request["isnew"], source = Request["source"] })" class="form-horizontal">
+                <form id="form1" method="post" action="@Url.Action("editconfirmation", "activity", new {id = Model.Activity.Uid, isnew = Request["isnew"], source = Request["source"]})" class="form-horizontal">
 
                     @if (!Model.Activity.IsPublished)
                     {
-                        @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model.Activity, "editconfirmation", "publish", true, true, Request))
+                        @Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editconfirmation", "publish", true, true, Request))
                     }
-                    @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(true, false))
+                    @Html.Raw(ActivitySetupHelper.SaveButton(true, false))
 
-                    @{Html.RenderPartial("~/Views/Shared/_ActivityFormConfirmation.cshtml", Model.Activity);}
+                    @{
+                        if (Model.Activity.ActivityTypeId == ActivityType.VolunteerOpportunity)
+                        {
+                            var activityProperties = Model.Activity.GetActivityProperties();
+                            var emailTextContent = activityProperties
+                                .FirstOrDefault(x => x.AccountPropertyTypeId == AccountPropertyType.RegistrationThankYouEmail)?.Value;
+                            Html.RenderPartial("_VolunteerFormConfirmation", emailTextContent);
+                        }
+                        else
+                        {
+                            Html.RenderPartial("_ActivityFormConfirmation", Model.Activity);
+                        }
+                    }
 
                     <div class="form-group">
                         @if (!Model.Activity.IsPublished)
                         {
                             <div class="col-sm-6 col-sm-offset-3">
-                                @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(false, false))
+                                @Html.Raw(ActivitySetupHelper.SaveButton(false, false))
                             </div>
                             <div class="col-sm-3">
-                                @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model.Activity, "editconfirmation", "publish", false, true, Request))
+                                @Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editconfirmation", "publish", false, true, Request))
                             </div>
                         }
                         else
                         {
                             <div class="col-md-offset-3 col-sm-9">
-                                @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(false, false))
+                                @Html.Raw(ActivitySetupHelper.SaveButton(false, false))
                             </div>
                         }
                     </div>
@@ -70,9 +82,8 @@
             <div class="col-md-2 col-lg-3">
                 @{ Html.RenderPartial("~/Views/Shared/_ActivityEditNav.cshtml", Model.Activity, new ViewDataDictionary
                    {
-                       { "ActiveMenu", "EditConfirmation" }
-                   });
-                }
+                       {"ActiveMenu", "EditConfirmation"},
+                   }); }
             </div>
 
         </div>

@@ -43,10 +43,19 @@
                     }
                     @Html.Raw(ActivitySetupHelper.SaveButton(true, false))
 
-                    @{ Html.RenderPartial("~/Views/Shared/_ActivityFormContactInfo.cshtml", Model.Activity, new ViewDataDictionary
-                       {
-                           {"Instructors", Model.Instructors},
-                       }); }
+                    @{
+                        if (Model.Activity.ActivityTypeId == ActivityType.VolunteerOpportunity)
+                        {
+                            Html.RenderPartial("~/Views/Shared/_VolunteerFormContactInfo.cshtml", Model.Activity);
+                        }
+                        else
+                        {
+                            Html.RenderPartial("~/Views/Shared/_ActivityFormContactInfo.cshtml", Model.Activity, new ViewDataDictionary
+                            {
+                                {"Instructors", Model.Instructors},
+                            });
+                        }
+                    }
 
                     <div class="form-group">
                         <div class="col-sm-6 col-sm-offset-3">

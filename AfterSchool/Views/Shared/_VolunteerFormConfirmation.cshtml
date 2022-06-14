@@ -1,0 +1,25 @@
+﻿@model string
+<div class="panel panel-default panel-small-padding">
+    <div class="panel-heading activity-heading">
+        Email Content
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <label class="col-md-3 control-label">
+                @AccountPropertyType.RegistrationThankYouEmail.ToString().SplitByUpperCase()
+            </label>
+            <div class="col-md-9">
+                @{ Html.RenderPartial("_TextEditor", Model, new ViewDataDictionary
+                   {
+                       {"id", AccountPropertyType.RegistrationThankYouEmail.ToString().ToLower()},
+                       {"name", AccountPropertyType.RegistrationThankYouEmail.ToString().ToLower()},
+                       {"required", true},
+                   }); }
+
+                <p class="text-muted" style="font-style: italic">
+                    This thank you message is sent when the volunteer registers.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
