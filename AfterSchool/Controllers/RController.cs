@@ -451,7 +451,6 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
-            var canPublishActivity = false;
             var accountProfile = account?.GetAccountProfile(msgs);
 
             if (account.IsEmpty() || account.IsDeleted)
@@ -467,7 +466,7 @@ namespace AfterSchool.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.Account = account;
-            ViewBag.CanPublishActivity = canPublishActivity;
+            ViewBag.CanPublishActivity = false;
             ViewBag.CanRegisterFor = true;
             ViewBag.AccountProfile = accountProfile;
 
@@ -511,6 +510,18 @@ namespace AfterSchool.Controllers
 
             var selectedDates = dateFields.Cast<string>().Select(x => dateFields[x]).Select(x => x.ToDateTime())
                 .ToList();
+
+            if (selectedDates.Count == 0)
+            {
+                msgs.Add("Please select at least one date to continue.", MessageType.UserError);
+                
+                ViewBag.Account = account;
+                ViewBag.CanPublishActivity = false;
+                ViewBag.CanRegisterFor = true;
+                ViewBag.AccountProfile = account.GetAccountProfile(msgs);
+                ViewBag.Messages = msgs;
+                return View("ActivitySelectDates", participationObject);
+            }
 
             return RedirectToRegistration(account, participationObject, reg, selectedDates, msgs);
         }

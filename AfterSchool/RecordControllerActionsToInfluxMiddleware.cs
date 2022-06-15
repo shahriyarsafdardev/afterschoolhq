@@ -39,6 +39,7 @@ namespace AfterSchool
 
         private void SendDataToInflux(IDictionary<string, object> environment, long elapsedMilliseconds)
         {
+            const string notApplicable = "N/A";
             var httpContext = (HttpContextBase) environment["System.Web.HttpContextBase"];
             var response = httpContext.Response;
             var request = httpContext.Request;
@@ -47,22 +48,23 @@ namespace AfterSchool
             var ipAddress = string.IsNullOrEmpty(request.ServerVariables["HTTP_X_FORWARDED_FOR"])
                 ? request.ServerVariables["REMOTE_ADDR"]
                 : request.ServerVariables["HTTP_X_FORWARDED_FOR"].Split(',').FirstOrDefault()?.Trim();
-            if (ipAddress.IsEmpty()) ipAddress = "N/A";
+
+            if (ipAddress.IsEmpty()) ipAddress = notApplicable;
 
             var accountId = httpContext.Items["AccountId"]?.ToString();
-            if (accountId.IsEmpty()) accountId = "N/A";
+            if (accountId.IsEmpty()) accountId = notApplicable;
 
             var webUserId = httpContext.Items["WebUserId"]?.ToString();
-            if (webUserId.IsEmpty()) webUserId = "N/A";
+            if (webUserId.IsEmpty()) webUserId = notApplicable;
 
             var statusCode = response.Status;
             var callTo = request.Path;
-            var controller = routeData?.Values["controller"].ToString();
-            var controllerAction = controller + "/" + routeData?.Values["action"];
+            var controller = routeData?.Values["controller"]?.ToString() ?? notApplicable;
+            var controllerAction = controller == notApplicable ? notApplicable : controller + "/" + routeData?.Values["action"];
 
             var urlReferrer = request.UrlReferrer?.ToString();
             if (string.IsNullOrEmpty(urlReferrer))
-                urlReferrer = "N/A";
+                urlReferrer = notApplicable;
 
             var userAgent = request.UserAgent;
 
