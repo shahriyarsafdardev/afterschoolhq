@@ -6,14 +6,12 @@
     var openInstances = instances.Where(instance => instance.InstanceTypeId == InstanceType.InSession).ToList();
     var closedInstances = instances.Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession).ToList();
 
-    var isContinuousEnrollmentEnabled = ViewData["isContinuousEnrollmentEnabled"] != null && Equals(ViewData["isContinuousEnrollmentEnabled"], true);
+    var isContinuousEnrollmentEnabled = ViewData["isContinuousEnrollmentEnabled"] != null && (bool) ViewData["isContinuousEnrollmentEnabled"];
 
     if (isContinuousEnrollmentEnabled)
     {
         Model.IsOngoing = true;
     }
-
-    var hasSchedule = ViewData["hasSchedule"] != null && Equals(ViewData["hasSchedule"], true);
 }
 @if (isContinuousEnrollmentEnabled)
 {
@@ -37,33 +35,20 @@
         <div id="schedule-edit" class="">
 
             <div class="form-group">
-                <label class="col-md-3 control-label">
-                    Has Schedule
-                </label>
-                <div class="col-md-1">
-                    @{ Html.RenderPartial("_SwitchButton", hasSchedule, new ViewDataDictionary
-                       {
-                           {"checkboxname", "hasschedule"},
-                           {"checkboxid", "hasschedule"},
-                           {"disabled", false},
-                       }); }
-                </div>
-            </div>
-
-            <div class="form-group has-schedule-switch hide">
+                <input type="hidden" name="hasschedule" id="hasschedule" value="1"/>
                 <label class="col-md-3 control-label">
                     Repeats Weekly?
                 </label>
                 <div class="col-md-1">
                     @{ Html.RenderPartial("_SwitchButton", Model.RepeatsWeekly, new ViewDataDictionary
                        {
-                           {"checkboxname", "repeatsweekly"},
-                           {"checkboxid", "repeatsweekly"},
-                           {"disabled", false},
+                           { "checkboxname", "repeatsweekly" },
+                           { "checkboxid", "repeatsweekly" },
+                           { "disabled", false },
                        }); }
                 </div>
             </div>
-            <div class="col-md-offset-3 col-md-9 padding-v-20 has-schedule-switch hide">
+            <div class="col-md-offset-3 col-md-9 padding-v-20">
                 <span>
                     <a onclick="ActivitySetup.showAdvancedSettings()" id="btn-advanced-settings" class="pointer">
                         Show Advanced Settings
@@ -104,13 +89,13 @@
 
 </div>
 
-<div class="panel panel-default has-schedule-switch hide">
+<div class="panel panel-default">
     <div class="panel-heading">
         Enter your volunteer opportunity schedule
     </div>
 </div>
 
-<div class="panel-body has-schedule-switch">
+<div class="panel-body">
 
     <div class="hide" id="dailyrepeat">
 
@@ -262,13 +247,13 @@
 </div>
 
 
-<div class="panel panel-default has-schedule-switch hide">
+<div class="panel panel-default">
     <div class="panel-heading">
         Enter any dates that you will not meet
     </div>
 </div>
 
-<div class="panel-body has-schedule-switch hide">
+<div class="panel-body">
 
     <div id="schedule-closed-dates">
 
@@ -349,26 +334,10 @@
             }
         });
 
-        $('#hasschedule').click(function () {
-            checkHasSchedule();
-        });
-
-        checkHasSchedule();
-
         $('input[name=startdate],input[name=enddate],#dailystarttime,#dailyendtime').on('change', function () {
             validateSetup(0, event);
         });
     });
-
-    function checkHasSchedule() {
-        if ($('#hasschedule').is(':checked')) {
-            $('.has-schedule-switch').removeClass('hide');
-            $('#ongoing-div').removeClass('hide');
-        } else {
-            $('.has-schedule-switch').addClass('hide');
-            $('#ongoing-div').addClass('hide');
-        }
-    }
 
     function removeDate(i){
         $('#schedule-date-' + i).addClass('hide');

@@ -40,10 +40,22 @@
                     @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model.Activity, "editdetails", "next", true, true, Request))
                     @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(true, false))
 
-                    @{Html.RenderPartial("~/Views/Shared/_ActivityFormDetails.cshtml", Model.Activity, new ViewDataDictionary
-                      {
-                          {"AccountPackage", Model.AccountPackage }
-                      });}
+                    @{
+                        if (Model.Activity.ActivityTypeId == ActivityType.VolunteerOpportunity)
+                        {
+                            Html.RenderPartial("~/Views/Shared/_VolunteerFormDetails.cshtml", Model.Activity, new ViewDataDictionary
+                            {
+                                {"AccountPackage", Model.AccountPackage }
+                            });
+                        }
+                        else
+                        {
+                            Html.RenderPartial("~/Views/Shared/_ActivityFormDetails.cshtml", Model.Activity, new ViewDataDictionary
+                            {
+                                {"AccountPackage", Model.AccountPackage }
+                            });
+                        }
+                    }
 
                     <div class="form-group">
                         <div class="col-sm-6 col-sm-offset-3">

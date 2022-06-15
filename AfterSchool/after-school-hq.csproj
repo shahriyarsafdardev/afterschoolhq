@@ -2354,6 +2354,7 @@
     <Content Include="Scripts\npm.js" />
     <Content Include="Views\Shared\_VolunteerFormConfirmation.cshtml" />
     <Content Include="Views\Shared\_VolunteerFormContactInfo.cshtml" />
+    <Content Include="Views\Shared\_VolunteerFormDetails.cshtml" />
     <Content Include="Views\Shared\_VolunteerFormLocation.cshtml" />
     <Content Include="Views\Shared\_VolunteerFormRestrictions.cshtml" />
     <Content Include="Views\Shared\_VolunteerFormSchedule.cshtml" />
