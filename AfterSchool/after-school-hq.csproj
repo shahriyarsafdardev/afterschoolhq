@@ -701,6 +701,8 @@
     <Compile Include="Areas\WebHooks\Controllers\TwilioController.cs" />
     <Compile Include="Areas\WebHooks\WebHooksAreaRegistration.cs" />
     <Compile Include="Controllers\GetStartedAssembler.cs" />
+    <Compile Include="Controllers\RegistrationCommon.cs" />
+    <Compile Include="Controllers\VolunteerRegistrationController.cs" />
     <Compile Include="RecordControllerActionsToInfluxMiddleware.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\AfterSchoolController.cs" />
@@ -2359,6 +2361,8 @@
     <Content Include="Views\Shared\_VolunteerFormRestrictions.cshtml" />
     <Content Include="Views\Shared\_VolunteerFormSchedule.cshtml" />
     <Content Include="Views\Shared\_VolunteerFormSetup.cshtml" />
+    <Content Include="Views\VolunteerRegistration\GetStarted.cshtml" />
+    <Content Include="Views\VolunteerRegistration\Select.cshtml" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>

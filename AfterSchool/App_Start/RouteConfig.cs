@@ -27,96 +27,102 @@ namespace AfterSchool
             routes.MapRoute(
                 "Home",
                 "home/{action}/{id}",
-                new { controller = "home", action = "index", id = UrlParameter.Optional },
-                new[] { "AfterSchool.Controllers" });
+                new {controller = "home", action = "index", id = UrlParameter.Optional},
+                new[] {"AfterSchool.Controllers"});
 
             routes.MapRoute(
                 "AfterSchool",
                 "afterschool/{action}/{id}",
-                new { controller = "afterschool", action = "index", id = UrlParameter.Optional },
-                new[] { "AfterSchool.Controllers" });
+                new {controller = "afterschool", action = "index", id = UrlParameter.Optional},
+                new[] {"AfterSchool.Controllers"});
 
             routes.MapRoute(
                 "Services",
                 "services/{action}/{id}",
-                new { controller = "services", action = "index", id = UrlParameter.Optional },
-                new[] { "AfterSchool.Controllers" });
+                new {controller = "services", action = "index", id = UrlParameter.Optional},
+                new[] {"AfterSchool.Controllers"});
 
             routes.MapRoute(
                 "Login",
                 "login/{action}/{id}",
-                new { controller = "login", action = "index", id = UrlParameter.Optional });
+                new {controller = "login", action = "index", id = UrlParameter.Optional});
 
             routes.MapRoute(
                 "cleverIntegration",
                 "oauth/cleverintegration",
-                new { controller = "oauth", action = "cleverintegration" });
+                new {controller = "oauth", action = "cleverintegration"});
 
             routes.MapRoute(
                 "cleverLogin",
                 "oauth/cleverlogin",
-                new { controller = "oauth", action = "cleverlogin" });
+                new {controller = "oauth", action = "cleverlogin"});
 
             routes.MapRoute(
                 "cleverloginfromaccounttopbar",
                 "oauth/cleverloginfromaccounttopbar",
-                new { controller = "oauth", action = "cleverloginfromaccounttopbar" });
+                new {controller = "oauth", action = "cleverloginfromaccounttopbar"});
 
             routes.MapRoute(
                 "Indianapolis",
                 "indianapolis/{action}/{id}",
-                new { controller = "indianapolis", action = "index", id = UrlParameter.Optional });
+                new {controller = "indianapolis", action = "index", id = UrlParameter.Optional});
 
             routes.MapRoute(
                 "Search",
                 "search/{action}/{id}",
-                new { controller = "search", action = "index", id = UrlParameter.Optional });            
+                new {controller = "search", action = "index", id = UrlParameter.Optional});
 
             routes.MapRoute(
                 "Logout",
                 "logout/{action}/{id}",
-                new { controller = "logout", action = "index", id = UrlParameter.Optional });
+                new {controller = "logout", action = "index", id = UrlParameter.Optional});
 
             routes.MapRoute(
                 "Sitemap",
                 "sitemap/{action}/{id}",
-                new { controller = "sitemap", action = "index", id = UrlParameter.Optional });
+                new {controller = "sitemap", action = "index", id = UrlParameter.Optional});
 
             routes.MapRoute(
                 "SignUp",
                 "signup/{action}/{id}",
-                new { controller = "signup", action = "index", id = UrlParameter.Optional });
+                new {controller = "signup", action = "index", id = UrlParameter.Optional});
 
             routes.MapRoute(
                 "Pricing",
                 "pricing/{action}/{id}",
-                new { controller = "pricing", action = "index", id = UrlParameter.Optional });
+                new {controller = "pricing", action = "index", id = UrlParameter.Optional});
 
             routes.MapRoute(
                 "Legal",
                 "legal/{action}/{id}",
-                new { controller = "legal", action = "index", id = UrlParameter.Optional });
+                new {controller = "legal", action = "index", id = UrlParameter.Optional});
 
             routes.MapRoute(
                 "Msg",
                 "msg/{id}",
-                new { controller = "msg", action = "index", id = UrlParameter.Optional });
+                new {controller = "msg", action = "index", id = UrlParameter.Optional});
 
             routes.MapRoute(
                 "Faq",
                 "faq/{action}/{id}",
-                new { controller = "faq", action = "index", id = UrlParameter.Optional });
+                new {controller = "faq", action = "index", id = UrlParameter.Optional});
 
             routes.MapRoute(
                 "DB",
                 "db/{action}/{id}",
-                new { controller = "db", action = "index", id = UrlParameter.Optional });
+                new {controller = "db", action = "index", id = UrlParameter.Optional});
 
             routes.MapRoute(
                 "RegistrantAccount",
                 "account/{action}/{id}",
-                new { controller = "account", action = "getstarted", id = UrlParameter.Optional },
-                new string[] { "AfterSchool.Controllers" });
+                new {controller = "account", action = "getstarted", id = UrlParameter.Optional},
+                new[] {"AfterSchool.Controllers"});
+
+            routes.MapRoute(
+                "VolunteerRegistration",
+                "volunteerregistration/{action}/{id}",
+                new {controller = "VolunteerRegistration", action = "GetStarted", id = UrlParameter.Optional},
+                new[] {"AfterSchool.Controllers"});
 
             routes.MapRoute(
                 "LeagueHome1",
@@ -149,7 +155,7 @@ namespace AfterSchool
                     accountname = UrlParameter.Optional,
                     activitygrouptype = "league",
                     externalaccount = UrlParameter.Optional,
-                    group = UrlParameter.Optional
+                    group = UrlParameter.Optional,
                 });
 
             routes.MapRoute(
@@ -183,7 +189,7 @@ namespace AfterSchool
                     controller = "r",
                     action = "registersession",
                     accountname = UrlParameter.Optional,
-                    sessionname = UrlParameter.Optional
+                    sessionname = UrlParameter.Optional,
                 });
 
             routes.MapRoute(
@@ -194,7 +200,7 @@ namespace AfterSchool
                     controller = "r",
                     action = "browsesession",
                     accountname = UrlParameter.Optional,
-                    sessionname = UrlParameter.Optional
+                    sessionname = UrlParameter.Optional,
                 });
 
             routes.MapRoute(
@@ -206,7 +212,7 @@ namespace AfterSchool
                     action = "register",
                     accountname = UrlParameter.Optional,
                     activitytype = UrlParameter.Optional,
-                    activityname = UrlParameter.Optional
+                    activityname = UrlParameter.Optional,
                 });
 
             routes.MapRoute(
@@ -218,7 +224,7 @@ namespace AfterSchool
                     action = "selectdates",
                     accountname = UrlParameter.Optional,
                     activitytype = UrlParameter.Optional,
-                    activityname = UrlParameter.Optional
+                    activityname = UrlParameter.Optional,
                 });
 
             routes.MapRoute(
@@ -230,9 +236,9 @@ namespace AfterSchool
                     action = "selectdates",
                     accountname = UrlParameter.Optional,
                     activitytype = UrlParameter.Optional,
-                    activityname = UrlParameter.Optional
+                    activityname = UrlParameter.Optional,
                 });
-            
+
             routes.MapRoute(
                 "FieldTripRegister",
                 "{accountname}/fieldtrip/{activityname}/register",
@@ -242,7 +248,7 @@ namespace AfterSchool
                     action = "register",
                     accountname = UrlParameter.Optional,
                     activitytype = UrlParameter.Optional,
-                    activityname = UrlParameter.Optional
+                    activityname = UrlParameter.Optional,
                 });
 
             routes.MapRoute(
@@ -254,7 +260,7 @@ namespace AfterSchool
                     action = "register",
                     accountname = UrlParameter.Optional,
                     activitytype = UrlParameter.Optional,
-                    activityname = UrlParameter.Optional
+                    activityname = UrlParameter.Optional,
                 });
 
             routes.MapRoute(
@@ -266,7 +272,7 @@ namespace AfterSchool
                     action = "register",
                     accountname = UrlParameter.Optional,
                     activitytype = UrlParameter.Optional,
-                    activityname = UrlParameter.Optional
+                    activityname = UrlParameter.Optional,
                 });
 
             routes.MapRoute(
@@ -279,7 +285,7 @@ namespace AfterSchool
                     accountname = UrlParameter.Optional,
                     activitygrouptype = UrlParameter.Optional,
                     externalaccount = UrlParameter.Optional,
-                    group = UrlParameter.Optional
+                    group = UrlParameter.Optional,
                 });
 
             routes.MapRoute(
@@ -291,7 +297,7 @@ namespace AfterSchool
                     action = "interested",
                     accountname = UrlParameter.Optional,
                     activitytype = UrlParameter.Optional,
-                    activityname = UrlParameter.Optional
+                    activityname = UrlParameter.Optional,
                 });
 
             routes.MapRoute(
@@ -303,7 +309,7 @@ namespace AfterSchool
                     action = "interested",
                     accountname = UrlParameter.Optional,
                     activitytype = UrlParameter.Optional,
-                    activityname = UrlParameter.Optional
+                    activityname = UrlParameter.Optional,
                 });
 
             routes.MapRoute(
@@ -315,7 +321,7 @@ namespace AfterSchool
                     action = "interested",
                     accountname = UrlParameter.Optional,
                     activitytype = UrlParameter.Optional,
-                    activityname = UrlParameter.Optional
+                    activityname = UrlParameter.Optional,
                 });
 
             routes.MapRoute(
@@ -327,23 +333,23 @@ namespace AfterSchool
                     action = "interested",
                     accountname = UrlParameter.Optional,
                     activitytype = UrlParameter.Optional,
-                    activityname = UrlParameter.Optional
+                    activityname = UrlParameter.Optional,
                 });
 
             routes.MapRoute(
                 "AccountHome",
                 "{accountname}",
-                new { controller = "r", action = "account", accountname = UrlParameter.Optional });
+                new {controller = "r", action = "account", accountname = UrlParameter.Optional});
 
             routes.MapRoute(
                 "AccountBrowse",
                 "{accountname}/browse",
-                new { controller = "r", action = "browse", accountname = UrlParameter.Optional });
+                new {controller = "r", action = "browse", accountname = UrlParameter.Optional});
 
             routes.MapRoute(
                 "AccountContact",
                 "{accountname}/contact",
-                new { controller = "r", action = "contact", accountname = UrlParameter.Optional });
+                new {controller = "r", action = "contact", accountname = UrlParameter.Optional});
 
             routes.MapRoute(
                 "ActivityHome",
@@ -354,15 +360,14 @@ namespace AfterSchool
                     action = "activity",
                     accountname = UrlParameter.Optional,
                     activitytype = UrlParameter.Optional,
-                    activityname = UrlParameter.Optional
+                    activityname = UrlParameter.Optional,
                 });
 
             routes.MapRoute(
                 "Standard",
                 "{controller}/{action}/{id}",
-                new { controller = "pricing", action = "index", id = UrlParameter.Optional }
+                new {controller = "pricing", action = "index", id = UrlParameter.Optional}
             );
-
         }
     }
 }

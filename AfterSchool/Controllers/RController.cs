@@ -834,7 +834,13 @@ namespace AfterSchool.Controllers
                 SessionVariables.CurrentRegistrant = Registrant.LoadByUid(reg.ToGuid(), msgs);
 
             if (SessionVariables.CurrentRegistrant.IsEmpty())
+            {
+                if (participationObject.ActivityType == ActivityType.VolunteerOpportunity)
+                {
+                    return RedirectToAction("getstarted", "volunteerRegistration", new {area = "", regaccount = account.Uid});
+                }
                 return RedirectToAction("getstarted", "account", new {area = "", regaccount = account.Uid});
+            }
 
             var masterRegistrant = SessionVariables.CurrentUser.GetMasterRegistrant();
 

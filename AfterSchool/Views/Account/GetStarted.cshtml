@@ -231,7 +231,7 @@
         $.get(
             '/services/sendaccountconfirmationemail?email=' + encodeURIComponent(email) + '&redirecturl=@(Server.UrlEncode(participationObject.GetRegistrationPageUrl()))',
             function (data) {
-                if (data && data.status == 'ok') {
+                if (data && data.status === 'ok') {
                     $('#account-confirmation-text').removeClass('hide');
                     $('#btn-check-email').addClass('hide');
                 } else {
@@ -243,16 +243,16 @@
 
     function checkRegistrantEmail() {
         showLoader();
-        var email = $('#email-check').val();
-        var btnCheckEmail = $('#btn-check-email');
-        var originalBtnText = btnCheckEmail.html();
+        let email = $('#email-check').val();
+        let btnCheckEmail = $('#btn-check-email');
+        let originalBtnText = btnCheckEmail.html();
 
         btnCheckEmail.html('Checking...');
 
         $.get(
             '/services/checkaccountstatus?email=' + encodeURIComponent(email),
             function (data) {
-                if (data && data.status == 'ok') {
+                if (data && data.status === 'ok') {
                     hideLoader();
                     if (data.isRegistered) {
                         // show login form
