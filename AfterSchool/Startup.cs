@@ -38,7 +38,6 @@ namespace AfterSchool
         public void Configuration(IAppBuilder app)
         {
             app.MapSignalR();
-            ConfigureAuth(app);
 
             var services = new ServiceCollection();
             ConfigureServices(services);
