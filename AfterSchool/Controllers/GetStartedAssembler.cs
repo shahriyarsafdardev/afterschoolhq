@@ -35,7 +35,7 @@ namespace AfterSchool.Controllers
 
             var result = new AccountController.GetStartedResult
             {
-                StudentRegistrationEnabled = featureFlagRepository.IsEnabled("student-registration") && isStudentAllowedToRegister,
+                StudentRegistrationEnabled = isStudentAllowedToRegister,
                 ParticipationObject = participationObject,
                 CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso"),
                 RegistrationAccount = registrationAccount,

@@ -265,7 +265,7 @@ namespace AfterSchool.Controllers
                 msgs.Add("You must agree to the terms of service", MessageType.UserError);
 
             // Register as an existing student
-            if (featureFlagRepository.IsEnabled("student-registration") && currentUser.IsNotEmpty())
+            if (currentUser.IsNotEmpty())
             {
                 var studentRegistrant = currentUser.GetMasterRegistrant(msgs);
                 if (msgs.HasNoErrors() && !studentRegistrant.IsParentOrGuardian)
@@ -1129,9 +1129,6 @@ namespace AfterSchool.Controllers
             var redirectResult = HandleGetStartedAccountRedirect(false, msgs);
             if (redirectResult.IsNotEmpty())
                 return redirectResult;
-
-            if (!featureFlagRepository.IsEnabled("student-registration"))
-                return RedirectToAction("getstarted", new {regaccount});
 
             if (SessionVariables.CurrentUser.IsNotEmpty() &&
                 SessionVariables.CurrentAccount.AccountTypeId == AccountType.Registrant)
@@ -2298,11 +2295,6 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult GetStartedStudent(string regaccount)
         {
-            if (!featureFlagRepository.IsEnabled("student-registration"))
-            {
-                return RedirectToAction("getstarted", new {regaccount});
-            }
-
             if (SessionVariables.CurrentUser.IsNotEmpty() &&
                 SessionVariables.CurrentAccount.AccountTypeId == AccountType.Registrant)
                 return RedirectToAction("select");
