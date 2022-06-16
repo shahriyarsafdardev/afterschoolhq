@@ -1009,52 +1009,9 @@ namespace AfterSchool.Areas.Org.Controllers
                                 }
                             });
 
-                            // save new questions
                             if (Request.Form["newquestionsIds"].Length > 0)
                             {
-                                var questionIds = Request.Form["newquestionsIds"];
-                                var questionsList = questionIds.Split(',');
-                                foreach (var i in questionsList)
-                                {
-                                    var text = Request.Params[string.Format("new-text-{0}", i)];
-
-                                    var questionExists = FormQuestion.Exists(
-                                        criterias: new Hashtable
-                                        {
-                                            {"Text", text}, {"FormId", form.ID},
-                                            {"FormQuestionGroupId", questionGroup.ID}, {"IsDeleted", false},
-                                        }, msgs: amsgs, dc: adc);
-
-                                    if (!questionExists)
-                                    {
-                                        var question = new FormQuestion
-                                        {
-                                            FormId = form.ID,
-                                            CreateDate = DateTime.UtcNow,
-                                            LastModifiedDate = DateTime.UtcNow,
-                                            CreatedBy = currentUser.ID,
-                                            LastModifiedBy = currentUser.ID,
-                                            DisplayOrder = Request.Params[string.Format("new-sort-{0}", i)].ToInteger(),
-                                            //questionGroup.GetQuestionCount(amsgs, adc) + 1,
-                                            FormQuestionGroupId = questionGroup.ID,
-                                            IsTemplate = false,
-                                            QuestionDataTypeId = QuestionDataType.NotSet,
-                                            QuestionTypeId = (QuestionType) Request
-                                                .Params[string.Format("new-questiontype-{0}", i)].ToInteger(),
-                                            Text = text,
-                                            Options = Request.Params[string.Format("new-options-text-{0}", i)],
-                                            Link = Request.Params[string.Format("new-link-text-{0}", i)],
-                                            Description = Request.Params[string.Format("new-description-{0}", i)],
-                                            IsActive = true,
-                                            IsDeleted = false,
-                                            IsRequired = Request.Params[string.Format("new-required-{0}", i)]
-                                                .IsBoolean(),
-                                            IsAnswerDescriptionEnabled = Request
-                                                .Params[string.Format("new-description-enabled-{0}", i)].IsBoolean(),
-                                        };
-                                        amsgs.AddRange(question.Save(adc));
-                                    }
-                                }
+                                SaveNewQuestions(form.ID, currentUser.ID, questionGroup.ID, amsgs, adc);
                             }
                         }
                     },
@@ -1098,6 +1055,39 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.QuestionGroup = questionGroup;
             ViewBag.Messages = msgs;
             return View(form);
+        }
+
+        private void SaveNewQuestions(int? formId, int? currentUserId, int? formQuestionGroupId, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var questionIds = Request.Form["newquestionsIds"];
+            var questionsList = questionIds.Split(',');
+            foreach (var question in questionsList)
+            {
+                var text = Request.Params[$"new-text-{question}"];
+
+                var formQuestion = new FormQuestion
+                {
+                    FormId = formId,
+                    CreateDate = DateTime.UtcNow,
+                    LastModifiedDate = DateTime.UtcNow,
+                    CreatedBy = currentUserId,
+                    LastModifiedBy = currentUserId,
+                    DisplayOrder = Request.Params[$"new-sort-{question}"].ToInteger(),
+                    FormQuestionGroupId = formQuestionGroupId,
+                    IsTemplate = false,
+                    QuestionDataTypeId = QuestionDataType.NotSet,
+                    QuestionTypeId = (QuestionType) Request.Params[$"new-questiontype-{question}"].ToInteger(),
+                    Text = text,
+                    Options = Request.Params[$"new-options-text-{question}"],
+                    Link = Request.Params[$"new-link-text-{question}"],
+                    Description = Request.Params[$"new-description-{question}"],
+                    IsActive = true,
+                    IsDeleted = false,
+                    IsRequired = Request.Params[$"new-required-{question}"].IsBoolean(),
+                    IsAnswerDescriptionEnabled = Request.Params[$"new-description-enabled-{question}"].IsBoolean(),
+                };
+                msgs.AddRange(formQuestion.Save(dc));
+            }
         }
 
         [HttpGet]
@@ -1485,78 +1475,6 @@ namespace AfterSchool.Areas.Org.Controllers
             }
         }
 
-        //[HttpGet]
-        //public ActionResult Integrations()
-        //{
-        //    ViewBag.AccountPackage = SessionVariables.AccountPackage;
-        //    ViewBag.Messages = new SystemMessages();
-        //    ViewBag.FacebookAdPixel = SessionVariables.CurrentAccount.GetAccountProperty(AccountPropertyType.FacebookAdPixel);
-        //    return View(SessionVariables.CurrentAccount);
-        //}
-
-        //[ValidateInput(false)]
-        //[HttpPost]
-        //public ActionResult Integrations(string id, string facebookadpixelscript)
-        //{
-        //    var msgs = new SystemMessages();
-        //    var a = SessionVariables.CurrentAccount;
-
-        //    var facebookAdPixel = a.GetAccountProperty(AccountPropertyType.FacebookAdPixel);
-
-        //    if (facebookAdPixel.IsEmpty())
-        //    {
-        //        facebookAdPixel = new AccountProperty() { Value = facebookadpixelscript };
-        //        facebookAdPixel.AccountPropertyTypeId = AccountPropertyType.FacebookAdPixel;
-        //        facebookAdPixel.CreateDate = DateTime.UtcNow;
-        //        facebookAdPixel.CreatedBy = SessionVariables.LoggedInUser.ID;
-        //        facebookAdPixel.AccountId = a.ID;
-        //    }
-        //    else
-        //    {
-        //        facebookAdPixel.Value = facebookadpixelscript;
-        //    }
-
-        //    if (msgs.HasNoErrors())
-        //    {
-        //        Database.ExecuteTransaction(
-        //            action: (SystemMessages amsgs, DatabaseConnection adc) => {
-
-        //                a.LastModifiedDate = DateTime.UtcNow;
-        //                a.LastModifiedBy = SessionVariables.LoggedInUser.ID;
-        //                amsgs.AddRange(a.Save(adc));
-
-        //                if (amsgs.HasNoErrors())
-        //                {
-        //                    facebookAdPixel.LastModifiedDate = DateTime.UtcNow;
-        //                    facebookAdPixel.LastModifiedBy = SessionVariables.LoggedInUser.ID;
-        //                    amsgs.AddRange(facebookAdPixel.Save(adc));
-        //                }
-        //            },
-        //            onSuccess: (SystemMessages smsgs) => {
-        //                msgs.AddRange(smsgs);
-        //                msgs.Add("Saved Successfully", MessageType.Success);
-        //            },
-        //            onFailure: (SystemMessages fmsgs) => {
-        //                msgs.AddRange(fmsgs);
-        //            }
-        //        );
-
-        //    }
-
-        //    ViewBag.Messages = msgs;
-        //    ViewBag.AccountPackage = SessionVariables.AccountPackage;
-        //    ViewBag.FacebookAdPixel = facebookAdPixel;
-        //    return View(a);
-        //}
-
-        //[HttpGet]
-        //public ActionResult Detail()
-        //{
-        //    ViewBag.AccountPackage = SessionVariables.AccountPackage;
-        //    ViewBag.Messages = new SystemMessages();
-        //    return View(SessionVariables.CurrentAccount);
-        //}
-
         [HttpGet]
         public ActionResult Billing()
         {
@@ -1636,48 +1554,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
             return Json(new {success = false, status = "error", data = msgs.ToList().Select(msg => new {msg.Text})},
                 JsonRequestBehavior.AllowGet);
-        }
-
-        public static class PackageFeatureMapper
-        {
-            public static IEnumerable<PackageFeaturesPlanListing> FilterAndMapPackageFeatures(IEnumerable<(FeatureType type, decimal value)> features)
-            {
-                var featureTypesNotToIncludeInFeatureListing = new List<FeatureType>
-                {
-                    FeatureType.NotSet,
-                    FeatureType.CustomUrl,
-                    FeatureType.ManageExternalLeagues,
-                    FeatureType.ManageLeagues,
-                    FeatureType.ManageLocations,
-                    FeatureType.Participants,
-                    FeatureType.PaymentsPercentageFee,
-                    FeatureType.PaymentsPercentageFlatFee,
-                    FeatureType.TrialDays,
-                    FeatureType.UseStripeConnectedAccount,
-                    FeatureType.ViewInsights,
-                };
-
-                bool FeatureTypeHasNotBeenDeprecated(FeatureType featureType)
-                {
-                    return Enum.GetName(typeof(FeatureType), featureType) != null;
-                }
-
-                return features.Where(x => x.type.NotIn(featureTypesNotToIncludeInFeatureListing))
-                    .Where(x => FeatureTypeHasNotBeenDeprecated(x.type))
-                    .Select(x => new PackageFeaturesPlanListing((Enum.GetName(typeof(FeatureType), x.type)).ToString().SplitByUpperCase(), x.value));
-            }
-        }
-
-        public class PackageFeaturesPlanListing
-        {
-            public string type { get; }
-            public decimal value { get; }
-
-            public PackageFeaturesPlanListing(string type, decimal value)
-            {
-                this.type = type;
-                this.value = value;
-            }
         }
 
         [HttpPost]
@@ -1844,6 +1720,48 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
 
             return View("Billing", currentAccount);
+        }
+
+        public static class PackageFeatureMapper
+        {
+            public static IEnumerable<PackageFeaturesPlanListing> FilterAndMapPackageFeatures(IEnumerable<(FeatureType type, decimal value)> features)
+            {
+                var featureTypesNotToIncludeInFeatureListing = new List<FeatureType>
+                {
+                    FeatureType.NotSet,
+                    FeatureType.CustomUrl,
+                    FeatureType.ManageExternalLeagues,
+                    FeatureType.ManageLeagues,
+                    FeatureType.ManageLocations,
+                    FeatureType.Participants,
+                    FeatureType.PaymentsPercentageFee,
+                    FeatureType.PaymentsPercentageFlatFee,
+                    FeatureType.TrialDays,
+                    FeatureType.UseStripeConnectedAccount,
+                    FeatureType.ViewInsights,
+                };
+
+                bool FeatureTypeHasNotBeenDeprecated(FeatureType featureType)
+                {
+                    return Enum.GetName(typeof(FeatureType), featureType) != null;
+                }
+
+                return features.Where(x => x.type.NotIn(featureTypesNotToIncludeInFeatureListing))
+                    .Where(x => FeatureTypeHasNotBeenDeprecated(x.type))
+                    .Select(x => new PackageFeaturesPlanListing((Enum.GetName(typeof(FeatureType), x.type)).ToString().SplitByUpperCase(), x.value));
+            }
+        }
+
+        public class PackageFeaturesPlanListing
+        {
+            public PackageFeaturesPlanListing(string type, decimal value)
+            {
+                this.type = type;
+                this.value = value;
+            }
+
+            public string type { get; }
+            public decimal value { get; }
         }
     }
 }

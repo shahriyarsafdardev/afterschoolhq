@@ -389,14 +389,6 @@ namespace AfterSchoolLibrary.Models
             return newQuestion;
         }
 
-		public static bool Exists(Hashtable criterias = null, SystemMessages msgs = null, DatabaseConnection dc = null)
-		{
-			return GetCount(
-				criterias: criterias,
-				msgs: msgs,
-				dc: dc) > 0;
-		}
-        
         public static List<FormQuestion> LoadByQuestionDataTypeId(List<QuestionDataType> questionDataTypeIds, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
