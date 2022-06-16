@@ -38,8 +38,7 @@ namespace AfterSchool.Controllers
 
                     // if no parent account, then create one real quick
                     if (registrantAccount.IsEmpty())
-                        registrantAccount =
-                            currentUser.AddNewRegistrantAccount(UserType.Owner, true, true, currentUser, msgs);
+                        registrantAccount = currentUser.AddNewRegistrantAccount(UserType.Owner, true, true, currentUser, msgs);
                 }
 
                 var masterRegistrant = SessionVariables.CurrentUser.GetMasterRegistrant(msgs);
@@ -194,7 +193,7 @@ namespace AfterSchool.Controllers
                         LoadSessionInfo(user, account);
                     },
                     failureMessages => msgs.AddRange(failureMessages),
-                    exceptionMessages => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(exceptionMessages)
+                    AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog
                 );
             }
 

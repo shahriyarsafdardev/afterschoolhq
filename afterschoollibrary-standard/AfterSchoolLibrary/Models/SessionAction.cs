@@ -485,23 +485,7 @@ namespace AfterSchoolLibrary.Models
             };
         }
 
-        public string RegistrantName
-        {
-            get
-            {
-                string rtn = "";
-                if (this.RegistrantRegistrantTypeId == RegistrantType.Individual)
-                {
-                    rtn = BaseWebUser.BuildDisplayName(this.RegistrantFirstName, this.RegistrantLastName);
-                }
-                else if (this.RegistrantRegistrantTypeId == RegistrantType.Organization)
-                {
-                    rtn = this.RegistrantCompany.ToProperCase();
-                }
-
-                return rtn;
-            }
-        }
+        public string RegistrantName => BaseWebUser.BuildDisplayName(RegistrantFirstName, RegistrantLastName);
 
         public string WebUserName
         {

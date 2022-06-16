@@ -3,12 +3,11 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var questionGroups = (List<FormQuestionGroup>)ViewBag.QuestionGroups;
     var individualGroups = (List<FormQuestionGroup>)ViewBag.IndividualGroups;
-    var organizationGroups = (List<FormQuestionGroup>)ViewBag.OrganizationGroups;
     var questionGroup = (FormQuestionGroup)ViewBag.QuestionGroup;
     var qgId = new int?();
     var questions = new List<FormQuestion>();
-    var typesWithOptions = new List<QuestionType>() { QuestionType.CheckboxList, QuestionType.DropDownList, QuestionType.RadioList, QuestionType.RadioMatrix };
-    var typesUserCannotAdd = new List<QuestionType>() { QuestionType.CheckboxList, QuestionType.TextBlock, QuestionType.NotSet, QuestionType.RadioMatrix };
+    var typesWithOptions = new List<QuestionType> { QuestionType.CheckboxList, QuestionType.DropDownList, QuestionType.RadioList, QuestionType.RadioMatrix };
+    var typesUserCannotAdd = new List<QuestionType> { QuestionType.CheckboxList, QuestionType.TextBlock, QuestionType.NotSet, QuestionType.RadioMatrix };
 
     if (questionGroup.IsNotEmpty())
     {
@@ -214,7 +213,7 @@
                                                         @{Html.RenderPartial(
                                                             "~/Views/Shared/_SwitchButton.cshtml",
                                                             question.IsActive,
-                                                            new ViewDataDictionary()
+                                                            new ViewDataDictionary
                                                             {
                                                                 { "checkboxname", "active-" + question.ID },
                                                                 { "checkboxid", "active-" + question.ID },
@@ -226,7 +225,7 @@
                                                         @{Html.RenderPartial(
                                                                 "~/Views/Shared/_SwitchButton.cshtml",
                                                                 question.IsRequired,
-                                                                new ViewDataDictionary()
+                                                                new ViewDataDictionary
                                                                 {
                                                                 { "checkboxname", "required-" + question.ID },
                                                                 { "checkboxid", "required-" + question.ID },
@@ -293,7 +292,8 @@
 
                         @{ Html.RenderPartial("_FormEditMenu",
                              Model,
-                             new ViewDataDictionary() {
+                             new ViewDataDictionary
+                             {
                                 { "RegistrantType", RegistrantType.Individual },
                                 { "QuestionGroups", individualGroups },
                                 { "QuestionGroupId", qgId }
@@ -308,16 +308,6 @@
                                 </a>
                             </div>
                         </li>
-
-                        @{ Html.RenderPartial("_FormEditMenu",
-                             Model,
-                             new ViewDataDictionary() {
-                                { "RegistrantType", RegistrantType.Organization },
-                                { "QuestionGroups", organizationGroups },
-                                { "QuestionGroupId", qgId }
-                             });
-                        }
-
                     </ol>
                 </div>
 
@@ -404,7 +394,7 @@
         return `@{Html.RenderPartial(
             "~/Views/Shared/_SwitchButton.cshtml",
             true,
-            new ViewDataDictionary()
+            new ViewDataDictionary
             {
                 { "checkboxname", "new-active-::number::" },
                 { "checkboxid", "active-::number::" },
@@ -416,7 +406,7 @@
         return `@{Html.RenderPartial(
             "~/Views/Shared/_SwitchButton.cshtml",
             false,
-            new ViewDataDictionary()
+            new ViewDataDictionary
             {
                 { "checkboxname", "new-required-::number::" },
                 { "checkboxid", "required-::number::" },

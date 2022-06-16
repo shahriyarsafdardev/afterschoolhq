@@ -245,23 +245,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        public string RegistrantName
-        {
-            get
-            {
-                string rtn = "";
-                if (this.RegistrantRegistrantTypeId == RegistrantType.Individual)
-                {
-                    rtn = BaseWebUser.BuildDisplayName(this.RegistrantFirstName, this.RegistrantLastName);
-                }
-                else if (this.RegistrantRegistrantTypeId == RegistrantType.Organization)
-                {
-                    rtn = this.RegistrantCompany.ToProperCase();
-                }
-
-                return rtn;
-            }
-        }
+        public string RegistrantName => BaseWebUser.BuildDisplayName(RegistrantFirstName, RegistrantLastName);
 
         public static List<RegistrantActivityGroup> LoadByActivityGroupId(int ActivityGroupId, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {

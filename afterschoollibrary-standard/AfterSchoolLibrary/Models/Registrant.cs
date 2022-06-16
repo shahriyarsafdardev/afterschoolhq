@@ -7,6 +7,7 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
+using static BasicLibrary.BaseWebUser;
 
 namespace AfterSchoolLibrary.Models
 {
@@ -323,19 +324,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        public string Name
-        {
-            get
-            {
-                string rtn = "";
-                if (this.RegistrantTypeId == RegistrantType.Individual)
-                    rtn = BaseWebUser.BuildDisplayName(this.FirstName, this.LastName);
-                else if(this.RegistrantTypeId == RegistrantType.Organization)
-                    rtn = this.Company.ToProperCase();
-
-                return rtn;
-            }
-        }
+        public string Name => BuildDisplayName(FirstName, LastName);
 
         public List<FormQuestionAnswer> GetAnswers(int activityId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {

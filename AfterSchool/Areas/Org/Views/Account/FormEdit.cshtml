@@ -3,12 +3,11 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var questionGroups = (List<FormQuestionGroup>)ViewBag.QuestionGroups;
     var individualGroups = (List<FormQuestionGroup>)ViewBag.IndividualGroups;
-    var organizationGroups = (List<FormQuestionGroup>)ViewBag.OrganizationGroups;
     var questionGroup = (FormQuestionGroup)ViewBag.QuestionGroup;
     var qgId = new int?();
     var questions = new List<FormQuestion>();
-    var typesWithRating = new List<QuestionType>() { QuestionType.Rating };
-    var typesWithOptions = new List<QuestionType>() { QuestionType.CheckboxList, QuestionType.DropDownList, QuestionType.RadioList, QuestionType.RadioMatrix, QuestionType.Emoji };
+    var typesWithRating = new List<QuestionType> { QuestionType.Rating };
+    var typesWithOptions = new List<QuestionType> { QuestionType.CheckboxList, QuestionType.DropDownList, QuestionType.RadioList, QuestionType.RadioMatrix, QuestionType.Emoji };
     var typesUserCannotAdd = Model.GetTypesUserCannotAdd();
 
     if (questionGroup.IsNotEmpty())
@@ -267,7 +266,7 @@
                                                         @{Html.RenderPartial(
                                                               "~/Views/Shared/_SwitchButton.cshtml",
                                                               question.IsActive,
-                                                              new ViewDataDictionary()
+                                                              new ViewDataDictionary
                                                               {
                                                                                                         { "checkboxname", "active-" + question.ID },
                                                                                                         { "checkboxid", "active-" + question.ID },
@@ -281,7 +280,7 @@
                                                             Html.RenderPartial(
                                                                 "~/Views/Shared/_SwitchButton.cshtml",
                                                                 question.IsRequired,
-                                                                new ViewDataDictionary()
+                                                                new ViewDataDictionary
                                                                 {
                                                                                                         { "checkboxname", "required-" + question.ID },
                                                                                                         { "checkboxid", "required-" + question.ID },
@@ -294,7 +293,7 @@
                                                         @{Html.RenderPartial(
                                                               "~/Views/Shared/_SwitchButton.cshtml",
                                                               question.IsAnswerDescriptionEnabled,
-                                                              new ViewDataDictionary()
+                                                              new ViewDataDictionary
                                                               {
                                                                                                             { "checkboxname", "answerDescription-" + question.ID },
                                                                                                             { "checkboxid", "answerDescription-" + question.ID },
@@ -373,14 +372,12 @@
                             </div>
                         </li>
 
-                        @{ Html.RenderPartial("_FormEditMenu",
-                                          Model,
-                                          new ViewDataDictionary() {
-                                        { "RegistrantType", RegistrantType.Individual },
-                                        { "QuestionGroups", individualGroups },
-                                        { "QuestionGroupId", qgId }
-});
-                        }
+                        @{ Html.RenderPartial("_FormEditMenu", Model, new ViewDataDictionary
+                            {
+                                { "RegistrantType", RegistrantType.Individual },
+                                { "QuestionGroups", individualGroups },
+                                { "QuestionGroupId", qgId },
+                            }); }
 
                         <li class="dd-item">
                             <div class="dd-handle">
@@ -390,16 +387,6 @@
                                 </a>
                             </div>
                         </li>
-
-                        @{ Html.RenderPartial("_FormEditMenu",
-                                          Model,
-                                          new ViewDataDictionary() {
-                                        { "RegistrantType", RegistrantType.Organization },
-                                        { "QuestionGroups", organizationGroups },
-                                        { "QuestionGroupId", qgId }
-});
-                        }
-
                     </ol>
                 </div>
 
@@ -676,7 +663,7 @@
         return `@{Html.RenderPartial(
             "~/Views/Shared/_SwitchButton.cshtml",
             true,
-            new ViewDataDictionary()
+            new ViewDataDictionary
             {
                 { "checkboxname", "new-active-::number::" },
                 { "checkboxid", "active-::number::" },
@@ -689,7 +676,7 @@
         return `@{Html.RenderPartial(
             "~/Views/Shared/_SwitchButton.cshtml",
             false,
-            new ViewDataDictionary()
+            new ViewDataDictionary
             {
                 { "checkboxname", "new-required-::number::" },
                 { "checkboxid", "required-::number::" },
@@ -702,7 +689,7 @@
         return `@{Html.RenderPartial(
             "~/Views/Shared/_SwitchButton.cshtml",
             false,
-            new ViewDataDictionary()
+            new ViewDataDictionary
             {
                 { "checkboxname", "new-description-enabled-::number::" },
                 { "checkboxid", "answerDescription-::number::" },

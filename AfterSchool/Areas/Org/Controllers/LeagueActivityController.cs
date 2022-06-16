@@ -1315,23 +1315,12 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var questionGroups = activityForm.GetForm().GetQuestionGroups();
             var individualGroups = questionGroups.Where(x => x.RegistrantTypeId == RegistrantType.Individual).ToList();
-            var organizationGroups = questionGroups.Where(x => x.RegistrantTypeId == RegistrantType.Organization).ToList();
 
-            FormQuestionGroup questionGroup = null;
-
-            if (qg.IsNumber())
-            {
-                questionGroup = FormQuestionGroup.Load(qg.ToInteger());
-            }
-            else
-            {
-                questionGroup = questionGroups.First();
-            }
+            var questionGroup = qg.IsNumber() ? FormQuestionGroup.Load(qg.ToInteger()) : questionGroups.First();
 
             ViewBag.Messages = new SystemMessages();
             ViewBag.QuestionGroups = questionGroups;
             ViewBag.IndividualGroups = individualGroups;
-            ViewBag.OrganizationGroups = organizationGroups;
             ViewBag.QuestionGroup = questionGroup;
             ViewBag.ActivityForm = activityForm;
             return View(activity);
@@ -1417,7 +1406,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var questionGroups = activityForm.GetForm().GetQuestionGroups();
             var individualGroups = questionGroups.Where(x => x.RegistrantTypeId == RegistrantType.Individual).ToList();
-            var organizationGroups = questionGroups.Where(x => x.RegistrantTypeId == RegistrantType.Organization).ToList();
             var currentIndex = questionGroups.FindIndex(x => x.ID.Value == questionGroup.ID.Value);
             switch (cmd)
             {
@@ -1432,7 +1420,6 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.QuestionGroups = questionGroups;
             ViewBag.IndividualGroups = individualGroups;
-            ViewBag.OrganizationGroups = organizationGroups;
             ViewBag.QuestionGroup = questionGroup;
             ViewBag.ActivityForm = activityForm;
 

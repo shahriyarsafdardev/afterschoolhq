@@ -32,19 +32,12 @@ namespace AfterSchool.Areas.Org.Controllers
             var individualGroups = questionGroups
                 .Where(x => x.RegistrantTypeId == RegistrantType.Individual && x.GetQuestionCount() > 0)
                 .OrderBy(x => x.DisplayOrder).ToList();
-            var organizationGroups = questionGroups
-                .Where(x => x.RegistrantTypeId == RegistrantType.Organization && x.GetQuestionCount() > 0)
-                .OrderBy(x => x.DisplayOrder).ToList();
-
-            //temporarily disable organization groups
-            organizationGroups = new List<FormQuestionGroup>();
 
             //make sure only question groups with a setting of individual or organization are added to the final count
             questionGroups.Clear();
             questionGroups.AddRange(individualGroups);
-            questionGroups.AddRange(organizationGroups);
 
-            FormQuestionGroup questionGroup = null;
+            FormQuestionGroup questionGroup;
 
             if (qg.IsNumber())
             {
@@ -67,7 +60,6 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = new SystemMessages();
             ViewBag.QuestionGroups = questionGroups;
             ViewBag.IndividualGroups = individualGroups;
-            ViewBag.OrganizationGroups = organizationGroups;
             ViewBag.QuestionGroup = questionGroup;
             return View(form);
         }
@@ -214,18 +206,10 @@ namespace AfterSchool.Areas.Org.Controllers
                 .Where(x => x.RegistrantTypeId == RegistrantType.Individual && x.GetQuestionCount() > 0)
                 .OrderBy(x => x.DisplayOrder)
                 .ToList();
-            var organizationGroups = questionGroups
-                .Where(x => x.RegistrantTypeId == RegistrantType.Organization && x.GetQuestionCount() > 0)
-                .OrderBy(x => x.DisplayOrder)
-                .ToList();
-
-            //temporarily disable organization groups
-            organizationGroups = new List<FormQuestionGroup>();
 
             //make sure only question groups with a setting of individual or organization are added to the final count
             questionGroups.Clear();
             questionGroups.AddRange(individualGroups);
-            questionGroups.AddRange(organizationGroups);
 
             var currentIndex = -1;
 
@@ -247,7 +231,6 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.QuestionGroups = questionGroups;
             ViewBag.IndividualGroups = individualGroups;
-            ViewBag.OrganizationGroups = organizationGroups;
             ViewBag.QuestionGroup = questionGroup;
             return View(form);
         }

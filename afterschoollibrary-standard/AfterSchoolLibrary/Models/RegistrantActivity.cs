@@ -290,18 +290,7 @@ namespace AfterSchoolLibrary.Models
 
 		#region "UserDefined"        
 
-        public string RegistrantName
-        {
-            get
-            {
-                if (RegistrantRegistrantTypeId == RegistrantType.Individual)
-                    return BaseWebUser.BuildDisplayName(RegistrantFirstName, RegistrantLastName);
-                if (RegistrantRegistrantTypeId == RegistrantType.Organization)
-	                return RegistrantCompany.ToProperCase();
-
-                return "";
-            }
-        }
+        public string RegistrantName => BaseWebUser.BuildDisplayName(RegistrantFirstName, RegistrantLastName);
 
         public int TotalSeats
         {

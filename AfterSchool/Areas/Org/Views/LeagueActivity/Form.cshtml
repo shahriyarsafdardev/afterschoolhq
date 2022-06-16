@@ -1,12 +1,10 @@
 ﻿@model Activity
 @{
     ViewBag.Title = Model.AccountName;
-    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+    var msgs = (SystemMessages)ViewBag.Messages;
     var questionGroups = (List<FormQuestionGroup>)ViewBag.QuestionGroups;
     var individualGroups = (List<FormQuestionGroup>)ViewBag.IndividualGroups;
-    var organizationGroups = (List<FormQuestionGroup>)ViewBag.OrganizationGroups;
     var questionGroup = (FormQuestionGroup)ViewBag.QuestionGroup;
-    var activityForm = (ActivityForm)ViewBag.ActivityForm;
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
@@ -159,23 +157,6 @@
                             <li data-id="@(i+1)" class="dd-item">
                                 <div class="dd-handle @active">
                                     &nbsp;&nbsp;&nbsp;&nbsp;<a href="@Url.Action("form", "activity", new { id = Model.Uid.ToString(), qg = individualGroups[i].ID.ToString() })">@individualGroups[i].Name</a>
-                                </div>
-                            </li>
-                        }
-                        <li data-id="20" class="dd-item">
-                            <div class="dd-handle title">Organization</div>
-                        </li>
-                        @for (var i = 0; i < organizationGroups.Count; i++)
-                        {
-                            var active = "";
-                            if (questionGroup.ID == organizationGroups[i].ID)
-                            {
-                                active = "active";
-                            }
-
-                            <li data-id="@(i+21)" class="dd-item">
-                                <div class="dd-handle @active">
-                                    &nbsp;&nbsp;&nbsp;&nbsp;<a href="@Url.Action("form", "activity", new { id = Model.Uid.ToString(), qg = organizationGroups[i].ID.ToString() })">@organizationGroups[i].Name</a>
                                 </div>
                             </li>
                         }

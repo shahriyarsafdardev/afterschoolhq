@@ -768,19 +768,11 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var questionGroups = activityForm.GetForm(msgs).GetQuestionGroups(msgs);
             var individualGroups = questionGroups.Where(x => x.RegistrantTypeId == RegistrantType.Individual).ToList();
-            var organizationGroups =
-                questionGroups.Where(x => x.RegistrantTypeId == RegistrantType.Organization).ToList();
 
-            FormQuestionGroup questionGroup = null;
-
-            if (qg.IsNumber())
-                questionGroup = FormQuestionGroup.Load(qg.ToInteger(), msgs);
-            else
-                questionGroup = questionGroups.First();
+            var questionGroup = qg.IsNumber() ? FormQuestionGroup.Load(qg.ToInteger(), msgs) : questionGroups.First();
 
             ViewBag.QuestionGroups = questionGroups;
             ViewBag.IndividualGroups = individualGroups;
-            ViewBag.OrganizationGroups = organizationGroups;
             ViewBag.QuestionGroup = questionGroup;
             ViewBag.ActivityForm = activityForm;
             ViewBag.Messages = msgs;
@@ -831,20 +823,22 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         foreach (var question in questions)
                         {
-                            if (!question.IsLocked)
+                            if (question.IsLocked)
                             {
-                                question.Text = Request.Params[string.Format("text-{0}", question.ID)];
-
-                                question.IsActive = false;
-                                if (Request.Params[string.Format("active-{0}", question.ID)].IsBoolean())
-                                    question.IsActive = true;
-
-                                question.IsRequired = false;
-                                if (Request.Params[string.Format("required-{0}", question.ID)].IsBoolean())
-                                    question.IsRequired = true;
-
-                                amsgs.AddRange(question.Save(adc));
+                                continue;
                             }
+                            
+                            question.Text = Request.Params[string.Format("text-{0}", question.ID)];
+
+                            question.IsActive = false;
+                            if (Request.Params[string.Format("active-{0}", question.ID)].IsBoolean())
+                                question.IsActive = true;
+
+                            question.IsRequired = false;
+                            if (Request.Params[string.Format("required-{0}", question.ID)].IsBoolean())
+                                question.IsRequired = true;
+
+                            amsgs.AddRange(question.Save(adc));
                         }
                     },
                     onSuccess: (SystemMessages smsgs) =>
@@ -858,8 +852,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var questionGroups = activityForm.GetForm(msgs).GetQuestionGroups(msgs);
             var individualGroups = questionGroups.Where(x => x.RegistrantTypeId == RegistrantType.Individual).ToList();
-            var organizationGroups =
-                questionGroups.Where(x => x.RegistrantTypeId == RegistrantType.Organization).ToList();
             var currentIndex = questionGroups.FindIndex(x => x.ID.Value == questionGroup.ID.Value);
             switch (cmd)
             {
@@ -873,7 +865,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.QuestionGroups = questionGroups;
             ViewBag.IndividualGroups = individualGroups;
-            ViewBag.OrganizationGroups = organizationGroups;
             ViewBag.QuestionGroup = questionGroup;
             ViewBag.ActivityForm = activityForm;
             ViewBag.Messages = msgs;

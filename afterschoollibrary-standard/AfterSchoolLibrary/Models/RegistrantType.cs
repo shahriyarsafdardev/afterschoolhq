@@ -1,6 +1,6 @@
 public enum RegistrantType
 {
 	NotSet = 0,
-	Individual,
-	Organization
+	Individual = 1,
+	_ = 2,
 }
