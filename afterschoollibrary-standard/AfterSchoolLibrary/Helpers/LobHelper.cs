@@ -61,7 +61,7 @@ namespace AfterSchoolLibrary.Helpers
             {
                 addressVerification = GetVerificationService().Verify(options);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 msgs.Add("Error creating check", MessageType.Error);
             }
@@ -130,7 +130,7 @@ namespace AfterSchoolLibrary.Helpers
                 if (!check.Deleted)
                     msgs.Add($"Check ({checkId}) was not canceled", MessageType.UserError);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 msgs.Add("Error canceling check", MessageType.Error);
             }

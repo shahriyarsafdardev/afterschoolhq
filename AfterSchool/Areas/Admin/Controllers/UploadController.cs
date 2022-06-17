@@ -1,17 +1,20 @@
-﻿using System.Web.Mvc;
-using BasicLibrary;
-using AfterSchoolLibrary;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
-using System.Collections.Specialized;
 using AfterSchool.Models;
-using System.Collections.Generic;
-using AfterSchoolLibrary.Services;
-using BasicLibrary.DataAccess;
-using System;
-using Hangfire;
+using AfterSchoolLibrary;
 using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Services;
+using BasicLibrary;
+using BasicLibrary.DataAccess;
+using CsvHelper;
+using CsvHelper.Configuration;
+using Utilities = BasicLibrary.Utilities;
 
 namespace AfterSchool.Areas.Admin.Controllers
 {
@@ -109,8 +112,8 @@ namespace AfterSchool.Areas.Admin.Controllers
 
         private string ProcessImport(HttpPostedFileBase importfile, SystemMessages msgs)
         {
-            var sr = new System.IO.StreamReader(importfile.InputStream);
-            var extension = System.IO.Path.GetExtension(importfile.FileName);
+            var sr = new StreamReader(importfile.InputStream);
+            var extension = Path.GetExtension(importfile.FileName);
 
             List<string[]> headerList = new List<string[]>();
             AddHeaders(headerList);
@@ -122,10 +125,10 @@ namespace AfterSchool.Areas.Admin.Controllers
 
             if (extension == ".csv")
             {
-                CsvHelper.CsvReader reader = new CsvHelper.CsvReader(sr);
+                var reader = new CsvReader(sr);
                 reader.Configuration.Delimiter = ",";
                 reader.Configuration.HasHeaderRecord = true;
-                reader.Configuration.TrimOptions = CsvHelper.Configuration.TrimOptions.Trim;
+                reader.Configuration.TrimOptions = TrimOptions.Trim;
                 reader.Read();
                 reader.ReadHeader();
                 while (reader.Read())
@@ -173,7 +176,7 @@ namespace AfterSchool.Areas.Admin.Controllers
             {
                 if (headersWithData.Where(x => schoolHeaders.Contains(x)).Count() == 0)
                 {
-                    msgs.Add(String.Format("Please add {0} value to each record", headerName[0]), MessageType.UserError);
+                    msgs.Add(string.Format("Please add {0} value to each record", headerName[0]), MessageType.UserError);
                 }
             }
 
@@ -201,18 +204,18 @@ namespace AfterSchool.Areas.Admin.Controllers
 
                         if (phoneHeaders.Contains(headerName))
                         {
-                            if (field != "" && !field.IsMatch(BasicLibrary.Utilities.PhoneRegEx))
+                            if (field != "" && !field.IsMatch(Utilities.PhoneRegEx))
                             {
                                 hasErrors = true;
-                                msgs.Add(String.Format("In csv, line: {1} \n {0} is not a valid phone number", field, rows.IndexOf(row)), MessageType.UserError);
+                                msgs.Add(string.Format("In csv, line: {1} \n {0} is not a valid phone number", field, rows.IndexOf(row)), MessageType.UserError);
                             }
                         }
                         if (emailHeaders.Contains(headerName))
                         {
-                            if (!field.IsBlank() && !field.IsMatch(BasicLibrary.Utilities.EmailRegEx))
+                            if (!field.IsBlank() && !field.IsMatch(Utilities.EmailRegEx))
                             {
                                 hasErrors = true;
-                                msgs.Add(String.Format("In csv, line: {1} \n {0} is not a valid email", field, rows.IndexOf(row)), MessageType.UserError);
+                                msgs.Add(string.Format("In csv, line: {1} \n {0} is not a valid email", field, rows.IndexOf(row)), MessageType.UserError);
                             }
                         }
 
@@ -222,7 +225,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                 }
             }
 
-            var csvString = new System.Text.StringBuilder();
+            var csvString = new StringBuilder();
             foreach (var header in headersWithData)
             {
                 csvString.Append(header);
@@ -350,7 +353,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                if (account.IsEmpty())
                                {
                                    account = Account.Load(
-                                       criterias: new System.Collections.Hashtable
+                                       criterias: new Hashtable
                                        {
                                            { "Name", schoolName },
                                            { "Phone", schoolPhone }

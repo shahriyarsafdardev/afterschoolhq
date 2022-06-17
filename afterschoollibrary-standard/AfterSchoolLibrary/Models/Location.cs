@@ -1,12 +1,10 @@
-using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using System.Data;
-using System.Collections;
+using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchoolLibrary.Models
 {
@@ -26,8 +24,8 @@ namespace AfterSchoolLibrary.Models
 		public string GooglePlaceId { get { return (string)MDV["GooglePlaceId"].Value; } set { MDV["GooglePlaceId"].Value = value; } }
 		public string StreetNumber { get { return (string)MDV["StreetNumber"].Value; } set { MDV["StreetNumber"].Value = value; } }
 		public string StreetName { get { return (string)MDV["StreetName"].Value; } set { MDV["StreetName"].Value = value; } }
-		public string Neighborhood { get { return (string)MDV["Neighborhood"].Value; } set { MDV["Neighborhood"].Value = value; } }
-		public string County { get { return (string)MDV["County"].Value; } set { MDV["County"].Value = value; } }
+		public new string Neighborhood { get { return (string)MDV["Neighborhood"].Value; } set { MDV["Neighborhood"].Value = value; } }
+		public new string County { get { return (string)MDV["County"].Value; } set { MDV["County"].Value = value; } }
 		public decimal? Latitude { get { return (decimal?)MDV["Latitude"].Value; } set { MDV["Latitude"].Value = value; } }
 		public decimal? Longitude { get { return (decimal?)MDV["Longitude"].Value; } set { MDV["Longitude"].Value = value; } }
 		public decimal? DistanceFromOrigin { get { return (decimal?)MDV["DistanceFromOrigin"].Value; } set { MDV["DistanceFromOrigin"].Value = value; } }
@@ -43,74 +41,74 @@ namespace AfterSchoolLibrary.Models
 			
         }
 
-        public static BasicLibrary.DataAccess.DatabaseParameters ObjectMap
+        public static DatabaseParameters ObjectMap
         {
             get
             {
-                BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
-                string className = typeof(Location).Name;
-                _dp = BaseLocation.get_BaseObjectMap(className);
-				_dp.Add(className, "HostAccountId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "IsDefault", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "Details", System.Data.SqlDbType.NVarChar , "4000");
-				_dp.Add(className, "LocationTypeId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "IsTest", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "GooglePlaceId", System.Data.SqlDbType.NVarChar , "400");
-				_dp.Add(className, "StreetNumber", System.Data.SqlDbType.NVarChar , "50");
-				_dp.Add(className, "StreetName", System.Data.SqlDbType.NVarChar , "50");
-				_dp.Add(className, "Neighborhood", System.Data.SqlDbType.NVarChar , "100");
-				_dp.Add(className, "County", System.Data.SqlDbType.NVarChar , "100");
-				_dp.Add(className, "Latitude", System.Data.SqlDbType.Decimal , "30,5");
-				_dp.Add(className, "Longitude", System.Data.SqlDbType.Decimal , "30,5");
-				_dp.Add(className, "DistanceFromOrigin", System.Data.SqlDbType.Decimal , "30,5");
+                var _dp = new DatabaseParameters();
+                var className = nameof(Location);
+                _dp = get_BaseObjectMap(className);
+				_dp.Add(className, "HostAccountId", SqlDbType.Int);
+				_dp.Add(className, "IsDefault", SqlDbType.Bit);
+				_dp.Add(className, "Details", SqlDbType.NVarChar , "4000");
+				_dp.Add(className, "LocationTypeId", SqlDbType.Int);
+				_dp.Add(className, "IsTest", SqlDbType.Bit);
+				_dp.Add(className, "GooglePlaceId", SqlDbType.NVarChar , "400");
+				_dp.Add(className, "StreetNumber", SqlDbType.NVarChar , "50");
+				_dp.Add(className, "StreetName", SqlDbType.NVarChar , "50");
+				_dp.Add(className, "Neighborhood", SqlDbType.NVarChar , "100");
+				_dp.Add(className, "County", SqlDbType.NVarChar , "100");
+				_dp.Add(className, "Latitude", SqlDbType.Decimal , "30,5");
+				_dp.Add(className, "Longitude", SqlDbType.Decimal , "30,5");
+				_dp.Add(className, "DistanceFromOrigin", SqlDbType.Decimal , "30,5");
 				
                 return _dp;
             }
         }
 
-        public static Location LoadObject(System.Data.DataRow row)
+        public static Location LoadObject(DataRow row)
         {
-            Location obj = new Location();
+            var obj = new Location();
             obj.LoadObjectValues(ObjectMap, row);
             return obj;
         }
 
-        protected static BasicLibrary.DataAccess.DatabaseQuery DatabaseQuery
+        protected static DatabaseQuery DatabaseQuery
         {
             get
             {
-                BasicLibrary.DataAccess.DatabaseQuery dq = BaseObject.get_DatabaseQuery(ObjectMap, typeof(Location).Name);
+                var dq = get_DatabaseQuery(ObjectMap, nameof(Location));
 				
                 return dq;
             }
         }
 
-        public static Location Load(int id, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static Location Load(int id, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<Location> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<Location> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            var dq = DatabaseQuery;
             dq.Connection = dc;
 			dq.UseParameterizedQuery = false;
 			dq.SelectRange.Start = start;
 			dq.SelectRange.Length = length;
-            return Location.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            var dq = DatabaseQuery;
             dq.Connection = dc;
-            return Location.BaseGetCount(criterias, ObjectMap, dq, msgs);
+            return BaseGetCount(criterias, ObjectMap, dq, msgs);
         }
 
-		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public SystemMessages Save(DatabaseConnection dc = null)
         {
 			var msgs = new SystemMessages();
 
@@ -123,84 +121,82 @@ namespace AfterSchoolLibrary.Models
 			return msgs;
         }
 
-        public SystemMessages Delete(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public SystemMessages Delete(DatabaseConnection dc = null)
         {
             return base._Delete2(DatabaseQuery, dc, ObjectMap, typeof(Location).Name);
         }
 
-        public static SystemMessages Create(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static SystemMessages Create(DatabaseConnection dc = null)
         {
-            return BaseObject._Create(DatabaseQuery, dc, ObjectMap);
+            return _Create(DatabaseQuery, dc, ObjectMap);
         }
 
-        public static SystemMessages Alter(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static SystemMessages Alter(DatabaseConnection dc = null)
         {
-            SystemMessages msgs = new SystemMessages();
-            BasicLibrary.DataAccess.DatabaseParameters dps;
+            var msgs = new SystemMessages();
+            DatabaseParameters dps;
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps = new DatabaseParameters();
 			dps.Add(ObjectMap["HostAccountId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps = new DatabaseParameters();
 			dps.Add(ObjectMap["IsDefault"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps = new DatabaseParameters();
 			dps.Add(ObjectMap["Details"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps = new DatabaseParameters();
 			dps.Add(ObjectMap["LocationTypeId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps = new DatabaseParameters();
 			dps.Add(ObjectMap["IsTest"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps = new DatabaseParameters();
 			dps.Add(ObjectMap["GooglePlaceId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps = new DatabaseParameters();
 			dps.Add(ObjectMap["StreetNumber"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps = new DatabaseParameters();
 			dps.Add(ObjectMap["StreetName"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps = new DatabaseParameters();
 			dps.Add(ObjectMap["Neighborhood"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps = new DatabaseParameters();
 			dps.Add(ObjectMap["County"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps = new DatabaseParameters();
 			dps.Add(ObjectMap["Latitude"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps = new DatabaseParameters();
 			dps.Add(ObjectMap["Longitude"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps = new DatabaseParameters();
 			dps.Add(ObjectMap["DistanceFromOrigin"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			
+			msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
             return msgs;
         }
 
-		public Location Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public Location Reload(SystemMessages msgs = null, DatabaseConnection dc = null)
 		{
-			return Location.Load(this.ID.Value, msgs, dc: dc);
+			return Load(this.ID.Value, msgs, dc: dc);
 		}
 		
-		public static List<Location> LoadByHostAccountId(int HostAccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Location> LoadByHostAccountId(int HostAccountId, SystemMessages msgs = null, DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
@@ -208,7 +204,7 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static Location LoadByHostAccountIdByIsDefault(int HostAccountId, bool IsDefault, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static Location LoadByHostAccountIdByIsDefault(int HostAccountId, bool IsDefault, SystemMessages msgs = null, DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
@@ -217,7 +213,7 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static List<Location> LoadByLocationTypeId(LocationType LocationTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Location> LoadByLocationTypeId(LocationType LocationTypeId, SystemMessages msgs = null, DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
@@ -225,7 +221,7 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static Location LoadByGooglePlaceId(string GooglePlaceId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static Location LoadByGooglePlaceId(string GooglePlaceId, SystemMessages msgs = null, DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
@@ -233,7 +229,7 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static List<Location> LoadByCityByStateByCountry(string City, string State, string Country, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Location> LoadByCityByStateByCountry(string City, string State, string Country, SystemMessages msgs = null, DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
@@ -243,7 +239,7 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<Location> LoadByCountyByStateByCountry(string County, string State, string Country, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Location> LoadByCountyByStateByCountry(string County, string State, string Country, SystemMessages msgs = null, DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
@@ -253,7 +249,7 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<Location> LoadByStateByCountry(string State, string Country, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Location> LoadByStateByCountry(string State, string Country, SystemMessages msgs = null, DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
@@ -262,7 +258,7 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<Location> LoadByCountry(string Country, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Location> LoadByCountry(string Country, SystemMessages msgs = null, DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
@@ -280,7 +276,7 @@ namespace AfterSchoolLibrary.Models
         {
             var searchTerms = query.Split(' ').Where(term =>  
                 term.IsNotBlank() &&
-                term.ToLower().NotIn(Helpers.Utilities.FullTextSearchWordsToIgnore));
+                term.ToLower().NotIn(Utilities.FullTextSearchWordsToIgnore));
 
             if (searchTerms.Any())
             {
@@ -309,7 +305,7 @@ namespace AfterSchoolLibrary.Models
             return new List<Location>();
         }
 
-        public static List<Location> LoadByLocationTypeIdByCityByState(LocationType LocationTypeId, string city, string state, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<Location> LoadByLocationTypeIdByCityByState(LocationType LocationTypeId, string city, string state, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -319,7 +315,7 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-		public static List<string> LoadAllCities(string county = null, string state = null, string country = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<string> LoadAllCities(string county = null, string state = null, string country = null, SystemMessages msgs = null, DatabaseConnection dc = null)
 		{
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -340,7 +336,7 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(row => { return row[0].ToString(); });
         }
 
-        public static List<string> LoadAllNeighborhoods(string city, string county = null, string state = null, string country = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<string> LoadAllNeighborhoods(string city, string county = null, string state = null, string country = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -364,7 +360,7 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(row => { return row[0].ToString(); });
         }
 
-        public static List<string> LoadNeighborhoodsByHostAccount(int hostAccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<string> LoadNeighborhoodsByHostAccount(int hostAccountId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;

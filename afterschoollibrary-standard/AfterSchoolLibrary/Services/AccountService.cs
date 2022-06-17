@@ -1464,9 +1464,9 @@ namespace AfterSchoolLibrary.Services
         {
             var token = StripeHelper.CompleteOAuthConnection(code, msgs);
 
-            account.StripePublishableKey = token.StripePublishableKey;
-            account.StripeAccessToken = token.AccessToken;
-            account.StripeRefreshToken = token.RefreshToken;
+            account.StripePublishableKey = null;
+            account.StripeAccessToken = null;
+            account.StripeRefreshToken = null;
             account.StripeUserId = token.StripeUserId;
             account.StripeChargesEnabled = true;
             account.StripePayoutsEnabled = true;

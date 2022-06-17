@@ -1469,7 +1469,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 //if we reach here, something gone wrong. 
                 return Json(new {IsSuccess = false});
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return Json(new {IsSuccess = false});
             }

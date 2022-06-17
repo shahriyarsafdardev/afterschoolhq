@@ -657,7 +657,7 @@ namespace AfterSchoolLibrary.Billing
             {
                 product = GetProductService().Get(productId, null, requestOptions);
             }
-            catch (StripeException ex)
+            catch (StripeException)
             {
                 // msgs.Add($"No stripe product found with ID: {productId}", MessageType.Notice, ex);
             }
@@ -720,7 +720,7 @@ namespace AfterSchoolLibrary.Billing
             {
                 price = GetPriceService().Get(priceId);
             } 
-            catch (StripeException ex)
+            catch (StripeException)
             {
                 //msgs.Add(ex.Message, MessageType.UserError, ex);
                 msgs.Add($"Unable to retrieve price", MessageType.Notice);
@@ -911,7 +911,7 @@ namespace AfterSchoolLibrary.Billing
             {
                 plan = GetPlanService().Get(planId, null, requestOptions);
             }
-            catch (StripeException ex)
+            catch (StripeException)
             {
                 // msgs.Add($"No stripe plan found with ID: {planId}", MessageType.Notice, ex);
             }
@@ -1079,7 +1079,7 @@ namespace AfterSchoolLibrary.Billing
             {
                 customer = GetCustomerService().Get(customerId, null, requestOptions);
             }
-            catch (StripeException ex)
+            catch (StripeException)
             {
                 // msgs.Add($"No stripe customer found with ID: {customerId}", MessageType.Notice, ex);
             }
@@ -1848,7 +1848,7 @@ namespace AfterSchoolLibrary.Billing
             {
                 source = GetSourceService().Get(sourceId);
             }
-            catch (StripeException ex)
+            catch (StripeException)
             {
 
             }

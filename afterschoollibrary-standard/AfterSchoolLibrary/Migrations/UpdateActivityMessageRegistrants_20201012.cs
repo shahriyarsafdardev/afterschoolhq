@@ -28,7 +28,7 @@ namespace AfterSchoolLibrary.Migrations
 
                     amrs.ForEach(amr => {
 
-                        if (TwilioSMS.ExistsByRegistrantIdByActivityMessageId(amr.RegistrantId.Value, amr.ActivityMessageId.Value, amsgs, adc)) ;
+                        if (TwilioSMS.ExistsByRegistrantIdByActivityMessageId(amr.RegistrantId.Value, amr.ActivityMessageId.Value, amsgs, adc))
                         {
 
                             amr.SentText = true;

@@ -21,9 +21,6 @@ namespace AfterSchoolLibrary.Helpers
             "with",
         };
 
-        private static string AppDocumentRoot;
-
-        private static byte[] _AppIV;
         public static int ImageUploadMaxBytes => 1024 * 1024 * 4;
 
         public static string SurveyBaseUrl
@@ -235,7 +232,7 @@ namespace AfterSchoolLibrary.Helpers
 
                 return false;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
