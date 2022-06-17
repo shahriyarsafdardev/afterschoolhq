@@ -298,15 +298,8 @@ namespace AfterSchool.Areas.Admin.Controllers
             var accountIdIndex = GetHeaderPostion(headersWithData, accountIdHeaders);
             var minGradeIndex = GetHeaderPostion(headersWithData, minGradeHeaders);
             var maxGradeIndex = GetHeaderPostion(headersWithData, maxGradeHeaders);
-            Account districtAccount = null;
             var allGradeLevels = GradeLevel.Load();
-
-            if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
-                districtAccount = Account.Load(84);
-            else if (AfterSchoolLibrary.Helpers.Utilities.IsQA)
-                districtAccount = Account.Load(193);
-            // else
-            //     districtAccount = Account.Load(80);
+            var districtAccount = AfterSchoolLibrary.Helpers.Utilities.IsProduction ? Account.Load(84) : null;
 
             var users = new List<WebUser>();
             var accounts = new List<Account>();

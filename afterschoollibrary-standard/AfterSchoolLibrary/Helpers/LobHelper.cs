@@ -14,31 +14,7 @@ namespace AfterSchoolLibrary.Helpers
 {
     public class LobHelper
     {
-        private static string TestSecretKey { get { return "test_51a0a27eacb130427cd132a01e658c94740"; } }
-        private static string TestPublishableKey { get { return "test_pub_2d3cb69363d82c6e3ed80dc3037bbac"; } }
-        private static string LiveSecretKey { get { return ConfigurationManager.AppSettings["Lob.LiveSecretKey"]; } }
-        private static string LivePublishableKey { get { return ConfigurationManager.AppSettings["Lob.LivePublishableKey"]; } }
-
-        public static string SecretKey
-        {
-            get
-            {
-                if (Helpers.Utilities.IsProduction)
-                    return LiveSecretKey;
-
-                return TestSecretKey;
-            }
-        }
-        public static string PublishableKey
-        {
-            get
-            {
-                if (Helpers.Utilities.IsProduction)
-                    return LivePublishableKey;
-
-                return TestPublishableKey;
-            }
-        }
+        private static string SecretKey => ConfigurationManager.AppSettings["Lob.SecretKey"];
 
         private static Lob.Services.AddressVerificationService GetVerificationService()
         {
@@ -47,7 +23,7 @@ namespace AfterSchoolLibrary.Helpers
 
         public static bool IsDeliverableAddress(string address1, string city, string state, string postalCode, SystemMessages msgs)
         {
-            var options = new Lob.Models.AddressVerificationOptions()
+            var options = new Lob.Models.AddressVerificationOptions
             {
                 AddressLine1 = address1,
                 City = city,
@@ -76,7 +52,7 @@ namespace AfterSchoolLibrary.Helpers
 
         public static Lob.Models.Check CreateCheck(string description, Lob.Models.AccountType accountType, string toName, string toAddress1, string toAddress2, string toCity, string toState, string toPostalCode, string fromAddressId, string bankAccountId, decimal amount, string memo, string checkBottom, string attachment, dynamic metaData, SystemMessages msgs)
         {
-            var toAddress = new Lob.Models.AddressCreateOptions()
+            var toAddress = new Lob.Models.AddressCreateOptions
             {
                 AddressLine1 = toAddress1,
                 AddressLine2 = toAddress2,
@@ -90,7 +66,7 @@ namespace AfterSchoolLibrary.Helpers
             else
                 toAddress.Name = toName;
 
-            var options = new Lob.Models.CheckCreateOptions()
+            var options = new Lob.Models.CheckCreateOptions
             {
                 Description = description,
                 ToAddress = toAddress,
@@ -115,27 +91,6 @@ namespace AfterSchoolLibrary.Helpers
             }
 
             return check;
-        }
-
-        public static SystemMessages CancelCheck(string checkId)
-        {
-            var msgs = new SystemMessages();
-
-            Lob.Models.Check check = null;
-
-            try
-            {
-                check = GetCheckService().Cancel(checkId);
-
-                if (!check.Deleted)
-                    msgs.Add($"Check ({checkId}) was not canceled", MessageType.UserError);
-            }
-            catch (Exception)
-            {
-                msgs.Add("Error canceling check", MessageType.Error);
-            }
-
-            return msgs;
         }
     }
 }
@@ -256,7 +211,7 @@ namespace Lob
             public Models.Check Cancel(string checkId)
             {
                 dynamic result = SendRequest(Url, CreateMethod, $"/{checkId}", null);
-                return new Models.Check()
+                return new Models.Check
                 {
                     Id = result["id"],
                     Deleted = result["deleted"],                    
@@ -299,7 +254,7 @@ namespace Lob
 
             internal static Address FromDynamicObject(dynamic result)
             {
-                var address = new Models.Address()
+                var address = new Address
                 {
                     Id = (string)result["id"],
                     Description = (string)result["description"],
@@ -336,14 +291,9 @@ namespace Lob
             public string BankName { get; set; }
             public bool Verified { get; set; }
 
-            public BankAccount()
-            {
-
-            }
-
             internal static BankAccount FromDynamicObject(dynamic result)
             {
-                return new BankAccount()
+                return new BankAccount
                 {
                     Id = (string)result["id"],
                     Description = (string)result["description"],
@@ -352,7 +302,7 @@ namespace Lob
                     Signatory = (string)result["signatory"],
                     BankName = (string)result["bank_name"],
                     Verified = (bool)result["verified"],
-                    AccountType = ((string)result["account_type"]).Replace("_", " ").ToProperCase().Replace(" ", "").ParseEnum<Lob.Models.AccountType>(),
+                    AccountType = ((string)result["account_type"]).Replace("_", " ").ToProperCase().Replace(" ", "").ParseEnum<AccountType>(),
                     DateCreated = (DateTime)result["date_created"],
                     DateModified = (DateTime)result["date_modified"],
                     Object = (string)result["object"]
@@ -390,7 +340,7 @@ namespace Lob
 
             internal static AddressVerification FromDynamicObject(dynamic result)
             {
-                return new AddressVerification()
+                return new AddressVerification
                 {
                     Id = (string)result["id"],
                     Deliverability = ((string)result["deliverability"]).Replace("_", " ").ToProperCase().Replace(" ", "").ParseEnum<Deliverability>(),
@@ -425,7 +375,7 @@ namespace Lob
 
             internal static Check FromDynamicObject(dynamic result)
             {
-                return new Check()
+                return new Check
                 {
                     Id = (string)result["id"],
                     Description = (string)result["description"],
@@ -438,13 +388,13 @@ namespace Lob
                     AttachmentTemplateVersionId = (string)result["attachment_template_version_id"],
                     To = Address.FromDynamicObject(result["to"]),
                     From = Address.FromDynamicObject(result["from"]),
-                    BankAccount = BankAccount.FromDynamicObject(result["bank_account"]),
+                    BankAccount = Lob.Models.BankAccount.FromDynamicObject(result["bank_account"]),
                     Carrier = ((string)result["carrier"]).Replace("_", " ").ToProperCase().Replace(" ", "").ParseEnum<CarrierType>(),
                     TrackingNumber = (string)result["tracking_number"],
                     TrackingEvents = ((Newtonsoft.Json.Linq.JArray)result["tracking_events"]).ToObject<List<TrackingEvent>>(),
                     Thumbnails = ((Newtonsoft.Json.Linq.JArray)result["thumbnails"]).ToObject<List<Thumbnail>>(),
                     ExpectedDeliveryDate = (DateTime)result["expected_delivery_date"],
-                    MailType = ((string)result["mail_type"]).Replace("_", " ").ToProperCase().Replace(" ", "").ParseEnum<Lob.Models.MailType>(),
+                    MailType = ((string)result["mail_type"]).Replace("_", " ").ToProperCase().Replace(" ", "").ParseEnum<MailType>(),
                     SendDate = (DateTime)result["send_date"],
                     DateCreated = (DateTime)result["date_created"],
                     DateModified = (DateTime)result["date_modified"],

@@ -13,46 +13,10 @@ namespace AfterSchoolLibrary.Helpers
 {
     public class PlaidHelper
     {
-        private static string SandboxSecretKey { get { return ConfigurationManager.AppSettings["Plaid.SandboxSecretKey"]; } }
-        private static string DevelopmentSecretKey { get { return ConfigurationManager.AppSettings["Plaid.DevelopmentSecretKey"]; } }
-        private static string ProductionSecretKey { get { return ConfigurationManager.AppSettings["Plaid.ProductionSecretKey"]; } }
-
-        public static string ClientId { get { return ConfigurationManager.AppSettings["Plaid.ClientId"]; } }
-        public static string PublicKey { get { return ConfigurationManager.AppSettings["Plaid.PublicKey"]; } }
-
-        public static string SecretKey
-        {
-            get
-            {
-                if (Utilities.IsLocalHost)
-                    return DevelopmentSecretKey;
-
-                if (Utilities.IsStaging)
-                    return SandboxSecretKey;
-
-                if (Utilities.IsProduction)
-                    return ProductionSecretKey;
-
-                return SandboxSecretKey;
-            }
-        }
-
-        public static string PlaidEnvironment
-        {
-            get
-            {
-                if (Utilities.IsLocalHost)
-                    return "development";
-
-                if (Utilities.IsStaging)
-                    return "sandbox";
-
-                if (Utilities.IsProduction)
-                    return "production";
-
-                return "sandbox";
-            }
-        }
+        private static string ClientId => ConfigurationManager.AppSettings["Plaid.ClientId"];
+        public static string PublicKey => ConfigurationManager.AppSettings["Plaid.PublicKey"];
+        private static string SecretKey => ConfigurationManager.AppSettings["Plaid.SecretKey"];
+        public static string PlaidEnvironment => ConfigurationManager.AppSettings["Plaid.Environment"];
 
         private static Plaid.Services.TokenExchangeService GetTokenExchangeService()
         {
@@ -122,26 +86,7 @@ namespace Plaid
             protected const string PlaidApiVersion = "2019-05-29";
             protected const string ClientVersion = ".1";
 
-            protected static string SandboxBaseUrl { get { return ConfigurationManager.AppSettings["Plaid.SandboxBaseUrl"]; } }
-            protected static string DevelopmentBaseUrl { get { return ConfigurationManager.AppSettings["Plaid.DevelopmentBaseUrl"]; } }
-            protected static string ProductionBaseUrl { get { return ConfigurationManager.AppSettings["Plaid.ProductionBaseUrl"]; } }
-
-            protected static string BaseUrl
-            {
-                get
-                {
-                    if (AfterSchoolLibrary.Helpers.Utilities.IsLocalHost)
-                        return DevelopmentBaseUrl;
-
-                    if (AfterSchoolLibrary.Helpers.Utilities.IsStaging)
-                        return SandboxBaseUrl;
-
-                    if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
-                        return ProductionBaseUrl;
-
-                    return SandboxBaseUrl;
-                }
-            }
+            private static string BaseUrl => ConfigurationManager.AppSettings["Plaid.BaseUrl"];
 
             public PlaidService(string clientId, string secretKey)
             {

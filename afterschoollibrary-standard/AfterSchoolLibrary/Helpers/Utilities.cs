@@ -27,8 +27,6 @@ namespace AfterSchoolLibrary.Helpers
         {
             get
             {
-                if (IsQA)
-                    return "app-dev.afterschoolhq.com";
                 if (IsStaging)
                     return "app-staging.afterschoolhq.com";
                 if (IsProduction)
@@ -52,13 +50,7 @@ namespace AfterSchoolLibrary.Helpers
 
         public static bool IsStaging => ConfigurationManager.AppSettings["NET_ENV"] == "Staging";
 
-        public static bool IsTest => ConfigurationManager.AppSettings["NET_ENV"] == "Test";
-
-        public static bool IsCI => ConfigurationManager.AppSettings["NET_ENV"] == "CI";
-
-        public static bool IsQA => ConfigurationManager.AppSettings["NET_ENV"] == "QA";
-
-        public static bool IsLocalHost => !IsProduction && !IsStaging && !IsCI && !IsQA;
+        public static bool IsLocalHost => !IsProduction && !IsStaging;
 
         public static string RollbarAccessToken => ConfigurationManager.AppSettings["Rollbar.AccessToken"];
 
@@ -154,8 +146,6 @@ namespace AfterSchoolLibrary.Helpers
         {
             if (IsProduction) return "production";
             if (IsStaging) return "staging";
-            if (IsCI) return "ci";
-            if (IsQA) return "qa";
             return "local";
         }
 

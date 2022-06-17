@@ -20,7 +20,7 @@ namespace AfterSchool
 {
     public partial class Startup
     {
-        private readonly IConfigurationRoot _configurationRoot;
+        private readonly IConfigurationRoot configurationRoot;
 
         public Startup()
         {
@@ -28,7 +28,7 @@ namespace AfterSchool
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                     "afterschoolhq-overrides",
                     "appsettings.json");
-            _configurationRoot = new ConfigurationBuilder()
+            configurationRoot = new ConfigurationBuilder()
                 .SetBasePath(Path.Combine(AppContext.BaseDirectory))
                 .AddJsonFile("appsettings.json", true)
                 .AddJsonFile(localConfigOverridesPath, true)
@@ -63,10 +63,10 @@ namespace AfterSchool
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddTransient(provider => new DatabaseCredentials(
-                _configurationRoot.GetValue<string>("SqlServer:ServerName"),
-                _configurationRoot.GetValue<string>("SqlServer:DatabaseName"),
-                _configurationRoot.GetValue<string>("SqlServer:UserName"),
-                _configurationRoot.GetValue<string>("SqlServer:Password")));
+                configurationRoot.GetValue<string>("SqlServer:ServerName"),
+                configurationRoot.GetValue<string>("SqlServer:DatabaseName"),
+                configurationRoot.GetValue<string>("SqlServer:UserName"),
+                configurationRoot.GetValue<string>("SqlServer:Password")));
             services.AddTransient<IFeatureFlagRepository, FeatureFlagRepository>();
 
             services.AddControllersAsServices(typeof(Startup).Assembly.GetExportedTypes()
@@ -75,10 +75,10 @@ namespace AfterSchool
                             || t.Name.EndsWith("Controller", StringComparison.OrdinalIgnoreCase)));
 
             services.AddTransient<IInfluxSettings>(provider => new InfluxSettings(
-                _configurationRoot.GetValue<string>("InfluxDB:Hostname"),
-                _configurationRoot.GetValue<string>("InfluxDB:OrgName"),
-                _configurationRoot.GetValue<string>("InfluxDB:BucketName"),
-                _configurationRoot.GetValue<string>("InfluxDB:ApiToken")));
+                configurationRoot.GetValue<string>("InfluxDB:Hostname"),
+                configurationRoot.GetValue<string>("InfluxDB:OrgName"),
+                configurationRoot.GetValue<string>("InfluxDB:BucketName"),
+                configurationRoot.GetValue<string>("InfluxDB:ApiToken")));
             services.AddTransient<IInfluxLogger, InfluxLogger>();
             DependencyInjectionConfig.ConfigureServices(services);
         }
