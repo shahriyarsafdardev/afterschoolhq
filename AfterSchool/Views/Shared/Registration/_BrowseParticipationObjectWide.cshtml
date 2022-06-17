@@ -173,12 +173,14 @@
                         </span>
                         <br />
                     }
+                    @if (Model.ActivityType != ActivityType.VolunteerOpportunity)
+                    {
+                        <span>
+                            @ParticipationObjectUI.PrintAgeGradeRestrictions(Model)
+                        </span>
+                        <br />
+                    }
 
-                    <span>
-                        @ParticipationObjectUI.PrintAgeGradeRestrictions(Model)
-                    </span>
-
-                    <br />
                     <span>
                         Restrictions: @ParticipationObjectUI.PrintGenderRestrictions(Model)
                     </span>
