@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Web.Mvc;
 using AfterSchool.Models;
+using AfterSchoolLibrary;
 using AfterSchoolLibrary.FeatureFlag;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 using BasicLibrary;
 
 namespace AfterSchoolLibrary
@@ -284,5 +284,11 @@ namespace AfterSchoolLibrary
             int diff = (7 - (dt.DayOfWeek - startOfWeek)) % 7;
             return dt.AddDays(1 * diff).Date;
         }
+    }
+    
+    public static class StringExtensions
+    {
+        public static bool IsMatch(this string s, string regex) => Regex.IsMatch(s, regex);
+        public static string Truncate(this string s, int length) => s.Length <= length ? s : s.Substring(0, length - 1) + "…";
     }
 }
