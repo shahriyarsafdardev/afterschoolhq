@@ -55,9 +55,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="AuthyDotNet, Version=0.2.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\AuthyDotNet.0.2.3\lib\net45\AuthyDotNet.dll</HintPath>
-    </Reference>
     <Reference Include="AWS.SessionProvider, Version=4.0.0.0, Culture=neutral, PublicKeyToken=885c28607f98e604, processorArchitecture=MSIL">
       <HintPath>..\packages\AWS.SessionProvider.4.1.0\lib\net45\AWS.SessionProvider.dll</HintPath>
     </Reference>
