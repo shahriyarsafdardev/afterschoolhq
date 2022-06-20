@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Web.Mvc;
 using AfterSchool.Helpers;
 using AfterSchool.Models;
@@ -214,10 +215,161 @@ namespace AfterSchool.Controllers
             return View();
         }
 
+        public ActionResult CheckRedirect(bool checkForEmptyCart = false)
+        {
+            if (SessionVariables.RegistrationStartPageAccount.IsNotEmpty())
+            {
+                var redirectUrl = SessionVariables.RegistrationStartPageAccount.HomePageUrl;
+
+                if (SessionVariables.CurrentUser.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty())
+                    return Redirect(redirectUrl);
+
+                if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
+                    return Redirect(redirectUrl);
+
+                if (checkForEmptyCart && SessionVariables.Cart.IsEmpty())
+                    return Redirect(redirectUrl);
+            }
+
+            if (SessionVariables.CurrentUser.IsEmpty())
+                return Redirect(AfterSchoolLibrary.Helpers.Utilities.LoginUrl());
+
+            if (SessionVariables.CurrentAccount.IsEmpty())
+                return RedirectToAction("select", "login");
+
+            if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
+                return HandleRedirectAfterLogin(null);
+
+            if (checkForEmptyCart && SessionVariables.Cart.IsEmpty())
+                return HandleRedirectAfterLogin(null);
+
+            return null;
+        }
+
+        #region AddHomeAddress
+
+        private List<FormQuestion> GatherAddHomeAddressQuestions(SystemMessages msgs, ParticipationObject participationObject)
+        {
+            var form = FormService.GetAdministratorAccountForm(msgs);
+            var homeAddressQuestionGroup = form.GetQuestionGroups(msgs)
+                .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.HomeAddress);
+            var questions = homeAddressQuestionGroup.GetAllQuestions(msgs);
+
+            var personalContactGroup = form.GetQuestionGroups(msgs)
+                .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
+            var questionsWithPersonalInfo = personalContactGroup.GetAllQuestions(msgs);
+            var allQuestionsWithPersonalInfo = questionsWithPersonalInfo.Where(question =>
+                    question.QuestionDataTypeId.In(new List<QuestionDataType>
+                    {
+                        QuestionDataType.RegistrantHomePhone,
+                        QuestionDataType.RegistrantWorkPhone,
+                        QuestionDataType.RegistrantParentRelationship,
+                        QuestionDataType.RegistrantEmployer,
+                    }))
+                .ToList();
+
+            questions.AddRange(allQuestionsWithPersonalInfo);
+
+            questions.ForEach(question =>
+            {
+                switch (question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantAddress2:
+                    case QuestionDataType.RegistrantWorkPhone:
+                    case QuestionDataType.RegistrantHomePhone:
+                    case QuestionDataType.RegistrantEmployer:
+                        question.IsRequired = false;
+                        break;
+                    default:
+                        question.IsRequired = true;
+                        break;
+                }
+            });
+
+            return questions;
+        }
+
         [HttpGet]
         public ActionResult AddHomeAddress()
         {
-            return View("Select");
+            var results = CheckRedirect(true);
+            if (results.IsNotEmpty()) return results;
+
+            var result = GatherDataForAndAssembleAddHomeAddressResult();
+
+            return View(result);
         }
+
+        private AddHomeAddressResult GatherDataForAndAssembleAddHomeAddressResult()
+        {
+            var msgs = new SystemMessages();
+            var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+            var registrationStartPageAccount = SessionVariables.RegistrationStartPageAccount;
+            var questions = GatherAddHomeAddressQuestions(msgs, participationObject);
+            var formQuestionViewModels = questions.Select(question => question.ToFormQuestionViewModel()).ToList();
+
+            var result = new AddHomeAddressAssembler().AssembleAddHomeAddressResult(formQuestionViewModels, participationObject, registrationStartPageAccount,
+                msgs);
+            return result;
+        }
+
+        [HttpPost]
+        public ActionResult AddHomeAddress(string id)
+        {
+            var msgs = new SystemMessages();
+            var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+            var questions = GatherAddHomeAddressQuestions(msgs, participationObject);
+            var parentRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
+
+            questions.ForEach(question =>
+            {
+                if (question.IsRequired && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
+                    msgs.Add($"{question.Text} is required", MessageType.UserError);
+
+                switch (question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantHomePhone:
+                    case QuestionDataType.RegistrantWorkPhone:
+                        FormService.PhoneValidation(Request[question.ToFormQuestionViewModel().Name], question, msgs);
+                        break;
+                }
+            });
+
+            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+
+            if (msgs.HasNoErrors())
+                Database.ExecuteTransaction
+                (
+                    (amsgs, adc) =>
+                    {
+                        // add answers to parent registrant record
+                        // will be used later to copy information over to student records
+                        qvms.ForEach(qvm =>
+                        {
+                            parentRegistrant.AddOrUpdateAnswer(
+                                qvm.Value.IfEmpty("").Trim(),
+                                qvm.Question,
+                                SessionVariables.CurrentUser,
+                                amsgs,
+                                adc);
+                        });
+                    },
+                    smsgs => msgs.AddRange(smsgs),
+                    fmsgs => msgs.AddRange(fmsgs),
+                    emsgs => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                );
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("select");
+
+            ViewBag.Messages = msgs;
+            ViewBag.ParticipationObject = participationObject;
+            var registrationStartPageAccount = SessionVariables.RegistrationStartPageAccount;
+            var result = new AddHomeAddressAssembler().AssembleAddHomeAddressResult(qvms, participationObject, registrationStartPageAccount, msgs);
+
+            return View(result);
+        }
+
+        #endregion
     }
 }

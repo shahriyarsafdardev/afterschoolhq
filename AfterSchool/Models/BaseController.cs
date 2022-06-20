@@ -122,32 +122,37 @@ namespace AfterSchool.Models
 
         protected ActionResult LoginRedirect(Account registrationAccount = null, SystemMessages msgs = null)
         {
+            return Redirect(DetermineUrlForLoginRedirect(registrationAccount, msgs));
+        }
+
+        internal string DetermineUrlForLoginRedirect(Account registrationAccount, SystemMessages msgs)
+        {
             if (msgs.IsNotEmpty())
                 TempData["msgs"] = msgs;
 
             if (SessionVariables.CurrentAccount.IsEmpty())
-                return RedirectToAction("select", "login");
+                return new UrlHelper(ControllerContext.RequestContext).Action("select", "login");
             if (SessionVariables.CurrentUser.HasAccessTo(SessionVariables.CurrentAccount))
                 switch (SessionVariables.CurrentAccount.AccountTypeId)
                 {
                     case AccountType.AfterSchool:
-                        return RedirectToAction("index", "account", new {area = "admin"});
+                        return new UrlHelper(ControllerContext.RequestContext).Action("index", "account", new {area = "admin"});
 
                     case AccountType.SchoolDistrict:
-                        return RedirectToAction("index", "home", new {area = "district"});
+                        return new UrlHelper(ControllerContext.RequestContext).Action("index", "home", new {area = "district"});
 
                     case AccountType.Registrant:
                         if (SessionVariables.Cart.IsNotEmpty())
-                            return RedirectToAction("select", "account", new {area = ""});
+                            return new UrlHelper(ControllerContext.RequestContext).Action("select", "account", new {area = ""});
                         if (registrationAccount.IsNotEmpty())
-                            return Redirect(registrationAccount.HomePageUrl);
-                        return RedirectToAction("index", "home", new {area = "user"});
+                            return new UrlHelper(ControllerContext.RequestContext).Action(registrationAccount.HomePageUrl);
+                        return new UrlHelper(ControllerContext.RequestContext).Action("index", "home", new {area = "user"});
 
                     default:
-                        return RedirectToAction("index", "home", new {area = "org"});
+                        return new UrlHelper(ControllerContext.RequestContext).Action("index", "home", new {area = "org"});
                 }
 
-            return RedirectToAction("index", "login", new {area = ""});
+            return new UrlHelper(ControllerContext.RequestContext).Action("index", "login", new {area = ""});
         }
 
         protected void LoadSessionInfo(WebUser user, SystemMessages msgs = null)
@@ -308,36 +313,36 @@ namespace AfterSchool.Models
 
         internal ActionResult HandleRedirectAfterLogin(string returnUrl, SystemMessages msgs = null)
         {
-            var actionResult = LoginRedirect(msgs: msgs);
+            return Redirect(DetermineUrlForHandleRedirectAfterLogin(returnUrl, msgs));
+        }
+
+        private string DetermineUrlForHandleRedirectAfterLogin(string returnUrl, SystemMessages msgs)
+        {
+            return IsRequestedReturnUrlAcceptableForThisAccount(returnUrl, msgs) ? returnUrl : DetermineUrlForLoginRedirect(null, msgs);
+        }
+
+        private bool IsRequestedReturnUrlAcceptableForThisAccount(string requestedReturnUrl, SystemMessages msgs)
+        {
+            if (requestedReturnUrl.IsEmpty()) return false;
+
             var account = SessionVariables.CurrentAccount;
             const string adminPath = "/admin/";
             const string registrantPath = "/user/";
             const string districtPath = "/district/";
             const string orgPath = "/org/";
 
-            if (returnUrl.IsNotEmpty())
-                switch (account.AccountTypeId)
-                {
-                    case AccountType.AfterSchool:
-                        if (!returnUrl.ToLower().Contains(new[] {orgPath, registrantPath, districtPath}))
-                            actionResult = Redirect(returnUrl);
-                        break;
-                    case AccountType.Registrant:
-                        if (!returnUrl.ToLower().Contains(new[] {orgPath, adminPath, districtPath}))
-                            actionResult = Redirect(returnUrl);
-                        break;
-                    case AccountType.SchoolDistrict:
-                        if (!returnUrl.ToLower().Contains(new[] {orgPath, adminPath, registrantPath}))
-                            actionResult = Redirect(returnUrl);
-                        break;
-                    default:
-                        if (account.AccountTypeId.In(FormConstants.ProviderAccountTypes) && !returnUrl.ToLower()
-                                .Contains(new[] {adminPath, registrantPath, districtPath}))
-                            actionResult = Redirect(returnUrl);
-                        break;
-                }
-
-            return actionResult;
+            switch (account.AccountTypeId)
+            {
+                case AccountType.AfterSchool:
+                    return !requestedReturnUrl.ToLower().Contains(new[] {orgPath, registrantPath, districtPath});
+                case AccountType.Registrant:
+                    return !requestedReturnUrl.ToLower().Contains(new[] {orgPath, adminPath, districtPath});
+                case AccountType.SchoolDistrict:
+                    return !requestedReturnUrl.ToLower().Contains(new[] {orgPath, adminPath, registrantPath});
+                default:
+                    return account.AccountTypeId.In(FormConstants.ProviderAccountTypes) &&
+                           !requestedReturnUrl.ToLower().Contains(new[] {adminPath, registrantPath, districtPath});
+            }
         }
 
         internal bool isUnsupportedBrowser()

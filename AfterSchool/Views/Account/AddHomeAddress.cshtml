@@ -1,35 +1,35 @@
-﻿@model List<FormQuestionViewModel>
+﻿@model AfterSchool.Controllers.AddHomeAddressResult
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = "Add Home Address";
-    var msgs = (SystemMessages)ViewBag.Messages;
-    var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
+    var msgs = Model.Messages;
+    var participationObject = Model.ParticipationObject;
 }
 
-@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+@{ Html.RenderPartial("_RenderMessages", msgs); }
 
 @{
     Html.RenderPartial(
-        "~/Views/Shared/Registration/_AccountTopBar.cshtml",
-        SessionVariables.RegistrationStartPageAccount,
-        new ViewDataDictionary()
+        "Registration/_AccountTopBar",
+        Model.RegistrationStartPageAccount,
+        new ViewDataDictionary
         {
-            { "ParticipationObject", participationObject },
-            { "IsDuringProfileSetup", true }
-                        }
-    );
+            {"ParticipationObject", participationObject},
+            {"IsDuringProfileSetup", true},
+        }
+        );
 }
 
 @{
     Html.RenderPartial
-    (
-        "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
-        new RegistrationHeaderViewModel(participationObject, true),
-        new ViewDataDictionary()
-        {
-            { "hidebuttons", true }
-                        }
-    );
+        (
+            "Registration/_RegistrationHeader",
+            new RegistrationHeaderViewModel(participationObject, true),
+            new ViewDataDictionary
+            {
+                {"hidebuttons", true},
+            }
+        );
 }
 
 <div>
@@ -37,16 +37,18 @@
         <div class="panel">
             <div class="panel-body">
                 <div class="text-center reg-instructions">
-                    <p><strong>Step 2 of 6: Home Address</strong></p>
+                    <p>
+                        <strong>Step 2 of 6: Home Address</strong>
+                    </p>
                 </div>
                 <div>
                     <div class="text-center reg-login">
-                        <p>Add your home address so that activity providers have it on file in case of an emergency.</p><br />
+                        <p>Add your home address so that activity providers have it on file in case of an emergency.</p><br/>
                     </div>
                     <form class="form-horizontal" id="add-home-address-form" method="post" autocomplete="off" action="@Url.Action("addhomeaddress", "account")">
-                        @foreach (var qvm in Model)
+                        @foreach (var qvm in Model.Questions)
                         {
-                            Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
+                            Html.RenderPartial("Form/_Question", qvm);
                         }
 
                         <div class="row padding-v-20">
@@ -81,14 +83,14 @@
 @if (participationObject.IsActivityGroup() && participationObject.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.Session)
 {
     Html.RenderPartial(
-        "~/Views/Shared/Registration/_BrowseCart.cshtml",
+        "Registration/_BrowseCart",
         participationObject,
-        new ViewDataDictionary()
+        new ViewDataDictionary
         {
-            { "IsDuringCheckout", true },
-            { "AllowToModifyCart", false }
-                                                        }
-    );
+            {"IsDuringCheckout", true},
+            {"AllowToModifyCart", false},
+        }
+        );
 }
 
 @section scripts{
