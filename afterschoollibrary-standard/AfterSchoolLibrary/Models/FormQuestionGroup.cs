@@ -255,10 +255,9 @@ namespace AfterSchoolLibrary.Models
 
         public List<FormQuestion> GetAllQuestions(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (ID.HasValue)
-                return FormQuestion.LoadByFormQuestionGroupIdByIsDeleted(ID.Value, false, msgs, dc).OrderBy(x => x.DisplayOrder).ToList();
-
-            return new List<FormQuestion>();
+            return ID.HasValue
+                ? FormQuestion.LoadByFormQuestionGroupIdByIsDeleted(ID.Value, false, msgs, dc).OrderBy(x => x.DisplayOrder).ToList()
+                : new List<FormQuestion>();
         }
 
         public List<FormQuestion> GetActiveQuestions(SystemMessages msgs = null, DatabaseConnection dc = null)

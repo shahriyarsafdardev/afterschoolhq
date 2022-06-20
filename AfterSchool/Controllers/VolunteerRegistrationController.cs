@@ -251,37 +251,30 @@ namespace AfterSchool.Controllers
         private List<FormQuestion> GatherAddHomeAddressQuestions(SystemMessages msgs, ParticipationObject participationObject)
         {
             var form = FormService.GetAdministratorAccountForm(msgs);
-            var homeAddressQuestionGroup = form.GetQuestionGroups(msgs)
-                .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.HomeAddress);
-            var questions = homeAddressQuestionGroup.GetAllQuestions(msgs);
-
-            var personalContactGroup = form.GetQuestionGroups(msgs)
-                .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
-            var questionsWithPersonalInfo = personalContactGroup.GetAllQuestions(msgs);
-            var allQuestionsWithPersonalInfo = questionsWithPersonalInfo.Where(question =>
-                    question.QuestionDataTypeId.In(new List<QuestionDataType>
-                    {
-                        QuestionDataType.RegistrantHomePhone,
-                        QuestionDataType.RegistrantWorkPhone,
-                        QuestionDataType.RegistrantParentRelationship,
-                        QuestionDataType.RegistrantEmployer,
-                    }))
-                .ToList();
-
-            questions.AddRange(allQuestionsWithPersonalInfo);
+            var questions = FormQuestion.LoadByFormIdByQuestionDataTypeIds(form.ID.Value, new[]
+            {
+                QuestionDataType.RegistrantAddress1,
+                QuestionDataType.RegistrantAddress2,
+                QuestionDataType.RegistrantCity,
+                QuestionDataType.RegistrantState,
+                QuestionDataType.RegistrantPostalCode,
+                QuestionDataType.RegistrantHomePhone,
+                QuestionDataType.RegistrantWorkPhone,
+                QuestionDataType.RegistrantEmployer,
+            });
 
             questions.ForEach(question =>
             {
                 switch (question.QuestionDataTypeId)
                 {
-                    case QuestionDataType.RegistrantAddress2:
-                    case QuestionDataType.RegistrantWorkPhone:
-                    case QuestionDataType.RegistrantHomePhone:
-                    case QuestionDataType.RegistrantEmployer:
-                        question.IsRequired = false;
+                    case QuestionDataType.RegistrantAddress1:
+                    case QuestionDataType.RegistrantCity:
+                    case QuestionDataType.RegistrantState:
+                    case QuestionDataType.RegistrantPostalCode:
+                        question.IsRequired = true;
                         break;
                     default:
-                        question.IsRequired = true;
+                        question.IsRequired = false;
                         break;
                 }
             });
