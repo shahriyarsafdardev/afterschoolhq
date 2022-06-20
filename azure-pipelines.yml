@@ -5,6 +5,7 @@ trigger:
   branches:
     include:
       - refs/heads/main
+pr: none # Disable triggering a build on every pull request.
 resources:
   repositories:
     - repository: self
