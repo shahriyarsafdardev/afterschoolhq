@@ -671,11 +671,20 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var questions = FormQuestionService.GetEmergencyContactQuestions(msgs);
+            var formQuestionViewModels = questions.Select(question => question.ToFormQuestionViewModel()).ToList();
 
-            ViewBag.Messages = msgs;
-            ViewBag.ParticipationObject = RegistrationCommon.GetParticipationObjectFromCart();
+            var result = GatherDataForAndAssembleAddEmergencyContactResult(formQuestionViewModels, msgs);
+            return View(result);
+        }
 
-            return View(questions.Select(question => question.ToFormQuestionViewModel()).ToList());
+        private static AddEmergencyContactResult GatherDataForAndAssembleAddEmergencyContactResult(List<FormQuestionViewModel> formQuestionViewModels,
+            SystemMessages msgs)
+        {
+            var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+            var registrationStartPageAccount = SessionVariables.RegistrationStartPageAccount;
+
+            var result = new AddEmergencyContactAssembler().AssembleAddEmergencyContactResult(formQuestionViewModels, participationObject, registrationStartPageAccount, msgs);
+            return result;
         }
 
         [HttpPost]
@@ -720,10 +729,8 @@ namespace AfterSchool.Controllers
             if (msgs.HasNoErrors())
                 return RedirectToAction("addstudent");
 
-            ViewBag.Messages = msgs;
-            ViewBag.ParticipationObject = RegistrationCommon.GetParticipationObjectFromCart();
-
-            return View(qvms);
+            var result = GatherDataForAndAssembleAddEmergencyContactResult(qvms, msgs);
+            return View(result);
         }
 
         #endregion

@@ -1,9 +1,9 @@
-﻿@model List<FormQuestionViewModel>
+﻿@model AfterSchool.Controllers.AddEmergencyContactResult
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = "Add Emergency Contacts";
-    var msgs = (SystemMessages)ViewBag.Messages;
-    var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
+    var msgs = (SystemMessages)Model.Messages;
+    var participationObject = (ParticipationObject)Model.ParticipationObject;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -11,7 +11,7 @@
 @{
     Html.RenderPartial(
         "~/Views/Shared/Registration/_AccountTopBar.cshtml",
-        SessionVariables.RegistrationStartPageAccount,
+        Model.RegistrationStartPageAccount,
         new ViewDataDictionary()
         {
             { "ParticipationObject", participationObject },
@@ -53,19 +53,19 @@
                     <form class="form-horizontal" id="emergency-contact-form" method="post" action="@Url.Action("addemergencycontacts", "account")">
 
                         <h4 class="col-md-9 col-md-offset-3 padding-v-20">Emergency Contact 1</h4>
-                        @foreach (var qvm in Model.Where(qvm => qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1))
+                        @foreach (var qvm in Model.Questions.Where(qvm => qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1))
                         {
                             Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
                         }
 
                         <h4 class="col-md-9 col-md-offset-3 padding-v-20">Emergency Contact 2 (optional)</h4>
-                        @foreach (var qvm in Model.Where(qvm => qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2))
+                        @foreach (var qvm in Model.Questions.Where(qvm => qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2))
                         {
                             Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
                         }
 
                         <h4 class="col-md-9 col-md-offset-3 padding-v-20">Emergency Contact 3 (optional)</h4>
-                        @foreach (var qvm in Model.Where(qvm => qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact3))
+                        @foreach (var qvm in Model.Questions.Where(qvm => qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact3))
                         {
                             Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
                         }

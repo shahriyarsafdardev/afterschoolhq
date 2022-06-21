@@ -630,6 +630,7 @@
     <Compile Include="Areas\WebHooks\Controllers\StripeController.cs" />
     <Compile Include="Areas\WebHooks\Controllers\TwilioController.cs" />
     <Compile Include="Areas\WebHooks\WebHooksAreaRegistration.cs" />
+    <Compile Include="Controllers\AddEmergencyContactAssembler.cs" />
     <Compile Include="Controllers\AddHomeAddressAssembler.cs" />
     <Compile Include="Controllers\GetStartedAssembler.cs" />
     <Compile Include="Controllers\RegistrationCommon.cs" />
@@ -2291,6 +2292,7 @@
     <Content Include="Views\Shared\_VolunteerFormRestrictions.cshtml" />
     <Content Include="Views\Shared\_VolunteerFormSchedule.cshtml" />
     <Content Include="Views\Shared\_VolunteerFormSetup.cshtml" />
+    <Content Include="Views\VolunteerRegistration\AddEmergencyContacts.cshtml" />
     <Content Include="Views\VolunteerRegistration\AddHomeAddress.cshtml" />
     <Content Include="Views\VolunteerRegistration\GetStarted.cshtml" />
     <Content Include="Views\VolunteerRegistration\Select.cshtml" />

@@ -353,13 +353,88 @@ namespace AfterSchool.Controllers
                 );
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("select");
+                return RedirectToAction("addEmergencyContacts");
 
             ViewBag.Messages = msgs;
             ViewBag.ParticipationObject = participationObject;
             var registrationStartPageAccount = SessionVariables.RegistrationStartPageAccount;
             var result = new AddHomeAddressAssembler().AssembleAddHomeAddressResult(qvms, participationObject, registrationStartPageAccount, msgs);
 
+            return View(result);
+        }
+
+        #endregion
+
+        #region AddEmergencyContacts
+
+        [HttpGet]
+        public ActionResult AddEmergencyContacts()
+        {
+            var results = CheckRedirect();
+            if (results.IsNotEmpty()) return results;
+
+            var msgs = new SystemMessages();
+            var questions = FormQuestionService.GetEmergencyContactQuestions(msgs);
+            var formQuestionViewModels = questions.Select(question => question.ToFormQuestionViewModel()).ToList();
+
+            var result = GatherDataForAndAssembleAddEmergencyContactResult(formQuestionViewModels, msgs);
+            return View(result);
+        }
+
+        private static AddEmergencyContactResult GatherDataForAndAssembleAddEmergencyContactResult(List<FormQuestionViewModel> formQuestionViewModels,
+            SystemMessages msgs)
+        {
+            var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+            var registrationStartPageAccount = SessionVariables.RegistrationStartPageAccount;
+
+            var result = new AddEmergencyContactAssembler().AssembleAddEmergencyContactResult(formQuestionViewModels, participationObject,
+                registrationStartPageAccount, msgs);
+            return result;
+        }
+
+        [HttpPost]
+        public ActionResult AddEmergencyContacts(string id)
+        {
+            var msgs = new SystemMessages();
+            var questions = FormQuestionService.GetEmergencyContactQuestions(msgs);
+            var parentRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
+
+            // validate emergency contact fields
+            FormQuestionService.ValidateFormQuestionForEmergencyContacts(
+                questions.Select(question => question.ToFormQuestionViewModelForService(Request.Params))
+                    .ToList(), msgs);
+
+            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+
+            if (msgs.HasNoErrors())
+                Database.ExecuteTransaction
+                (
+                    (amsgs, adc) =>
+                    {
+                        // mark parent profile as completed since they've went through all the steps
+                        parentRegistrant.SetProfileAsCompleted(SessionVariables.CurrentUser, amsgs, adc);
+
+                        // add answers to parent registrant record
+                        // will be used later to copy information over to student records
+                        qvms.ForEach(qvm =>
+                        {
+                            parentRegistrant.AddOrUpdateAnswer(
+                                qvm.Value.IfEmpty("").Trim(),
+                                qvm.Question,
+                                SessionVariables.CurrentUser,
+                                amsgs,
+                                adc);
+                        });
+                    },
+                    smsgs => msgs.AddRange(smsgs),
+                    fmsgs => msgs.AddRange(fmsgs),
+                    emsgs => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                );
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("select");
+
+            var result = GatherDataForAndAssembleAddEmergencyContactResult(qvms, msgs);
             return View(result);
         }
 

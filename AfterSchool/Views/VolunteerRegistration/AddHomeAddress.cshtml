@@ -45,7 +45,7 @@
                     <div class="text-center reg-login">
                         <p>Add your home address so that activity providers have it on file in case of an emergency.</p><br/>
                     </div>
-                    <form class="form-horizontal" id="add-home-address-form" method="post" autocomplete="off" action="@Url.Action("addhomeaddress", "account")">
+                    <form class="form-horizontal" id="add-home-address-form" method="post" autocomplete="off" action="@Url.Action("addhomeaddress", "VolunteerRegistration")">
                         @foreach (var qvm in Model.Questions)
                         {
                             Html.RenderPartial("Form/_Question", qvm);
