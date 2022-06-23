@@ -208,7 +208,7 @@ namespace AfterSchoolLibraryTests.Tests
             var accountOwner = WebUserFactory.Create(msgs, dc);
             var account = AccountFactory.Create(accountOwner, msgs, dc);
 
-            msgs.AddRange(account.SaveWithStripe(dc));            
+            msgs.AddRange(account.SaveWithStripe(StripeAccountType.ConnectAccount, dc));            
             
         }
 

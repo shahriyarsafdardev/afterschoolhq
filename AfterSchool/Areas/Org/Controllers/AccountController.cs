@@ -89,7 +89,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         a.LastModifiedDate = DateTime.UtcNow;
                         a.LastModifiedBy = SessionVariables.CurrentUser.ID;
-                        amsgs.AddRange(a.SaveWithStripe(adc));
+                        amsgs.AddRange(a.SaveWithStripe(StripeAccountType.SubscriberAccount, adc));
                     }
                 },
                 onSuccess: (SystemMessages smsgs) =>

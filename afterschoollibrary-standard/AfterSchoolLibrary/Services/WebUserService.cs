@@ -6,6 +6,7 @@ using System.Linq;
 using SendGrid.Helpers.Mail;
 using AfterSchoolLibrary.Models;
 using System.Collections;
+using AfterSchoolLibrary.Billing;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -572,6 +573,7 @@ namespace AfterSchoolLibrary.Services
                                     packageBillingPeriod: null,
                                     timeZone: null,
                                     createWithStripe: true,
+                                    stripeAccountType: StripeAccountType.ConnectAccount,
                                     loggedInUser: loggedInUser,
                                     isAfterSchool: isAfterSchool,
                                     msgs: amsgs,
@@ -857,7 +859,7 @@ namespace AfterSchoolLibrary.Services
                             account.SetDefaultAccountPackage(loggedInUser, amsgs, adc);
 
                         if (account.StripeCustomerId.IsEmpty())
-                            amsgs.AddRange(account.SaveWithStripe(dc));
+                            amsgs.AddRange(account.SaveWithStripe(StripeAccountType.SubscriberAccount, dc));
                     } 
                     else {
                         var awu = AccountWebUser.LoadByAccountIdByWebUserId(AccountId: account.ID.Value, WebUserId: user.ID.Value, msgs: amsgs, dc: adc);

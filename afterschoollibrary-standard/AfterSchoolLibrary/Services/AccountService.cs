@@ -1539,14 +1539,14 @@ namespace AfterSchoolLibrary.Services
                 StripeHelper.GetStripeHelperConnectAccount().DeauthorizeOAuthConnection(account.StripeUserId, msgs);
         }
 
-        public static SystemMessages SaveWithStripe(this Account account, DatabaseConnection dc = null)
+        public static SystemMessages SaveWithStripe(this Account account, StripeAccountType stripeAccountType, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
             msgs.AddRange(account.Save(dc: dc));
 
             if (msgs.HasNoErrors())
-                account.CreateStripeCustomer(StripeAccountType.SubscriberAccount, msgs, dc);
+                account.CreateStripeCustomer(stripeAccountType, msgs, dc);
 
             return msgs;
         }
@@ -2620,12 +2620,21 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc)
         {
             return CreateNew(orgName, email, phone, isActive, accountType, accountOwner, packageId,
-                packageBillingPeriod, timeZone, loggedInUser, isAfterSchool, createWithStripe, true, msgs, dc);
+                packageBillingPeriod, timeZone, loggedInUser, isAfterSchool, createWithStripe, StripeAccountType.SubscriberAccount, true, msgs, dc);
         }
 
         public static Account CreateNew(string orgName, string email, string phone, bool isActive,
             AccountType accountType, WebUser accountOwner, int? packageId, BillingPeriodType? packageBillingPeriod,
-            string timeZone, WebUser loggedInUser, bool isAfterSchool, bool createWithStripe, bool isClaimed,
+            string timeZone, WebUser loggedInUser, bool isAfterSchool, bool createWithStripe, StripeAccountType stripeAccountType, SystemMessages msgs,
+            DatabaseConnection dc)
+        {
+            return CreateNew(orgName, email, phone, isActive, accountType, accountOwner, packageId,
+                packageBillingPeriod, timeZone, loggedInUser, isAfterSchool, createWithStripe, stripeAccountType, true, msgs, dc);
+        }
+
+        public static Account CreateNew(string orgName, string email, string phone, bool isActive,
+            AccountType accountType, WebUser accountOwner, int? packageId, BillingPeriodType? packageBillingPeriod,
+            string timeZone, WebUser loggedInUser, bool isAfterSchool, bool createWithStripe, StripeAccountType stripeAccountType, bool isClaimed,
             SystemMessages msgs, DatabaseConnection dc)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -2659,7 +2668,7 @@ namespace AfterSchoolLibrary.Services
             };
 
             if (createWithStripe)
-                msgs.AddRange(account.SaveWithStripe(dc));
+                msgs.AddRange(account.SaveWithStripe(stripeAccountType, dc));
             else
                 msgs.AddRange(account.Save(dc));
 
@@ -2732,7 +2741,7 @@ namespace AfterSchoolLibrary.Services
             };
 
             if (createWithStripe)
-                msgs.AddRange(account.SaveWithStripe(dc));
+                msgs.AddRange(account.SaveWithStripe(StripeAccountType.SubscriberAccount, dc));
             else
                 msgs.AddRange(account.Save(dc));
 
