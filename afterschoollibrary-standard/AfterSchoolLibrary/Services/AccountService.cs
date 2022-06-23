@@ -4095,7 +4095,7 @@ namespace AfterSchoolLibrary.Services
         {
             submittedRecord.StartSubscriptionPlan(checkoutObject: checkoutObject, loggedInUser: loggedInUser,
                 msgs: msgs, dc: dc);
-
+            
             if (msgs.HasNoErrors())
                 CreatePurchase(checkoutObject, loggedInUser, msgs, dc);
         }
@@ -4125,7 +4125,7 @@ namespace AfterSchoolLibrary.Services
 
             submittedRecord.StartPaymentPlan(checkoutObject: checkoutObject, loggedInUser: loggedInUser, msgs: msgs,
                 dc: dc);
-
+            
             if (msgs.HasNoErrors())
                 CreatePurchase(checkoutObject, loggedInUser, msgs, dc);
         }
