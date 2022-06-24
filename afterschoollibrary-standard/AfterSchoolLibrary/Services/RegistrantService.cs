@@ -221,7 +221,7 @@ namespace AfterSchoolLibrary.Services
                 // create the subscription on the stripe account (could be added to main account or connected account)
                 if (isSubscriptionRequired)
                 {
-                    var subscription = new Billing.StripeHelper().CreateRegistrantSubscription(
+                    var subscription = StripeHelper.GetStripeHelperConnectAccount().CreateRegistrantSubscription(
                                     customerId: customer.Id,
                                     planId: plan.StripePlanId,
                                     isProrated: billingCycleAnchor.HasValue,
