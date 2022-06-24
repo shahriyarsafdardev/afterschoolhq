@@ -4037,7 +4037,7 @@ namespace AfterSchoolLibrary.Services
             );
         }
 
-        public static void CreatePurchaseTransactionPayment(CheckoutObject checkoutObject, WebUser loggedInUser,
+        public static Registrant CreatePurchase(CheckoutObject checkoutObject, WebUser loggedInUser,
             SystemMessages msgs, DatabaseConnection dc = null)
         {
             Registrant registrant = null;
@@ -4050,6 +4050,14 @@ namespace AfterSchoolLibrary.Services
                 // need to check for existing purchase or create a new one
                 checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
             }
+
+            return registrant;
+        }
+
+        public static void CreatePurchaseTransactionPayment(CheckoutObject checkoutObject, WebUser loggedInUser,
+            SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var registrant = CreatePurchase(checkoutObject, loggedInUser, msgs, dc);
 
             // charge successful so I need to create a transaction
             var transaction = AddTransaction(
@@ -4066,7 +4074,7 @@ namespace AfterSchoolLibrary.Services
                 registrant.ProcessActivityPayment(checkoutObject, transaction, loggedInUser, msgs, dc);
 
                 // if successful payment and reserved pending payment then it should be reserved
-                // TODO: Needs review!!
+                // TODO: Needs review!! 
                 if (msgs.HasNoErrors())
                 {
                     var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
@@ -4124,7 +4132,7 @@ namespace AfterSchoolLibrary.Services
                 msgs: msgs, dc: dc);
 
             if (msgs.HasNoErrors())
-                CreatePurchaseTransactionPayment(checkoutObject, loggedInUser, msgs, dc);
+                CreatePurchase(checkoutObject, loggedInUser, msgs, dc);
         }
 
         public static void ProcessPaymentPlan(CheckoutObject checkoutObject, Registrant submittedRecord,
@@ -4154,7 +4162,7 @@ namespace AfterSchoolLibrary.Services
                 dc: dc);
 
             if (msgs.HasNoErrors())
-                CreatePurchaseTransactionPayment(checkoutObject, loggedInUser, msgs, dc);
+                CreatePurchase(checkoutObject, loggedInUser, msgs, dc);
         }
 
         public static void ProcessStudentRegistration(CheckoutObject checkoutObject, bool sendConfirmationEmail,
