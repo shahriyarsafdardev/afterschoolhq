@@ -394,24 +394,14 @@ namespace AfterSchoolLibrary.Services
         {
             DateTime? billingCycleAnchor = null;
 
-            if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
+            // ongoing activity
+            //.. If first day of month, don't set anchor so no pro rate
+            if (plan.PlanTypeId == SubscriptionPlanType.Subscription && participationObject.Schedule.IsEmpty() && DateTime.UtcNow.Date != DateTime.Now.FirstDateOfMonth().Date)
             {
-                //.. Ongoing activity
-                if (participationObject.Schedule.IsEmpty())
-                {
-                    //.. If first day of month, don't set anchor so no pro rate
-                    if (DateTime.UtcNow.Date != DateTime.Now.FirstDateOfMonth().Date)
-                    {
-                        if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
-                            billingCycleAnchor = startDateTime.LastDateOfMonth().AddDays(1);
-                        else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
-                            billingCycleAnchor = startDateTime.LastDateOfWeek().AddDays(1);
-                    }
-                }
-                else if (startDateTime < DateTime.UtcNow)
-                {
-                    billingCycleAnchor = null; // ..else start billing immediately (stripe defaults to now + trial days)  
-                }
+                if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
+                    billingCycleAnchor = startDateTime.LastDateOfMonth().AddDays(1);
+                else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
+                    billingCycleAnchor = startDateTime.LastDateOfWeek().AddDays(1);
             }
 
             return billingCycleAnchor;
