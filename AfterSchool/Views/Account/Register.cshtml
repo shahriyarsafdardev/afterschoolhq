@@ -1,16 +1,15 @@
-﻿@model ParticipationObject
+﻿@model AfterSchool.Controllers.RegisterResult
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = "Complete Registration";
-    var msgs = (SystemMessages)ViewBag.Messages;
-    var cart = (Cart)ViewBag.Cart;
-    var qvms = (List<FormQuestionViewModel>)ViewBag.QuestionViewModels;
-    var registrant = (Registrant)ViewBag.Registrant;
+    var msgs = Model.Messages;
+    var qvms = Model.Questions;
+    var registrant = Model.Registrant;
     var groups = qvms.Select(qvm => qvm.Question.ToFormQuestionGroup())
         .OrderBy(group => group.DisplayOrder)
         .DistinctBy(group => group.ID)
         .ToList();
-    var sessionActivities = (List<ParticipationObject>)ViewBag.SessionActivities;
+    var sessionActivities = Model.SessionActivities;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -18,11 +17,11 @@
 @{
     Html.RenderPartial(
         "~/Views/Shared/Registration/_AccountTopBar.cshtml",
-        SessionVariables.RegistrationStartPageAccount,
-        new ViewDataDictionary()
+        Model.RegistrationStartPageAccount,
+        new ViewDataDictionary
         {
-            { "ParticipationObject", Model }
-                        }
+            { "ParticipationObject", Model.ParticipationObject },
+        }
     );
 }
 
@@ -30,8 +29,8 @@
     Html.RenderPartial
     (
         "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
-        new RegistrationHeaderViewModel(Model, $"Registering <strong>{SessionVariables.CurrentRegistrant.FirstName}</strong> for <strong>{Model.Name}</strong>", ""),
-        new ViewDataDictionary()
+        new RegistrationHeaderViewModel(Model.ParticipationObject, $"Registering <strong>{registrant.FirstName}</strong> for <strong>{Model.ParticipationObject.Name}</strong>", ""),
+        new ViewDataDictionary
         {
             { "hidebuttons", true }
         }
@@ -54,7 +53,7 @@
                         Html.RenderPartial(
                             "~/Views/Shared/Form/_Group.cshtml",
                             group,
-                            new ViewDataDictionary() { { "QuestionViewModels", qvms.Where(qvm => qvm.Question.FormQuestionGroupId == group.ID).ToList() } });
+                            new ViewDataDictionary { { "QuestionViewModels", qvms.Where(qvm => qvm.Question.FormQuestionGroupId == group.ID).ToList() } });
                     }
 
                     @if (sessionActivities.IsNotEmpty() && sessionActivities.Any())
@@ -77,11 +76,11 @@
                     <div class="row padding-v-20">
                         <div class="col-md-6 col-md-offset-3">
                             <button type="submit" id="btn-register" class="btn btn-register-primary btn-lg">
-                                @if (!Model.ShouldParentPay())
+                                @if (!Model.ParticipationObject.ShouldParentPay())
                                 {
                                     @: Complete Registration &raquo;
                                 }
-                                else if (Model.PostPayPlans.Any())
+                                else if (Model.ParticipationObject.PostPayPlans.Any())
                                 {
                                     @: E-Sign &amp; Add Payment Method &raquo;
                                 }
@@ -106,7 +105,7 @@
     </div>
 </div>
 
-@{ Html.RenderPartial("~/Views/Shared/Registration/_GradeIneligibility.cshtml", Model); }
+@{ Html.RenderPartial("~/Views/Shared/Registration/_GradeIneligibility.cshtml", Model.ParticipationObject); }
 
 <script>
     PageEvent.add(PageEvent.AFTER_INIT, function () {
@@ -119,14 +118,14 @@
     });
 </script>
 
-@if (Model.IsActivityGroup() && Model.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.Session)
+@if (Model.ParticipationObject.IsActivityGroup() && Model.ParticipationObject.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.Session)
 {
     Html.RenderPartial(
         "~/Views/Shared/Registration/_BrowseCart.cshtml",
-        Model,
-        new ViewDataDictionary()
+        Model.ParticipationObject,
+        new ViewDataDictionary
         {
             { "IsDuringCheckout", true }
-                                }
+        }
     );
 }

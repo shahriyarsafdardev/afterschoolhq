@@ -183,7 +183,7 @@
                         @if (CanView(FeatureType.ManageVolunteerOpportunities, SessionVariables.AccountUserType, PermissionType.VolunteerOpportunitiesView))
                         {
                             <li>
-                                <a href="@Url.Action("index", "activity", new {type = (int) ActivityType.VolunteerOpportunity})">
+                                <a data-test="volunteer-opportunities" href="@Url.Action("index", "activity", new {type = (int) ActivityType.VolunteerOpportunity})">
                                     <i class="icon s7-smile"></i> @UILabel.ActivityLabel(ActivityType.VolunteerOpportunity, true)
                                 </a>
                             </li>

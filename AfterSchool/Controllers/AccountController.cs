@@ -106,7 +106,7 @@ namespace AfterSchool.Controllers
 
                         if (amsgs.HasNoErrors()) RegistrationCommon.AddOrUpdateStandardAnswers(qvms, submittedContact, null, amsgs, adc);
 
-                        if (amsgs.HasNoErrors()) AddCustomQuestions(qvms, submittedContact, null, null, amsgs, adc);
+                        if (amsgs.HasNoErrors()) RegistrationCommon.AddCustomQuestions(qvms, submittedContact, null, null, Request, amsgs, adc);
                     },
                     smsgs =>
                     {
@@ -683,7 +683,8 @@ namespace AfterSchool.Controllers
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
             var registrationStartPageAccount = SessionVariables.RegistrationStartPageAccount;
 
-            var result = new AddEmergencyContactAssembler().AssembleAddEmergencyContactResult(formQuestionViewModels, participationObject, registrationStartPageAccount, msgs);
+            var result = new AddEmergencyContactAssembler().AssembleAddEmergencyContactResult(formQuestionViewModels, participationObject,
+                registrationStartPageAccount, msgs);
             return result;
         }
 
@@ -1543,6 +1544,9 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult Select()
         {
+            if (!RegistrationCommon.IsValidLogin())
+                return Logout(Request.Url.ToString(), true);
+            
             var results = CheckRedirect(true);
             if (results.IsNotEmpty()) return Redirect(results);
 
@@ -1575,7 +1579,7 @@ namespace AfterSchool.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.ParticipationObject = RegistrationCommon.GetParticipationObjectFromCart();
-            ViewBag.SelectedDates = GetSelectedDatesFromCart();
+            ViewBag.SelectedDates = RegistrationCommon.GetSelectedDatesFromCart();
 
             return View(students);
         }
@@ -1594,60 +1598,32 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult SetStudent(string id)
         {
-            return HandleIsLoggedIn() ?? SetStudentAction(id);
+            if (!RegistrationCommon.IsValidLogin())
+                return Logout(Request.Url.ToString(), true);
+
+            return SetStudentAction(id);
         }
 
         #endregion
 
         #region Register
 
-        private List<FormQuestion> RegisterViewBag(ParticipationObject participationObject, SystemMessages msgs)
+        [HttpGet]
+        public ActionResult Register()
         {
-            var allQuestions = participationObject.Form.GetActiveQuestions(msgs).ToList();
+            if (!RegistrationCommon.IsValidLogin())
+                return Logout(Request.Url.ToString(), true);
 
-            var requiredQuestions = allQuestions
-                .Where(question => question.IsRequired &&
-                                   question.FormQuestionGroupRegistrantTypeId == RegistrantType.Individual &&
-                                   question.QuestionDataTypeId != QuestionDataType.NotSet)
-                .ToList();
-
-            var answers = SessionVariables.CurrentRegistrant.GetAnswers(msgs);
-
-            var questions = requiredQuestions.Where(question =>
-                    answers.FirstOrDefault(answer => answer.QuestionDataTypeId == question.QuestionDataTypeId)
-                        .IsEmpty() ||
-                    answers.FirstOrDefault(answer => answer.QuestionDataTypeId == question.QuestionDataTypeId).Text
-                        .IsBlank()
-                )
-                .Distinct()
-                .ToList();
-
-            questions.AddRange(allQuestions
-                .Where(question => !question.IsDeleted && question.QuestionDataTypeId == QuestionDataType.NotSet)
-                .Where(question => answers.Find(answer => answer.FormQuestionId == question.ID).IsEmpty())
-                .OrderBy(question => question.DisplayOrder)
-            );
-
-            ViewBag.Registrant = SessionVariables.CurrentRegistrant;
-            ViewBag.QuestionViewModels = questions.Select(question => question.ToFormQuestionViewModel()).ToList();
-
-            return questions;
-        }
-
-        private ActionResult RegisterActionGet()
-        {
             var results = CheckRedirect(true);
             if (results.IsNotEmpty()) return Redirect(results);
 
             var msgs = new SystemMessages();
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
-            var selectedDates = GetSelectedDatesFromCart();
             var currentRegistrant = SessionVariables.CurrentRegistrant;
             var parentOrGuardian = currentRegistrant.GetParentOrGuardian(msgs);
             var (submittedRecord, registration) = currentRegistrant.GetSubmittedRecord(participationObject, msgs);
 
-            if (!parentOrGuardian.IsProfileCompleted &&
-                parentOrGuardian.GetOwner(msgs).ID == SessionVariables.CurrentUser.ID)
+            if (!parentOrGuardian.IsProfileCompleted && parentOrGuardian.GetOwner(msgs).ID == SessionVariables.CurrentUser.ID)
                 return RedirectToAction("editpersonal", "family",
                     new
                     {
@@ -1663,79 +1639,69 @@ namespace AfterSchool.Controllers
                         student = currentRegistrant?.Uid, returnUrl = Url.Action("select", "account"),
                     });
 
-            // check grade eligibility (extra check)
-            if (!participationObject.IsStudentGradeInRange(currentRegistrant, msgs))
+            if (!participationObject.IsStudentGradeInRange(currentRegistrant, msgs) ||
+                IsCurrentRegistrantAlreadyRegistered(submittedRecord, registration, participationObject, msgs))
                 return RedirectToAction("select");
 
-            // current registrant is already registered
-            var needsToRegister =
-                submittedRecord.NeedsToRegister(registration, participationObject, selectedDates, msgs);
-            if (!needsToRegister && !participationObject.IsSession())
-                return RedirectToAction("select");
+            var questions = RegistrationCommon.GetQuestionsRequiredForActivityThatHaveNotYetBeenCollected(participationObject, currentRegistrant, msgs);
 
-            // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
-            var questions = RegisterViewBag(participationObject, msgs);
-
-            // if there are no additional questions to answer, 
-            // if it doesn't require parental consent, 
-            // the registration has already been started (by the child)
-            // and it's not a session (parents can edit registrations for sessions)
+            // Participation object must not be a session because parents can edit registrations for sessions.
             var gotoPayment = !questions.Any() && !participationObject.RequiresParentalConsent &&
                               registration.IsNotEmpty() && !participationObject.IsSession();
 
             if (gotoPayment)
-            {
-                if (participationObject.ShouldParentPay())
-                    return RedirectToAction("payment", new {id = registration.Uid});
+                return participationObject.ShouldParentPay()
+                    ? RedirectToAction("payment", new {id = registration.Uid})
+                    : RedirectToAction("finalizeregistration", new {id = registration.Uid});
 
-                return RedirectToAction("finalizeregistration", new {id = registration.Uid});
-            }
-
-            LoadSessionActivitiesViewBag(participationObject, registration, msgs);
-            ViewBag.Messages = msgs;
-
-            return View(participationObject);
+            var result = GatherDataForAndAssembleRegisterResult(participationObject, registration, msgs, questions, currentRegistrant);
+            return View(result);
         }
 
-        [HttpGet]
-        public ActionResult Register()
+        private RegisterResult GatherDataForAndAssembleRegisterResult(ParticipationObject participationObject, Registration registration, SystemMessages msgs,
+            List<FormQuestionViewModel> questions, Registrant currentRegistrant)
         {
-            return HandleIsLoggedIn() ?? RegisterActionGet();
+            var sessionActivities = CheckForSessionAndLoadSessionActivities(participationObject, registration, msgs);
+            var registrationStartPageAccount = SessionVariables.RegistrationStartPageAccount;
+            return new RegisterAssembler().AssembleRegisterResult(questions, participationObject, registrationStartPageAccount, currentRegistrant,
+                sessionActivities, msgs);
         }
 
-        private ActionResult RegisterStudentByParent(string signature)
+        private bool IsCurrentRegistrantAlreadyRegistered(Registrant submittedRecord, Registration registration, ParticipationObject participationObject,
+            SystemMessages msgs)
         {
-            var msgs = new SystemMessages();
-            var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
-
-            // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
-            var questions = RegisterStudentViewBag(participationObject, msgs);
-            ValidateRegisterStudentQuestions(questions, msgs);
-
-            if (signature.IsEmpty())
-                msgs.Add("E-signature is required", MessageType.UserError);
-
-            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
-            var registration = CreateRegistration(participationObject, qvms, signature, msgs);
-
-            if (msgs.HasNoErrors())
-            {
-                if (!participationObject.ShouldParentPay())
-                    return RedirectToAction("finalizeregistration", new {id = registration.Uid});
-
-                return RedirectToAction("payment", new {id = registration.Uid});
-            }
-
-            LoadSessionActivitiesViewBag(participationObject, registration, msgs);
-            ViewBag.Messages = msgs;
-
-            return View(participationObject);
+            var selectedDates = RegistrationCommon.GetSelectedDatesFromCart();
+            var needsToRegister = submittedRecord.NeedsToRegister(registration, participationObject, selectedDates, msgs);
+            return !needsToRegister && !participationObject.IsSession();
         }
 
         [HttpPost]
         public ActionResult Register(string signature)
         {
-            return HandleIsLoggedIn() ?? RegisterStudentByParent(signature);
+            if (!RegistrationCommon.IsValidLogin())
+                return Logout(Request.Url.ToString(), true);
+
+            var msgs = new SystemMessages();
+            var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+
+            // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
+            var questions = RegistrationCommon.GetActiveCustomQuestionsThatHaveNotYetBeenAnswered(participationObject, msgs);
+            RegistrationCommon.ValidateRegisterStudentQuestions(questions, msgs, Request);
+
+            if (signature.IsEmpty())
+                msgs.Add("E-signature is required", MessageType.UserError);
+
+            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+            var registration = RegistrationCommon.CreateRegistration(participationObject, qvms, signature, Request, msgs);
+
+            if (msgs.HasNoErrors())
+                return participationObject.ShouldParentPay()
+                    ? RedirectToAction("payment", new {id = registration.Uid})
+                    : RedirectToAction("finalizeregistration", new {id = registration.Uid});
+
+            var currentRegistrant = SessionVariables.CurrentRegistrant;
+            var result = GatherDataForAndAssembleRegisterResult(participationObject, registration, msgs, qvms, currentRegistrant);
+            return View(result);
         }
 
         private ActionResult FinalizeRegistrationGet(string registrationUid)
@@ -1762,7 +1728,7 @@ namespace AfterSchool.Controllers
 
             var currentRegistrant = SessionVariables.CurrentRegistrant;
             var currentAccount = SessionVariables.CurrentAccount;
-            var selectedDates = GetSelectedDatesFromCart();
+            var selectedDates = RegistrationCommon.GetSelectedDatesFromCart();
             var datesToRemove = new List<DateTime>();
 
             selectedDates?.ForEach(date =>
@@ -1799,7 +1765,10 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult FinalizeRegistration(string id)
         {
-            return HandleIsLoggedIn() ?? FinalizeRegistrationGet(id);
+            if (!RegistrationCommon.IsValidLogin())
+                return Logout(Request.Url.ToString(), true);
+
+            return FinalizeRegistrationGet(id);
         }
 
         [HttpGet]
@@ -1837,7 +1806,7 @@ namespace AfterSchool.Controllers
             ViewBag.ParticipationObject = participationObject;
             ViewBag.Messages = msgs;
             ViewBag.AccountCanAcceptPayments = participationObject.PaymentAccount.CanProcessPayments(msgs);
-            ViewBag.SelectedDates = GetSelectedDatesFromCart();
+            ViewBag.SelectedDates = RegistrationCommon.GetSelectedDatesFromCart();
 
             return registration;
         }
@@ -1849,7 +1818,7 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
-            var selectedDates = GetSelectedDatesFromCart();
+            var selectedDates = RegistrationCommon.GetSelectedDatesFromCart();
             var currentRegistrant = SessionVariables.CurrentRegistrant;
 
             PaymentViewBag(id, participationObject, msgs);
@@ -1878,7 +1847,10 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult Payment(string id)
         {
-            return HandleIsLoggedIn() ?? PaymentActionGet(id);
+            if (!RegistrationCommon.IsValidLogin())
+                return Logout(Request.Url.ToString(), true);
+
+            return PaymentActionGet(id);
         }
 
         private ActionResult PaymentActionPost(string id, string stripetoken, string plaidtoken, string plaidaccountid,
@@ -1888,10 +1860,9 @@ namespace AfterSchool.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
-            var selectedDates = GetSelectedDatesFromCart();
+            var selectedDates = RegistrationCommon.GetSelectedDatesFromCart();
             var coupon = new Coupon();
             var currentRegistrant = SessionVariables.CurrentRegistrant;
-            CheckoutObject checkoutObject = null;
 
             if (couponCode.IsNotEmpty())
                 coupon = SessionVariables.CurrentAccount.ValidateCoupon(participationObject, couponCode, msgs);
@@ -1964,7 +1935,7 @@ namespace AfterSchool.Controllers
 
                 datesToRemove.ForEach(date => selectedDates.Remove(date));
 
-                checkoutObject = AccountService.ProcessRegistrationWithPayment(
+                var checkoutObject = AccountService.ProcessRegistrationWithPayment(
                     new CheckoutObject
                     {
                         Coupon = coupon,
@@ -1993,7 +1964,7 @@ namespace AfterSchool.Controllers
                 if (msgs.HasNoErrors())
                 {
                     var activity = participationObject.GetActivity();
-                    var phrase = "";
+                    string phrase;
 
                     if (participationObject.SubscriptionPlans.IsNotEmpty() &&
                         participationObject.SubscriptionPlans.Count > 0)
@@ -2037,8 +2008,10 @@ namespace AfterSchool.Controllers
         public ActionResult Payment(string id, string ccsource, string banksource, string stripetoken,
             string plaidtoken, string plaidaccountid, string savepaymentinfo, string paymentoption, string coupon)
         {
-            return HandleIsLoggedIn() ?? PaymentActionPost(id, stripetoken, plaidtoken, plaidaccountid, ccsource,
-                banksource, savepaymentinfo, paymentoption, coupon);
+            if (!RegistrationCommon.IsValidLogin())
+                return Logout(Request.Url.ToString(), true);
+
+            return PaymentActionPost(id, stripetoken, plaidtoken, plaidaccountid, ccsource, banksource, savepaymentinfo, paymentoption, coupon);
         }
 
         private ActionResult MakePaymentActionGet(string id)
@@ -2078,7 +2051,10 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult MakePayment(string id)
         {
-            return HandleIsLoggedIn() ?? MakePaymentActionGet(id);
+            if (!RegistrationCommon.IsValidLogin())
+                return Logout(Request.Url.ToString(), true);
+
+            return MakePaymentActionGet(id);
         }
 
         [HttpPost]
@@ -2185,41 +2161,25 @@ namespace AfterSchool.Controllers
 
         #region ThankYou
 
-        private void ThankYouViewBag(string registrationUid, SystemMessages msgs)
-        {
-            ResetRegistrationSession();
-
-            var registration = Registration.LoadByUid(registrationUid.ToGuid(), msgs);
-            var registrant = registration.GetRegistrant(msgs);
-            var masterRegistrant = registrant.GetMasterRegistrant(msgs);
-            var (participationObject, assignmentType) = GetParticipationObjectFromRegistration(registration, msgs);
-            var account = SessionVariables.RegistrationStartPageAccount ?? participationObject.OwnerAccount;
-            var currentUser = SessionVariables.CurrentUser;
-
-            ViewBag.Registration = registration;
-            ViewBag.Account = account;
-            ViewBag.IsSelfRegistered = masterRegistrant.WebUserId == currentUser.ID;
-            ViewBag.Registrant = masterRegistrant;
-            ViewBag.Messages = msgs;
-            ViewBag.ParticipationObject = participationObject;
-            ViewBag.AssignmentType = assignmentType;
-            ViewBag.Profile = account.GetAccountProfile();
-            ViewBag.CurrentUser = currentUser;
-        }
-
-        private ActionResult ThankYouActionGet(string registrationUid)
-        {
-            var msgs = new SystemMessages();
-
-            ThankYouViewBag(registrationUid, msgs);
-
-            return View();
-        }
-
         [HttpGet]
         public ActionResult ThankYou(string id)
         {
-            return HandleIsLoggedIn() ?? ThankYouActionGet(id);
+            if (!RegistrationCommon.IsValidLogin())
+                return Logout(Request.Url.ToString(), true);
+
+            var msgs = new SystemMessages();
+
+            RegistrationCommon.ResetRegistrationSession();
+
+            var registration = Registration.LoadByUid(id.ToGuid(), msgs);
+            var (participationObject, assignmentType) = RegistrationCommon.GetParticipationObjectFromRegistration(registration, msgs);
+            var account = SessionVariables.RegistrationStartPageAccount ?? participationObject.OwnerAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var registrant = registration.GetRegistrant(msgs);
+            var masterRegistrant = registrant.GetMasterRegistrant(msgs);
+            var isSelfRegistered = masterRegistrant.WebUserId == currentUser.ID;
+            var result = new ThankYouResultAssembler().AssembleThankYouResult(participationObject, account, currentUser, registrant, isSelfRegistered, assignmentType, msgs);
+            return View(result);
         }
 
         private ActionResult PaymentThankYouActionGet(string accountUid)
@@ -2235,7 +2195,10 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult PaymentThankYou(string id)
         {
-            return HandleIsLoggedIn() ?? PaymentThankYouActionGet(id);
+            if (!RegistrationCommon.IsValidLogin())
+                return Logout(Request.Url.ToString(), true);
+
+            return PaymentThankYouActionGet(id);
         }
 
         #endregion
@@ -2557,42 +2520,6 @@ namespace AfterSchool.Controllers
 
         #region RegisterStudent
 
-        private List<FormQuestion> RegisterStudentViewBag(ParticipationObject participationObject, SystemMessages msgs)
-        {
-            var allQuestions = participationObject.Form.GetActiveQuestions(msgs).ToList();
-            var answers = SessionVariables.CurrentRegistrant.GetAnswers(msgs);
-            var questions = allQuestions
-                .Where(question => !question.IsDeleted && question.QuestionDataTypeId == QuestionDataType.NotSet &&
-                                   answers.Find(answer => answer.FormQuestionId == question.ID).IsEmpty())
-                .OrderBy(question => question.DisplayOrder)
-                .ToList();
-
-            ViewBag.Registrant = SessionVariables.CurrentRegistrant;
-            ViewBag.QuestionViewModels = questions.Select(question => question.ToFormQuestionViewModel()).ToList();
-            return questions;
-        }
-
-        private void ValidateRegisterStudentQuestions(List<FormQuestion> questions, SystemMessages msgs)
-        {
-            questions.ForEach(question =>
-            {
-                if (question.IsRequired)
-                {
-                    var populated = true;
-
-                    if (question.QuestionTypeId == QuestionType.FileUpload &&
-                        Request.Files[question.ToFormQuestionViewModel().Name].IsEmpty())
-                        populated = false;
-                    else if (question.QuestionTypeId != QuestionType.FileUpload &&
-                             Request[question.ToFormQuestionViewModel().Name].IsEmpty())
-                        populated = false;
-
-                    if (!populated)
-                        msgs.Add($"{question.Text} is required", MessageType.UserError);
-                }
-            });
-        }
-
         [HttpGet]
         public ActionResult RegisterStudent()
         {
@@ -2609,7 +2536,9 @@ namespace AfterSchool.Controllers
             LoadSessionActivitiesViewBag(participationObject, registration, msgs);
 
             // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
-            RegisterStudentViewBag(participationObject, msgs);
+            var questions = RegistrationCommon.GetActiveCustomQuestionsThatHaveNotYetBeenAnswered(participationObject, msgs);
+            ViewBag.Registrant = SessionVariables.CurrentRegistrant;
+            ViewBag.QuestionViewModels = questions.Select(question => question.ToFormQuestionViewModel()).ToList();
 
             ViewBag.AlreadyRegistered = submittedRecord.IsNotEmpty();
             ViewBag.Messages = msgs;
@@ -2623,8 +2552,10 @@ namespace AfterSchool.Controllers
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
 
             // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
-            var questions = RegisterStudentViewBag(participationObject, msgs);
-            ValidateRegisterStudentQuestions(questions, msgs);
+            var questions = RegistrationCommon.GetActiveCustomQuestionsThatHaveNotYetBeenAnswered(participationObject, msgs);
+            ViewBag.Registrant = SessionVariables.CurrentRegistrant;
+            ViewBag.QuestionViewModels = questions.Select(question => question.ToFormQuestionViewModel()).ToList();
+            RegistrationCommon.ValidateRegisterStudentQuestions(questions, msgs, Request);
 
             if (agree.IsEmpty()) msgs.Add("Must agree that you intend to participate", MessageType.UserError);
 
@@ -2678,23 +2609,21 @@ namespace AfterSchool.Controllers
                             adc);
 
                         if (qvms.IsNotEmpty())
-                            AddCustomQuestions(
+                            RegistrationCommon.AddCustomQuestions(
                                 qvms,
                                 submittedRecord,
                                 registration,
-                                currentUser,
-                                amsgs,
-                                adc);
+                                currentUser, Request,
+                                amsgs, adc);
 
 
                         if (amsgs.HasNoErrors() && participationObject.IsSession())
-                            AddSessionActivitiesToRegistration(
+                            RegistrationCommon.AddSessionActivitiesToRegistration(
                                 participationObject,
                                 registration,
                                 submittedRecord,
-                                period,
-                                amsgs,
-                                adc);
+                                period, Request,
+                                amsgs, adc);
                     },
                     smsgs => msgs.AddRange(smsgs),
                     fmsgs => msgs.AddRange(fmsgs),
@@ -2771,12 +2700,12 @@ namespace AfterSchool.Controllers
 
         private void RegistrationCompleteViewBag(string registrationUid, SystemMessages msgs)
         {
-            ResetRegistrationSession();
+            RegistrationCommon.ResetRegistrationSession();
 
             var registration = Registration.LoadByUid(registrationUid.ToGuid(), msgs);
             var registrant = registration.GetRegistrant(msgs);
             var masterRegistrant = registrant.GetMasterRegistrant(msgs);
-            var (participationObject, assignmentType) = GetParticipationObjectFromRegistration(registration, msgs);
+            var (participationObject, assignmentType) = RegistrationCommon.GetParticipationObjectFromRegistration(registration, msgs);
 
             ViewBag.Registrant = masterRegistrant;
             ViewBag.Messages = msgs;
@@ -2796,90 +2725,15 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult RegistrationComplete(string id)
         {
-            return HandleIsLoggedIn() ?? RegistrationCompleteActionGet(id);
+            if (!RegistrationCommon.IsValidLogin())
+                return Logout(Request.Url.ToString(), true);
+
+            return RegistrationCompleteActionGet(id);
         }
 
         #endregion
 
         #region Helpers
-
-        private Registration CreateRegistration(ParticipationObject participationObject,
-            List<FormQuestionViewModel> qvms, string signature, SystemMessages msgs = null)
-        {
-            Registration registration = null;
-            RegistrationPeriod period = null;
-            Registrant submittedRecord = null;
-            var currentAccount = SessionVariables.CurrentAccount;
-            var currentRegistrant = SessionVariables.CurrentRegistrant;
-            var currentUser = SessionVariables.CurrentUser;
-
-            (submittedRecord, registration) = currentRegistrant.GetSubmittedRecord(participationObject, msgs);
-
-            if (msgs.HasNoErrors())
-                Database.ExecuteTransaction
-                (
-                    (amsgs, adc) =>
-                    {
-                        period = participationObject.GetCurrentRegistrationPeriod(amsgs, adc);
-
-                        if (qvms.IsNotEmpty())
-                            RegistrationCommon.AddOrUpdateStandardAnswers(
-                                qvms,
-                                currentRegistrant,
-                                currentUser,
-                                amsgs,
-                                adc);
-
-                        SubmitRecord(
-                            ref registration,
-                            ref submittedRecord,
-                            currentRegistrant,
-                            participationObject,
-                            currentUser,
-                            period,
-                            signature,
-                            amsgs,
-                            adc);
-
-                        if (qvms.IsNotEmpty())
-                            AddCustomQuestions(
-                                qvms,
-                                submittedRecord,
-                                registration,
-                                currentUser,
-                                amsgs,
-                                adc);
-
-                        if (amsgs.HasNoErrors() && participationObject.IsSession())
-                            AddSessionActivitiesToRegistration(
-                                participationObject,
-                                registration,
-                                submittedRecord,
-                                period,
-                                amsgs,
-                                adc);
-                    },
-                    smsgs => msgs.AddRange(smsgs),
-                    fmsgs => msgs.AddRange(fmsgs),
-                    emsgs => Utilities.SystemErrorLog(emsgs)
-                );
-
-            if (msgs.HasNoErrors())
-                // LOG: Someone Registered RegistrantName for ParticipationObjectType ParticipationObjectName
-                SessionVariables.WebSession.LogActivity(
-                    currentAccount,
-                    currentUser,
-                    WebSessionActionType.Registered,
-                    ObjectType.Registrant,
-                    objectId: currentRegistrant.ID.Value,
-                    objectText: currentRegistrant.FullName,
-                    indirectObjectType: participationObject.GetWebSessionObjectType(),
-                    indirectObjectId: participationObject.ObjectID.Value,
-                    indirectObjectText: participationObject.Name
-                );
-
-            return registration;
-        }
 
         public string CheckRedirect(bool checkForEmptyCart = false)
         {
@@ -2909,247 +2763,21 @@ namespace AfterSchool.Controllers
             return null;
         }
 
-
-        public string GetUserHostAddress()
-        {
-            if (Request.ServerVariables["HTTP_X_FORWARDED_FOR"].IsNotEmpty())
-                return Request.ServerVariables["HTTP_X_FORWARDED_FOR"].Split(',')[0];
-
-            return Request.ServerVariables["REMOTE_ADDR"];
-        }
-
-        private void SubmitRecord(ref Registration registration, ref Registrant submittedRecord,
-            Registrant currentRegistrant, ParticipationObject participationObject, WebUser currentUser,
-            RegistrationPeriod period, string signature, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            // account gets copy / snapshot of master registrant record
-            // required in order to make sure registration data doesn't change as registrant changes information in master record.
-            if (submittedRecord.IsEmpty())
-            {
-                submittedRecord = currentRegistrant.SubmitRecordToAccount(
-                    participationObject.OwnerAccount,
-                    currentUser,
-                    msgs,
-                    dc);
-
-                // create or update registration
-                registration = submittedRecord.AddRegistrationWithESignature(
-                    participationObject.OwnerAccount.ID.Value,
-                    participationObject.GetAnyRelatedActivityGroupId(),
-                    participationObject.GetAccountActivityGroupId(),
-                    period?.ID,
-                    signature,
-                    Request.UserAgent.MaxChars(400),
-                    GetUserHostAddress(),
-                    currentUser.ID.Value,
-                    msgs,
-                    dc);
-            }
-            else
-            {
-                registration.AddESignature(
-                    signature,
-                    Request.UserAgent.MaxChars(400),
-                    GetUserHostAddress(),
-                    currentUser,
-                    msgs,
-                    dc);
-            }
-
-            //copy all answers from the main account to the registrant & registration :)
-            currentRegistrant.CopyAnswersTo(
-                submittedRecord,
-                registration,
-                currentUser,
-                msgs,
-                dc);
-        }
-
-        private void AddCustomQuestions(List<FormQuestionViewModel> qvms, Registrant submittedRecord,
-            Registration registration, WebUser currentUser, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            // add custom answers to questions directly to this registration
-            qvms.Where(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.NotSet)
-                .ToList()
-                .ForEach(qvm =>
-                {
-                    if (qvm.Question.QuestionTypeId == QuestionType.FileUpload)
-                    {
-                        if (Request.Files[qvm.Name].IsNotEmpty() && Request.Files[qvm.Name].ContentLength > 0)
-                        {
-                            var currentFileSizeInBytes = Request.Files[qvm.Name].ContentLength;
-                            //5 MB = 5242880 Bytes
-                            //File uploaded here should be less than of 5MB
-                            if (currentFileSizeInBytes <= 5242880)
-                                submittedRecord.AddOrUpdateAnswer(
-                                    Request.Files[qvm.Name].InputStream,
-                                    Request.Files[qvm.Name].FileName,
-                                    qvm.Question,
-                                    registration.ID,
-                                    currentUser,
-                                    msgs,
-                                    dc);
-                            else
-                                msgs.Add("Upload a file less than or equal to 5 megabytes", MessageType.UserError);
-                        }
-                    }
-                    else
-                    {
-                        submittedRecord.AddOrUpdateAnswer(
-                            qvm.Value,
-                            qvm.Question,
-                            registration?.ID,
-                            currentUser,
-                            msgs,
-                            dc);
-                    }
-                });
-        }
-
-        private (ParticipationObject, RegistrationAssignmentType) GetParticipationObjectFromRegistration(
-            Registration registration, SystemMessages msgs)
-        {
-            var registrantActivities = registration.GetRegistrantActivities(msgs);
-            RegistrantActivity registrantActivity = null;
-
-            if (registrantActivities.Count == 1)
-                registrantActivity = registrantActivities.First();
-            else
-                registrantActivity = registrantActivities
-                    .First(x => x.ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup);
-
-            var assignmentType = registrantActivity.AssignmentTypeId;
-
-            return (registrantActivity.GetParticipationObject(msgs), assignmentType);
-        }
-
-
-        private List<DateTime> GetSelectedDatesFromCart()
-        {
-            return SessionVariables.Cart?.GetCartItems().FirstOrDefault()?.SelectedDates?.Split(',')
-                .Select(x => x.ToDateTime()).ToList();
-        }
-
-        private void ResetRegistrationSession()
-        {
-            SessionVariables.CurrentRegistrant = null;
-            SessionVariables.Cart = null;
-        }
-
-        private ActionResult HandleIsLoggedIn()
-        {
-            if (SessionVariables.CurrentUser.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty())
-                return Logout(Request.Url.ToString(), true);
-
-            if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
-                return Logout(Request.Url.ToString(), true);
-
-            return null;
-        }
-
-        private void AddSessionActivitiesToRegistration(ParticipationObject participationObject,
-            Registration registration, Registrant submittedRecord, RegistrationPeriod period, SystemMessages msgs,
-            DatabaseConnection dc = null)
-        {
-            // if there is a Session, then a person may set their preferences for activities in that session, 
-            // also only if the session is set to Apply
-            if (participationObject.IsSession())
-            {
-                // only get activities that are in the cart
-                var participationObjects = GetAllParticipationObjectsForCheckout(registration, msgs, dc);
-
-                if (participationObject.RegistrationMode == RegistrationMode.Apply)
-                {
-                    for (var i = 1; i <= participationObjects.Count; i++)
-                    {
-                        var postedValue = Request[$"activity-preference-{i}"];
-                        if (postedValue.IsGuid())
-                        {
-                            var po = participationObjects.First(x => x.Uid == postedValue.ToGuid());
-
-                            registration.ProcessRegistrationAssignment(
-                                po,
-                                SessionVariables.CurrentRegistrant,
-                                submittedRecord,
-                                1,
-                                i,
-                                participationObject.GetActivityGroupId(),
-                                amountCharged: po.Cost,
-                                periodId: period?.ID,
-                                registeredDates: null,
-                                loggedInUser: SessionVariables.CurrentUser,
-                                msgs: msgs,
-                                dc: dc);
-                        }
-                    }
-
-                    // make sure the number of final registered programs is equal to the number of programs that is in the cart + what already exists
-                    var registeredPOs = GetCurrentlyRegisteredForParticipationObjects(registration, msgs, dc);
-
-                    if (registeredPOs.Count != participationObjects.Count)
-                        msgs.Add(
-                            $"Please enter all of your {UILabel.ActivityLabel().ToLower()} preferences",
-                            MessageType.UserError);
-                }
-                else
-                {
-                    participationObjects.ForEach(po =>
-                    {
-                        registration.ProcessRegistrationAssignment(
-                            po,
-                            SessionVariables.CurrentRegistrant,
-                            submittedRecord,
-                            1,
-                            participationObject.GetActivityGroupId(),
-                            amountCharged: po.Cost,
-                            periodId: period?.ID,
-                            loggedInUser: SessionVariables.CurrentUser,
-                            msgs: msgs,
-                            dc: dc);
-                    });
-                }
-            }
-        }
-
-        private List<ParticipationObject> GetAllParticipationObjectsForCheckout(Registration registration,
-            SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            var participationObjects = new List<ParticipationObject>();
-
-            participationObjects.AddRange(SessionVariables.Cart.GetCartItems(msgs, dc)
-                .Where(x => x.ParticipationObjectTypeId == ParticipationObjectType.Activity)
-                .Select(x => x.GetParticipationObject(msgs, dc))
-                .Where(x => x.GetActivity().ActivityGroupId.HasValue));
-
-            if (registration.IsNotEmpty())
-                participationObjects.AddRange(GetCurrentlyRegisteredForParticipationObjects(registration, msgs, dc));
-
-            return participationObjects.DistinctBy(x => x.ObjectID).OrderBy(x => x.Name).ToList();
-        }
-
-        private List<ParticipationObject> GetCurrentlyRegisteredForParticipationObjects(Registration registration,
-            SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            var ignoredTypes = new List<RegistrationAssignmentType>
-            {
-                RegistrationAssignmentType.Declined,
-                RegistrationAssignmentType.Withdrawn,
-                RegistrationAssignmentType.Invited,
-                RegistrationAssignmentType.NotSet,
-            };
-
-            return registration.GetRegistrantActivities(msgs, dc)
-                .Where(x => x.AssignmentTypeId.NotIn(ignoredTypes))
-                .Where(x => x.ParticipationObjectTypeId == ParticipationObjectType.Activity)
-                .Select(x => x.GetParticipationObject(msgs, dc))
-                .ToList();
-        }
-
         private void LoadSessionActivitiesViewBag(ParticipationObject participationObject, Registration registration,
             SystemMessages msgs)
         {
+            var participationObjects = CheckForSessionAndLoadSessionActivities(participationObject, registration, msgs);
+            if (participationObjects != null)
+                ViewBag.SessionActivities = participationObjects;
+        }
+
+        private List<ParticipationObject> CheckForSessionAndLoadSessionActivities(ParticipationObject participationObject, Registration registration,
+            SystemMessages msgs)
+        {
             if (participationObject.IsSession() && participationObject.RegistrationMode == RegistrationMode.Apply)
-                ViewBag.SessionActivities = GetAllParticipationObjectsForCheckout(registration, msgs);
+                return RegistrationCommon.GetAllParticipationObjectsForCheckout(registration, msgs);
+
+            return null;
         }
 
         #endregion

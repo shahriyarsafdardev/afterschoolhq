@@ -633,7 +633,9 @@
     <Compile Include="Controllers\AddEmergencyContactAssembler.cs" />
     <Compile Include="Controllers\AddHomeAddressAssembler.cs" />
     <Compile Include="Controllers\GetStartedAssembler.cs" />
+    <Compile Include="Controllers\RegisterAssembler.cs" />
     <Compile Include="Controllers\RegistrationCommon.cs" />
+    <Compile Include="Controllers\ThankYouAssembler.cs" />
     <Compile Include="Controllers\VolunteerRegistrationController.cs" />
     <Compile Include="RecordControllerActionsToInfluxMiddleware.cs" />
     <Compile Include="Controllers\AccountController.cs" />
@@ -2295,7 +2297,9 @@
     <Content Include="Views\VolunteerRegistration\AddEmergencyContacts.cshtml" />
     <Content Include="Views\VolunteerRegistration\AddHomeAddress.cshtml" />
     <Content Include="Views\VolunteerRegistration\GetStarted.cshtml" />
+    <Content Include="Views\VolunteerRegistration\Register.cshtml" />
     <Content Include="Views\VolunteerRegistration\Select.cshtml" />
+    <Content Include="Views\VolunteerRegistration\ThankYou.cshtml" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>

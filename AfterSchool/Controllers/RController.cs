@@ -462,6 +462,14 @@ namespace AfterSchool.Controllers
             if (activity.IsEmpty())
                 return HttpNotFound();
 
+            if (IsStudentSelectingDatesForVolunteerOpportunity(activity, msgs))
+            {
+                msgs.Add("Only parents or guardians can register for volunteer opportunities", MessageType.UserError);
+                SetTempMessage(msgs);
+                return Redirect(activity.GetHomePageUrl());
+            }
+                
+
             var participationObject = activity.GetParticipationObject(msgs);
 
             ViewBag.Messages = msgs;
@@ -470,20 +478,13 @@ namespace AfterSchool.Controllers
             ViewBag.CanRegisterFor = true;
             ViewBag.AccountProfile = accountProfile;
 
-            // LOG: Someone Viewed ParticipationObjectType ParticipationObjectName by Account AccountName
-            //SessionVariables.WebSession.LogActivity(
-            //    account: account,
-            //    actor: SessionVariables.CurrentUser,
-            //    actionType: WebSessionActionType.Viewed,
-            //    objectType: participationObject.GetWebSessionObjectType(),
-            //    objectId: participationObject.ObjectID.Value,
-            //    objectText: participationObject.Name,
-            //    indirectObjectType: ObjectType.Account,
-            //    indirectObjectId: participationObject.OwnerAccount.ID.Value,
-            //    indirectObjectText: participationObject.OwnerAccount.Name
-            //);
-
             return View("ActivitySelectDates", participationObject);
+        }
+
+        private static bool IsStudentSelectingDatesForVolunteerOpportunity(Activity activity, SystemMessages msgs)
+        {
+            return activity.ActivityTypeId == ActivityType.VolunteerOpportunity &&
+                   (!SessionVariables.CurrentUser?.GetMasterRegistrant(msgs).IsParentOrGuardian ?? false);
         }
 
         [HttpPost]

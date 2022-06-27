@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Controllers
 {
@@ -55,11 +57,9 @@ namespace AfterSchool.Controllers
         public static WebUser CreateOrUpdateUser(WebUser currentUser, string firstName, string lastName, string email,
             string phone, string password, bool allowTextMessages, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            WebUser user = null;
-
             if (currentUser.IsEmpty())
             {
-                user = WebUserService.CreateNew(
+                return WebUserService.CreateNew(
                     firstName,
                     lastName,
                     email.Trim(),
@@ -73,16 +73,13 @@ namespace AfterSchool.Controllers
                     msgs,
                     dc);
             }
-            else
-            {
-                user = SessionVariables.CurrentUser;
-                user.Phone = phone.Trim();
-                user.AllowTextMessages = allowTextMessages;
-                user.LastModifiedBy = currentUser.ID;
-                user.LastModifiedDate = DateTime.UtcNow;
-                msgs.AddRange(user.Save(dc));
-            }
 
+            var user = SessionVariables.CurrentUser;
+            user.Phone = phone.Trim();
+            user.AllowTextMessages = allowTextMessages;
+            user.LastModifiedBy = currentUser.ID;
+            user.LastModifiedDate = DateTime.UtcNow;
+            msgs.AddRange(user.Save(dc));
             return user;
         }
 
@@ -140,6 +137,367 @@ namespace AfterSchool.Controllers
                         msgs,
                         dc);
                 });
+        }
+
+        public static List<FormQuestionViewModel> GetQuestionsRequiredForActivityThatHaveNotYetBeenCollected(ParticipationObject participationObject,
+            Registrant currentRegistrant,
+            SystemMessages msgs)
+        {
+            var allQuestions = participationObject.Form.GetActiveQuestions(msgs).ToList();
+            var answers = currentRegistrant.GetAnswers(msgs);
+
+            var requiredQuestionsThatNeedAnswers = allQuestions
+                .Where(question => question.IsRequired &&
+                                   question.FormQuestionGroupRegistrantTypeId == RegistrantType.Individual &&
+                                   question.QuestionDataTypeId != QuestionDataType.NotSet)
+                .Where(question => answers.FirstOrDefault(answer => answer.QuestionDataTypeId == question.QuestionDataTypeId).IsEmpty() ||
+                                   answers.First(answer => answer.QuestionDataTypeId == question.QuestionDataTypeId).Text.IsBlank())
+                .Distinct()
+                .ToList();
+
+            var customQuestionsThatNeedAnswers = allQuestions
+                .Where(question => !question.IsDeleted && question.QuestionDataTypeId == QuestionDataType.NotSet)
+                .Where(question => answers.Find(answer => answer.FormQuestionId == question.ID).IsEmpty())
+                .OrderBy(question => question.DisplayOrder)
+                .ToList();
+
+            var questionsThatNeedAnswers = requiredQuestionsThatNeedAnswers.Concat(customQuestionsThatNeedAnswers).ToList();
+            return questionsThatNeedAnswers.Select(question => question.ToFormQuestionViewModel()).ToList();
+        }
+
+        public static List<DateTime> GetSelectedDatesFromCart()
+        {
+            return SessionVariables.Cart?.GetCartItems().FirstOrDefault()?.SelectedDates?.Split(',')
+                .Select(x => x.ToDateTime()).ToList();
+        }
+
+        public static List<FormQuestion> GetActiveCustomQuestionsThatHaveNotYetBeenAnswered(ParticipationObject participationObject, SystemMessages msgs)
+        {
+            var allQuestions = participationObject.Form.GetActiveQuestions(msgs).ToList();
+            var answers = SessionVariables.CurrentRegistrant.GetAnswers(msgs);
+            var questions = allQuestions
+                .Where(question => !question.IsDeleted
+                                   && question.QuestionDataTypeId == QuestionDataType.NotSet
+                                   && answers.Find(answer => answer.FormQuestionId == question.ID).IsEmpty())
+                .OrderBy(question => question.DisplayOrder)
+                .ToList();
+
+            return questions;
+        }
+
+        public static void ValidateRegisterStudentQuestions(List<FormQuestion> questions, SystemMessages msgs, HttpRequestBase httpRequestBase)
+        {
+            questions.ForEach(question =>
+            {
+                if (!question.IsRequired) return;
+
+                var populated = true;
+
+                if (question.QuestionTypeId == QuestionType.FileUpload &&
+                    httpRequestBase.Files[question.ToFormQuestionViewModel().Name].IsEmpty())
+                    populated = false;
+                else if (question.QuestionTypeId != QuestionType.FileUpload &&
+                         httpRequestBase[question.ToFormQuestionViewModel().Name].IsEmpty())
+                    populated = false;
+
+                if (!populated)
+                    msgs.Add($"{question.Text} is required", MessageType.UserError);
+            });
+        }
+
+        public static Registration CreateRegistration(ParticipationObject participationObject,
+            List<FormQuestionViewModel> qvms, string signature, HttpRequestBase request, SystemMessages msgs = null)
+        {
+            Registration registration;
+            Registrant submittedRecord;
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentRegistrant = SessionVariables.CurrentRegistrant;
+            var currentUser = SessionVariables.CurrentUser;
+
+            (submittedRecord, registration) = currentRegistrant.GetSubmittedRecord(participationObject, msgs);
+
+            if (msgs.HasNoErrors())
+                Database.ExecuteTransaction
+                (
+                    (amsgs, adc) =>
+                    {
+                        var period = participationObject.GetCurrentRegistrationPeriod(amsgs, adc);
+
+                        if (qvms.IsNotEmpty())
+                            AddOrUpdateStandardAnswers(
+                                qvms,
+                                currentRegistrant,
+                                currentUser,
+                                amsgs,
+                                adc);
+
+                        SubmitRecord(
+                            ref registration,
+                            ref submittedRecord,
+                            currentRegistrant,
+                            participationObject,
+                            currentUser,
+                            period,
+                            signature,
+                            amsgs,
+                            request,
+                            adc);
+
+                        if (qvms.IsNotEmpty())
+                            AddCustomQuestions(
+                                qvms,
+                                submittedRecord,
+                                registration,
+                                currentUser,
+                                request,
+                                amsgs, adc);
+
+                        if (amsgs.HasNoErrors() && participationObject.IsSession())
+                            AddSessionActivitiesToRegistration(
+                                participationObject,
+                                registration,
+                                submittedRecord,
+                                period,
+                                request,
+                                amsgs, adc);
+                    },
+                    smsgs => msgs.AddRange(smsgs),
+                    fmsgs => msgs.AddRange(fmsgs),
+                    emsgs => Utilities.SystemErrorLog(emsgs)
+                );
+
+            if (msgs.HasNoErrors())
+                // LOG: Someone Registered RegistrantName for ParticipationObjectType ParticipationObjectName
+                SessionVariables.WebSession.LogActivity(
+                    currentAccount,
+                    currentUser,
+                    WebSessionActionType.Registered,
+                    ObjectType.Registrant,
+                    objectId: currentRegistrant.ID.Value,
+                    objectText: currentRegistrant.FullName,
+                    indirectObjectType: participationObject.GetWebSessionObjectType(),
+                    indirectObjectId: participationObject.ObjectID.Value,
+                    indirectObjectText: participationObject.Name
+                );
+
+            return registration;
+        }
+
+        private static string GetUserHostAddress(HttpRequestBase request)
+        {
+            if (request.ServerVariables["HTTP_X_FORWARDED_FOR"].IsNotEmpty())
+                return request.ServerVariables["HTTP_X_FORWARDED_FOR"].Split(',')[0];
+
+            return request.ServerVariables["REMOTE_ADDR"];
+        }
+
+        private static void SubmitRecord(ref Registration registration, ref Registrant submittedRecord,
+            Registrant currentRegistrant, ParticipationObject participationObject, WebUser currentUser,
+            RegistrationPeriod period, string signature, SystemMessages msgs, HttpRequestBase request, DatabaseConnection dc = null)
+        {
+            // account gets copy / snapshot of master registrant record
+            // required in order to make sure registration data doesn't change as registrant changes information in master record.
+            if (submittedRecord.IsEmpty())
+            {
+                submittedRecord = currentRegistrant.SubmitRecordToAccount(
+                    participationObject.OwnerAccount,
+                    currentUser,
+                    msgs,
+                    dc);
+
+                // create or update registration
+                registration = submittedRecord.AddRegistrationWithESignature(
+                    participationObject.OwnerAccount.ID.Value,
+                    participationObject.GetAnyRelatedActivityGroupId(),
+                    participationObject.GetAccountActivityGroupId(),
+                    period?.ID,
+                    signature,
+                    request.UserAgent.MaxChars(400), GetUserHostAddress(request),
+                    currentUser.ID.Value,
+                    msgs,
+                    dc);
+            }
+            else
+            {
+                registration.AddESignature(
+                    signature,
+                    request.UserAgent.MaxChars(400), GetUserHostAddress(request),
+                    currentUser,
+                    msgs,
+                    dc);
+            }
+
+            //copy all answers from the main account to the registrant & registration :)
+            currentRegistrant.CopyAnswersTo(
+                submittedRecord,
+                registration,
+                currentUser,
+                msgs,
+                dc);
+        }
+
+        public static void AddCustomQuestions(List<FormQuestionViewModel> qvms, Registrant submittedRecord,
+            Registration registration, WebUser currentUser, HttpRequestBase request, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            // add custom answers to questions directly to this registration
+            qvms.Where(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.NotSet)
+                .ToList()
+                .ForEach(qvm =>
+                {
+                    if (qvm.Question.QuestionTypeId == QuestionType.FileUpload)
+                    {
+                        if (request.Files[qvm.Name].IsNotEmpty() && request.Files[qvm.Name].ContentLength > 0)
+                        {
+                            var currentFileSizeInBytes = request.Files[qvm.Name].ContentLength;
+                            //5 MB = 5242880 Bytes
+                            //File uploaded here should be less than of 5MB
+                            if (currentFileSizeInBytes <= 5242880)
+                                submittedRecord.AddOrUpdateAnswer(
+                                    request.Files[qvm.Name].InputStream,
+                                    request.Files[qvm.Name].FileName,
+                                    qvm.Question,
+                                    registration.ID,
+                                    currentUser,
+                                    msgs,
+                                    dc);
+                            else
+                                msgs.Add("Upload a file less than or equal to 5 megabytes", MessageType.UserError);
+                        }
+                    }
+                    else
+                    {
+                        submittedRecord.AddOrUpdateAnswer(
+                            qvm.Value,
+                            qvm.Question,
+                            registration?.ID,
+                            currentUser,
+                            msgs,
+                            dc);
+                    }
+                });
+        }
+
+        public static void AddSessionActivitiesToRegistration(ParticipationObject participationObject, Registration registration, Registrant submittedRecord,
+            RegistrationPeriod period, HttpRequestBase request, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            // if there is a Session, then a person may set their preferences for activities in that session, 
+            // also only if the session is set to Apply
+            if (participationObject.IsSession())
+            {
+                // only get activities that are in the cart
+                var participationObjects = GetAllParticipationObjectsForCheckout(registration, msgs, dc);
+
+                if (participationObject.RegistrationMode == RegistrationMode.Apply)
+                {
+                    for (var i = 1; i <= participationObjects.Count; i++)
+                    {
+                        var postedValue = request[$"activity-preference-{i}"];
+                        if (postedValue.IsGuid())
+                        {
+                            var po = participationObjects.First(x => x.Uid == postedValue.ToGuid());
+
+                            registration.ProcessRegistrationAssignment(
+                                po,
+                                SessionVariables.CurrentRegistrant,
+                                submittedRecord,
+                                1,
+                                i,
+                                participationObject.GetActivityGroupId(),
+                                amountCharged: po.Cost,
+                                periodId: period?.ID,
+                                registeredDates: null,
+                                loggedInUser: SessionVariables.CurrentUser,
+                                msgs: msgs,
+                                dc: dc);
+                        }
+                    }
+
+                    // make sure the number of final registered programs is equal to the number of programs that is in the cart + what already exists
+                    var registeredPOs = GetCurrentlyRegisteredForParticipationObjects(registration, msgs, dc);
+
+                    if (registeredPOs.Count != participationObjects.Count)
+                        msgs.Add(
+                            $"Please enter all of your {UILabel.ActivityLabel().ToLower()} preferences",
+                            MessageType.UserError);
+                }
+                else
+                {
+                    participationObjects.ForEach(po =>
+                    {
+                        registration.ProcessRegistrationAssignment(
+                            po,
+                            SessionVariables.CurrentRegistrant,
+                            submittedRecord,
+                            1,
+                            participationObject.GetActivityGroupId(),
+                            amountCharged: po.Cost,
+                            periodId: period?.ID,
+                            loggedInUser: SessionVariables.CurrentUser,
+                            msgs: msgs,
+                            dc: dc);
+                    });
+                }
+            }
+        }
+
+        public static List<ParticipationObject> GetAllParticipationObjectsForCheckout(Registration registration,
+            SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var participationObjects = new List<ParticipationObject>();
+
+            participationObjects.AddRange(SessionVariables.Cart.GetCartItems(msgs, dc)
+                .Where(x => x.ParticipationObjectTypeId == ParticipationObjectType.Activity)
+                .Select(x => x.GetParticipationObject(msgs, dc))
+                .Where(x => x.GetActivity().ActivityGroupId.HasValue));
+
+            if (registration.IsNotEmpty())
+                participationObjects.AddRange(GetCurrentlyRegisteredForParticipationObjects(registration, msgs, dc));
+
+            return participationObjects.DistinctBy(x => x.ObjectID).OrderBy(x => x.Name).ToList();
+        }
+
+        private static List<ParticipationObject> GetCurrentlyRegisteredForParticipationObjects(Registration registration,
+            SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var ignoredTypes = new List<RegistrationAssignmentType>
+            {
+                RegistrationAssignmentType.Declined,
+                RegistrationAssignmentType.Withdrawn,
+                RegistrationAssignmentType.Invited,
+                RegistrationAssignmentType.NotSet,
+            };
+
+            return registration.GetRegistrantActivities(msgs, dc)
+                .Where(x => x.AssignmentTypeId.NotIn(ignoredTypes))
+                .Where(x => x.ParticipationObjectTypeId == ParticipationObjectType.Activity)
+                .Select(x => x.GetParticipationObject(msgs, dc))
+                .ToList();
+        }
+
+        public static bool IsValidLogin()
+        {
+            return SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentAccount.IsNotEmpty() &&
+                   SessionVariables.CurrentAccount.AccountTypeId == AccountType.Registrant;
+        }
+
+        public static void ResetRegistrationSession()
+        {
+            SessionVariables.CurrentRegistrant = null;
+            SessionVariables.Cart = null;
+        }
+
+        public static (ParticipationObject, RegistrationAssignmentType) GetParticipationObjectFromRegistration(
+            Registration registration, SystemMessages msgs)
+        {
+            var registrantActivities = registration.GetRegistrantActivities(msgs);
+
+            var registrantActivity = registrantActivities.Count == 1
+                ? registrantActivities.Single()
+                : registrantActivities.First(x => x.ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup);
+
+            var assignmentType = registrantActivity.AssignmentTypeId;
+
+            return (registrantActivity.GetParticipationObject(msgs), assignmentType);
         }
     }
 }

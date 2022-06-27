@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using AfterSchool.Helpers;
@@ -27,6 +28,7 @@ namespace AfterSchool.Controllers
 
             var currentUser = SessionVariables.CurrentUser;
             var currentAccount = SessionVariables.CurrentAccount;
+            var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
 
             if (currentUser.IsNotEmpty() && currentAccount.IsNotEmpty())
             {
@@ -44,6 +46,9 @@ namespace AfterSchool.Controllers
 
                 var masterRegistrant = SessionVariables.CurrentUser.GetMasterRegistrant(msgs);
 
+                if (!masterRegistrant.IsParentOrGuardian)
+                    return Redirect(participationObject.GetHomePageUrl());
+
                 if (masterRegistrant.IsNotEmpty())
                     registrantAccount = masterRegistrant.GetAccount(msgs);
 
@@ -57,10 +62,8 @@ namespace AfterSchool.Controllers
                 var hasCompletedParentProfile = masterRegistrant.IsNotEmpty() && masterRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed &&
                                                 masterRegistrant.IsParentOrGuardian;
                 if (hasCompletedParentProfile)
-                    return RedirectToAction("Select");
+                    return RedirectToAction("Register");
             }
-
-            var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
 
             Account registrationAccount = null;
 
@@ -75,7 +78,7 @@ namespace AfterSchool.Controllers
 
                 return HttpNotFound();
             }
-
+            
             var questions = RegistrationCommon.GetAllDefaultPersonalInformationQuestions(msgs);
 
             var getStartedAssembler = new GetStartedAssembler(featureFlagRepository);
@@ -279,7 +282,7 @@ namespace AfterSchool.Controllers
                 }
             });
 
-            return questions;
+            return questions.OrderBy(question => question.QuestionDataTypeId).ToList();
         }
 
         [HttpGet]
@@ -432,12 +435,161 @@ namespace AfterSchool.Controllers
                 );
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("select");
+                return RedirectToAction("Register");
 
             var result = GatherDataForAndAssembleAddEmergencyContactResult(qvms, msgs);
             return View(result);
         }
 
         #endregion
+
+        #region Register
+
+        [HttpGet]
+        public ActionResult Register()
+        {
+            if (!RegistrationCommon.IsValidLogin())
+                return Logout(Request.Url.ToString(), true);
+
+            var results = CheckRedirect(true);
+            if (results.IsNotEmpty()) return results;
+
+            var msgs = new SystemMessages();
+            var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+            var currentRegistrant = SessionVariables.CurrentUser.GetMasterRegistrant();
+            SessionVariables.CurrentRegistrant = currentRegistrant;
+            var parentOrGuardian = currentRegistrant.GetParentOrGuardian(msgs);
+            var (_, registration) = currentRegistrant.GetSubmittedRecord(participationObject, msgs);
+
+            if (!parentOrGuardian.IsProfileCompleted && parentOrGuardian.GetOwner(msgs).ID == SessionVariables.CurrentUser.ID)
+                return RedirectToAction("editpersonal", "family",
+                    new
+                    {
+                        Area = "user", id = parentOrGuardian.Uid, reg = registration?.Uid,
+                        student = currentRegistrant?.Uid, returnUrl = Url.Action("select", "account"),
+                    });
+
+            var questions = RegistrationCommon.GetQuestionsRequiredForActivityThatHaveNotYetBeenCollected(participationObject, currentRegistrant, msgs);
+
+            var isReadyToFinalizeRegistration = !questions.Any() && registration.IsNotEmpty() && msgs.HasNoErrors();
+            if (isReadyToFinalizeRegistration)
+            {
+                if (CurrentRegistrantHasAlreadySubmitted(registration.CompletionStatusId))
+                    return RedirectToAction("select");
+
+                if (msgs.HasNoErrors())
+                    ProcessRegistration(currentRegistrant, participationObject, registration, msgs);
+
+                if (msgs.HasNoErrors())
+                    return RedirectToAction("thankyou", new {id = registration.Uid});
+            }
+
+            var result = GatherDataForAndAssembleRegisterResult(participationObject, registration, msgs, questions, currentRegistrant);
+            return View(result);
+        }
+
+        private static void ProcessRegistration(Registrant currentRegistrant, ParticipationObject participationObject, Registration registration,
+            SystemMessages msgs)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var selectedDates = GatherAvailableSelectedDates(currentRegistrant, participationObject);
+            AccountService.ProcessRegistrationWithoutPayment(
+                new CheckoutObject
+                {
+                    BillingAccount = participationObject.OwnerAccount,
+                    PayingAccount = currentAccount,
+                    NumberOfSeats = 1,
+                    ParticipationObject = participationObject,
+                    Registration = registration,
+                    MasterRegistrant = currentRegistrant,
+                    SubscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault(),
+                    SelectedDates = selectedDates,
+                },
+                true,
+                SessionVariables.CurrentUser,
+                msgs);
+        }
+
+        private static bool CurrentRegistrantHasAlreadySubmitted(RegistrationCompletionStatus registrationCompletionStatusId)
+        {
+            return registrationCompletionStatusId == RegistrationCompletionStatus.Completed;
+        }
+
+        private static List<DateTime> GatherAvailableSelectedDates(Registrant currentRegistrant, ParticipationObject participationObject)
+        {
+            return RegistrationCommon.GetSelectedDatesFromCart()?.Where(date =>
+                !currentRegistrant.IsReservedForDate(participationObject, date, null)
+            ).ToList();
+        }
+
+        private RegisterResult GatherDataForAndAssembleRegisterResult(ParticipationObject participationObject, Registration registration, SystemMessages msgs,
+            List<FormQuestionViewModel> questions, Registrant currentRegistrant)
+        {
+            var registrationStartPageAccount = SessionVariables.RegistrationStartPageAccount;
+            return new RegisterAssembler().AssembleRegisterResult(questions, participationObject, registrationStartPageAccount, currentRegistrant, null, msgs);
+        }
+
+        [HttpPost]
+        public ActionResult Register(string signature)
+        {
+            if (!RegistrationCommon.IsValidLogin())
+                return Logout(Request.Url.ToString(), true);
+
+            var results = CheckRedirect(true);
+            if (results.IsNotEmpty()) return results;
+
+            var msgs = new SystemMessages();
+            var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+
+            // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
+            var questions = RegistrationCommon.GetActiveCustomQuestionsThatHaveNotYetBeenAnswered(participationObject, msgs);
+            RegistrationCommon.ValidateRegisterStudentQuestions(questions, msgs, Request);
+
+            if (signature.IsEmpty())
+                msgs.Add("E-signature is required", MessageType.UserError);
+
+            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+            var registration = RegistrationCommon.CreateRegistration(participationObject, qvms, signature, Request, msgs);
+            var currentRegistrant = SessionVariables.CurrentRegistrant;
+
+            if (msgs.HasNoErrors() && registration != null)
+            {
+                if (CurrentRegistrantHasAlreadySubmitted(registration.CompletionStatusId))
+                    return RedirectToAction("select");
+
+                if (msgs.HasNoErrors())
+                    ProcessRegistration(currentRegistrant, participationObject, registration, msgs);
+
+                if (msgs.HasNoErrors())
+                    return RedirectToAction("thankyou", new {id = registration.Uid});
+            }
+
+            var result = GatherDataForAndAssembleRegisterResult(participationObject, registration, msgs, qvms, currentRegistrant);
+            return View(result);
+        }
+
+        #endregion
+
+        [HttpGet]
+        public ActionResult ThankYou(string id)
+        {
+            if (!RegistrationCommon.IsValidLogin())
+                return Logout(Request.Url.ToString(), true);
+
+            var msgs = new SystemMessages();
+
+            RegistrationCommon.ResetRegistrationSession();
+
+            var registration = Registration.LoadByUid(id.ToGuid(), msgs);
+            var (participationObject, assignmentType) = RegistrationCommon.GetParticipationObjectFromRegistration(registration, msgs);
+            var account = SessionVariables.RegistrationStartPageAccount ?? participationObject.OwnerAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var registrant = registration.GetRegistrant(msgs);
+            var masterRegistrant = registrant.GetMasterRegistrant(msgs);
+            var isSelfRegistered = masterRegistrant.WebUserId == currentUser.ID;
+            var result = new ThankYouResultAssembler().AssembleThankYouResult(participationObject, account, currentUser, registrant, isSelfRegistered,
+                assignmentType, msgs);
+            return View(result);
+        }
     }
 }

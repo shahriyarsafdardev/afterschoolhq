@@ -1,16 +1,15 @@
 ﻿@using Utilities = AfterSchoolLibrary.Helpers.Utilities
+@model AfterSchool.Controllers.ThankYouResult
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = "Thank you";
-    var msgs = (SystemMessages) ViewBag.Messages;
-    var account = (Account) ViewBag.Account;
-    var registration = (Registration) ViewBag.Registration;
-    var registrant = (Registrant) ViewBag.Registrant;
-    var isSelfRegistered = (bool) ViewBag.IsSelfRegistered;
-    var assignmentType = (RegistrationAssignmentType) ViewBag.AssignmentType;
-    var participationObject = (ParticipationObject) ViewBag.ParticipationObject;
-    var profile = (AccountProfile) ViewBag.Profile;
-    var currentUser = (WebUser) ViewBag.CurrentUser;
+    var msgs = Model.Messages;
+    var account = Model.Account;
+    var registrant = Model.Registrant;
+    var isSelfRegistered = Model.IsSelfRegistered;
+    var assignmentType = Model.AssignmentType;
+    var participationObject = Model.ParticipationObject;
+    var currentUser = Model.CurrentUser;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
