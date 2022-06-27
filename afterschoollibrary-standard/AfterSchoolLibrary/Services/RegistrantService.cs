@@ -394,20 +394,7 @@ namespace AfterSchoolLibrary.Services
         {
             DateTime? billingCycleAnchor = null;
 
-            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
-            {
-                //.. Payment Plans are just the registration fee broken up into multiple payments.
-                //.. So when a person registers late it should just start the payment plan on checkout in that case. 
-
-                //if (startDateTime <= DateTime.UtcNow && plan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
-                //{
-                //    if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
-                //        billingCycleAnchor = DateTime.UtcNow.Date.LastDateOfMonth().AddDays(1);
-                //    else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
-                //        billingCycleAnchor = DateTime.UtcNow.Date.LastDateOfWeek().AddDays(1);
-                //}                           
-            }
-            else if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
+            if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
             {
                 //.. Ongoing activity
                 if (participationObject.Schedule.IsEmpty())
