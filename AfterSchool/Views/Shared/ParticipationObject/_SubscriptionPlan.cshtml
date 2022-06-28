@@ -1,28 +1,15 @@
-﻿@model ParticipationObject
-
-@{
-    var displayCheckoutPrice = false;
-
-    if (ViewData["DisplayCheckoutPrice"] != null && ViewData["DisplayCheckoutPrice"].ToString().IsBoolean())
-    {
-        displayCheckoutPrice = ViewData["DisplayCheckoutPrice"].ToString().ToBoolean();
-    }
-}
-
-@if (Model.SubscriptionPlans.Any())
+﻿@model ParticipationObjectViewModel
+@if (Model.ParticipationObject.SubscriptionPlans.Any())
 {
-    var subscriptionPlan = Model.SubscriptionPlans.First();
+    var subscriptionPlan = Model.ParticipationObject.SubscriptionPlans.First();
     <span>
-        @if (!Model.IsRegistrationFree)
+        @if (!Model.ParticipationObject.IsRegistrationFree)
         {
-            <span>Pay</span> <strong>@Model.Cost.ToCurrency()</strong> <span>today plus</span>
+            <span>Pay</span> <strong>@Model.ParticipationObject.Cost.ToCurrency()</strong> <span>today plus</span>
         }
 
-    @if (subscriptionPlan.SplitCostEvenly)
-    {
-        @*<span>
-                between <strong>@ParticipationObjectUI.PrintMinPlanFee(subscriptionPlan, Model.OwnerAccount, displayCheckoutPrice)</strong> and <strong>@ParticipationObjectUI.PrintMaxPlanFee(subscriptionPlan, Model.OwnerAccount, displayCheckoutPrice)</strong>
-            </span>*@
+        @if (subscriptionPlan.SplitCostEvenly)
+        {
             <span>
                 a fee to be determined after all students are registered
             </span>
@@ -30,7 +17,7 @@
         else
         {
             <span>
-                <strong>@ParticipationObjectUI.PrintPlanFee(subscriptionPlan, Model.OwnerAccount, displayCheckoutPrice)</strong>
+                <strong>@ParticipationObjectUI.PrintPlanFee(subscriptionPlan, Model.ParticipationObject.OwnerAccount, Model.IsCheckoutCost)</strong>
                 every
                 <strong>@subscriptionPlan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong>
 
@@ -52,28 +39,9 @@
             </span>
         }
 
-
-    @*
-        @if (subscriptionPlan.SplitCostEvenly)
+        @if (subscriptionPlan.RegFeeAsDownPayment && !Model.ParticipationObject.IsRegistrationFree)
         {
-            <span>with <strong>@(Model.MinSeatsRequired ?? 1)</strong> to <strong>@Model.SeatsAvailable</strong> students attending</span>
-            <span><br /><br />Final cost will be determined once all students are registered</span>
+            <span><br /><br />The registration fee will count towards @(Model.IsCheckoutCost ? "your" : "the") subscription payments</span>
         }
-    *@
-
-    @if (subscriptionPlan.RegFeeAsDownPayment && !Model.IsRegistrationFree)
-    {
-        <span><br /><br />The registration fee will count towards @(displayCheckoutPrice ? "your" : "the") subscription payments</span>
-    }
-</span>
-}
-
-@helper PrintPlanFee(SubscriptionPlan plan, Account ownerAccount, bool displayCheckoutPrice)
-{
-    if (displayCheckoutPrice)
-    {
-        @plan.GetTotalCostWithConvenienceFee(ownerAccount).ToCurrency();
-    }
-
-    @plan.CostPerPeriod.ToCurrency();
+    </span>
 }

@@ -1,60 +1,57 @@
-﻿@model ParticipationObject
+﻿@model ParticipationObjectViewModel
 
 @{
-    var displayCheckoutPrice = false;
-
-    if (ViewData["DisplayCheckoutPrice"] != null && ViewData["DisplayCheckoutPrice"].ToString().IsBoolean())
-    {
-        displayCheckoutPrice = ViewData["DisplayCheckoutPrice"].ToString().ToBoolean();
-    }
-
-    var billingPeriod = Model.PostPayPlans.FirstOrDefault()?.BillingPeriodTypeId.ToString().ToLower();
+    var billingPeriod = Model.ParticipationObject.PostPayPlans.FirstOrDefault()?.BillingPeriodTypeId.ToString().ToLower();
 
     var youOrProvider = "you";
     var currentAccount = SessionVariables.CurrentAccount;
 
-    if (Model.IsActivity() && Model.GetActivity().ProviderAccountId.HasValue && Model.GetActivity().ProviderAccountId != currentAccount?.ID)
+    if (Model.ParticipationObject.IsActivity() && Model.ParticipationObject.GetActivity().ProviderAccountId.HasValue &&
+        Model.ParticipationObject.GetActivity().ProviderAccountId != currentAccount?.ID)
     {
-        youOrProvider = Model.GetActivity().GetProvider().Name;
+        youOrProvider = Model.ParticipationObject.GetActivity().GetProvider().Name;
     }
 
 }
 
 <p>    
-    @if (!Model.IsRegistrationFree)
+    @if (!Model.ParticipationObject.IsRegistrationFree)
     {
-        <span>Cost to register is @ParticipationObjectUI.PrintRegistrationFee(Model, displayCheckoutPrice) plus</span>
+        <span>Cost to register is @ParticipationObjectUI.PrintRegistrationFee(Model.ParticipationObject, Model.IsCheckoutCost) plus</span>
     }
 
-    @if (Model.PostPayPlans.Any())
+    @if (Model.ParticipationObject.PostPayPlans.Any())
     {
         <span>
-            @if (displayCheckoutPrice)
+            @{
+                var firstPostPayPlanHasNumberOfPrePaidPeriods = Model.ParticipationObject.PostPayPlans.First().NumberOfPeriodsPrePaid.HasValue;
+                var prePaymentAmount = (Model.ParticipationObject.GetPostPayCostWithConvenienceFee() * Model.ParticipationObject.PostPayPlans.First().NumberOfPeriodsPrePaid.Value).ToCurrency();
+            }
+            @if (Model.IsCheckoutCost)
             {
                 <span>                        
-                    <strong>@Model.GetPostPayCostWithConvenienceFee().ToCurrency()</strong>
+                    <strong>@Model.ParticipationObject.GetPostPayCostWithConvenienceFee().ToCurrency()</strong>
                     per @billingPeriod attended per @UILabel.RegistrantLabel().ToLower()
                 </span>
-                if (Model.PostPayPlans.First().NumberOfPeriodsPrePaid.HasValue)
+                if (firstPostPayPlanHasNumberOfPrePaidPeriods)
                 { 
                     <span>
-                        with a pre-payment of 
-                        <strong>@((Model.GetPostPayCostWithConvenienceFee() * Model.PostPayPlans.First().NumberOfPeriodsPrePaid.Value).ToCurrency())</strong>
+                        with a pre-payment of <strong>@prePaymentAmount</strong>
                     </span>
                 }
             }
             else
             {
                 <span>
-                    Parents will pay <strong>@Model.GetPostPayCostWithConvenienceFee().ToCurrency()</strong> 
-                    @if (Model.PostPayPlans.First().NumberOfPeriodsPrePaid.HasValue)
+                    Parents will pay <strong>@Model.ParticipationObject.GetPostPayCostWithConvenienceFee().ToCurrency()</strong> 
+                    @if (firstPostPayPlanHasNumberOfPrePaidPeriods)
                     { 
-                <span>
-                    with a pre-payment of <strong>@((Model.GetPostPayCostWithConvenienceFee() * Model.PostPayPlans.First().NumberOfPeriodsPrePaid.Value).ToCurrency())</strong>
-                </span>
+                        <span>
+                            with a pre-payment of <strong>@prePaymentAmount</strong>
+                        </span>
                     }
                     and @youOrProvider will receive
-                    <strong>@Model.GetPostPayProviderAmount().ToCurrency()</strong>
+                    <strong>@Model.ParticipationObject.GetPostPayProviderAmount().ToCurrency()</strong>
                     per @billingPeriod attended per @UILabel.RegistrantLabel().ToLower()
                 </span>
                     

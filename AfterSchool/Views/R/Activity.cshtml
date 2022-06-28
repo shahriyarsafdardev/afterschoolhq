@@ -148,7 +148,7 @@
                 }
 
                 <div class="activity-detail-block">
-                    @{ Html.RenderPartial("~/Views/Shared/ParticipationObject/_PaymentInfo.cshtml", Model); }
+                    @{ Html.RenderPartial("ParticipationObject/_PaymentInfo", Model, new ViewDataDictionary{{"CurrentAccount", currentAccount}}); }
 
                     @if (Model.IsActivityGroup() && Model.GetActivityGroup().IsInviteOnly)
                     {

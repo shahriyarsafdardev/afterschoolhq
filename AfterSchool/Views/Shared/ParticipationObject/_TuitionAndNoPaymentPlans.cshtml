@@ -1,26 +1,15 @@
-﻿@model ParticipationObject
+﻿@model ParticipationObjectViewModel
 
-@{ 
-    var displayCheckoutPrice = false;
+@{
+    var currentAccount = (Account) ViewData["CurrentAccount"];
 
-    if (ViewData["DisplayCheckoutPrice"] != null && ViewData["DisplayCheckoutPrice"].ToString().IsBoolean())
-    {
-        displayCheckoutPrice = ViewData["DisplayCheckoutPrice"].ToString().ToBoolean();
-    }
-
-    var youOrProvider = "you";
-    var currentAccount = SessionVariables.CurrentAccount;
-
-    if (Model.IsActivity() && Model.GetActivity().ProviderAccountId.HasValue && Model.GetActivity().ProviderAccountId != currentAccount?.ID)
-    {
-        youOrProvider = Model.GetActivity().GetProvider().Name;
-    }
+    var youOrProvider = Model.ParticipationObject.IsActivity() && Model.ParticipationObject.GetActivity().ProviderAccountId.HasValue && Model.ParticipationObject.GetActivity().ProviderAccountId != currentAccount?.ID ? Model.ParticipationObject.GetActivity().GetProvider().Name : "you";
 }
 
 <p>
-    @if (Model.SubscriptionPlans.Any())
+    @if (Model.ParticipationObject.SubscriptionPlans.Any())
     {
-        if (displayCheckoutPrice)
+        if (Model.IsCheckoutCost)
         {
             <span>The cost is</span>
         }
@@ -30,12 +19,12 @@
         }
     }
 
-    @if (!Model.IsRegistrationFree)
+    @if (!Model.ParticipationObject.IsRegistrationFree)
     {
         <span>
-            @if (!Model.SubscriptionPlans.Any())
+            @if (!Model.ParticipationObject.SubscriptionPlans.Any())
             { 
-                if (displayCheckoutPrice)
+                if (Model.IsCheckoutCost)
                 {
                     <span>The fee is</span>
                 }
@@ -46,14 +35,14 @@
             }
             
             <strong>
-                @ParticipationObjectUI.PrintRegistrationFee(Model, displayCheckoutPrice)
+                @ParticipationObjectUI.PrintRegistrationFee(Model.ParticipationObject, Model.IsCheckoutCost)
             </strong>
             
-            @if (!Model.SubscriptionPlans.Any())
+            @if (!Model.ParticipationObject.SubscriptionPlans.Any())
             {
                 <span>
                     per                     
-                    @if (Model.IsActivity() && Model.GetActivity().CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
+                    @if (Model.ParticipationObject.IsActivity() && Model.ParticipationObject.GetActivity().CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
                     {
                         <span>selected date</span>
                     }
@@ -67,9 +56,5 @@
         </span>
     }    
 
-    @{ Html.RenderPartial(
-        "~/Views/Shared/ParticipationObject/_SubscriptionPlan.cshtml",
-        Model,
-        new ViewDataDictionary() { { "DisplayCheckoutPrice", displayCheckoutPrice } }); 
-    }
+    @{ Html.RenderPartial("_SubscriptionPlan", Model); }
 </p>

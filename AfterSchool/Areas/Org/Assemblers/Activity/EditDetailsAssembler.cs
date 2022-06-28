@@ -1,14 +1,15 @@
+using AfterSchool.Areas.Org.Controllers;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 
-namespace AfterSchool.Areas.Org.Controllers
+namespace AfterSchool.Areas.Org.Assemblers.Activity
 {
     public class EditDetailsResult
     {
         public Account Account { get; set; }
         public SystemMessages Messages { get; set; }
         public bool IsFullScreen { get; set; }
-        public Activity Activity { get; set; }
+        public AfterSchoolLibrary.Models.Activity Activity { get; set; }
         public string FullScreenExitUrl { get; set; }
         public bool IsActivityLeader { get; set; }
         public AccountPackage AccountPackage { get; set; }
@@ -17,7 +18,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
     public class EditDetailsAssembler
     {
-        public EditDetailsResult AssembleEditDetailsResult(Account account, SystemMessages messages, Activity activity,
+        public EditDetailsResult AssembleEditDetailsResult(Account account, SystemMessages messages, AfterSchoolLibrary.Models.Activity activity,
             string fullScreenExitUrl, bool isActivityLeader, AccountPackage accountPackage, bool isNew)
         {
             var isFullScreen = EditHelpers.GetIsFullScreen(activity, isNew);

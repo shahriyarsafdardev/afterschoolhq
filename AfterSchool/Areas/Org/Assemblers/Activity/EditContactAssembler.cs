@@ -1,14 +1,15 @@
 ﻿using System.Collections.Generic;
+using AfterSchool.Areas.Org.Controllers;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 
-namespace AfterSchool.Areas.Org.Controllers
+namespace AfterSchool.Areas.Org.Assemblers.Activity
 {
     public class EditContactResult
     {
         public Account Account { get; set; }
         public SystemMessages Messages { get; set; }
-        public Activity Activity { get; set; }
+        public AfterSchoolLibrary.Models.Activity Activity { get; set; }
         public bool IsFullScreen { get; set; }
         public string FullScreenExitUrl { get; set; }
         public bool IsActivityLeader { get; set; }
@@ -18,7 +19,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
     public class EditContactAssembler
     {
-        public EditContactResult AssembleEditContactResult(Account account, SystemMessages messages, Activity activity, string isNew, string fullScreenExitUrl,
+        public EditContactResult AssembleEditContactResult(Account account, SystemMessages messages, AfterSchoolLibrary.Models.Activity activity, string isNew, string fullScreenExitUrl,
             List<WebUser> instructors, UserType accountUserType, bool currentUserIsActivityLeader)
         {
             var isFullScreen = EditHelpers.GetIsFullScreen(activity, isNew == "1");

@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
-using AfterSchool.Areas.Org.Controllers;
+using AfterSchool.Areas.Org.Assemblers.Activity;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using NUnit.Framework;
 
-namespace after_school_hq.Tests
+namespace after_school_hq.Tests.Assemblers.Activity
 {
     public class EditSetupAssemblerTests
     {
@@ -13,7 +13,7 @@ namespace after_school_hq.Tests
         public void EditSetupAssemblerTest()
         {
             var assembler = new EditSetupAssembler();
-            var activity = new Activity
+            var activity = new AfterSchoolLibrary.Models.Activity
             {
                 AccountId = 1,
             };

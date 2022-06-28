@@ -1,34 +1,24 @@
-﻿@model ParticipationObject
-
-@{
-    var displayCheckoutPrice = false;
-
-    if (ViewData["DisplayCheckoutPrice"] != null && ViewData["DisplayCheckoutPrice"].ToString().IsBoolean())
-    {
-        displayCheckoutPrice = ViewData["DisplayCheckoutPrice"].ToString().ToBoolean();
-    }
-}
-
+﻿@model ParticipationObjectViewModel
 <p>
     Registration Fee payment options:
     <ul>
-        @if (!Model.IsRegistrationFree)
+        @if (!Model.ParticipationObject.IsRegistrationFree)
         {
         <li>
-            1 payment of             
-             @ParticipationObjectUI.PrintRegistrationFee(Model, displayCheckoutPrice)@(Model.PaymentPlans.Any() ? ", or " : "")
+            1 payment of
+            @ParticipationObjectUI.PrintRegistrationFee(Model.ParticipationObject, Model.IsCheckoutCost)@(Model.ParticipationObject.PaymentPlans.Any() ? ", or " : "")
         </li>
         }
-        @foreach (var plan in Model.PaymentPlans)
+        @foreach (var plan in Model.ParticipationObject.PaymentPlans)
         {
             <li>
                 @plan.TotalPeriods payments of
-                @ParticipationObjectUI.PrintPlanFee(plan, Model.OwnerAccount, displayCheckoutPrice)
+                @ParticipationObjectUI.PrintPlanFee(plan, Model.ParticipationObject.OwnerAccount, Model.IsCheckoutCost)
 
                 @if (plan.TotalPeriods > 1)
                 {    
                     <span>each</span>
-                    @plan.BillingPeriodTypeId.ToString().ToLower() @(plan.ID != Model.PaymentPlans.Last().ID ? ", or " : "")
+                    @plan.BillingPeriodTypeId.ToString().ToLower() @(plan.ID != Model.ParticipationObject.PaymentPlans.Last().ID ? ", or " : "")
                 }
             </li>
         }
@@ -36,9 +26,5 @@
 </p>
 
 <p>
-    @{ Html.RenderPartial(
-          "~/Views/Shared/ParticipationObject/_SubscriptionPlan.cshtml",
-          Model,
-          new ViewDataDictionary() { { "DisplayCheckoutPrice", displayCheckoutPrice } });
-    }
+    @{ Html.RenderPartial("_SubscriptionPlan", Model); }
 </p>

@@ -1,17 +1,17 @@
-﻿using AfterSchool.Areas.Org.Controllers;
+﻿using AfterSchool.Areas.Org.Assemblers.Activity;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using NUnit.Framework;
 
-namespace after_school_hq.Tests
+namespace after_school_hq.Tests.Assemblers.Activity
 {
-    public class EditDetailsAssemblerTests
+    public class EditRestrictionsAssemblerTests
     {
         [Test]
-        public void EditDetailsAssemblerTest()
+        public void EditRestrictionsAssemblerTest()
         {
-            var assembler = new EditDetailsAssembler();
-            var activity = new Activity
+            var assembler = new EditRestrictionsAssembler();
+            var activity = new AfterSchoolLibrary.Models.Activity
             {
                 AccountId = 1,
             };
@@ -21,10 +21,10 @@ namespace after_school_hq.Tests
                 ID = 1,
             };
             var fullScreenExitUrl = string.Empty;
-            var accountPackage = new AccountPackage();
-            var result = assembler.AssembleEditDetailsResult(currentAccount, msgs, activity, fullScreenExitUrl, false, accountPackage, true );
 
-            Assert.That(result.ActiveMenu, Is.EqualTo("EditDetails"));
+            var result = assembler.AssembleEditRestrictionsResult(activity, msgs, currentAccount, true, fullScreenExitUrl);
+
+            Assert.That(result.ActiveMenu, Is.EqualTo("EditRestrictions"));
             Assert.That(result.IsFullScreen, Is.True);
             Assert.That(result.Messages, Is.SameAs(msgs));
             Assert.That(result.Activity, Is.SameAs(activity));

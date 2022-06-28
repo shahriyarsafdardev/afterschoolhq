@@ -1,11 +1,12 @@
-﻿using AfterSchoolLibrary.Models;
+﻿using AfterSchool.Areas.Org.Controllers;
+using AfterSchoolLibrary.Models;
 using BasicLibrary;
 
-namespace AfterSchool.Areas.Org.Controllers
+namespace AfterSchool.Areas.Org.Assemblers.Activity
 {
     public class EditRestrictionsResult
     {
-        public Activity Activity { get; set; }
+        public AfterSchoolLibrary.Models.Activity Activity { get; set; }
         public SystemMessages Messages { get; set; }
         public Account CurrentAccount { get; set; }
         public string ActiveMenu { get; set; }
@@ -15,7 +16,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
     public class EditRestrictionsAssembler
     {
-        public EditRestrictionsResult AssembleEditRestrictionsResult(Activity activity, SystemMessages messages, Account currentAccount, bool isNew,
+        public EditRestrictionsResult AssembleEditRestrictionsResult(AfterSchoolLibrary.Models.Activity activity, SystemMessages messages, Account currentAccount, bool isNew,
             string fullScreenExitUrl)
         {
             var isFullScreen = EditHelpers.GetIsFullScreen(activity, isNew);

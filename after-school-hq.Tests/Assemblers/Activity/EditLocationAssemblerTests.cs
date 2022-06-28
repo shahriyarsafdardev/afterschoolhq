@@ -1,9 +1,9 @@
-﻿using AfterSchool.Areas.Org.Controllers;
+﻿using AfterSchool.Areas.Org.Assemblers.Activity;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using NUnit.Framework;
 
-namespace after_school_hq.Tests
+namespace after_school_hq.Tests.Assemblers.Activity
 {
     public class EditLocationAssemblerTests
     {
@@ -12,7 +12,7 @@ namespace after_school_hq.Tests
         {
             var assembler = new EditLocationAssembler();
             var account = new Account();
-            var activity = new Activity();
+            var activity = new AfterSchoolLibrary.Models.Activity();
             var messages = new SystemMessages();
             const string fullScreenExitUrl = "";
             var result = assembler.AssembleEditLocationResult(account, activity, messages, "1", UserType.NotSet, true, fullScreenExitUrl,

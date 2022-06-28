@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using AfterSchool.Areas.Org.Controllers;
+using AfterSchool.Areas.Org.Assemblers.Activity;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using NUnit.Framework;
 
-namespace after_school_hq.Tests
+namespace after_school_hq.Tests.Assemblers.Activity
 {
     public class EditScheduleAssemblerTests
     {
@@ -13,7 +13,7 @@ namespace after_school_hq.Tests
         public void CreateDefaultScheduleForRegistrationPeriodTest()
         {
             var assembler = new EditScheduleAssembler();
-            var activity = new Activity
+            var activity = new AfterSchoolLibrary.Models.Activity
             {
                 IsContinuousEnrollment = false,
                 CostFrequencyTypeId = ActivityCostFrequencyType.PerActivity,
@@ -33,7 +33,7 @@ namespace after_school_hq.Tests
         public void EditScheduleAssemblerTest()
         {
             var assembler = new EditScheduleAssembler();
-            var activity = new Activity();
+            var activity = new AfterSchoolLibrary.Models.Activity();
             var msgs = new SystemMessages();
             var currentAccount = new Account();
             var fullScreenExitUrl = string.Empty;

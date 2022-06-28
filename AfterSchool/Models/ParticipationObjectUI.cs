@@ -61,11 +61,11 @@ namespace AfterSchool.Models
             return "No Location Available";
         }
 
-        public static string PrintRegistrationFee(ParticipationObject participationObject, bool displayCheckoutPrice)
+        public static string PrintRegistrationFee(ParticipationObject participationObject, bool isCheckoutCost)
         {
             if (participationObject.Cost.HasValue)
             {
-                if (displayCheckoutPrice)
+                if (isCheckoutCost)
                     return participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency();
 
                 return participationObject.Cost.ToCurrency();
@@ -74,25 +74,25 @@ namespace AfterSchool.Models
             return "Free";
         }
 
-        public static string PrintPlanFee(SubscriptionPlan plan, Account ownerAccount, bool displayCheckoutPrice)
+        public static string PrintPlanFee(SubscriptionPlan plan, Account ownerAccount, bool isCheckoutCost)
         {
-            if (displayCheckoutPrice)
+            if (isCheckoutCost)
                 return plan.GetTotalCostWithConvenienceFee(ownerAccount).ToCurrency();
 
             return plan.CostPerPeriod.ToCurrency();
         }
 
-        public static string PrintMinPlanFee(SubscriptionPlan plan, Account ownerAccount, bool displayCheckoutPrice)
+        public static string PrintMinPlanFee(SubscriptionPlan plan, Account ownerAccount, bool isCheckoutCost)
         {
-            if (displayCheckoutPrice)
+            if (isCheckoutCost)
                 return plan.GetMinCostWithConvenienceFee(ownerAccount).ToCurrency();
 
             return (plan.CostPerPeriod.Value / plan.GetParticipationObject().SeatsAvailable.Value).ToCurrency();
         }
 
-        public static string PrintMaxPlanFee(SubscriptionPlan plan, Account ownerAccount, bool displayCheckoutPrice)
+        public static string PrintMaxPlanFee(SubscriptionPlan plan, Account ownerAccount, bool isCheckoutCost)
         {
-            if (displayCheckoutPrice)
+            if (isCheckoutCost)
                 return plan.GetMaxCostWithConvenienceFee(ownerAccount).ToCurrency();
 
             return (plan.CostPerPeriod.Value / (plan.GetParticipationObject().MinSeatsRequired ?? 1)).ToCurrency();

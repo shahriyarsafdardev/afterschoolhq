@@ -1,11 +1,12 @@
-﻿using AfterSchoolLibrary.Models;
+﻿using AfterSchool.Areas.Org.Controllers;
+using AfterSchoolLibrary.Models;
 using BasicLibrary;
 
-namespace AfterSchool.Areas.Org.Controllers
+namespace AfterSchool.Areas.Org.Assemblers.Activity
 {
     public class EditConfirmationResult
     {
-        public Activity Activity { get; set; }
+        public AfterSchoolLibrary.Models.Activity Activity { get; set; }
         public Account Account { get; set; }
         public SystemMessages Messages { get; set; }
         public bool IsFullScreen { get; set; }
@@ -14,7 +15,7 @@ namespace AfterSchool.Areas.Org.Controllers
     }
     public class EditConfirmationAssembler
     {
-        public EditConfirmationResult AssembleEditConfirmationResult(Account currentAccount, Activity activity, UserType accountUserType, bool currentUserIsActivityLeader, string isNew,
+        public EditConfirmationResult AssembleEditConfirmationResult(Account currentAccount, AfterSchoolLibrary.Models.Activity activity, UserType accountUserType, bool currentUserIsActivityLeader, string isNew,
             string fullScreenExitUrl, SystemMessages msgs)
         {
             return new EditConfirmationResult

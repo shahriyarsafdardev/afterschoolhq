@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using AfterSchool.Areas.Org.Controllers;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 
-namespace AfterSchool.Areas.Org.Controllers
+namespace AfterSchool.Areas.Org.Assemblers.Activity
 {
     public class EditSetupResult
     {
@@ -18,13 +19,13 @@ namespace AfterSchool.Areas.Org.Controllers
         public bool IsFullScreen { get; set; }
         public SystemMessages Messages { get; set; }
         public string ActiveMenu { get; set; }
-        public Activity Activity { get; set; }
+        public AfterSchoolLibrary.Models.Activity Activity { get; set; }
         public string FullScreenExitUrl { get; set; }
     }
 
     public class EditSetupAssembler
     {
-        public EditSetupResult AssembleEditSetupResult(Activity activity, ActivityGroup activityGroup, SystemMessages msgs, Account currentAccount,
+        public EditSetupResult AssembleEditSetupResult(AfterSchoolLibrary.Models.Activity activity, ActivityGroup activityGroup, SystemMessages msgs, Account currentAccount,
             string activeMenu, List<RegistrationPeriod> periods, RegistrationPeriod activePeriod, ActivityForm activeForm, AccountPackage accountPackage,
             UserType accountUserType, bool currentUserIsActivityLeader, string isNew, IEnumerable<Form> forms, string fullScreenExitUrl)
         {

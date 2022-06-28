@@ -1,46 +1,41 @@
-﻿@model Activity
+﻿@model AfterSchool.Areas.Org.Assemblers.Activity.SummaryResult
 @{
-    var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
-    var msgs = (SystemMessages)ViewBag.Messages;
-    var registrants = Model.GetRegistrantActivities();
-    var schedule = (ActivitySchedule)ViewBag.Schedule;
-    var totalPaid = (decimal)ViewBag.TotalPaid;
+    var participationObject = Model.ParticipationObject;
+    var msgs = Model.Messages;
+    var registrants = Model.Activity.GetRegistrantActivities();
+    var schedule = Model.Schedule;
+    var totalPaid = Model.TotalPaid;
     var registrantCount = registrants.Count;
     var waitingListCount = registrants.Count(x => x.AssignmentTypeId == RegistrationAssignmentType.WaitingList);
 
-    var currentAccount = SessionVariables.CurrentAccount;
+    var currentAccount = Model.CurrentAccount;
     var dates = registrants.Select(x => currentAccount.ConvertToAccountTimeZone(x.CreateDate.Value).ToShortDateString()).Distinct();
 
-    var classes = Model.GetCompletedAttendance();
-    var totalPresent = Model.GetAttendancePresentCount();
-    var totalPossible = Model.GetAttendancePossibleCount();
+    var classes = Model.Activity.GetCompletedAttendance();
+    var totalPresent = Model.Activity.GetAttendancePresentCount();
+    var totalPossible = Model.Activity.GetAttendancePossibleCount();
     var totalAbsent = totalPossible - totalPresent;
-    var attendanceRate = "0";
-    var isActivityLeader = true;
 
-    if (ViewBag.IsActivityLeader != null)
-    {
-        isActivityLeader = (bool)ViewBag.IsActivityLeader;
-    }
-
-    if (totalPresent > 0) {
-        attendanceRate = ((totalPresent.ToDouble() / (totalPresent + totalAbsent)) * 100).Round(1).ToString("###.#");
-    }
-    var accountPackage = SessionVariables.AccountPackage;
-    var currentUser = SessionVariables.CurrentUser;
+    var isActivityLeader = !Model.IsActivityLeader.HasValue || Model.IsActivityLeader.Value;
+    var attendanceRate = totalPresent > 0 ? (totalPresent.ToDouble() / (totalPresent + totalAbsent) * 100).Round(1).ToString("###.#") : "0";
+    var accountPackage = Model.AccountPackage;
+    var currentUser = Model.CurrentUser;
 }
 
-@{Html.RenderPartial("OrgAccountHeader");}
+@{Html.RenderPartial("OrgAccountHeader", currentAccount.ID.Value.ToString(), new ViewDataDictionary
+  {
+      { "IsFullScreen", false }
+  });}
 
 <div class="main-content">
 
-    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+    @{ Html.RenderPartial("_RenderMessages", msgs); }
 
-    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", new ActivityHeaderModel
+    @{ Html.RenderPartial("_ActivityHeader", new ActivityHeaderModel
        {
-           Activity = Model,
-           IsActivityLeader = (bool?) ViewData["IsActivityLeader"],
-           IsFullScreen = (bool?) ViewData["IsFullScreen"],
+           Activity = Model.Activity,
+           IsActivityLeader = Model.IsActivityLeader,
+           IsFullScreen = false,
            AccountPackage = accountPackage,
            CurrentAccount = currentAccount,
            CurrentUser = currentUser,
@@ -48,16 +43,16 @@
 
     <div class="panel panel-default">
         <div class="panel-heading text-center-sm">
-            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name + " - Summary"); }
+            @{Html.RenderPartial("_ActivityTitle", Model.Activity.Name + " - Summary"); }
 
             @if (isActivityLeader)
             {           
                 <div class="pull-right visible-lg visible-md">
-                    <a href="@Url.Action("editsetup", "activity", new {id = Model.Uid })" class="btn btn-default">Edit @UILabel.ActivityLabel(Model.ActivityTypeId) &raquo;</a>
+                    <a href="@Url.Action("EditSetup", "Activity", new {id = Model.Activity.Uid })" class="btn btn-default">Edit @UILabel.ActivityLabel(Model.Activity.ActivityTypeId) &raquo;</a>
                 </div>
            
                 <div class="visible-xs visible-sm">                
-                    <a href="@Url.Action("editsetup", "activity", new {id = Model.Uid })" class="btn btn-default">Edit @UILabel.ActivityLabel(Model.ActivityTypeId) &raquo;</a>                
+                    <a href="@Url.Action("EditSetup", "Activity", new {id = Model.Activity.Uid })" class="btn btn-default">Edit @UILabel.ActivityLabel(Model.Activity.ActivityTypeId) &raquo;</a>                
                 </div>             
 
             }
@@ -78,7 +73,7 @@
                     </div>
                     <div class="col-md-6">
 
-                        @if (Model.CostPerRegistrant > 0 && Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView))
+                        @if (Model.Activity.CostPerRegistrant > 0 && Permissions.HasPermission(Model.AccountUserType, PermissionType.AccountingView))
                         {
                             <div class="widget widget-tile widget-bordered">
                                 <div class="data-info">
@@ -104,7 +99,7 @@
                         <div class="widget widget-tile widget-bordered">
                             <div class="data-info">
                                 <div data-toggle="counter" data-end="@classes.Count" data-decimals="0" data-suffix="" class="value">@classes.Count</div>
-                                <div class="desc">Total @UILabel.ActivityLabel(Model.ActivityTypeId) Meetings</div>
+                                <div class="desc">Total @UILabel.ActivityLabel(Model.Activity.ActivityTypeId) Meetings</div>
                             </div>
                             <div class="icon"><span class="s7-users"></span></div>
                         </div>
@@ -141,7 +136,7 @@
 
                 <div class="col-md-4">
                     
-                    @if (!Model.IsFree)
+                    @if (!Model.Activity.IsFree)
                     {
                         <div class="panel panel-default">
                             <div class="panel-heading">
@@ -149,22 +144,34 @@
                                 @if (isActivityLeader)
                                 {
                                     <div class="pull-right">
-                                        <a href="@Url.Action("editcost", "activity", new { id = Model.Uid })" class="btn btn-sm btn-link">Edit &raquo;</a>
+                                        <a href="@Url.Action("EditCost", "Activity", new { id = Model.Activity.Uid })" class="btn btn-sm btn-link">Edit &raquo;</a>
                                     </div>
                                 }
                             </div>
                             <div class="panel-body">
                                 @if (participationObject.PostPayPlans.Any())
                                 {
-                                    Html.RenderPartial("~/Views/Shared/ParticipationObject/_TuitionAndPostPayPlans.cshtml", participationObject);
+                                    Html.RenderPartial("ParticipationObject/_TuitionAndPostPayPlans", new ParticipationObjectViewModel
+                                    {
+                                        IsCheckoutCost = false,
+                                        ParticipationObject = participationObject,
+                                    });
                                 }
                                 else if (!participationObject.PaymentPlans.Any())
                                 {
-                                    Html.RenderPartial("~/Views/Shared/ParticipationObject/_TuitionAndNoPaymentPlans.cshtml", participationObject);
+                                    Html.RenderPartial("ParticipationObject/_TuitionAndNoPaymentPlans", new ParticipationObjectViewModel
+                                    {
+                                        IsCheckoutCost = false,
+                                        ParticipationObject = participationObject,
+                                    }, new ViewDataDictionary{{"CurrentAccount", currentAccount}});
                                 }
                                 else
                                 {
-                                    Html.RenderPartial("~/Views/Shared/ParticipationObject/_TuitionAndPaymentPlans.cshtml", participationObject);
+                                    Html.RenderPartial("ParticipationObject/_TuitionAndPaymentPlans", new ParticipationObjectViewModel
+                                    {
+                                        IsCheckoutCost = false,
+                                        ParticipationObject = participationObject,
+                                    });
                                 }
                             </div>
                         </div>
@@ -179,15 +186,13 @@
                                 @if (isActivityLeader)
                                 {
                                     <div class="pull-right">
-                                        <a href="@Url.Action("editschedule", "activity", new { id = Model.Uid })" class="btn btn-sm btn-link">Edit &raquo;</a>
+                                        <a href="@Url.Action("EditSchedule", "Activity", new { id = Model.Activity.Uid })" class="btn btn-sm btn-link">Edit &raquo;</a>
                                     </div>
                                 }
 
                             </div>
                             <div class="panel-body">
-                                @{
-                                    Html.RenderPartial("~/Views/Shared/_ActivityScheduleHtml.cshtml", schedule);
-                                }
+                                @{ Html.RenderPartial("_ActivityScheduleHtml", schedule); }
                             </div>
                         </div>
                     }

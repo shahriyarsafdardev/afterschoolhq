@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Web.Mvc;
+using AfterSchool.Areas.Org.Assemblers.Activity;
 using AfterSchool.Models;
 using AfterSchoolLibrary;
 using AfterSchoolLibrary.Billing;
@@ -35,15 +36,25 @@ namespace AfterSchool.Areas.Org.Controllers
             if (activity.IsEmpty())
                 return HttpNotFound();
 
-            ViewBag.ParticipationObject = activity.GetParticipationObject(msgs);
-            var currentUserIsActivityLeader = SessionVariables.CurrentUser.IsActivityLeader(activity, msgs);
-            ViewBag.IsActivityLeader =
-                EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, SessionVariables.AccountUserType, currentUserIsActivityLeader);
-            ViewBag.Schedule = activity.GetSchedule(msgs);
-            ViewBag.TotalPaid = activity.GetTotalAmountPaid(msgs);
-            ViewBag.Messages = msgs;
+            var currentUser = SessionVariables.CurrentUser;
+            var accountUserType = SessionVariables.AccountUserType;
+            var accountPackage = SessionVariables.AccountPackage;
+            var result = GatherAndAssembleDataForSummaryResult(activity, currentAccount, currentUser, accountUserType, accountPackage, msgs);
+            return View(result);
+        }
 
-            return View(activity);
+        private SummaryResult GatherAndAssembleDataForSummaryResult(Activity activity, Account currentAccount, WebUser currentUser, UserType accountUserType,
+            AccountPackage accountPackage, SystemMessages msgs)
+        {
+            var participationObject = activity.GetParticipationObject(msgs);
+            var currentUserIsActivityLeader = currentUser.IsActivityLeader(activity, msgs);
+            var isActivityLeader =
+                EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, accountUserType, currentUserIsActivityLeader);
+            var schedule = activity.GetSchedule(msgs);
+            var totalPaid = activity.GetTotalAmountPaid(msgs);
+            var result = new SummaryAssembler().AssembleSummaryResult(activity, participationObject, schedule, totalPaid, isActivityLeader, 
+                accountUserType, currentAccount, accountPackage, currentUser, msgs);
+            return result;
         }
 
         [HttpGet]

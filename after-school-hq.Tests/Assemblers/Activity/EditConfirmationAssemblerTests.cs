@@ -1,9 +1,9 @@
-﻿using AfterSchool.Areas.Org.Controllers;
+﻿using AfterSchool.Areas.Org.Assemblers.Activity;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using NUnit.Framework;
 
-namespace after_school_hq.Tests
+namespace after_school_hq.Tests.Assemblers.Activity
 {
     public class EditConfirmationAssemblerTests
     {
@@ -12,7 +12,7 @@ namespace after_school_hq.Tests
         {
             var editConfirmationAssembler = new EditConfirmationAssembler();
             var account = new Account();
-            var activity = new Activity();
+            var activity = new AfterSchoolLibrary.Models.Activity();
             var systemMessages = new SystemMessages();
             var result = editConfirmationAssembler.AssembleEditConfirmationResult(account, activity, UserType.NotSet, true, "1", "http://fullscreen.local",
                 systemMessages);

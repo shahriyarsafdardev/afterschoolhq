@@ -1,15 +1,16 @@
 using System;
 using System.Collections.Generic;
+using AfterSchool.Areas.Org.Controllers;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 
-namespace AfterSchool.Areas.Org.Controllers
+namespace AfterSchool.Areas.Org.Assemblers.Activity
 {
     public class EditScheduleResult
     {
         public Account Account { get; set; }
         public SystemMessages Messages { get; set; }
-        public Activity Activity { get; set; }
+        public AfterSchoolLibrary.Models.Activity Activity { get; set; }
         public bool IsPublished { get; set; }
         public bool IsFullScreen { get; set; }
         public bool IsActivityLeader { get; set; }
@@ -21,7 +22,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
     public class EditScheduleAssembler
     {
-        public EditScheduleResult AssembleEditScheduleResult(ActivitySchedule schedule, Activity activity,
+        public EditScheduleResult AssembleEditScheduleResult(ActivitySchedule schedule, AfterSchoolLibrary.Models.Activity activity,
             Account currentAccount, UserType accountUserType, RegistrationPeriod activeRegistrationPeriod, bool currentUserIsActivityLeader,
             List<ActivitySchedule> schedules, string isNew, string fullScreenUrl, SystemMessages msgs)
         {
@@ -46,7 +47,7 @@ namespace AfterSchool.Areas.Org.Controllers
             return editScheduleResult;
         }
 
-        internal ActivitySchedule CreateDefaultScheduleForRegistrationPeriod(Activity activity, RegistrationPeriod period)
+        internal ActivitySchedule CreateDefaultScheduleForRegistrationPeriod(AfterSchoolLibrary.Models.Activity activity, RegistrationPeriod period)
         {
             var startDate = period.EndDateTime.Value.Date.FirstDateOfWeek().AddWeeks(1);
             var endDate = period.EndDateTime.Value.Date.FirstDateOfWeek().AddWeeks(9);

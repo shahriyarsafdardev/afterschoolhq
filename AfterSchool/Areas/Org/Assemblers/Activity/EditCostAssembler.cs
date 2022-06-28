@@ -1,11 +1,12 @@
-﻿using AfterSchoolLibrary.Models;
+﻿using AfterSchool.Areas.Org.Controllers;
+using AfterSchoolLibrary.Models;
 using BasicLibrary;
 
-namespace AfterSchool.Areas.Org.Controllers
+namespace AfterSchool.Areas.Org.Assemblers.Activity
 {
     public class EditCostResult
     {
-        public Activity Activity { get; set; }
+        public AfterSchoolLibrary.Models.Activity Activity { get; set; }
         public SystemMessages Messages { get; set; }
         public bool IsFullScreen { get; set; }
         public bool IsActivityLeader { get; set; }
@@ -18,7 +19,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
     public class EditCostAssembler
     {
-        public EditCostResult AssembleEditCostResult(Activity activity, int? accountId, UserType accountUserType, bool currentUserIsActivityLeader,
+        public EditCostResult AssembleEditCostResult(AfterSchoolLibrary.Models.Activity activity, int? accountId, UserType accountUserType, bool currentUserIsActivityLeader,
             string isNew,
             string fullScreenExitUrl, SystemMessages msgs, SubscriptionPlan subscriptionPlan, SubscriptionPlan paymentPlan, SubscriptionPlan postPayPlan,
             AccountPackage accountPackage)

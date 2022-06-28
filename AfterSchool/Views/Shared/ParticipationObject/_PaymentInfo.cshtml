@@ -1,37 +1,41 @@
 ﻿@model ParticipationObject
 
 <h3>
-    @{ Html.RenderPartial("~/Views/Shared/ParticipationObject/_FreeTuition.cshtml", Model); }
+    @{ Html.RenderPartial("_FreeTuition", Model); }
 </h3>
 
 @if (!Model.IsFree)
 {
     if (Model.PostPayPlans.IsNotEmpty() && Model.PostPayPlans.Any())
     {
-        Html.RenderPartial(
-            "~/Views/Shared/ParticipationObject/_TuitionAndPostPayPlans.cshtml",
-            Model,
-            new ViewDataDictionary() { { "DisplayCheckoutPrice", true } });
+        Html.RenderPartial("_TuitionAndPostPayPlans", new ParticipationObjectViewModel
+        {
+            IsCheckoutCost = true,
+            ParticipationObject = Model,
+        });
     }
     else if (Model.SubscriptionPlans.IsNotEmpty() && Model.SubscriptionPlans.Any())
     {
-        Html.RenderPartial(
-          "~/Views/Shared/ParticipationObject/_SubscriptionPlan.cshtml",
-          Model,
-          new ViewDataDictionary() { { "DisplayCheckoutPrice", true } });
+        Html.RenderPartial("_SubscriptionPlan", new ParticipationObjectViewModel
+        {
+            IsCheckoutCost = true,
+            ParticipationObject = Model,
+        });
     }
     else if (Model.PaymentPlans.IsNotEmpty() && Model.PaymentPlans.Any())
     {
-        Html.RenderPartial(
-            "~/Views/Shared/ParticipationObject/_TuitionAndPaymentPlans.cshtml",
-            Model,
-            new ViewDataDictionary() { { "DisplayCheckoutPrice", true } });
+        Html.RenderPartial("_TuitionAndPaymentPlans", new ParticipationObjectViewModel
+        {
+            IsCheckoutCost = true,
+            ParticipationObject = Model,
+        });
     }
     else
     {
-        Html.RenderPartial(
-            "~/Views/Shared/ParticipationObject/_TuitionAndNoPaymentPlans.cshtml",
-            Model,
-            new ViewDataDictionary() { { "DisplayCheckoutPrice", true } });
+        Html.RenderPartial("_TuitionAndNoPaymentPlans", new ParticipationObjectViewModel
+        {
+            IsCheckoutCost = true,
+            ParticipationObject = Model,
+        }, new ViewDataDictionary{{"CurrentAccount", SessionVariables.CurrentAccount}});
     }
 }

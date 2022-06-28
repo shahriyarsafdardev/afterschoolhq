@@ -1,9 +1,9 @@
-﻿using AfterSchool.Areas.Org.Controllers;
+﻿using AfterSchool.Areas.Org.Assemblers.Activity;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using NUnit.Framework;
 
-namespace after_school_hq.Tests
+namespace after_school_hq.Tests.Assemblers.Activity
 {
     public class EditCostAssemblerTests
     {
@@ -11,7 +11,7 @@ namespace after_school_hq.Tests
         public void EditCostAssemblerTest()
         {
             var assembler = new EditCostAssembler();
-            var activity = new Activity {AccountId = 3};
+            var activity = new AfterSchoolLibrary.Models.Activity {AccountId = 3};
             var msgs = new SystemMessages();
             var accountPackage = new AccountPackage();
             const string fullScreenExitUrl = "";
