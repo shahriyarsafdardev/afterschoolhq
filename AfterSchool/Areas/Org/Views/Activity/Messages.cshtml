@@ -3,6 +3,9 @@
     ViewBag.Title = Model.AccountName;
     var msgs = (SystemMessages)ViewBag.Messages;
     var activityMessages = (List<ActivityMessage>)ViewBag.ActivityMessages;
+    var accountPackage = SessionVariables.AccountPackage;
+    var currentAccount = SessionVariables.CurrentAccount;
+    var currentUser = SessionVariables.CurrentUser;
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
@@ -11,7 +14,15 @@
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model);}
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", new ActivityHeaderModel
+       {
+           Activity = Model,
+           IsActivityLeader = (bool?) ViewData["IsActivityLeader"],
+           IsFullScreen = (bool?) ViewData["IsFullScreen"],
+           AccountPackage = accountPackage,
+           CurrentAccount = currentAccount,
+           CurrentUser = currentUser,
+       }); }
 
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -21,10 +32,10 @@
             @{Html.RenderPartial(
                 "~/Views/Shared/_Messages.cshtml",
                 activityMessages,
-                new ViewDataDictionary()
+                new ViewDataDictionary
                 {
                     { "SendNewMessageLink", Url.Action("messageadd", "activity", new { id = Model.Uid }) },
-                    { "Account", SessionVariables.CurrentAccount },
+                    { "Account", currentAccount },
                     { "ViewLinkController", "activity" },
                     { "ViewLinkAction", "messages" },
                     { "ViewLinkId", Model.Uid.ToString() },

@@ -7,11 +7,13 @@
     var showCopyWithStudents = "1";
     var mustRequestToPublish = (bool) ViewBag.MustRequestToPublish;
     var showCopyButton = (bool) ViewBag.ShowCopyButton;
+    var currentAccount = SessionVariables.CurrentAccount;
     var showSetupPayments = Model.ProviderAccountId.IsEmpty() &&
-                            !SessionVariables.CurrentAccount.CanReceivePaymentDeposits() &&
-                            !SessionVariables.CurrentAccount.HasTreasurer() &&
+                            !currentAccount.CanReceivePaymentDeposits() &&
+                            !currentAccount.HasTreasurer() &&
                             !Model.IsFree;
-    var allowInvitesPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowInvites, SessionVariables.AccountPackage);
+    var accountPackage = SessionVariables.AccountPackage;
+    var allowInvitesPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowInvites, accountPackage);
 
     if (Request["isnew"] == "1")
     {
@@ -39,7 +41,8 @@
         Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
     }
 
-    var showAllowInvites = SessionVariables.AccountPackage.HasFeature(FeatureType.AllowInvites);
+    var showAllowInvites = accountPackage.HasFeature(FeatureType.AllowInvites);
+    var currentUser = SessionVariables.CurrentUser;
 }
 
 @{ Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString()); }
@@ -48,7 +51,15 @@
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-@{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model); }
+@{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", new ActivityHeaderModel
+   {
+       Activity = Model,
+       IsActivityLeader = (bool?) ViewData["IsActivityLeader"],
+       IsFullScreen = (bool?) ViewData["IsFullScreen"],
+       AccountPackage = accountPackage,
+       CurrentAccount = currentAccount,
+       CurrentUser = currentUser,
+   }); }
 
 <div class="panel panel-default">
 <div class="panel-heading">
@@ -180,13 +191,13 @@
                         <tr>
                             <td>Organization Home Page</td>
                             <td>
-                                <input type="text" value="@SessionVariables.CurrentAccount.ShortHomePageUrl" id="account-reg-url" onclick="this.select()" class="form-control inline"/>
+                                <input type="text" value="@currentAccount.ShortHomePageUrl" id="account-reg-url" onclick="this.select()" class="form-control inline"/>
                             </td>
                             <td>
-                                <span onclick="WebPage.copySelection('@SessionVariables.CurrentAccount.ShortHomePageUrl', 'URL has been copied')" title="Copy Url">
+                                <span onclick="WebPage.copySelection('@currentAccount.ShortHomePageUrl', 'URL has been copied')" title="Copy Url">
                                     <i class="s7-copy-file icon-large text-success pointer"></i>
                                 </span>
-                                <a href="@SessionVariables.CurrentAccount.ShortHomePageUrl" target="_blank" title="View Page">
+                                <a href="@currentAccount.ShortHomePageUrl" target="_blank" title="View Page">
                                     <i class="s7-link icon-large"></i>
                                 </a>
                             </td>

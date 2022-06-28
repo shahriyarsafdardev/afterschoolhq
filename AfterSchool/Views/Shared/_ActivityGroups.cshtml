@@ -8,13 +8,8 @@
     var isExternalGroupsView = ViewBag.isExternalGroupsView ?? false;
     var pendingInvites = (List<ActivityGroup>)ViewBag.pendingInvites;
     var recentlyDeclinedInvites = (List<ActivityGroup>)ViewBag.RecentlyDeclinedInvites;
-    var addAction = "edit";
-    if (Model.Count == 0  && activityGroupType == ActivityGroupType.League)
-    {
-        addAction = "editsetup";
-    }
 
-if (action == null)
+    if (action == null)
     {
         action = "index";
     }
@@ -72,11 +67,11 @@ else if (isExternalGroupsView && Model.Count == 0)
             }
             else
             {
-                <p>You haven't created any @UILabel.ActivityGroupLabel(activityGroupType, true).ToLower() yet. In order to get started, <a href="@Url.Action(addAction, controller, new { isnew = 1 })">create your first @UILabel.ActivityGroupLabel(activityGroupType).ToLower()</a>.</p>
+                <p>You haven't created any @UILabel.ActivityGroupLabel(activityGroupType, true).ToLower() yet. In order to get started, <a href="@Url.Action("edit", controller, new { isnew = 1 })">create your first @UILabel.ActivityGroupLabel(activityGroupType).ToLower()</a>.</p>
 
                 <p>&nbsp;</p>
                 <p>
-                    <a href="@Url.Action(addAction, controller, new { isnew = 1 })" class="btn btn-primary btn-lg">Create Your First @UILabel.ActivityGroupLabel(activityGroupType) &raquo;</a>
+                    <a href="@Url.Action("edit", controller, new { isnew = 1 })" class="btn btn-primary btn-lg">Create Your First @UILabel.ActivityGroupLabel(activityGroupType) &raquo;</a>
                 </p>
             }
 
@@ -222,9 +217,9 @@ else
     </div>
 
     Html.RenderPartial(
-        "~/Views/Shared/_Paging.cshtml",
+        "_Paging",
         paging,
-        new ViewDataDictionary()
+        new ViewDataDictionary
         {
             { "id", "" },
             { "querystring", string.Format("archive={0}", Request["archive"]) },

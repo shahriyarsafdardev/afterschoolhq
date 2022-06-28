@@ -4,11 +4,22 @@
     var msgs = (SystemMessages) ViewBag.Messages;
     var surveyResponses = (List<SurveyResponse>) ViewBag.GetSurveyFeedback;
     var survey = (SurveyRequest) ViewBag.Survey;
+    var accountPackage = SessionVariables.AccountPackage;
+    var currentAccount = SessionVariables.CurrentAccount;
+    var currentUser = SessionVariables.CurrentUser;
 }
 @{ Html.RenderPartial("OrgAccountHeader"); }
 <div class="main-content">
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
-    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model); }
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", new ActivityHeaderModel
+       {
+           Activity = Model,
+           IsActivityLeader = (bool?) ViewData["IsActivityLeader"],
+           IsFullScreen = (bool?) ViewData["IsFullScreen"],
+           AccountPackage = accountPackage,
+           CurrentAccount = currentAccount,
+           CurrentUser = currentUser,
+       }); }
     <div class="panel panel-default">
         <div class="panel-body surveypanelpadding">
             <div class="row">

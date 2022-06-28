@@ -6,29 +6,20 @@
     var account = SessionVariables.CurrentAccount;
     var totalPaid = Model.GetTotalPaid();
     var activeRegistrationPeriod = Model.GetActiveRegistrationPeriod();
-    int registrantCount = ras
-        .Where(x => x.AssignmentTypeId.In(Registration.ReservedStatuses))
-        .Count();
-    int waitingListCount = ras
-        .Where(x => x.AssignmentTypeId == RegistrationAssignmentType.WaitingList)
-        .Count();
-    int applicationCount = ras
-        .Where(x => x.AssignmentTypeId == RegistrationAssignmentType.Applied)
-        .Count();
-    int invitationCount = ras
-        .Where(x => x.AssignmentTypeId == RegistrationAssignmentType.Invited)
-        .Count();
-    int declinedCount = ras
-        .Where(x => x.AssignmentTypeId == RegistrationAssignmentType.Declined)
-        .Count();
+    var registrantCount = ras.Count(x => x.AssignmentTypeId.In(Registration.ReservedStatuses));
+    var waitingListCount = ras.Count(x => x.AssignmentTypeId == RegistrationAssignmentType.WaitingList);
+    var applicationCount = ras.Count(x => x.AssignmentTypeId == RegistrationAssignmentType.Applied);
+    var invitationCount = ras.Count(x => x.AssignmentTypeId == RegistrationAssignmentType.Invited);
+    var declinedCount = ras.Count(x => x.AssignmentTypeId == RegistrationAssignmentType.Declined);
     var assignmentType = (RegistrationAssignmentType)ViewBag.AssignmentType;
 
     var accountPackage = SessionVariables.AccountPackage;
     var showAllowInvites = accountPackage.HasFeature(FeatureType.AllowInvites);
     var showStudentCRM = accountPackage.HasFeature(FeatureType.StudentCRM);
-    var allowInvitesPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowInvites, SessionVariables.AccountPackage);
-    var studentCRMPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.StudentCRM, SessionVariables.AccountPackage);
+    var allowInvitesPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowInvites, accountPackage);
+    var studentCRMPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.StudentCRM, accountPackage);
     var isReadOnlySeatStatus = (bool)ViewBag.IsReadOnlySeatStatus;
+    var currentUser = SessionVariables.CurrentUser;
 }
 
 
@@ -38,7 +29,15 @@
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model);}
+    @{ Html.RenderPartial("_ActivityHeader", new ActivityHeaderModel
+       {
+           Activity = Model,
+           IsActivityLeader = (bool?) ViewData["IsActivityLeader"],
+           IsFullScreen = (bool?) ViewData["IsFullScreen"],
+           AccountPackage = accountPackage,
+           CurrentAccount = account,
+           CurrentUser = currentUser,
+       }); }
 
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -216,9 +215,6 @@
 
                     <a href="@Url.Action("registrantdownload", "activity", new { id = Model.Uid })" class="btn btn-primary btn-space hide">
                         <i class="icon icon-left s7-download"></i> Download Registration Data
-                    </a>
-                    <a href="@Url.Action("registrantimport", "activity", new { id = Model.Uid })" class="btn btn-primary btn-space hide">
-                        <i class="icon icon-left s7-upload"></i> Import Registration Data
                     </a>
                 </div>
             </div>

@@ -1,17 +1,18 @@
 ﻿@model List<Activity>
 @{
-    ViewBag.Title = SessionVariables.CurrentAccount.Name;
+    var currentAccount = SessionVariables.CurrentAccount;
+    ViewBag.Title = currentAccount.Name;
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
     var hasArchivedActivities = (bool)ViewBag.HasArchivedActivities;
     var activityType = (ActivityType)ViewBag.ActivityType;
     var accountPackage = SessionVariables.AccountPackage;
     var managePermissionSlips = accountPackage.HasFeature(FeatureType.ManagePermissionSlips);
     var maxPermissionSlipCount = accountPackage.IsNotEmpty() ? (int)accountPackage.GetFeature(FeatureType.ManagePermissionSlips).Max.Value : 0;
-    var showPermissionSlipFields = ViewBag.PagingModel?.TotalCount >= maxPermissionSlipCount ? false : true;
-    var permissionSlipsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManagePermissionSlips, SessionVariables.AccountPackage);
+    var showPermissionSlipFields = ViewBag.PagingModel?.TotalCount < maxPermissionSlipCount;
+    var permissionSlipsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManagePermissionSlips, accountPackage);
 }
 
-@{Html.RenderPartial("OrgAccountHeader", SessionVariables.CurrentAccount.ID.ToString());}
+@{Html.RenderPartial("OrgAccountHeader", currentAccount.ID.ToString());}
 
 <div class="main-content">
 
@@ -52,9 +53,10 @@
             @{ Html.RenderPartial(
                  "~/Views/Shared/_Activities.cshtml",
                  Model,
-                 new ViewDataDictionary() {
-                    { "Account", SessionVariables.CurrentAccount },
-                    { "AccountPackage", SessionVariables.AccountPackage },
+                 new ViewDataDictionary
+                 {
+                    { "Account", currentAccount },
+                    { "AccountPackage", accountPackage },
                     { "PagingModel", ViewBag.PagingModel },
                     { "ShowRegistrationPeriodFilter", true },
                     { "Groups", ViewBag.Groups },
@@ -62,8 +64,7 @@
                     { "NeedToUpgrade", false },
                     { "HasArchivedActivities", hasArchivedActivities },
                     { "ActivityType", (int)activityType }
-                     }
-                 ); }
+                }); }
         </div>
     </div>
 </div>

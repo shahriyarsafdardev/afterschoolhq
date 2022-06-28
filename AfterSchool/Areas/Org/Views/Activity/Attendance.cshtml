@@ -2,6 +2,9 @@
 @{
     ViewBag.Title = Model.AccountName;
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+    var accountPackage = SessionVariables.AccountPackage;
+    var currentAccount = SessionVariables.CurrentAccount;
+    var currentUser = SessionVariables.CurrentUser;
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
@@ -10,7 +13,15 @@
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model);}
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", new ActivityHeaderModel
+       {
+           Activity = Model,
+           IsActivityLeader = (bool?) ViewData["IsActivityLeader"],
+           IsFullScreen = (bool?) ViewData["IsFullScreen"],
+           AccountPackage = accountPackage,
+           CurrentAccount = currentAccount,
+           CurrentUser = currentUser,
+       }); }
 
     <div class="panel panel-default">
         <div class="panel-heading">

@@ -19,8 +19,10 @@
         : 0;
     var currentEmailCount = ViewBag.EmailCount != null ? (int)ViewBag.EmailCount : 0;
     var emailQuotaExceeded = currentEmailCount >= maxEmailCount;
-    var emailMessagingPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.EmailMessaging, SessionVariables.AccountPackage);
-    var textMessagingPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.TextMessaging, SessionVariables.AccountPackage);
+    var emailMessagingPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.EmailMessaging, accountPackage);
+    var textMessagingPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.TextMessaging, accountPackage);
+    var currentAccount = SessionVariables.CurrentAccount;
+    var currentUser = SessionVariables.CurrentUser;
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
@@ -29,7 +31,15 @@
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model); }
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", new ActivityHeaderModel
+       {
+           Activity = Model,
+           IsActivityLeader = (bool?) ViewData["IsActivityLeader"],
+           IsFullScreen = (bool?) ViewData["IsFullScreen"],
+           AccountPackage = accountPackage,
+           CurrentAccount = currentAccount,
+           CurrentUser = currentUser,
+       }); }
 
     <div class="panel panel-default">
         <div class="panel-heading">

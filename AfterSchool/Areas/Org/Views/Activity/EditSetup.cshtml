@@ -12,6 +12,7 @@
     {
         Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
     }
+    var currentUser = SessionVariables.CurrentUser;
 }
 
 @{ Html.RenderPartial("OrgAccountHeader", Model.Activity.AccountId.ToString()); }
@@ -20,7 +21,15 @@
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model.Activity); }
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", new ActivityHeaderModel
+       {
+           Activity = Model.Activity,
+           IsActivityLeader = (bool?) ViewData["IsActivityLeader"],
+           IsFullScreen = (bool?) ViewData["IsFullScreen"],
+           AccountPackage = accountPackage,
+           CurrentAccount = Model.Account,
+           CurrentUser = currentUser,
+       }); }
 
     <div class="panel panel-default margin-bottom-zero">
         <div class="panel-heading">

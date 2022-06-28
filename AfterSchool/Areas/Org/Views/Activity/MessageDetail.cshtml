@@ -12,6 +12,8 @@
     {
         registrantsPerColumn = Math.Ceiling(amrs.Count / 3.0).ToInteger();
     }
+    var accountPackage = SessionVariables.AccountPackage;
+    var currentUser = SessionVariables.CurrentUser;
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
@@ -20,7 +22,15 @@
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", activity);}
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", new ActivityHeaderModel
+       {
+           Activity = activity,
+           IsActivityLeader = (bool?) ViewData["IsActivityLeader"],
+           IsFullScreen = (bool?) ViewData["IsFullScreen"],
+           AccountPackage = accountPackage,
+           CurrentAccount = account,
+           CurrentUser = currentUser,
+       }); }
 
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -80,7 +90,7 @@
                                                     {
                                                         <i class="s7-check-circle text-success text-bold"></i>
                                                     }
-                                                    @(amr.RegistrantDisplayName.HasValue() ? amr.RegistrantDisplayName : amr.RegistrantEmail)
+                                                    @(string.IsNullOrEmpty(amr.RegistrantDisplayName) ? amr.RegistrantEmail : amr.RegistrantDisplayName)
                                                 </div>
                                             }
                                         </div>

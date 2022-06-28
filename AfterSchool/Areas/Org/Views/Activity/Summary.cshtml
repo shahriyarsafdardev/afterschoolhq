@@ -5,12 +5,11 @@
     var registrants = Model.GetRegistrantActivities();
     var schedule = (ActivitySchedule)ViewBag.Schedule;
     var totalPaid = (decimal)ViewBag.TotalPaid;
-    int registrantCount = registrants.Count;
-    int waitingListCount = registrants
-        .Where(x => x.AssignmentTypeId == RegistrationAssignmentType.WaitingList)
-        .Count();
+    var registrantCount = registrants.Count;
+    var waitingListCount = registrants.Count(x => x.AssignmentTypeId == RegistrationAssignmentType.WaitingList);
 
-    var dates = registrants.Select(x => SessionVariables.CurrentAccount.ConvertToAccountTimeZone(x.CreateDate.Value).ToShortDateString()).Distinct();
+    var currentAccount = SessionVariables.CurrentAccount;
+    var dates = registrants.Select(x => currentAccount.ConvertToAccountTimeZone(x.CreateDate.Value).ToShortDateString()).Distinct();
 
     var classes = Model.GetCompletedAttendance();
     var totalPresent = Model.GetAttendancePresentCount();
@@ -27,6 +26,8 @@
     if (totalPresent > 0) {
         attendanceRate = ((totalPresent.ToDouble() / (totalPresent + totalAbsent)) * 100).Round(1).ToString("###.#");
     }
+    var accountPackage = SessionVariables.AccountPackage;
+    var currentUser = SessionVariables.CurrentUser;
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -35,7 +36,15 @@
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model); }
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", new ActivityHeaderModel
+       {
+           Activity = Model,
+           IsActivityLeader = (bool?) ViewData["IsActivityLeader"],
+           IsFullScreen = (bool?) ViewData["IsFullScreen"],
+           AccountPackage = accountPackage,
+           CurrentAccount = currentAccount,
+           CurrentUser = currentUser,
+       }); }
 
     <div class="panel panel-default">
         <div class="panel-heading text-center-sm">
@@ -199,7 +208,7 @@
             // the chart.
             data: [
                 @foreach(var date in dates){
-                    @:{ date: '@date', value: @registrants.Where(x => SessionVariables.CurrentAccount.ConvertToAccountTimeZone(x.CreateDate.Value).ToShortDateString() == date).Count() },
+                    @:{ date: '@date', value: @registrants.Count(x => currentAccount.ConvertToAccountTimeZone(x.CreateDate.Value).ToShortDateString() == date) },
                 }
             ],
             // The name of the data record attribute that contains x-values.

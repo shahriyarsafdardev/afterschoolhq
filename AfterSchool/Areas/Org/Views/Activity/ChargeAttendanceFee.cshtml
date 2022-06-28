@@ -4,6 +4,9 @@
     var attendancesToBillRegistrants = (Dictionary<RegistrantActivity, List<Attendance>>)ViewBag.AttendancesToBillRegistrants;
     var billingPeriodType = ViewBag.BillingPeriodType;
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+    var accountPackage = SessionVariables.AccountPackage;
+    var currentAccount = SessionVariables.CurrentAccount;
+    var currentUser = SessionVariables.CurrentUser;
 }
 
 @{
@@ -15,7 +18,15 @@
     @{
         Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs);
 
-        Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model);
+        Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", new ActivityHeaderModel
+        {
+            Activity = Model,
+            IsActivityLeader = (bool?) ViewData["IsActivityLeader"],
+            IsFullScreen = (bool?) ViewData["IsFullScreen"],
+            AccountPackage = accountPackage,
+            CurrentAccount = currentAccount,
+            CurrentUser = currentUser,
+        });
     }
 
     <div class="panel panel-default">
