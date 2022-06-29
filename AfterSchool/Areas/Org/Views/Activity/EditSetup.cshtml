@@ -15,7 +15,10 @@
     var currentUser = SessionVariables.CurrentUser;
 }
 
-@{ Html.RenderPartial("OrgAccountHeader", Model.Activity.AccountId.ToString()); }
+@{ Html.RenderPartial("OrgAccountHeader", Model.Activity.AccountId.ToString(), new ViewDataDictionary
+   {
+       {"IsFullScreen", isFullScreen},
+   }); }
 
 <div class="main-content">
 
@@ -24,8 +27,8 @@
     @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", new ActivityHeaderModel
        {
            Activity = Model.Activity,
-           IsActivityLeader = (bool?) ViewData["IsActivityLeader"],
-           IsFullScreen = (bool?) ViewData["IsFullScreen"],
+           IsActivityLeader = Model.IsActivityLeader,
+           IsFullScreen = isFullScreen,
            AccountPackage = accountPackage,
            CurrentAccount = Model.Account,
            CurrentUser = currentUser,
