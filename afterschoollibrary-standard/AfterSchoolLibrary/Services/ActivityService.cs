@@ -931,7 +931,9 @@ namespace AfterSchoolLibrary.Services
             if (name.IsNotEmpty())
             {
                 activity.Name = name.ToString();
-                activity.UniqueName = GenerateUniqueName(name.ToString(), activity.ID, activity.AccountId, msgs, dc);
+                
+                if (activity.UniqueName.IsEmpty())
+                    activity.UniqueName = GenerateUniqueName(name.ToString(), activity.ID, activity.AccountId, msgs, dc);
             }
 
             if (ageStart.IsNumber())
