@@ -1503,32 +1503,34 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var isNew = Request[IsNewRequest] == "1";
             var fullScreenExitUrl = GetFullScreenExitUrl(activity);
-            switch (activity.ActivityTypeId)
-            {
-                case ActivityType.LearningPod:
-                case ActivityType.Activity:
-                case ActivityType.VolunteerOpportunity:
-                    var editRestrictionsResult = new EditRestrictionsAssembler().AssembleEditRestrictionsResult(activity, msgs, currentAccount, isNew,
-                        fullScreenExitUrl);
+            if(cmd == "next") {
+                switch (activity.ActivityTypeId)
+                {
+                    case ActivityType.LearningPod:
+                    case ActivityType.Activity:
+                    case ActivityType.VolunteerOpportunity:
+                        var editRestrictionsResult = new EditRestrictionsAssembler().AssembleEditRestrictionsResult(activity, msgs, currentAccount, isNew,
+                            fullScreenExitUrl);
 
-                    return View("EditRestrictions", editRestrictionsResult);
+                        return View("EditRestrictions", editRestrictionsResult);
 
-                case ActivityType.FieldTrip:
-                case ActivityType.Team:
-                    return GoToEditSchedule(activity, activity.ActivityScheduleId?.ToString(), msgs, currentAccount, currentUser);
+                    case ActivityType.FieldTrip:
+                    case ActivityType.Team:
+                        return GoToEditSchedule(activity, activity.ActivityScheduleId?.ToString(), msgs, currentAccount, currentUser);
 
-                case ActivityType.PermissionSlip:
-                    var isActivityLeader = EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, SessionVariables.AccountUserType,
-                        currentUser.IsActivityLeader(activity, msgs));
-                    var editDetailsResult = new EditDetailsAssembler().AssembleEditDetailsResult(currentAccount, msgs, activity, fullScreenExitUrl,
-                        isActivityLeader, accountPackage, isNew);
-                    return View("EditDetails", editDetailsResult);
-
-                default:
-                    var resultDefault =
-                        GatherDataForAndAssembleEditSetupResult(activity, activityGroup, msgs, currentAccount, "EditSetup", Request[IsNewRequest]);
-                    return View(resultDefault);
+                    case ActivityType.PermissionSlip:
+                        var isActivityLeader = EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, SessionVariables.AccountUserType,
+                            currentUser.IsActivityLeader(activity, msgs));
+                        var editDetailsResult = new EditDetailsAssembler().AssembleEditDetailsResult(currentAccount, msgs, activity, fullScreenExitUrl,
+                            isActivityLeader, accountPackage, isNew);
+                        return View("EditDetails", editDetailsResult);
+                }
             }
+            
+            var resultDefault =
+                GatherDataForAndAssembleEditSetupResult(activity, activityGroup, msgs, currentAccount, "EditSetup", Request[IsNewRequest]);
+            return View(resultDefault);
+            
         }
 
         private ActionResult GoToEditSchedule(Activity activity, string scheduleId, SystemMessages msgs, Account currentAccount, WebUser currentUser)
