@@ -2,7 +2,7 @@
 @{
     var currentAccount = SessionVariables.CurrentAccount;
     ViewBag.Title = currentAccount.Name;
-    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+    var msgs = (SystemMessages)ViewBag.Messages;
     var hasArchivedActivities = (bool)ViewBag.HasArchivedActivities;
     var activityType = (ActivityType)ViewBag.ActivityType;
     var accountPackage = SessionVariables.AccountPackage;
@@ -46,7 +46,10 @@
                     </a>
                 }
             </div>
-            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", UILabel.ActivityLabel(activityType, true)); }
+            @{
+                var activityTypeLabel = (activityType == ActivityType.VolunteerOpportunity ? "Volunteer " : "") + UILabel.ActivityLabel(activityType, true);
+                Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", activityTypeLabel);
+            }
             <div class="clearfix"></div>
         </div>
         <div class="panel-body">

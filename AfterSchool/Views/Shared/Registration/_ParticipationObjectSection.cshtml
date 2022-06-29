@@ -6,6 +6,7 @@
     var isInEditMode = (bool) ViewData["IsInEditMode"];
     var accountUid = (Guid) ViewData["AccountUid"];
     var activityTypeDisplayLabel = activityType.ToString().SplitByUpperCase();
+    var activityLabel = (string)ViewData["ActivityLabel"];
 }
 
 @if (Model.Any())
@@ -14,7 +15,7 @@
         <div class="col-lg-12">
             <div class="activity-detail-block">
                 <div class="pull-left">
-                    <h2>@UILabel.ActivityLabel(activityType, true)</h2>
+                    <h2>@activityLabel</h2>
                 </div>
                 <div class="pull-right padding-v-20">
                     <a href="@browseUrl">

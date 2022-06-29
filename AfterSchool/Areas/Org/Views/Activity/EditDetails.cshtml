@@ -2,7 +2,7 @@
 @{
     ViewBag.Title = Model.Account.Name;
     var msgs = Model.Messages;
-    var isFullScreen = Model.IsFullScreen;
+    var isFullScreen = (Request["isnew"] == "1" && !Model.Activity.IsPublished) || Model.IsFullScreen;
     if (isFullScreen)
     {
         Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
@@ -10,8 +10,10 @@
     var currentUser = SessionVariables.CurrentUser;
 }
 
-@{ Html.RenderPartial("OrgAccountHeader", Model.Activity.AccountId.ToString());}
-
+@{ Html.RenderPartial("OrgAccountHeader", Model.Activity.AccountId.ToString(), new ViewDataDictionary
+   {
+       {"IsFullScreen", Model.IsFullScreen},
+   }); }
 <div class="main-content">
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }

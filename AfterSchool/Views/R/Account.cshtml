@@ -177,6 +177,7 @@
                     {"ShowViewMore", activities.Count > takeActivities},
                     {"IsInEditMode", isInEditMode},
                     {"AccountUid", Model.Uid},
+                    {"ActivityLabel", UILabel.ActivityLabel(ActivityType.Activity, true)}
                 });
             
             if(Model.HasAccountPackageFeature(FeatureType.ManageVolunteerOpportunities)) {
@@ -190,6 +191,7 @@
                                 {"ShowViewMore", volunteerOpportunities.Count > takeActivities},
                                 {"IsInEditMode", isInEditMode},
                                 {"AccountUid", Model.Uid},
+                                {"ActivityLabel", "Volunteering"}
                             });
             }
         

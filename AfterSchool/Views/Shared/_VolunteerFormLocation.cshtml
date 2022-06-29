@@ -9,13 +9,13 @@
 
 <div class="panel panel-default panel-small-padding">
     <div class="panel-heading activity-heading">
-        Your Volunteer Opportunity Location Information
+        Location Information
     </div>
     <div class="panel-body">
 
         <div class="form-group">
             <label class="col-md-3 control-label">
-                Location
+                Type
             </label>
             <div class="col-md-9">
                 <div class="am-radio">
@@ -26,7 +26,7 @@
                                value="@((int) ActivityLocationType.NotSet)"
                                class="activitylocationtype"
                                @(Model.ActivityLocationTypeId == ActivityLocationType.NotSet ? "checked=\"checked\"" : "")/>
-                        <label for="activitylocationtype-@((int) ActivityLocationType.NotSet)">None</label>
+                        <label for="activitylocationtype-@((int) ActivityLocationType.NotSet)">N/A</label>
                     </span>
                     <span>
                         <input type="radio"
@@ -54,7 +54,7 @@
 
             <div class="form-group">
                 <label class="col-sm-3 control-label">
-                    Volunteer Opportunity Location
+                    Address
                 </label>
                 <div class="col-sm-9">
                     @{ Html.RenderPartial("Components/_GoogleLocationEdit", location); }
@@ -70,7 +70,7 @@
                            Model.LocationDetails,
                            new ViewDataDictionary {{"name", "locationdetails"}, {"id", "locationdetails"}}); }
                     <p class="text-muted">
-                        <em>Enter your room number or any special instructions or information about the location?</em>
+                        <em>Enter your room number or any special instructions or information about the location.</em>
                     </p>
                 </div>
             </div>
