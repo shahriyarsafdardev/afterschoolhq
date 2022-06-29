@@ -396,7 +396,7 @@ namespace AfterSchoolLibrary.Services
 
             // ongoing activity
             //.. If first day of month, don't set anchor so no pro rate
-            if (plan.PlanTypeId == SubscriptionPlanType.Subscription && participationObject.Schedule.IsEmpty() && DateTime.UtcNow.Date != DateTime.Now.FirstDateOfMonth().Date)
+            if (DoesSubscriptionNeedBillingAnchorSet(participationObject, plan))
             {
                 if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
                     billingCycleAnchor = startDateTime.LastDateOfMonth().AddDays(1);
@@ -405,6 +405,12 @@ namespace AfterSchoolLibrary.Services
             }
 
             return billingCycleAnchor;
+        }
+
+        private static bool DoesSubscriptionNeedBillingAnchorSet(ParticipationObject participationObject, SubscriptionPlan plan)
+        {
+            return plan.PlanTypeId == SubscriptionPlanType.Subscription && participationObject.Schedule.IsEmpty() &&
+                   DateTime.UtcNow.Date != DateTime.Now.FirstDateOfMonth().Date;
         }
 
         public static bool CheckRegistrantChargeForWeeklyBillingType(this Registrant registrant, Activity activity)
