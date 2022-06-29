@@ -932,6 +932,7 @@ namespace AfterSchoolLibrary.Services
             {
                 activity.Name = name.ToString();
                 
+                // would be better to know if the activity has been published at least once
                 if (activity.UniqueName.IsEmpty())
                     activity.UniqueName = GenerateUniqueName(name.ToString(), activity.ID, activity.AccountId, msgs, dc);
             }
