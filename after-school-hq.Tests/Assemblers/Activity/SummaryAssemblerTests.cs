@@ -28,7 +28,6 @@ namespace after_school_hq.Tests.Assemblers.Activity
             Assert.That(result.Schedule, Is.EqualTo(schedule));
             Assert.That(result.TotalPaid, Is.EqualTo(totalPaid));
             Assert.That(result.IsActivityLeader, Is.False);
-            Assert.That(result.IsFullScreen, Is.False);
             Assert.That(result.AccountUserType, Is.EqualTo(accountUserType));
             Assert.That(result.CurrentAccount, Is.EqualTo(currentAccount));
             Assert.That(result.CurrentUser, Is.EqualTo(currentUser));
