@@ -1339,6 +1339,8 @@ namespace AfterSchoolLibrary.Billing
             if (endDate.HasValue && endDate.IsNotEmpty() && endDate.Value.Date.IsAfter(DateTime.UtcNow.Date.AddDays(1)))
                 options.CancelAt = endDate.Value;
 
+            // options.ProrationBehavior = "none";
+
             if (stripeAccountId.IsNotEmpty())
                 options.TransferData = new SubscriptionTransferDataOptions()
                 {
