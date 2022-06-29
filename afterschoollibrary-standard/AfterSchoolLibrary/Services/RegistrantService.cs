@@ -394,40 +394,23 @@ namespace AfterSchoolLibrary.Services
         {
             DateTime? billingCycleAnchor = null;
 
-            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
+            // ongoing activity
+            //.. If first day of month, don't set anchor so no pro rate
+            if (DoesSubscriptionNeedBillingAnchorSet(participationObject, plan))
             {
-                //.. Payment Plans are just the registration fee broken up into multiple payments.
-                //.. So when a person registers late it should just start the payment plan on checkout in that case. 
-
-                //if (startDateTime <= DateTime.UtcNow && plan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
-                //{
-                //    if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
-                //        billingCycleAnchor = DateTime.UtcNow.Date.LastDateOfMonth().AddDays(1);
-                //    else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
-                //        billingCycleAnchor = DateTime.UtcNow.Date.LastDateOfWeek().AddDays(1);
-                //}                           
-            }
-            else if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
-            {
-                //.. Ongoing activity
-                if (participationObject.Schedule.IsEmpty())
-                {
-                    //.. If first day of month, don't set anchor so no pro rate
-                    if (DateTime.UtcNow.Date != DateTime.Now.FirstDateOfMonth().Date)
-                    {
-                        if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
-                            billingCycleAnchor = startDateTime.LastDateOfMonth().AddDays(1);
-                        else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
-                            billingCycleAnchor = startDateTime.LastDateOfWeek().AddDays(1);
-                    }
-                }
-                else if (startDateTime < DateTime.UtcNow)
-                {
-                    billingCycleAnchor = null; // ..else start billing immediately (stripe defaults to now + trial days)  
-                }
+                if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
+                    billingCycleAnchor = startDateTime.LastDateOfMonth().AddDays(1);
+                else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
+                    billingCycleAnchor = startDateTime.LastDateOfWeek().AddDays(1);
             }
 
             return billingCycleAnchor;
+        }
+
+        private static bool DoesSubscriptionNeedBillingAnchorSet(ParticipationObject participationObject, SubscriptionPlan plan)
+        {
+            return plan.PlanTypeId == SubscriptionPlanType.Subscription && participationObject.Schedule.IsEmpty() &&
+                   DateTime.UtcNow.Date != DateTime.Now.FirstDateOfMonth().Date;
         }
 
         public static bool CheckRegistrantChargeForWeeklyBillingType(this Registrant registrant, Activity activity)

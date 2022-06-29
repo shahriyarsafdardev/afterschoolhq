@@ -1332,12 +1332,14 @@ namespace AfterSchoolLibrary.Billing
                 BillingCycleAnchor = billingCycleAnchor
             };
 
-            if (startDate.Value.Date.AddDays(-1).IsAfter(DateTime.UtcNow.Date))
-                options.TrialEnd = startDate.Value.AddDays(-1); // if start date is at least one day in the future, start a day before start date            
+            if (startDate.Value.Date.IsAfter(DateTime.UtcNow.Date.AddDays(1)))
+                options.TrialEnd = startDate.Value; // if start date is at least one day in the future, start on start date
 
             // please make sure that billing ends when the program ends.
-            if (endDate.HasValue && endDate.IsNotEmpty() && endDate.Value.Date.AddDays(-1).IsAfter(DateTime.UtcNow.Date))
+            if (endDate.HasValue && endDate.IsNotEmpty() && endDate.Value.Date.IsAfter(DateTime.UtcNow.Date.AddDays(1)))
                 options.CancelAt = endDate.Value;
+
+            // options.ProrationBehavior = "none";
 
             if (stripeAccountId.IsNotEmpty())
                 options.TransferData = new SubscriptionTransferDataOptions()
