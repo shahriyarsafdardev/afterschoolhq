@@ -1,14 +1,14 @@
 ﻿@model ParticipationObject
 
 <h3>
-    @{ Html.RenderPartial("_FreeTuition", Model); }
+    @{ Html.RenderPartial("ParticipationObject/_FreeTuition", Model); }
 </h3>
 
 @if (!Model.IsFree)
 {
     if (Model.PostPayPlans.IsNotEmpty() && Model.PostPayPlans.Any())
     {
-        Html.RenderPartial("_TuitionAndPostPayPlans", new ParticipationObjectViewModel
+        Html.RenderPartial("ParticipationObject/_TuitionAndPostPayPlans", new ParticipationObjectViewModel
         {
             IsCheckoutCost = true,
             ParticipationObject = Model,
@@ -16,7 +16,7 @@
     }
     else if (Model.SubscriptionPlans.IsNotEmpty() && Model.SubscriptionPlans.Any())
     {
-        Html.RenderPartial("_SubscriptionPlan", new ParticipationObjectViewModel
+        Html.RenderPartial("ParticipationObject/_SubscriptionPlan", new ParticipationObjectViewModel
         {
             IsCheckoutCost = true,
             ParticipationObject = Model,
@@ -24,7 +24,7 @@
     }
     else if (Model.PaymentPlans.IsNotEmpty() && Model.PaymentPlans.Any())
     {
-        Html.RenderPartial("_TuitionAndPaymentPlans", new ParticipationObjectViewModel
+        Html.RenderPartial("ParticipationObject/_TuitionAndPaymentPlans", new ParticipationObjectViewModel
         {
             IsCheckoutCost = true,
             ParticipationObject = Model,
@@ -32,7 +32,7 @@
     }
     else
     {
-        Html.RenderPartial("_TuitionAndNoPaymentPlans", new ParticipationObjectViewModel
+        Html.RenderPartial("ParticipationObject/_TuitionAndNoPaymentPlans", new ParticipationObjectViewModel
         {
             IsCheckoutCost = true,
             ParticipationObject = Model,
