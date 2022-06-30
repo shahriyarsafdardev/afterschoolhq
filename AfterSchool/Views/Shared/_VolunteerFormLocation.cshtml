@@ -22,15 +22,6 @@
                     <span>
                         <input type="radio"
                                name="activitylocationtype"
-                               id="activitylocationtype-@((int) ActivityLocationType.NotSet)"
-                               value="@((int) ActivityLocationType.NotSet)"
-                               class="activitylocationtype"
-                               @(Model.ActivityLocationTypeId == ActivityLocationType.NotSet ? "checked=\"checked\"" : "")/>
-                        <label for="activitylocationtype-@((int) ActivityLocationType.NotSet)">N/A</label>
-                    </span>
-                    <span>
-                        <input type="radio"
-                               name="activitylocationtype"
                                id="activitylocationtype-@((int) ActivityLocationType.Physical)"
                                value="@((int) ActivityLocationType.Physical)"
                                class="activitylocationtype"
@@ -46,6 +37,15 @@
                                @(Model.ActivityLocationTypeId == ActivityLocationType.Virtual ? "checked=\"checked\"" : "")/>
                         <label for="activitylocationtype-@((int) ActivityLocationType.Virtual)">Virtual</label>
                     </span>
+                    <span>
+                        <input type="radio"
+                               name="activitylocationtype"
+                               id="activitylocationtype-@((int) ActivityLocationType.NotSet)"
+                               value="@((int) ActivityLocationType.NotSet)"
+                               class="activitylocationtype"
+                               @(Model.ActivityLocationTypeId == ActivityLocationType.NotSet ? "checked=\"checked\"" : "")/>
+                        <label for="activitylocationtype-@((int) ActivityLocationType.NotSet)">To be determined</label>
+                    </span>
                 </div>
             </div>
         </div>
@@ -54,7 +54,7 @@
 
             <div class="form-group">
                 <label class="col-sm-3 control-label">
-                    Address
+                    Location
                 </label>
                 <div class="col-sm-9">
                     @{ Html.RenderPartial("Components/_GoogleLocationEdit", location); }
@@ -122,18 +122,21 @@
     });
 
     function toggleLocationEdit(obj) {
-        $('#physical-location').addClass('hide');
-        $('#virtual-location').addClass('hide');
+        let isPhysical = obj.val() === '@((int) ActivityLocationType.Physical)';
+        let isVirtual = obj.val() === '@((int) ActivityLocationType.Virtual)';
 
-        $('.my-location').prop("required", false);
-        $('#virtuallocation').prop("required", false);
+        $('.my-location').prop("required", isPhysical);
 
-        if (obj.val() == '@((int) ActivityLocationType.Physical)') {
+        if (isPhysical) {
             $('#physical-location').removeClass('hide');
-            $('.my-location').prop("required", true);
-        } else if (obj.val() == '@((int) ActivityLocationType.Virtual)') {
+        } else {
+            $('#physical-location').addClass('hide');
+        }
+
+        if (isVirtual) {
             $('#virtual-location').removeClass('hide');
-            $('#virtuallocation').prop("required", true);
+        } else {
+            $('#virtual-location').addClass('hide');
         }
     }
 

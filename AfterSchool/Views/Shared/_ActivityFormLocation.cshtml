@@ -1,27 +1,24 @@
 ﻿@model Activity
 @{ var location = ViewData["Location"]; }
+
+<style>
+    span > label {
+        margin-right:  15px;
+    }
+</style>
+
 <div class="panel panel-default panel-small-padding">
     <div class="panel-heading activity-heading">
-        Your Activity Location Information
+        Location Information
     </div>
     <div class="panel-body">
 
         <div class="form-group">
             <label class="col-md-3 control-label">
-                Location
+                Type
             </label>
             <div class="col-md-9">
                 <div class="am-radio">
-                    <span>
-                        <input type="radio"
-                               name="activitylocationtype"
-                               id="activitylocationtype-@((int) ActivityLocationType.NotSet)"
-                               value="@((int) ActivityLocationType.NotSet)"
-                               class="activitylocationtype"
-                               @(Model.ActivityLocationTypeId == ActivityLocationType.NotSet ? "checked=\"checked\"" : "")/>
-                        <label for="activitylocationtype-@((int) ActivityLocationType.NotSet)">None</label>
-                        &nbsp;
-                    </span>
                     <span>
                         <input type="radio"
                                name="activitylocationtype"
@@ -30,7 +27,6 @@
                                class="activitylocationtype"
                                @(Model.ActivityLocationTypeId == ActivityLocationType.Physical ? "checked=\"checked\"" : "")/>
                         <label for="activitylocationtype-@((int) ActivityLocationType.Physical)">Physical</label>
-                        &nbsp;
                     </span>
                     <span>
                         <input type="radio"
@@ -40,8 +36,16 @@
                                class="activitylocationtype"
                                @(Model.ActivityLocationTypeId == ActivityLocationType.Virtual ? "checked=\"checked\"" : "")/>
                         <label for="activitylocationtype-@((int) ActivityLocationType.Virtual)">Virtual</label>
-                        &nbsp;
                     </span>
+                     <span>
+                        <input type="radio"
+                               name="activitylocationtype"
+                               id="activitylocationtype-@((int) ActivityLocationType.NotSet)"
+                               value="@((int) ActivityLocationType.NotSet)"
+                               class="activitylocationtype"
+                               @(Model.ActivityLocationTypeId == ActivityLocationType.NotSet ? "checked=\"checked\"" : "")/>
+                        <label for="activitylocationtype-@((int) ActivityLocationType.NotSet)">To be determined</label>
+                     </span>
                 </div>
             </div>
         </div>
@@ -50,7 +54,7 @@
 
             <div class="form-group">
                 <label class="col-sm-3 control-label">
-                    Activity Location
+                    Location
                 </label>
                 <div class="col-sm-9">
                     @{ Html.RenderPartial("~/Views/Shared/Components/_GoogleLocationEdit.cshtml", location); }
@@ -117,20 +121,23 @@
 
     });
 
-    function toggleLocationEdit(obj) {
-        $('#physical-location').addClass('hide');
-        $('#virtual-location').addClass('hide');
+   function toggleLocationEdit(obj) {
+       let isPhysical = obj.val() === '@((int) ActivityLocationType.Physical)';
+       let isVirtual = obj.val() === '@((int) ActivityLocationType.Virtual)';
 
-        $('.my-location').prop("required", false);
-        $('#virtuallocation').prop("required", false);
+       $('.my-location').prop("required", isPhysical);
 
-        if (obj.val() == '@((int) ActivityLocationType.Physical)') {
-            $('#physical-location').removeClass('hide');
-            $('.my-location').prop("required", true);
-        } else if (obj.val() == '@((int) ActivityLocationType.Virtual)') {
-            $('#virtual-location').removeClass('hide');
-            $('#virtuallocation').prop("required", true);
-        }
-    }
+       if (isPhysical) {
+           $('#physical-location').removeClass('hide');
+       } else {
+           $('#physical-location').addClass('hide');
+       }
+
+       if (isVirtual) {
+           $('#virtual-location').removeClass('hide');
+       } else {
+           $('#virtual-location').addClass('hide');
+       }
+   }
 
 </script>

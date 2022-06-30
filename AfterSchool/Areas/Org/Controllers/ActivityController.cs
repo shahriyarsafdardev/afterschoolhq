@@ -1345,16 +1345,11 @@ namespace AfterSchool.Areas.Org.Controllers
             var accountPackage = SessionVariables.AccountPackage;
             var msgs = new SystemMessages();
 
-            Activity activity;
-            Activity defaultActivity;
-            ActivityGroup activityGroup = null;
-            ActivityForm activeForm;
-
             if (id.IsEmpty() || !id.IsGuid())
                 return HttpNotFound();
 
-            activity = currentAccount.GetActivity(id.ToGuid(), msgs);
-            defaultActivity = currentAccount.GetDefaultNewActivity();
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+            var defaultActivity = currentAccount.GetDefaultNewActivity();
 
             if (name.IsEmpty())
                 msgs.Add("Activity name is required.", MessageType.UserError);
@@ -1363,6 +1358,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (form.IsEmpty() && (isAdvanceSettingEnabled.IsEmpty() || !isAdvanceSettingEnabled.ToBoolean()))
             {
+                ActivityForm activeForm;
                 if (activity.IsNotEmpty())
                     //.. edit activity
                     activeForm = activity.GetActiveActivityForm(msgs);
@@ -1387,6 +1383,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 return View(result);
             }
 
+            var activityLocationTypeId = (int)(activity.IsNotEmpty() ? activity.ActivityLocationTypeId : defaultActivity.ActivityLocationTypeId);
             var values = new Dictionary<string, object>
             {
                 {"name", name.MaxChars(75)},
@@ -1415,12 +1412,39 @@ namespace AfterSchool.Areas.Org.Controllers
                 {"ageend", activity.IsNotEmpty() ? activity.AgeEnd : defaultActivity.AgeEnd},
                 {"costfrequencytype", costfrequencytype},
                 {"cutoffhours", cutoffhours},
-                {
-                    "isContinuousEnrollmentEnabled",
-                    isContinuousEnrollmentEnabled.IsNotEmpty() && isContinuousEnrollmentEnabled.ToBoolean()
-                },
+                {"isContinuousEnrollmentEnabled", isContinuousEnrollmentEnabled.IsNotEmpty() && isContinuousEnrollmentEnabled.ToBoolean()},
+                {"activitylocationtype", activityLocationTypeId},
             };
+            var isNew = Request[IsNewRequest] == "1";
+            if (isNew && activityLocationTypeId == (int) ActivityLocationType.Physical && activity.IsEmpty())
+            {
+                var location = currentAccount.GetDefaultLocation();
+                
+                if (location.IsNotEmpty())
+                {
+                    values = values.Concat(new Dictionary<string, object>
+                    {
+                        {"locationname", location.Name},
+                        {"locationdetails", location.Details},
+                        {"address1", location.Address1},
+                        {"streetnumber", location.StreetNumber},
+                        {"streetname", location.StreetName},
+                        {"address2", location.Address2},
+                        {"neighborhood", location.Neighborhood},
+                        {"city", location.City},
+                        {"county", location.County},
+                        {"state", location.State},
+                        {"postalcode", location.PostalCode},
+                        {"country", location.Country},
+                        {"placeid", location.GooglePlaceId},
+                        {"latitude", location.Latitude},
+                        {"longitude", location.Longitude},
+                        {"mylocation", location.HostAccountId == currentAccount.ID},
+                    }).ToDictionary(k => k.Key, v => v.Value);
+                }
+            }
 
+            ActivityGroup activityGroup = null;
             if (activity.IsNotEmpty())
             {
                 activity = ActivityService.EditExisting(
@@ -1500,8 +1524,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (group.IsGuid())
                 activityGroup = currentAccount.GetActivityGroup(group.ToGuid(), msgs);
-
-            var isNew = Request[IsNewRequest] == "1";
+            
             var fullScreenExitUrl = GetFullScreenExitUrl(activity);
             if(cmd == "next") {
                 switch (activity.ActivityTypeId)
@@ -1753,17 +1776,19 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 if (beforeProviderAccountId != activity.ProviderAccountId)
                     activity.NotifyProviderOfNewActivity(currentUser, msgs);
-
-                switch (activity.ActivityTypeId)
+                if (cmd == "next")
                 {
-                    case ActivityType.Activity:
-                    case ActivityType.LearningPod:
-                    case ActivityType.VolunteerOpportunity:
-                        var editLocationResult = GatherDataForAndAssembleEditLocationResult(id, Request[IsNewRequest]);
-                        return View("EditLocation", editLocationResult);
-                    default:
-                        var editCostResult = GatherDataForAndAssembleEditCostResult(activity, msgs, currentAccount, currentUser, Request[IsNewRequest]);
-                        return View("EditCost", editCostResult);
+                    switch (activity.ActivityTypeId)
+                    {
+                        case ActivityType.Activity:
+                        case ActivityType.LearningPod:
+                        case ActivityType.VolunteerOpportunity:
+                            var editLocationResult = GatherDataForAndAssembleEditLocationResult(id, Request[IsNewRequest], msgs);
+                            return View("EditLocation", editLocationResult);
+                        default:
+                            var editCostResult = GatherDataForAndAssembleEditCostResult(activity, msgs, currentAccount, currentUser, Request[IsNewRequest]);
+                            return View("EditCost", editCostResult);
+                    } 
                 }
             }
 
@@ -2061,14 +2086,13 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult EditLocation(string id)
         {
-            var result = GatherDataForAndAssembleEditLocationResult(id, Request[IsNewRequest]);
+            var result = GatherDataForAndAssembleEditLocationResult(id, Request[IsNewRequest], new SystemMessages());
             return View(result);
         }
 
-        private EditLocationResult GatherDataForAndAssembleEditLocationResult(string id, string isNew)
+        private EditLocationResult GatherDataForAndAssembleEditLocationResult(string id, string isNew, SystemMessages msgs)
         {
             var currentAccount = SessionVariables.CurrentAccount;
-            var msgs = new SystemMessages();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var currentUser = SessionVariables.CurrentUser;
 
@@ -2078,7 +2102,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var fullScreenExitUrl = GetFullScreenExitUrl(activity);
             var location = activity.GetLocation() ?? activity.GetAccount().GetAccountProfile()?.GetLocation();
             return new EditLocationAssembler().AssembleEditLocationResult(currentAccount, activity, msgs, isNew, accountUserType,
-                currentUserIsActivityLeader, fullScreenExitUrl, location);
+                currentUserIsActivityLeader, fullScreenExitUrl, location, accountPackage, currentUser);
         }
 
         [ValidateInput(false)]
@@ -2174,7 +2198,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
             }
 
-            var editLocationResult = GatherDataForAndAssembleEditLocationResult(id, isNew);
+            var editLocationResult = GatherDataForAndAssembleEditLocationResult(id, isNew, msgs);
             return View(editLocationResult);
         }
 

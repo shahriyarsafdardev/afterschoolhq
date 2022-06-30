@@ -15,8 +15,10 @@ namespace after_school_hq.Tests.Assemblers.Activity
             var activity = new AfterSchoolLibrary.Models.Activity();
             var messages = new SystemMessages();
             const string fullScreenExitUrl = "";
-            var result = assembler.AssembleEditLocationResult(account, activity, messages, "1", UserType.NotSet, true, fullScreenExitUrl,
-                null);
+            var accountPackage = new AccountPackage();
+            var currentUser = new WebUser();
+            var result = assembler.AssembleEditLocationResult(account, activity, messages, "1", UserType.NotSet, true, fullScreenExitUrl, null, accountPackage,
+                currentUser);
 
             Assert.That(result.Account, Is.SameAs(account));
             Assert.That(result.Activity, Is.SameAs(activity));
@@ -25,6 +27,8 @@ namespace after_school_hq.Tests.Assemblers.Activity
             Assert.That(result.IsFullScreen, Is.True);
             Assert.That(result.FullScreenExitUrl, Is.EqualTo(fullScreenExitUrl));
             Assert.That(result.Location.LocationTypeId, Is.EqualTo(LocationType.NotSet));
+            Assert.That(result.AccountPackage, Is.SameAs(accountPackage));
+            Assert.That(result.CurrentUser, Is.SameAs(currentUser));
         }
     }
 }

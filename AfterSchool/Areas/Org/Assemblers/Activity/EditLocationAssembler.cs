@@ -13,12 +13,15 @@ namespace AfterSchool.Areas.Org.Assemblers.Activity
         public bool IsActivityLeader { get; set; }
         public string FullScreenExitUrl { get; set; }
         public Location Location { get; set; }
+        public AccountPackage AccountPackage { get; set; }
+        public WebUser CurrentUser { get; set; }
     }
 
     public class EditLocationAssembler
     {
         public EditLocationResult AssembleEditLocationResult(Account account, AfterSchoolLibrary.Models.Activity activity, SystemMessages messages,
-            string isNew, UserType accountUserType, bool currentUserIsActivityLeader, string fullScreenExitUrl, Location location)
+            string isNew, UserType accountUserType, bool currentUserIsActivityLeader, string fullScreenExitUrl, Location location,
+            AccountPackage accountPackage, WebUser currentUser)
         {
             var isActivityLeader = EditHelpers.IsActivityLeader(account.ID, activity.AccountId, accountUserType, currentUserIsActivityLeader);
             var isFullScreen = EditHelpers.GetIsFullScreen(activity, isNew == "1");
@@ -31,6 +34,8 @@ namespace AfterSchool.Areas.Org.Assemblers.Activity
                 IsFullScreen = isFullScreen,
                 FullScreenExitUrl = fullScreenExitUrl,
                 Location = location ?? new Location(),
+                AccountPackage = accountPackage,
+                CurrentUser = currentUser,
             };
         }
     }

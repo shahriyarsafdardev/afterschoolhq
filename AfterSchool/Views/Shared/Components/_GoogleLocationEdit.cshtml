@@ -34,12 +34,12 @@
 
 <script>
 
-    var selected = false;
+    let selected = false;
 
     PageEvent.add(PageEvent.AFTER_INIT, function () {
-        var input = document.getElementById('location');        
+        let input = document.getElementById('location');        
 
-        var options = {
+        let options = {
             @if (types.IsNotEmpty())
             {
                 @:types: ['@types'],
@@ -48,18 +48,18 @@
 
         (function pacSelectFirst(input) {
             // store the original event binding function
-            var _addEventListener = (input.addEventListener) ? input.addEventListener : input.attachEvent;
+            let _addEventListener = (input.addEventListener) ? input.addEventListener : input.attachEvent;
 
             function addEventListenerWrapper(type, listener) {
                 // Simulate a 'down arrow' keypress on hitting 'return' when no pac suggestion is selected,
                 // and then trigger the original listener.
                 if (type == "keydown") {
-                    var orig_listener = listener;
+                    let orig_listener = listener;
                     listener = function (event) {
-                        var suggestion_selected = $(".pac-item-selected").length > 0;
+                        let suggestion_selected = $(".pac-item-selected").length > 0;
                         if (event.which == 13 && !suggestion_selected) {
                             event.preventDefault();
-                            var simulated_downarrow = $.Event("keydown", {
+                            let simulated_downarrow = $.Event("keydown", {
                                 keyCode: 40,
                                 which: 40
                             });

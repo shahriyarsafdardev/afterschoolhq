@@ -2505,8 +2505,7 @@ namespace AfterSchoolLibrary.Services
 
             return new Activity
             {
-                SeatsAvailable = Math.Min(20,
-                    account.GetActiveAccountPackage().GetFeature(FeatureType.Participants).Max.Value.ToInteger()),
+                SeatsAvailable = Math.Min(20, account.GetActiveAccountPackage().GetFeature(FeatureType.Participants).Max.Value.ToInteger()),
                 CostPerRegistrant = 0,
                 AccountId = account.ID,
                 RegistrationModeId = RegistrationMode.Register,
@@ -2518,6 +2517,7 @@ namespace AfterSchoolLibrary.Services
                 AgeStart = profile?.AgeStart,
                 AgeEnd = profile?.AgeEnd,
                 IsContinuousEnrollment = false,
+                ActivityLocationTypeId = ActivityLocationType.Physical,
             };
         }
 
