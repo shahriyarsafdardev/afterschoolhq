@@ -180,21 +180,21 @@
                     {"ActivityLabel", UILabel.ActivityLabel(ActivityType.Activity, true)}
                 });
             
-            if(Model.HasAccountPackageFeature(FeatureType.ManageVolunteerOpportunities)) {
-             var volunteerOpportunities = participationObjects.Where(po => po.ActivityType == ActivityType.VolunteerOpportunity).ToList();
-                        Html.RenderPartial("Registration/_ParticipationObjectSection",
-                            volunteerOpportunities.Take(takeActivities).ToList(),
-                            new ViewDataDictionary
-                            {
-                                {"BrowseUrl", Model.BrowseUrl},
-                                {"ActivityType", ActivityType.VolunteerOpportunity},
-                                {"ShowViewMore", volunteerOpportunities.Count > takeActivities},
-                                {"IsInEditMode", isInEditMode},
-                                {"AccountUid", Model.Uid},
-                                {"ActivityLabel", "Volunteering"}
-                            });
+            if (Model.HasAccountPackageFeature(FeatureType.ManageVolunteerOpportunities))
+            {
+                var volunteerOpportunities = participationObjects.Where(po => po.ActivityType == ActivityType.VolunteerOpportunity).ToList();
+                Html.RenderPartial("Registration/_ParticipationObjectSection",
+                    volunteerOpportunities.Take(takeActivities).ToList(),
+                    new ViewDataDictionary
+                    {
+                        {"BrowseUrl", Model.BrowseUrl},
+                        {"ActivityType", ActivityType.VolunteerOpportunity},
+                        {"ShowViewMore", volunteerOpportunities.Count > takeActivities},
+                        {"IsInEditMode", isInEditMode},
+                        {"AccountUid", Model.Uid},
+                        {"ActivityLabel", "Volunteer Opportunities"},
+                    });
             }
-        
         }
     </div>
 }
