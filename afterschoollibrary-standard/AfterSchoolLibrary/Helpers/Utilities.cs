@@ -35,16 +35,7 @@ namespace AfterSchoolLibrary.Helpers
             }
         }
 
-        public static string Environment
-        {
-            get
-            {
-                if (!IsLocalHost)
-                    return ConfigurationManager.AppSettings["NET_ENV"];
-
-                return "Local";
-            }
-        }
+        public static string Environment => IsLocalHost ? "Local" : ConfigurationManager.AppSettings["NET_ENV"];
 
         public static bool IsProduction => ConfigurationManager.AppSettings["NET_ENV"] == "Production";
 
