@@ -1,9 +1,5 @@
 ﻿@model ParticipationObject
 @{
-    var objects = (List<ParticipationObject>)ViewBag.ParticipationObjects;
-    var grades = (List<GradeLevel>)ViewBag.Grades;
-    var cart = (Cart)ViewBag.Cart;
-    var locations = (List<Location>)ViewBag.Locations;
     var showSeatsRemaining = true;
     var showLocation = false;
     var accountProfile = (AccountProfile)ViewBag.AccountProfile;
@@ -137,13 +133,23 @@
                             <em>
                                 @if (!Model.RegistrationPeriod.IsClosed(Model.OwnerAccount))
                                 {
-                                    <span>@Model.SeatsRemaining.ToString() seats</span>
-                                    @(Model.RegistrationMode == RegistrationMode.Register ? "left" : "")
-
-                                    if (Model.CanRegisterPerClass)
+                                    var remainingSeats = Model.SeatsRemaining.ToString();
+                                    if (Model.ActivityType == ActivityType.VolunteerOpportunity)
                                     {
-                                        <span>for next class</span>
+                                        remainingSeats += " volunteers needed";
                                     }
+                                    else
+                                    {
+                                        remainingSeats += " seats";
+                                        remainingSeats += Model.RegistrationMode == RegistrationMode.Register ? " left" : "";
+                                        
+                                        if (Model.CanRegisterPerClass)
+                                        {
+                                            remainingSeats += " for next class";
+                                        }
+                                    }
+                                    
+                                    <span>@remainingSeats</span>
                                 }
                                 else if (!Model.RegistrationPeriod.WillOpen(Model.OwnerAccount))
                                 {
@@ -182,7 +188,7 @@
                     }
 
                     <span>
-                        Restrictions: @ParticipationObjectUI.PrintGenderRestrictions(Model)
+                        Gender Restrictions: @ParticipationObjectUI.PrintGenderRestrictions(Model)
                     </span>
                 </div>
             </div>

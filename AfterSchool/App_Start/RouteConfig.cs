@@ -9,20 +9,7 @@ namespace AfterSchool
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
-            //routes.RouteExistingFiles = true;
-            //routes.MapRoute(
-            //    name: "StaticFileRoute",
-            //    url: "home/{*file}",
-            //    defaults: new { controller = "Home", action = "HandleStatic", area = "" }
-            //);
-
             routes.IgnoreRoute("");
-
-            //routes.MapRoute(
-            //    "HomePage",
-            //    "",
-            //    new { controller = "home", action = "index", id = UrlParameter.Optional },
-            //    new[] { "AfterSchool.Controllers" });
 
             routes.MapRoute(
                 "Home",
@@ -229,7 +216,7 @@ namespace AfterSchool
 
             routes.MapRoute(
                 "VolunteerOpportunitySelectDates",
-                "{accountname}/volunteeropportunity/{activityname}/selectdates",
+                "{accountname}/opportunity/{activityname}/selectdates",
                 new
                 {
                     controller = "r",
@@ -363,6 +350,18 @@ namespace AfterSchool
                     activityname = UrlParameter.Optional,
                 });
 
+            routes.MapRoute(
+                "VolunteerOpportunityHome",
+                "{accountname}/opportunity/{activityname}",
+                new
+                {
+                    controller = "r",
+                    action = "activity",
+                    accountname = UrlParameter.Optional,
+                    activitytype = ActivityType.VolunteerOpportunity.ToString(),
+                    activityname = UrlParameter.Optional,
+                });
+            
             routes.MapRoute(
                 "Standard",
                 "{controller}/{action}/{id}",

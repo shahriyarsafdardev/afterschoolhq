@@ -17,11 +17,15 @@
 
     if (Model.ActivityLocationType == ActivityLocationType.Physical)
     {
-        instruction = "In-Person Instruction";
+        instruction = "In-Person";
     }
     else if (Model.ActivityLocationType == ActivityLocationType.Virtual)
     {
-        instruction = "Virtual Instruction";
+        instruction = "Virtual";
+    }
+    if (!string.IsNullOrEmpty(instruction) && Model.ActivityType != ActivityType.VolunteerOpportunity)
+    {
+        instruction += " Instruction";
     }
 
     if (Model.HidePreciseLocation)

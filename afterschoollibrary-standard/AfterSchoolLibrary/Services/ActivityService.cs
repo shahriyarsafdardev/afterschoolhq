@@ -113,8 +113,8 @@ namespace AfterSchoolLibrary.Services
         public static string BuildHomePageUrl(string accountUniqueName, ActivityType activityType,
             string activityUniqueName)
         {
-            return
-                $"{Helpers.Utilities.BaseUrl()}/{accountUniqueName}/{activityType.ToString().ToLower()}/{activityUniqueName?.ToLower()}";
+            var activityTypeSlug = activityType != ActivityType.VolunteerOpportunity ?  activityType.ToString().ToLower() : "opportunity";
+            return $"{Helpers.Utilities.BaseUrl()}/{accountUniqueName}/{activityTypeSlug}/{activityUniqueName?.ToLower()}";
         }
 
         public static string BuildShortHomePageUrl(string accountUniqueName, ActivityType activityType,
@@ -914,7 +914,7 @@ namespace AfterSchoolLibrary.Services
                     CreatedBy = loggedInUserId,
                     SeatsAvailable = seatsAvailable.ToString().ToInteger(),
                     AccountId = account.ID,
-                    RequiresParentalConsent = true,
+                    RequiresParentalConsent = activityType != ActivityType.VolunteerOpportunity,
                     CostFrequencyTypeId = ActivityCostFrequencyType.PerActivity,
                 };
 
