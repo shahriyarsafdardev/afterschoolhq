@@ -1,24 +1,23 @@
 ﻿using System.Collections.Generic;
-using AfterSchool.Controllers;
+using AfterSchool.Assemblers;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using NUnit.Framework;
 
-namespace after_school_hq.Tests
+namespace after_school_hq.Tests.Assemblers
 {
-    public class AddHomeAddressAssemblerTests
+    public class AddEmergencyContactAssemblerTests
     {
         [Test]
-        public void AddHomeAddressAssemblerTest()
+        public void AddEmergencyContactAssemblerTest()
         {
-            var addHomeAddressAssembler = new AddHomeAddressAssembler();
+            var addEmergencyContactAssembler = new AddEmergencyContactAssembler();
             var formQuestionViewModels = new List<FormQuestionViewModel>();
             var participationObject = new ParticipationObject(ActivityType.Activity);
             var registrationStartPageAccount = new Account();
             var systemMessages = new SystemMessages();
-            var result = addHomeAddressAssembler.AssembleAddHomeAddressResult(formQuestionViewModels, participationObject, registrationStartPageAccount,
-                systemMessages);
+            var result = addEmergencyContactAssembler.AssembleAddEmergencyContactResult(formQuestionViewModels, participationObject, registrationStartPageAccount, systemMessages);
 
             Assert.That(result.Questions, Is.SameAs(formQuestionViewModels));
             Assert.That(result.ParticipationObject, Is.SameAs(participationObject));

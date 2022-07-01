@@ -1,9 +1,9 @@
-﻿using AfterSchool.Controllers;
+﻿using AfterSchool.Assemblers;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using NUnit.Framework;
 
-namespace after_school_hq.Tests
+namespace after_school_hq.Tests.Assemblers
 {
     public class ThankYouAssemblerTests
     {

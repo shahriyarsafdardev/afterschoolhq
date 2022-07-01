@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web.Mvc;
+using AfterSchool.Assemblers;
 using AfterSchool.Models;
 using AfterSchoolLibrary;
 using AfterSchoolLibrary.FeatureFlag;
@@ -224,31 +225,8 @@ namespace AfterSchool.Controllers
             if (account.IsEmpty() || account.IsDeleted)
                 return HttpNotFound();
 
-            RestartRegistrationSession();
-            SetRegistrationStartPage(account, true);
-
-            var participationObjects = new List<ParticipationObject>();
-            var locations = new List<Location>();
-            var grades = GradeLevel.Load(msgs: msgs);
-            var featuredProviders = new List<Account>();
-
-            List<ParticipationObject> regOpened = null;
-            List<ParticipationObject> regWillOpen = null;
-            List<ParticipationObject> regClosed = null;
-
             if (account.IsNotEmpty())
             {
-                participationObjects = GetParticipationObjects(account, msgs);
-
-                locations.AddRange(account.GetAllAvailableLocations(msgs));
-                locations.AddRange(participationObjects.Where(po => po.Location.IsNotEmpty())
-                    .Select(po => po.Location));
-
-                regOpened = participationObjects.Where(po => po.RegistrationPeriod.IsOpen(account, msgs)).ToList();
-                regWillOpen = participationObjects.Where(po => po.RegistrationPeriod.WillOpen(account, msgs)).ToList();
-                regClosed = participationObjects
-                    .Where(po => po.NotIn(regWillOpen) && po.RegistrationPeriod.IsClosed(account, msgs)).ToList();
-
                 // LOG: Someone Browsed Account AccountName's Programs
                 SessionVariables.WebSession.LogActivity(
                     account,
@@ -258,39 +236,63 @@ namespace AfterSchool.Controllers
                     objectId: account.ID,
                     objectText: account.Name
                 );
-
-                featuredProviders = account.GetApprovedVisitorAccounts(msgs);
             }
             else
             {
                 if (CookieVariables.DemoUniqueOrgName.IsNotEmpty() && accountname != CookieVariables.DemoUniqueOrgName)
                     return HttpNotFound();
-
-                var accountUniqueName = "";
-                (accountname, accountUniqueName) = GetDemoAccountDetails(accountname);
-
-                ParticipationObject.GenerateDemoObjects(ref account, participationObjects, locations, accountname,
-                    accountUniqueName, grades);
-                participationObjects = participationObjects.Take(11).ToList();
-
-                regOpened = participationObjects;
-                regWillOpen = new List<ParticipationObject>();
-                regClosed = new List<ParticipationObject>();
             }
 
-            ViewBag.RegistrationOpened = regOpened;
-            ViewBag.RegistrationWillOpen = regWillOpen;
-            ViewBag.RegistrationClosed = regClosed;
-            ViewBag.Grades = grades;
-            ViewBag.Messages = msgs;
-            ViewBag.Cart = SessionVariables.Cart;
-            ViewBag.Locations = locations.DistinctBy(location => location.ID);
-            ViewBag.ParticipationObjects = participationObjects;
-            ViewBag.AccountProfile = account.GetAccountProfile(msgs);
-            ViewBag.FeaturedProviders = featuredProviders;
-            ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
+            RestartRegistrationSession();
+            SetRegistrationStartPage(account, true);
 
-            return View(account);
+            var result = GatherAndAssembleDataForBrowseResult(accountname, account, msgs);
+            return View(result);
+        }
+
+        private BrowseResult GatherAndAssembleDataForBrowseResult(string accountName, Account account, SystemMessages msgs)
+        {
+            var participationObjects = new List<ParticipationObject>();
+            var locations = new List<Location>();
+            var grades = GradeLevel.Load(msgs: msgs);
+            var featuredProviders = new List<Account>();
+
+            List<ParticipationObject> registrationOpened;
+            List<ParticipationObject> registrationWillOpen;
+            List<ParticipationObject> registrationClosed;
+
+            if (account.IsNotEmpty())
+            {
+                participationObjects = GetParticipationObjects(account, msgs);
+
+                locations.AddRange(account.GetAllAvailableLocations(msgs));
+                locations.AddRange(participationObjects.Where(po => po.Location.IsNotEmpty())
+                    .Select(po => po.Location));
+
+                registrationOpened = participationObjects.Where(po => po.RegistrationPeriod.IsOpen(account, msgs)).ToList();
+                registrationWillOpen = participationObjects.Where(po => po.RegistrationPeriod.WillOpen(account, msgs)).ToList();
+                registrationClosed = participationObjects.Where(po => po.NotIn(registrationWillOpen) && po.RegistrationPeriod.IsClosed(account, msgs)).ToList();
+
+                featuredProviders = account.GetApprovedVisitorAccounts(msgs);
+            }
+            else
+            {
+                string accountUniqueName;
+                (accountName, accountUniqueName) = GetDemoAccountDetails(accountName);
+
+                ParticipationObject.GenerateDemoObjects(ref account, participationObjects, locations, accountName, accountUniqueName, grades);
+                participationObjects = participationObjects.Take(11).ToList();
+
+                registrationOpened = participationObjects;
+                registrationWillOpen = new List<ParticipationObject>();
+                registrationClosed = new List<ParticipationObject>();
+            }
+
+            var accountProfile = account.GetAccountProfile(msgs);
+            var cleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
+
+            return new BrowseAssembler().AssembleBrowseResult(account, accountProfile, cleverSsoEnabled, featuredProviders, grades, locations,
+                registrationClosed, registrationOpened, registrationWillOpen, null, msgs);
         }
 
         [HttpGet]
@@ -724,28 +726,28 @@ namespace AfterSchool.Controllers
 
             var featuredProviders = new List<Account>();
             var session = ActivityGroup.LoadByAccountIdByUniqueName(account.ID.Value, sessionname, msgs);
-
             if (session.IsEmpty())
                 return HttpNotFound();
 
             LoadSessionInvite(session, invite, decline, msgs);
 
             var canRegisterFor = !session.IsInviteOnly || (SessionVariables.SessionInvite.IsGuid() &&
-                                                           session.IsInvited(SessionVariables.SessionInvite.ToGuid(),
-                                                               msgs));
+                                                           session.IsInvited(SessionVariables.SessionInvite.ToGuid(), msgs));
 
             if (!canRegisterFor)
                 return Redirect(session.HomePageUrl);
 
             AddNoCacheHeaders();
 
-            List<Activity> activities = null;
+            var result = GatherAndAssembleDataForBrowseSessionResult(session, msgs, account, featuredProviders);
+            return View("Browse", result);
+        }
 
-            if (session.IsInviteOnly)
-                activities = session.GetInvitedToActivities(SessionVariables.SessionInvite.ToGuid(), msgs);
-            else
-                activities = session.GetActivities(msgs);
-
+        private BrowseResult GatherAndAssembleDataForBrowseSessionResult(ActivityGroup session, SystemMessages msgs, Account account, List<Account> featuredProviders)
+        {
+            var activities = session.IsInviteOnly
+                ? session.GetInvitedToActivities(SessionVariables.SessionInvite.ToGuid(), msgs)
+                : session.GetActivities(msgs);
             var participationObjects = activities.Select(activity => activity.GetParticipationObject(msgs)).ToList();
             var opened = new List<ParticipationObject>();
             var willOpen = new List<ParticipationObject>();
@@ -758,19 +760,14 @@ namespace AfterSchool.Controllers
             else
                 closed = participationObjects;
 
-            ViewBag.Session = session.GetParticipationObject(msgs);
-            ViewBag.Grades = GradeLevel.Load(msgs: msgs);
-            ViewBag.Messages = msgs;
-            ViewBag.Cart = SessionVariables.Cart;
-            ViewBag.Locations = account.GetAllAvailableLocations(msgs);
-            ViewBag.ParticipationObjects = participationObjects;
-            ViewBag.RegistrationOpened = opened;
-            ViewBag.RegistrationClosed = closed;
-            ViewBag.RegistrationWillOpen = willOpen;
-            ViewBag.AccountProfile = account.GetAccountProfile(msgs);
-            ViewBag.FeaturedProviders = featuredProviders;
+            var grades = GradeLevel.Load(msgs: msgs);
+            var locations = account.GetAllAvailableLocations(msgs);
+            var accountProfile = account.GetAccountProfile(msgs);
+            var cleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");
 
-            return View("browse", account);
+            var result = new BrowseAssembler().AssembleBrowseResult(account, accountProfile, cleverSsoEnabled, featuredProviders, grades, locations,
+                closed, opened, willOpen, session.GetParticipationObject(msgs), msgs);
+            return result;
         }
 
         [HttpGet]
@@ -887,13 +884,13 @@ namespace AfterSchool.Controllers
 
         private void LoadSessionInvite(ActivityGroup session, string invite, string decline, SystemMessages msgs)
         {
-            if (invite.IsGuid())
-            {
-                SessionVariables.SessionInvite = invite;
+            if (!invite.IsGuid())
+                return;
+            
+            SessionVariables.SessionInvite = invite;
 
-                if (decline.IsBoolean() && decline.ToBoolean())
-                    session.DeclineInvite(SessionVariables.SessionInvite.ToGuid(), msgs);
-            }
+            if (decline.IsBoolean() && decline.ToBoolean())
+                session.DeclineInvite(SessionVariables.SessionInvite.ToGuid(), msgs);
         }
 
         private (string AccountName, string AccountUniqueName) GetDemoAccountDetails(string accountName)

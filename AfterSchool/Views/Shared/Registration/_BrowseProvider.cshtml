@@ -3,7 +3,6 @@
 @{
     var account = Model.GetAccount();
     var profileHeaderImageUrl = Model.GetHeaderImageUrl();
-    var followers = account.IsEmpty() ? 0 : account.GetSubscriberCount();
     var location = Model.GetLocation();
     var gradeLevelStart = Model.GetGradeLevelStart();
     var gradeLevelEnd = Model.GetGradeLevelEnd();

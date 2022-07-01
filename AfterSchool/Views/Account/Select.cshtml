@@ -3,17 +3,7 @@
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = "Select Student";
     var msgs = (SystemMessages)ViewBag.Messages;
-    var cart = (Cart)ViewBag.Cart;
     var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
-
-    var registered = "Registered";
-    var register = "Register";
-
-    if (participationObject.RegistrationMode == RegistrationMode.Apply)
-    {
-        register = "Apply";
-        registered = "Applied";
-    }
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }

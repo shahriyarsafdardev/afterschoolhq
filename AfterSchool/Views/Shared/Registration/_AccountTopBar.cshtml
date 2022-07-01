@@ -5,13 +5,12 @@
     var currentAccount = SessionVariables.CurrentAccount;
     var accountOrDashboard = "Account";
     var participationObject = (ParticipationObject) ViewData["ParticipationObject"];
-    var canPublishActivity = ViewData["CanPublishActivity"].IsNotEmpty() ? ViewData["CanPublishActivity"].ToString().ToBoolean() : false;
+    var canPublishActivity = ViewData["CanPublishActivity"].IsNotEmpty() && ViewData["CanPublishActivity"].ToString().ToBoolean();
     var dashboardUrl = Url.Action("index", "home", new {area = "user"});
-    var session = (ParticipationObject) ViewData["session"];
     var isDuringProfileSetup = false;
     var returnUrl = SessionVariables.RegistrationStartPageAccount?.HomePageUrl;
     var registrationStartPage = SessionVariables.RegistrationStartPageAccount;
-    var isAccount = ViewData["IsAccount"] != null ? (bool) ViewData["IsAccount"] : false;
+    var isAccount = ViewData["IsAccount"] != null && (bool) ViewData["IsAccount"];
     var isOnboardingStepsAcknowledged = CookieVariables.OnboardingStepsAcknowledged;
     var isInEditMode = Request["edit"] == "1";
 
@@ -25,11 +24,6 @@
     {
         accountOrDashboard = "Dashboard";
         dashboardUrl = Url.Action("index", "home", new {area = "org"});
-    }
-
-    if (session.IsEmpty() && participationObject.IsNotEmpty() && participationObject.IsSession())
-    {
-        session = participationObject;
     }
 
     if (ViewData["IsDuringProfileSetup"].IsNotEmpty() && ViewData["IsDuringProfileSetup"].ToString().IsBoolean())
@@ -51,7 +45,7 @@
                                           currentAccount.ID == Model?.ID &&
                                           currentUser.HasAccessTo(Model);
 
-    Activity unpublishActivity = null;
+    Activity unpublishActivity;
     var url = "";
     if (currentLevel == GettingStartedOptions.PublishActivity)
     {

@@ -1,29 +1,24 @@
-﻿@model Account
+﻿@model AfterSchool.Assemblers.BrowseResult
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
-    ViewBag.Title = Model.Name;
-    var participationObjects = (List<ParticipationObject>)ViewBag.ParticipationObjects;
-    var grades = (List<GradeLevel>)ViewBag.Grades;
-    var cart = (Cart)ViewBag.Cart;
-    var locations = (List<Location>)ViewBag.Locations;
-    var registrationOpen = (List<ParticipationObject>)ViewBag.RegistrationOpened;
-    var featuredProviders = (List<Account>)ViewBag.FeaturedProviders;
-    var registrationClosed = (List<ParticipationObject>)ViewBag.RegistrationClosed;
-    var registrationWillOpen = (List<ParticipationObject>)ViewBag.RegistrationWillOpen;
-    var session = (ParticipationObject)ViewBag.Session;
-    var msgs = (SystemMessages)ViewBag.Messages;
-    var accountProfile = (AccountProfile)ViewBag.AccountProfile;
+    ViewBag.Title = Model.Account.Name;
+    var registrationOpen = Model.RegistrationOpened;
+    var featuredProviders = Model.FeaturedProviders;
+    var registrationClosed = Model.RegistrationClosed;
+    var registrationWillOpen = Model.RegistrationWillOpen;
+    var session = Model.Session;
+    var msgs = Model.Messages;
+    var accountProfile = Model.AccountProfile;
 
-    var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
+    var cleverSsoEnabled = Model.CleverSsoEnabled;
 }
 
-@{ Html.RenderPartial(
+@{ Html.RenderPartial (
        "~/Views/Shared/Registration/_AccountTopBar.cshtml",
-       Model,
-       new ViewDataDictionary()
+       Model.Account,
+       new ViewDataDictionary
        {
-           { "LoginReturnUrl", Model.HomePageUrl },
-           { "session", session },
+           { "LoginReturnUrl", Model.Account.HomePageUrl },
            { "CleverSsoEnabled", cleverSsoEnabled },
        });
 }
@@ -33,20 +28,19 @@
 @{ Html.RenderPartial(
          "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
          new RegistrationHeaderViewModel(
-             Model,
-             (AccountProfile)ViewBag.AccountProfile,
-             (ParticipationObject)ViewBag.Session)); }
+             Model.Account,
+             accountProfile,
+             session)); }
 
-@{ Html.RenderPartial("~/Views/Shared/Registration/_FirstTimeInformation.cshtml", Model); }
+@{ Html.RenderPartial("~/Views/Shared/Registration/_FirstTimeInformation.cshtml", Model.Account); }
 
-@{ Html.RenderPartial("~/Views/Shared/Registration/_BrowseFilterBar.cshtml", Model); }
+@{ Html.RenderPartial("~/Views/Shared/Registration/_BrowseFilterBar.cshtml", Model.Account, new ViewDataDictionary
+   {
+       {"Grades", Model.Grades},
+       {"Locations", Model.Locations},
+   }); }
 
 <div class="margin-10">
-
-    @{
-        // Html.RenderPartial("~/Views/Shared/Registration/_AddActivity.cshtml", Model);
-    }
-
     <div class="col-lg-10 col-lg-offset-1 col-md-12">
         @if (!registrationOpen.Any() && !registrationWillOpen.Any() && !registrationClosed.Any())
         {
@@ -56,7 +50,7 @@
                     @if (accountProfile.IsNotEmpty() && (accountProfile.ProfileEmail.IsNotEmpty() || accountProfile.ProfilePhone.IsNotEmpty()))
                     {
                         <p>
-                            Have questions? Please contact @Model.Name @@ @Html.Raw(accountProfile.ProfilePhone.IsNotBlank() ? accountProfile.ProfilePhone : $"<a href=\"mailto:{accountProfile.ProfileEmail}\">{accountProfile.ProfileEmail}</a>")
+                            Have questions? Please contact @Model.Account.Name @@ @Html.Raw(accountProfile.ProfilePhone.IsNotBlank() ? accountProfile.ProfilePhone : $"<a href=\"mailto:{accountProfile.ProfileEmail}\">{accountProfile.ProfileEmail}</a>")
                         </p>
                     }
                 </div>
@@ -68,7 +62,7 @@
             Html.RenderPartial(
                 "~/Views/Shared/Registration/_BrowseParticipationObjectList.cshtml",
                 registrationOpen,
-                new ViewDataDictionary() { { "title", "Open for Registration" }, { "accountprofile", accountProfile } });
+                new ViewDataDictionary { { "title", "Open for Registration" }, { "accountprofile", accountProfile } });
         }
 
         @if (registrationWillOpen.Any())
@@ -76,7 +70,7 @@
             Html.RenderPartial(
                 "~/Views/Shared/Registration/_BrowseParticipationObjectList.cshtml",
                 registrationWillOpen,
-                new ViewDataDictionary() { { "title", "Registration Opening Soon" }, { "accountprofile", accountProfile } });
+                new ViewDataDictionary { { "title", "Registration Opening Soon" }, { "accountprofile", accountProfile } });
         }
 
         @if (registrationClosed.Any())
@@ -84,14 +78,14 @@
             Html.RenderPartial(
                 "~/Views/Shared/Registration/_BrowseParticipationObjectList.cshtml",
                 registrationClosed,
-                new ViewDataDictionary() { { "title", "Registration Closed" }, { "accountprofile", accountProfile } });
+                new ViewDataDictionary { { "title", "Registration Closed" }, { "accountprofile", accountProfile } });
         }
 
         @if (featuredProviders.IsNotEmpty() && featuredProviders.Any())
         {
             <div class="row">
                 <div class="col-md-12 text-center">
-                    <h3>Explore profiles of providers at @Model.Name</h3>
+                    <h3>Explore profiles of providers at @Model.Account.Name</h3>
                 </div>
 
                 @foreach(var item in featuredProviders)
@@ -108,9 +102,7 @@
         }
 
     </div>
-
-
-
+    
 </div>
 
 @if (session.IsNotEmpty())
@@ -118,6 +110,6 @@
     Html.RenderPartial("~/Views/Shared/Registration/_BrowseCart.cshtml", session);
 }
 
-@{Html.RenderPartial("~/Views/Shared/Modals/_LeadForm.cshtml", Model);}
+@{Html.RenderPartial("~/Views/Shared/Modals/_LeadForm.cshtml", Model.Account);}
 
-@{Html.RenderPartial("~/Views/Shared/Modals/_FirstTimeDemoOrgName.cshtml", Model);}
+@{Html.RenderPartial("~/Views/Shared/Modals/_FirstTimeDemoOrgName.cshtml", Model.Account);}

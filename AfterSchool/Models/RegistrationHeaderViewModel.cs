@@ -150,7 +150,6 @@ namespace AfterSchool.Models
 
             if (session.IsNotEmpty())
                 SessionName = session.Name;
-
         }
     }
 }

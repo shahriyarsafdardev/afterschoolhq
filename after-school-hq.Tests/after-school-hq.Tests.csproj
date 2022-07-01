@@ -19,4 +19,12 @@
       <ProjectReference Include="..\AfterSchool\after-school-hq.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="Assemblers\GetStartedAssemblerTests.FilterAndTransformQuestionsForParentRegistrationTest.approved.txt">
+        <ParentExtension>.cs</ParentExtension>
+        <ParentFile>GetStartedAssemblerTests</ParentFile>
+        <DependentUpon>GetStartedAssemblerTests.cs</DependentUpon>
+      </None>
+    </ItemGroup>
+
 </Project>

@@ -3,7 +3,7 @@ using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 
-namespace AfterSchool.Controllers
+namespace AfterSchool.Assemblers
 {
     public class AddEmergencyContactResult
     {

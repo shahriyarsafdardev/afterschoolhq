@@ -2,7 +2,6 @@
 
 @{
     var currentUser = SessionVariables.CurrentUser;
-    var currentAccount = SessionVariables.CurrentAccount;
     var regHeaderStyle = "";
     var logoUrl = "";
     var isFollowing = false;
@@ -13,7 +12,6 @@
     var shareUrl = Model.Account.ShortHomePageUrl;
     var shareObject = Model.Account.Name;
     var isInEditMode = currentUser.IsNotEmpty() && currentUser.HasAccessTo(Model.Account) && Request["edit"] == "1";
-    var groupId = Model.ParticipationObject?.GetAnyRelatedActivityGroupId();
 
     if (Model.ParticipationObject.IsNotEmpty())
     {
@@ -123,7 +121,7 @@
                     <span>@Html.Raw(Model.Title)</span>
                     @if (Model.SessionName.IsNotEmpty())
                     {
-                        @: - @(((ParticipationObject) ViewBag.Session).Name)
+                        @: - @(Model.SessionName)
                     }
                     @if (Model.IsDemo)
                     {

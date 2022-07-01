@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using AfterSchool.Controllers;
 using AfterSchool.Models;
 using AfterSchoolLibrary.FeatureFlag;
 using AfterSchoolLibrary.Models;
@@ -8,7 +9,7 @@ using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using Extensions = BasicLibrary.Extensions;
 
-namespace AfterSchool.Controllers
+namespace AfterSchool.Assemblers
 {
     public class GetStartedAssembler
     {

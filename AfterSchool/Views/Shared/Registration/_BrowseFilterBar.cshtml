@@ -3,14 +3,13 @@
     var filterCols = 2;
     var filterColsSm = 12;
     var grades = (List<GradeLevel>)ViewBag.Grades;
-    var cart = (Cart)ViewBag.Cart;
     var locations = (List<Location>)ViewBag.Locations;
 }
 
 <div class="filter-bar">
     <div class="reg-container">
         <div class="col-md-@filterCols col-sm-@filterColsSm">
-            <input type="text" placeholder="Search @UILabel.ActivityLabel(ActivityType.Activity) Name" id="search-name" class="form-control search-field" />
+            <input type="text" placeholder="Search @UILabel.ActivityLabel() Name" id="search-name" class="form-control search-field" />
         </div>
 
         <div class="col-md-@filterCols col-sm-@filterColsSm">

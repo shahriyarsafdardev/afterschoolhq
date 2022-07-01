@@ -2,10 +2,8 @@
 @{
     ViewBag.Title = "Complete Registration";
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
-    var cart = (Cart)ViewBag.Cart;
     var msgs = (SystemMessages)ViewBag.Messages;
     var alreadyRegistered = (bool)ViewBag.AlreadyRegistered;
-    var homePageUrl = Model.GetActivity();
     var sessionActivities = (List<ParticipationObject>)ViewBag.SessionActivities;
     var qvms = (List<FormQuestionViewModel>)ViewBag.QuestionViewModels;
     var groups = qvms.Select(qvm => qvm.Question.ToFormQuestionGroup())

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Web.Mvc;
+using AfterSchool.Assemblers;
 using AfterSchool.Helpers;
 using AfterSchool.Models;
 using AfterSchoolLibrary.FeatureFlag;

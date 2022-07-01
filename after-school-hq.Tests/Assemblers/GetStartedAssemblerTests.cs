@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Reflection;
-using AfterSchool.Controllers;
+using AfterSchool.Assemblers;
 using AfterSchoolLibrary.FeatureFlag;
 using AfterSchoolLibrary.Models;
 using ApprovalTests;
@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using NUnit.Framework;
 
-namespace after_school_hq.Tests
+namespace after_school_hq.Tests.Assemblers
 {
     [UseReporter(typeof(DiffReporter))]
     public class GetStartedAssemblerTests
