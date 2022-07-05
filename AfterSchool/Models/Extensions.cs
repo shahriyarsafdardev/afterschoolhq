@@ -215,6 +215,15 @@ namespace AfterSchool.Models
 
             msgs.AddRange(activity.IsPaymentMethodAddedForExternalAccount(SessionVariables.CurrentAccount, msg, dc));
 
+            if (activity.ActivityTypeId == ActivityType.VolunteerOpportunity && !activity.HasSchedule)
+            {
+                msgs.Add(new SystemMessage
+                (
+                    $"<a href=\"/org/activity/editschedule/{activity.Uid}\">Add a Schedule</a>",
+                    MessageType.Error
+                ));
+            }
+            
             if (archiveMsgs.HasErrors())
             {
                 archiveMsgs.Insert(0,
