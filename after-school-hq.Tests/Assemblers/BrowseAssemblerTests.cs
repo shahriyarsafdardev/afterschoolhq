@@ -17,7 +17,13 @@ namespace after_school_hq.Tests.Assemblers
             var accountProfile = new AccountProfile();
             var featuredProviders = new List<Account>();
             var grades = new List<GradeLevel>();
-            var locations = new List<Location>();
+            var location = new Location{ ID = 1 };
+            var locations = new List<Location>
+            {
+                location,
+                new Location{ ID = 1 }
+            };
+            var expectedLocations = new List<Location>{ location };
             var registrationClosed = new List<ParticipationObject>();
             var registrationOpened = new List<ParticipationObject>();
             var registrationWillOpen = new List<ParticipationObject>();
@@ -31,7 +37,7 @@ namespace after_school_hq.Tests.Assemblers
             Assert.That(result.CleverSsoEnabled, Is.False);
             Assert.That(result.FeaturedProviders, Is.SameAs(featuredProviders));
             Assert.That(result.Grades, Is.SameAs(grades));
-            Assert.That(result.Locations, Is.SameAs(locations));
+            Assert.That(result.Locations, Is.EqualTo(expectedLocations));
             Assert.That(result.RegistrationClosed, Is.SameAs(registrationClosed));
             Assert.That(result.RegistrationOpened, Is.SameAs(registrationOpened));
             Assert.That(result.RegistrationWillOpen, Is.SameAs(registrationWillOpen));
