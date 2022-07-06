@@ -546,6 +546,38 @@ namespace AfterSchoolLibrary.Services
             return true;
         }
 
+        public static DateTime? GetPlanEndDateForRegistrantSubscriptionUtc(this SubscriptionPlan plan, DateTime startDateTime, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var billingAccount = plan.GetAccount(msgs, dc);
+            
+            if (msgs.IsEmpty())
+                msgs = new SystemMessages();
+
+            if (plan.PlanTypeId == SubscriptionPlanType.PostPayPlan || plan.PlanTypeId == SubscriptionPlanType.NotSet)
+                return null;
+
+            DateTime? endDate = null;
+
+            if (plan.EndDate.HasValue)
+                endDate = billingAccount.ConvertFromAccountTimeZone(plan.EndDate.Value);
+
+            if (endDate.IsEmpty())
+            {
+                if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
+                    endDate = plan.GetSubscriptionEndDateUtc(participationObject, msgs);
+
+                // no need for UTC since it just calculates based on the passed in start date time
+                else if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
+                    endDate = plan.GetPaymenPlanEndDate(startDateTime, msgs);
+            }
+
+            // make sure endDate > startDate for stripe
+            if (endDate.HasValue && DateTimeSpan.CompareDates(startDateTime, endDate.Value).TotalDays < 1)
+                endDate = startDateTime.AddDays(1);
+
+            return endDate;
+        }
+        
         public static DateTime? GetPlanEndDateForRegistrantSubscription(this SubscriptionPlan plan, DateTime startDateTime, ParticipationObject participationObject, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty())
@@ -575,9 +607,20 @@ namespace AfterSchoolLibrary.Services
             return endDate;
         }
 
+        private static DateTime? GetSubscriptionEndDateUtc(this SubscriptionPlan plan, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var billingAccount = plan.GetAccount(msgs, dc);
+            var endDate = plan.GetSubscriptionEndDate(participationObject, msgs);
+            
+            if (endDate.HasValue)
+                return billingAccount.ConvertFromAccountTimeZone(endDate.Value);
+
+            return null;
+        }
+
         private static DateTime? GetSubscriptionEndDate(this SubscriptionPlan plan, ParticipationObject participationObject, SystemMessages msgs = null)
         {
-            if (plan.PlanTypeId == SubscriptionPlanType.Subscription && participationObject.Schedule.IsNotEmpty() && participationObject.Schedule.EndDate.HasValue)
+            if (plan.PlanTypeId == SubscriptionPlanType.Subscription && participationObject.EndDate.HasValue)
                 return participationObject.Schedule.EndDate.Value.AddDays(1);
 
             return null;

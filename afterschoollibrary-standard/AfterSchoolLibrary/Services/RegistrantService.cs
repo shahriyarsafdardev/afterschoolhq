@@ -178,8 +178,8 @@ namespace AfterSchoolLibrary.Services
                 var useStripeConnectedAccount = billingAccount.HasAccountPackageFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
                 var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, msgs);
                 // var stripeCouponId = plan.DoesCouponApply(checkoutObject.Coupon) ? checkoutObject.Coupon.StripeCouponId : null;
-                var startDateTime = submittedRecord.GetPlanStartDate(plan, checkoutObject.ParticipationObject, msgs, dc);
-                var endDateTime = plan.GetPlanEndDateForRegistrantSubscription(startDateTime, checkoutObject.ParticipationObject, msgs);
+                var startDateTime = submittedRecord.GetPlanStartDateUtc(plan, checkoutObject.ParticipationObject, msgs, dc);
+                var endDateTime = plan.GetPlanEndDateForRegistrantSubscriptionUtc(startDateTime, checkoutObject.ParticipationObject, msgs, dc);
                 var platformFeePercent = new decimal?();
                 string stripeAccountId = null;
                 string stripeCouponId = null;
@@ -205,9 +205,11 @@ namespace AfterSchoolLibrary.Services
                     if (startDateTime.IsNotEmpty() && endDateTime.IsNotEmpty())
                         isSubscriptionRequired = plan.CheckIfSubscriptionRequired(startDateTime, endDateTime.Value);
 
+                    // maybe should use stripe subscription pro-rating. but could be a reason we wrote our own
                     submittedRecord.ChargeRegistrantMidPeriod(checkoutObject, subscriptionPlanType, isSubscriptionRequired, loggedInUser, msgs, dc);
 
                     // we will update starting of subscription for this registrant to next cycle
+                    // NOTE: should this be Now or UtcNow?
                     if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
                         startDateTime = DateTime.Now.LastDateOfMonth().AddDays(1);                        
                     else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
@@ -339,7 +341,7 @@ namespace AfterSchoolLibrary.Services
                     Registration = checkoutObject.Registration,
                     ParticipationObject = participationObject,
                     MasterRegistrant = masterRegistrant,
-                    Description = "Pro-rating charge on joing mid-period",                        
+                    Description = "Pro-rating charge on joining mid-period",                        
 
                 },
                 loggedInUser: loggedInUser,
@@ -571,60 +573,64 @@ namespace AfterSchoolLibrary.Services
                     .OrderBy(rsp => rsp.ValidUntil)
                     .ToList();
         }
-
+        
+        /// <summary>
+        /// should be used for returns to stripe or other services that require UTC 
+        /// </summary>
+        /// <param name="registrant"></param>
+        /// <param name="plan"></param>
+        /// <param name="participationObject"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        public static DateTime GetPlanStartDateUtc(this Registrant registrant, SubscriptionPlan plan, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var billingAccount = plan.GetAccount(msgs, dc);
+            var planStartDate = registrant.GetPlanStartDate(plan, participationObject, msgs, dc);
+            return billingAccount.ConvertFromAccountTimeZone(planStartDate);
+        }
+        
         public static DateTime GetPlanStartDate(this Registrant registrant, SubscriptionPlan plan, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var initialDate = DateTime.UtcNow.AddDays(1);
+            // start dates are in the provider's timezone, so when comparing dates, we need to start there
+            var billingAccount = plan.GetAccount(msgs, dc);
+            var today = billingAccount.ConvertToAccountTimeZone(DateTime.UtcNow);
+            var startDate = today;
 
             if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
             {
                 if (plan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
                 {
-                    // find existing cancelled plans and make new plan start the day after it ends.
+                    // find existing canceled plans and make new plan start the day after it ends.
                     // for a person restarting a plan after cancellation
                     var rsps = registrant.GetUnexpiredCancelledRegistrantSubscriptionPlans(participationObject, msgs, dc);
 
                     if (rsps.Any(rsp => rsp.ValidUntil.HasValue))
-                        return rsps.Last().ValidUntil.Value.AddDays(1);
-
-                    // can't start in the past
-                    if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.IsAfter(initialDate))
-                        return participationObject.StartDate.Value.AddDays(1);
-
+                        startDate = rsps.Last().ValidUntil.Value.AddDays(1); // need to double check this
+                    else if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.Date.IsAfter(today.Date))
+                        startDate = participationObject.StartDate.Value;
                 }
                 else if (plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout)
                 {
-                    //.. if activity is in future and provider opt for oncheckout, payment will only began for when activity starts. 
-                    //.. becuase in this  case parent can join earlier, and we can't start payment before activity schedule.
-                    if (participationObject.Schedule.IsNotEmpty() && participationObject.Schedule.StartDate.Value.IsAfter(DateTime.UtcNow))
-                    {
-                        return participationObject.Schedule.StartDate.Value.AddDays(1);
-                    }
+                    // if on checkout, but activity has not started yet, then should only start subscription once activity starts.
+                    if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.Date.IsAfter(today))
+                        startDate = participationObject.StartDate.Value;
                 }
                 else if (plan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart)
                 {
-                    return plan.StartDate.HasValue && plan.StartDate.Value.IsAfter(initialDate) ? plan.StartDate.Value.AddDays(1) : initialDate;
+                    if (plan.StartDate.HasValue && plan.StartDate.Value.Date.IsAfter(today))
+                        startDate = plan.StartDate.Value;
                 }
+
             }
-            else if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
+            else if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && plan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
             {
-                if (plan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
-                {
-                    if (participationObject.Schedule.IsNotEmpty() && 
-                        participationObject.Schedule.StartDate.IsNotEmpty() && 
-                        participationObject.Schedule.StartDate.Value.IsAfter(DateTime.UtcNow))
-                        return participationObject.Schedule.StartDate.Value;
-                    else
-                        initialDate = DateTime.UtcNow;
-                } 
-                else if (plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout)
-                {
-                    //.. Future start date activity (should start when registrant checkout, can be before activity start, first payment invoice will be instant)
-                    initialDate = DateTime.UtcNow;
-                }
+                if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.Date.IsAfter(today.Date))
+                    startDate = participationObject.StartDate.Value;
             }
 
-            return initialDate;
+            // convert back to utc because dates may be transferred to other methods that expect utc, such as stripe, etc.
+            return startDate;
         }
 
         private static PlanFeeObject GetFeeObject(CheckoutObject checkoutObject, Account billingAccount, SubscriptionPlan plan, SystemMessages msgs, DatabaseConnection dc = null)

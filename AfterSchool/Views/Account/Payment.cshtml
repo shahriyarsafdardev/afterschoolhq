@@ -50,7 +50,7 @@
             var planStartDate = SessionVariables.CurrentRegistrant.GetPlanStartDate(plan, participationObject);
             var startDateText = "today";
 
-            if (planStartDate.Date != DateTime.UtcNow.Date)
+            if (participationObject.OwnerAccount.ConvertFromAccountTimeZone(planStartDate.Date) != DateTime.UtcNow.Date)
             {
                 startDateText = planStartDate.ToLongDateString();
             }
