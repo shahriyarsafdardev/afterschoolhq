@@ -123,7 +123,7 @@ namespace AfterSchool.Models
                 if (longFormat)
                     return participationObject.Schedule.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString()).ToStringList(",");
 
-                return participationObject.Schedule.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().MaxChars(2)).ToStringList(",");
+                return participationObject.Schedule.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().MaxChars(3)).ToStringList(",");
             }
 
             if (participationObject.StartDate.HasValue)
@@ -153,8 +153,10 @@ namespace AfterSchool.Models
                     return "Girls Only";
                 case GenderRestrictionType.MaleOnly:
                     return "Boys Only";
+                case GenderRestrictionType.None:
+                default:
+                    return "None";
             }
-            return "None";
         }
 
         public static string PrintRegistrationPeriod(ParticipationObject participationObject)

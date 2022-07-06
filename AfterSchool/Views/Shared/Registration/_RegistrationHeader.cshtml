@@ -200,7 +200,16 @@
             {
                 <div class="col-lg-3 col-md-6 col-sm-12">
                     <div class="padding-v-20 text-center" id="activityHeaderbtns">
-                        <div>@RenderViewActivitiesButton(isInEditMode)</div>
+                        <div>
+                            @{
+                                var displayActivity = Model.ParticipationObject?.ActivityType  != ActivityType.VolunteerOpportunity;
+                                var browseActivitiesOrOpportunitiesUrl = displayActivity ? Model.Account.BrowseUrl : Model.Account.BrowseVolunteerOpportunitiesUrl;
+                                var buttonText = displayActivity 
+                                    ? "View All " + UILabel.ActivityLabel(ActivityType.Activity, true) 
+                                    : "View " + UILabel.ActivityLabel(ActivityType.VolunteerOpportunity, true);
+                            }
+                            @RenderViewActivitiesButton(isInEditMode, browseActivitiesOrOpportunitiesUrl, buttonText)
+                        </div>
                         <div style="margin-top:10px" class="icons-div">
                             @if (!Model.Account.IsClaimed)
                             {
@@ -453,7 +462,7 @@
                 $('#btn-claim-profile').prop('disabled', false);
                 $('#btn-claim-profile').html('Claim Profile');
 
-                if (data && data.status == 'ok') {
+                if (data && data.status === 'ok') {
                     $('#claim-profile-form').addClass('hide');
                     $('#claim-profile-done').removeClass('hide');
                 } else {
@@ -501,7 +510,7 @@
                 $('#btn-contact-provider').prop('disabled', false);
                 $('#btn-contact-provider').html('Contact &raquo;');
 
-                if (data && data.status == 'ok') {
+                if (data && data.status === 'ok') {
                     $('#contact-provider-form').addClass('hide');
                     $('#contact-provider-done').removeClass('hide');
                 } else {
@@ -524,10 +533,18 @@
 
 </script>
 
-@helper RenderViewActivitiesButton(bool isInEditMode)
+@functions {
+    private bool ShowViewActivitiesButton(bool isInEditMode)
+    {
+        return Request.Url is null || Request.Url.ToString().IsSameAs(Model.Account.BrowseUrl)
+               || Request.Url.ToString().IsSameAs(Model.Account.BrowseVolunteerOpportunitiesUrl)
+               || (isInEditMode && !Model.Account.HasActivities());
+    }
+}
+
+@helper RenderViewActivitiesButton(bool isInEditMode, string browseUrl, string buttonText)
 {
-    if (Request.Url is null || Request.Url.ToString().IsSameAs(Model.Account.BrowseUrl)
-        || (isInEditMode && !Model.Account.HasActivities()))
+    if (ShowViewActivitiesButton(isInEditMode))
     {
         return;
     }
@@ -541,9 +558,8 @@
     }
     else
     {
-        <button onclick="location.href='@Model.Account.BrowseUrl'" class="btn btn-header-action btn-view-all"
-                type="button">
-            View All @UILabel.ActivityLabel(ActivityType.Activity, true)
+        <button onclick="location.href='@browseUrl'" class="btn btn-header-action btn-view-all" type="button">
+            @buttonText
         </button>
     }
 }

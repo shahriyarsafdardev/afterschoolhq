@@ -1,0 +1,114 @@
+﻿@model AfterSchool.Assemblers.BrowseResult
+@{
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+    ViewBag.Title = Model.Account.Name;
+    var registrationOpen = Model.RegistrationOpened;
+    var featuredProviders = Model.FeaturedProviders;
+    var registrationClosed = Model.RegistrationClosed;
+    var registrationWillOpen = Model.RegistrationWillOpen;
+    var session = Model.Session;
+    var msgs = Model.Messages;
+    var accountProfile = Model.AccountProfile;
+
+    var cleverSsoEnabled = Model.CleverSsoEnabled;
+}
+
+@{ Html.RenderPartial (
+       "~/Views/Shared/Registration/_AccountTopBar.cshtml",
+       Model.Account,
+       new ViewDataDictionary
+       {
+           { "LoginReturnUrl", Model.Account.HomePageUrl },
+           { "CleverSsoEnabled", cleverSsoEnabled },
+       });
+}
+
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+@{ Html.RenderPartial(
+         "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
+         new RegistrationHeaderViewModel(
+             Model.Account,
+             accountProfile,
+             session)); }
+
+@{ Html.RenderPartial("~/Views/Shared/Registration/_FirstTimeInformation.cshtml", Model.Account); }
+
+@{ Html.RenderPartial("Registration/_BrowseVolunteerOpportunitiesFilterBar", Model.Account, new ViewDataDictionary
+   {
+       {"Locations", Model.Locations},
+   }); }
+
+<div class="margin-10">
+    <div class="col-lg-10 col-lg-offset-1 col-md-12">
+        @if (!registrationOpen.Any() && !registrationWillOpen.Any() && !registrationClosed.Any())
+        {
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <h3>No opportunities currently open for volunteers</h3>
+                    @if (accountProfile.IsNotEmpty() && (accountProfile.ProfileEmail.IsNotEmpty() || accountProfile.ProfilePhone.IsNotEmpty()))
+                    {
+                        <p>
+                            Have questions? Please contact @Model.Account.Name @@ @Html.Raw(accountProfile.ProfilePhone.IsNotBlank() ? accountProfile.ProfilePhone : $"<a href=\"mailto:{accountProfile.ProfileEmail}\">{accountProfile.ProfileEmail}</a>")
+                        </p>
+                    }
+                </div>
+            </div>
+        }
+
+        @if (registrationOpen.Any())
+        {
+            Html.RenderPartial(
+                "~/Views/Shared/Registration/_BrowseParticipationObjectList.cshtml",
+                registrationOpen,
+                new ViewDataDictionary { { "title", "Open for Registration" }, { "accountprofile", accountProfile } });
+        }
+
+        @if (registrationWillOpen.Any())
+        {
+            Html.RenderPartial(
+                "~/Views/Shared/Registration/_BrowseParticipationObjectList.cshtml",
+                registrationWillOpen,
+                new ViewDataDictionary { { "title", "Registration Opening Soon" }, { "accountprofile", accountProfile } });
+        }
+
+        @if (registrationClosed.Any())
+        {
+            Html.RenderPartial(
+                "~/Views/Shared/Registration/_BrowseParticipationObjectList.cshtml",
+                registrationClosed,
+                new ViewDataDictionary { { "title", "Registration Closed" }, { "accountprofile", accountProfile } });
+        }
+
+        @if (featuredProviders.IsNotEmpty() && featuredProviders.Any())
+        {
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <h3>Explore profiles of providers at @Model.Account.Name</h3>
+                </div>
+
+                @foreach(var item in featuredProviders)
+                {
+                    var featuredProfile = item.GetAccountProfile();
+
+                    if (featuredProfile.IsNotEmpty() && featuredProfile.LocationId.HasValue && featuredProfile.Headline.IsNotBlank())
+                    {
+                        Html.RenderPartial("~/Views/Shared/Registration/_BrowseProvider.cshtml", featuredProfile);
+                    }
+                }
+
+            </div>
+        }
+
+    </div>
+    
+</div>
+
+@if (session.IsNotEmpty())
+{
+    Html.RenderPartial("~/Views/Shared/Registration/_BrowseCart.cshtml", session);
+}
+
+@{Html.RenderPartial("~/Views/Shared/Modals/_LeadForm.cshtml", Model.Account);}
+
+@{Html.RenderPartial("~/Views/Shared/Modals/_FirstTimeDemoOrgName.cshtml", Model.Account);}

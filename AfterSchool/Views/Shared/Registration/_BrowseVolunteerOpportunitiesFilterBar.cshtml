@@ -1,0 +1,244 @@
+﻿@model Account
+@{
+    var locations = (List<Location>)ViewBag.Locations;
+}
+<style>
+    .filter-container {
+        display:  flex;
+        flex-direction:  column;
+    }
+</style>
+<style media="all and (min-width: 768px)">
+    .filter-container {
+       display: grid;
+       gap: 20px;
+       grid-template-columns: repeat(5, 1fr);
+       margin: 0 20px;
+    }
+</style>
+
+<div class="filter-bar">
+    <div class="filter-container">
+        <div class="filter">
+            <input type="text" placeholder="Search @UILabel.ActivityLabel(ActivityType.VolunteerOpportunity) Name" id="search-name" class="form-control search-field" />
+        </div>
+
+        <div class="filter">
+            <select class="form-control reg-form-control" id="search-location" name="search-location">
+                <option value="">Any Location</option>
+                @foreach (var location in locations)
+                {
+                    <option value="@(location.FormatAddress(false))">@location.FormatAddress(false)</option>
+                }
+            </select>
+        </div>
+
+        <div class="filter">
+            <select class="form-control reg-form-control" id="search-seatsfilled" name="search-seatsfilled">
+                <option value="">All Opportunities</option>
+                <option value="1">Needs Volunteers</option>
+            </select>
+        </div>
+
+        <div class="filter">
+            <select class="form-control reg-form-control" id="search-dayofweek" name="search-dayofweek">
+                <option value="">Any Day</option>
+                @foreach (var item in Enum.GetValues(typeof(DayOfWeekASL)).Cast<DayOfWeekASL>().Where(x => x != DayOfWeekASL.NotSet))
+                {
+                    <option value="@item.ToString().MaxChars(2)">
+                        @item.ToString()
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="filter">
+            <select class="form-control reg-form-control" id="search-gender" name="search-gender">
+                <option value="">Any Gender</option>
+                @foreach (var item in Enum.GetValues(typeof(GenderType)).Cast<GenderType>().Where(x => x != GenderType.NotSet))
+                {
+                    <option value="@((int)item)" @(SessionVariables.Cart?.Gender == item ? "selected=\"selected\"" : "")>
+                        @item.ToString().SplitByUpperCase()
+                    </option>
+                }
+            </select>
+        </div>
+
+    </div>
+
+</div>
+<div id="search-noresults" class="hide margin-t-20 padding-30">
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
+    <h1 class="text-center">Sorry, there are no volunteer opportunities matching your search</h1>
+</div>
+
+<div id="no-activities" class="hide margin-t-20 padding-30">
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
+    <h1 class="text-center">Sorry, there are currently no volunteer opportunities</h1>
+</div>
+
+<script>
+
+    var searchableActivityType = '';
+
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#search-name').keyup(function () {
+            search();
+        });
+        $('#search-seatsfilled, #search-grade, #search-gender, #search-dayofweek, #search-location').change(function () {
+            search();
+        });
+
+        $('#search-allactivities').click(function () {
+            $('.selectedBtn').removeClass('selectedBtn');
+            searchableActivityType = '';
+            search();
+            $("#search-allactivities").addClass('selectedBtn');
+        });
+
+        $('#search-physical').click(function () {
+            $('.selectedBtn').removeClass('selectedBtn');
+            searchableActivityType = 'physical';
+            search();
+            $("#search-physical").addClass('selectedBtn');
+        });
+
+        $('#search-sport').click(function () {
+            $('.selectedBtn').removeClass('selectedBtn');
+            searchableActivityType = 'sport';
+            search();
+            $("#search-sport").addClass('selectedBtn');
+        });
+
+        $('#search-virtual').click(function () {
+            $('.selectedBtn').removeClass('selectedBtn');
+            searchableActivityType = 'virtual';
+            search();
+            $("#search-virtual").addClass('selectedBtn');
+        });
+
+        $('#search-allactivities').trigger('click');
+    });
+
+    function search() {
+
+        var name = $('#search-name').val();
+        var seatsfilled = $('#search-seatsfilled').val();
+        var grade = $('#search-grade').val();
+        var gender = $('#search-gender').val();
+        var dayofweek = $('#search-dayofweek').val();
+        var location = $('#search-location').val();
+        var totalDivs = 0;
+        var hiddenDivs = 0;
+        var searchable = $('.searchable-object');
+        var searching = false;
+
+        $('.participation-object-add').removeClass('hide');
+
+        searchable.each(function () {
+            $(this).removeClass('hide');
+            totalDivs++;
+        });
+
+        if (name != null && name.length > 0) {
+            searching = true;
+            searchable.each(function () {
+                if ($(this).attr('name').toLowerCase().indexOf(name.toLowerCase()) == -1 && !$(this).hasClass('hide')) {
+                    $(this).addClass('hide');
+                    hiddenDivs++;
+                }
+            });
+        }
+
+        if (grade != null && grade.length > 0) {
+            searching = true;
+            searchable.each(function () {
+                if ((parseInt(grade) < parseInt($(this).attr('mingrade')) || parseInt(grade) > parseInt($(this).attr('maxgrade'))) && !$(this).hasClass('hide')) {
+                    $(this).addClass('hide');
+                    hiddenDivs++;
+                }
+            });
+        }
+
+        if (gender != null && gender.length > 0) {
+            searching = true;
+            searchable.each(function () {
+                var genderRestriction = parseInt($(this).attr('gender'));
+                if (genderRestriction > 0 && genderRestriction != gender && !$(this).hasClass('hide')) {
+                    $(this).addClass('hide');
+                    hiddenDivs++;
+                }
+            });
+        }
+
+        if (dayofweek != null && dayofweek.length > 0) {
+            searching = true;
+            searchable.each(function () {
+                var days = $(this).attr('days').split(',');
+                if (days.indexOf(dayofweek) == -1 && !$(this).hasClass('hide')) {
+                    $(this).addClass('hide');
+                    hiddenDivs++;
+                }
+            });
+        }
+
+        if (location != null && location.length > 0) {
+            searching = true;
+            searchable.each(function () {
+                if ($(this).attr('location') != location && !$(this).hasClass('hide')) {
+                    $(this).addClass('hide');
+                    hiddenDivs++;
+                }
+            });
+        }
+
+        if (seatsfilled != null && seatsfilled.length > 0) {
+            searching = true;
+            searchable.each(function () {
+                if ($(this).attr('hasseatsremaining') != "true" && !$(this).hasClass('hide')) {
+                    $(this).addClass('hide');
+                    hiddenDivs++;
+                }
+            });
+        }
+
+        if (searchableActivityType != null && searchableActivityType.length > 0) {
+            searching = true;
+            searchable.each(function () {
+
+                console.log(searchableActivityType);
+
+                if ($(this).attr('isvirtual') != "1" && searchableActivityType == 'virtual' && !$(this).hasClass('hide')) {
+                    $(this).addClass('hide');
+                    hiddenDivs++;
+                }
+                else if ($(this).attr('isphysical') != "1" && searchableActivityType == 'physical' && !$(this).hasClass('hide')) {
+                    $(this).addClass('hide');
+                    hiddenDivs++;
+                }
+                else if ($(this).attr('issport') != "1" && searchableActivityType == 'sport' && !$(this).hasClass('hide')) {
+                    $(this).addClass('hide');
+                    hiddenDivs++;
+                }
+            });
+        }
+
+        if (searching) {
+            $('.participation-object-add').addClass('hide');
+        }
+
+        if (totalDivs == 0) {
+            $('#no-activities').removeClass('hide');
+            $('#search-noresults').addClass('hide');
+        } else if (hiddenDivs == totalDivs) {
+            $('#search-noresults').removeClass('hide');
+            $('#no-activities').addClass('hide');
+        } else {
+            $('#search-noresults').addClass('hide');
+            $('#no-activities').addClass('hide');
+        }
+
+    }
+</script>

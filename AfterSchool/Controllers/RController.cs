@@ -212,7 +212,38 @@ namespace AfterSchool.Controllers
                 .ToList();
         }
 
+        private List<ParticipationObject> GetBrowseActivitiesParticipationObjects(Account account, SystemMessages msgs)
+        {
+            var participationObjects = new List<ParticipationObject>();
+            participationObjects.AddRange(account.GetPublishedParticipationObjects(msgs));
 
+            return participationObjects
+                .Where(ShouldDisplayOnBrowseActivities)
+                .OrderBy(po => po.RegistrationPeriod.IsClosed(account, msgs))
+                .ThenBy(po => po.RegistrationPeriod.WillOpen(account, msgs))
+                .ThenBy(po => po.RegistrationPeriod.IsOpen(account, msgs))
+                .ToList();
+        }
+
+        private static bool ShouldDisplayOnBrowseActivities(ParticipationObject po)
+        {
+            return (!po.IsActivity() || (!po.GetActivity().ActivityGroupId.HasValue && po.GetActivity().ActivityTypeId != ActivityType.VolunteerOpportunity))
+                   && !po.IsInviteOnly;
+        }
+
+        private List<ParticipationObject> GetVolunteerOpportunityParticipationObjects(Account account, SystemMessages msgs)
+        {
+            var participationObjects = new List<ParticipationObject>();
+            participationObjects.AddRange(account.GetPublishedParticipationObjects(msgs));
+
+            return participationObjects
+                .Where(po => po.IsActivity() && po.GetActivity().ActivityTypeId == ActivityType.VolunteerOpportunity)
+                .OrderBy(po => po.RegistrationPeriod.IsClosed(account, msgs))
+                .ThenBy(po => po.RegistrationPeriod.WillOpen(account, msgs))
+                .ThenBy(po => po.RegistrationPeriod.IsOpen(account, msgs))
+                .ToList();
+        }
+        
         [HttpGet]
         public ActionResult Browse(string accountname)
         {
@@ -246,13 +277,50 @@ namespace AfterSchool.Controllers
             RestartRegistrationSession();
             SetRegistrationStartPage(account, true);
 
-            var result = GatherAndAssembleDataForBrowseResult(accountname, account, msgs);
+            var result = GatherAndAssembleDataForBrowseResult(accountname, account, false, msgs);
+            return View(result);
+        }
+        
+        [HttpGet]
+        public ActionResult BrowseVolunteerOpportunities(string accountname)
+        {
+            if (isUnsupportedBrowser())
+                return RedirectUnsupportedBrowser();
+
+            var msgs = new SystemMessages();
+            var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname);
+
+            if (account.IsEmpty() || account.IsDeleted)
+                return HttpNotFound();
+
+            if (account.IsNotEmpty())
+            {
+                // LOG: Someone Browsed Account AccountName's Programs
+                SessionVariables.WebSession.LogActivity(
+                    account,
+                    SessionVariables.CurrentUser,
+                    WebSessionActionType.BrowsedAllActivities,
+                    ObjectType.Account,
+                    objectId: account.ID,
+                    objectText: account.Name
+                );
+            }
+            else
+            {
+                if (CookieVariables.DemoUniqueOrgName.IsNotEmpty() && accountname != CookieVariables.DemoUniqueOrgName)
+                    return HttpNotFound();
+            }
+
+            RestartRegistrationSession();
+            SetRegistrationStartPage(account, true);
+
+            var result = GatherAndAssembleDataForBrowseResult(accountname, account, true, msgs);
             return View(result);
         }
 
-        private BrowseResult GatherAndAssembleDataForBrowseResult(string accountName, Account account, SystemMessages msgs)
+        private BrowseResult GatherAndAssembleDataForBrowseResult(string accountName, Account account, bool browseForVolunteerOpportunities, SystemMessages msgs)
         {
-            var participationObjects = new List<ParticipationObject>();
+            List<ParticipationObject> participationObjects;
             var locations = new List<Location>();
             var grades = GradeLevel.Load(msgs: msgs);
             var featuredProviders = new List<Account>();
@@ -263,7 +331,9 @@ namespace AfterSchool.Controllers
 
             if (account.IsNotEmpty())
             {
-                participationObjects = GetParticipationObjects(account, msgs);
+                participationObjects = browseForVolunteerOpportunities
+                    ? GetVolunteerOpportunityParticipationObjects(account, msgs)
+                    : GetBrowseActivitiesParticipationObjects(account, msgs);
 
                 locations.AddRange(account.GetAllAvailableLocations(msgs));
                 locations.AddRange(participationObjects.Where(po => po.Location.IsNotEmpty())
@@ -280,6 +350,7 @@ namespace AfterSchool.Controllers
                 string accountUniqueName;
                 (accountName, accountUniqueName) = GetDemoAccountDetails(accountName);
 
+                participationObjects = new List<ParticipationObject>();
                 ParticipationObject.GenerateDemoObjects(ref account, participationObjects, locations, accountName, accountUniqueName, grades);
                 participationObjects = participationObjects.Take(11).ToList();
 

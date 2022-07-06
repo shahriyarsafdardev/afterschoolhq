@@ -96,21 +96,31 @@
         <div class="row">
             <div class="col-lg-8 col-md-12">
                 <h3 class="text-center">
-                    @if (Model.Schedule.IsNotEmpty())
-                    {
-                        <span>
-                            @ParticipationObjectUI.PrintDaysOfWeekOrStartDate(Model) &bull;
-                        </span>
+                    @{
+                        var hasSchedule = Model.Schedule.IsNotEmpty();
+                        var displayAgeGradeRestrictions = !Model.ActivityType.HasValue || Model.ActivityType.Value.NotIn(new[] {ActivityType.PermissionSlip, ActivityType.FieldTrip, ActivityType.VolunteerOpportunity});
+                        var displayGenderRestrictions = Model.GenderRestriction != GenderRestrictionType.None && (!Model.ActivityType.HasValue || Model.ActivityType.Value.NotIn(new[] {ActivityType.VolunteerOpportunity}));
                     }
-
-                    @if (!Model.ActivityType.HasValue || Model.ActivityType.Value.NotIn(new[] {ActivityType.PermissionSlip, ActivityType.FieldTrip}))
+                    @if (hasSchedule)
                     {
-                        <span>
-                            @ParticipationObjectUI.PrintAgeGradeRestrictions(Model) &bull;
-                        </span>
+                        @ParticipationObjectUI.PrintDaysOfWeekOrStartDate(Model)
                     }
-
-                    @ParticipationObjectUI.PrintGenderRestrictions(Model)
+                    @if (hasSchedule && displayAgeGradeRestrictions)
+                    {
+                        <span role="separator">&bull;</span>
+                    }
+                    @if (displayAgeGradeRestrictions)
+                    {
+                        @ParticipationObjectUI.PrintAgeGradeRestrictions(Model)
+                    }
+                    @if ((hasSchedule || displayAgeGradeRestrictions) && displayGenderRestrictions)
+                    {
+                        <span role="separator">&bull;</span>
+                    }
+                    @if (displayGenderRestrictions)
+                    {
+                        @ParticipationObjectUI.PrintGenderRestrictions(Model)
+                    }
                 </h3>
             </div>
             <div class="col-lg-4 col-md-12">
@@ -160,12 +170,12 @@
                         </div>
                     }
 
-                    @if (Model.Schedule.IsNotEmpty() || Model.StartDate.HasValue)
+                    @if (hasSchedule || Model.StartDate.HasValue)
                     {
                         <div class="activity-detail-block">
                             <h3>Schedule</h3>
 
-                            @if (Model.Schedule.IsNotEmpty() && Model.Schedule.RepeatsWeekly && !Model.Schedule.IsOngoing)
+                            @if (hasSchedule && Model.Schedule.RepeatsWeekly && !Model.Schedule.IsOngoing)
                             {
                                 if (Model.StartDate.HasValue && (!Model.EndDate.HasValue || Model.StartDate.Value.Date != Model.EndDate.Value.Date))
                                 {
@@ -182,7 +192,7 @@
                                 }
                             }
 
-                            @if (Model.Schedule.IsNotEmpty())
+                            @if (hasSchedule)
                             {
                                 <p>
                                     @{ Html.RenderPartial("_ActivityScheduleHtml", Model.Schedule); }

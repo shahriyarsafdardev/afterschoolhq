@@ -630,6 +630,8 @@ namespace AfterSchoolLibrary.Models
         }
 
         public string BrowseUrl => $"{HomePageUrl}/browse";
+        
+        public string BrowseVolunteerOpportunitiesUrl => $"{HomePageUrl}/browseVolunteerOpportunities";
 
         public string ContactUrl => $"{HomePageUrl}/contact";
 

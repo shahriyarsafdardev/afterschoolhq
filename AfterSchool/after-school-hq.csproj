@@ -2042,7 +2042,9 @@
     <Content Include="Scripts\umd\popper-utils.min.js" />
     <Content Include="Scripts\umd\popper.js" />
     <Content Include="Scripts\umd\popper.min.js" />
+    <Content Include="Views\R\BrowseVolunteerOpportunities.cshtml" />
     <Content Include="Views\Shared\Layouts\_PrintScreen.cshtml" />
+    <Content Include="Views\Shared\Registration\_BrowseVolunteerOpportunitiesFilterBar.cshtml" />
     <Content Include="Views\Shared\Registration\_ParticipationObjectSection.cshtml" />
     <Content Include="Views\Shared\_Users.cshtml" />
     <Content Include="Areas\Admin\Views\Package\Index.cshtml" />

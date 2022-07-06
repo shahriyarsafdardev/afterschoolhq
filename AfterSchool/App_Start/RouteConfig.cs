@@ -332,7 +332,12 @@ namespace AfterSchool
                 "AccountBrowse",
                 "{accountname}/browse",
                 new {controller = "r", action = "browse", accountname = UrlParameter.Optional});
-
+            
+            routes.MapRoute(
+                "AccountBrowseVolunteerOpportunities",
+                "{accountname}/browseVolunteerOpportunities",
+                new {controller = "r", action = "browseVolunteerOpportunities", accountname = UrlParameter.Optional});
+            
             routes.MapRoute(
                 "AccountContact",
                 "{accountname}/contact",
