@@ -80,6 +80,7 @@ namespace AfterSchoolLibrary.Services
                 CreatedBy = 0,
                 Name = $"Default Form {(formCount + 1)}",
                 IsActive = true,
+                FormTypeId = FormType.Registration,
             };
             msgs.AddRange(f.Save(dc));
 

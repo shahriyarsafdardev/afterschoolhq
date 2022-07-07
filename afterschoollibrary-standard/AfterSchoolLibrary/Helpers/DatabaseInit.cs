@@ -114,6 +114,7 @@ namespace AfterSchoolLibrary.Helpers
                     Migration_20220601_AddStudentIdQuestionToAdminDefaultForm.Do(amsgs, adc);
                     Migration_20220603_AddDistrictofColumbiaToStateOptions.Do(amsgs, adc);
                     Migration_20220606_VolunteerManagement.Do(amsgs, adc);
+                    Migration_20220707_EnsureFormTypeIds.Do(amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs)
