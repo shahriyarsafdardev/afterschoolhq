@@ -621,7 +621,7 @@ namespace AfterSchoolLibrary.Services
         private static DateTime? GetSubscriptionEndDate(this SubscriptionPlan plan, ParticipationObject participationObject, SystemMessages msgs = null)
         {
             if (plan.PlanTypeId == SubscriptionPlanType.Subscription && participationObject.EndDate.HasValue)
-                return participationObject.Schedule.EndDate.Value.AddDays(1);
+                return participationObject.EndDate.Value.AddDays(1); // don't want it to end at the start of the end date, should end at the end of the end date
 
             return null;
         }

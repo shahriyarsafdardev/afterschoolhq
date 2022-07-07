@@ -1297,7 +1297,7 @@ namespace AfterSchoolLibrary.Billing
                 options.TrialEnd = startDate.Value; // if start date is at least one day in the future, start on start date
 
             // please make sure that billing ends when the program ends.
-            if (endDate.HasValue && endDate.IsNotEmpty() && endDate.Value.Date.IsAfter(DateTime.UtcNow.Date.AddDays(1)))
+            if (endDate.HasValue && endDate.Value.Date.IsOnOrAfter(DateTime.UtcNow.Date.AddDays(1)))
                 options.CancelAt = endDate.Value;
 
             // options.ProrationBehavior = "none";
