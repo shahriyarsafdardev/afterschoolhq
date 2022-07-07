@@ -209,7 +209,6 @@ namespace AfterSchoolLibrary.Services
                     submittedRecord.ChargeRegistrantMidPeriod(checkoutObject, subscriptionPlanType, isSubscriptionRequired, loggedInUser, msgs, dc);
 
                     // we will update starting of subscription for this registrant to next cycle
-                    // NOTE: should this be Now or UtcNow?
                     if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
                         startDateTime = DateTime.UtcNow.LastDateOfMonth().AddDays(1);                        
                     else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
