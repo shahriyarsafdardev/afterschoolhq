@@ -452,33 +452,30 @@ namespace AfterSchool.Controllers
                 if (msgs.HasNoErrors())
                 {
                     msgs.Add("Your account has been verified", MessageType.Success);
+                    
+                    // this is only here if the user is already logged in, there's a chance the user won't be logged in
+                    var currentAccount = SessionVariables.CurrentAccount;
                     var currentUser = SessionVariables.CurrentUser;
 
                     // if logged in reload with new verified value
                     if (currentUser.IsNotEmpty() && currentUser.Uid == id.ToGuid())
                         SessionVariables.CurrentUser = WebUser.Load(currentUser.ID.Value);
 
-                    var account = SessionVariables.CurrentAccount;
-                    if (user.IsNotEmpty())
+                    // if not logged in you need to redirect to login afterwards.
+                    if (currentAccount.IsEmpty() || currentUser.IsEmpty())
                     {
-                        if (account.IsEmpty())
-                        {
-                            // For now, we will LoadByOwnerId and will grab the first account is where the AccountType is not a Registrant or AfterSchool
-                            account = Account.LoadByOwnerId(user.ID.Value).FirstOrDefault(m =>
-                                m.AccountTypeId.NotIn(new List<AccountType>()
-                                    {AccountType.AfterSchool, AccountType.Registrant}));
-                        }
-
-                        SendGridHelper.AddOrUpdateContact(account, user, msgs);
+                        ViewBag.Url = AfterSchoolLibrary.Helpers.Utilities.LoginUrl(redirectUrl);
                     }
-
-                    if (redirectUrl.IsNotEmpty())
+                    else if (redirectUrl.IsNotEmpty())
                     {
                         ViewBag.URL = redirectUrl;
                     }
                     else
                     {
-                        switch (account.OnboardingStepDone)
+                        // NOTE: this code should go here, but it is not important right now, we need to use hubspot anyway moving forward
+                        SendGridHelper.AddOrUpdateContact(currentAccount, user, msgs);
+                        
+                        switch (currentAccount.OnboardingStepDone)
                         {
                             case OnboardingStepType.AccountType:
                                 ViewBag.URL = Url.Action("ProgramInfo", "Onboarding", new {area = "org"});
@@ -505,7 +502,7 @@ namespace AfterSchool.Controllers
                                 ViewBag.URL = Url.Action("Links", "Onboarding", new {area = "org"});
                                 break;
                             case OnboardingStepType.All:
-                                ViewBag.URL = Url.Action("Account", "R", new {accountname = account.UniqueName});
+                                ViewBag.URL = Url.Action("Account", "R", new {accountname = currentAccount.UniqueName});
                                 break;
                             default:
                                 break;
