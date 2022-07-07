@@ -211,9 +211,9 @@ namespace AfterSchoolLibrary.Services
                     // we will update starting of subscription for this registrant to next cycle
                     // NOTE: should this be Now or UtcNow?
                     if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
-                        startDateTime = DateTime.Now.LastDateOfMonth().AddDays(1);                        
+                        startDateTime = DateTime.UtcNow.LastDateOfMonth().AddDays(1);                        
                     else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
-                        startDateTime = DateTime.Now.LastDateOfWeek().AddDays(1);
+                        startDateTime = DateTime.UtcNow.LastDateOfWeek().AddDays(1);
                 }
 
                 var billingCycleAnchor = GetBillingCycleAnchor(participationObject, plan, startDateTime);
