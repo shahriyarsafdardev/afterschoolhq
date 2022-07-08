@@ -43,7 +43,10 @@
 
     <div class="panel panel-default">
         <div class="panel-heading text-center-sm">
-            @{Html.RenderPartial("_ActivityTitle", Model.Activity.Name + " - Summary"); }
+            @{Html.RenderPartial("_ActivityTitle", Model.Activity.Name + " - Summary", new ViewDataDictionary
+              {
+                  {"IconClass", AfterSchool.Helpers.IconForActivityType.GetIconClassForActivityType(Model.Activity.ActivityTypeId)},
+              }); }
 
             @if (isActivityLeader)
             {           
@@ -66,7 +69,7 @@
                         <div class="widget widget-tile widget-bordered">
                             <div class="data-info">
                                 <div data-toggle="counter" data-end="@registrantCount" data-decimals="0" data-suffix="" class="value">@registrantCount</div>
-                                <div class="desc">Total @UILabel.RegistrantLabel(true)</div>
+                                <div class="desc">Total @(UILabel.RegistrantLabel(Model.Activity.ActivityTypeId, true))</div>
                             </div>
                             <div class="icon"><span class="s7-users"></span></div>
                         </div>

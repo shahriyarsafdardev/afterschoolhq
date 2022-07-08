@@ -54,7 +54,7 @@
                         </p>
                     </div>
 
-                    <form class="form-horizontal" id="add-student-form" method="post" action="@Url.Action("addstudent", "account")" onkeydown="return event.key != 'Enter';">
+                    <form class="form-horizontal" id="add-student-form" method="post" action="@Url.Action("addstudent", "account")" onkeydown="return event.key !== 'Enter';">
 
                         @foreach (var qvm in Model)
                         {

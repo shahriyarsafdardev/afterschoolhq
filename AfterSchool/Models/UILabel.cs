@@ -41,6 +41,11 @@ namespace AfterSchool.Models
             return GetLabelConfigParam("Registrant", plural);
         }
 
+        public static string RegistrantLabel(ActivityType activityType, bool plural = false)
+        {
+            return activityType == ActivityType.VolunteerOpportunity ? GetLabelConfigParam("Volunteer", plural) : RegistrantLabel(plural);
+        }
+
         public static string ActivityGroupLabel(ActivityGroupType groupType, bool plural = false)
         {
             if (groupType == ActivityGroupType.League)

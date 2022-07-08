@@ -639,6 +639,7 @@
     <Compile Include="Assemblers\ThankYouAssembler.cs" />
     <Compile Include="Controllers\RegistrationCommon.cs" />
     <Compile Include="Controllers\VolunteerRegistrationController.cs" />
+    <Compile Include="Helpers\IconForActivityType.cs" />
     <Compile Include="Models\ActivityHeaderModel.cs" />
     <Compile Include="Models\ParticipationObjectViewModel.cs" />
     <Compile Include="RecordControllerActionsToInfluxMiddleware.cs" />
@@ -1927,7 +1928,6 @@
     <Content Include="appspec.yml" />
     <Content Include="Areas\Org\Views\LeagueActivity\Schedule.cshtml" />
     <Content Include="Areas\Org\Views\Home\GetStarted.cshtml" />
-    <Content Include="Areas\Org\Views\Shared\_CopyActivityModal.cshtml" />
     <Content Include="Areas\Org\Views\Shared\_ExitFullScreen.cshtml" />
     <Content Include="Areas\Org\Views\Group\AddRegistration.cshtml" />
     <Content Include="Areas\Org\Views\Account\GetStartedPayments.cshtml" />
@@ -2046,6 +2046,7 @@
     <Content Include="Views\Shared\Layouts\_PrintScreen.cshtml" />
     <Content Include="Views\Shared\Registration\_BrowseVolunteerOpportunitiesFilterBar.cshtml" />
     <Content Include="Views\Shared\Registration\_ParticipationObjectSection.cshtml" />
+    <Content Include="Views\Shared\_CopyActivityModal.cshtml" />
     <Content Include="Views\Shared\_Users.cshtml" />
     <Content Include="Areas\Admin\Views\Package\Index.cshtml" />
     <Content Include="Areas\Admin\Views\Package\Edit.cshtml" />

@@ -7,12 +7,9 @@
     var viewId = (string)ViewData["ViewLinkId"];
     var account = (Account)ViewData["Account"];
     var paging = (PagingModel)ViewData["PagingModel"];
-    var showAddMessage = true;
-
-    if (ViewData["ShowAddMessage"] != null && ViewData["ShowAddMessage"].ToString().IsBoolean())
-    {
-        showAddMessage = ViewData["ShowAddMessage"].ToString().ToBoolean();
-    }
+    var showAddMessage = ViewData["ShowAddMessage"] == null || !ViewData["ShowAddMessage"].ToString().IsBoolean()
+                         || ViewData["ShowAddMessage"].ToString().ToBoolean();
+    var activityType = ViewData["ActivityType"] != null ? (ActivityType) ViewData["ActivityType"] : ActivityType.Activity;
 }
 
 @if (showAddMessage)
@@ -53,7 +50,7 @@
             else
             {
                 <tr>
-                    <td colspan="5">You haven't sent any messages to your @UILabel.RegistrantLabel(true).ToLower()</td>
+                    <td colspan="5">You haven't sent any messages to your @UILabel.RegistrantLabel(activityType, true).ToLower()</td>
                 </tr>
             }
         </tbody>

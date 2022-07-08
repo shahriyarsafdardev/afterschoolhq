@@ -48,7 +48,10 @@
             </div>
             @{
                 var activityTypeLabel = (activityType == ActivityType.VolunteerOpportunity ? "Volunteer " : "") + UILabel.ActivityLabel(activityType, true);
-                Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", activityTypeLabel);
+                Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", activityTypeLabel, new ViewDataDictionary
+                {
+                    {"IconClass", AfterSchool.Helpers.IconForActivityType.GetIconClassForActivityType(activityType)},
+                });
             }
             <div class="clearfix"></div>
         </div>

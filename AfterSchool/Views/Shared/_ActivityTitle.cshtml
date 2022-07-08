@@ -1,3 +1,10 @@
 ﻿@model string
-<i class="s7-gleam"></i> 
+@{
+    var icon = (string) ViewData["IconClass"];
+    if (string.IsNullOrEmpty(icon))
+    {
+        icon = "s7-gleam";
+    }
+}
+<i class="@icon"></i> 
 @Model

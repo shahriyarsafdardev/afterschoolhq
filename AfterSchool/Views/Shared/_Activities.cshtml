@@ -39,22 +39,18 @@
         }
     }
 
-    var currentClass = "";
-    var archiveClass = "";
-    if (Request["archive"] == "1" && hasArchivedActivities)
-    {
-        archiveClass = "text-bold";
-    }
-    else
-    {
-        currentClass = "text-bold";
-    }
+    var currentlyViewingArchive = Request["archive"] == "1" && hasArchivedActivities;
+    var currentClass = currentlyViewingArchive ? string.Empty : "text-bold";
+    var archiveClass = currentlyViewingArchive ? "text-bold" : string.Empty;
 
     var paging = (PagingModel) ViewData["PagingModel"];
     var managePermissionSlips = accountPackage.HasFeature(FeatureType.ManagePermissionSlips);
     var maxPermissionSlipCount = accountPackage.IsNotEmpty() ? (int) accountPackage.GetFeature(FeatureType.ManagePermissionSlips).Max.Value : 0;
-    var showPermissionSlipFields = ViewBag.PagingModel?.TotalCount >= maxPermissionSlipCount ? false : true;
+    var showPermissionSlipFields = ViewBag.PagingModel?.TotalCount < maxPermissionSlipCount;
     var managePermissionSlipsPackage = PackageService.GetPackageWithFeatureMaximumAvailability(FeatureType.ManagePermissionSlips, maxPermissionSlipCount);
+    var activityTypeLabel = UILabel.ActivityLabel(activityType);
+    var activityTypeLabelPlural = UILabel.ActivityLabel(activityType, true);
+    var registrantsLabel = UILabel.RegistrantLabel(activityType, true);
 }
 
 @if (Model.Count == 0 && group.IsEmpty() && !hasArchivedActivities && !hasSearchQuery)
@@ -63,7 +59,7 @@
     {
         <div class="widget">
             <div class="widget-head">
-                <h1>@account.Name @UILabel.ActivityLabel(activityType, true)</h1>
+                <h1>@account.Name @activityTypeLabelPlural</h1>
             </div>
             <div class="widget-tile">
                 <hr/>
@@ -71,22 +67,22 @@
 
                 @if (managePermissionSlips)
                 {
-                    <p>You haven't created any @UILabel.ActivityLabel(activityType, true).ToLower() yet. In order to get started, <a href="@addUrl"> Create your first @UILabel.ActivityLabel(activityType).ToLower()</a>.</p>
+                    <p>You haven't created any @activityTypeLabelPlural.ToLower() yet. In order to get started, <a href="@addUrl"> Create your first @activityTypeLabel.ToLower()</a>.</p>
                 }
                 else
                 {
                     <p>
-                        You haven't created any @UILabel.ActivityLabel(activityType, true).ToLower() yet. In order to get started, <a href="#" onclick="return showUpgradeMyPlan('@(managePermissionSlipsPackage?.Name)',@(managePermissionSlipsPackage?.ID))"> Create your first @UILabel.ActivityLabel(activityType).ToLower()</a>.
+                        You haven't created any @activityTypeLabelPlural.ToLower() yet. In order to get started, <a href="#" onclick="return showUpgradeMyPlan('@(managePermissionSlipsPackage?.Name)',@(managePermissionSlipsPackage?.ID))"> Create your first @activityTypeLabel.ToLower()</a>.
                     </p>
                 }
                 <p>&nbsp;</p>
                 @if (managePermissionSlips)
                 {
-                    <a href="@addUrl" class="btn btn-primary btn-lg"> Create Your First @UILabel.ActivityLabel(activityType) &raquo;</a>
+                    <a href="@addUrl" class="btn btn-primary btn-lg"> Create Your First @activityTypeLabel &raquo;</a>
                 }
                 else
                 {
-                    <a href="#" class="btn btn-primary btn-lg" onclick="return showUpgradeMyPlan('@(managePermissionSlipsPackage?.Name)',@(managePermissionSlipsPackage?.ID))"> Create Your First @UILabel.ActivityLabel(activityType) &raquo;</a>
+                    <a href="#" class="btn btn-primary btn-lg" onclick="return showUpgradeMyPlan('@(managePermissionSlipsPackage?.Name)',@(managePermissionSlipsPackage?.ID))"> Create Your First @activityTypeLabel &raquo;</a>
                 }
             </div>
         </div>
@@ -95,15 +91,15 @@
     {
         <div class="widget">
             <div class="widget-head">
-                <h1>@account.Name @UILabel.ActivityLabel(activityType, true)</h1>
+                <h1>@account.Name @activityTypeLabelPlural</h1>
             </div>
             <div class="widget-tile">
                 <hr/>
                 <p>Welcome, @currentUser.FirstName!</p>
-                <p>You haven't created any @UILabel.ActivityLabel(activityType, true).ToLower() yet. In order to get started, <a href="@addUrl"> Create your first @UILabel.ActivityLabel(activityType).ToLower()</a>.</p>
+                <p>You haven't created any @activityTypeLabelPlural.ToLower() yet. In order to get started, <a href="@addUrl"> Create your first @activityTypeLabel.ToLower()</a>.</p>
                 <p>&nbsp;</p>
                 <p>
-                    <a href="@addUrl" class="btn btn-primary btn-lg"> Create Your First @UILabel.ActivityLabel(activityType) &raquo;</a>
+                    <a href="@addUrl" class="btn btn-primary btn-lg"> Create Your First @activityTypeLabel &raquo;</a>
                 </p>
             </div>
         </div>
@@ -116,7 +112,7 @@ else
         <div class="row">
             <div class="col-md-8">
                 <select class="form-control" id="registration-group" name="registration-group">
-                    <option value="">All @UILabel.ActivityLabel(activityType, true)</option>
+                    <option value="">All @activityTypeLabelPlural</option>
                     @if (groups.Count > 0)
                     {
                         <optgroup label="@UILabel.ActivityGroupLabel(group.ActivityGroupTypeId, true)">
@@ -158,18 +154,18 @@ else
     <thead>
     <tr>
         <th></th>
-        <th>@UILabel.ActivityLabel(activityType)</th>
+        <th>@activityTypeLabel</th>
         @if (activityType != ActivityType.PermissionSlip)
         {
             <th class="text-center">Starts</th>
             <th class="text-center">Days</th>
         }
-        @if (activityType.NotIn(new[] {ActivityType.FieldTrip, ActivityType.PermissionSlip}))
+        @if (activityType.NotIn(new[] {ActivityType.FieldTrip, ActivityType.PermissionSlip, ActivityType.VolunteerOpportunity}))
         {
             <th class="text-center">Grades</th>
             <th class="text-center">Ages</th>
         }
-        <th class="text-center">Students</th>
+        <th class="text-center">@registrantsLabel</th>
         <th></th>
     </tr>
     </thead>
@@ -269,7 +265,7 @@ else
                     }
                 </td>
             }
-            @if (activityType.NotIn(new[] {ActivityType.FieldTrip, ActivityType.PermissionSlip}))
+            @if (activityType.NotIn(new[] {ActivityType.FieldTrip, ActivityType.PermissionSlip, ActivityType.VolunteerOpportunity}))
             {
                 <td class="text-center">
                     @if (showLink)
@@ -403,7 +399,7 @@ else
             </tr>
         }
     }
-    else if (Model.Count() == 0 && hasSearchQuery)
+    else if (!Model.Any() && hasSearchQuery)
     {
         <tr class="text-center">
             <td colspan="9">No activity found with search terms '@Request["q"]'</td>
@@ -412,7 +408,7 @@ else
     else
     {
         <tr>
-            <td colspan="9">There are no @UILabel.ActivityLabel(activityType, true).ToLower(). Please <a href="@addUrl">add new @UILabel.ActivityLabel(activityType).ToLower()</a></td>
+            <td colspan="9">There are no @activityTypeLabelPlural.ToLower(). Please <a href="@addUrl">add new @activityTypeLabel.ToLower()</a></td>
         </tr>
     }
     </tbody>
@@ -469,15 +465,15 @@ else
                 <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">
                     <i class="icon s7-close"></i>
                 </button>
-                <h3 class="modal-title">Create New @UILabel.ActivityLabel(activityType) Offering</h3>
+                <h3 class="modal-title">Create New @activityTypeLabel Offering</h3>
             </div>
             <div class="modal-body form">
 
-                <p>This is used to offer the same @UILabel.ActivityLabel(activityType).ToLower() for a new group of @UILabel.RegistrantLabel(true).ToLower(). You will only be able to change the name, seats, and registration open and close dates. All other changes will need to be made on the original @UILabel.ActivityLabel(activityType).ToLower() offering.</p>
+                <p>This is used to offer the same @activityTypeLabel.ToLower() for a new group of @registrantsLabel.ToLower(). You will only be able to change the name, seats, and registration open and close dates. All other changes will need to be made on the original @activityTypeLabel.ToLower() offering.</p>
 
                 <div class="form-group">
-                    <label>@UILabel.ActivityLabel(activityType) Name</label>
-                    <input type="text" placeholder="Your @UILabel.ActivityLabel(activityType) Name" class="form-control" id="activitynameoffer" name="activitynameoffer" onfocus="this.select()">
+                    <label>@activityTypeLabel Name</label>
+                    <input type="text" placeholder="Your @activityTypeLabel Name" class="form-control" id="activitynameoffer" name="activitynameoffer" onfocus="this.select()">
                 </div>
             </div>
             <div class="modal-footer">
@@ -496,7 +492,7 @@ else
             <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">
                 <i class="icon s7-close"></i>
             </button>
-            <h3 class="modal-title">Delete @UILabel.ActivityLabel(activityType)</h3>
+            <h3 class="modal-title">Delete @activityTypeLabel</h3>
         </div>
         <div class="modal-body form">
 
@@ -522,7 +518,7 @@ else
             <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">
                 <i class="icon s7-close"></i>
             </button>
-            <h3 class="modal-title">Archive @UILabel.ActivityLabel(activityType)</h3>
+            <h3 class="modal-title">Archive @activityTypeLabel</h3>
         </div>
         <div class="modal-body form">
 
@@ -532,7 +528,7 @@ else
                     <span id="archive-activity-name"></span>
                 </strong>?
             </p>
-            <p>Archived @UILabel.ActivityLabel(activityType, true).ToLower() are automatically unpublished.</p>
+            <p>Archived @activityTypeLabelPlural.ToLower() are automatically unpublished.</p>
 
         </div>
         <div class="modal-footer">
@@ -548,7 +544,7 @@ else
             <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">
                 <i class="icon s7-close"></i>
             </button>
-            <h3 class="modal-title">Restore @UILabel.ActivityLabel(activityType)</h3>
+            <h3 class="modal-title">Restore @activityTypeLabel</h3>
         </div>
         <div class="modal-body form">
 
@@ -578,7 +574,7 @@ else
         $.get(
             `/org/services/updateschedule/${activity}?schedule=${schedule}`,
             function (data) {
-                if (data && data.status == 'ok') {
+                if (data && data.status === 'ok') {
                     $(`#edit-schedule-${activity}`).attr('onclick', `editSchedule('${activityName}', ${activity}, ${schedule})`);
 
                     Notifications.showBar({
@@ -635,7 +631,7 @@ else
     });
 
     function HandleNotification(packageName, packageID) {
-        if(packageID > 0 && packageName != ""){
+        if(packageID > 0 && packageName !== ""){
         //show package banner
         showUpgradeMyPlan(packageName, packageID);
     }

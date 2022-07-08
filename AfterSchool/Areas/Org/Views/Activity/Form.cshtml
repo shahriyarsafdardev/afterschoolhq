@@ -28,7 +28,10 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name + " - Registration Form"); }
+            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name + " - Registration Form", new ViewDataDictionary
+              {
+                  {"IconClass", AfterSchool.Helpers.IconForActivityType.GetIconClassForActivityType(Model.ActivityTypeId)},
+              }); }
         </div>
         <div class="panel-body">
             

@@ -63,7 +63,10 @@
 
 <div class="panel panel-default">
 <div class="panel-heading">
-    @{ Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name + " - Publish"); }
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name + " - Publish", new ViewDataDictionary
+       {
+           {"IconClass", AfterSchool.Helpers.IconForActivityType.GetIconClassForActivityType(Model.ActivityTypeId)},
+       }); }
 </div>
 <div class="panel-body">
 
@@ -71,7 +74,7 @@
 <div class="panel-heading">
     <div class="btn-group pull-right">
 
-        @if (!Model.ActivityGroupId.HasValue)
+        @if (!Model.ActivityGroupId.HasValue && Model.ActivityTypeId != ActivityType.VolunteerOpportunity)
         {
             if (!showAllowInvites)
             {

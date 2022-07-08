@@ -1,7 +1,7 @@
 ﻿@model Activity
 @{
     ViewBag.Title = Model.AccountName;
-    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+    var msgs = (SystemMessages)ViewBag.Messages;
 
     var registrants = (List<Registrant>)ViewBag.Registrants;
     var body = ViewBag.Body;
@@ -23,6 +23,8 @@
     var textMessagingPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.TextMessaging, accountPackage);
     var currentAccount = SessionVariables.CurrentAccount;
     var currentUser = SessionVariables.CurrentUser;
+    var activityType = Model.ActivityTypeId;
+    var registrantsLabel = UILabel.RegistrantLabel(activityType, true);
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
@@ -43,7 +45,10 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name + " - Send Message"); }
+            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name + " - Send Message", new ViewDataDictionary
+              {
+                  {"IconClass", AfterSchool.Helpers.IconForActivityType.GetIconClassForActivityType(activityType)},
+              }); }
         </div>
         <div class="panel-body">
             <form method="post" id="message-form" action="@Url.Action("messageadd", "activity", new { id = Model.Uid })" class="form-horizontal">
@@ -52,7 +57,7 @@
                 {
                     <div>
                         <a href="@Url.Action("messages", "activity", new { id = Model.Uid })" class="btn btn-default pull-right">&laquo; Back to List</a>
-                        <p>There are no @UILabel.RegistrantLabel(true).ToLower() with valid email addresses</p>
+                        <p>There are no @registrantsLabel.ToLower() with valid email addresses</p>
                     </div>
                 }
                 else
@@ -116,7 +121,7 @@
 
                     <div class="form-group">
                         <label class="col-sm-3 control-label">
-                            Select @UILabel.RegistrantLabel(true)<br />
+                            Select @registrantsLabel<br />
                             <a href="javascript:selectAll()">Select All</a> | <a href="javascript:clearAll()">Clear All</a>
                         </label>
                         <div class="col-sm-6">
@@ -156,7 +161,7 @@
                             </div>
                             <div class="pull-right">
                                 <button id="send-btn" type="submit" class="btn btn-primary btn-lg btn-block pull-right">
-                                    <i class="s7-mail"></i> Send Message to Selected Registrants &raquo;
+                                    <i class="s7-mail"></i> Send Message to Selected @registrantsLabel &raquo;
                                 </button>
                             </div>
                         </div>

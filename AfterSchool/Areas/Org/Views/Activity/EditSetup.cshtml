@@ -36,7 +36,10 @@
 
     <div class="panel panel-default margin-bottom-zero">
         <div class="panel-heading">
-            @{ Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", title); }
+            @{ Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", title, new ViewDataDictionary
+               {
+                   {"IconClass", IconForActivityType.GetIconClassForActivityType(Model.Activity.ActivityTypeId)},
+               }); }
 
             @if (isFullScreen)
             {

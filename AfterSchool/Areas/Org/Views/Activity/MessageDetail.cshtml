@@ -34,7 +34,10 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", activity.Name + " - Message"); }
+            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", activity.Name + " - Message", new ViewDataDictionary
+              {
+                  {"IconClass", AfterSchool.Helpers.IconForActivityType.GetIconClassForActivityType(activity.ActivityTypeId)},
+              }); }
         </div>
         <div class="panel-body">
             <div class="col-md-10 col-md-offset-1">
@@ -75,7 +78,7 @@
                     {
                         <div class="form-group">
                             <label class="col-sm-3 control-label">
-                                Student Recipients
+                                @UILabel.RegistrantLabel(activity.ActivityTypeId) Recipients
                             </label>
                             <div class="col-sm-6 padding-10">
                                 @if (amrs.Count > 0)

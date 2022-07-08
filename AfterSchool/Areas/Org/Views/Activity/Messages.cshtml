@@ -26,7 +26,10 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name + " - Messages"); }
+            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name + " - Messages", new ViewDataDictionary
+              {
+                  {"IconClass", AfterSchool.Helpers.IconForActivityType.GetIconClassForActivityType(Model.ActivityTypeId)},
+              }); }
         </div>
         <div class="panel-body">
             @{Html.RenderPartial(
@@ -40,6 +43,7 @@
                     { "ViewLinkAction", "messages" },
                     { "ViewLinkId", Model.Uid.ToString() },
                     { "PagingModel", ViewBag.PagingModel },
+                    { "ActivityType", Model.ActivityTypeId },
                 }
                 );}
 

@@ -41,7 +41,7 @@
             @if (Model.Activity.IsPublished || registrantCount > 0)
             {
                 <a href="@Url.Action("registrants", "activity", new {id = Model.Activity.Uid})" class="btn btn-alt6@(actionName == "registrants" ? "-active" : "")">
-                    <i class="s7-user"></i> @UILabel.RegistrantLabel(true)
+                    <i class="s7-user"></i> @(UILabel.RegistrantLabel(Model.Activity.ActivityTypeId, true))
                 </a>
 
                 if (Model.Activity.HasSchedule && Model.Activity.ActivityTypeId.NotIn(new[] {ActivityType.FieldTrip, ActivityType.PermissionSlip}))

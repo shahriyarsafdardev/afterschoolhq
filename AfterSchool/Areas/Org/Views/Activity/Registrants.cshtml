@@ -41,7 +41,11 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name + " - " + UILabel.RegistrantLabel(true)); }
+            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name + " - " + UILabel.RegistrantLabel(Model.ActivityTypeId, true),
+                  new ViewDataDictionary
+                  {
+                      {"IconClass", AfterSchool.Helpers.IconForActivityType.GetIconClassForActivityType(Model.ActivityTypeId)},
+                  }); }
         </div>
         <div class="panel-body">
             <div class="row">

@@ -1,32 +1,14 @@
 @model RegistrantActivity
 @{
     var answers = Model.GetAnswers();
-    var isActivityLeader = false;
     var account = SessionVariables.CurrentAccount;
-    var backtolistAction = ViewData["BackToListAction"].ToString();
-    var backtolistController = ViewData["BackToListController"].ToString();
-    var showPaymentForm = (bool)ViewData["ShowPaymentForm"];
+    var backToListAction = ViewData["BackToListAction"].ToString();
+    var backToListController = ViewData["BackToListController"].ToString();
     var activity = Model.GetActivity();
-    var attachedCoupons = (List<AttachedCoupon>)ViewData["AttachedCoupons"];
     var registration = Model.GetRegistration();
 
-    if (showPaymentForm)
-    {
-        isActivityLeader = (bool)ViewData["IsActivityLeader"];
-    }
-
-    var isPrintView = false;
-    var tableCondensed = "";
-    if (ViewData["IsPrintView"].IsNotEmpty() && ViewData["IsPrintView"].ToString().IsBoolean())
-    {
-        isPrintView = ViewData["IsPrintView"].ToString().ToBoolean();
-    }
-
-    if (isPrintView)
-    {
-        tableCondensed = "table-condensed";
-    }
-    
+    var isPrintView = ViewData["IsPrintView"].IsNotEmpty() && ViewData["IsPrintView"].ToString().IsBoolean() && ViewData["IsPrintView"].ToString().ToBoolean();
+    var tableCondensed = isPrintView ? "table-condensed" : "";
 }
 <div class="panel panel-default">
 <div class="panel-heading" style="margin:0">
@@ -39,7 +21,7 @@
                     View Full Registration
                 </a>
             }
-            <a href="@Url.Action(backtolistAction, backtolistController, new { id = activity.Uid })" class="btn btn-default">&laquo; Back to List</a>
+            <a href="@Url.Action(backToListAction, backToListController, new { id = activity.Uid })" class="btn btn-default">&laquo; Back to List</a>
         </div>
     }
     
