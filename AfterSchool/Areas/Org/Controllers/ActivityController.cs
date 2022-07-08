@@ -1368,9 +1368,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 if (activeForm.IsEmpty())
                 {
-                    var defaultForm = currentAccount.CreateDefaultStudentForm(currentUser, msgs);
-                    currentAccount.SetDefaultStudentForm(defaultForm, currentUser);
-
+                    // NOTE: should this use EnsureDefaultStudentForm or always create??
+                    currentAccount.EnsureDefaultStudentForm(currentUser, msgs);
                     activeForm = currentAccount.GetDefaultActivityForm(msgs);
                 }
 
