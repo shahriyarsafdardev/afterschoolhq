@@ -207,7 +207,7 @@ namespace AfterSchool.Controllers
                 return RedirectToAction("Index");
 
             var accounts = SessionVariables.CurrentUser.GetAccounts(msgs);
-            //We should not show deactivated or tests accounts.
+            //We should not show deactivated accounts.
             accounts = accounts.Where(x => x.IsActive == true).ToList();
 
             if (invite.IsGuid())
