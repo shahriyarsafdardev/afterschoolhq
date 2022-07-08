@@ -317,6 +317,17 @@ namespace AfterSchoolLibrary.Models
                 .Any(x => x.FeatureTypeId == featureType && x.Max.HasValue && x.Max > 0);
         }
 
+        public bool HasAnyFeature(FeatureType[] featureTypes, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var features = GetFeatures(msgs, dc);
+
+            foreach (var featureType in featureTypes)
+                if (features.Any(x => x.FeatureTypeId == featureType && x.Max.HasValue && x.Max > 0))
+                    return true;
+
+            return false;
+        }
+
         public AccountPackageFeature GetFeature(FeatureType featureType, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {

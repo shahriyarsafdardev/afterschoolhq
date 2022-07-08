@@ -457,7 +457,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             var newForm = defaultForm.Copy(
                                 currentWebUser.ID.Value,
                                 currentAccount.ID.Value,
-                                FormType.Registration,
+                                FormType.StudentForm,
                                 (league.Name + " Form").MaxChars(100, "..."),
                                 amsgs,
                                 adc);

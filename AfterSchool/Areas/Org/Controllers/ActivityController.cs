@@ -1482,7 +1482,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     var defaultForm = currentAccount.GetDefaultForm(msgs);
                     var newForm = defaultForm.Copy(currentUser.ID.Value, currentAccount.ID.Value,
-                        FormType.Registration, (name + " form").MaxChars(100, "..."), msgs);
+                        FormType.StudentForm, (name + " form").MaxChars(100, "..."), msgs);
                     if (msgs.HasNoErrors())
                     {
                         if (values.Any(m => m.Key == "form"))
