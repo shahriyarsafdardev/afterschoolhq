@@ -130,7 +130,7 @@ namespace AfterSchoolLibrary.Helpers
 
             msgs.AddRange(GradeLevel.CreateDefaultGradeLevels(dc));
 
-            FormService.AddNewAfterSchoolDefaultForm(msgs, dc);
+            FormService.AddNewAfterSchoolDefaultStudentForm(msgs, dc);
 
             var packageCount = Package.GetCount(null, msgs, dc);
             if (packageCount == 0)

@@ -23,7 +23,7 @@ namespace AfterSchoolLibrary.Migrations
 
                     forms.ForEach(form =>
                     {
-                        form.FormTypeId = FormType.Registration;
+                        form.FormTypeId = FormType.StudentForm;
                         amsgs.AddRange(form.Save(adc));
                     });
                 },

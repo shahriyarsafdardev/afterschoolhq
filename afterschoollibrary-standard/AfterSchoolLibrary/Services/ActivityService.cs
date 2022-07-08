@@ -523,7 +523,7 @@ namespace AfterSchoolLibrary.Services
                         //get form and use the same form
                         var formToUse = activity.GetActiveForm(amsgs, adc);
                         if (formToUse.IsEmpty())
-                            formToUse = account.GetDefaultForm(msgs, adc);
+                            formToUse = account.GetDefaultStudentForm(msgs, adc);
 
                         copy.AddFormAndActivate(formToUse, loggedInUserId, false, amsgs, dc: adc);
                     }
@@ -534,7 +534,7 @@ namespace AfterSchoolLibrary.Services
                         if (useSameForm)
                             formToCopy = activity.GetActiveForm(amsgs, adc);
                         else
-                            formToCopy = account.GetDefaultForm(amsgs, adc);
+                            formToCopy = account.GetDefaultStudentForm(amsgs, adc);
 
                         var newForm = formToCopy.Copy(loggedInUserId, copy.AccountId.Value, FormType.NotSet, null,
                             amsgs, dc: adc);
@@ -1835,7 +1835,7 @@ namespace AfterSchoolLibrary.Services
                 if (formId == 0)
                 {
                     //if creating a new form, copy from the default form
-                    var defaultForm = account.GetDefaultForm(dc: dc);
+                    var defaultForm = account.GetDefaultStudentForm(dc: dc);
                     newForm = defaultForm.Copy(loggedInUserId, account.ID.Value, FormType.StudentForm, null, msgs,
                         dc: dc);
                     newForm.Name = (activity.Name + " Form").MaxChars(100, "...");

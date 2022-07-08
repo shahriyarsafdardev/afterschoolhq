@@ -27,7 +27,7 @@ namespace AfterSchoolLibraryTests.Tests
         {
             // Arrange
             // Act
-            var form = FormService.AddNewAfterSchoolDefaultForm(msgs, dc);
+            var form = FormService.AddNewAfterSchoolDefaultStudentForm(msgs, dc);
 
             // Assert
             Assert.NotNull(form);
@@ -161,7 +161,7 @@ namespace AfterSchoolLibraryTests.Tests
         {
             // Arrange
             // Act
-            var qhs = FormService.CreateEmergencyContact1Group();
+            var qhs = FormService.CreateEmergencyContact1Group(FormType.StudentForm);
 
             // Assert
             Assert.NotNull(qhs);
@@ -181,7 +181,7 @@ namespace AfterSchoolLibraryTests.Tests
         {
             // Arrange
             // Act
-            var qhs = FormService.CreateEmergencyContact2Group();
+            var qhs = FormService.CreateEmergencyContact2Group(FormType.StudentForm);
 
             // Assert
             Assert.NotNull(qhs);
@@ -201,7 +201,7 @@ namespace AfterSchoolLibraryTests.Tests
         {
             // Arrange
             // Act
-            var qhs = FormService.CreateEmergencyContact3Group();
+            var qhs = FormService.CreateEmergencyContact3Group(FormType.StudentForm);
 
             // Assert
             Assert.NotNull(qhs);

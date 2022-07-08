@@ -347,7 +347,7 @@ namespace AfterSchoolLibraryTests.Tests
                 var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
                 var package = PackageFactory.Create(msgs, dc);
                 var accountPackage = AccountPackageFactory.Create(ActivityOwnerAccount, package, msgs, dc);
-                var form = ActivityOwnerAccount.GetOrCreateDefaultForm(LoggedInUser, msgs, dc);
+                var form = ActivityOwnerAccount.GetOrCreateDefaultStudentForm(LoggedInUser, msgs, dc);
                  var activity = ActivityFactory.Create(ActivityOwnerAccount, schedule, msgs, dc);                
 
                 // Act
@@ -366,7 +366,7 @@ namespace AfterSchoolLibraryTests.Tests
             var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
             var package = PackageFactory.Create(msgs, dc);
             var accountPackage = AccountPackageFactory.Create(ActivityOwnerAccount, package, msgs, dc);
-            var form = ActivityOwnerAccount.GetOrCreateDefaultForm(LoggedInUser, msgs, dc);
+            var form = ActivityOwnerAccount.GetOrCreateDefaultStudentForm(LoggedInUser, msgs, dc);
             var activity = ActivityFactory.Create(ActivityOwnerAccount, schedule, msgs, dc);
 
             // Act
@@ -387,7 +387,7 @@ namespace AfterSchoolLibraryTests.Tests
                 var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
                 var package = PackageFactory.Create(msgs, dc);
                 var accountPackage = AccountPackageFactory.Create(ActivityOwnerAccount, package, msgs, dc);
-                var form = ActivityOwnerAccount.GetOrCreateDefaultForm(LoggedInUser, msgs, dc);
+                var form = ActivityOwnerAccount.GetOrCreateDefaultStudentForm(LoggedInUser, msgs, dc);
                 var activity = ActivityFactory.Create(ActivityOwnerAccount, schedule, msgs, dc);
 
                 var startDates = new List<DateRange>()
@@ -473,7 +473,7 @@ namespace AfterSchoolLibraryTests.Tests
                 var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
                 var package = PackageFactory.Create(msgs, dc);
                 var accountPackage = AccountPackageFactory.Create(ActivityOwnerAccount, package, msgs, dc);
-                var form = ActivityOwnerAccount.GetOrCreateDefaultForm(LoggedInUser, msgs, dc);
+                var form = ActivityOwnerAccount.GetOrCreateDefaultStudentForm(LoggedInUser, msgs, dc);
                 var activity = ActivityFactory.Create(ActivityOwnerAccount, schedule, msgs, dc);
 
                 var startDates = new List<DateRange>();
@@ -533,7 +533,7 @@ namespace AfterSchoolLibraryTests.Tests
                 // Arrange
                 var package = PackageFactory.Create(msgs, dc);
                 var accountPackage = AccountPackageFactory.Create(ActivityOwnerAccount, package, msgs, dc);
-                var form = ActivityOwnerAccount.GetOrCreateDefaultForm(LoggedInUser, msgs, dc);
+                var form = ActivityOwnerAccount.GetOrCreateDefaultStudentForm(LoggedInUser, msgs, dc);
                 var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
                 AccountPropertyFactory.Create(activity, AccountPropertyType.RegistrationThankYouEmail, msgs, dc);
                 AccountPropertyFactory.Create(activity, AccountPropertyType.ApplicationThankYouEmail, msgs, dc);
@@ -565,7 +565,7 @@ namespace AfterSchoolLibraryTests.Tests
             // Arrange
             var package = PackageFactory.Create(msgs, dc);
             var accountPackage = AccountPackageFactory.Create(ActivityOwnerAccount, package, msgs, dc);
-            var form = ActivityOwnerAccount.GetOrCreateDefaultForm(LoggedInUser, msgs, dc);
+            var form = ActivityOwnerAccount.GetOrCreateDefaultStudentForm(LoggedInUser, msgs, dc);
             var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
             AccountPropertyFactory.Create(activity, AccountPropertyType.RegistrationThankYouEmail, msgs, dc);
             AccountPropertyFactory.Create(activity, AccountPropertyType.ApplicationThankYouEmail, msgs, dc);

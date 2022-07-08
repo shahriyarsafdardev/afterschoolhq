@@ -197,7 +197,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 //create initial form for account
                 if (msgs.HasNoErrors() && !SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
                 {
-                    var defaultForm = currentAccount.GetDefaultForm();
+                    var defaultForm = currentAccount.GetDefaultStudentForm();
                     var newForm = defaultForm.Copy(currentUser.ID.Value, currentAccount.ID.Value, FormType.StudentForm, (name + " form").MaxChars(100, "..."),
                         msgs);
 

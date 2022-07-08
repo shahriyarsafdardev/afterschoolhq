@@ -598,9 +598,9 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Features(string x)
         {
             var msgs = new SystemMessages();
-            var a = SessionVariables.CurrentAccount;
-            var currentuser = SessionVariables.CurrentUser;
-            var accountPackage = a.GetActiveAccountPackage(msgs);
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var accountPackage = currentAccount.GetActiveAccountPackage(msgs);
 
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
@@ -617,33 +617,39 @@ namespace AfterSchool.Areas.Org.Controllers
                                 accountFeature = new AccountPackageFeature();
                                 accountFeature.AccountPackageId = accountPackage.ID;
                                 accountFeature.CreateDate = DateTime.UtcNow;
-                                accountFeature.CreatedBy = currentuser.ID;
+                                accountFeature.CreatedBy = currentUser.ID;
                                 accountFeature.FeatureTypeId = type;
                             }
 
                             accountFeature.Max = Request[type.ToString()].ToDecimal();
-                            accountFeature.LastModifiedBy = currentuser.ID;
+                            accountFeature.LastModifiedBy = currentUser.ID;
                             accountFeature.LastModifiedDate = DateTime.UtcNow;
                             amsgs.AddRange(accountFeature.Save(adc));
 
                             if (accountFeature.FeatureTypeId == FeatureType.TrialDays &&
                                 accountPackage.TrialStartDate.HasValue)
+                            {
                                 amsgs.AddRange(
                                     accountPackage.UpdateTrialDays(accountFeature.Max.Value.ToInteger(), adc));
+                            }
                             else if (accountFeature.FeatureTypeId == FeatureType.ManualStripePayouts &&
-                                     a.StripeUserId.IsNotEmpty())
+                                     currentAccount.StripeUserId.IsNotEmpty())
                             {
                                 var manualStripePayouts =
                                     accountPackage.HasFeature(featureType: FeatureType.ManualStripePayouts, msgs: amsgs,
                                         dc: adc);
                                 if (manualStripePayouts)
                                     StripeHelper.ToggleStripePayoutForConnectedAccount(
-                                        customAccountsStripeUserId: a.StripeUserId, accountName: a.Name,
+                                        customAccountsStripeUserId: currentAccount.StripeUserId, accountName: currentAccount.Name,
                                         payoutIntervalType: PayoutIntervalType.Manual, msgs: amsgs);
                                 else
                                     StripeHelper.ToggleStripePayoutForConnectedAccount(
-                                        customAccountsStripeUserId: a.StripeUserId, accountName: a.Name,
+                                        customAccountsStripeUserId: currentAccount.StripeUserId, accountName: currentAccount.Name,
                                         payoutIntervalType: PayoutIntervalType.Daily, msgs: amsgs);
+                            }
+                            else if (accountFeature.FeatureTypeId == FeatureType.ManageVolunteerOpportunities)
+                            {
+                                currentAccount.EnsureDefaultVolunteerForm(currentUser, amsgs, adc);
                             }
                         }
                     }
@@ -652,16 +658,16 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     msgs.AddRange(smsgs);
                     msgs.Add("Saved Successfully", MessageType.Success);
-                    SessionVariables.AccountPackage = a.GetActiveAccountPackage();
+                    SessionVariables.AccountPackage = currentAccount.GetActiveAccountPackage();
                 },
                 onFailure: (SystemMessages fmsgs) => { msgs.AddRange(fmsgs); }
             );
 
-            ViewBag.Features = a.GetAccountPackageFeatures(msgs);
+            ViewBag.Features = currentAccount.GetAccountPackageFeatures(msgs);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Messages = msgs;
 
-            return View(a);
+            return View(currentAccount);
         }
 
         [HttpGet]
@@ -893,7 +899,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     form = currentAccount.GetForm(copyfrom.ToInteger(), msgs)?.Copy(currentUser.ID.Value,
                         currentAccount.ID.Value, (FormType) formtype.ToInteger(), null, msgs);
                 else
-                    form = currentAccount.GetDefaultForm(msgs)?.Copy(currentUser.ID.Value, currentAccount.ID.Value,
+                    form = currentAccount.GetDefaultStudentForm(msgs)?.Copy(currentUser.ID.Value, currentAccount.ID.Value,
                         (FormType) formtype.ToInteger(), null, msgs);
             }
             else

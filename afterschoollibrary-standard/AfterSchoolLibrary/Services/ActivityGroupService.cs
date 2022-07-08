@@ -287,7 +287,7 @@ namespace AfterSchoolLibrary.Services
                         {
                             if (form.ToString().ToInteger() == 0)
                             {
-                                var defaultForm = account.GetOrCreateDefaultForm(loggedInUser, amsgs, adc);
+                                var defaultForm = account.GetOrCreateDefaultStudentForm(loggedInUser, amsgs, adc);
                                 var newForm = defaultForm.Copy(
                                     loggedInUser.ID.Value,
                                     account.ID.Value,

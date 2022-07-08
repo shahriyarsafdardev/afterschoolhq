@@ -2107,7 +2107,13 @@ namespace AfterSchoolLibrary.Services
         #endregion
 
         #region NewAccounSetup
-
+        
+        public static void EnsureDefaultStudentForm(this Account formOwner, WebUser loggedInUser, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            formOwner.GetOrCreateDefaultStudentForm(loggedInUser, msgs, dc);
+        }
+        
         /// <summary>
         ///     Copy default form from main After School HQ Account
         /// </summary>
@@ -2116,21 +2122,41 @@ namespace AfterSchoolLibrary.Services
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static Form CreateDefaultForm(this Account formOwner, WebUser loggedInUser, SystemMessages msgs = null,
+        public static Form CreateDefaultStudentForm(this Account formOwner, WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            var form = FormService.GetOrCreateAfterSchoolAccountTemplateForm(msgs, dc);
+            var form = FormService.GetOrCreateAfterSchoolAccountTemplateForm(FormType.StudentForm, msgs, dc);
 
             if (form.AccountId != formOwner.ID)
                 form = form.Copy(loggedInUser.ID.Value, formOwner.ID.Value, FormType.StudentForm, "Standard Reg Form",
                     msgs, dc);
 
-            msgs.AddRange(formOwner.SetDefaultForm(form, loggedInUser, dc));
+            msgs.AddRange(formOwner.SetDefaultStudentForm(form, loggedInUser, dc));
 
             return form;
         }
 
-        public static SystemMessages SetDefaultForm(this Account account, Form form, WebUser loggedInUser,
+        public static void EnsureDefaultVolunteerForm(this Account formOwner, WebUser loggedInUser, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            formOwner.GetOrCreateDefaultVolunteerForm(loggedInUser, msgs, dc);
+        }
+        
+        public static Form CreateDefaultVolunteerForm(this Account formOwner, WebUser loggedInUser, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            var form = FormService.GetOrCreateAfterSchoolAccountTemplateForm(FormType.VolunteerForm, msgs, dc);
+
+            if (form.AccountId != formOwner.ID)
+                form = form.Copy(loggedInUser.ID.Value, formOwner.ID.Value, FormType.VolunteerForm, "Standard Volunteer Reg Form",
+                    msgs, dc);
+
+            msgs.AddRange(formOwner.SetDefaultVolunteerForm(form, loggedInUser, dc));
+
+            return form;
+        }
+
+        public static SystemMessages SetDefaultStudentForm(this Account account, Form form, WebUser loggedInUser,
             DatabaseConnection dc = null)
         {
             account.DefaultFormId = form.ID;
@@ -2139,13 +2165,34 @@ namespace AfterSchoolLibrary.Services
             return account.Save(dc);
         }
 
-        public static Form GetOrCreateDefaultForm(this Account account, WebUser loggedInUser,
-            SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static SystemMessages SetDefaultVolunteerForm(this Account account, Form form, WebUser loggedInUser,
+            DatabaseConnection dc = null)
         {
-            return account.GetDefaultForm(msgs, dc) ?? CreateDefaultForm(account, loggedInUser, msgs, dc);
+            account.DefaultVolunteerFormId = form.ID;
+            account.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+            account.LastModifiedDate = DateTime.UtcNow;
+            return account.Save(dc);
         }
 
-        public static Form GetDefaultForm(this Account account, SystemMessages msgs = null,
+        public static Form GetOrCreateDefaultStudentForm(this Account account, WebUser loggedInUser,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.GetDefaultStudentForm(msgs, dc) ?? CreateDefaultStudentForm(account, loggedInUser, msgs, dc);
+        }
+
+        public static Form GetDefaultStudentForm(this Account account, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            return account.DefaultFormId.HasValue ? Form.Load(account.DefaultFormId.Value, msgs, dc) : null;
+        }
+
+        public static Form GetOrCreateDefaultVolunteerForm(this Account account, WebUser loggedInUser,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.GetDefaultVolunteerForm(msgs, dc) ?? CreateDefaultVolunteerForm(account, loggedInUser, msgs, dc);
+        }
+
+        public static Form GetDefaultVolunteerForm(this Account account, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             return account.DefaultFormId.HasValue ? Form.Load(account.DefaultFormId.Value, msgs, dc) : null;
@@ -2191,7 +2238,7 @@ namespace AfterSchoolLibrary.Services
         {
             return new ActivityForm
             {
-                FormId = account.GetDefaultForm(msgs, dc).ID,
+                FormId = account.GetDefaultStudentForm(msgs, dc).ID,
                 IsActive = true,
                 AccountId = account.ID,
             };
@@ -2627,7 +2674,12 @@ namespace AfterSchoolLibrary.Services
 
                 //create default form for account to use for registration
                 if (accountType != AccountType.Registrant)
-                    account.CreateDefaultForm(loggedInUser, msgs, dc);
+                {
+                    account.CreateDefaultStudentForm(loggedInUser, msgs, dc);
+                    
+                    if (account.HasFeature(FeatureType.ManageVolunteerOpportunities))
+                        account.CreateDefaultVolunteerForm(loggedInUser, msgs, dc);
+                }
             }
 
             return account;
@@ -2695,7 +2747,7 @@ namespace AfterSchoolLibrary.Services
 
                 //create default form for account to use for registration
                 if (accountType != AccountType.Registrant)
-                    account.CreateDefaultForm(loggedInUser, msgs, dc);
+                    account.CreateDefaultStudentForm(loggedInUser, msgs, dc);
             }
 
             return account;
@@ -2726,7 +2778,7 @@ namespace AfterSchoolLibrary.Services
 
             //create default form for account to use for registration
             if (msgs.HasNoErrors())
-                account.CreateDefaultForm(loggedInUser, msgs, dc);
+                account.CreateDefaultStudentForm(loggedInUser, msgs, dc);
 
             return account;
         }

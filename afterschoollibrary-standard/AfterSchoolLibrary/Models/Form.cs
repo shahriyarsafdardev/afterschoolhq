@@ -194,12 +194,13 @@ namespace AfterSchoolLibrary.Models
             );
         }
 
-        public static Form GetLatestTemplateForm(int accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Form GetLatestTemplateForm(int accountId, FormType formTypeId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], accountId);
             dq.Criterias.Add(ObjectMap["IsActive"], true);
+            dq.Criterias.Add(ObjectMap["FormTypeId"], (int)formTypeId);
             dq.OrderBys.Add(ObjectMap["ID"], OrderByDirectionEnum.Descending);
             dq.SelectRange.Start = 0;
             dq.SelectRange.Length = 1;

@@ -1368,8 +1368,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 if (activeForm.IsEmpty())
                 {
-                    var defaultForm = currentAccount.CreateDefaultForm(currentUser, msgs);
-                    currentAccount.SetDefaultForm(defaultForm, currentUser);
+                    var defaultForm = currentAccount.CreateDefaultStudentForm(currentUser, msgs);
+                    currentAccount.SetDefaultStudentForm(defaultForm, currentUser);
 
                     activeForm = currentAccount.GetDefaultActivityForm(msgs);
                 }
@@ -1480,7 +1480,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 //create initial form for account
                 if (msgs.HasNoErrors() && !accountPackage.HasFeature(FeatureType.ManageForms, msgs))
                 {
-                    var defaultForm = currentAccount.GetDefaultForm(msgs);
+                    var defaultForm = currentAccount.GetDefaultStudentForm(msgs);
                     var newForm = defaultForm.Copy(currentUser.ID.Value, currentAccount.ID.Value,
                         FormType.StudentForm, (name + " form").MaxChars(100, "..."), msgs);
                     if (msgs.HasNoErrors())

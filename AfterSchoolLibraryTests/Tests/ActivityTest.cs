@@ -906,7 +906,7 @@ namespace AfterSchoolLibraryTests.Tests
             var user = WebUserFactory.Create(msgs, dc);
             var account = AccountFactory.Create(user, msgs, dc);
             var activity = ActivityFactory.Create(account, msgs, dc);
-            var form = account.GetOrCreateDefaultForm(user, msgs, dc);
+            var form = account.GetOrCreateDefaultStudentForm(user, msgs, dc);
             var questions = form.GetActiveQuestions(msgs, dc);
             var registrant = RegistrantFactory.Create(account, isMaster: false, msgs, dc: dc);
             var registration = RegistrationFactory.Create(account, registrant, RegistrationCompletionStatus.Completed, msgs, dc);

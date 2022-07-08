@@ -249,7 +249,7 @@ namespace AfterSchoolLibraryTests.Tests
         {
             var accountOwner = WebUserFactory.Create(msgs, dc);
             var account = AccountFactory.Create(accountOwner, msgs, dc);
-            var form = account.GetOrCreateDefaultForm(accountOwner, msgs, dc);
+            var form = account.GetOrCreateDefaultStudentForm(accountOwner, msgs, dc);
 
             Assert.NotNull(form);
         }

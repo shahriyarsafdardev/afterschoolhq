@@ -1204,7 +1204,7 @@ namespace AfterSchool.Areas.Org.Controllers
         private void LoadEditSetupViewBag(ActivityGroup league, SystemMessages msgs)
         {
             var currentAccount = SessionVariables.CurrentAccount;
-            var activeForm = league?.GetForm(msgs) ?? currentAccount.GetDefaultForm(msgs);
+            var activeForm = league?.GetForm(msgs) ?? currentAccount.GetDefaultStudentForm(msgs);
 
             ViewBag.Account = currentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;

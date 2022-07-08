@@ -453,7 +453,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         if (form.ToString().ToInteger() == 0)
                         {
-                            var defaultForm = currentAccount.GetOrCreateDefaultForm(currentWebUser, amsgs, adc);
+                            var defaultForm = currentAccount.GetOrCreateDefaultStudentForm(currentWebUser, amsgs, adc);
                             var newForm = defaultForm.Copy(
                                 currentWebUser.ID.Value,
                                 currentAccount.ID.Value,

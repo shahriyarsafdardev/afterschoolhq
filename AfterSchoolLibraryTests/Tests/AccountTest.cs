@@ -116,7 +116,7 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void CheckIfRegistrantTShirtSizeOptionsExistsTest()
         {
-            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultStudentForm(msgs, dc);
             var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
             var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
 
@@ -126,7 +126,7 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void CheckNewRegistrantTShirtSizeOptionsTest()
         {
-            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultStudentForm(msgs, dc);
             var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
             var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
             var question = questions.Where(f => f.QuestionDataTypeId == QuestionDataType.RegistrantTShirtSize).FirstOrDefault();
@@ -137,7 +137,7 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void RegistrantMiddleNameExistsTest()
         {
-            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultStudentForm(msgs, dc);
             var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
             var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
 
@@ -147,7 +147,7 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void Parent1InformationMiddleNameExistsTest()
         {
-            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultStudentForm(msgs, dc);
             var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.Parent1Information);
             var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
 
@@ -157,7 +157,7 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void Parent2InformationMiddleNameExistsTest()
         {
-            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultStudentForm(msgs, dc);
             var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.Parent2Information);
             var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
 
@@ -167,7 +167,7 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void Parent1InformationEmployerExistsTest()
         {
-            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultStudentForm(msgs, dc);
             var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.Parent1Information);
             var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
 
@@ -177,7 +177,7 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void Parent1InformationRelationshipToRegistrantExistsTest()
         {
-            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultStudentForm(msgs, dc);
             var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.Parent1Information);
             var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
 
@@ -187,7 +187,7 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void Parent2InformationEmployerExistsTest()
         {
-            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultStudentForm(msgs, dc);
             var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.Parent2Information);
             var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
 
@@ -197,7 +197,7 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void Parent2InformationRelationshipToRegistrantExistsTest()
         {
-            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultStudentForm(msgs, dc);
             var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.Parent2Information);
             var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
 
@@ -207,7 +207,7 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void RegistrantEmployerExistsTest()
         {
-            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultStudentForm(msgs, dc);
             var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
             var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
 
@@ -216,7 +216,7 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void RegistrantParentRelationshipExistsTest()
         {
-            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultForm(msgs, dc);
+            var administratorAccountForm = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).First().GetDefaultStudentForm(msgs, dc);
             var personalInformationQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs, dc).First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
             var questions = personalInformationQuestionGroup.GetAllQuestions(msgs, dc);
 

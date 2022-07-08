@@ -233,6 +233,15 @@ namespace AfterSchoolLibrary.Models
             set => MDV["Subdomain"].Value = value;
         }
 
+        /// <summary>
+        ///     default volunteer form id for the account
+        /// </summary>
+        public int? DefaultVolunteerFormId
+        {
+            get => (int?) MDV["DefaultVolunteerFormId"].Value;
+            set => MDV["DefaultVolunteerFormId"].Value = value;
+        }
+
 
         public Account()
         {
@@ -294,7 +303,7 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "ContactFormId", SqlDbType.Int);
                 _dp.Add(className, "ClaimEmailDomain", SqlDbType.NVarChar, "50");
                 _dp.Add(className, "Subdomain", SqlDbType.NVarChar, "100");
-
+                _dp.Add(className, "DefaultVolunteerFormId", SqlDbType.Int);
                 return _dp;
             }
         }
@@ -502,6 +511,10 @@ namespace AfterSchoolLibrary.Models
 
             dps = new DatabaseParameters();
             dps.Add(ObjectMap["Subdomain"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["DefaultVolunteerFormId"]);
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
 

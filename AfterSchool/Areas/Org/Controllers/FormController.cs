@@ -81,7 +81,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         .Copy(SessionVariables.CurrentUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, FormType.NotSet, null, msgs);
                 else
                     form = SessionVariables.CurrentAccount
-                        .GetDefaultForm(msgs)
+                        .GetDefaultStudentForm(msgs)
                         .Copy(SessionVariables.CurrentUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, FormType.NotSet, null, msgs);
             }
             else
