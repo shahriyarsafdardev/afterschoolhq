@@ -2198,6 +2198,17 @@ namespace AfterSchoolLibrary.Services
             return account.Save(dc);
         }
 
+        public static Form GetOrCreateDefaultForm(this Account account, FormType formType, WebUser loggedInUser,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (formType == FormType.StudentForm)
+                return account.GetOrCreateDefaultStudentForm(loggedInUser, msgs, dc);
+            else if (formType == FormType.VolunteerForm)
+                return account.GetOrCreateDefaultVolunteerForm(loggedInUser, msgs, dc);
+
+            return null;
+        }
+
         public static Form GetOrCreateDefaultStudentForm(this Account account, WebUser loggedInUser,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {

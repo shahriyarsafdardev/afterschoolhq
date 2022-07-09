@@ -897,23 +897,12 @@ namespace AfterSchool.Areas.Org.Controllers
             if (id.ToInteger() == 0)
             {
                 if (copyfrom.IsNumber())
-                {
                     form = currentAccount.GetForm(copyfrom.ToInteger(), msgs)?.Copy(currentUser.ID.Value,
                         currentAccount.ID.Value, formTypeId, null, msgs);
-                }
                 else
-                {
-                    Form defaultForm = null;
-                    
-                    if (formTypeId == FormType.StudentForm)
-                        defaultForm = currentAccount.GetOrCreateDefaultStudentForm(currentUser, msgs);
-                    else if (formTypeId == FormType.VolunteerForm)
-                        defaultForm = currentAccount.GetOrCreateDefaultVolunteerForm(currentUser, msgs);
-                    
-                    if (defaultForm.IsNotEmpty())
-                        form = defaultForm.Copy(currentUser.ID.Value, currentAccount.ID.Value,
-                            (FormType)formtype.ToInteger(), null, msgs);
-                }
+                    form = currentAccount.GetOrCreateDefaultForm(formTypeId, currentUser, msgs)
+                                            .Copy(currentUser.ID.Value, currentAccount.ID.Value,
+                                                formTypeId, null, msgs);
             }
             else
                 form = currentAccount.GetForm(id.ToInteger(), msgs);
