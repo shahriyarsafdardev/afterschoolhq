@@ -1352,9 +1352,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var defaultActivity = currentAccount.GetDefaultNewActivity();
 
             if (name.IsEmpty())
-                msgs.Add("Activity name is required.", MessageType.UserError);
+                msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} name is required.", MessageType.UserError);
             else if (name.Length > 75)
-                msgs.Add("Activity name must not be greater than 75 characters.", MessageType.UserError);
+                msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} name must not be greater than 75 characters.", MessageType.UserError);
 
             if (form.IsEmpty() && (isAdvanceSettingEnabled.IsEmpty() || !isAdvanceSettingEnabled.ToBoolean()))
             {
