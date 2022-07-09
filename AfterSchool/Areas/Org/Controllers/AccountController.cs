@@ -889,6 +889,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             Form form = null;
             FormQuestionGroup questionGroup = null;
+            FormType formTypeId = (FormType)formtype.ToInteger();
 
             if (name.IsEmpty() && qg.IsBlank())
                 msgs.Add("Name is required", MessageType.UserError);
@@ -896,11 +897,23 @@ namespace AfterSchool.Areas.Org.Controllers
             if (id.ToInteger() == 0)
             {
                 if (copyfrom.IsNumber())
+                {
                     form = currentAccount.GetForm(copyfrom.ToInteger(), msgs)?.Copy(currentUser.ID.Value,
-                        currentAccount.ID.Value, (FormType) formtype.ToInteger(), null, msgs);
+                        currentAccount.ID.Value, formTypeId, null, msgs);
+                }
                 else
-                    form = currentAccount.GetDefaultStudentForm(msgs)?.Copy(currentUser.ID.Value, currentAccount.ID.Value,
-                        (FormType) formtype.ToInteger(), null, msgs);
+                {
+                    Form defaultForm = null;
+                    
+                    if (formTypeId == FormType.StudentForm)
+                        defaultForm = currentAccount.GetOrCreateDefaultStudentForm(currentUser, msgs);
+                    else if (formTypeId == FormType.VolunteerForm)
+                        defaultForm = currentAccount.GetOrCreateDefaultVolunteerForm(currentUser, msgs);
+                    
+                    if (defaultForm.IsNotEmpty())
+                        form = defaultForm.Copy(currentUser.ID.Value, currentAccount.ID.Value,
+                            (FormType)formtype.ToInteger(), null, msgs);
+                }
             }
             else
                 form = currentAccount.GetForm(id.ToInteger(), msgs);

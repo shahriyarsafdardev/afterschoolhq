@@ -1359,18 +1359,21 @@ namespace AfterSchool.Areas.Org.Controllers
             if (form.IsEmpty() && (isAdvanceSettingEnabled.IsEmpty() || !isAdvanceSettingEnabled.ToBoolean()))
             {
                 ActivityForm activeForm;
+
                 if (activity.IsNotEmpty())
+                {
                     //.. edit activity
                     activeForm = activity.GetActiveActivityForm(msgs);
+                }
                 else
-                    //.. create activity
-                    activeForm = currentAccount.GetDefaultActivityForm(msgs);
-
-                if (activeForm.IsEmpty())
                 {
-                    // NOTE: should this use EnsureDefaultStudentForm or always create??
-                    currentAccount.EnsureDefaultStudentForm(currentUser, msgs);
-                    activeForm = currentAccount.GetDefaultActivityForm(msgs);
+                    if (activity.ActivityTypeId == ActivityType.VolunteerOpportunity)
+                        currentAccount.EnsureDefaultVolunteerForm(currentUser, msgs);
+                    else
+                        currentAccount.EnsureDefaultStudentForm(currentUser, msgs);
+                    
+                    //.. create activity
+                    activeForm = currentAccount.GetDefaultActivityForm(activity, msgs);
                 }
 
                 form = activeForm.FormId.Value.ToString();
@@ -1568,7 +1571,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs = new SystemMessages();
 
             var activeForm = activity.GetActiveActivityForm(msgs) ?? activityGroup?.GetDefaultActivityForm(msgs) ??
-                currentAccount.GetDefaultActivityForm(msgs);
+                currentAccount.GetDefaultActivityForm(activity, msgs);
             var periods = currentAccount.GetOpenAndUpcomingRegistrationPeriods(msgs);
             var activePeriod = activity.GetActiveRegistrationPeriod(msgs) ??
                                currentAccount.GetDefaultNewRegistrationPeriod();

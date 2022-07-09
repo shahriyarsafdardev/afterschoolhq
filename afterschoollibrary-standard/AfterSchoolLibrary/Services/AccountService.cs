@@ -2195,7 +2195,7 @@ namespace AfterSchoolLibrary.Services
         public static Form GetDefaultVolunteerForm(this Account account, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            return account.DefaultFormId.HasValue ? Form.Load(account.DefaultFormId.Value, msgs, dc) : null;
+            return account.DefaultVolunteerFormId.HasValue ? Form.Load(account.DefaultVolunteerFormId.Value, msgs, dc) : null;
         }
 
         public static SystemMessages SetInterestForm(this Account account, Form form, WebUser loggedInUser,
@@ -2233,12 +2233,16 @@ namespace AfterSchoolLibrary.Services
             return account.InterestFormId.HasValue ? Form.Load(account.InterestFormId.Value, msgs, dc) : null;
         }
 
-        public static ActivityForm GetDefaultActivityForm(this Account account, SystemMessages msgs = null,
+        public static ActivityForm GetDefaultActivityForm(this Account account, Activity activity, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
+            var formId = activity.ActivityTypeId == ActivityType.VolunteerOpportunity ? 
+                                account.GetDefaultVolunteerForm(msgs, dc).ID : 
+                                account.GetDefaultStudentForm(msgs, dc).ID;
+            
             return new ActivityForm
             {
-                FormId = account.GetDefaultStudentForm(msgs, dc).ID,
+                FormId = formId,
                 IsActive = true,
                 AccountId = account.ID,
             };
