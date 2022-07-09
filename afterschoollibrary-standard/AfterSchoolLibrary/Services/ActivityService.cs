@@ -1835,8 +1835,8 @@ namespace AfterSchoolLibrary.Services
                 if (formId == 0)
                 {
                     //if creating a new form, copy from the default form
-                    var defaultForm = account.GetDefaultStudentForm(dc: dc);
-                    newForm = defaultForm.Copy(loggedInUserId, account.ID.Value, FormType.StudentForm, null, msgs,
+                    var defaultForm = account.GetDefaultForm(activity, msgs, dc);
+                    newForm = defaultForm.Copy(loggedInUserId, account.ID.Value, defaultForm.FormTypeId, null, msgs,
                         dc: dc);
                     newForm.Name = (activity.Name + " Form").MaxChars(100, "...");
                     msgs.AddRange(newForm.Save(dc: dc));

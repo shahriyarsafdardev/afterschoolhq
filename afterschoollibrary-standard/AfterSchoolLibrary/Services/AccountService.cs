@@ -59,6 +59,21 @@ namespace AfterSchoolLibrary.Services
             return Form.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
+        public static List<Form> GetForms(this Account account, FormType formType, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            return Form.LoadByAccountIdByFormTypeId(account.ID.Value, formType, msgs, dc);
+        }
+
+        public static List<Form> GetForms(this Account account, Activity activity, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {   
+            if (activity.ActivityTypeId == ActivityType.VolunteerOpportunity)
+                return Form.LoadByAccountIdByFormTypeId(account.ID.Value, FormType.VolunteerForm, msgs, dc);
+            
+            return Form.LoadByAccountIdByFormTypeId(account.ID.Value, FormType.StudentForm, msgs, dc);
+        }
+
         public static Form GetContactForm(this Account account, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
@@ -2135,7 +2150,16 @@ namespace AfterSchoolLibrary.Services
 
             return form;
         }
-
+        
+        public static void EnsureDefaultForm(this Account formOwner, Activity activity, WebUser loggedInUser, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            if (activity.ActivityTypeId == ActivityType.VolunteerOpportunity)
+                formOwner.GetOrCreateDefaultVolunteerForm(loggedInUser, msgs, dc);
+            else
+                formOwner.GetOrCreateDefaultStudentForm(loggedInUser, msgs, dc);
+        }
+        
         public static void EnsureDefaultVolunteerForm(this Account formOwner, WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
@@ -2184,6 +2208,14 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc = null)
         {
             return account.DefaultFormId.HasValue ? Form.Load(account.DefaultFormId.Value, msgs, dc) : null;
+        }
+
+        public static Form GetDefaultForm(this Account account, Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (activity.ActivityTypeId == ActivityType.VolunteerOpportunity)
+                return account.GetDefaultVolunteerForm(msgs, dc);
+
+            return account.GetDefaultStudentForm(msgs, dc);
         }
 
         public static Form GetOrCreateDefaultVolunteerForm(this Account account, WebUser loggedInUser,

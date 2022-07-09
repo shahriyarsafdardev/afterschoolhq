@@ -169,6 +169,15 @@ namespace AfterSchoolLibrary.Models
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
+		
+        public static List<Form> LoadByAccountIdByFormTypeId(int AccountId, FormType formTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+            dq.Criterias.Add(ObjectMap["FormTypeId"], formTypeId);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
 
 		public static Form LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{

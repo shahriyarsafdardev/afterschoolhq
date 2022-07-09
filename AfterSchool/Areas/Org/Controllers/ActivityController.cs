@@ -1367,10 +1367,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
                 else
                 {
-                    if (activity.ActivityTypeId == ActivityType.VolunteerOpportunity)
-                        currentAccount.EnsureDefaultVolunteerForm(currentUser, msgs);
-                    else
-                        currentAccount.EnsureDefaultStudentForm(currentUser, msgs);
+                    currentAccount.EnsureDefaultForm(activity, currentUser, msgs);
                     
                     //.. create activity
                     activeForm = currentAccount.GetDefaultActivityForm(activity, msgs);
@@ -1482,9 +1479,10 @@ namespace AfterSchool.Areas.Org.Controllers
                 //create initial form for account
                 if (msgs.HasNoErrors() && !accountPackage.HasFeature(FeatureType.ManageForms, msgs))
                 {
-                    var defaultForm = currentAccount.GetDefaultStudentForm(msgs);
+                    var defaultForm = currentAccount.GetDefaultForm(activity, msgs);
                     var newForm = defaultForm.Copy(currentUser.ID.Value, currentAccount.ID.Value,
-                        FormType.StudentForm, (name + " form").MaxChars(100, "..."), msgs);
+                        defaultForm.FormTypeId, (name + " form").MaxChars(100, "..."), msgs);
+                    
                     if (msgs.HasNoErrors())
                     {
                         if (values.Any(m => m.Key == "form"))
@@ -1579,7 +1577,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentUserIsActivityLeader = SessionVariables.CurrentUser.IsActivityLeader(activity, msgs);
             var editSetupAssembler = new EditSetupAssembler();
             var fullScreenExitUrl = GetFullScreenExitUrl(activity, activityGroup?.Uid.ToString());
-            var forms = currentAccount.GetForms(msgs);
+            var forms = currentAccount.GetForms(activity, msgs);
+            
             return editSetupAssembler.AssembleEditSetupResult(activity, activityGroup, msgs, currentAccount, activeMenu, periods, activePeriod, activeForm,
                 SessionVariables.AccountPackage, SessionVariables.AccountUserType, currentUserIsActivityLeader, isNew, forms,
                 fullScreenExitUrl);
