@@ -7,6 +7,7 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
+using AfterSchoolLibrary.Enums;
 using static BasicLibrary.BaseWebUser;
 
 namespace AfterSchoolLibrary.Models
@@ -43,6 +44,7 @@ namespace AfterSchoolLibrary.Models
 		/// The status of the profile - completed
 		/// </summary>
 		public RegistrantProfileStatus ProfileStatusId { get { return (RegistrantProfileStatus)MDV["ProfileStatusId"].Value; } set { MDV["ProfileStatusId"].Value = value; } }
+        public RegistrantPersonType PersonTypeId { get { return (RegistrantPersonType)MDV["PersonTypeId"].Value; } set { MDV["PersonTypeId"].Value = value; } }
 		public bool IsDeleted { get { return (bool)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
 		
 
@@ -58,7 +60,8 @@ namespace AfterSchoolLibrary.Models
 			this.AllowTextMessages = false;
 			this.ProfileStatusId = RegistrantProfileStatus.NotSet;
 			this.IsDeleted = false;
-			
+            this.PersonTypeId = RegistrantPersonType.NotSet;
+
         }
 
         public static BasicLibrary.DataAccess.DatabaseParameters ObjectMap
@@ -79,8 +82,9 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "IsParentOrGuardian", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "AllowTextMessages", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "SchoolLocationId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "ProfileStatusId", System.Data.SqlDbType.Int);
+                _dp.Add(className, "ProfileStatusId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
+                _dp.Add(className, "PersonTypeId", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -206,9 +210,13 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["ProfileStatusId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["IsDeleted"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps.Add(ObjectMap["IsDeleted"]);
+            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps.Add(ObjectMap["PersonTypeId"]);
+            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
 
