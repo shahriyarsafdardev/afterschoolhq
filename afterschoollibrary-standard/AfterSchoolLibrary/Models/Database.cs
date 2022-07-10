@@ -867,6 +867,7 @@ namespace AfterSchoolLibrary.Models
             msgs.AddRange(
                 dq.ExecuteSql("CREATE INDEX IX_ActivityForm_IsPublished_Uid ON [ActivityForm] (Uid,IsPublished)"));
             msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Form_AccountId ON [Form] (AccountId)"));
+            msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Form_AccountId_FormTypeId ON [Form] (AccountId,FormTypeId)"));
             msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Form_Uid ON [Form] (Uid)"));
             msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestion_FormId ON [FormQuestion] (FormId)"));
             msgs.AddRange(
