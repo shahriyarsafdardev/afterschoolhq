@@ -74,8 +74,7 @@
 <script>
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         $('#add-home-address-form').submit(function () {
-            $('#btn-add-home-address').html('Saving Home Address...');
-            $('#btn-add-home-address').prop('disabled', true);
+            $('#btn-add-home-address').html('Saving Home Address...').prop('disabled', true);
         });
     });
 </script>
@@ -95,60 +94,5 @@
 
 @section scripts{
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBq47Ro2O69sQhVLEW4_2L0ClOBSW_Srmc&libraries=places"></script>
-    <script>
-        $(document).ready(function () {
-
-            var input = $('form').find('input:first')[0];
-
-            var streenumber = "";
-            var mainAddress = "";
-
-            var autocomplete = new google.maps.places.Autocomplete(input, null);
-            autocomplete.setFields(['place_id', 'name', 'address_components', 'geometry']);
-            autocomplete.addListener('place_changed', function () {
-                const place = autocomplete.getPlace();
-                const components = place.address_components;
-
-                if (typeof components !== 'undefined') {
-                    for (component of components) {
-
-                        const type = component.types[0];
-                        const longName = component.long_name;
-                        const shortName = component.short_name;
-                        switch (type) {
-                            case 'street_number':
-                                streenumber = longName
-                                break;
-                            case 'route':
-                                mainAddress = streenumber + " " + shortName;
-                                break;
-                            case 'sublocality_level_2':
-                                mainAddress = mainAddress + " " + shortName;
-                                break;
-                            case 'sublocality_level_1':
-                                mainAddress = mainAddress + " " + shortName;
-                                break;
-                            case 'locality':
-                                $(input).val(mainAddress);
-                                $('form').find('input').eq(2).val(shortName);
-                                break;
-                            case 'postal_code':
-                                $('form').find('input').eq(3).val(longName);
-                                break;
-                            case 'administrative_area_level_2':
-                                break;
-                            case 'administrative_area_level_1':
-                                $('form').find('select').eq(0).find("option:contains(" + longName + ")").attr('selected', 'selected');
-                                state = longName;
-                                break;
-                            case 'country':
-                                break;
-                        }
-                    }
-                }
-            });
-            $(input).attr('placeholder', '');
-        })
-
-    </script>
+    <script src="~/Assets/js/google-places-autocomplete.js"></script>
 }
