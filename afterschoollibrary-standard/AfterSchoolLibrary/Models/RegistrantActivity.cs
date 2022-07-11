@@ -549,5 +549,13 @@ namespace AfterSchoolLibrary.Models
         }
 
         #endregion
+
+        public static bool ExistsByUid(string uid, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["Uid"], uid);
+            return dq.GetCount(msgs) > 0;
+        }
     }
 }

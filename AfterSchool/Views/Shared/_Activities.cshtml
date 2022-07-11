@@ -19,8 +19,8 @@
     var pagingController = "activity";
     var pagingAction = "index";
     var id = "";
-    var currentListUrl = Url.Action("index", "activity", new {archive = 0});
-    var archivedListUrl = Url.Action("index", "activity", new {archive = 1});
+    var currentListUrl = Url.Action("index", "activity", new {type = (int)activityType, archive = 0});
+    var archivedListUrl = Url.Action("index", "activity", new {type = (int)activityType, archive = 1});
     var hasArchivedActivities = (bool) ViewData["HasArchivedActivities"];
     var hasSearchQuery = Request["q"].IsNotEmpty();
 

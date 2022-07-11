@@ -6,24 +6,8 @@
     var openInstances = instances.Where(instance => instance.InstanceTypeId == InstanceType.InSession).ToList();
     var closedInstances = instances.Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession).ToList();
 
-    var isContinuousEnrollmentEnabled = ViewData["isContinuousEnrollmentEnabled"] != null && (bool) ViewData["isContinuousEnrollmentEnabled"];
+}
 
-    if (isContinuousEnrollmentEnabled)
-    {
-        Model.IsOngoing = true;
-    }
-}
-@if (isContinuousEnrollmentEnabled)
-{
-    <style>
-        .isongoing .switch-button input[type="checkbox"]:checked + span {
-            background-color: #ababab;
-        }
-        .isongoing .switch-button input[type="checkbox"]:checked + span label{
-            border-color: #ababab;
-        }
-    </style>
-}
 <div class="panel panel-default panel-small-padding">
 <div class="panel-heading activity-heading">
     Schedule Information
@@ -46,42 +30,6 @@
                            { "checkboxid", "repeatsweekly" },
                            { "disabled", false },
                        }); }
-                </div>
-            </div>
-            <div class="col-md-offset-3 col-md-9 padding-v-20">
-                <span>
-                    <a onclick="ActivitySetup.showAdvancedSettings()" id="btn-advanced-settings" class="pointer">
-                        Show Advanced Settings
-                    </a>
-                </span>
-            </div>
-
-            <div class="hide advanced-settings">
-                <div class="form-group" id="ongoing-div">
-                    <label class="col-md-3 control-label">
-                        Is this an ongoing opportunity?
-                        <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover"
-                           data-content="Ongoing volunteer opportunities do not have an end date."
-                           data-placement="top">
-                        </i>
-                    </label>
-                    <div class="col-md-9 isongoing">
-                        @{
-                            Html.RenderPartial("_SwitchButton", Model.IsOngoing, new ViewDataDictionary
-                            {
-                                {"checkboxname", "isongoing"},
-                                {"checkboxid", "isongoing"},
-                                {"disabled", isContinuousEnrollmentEnabled},
-                            });
-                        }
-
-                        @if (isContinuousEnrollmentEnabled)
-                        {
-                            <p class="text-muted padding-v-10 font-style-italic">
-                                <img src="~/Assets/img/alert-2.svg" class="alert-image-style" alt="alert"> Volunteer opportunities must be listed as ongoing while Continuous enrollment is enabled.
-                            </p>
-                        }
-                    </div>
                 </div>
             </div>
         </div>
@@ -306,17 +254,8 @@
         $('#repeatsweekly').click(function () {
             checkRepeatsWeekly();
         });
-        $('#isongoing').change(function () {
-            checkIsOnGoing();
-        });
-         @if (isContinuousEnrollmentEnabled)
-         {
-             <text>
-            ActivitySetup.showAdvancedSettings()
-          </text>
-         }
+
         showClosedDates();
-        checkIsOnGoing();
         checkRepeatsWeekly();
 
         $('#schedule').change(function(){
@@ -389,27 +328,17 @@
             $('#repeating-schedule').removeClass('hide');
             $('#requiresalldays-group').removeClass('hide');
             $('#schedule-dates').addClass('hide');
-            $('#ongoing-div').removeClass('hide');
             $('#btn-advanced-settings').removeClass('hide');
         } else {
             $('#dailyrepeat').addClass('hide');
             $('#requiresalldays-group').addClass('hide');
             $('#repeating-schedule').addClass('hide');
             $('#schedule-dates').removeClass('hide');
-            $('#ongoing-div').addClass('hide');
             $('#btn-advanced-settings').addClass('hide');
 
             if ($('.schedule-date').length === $('.schedule-date.hide').length) {
                 showDates();
             }
-        }
-    }
-
-    function checkIsOnGoing() {
-        if ($('#isongoing').is(':checked')) {
-            $('.repeating-end-date').addClass('hide');
-        } else {
-            $('.repeating-end-date').removeClass('hide');
         }
     }
 

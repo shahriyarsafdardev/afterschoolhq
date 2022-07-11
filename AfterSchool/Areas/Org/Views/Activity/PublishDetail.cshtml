@@ -74,7 +74,7 @@
 <div class="panel-heading">
     <div class="btn-group pull-right">
 
-        @if (!Model.ActivityGroupId.HasValue && Model.ActivityTypeId != ActivityType.VolunteerOpportunity)
+        @if (!Model.ActivityGroupId.HasValue)
         {
             if (!showAllowInvites)
             {

@@ -3,10 +3,10 @@
 @{
     var condensed = false;
     var accountOwner = Model.OwnerAccount.ID.HasValue ? Model.OwnerAccount.GetAccountOwner() : null;
-    var canRegiserFor = true;
+    var canRegisterFor = true;
     var session = (ParticipationObject)ViewData["session"];
     var currentUser = SessionVariables.CurrentUser;
-    var anotherChild = (bool)ViewData["anotherChild"].IsNotEmpty() ? true : false;
+    var anotherChild = ViewData["anotherChild"].IsNotEmpty();
 
     if (ViewData["condensed"].IsNotEmpty() && ViewData["condensed"].ToString().ToBoolean())
     {
@@ -15,7 +15,7 @@
 
     if (ViewData["canRegisterFor"].IsNotEmpty())
     {
-        canRegiserFor = ViewData["canRegisterFor"].ToString().ToBoolean();
+        canRegisterFor = ViewData["canRegisterFor"].ToString().ToBoolean();
     }
 
     var IsPublished = Model.IsPublished;
@@ -140,7 +140,7 @@ else
         {
             var group = Model.GetActivityGroup();
 
-            if (canRegiserFor)
+            if (canRegisterFor)
             {
                 <a href="@group.BrowseUrl" class="btn btn-register btn-block">
                     @if (condensed)
@@ -156,9 +156,12 @@ else
         }
         else if (session.IsNotEmpty())
         {
-            <button href="@Model.GetRegistrationPageUrl()" class="btn btn-register btn-cart btn-block" in-cart="0" uid="@Model.Uid">
-                <span><i class="s7-plus icon-medium"></i><i class="s7-cart icon-medium"></i></span>
-            </button>
+            if (canRegisterFor)
+            {
+                <button href="@Model.GetRegistrationPageUrl()" class="btn btn-register btn-cart btn-block" in-cart="0" uid="@Model.Uid">
+                    <span><i class="s7-plus icon-medium"></i><i class="s7-cart icon-medium"></i></span>
+                </button>
+            }
         }
         else if (Model.Schedule.IsNotEmpty() && !Model.Schedule.IsOngoing && Model.Schedule.IsEndingInTwoDays(Model.OwnerAccount))
         {
@@ -166,25 +169,30 @@ else
                 Registration Closed
             </button>
         }
-        else if (Model.IsActivity() && Model.GetActivity().CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
-        {
-            var anotherChildString = anotherChild ? $" for New Child" : "";
-
-            <a href="@(IsPublished? Model.GetActivityDateSelectionUrl() : "javascript:void(0)")"
-               class="@(IsPublished?"":"disabled") btn btn-register btn-block"
-               @IsPublished>
-                <span>Select Dates @anotherChildString &raquo;</span>
-            </a>
-        }
         else
         {
-            var anotherChildString = anotherChild ? $" for New Child" : "";
-            var buttonText = Model.SeatsRemaining == 0 ? "Join Waiting List" : Model.RegistrationMode.ToString();
-            <a href="@(IsPublished? Model.GetRegistrationPageUrl(): "javascript:void(0)")" 
-               class="@(IsPublished?"":"disabled") btn btn-register btn-block" 
-               @IsPublished>
-                @buttonText @anotherChildString &raquo;
-            </a>
+            if (canRegisterFor || !IsPublished)
+            {
+                var anotherChildString = anotherChild ? " for New Child" : "";
+                
+                if (Model.IsActivity() && Model.GetActivity().CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
+                {
+                    <a href="@(IsPublished ? Model.GetActivityDateSelectionUrl() : "javascript:void(0)")"
+                       class="@(IsPublished ? "" : "disabled") btn btn-register btn-block"
+                       @IsPublished>
+                        <span>Select Dates @anotherChildString &raquo;</span>
+                    </a>
+                }
+                else
+                {
+                    var buttonText = Model.SeatsRemaining == 0 ? "Join Waiting List" : Model.RegistrationMode.ToString();
+                    <a href="@(IsPublished? Model.GetRegistrationPageUrl(): "javascript:void(0)")" 
+                       class="@(IsPublished?"":"disabled") btn btn-register btn-block" 
+                       @IsPublished>
+                        @buttonText @anotherChildString &raquo;
+                    </a>
+                }
+            }
         }
     }
     else if (Model.RegistrationPeriod.WillOpen(Model.OwnerAccount))

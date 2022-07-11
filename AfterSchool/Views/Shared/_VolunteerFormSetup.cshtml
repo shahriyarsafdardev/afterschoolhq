@@ -49,21 +49,7 @@
         </div>
 
         <input type="hidden" name="type" value="@((int) Model.ActivityTypeId)"/>
-
-        <div class="form-group">
-            <label class="col-sm-3 control-label">
-                Continuous Enrollment? <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="With continuous enrollment, the sign up period stays open. This can be updated via settings." data-placement="top"></i>
-            </label>
-            <div class="col-sm-9">
-                @{ Html.RenderPartial("_SwitchButton", Model.IsContinuousEnrollment, new ViewDataDictionary
-                   {
-                       {"checkboxname", "isContinuousEnrollmentEnabled"},
-                       {"checkboxid", "isContinuousEnrollmentEnabled"},
-                       {"disabled", false},
-                   }); }
-            </div>
-        </div>
-
+        <input type="hidden" name="isContinuousEnrollmentEnabled" value="0"/>
         <input type="hidden" name="costfrequencytype" value="@((int) ActivityCostFrequencyType.PerClass)"/>
 
         <div class="form-group" id="cutoffhours-container">
