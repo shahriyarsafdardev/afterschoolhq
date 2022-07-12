@@ -7,6 +7,7 @@ using SendGrid.Helpers.Mail;
 using AfterSchoolLibrary.Models;
 using System.Collections;
 using AfterSchoolLibrary.Billing;
+using AfterSchoolLibrary.Enums;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -90,6 +91,11 @@ namespace AfterSchoolLibrary.Services
         public static Account GetRegistrantAccount(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return user.GetAccounts(msgs, dc).FirstOrDefault(account => account.AccountTypeId == AccountType.Registrant);
+        }
+
+        public static Account GetVolunteerAccount(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return user.GetAccounts(msgs, dc).FirstOrDefault(account => account.AccountTypeId == AccountType.Volunteer);
         }
 
         public static bool HasRegistrantAccount(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -279,6 +285,11 @@ namespace AfterSchoolLibrary.Services
                 msgs.AddRange(Helpers.EmailHelper.SendPasswordReset(user, token, isAfterSchool));
 
             return msgs;
+        }
+        
+        public static Registrant GetMasterVolunteerRegistrant(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Registrant.LoadByWebUserId(user.ID.Value, RegistrantPersonType.Volunteer, true, false, msgs, dc).FirstOrDefault();
         }
         
         public static Registrant GetMasterRegistrant(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -592,6 +603,67 @@ namespace AfterSchoolLibrary.Services
                         isParentOrGuardian: true,
                         allowTextMessages: false,
                         schoolLocationId: null,
+                        profileStatus: RegistrantProfileStatus.Started,
+                        loggedInUser: user,
+                        msgs: amsgs,
+                        dc: adc);
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );            
+
+            return account;
+        }
+
+        /// <summary>
+        /// For adding a payment account to a volunteer account
+        /// </summary>
+        /// <param name="accountOwner"></param>
+        /// <param name="phone"></param>
+        /// <param name="isActive"></param>
+        /// <param name="packageId"></param>
+        /// <param name="packageBillingPeriod"></param>
+        /// <param name="isAfterSchool"></param>
+        /// <param name="loggedInUser"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        public static Account AddNewVolunteerAccount(this WebUser user, UserType userType, bool isActive, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            Account account = null;
+
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    account = AccountService.CreateNew(
+                                    orgName: $"{user.FirstName} Volunteer Account",
+                                    email: user.Email,
+                                    phone: user.Phone,
+                                    isActive: isActive,
+                                    accountType: AccountType.Volunteer,
+                                    accountOwner: userType == UserType.Owner ? user : null,
+                                    packageId: null,
+                                    packageBillingPeriod: null,
+                                    timeZone: null,
+                                    createWithStripe: true,
+                                    loggedInUser: loggedInUser,
+                                    isAfterSchool: isAfterSchool,
+                                    msgs: amsgs,
+                                    dc: adc);
+
+                    user.AddAccount(account, userType, loggedInUser, amsgs, adc);
+
+                    account.CreateVolunteerRegistrant(
+                        firstName: user.FirstName,
+                        lastName: user.LastName,
+                        email: user.Email,
+                        registrantOwner: user,
+                        canBeAccessedBy: user.AsList(),
+                        isMaster: true,
+                        allowTextMessages: false,
                         profileStatus: RegistrantProfileStatus.Started,
                         loggedInUser: user,
                         msgs: amsgs,

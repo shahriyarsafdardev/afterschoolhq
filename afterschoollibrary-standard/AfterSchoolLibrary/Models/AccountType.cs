@@ -10,5 +10,6 @@ public enum AccountType
 	CommunityCenter,
 	Business,
 	Church,
-	Directory
+	Directory,
+    Volunteer
 }

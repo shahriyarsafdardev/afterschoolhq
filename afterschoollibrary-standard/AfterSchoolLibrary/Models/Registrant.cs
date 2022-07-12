@@ -491,12 +491,7 @@ namespace AfterSchoolLibrary.Models
 
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
-
-
-        //public List<Activity> GetActivitiesByDay(DayOfWeekASL day, DatabaseConnection dc = null)
-        //{
-        //    return Activity.GetActivitiesByRegistrantByDay(this.ID.Value, day, DateTime.UtcNow, dc: dc);
-        //}
+        
 
         public static List<Registrant> LoadFirstRegistrants(int accountId, int? start, int? length, DatabaseConnection dc = null)
         {
@@ -587,6 +582,17 @@ namespace AfterSchoolLibrary.Models
                 return $"{this.FirstName} {this.LastName.MaskString(1)}.";
             
             return $"{this.FirstName.MaskString(Math.Max(this.FirstName.Length - 3, 3))} {this.LastName.MaskString(1)}.";
+        }
+        
+        public static List<Registrant> LoadByWebUserId(int WebUserId, RegistrantPersonType personTypeId, bool IsMaster, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["WebUserId"], WebUserId);
+            dq.Criterias.Add(ObjectMap["IsMaster"], IsMaster);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
+            dq.Criterias.Add(ObjectMap["PersonTypeId"], (int)personTypeId);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
         #endregion

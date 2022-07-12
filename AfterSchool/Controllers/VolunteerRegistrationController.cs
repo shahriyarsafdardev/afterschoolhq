@@ -5,6 +5,7 @@ using System.Web.Mvc;
 using AfterSchool.Assemblers;
 using AfterSchool.Helpers;
 using AfterSchool.Models;
+using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.FeatureFlag;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
@@ -35,20 +36,17 @@ namespace AfterSchool.Controllers
             {
                 var registrantAccount = currentAccount;
 
-                if (currentAccount.AccountTypeId != AccountType.Registrant)
+                if (currentAccount.AccountTypeId != AccountType.Volunteer)
                 {
                     //check if the user has a parent account
-                    registrantAccount = currentUser.GetRegistrantAccount(msgs);
+                    registrantAccount = currentUser.GetVolunteerAccount(msgs);
 
                     // if no parent account, then create one real quick
                     if (registrantAccount.IsEmpty())
-                        registrantAccount = currentUser.AddNewRegistrantAccount(UserType.Owner, true, true, currentUser, msgs);
+                        registrantAccount = currentUser.AddNewVolunteerAccount(UserType.Owner, true, true, currentUser, msgs);
                 }
 
-                var masterRegistrant = SessionVariables.CurrentUser.GetMasterRegistrant(msgs);
-
-                if (!masterRegistrant.IsParentOrGuardian)
-                    return Redirect(participationObject.GetHomePageUrl());
+                var masterRegistrant = currentUser.GetMasterVolunteerRegistrant(msgs);
 
                 if (masterRegistrant.IsNotEmpty())
                     registrantAccount = masterRegistrant.GetAccount(msgs);
@@ -60,9 +58,10 @@ namespace AfterSchool.Controllers
                         false,
                         msgs);
 
-                var hasCompletedParentProfile = masterRegistrant.IsNotEmpty() && masterRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed &&
-                                                masterRegistrant.IsParentOrGuardian;
-                if (hasCompletedParentProfile)
+                var hasCompletedVolunteerProfile = masterRegistrant.IsNotEmpty() && masterRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed &&
+                                                masterRegistrant.PersonTypeId == RegistrantPersonType.Volunteer;
+                
+                if (hasCompletedVolunteerProfile)
                     return RedirectToAction("Register");
             }
 
@@ -83,8 +82,10 @@ namespace AfterSchool.Controllers
             var questions = RegistrationCommon.GetAllDefaultPersonalInformationQuestions(msgs);
 
             var getStartedAssembler = new GetStartedAssembler(featureFlagRepository);
+            
+            // NOTE: Should this be updated for volunteers?
             var result = getStartedAssembler.AssembleGetStartedResult(msgs, participationObject, registrationAccount,
-                SessionVariables.CurrentUser, questions, false, Request.Params);
+                currentUser, questions, false, Request.Params);
             ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
             return View(result);
         }
@@ -163,7 +164,7 @@ namespace AfterSchool.Controllers
 
                         if (amsgs.HasNoErrors() && user.IsNotEmpty())
                         {
-                            account = RegistrationCommon.CreateOrUpdateAccount(user, amsgs, adc);
+                            account = RegistrationCommon.CreateOrUpdateVolunteerAccount(user, amsgs, adc);
 
                             // LOG: Someone Created Account AccountName
                             SessionVariables.WebSession.LogActivity(
@@ -187,7 +188,7 @@ namespace AfterSchool.Controllers
                         }
 
                         if (amsgs.HasNoErrors())
-                            registrant = RegistrationCommon.CreateOrUpdateRegistrant(account, user, amsgs, adc);
+                            registrant = RegistrationCommon.CreateOrUpdateVolunteerRegistrant(account, user, amsgs, adc);
 
                         if (amsgs.HasNoErrors())
                             RegistrationCommon.AddOrUpdateStandardAnswers(qvms, registrant, user, amsgs, adc);
@@ -316,7 +317,7 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
             var questions = GatherAddHomeAddressQuestions(msgs, participationObject);
-            var parentRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
+            var volunteerRegistrant = SessionVariables.CurrentAccount.GetVolunteerRegistrant();
 
             questions.ForEach(question =>
             {
@@ -343,7 +344,7 @@ namespace AfterSchool.Controllers
                         // will be used later to copy information over to student records
                         qvms.ForEach(qvm =>
                         {
-                            parentRegistrant.AddOrUpdateAnswer(
+                            volunteerRegistrant.AddOrUpdateAnswer(
                                 qvm.Value.IfEmpty("").Trim(),
                                 qvm.Question,
                                 SessionVariables.CurrentUser,
@@ -401,7 +402,8 @@ namespace AfterSchool.Controllers
         {
             var msgs = new SystemMessages();
             var questions = FormQuestionService.GetEmergencyContactQuestions(msgs);
-            var parentRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
+            var volunteerRegistrant = SessionVariables.CurrentAccount.GetVolunteerRegistrant();
+            var currentUser = SessionVariables.CurrentUser;
 
             // validate emergency contact fields
             FormQuestionService.ValidateFormQuestionForEmergencyContacts(
@@ -416,16 +418,16 @@ namespace AfterSchool.Controllers
                     (amsgs, adc) =>
                     {
                         // mark parent profile as completed since they've went through all the steps
-                        parentRegistrant.SetProfileAsCompleted(SessionVariables.CurrentUser, amsgs, adc);
+                        volunteerRegistrant.SetProfileAsCompleted(currentUser, amsgs, adc);
 
                         // add answers to parent registrant record
                         // will be used later to copy information over to student records
                         qvms.ForEach(qvm =>
                         {
-                            parentRegistrant.AddOrUpdateAnswer(
+                            volunteerRegistrant.AddOrUpdateAnswer(
                                 qvm.Value.IfEmpty("").Trim(),
                                 qvm.Question,
-                                SessionVariables.CurrentUser,
+                                currentUser,
                                 amsgs,
                                 adc);
                         });
@@ -457,26 +459,29 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
-            var currentRegistrant = SessionVariables.CurrentUser.GetMasterRegistrant();
+            var currentUser = SessionVariables.CurrentUser;
+            var currentRegistrant = currentUser.GetMasterRegistrant();
             SessionVariables.CurrentRegistrant = currentRegistrant;
             var parentOrGuardian = currentRegistrant.GetParentOrGuardian(msgs);
             var (_, registration) = currentRegistrant.GetSubmittedRecord(participationObject, msgs);
 
-            if (!parentOrGuardian.IsProfileCompleted && parentOrGuardian.GetOwner(msgs).ID == SessionVariables.CurrentUser.ID)
+            // NOTE: Should be removed for now, since there is no volunteer account portal to actually edit the profile
+            /*if (!parentOrGuardian.IsProfileCompleted && parentOrGuardian.GetOwner(msgs).ID == currentUser.ID)
                 return RedirectToAction("editpersonal", "family",
                     new
                     {
                         Area = "user", id = parentOrGuardian.Uid, reg = registration?.Uid,
                         student = currentRegistrant?.Uid, returnUrl = Url.Action("select", "account"),
-                    });
+                    });*/
 
             var questions = RegistrationCommon.GetQuestionsRequiredForActivityThatHaveNotYetBeenCollected(participationObject, currentRegistrant, msgs);
 
             var isReadyToFinalizeRegistration = !questions.Any() && registration.IsNotEmpty() && msgs.HasNoErrors();
             if (isReadyToFinalizeRegistration)
             {
+                // NOTE: If already submitted, then there is nothing else to select, should be kicked totally out
                 if (CurrentRegistrantHasAlreadySubmitted(registration.CompletionStatusId))
-                    return RedirectToAction("select");
+                    return new RedirectResult(SessionVariables.RegistrationStartPageAccount.HomePageUrl);
 
                 if (msgs.HasNoErrors())
                     ProcessRegistration(currentRegistrant, participationObject, registration, msgs);

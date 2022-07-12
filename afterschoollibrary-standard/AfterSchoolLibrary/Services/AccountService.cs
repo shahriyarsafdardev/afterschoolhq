@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Billing;
+using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
@@ -3377,6 +3378,15 @@ namespace AfterSchoolLibrary.Services
 
         #region ParentAccounts
 
+        public static Registrant GetVolunteerRegistrant(this Account account, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            return Registrant.LoadByAccountIdByIsDeleted(account.ID.Value, false, msgs, dc)
+                .Where(registrant => registrant.PersonTypeId == RegistrantPersonType.Volunteer)
+                .OrderBy(registrant => registrant.ID)
+                .FirstOrDefault();
+        }
+        
         public static Registrant GetFirstParentOrGuardianRegistrant(this Account account, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
@@ -3492,6 +3502,105 @@ namespace AfterSchoolLibrary.Services
                         LastName = lastName,
                         Email = email,
                         IsDeleted = false,
+                    };
+                    amsgs.AddRange(registrant.Save(adc));
+
+                    if (canBeAccessedBy.IsNotEmpty() && canBeAccessedBy.Count > 0)
+                        registrant.AddUsersWithAccess(canBeAccessedBy, loggedInUser, amsgs, adc);
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+
+            return registrant;
+        }
+
+        /// <summary>
+        ///     Create basic registrant/student record for an account user, not attached to an account, so it's attached to the
+        ///     user record, data can be added later
+        /// </summary>
+        /// <param name="account"></param>
+        /// <param name="associatedUser">Can be null, should only be linked if the logged in user is the same as the registrant</param>
+        /// <param name="registrantType"></param>
+        /// <param name="isMaster"></param>
+        /// <param name="isParentOrGuardian"></param>
+        /// <param name="loggedInUser"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        public static Registrant CreateVolunteerRegistrant(this Account account, WebUser registrantOwner,
+            List<WebUser> canBeAccessedBy, bool isMaster,
+            bool allowTextMessages, RegistrantProfileStatus profileStatus, WebUser loggedInUser,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var registrant = new Registrant
+            {
+                RegistrantTypeId = RegistrantType.Individual,
+                IsMaster = isMaster,
+                IsContactOnly = false,
+                IsParentOrGuardian = false,
+                WebUserId = registrantOwner?.ID,
+                AccountId = account.ID,
+                AllowTextMessages = allowTextMessages,
+                SchoolLocationId = null,
+                ProfileStatusId = profileStatus,
+                CreateDate = DateTime.UtcNow,
+                LastModifiedDate = DateTime.UtcNow,
+                CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                IsDeleted = false,
+                PersonTypeId = RegistrantPersonType.Volunteer
+            };
+            msgs.AddRange(registrant.Save(dc));
+
+            if (canBeAccessedBy.IsNotEmpty() && canBeAccessedBy.Count > 0)
+                registrant.AddUsersWithAccess(canBeAccessedBy, loggedInUser, msgs, dc);
+
+            return registrant;
+        }
+
+        /// <summary>
+        ///     Create basic registrant/student record for an account user, not attached to an account, so it's attached to the
+        ///     user record, data can be added later
+        /// </summary>
+        /// <returns></returns>
+        public static Registrant CreateVolunteerRegistrant(this Account account, string firstName, string lastName, string email,
+            WebUser registrantOwner, List<WebUser> canBeAccessedBy, bool isMaster, bool allowTextMessages,
+            RegistrantProfileStatus profileStatus, WebUser loggedInUser, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            Registrant registrant = null;
+
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    registrant = new Registrant
+                    {
+                        RegistrantTypeId = RegistrantType.Individual,
+                        IsMaster = isMaster,
+                        IsContactOnly = false,
+                        IsParentOrGuardian = false,
+                        WebUserId = registrantOwner?.ID,
+                        AccountId = account.ID,
+                        AllowTextMessages = allowTextMessages,
+                        SchoolLocationId = null,
+                        ProfileStatusId = profileStatus,
+                        CreateDate = DateTime.UtcNow,
+                        LastModifiedDate = DateTime.UtcNow,
+                        CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                        LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                        FirstName = firstName,
+                        LastName = lastName,
+                        Email = email,
+                        IsDeleted = false,
+                        PersonTypeId = RegistrantPersonType.Volunteer
                     };
                     amsgs.AddRange(registrant.Save(adc));
 

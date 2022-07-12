@@ -100,6 +100,23 @@ namespace AfterSchool.Controllers
             return account;
         }
 
+        public static Account CreateOrUpdateVolunteerAccount(WebUser user, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var account = user.GetVolunteerAccount(msgs, dc);
+
+            // create account
+            if (account.IsEmpty())
+                account = user.AddNewVolunteerAccount(
+                    UserType.Owner,
+                    true,
+                    true,
+                    user,
+                    msgs,
+                    dc);
+
+            return account;
+        }
+
         public static Registrant CreateOrUpdateRegistrant(Account account, WebUser user, SystemMessages msgs,
             DatabaseConnection dc = null)
         {
@@ -115,6 +132,26 @@ namespace AfterSchool.Controllers
                     true,
                     false,
                     null,
+                    RegistrantProfileStatus.Started,
+                    user,
+                    msgs,
+                    dc);
+
+            return registrant;
+        }
+
+        public static Registrant CreateOrUpdateVolunteerRegistrant(Account account, WebUser user, SystemMessages msgs,
+            DatabaseConnection dc = null)
+        {
+            var registrant = account.getma(msgs, dc);
+
+            if (registrant.IsEmpty())
+                // create parent registrant record
+                registrant = account.CreateVolunteerRegistrant(
+                    user,
+                    user.AsList(),
+                    true,
+                    false,
                     RegistrantProfileStatus.Started,
                     user,
                     msgs,
