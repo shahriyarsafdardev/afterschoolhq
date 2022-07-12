@@ -821,11 +821,38 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Forms(string fromSurvey)
+        public ActionResult Forms(string fromSurvey, string pn, string rpp, string q, string type)
         {
             var msgs = new SystemMessages();
-            var forms = SessionVariables.CurrentAccount.GetForms(msgs);
+            
+            var pageNumber = 1;
+            var recordsPerPage = 10;
+            var currentAccount = SessionVariables.CurrentAccount;
+            var formType = FormType.NotSet;
 
+            if (pn.IsNumber() && pn.ToInteger() > 0)
+                pageNumber = pn.ToInteger();
+
+            if (rpp.IsNumber() && rpp.ToInteger() > 0)
+                recordsPerPage = rpp.ToInteger();
+
+            if (type.IsNotEmpty() && type.IsNumber())
+                formType = type.ToInteger().ToEnum<FormType>();
+
+            var start = recordsPerPage * (pageNumber - 1);
+            var length = recordsPerPage;
+            
+            var forms = currentAccount.GetForms(formType, q, start, length, msgs);
+            var formCount = currentAccount.GetFormCount(formType, q, msgs);
+            var totalPages = Math.Ceiling(formCount.ToDouble() / recordsPerPage).ToInteger();
+            
+            ViewBag.PagingModel = new PagingModel
+            {
+                TotalCount = formCount,
+                PageNumber = pageNumber,
+                RecordsPerPage = recordsPerPage,
+                TotalPages = totalPages,
+            };
             ViewBag.Messages = msgs;
             ViewBag.FromSurvey = fromSurvey;
             return View(forms);

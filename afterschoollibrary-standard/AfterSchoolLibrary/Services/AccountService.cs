@@ -65,6 +65,18 @@ namespace AfterSchoolLibrary.Services
             return Form.LoadByAccountIdByFormTypeId(account.ID.Value, formType, msgs, dc);
         }
 
+        public static List<Form> GetForms(this Account account, FormType formType, string search, int? start, int? length, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            return Form.Search(account.ID.Value, formType, search, start, length, msgs, dc);
+        }
+
+        public static int GetFormCount(this Account account, FormType formType, string search, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            return Form.GetSearchCount(account.ID.Value, formType, search, msgs, dc);
+        }
+
         public static List<Form> GetForms(this Account account, Activity activity, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {   

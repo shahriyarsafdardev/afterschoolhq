@@ -297,6 +297,38 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
+		
+        public static List<Form> Search(int AccountId, FormType formTypeId, string search, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+            
+            if (formTypeId != FormType.NotSet)
+                dq.Criterias.Add(ObjectMap["FormTypeId"], formTypeId);
+            
+            if (search.IsNotEmpty())
+                dq.Criterias.Add(ObjectMap["Name"], search, DatabaseCriteriaOperatorEnum.Like);
+            
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+		
+        public static int GetSearchCount(int AccountId, FormType formTypeId, string search, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+            
+            if (formTypeId != FormType.NotSet)
+                dq.Criterias.Add(ObjectMap["FormTypeId"], formTypeId);
+            
+            if (search.IsNotEmpty())
+                dq.Criterias.Add(ObjectMap["Name"], search, DatabaseCriteriaOperatorEnum.Like);
+            
+            return dq.GetCount(msgs);
+        }
 
         #endregion
     }

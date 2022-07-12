@@ -18,29 +18,46 @@
     <div class="panel panel-default">
 
         <div class="panel-heading">
-            <div class="pull-right">
-                <input type="text" id="search" class="form-control searchFormInput" placeholder="Search Forms" />
-                <button class="btn btn-primary searchFormBtn" id="searchBtn">
-                    Search
-                </button>
-                @if (showFormFields)
-                {
-                    <button class="btn btn-primary btn-space md-trigger mdpopup" data-modal="modal-newform" onclick="showFormType()">
-                        <i class="icon icon-left s7-plus"></i>
-                        Add Form
-                    </button>
-                }
-                else
-                {
-                    <button class="btn btn-primary btn-space md-trigger" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))">
-                        <i class="icon icon-left s7-plus"></i>
-                        Add Form
-                    </button>
-                }
-
+            <div class="row">
+                <div class="col-md-4 col-sm-12">
+                    <i class="s7-note2"></i> Forms
+                    <div class="clearfix"></div>
+                </div>
             </div>
-            <i class="s7-note2"></i> Forms
-            <div class="clearfix"></div>
+            <div class="row">
+                <div class="col-md-6"></div>
+                <div class="col-md-3">
+                    <select class="form-control" id="formtypefilter">
+                        <option value="">All Form Types</option>
+                        @foreach (var formType in Enum.GetValues(typeof(FormType)).Cast<FormType>().Where(x => x != FormType.NotSet))
+                        {
+                            <option value="@((int)@formType)" @(Request["type"] == ((int)formType).ToString() ? "selected=\"selected\"" : "")>@formType.ToString().SplitByUpperCase()</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <div class="pull-right">
+                        <input type="text" id="search" class="form-control searchFormInput" placeholder="Search Forms" value="@Request["q"]"/>
+                        <button class="btn btn-primary searchFormBtn" id="searchBtn">
+                            Search
+                        </button>
+                        @if (showFormFields)
+                        {
+                            <button class="btn btn-primary btn-space md-trigger mdpopup" data-modal="modal-newform" onclick="showFormType()">
+                                <i class="icon icon-left s7-plus"></i>
+                                Add Form
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-primary btn-space md-trigger" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))">
+                                <i class="icon icon-left s7-plus"></i>
+                                Add Form
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="panel-body">
@@ -58,6 +75,7 @@
                         <tr>
                             <th></th>
                             <th>Form</th>
+                            <th>Type</th>
                             <th>Created On</th>
                             <th></th>
                         </tr>
@@ -86,6 +104,7 @@
 
                                     </td>
                                     <td><a href="@Url.Action("formedit", "account", new {id = form.ID})">@form.Name</a></td>
+                                    <td>@form.FormTypeId.ToString().SplitByUpperCase()</td>
                                     <td>@form.CreateDate.Value.ToLongDateString()</td>
                                     <td>
                                         @if (showFormFields)
@@ -112,7 +131,22 @@
                         }
                     </tbody>
                 </table>
+                
             </div>
+            
+            @{ 
+                Html.RenderPartial(
+                   "~/Views/Shared/_Paging.cshtml",
+                   (PagingModel)ViewBag.PagingModel,
+                   new ViewDataDictionary
+                   {
+                       { "querystring", $"q={Request["q"]}&type={Request["type"]}" },
+                       { "action", "forms" },
+                       { "controller", "account" }
+                   }
+                   ); 
+            }
+            
         </div>
     </div>
 </div>
@@ -193,49 +227,23 @@
                 $(".mdpopup").trigger('click');
             }
 
-
+            $('#formtypefilter').on('change', function (){
+                search();
+            });
+            
             $("#searchBtn").on("click", function () {
-                tableSearch();
+                search();
             });
 
             $("#search").keypress(function (event) {
                 if (event.which == 13) {
-                    tableSearch();
+                    search();
                 }
             });
-
-            function tableSearch() {
-                var value = $("#search").val().toLowerCase();
-                $("table tbody tr").each(function (index) {
-                    if (index != 0) {
-                        var len = $('td:eq(1):contains("' + value + '")', $(this)).length;
-
-                        if (len > 0) {
-                            $(this).show();
-                        }
-                        else {
-                            $(this).hide();
-                        }
-                    }
-                }).promise().done(function () {
-                    var numOfVisibleRows = $('table tbody tr:visible', '.table-responsive').length;
-                    if (numOfVisibleRows == 0) {
-                        $('.emptyTable').remove();
-                        $('.table-responsive table tbody').append('<tr class="emptyTable text-center"><td colspan="4">No search results found.</tr></td>');
-                        $('.formCount').hide();
-                    }
-                    else {
-                        $('.emptyTable').remove();
-                        $('.formCount').show();
-                        $('#currentFormNumber').html(numOfVisibleRows);
-                    }
-                });
-            }
-        })
-        $.expr[":"].contains = $.expr.createPseudo(function (arg) {
-            return function (elem) {
-                return $(elem).text().toUpperCase().indexOf(arg.toUpperCase()) >= 0;
-            };
         });
+                       
+        function search(){                                 
+            location.href='@Url.Action("forms", "account")?q=' + $('#search').val() + '&type='+$('#formtypefilter').val();            
+        }
     </script>
 }
