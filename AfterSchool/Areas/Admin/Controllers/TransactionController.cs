@@ -200,7 +200,7 @@ namespace AfterSchool.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public ActionResult Refund(string id, string request, string refundcc, string refundcf, PaymentSourceType paymentsource)
+        public ActionResult Refund(string id, string request, string refundcc, string refundcf, PaymentSourceType? paymentsource)
         {
             var msgs = new SystemMessages();
 
@@ -222,7 +222,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                 true, 
                                 refundCreditFees, 
                                 refundConvenienceFees,
-                                paymentsource,
+                                paymentsource.Value,
                                 SessionVariables.CurrentUser, 
                                 msgs);
                     }
