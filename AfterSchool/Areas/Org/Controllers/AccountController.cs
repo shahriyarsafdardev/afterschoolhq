@@ -924,8 +924,12 @@ namespace AfterSchool.Areas.Org.Controllers
             if (id.ToInteger() == 0)
             {
                 if (copyfrom.IsNumber())
-                    form = currentAccount.GetForm(copyfrom.ToInteger(), msgs)?.Copy(currentUser.ID.Value,
-                        currentAccount.ID.Value, formTypeId, null, msgs);
+                {
+                    var formToCopy = currentAccount.GetForm(copyfrom.ToInteger(), msgs);
+                    
+                    if (formToCopy.IsNotEmpty())
+                        form = formToCopy.Copy(currentUser.ID.Value, currentAccount.ID.Value, formToCopy.FormTypeId, null, msgs);
+                }
                 else
                     form = currentAccount.GetOrCreateDefaultForm(formTypeId, currentUser, msgs)
                                             .Copy(currentUser.ID.Value, currentAccount.ID.Value,
