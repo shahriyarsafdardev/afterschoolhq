@@ -143,7 +143,7 @@ namespace AfterSchool.Controllers
         public static Registrant CreateOrUpdateVolunteerRegistrant(Account account, WebUser user, SystemMessages msgs,
             DatabaseConnection dc = null)
         {
-            var registrant = account.getma(msgs, dc);
+            var registrant = account.GetVolunteerRegistrant(msgs, dc);
 
             if (registrant.IsEmpty())
                 // create parent registrant record
