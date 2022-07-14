@@ -19,8 +19,8 @@
     var pagingController = "activity";
     var pagingAction = "index";
     var id = "";
-    var currentListUrl = Url.Action("index", "activity", new {type = (int)activityType, archive = 0});
-    var archivedListUrl = Url.Action("index", "activity", new {type = (int)activityType, archive = 1});
+    var currentListUrl = Url.Action("index", "activity", new {type = (int) activityType, archive = 0});
+    var archivedListUrl = Url.Action("index", "activity", new {type = (int) activityType, archive = 1});
     var hasArchivedActivities = (bool) ViewData["HasArchivedActivities"];
     var hasSearchQuery = Request["q"].IsNotEmpty();
 
@@ -42,6 +42,7 @@
     var currentlyViewingArchive = Request["archive"] == "1" && hasArchivedActivities;
     var currentClass = currentlyViewingArchive ? string.Empty : "text-bold";
     var archiveClass = currentlyViewingArchive ? "text-bold" : string.Empty;
+    var newArchiveValue = currentlyViewingArchive ? "1" : "0";
 
     var paging = (PagingModel) ViewData["PagingModel"];
     var managePermissionSlips = accountPackage.HasFeature(FeatureType.ManagePermissionSlips);
@@ -421,7 +422,7 @@ else
         new ViewDataDictionary
         {
             {"id", id},
-            {"querystring", $"archive={Request["archive"]}&type={(int) activityType}"},
+            {"querystring", $"archive={newArchiveValue}&type={(int) activityType}"},
             {"action", pagingAction},
             {"controller", pagingController},
         }

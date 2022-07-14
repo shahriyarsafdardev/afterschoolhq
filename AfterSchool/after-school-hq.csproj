@@ -602,6 +602,7 @@
     <Compile Include="Areas\Org\Assemblers\Activity\EditRestrictionsAssembler.cs" />
     <Compile Include="Areas\Org\Assemblers\Activity\EditScheduleAssembler.cs" />
     <Compile Include="Areas\Org\Assemblers\Activity\EditSetupAssembler.cs" />
+    <Compile Include="Areas\Org\Assemblers\Activity\RegistrantsAssembler.cs" />
     <Compile Include="Areas\Org\Assemblers\Activity\SummaryAssembler.cs" />
     <Compile Include="Areas\Org\Controllers\AccountController.cs" />
     <Compile Include="Areas\Org\Controllers\AccountingController.cs" />
@@ -718,6 +719,7 @@
     <Content Include="ahq-partners-with-mccoy.html" />
     <Content Include="appsettings.json" />
     <Content Include="Areas\Org\Views\Activity\PrintRegistrants.cshtml" />
+    <Content Include="Areas\Org\Views\Activity\VolunteerRegistrants.cshtml" />
     <Content Include="Areas\Org\Views\Onboarding\FreeTrial.cshtml" />
     <Content Include="Areas\Org\Views\Shared\_RegistrationForm.cshtml" />
     <Content Include="Assets\css\common.css" />

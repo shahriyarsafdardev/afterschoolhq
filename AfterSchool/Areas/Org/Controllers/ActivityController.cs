@@ -43,7 +43,8 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(result);
         }
 
-        private SummaryResult GatherAndAssembleDataForSummaryResult(Activity activity, Account currentAccount, WebUser currentUser, UserType accountUserType,
+        private static SummaryResult GatherAndAssembleDataForSummaryResult(Activity activity, Account currentAccount, WebUser currentUser,
+            UserType accountUserType,
             AccountPackage accountPackage, SystemMessages msgs)
         {
             var participationObject = activity.GetParticipationObject(msgs);
@@ -52,97 +53,26 @@ namespace AfterSchool.Areas.Org.Controllers
                 EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, accountUserType, currentUserIsActivityLeader);
             var schedule = activity.GetSchedule(msgs);
             var totalPaid = activity.GetTotalAmountPaid(msgs);
-            var result = new SummaryAssembler().AssembleSummaryResult(activity, participationObject, schedule, totalPaid, isActivityLeader, 
+            var result = new SummaryAssembler().AssembleSummaryResult(activity, participationObject, schedule, totalPaid, isActivityLeader,
                 accountUserType, currentAccount, accountPackage, currentUser, msgs);
             return result;
         }
 
         [HttpGet]
-        public ActionResult Index(string group, string pn, string rpp, string archive, string copyerror, string type,
-            string q)
+        public ActionResult Index(string group, string pn, string rpp, string archive, string copyerror, string type, string q)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
-            var pageNumber = 1;
-            var recordsPerPage = 10;
-            var isArchived = false;
-            var activityType = ActivityType.Activity;
 
-            if (pn.IsNumber() && pn.ToInteger() > 0)
-                pageNumber = pn.ToInteger();
-
-            if (rpp.IsNumber() && rpp.ToInteger() > 0)
-                recordsPerPage = rpp.ToInteger();
-
-            if (archive.IsBoolean())
-                isArchived = archive.ToBoolean();
-
-            if (type.IsNotEmpty() && type.IsNumber())
-                activityType = type.ToInteger().ToEnum<ActivityType>();
+            var pageNumber = pn.IsNumber() && pn.ToInteger() > 0 ? pn.ToInteger() : 1;
+            var recordsPerPage = rpp.IsNumber() && rpp.ToInteger() > 0 ? rpp.ToInteger() : 10;
+            var isArchived = archive.IsBoolean() && archive.ToBoolean();
+            var activityType = type.IsNotEmpty() && type.IsNumber() ? type.ToInteger().ToEnum<ActivityType>() : ActivityType.Activity;
 
             var start = recordsPerPage * (pageNumber - 1);
-            var length = recordsPerPage;
 
-            List<Activity> activities = null;
-            var totalActivityCount = 0;
-            var hasArchivedActivities = false;
-
-            ActivityGroup activityGroup = null;
-            if (group.IsGuid())
-            {
-                activityGroup = currentAccount.GetActivityGroup(group.ToGuid(), msgs);
-                totalActivityCount =
-                    activityGroup.GetActivityCount(ActivityType.Activity, isArchived, false, null, msgs);
-                activities = activityGroup.GetActivities(ActivityType.Activity, isArchived, false, start, length,
-                    msgs: msgs);
-                hasArchivedActivities =
-                    activityGroup.GetActivityCount(ActivityType.Activity, true, false, null, msgs) > 0;
-            }
-            else
-            {
-                var getUngroupActivitiesOnly = currentAccount.AccountTypeId == AccountType.School;
-
-                totalActivityCount = currentAccount.GetActivityCount(
-                    SessionVariables.AccountUserType,
-                    SessionVariables.CurrentUser,
-                    q,
-                    activityType,
-                    isArchived,
-                    false,
-                    getUngroupActivitiesOnly,
-                    msgs);
-
-                activities = currentAccount.GetActivities(
-                    SessionVariables.AccountUserType,
-                    SessionVariables.CurrentUser,
-                    q,
-                    activityType,
-                    isArchived,
-                    false,
-                    getUngroupActivitiesOnly,
-                    start,
-                    length,
-                    msgs);
-
-                hasArchivedActivities = currentAccount.GetActivityCount(
-                    SessionVariables.AccountUserType,
-                    SessionVariables.CurrentUser,
-                    q,
-                    activityType,
-                    true,
-                    false,
-                    getUngroupActivitiesOnly,
-                    msgs) > 0;
-            }
-
-            var totalPages = Math.Ceiling(totalActivityCount.ToDouble() / recordsPerPage).ToInteger();
-
-            var finalActivities = activities
-                .OrderBy(x => x.Name)
-                .ToList();
-
-            if (!finalActivities.Any() && archive == "1")
-                return RedirectToAction("index");
+            var (activities, activityGroup, hasArchivedActivities, totalActivityCount, totalPages) = GetActivitiesForIndexPage(group, q, currentAccount,
+                isArchived, start, recordsPerPage, activityType, recordsPerPage, SessionVariables.AccountUserType, SessionVariables.CurrentUser, msgs);
 
             if (copyerror.IsBoolean() && copyerror.ToBoolean())
                 msgs.Add("Error creating copy", MessageType.Error);
@@ -161,7 +91,48 @@ namespace AfterSchool.Areas.Org.Controllers
             };
             ViewBag.Messages = msgs;
 
-            return View(finalActivities);
+            return View(activities);
+        }
+
+        private static (List<Activity> Activities, ActivityGroup ActivityGroup, bool HasArchivedActivities, int TotalActivityCount, int TotalPages)
+            GetActivitiesForIndexPage(string group, string q, Account currentAccount, bool isArchived, int start, int length,
+                ActivityType activityType, int recordsPerPage, UserType accountUserType, WebUser currentUser, SystemMessages msgs)
+        {
+            var isActivityGroup = group.IsGuid();
+            var activityGroup = isActivityGroup ? currentAccount.GetActivityGroup(group.ToGuid(), msgs) : null;
+            var activities = GetActivities(activityGroup, isArchived, start, length, currentAccount, accountUserType, currentUser, q, activityType, msgs);
+
+            if (!activities.Any() && isArchived)
+            {
+                isArchived = false;
+                activities = GetActivities(activityGroup, false, start, length, currentAccount, accountUserType, currentUser, q, activityType, msgs);
+            }
+
+            var totalActivityCount = GetActivityCount(q, currentAccount, isArchived, activityType, accountUserType, currentUser, activityGroup, msgs);
+            var hasArchivedActivities = isArchived || GetActivityCount(q, currentAccount, true, activityType, accountUserType, currentUser, activityGroup, msgs) > 0;
+
+            var totalPages = Math.Ceiling(totalActivityCount.ToDouble() / recordsPerPage).ToInteger();
+            var finalActivities = activities.OrderBy(x => x.Name).ToList();
+            return (Activities: finalActivities, ActivityGroup: activityGroup, HasArchivedActivities: hasArchivedActivities,
+                TotalActivityCount: totalActivityCount, TotalPages: totalPages);
+        }
+
+        private static List<Activity> GetActivities(ActivityGroup activityGroup, bool isArchived, int start, int length, Account currentAccount, 
+            UserType accountUserType, WebUser currentUser, string textToMatch, ActivityType activityType, SystemMessages msgs)
+        {
+            return activityGroup.IsNotEmpty()
+                ? activityGroup.GetActivities(ActivityType.Activity, isArchived, false, start, length, msgs: msgs)
+                : currentAccount.GetActivities(accountUserType, currentUser, textToMatch, activityType, isArchived, false,
+                    currentAccount.AccountTypeId == AccountType.School, start, length, msgs);
+        }
+
+        private static int GetActivityCount(string q, Account currentAccount, bool isArchived, ActivityType activityType, UserType accountUserType,
+            WebUser currentUser, ActivityGroup activityGroup, SystemMessages msgs)
+        {
+            return activityGroup.IsNotEmpty()
+                ? activityGroup.GetActivityCount(ActivityType.Activity, isArchived, false, null, msgs)
+                : currentAccount.GetActivityCount(accountUserType, currentUser, q, activityType, isArchived, false, 
+                    currentAccount.AccountTypeId == AccountType.School, msgs);
         }
 
         [HttpGet]
@@ -219,11 +190,45 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Registrants(string id, string atype, string msg)
         {
             var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
             HandleTempMessages(msgs);
+            if (msg.IsNotEmpty())
+                msgs.Add(msg, msg.ToLower().Contains("error") ? MessageType.UserError : MessageType.Success);
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
-            RegistrantsViewBag(activity, atype, msg, msgs);
-            return View(activity);
+            var result = GatherDataForAndAssembleRegistrantsResult(activity, atype, currentAccount, currentUser, msgs);
+            
+            if (activity.ActivityTypeId == ActivityType.VolunteerOpportunity)
+                return View("VolunteerRegistrants", result);
+            
+            return View(result);
+        }
+
+        private static RegistrantsResult GatherDataForAndAssembleRegistrantsResult(Activity activity, string assignmentTypeAsString, Account currentAccount,
+            WebUser currentUser, SystemMessages msgs)
+        {
+            var assignmentType = RegistrationAssignmentType.NotSet;
+            List<RegistrantActivity> registrantActivities = null;
+
+            if (assignmentTypeAsString.IsNotEmpty())
+            {
+                assignmentType = (RegistrationAssignmentType)assignmentTypeAsString.ToInteger();
+                if (assignmentType == RegistrationAssignmentType.Invited)
+                    registrantActivities = activity.GetRegistrantActivities(true, msgs);
+            }
+
+            //Review: we will bring all data to provider review but we will disable those in UI so provider will have proper idea.            
+            if (registrantActivities.IsEmpty())
+                registrantActivities = activity.GetRegistrantActivities(includeInvited: true, msgs);
+            
+            var currentUserIsActivityLeader = SessionVariables.CurrentUser.IsActivityLeader(activity, msgs);
+            var accountUserType = SessionVariables.AccountUserType;
+            var isReadOnlySeatStatus = activity.GetParticipationObject(msgs).IsExternalToAccount(currentAccount);
+
+            var result = new RegistrantsAssembler().AssembleRegistrantsResult(activity, registrantActivities, currentAccount, currentUser, assignmentType,
+                currentAccount.GetActiveAccountPackage(msgs), isReadOnlySeatStatus, activity.GetSchedule(msgs), accountUserType,
+                currentUserIsActivityLeader, msgs);
+            return result;
         }
 
         [HttpGet]
@@ -268,6 +273,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult RegistrantSummary(string id)
         {
             var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
@@ -278,15 +284,15 @@ namespace AfterSchool.Areas.Org.Controllers
 
             msgs.Add("Your report will be sent shortly", MessageType.Success);
 
-            RegistrantsViewBag(activity, null, null, msgs);
-            ViewBag.Messages = msgs;
-            return View("Registrants", activity);
+            var result = GatherDataForAndAssembleRegistrantsResult(activity, "", currentAccount, currentUser, msgs);
+            return View("Registrants", result);
         }
 
         [HttpGet]
         public ActionResult RegistrantDownload(string id)
         {
             var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var af = activity.GetActiveActivityForm(msgs);
@@ -329,21 +335,19 @@ namespace AfterSchool.Areas.Org.Controllers
                 table.Add(row);
             }
 
-            string csv = CsvFile.Create(table);
+            var csv = CsvFile.Create(table);
 
             Response.Clear();
             Response.AddHeader("Content-Type", BasicLibrary.Utilities.GetMimeType("csv"));
             Response.AddHeader("Content-Disposition", "attachment; filename=registrants.csv");
 
-            byte[] filebytes = UTF8Encoding.UTF8.GetBytes(csv);
-            Response.AddHeader("Content-Length", filebytes.Length.ToString());
-            Response.BinaryWrite(filebytes);
+            var fileBytes = Encoding.UTF8.GetBytes(csv);
+            Response.AddHeader("Content-Length", fileBytes.Length.ToString());
+            Response.BinaryWrite(fileBytes);
             Response.End();
 
-            RegistrantsViewBag(activity, null, null, msgs);
-            ViewBag.Messages = msgs;
-
-            return View("Registrants", activity);
+            var result = GatherDataForAndAssembleRegistrantsResult(activity, "", currentAccount, currentUser, msgs);
+            return View("Registrants", result);
         }
 
         [HttpPost]
@@ -838,7 +842,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             {
                                 continue;
                             }
-                            
+
                             question.Text = Request.Params[string.Format("text-{0}", question.ID)];
 
                             question.IsActive = false;
@@ -1382,7 +1386,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 return View(result);
             }
 
-            var activityLocationTypeId = (int)(activity.IsNotEmpty() ? activity.ActivityLocationTypeId : defaultActivity.ActivityLocationTypeId);
+            var activityLocationTypeId = (int) (activity.IsNotEmpty() ? activity.ActivityLocationTypeId : defaultActivity.ActivityLocationTypeId);
             var values = new Dictionary<string, object>
             {
                 {"name", name.MaxChars(75)},
@@ -1418,7 +1422,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (isNew && activityLocationTypeId == (int) ActivityLocationType.Physical && activity.IsEmpty())
             {
                 var location = currentAccount.GetDefaultLocation();
-                
+
                 if (location.IsNotEmpty())
                 {
                     values = values.Concat(new Dictionary<string, object>
@@ -1524,9 +1528,10 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (group.IsGuid())
                 activityGroup = currentAccount.GetActivityGroup(group.ToGuid(), msgs);
-            
+
             var fullScreenExitUrl = GetFullScreenExitUrl(activity);
-            if(cmd == "next") {
+            if (cmd == "next")
+            {
                 switch (activity.ActivityTypeId)
                 {
                     case ActivityType.LearningPod:
@@ -1549,11 +1554,10 @@ namespace AfterSchool.Areas.Org.Controllers
                         return View("EditDetails", editDetailsResult);
                 }
             }
-            
+
             var resultDefault =
                 GatherDataForAndAssembleEditSetupResult(activity, activityGroup, msgs, currentAccount, "EditSetup", Request[IsNewRequest]);
             return View(resultDefault);
-            
         }
 
         private ActionResult GoToEditSchedule(Activity activity, string scheduleId, SystemMessages msgs, Account currentAccount, WebUser currentUser)
@@ -1789,7 +1793,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         default:
                             var editCostResult = GatherDataForAndAssembleEditCostResult(activity, msgs, currentAccount, currentUser, Request[IsNewRequest]);
                             return View("EditCost", editCostResult);
-                    } 
+                    }
                 }
             }
 

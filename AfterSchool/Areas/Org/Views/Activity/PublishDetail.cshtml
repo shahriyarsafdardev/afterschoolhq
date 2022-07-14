@@ -43,6 +43,7 @@
 
     var showAllowInvites = accountPackage.HasFeature(FeatureType.AllowInvites);
     var currentUser = SessionVariables.CurrentUser;
+    var inviteesLabel = Model.ActivityTypeId == ActivityType.VolunteerOpportunity ? "Volunteers" : "Parents";
 }
 
 @{ Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString()); }
@@ -78,11 +79,11 @@
         {
             if (!showAllowInvites)
             {
-                <a href="#" class="btn btn-default" onclick="return showUpgradeMyPlan('@(allowInvitesPackage?.Name)', @(allowInvitesPackage?.ID))" disabled="disabled">Invite Parents &raquo;</a>
+                <a href="#" class="btn btn-default" onclick="return showUpgradeMyPlan('@(allowInvitesPackage?.Name)', @(allowInvitesPackage?.ID))" disabled="disabled">Invite @inviteesLabel &raquo;</a>
             }
             else
             {
-                <a href="@Url.Action("inviteto", "contact", new {id = Model.Uid, type = "activity"})" class="btn btn-default">Invite Parents &raquo;</a>
+                <a href="@Url.Action("inviteto", "contact", new {id = Model.Uid, type = "activity"})" class="btn btn-default">Invite @inviteesLabel &raquo;</a>
             }
         }
 

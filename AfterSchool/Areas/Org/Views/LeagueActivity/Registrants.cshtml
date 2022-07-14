@@ -1,4 +1,4 @@
-﻿@model Activity
+@model Activity
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
 
@@ -108,19 +108,19 @@
                         <option value="">View All Assignments</option>
 
 
-                        @foreach (var x in Enum.GetValues(typeof(RegistrationAssignmentType)).Cast<RegistrationAssignmentType>().Where(x => x != RegistrationAssignmentType.NotSet))
+                        @foreach (var x in Enum.GetValues(typeof(RegistrationAssignmentType)).Cast<RegistrationAssignmentType>().Where(x => x != RegistrationAssignmentType.NotSet && x != RegistrationAssignmentType.ReservedPendingBackgroundCheck))
                         {
-                            if (account.HasFeature(FeatureType.AllowApplications) || x != RegistrationAssignmentType.Applied)
-                            {
-                                var selected = "";
-                                if (assignmentType == x)
+                                if (account.HasFeature(FeatureType.AllowApplications) || x != RegistrationAssignmentType.Applied)
                                 {
-                                    selected = "selected=\"selected\"";
-                                }
+                                    var selected = "";
+                                    if (assignmentType == x)
+                                    {
+                                        selected = "selected=\"selected\"";
+                                    }
 
                                 <option value="@((int)x)" @selected>@x.ToString().SplitByUpperCase()</option>
+                                }
                             }
-                        }
                     </select>
                 </div>
                 <div class="col-md-8">

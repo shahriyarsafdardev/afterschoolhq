@@ -1,4 +1,4 @@
-﻿@{
+@{
     var activities = (List<Activity>)ViewBag.Activities;
     var groups = (List<ActivityGroup>)ViewBag.Groups;
     var questions = (List<FormQuestion>)ViewBag.Questions;
@@ -106,7 +106,7 @@
                 <option value="">All Seat Assignments</option>
                 @foreach (RegistrationAssignmentType item in Enum.GetValues(typeof(RegistrationAssignmentType)))
                 {
-                    if (item == RegistrationAssignmentType.NotSet)
+                    if (item == RegistrationAssignmentType.NotSet || item == RegistrationAssignmentType.ReservedPendingBackgroundCheck)
                     {
                         continue;
                     }

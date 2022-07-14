@@ -1,11 +1,11 @@
-﻿@model Registration
+@model Registration
 
 @{
     var listUrl = ViewBag.ListUrl;
     var activities = (List<Activity>)ViewBag.AvailableActivities;
     var selectedRegistration = (Registration)ViewBag.SelectedRegistration;
 
-    var invalidAssignmentTypes = new RegistrationAssignmentType[] { RegistrationAssignmentType.NotSet, RegistrationAssignmentType.Invited, RegistrationAssignmentType.Withdrawn, RegistrationAssignmentType.Declined };
+    var invalidAssignmentTypes = new RegistrationAssignmentType[] { RegistrationAssignmentType.NotSet, RegistrationAssignmentType.Invited, RegistrationAssignmentType.Withdrawn, RegistrationAssignmentType.Declined, RegistrationAssignmentType.ReservedPendingBackgroundCheck };
     var validAssignmentTypes = Enum.GetValues(typeof(RegistrationAssignmentType)).Cast<RegistrationAssignmentType>().Where(x => x.NotIn(invalidAssignmentTypes));
 }
 

@@ -440,7 +440,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
-        public ActionResult Activity(string accountname, string activitytype, string activityname, string preview, string invite, string decline)
+        public ActionResult Activity(string accountname, string activitytype, string activityname, string preview)
         {
             if (isUnsupportedBrowser())
                 return RedirectUnsupportedBrowser();
@@ -455,7 +455,6 @@ namespace AfterSchool.Controllers
             var currentUser = SessionVariables.CurrentUser;
             var currentAccount = SessionVariables.CurrentAccount;
             ParticipationObject session = null;
-            var canRegisterFor = true;
 
             if (account.IsNotEmpty())
             {
@@ -484,16 +483,6 @@ namespace AfterSchool.Controllers
 
                 if (currentUser.IsNotEmpty() && currentAccount.IsNotEmpty())
                     canPublishActivity = currentUser.CanPublishActivity(currentAccount, activity, msgs);
-
-                if (activity.IsInviteOnly)
-                {
-                    SessionVariables.SessionInvite = invite.IsGuid() ? invite : "";
-
-                    canRegisterFor = !activity.IsInviteOnly || activity.IsInvited(SessionVariables.SessionInvite, msgs);
-
-                    if (!canRegisterFor && (currentUser.IsEmpty() || !currentUser.HasAccessToActivity(activity)))
-                        return activitytype == "volunteeropportunity" ? Redirect(account.BrowseVolunteerOpportunitiesUrl) : Redirect(account.BrowseUrl);
-                }
             }
             else
             {
@@ -519,7 +508,6 @@ namespace AfterSchool.Controllers
             ViewBag.Messages = msgs;
             ViewBag.Account = account;
             ViewBag.CanPublishActivity = canPublishActivity;
-            ViewBag.CanRegisterFor = canRegisterFor;
             ViewBag.Session = session;
             ViewBag.AccountProfile = accountProfile;
             ViewBag.CleverSsoEnabled = featureFlagRepository.IsEnabled("clever-sso");

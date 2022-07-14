@@ -1,4 +1,4 @@
-﻿@model List<RegistrantActivity>
+@model List<RegistrantActivity>
 @{ 
     var account = (Account)ViewData["Account"];
     var activity = (Activity)ViewData["Activity"];
@@ -115,7 +115,9 @@
                                         switch (assignmenttype)
                                         {
                                             case RegistrationAssignmentType.NotSet:
+                                            case RegistrationAssignmentType.ReservedPendingBackgroundCheck:
                                                 continue;
+
                                         }
                                         <option value="@((int)assignmenttype)" @(assignmenttype == ra.AssignmentTypeId ? "selected=\"selected\"" : "")>
                                             @assignmenttype.ToString().SplitByUpperCase()

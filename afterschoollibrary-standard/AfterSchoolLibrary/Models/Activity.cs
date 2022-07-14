@@ -938,10 +938,5 @@ namespace AfterSchoolLibrary.Models
         }        
 
         #endregion
-
-        public bool IsInvited(string invite, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            return RegistrantActivity.ExistsByUid(invite, msgs, dc);
-        }
     }
 }
