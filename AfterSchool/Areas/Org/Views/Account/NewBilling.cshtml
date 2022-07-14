@@ -248,7 +248,7 @@
 
         PageEvent.add(PageEvent.AFTER_INIT, function () {
 
-            var stripe = Stripe('@AfterSchoolLibrary.Billing.StripeHelper.AHQSubsPublishableKey');
+            var stripe = Stripe('@AfterSchoolLibrary.Billing.StripeHelper.SubscriptionsPublishableKey');
             var elements = stripe.elements();
 
             var style = {

@@ -19,10 +19,8 @@ namespace AfterSchoolLibrary.Billing
         private static string DevPlatformClientId => "ca_7kmNt22jLhXZWtyVV1884Kng6mgs79Jv";
         private static string LivePlatformClientId => ConfigurationManager.AppSettings["Stripe.LivePlatformClientId"];
 
-        private static string AHQSubsTestSecretKey => "sk_test_51L86SRKqvjOx1xht5HLUSdCXXvePMWwsmWyqjJpwH5vBWPJaBcwrRM3HqfNHAsjn8cDolgGx2NQr7P7tombgd1Kw000Ej19ATs";
-        private static string AHQSubsTestPublishableKey => "pk_test_51L86SRKqvjOx1xhtySfmOFLymwZjBhtoUweSkImAJbF52trFklUdsEmDewGcxs7JFmZddTvSmkAhj3f8UfkMJOpV00aFruefGr";
-        private static string AHQSubsLiveSecretKey => ConfigurationManager.AppSettings["StripeAHQSubs.LiveSecretKey"];
-        private static string AHQSubsLivePublishableKey => ConfigurationManager.AppSettings["StripeAHQSubs.LivePublishableKey"];
+        private static string DevSubscriptionsSecretKey => "sk_test_51L86SRKqvjOx1xht5HLUSdCXXvePMWwsmWyqjJpwH5vBWPJaBcwrRM3HqfNHAsjn8cDolgGx2NQr7P7tombgd1Kw000Ej19ATs";
+        private static string DevSubscriptionsPublishableKey => "pk_test_51L86SRKqvjOx1xhtySfmOFLymwZjBhtoUweSkImAJbF52trFklUdsEmDewGcxs7JFmZddTvSmkAhj3f8UfkMJOpV00aFruefGr";
 
         public const decimal StripePercentFee = .029M;
         public const decimal StripeFlatFee = .3M;
@@ -35,7 +33,6 @@ namespace AfterSchoolLibrary.Billing
                 : (cost + StripeFlatFee) / (1 - StripePercentFee) - cost;
             return Math.Round(fee, 2, MidpointRounding.AwayFromZero);
         }
-
         public static decimal CalculateStripeAchFee(decimal cost, bool feeTakenOutOfCost)
         {
             var fee = feeTakenOutOfCost
@@ -45,34 +42,12 @@ namespace AfterSchoolLibrary.Billing
         }
 
         public static string SecretKey => Helpers.Utilities.IsLocalHost ? TestSecretKey : LiveSecretKey;
-
         public static string PublishableKey  => Helpers.Utilities.IsLocalHost ? TestPublishableKey : LivePublishableKey;
-       
         public static string PlatformClientId => Helpers.Utilities.IsLocalHost ? DevPlatformClientId : LivePlatformClientId;
-
-        public static string AHQSubsSecretKey
-        {
-            get
-            {
-                if (Helpers.Utilities.IsProduction)
-                    return AHQSubsLiveSecretKey;
-                else
-                    return AHQSubsTestSecretKey;
-            }
-        }
-
-        public static string AHQSubsPublishableKey
-        {
-            get
-            {
-                if (Helpers.Utilities.IsProduction)
-                    return AHQSubsLivePublishableKey;
-                else
-                    return AHQSubsTestPublishableKey;
-            }
-        }
+        public static string SubscriptionsSecretKey => Helpers.Utilities.IsLocalHost ? DevSubscriptionsSecretKey : ConfigurationManager.AppSettings["Stripe.SubscriptionsSecretKey"];
+        public static string SubscriptionsPublishableKey => Helpers.Utilities.IsLocalHost ? DevSubscriptionsPublishableKey : ConfigurationManager.AppSettings["Stripe.SubscriptionsPublishableKey"];
         
-        public static StripeHelper GetStripeHelperSubscriberAccount() => new StripeHelper(StripeHelper.AHQSubsSecretKey);
+        public static StripeHelper GetStripeHelperSubscriberAccount() => new StripeHelper(StripeHelper.SubscriptionsSecretKey);
         public static StripeHelper GetStripeHelperConnectAccount() => new StripeHelper(StripeHelper.SecretKey);
         public static StripeHelper GetStripeHelper(StripeAccountType stripeAccountType) => stripeAccountType == StripeAccountType.SubscriberAccount ?  GetStripeHelperSubscriberAccount() : GetStripeHelperConnectAccount();
 
