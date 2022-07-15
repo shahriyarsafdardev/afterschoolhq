@@ -49,7 +49,7 @@
                         }
                         for <strong>@participationObject.Name</strong>
                     </p>
-                    @if (currentUser.IsRegistered)
+                    @if (currentUser.IsRegistered && false) // Volunteer dashboard isn't ready yet
                     {
                         <p>
                             <a href="@Url.Action("index", "home", new {area = "user"})">View your account</a>
@@ -62,7 +62,7 @@
 
                     <div class="margin-v-10">
                         <p>
-                            <a href="@account.HomePageUrl" class="btn btn-xl btn-register-primary btn-register-xl">Find Another Opportunity</a>
+                            <a href="@account.HomePageUrl" class="btn btn-xl btn-register-primary btn-register-xl">Find another @UILabel.ActivityLabel(ActivityType.VolunteerOpportunity)</a>
                         </p>
                     </div>
 

@@ -29,7 +29,15 @@ namespace AfterSchool.Controllers
 
         public static List<FormQuestion> GetAllDefaultPersonalInformationQuestions(SystemMessages msgs)
         {
-            var administratorDefaultForm = LoadAdministratorDefaultForm(msgs);
+            var administratorDefaultForm = FormService.GetAdministratorAccountForm(msgs);
+            var personalContactGroup = GetQuestionGroups(msgs, administratorDefaultForm)
+                .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
+            return GetAllQuestionsForQuestionGroup(msgs, personalContactGroup);
+        }
+
+        public static List<FormQuestion> GetAllDefaultVolunteerPersonalInformationQuestions(SystemMessages msgs)
+        {
+            var administratorDefaultForm = FormService.GetAdministratorAccountVolunteerForm(msgs);
             var personalContactGroup = GetQuestionGroups(msgs, administratorDefaultForm)
                 .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
             return GetAllQuestionsForQuestionGroup(msgs, personalContactGroup);
@@ -46,13 +54,14 @@ namespace AfterSchool.Controllers
             return form.GetQuestionGroups(msgs);
         }
 
-        private static Form LoadAdministratorDefaultForm(SystemMessages msgs)
+        /*private static Form LoadAdministratorDefaultForm(SystemMessages msgs)
         {
-            var administratorAccount = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs).FirstOrDefault();
+            var administratorAccount = AccountService.GetAfterSchoolAccount(msgs);
+            // var administratorAccount = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs).FirstOrDefault();
             return administratorAccount?.DefaultFormId != null
                 ? Form.Load(administratorAccount.DefaultFormId.Value, msgs)
                 : null;
-        }
+        }*/
 
         public static WebUser CreateOrUpdateUser(WebUser currentUser, string firstName, string lastName, string email,
             string phone, string password, bool allowTextMessages, SystemMessages msgs, DatabaseConnection dc = null)

@@ -20,7 +20,7 @@
                               participationObject.IsExternalToAccount(currentAccount) &&
                               !participationObject.IsAccountActivityGroup();
 
-    if (currentAccount.IsNotEmpty() && currentAccount.AccountTypeId != AccountType.Registrant)
+    if (currentAccount.IsNotEmpty() && currentAccount.AccountTypeId.NotIn(new AccountType[] { AccountType.Registrant, AccountType.Volunteer}))
     {
         accountOrDashboard = "Dashboard";
         dashboardUrl = Url.Action("index", "home", new {area = "org"});
@@ -265,7 +265,7 @@ else if (currentUser.IsNotEmpty())
                 </a>
             }
 
-            if (currentUser.IsActive)
+            if (currentUser.IsActive && currentAccount.AccountTypeId != AccountType.Volunteer)
             {
                 <a href="@dashboardUrl" class="btn btn-link">@accountOrDashboard</a>
             }

@@ -809,9 +809,6 @@ namespace AfterSchoolLibrary.Helpers
                     "Registration_Confirmation_Table-1.0",
                     msgs);
 
-            var registrationDetails = "Login to your account to view more details about this registration.";
-            var loginLink = Utilities.LoginUrl();
-
             if (customMessage.IsEmpty())
             {
                 customMessage = registrationThankYou;
@@ -838,14 +835,14 @@ namespace AfterSchoolLibrary.Helpers
             {
                 {"FirstName", loggedInUser.FirstName},
                 {"ProductName", Utilities.AppName(isAfterSchool)},
-                {"LoginLink", loginLink},
+                {"LoginLink", ""},
                 {"ActivityContactEmail", participationObject.ContactEmail.IfBlank(billingAccount.Email)},
                 {"ActivityContactPhone", participationObject.ContactPhone.IfBlank(billingAccount.Phone)},
                 {"ActivityContactName", participationObject.ContactName.IfBlank(billingAccount.Name)},
                 {"BillerAccountName", billingAccount.Name},
                 {"BillerAccountLink", billingAccount.HomePageUrl},
                 {"CustomMessage", customMessage},
-                {"RegistrationDetails", registrationDetails},
+                {"RegistrationDetails", ""},
                 {"VirtualInfo", virtualInfo},
                 {"PhysicalInfo", physicalInfo},
                 {"SplitPaymentSubscriptionInfo", ""},

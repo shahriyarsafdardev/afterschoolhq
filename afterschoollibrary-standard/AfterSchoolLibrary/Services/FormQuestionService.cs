@@ -21,6 +21,19 @@ namespace AfterSchoolLibrary.Services
 
             return questions;
         }
+        
+        public static List<FormQuestion> GetVolunteerEmergencyContactQuestions(SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var questions = new List<FormQuestion>();
+            var form = FormService.GetAdministratorAccountVolunteerForm(msgs, dc);
+
+            form.GetQuestionGroups(msgs, dc)
+                .Where(group => group.QuestionGroupDataTypeId.In(GetEmergencyContactQuestionGroups()))
+                .ToList()
+                .ForEach(group => questions.AddRange(group.GetAllQuestions(msgs, dc)));
+
+            return questions;
+        }
 
         public static SystemMessages ValidateFormQuestionForEmergencyContacts(List<FormQuestionViewModel> questions, SystemMessages msgs = null, DatabaseConnection dc = null)
         {

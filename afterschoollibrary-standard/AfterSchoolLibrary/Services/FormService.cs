@@ -44,6 +44,12 @@ namespace AfterSchoolLibrary.Services
             var administratorAccount = AccountService.GetAfterSchoolAccount(msgs, dc);
             return administratorAccount.GetDefaultStudentForm(msgs, dc);
         }
+        
+        public static Form GetAdministratorAccountVolunteerForm(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var administratorAccount = AccountService.GetAfterSchoolAccount(msgs, dc);
+            return administratorAccount.GetDefaultVolunteerForm(msgs, dc);
+        }
 
         /// <summary>
         ///     get template from default afterschool account with ID = 1
