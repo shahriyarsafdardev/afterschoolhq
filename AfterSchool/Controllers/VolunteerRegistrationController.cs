@@ -229,24 +229,26 @@ namespace AfterSchool.Controllers
                 if (SessionVariables.CurrentUser.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty())
                     return Redirect(redirectUrl);
 
-                if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
+                if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Volunteer)
                     return Redirect(redirectUrl);
 
                 if (checkForEmptyCart && SessionVariables.Cart.IsEmpty())
                     return Redirect(redirectUrl);
             }
+            else
+            {
+                if (SessionVariables.CurrentUser.IsEmpty())
+                    return Redirect(AfterSchoolLibrary.Helpers.Utilities.LoginUrl());
 
-            if (SessionVariables.CurrentUser.IsEmpty())
-                return Redirect(AfterSchoolLibrary.Helpers.Utilities.LoginUrl());
+                if (SessionVariables.CurrentAccount.IsEmpty())
+                    return RedirectToAction("select", "login");
 
-            if (SessionVariables.CurrentAccount.IsEmpty())
-                return RedirectToAction("select", "login");
+                if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Volunteer)
+                    return HandleRedirectAfterLogin(null);
 
-            if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
-                return HandleRedirectAfterLogin(null);
-
-            if (checkForEmptyCart && SessionVariables.Cart.IsEmpty())
-                return HandleRedirectAfterLogin(null);
+                if (checkForEmptyCart && SessionVariables.Cart.IsEmpty())
+                    return HandleRedirectAfterLogin(null);
+            }
 
             return null;
         }
@@ -451,7 +453,7 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult Register()
         {
-            if (!RegistrationCommon.IsValidLogin())
+            if (!RegistrationCommon.IsValidLogin(AccountType.Volunteer))
                 return Logout(Request.Url.ToString(), true);
 
             var results = CheckRedirect(true);
@@ -538,7 +540,7 @@ namespace AfterSchool.Controllers
         [HttpPost]
         public ActionResult Register(string signature)
         {
-            if (!RegistrationCommon.IsValidLogin())
+            if (!RegistrationCommon.IsValidLogin(AccountType.Volunteer))
                 return Logout(Request.Url.ToString(), true);
 
             var results = CheckRedirect(true);
@@ -579,7 +581,7 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult ThankYou(string id)
         {
-            if (!RegistrationCommon.IsValidLogin())
+            if (!RegistrationCommon.IsValidLogin(AccountType.Volunteer))
                 return Logout(Request.Url.ToString(), true);
 
             var msgs = new SystemMessages();

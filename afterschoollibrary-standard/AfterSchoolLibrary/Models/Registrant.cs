@@ -331,6 +331,14 @@ namespace AfterSchoolLibrary.Models
                 return this.ProfileStatusId == RegistrantProfileStatus.Completed;
             }
         }
+        
+        public bool IsVolunteer
+        {
+            get
+            {
+                return this.PersonTypeId == RegistrantPersonType.Volunteer;
+            }
+        }
 
         public string Name => BuildDisplayName(FirstName, LastName);
 

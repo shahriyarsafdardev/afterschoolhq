@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
@@ -26,14 +27,16 @@ namespace AfterSchoolLibrary.Services
         public static void SendConfirmation(this Registration registration, CheckoutObject checkoutObject,
             string customMessage, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            msgs.AddRange(EmailHelper.SendRegistrationConfirmed(checkoutObject, customMessage, loggedInUser, false,
-                sendBcc, dc));
+            if (checkoutObject.ParticipationObject.ActivityType == ActivityType.VolunteerOpportunity)
+                msgs.AddRange(EmailHelper.SendVolunteerRegistrationConfirmed(checkoutObject, customMessage, loggedInUser, sendBcc, dc));
+            else
+                msgs.AddRange(EmailHelper.SendRegistrationConfirmed(checkoutObject, customMessage, loggedInUser, false, sendBcc, dc));
 
             // if the person registering is the student
             // TODO: Handle better if provider on the backend is registering the student
             var masterRegistrant = loggedInUser.GetMasterRegistrant(msgs, dc);
 
-            if (masterRegistrant.IsNotEmpty() && !masterRegistrant.IsParentOrGuardian)
+            if (masterRegistrant.IsNotEmpty() && masterRegistrant.PersonTypeId == RegistrantPersonType.Student)
                 msgs.AddRange(EmailHelper.SendRegistrationConfirmed(checkoutObject, customMessage, loggedInUser, true,
                     false, dc));
         }

@@ -744,6 +744,155 @@ namespace AfterSchoolLibrary.Helpers
                     emailTemplateId: SendGridHelper.GetGenericTemplateId())));
         }
 
+        public static SystemMessages SendVolunteerRegistrationConfirmed(CheckoutObject checkoutObject, string customMessage,
+            WebUser loggedInUser, bool sendBcc, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var isAfterSchool = checkoutObject.PayingAccount.IsAfterSchool;
+            var purchaser = checkoutObject.PayingAccount.GetAccountOwner(msgs, dc);
+            var participationObject = checkoutObject.ParticipationObject;
+            var billingAccount = checkoutObject.ParticipationObject.OwnerAccount;
+            var masterRegistrant = checkoutObject.MasterRegistrant;
+            var registration = checkoutObject.Registration;
+
+            var receiptRows = "";
+            var regStatus = "";
+            var registrantActivities = registration.GetRegistrantActivities(msgs, dc);
+            var mainRA = registrantActivities.First(ra =>
+                ra.ParticipationObjectId == participationObject.ObjectID &&
+                ra.ParticipationObjectTypeId == participationObject.ObjectType);
+
+            var otherRAs = new List<RegistrantActivity>();
+
+            var registrationThankYou = participationObject.GetRegistrationThankYou(mainRA, msgs, dc);
+            var cost = "";
+            var ccFee = "";
+            var additionalDetails = "";
+
+            switch (mainRA.AssignmentTypeId)
+            {
+                case RegistrationAssignmentType.Reserved:
+                case RegistrationAssignmentType.ReservedPendingPayment:
+                case RegistrationAssignmentType.ReservedPendingParentalConsent:
+                    regStatus = "Reserved";
+                    break;
+                case RegistrationAssignmentType.WaitingList:
+                    regStatus = "Waiting List";
+                    break;
+                case RegistrationAssignmentType.Applied:
+                    regStatus = "Applied";
+                    break;
+            }
+
+            var appliedOrWaitingList = new[]
+                {RegistrationAssignmentType.Applied, RegistrationAssignmentType.WaitingList};
+
+            var description = $"{participationObject.Name} - {regStatus}";
+
+            if (participationObject.CanRegisterPerClass)
+                checkoutObject.SelectedDates.ForEach(date =>
+                    description += $"<br />&nbsp;&bull;&nbsp;{date.ToLongDateTimeString()}");
+            
+            var registrationTable = "";
+            var showTable = false;
+
+            if (showTable)
+                registrationTable = ProcessTemplate(
+                    EmailTemplates.Registration_Confirmation_Table,
+                    new NameValueCollection
+                    {
+                        {"AmountDueOrPaid", ""},
+                        {"TotalCost", 0.ToCurrency()},
+                        {"BodyRows", receiptRows},
+                        {"CreditCardFee", ""},
+                    },
+                    "Registration_Confirmation_Table-1.0",
+                    msgs);
+
+            var registrationDetails = "Login to your account to view more details about this registration.";
+            var loginLink = Utilities.LoginUrl();
+
+            if (customMessage.IsEmpty())
+            {
+                customMessage = registrationThankYou;
+
+                if (customMessage == "Thank you for registering")
+                    customMessage += ". ";
+            }
+
+            var virtualInfo = "";
+            if (participationObject.ActivityLocationType == ActivityLocationType.Virtual &&
+                participationObject.VirtualLocationInfo.IsNotEmpty() &&
+                mainRA.AssignmentTypeId.In(Registration.ReservedStatuses))
+                virtualInfo +=
+                    $"<p>Join this activity virtually with the following info: <br /><br />{participationObject.VirtualLocationInfo}</a>.<br /></p>";
+
+            var physicalInfo = "";
+            if (participationObject.ActivityLocationType == ActivityLocationType.Physical &&
+                participationObject.Location.IsNotEmpty() &&
+                mainRA.AssignmentTypeId.In(Registration.ReservedStatuses))
+                physicalInfo +=
+                    $"<p>The location of {participationObject.Name} is at: {participationObject.Location.FormatAddress()}<br /></p>";
+
+            var model = new NameValueCollection
+            {
+                {"FirstName", loggedInUser.FirstName},
+                {"ProductName", Utilities.AppName(isAfterSchool)},
+                {"LoginLink", loginLink},
+                {"ActivityContactEmail", participationObject.ContactEmail.IfBlank(billingAccount.Email)},
+                {"ActivityContactPhone", participationObject.ContactPhone.IfBlank(billingAccount.Phone)},
+                {"ActivityContactName", participationObject.ContactName.IfBlank(billingAccount.Name)},
+                {"BillerAccountName", billingAccount.Name},
+                {"BillerAccountLink", billingAccount.HomePageUrl},
+                {"CustomMessage", customMessage},
+                {"RegistrationDetails", registrationDetails},
+                {"VirtualInfo", virtualInfo},
+                {"PhysicalInfo", physicalInfo},
+                {"SplitPaymentSubscriptionInfo", ""},
+                {"RegistrationTable", registrationTable},
+            };
+
+            var subject = $"{participationObject.Name} registration for {masterRegistrant.FirstName}";
+            var body = ProcessTemplate(
+                EmailTemplates.Registration_Confirmation,
+                model,
+                "Registration_Confirmation-1.2",
+                msgs);
+
+            // SEND EMAILS
+            var mailMsgs = new SystemMessages();
+
+            // Send email to registerer
+            mailMsgs.AddRange(SendGridHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(isAfterSchool),
+                new EmailAddress(loggedInUser.Email),
+                subject,
+                body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
+
+            // send bcc to activity contact
+            if (sendBcc)
+            {
+                var emails = new List<string>();
+
+                if (participationObject.ContactEmail.IsEmail() &&
+                    participationObject.ContactEmail.ToLower().NotIn(emails))
+                    emails.Add(participationObject.ContactEmail.ToLower());
+
+                emails.ForEach(email =>
+                    SendGridHelper.SendMail(
+                        Email.SendGridNoReplyEmailAddress(isAfterSchool),
+                        new EmailAddress(email),
+                        $"Registration CC: {subject}",
+                        body,
+                        emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
+            }
+
+            msgs.AddRange(mailMsgs);
+
+            return msgs;
+        }
+
         public static SystemMessages SendRegistrationConfirmed(CheckoutObject checkoutObject, string customMessage,
             WebUser loggedInUser, bool isParentCopy, bool sendBcc, DatabaseConnection dc = null)
         {

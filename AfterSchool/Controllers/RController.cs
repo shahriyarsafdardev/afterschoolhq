@@ -535,9 +535,9 @@ namespace AfterSchool.Controllers
             if (activity.IsEmpty())
                 return HttpNotFound();
 
-            if (IsStudentSelectingDatesForVolunteerOpportunity(activity, msgs))
+            if (IsNonVolunteerSelectingDatesForVolunteerOpportunity(activity, msgs))
             {
-                msgs.Add("Only parents or guardians can register for volunteer opportunities", MessageType.UserError);
+                msgs.Add("Only volunteer accounts can register for volunteer opportunities", MessageType.UserError);
                 SetTempMessage(msgs);
                 return Redirect(activity.GetHomePageUrl());
             }
@@ -554,10 +554,10 @@ namespace AfterSchool.Controllers
             return View("ActivitySelectDates", participationObject);
         }
 
-        private static bool IsStudentSelectingDatesForVolunteerOpportunity(Activity activity, SystemMessages msgs)
+        private static bool IsNonVolunteerSelectingDatesForVolunteerOpportunity(Activity activity, SystemMessages msgs)
         {
             return activity.ActivityTypeId == ActivityType.VolunteerOpportunity &&
-                   (!SessionVariables.CurrentUser?.GetMasterRegistrant(msgs).IsParentOrGuardian ?? false);
+                   (!SessionVariables.CurrentUser?.GetMasterRegistrant(msgs).IsVolunteer ?? false);
         }
 
         [HttpPost]

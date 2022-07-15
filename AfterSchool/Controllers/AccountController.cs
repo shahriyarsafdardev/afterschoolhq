@@ -1546,7 +1546,7 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult Select()
         {
-            if (!RegistrationCommon.IsValidLogin())
+            if (!RegistrationCommon.IsValidLogin(AccountType.Registrant))
                 return Logout(Request.Url.ToString(), true);
             
             var results = CheckRedirect(true);
@@ -1600,7 +1600,7 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult SetStudent(string id)
         {
-            if (!RegistrationCommon.IsValidLogin())
+            if (!RegistrationCommon.IsValidLogin(AccountType.Registrant))
                 return Logout(Request.Url.ToString(), true);
 
             return SetStudentAction(id);
@@ -1613,7 +1613,7 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult Register()
         {
-            if (!RegistrationCommon.IsValidLogin())
+            if (!RegistrationCommon.IsValidLogin(AccountType.Registrant))
                 return Logout(Request.Url.ToString(), true);
 
             var results = CheckRedirect(true);
@@ -1680,7 +1680,7 @@ namespace AfterSchool.Controllers
         [HttpPost]
         public ActionResult Register(string signature)
         {
-            if (!RegistrationCommon.IsValidLogin())
+            if (!RegistrationCommon.IsValidLogin(AccountType.Registrant))
                 return Logout(Request.Url.ToString(), true);
 
             var msgs = new SystemMessages();
@@ -1767,7 +1767,7 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult FinalizeRegistration(string id)
         {
-            if (!RegistrationCommon.IsValidLogin())
+            if (!RegistrationCommon.IsValidLogin(AccountType.Registrant))
                 return Logout(Request.Url.ToString(), true);
 
             return FinalizeRegistrationGet(id);
@@ -1849,7 +1849,7 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult Payment(string id)
         {
-            if (!RegistrationCommon.IsValidLogin())
+            if (!RegistrationCommon.IsValidLogin(AccountType.Registrant))
                 return Logout(Request.Url.ToString(), true);
 
             return PaymentActionGet(id);
@@ -2010,7 +2010,7 @@ namespace AfterSchool.Controllers
         public ActionResult Payment(string id, string ccsource, string banksource, string stripetoken,
             string plaidtoken, string plaidaccountid, string savepaymentinfo, string paymentoption, string coupon)
         {
-            if (!RegistrationCommon.IsValidLogin())
+            if (!RegistrationCommon.IsValidLogin(AccountType.Registrant))
                 return Logout(Request.Url.ToString(), true);
 
             return PaymentActionPost(id, stripetoken, plaidtoken, plaidaccountid, ccsource, banksource, savepaymentinfo, paymentoption, coupon);
@@ -2053,7 +2053,7 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult MakePayment(string id)
         {
-            if (!RegistrationCommon.IsValidLogin())
+            if (!RegistrationCommon.IsValidLogin(AccountType.Registrant))
                 return Logout(Request.Url.ToString(), true);
 
             return MakePaymentActionGet(id);
@@ -2166,7 +2166,7 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult ThankYou(string id)
         {
-            if (!RegistrationCommon.IsValidLogin())
+            if (!RegistrationCommon.IsValidLogin(AccountType.Registrant))
                 return Logout(Request.Url.ToString(), true);
 
             var msgs = new SystemMessages();
@@ -2197,7 +2197,7 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult PaymentThankYou(string id)
         {
-            if (!RegistrationCommon.IsValidLogin())
+            if (!RegistrationCommon.IsValidLogin(AccountType.Registrant))
                 return Logout(Request.Url.ToString(), true);
 
             return PaymentThankYouActionGet(id);
@@ -2727,7 +2727,7 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult RegistrationComplete(string id)
         {
-            if (!RegistrationCommon.IsValidLogin())
+            if (!RegistrationCommon.IsValidLogin(AccountType.Registrant))
                 return Logout(Request.Url.ToString(), true);
 
             return RegistrationCompleteActionGet(id);

@@ -511,10 +511,10 @@ namespace AfterSchool.Controllers
                 .ToList();
         }
 
-        public static bool IsValidLogin()
+        public static bool IsValidLogin(AccountType accountType)
         {
             return SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentAccount.IsNotEmpty() &&
-                   SessionVariables.CurrentAccount.AccountTypeId == AccountType.Registrant;
+                   SessionVariables.CurrentAccount.AccountTypeId == accountType;
         }
 
         public static void ResetRegistrationSession()
