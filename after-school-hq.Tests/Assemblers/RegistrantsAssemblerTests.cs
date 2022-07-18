@@ -46,6 +46,8 @@ namespace after_school_hq.Tests.Assemblers
             Assert.That(result.IsActivityLeader, Is.False);
             Assert.That(result.ActivitySchedule, Is.SameAs(activitySchedule));
             Assert.That(result.Messages, Is.SameAs(systemMessages));
+            Assert.That(result.ApplicationCount, Is.EqualTo(1));
+            Assert.That(result.InvitationCount, Is.EqualTo(2));
         }
         
         [Test]

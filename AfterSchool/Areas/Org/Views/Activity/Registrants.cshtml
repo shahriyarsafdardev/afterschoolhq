@@ -6,11 +6,11 @@
     var account = Model.CurrentAccount;
     var totalPaid = Model.Activity.GetTotalPaid();
     var activeRegistrationPeriod = Model.Activity.GetActiveRegistrationPeriod();
-    var registrantCount = ras.Count(x => x.AssignmentTypeId.In(Registration.ReservedStatuses));
-    var waitingListCount = ras.Count(x => x.AssignmentTypeId == RegistrationAssignmentType.WaitingList);
-    var applicationCount = ras.Count(x => x.AssignmentTypeId == RegistrationAssignmentType.Applied);
-    var invitationCount = ras.Count(x => x.AssignmentTypeId == RegistrationAssignmentType.Invited);
-    var declinedCount = ras.Count(x => x.AssignmentTypeId == RegistrationAssignmentType.Declined);
+    var registrantCount = Model.RegistrantCount;
+    var waitingListCount = Model.WaitingListCount;
+    var applicationCount = Model.ApplicationCount;
+    var invitationCount = Model.InvitationCount;
+    var declinedCount = Model.DeclinedCount;
     var assignmentType = Model.AssignmentType;
 
     var accountPackage = Model.AccountPackage;

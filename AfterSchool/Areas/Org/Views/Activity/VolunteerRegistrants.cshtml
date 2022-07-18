@@ -5,11 +5,9 @@
     var ras = Model.RegistrantActivities;
     var account = Model.CurrentAccount;
     var activeRegistrationPeriod = Model.Activity.GetActiveRegistrationPeriod();
-    var registrantCount = ras.Count(x => x.AssignmentTypeId.In(Registration.ReservedStatuses));
-    var waitingListCount = ras.Count(x => x.AssignmentTypeId == RegistrationAssignmentType.WaitingList);
-    var pendingBackgroundCheckCount = ras.Count(x => x.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingBackgroundCheck);
-    var invitationCount = ras.Count(x => x.AssignmentTypeId == RegistrationAssignmentType.Invited);
-    var declinedCount = ras.Count(x => x.AssignmentTypeId == RegistrationAssignmentType.Declined);
+    var registrantCount = Model.RegistrantCount;
+    var waitingListCount = Model.WaitingListCount;
+    var pendingBackgroundCheckCount = Model.PendingBackgroundCheckCount;
     var assignmentType = Model.AssignmentType;
 
     var accountPackage = Model.AccountPackage;

@@ -17,6 +17,7 @@
     var applied = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.Applied).ToList();
     var withdrawn = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.Withdrawn).ToList();
     var declined = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.Declined).ToList();
+    var reservedPendingBackgroundCheck = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingBackgroundCheck).ToList();
 }
 
 <div class="clearfix"></div>
@@ -150,6 +151,23 @@
             {"EditAction", editaction},
             {"EditController", editcontroller},
             {"HeaderTitle", RegistrationAssignmentType.Declined},
+            {"IsReadOnly", isReadOnlySeatStatus},
+        }
+        );
+}
+
+<div class="clearfix"></div>
+@if (reservedPendingBackgroundCheck.IsNotEmpty() && reservedPendingBackgroundCheck.Count > 0)
+{
+    Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
+        reservedPendingBackgroundCheck,
+        new ViewDataDictionary
+        {
+            {"Activity", activity},
+            {"Account", account},
+            {"EditAction", editaction},
+            {"EditController", editcontroller},
+            {"HeaderTitle", RegistrationAssignmentType.ReservedPendingBackgroundCheck},
             {"IsReadOnly", isReadOnlySeatStatus},
         }
         );

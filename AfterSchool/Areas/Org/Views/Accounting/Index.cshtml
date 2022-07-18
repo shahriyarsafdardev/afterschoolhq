@@ -1,4 +1,4 @@
-﻿@model List<Transaction>
+@model List<Transaction>
 @{
     var msgs = (SystemMessages) ViewBag.Messages;
     var account = SessionVariables.CurrentAccount;
@@ -102,7 +102,7 @@
     <div class="col-md-2">
         <div class="widget widget-tile widget-bordered">
             <div class="data-info">
-                <div data-toggle="counter" data-end="@transactionCount" id="transactionCount" data-decimals="0" data-suffix="" class="value">@transactionCount</div>
+                <div data-end="@transactionCount" id="transactionCount" data-decimals="0" data-suffix="" class="value">@transactionCount</div>
                 <div class="desc">Total Transactions</div>
             </div>
             <div class="icon">

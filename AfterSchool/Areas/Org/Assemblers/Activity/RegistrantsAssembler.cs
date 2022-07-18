@@ -17,6 +17,12 @@ namespace AfterSchool.Areas.Org.Assemblers.Activity
         public bool IsReadOnlySeatStatus { get; set; }
         public bool IsActivityLeader { get; set; }
         public ActivitySchedule ActivitySchedule { get; set; }
+        public int RegistrantCount { get; set; }
+        public int WaitingListCount { get; set; }
+        public int ApplicationCount { get; set; }
+        public int InvitationCount { get; set; }
+        public int DeclinedCount { get; set; }
+        public int PendingBackgroundCheckCount { get; set; }
         public SystemMessages Messages { get; set; }
     }
 
@@ -26,6 +32,13 @@ namespace AfterSchool.Areas.Org.Assemblers.Activity
             Account currentAccount, WebUser currentUser, RegistrationAssignmentType assignmentType, AccountPackage accountPackage, bool isReadOnlySeatStatus,
             ActivitySchedule activitySchedule, UserType userType, bool userIsActivityLeader, SystemMessages messages)
         {
+            var registrantCount = registrantActivities.Count(x => x.AssignmentTypeId.In(Registration.ReservedStatuses));
+            var waitingListCount = registrantActivities.Count(x => x.AssignmentTypeId == RegistrationAssignmentType.WaitingList);
+            var applicationCount = registrantActivities.Count(x => x.AssignmentTypeId == RegistrationAssignmentType.Applied);
+            var invitationCount = registrantActivities.Count(x => x.AssignmentTypeId == RegistrationAssignmentType.Invited);
+            var declinedCount = registrantActivities.Count(x => x.AssignmentTypeId == RegistrationAssignmentType.Declined);
+            var pendingBackgroundCheckCount = registrantActivities.Count(x => x.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingBackgroundCheck);
+            
             if (assignmentType != RegistrationAssignmentType.NotSet)
                 registrantActivities = registrantActivities.Where(x => x.AssignmentTypeId == assignmentType).OrderBy(x => x.SeatIndex).ToList();
 
@@ -40,6 +53,12 @@ namespace AfterSchool.Areas.Org.Assemblers.Activity
                 IsReadOnlySeatStatus = isReadOnlySeatStatus,
                 IsActivityLeader = EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, userType, userIsActivityLeader),
                 ActivitySchedule = activitySchedule,
+                RegistrantCount = registrantCount,
+                WaitingListCount = waitingListCount,
+                ApplicationCount = applicationCount,
+                InvitationCount = invitationCount,
+                DeclinedCount = declinedCount,
+                PendingBackgroundCheckCount = pendingBackgroundCheckCount,
                 Messages = messages,
             };
         }

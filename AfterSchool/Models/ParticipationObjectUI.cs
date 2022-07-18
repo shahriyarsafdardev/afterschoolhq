@@ -150,9 +150,9 @@ namespace AfterSchool.Models
             switch(participationObject.GenderRestriction)
             {
                 case GenderRestrictionType.FemaleOnly:
-                    return "Girls Only";
+                    return participationObject.ActivityType == ActivityType.VolunteerOpportunity? "Women Only":"Girls Only";
                 case GenderRestrictionType.MaleOnly:
-                    return "Boys Only";
+                    return participationObject.ActivityType == ActivityType.VolunteerOpportunity? "Men Only":"Boys Only";
                 case GenderRestrictionType.None:
                 default:
                     return "None";

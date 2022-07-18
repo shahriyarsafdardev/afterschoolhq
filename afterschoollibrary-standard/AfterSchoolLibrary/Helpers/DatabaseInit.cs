@@ -1,4 +1,4 @@
-﻿using AfterSchoolLibrary.Migrations;
+using AfterSchoolLibrary.Migrations;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
@@ -58,7 +58,7 @@ namespace AfterSchoolLibrary.Helpers
                     UpdatePlanPaymentStartType_20191230.Do(amsgs, adc);
                     AddFieldTripsFeatureToSchools_20200126.Do(amsgs, adc);
                     CleanUpExtraParentAccounts_20200215.Do(amsgs, adc);
-                    ReattachTransactionsToNonDeletedAccounts_20200216.Do(amsgs, adc);
+                    ReattachTransactionsToNonDeletedAccounts_20200216.Do(amsgs, adc);   
                     FixTransactionsForDeletedAccounts_20200227.Do(amsgs, adc);
                     FixAccountPackageIsActive_20210603.Do(amsgs, adc);
 
