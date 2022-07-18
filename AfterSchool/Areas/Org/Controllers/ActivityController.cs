@@ -1372,8 +1372,6 @@ namespace AfterSchool.Areas.Org.Controllers
                 else
                 {
                     currentAccount.EnsureDefaultForm(activity, currentUser, msgs);
-                    
-                    //.. create activity
                     activeForm = currentAccount.GetDefaultActivityForm(activity, msgs);
                 }
 
@@ -1572,13 +1570,15 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.IsEmpty())
                 msgs = new SystemMessages();
 
+            var currentUser = SessionVariables.CurrentUser;
+            currentAccount.EnsureDefaultForm(activity, currentUser, msgs);
             var activeForm = activity.GetActiveActivityForm(msgs) ?? activityGroup?.GetDefaultActivityForm(msgs) ??
                 currentAccount.GetDefaultActivityForm(activity, msgs);
             var periods = currentAccount.GetOpenAndUpcomingRegistrationPeriods(msgs);
             var activePeriod = activity.GetActiveRegistrationPeriod(msgs) ??
                                currentAccount.GetDefaultNewRegistrationPeriod();
 
-            var currentUserIsActivityLeader = SessionVariables.CurrentUser.IsActivityLeader(activity, msgs);
+            var currentUserIsActivityLeader = currentUser.IsActivityLeader(activity, msgs);
             var editSetupAssembler = new EditSetupAssembler();
             var fullScreenExitUrl = GetFullScreenExitUrl(activity, activityGroup?.Uid.ToString());
             var forms = currentAccount.GetForms(activity, msgs);

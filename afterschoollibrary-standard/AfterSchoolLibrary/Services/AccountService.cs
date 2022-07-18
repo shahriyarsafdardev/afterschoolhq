@@ -2178,10 +2178,9 @@ namespace AfterSchoolLibrary.Services
 
         public static Form GetDefaultForm(this Account account, Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (activity.ActivityTypeId == ActivityType.VolunteerOpportunity)
-                return account.GetDefaultVolunteerForm(msgs, dc);
-
-            return account.GetDefaultStudentForm(msgs, dc);
+            return activity.ActivityTypeId == ActivityType.VolunteerOpportunity
+                ? account.GetDefaultVolunteerForm(msgs, dc)
+                : account.GetDefaultStudentForm(msgs, dc);
         }
 
         public static Form GetOrCreateDefaultVolunteerForm(this Account account, WebUser loggedInUser,
