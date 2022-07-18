@@ -336,7 +336,7 @@ namespace AfterSchool.Controllers
 
                         if (amsgs.HasNoErrors() && user.IsNotEmpty())
                         {
-                            account = RegistrationCommon.CreateOrUpdateAccount(user, amsgs, adc);
+                            account = RegistrationCommon.GetOrCreateRegistrantAccount(user, amsgs, adc);
 
                             // LOG: Someone Created Account AccountName
                             SessionVariables.WebSession.LogActivity(
@@ -359,7 +359,7 @@ namespace AfterSchool.Controllers
                             );
                         }
 
-                        if (amsgs.HasNoErrors()) registrant = RegistrationCommon.CreateOrUpdateRegistrant(account, user, amsgs, adc);
+                        if (amsgs.HasNoErrors()) registrant = RegistrationCommon.GetOrCreateParentOrGuardianRegistrant(account, user, amsgs, adc);
 
                         if (amsgs.HasNoErrors()) RegistrationCommon.AddOrUpdateStandardAnswers(qvms, registrant, user, amsgs, adc);
                     },

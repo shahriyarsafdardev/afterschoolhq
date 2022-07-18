@@ -54,15 +54,6 @@ namespace AfterSchool.Controllers
             return form.GetQuestionGroups(msgs);
         }
 
-        /*private static Form LoadAdministratorDefaultForm(SystemMessages msgs)
-        {
-            var administratorAccount = AccountService.GetAfterSchoolAccount(msgs);
-            // var administratorAccount = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs).FirstOrDefault();
-            return administratorAccount?.DefaultFormId != null
-                ? Form.Load(administratorAccount.DefaultFormId.Value, msgs)
-                : null;
-        }*/
-
         public static WebUser CreateOrUpdateUser(WebUser currentUser, string firstName, string lastName, string email,
             string phone, string password, bool allowTextMessages, SystemMessages msgs, DatabaseConnection dc = null)
         {
@@ -92,7 +83,7 @@ namespace AfterSchool.Controllers
             return user;
         }
 
-        public static Account CreateOrUpdateAccount(WebUser user, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Account GetOrCreateRegistrantAccount(WebUser user, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var account = user.GetRegistrantAccount(msgs, dc);
 
@@ -109,7 +100,7 @@ namespace AfterSchool.Controllers
             return account;
         }
 
-        public static Account CreateOrUpdateVolunteerAccount(WebUser user, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Account GetOrCreateVolunteerAccount(WebUser user, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var account = user.GetVolunteerAccount(msgs, dc);
 
@@ -126,7 +117,7 @@ namespace AfterSchool.Controllers
             return account;
         }
 
-        public static Registrant CreateOrUpdateRegistrant(Account account, WebUser user, SystemMessages msgs,
+        public static Registrant GetOrCreateParentOrGuardianRegistrant(Account account, WebUser user, SystemMessages msgs,
             DatabaseConnection dc = null)
         {
             var registrant = account.GetFirstParentOrGuardianRegistrant(msgs, dc);
@@ -149,7 +140,7 @@ namespace AfterSchool.Controllers
             return registrant;
         }
 
-        public static Registrant CreateOrUpdateVolunteerRegistrant(Account account, WebUser user, SystemMessages msgs,
+        public static Registrant GetOrCreateVolunteerRegistrant(Account account, WebUser user, SystemMessages msgs,
             DatabaseConnection dc = null)
         {
             var registrant = account.GetVolunteerRegistrant(msgs, dc);
