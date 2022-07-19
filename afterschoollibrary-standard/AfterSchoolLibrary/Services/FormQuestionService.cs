@@ -12,7 +12,7 @@ namespace AfterSchoolLibrary.Services
         public static List<FormQuestion> GetEmergencyContactQuestions(SystemMessages msgs, DatabaseConnection dc = null)
         {
             var questions = new List<FormQuestion>();
-            var form = FormService.GetAdministratorAccountForm(msgs, dc);
+            var form = FormService.GetAdministratorAccountStudentForm(msgs, dc);
 
             form.GetQuestionGroups(msgs, dc)
                 .Where(group => group.QuestionGroupDataTypeId.In(GetEmergencyContactQuestionGroups()))

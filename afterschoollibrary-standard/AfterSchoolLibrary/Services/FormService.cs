@@ -39,7 +39,7 @@ namespace AfterSchoolLibrary.Services
         public static string ParentRelationshipToRegistrant =>
             "Father,Mother,Grandfather,Grandmother,Brother,Sister,Uncle,Aunt,Legal Guardian,Other";
 
-        public static Form GetAdministratorAccountForm(SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Form GetAdministratorAccountStudentForm(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var administratorAccount = AccountService.GetAfterSchoolAccount(msgs, dc);
             return administratorAccount.GetDefaultStudentForm(msgs, dc);

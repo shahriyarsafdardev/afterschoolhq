@@ -16,7 +16,7 @@ namespace AfterSchoolLibraryTests.Tests
         public void GetAdministratorAccountFormTest()
         {
             // Arrange & Act
-            var form = FormService.GetAdministratorAccountForm(msgs, dc);
+            var form = FormService.GetAdministratorAccountStudentForm(msgs, dc);
 
             // Assert
             Assert.NotNull(form);

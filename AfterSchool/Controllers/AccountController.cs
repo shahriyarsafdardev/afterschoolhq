@@ -394,7 +394,7 @@ namespace AfterSchool.Controllers
 
         private List<FormQuestion> GatherAddHomeAddressQuestions(SystemMessages msgs, ParticipationObject participationObject)
         {
-            var form = FormService.GetAdministratorAccountForm(msgs);
+            var form = FormService.GetAdministratorAccountStudentForm(msgs);
             var homeAddressQuestionGroup = form.GetQuestionGroups(msgs)
                 .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.HomeAddress);
             var questions = homeAddressQuestionGroup.GetAllQuestions(msgs);
@@ -518,7 +518,7 @@ namespace AfterSchool.Controllers
 
         private List<FormQuestion> AddParentViewBag(SystemMessages msgs)
         {
-            var form = FormService.GetAdministratorAccountForm(msgs);
+            var form = FormService.GetAdministratorAccountStudentForm(msgs);
             var personalContactGroup = form.GetQuestionGroups(msgs)
                 .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
             var questions = personalContactGroup.GetAllQuestions(msgs);
@@ -793,7 +793,7 @@ namespace AfterSchool.Controllers
             if (results.IsNotEmpty()) return Redirect(results);
 
             var msgs = new SystemMessages();
-            var adminAccountForm = FormService.GetAdministratorAccountForm(msgs);
+            var adminAccountForm = FormService.GetAdministratorAccountStudentForm(msgs);
             var parentOrGuardian = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
             var questions = AddStudentViewBag(adminAccountForm, msgs);
             var values = new NameValueCollection();
@@ -831,7 +831,7 @@ namespace AfterSchool.Controllers
             if (results.IsNotEmpty()) return Redirect(results);
 
             var msgs = new SystemMessages();
-            var adminAccountForm = FormService.GetAdministratorAccountForm(msgs);
+            var adminAccountForm = FormService.GetAdministratorAccountStudentForm(msgs);
             var parentRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant(msgs);
             var parentRegistrant2 = SessionVariables.CurrentAccount.GetSecondParentOrGuardianRegistrant(msgs);
             var questions = AddStudentViewBag(adminAccountForm, msgs);
@@ -1065,7 +1065,7 @@ namespace AfterSchool.Controllers
 
         private List<FormQuestion> StudentRegistrationViewBag(SystemMessages msgs)
         {
-            var form = FormService.GetAdministratorAccountForm(msgs);
+            var form = FormService.GetAdministratorAccountStudentForm(msgs);
             var personalContactGroup = form.GetQuestionGroups(msgs)
                 .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
             var questions = personalContactGroup.GetAllQuestions(msgs);
@@ -1091,7 +1091,7 @@ namespace AfterSchool.Controllers
 
         private List<FormQuestion> StudentRegistrationParentViewBag(SystemMessages msgs)
         {
-            var form = FormService.GetAdministratorAccountForm(msgs);
+            var form = FormService.GetAdministratorAccountStudentForm(msgs);
             var personalContactGroup = form.GetQuestionGroups(msgs)
                 .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
             var questions = personalContactGroup.GetAllQuestions(msgs);
@@ -1430,7 +1430,7 @@ namespace AfterSchool.Controllers
 
         private List<FormQuestion> AddHealthViewBag(SystemMessages msgs)
         {
-            var form = FormService.GetAdministratorAccountForm(msgs);
+            var form = FormService.GetAdministratorAccountStudentForm(msgs);
             var healthQuestionGroup = form.GetQuestionGroups(msgs)
                 .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.HealthInformation);
             var questions = healthQuestionGroup.GetAllQuestions(msgs);
@@ -2209,7 +2209,7 @@ namespace AfterSchool.Controllers
 
         private List<FormQuestion> GetStartedStudentViewBag(SystemMessages msgs)
         {
-            var form = FormService.GetAdministratorAccountForm(msgs);
+            var form = FormService.GetAdministratorAccountStudentForm(msgs);
             var personalContactGroup = form.GetQuestionGroups(msgs)
                 .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
             var questions = personalContactGroup.GetAllQuestions(msgs);
@@ -2392,7 +2392,7 @@ namespace AfterSchool.Controllers
 
         private List<FormQuestion> InviteParentViewBag(SystemMessages msgs)
         {
-            var form = FormService.GetAdministratorAccountForm(msgs);
+            var form = FormService.GetAdministratorAccountStudentForm(msgs);
             var personalContactGroup = form.GetQuestionGroups(msgs)
                 .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
             var questions = personalContactGroup.GetAllQuestions(msgs);

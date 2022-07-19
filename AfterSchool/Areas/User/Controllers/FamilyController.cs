@@ -32,7 +32,7 @@ namespace AfterSchool.Areas.User.Controllers
 
         private List<FormQuestion> GetStudentPersonalQuestions(SystemMessages msgs)
         {
-            var form = FormService.GetAdministratorAccountForm(msgs);
+            var form = FormService.GetAdministratorAccountStudentForm(msgs);
             var studentQuestionGroup = form.GetQuestionGroups(msgs)
                 .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
             var questions = studentQuestionGroup.GetAllQuestions(msgs);
@@ -188,7 +188,7 @@ namespace AfterSchool.Areas.User.Controllers
 
         private List<FormQuestion> GetHealthQuestions(SystemMessages msgs)
         {
-            var form = FormService.GetAdministratorAccountForm(msgs);
+            var form = FormService.GetAdministratorAccountStudentForm(msgs);
             var questionGroup = form.GetQuestionGroups(msgs)
                 .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.HealthInformation);
             var questions = questionGroup.GetAllQuestions(msgs);
@@ -322,7 +322,7 @@ namespace AfterSchool.Areas.User.Controllers
 
         private List<FormQuestion> GetPeronalQuestions(SystemMessages msgs)
         {
-            var form = FormService.GetAdministratorAccountForm(msgs);
+            var form = FormService.GetAdministratorAccountStudentForm(msgs);
             var questionGroup = form.GetQuestionGroups(msgs)
                 .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
             var questions = questionGroup.GetAllQuestions(msgs);
@@ -475,7 +475,7 @@ namespace AfterSchool.Areas.User.Controllers
 
         private List<FormQuestion> GetHomeAddressQuestions(SystemMessages msgs)
         {
-            var form = FormService.GetAdministratorAccountForm(msgs);
+            var form = FormService.GetAdministratorAccountStudentForm(msgs);
             var questionGroup = form.GetQuestionGroups(msgs)
                 .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.HomeAddress);
             var questions = questionGroup.GetAllQuestions(msgs);

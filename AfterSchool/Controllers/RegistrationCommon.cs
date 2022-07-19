@@ -29,7 +29,7 @@ namespace AfterSchool.Controllers
 
         public static List<FormQuestion> GetAllDefaultPersonalInformationQuestions(SystemMessages msgs)
         {
-            var administratorDefaultForm = FormService.GetAdministratorAccountForm(msgs);
+            var administratorDefaultForm = FormService.GetAdministratorAccountStudentForm(msgs);
             var personalContactGroup = GetQuestionGroups(msgs, administratorDefaultForm)
                 .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
             return GetAllQuestionsForQuestionGroup(msgs, personalContactGroup);
