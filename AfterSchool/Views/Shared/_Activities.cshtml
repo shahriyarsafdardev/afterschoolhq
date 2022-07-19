@@ -566,7 +566,7 @@ else
 
 <script>
      function doSearch(){
-         location.href = `@Url.Action("index", "activity")?type=1&${getQuery()}`;
+         location.href = `@Url.Action("index", "activity")?type=@((int)activityType)&archive=@(newArchiveValue)&${getQuery()}`;
     }
     function updateSchedule() {
         var schedule = $('#schedule').val();
