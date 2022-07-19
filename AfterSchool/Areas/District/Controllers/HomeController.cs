@@ -21,14 +21,17 @@ namespace AfterSchool.Areas.District.Controllers
         // GET: District/Home
         public ActionResult Index()
         {
-            var activityGroups = ActivityGroup.LoadByAccountId(SessionVariables.CurrentAccount.ID.Value);
-            var activties = new List<Activity>();
+            var currentAccount = SessionVariables.CurrentAccount;
+            
+            // only check last 60 days to speed up query
+            var activityGroups = ActivityGroup.LoadByAccountIdByDateRange(currentAccount.ID.Value, DateTime.UtcNow.AddMonths(-2), DateTime.UtcNow);
+            var activities = new List<Activity>();
 
             activityGroups.ForEach(activityGroup => 
-                activties.AddRange(activityGroup.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School.AsList()))
+                activities.AddRange(activityGroup.GetLeagueTeams(currentAccount, AccountType.School.AsList()))
             );
 
-            ViewBag.SubmittedActivities = activties.Where(sa => sa.DateSubmittedToActivityGroup.IsNotEmpty())
+            ViewBag.SubmittedActivities = activities.Where(sa => sa.DateSubmittedToActivityGroup.IsNotEmpty())
                 .OrderByDescending(sa => sa.DateSubmittedToActivityGroup.Value)
                 .Take(10)
                 .ToList();
