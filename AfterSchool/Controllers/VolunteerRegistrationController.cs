@@ -99,7 +99,7 @@ namespace AfterSchool.Controllers
 
             var allQuestionsForQuestionGroup = RegistrationCommon.GetAllDefaultVolunteerPersonalInformationQuestions(msgs);
             var getStartedAssembler = new GetStartedAssembler(featureFlagRepository);
-            var qvms = getStartedAssembler.FilterAndTransformQuestionsForParentRegistration(currentUser, allQuestionsForQuestionGroup, Request.Params);
+            var qvms = getStartedAssembler.FilterAndTransformQuestionsForVolunteerRegistration(currentUser, allQuestionsForQuestionGroup, Request.Params);
 
             if (!agree.IsBoolean())
                 msgs.Add("You must agree to the terms of service", MessageType.UserError);

@@ -44,6 +44,24 @@ namespace AfterSchoolLibrary.Services
             };
         }
 
+        public static List<QuestionDataType> QuestionsToNotIncludeInVolunteerPanel()
+        {
+            return new List<QuestionDataType>
+            {
+                QuestionDataType.RegistrantOrganization,
+                QuestionDataType.RegistrantGrade,
+                QuestionDataType.RegistrantDateOfBirth,
+                QuestionDataType.RegistrantRaceUsFed,
+                QuestionDataType.RegistrantEthnicityUsFed,
+                QuestionDataType.RegistrantTShirtSize,
+                QuestionDataType.RegistrantWorkPhone,
+                QuestionDataType.RegistrantHomePhone,
+                QuestionDataType.RegistrantParentRelationship,
+                QuestionDataType.RegistrantEmployer,
+                QuestionDataType.StudentId,
+            };
+        }
+
         public static List<QuestionDataType> QuestionsToNotIncludeInStudentRegistrationPanel()
         {
             return new List<QuestionDataType>

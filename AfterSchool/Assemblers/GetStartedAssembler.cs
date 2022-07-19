@@ -24,7 +24,9 @@ namespace AfterSchool.Assemblers
             ParticipationObject participationObject, Account registrationAccount, WebUser currentUser,
             List<FormQuestion> questions, bool isStudentAllowedToRegister, NameValueCollection requestParams)
         {
-            var questionsForParentRegistration = FilterAndTransformQuestionsForParentRegistration(currentUser, questions, requestParams);
+            var questionsForParentRegistration = participationObject.ActivityType == ActivityType.VolunteerOpportunity ? 
+                FilterAndTransformQuestionsForVolunteerRegistration(currentUser, questions, requestParams) : 
+                FilterAndTransformQuestionsForParentRegistration(currentUser, questions, requestParams);
 
             // pre-load phone number
             if (currentUser.IsNotEmpty())
@@ -72,9 +74,53 @@ namespace AfterSchool.Assemblers
             var qvms = questions.Select(question => new FormQuestionViewModel(question, requestParams)).ToList();
 
             if (currentUser.IsEmpty())
-            {
                 return qvms;
-            }
+
+            qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value = currentUser.FirstName;
+            qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value = currentUser.LastName;
+            qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value = currentUser.Phone;
+            qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value = currentUser.Email;
+
+            qvms.ForEach(qvm =>
+            {
+                if (qvm.Question.QuestionDataTypeId.In(nonIncludedQuestionsExistingUser))
+                {
+                    qvm.Hide = true;
+                    qvm.Question.IsRequired = false;
+                }
+            });
+
+            return qvms;
+        }
+
+        public List<FormQuestionViewModel> FilterAndTransformQuestionsForVolunteerRegistration(WebUser currentUser,
+            List<FormQuestion> questions, NameValueCollection requestParams)
+        {
+            var nonIncludedQuestionsExistingUser = new List<QuestionDataType>
+            {
+                QuestionDataType.RegistrantFirstName,
+                QuestionDataType.RegistrantLastName,
+                QuestionDataType.RegistrantEmail,
+                QuestionDataType.RegistrantMiddleName,
+                QuestionDataType.RegistrantMobilePhone,
+            };
+
+            questions = questions.Where(question =>
+                            question.QuestionDataTypeId.NotIn(FormConstants.QuestionsToNotIncludeInVolunteerPanel())
+                        ).ToList();
+
+            questions.ForEach(question =>
+            {
+                question.IsRequired = question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName
+                                      || question.QuestionDataTypeId == QuestionDataType.RegistrantLastName
+                                      || question.QuestionDataTypeId == QuestionDataType.RegistrantEmail
+                                      || question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone;
+            });
+
+            var qvms = questions.Select(question => new FormQuestionViewModel(question, requestParams)).ToList();
+
+            if (currentUser.IsEmpty())
+                return qvms;
 
             qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value = currentUser.FirstName;
             qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value = currentUser.LastName;
