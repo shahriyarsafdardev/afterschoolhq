@@ -1581,7 +1581,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentUserIsActivityLeader = currentUser.IsActivityLeader(activity, msgs);
             var editSetupAssembler = new EditSetupAssembler();
             var fullScreenExitUrl = GetFullScreenExitUrl(activity, activityGroup?.Uid.ToString());
-            var forms = currentAccount.GetForms(activity, msgs);
+            var forms = currentAccount.GetForms(activity.ActivityTypeId, msgs);
             
             return editSetupAssembler.AssembleEditSetupResult(activity, activityGroup, msgs, currentAccount, activeMenu, periods, activePeriod, activeForm,
                 SessionVariables.AccountPackage, SessionVariables.AccountUserType, currentUserIsActivityLeader, isNew, forms,
@@ -3157,18 +3157,36 @@ namespace AfterSchool.Areas.Org.Controllers
                 Value = m.RegistrantId.Value.ToString(),
             });
 
-            var result = GatherDataForAndAssembleEditSetupResult(activity, activityGroup, msgs, SessionVariables.CurrentAccount, null, Request[IsNewRequest]);
-            ViewBag.Group = result.Group;
-            ViewBag.Account = result.Account;
-            ViewBag.AccountPackage = result.AccountPackage;
-            ViewBag.Forms = result.Forms;
-            ViewBag.Periods = result.Periods;
-            ViewBag.IsActivityLeader = result.IsActivityLeader;
-            ViewBag.ActivePeriod = result.ActivePeriod;
-            ViewBag.ActiveForm = result.ActiveForm;
-            ViewBag.IsFullScreen = result.IsFullScreen;
-            ViewBag.Messages = result.Messages;
-            ViewBag.FullScreenExitUrl = result.FullScreenExitUrl;
+            var isNew = Request[IsNewRequest];
+
+            var currentUser = SessionVariables.CurrentUser;
+            currentAccount.EnsureDefaultForm(activity, currentUser, msgs);
+            var activeForm = activity.GetActiveActivityForm(msgs) ?? activityGroup?.GetDefaultActivityForm(msgs) ??
+                currentAccount.GetDefaultActivityForm(activity, msgs);
+            var periods = currentAccount.GetOpenAndUpcomingRegistrationPeriods(msgs);
+            var activePeriod = activity.GetActiveRegistrationPeriod(msgs) ??
+                               currentAccount.GetDefaultNewRegistrationPeriod();
+
+            var currentUserIsActivityLeader = currentUser.IsActivityLeader(activity, msgs);
+            var fullScreenExitUrl = GetFullScreenExitUrl(activity, activityGroup?.Uid.ToString());
+            var forms = currentAccount.GetSurveyForms(msgs);
+            periods.Add(activePeriod);
+            periods = periods.OrderBy(period => period.StartDateTime.Value).ToList();
+            var formsList = forms.OrderBy(x => x.Name).ToList();
+            var isActivityLeader = EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, SessionVariables.AccountUserType, currentUserIsActivityLeader);
+            var isFullScreen = EditHelpers.GetIsFullScreen(activity, isNew == "1");
+
+            ViewBag.Group = activityGroup;
+            ViewBag.Account = currentAccount;
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.Forms = formsList;
+            ViewBag.Periods = periods;
+            ViewBag.IsActivityLeader = isActivityLeader;
+            ViewBag.ActivePeriod = activePeriod;
+            ViewBag.ActiveForm = activeForm;
+            ViewBag.IsFullScreen = isFullScreen;
+            ViewBag.Messages = msgs;
+            ViewBag.FullScreenExitUrl = fullScreenExitUrl;
 
             ViewBag.Students = studentList.ToList();
             ViewBag.Messages = msgs;

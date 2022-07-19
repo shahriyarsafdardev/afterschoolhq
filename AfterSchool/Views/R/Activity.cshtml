@@ -99,7 +99,7 @@
                     @{
                         var hasSchedule = Model.Schedule.IsNotEmpty();
                         var displayAgeGradeRestrictions = !Model.ActivityType.HasValue || Model.ActivityType.Value.NotIn(new[] {ActivityType.PermissionSlip, ActivityType.FieldTrip, ActivityType.VolunteerOpportunity});
-                        var displayGenderRestrictions = Model.GenderRestriction != GenderRestrictionType.None && (!Model.ActivityType.HasValue || Model.ActivityType.Value.NotIn(new[] {ActivityType.VolunteerOpportunity}));
+                        var displayGenderRestrictions = Model.GenderRestriction != GenderRestrictionType.None;
                     }
                     @if (hasSchedule)
                     {

@@ -77,13 +77,17 @@ namespace AfterSchoolLibrary.Services
             return Form.GetSearchCount(account.ID.Value, formType, search, msgs, dc);
         }
 
-        public static List<Form> GetForms(this Account account, Activity activity, SystemMessages msgs = null,
+        public static List<Form> GetForms(this Account account, ActivityType activityType, SystemMessages msgs = null,
             DatabaseConnection dc = null)
-        {   
-            if (activity.ActivityTypeId == ActivityType.VolunteerOpportunity)
-                return Form.LoadByAccountIdByFormTypeId(account.ID.Value, FormType.VolunteerForm, msgs, dc);
-            
-            return Form.LoadByAccountIdByFormTypeId(account.ID.Value, FormType.StudentForm, msgs, dc);
+        {
+            var formType = activityType == ActivityType.VolunteerOpportunity ? FormType.VolunteerForm : FormType.StudentForm;
+            return Form.LoadByAccountIdByFormTypeId(account.ID.Value, formType, msgs, dc);
+        }
+
+        public static List<Form> GetSurveyForms(this Account account, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            return Form.LoadByAccountIdByFormTypeId(account.ID.Value, FormType.Survey, msgs, dc);
         }
 
         public static Form GetContactForm(this Account account, SystemMessages msgs = null,
@@ -1511,7 +1515,7 @@ namespace AfterSchoolLibrary.Services
                 // set payout type to manual for this account if it has package with ManualStripePayouts
                 var isManualStripeEnabled =
                     account.GetAccountPackageFeature(featureType: FeatureType.ManualStripePayouts, msgs: msgs, dc: dc);
-                
+
                 if (isManualStripeEnabled.IsNotEmpty() && isManualStripeEnabled.Max > 0 &&
                     account.StripeUserId.IsNotEmpty())
                     stripeHelper.ToggleStripePayoutForConnectedAccount(customAccountsStripeUserId: account.StripeUserId,
@@ -1582,7 +1586,8 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(account.Save(dc: dc));
         }
 
-        public static Customer CreateStripeCustomer(this Account account, StripeAccountType stripeAccountType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Customer CreateStripeCustomer(this Account account, StripeAccountType stripeAccountType, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -1655,7 +1660,7 @@ namespace AfterSchoolLibrary.Services
             if (!customer.IsEmpty())
             {
                 var charges = account.GetStripeBillingHistory(stripeAccountType, msgs);
-                
+
                 charges.ForEach(charge => refunds.AddRange(StripeHelper.GetStripeHelper(stripeAccountType).GetRefunds(charge.Id, msgs)));
             }
 
@@ -2077,13 +2082,13 @@ namespace AfterSchoolLibrary.Services
         #endregion
 
         #region NewAccounSetup
-        
+
         public static void EnsureDefaultStudentForm(this Account formOwner, WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             formOwner.GetOrCreateDefaultStudentForm(loggedInUser, msgs, dc);
         }
-        
+
         /// <summary>
         ///     Copy default form from main After School HQ Account
         /// </summary>
@@ -2105,7 +2110,7 @@ namespace AfterSchoolLibrary.Services
 
             return form;
         }
-        
+
         public static void EnsureDefaultForm(this Account formOwner, Activity activity, WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
@@ -2114,13 +2119,13 @@ namespace AfterSchoolLibrary.Services
             else
                 formOwner.GetOrCreateDefaultStudentForm(loggedInUser, msgs, dc);
         }
-        
+
         public static void EnsureDefaultVolunteerForm(this Account formOwner, WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             formOwner.GetOrCreateDefaultVolunteerForm(loggedInUser, msgs, dc);
         }
-        
+
         public static Form CreateDefaultVolunteerForm(this Account formOwner, WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
@@ -2156,12 +2161,13 @@ namespace AfterSchoolLibrary.Services
         public static Form GetOrCreateDefaultForm(this Account account, FormType formType, WebUser loggedInUser,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (formType == FormType.StudentForm)
-                return account.GetOrCreateDefaultStudentForm(loggedInUser, msgs, dc);
-            else if (formType == FormType.VolunteerForm)
-                return account.GetOrCreateDefaultVolunteerForm(loggedInUser, msgs, dc);
-
-            return null;
+            return formType switch
+            {
+                FormType.StudentForm => account.GetOrCreateDefaultStudentForm(loggedInUser, msgs, dc),
+                FormType.VolunteerForm => account.GetOrCreateDefaultVolunteerForm(loggedInUser, msgs, dc),
+                FormType.Survey => FormService.GetOrCreateAfterSchoolAccountTemplateForm(FormType.Survey, msgs, dc),
+                _ => null,
+            };
         }
 
         public static Form GetOrCreateDefaultStudentForm(this Account account, WebUser loggedInUser,
@@ -2233,10 +2239,10 @@ namespace AfterSchoolLibrary.Services
         public static ActivityForm GetDefaultActivityForm(this Account account, Activity activity, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            var formId = activity.ActivityTypeId == ActivityType.VolunteerOpportunity ? 
-                                account.GetDefaultVolunteerForm(msgs, dc).ID : 
-                                account.GetDefaultStudentForm(msgs, dc).ID;
-            
+            var formId = activity.ActivityTypeId == ActivityType.VolunteerOpportunity
+                ? account.GetDefaultVolunteerForm(msgs, dc).ID
+                : account.GetDefaultStudentForm(msgs, dc).ID;
+
             return new ActivityForm
             {
                 FormId = formId,
@@ -2433,7 +2439,8 @@ namespace AfterSchoolLibrary.Services
                                     signupType != SignUpType.ChangePackage &&
                                     signupType != SignUpType.ChangePackageDuringTrial)
                                 {
-                                    var subscription = StripeHelper.GetStripeHelperSubscriberAccount().GetSubscription(currentPackage?.StripeSubscriptionId, "", msgs);
+                                    var subscription = StripeHelper.GetStripeHelperSubscriberAccount()
+                                        .GetSubscription(currentPackage?.StripeSubscriptionId, "", msgs);
                                     if (subscription.IsNotEmpty() && subscription.Status == "active")
                                         newap.StripeSubscriptionId = subscription.Id;
                                 }
@@ -2685,7 +2692,7 @@ namespace AfterSchoolLibrary.Services
                 if (accountType != AccountType.Registrant)
                 {
                     account.CreateDefaultStudentForm(loggedInUser, msgs, dc);
-                    
+
                     if (account.HasFeature(FeatureType.ManageVolunteerOpportunities))
                         account.CreateDefaultVolunteerForm(loggedInUser, msgs, dc);
                 }
@@ -3815,9 +3822,9 @@ namespace AfterSchoolLibrary.Services
         {
             var stripeHelper = StripeHelper.GetStripeHelper(stripeAccountType);
             var source = stripeHelper.CreateCreditCardSource(stripeToken, msgs);
-            
+
             stripeHelper.AddNewCardToCustomer(payingAccount.StripeCustomerId, source, null, msgs);
-            
+
             return source.Id;
         }
 
@@ -3832,7 +3839,7 @@ namespace AfterSchoolLibrary.Services
                     bankAccountPurchaseObject.PlaidAccountId, msgs);
                 var source = StripeHelper.GetStripeHelper(stripeAccountType).AttachSourceToCustomer(fromAccount.StripeCustomerId,
                     bankAccount.StripeBankAccountToken, null, msgs);
-                
+
                 //return customer.DefaultSourceId;
                 return source.Id;
             }
@@ -4094,7 +4101,7 @@ namespace AfterSchoolLibrary.Services
         {
             submittedRecord.StartSubscriptionPlan(checkoutObject: checkoutObject, loggedInUser: loggedInUser,
                 msgs: msgs, dc: dc);
-            
+
             if (msgs.HasNoErrors())
                 CreatePurchase(checkoutObject, loggedInUser, msgs, dc);
         }
@@ -4124,7 +4131,7 @@ namespace AfterSchoolLibrary.Services
 
             submittedRecord.StartPaymentPlan(checkoutObject: checkoutObject, loggedInUser: loggedInUser, msgs: msgs,
                 dc: dc);
-            
+
             if (msgs.HasNoErrors())
                 CreatePurchase(checkoutObject, loggedInUser, msgs, dc);
         }
@@ -4591,9 +4598,9 @@ namespace AfterSchoolLibrary.Services
 
             return Math.Round(feeAmount / totalCost, 4);
         }
-        
+
         /// <summary>
-        /// FOR AHQ Platform Payouts Only
+        ///     FOR AHQ Platform Payouts Only
         /// </summary>
         /// <param name="account"></param>
         /// <param name="payout"></param>
@@ -4616,7 +4623,7 @@ namespace AfterSchoolLibrary.Services
                 };
 
                 var stripeHelper = StripeHelper.GetStripeHelperConnectAccount();
-                
+
                 stripeHelper.CreateTransfer(
                     amount: payout.Amount.Value,
                     description:

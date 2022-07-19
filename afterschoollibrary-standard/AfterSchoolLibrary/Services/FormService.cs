@@ -10,17 +10,12 @@ namespace AfterSchoolLibrary.Services
 {
     public static class FormService
     {
-        private static List<QuestionType> SurveyOnlyQuestionTypes
-        {
-            get
+        private static List<QuestionType> SurveyOnlyQuestionTypes =>
+            new List<QuestionType>
             {
-                return new List<QuestionType>
-                {
-                    QuestionType.Audio, QuestionType.Video, QuestionType.Photo, QuestionType.Emoji, QuestionType.Rating,
-                    QuestionType.FileUpload,
-                };
-            }
-        }
+                QuestionType.Audio, QuestionType.Video, QuestionType.Photo, QuestionType.Emoji, QuestionType.Rating,
+                QuestionType.FileUpload,
+            };
 
         public static string RegistrantGrade =>
             "Pre-K,K,1st,2nd,3rd,4th,5th,6th,7th,8th,9th,10th,11th,12th";
@@ -64,22 +59,23 @@ namespace AfterSchoolLibrary.Services
                    AddNewAfterSchoolDefaultForm(formType, msgs, dc);
         }
 
-        public static Form AddNewAfterSchoolDefaultForm(FormType formType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        private static Form AddNewAfterSchoolDefaultForm(FormType formType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (formType == FormType.StudentForm)
-                return AddNewAfterSchoolDefaultStudentForm(msgs, dc);
-            else if (formType == FormType.VolunteerForm)
-                return AddNewAfterSchoolDefaultVolunteerForm(msgs, dc);
-
-            return null;
+            return formType switch
+            {
+                FormType.StudentForm => AddNewAfterSchoolDefaultStudentForm(msgs, dc),
+                FormType.VolunteerForm => AddNewAfterSchoolDefaultVolunteerForm(msgs, dc),
+                FormType.Survey => CreateBlankForm(msgs, dc),
+                _ => null,
+            };
         }
-        
+
         public static Form AddNewAfterSchoolDefaultStudentForm(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var account = AccountService.GetAfterSchoolAccount(msgs, dc);
-            var formCount = Form.GetCount(new Hashtable {{"AccountId", account.ID}, {"FormTypeId", (int)FormType.StudentForm}}, msgs, dc);
+            var formCount = Form.GetCount(new Hashtable {{"AccountId", account.ID}, {"FormTypeId", (int) FormType.StudentForm}}, msgs, dc);
 
             var f = new Form
             {
@@ -88,7 +84,7 @@ namespace AfterSchoolLibrary.Services
                 CreateDate = DateTime.UtcNow,
                 LastModifiedBy = 0,
                 CreatedBy = 0,
-                Name = $"Default Form {(formCount + 1)}",
+                Name = $"Default Form {formCount + 1}",
                 IsActive = true,
                 FormTypeId = FormType.StudentForm,
             };
@@ -109,13 +105,13 @@ namespace AfterSchoolLibrary.Services
             questions.AddRange(CreateEmergencyContact3Group(FormType.StudentForm));
             questions.AddRange(CreateHealthInformationGroup());
 
-            int displayOrder = 0;
-            int groupDisplayOrder = 0;
+            var displayOrder = 0;
+            var groupDisplayOrder = 0;
 
             foreach (var question in questions)
             {
                 var group = FormQuestionGroup.Load(
-                        criterias: new Hashtable
+                        new Hashtable
                         {
                             {"Name", question.GroupName},
                             {"FormId", f.ID.Value},
@@ -169,13 +165,13 @@ namespace AfterSchoolLibrary.Services
 
             return f;
         }
-        
+
         public static Form AddNewAfterSchoolDefaultVolunteerForm(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var account = AccountService.GetAfterSchoolAccount(msgs, dc);
-            var formCount = Form.GetCount(new Hashtable {{"AccountId", account.ID}, {"FormTypeId", (int)FormType.VolunteerForm}}, msgs, dc);
+            var formCount = Form.GetCount(new Hashtable {{"AccountId", account.ID}, {"FormTypeId", (int) FormType.VolunteerForm}}, msgs, dc);
 
             var f = new Form
             {
@@ -184,7 +180,7 @@ namespace AfterSchoolLibrary.Services
                 CreateDate = DateTime.UtcNow,
                 LastModifiedBy = 0,
                 CreatedBy = 0,
-                Name = $"Default Volunteer Form {(formCount + 1)}",
+                Name = $"Default Volunteer Form {formCount + 1}",
                 IsActive = true,
                 FormTypeId = FormType.VolunteerForm,
             };
@@ -200,13 +196,13 @@ namespace AfterSchoolLibrary.Services
             questions.AddRange(CreateEmergencyContact2Group(FormType.VolunteerForm));
             questions.AddRange(CreateEmergencyContact3Group(FormType.VolunteerForm));
 
-            int displayOrder = 0;
-            int groupDisplayOrder = 0;
+            var displayOrder = 0;
+            var groupDisplayOrder = 0;
 
             foreach (var question in questions)
             {
                 var group = FormQuestionGroup.Load(
-                        criterias: new Hashtable
+                        new Hashtable
                         {
                             {"Name", question.GroupName},
                             {"FormId", f.ID.Value},
@@ -288,33 +284,37 @@ namespace AfterSchoolLibrary.Services
             return AddNewAfterSchoolInterestForm(msgs, dc);
         }
 
-        public static Form CreateBlankForm(Form form, int userId, int id, string name, string description,
-            SystemMessages msgs = null, DatabaseConnection dc = null)
+        private static Form CreateBlankForm(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Form form = null;
+            var account = AccountService.GetAfterSchoolAccount(msgs, dc);
+            var formCount = Form.GetCount(new Hashtable {{"AccountId", account.ID}, {"FormTypeId", (int) FormType.Survey}}, msgs, dc);
+
             Database.ExecuteTransaction(
-                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                (amsgs, adc) =>
                 {
                     form = new Form
                     {
-                        Name = name,
-                        Description = description,
+                        Name = $"Default Survey Form {formCount + 1}",
                         LastModifiedDate = DateTime.UtcNow,
                         CreateDate = DateTime.UtcNow,
                         FormTypeId = FormType.Survey,
-                        LastModifiedBy = userId,
-                        CreatedBy = userId,
-                        AccountId = id,
+                        LastModifiedBy = 0,
+                        CreatedBy = 0,
+                        AccountId = account.ID,
                         IsActive = true,
                         Uid = Guid.NewGuid(),
                     };
-                    msgs.AddRange(form.Save(dc: dc));
+                    msgs.AddRange(form.Save(dc));
                 },
-                onSuccess: (SystemMessages smsgs) =>
+                smsgs =>
                 {
                     msgs.AddRange(smsgs);
                     msgs.Add("Form Saved", MessageType.Success);
                 },
-                onFailure: (SystemMessages fmsgs) => { msgs.AddRange(fmsgs); }
+                fmsgs => { msgs.AddRange(fmsgs); }
             );
 
             return form;
@@ -334,20 +334,20 @@ namespace AfterSchoolLibrary.Services
                 CreateDate = DateTime.UtcNow,
                 LastModifiedBy = 0,
                 CreatedBy = 0,
-                Name = $"Interest Form {(formCount + 1)}",
+                Name = $"Interest Form {formCount + 1}",
                 IsActive = true,
             };
             msgs.AddRange(f.Save(dc));
             msgs.AddRange(account.SetInterestForm(f, null, dc));
 
             var questions = CreateParent1InterestGroup();
-            int displayOrder = 0;
-            int groupDisplayOrder = 0;
+            var displayOrder = 0;
+            var groupDisplayOrder = 0;
 
             questions.ForEach(question =>
             {
                 var group = FormQuestionGroup.Load(
-                        criterias: new Hashtable
+                        new Hashtable
                         {
                             {"Name", question.GroupName},
                             {"FormId", f.ID.Value},
@@ -487,7 +487,6 @@ namespace AfterSchoolLibrary.Services
             });
 
             if (formType != FormType.VolunteerForm)
-            {
                 qhs.Add(new QuestionHolder
                 {
                     Text = "Relationship To Registrant", IsActive = true, QuestionTypeId = QuestionType.DropDownList,
@@ -495,7 +494,6 @@ namespace AfterSchoolLibrary.Services
                     QuestionDataTypeId = QuestionDataType.EmergencyContact1RelationshipToRegistrant,
                     Options = RelationshipToRegistrantForEmergencyContactsList,
                 });
-            }
 
             return qhs;
         }
@@ -534,7 +532,6 @@ namespace AfterSchoolLibrary.Services
                 QuestionDataTypeId = QuestionDataType.EmergencyContact2Phone3,
             });
             if (formType != FormType.VolunteerForm)
-            {
                 qhs.Add(new QuestionHolder
                 {
                     Text = "Relationship To Registrant", IsActive = true, QuestionTypeId = QuestionType.DropDownList,
@@ -542,7 +539,6 @@ namespace AfterSchoolLibrary.Services
                     QuestionDataTypeId = QuestionDataType.EmergencyContact2RelationshipToRegistrant,
                     Options = RelationshipToRegistrantForEmergencyContactsList,
                 });
-            }
 
             return qhs;
         }
@@ -581,7 +577,6 @@ namespace AfterSchoolLibrary.Services
                 QuestionDataTypeId = QuestionDataType.EmergencyContact3Phone3,
             });
             if (formType != FormType.VolunteerForm)
-            {
                 qhs.Add(new QuestionHolder
                 {
                     Text = "Relationship To Registrant", IsActive = true, QuestionTypeId = QuestionType.DropDownList,
@@ -589,7 +584,6 @@ namespace AfterSchoolLibrary.Services
                     QuestionDataTypeId = QuestionDataType.EmergencyContact3RelationshipToRegistrant,
                     Options = RelationshipToRegistrantForEmergencyContactsList,
                 });
-            }
 
             return qhs;
         }
@@ -1241,10 +1235,7 @@ namespace AfterSchoolLibrary.Services
                 RegistrantTypeId = RegistrantType.Individual;
             }
 
-            public static string StateList
-            {
-                get { return Utilities.GetStateList(); }
-            }
+            public static string StateList => Utilities.GetStateList();
         }
     }
 }
