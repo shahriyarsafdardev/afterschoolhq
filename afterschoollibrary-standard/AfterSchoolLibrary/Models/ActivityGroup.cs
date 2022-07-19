@@ -326,7 +326,7 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 		
-        public static List<ActivityGroup> LoadByAccountIdByDateRange(int AccountId, DateTime startDate, DateTime endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<ActivityGroup> LoadByAccountIdByCreateDate(int AccountId, DateTime startDate, DateTime endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;

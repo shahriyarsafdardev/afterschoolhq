@@ -24,7 +24,7 @@ namespace AfterSchool.Areas.District.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             
             // only check last 60 days to speed up query
-            var activityGroups = ActivityGroup.LoadByAccountIdByDateRange(currentAccount.ID.Value, DateTime.UtcNow.AddMonths(-2), DateTime.UtcNow);
+            var activityGroups = ActivityGroup.LoadByAccountIdByCreateDate(currentAccount.ID.Value, DateTime.UtcNow.AddMonths(-2), DateTime.UtcNow);
             var activities = new List<Activity>();
 
             activityGroups.ForEach(activityGroup => 
