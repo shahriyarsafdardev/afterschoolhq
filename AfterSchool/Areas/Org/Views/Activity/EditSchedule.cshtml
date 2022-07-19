@@ -58,6 +58,8 @@
                         {
                             Html.RenderPartial("_VolunteerFormSchedule", Model.Schedule, new ViewDataDictionary
                             {
+                                {"ActivityType", (int) Model.Activity.ActivityTypeId}, 
+                                {"hasSchedule", hasSchedule},
                                 {"isContinuousEnrollmentEnabled", Model.Activity.IsContinuousEnrollment},
                             });
                         }

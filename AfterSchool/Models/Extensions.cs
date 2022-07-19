@@ -205,7 +205,7 @@ namespace AfterSchool.Models
                     $"<a href=\"/org/activity/editcost/{activity.Uid}\">update pricing and payment for this activity</a>";
                 var upgradePackageLink =
                     $"<a href=\"#\" onclick=\"setFeatureIdAndLoadUpgradePage('{freeActivityLimitPackage.ID}')\">upgrade your account for more free activities</a>";
-               
+
                 msgs.Add(
                     $"<p class=\"no-bullet\">You've reached your limit on free activities, please take one of the following actions:</p><ul>" +
                     $"<li>{editCostLink}</li><li>{upgradePackageLink}</li>" +
@@ -215,21 +215,20 @@ namespace AfterSchool.Models
 
             msgs.AddRange(activity.IsPaymentMethodAddedForExternalAccount(SessionVariables.CurrentAccount, msg, dc));
 
-            if (activity.ActivityTypeId == ActivityType.VolunteerOpportunity && !activity.HasSchedule)
-            {
-                msgs.Add(new SystemMessage
-                (
-                    $"<a href=\"/org/activity/editschedule/{activity.Uid}\">Add a Schedule</a>",
-                    MessageType.Error
-                ));
-            }
-            
             if (archiveMsgs.HasErrors())
             {
                 archiveMsgs.Insert(0,
                     new SystemMessage("<span class=\"publish-error-title\">Archive Errors<span>",
                         MessageType.UserError));
                 msgs.AddRange(archiveMsgs);
+            }
+
+            if (activity.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass && !activity.HasSchedule)
+            {
+                var perClassOrDate = activity.ActivityTypeId == ActivityType.VolunteerOpportunity ? "Date" : "Class";
+                msgs.Add(
+                    $"<p class=\"no-bullet\">Setting Register per {perClassOrDate} requires a schedule, <a href=\"/org/activity/editschedule/{activity.Uid}\">please add a schedule to publish</a></p>",
+                    MessageType.UserError);
             }
 
             return msgs;

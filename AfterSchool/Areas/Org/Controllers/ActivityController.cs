@@ -2085,7 +2085,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
             }
 
-            return GoToEditSchedule(activity, activitySchedule.ID?.ToString(), msgs, currentAccount, currentUser);
+            return GoToEditSchedule(activity, activitySchedule?.ID?.ToString(), msgs, currentAccount, currentUser);
         }
 
         [HttpGet]

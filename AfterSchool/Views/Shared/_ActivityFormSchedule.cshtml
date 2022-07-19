@@ -11,7 +11,6 @@
     var activityMeetingLabel = "Activity";
     var activityMeetingVerbLabel = "meet";
     var forceNonRepeating = false;
-    var hasSchedule = false;
     var isContinuousEnrollmentEnabled = ViewData["isContinuousEnrollmentEnabled"] != null && Equals(ViewData["isContinuousEnrollmentEnabled"], true);
 
     if (isContinuousEnrollmentEnabled)
@@ -50,10 +49,7 @@
         }
     }
 
-    if (ViewData["hasSchedule"] != null && Equals(ViewData["hasSchedule"], true))
-    {
-        hasSchedule = true;
-    }
+    var hasSchedule = ViewData["hasSchedule"] != null && Equals(ViewData["hasSchedule"], true);
 
     var showAllowSubscriptionPlans = SessionVariables.AccountPackage.HasFeature(FeatureType.AllowSubscriptionPlans);
     var allowSubscriptionPlansPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowSubscriptionPlans, SessionVariables.AccountPackage);

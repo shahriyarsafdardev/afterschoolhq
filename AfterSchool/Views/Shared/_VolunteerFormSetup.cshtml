@@ -1,9 +1,9 @@
 ﻿@model Activity
 @{
-    var accountPackage = (AccountPackage) ViewData["AccountPackage"];
-    var forms = (List<Form>) ViewData["Forms"];
-    var activePeriod = (RegistrationPeriod) ViewData["ActivePeriod"];
-    var activeForm = (ActivityForm) ViewData["ActiveForm"];
+    var accountPackage = (AccountPackage)ViewData["AccountPackage"];
+    var forms = (List<Form>)ViewData["Forms"];
+    var activePeriod = (RegistrationPeriod)ViewData["ActivePeriod"];
+    var activeForm = (ActivityForm)ViewData["ActiveForm"];
     var maximumFormCount = accountPackage.GetFeature(FeatureType.ManageForms).Max ?? 0;
     var canAddNewForm = forms.Count < maximumFormCount;
     var maximumParticipantsPerActivity = accountPackage.GetFeature(FeatureType.Participants).Max ?? 0;
@@ -41,16 +41,38 @@
             <div class="col-md-9">
                 @{ Html.RenderPartial("_SwitchButton", Model.IsInviteOnly, new ViewDataDictionary
                    {
-                       {"checkboxname", "inviteonly"},
-                       {"checkboxid", "inviteonly"},
-                       {"disabled", false},
+                       { "checkboxname", "inviteonly" },
+                       { "checkboxid", "inviteonly" },
+                       { "disabled", false },
                    }); }
             </div>
         </div>
 
-        <input type="hidden" name="type" value="@((int) Model.ActivityTypeId)"/>
+        <input type="hidden" name="type" value="@((int)Model.ActivityTypeId)"/>
         <input type="hidden" name="isContinuousEnrollmentEnabled" value="0"/>
-        <input type="hidden" name="costfrequencytype" value="@((int) ActivityCostFrequencyType.PerClass)"/>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">Volunteers can register for:</label>
+            <div class="col-sm-9">
+
+                <div class="am-radio inline">
+                    <input type="radio" class="form-control costfrequencytype" name="costfrequencytype"
+                           id="costfrequencytype-@((int)ActivityCostFrequencyType.PerActivity)" required
+                           @(Model.CostFrequencyTypeId == ActivityCostFrequencyType.PerActivity ? "checked=\"checked\"" : "")
+                           value="@((int)ActivityCostFrequencyType.PerActivity)"/>
+                    <label for="costfrequencytype-@((int)ActivityCostFrequencyType.PerActivity)">The Entire Opportunity</label>
+                </div>
+
+                <div class="am-radio inline">
+                    <input type="radio" class="form-control costfrequencytype" name="costfrequencytype" id="costfrequencytype-@((int)ActivityCostFrequencyType.PerClass)" required @(Model.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass ? "checked=\"checked\"" : "") value="@((int)ActivityCostFrequencyType.PerClass)"/>
+                    <label for="costfrequencytype-@((int)ActivityCostFrequencyType.PerClass)">Individual Dates</label>
+                </div>
+
+                <p class="text-muted">
+                    This is used if you allow volunteers to be registered for all dates in the activity or for each individual date.
+                </p>
+
+            </div>
+        </div>
 
         <div class="form-group" id="cutoffhours-container">
             <label class="col-sm-3 control-label">Registration cut-off time</label>
@@ -91,9 +113,9 @@
 
                     @{ Html.RenderPartial("_TimeSelect", activePeriod.StartDateTime.Value, new ViewDataDictionary
                        {
-                           {"name", "registrationopentime"},
-                           {"id", "registrationopentime"},
-                           {"required", true},
+                           { "name", "registrationopentime" },
+                           { "id", "registrationopentime" },
+                           { "required", true },
                        }); }
 
                 </div>
@@ -113,9 +135,9 @@
 
                     @{ Html.RenderPartial("_TimeSelect", activePeriod.EndDateTime.Value, new ViewDataDictionary
                        {
-                           {"name", "registrationclosetime"},
-                           {"id", "registrationclosetime"},
-                           {"required", true},
+                           { "name", "registrationclosetime" },
+                           { "id", "registrationclosetime" },
+                           { "required", true },
                        }); }
 
                 </div>
@@ -147,11 +169,11 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <a id="editForm" class="btn btn-block btn-link" href="@Url.Action("FormEdit", "Account", new {id = activeForm?.ID})" target="_blank">Edit Form</a>
+                    <a id="editForm" class="btn btn-block btn-link" href="@Url.Action("FormEdit", "Account", new { id = activeForm?.ID })" target="_blank">Edit Form</a>
                 </div>
             </div>
 
-            <input type="hidden" name="regmode" value="@((int) RegistrationMode.Register)"/>
+            <input type="hidden" name="regmode" value="@((int)RegistrationMode.Register)"/>
         </div>
     </div>
 </div>

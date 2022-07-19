@@ -18,7 +18,7 @@
         canRegisterFor = ViewData["canRegisterFor"].ToString().ToBoolean();
     }
 
-    var IsPublished = Model.IsPublished;
+    var isPublished = Model.IsPublished;
 }
 
 @if (!Model.OwnerAccount.ID.HasValue)
@@ -171,24 +171,24 @@ else
         }
         else
         {
-            if (canRegisterFor || !IsPublished)
+            if (canRegisterFor || !isPublished)
             {
                 var anotherChildString = anotherChild ? " for New Child" : "";
                 
                 if (Model.IsActivity() && Model.GetActivity().CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
                 {
-                    <a href="@(IsPublished ? Model.GetActivityDateSelectionUrl() : "javascript:void(0)")"
-                       class="@(IsPublished ? "" : "disabled") btn btn-register btn-block"
-                       @IsPublished>
+                    <a href="@(isPublished ? Model.GetActivityDateSelectionUrl() : "javascript:void(0)")"
+                       class="@(isPublished ? "" : "disabled") btn btn-register btn-block"
+                       @isPublished>
                         <span>Select Dates @anotherChildString &raquo;</span>
                     </a>
                 }
                 else
                 {
                     var buttonText = Model.SeatsRemaining == 0 ? "Join Waiting List" : Model.RegistrationMode.ToString();
-                    <a href="@(IsPublished? Model.GetRegistrationPageUrl(): "javascript:void(0)")" 
-                       class="@(IsPublished?"":"disabled") btn btn-register btn-block" 
-                       @IsPublished>
+                    <a href="@(isPublished? Model.GetRegistrationPageUrl(): "javascript:void(0)")" 
+                       class="@(isPublished?"":"disabled") btn btn-register btn-block" 
+                       @isPublished>
                         @buttonText @anotherChildString &raquo;
                     </a>
                 }
