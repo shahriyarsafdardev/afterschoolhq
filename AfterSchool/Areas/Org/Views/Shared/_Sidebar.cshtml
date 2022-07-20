@@ -7,6 +7,7 @@
         leagueactive = "",
         sessionactive = "",
         registrationactive = "",
+        volunteercontactsactive = "",
         formactive = "",
         contactactive = "",
         teamactive = "",
@@ -16,7 +17,7 @@
         leagueexternalactive = "",
         activitycenteractive = "",
         accountsubmenuactive = "",
-        studentcontactmenuactive = "";
+        contactmenuactive = "";
 
     switch (controller)
     {
@@ -31,7 +32,7 @@
             break;
         case "registration":
         case "contact":
-            studentcontactmenuactive = "active";
+            contactmenuactive = "active";
             break;
     }
 
@@ -51,7 +52,16 @@
             leagueexternalactive = "active";
             break;
         case "registration":
-            registrationactive = "active";
+            var queryString = ViewContext.HttpContext.Request.QueryString;
+            if (queryString.HasKeys() && queryString.GetKey(0) == "volunteers")
+            {
+                volunteercontactsactive = "active";
+            }
+            else
+            {
+                registrationactive = "active";
+            }
+
             break;
         case "form":
             formactive = "active";
@@ -111,7 +121,7 @@
                 if (CanView(SessionVariables.AccountUserType, PermissionType.ActivitiesView))
                 {
                     <li class="@activityactive">
-                        <a href="@Url.Action("index", "activity", new {type = (int) ActivityType.Activity})">
+                        <a href="@Url.Action("index", "activity", new { type = (int)ActivityType.Activity })">
                             <i class="icon s7-gleam"></i> @UILabel.ActivityLabel(ActivityType.Activity, true)
                         </a>
                     </li>
@@ -127,13 +137,13 @@
                         @if (CanView(SessionVariables.AccountUserType, PermissionType.ActivitiesView))
                         {
                             <li>
-                                <a href="@Url.Action("index", "activity", new {type = (int) ActivityType.Activity})"><i class="icon s7-gleam"></i> Extracurricular @UILabel.ActivityLabel(ActivityType.Activity, true)</a>
+                                <a href="@Url.Action("index", "activity", new { type = (int)ActivityType.Activity })"><i class="icon s7-gleam"></i> Extracurricular @UILabel.ActivityLabel(ActivityType.Activity, true)</a>
                             </li>
                         }
                         @if (CanView(FeatureType.ManageFieldTrips, SessionVariables.AccountUserType, PermissionType.FieldTripsView))
                         {
                             <li>
-                                <a href="@Url.Action("index", "activity", new {type = (int) ActivityType.FieldTrip})">
+                                <a href="@Url.Action("index", "activity", new { type = (int)ActivityType.FieldTrip })">
                                     <i class="icon s7-compass"></i> @UILabel.ActivityLabel(ActivityType.FieldTrip, true)
                                 </a>
                             </li>
@@ -141,7 +151,7 @@
                         @if (CanView(SessionVariables.AccountUserType, PermissionType.PermissionSlipsView))
                         {
                             <li>
-                                <a href="@Url.Action("index", "activity", new {type = (int) ActivityType.PermissionSlip})">
+                                <a href="@Url.Action("index", "activity", new { type = (int)ActivityType.PermissionSlip })">
                                     <i class="icon s7-file"></i> @UILabel.ActivityLabel(ActivityType.PermissionSlip, true)
                                 </a>
                             </li>
@@ -149,7 +159,7 @@
                         @if (CanView(FeatureType.ManageLearningPods, SessionVariables.AccountUserType, PermissionType.LearningPodsView))
                         {
                             <li>
-                                <a href="@Url.Action("index", "activity", new {type = (int) ActivityType.LearningPod})">
+                                <a href="@Url.Action("index", "activity", new { type = (int)ActivityType.LearningPod })">
                                     <i class="icon s7-box2"></i> @UILabel.ActivityLabel(ActivityType.LearningPod, true)
                                 </a>
                             </li>
@@ -179,22 +189,22 @@
                                 </a>
                             </li>
                         }
-
-                        @if (CanView(FeatureType.ManageVolunteerOpportunities, SessionVariables.AccountUserType, PermissionType.VolunteerOpportunitiesView))
-                        {
-                            <li>
-                                <a data-test="volunteer-opportunities" href="@Url.Action("index", "activity", new {type = (int) ActivityType.VolunteerOpportunity})">
-                                    <i class="icon s7-smile"></i> Volunteer Opportunities
-                                </a>
-                            </li>
-                        }
                     </ul>
                 </li>
             }
+            
+            @if (CanView(FeatureType.ManageVolunteerOpportunities, SessionVariables.AccountUserType, PermissionType.VolunteerOpportunitiesView))
+            {
+                <li>
+                    <a data-test="volunteer-opportunities" href="@Url.Action("index", "activity", new { type = (int)ActivityType.VolunteerOpportunity })">
+                        <i class="icon s7-smile"></i> Volunteer Opportunities
+                    </a>
+                </li>
+            }
 
-            <li class="parent @studentcontactmenuactive">
+            <li class="parent @contactmenuactive">
                 <a href="#">
-                    <i class="icon s7-id"></i> <span>Students & Contacts</span>
+                    <i class="icon s7-id"></i> <span>Contacts</span>
                 </a>
                 <ul class="sub-menu">
                     @if (CanView(SessionVariables.AccountUserType, PermissionType.StudentsView))
@@ -202,6 +212,16 @@
                         <li class="@registrationactive">
                             <a href="@Url.Action("index", "registration")">
                                 <i class="icon s7-id"></i> @UILabel.RegistrantLabel(true)
+                            </a>
+                        </li>
+                    }
+                    @if (CanView(FeatureType.ManageVolunteerOpportunities, SessionVariables.AccountUserType, PermissionType.VolunteerOpportunitiesView))
+                    {
+                        <li class="@volunteercontactsactive">
+                            <a href="@Url.Action("index", "registration", new {
+                                         volunteers = true
+                                     })">
+                                <i class="icon s7-smile"></i> @UILabel.RegistrantLabel(ActivityType.VolunteerOpportunity, true)
                             </a>
                         </li>
                     }
@@ -264,18 +284,18 @@
                         if (registrationAccount.IsNotEmpty())
                         {
                             <li class="">
-                                <a href="@Url.Action("select", "login", new {area = "", id = registrationAccount.Uid.ToString()})"><i class="icon s7-shuffle"></i> Switch to @registrationAccount.Name</a>
+                                <a href="@Url.Action("select", "login", new { area = "", id = registrationAccount.Uid.ToString() })"><i class="icon s7-shuffle"></i> Switch to @registrationAccount.Name</a>
                             </li>
                         }
                         else
                         {
                             <li class="">
-                                <a href="@Url.Action("switch", "logout", new {area = ""})"><i class="icon s7-shuffle"></i> Switch Accounts</a>
+                                <a href="@Url.Action("switch", "logout", new { area = "" })"><i class="icon s7-shuffle"></i> Switch Accounts</a>
                             </li>
                         }
                     }
                     <li class="">
-                        <a href="@Url.Action("index", "logout", new {area = ""})"><i class="icon s7-power"></i> Logout</a>
+                        <a href="@Url.Action("index", "logout", new { area = "" })"><i class="icon s7-power"></i> Logout</a>
                     </li>
                 </ul>
             </li>

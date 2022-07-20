@@ -2585,7 +2585,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static SystemMessages SendRegistrationSummaryReport(int activityId, string uiActivityLabel,
-            DatabaseConnection dc = null)
+            bool getVolunteers, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var activity = Activity.Load(activityId, msgs, dc);
@@ -2608,7 +2608,7 @@ namespace AfterSchoolLibrary.Services
                 uiActivityLabel,
                 activity.ContactEmail,
                 subject,
-                body,
+                body, getVolunteers,
                 msgs,
                 dc));
 

@@ -395,7 +395,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [HttpPost]
         public ActionResult EmailRegistrationReport(string id, string q, string activity, string emails,
-            string filename, string reporttype, string question)
+            string filename, string reporttype, string question, string volunteers)
         {
             var account = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
@@ -417,6 +417,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (question.IsNumber())
                 questionId = question.ToInteger();
 
+            var getVolunteers = volunteers.IsBoolean() && volunteers.ToBoolean();
             BackgroundJob.Enqueue(() =>
                 RegistrationService.EmailCsvReport(
                     account.ID.Value,
@@ -432,6 +433,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     emails,
                     null,
                     null,
+                    getVolunteers,
                     null,
                     null)
             );

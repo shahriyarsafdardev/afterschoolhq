@@ -1091,14 +1091,15 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult RegistrantSummary(string id)
+        public ActionResult RegistrantSummary(string id, string volunteers)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
+            var getVolunteers = volunteers.IsBoolean() && volunteers.ToBoolean();
             BackgroundJob.Enqueue(() =>
-                ActivityService.SendRegistrationSummaryReport(activity.ID.Value, UILabel.ActivityLabel(activity.ActivityTypeId, false), null)
+                ActivityService.SendRegistrationSummaryReport(activity.ID.Value, UILabel.ActivityLabel(activity.ActivityTypeId, false), getVolunteers, null)
             );
 
             msgs.Add("Your report will be sent shortly", MessageType.Success);

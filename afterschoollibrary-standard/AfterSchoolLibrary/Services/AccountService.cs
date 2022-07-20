@@ -1955,19 +1955,20 @@ namespace AfterSchoolLibrary.Services
         public static List<Registration> SearchRegistrations(this Account account, string searchText, int? questionId,
             List<int> participationObjectIds, ParticipationObjectType participationObjectType,
             RegistrationStatus regStatus, List<RegistrationAssignmentType> rats, int? start, int? length,
+            bool getVolunteers,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Registration.Search(searchText, account.ID.Value, questionId, participationObjectIds,
-                participationObjectType, regStatus, rats, start, length, msgs: msgs, dc: dc);
+                participationObjectType, regStatus, rats, start, length, getVolunteers, msgs: msgs, dc: dc);
         }
 
         public static int SearchRegistrationCount(this Account account, string searchText, int? questionId,
             List<int> participationObjectIds, ParticipationObjectType participationObjectType,
-            RegistrationStatus regStatus, List<RegistrationAssignmentType> rats, SystemMessages msgs = null,
+            RegistrationStatus regStatus, List<RegistrationAssignmentType> rats, bool getVolunteers, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             return Registration.SearchCount(searchText, account.ID.Value, questionId, participationObjectIds,
-                participationObjectType, regStatus, rats, msgs: msgs, dc: dc);
+                participationObjectType, regStatus, rats, getVolunteers, msgs: msgs, dc: dc);
         }
 
         public static void CreateNewRegistrantAndRegistration(this Account account,

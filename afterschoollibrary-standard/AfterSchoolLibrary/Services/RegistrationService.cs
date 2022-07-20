@@ -326,6 +326,7 @@ namespace AfterSchoolLibrary.Services
             List<int> participationObjectIds, ParticipationObjectType participationObjectType, string filename,
             RegistrationReportType reportType, List<RegistrationAssignmentType> rats,
             RegistrationStatus registrationStatus, string uiActivityLabel, string emails, string subject, string body,
+            bool getVolunteers,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty())
@@ -342,6 +343,7 @@ namespace AfterSchoolLibrary.Services
                 rats,
                 null,
                 null,
+                getVolunteers,
                 msgs,
                 dc);
 

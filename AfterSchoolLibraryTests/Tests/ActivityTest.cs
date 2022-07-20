@@ -921,7 +921,7 @@ namespace AfterSchoolLibraryTests.Tests
                 msgs: msgs,
                 dc: dc);
 
-            Assert.True(ActivityService.SendRegistrationSummaryReport(activity.ID.Value, "test", dc).HasNoErrors());
+            Assert.True(ActivityService.SendRegistrationSummaryReport(activity.ID.Value, "test", false, dc).HasNoErrors());
         }
 
         [Fact]

@@ -104,6 +104,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     emails,
                     null,
                     null,
+                    false,
                     null,
                     null)
             );
@@ -334,7 +335,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Invalid registration", MessageType.UserError);
 
             ViewBag.Messages = msgs;
-
+            
+            
             return View("edit", registration);
         }
 
@@ -695,10 +697,10 @@ namespace AfterSchool.Areas.Org.Controllers
                 : RegistrationStatus.NotSet;
 
             var registrations = currentAccount.SearchRegistrations(q, null, activityIds,
-                ParticipationObjectType.Activity, registrationStatus, registrationAssignmentTypes, start, recordsPerPage, msgs);
+                ParticipationObjectType.Activity, registrationStatus, registrationAssignmentTypes, start, recordsPerPage,false,msgs);
 
-            var totalCount = currentAccount.SearchRegistrationCount(q, null, activityIds,
-                ParticipationObjectType.Activity, registrationStatus, registrationAssignmentTypes, msgs);
+            var totalCount = currentAccount.SearchRegistrationCount(q, null,  activityIds,
+                ParticipationObjectType.Activity, registrationStatus, registrationAssignmentTypes,false,msgs);
 
             var activities = currentAccount
                 .GetActivities(UserType.Administrator, currentUser, null, null, false, false, null, msgs: msgs)

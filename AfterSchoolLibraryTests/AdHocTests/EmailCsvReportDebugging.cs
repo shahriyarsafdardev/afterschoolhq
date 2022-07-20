@@ -20,7 +20,7 @@ namespace AfterSchoolLibraryTests.AdHocTests
 
             RegistrationService.EmailCsvReport(1148, null, null, new List<int> { 3494, 3495, 3496, 3497, 3498, 3499, 3500, 3501 },
                 ParticipationObjectType.Activity, "Registrations", RegistrationReportType.Dismissal, null, RegistrationStatus.NotSet,
-                "Activity", "", null, null, null, dc);
+                "Activity", "", null, null, false, null, dc);
         }
 
     }
