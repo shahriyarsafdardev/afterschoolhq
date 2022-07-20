@@ -628,11 +628,11 @@
                                     message: 'Email id already exists.',
                                     success: false
                                 });
-                                $(".register-continue").attr('disabled', 'disabled');
+                                $(".register-continue").prop('disabled', true);
                                 $("#email").attr('style', 'border: 1px solid red;');
                             }
                             else {
-                                $(".register-continue").removeAttr('disabled');
+                                $(".register-continue").prop('disabled', false);
                                 $("#email").removeAttr('style');
                             }
                         }
@@ -661,7 +661,7 @@
                     message: 'Email id is not in valid format.',
                     success: false
                 });
-                $(".register-continue").attr('disabled', 'disabled');
+                $(".register-continue").prop('disabled', true);
                 $("#email").attr('style', 'border: 1px solid red;');
             }
         }
@@ -1007,7 +1007,7 @@
             hiddenAccountProfileUrl.val('');
             hiddenAccountName.val('');
             signupAccountSearch.val('');
-            btnContinue.attr('disabled', 'disabled');
+            btnContinue.prop('disabled', true);
         }
 
     // #region: phone number validation
