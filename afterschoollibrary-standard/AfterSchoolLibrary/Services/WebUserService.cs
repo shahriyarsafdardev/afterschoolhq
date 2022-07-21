@@ -648,7 +648,7 @@ namespace AfterSchoolLibrary.Services
                                     packageId: null,
                                     packageBillingPeriod: null,
                                     timeZone: null,
-                                    createWithStripe: true,
+                                    createWithStripe: false,
                                     loggedInUser: loggedInUser,
                                     isAfterSchool: isAfterSchool,
                                     msgs: amsgs,
