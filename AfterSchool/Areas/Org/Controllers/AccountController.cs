@@ -1339,7 +1339,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         package = Package.LoadByUid(selectedPackageArr[1].ToGuid(), amsgs, adc);
 
-                        customer = currentAccount.CreateStripeCustomer(StripeAccountType.SubscriberAccount, amsgs, adc);
+                        customer = currentAccount.CreateStripeCustomer(StripeAccountType.SubscriberAccount, null, amsgs, adc);
 
                         if (stripetoken.IsNotEmpty())
                             currentAccount.CreateStripeCardFromToken(stripetoken, customer, StripeAccountType.SubscriberAccount, amsgs, adc);

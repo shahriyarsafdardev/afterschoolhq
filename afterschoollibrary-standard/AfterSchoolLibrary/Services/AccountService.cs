@@ -1551,7 +1551,7 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(account.Save(dc: dc));
 
             if (msgs.HasNoErrors())
-                account.CreateStripeCustomer(stripeAccountType, msgs, dc);
+                account.CreateStripeCustomer(stripeAccountType, null, msgs, dc);
 
             return msgs;
         }
@@ -1587,7 +1587,7 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(account.Save(dc: dc));
         }
 
-        public static Customer CreateStripeCustomer(this Account account, StripeAccountType stripeAccountType, SystemMessages msgs = null,
+        public static Customer CreateStripeCustomer(this Account account, StripeAccountType stripeAccountType, WebUser accountOwner, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -1597,7 +1597,27 @@ namespace AfterSchoolLibrary.Services
             if (customer.IsNotEmpty())
                 return StripeHelper.GetStripeHelper(stripeAccountType).UpdateCustomer(customer.Id, account.Name, account.Email, null, msgs);
 
-            customer = StripeHelper.GetStripeHelper(stripeAccountType).CreateCustomer(account.Name, account.Email, null, msgs);
+            var metadata = new Dictionary<string, string>();
+
+            if (accountOwner.IsEmpty())
+                accountOwner = account.GetAccountOwner(msgs, dc);
+
+            if (accountOwner.IsNotEmpty())
+                metadata = new Dictionary<string, string>()
+                {
+                    { "Customer First Name", accountOwner.FirstName },
+                    { "Customer Last Name", accountOwner.LastName },
+                    { "How did you hear about us", accountOwner.HowHearAboutUs },
+                };
+            
+            customer = StripeHelper.GetStripeHelper(stripeAccountType).CreateCustomer(
+                account.Name ?? accountOwner?.DisplayName, 
+                account.Email ?? accountOwner?.Email, 
+                account.Phone ?? accountOwner?.Phone, 
+                account.AccountTypeId.ToString().SplitByUpperCase(), 
+                null,
+                metadata,
+                msgs);
             account.SetStripeCustomer(customer, msgs, dc);
 
             return customer;
@@ -2256,7 +2276,7 @@ namespace AfterSchoolLibrary.Services
         public static AccountPackage SetDefaultAccountPackage(this Account account, WebUser loggedInUser,
             SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var package = Package.Load(start: 0, length: 1, msgs: msgs, dc: dc).First();
+            var package = PackageService.GetDefaultCustomerPackage(msgs);
 
             return account.AddPackage(package.ID.Value, BillingPeriodType.Month, loggedInUser, msgs, dc);
         }

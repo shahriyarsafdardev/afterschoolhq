@@ -422,10 +422,7 @@ namespace AfterSchoolLibrary.Models
                         stripeCustomerId,
                         priceId, //TODO: dynamic price for subscription
                         null,
-                        null,
-                        // trialEndDate: this.TrialEndDate, 
-                        DateTime.UtcNow,
-                        null,
+                        this.TrialEndDate,
                         null,
                         null,
                         msgs);

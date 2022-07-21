@@ -45,44 +45,37 @@ namespace AfterSchool.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public ActionResult Edit(string id, string name, string price, string priceperyear, string isactive, string ispopular, string isafterschool, string description)
+        public ActionResult Edit(string id, string name, string price, string priceperyear, string isactive, string ispopular, string isafterschool, string description, string isdefaultcustomerpackage)
         {
             SystemMessages msgs = new SystemMessages();
             var package = new Package();
             var features = new List<PackageFeature>();
 
             if (name.IsEmpty())
-            {
                 msgs.Add("Package name is required", MessageType.UserError);
-            }
+                
             if (price.IsEmpty() || !price.IsNumber())
-            {
                 msgs.Add("Price / Month is required", MessageType.UserError);
-            }
             else if (price.ToDecimal() < 0)
-            {
                 msgs.Add("Price / Month must be greater than or equal to 0", MessageType.UserError);
-            }
+            
             if (priceperyear.IsEmpty() || !priceperyear.IsNumber())
-            {
                 msgs.Add("Price / Year is required", MessageType.UserError);
-            }
             else if (price.ToDecimal() < 0)
-            {
                 msgs.Add("Price / Year must be greater than or equal to 0", MessageType.UserError);
-            }
 
             if (msgs.HasNoErrors())
             {
                 Database.ExecuteTransaction(
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-
+                        var currentUser = SessionVariables.CurrentUser;
+                        
                         if (id.IsEmpty())
                         {
                             package = new Package();
                             package.CreateDate = DateTime.UtcNow;
-                            package.CreatedBy = SessionVariables.CurrentUser.ID;
+                            package.CreatedBy = currentUser.ID;
                         }
                         else
                         {
@@ -94,7 +87,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                         package.PricePerYear = priceperyear.ToDecimal();
 
                         package.LastModifiedDate = DateTime.UtcNow;
-                        package.LastModifiedBy = SessionVariables.CurrentUser.ID;
+                        package.LastModifiedBy = currentUser.ID;
 
                         package.Name = name;
                         package.IsActive = isactive.IsNotEmpty();
@@ -103,6 +96,9 @@ namespace AfterSchool.Areas.Admin.Controllers
                         package.Description = description;
                         amsgs.AddRange(package.SaveWithStripe(adc));
 
+                        if (isdefaultcustomerpackage.IsBoolean() && isdefaultcustomerpackage.ToBoolean())
+                            package.SetAsDefaultCustomerPackage(currentUser, amsgs, adc);
+                        
                         if (amsgs.HasNoErrors())
                         {
                             foreach (var type in Enum.GetValues(typeof(FeatureType)).Cast<FeatureType>().Where(x => x != FeatureType.NotSet))
@@ -115,12 +111,12 @@ namespace AfterSchool.Areas.Admin.Controllers
                                         feature = new PackageFeature();
                                         feature.PackageId = package.ID;
                                         feature.CreateDate = DateTime.UtcNow;
-                                        feature.CreatedBy = SessionVariables.CurrentUser.ID;
+                                        feature.CreatedBy = currentUser.ID;
                                         feature.FeatureTypeId = type;
                                     }
 
                                     feature.Max = Request[type.ToString()].ToDecimal();
-                                    feature.LastModifiedBy = SessionVariables.CurrentUser.ID;
+                                    feature.LastModifiedBy = currentUser.ID;
                                     feature.LastModifiedDate = DateTime.UtcNow;
                                     amsgs.AddRange(feature.Save(adc));
                                 }

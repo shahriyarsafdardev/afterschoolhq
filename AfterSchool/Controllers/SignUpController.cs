@@ -106,7 +106,7 @@ namespace AfterSchool.Controllers
                             msgs: amsgs,
                             dc: adc);
 
-                        account = user.AddNewAccount(
+                        account = user.AddNewAccountWithDefaultPackage(
                             orgName: model.OrgName,
                             accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
                             loggedInUser: user,
@@ -193,23 +193,24 @@ namespace AfterSchool.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        user = WebUserService.CreateNewWithNoPhone(
+                        user = WebUserService.CreateNewWithOptionalPhone(
                             firstName: model.FirstName,
                             lastName: model.LastName,
                             email: model.Email,
+                            phone: model.Phone,
                             password: model.Password2,
                             isActive: true,
                             isRegistered: true,
                             isVerified: false,
-                            loggedInUser: null,
                             howHearAboutUs: model.HowHearAboutUs,
+                            loggedInUser: null,
                             msgs: amsgs,
                             dc: adc);
 
                         if (model.SignupType.IsNotEmpty() && model.SignupType == SignUpType.Teacher1099)
                             model.OrgName = $"{model.FirstName} {model.LastName} Teacher";
 
-                        account = user.AddNewAccount(
+                        account = user.AddNewAccountWithDefaultPackageWithStripe(
                             orgName: model.OrgName,
                             accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
                             loggedInUser: user,

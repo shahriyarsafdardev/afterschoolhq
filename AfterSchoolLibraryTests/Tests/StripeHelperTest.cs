@@ -115,7 +115,7 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void CreateCustomerTest()
         {
-            var customer = StripeHelper.GetStripeHelperConnectAccount().CreateCustomer("This is my customer", "test@test.com", null, msgs);
+            var customer = StripeHelper.GetStripeHelperConnectAccount().CreateCustomer("This is my customer", "test@test.com", null, "", null, null, msgs);
             Assert.NotNull(customer);
             msgs.AddRange(StripeHelper.GetStripeHelperConnectAccount().DeleteCustomer(customer.Id, null));
         }
@@ -123,7 +123,7 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void DeleteCustomerTest()
         {
-            var customer = StripeHelper.GetStripeHelperConnectAccount().CreateCustomer("This is my customer", "test@test.com", null, msgs);
+            var customer = StripeHelper.GetStripeHelperConnectAccount().CreateCustomer("This is my customer", "test@test.com", null, "", null, null, msgs);
             msgs.AddRange(StripeHelper.GetStripeHelperConnectAccount().DeleteCustomer(customer.Id, null));
 
             var customerReload = StripeHelper.GetStripeHelperConnectAccount().GetCustomer(customer.Id, null, msgs);
@@ -134,7 +134,7 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void GetCustomer()
         {
-            var customer = StripeHelper.GetStripeHelperConnectAccount().CreateCustomer("This is my customer", "test@test.com", null, msgs);
+            var customer = StripeHelper.GetStripeHelperConnectAccount().CreateCustomer("This is my customer", "test@test.com", null, "", null, null, msgs);
             Assert.NotNull(StripeHelper.GetStripeHelperConnectAccount().GetCustomer(customer.Id, null, msgs));
             msgs.AddRange(StripeHelper.GetStripeHelperConnectAccount().DeleteCustomer(customer.Id, null));
         }
@@ -157,7 +157,7 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void UpdateCustomerTest()
         {
-            var customer = StripeHelper.GetStripeHelperConnectAccount().CreateCustomer("This is my customer", "test@test.com", null, msgs);
+            var customer = StripeHelper.GetStripeHelperConnectAccount().CreateCustomer("This is my customer", "test@test.com", null, "", null, null, msgs);
             var newDescription = "this is my new customer";
             var customer2 = StripeHelper.GetStripeHelperConnectAccount().UpdateCustomer(customer.Id, newDescription, "test@test.com", null, msgs);
 
