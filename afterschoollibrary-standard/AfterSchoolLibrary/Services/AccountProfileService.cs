@@ -132,7 +132,7 @@ namespace AfterSchoolLibrary.Services
 
         public static void UpdateProfile(this AccountProfile profile, string title = null, string headline = null,
             string about = null, string registrationurl = null, string buttontext = null, string website = null,
-            bool opencovid = false, bool elearningcenter = false, bool isvirtualprogram = false, string mingrade = null,
+            bool isvirtualprogram = false, string mingrade = null,
             string maxgrade = null, string agestart = null, string ageend = null, string costlow = null,
             string costhigh = null, string twitter = null, string facebook = null, string instagram = null,
             string linkedin = null, string youtube = null, string calendar = null, string genderrestriction = null,
@@ -253,8 +253,6 @@ namespace AfterSchoolLibrary.Services
                     if (costlow.IsNotEmpty())
                         profile.CostLow = costlow.ToDecimal();
 
-                    profile.IsOpenDuringCovid = opencovid;
-                    profile.IsELearningCenter = elearningcenter;
                     profile.IsVirtualProgram = isvirtualprogram;
 
                     if (ahqapproved.IsNumber())
@@ -393,16 +391,13 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static void UpdateProfileAdditionalInfo(this AccountProfile profile, string mingrade, string maxgrade,
-            string agestart, string ageend, string costhigh, string costlow, bool opencovid = false,
-            bool elearningcenter = false, bool isvirtualprogram = false, WebUser loggedInUser = null,
+            string agestart, string ageend, string costhigh, string costlow, bool isvirtualprogram = false, WebUser loggedInUser = null,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             profile.GradeLevelStart = mingrade.IsInteger() ? mingrade.ToInteger() : new int?();
             profile.GradeLevelEnd = maxgrade.IsInteger() ? maxgrade.ToInteger() : new int?();
             profile.AgeStart = agestart.IsInteger() ? agestart.ToInteger() : new int?();
             profile.AgeEnd = ageend.IsInteger() ? ageend.ToInteger() : new int?();
-            profile.IsOpenDuringCovid = opencovid;
-            profile.IsELearningCenter = elearningcenter;
             profile.IsVirtualProgram = isvirtualprogram;
             profile.LastModifiedBy = loggedInUser.ID.Value;
             profile.LastModifiedDate = DateTime.UtcNow;

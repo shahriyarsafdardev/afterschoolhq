@@ -2,8 +2,6 @@
 @{ 
     Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml";
     var msgs = (SystemMessages)ViewBag.Messages;
-    var opencovid = (bool)ViewBag.OpenCovid;
-    var elc = (bool)ViewBag.ELC;
     var isVirtualProgram = (bool)ViewBag.IsVirtualProgram;
     var grades = (List<GradeLevel>)ViewBag.Grades;
     var gradeStart = (int)ViewBag.GradeStart;
@@ -70,31 +68,7 @@
 
                     <div class="clearfix"></div>
                     <div class="col-md-12 onboarding-form-group">
-                        <label class="onboarding-label"> PROVIDING SERVICES DURING COVID-19? </label>
-                        <div class="clearfix"></div>
-                        @{ Html.RenderPartial("~/Views/Shared/_SwitchButton.cshtml", opencovid, new ViewDataDictionary() {
-                                        { "checkboxname", "opencovid" },
-                                        { "checkboxid", "chkOpenCovid" },
-                                        {"classname", "form-control onboarding-input " }
-                                    }); }
-                    </div>
-
-                    <div class="clearfix"></div>
-                    <div class="col-md-12 onboarding-form-group">
-                        <label class="onboarding-label"> ARE YOU AN E-LEARNING CENTER? </label>
-                        <div class="clearfix"></div>
-
-                        @{ Html.RenderPartial("~/Views/Shared/_SwitchButton.cshtml", elc, new ViewDataDictionary() {
-                                        { "checkboxname", "elearningcenter" },
-                                        { "checkboxid", "chkELearningCenter" },
-                                        {"classname", "form-control onboarding-input " }
-                                    }); }
-
-                    </div>
-
-                    <div class="clearfix"></div>
-                    <div class="col-md-12 onboarding-form-group">
-                        <label class="onboarding-label">  IS IT A VIRTUAL PROGRAM? </label>
+                        <label class="onboarding-label">  DO YOU OFFER VIRTUAL PROGRAMS? </label>
                         <div class="clearfix"></div>
 
                         @{ Html.RenderPartial("~/Views/Shared/_SwitchButton.cshtml", isVirtualProgram, new ViewDataDictionary() {

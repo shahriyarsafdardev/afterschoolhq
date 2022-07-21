@@ -172,8 +172,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Grades = grades;
             ViewBag.Messages = msgs;
-            ViewBag.ELC = profile.IsNotEmpty() && profile.IsELearningCenter;
-            ViewBag.OpenCovid = profile.IsNotEmpty() && profile.IsOpenDuringCovid;
             ViewBag.IsVirtualProgram = profile.IsNotEmpty() && profile.IsVirtualProgram;
             ViewBag.IsRestrictByGrade = profile.IsRestrictByGrade();
             ViewBag.GradeStart = gradeStart.IsNotEmpty() ? gradeStart.ID : minGradeId;
@@ -188,7 +186,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [HttpPost]
         public ActionResult AdditionalInfo(string mingrade, string maxgrade, string agestart, string ageend,
-            string opencovid, string elearningcenter, string isvirtualprogram, string costlow, string costhigh)
+            string isvirtualprogram, string costlow, string costhigh)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -197,8 +195,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
             HandleTempMessages(msgs);
 
-            var isOpenDuringCovid = opencovid.IsBoolean() && opencovid.ToBoolean();
-            var isElc = elearningcenter.IsBoolean() && elearningcenter.ToBoolean();
             var isVirtualProgram = isvirtualprogram.IsBoolean() && isvirtualprogram.ToBoolean();
 
             if (msgs.HasNoErrors())
@@ -215,8 +211,6 @@ namespace AfterSchool.Areas.Org.Controllers
                             maxgrade: maxgrade,
                             agestart: agestart,
                             ageend: ageend,
-                            opencovid: isOpenDuringCovid,
-                            elearningcenter: isElc,
                             isvirtualprogram: isVirtualProgram,
                             loggedInUser: currentUser,
                             costhigh: costhigh,
@@ -238,8 +232,6 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Grades = grades;
             ViewBag.MinGradeId = Request["mingrade"] ?? grades.First().ID.ToString();
             ViewBag.MaxGradeId = Request["maxgrade"] ?? grades.Last().ID.ToString();
-            ViewBag.OpenCovid = opencovid.IsBoolean() && opencovid.ToBoolean();
-            ViewBag.ELC = isElc;
             ViewBag.IsVirtualProgram = isVirtualProgram;
             ViewBag.CostLow = costlow;
             ViewBag.CostHigh = costhigh;

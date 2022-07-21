@@ -255,18 +255,6 @@
 
         <div class="form-group">
             <label class="col-md-3 control-label">
-                Providing services during COVID?
-            </label>
-            <div class="col-md-9">
-                @{ Html.RenderPartial(
-                       "~/Views/Shared/_SwitchButton.cshtml",
-                       Model.IsOpenDuringCovid,
-                       new ViewDataDictionary {{"checkboxname", "opencovid"}, {"checkboxid", "opencovid"}}); }
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label class="col-md-3 control-label">
                 Are you offering virtual programs?
             </label>
             <div class="col-md-9">
@@ -274,19 +262,6 @@
                        "~/Views/Shared/_SwitchButton.cshtml",
                        Model.IsVirtualProgram,
                        new ViewDataDictionary {{"checkboxname", "virtualprogram"}, {"checkboxid", "virtualprogram"}}); }
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label class="col-md-3 control-label">
-                Are you an E-Learning Center?
-            </label>
-            <div class="col-md-9">
-                @{ Html.RenderPartial(
-                       "~/Views/Shared/_SwitchButton.cshtml",
-                       Model.IsELearningCenter,
-                       new ViewDataDictionary {{"checkboxname", "elearningcenter"}, {"checkboxid", "elearningcenter"}}); }
-                <p class="text-muted">You host/care for students to assist e-learning during the school day</p>
             </div>
         </div>
 
