@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Configuration;
+using Twilio.Types;
 
 namespace AfterSchoolLibrary.Billing
 {
@@ -907,12 +908,7 @@ namespace AfterSchoolLibrary.Billing
             return new Stripe.CustomerService(StripeClient);
         }
 
-        public Stripe.Customer CreateCustomer(string description, string email, string stripeAccountId, SystemMessages msgs)
-        {
-            return CreateCustomer(description, email, null, null, msgs);
-        }
-
-        public Stripe.Customer CreateCustomer(string description, string email, string sourceId, string stripeAccountId, SystemMessages msgs)
+        public Stripe.Customer CreateCustomer(string name, string email, string phone, string description, string sourceId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -920,17 +916,14 @@ namespace AfterSchoolLibrary.Billing
             var options = new Stripe.CustomerCreateOptions
             {
                 Description = description,
-                Email = email
+                Email = email,
+                Name = name,
+                Phone = phone,
             };
-
-            var requestOptions = new Stripe.RequestOptions();
-
-            if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeAccount = stripeAccountId;
 
             try
             {
-                customer = GetCustomerService().Create(options, requestOptions);
+                customer = GetCustomerService().Create(options);
             }
             catch (StripeException ex)
             {

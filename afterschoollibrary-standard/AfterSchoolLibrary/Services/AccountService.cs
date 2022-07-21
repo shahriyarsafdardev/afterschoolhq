@@ -1597,7 +1597,7 @@ namespace AfterSchoolLibrary.Services
             if (customer.IsNotEmpty())
                 return StripeHelper.GetStripeHelper(stripeAccountType).UpdateCustomer(customer.Id, account.Name, account.Email, null, msgs);
 
-            customer = StripeHelper.GetStripeHelper(stripeAccountType).CreateCustomer(account.Name, account.Email, null, msgs);
+            customer = StripeHelper.GetStripeHelper(stripeAccountType).CreateCustomer(account.Name, account.Email, account.Phone, account.AccountTypeId.ToString().SplitByUpperCase(), null, msgs);
             account.SetStripeCustomer(customer, msgs, dc);
 
             return customer;
