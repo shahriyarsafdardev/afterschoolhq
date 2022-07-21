@@ -73,6 +73,12 @@ namespace AfterSchoolLibrary.Models
             set => MDV["StripePricePerYearId"].Value = value;
         }
 
+        public bool IsDefaultCustomerPackage
+        {
+            get => (bool) MDV["IsDefaultCustomerPackage"].Value;
+            set => MDV["IsDefaultCustomerPackage"].Value = value;
+        }
+
 
         public Package()
         {
@@ -82,6 +88,7 @@ namespace AfterSchoolLibrary.Models
             IsPopular = false;
             IsAfterSchool = false;
             Uid = Guid.NewGuid();
+            IsDefaultCustomerPackage = false;
         }
 
         public static DatabaseParameters ObjectMap
@@ -99,6 +106,7 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "Uid", SqlDbType.UniqueIdentifier);
                 _dp.Add(className, "StripePricePerMonthId", SqlDbType.NVarChar, "50");
                 _dp.Add(className, "StripePricePerYearId", SqlDbType.NVarChar, "50");
+                _dp.Add(className, "IsDefaultCustomerPackage", SqlDbType.Bit);
 
                 return _dp;
             }
@@ -211,6 +219,10 @@ namespace AfterSchoolLibrary.Models
             dps.Add(ObjectMap["StripePricePerYearId"]);
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["IsDefaultCustomerPackage"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
 
             return msgs;
         }
@@ -246,6 +258,15 @@ namespace AfterSchoolLibrary.Models
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["IsPopular"], IsPopular);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static Package LoadByIsDefaultCustomerPackage(bool IsDefaultCustomerPackage, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["IsDefaultCustomerPackage"], IsDefaultCustomerPackage);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
         public static List<Package> LoadByIsPopularByIsAfterSchool(bool IsPopular, bool IsAfterSchool,

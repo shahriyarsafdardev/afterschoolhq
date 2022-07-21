@@ -106,7 +106,7 @@ namespace AfterSchool.Controllers
                             msgs: amsgs,
                             dc: adc);
 
-                        account = user.AddNewAccount(
+                        account = user.AddNewAccountWithDefaultPackage(
                             orgName: model.OrgName,
                             accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
                             loggedInUser: user,
@@ -209,7 +209,7 @@ namespace AfterSchool.Controllers
                         if (model.SignupType.IsNotEmpty() && model.SignupType == SignUpType.Teacher1099)
                             model.OrgName = $"{model.FirstName} {model.LastName} Teacher";
 
-                        account = user.AddNewAccount(
+                        account = user.AddNewAccountWithDefaultPackageWithStripe(
                             orgName: model.OrgName,
                             accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
                             loggedInUser: user,

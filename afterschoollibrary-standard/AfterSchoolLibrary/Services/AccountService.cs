@@ -2256,7 +2256,7 @@ namespace AfterSchoolLibrary.Services
         public static AccountPackage SetDefaultAccountPackage(this Account account, WebUser loggedInUser,
             SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var package = Package.Load(start: 0, length: 1, msgs: msgs, dc: dc).First();
+            var package = PackageService.GetDefaultCustomerPackage(msgs);
 
             return account.AddPackage(package.ID.Value, BillingPeriodType.Month, loggedInUser, msgs, dc);
         }

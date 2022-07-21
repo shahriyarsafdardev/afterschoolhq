@@ -784,9 +784,9 @@ namespace AfterSchoolLibrary.Services
             return AddNewRegistrantAccount(accountOwner, userType, isActive, null, null, isAfterSchool, loggedInUser, msgs, dc);
         }
 
-        public static Account AddNewAccount(this WebUser accountOwner, string orgName, string phone, bool isActive, AccountType accountType, bool addDefaultPackage, string timeZone, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Account AddNewAccountWithDefaultPackage(this WebUser accountOwner, string orgName, AccountType accountType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var account = AddNewAccount(accountOwner, orgName, phone, isActive, accountType, null, null, timeZone, true, loggedInUser, msgs, dc);
+            var account = AddNewAccount(accountOwner, orgName, null, true, accountType, null, null, null, true, loggedInUser, msgs, dc);
 
             if (account.IsNotEmpty())
                 account.SetDefaultAccountPackage(loggedInUser, msgs, dc);
@@ -794,12 +794,15 @@ namespace AfterSchoolLibrary.Services
             return account;
         }
 
-        public static Account AddNewAccount(this WebUser accountOwner, string orgName, AccountType accountType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Account AddNewAccountWithDefaultPackageWithStripe(this WebUser accountOwner, string orgName, AccountType accountType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var account = AddNewAccount(accountOwner, orgName, null, true, accountType, null, null, null, true, loggedInUser, msgs, dc);
 
             if (account.IsNotEmpty())
+            {
+                account.CreateStripeCustomer(StripeAccountType.SubscriberAccount, msgs, dc);
                 account.SetDefaultAccountPackage(loggedInUser, msgs, dc);
+            }
 
             return account;
         }

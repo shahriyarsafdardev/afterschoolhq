@@ -1340,7 +1340,7 @@ namespace AfterSchoolLibrary.Billing
             return subscription;
         }
 
-        public Stripe.Subscription CreatePackageSubscription(string customerId, string priceId, string sourceId, decimal? platformFeePercent, DateTime? startDate, string stripeAccountId, string stripeCouponId, Dictionary<string, string> metaData, SystemMessages msgs)
+        public Stripe.Subscription CreatePackageSubscription(string customerId, string priceId, string sourceId, DateTime? trialEndDate, string stripeCouponId, Dictionary<string, string> metaData, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -1372,15 +1372,8 @@ namespace AfterSchoolLibrary.Billing
             if (stripeCouponId.IsNotEmpty())
                 options.Coupon = stripeCouponId;
 
-            if (startDate.Value.AddDays(-1).IsAfter(DateTime.UtcNow))
-                options.TrialEnd = startDate.Value.AddDays(-1);
-
-            if (stripeAccountId.IsNotEmpty())
-                options.TransferData = new SubscriptionTransferDataOptions()
-                {
-                    Destination = stripeAccountId,
-                    AmountPercent = 100 - (platformFeePercent * 100)
-                };
+            if (trialEndDate.HasValue)
+                options.TrialEnd = trialEndDate.Value;
 
             try
             {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using AfterSchoolLibrary.Models;
@@ -30,7 +31,33 @@ namespace AfterSchoolLibrary.Services
             return packageFeature;
         }
 
+        public static void SetAsDefaultCustomerPackage(this Package package, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            msgs.AddRange(Package.Update(
+                new Hashtable() { { "IsDefaultCustomerPackage", false } },
+                new Hashtable(),
+                Package.ObjectMap,
+                dc));
 
+            package.IsDefaultCustomerPackage = true;
+            package.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+            package.LastModifiedDate = DateTime.UtcNow;
+            msgs.AddRange(package.Save(dc));
+        }
+
+        public static Package GetDefaultCustomerPackage(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var package = Package.LoadByIsDefaultCustomerPackage(true, msgs, dc);
+
+            if (package.IsEmpty())
+            {
+                package = Package.Load(start: 0, length: 1, msgs: msgs, dc: dc).First();
+                package.SetAsDefaultCustomerPackage(null, msgs, dc);
+            }
+
+            return package;
+        }
+        
         public static Package CreateDefaultPackage(WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
