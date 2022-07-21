@@ -908,7 +908,7 @@ namespace AfterSchoolLibrary.Billing
             return new Stripe.CustomerService(StripeClient);
         }
 
-        public Stripe.Customer CreateCustomer(string name, string email, string phone, string description, string sourceId, SystemMessages msgs)
+        public Stripe.Customer CreateCustomer(string accountName, string email, string phone, string description, string sourceId, Dictionary<string, string> metaData, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -917,8 +917,9 @@ namespace AfterSchoolLibrary.Billing
             {
                 Description = description,
                 Email = email,
-                Name = name,
+                Name = accountName,
                 Phone = phone,
+                Metadata = metaData
             };
 
             try

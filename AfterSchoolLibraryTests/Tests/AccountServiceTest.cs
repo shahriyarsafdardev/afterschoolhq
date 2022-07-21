@@ -1905,7 +1905,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             var subscriptionPlan = SubscriptionPlanFactory.Create(billingAccount, activity,
                 SubscriptionPlanType.Subscription, amountPaidByParent, msgs, dc);
-            purchasingAccount.CreateStripeCustomer(StripeAccountType.SubscriberAccount, msgs, dc);
+            purchasingAccount.CreateStripeCustomer(StripeAccountType.SubscriberAccount, null, msgs, dc);
 
             var purchase = PurchaseFactory.Create(purchasingAccount, amount, registrant.ID.Value, registration.ID.Value,
                 msgs, dc); // check: we are inserting row amount here

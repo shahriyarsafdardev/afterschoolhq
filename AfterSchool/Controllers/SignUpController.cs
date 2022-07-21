@@ -193,16 +193,17 @@ namespace AfterSchool.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        user = WebUserService.CreateNewWithNoPhone(
+                        user = WebUserService.CreateNewWithOptionalPhone(
                             firstName: model.FirstName,
                             lastName: model.LastName,
                             email: model.Email,
+                            phone: model.Phone,
                             password: model.Password2,
                             isActive: true,
                             isRegistered: true,
                             isVerified: false,
-                            loggedInUser: null,
                             howHearAboutUs: model.HowHearAboutUs,
+                            loggedInUser: null,
                             msgs: amsgs,
                             dc: adc);
 

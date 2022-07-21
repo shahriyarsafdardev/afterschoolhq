@@ -319,10 +319,7 @@ namespace AfterSchoolLibrary.Services
 
         public static WebUser InviteNew(string firstName, string lastName, string email, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (firstName.IsEmpty())
-                msgs.Add("First Name is required", MessageType.UserError);
-            if (lastName.IsEmpty())
-                msgs.Add("Last Name is required", MessageType.UserError);
+            ValidateNameForNewUser(firstName, lastName, msgs);
 
             if (email.IsEmpty())
                 msgs.Add("Email is required", MessageType.UserError);
@@ -355,17 +352,9 @@ namespace AfterSchoolLibrary.Services
 
         public static WebUser StartUserAccount(string firstName, string lastName, string email, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (firstName.IsEmpty())
-                msgs.Add("First Name is required", MessageType.UserError);
-            if (lastName.IsEmpty())
-                msgs.Add("Last Name is required", MessageType.UserError);
-
-            if (email.IsEmpty())
-                msgs.Add("Email is required", MessageType.UserError);
-            else if (!email.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
-                msgs.Add("Email must valid", MessageType.UserError);
-            else if (WebUser.ExistsByEmail(email, msgs, dc))
-                msgs.Add("Email is already in use, do you already have an account?", MessageType.UserError);
+            ValidateNameForNewUser(firstName, lastName, msgs);
+            
+            ValidateEmailForNewUser(email, msgs, dc);
 
             if (msgs.HasNoErrors())
             {
@@ -393,22 +382,53 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static WebUser CreateNewWithNoPhone(string firstName, string lastName, string email, string password, bool isActive, bool isRegistered, bool isVerified, WebUser loggedInUser, string howHearAboutUs, SystemMessages msgs = null, DatabaseConnection dc = null)
+        private static void ValidateNameForNewUser(string firstName, string lastName, SystemMessages msgs)
         {
             if (firstName.IsEmpty())
                 msgs.Add("First Name is required", MessageType.UserError);
             if (lastName.IsEmpty())
                 msgs.Add("Last Name is required", MessageType.UserError);
-
+        }
+        
+        private static void ValidateEmailForNewUser(string email, SystemMessages msgs, DatabaseConnection dc = null)
+        {
             if (email.IsEmpty())
                 msgs.Add("Email is required", MessageType.UserError);
             else if (!email.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
                 msgs.Add("Email must valid", MessageType.UserError);
             else if (WebUser.ExistsByEmail(email, msgs, dc))
                 msgs.Add("Email is already in use, do you already have an account?", MessageType.UserError);
+        }
 
+        private static void ValidatePasswordForNewUser(string password, SystemMessages msgs)
+        {
             if (password.IsNotEmpty() && password.Length < 8)
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);
+        }
+
+        private static void ValidateRequiredPhoneForNewUser(string phone, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (phone.IsEmpty())
+                msgs.Add("Phone is required", MessageType.UserError);
+            else
+                ValidateOptionalPhoneForNewUser(phone, msgs, dc);
+        }
+
+        private static void ValidateOptionalPhoneForNewUser(string phone, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (!phone.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                msgs.Add("Phone must be valid", MessageType.UserError);
+            else if (WebUser.ExistsByPhone(phone, msgs, dc))
+                msgs.Add("Phone is already in use, do you already have an account?", MessageType.UserError);
+        }
+        
+        public static WebUser CreateNewWithNoPhone(string firstName, string lastName, string email, string password, bool isActive, bool isRegistered, bool isVerified, string howHearAboutUs, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            ValidateNameForNewUser(firstName, lastName, msgs);
+            
+            ValidateEmailForNewUser(email, msgs, dc);
+
+            ValidatePasswordForNewUser(password, msgs);
 
             if (msgs.HasNoErrors())
             {
@@ -440,30 +460,57 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static WebUser CreateNewWithOptionalPhone(string firstName, string lastName, string email, string phone, string password, bool isActive, bool isRegistered, bool isVerified, bool allowTextMessages, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static WebUser CreateNewWithOptionalPhone(string firstName, string lastName, string email, string phone, string password, bool isActive, bool isRegistered, bool isVerified, string howHearAboutUs, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (firstName.IsEmpty())
-                msgs.Add("First Name is required", MessageType.UserError);
-            if (lastName.IsEmpty())
-                msgs.Add("Last Name is required", MessageType.UserError);
+            ValidateNameForNewUser(firstName, lastName, msgs);
 
-            if (email.IsEmpty())
-                msgs.Add("Email is required", MessageType.UserError);
-            else if (!email.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
-                msgs.Add("Email must valid", MessageType.UserError);
-            else if (WebUser.ExistsByEmail(email, msgs, dc))
-                msgs.Add("Email is already in use, do you already have an account?", MessageType.UserError);
+            ValidateEmailForNewUser(email, msgs, dc);
 
             if (phone.IsNotEmpty())
-            { 
-                if (!phone.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
-                    msgs.Add("Phone must be valid", MessageType.UserError);
-                else if (WebUser.ExistsByPhone(phone, msgs, dc))
-                    msgs.Add("Phone is already in use, do you already have an account?", MessageType.UserError);
+                ValidateOptionalPhoneForNewUser(phone, msgs, dc);
+
+            ValidatePasswordForNewUser(password, msgs);
+
+            if (msgs.HasNoErrors())
+            {
+                var user = new WebUser()
+                {
+                    FirstName = firstName,
+                    LastName = lastName,
+                    Email = email,
+                    Phone = phone,
+                    IsActive = isActive,
+                    IsRegistered = isRegistered,
+                    VerifiedAccount = isVerified,
+                    HowHearAboutUs = howHearAboutUs,
+                    CreateDate = DateTime.UtcNow,
+                    CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                    LastModifiedDate = DateTime.UtcNow,
+                    LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                    Username = WebUserService.GenerateUsername(firstName, lastName)
+                };
+
+                if (password.IsNotEmpty())
+                    user.Password = WebUserService.EncryptPassword(password);
+
+                msgs.AddRange(user.Save(dc));
+
+                return user;
             }
 
-            if (password.IsNotEmpty() && password.Length < 8)
-                msgs.Add("Password must be at least 8 characters", MessageType.UserError);
+            return null;
+        }
+
+        public static WebUser CreateNewWithOptionalPhone(string firstName, string lastName, string email, string phone, string password, bool isActive, bool isRegistered, bool isVerified, bool allowTextMessages, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            ValidateNameForNewUser(firstName, lastName, msgs);
+
+            ValidateEmailForNewUser(email, msgs, dc);
+
+            if (phone.IsNotEmpty())
+                ValidateOptionalPhoneForNewUser(phone, msgs, dc);
+
+            ValidatePasswordForNewUser(password, msgs);
 
             if (msgs.HasNoErrors())
             {
@@ -497,27 +544,13 @@ namespace AfterSchoolLibrary.Services
 
         public static WebUser CreateNew(string firstName, string lastName, string email, string phone, string password, bool isActive, bool isRegistered, bool isVerified, bool allowTextMessages, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (firstName.IsEmpty())
-                msgs.Add("First Name is required", MessageType.UserError);
-            if (lastName.IsEmpty())
-                msgs.Add("Last Name is required", MessageType.UserError);
+            ValidateNameForNewUser(firstName, lastName, msgs);
+            
+            ValidateEmailForNewUser(email, msgs, dc);
 
-            if (email.IsEmpty())
-                msgs.Add("Email is required", MessageType.UserError);
-            else if (!email.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
-                msgs.Add("Email must valid", MessageType.UserError);
-            else if (WebUser.ExistsByEmail(email, msgs, dc))
-                msgs.Add("Email is already in use, do you already have an account?", MessageType.UserError);
+            ValidateRequiredPhoneForNewUser(phone, msgs, dc);
 
-            if (phone.IsEmpty())
-                msgs.Add("Phone is required", MessageType.UserError);
-            else if (!phone.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
-                msgs.Add("Phone must be valid", MessageType.UserError);
-            else if (WebUser.ExistsByPhone(phone, msgs, dc))
-                msgs.Add("Phone is already in use, do you already have an account?", MessageType.UserError);
-
-            if (password.IsNotEmpty() && password.Length < 8)
-                msgs.Add("Password must be at least 8 characters", MessageType.UserError);
+            ValidatePasswordForNewUser(password, msgs);
 
             if (allowTextMessages && phone.IsEmpty())
                 msgs.Add("Mobile Phone is required to accept text messages", MessageType.UserError);
@@ -800,7 +833,7 @@ namespace AfterSchoolLibrary.Services
 
             if (account.IsNotEmpty())
             {
-                account.CreateStripeCustomer(StripeAccountType.SubscriberAccount, msgs, dc);
+                account.CreateStripeCustomer(StripeAccountType.SubscriberAccount, accountOwner, msgs, dc);
                 account.SetDefaultAccountPackage(loggedInUser, msgs, dc);
             }
 
