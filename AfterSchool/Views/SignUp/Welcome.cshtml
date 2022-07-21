@@ -541,10 +541,10 @@
             proceedFurther('@EnumSignupPages.Register');
         }
 
-
         PageEvent.add(PageEvent.AFTER_INIT, function () {
 
             signupAccountSearch.keyup(function (e) {
+            
                 var searchLength = signupAccountSearch.val().length;
 
                 if (searchLength >= 40) {
@@ -570,37 +570,47 @@
                 if (searchLength <= 2) {
                     signupAccountSearchList.html('');
                     signupAccountSearchList.addClass('hide');
-                    btnContinue.attr('disabled', 'disabled');
+                    btnContinue.prop('disabled', true);
                     return false;
+                } else if (!isSearchSchoolPage) {
+                    btnContinue.prop('disabled', false);
+                    hiddenAccountName.val(signupAccountSearch.val());
+                }                        
+                
+                if (isSearchSchoolPage)
+                {                
+                    signupAccountSearchList.removeClass('hide');
+                    signupAccountSearchList.html('');
+                    signupAccountSearchList.append(`
+                    <div class="${signupListItemClass}"
+                        style="${signupListItemStyle}"
+                        id="signup-search-listItem">
+                        <strong>Searching... Type the account name</strong>
+                    </div>`);
+    
+                    if (!isSearching) {
+                        clearTimeout(searchTimeout);
+                    }
+    
+                    searchTimeout = setTimeout(function () {
+                        doAccountSearch(signupAccountSearch, signupAccountSearchList)
+                    }, 250);
                 }
-
-                signupAccountSearchList.removeClass('hide');
-                signupAccountSearchList.html('');
-                signupAccountSearchList.append(`
-                <div class="${signupListItemClass}"
-                    style="${signupListItemStyle}"
-                    id="signup-search-listItem">
-                    <strong>Searching... Type the account name</strong>
-                </div>`);
-
-                if (!isSearching) {
-                    clearTimeout(searchTimeout);
-                }
-
-                searchTimeout = setTimeout(function () {
-                    doAccountSearch(signupAccountSearch, signupAccountSearchList)
-                }, 250);
 
 
             });
 
-              @if(showInviteWelcome && Model.InvitingAccount.IsEmpty())
+              @if (showInviteWelcome && Model.InvitingAccount.IsEmpty())
               {
-                    <text>$("#NoAccountFoundPopup").modal('show');</text>
+                  <text>$("#NoAccountFoundPopup").modal('show');</text>
               }
         });
         
         function validateEmailServerSide(value) {
+            
+            // this is getting hit as soon as the page loads in Edge for some reason
+            // need to review
+            return;
             
             if (value.length > 0 && validateEmail(value)) {
                 var dataToSend = JSON.stringify({ emailId: value });
@@ -618,11 +628,11 @@
                                     message: 'Email id already exists.',
                                     success: false
                                 });
-                                $(".register-continue").attr('disabled', 'disabled');
+                                $(".register-continue").prop('disabled', true);
                                 $("#email").attr('style', 'border: 1px solid red;');
                             }
                             else {
-                                $(".register-continue").removeAttr('disabled');
+                                $(".register-continue").prop('disabled', false);
                                 $("#email").removeAttr('style');
                             }
                         }
@@ -651,7 +661,7 @@
                     message: 'Email id is not in valid format.',
                     success: false
                 });
-                $(".register-continue").attr('disabled', 'disabled');
+                $(".register-continue").prop('disabled', true);
                 $("#email").attr('style', 'border: 1px solid red;');
             }
         }
@@ -695,6 +705,7 @@
         }
 
         function doAccountSearch(search, list) {
+            
             if (search.val().length > 0 && !isSearching) {
                 isSearching = true;
 
@@ -738,7 +749,7 @@
 
                                 var placeholder = '';
                                 if (isSchool) {
-                                    placeholder = `Can't find your school, organization, or program ? Click here`;
+                                    placeholder = `Can't find your school, organization, or program ? Click 'Continue' below`;
                                 } else {
                                     placeholder = `Can't find your ${isOrganization ? 'organization' : 'program'}? Enter the name of your ${isOrganization ? 'organization' : 'program'} then click here.`;
                                 }
@@ -786,7 +797,7 @@
                 isSchool = false;
                 hiddenAccountType.val('@AccountType.Teacher');
                 lblOrgSearchTitle.text('What\'s the name of your program?');
-                signupSearchLable.html('SEARCH OR ADD YOUR PROGRAM')
+                signupSearchLable.html('ENTER YOUR PROGRAM NAME');
                 clearSearch();
                 signupIndividualType.hide();
                 signupSearchName.show();
@@ -795,7 +806,7 @@
                 isOrganization = true;
                 isSchool = false;
                 lblOrgSearchTitle.text('What\'s the name of your organization?');
-                signupSearchLable.html('SEARCH FOR OR ADD YOUR ORGANIZATION')
+                signupSearchLable.html('ENTER YOUR ORGANIZATION NAME');
                 clearSearch();
                 signupOrgType.hide();
                 signupSearchName.show();
@@ -996,7 +1007,7 @@
             hiddenAccountProfileUrl.val('');
             hiddenAccountName.val('');
             signupAccountSearch.val('');
-            btnContinue.attr('disabled', 'disabled');
+            btnContinue.prop('disabled', true);
         }
 
     // #region: phone number validation

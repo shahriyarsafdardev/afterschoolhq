@@ -39,14 +39,14 @@
         <label class="onboarding-label">HOW'D YOU HEAR ABOUT US?</label>
         <select required="required" name="HowHearAboutUs" id="HowHearAboutUs" class="form-control onboarding-input" style="height:40px">
             <option value=""></option>
-            <option value="Ad">Ad</option>
-            <option value="Conference/Event">Conference/Event</option>
-            <option value="Email">Email</option>
-            <option value="My School">My School</option>
-            <option value="Search Engine">Search Engine</option>
-            <option value="Social Media">Social Media</option>
-            <option value="Word of Mouth">Word of Mouth</option>
-            <option value="Other">Other</option>
+            <option value="Ad" @(Model.HowHearAboutUs == "Ad" ? "selected=\"selected\"" : "")>Ad</option>
+            <option value="Conference/Event" @(Model.HowHearAboutUs == "Conference/Event" ? "selected=\"selected\"" : "")>Conference/Event</option>
+            <option value="Email" @(Model.HowHearAboutUs == "Email" ? "selected=\"selected\"" : "")>Email</option>
+            <option value="My School" @(Model.HowHearAboutUs == "My School" ? "selected=\"selected\"" : "")>My School</option>
+            <option value="Search Engine" @(Model.HowHearAboutUs == "Search Engine" ? "selected=\"selected\"" : "")>Search Engine</option>
+            <option value="Social Media" @(Model.HowHearAboutUs == "Social Media" ? "selected=\"selected\"" : "")>Social Media</option>
+            <option value="Word of Mouth" @(Model.HowHearAboutUs == "Word of Mouth" ? "selected=\"selected\"" : "")>Word of Mouth</option>
+            <option value="Other" @(Model.HowHearAboutUs == "Other" ? "selected=\"selected\"" : "")>Other</option>
         </select>
     </div>
 
