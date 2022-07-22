@@ -941,7 +941,8 @@ namespace AfterSchoolLibrary.Services
                                 !x.IsDeleted &&
                                 !x.IsArchived &&
                                 (!x.ActivityGroupId.HasValue || !x.ActivityGroupIsArchived.Value))
-                            .Select(activity => activity.ID.Value);
+                            .Select(activity => activity.ID.Value)
+                            .ToList();
 
                         rasToReturn.AddRange(registrantActivities.Where(
                             registrantActivity =>
