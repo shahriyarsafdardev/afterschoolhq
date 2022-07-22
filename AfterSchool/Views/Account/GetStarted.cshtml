@@ -118,7 +118,14 @@
                                         </div>
                                         <div class="message">
                                             <p class="text-center reg-login new-account">
-                                                Please enter your info below to begin registration.
+                                                @if (currentUser.IsNotEmpty())
+                                                {
+                                                    @:Please finalize your family account setup to begin registration.
+                                                }
+                                                else
+                                                {   
+                                                    @:Please enter your info below to begin registration.
+                                                }
                                             </p>
                                         </div>
                                     </div>

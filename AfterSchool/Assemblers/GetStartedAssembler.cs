@@ -57,9 +57,8 @@ namespace AfterSchool.Assemblers
                 QuestionDataType.RegistrantLastName,
                 QuestionDataType.RegistrantEmail,
                 QuestionDataType.RegistrantMiddleName,
-                QuestionDataType.RegistrantMobilePhone,
             };
-
+            
             questions = questions.Where(question =>
                 Extensions.NotIn(question.QuestionDataTypeId, FormConstants.QuestionsToNotIncludeInParentPanel())).ToList();
 
@@ -78,8 +77,10 @@ namespace AfterSchool.Assemblers
 
             qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value = currentUser.FirstName;
             qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value = currentUser.LastName;
-            qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value = currentUser.Phone;
             qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value = currentUser.Email;
+            
+            if (currentUser.Phone.IsNotEmpty())
+                qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value = currentUser.Phone;
 
             qvms.ForEach(qvm =>
             {
@@ -102,7 +103,6 @@ namespace AfterSchool.Assemblers
                 QuestionDataType.RegistrantLastName,
                 QuestionDataType.RegistrantEmail,
                 QuestionDataType.RegistrantMiddleName,
-                QuestionDataType.RegistrantMobilePhone,
             };
 
             questions = questions.Where(question =>
@@ -124,8 +124,10 @@ namespace AfterSchool.Assemblers
 
             qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value = currentUser.FirstName;
             qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value = currentUser.LastName;
-            qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value = currentUser.Phone;
             qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value = currentUser.Email;
+            
+            if (currentUser.Phone.IsNotEmpty())
+                qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value = currentUser.Phone;
 
             qvms.ForEach(qvm =>
             {

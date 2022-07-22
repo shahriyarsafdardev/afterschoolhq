@@ -280,19 +280,9 @@
                     </li>
                     @if (SessionVariables.CurrentUser.HasMultipleAccounts())
                     {
-                        var registrationAccount = SessionVariables.CurrentUser.GetRegistrantAccount();
-                        if (registrationAccount.IsNotEmpty())
-                        {
-                            <li class="">
-                                <a href="@Url.Action("select", "login", new { area = "", id = registrationAccount.Uid.ToString() })"><i class="icon s7-shuffle"></i> Switch to @registrationAccount.Name</a>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="">
-                                <a href="@Url.Action("switch", "logout", new { area = "" })"><i class="icon s7-shuffle"></i> Switch Accounts</a>
-                            </li>
-                        }
+                        <li class="">
+                            <a href="@Url.Action("switch", "logout", new { area = "" })"><i class="icon s7-shuffle"></i> Switch Accounts</a>
+                        </li>
                     }
                     <li class="">
                         <a href="@Url.Action("index", "logout", new { area = "" })"><i class="icon s7-power"></i> Logout</a>
