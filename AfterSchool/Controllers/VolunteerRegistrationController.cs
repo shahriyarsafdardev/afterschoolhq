@@ -152,10 +152,10 @@ namespace AfterSchool.Controllers
                     {
                         user = RegistrationCommon.CreateOrUpdateUser(
                             currentUser,
-                            firstName.Value.Trim(),
-                            lastName.Value.Trim(),
-                            email.Value.Trim(),
-                            phone.Value.Trim(),
+                            firstName?.Value.Trim(),
+                            lastName?.Value.Trim(),
+                            email?.Value.Trim(),
+                            phone?.Value.Trim(),
                             password1,
                             textnotifications.IfBlank("0").ToBoolean(),
                             amsgs,
@@ -462,7 +462,7 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
             var currentUser = SessionVariables.CurrentUser;
-            var currentRegistrant = currentUser.GetMasterRegistrant();
+            var currentRegistrant = currentUser.GetMasterVolunteerRegistrant();
             SessionVariables.CurrentRegistrant = currentRegistrant;
             var parentOrGuardian = currentRegistrant.GetParentOrGuardian(msgs);
             var (_, registration) = currentRegistrant.GetSubmittedRecord(participationObject, msgs);

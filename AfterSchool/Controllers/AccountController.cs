@@ -324,10 +324,10 @@ namespace AfterSchool.Controllers
                     {
                         user = RegistrationCommon.CreateOrUpdateUser(
                             currentUser,
-                            firstName.Value.Trim(),
-                            lastName.Value.Trim(),
-                            email.Value.Trim(),
-                            phone.Value.Trim(),
+                            firstName?.Value.Trim(),
+                            lastName?.Value.Trim(),
+                            email?.Value.Trim(),
+                            phone?.Value.Trim(),
                             password1,
                             textnotifications.IfBlank("0").ToBoolean(),
                             amsgs,
