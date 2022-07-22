@@ -3471,6 +3471,7 @@ namespace AfterSchoolLibrary.Services
                 AllowTextMessages = allowTextMessages,
                 SchoolLocationId = schoolLocationId,
                 ProfileStatusId = profileStatus,
+                PersonTypeId = isParentOrGuardian ? RegistrantPersonType.Parent : RegistrantPersonType.Student,
                 CreateDate = DateTime.UtcNow,
                 LastModifiedDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
