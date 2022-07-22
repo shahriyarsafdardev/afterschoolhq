@@ -175,11 +175,11 @@ else
             {
                 if (Model.GetActivity().CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
                 {   
-                    <a href="@(isPublished ? Model.GetActivityDateSelectionUrl() : "javascript:void(0)")"
-                       class="@(isPublished ? "" : "disabled") btn btn-register btn-block"
-                       @isPublished>
+                    <button onclick="location.href='@Model.GetActivityDateSelectionUrl()'"
+                            class="@(!isPublished ? "disabled" : "") btn btn-register btn-block"
+                            @(!isPublished?"disabled=\"disabled\"":"")>
                         <span>Select Dates &raquo;</span>
-                    </a>
+                    </button>
                 }
                 else
                 {
@@ -187,17 +187,17 @@ else
                     var alreadyRegistered = false;
                     var volunteerRegistrant = currentUser?.GetMasterVolunteerRegistrant();
                     
-                    if (volunteerRegistrant.IsNotEmpty())
+                    if (volunteerRegistrant.IsNotEmpty() && volunteerRegistrant.HasSubmittedFor(Model, null))
                     {
-                        alreadyRegistered = volunteerRegistrant.HasSubmittedFor(Model, null);
+                        alreadyRegistered = true;
                         buttonText = "Already Registered";
                     }
                     
-                    <a href="@(isPublished? Model.GetRegistrationPageUrl(): "javascript:void(0)")" 
-                       class="@(isPublished || alreadyRegistered?"":"disabled") btn btn-register btn-block" 
-                       @isPublished>
-                        @buttonText &raquo;
-                    </a>
+                    <button onclick="location.href='@Model.GetActivityDateSelectionUrl()'"
+                            class="@(!isPublished || alreadyRegistered?"disabled":"") btn btn-register btn-block"
+                            @(!isPublished || alreadyRegistered?"disabled=\"disabled\"":"")>
+                        <span>@buttonText &raquo;</span>
+                    </button>
                 }
             }
         }
