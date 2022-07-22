@@ -211,7 +211,7 @@ namespace AfterSchool.Controllers
                             model.OrgName = $"{model.FirstName} {model.LastName} Teacher";
 
                         // teachers aren't looking to pay and people coming in from an invite should just start on the free account
-                        if (model.SignupType == SignUpType.Teacher1099 || model.InviteCodeToShare.IsNotEmpty())
+                        if (model.SignupType == SignUpType.Teacher1099 || invitingAccount.IsNotEmpty())
                             account = user.AddNewAccount(
                                 model.OrgName,
                                 model.Phone,
