@@ -210,7 +210,27 @@ namespace AfterSchool.Controllers
                         if (model.SignupType.IsNotEmpty() && model.SignupType == SignUpType.Teacher1099)
                             model.OrgName = $"{model.FirstName} {model.LastName} Teacher";
 
-                        account = user.AddNewAccountWithDefaultPackageWithStripe(
+                        // teachers aren't looking to pay
+                        if (model.SignupType == SignUpType.Teacher1099)
+                        {
+                            var package = PackageService.GetFreePackage(amsgs, adc);
+                            
+                            //this WebUser accountOwner, string orgName, string phone, bool isActive, AccountType accountType, int? packageId, BillingPeriodType? packageBillingPeriod, string timeZone, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null
+                            account = user.AddNewAccount(
+                                model.OrgName,
+                                model.Phone,
+                                true,
+                                model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
+                                package.ID.Value,
+                                BillingPeriodType.Month,
+                                null,
+                                true,
+                                user,
+                                amsgs,
+                                adc);
+                        }
+                        else
+                            account = user.AddNewAccountWithDefaultPackageWithStripe(
                             orgName: model.OrgName,
                             accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
                             loggedInUser: user,
@@ -274,6 +294,8 @@ namespace AfterSchool.Controllers
                     return RedirectToAction("paymentsoptions", "account",
                         new {area = "org", isfullscreen = 1, signuptype = (int) model.SignupType});
 
+                return RedirectToAction("freetrial", "onboarding", new { area = "org" });
+                
                 return featureFlagRepository.IsEnabled("free-trial")
                     ? RedirectToAction("freetrial", "onboarding", new {area = "org"})
                     : RedirectToAction("index", "onboarding", new {area = "org", showGettingStarted = true});
