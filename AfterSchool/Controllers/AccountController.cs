@@ -173,7 +173,7 @@ namespace AfterSchool.Controllers
                             currentUser.AddNewRegistrantAccount(UserType.Owner, true, true, currentUser, msgs);
                 }
 
-                var masterRegistrant = SessionVariables.CurrentUser.GetMasterRegistrant(msgs);
+                var masterRegistrant = SessionVariables.CurrentUser.GetMasterParentOrStudentRegistrant(msgs);
 
                 if (masterRegistrant.IsNotEmpty())
                     registrantAccount = masterRegistrant.GetAccount(msgs);
@@ -266,7 +266,7 @@ namespace AfterSchool.Controllers
             // Register as an existing student
             if (currentUser.IsNotEmpty())
             {
-                var studentRegistrant = currentUser.GetMasterRegistrant(msgs);
+                var studentRegistrant = currentUser.GetMasterParentOrStudentRegistrant(msgs);
                 if (msgs.HasNoErrors() && !studentRegistrant.IsParentOrGuardian)
                 {
                     SessionVariables.CurrentRegistrant = studentRegistrant;
@@ -1558,7 +1558,7 @@ namespace AfterSchool.Controllers
             if (SessionVariables.AccountUserType == UserType.Student)
                 return RedirectToAction("Home", "User");
 
-            var masterRegistrant = SessionVariables.CurrentUser.GetMasterRegistrant();
+            var masterRegistrant = SessionVariables.CurrentUser.GetMasterParentOrStudentRegistrant();
 
             if (masterRegistrant.IsEmpty())
                 return RedirectToAction("getstarted");

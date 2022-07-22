@@ -602,6 +602,17 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["PersonTypeId"], (int)personTypeId);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
+        
+        public static List<Registrant> LoadByWebUserId(int WebUserId, List<RegistrantPersonType> personTypeIds, bool IsMaster, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["WebUserId"], WebUserId);
+            dq.Criterias.Add(ObjectMap["IsMaster"], IsMaster);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
+            dq.Criterias.Add(ObjectMap["PersonTypeId"], personTypeIds.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
 
         #endregion
     }
