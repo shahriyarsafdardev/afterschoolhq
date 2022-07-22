@@ -1149,8 +1149,6 @@ namespace AfterSchool.Areas.Org.Controllers
                     registrationurl,
                     buttontext,
                     website,
-                    opencovid.IsNumber() && opencovid.ToBoolean(),
-                    elearningcenter.IsNumber() && elearningcenter.ToBoolean(),
                     virtualprogram.IsNumber() && virtualprogram.ToBoolean(),
                     mingrade,
                     maxgrade,

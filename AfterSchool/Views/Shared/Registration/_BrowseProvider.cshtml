@@ -32,29 +32,11 @@
     <div class="panel" style="overflow: hidden;">
         <div class="reg-header" style="background-image: url(@profileHeaderImageUrl); min-height: 100px; height: 150px; padding: 5px 5px; position: relative;">
 
-            @if (Model.IsOpenDuringCovid)
-            {
-                <div class="pull-right margin-l-10">
-                    <span class="badge badge-success profile-badge text-small">
-                        Open During COVID
-                    </span>
-                </div>
-            }
-
             @if (Model.IsVirtualProgram)
             {
                 <div class="pull-right margin-l-10">
                     <span class="badge badge-blue profile-badge text-small">
                         Virtual
-                    </span>
-                </div>
-            }
-
-            @if (Model.IsELearningCenter)
-            {
-                <div class="pull-right margin-l-10">
-                    <span class="badge badge-success profile-badge text-small">
-                        E-Learning Center
                     </span>
                 </div>
             }
