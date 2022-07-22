@@ -288,12 +288,10 @@ namespace AfterSchool.Controllers
                 if (model.SignupType == SignUpType.Teacher1099)
                     return RedirectToAction("paymentsoptions", "account",
                         new {area = "org", isfullscreen = 1, signuptype = (int) model.SignupType});
-
-                return RedirectToAction("freetrial", "onboarding", new { area = "org" });
+                else if (invitingAccount.IsNotEmpty())
+                    return RedirectToAction("index", "onboarding", new {area = "org", showGettingStarted = true});
                 
-                return featureFlagRepository.IsEnabled("free-trial")
-                    ? RedirectToAction("freetrial", "onboarding", new {area = "org"})
-                    : RedirectToAction("index", "onboarding", new {area = "org", showGettingStarted = true});
+                return RedirectToAction("freetrial", "onboarding", new { area = "org" });
             }
 
 
