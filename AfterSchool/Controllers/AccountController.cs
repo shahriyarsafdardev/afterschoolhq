@@ -331,7 +331,6 @@ namespace AfterSchool.Controllers
                             amsgs,
                             adc);
 
-
                         if (amsgs.HasNoErrors() && user.IsNotEmpty())
                         {
                             account = RegistrationCommon.GetOrCreateRegistrantAccount(user, amsgs, adc);
