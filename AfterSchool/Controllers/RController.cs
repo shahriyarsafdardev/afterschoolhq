@@ -535,14 +535,6 @@ namespace AfterSchool.Controllers
             if (activity.IsEmpty())
                 return HttpNotFound();
 
-            /*if (IsNonVolunteerSelectingDatesForVolunteerOpportunity(activity, msgs))
-            {
-                msgs.Add("Only volunteer accounts can register for volunteer opportunities", MessageType.UserError);
-                SetTempMessage(msgs);
-                return Redirect(activity.GetHomePageUrl());
-            }*/
-                
-
             var participationObject = activity.GetParticipationObject(msgs);
 
             ViewBag.Messages = msgs;
