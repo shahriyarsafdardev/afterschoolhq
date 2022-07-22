@@ -169,6 +169,38 @@ else
                 Registration Closed
             </button>
         }
+        else if (Model.ActivityType == ActivityType.VolunteerOpportunity)
+        {
+            if (canRegisterFor || !isPublished)
+            {
+                if (Model.GetActivity().CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
+                {   
+                    <a href="@(isPublished ? Model.GetActivityDateSelectionUrl() : "javascript:void(0)")"
+                       class="@(isPublished ? "" : "disabled") btn btn-register btn-block"
+                       @isPublished>
+                        <span>Select Dates &raquo;</span>
+                    </a>
+                }
+                else
+                {
+                    var buttonText = Model.SeatsRemaining == 0 ? "Join Waiting List" : Model.RegistrationMode.ToString();
+                    var alreadyRegistered = false;
+                    var volunteerRegistrant = currentUser?.GetMasterVolunteerRegistrant();
+                    
+                    if (volunteerRegistrant.IsNotEmpty())
+                    {
+                        alreadyRegistered = volunteerRegistrant.HasSubmittedFor(Model, null);
+                        buttonText = "Already Registered";
+                    }
+                    
+                    <a href="@(isPublished? Model.GetRegistrationPageUrl(): "javascript:void(0)")" 
+                       class="@(isPublished || alreadyRegistered?"":"disabled") btn btn-register btn-block" 
+                       @isPublished>
+                        @buttonText &raquo;
+                    </a>
+                }
+            }
+        }
         else
         {
             if (canRegisterFor || !isPublished)

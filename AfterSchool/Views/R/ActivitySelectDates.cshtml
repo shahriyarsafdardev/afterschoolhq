@@ -6,6 +6,8 @@
     var account = (Account)ViewBag.Account;
     var msgs = (SystemMessages)ViewBag.Messages;
     var accountProfile = (AccountProfile)ViewBag.AccountProfile;
+    var currentUser = SessionVariables.CurrentUser;
+    var volunteerRegistrant = currentUser?.GetMasterVolunteerRegistrant();
 }
 <style>
     .disabled {
@@ -51,8 +53,15 @@
                                 <div>
                                     @foreach (var date in Model.Schedule.GetNextInstances(12, Model))
                                     {
+                                        var alreadyRegistered = false;
+                                        
+                                        if (volunteerRegistrant.IsNotEmpty())
+                                        {
+                                            alreadyRegistered = volunteerRegistrant.IsReservedForDate(Model, date, null);
+                                        }
+                                        
                                         <div class="am-checkbox">
-                                            <input type="checkbox" class="form-control" name="date-@date" id="date-@date" value="@date" />
+                                            <input type="checkbox" class="form-control" name="date-@date" id="date-@date" value="@date" @(alreadyRegistered?"disabled=\"disabled\"":"") />
                                             <label for="date-@date">
                                                 @date.ToLongDateTimeString()
                                                 (@Model.GetActivity().GetSeatsRemainingByDate(date) Spots Left)
