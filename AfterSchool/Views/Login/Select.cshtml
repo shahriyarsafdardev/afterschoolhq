@@ -34,7 +34,8 @@
                             @foreach (var account in Model)
                             {                            
                                 <button onclick="selectAccount('@account.Uid')"
-                                        class="btn btn-primary btn-xl btn-space btn-block">
+                                        class="btn btn-primary btn-xl btn-space btn-block"
+                                        @(account.AccountTypeId == AccountType.Volunteer ? "disabled=\"disabled\"" : "")>
                                     @account.Name &raquo;
                                 </button>
                             }

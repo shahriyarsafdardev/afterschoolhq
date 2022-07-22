@@ -295,15 +295,7 @@ else if (currentUser.IsNotEmpty())
 
             if (currentUser.HasMultipleAccounts())
             {
-                var registrationAccount = currentUser.GetRegistrantAccount();
-                if (registrationAccount.IsNotEmpty() && currentAccount?.ID != registrationAccount.ID)
-                {
-                    <a class="btn btn-link" href="@Url.Action("select", "login", new {area = "", id = registrationAccount.Uid.ToString()})">Switch to @registrationAccount.Name</a>
-                }
-                else
-                {
-                    <a href="@Url.Action("switch", "logout", new {returnurl = returnUrl})" class="btn btn-link">Switch Accounts</a>
-                }
+                <a href="@Url.Action("switch", "logout", new {returnurl = returnUrl})" class="btn btn-link">Switch Accounts</a>
             }
             <a href="@Url.Action("index", "logout", new {returnurl = Context.Request.Path})" class="btn btn-link">Logout</a>
         }
