@@ -213,17 +213,17 @@ namespace AfterSchool.Controllers
                         // teachers aren't looking to pay and people coming in from an invite should just start on the free account
                         if (model.SignupType == SignUpType.Teacher1099 || invitingAccount.IsNotEmpty())
                             account = user.AddNewAccount(
-                                model.OrgName,
-                                model.Phone,
-                                true,
-                                model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
-                                PackageService.GetFreePackage(amsgs, adc).ID.Value,
+                                orgName: model.OrgName,
+                                phone: model.Phone,
+                                isActive: true,
+                                accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
+                                packageId: PackageService.GetFreePackage(amsgs, adc).ID.Value,
                                 BillingPeriodType.Month,
-                                null,
-                                true,
-                                user,
-                                amsgs,
-                                adc);
+                                timeZone: null,
+                                isAfterSchool: true,
+                                loggedInUser: user,
+                                msgs: amsgs,
+                                dc: adc);
                         else
                             account = user.AddNewAccountWithDefaultPackageWithStripe(
                                 orgName: model.OrgName,
