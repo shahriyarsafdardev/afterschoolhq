@@ -267,14 +267,12 @@ namespace AfterSchool.Controllers
             if (currentUser.IsNotEmpty())
             {
                 var studentRegistrant = currentUser.GetMasterParentOrStudentRegistrant(msgs);
-                if (msgs.HasNoErrors() && !studentRegistrant.IsParentOrGuardian)
+                if (msgs.HasNoErrors() && studentRegistrant.IsNotEmpty() && !studentRegistrant.IsParentOrGuardian)
                 {
                     SessionVariables.CurrentRegistrant = studentRegistrant;
-
                     return RedirectToAction("RegisterStudent");
                 }
             }
-
 
             qvms.ForEach(qvm =>
             {

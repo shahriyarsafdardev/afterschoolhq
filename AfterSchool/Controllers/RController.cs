@@ -416,7 +416,7 @@ namespace AfterSchool.Controllers
                     registrantAccount =
                         currentUser.AddNewRegistrantAccount(UserType.Owner, true, true, currentUser, msgs);
 
-                var masterRegistrant = currentUser.GetMasterRegistrant(msgs);
+                var masterRegistrant = currentUser.GetMasterParentOrStudentRegistrant(msgs);
 
                 if (masterRegistrant.IsNotEmpty())
                     registrantAccount = masterRegistrant.GetAccount(msgs);
@@ -544,12 +544,6 @@ namespace AfterSchool.Controllers
             ViewBag.AccountProfile = accountProfile;
 
             return View("ActivitySelectDates", participationObject);
-        }
-
-        private static bool IsNonVolunteerSelectingDatesForVolunteerOpportunity(Activity activity, SystemMessages msgs)
-        {
-            return activity.ActivityTypeId == ActivityType.VolunteerOpportunity &&
-                   (!SessionVariables.CurrentUser?.GetMasterRegistrant(msgs).IsVolunteer ?? false);
         }
 
         [HttpPost]
@@ -897,17 +891,22 @@ namespace AfterSchool.Controllers
             if (SessionVariables.CurrentRegistrant.IsEmpty())
             {
                 if (participationObject.ActivityType == ActivityType.VolunteerOpportunity)
-                {
                     return RedirectToAction("getstarted", "volunteerRegistration", new {area = "", regaccount = account.Uid});
-                }
+                
                 return RedirectToAction("getstarted", "account", new {area = "", regaccount = account.Uid});
             }
 
-            var masterRegistrant = SessionVariables.CurrentUser.GetMasterRegistrant();
 
-            if (masterRegistrant.IsParentOrGuardian)
+            Registrant masterRegistrant = null;
+
+            if (participationObject.ActivityType == ActivityType.VolunteerOpportunity)
+                masterRegistrant = SessionVariables.CurrentUser.GetMasterVolunteerRegistrant();
+            else
+                masterRegistrant = SessionVariables.CurrentUser.GetMasterParentOrStudentRegistrant();
+
+            if (masterRegistrant.IsVolunteer || masterRegistrant.IsParentOrGuardian)
             {
-                // LOG: Somone Began Registration for ParticipationObjectType ParticipationObjectName by Account AccountName
+                // LOG: Someone Began Registration for ParticipationObjectType ParticipationObjectName by Account AccountName
                 SessionVariables.WebSession.LogActivity(
                     account,
                     SessionVariables.CurrentUser,

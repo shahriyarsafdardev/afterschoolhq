@@ -28,13 +28,16 @@ namespace AfterSchoolLibrary.Services
             string customMessage, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (checkoutObject.ParticipationObject.ActivityType == ActivityType.VolunteerOpportunity)
+            {
                 msgs.AddRange(EmailHelper.SendVolunteerRegistrationConfirmed(checkoutObject, customMessage, loggedInUser, sendBcc, dc));
-            else
-                msgs.AddRange(EmailHelper.SendRegistrationConfirmed(checkoutObject, customMessage, loggedInUser, false, sendBcc, dc));
+                return;
+            }
+
+            msgs.AddRange(EmailHelper.SendRegistrationConfirmed(checkoutObject, customMessage, loggedInUser, false, sendBcc, dc));
 
             // if the person registering is the student
             // TODO: Handle better if provider on the backend is registering the student
-            var masterRegistrant = loggedInUser.GetMasterRegistrant(msgs, dc);
+            var masterRegistrant = loggedInUser.GetMasterParentOrStudentRegistrant(msgs, dc);
 
             if (masterRegistrant.IsNotEmpty() && masterRegistrant.PersonTypeId == RegistrantPersonType.Student)
                 msgs.AddRange(EmailHelper.SendRegistrationConfirmed(checkoutObject, customMessage, loggedInUser, true,

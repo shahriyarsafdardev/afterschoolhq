@@ -297,11 +297,6 @@ namespace AfterSchoolLibrary.Services
             return Registrant.LoadByWebUserId(user.ID.Value, new List<RegistrantPersonType>() { RegistrantPersonType.Parent, RegistrantPersonType.Student },
                 true, false, msgs, dc).FirstOrDefault();
         }
-        
-        public static Registrant GetMasterRegistrant(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return Registrant.LoadByWebUserIdByIsMasterByIsDeleted(user.ID.Value, true, false, msgs, dc).FirstOrDefault();
-        }
 
         public static List<Registrant> GetAllRegistrants(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
