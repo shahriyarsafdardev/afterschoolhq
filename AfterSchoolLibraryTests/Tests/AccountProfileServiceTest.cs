@@ -35,7 +35,7 @@ namespace AfterSchoolLibraryTests.Tests
         {
             var accountProfile = AccountProfileFactory.Create(account, msgs, dc);
 
-            AccountProfileService.UpdateProfileAdditionalInfo(accountProfile, "", "", "", "", "10", "12", false , false, false, user, msgs, dc);
+            AccountProfileService.UpdateProfileAdditionalInfo(accountProfile, "", "", "", "", "10", "12", false, user, msgs, dc);
 
             Assert.True(accountProfile.CostHigh == 10);
         }
