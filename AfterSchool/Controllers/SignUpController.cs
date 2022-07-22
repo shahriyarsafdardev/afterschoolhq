@@ -210,32 +210,27 @@ namespace AfterSchool.Controllers
                         if (model.SignupType.IsNotEmpty() && model.SignupType == SignUpType.Teacher1099)
                             model.OrgName = $"{model.FirstName} {model.LastName} Teacher";
 
-                        // teachers aren't looking to pay
-                        if (model.SignupType == SignUpType.Teacher1099)
-                        {
-                            var package = PackageService.GetFreePackage(amsgs, adc);
-                            
-                            //this WebUser accountOwner, string orgName, string phone, bool isActive, AccountType accountType, int? packageId, BillingPeriodType? packageBillingPeriod, string timeZone, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null
+                        // teachers aren't looking to pay and people coming in from an invite should just start on the free account
+                        if (model.SignupType == SignUpType.Teacher1099 || model.InviteCodeToShare.IsNotEmpty())
                             account = user.AddNewAccount(
                                 model.OrgName,
                                 model.Phone,
                                 true,
                                 model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
-                                package.ID.Value,
+                                PackageService.GetFreePackage(amsgs, adc).ID.Value,
                                 BillingPeriodType.Month,
                                 null,
                                 true,
                                 user,
                                 amsgs,
                                 adc);
-                        }
                         else
                             account = user.AddNewAccountWithDefaultPackageWithStripe(
-                            orgName: model.OrgName,
-                            accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
-                            loggedInUser: user,
-                            msgs: amsgs,
-                            dc: adc);
+                                orgName: model.OrgName,
+                                accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
+                                loggedInUser: user,
+                                msgs: amsgs,
+                                dc: adc);
 
                         if (user.IsNotEmpty() && account.IsNotEmpty() && amsgs.HasNoErrors())
                         {
