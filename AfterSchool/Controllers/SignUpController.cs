@@ -210,12 +210,27 @@ namespace AfterSchool.Controllers
                         if (model.SignupType.IsNotEmpty() && model.SignupType == SignUpType.Teacher1099)
                             model.OrgName = $"{model.FirstName} {model.LastName} Teacher";
 
-                        account = user.AddNewAccountWithDefaultPackageWithStripe(
-                            orgName: model.OrgName,
-                            accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
-                            loggedInUser: user,
-                            msgs: amsgs,
-                            dc: adc);
+                        // teachers aren't looking to pay and people coming in from an invite should just start on the free account
+                        if (model.SignupType == SignUpType.Teacher1099 || invitingAccount.IsNotEmpty())
+                            account = user.AddNewAccount(
+                                orgName: model.OrgName,
+                                phone: model.Phone,
+                                isActive: true,
+                                accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
+                                packageId: PackageService.GetFreePackage(amsgs, adc).ID.Value,
+                                BillingPeriodType.Month,
+                                timeZone: null,
+                                isAfterSchool: true,
+                                loggedInUser: user,
+                                msgs: amsgs,
+                                dc: adc);
+                        else
+                            account = user.AddNewAccountWithDefaultPackageWithStripe(
+                                orgName: model.OrgName,
+                                accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
+                                loggedInUser: user,
+                                msgs: amsgs,
+                                dc: adc);
 
                         if (user.IsNotEmpty() && account.IsNotEmpty() && amsgs.HasNoErrors())
                         {
@@ -273,10 +288,10 @@ namespace AfterSchool.Controllers
                 if (model.SignupType == SignUpType.Teacher1099)
                     return RedirectToAction("paymentsoptions", "account",
                         new {area = "org", isfullscreen = 1, signuptype = (int) model.SignupType});
-
-                return featureFlagRepository.IsEnabled("free-trial")
-                    ? RedirectToAction("freetrial", "onboarding", new {area = "org"})
-                    : RedirectToAction("index", "onboarding", new {area = "org", showGettingStarted = true});
+                else if (invitingAccount.IsNotEmpty())
+                    return RedirectToAction("index", "onboarding", new {area = "org", showGettingStarted = true});
+                
+                return RedirectToAction("freetrial", "onboarding", new { area = "org" });
             }
 
 
