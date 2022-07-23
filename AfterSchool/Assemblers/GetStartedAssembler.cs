@@ -80,7 +80,7 @@ namespace AfterSchool.Assemblers
             qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value = currentUser.Email;
             
             if (currentUser.Phone.IsNotEmpty())
-                qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value = currentUser.Phone;
+                qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value = currentUser.Phone;
 
             qvms.ForEach(qvm =>
             {
@@ -127,7 +127,7 @@ namespace AfterSchool.Assemblers
             qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value = currentUser.Email;
             
             if (currentUser.Phone.IsNotEmpty())
-                qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value = currentUser.Phone;
+                qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value = currentUser.Phone;
 
             qvms.ForEach(qvm =>
             {
