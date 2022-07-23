@@ -225,13 +225,13 @@ else
                 {
                     if (!isPublished)
                     {
-                        <button class="disabled btn btn-register btn-block" disabled="disabled" False>
+                        <button class="disabled btn btn-register btn-block" disabled="disabled">
                             <span>Select Dates @anotherChildString &raquo;</span>
                         </button>
                     }
                     else
                     {
-                        <a href="@Model.GetActivityDateSelectionUrl()" class="btn btn-register btn-block" True>
+                        <a href="@Model.GetActivityDateSelectionUrl()" class="btn btn-register btn-block">
                             <span>Select Dates @anotherChildString &raquo;</span>
                         </a>
                     }
@@ -242,14 +242,13 @@ else
                     
                     if (!isPublished)
                     {
-                        <button class="disabled btn btn-register btn-block"
-                                disabled="disabled" False>
+                        <button class="disabled btn btn-register btn-block" disabled="disabled">
                             <span>@buttonText @anotherChildString &raquo;</span>
                         </button>
                     }
                     else
                     {
-                        <a href="@Model.GetRegistrationPageUrl()" class="btn btn-register btn-block" True>
+                        <a href="@Model.GetRegistrationPageUrl()" class="btn btn-register btn-block">
                             <span>@buttonText @anotherChildString &raquo;</span>
                         </a>
                     }
