@@ -175,11 +175,18 @@ else
             {
                 if (Model.GetActivity().CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
                 {   
-                    <button onclick="location.href='@Model.GetActivityDateSelectionUrl()'"
-                            class="@(!isPublished ? "disabled" : "") btn btn-register btn-block"
-                            @(!isPublished?"disabled=\"disabled\"":"")>
-                        <span>Select Dates &raquo;</span>
-                    </button>
+                    if (!isPublished)
+                    {
+                        <button class="disabled btn btn-register btn-block" disabled="disabled" False>
+                            <span>Select Dates &raquo;</span>
+                        </button>
+                    }
+                    else
+                    {
+                        <a href="@Model.GetActivityDateSelectionUrl()" class="btn btn-register btn-block" True>
+                            <span>Select Dates &raquo;</span>
+                        </a>
+                    }
                 }
                 else
                 {
@@ -192,12 +199,19 @@ else
                         alreadyRegistered = true;
                         buttonText = "Already Registered";
                     }
-                    
-                    <button onclick="location.href='@Model.GetActivityDateSelectionUrl()'"
-                            class="@(!isPublished || alreadyRegistered?"disabled":"") btn btn-register btn-block"
-                            @(!isPublished || alreadyRegistered?"disabled=\"disabled\"":"")>
-                        <span>@buttonText &raquo;</span>
-                    </button>
+
+                    if (!isPublished || alreadyRegistered)
+                    {
+                        <button class="disabled btn btn-register btn-block" disabled="disabled">
+                            <span>@buttonText &raquo;</span>
+                        </button>
+                    }
+                    else
+                    {
+                        <a href="@Model.GetRegistrationPageUrl()" class="btn btn-register btn-block">
+                            <span>@buttonText &raquo;</span>
+                        </a>
+                    }
                 }
             }
         }
@@ -209,20 +223,36 @@ else
                 
                 if (Model.IsActivity() && Model.GetActivity().CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
                 {
-                    <a href="@(isPublished ? Model.GetActivityDateSelectionUrl() : "javascript:void(0)")"
-                       class="@(isPublished ? "" : "disabled") btn btn-register btn-block"
-                       @isPublished>
-                        <span>Select Dates @anotherChildString &raquo;</span>
-                    </a>
+                    if (!isPublished)
+                    {
+                        <button class="disabled btn btn-register btn-block" disabled="disabled" False>
+                            <span>Select Dates @anotherChildString &raquo;</span>
+                        </button>
+                    }
+                    else
+                    {
+                        <a href="@Model.GetActivityDateSelectionUrl()" class="btn btn-register btn-block" True>
+                            <span>Select Dates @anotherChildString &raquo;</span>
+                        </a>
+                    }
                 }
                 else
                 {
                     var buttonText = Model.SeatsRemaining == 0 ? "Join Waiting List" : Model.RegistrationMode.ToString();
-                    <a href="@(isPublished? Model.GetRegistrationPageUrl(): "javascript:void(0)")" 
-                       class="@(isPublished?"":"disabled") btn btn-register btn-block" 
-                       @isPublished>
-                        @buttonText @anotherChildString &raquo;
-                    </a>
+                    
+                    if (!isPublished)
+                    {
+                        <button class="disabled btn btn-register btn-block"
+                                disabled="disabled" False>
+                            <span>@buttonText @anotherChildString &raquo;</span>
+                        </button>
+                    }
+                    else
+                    {
+                        <a href="@Model.GetRegistrationPageUrl()" class="btn btn-register btn-block" True>
+                            <span>@buttonText @anotherChildString &raquo;</span>
+                        </a>
+                    }
                 }
             }
         }
