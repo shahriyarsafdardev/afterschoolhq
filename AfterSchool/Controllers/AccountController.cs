@@ -356,9 +356,11 @@ namespace AfterSchool.Controllers
                             );
                         }
 
-                        if (amsgs.HasNoErrors()) registrant = RegistrationCommon.GetOrCreateParentOrGuardianRegistrant(account, user, amsgs, adc);
+                        if (amsgs.HasNoErrors()) 
+                            registrant = RegistrationCommon.GetOrCreateParentOrGuardianRegistrant(account, user, amsgs, adc);
 
-                        if (amsgs.HasNoErrors()) RegistrationCommon.AddOrUpdateStandardAnswers(qvms, registrant, user, amsgs, adc);
+                        if (amsgs.HasNoErrors()) 
+                            RegistrationCommon.AddOrUpdateStandardAnswers(qvms, registrant, user, amsgs, adc);
                     },
                     smsgs =>
                     {
