@@ -185,10 +185,13 @@ namespace AfterSchool.Controllers
                         false,
                         msgs);
 
-                var hasCompletedParentProfile = masterRegistrant.IsNotEmpty() && masterRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed &&
-                                                !isInterestForm && masterRegistrant.IsParentOrGuardian;
-                if (hasCompletedParentProfile)
-                    return RedirectToAction("select");
+                if (masterRegistrant.IsParentOrGuardian)
+                {
+                    var hasCompletedParentProfile = masterRegistrant.IsNotEmpty() && masterRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed &&
+                                                    !isInterestForm && masterRegistrant.IsParentOrGuardian;
+                    if (hasCompletedParentProfile)
+                        return RedirectToAction("select");
+                }
             }
 
             return null;
