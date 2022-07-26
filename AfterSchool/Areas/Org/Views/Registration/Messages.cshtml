@@ -3,9 +3,8 @@
     ViewBag.Title = $"Messages - {SessionVariables.CurrentAccount.Name}";
     var msgs = (SystemMessages)ViewBag.Messages;
     var isVolunteers = Request.QueryString["volunteers"] == "true";
-    var SendNewMessageUrl = isVolunteers ? Url.Action("messageadd", "registration", new {volunteers = "true"}) : Url.Action("messageadd", "registration");
-    var receiptants = isVolunteers ? "Volunteers" : "Students"; //Verify how it is done in other locations
-}
+    var sendNewMessageUrl = isVolunteers ? Url.Action("messageadd", "registration", new {volunteers = "true"}) : Url.Action("messageadd", "registration");
+    var registrants = UILabel.RegistrantLabel(isVolunteers ? ActivityType.VolunteerOpportunity : ActivityType.Activity, true);}
 
 @{Html.RenderPartial("OrgAccountHeader");}
 
@@ -28,7 +27,7 @@
 
                 <div class="panel-body">
 
-                    <h3>Filter @receiptants</h3>
+                    <h3>Filter @registrants</h3>
 
                     @{ Html.RenderPartial("_RegistrationSearchBar"); }
 
@@ -45,7 +44,7 @@
                   Model,
                   new ViewDataDictionary
                   {
-                    { "SendNewMessageLink", @SendNewMessageUrl },
+                    { "SendNewMessageLink", sendNewMessageUrl },
                     { "Account", SessionVariables.CurrentAccount },
                     { "ViewLinkController", "registration" },
                     { "ShowAddMessage", false },
