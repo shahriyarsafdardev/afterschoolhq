@@ -593,7 +593,7 @@
                     var discountString = data.discountString;
 
                     //.. calculated this value on back end side and updated the UI on the fly
-                    // if coupon is invalid amounts will be regular amount of activity
+                    // if coupon is invalid amounts will be regular amount of activity                    
                     if (data.postPayPlanAmount <= 0 && data.calculatedAmountCC == 0 && data.calculatedAmountACH == 0 && data.calculatedCCFee == 0) {
                         $('#payment-info-ach').hide()
                         $('#payment-info').hide()

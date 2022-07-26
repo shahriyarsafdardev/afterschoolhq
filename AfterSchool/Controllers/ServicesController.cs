@@ -160,6 +160,10 @@ namespace AfterSchool.Controllers
                 // ACH amount, since we don't have any transaction fees on ACH, we can directly pass discounted amount
                 calculatedAmountACH = discountedAmount;
 
+                // can't charge a CC fee is the total amount is $0
+                if (discountedAmount == 0)
+                    ccFee = 0;
+                
                 // CC amount with ccFee. we had to kept ccFee out of discounted value because of per class registration
                 // if student opted for 2 classes, fees should be calculated per class
                 calculatedAmountCC = discountedAmount + ccFee;
@@ -185,7 +189,7 @@ namespace AfterSchool.Controllers
             if (msgs.HasNoErrors())
             {
                 status = "ok";
-                msgs.Add("Coupon has successfuly been applied", MessageType.Success);
+                msgs.Add("Coupon has successfully been applied", MessageType.Success);
             }
 
             return Json(
