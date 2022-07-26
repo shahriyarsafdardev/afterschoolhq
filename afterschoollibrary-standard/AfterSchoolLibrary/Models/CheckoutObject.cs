@@ -201,7 +201,7 @@ namespace AfterSchoolLibrary.Models
         public decimal GetTotalCostNoFees(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (IsCouponApplied)
-                return GetTotalCost(msgs, dc) - CouponValue(msgs, dc);
+                return Math.Max(GetTotalCost(msgs, dc) - CouponValue(msgs, dc), 0); // NOTE: Coupon value should know whether to include fees or not, but have to research much deeper
             else
                 return GetTotalCost(msgs, dc);
         }
@@ -241,7 +241,12 @@ namespace AfterSchoolLibrary.Models
             if (PaymentPlan.IsNotEmpty())
                 return GetPaymentPlanCostTodayConvenienceFee(msgs, dc) + GetSubscriptionCostTodayConvenienceFee(msgs, dc);
 
-            return GetRegistrationConvenienceFee(msgs, dc) + GetSubscriptionCostTodayConvenienceFee(msgs, dc) + GetPostPayPlanCostTodayConvenienceFee();
+            var regConvenienceFee = GetRegistrationConvenienceFee(msgs, dc);
+
+            if (RegistrationCostWithCoupon(msgs, dc) == 0)
+                regConvenienceFee = 0;
+            
+            return regConvenienceFee + GetSubscriptionCostTodayConvenienceFee(msgs, dc) + GetPostPayPlanCostTodayConvenienceFee();
         }
 
         public decimal GetTotalCreditCardFeesToday(SystemMessages msgs = null, DatabaseConnection dc = null)
