@@ -170,7 +170,7 @@ namespace AfterSchool.Controllers
                     // if no parent account, then create one real quick
                     if (registrantAccount.IsEmpty())
                         registrantAccount =
-                            currentUser.AddNewRegistrantAccount(UserType.Owner, true, true, currentUser, msgs);
+                            currentUser.AddNewParentOrStudentRegistrantAccount(UserType.Owner, true, true, currentUser, msgs);
                 }
 
                 var masterRegistrant = SessionVariables.CurrentUser.GetMasterParentOrStudentRegistrant(msgs);
@@ -333,7 +333,7 @@ namespace AfterSchool.Controllers
 
                         if (amsgs.HasNoErrors() && user.IsNotEmpty())
                         {
-                            account = RegistrationCommon.GetOrCreateRegistrantAccount(user, amsgs, adc);
+                            account = RegistrationCommon.GetOrCreateParentOrStudentRegistrantAccount(user, amsgs, adc);
 
                             // LOG: Someone Created Account AccountName
                             SessionVariables.WebSession.LogActivity(
@@ -623,7 +623,7 @@ namespace AfterSchool.Controllers
                         }
 
                         // create parent registrant record
-                        otherParent = SessionVariables.CurrentAccount.CreateRegistrant(
+                        otherParent = SessionVariables.CurrentAccount.CreateParentOrStudentRegistrant(
                             otherParentUser,
                             canBeAccessedBy,
                             RegistrantType.Individual,
@@ -780,7 +780,7 @@ namespace AfterSchool.Controllers
 
             ViewBag.School = schoolLocation;
             ViewBag.ParticipationObject = RegistrationCommon.GetParticipationObjectFromCart();
-            ViewBag.ShowStepNumber = SessionVariables.CurrentAccount.GetChildrenRegistrants(msgs).Count == 0;
+            ViewBag.ShowStepNumber = SessionVariables.CurrentAccount.GetStudentRegistrants(msgs).Count == 0;
 
             return questions;
         }
@@ -903,7 +903,7 @@ namespace AfterSchool.Controllers
                         }
 
                         // create student registrant record
-                        student = SessionVariables.CurrentAccount.CreateRegistrant(
+                        student = SessionVariables.CurrentAccount.CreateParentOrStudentRegistrant(
                             studentUser,
                             canBeAccessedBy,
                             RegistrantType.Individual,
@@ -1449,7 +1449,7 @@ namespace AfterSchool.Controllers
             else
                 ViewBag.ParticipationObject = RegistrationCommon.GetParticipationObjectFromCart();
 
-            ViewBag.ShowStepNumber = SessionVariables.CurrentAccount.GetChildrenRegistrants(msgs).Count < 2;
+            ViewBag.ShowStepNumber = SessionVariables.CurrentAccount.GetStudentRegistrants(msgs).Count < 2;
 
             return questions;
         }
@@ -2320,7 +2320,7 @@ namespace AfterSchool.Controllers
 
                         if (amsgs.HasNoErrors())
                             // create account
-                            account = user.AddNewRegistrantAccount(
+                            account = user.AddNewParentOrStudentRegistrantAccount(
                                 UserType.Student,
                                 true,
                                 SessionVariables.IsAfterSchool.Value,
@@ -2337,7 +2337,7 @@ namespace AfterSchool.Controllers
                                 location = null;
 
                             // create student registrant record
-                            registrant = account.CreateRegistrant(
+                            registrant = account.CreateParentOrStudentRegistrant(
                                 user,
                                 user.AsList(),
                                 RegistrantType.Individual,
@@ -2474,7 +2474,7 @@ namespace AfterSchool.Controllers
                             msgs);
 
                         // Create parent registrant
-                        var parentRegistrant = SessionVariables.CurrentAccount.CreateRegistrant(
+                        var parentRegistrant = SessionVariables.CurrentAccount.CreateParentOrStudentRegistrant(
                             parentUser,
                             parentUser.AsList(),
                             RegistrantType.Individual,

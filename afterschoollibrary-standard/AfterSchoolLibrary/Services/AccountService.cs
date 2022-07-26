@@ -2021,7 +2021,7 @@ namespace AfterSchoolLibrary.Services
                     var aagId = participationObject.GetAnyRelatedAccountActivityGroupId();
 
                     // create student registrant record associated to this (provider) account
-                    student = account.CreateRegistrant(
+                    student = account.CreateParentOrStudentRegistrant(
                         registrantOwner: null,
                         canBeAccessedBy: null,
                         registrantType: RegistrantType.Individual,
@@ -3431,11 +3431,11 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static List<Registrant> GetChildrenRegistrants(this Account account, SystemMessages msgs = null,
+        public static List<Registrant> GetStudentRegistrants(this Account account, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             return Registrant.LoadByAccountIdByIsDeleted(account.ID.Value, false, msgs, dc)
-                .Where(registrant => !registrant.IsParentOrGuardian)
+                .Where(registrant => registrant.PersonTypeId == RegistrantPersonType.Student)
                 .OrderBy(registrant => registrant.DisplayName)
                 .ToList();
         }
@@ -3453,7 +3453,7 @@ namespace AfterSchoolLibrary.Services
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static Registrant CreateRegistrant(this Account account, WebUser registrantOwner,
+        public static Registrant CreateParentOrStudentRegistrant(this Account account, WebUser registrantOwner,
             List<WebUser> canBeAccessedBy, RegistrantType registrantType, bool isMaster, bool isParentOrGuardian,
             bool allowTextMessages, int? schoolLocationId, RegistrantProfileStatus profileStatus, WebUser loggedInUser,
             SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -3491,7 +3491,7 @@ namespace AfterSchoolLibrary.Services
         ///     user record, data can be added later
         /// </summary>
         /// <returns></returns>
-        public static Registrant CreateRegistrant(this Account account, string firstName, string lastName, string email,
+        public static Registrant CreateParentOrStudentRegistrant(this Account account, string firstName, string lastName, string email,
             WebUser registrantOwner, List<WebUser> canBeAccessedBy, RegistrantType registrantType, bool isMaster,
             bool isParentOrGuardian, bool allowTextMessages, int? schoolLocationId,
             RegistrantProfileStatus profileStatus, WebUser loggedInUser, SystemMessages msgs = null,
@@ -3524,6 +3524,7 @@ namespace AfterSchoolLibrary.Services
                         LastName = lastName,
                         Email = email,
                         IsDeleted = false,
+                        PersonTypeId = isParentOrGuardian ? RegistrantPersonType.Parent : RegistrantPersonType.Student
                     };
                     amsgs.AddRange(registrant.Save(adc));
 
@@ -5385,7 +5386,7 @@ namespace AfterSchoolLibrary.Services
                             parentAccount.AddUser(studentUser, UserType.Student, studentUser, amsgs, adc);
 
                             // create student registrant record
-                            studentRegistrant = parentAccount.CreateRegistrant(
+                            studentRegistrant = parentAccount.CreateParentOrStudentRegistrant(
                                 registrantOwner: studentUser,
                                 canBeAccessedBy: studentUser.AsList(),
                                 registrantType: RegistrantType.Individual,
@@ -5412,7 +5413,7 @@ namespace AfterSchoolLibrary.Services
                             if (amsgs.HasNoErrors() && studentAccount.IsNotEmpty())
                             {
                                 // create student registrant record
-                                studentRegistrant = studentAccount.CreateRegistrant(
+                                studentRegistrant = studentAccount.CreateParentOrStudentRegistrant(
                                     registrantOwner: studentUser,
                                     canBeAccessedBy: studentUser.AsList(),
                                     registrantType: RegistrantType.Individual,
@@ -5480,7 +5481,7 @@ namespace AfterSchoolLibrary.Services
                     if (amsgs.HasNoErrors() && parentUser.IsNotEmpty())
                     {
                         // Create parent registrant
-                        parentRegistrant = studentAccount.CreateRegistrant(
+                        parentRegistrant = studentAccount.CreateParentOrStudentRegistrant(
                             firstName: parentUser.FirstName,
                             lastName: parentUser.LastName,
                             email: parentUser.Email,

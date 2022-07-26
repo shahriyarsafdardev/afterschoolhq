@@ -434,7 +434,7 @@ namespace AfterSchool.Areas.User.Controllers
                                 { QuestionDataType.RegistrantWorkPhone,  QuestionDataType.Parent1WorkPhone },
                             };
 
-                            var children = SessionVariables.CurrentAccount.GetChildrenRegistrants(msgs, adc);
+                            var children = SessionVariables.CurrentAccount.GetStudentRegistrants(msgs, adc);
 
                             children.ForEach(child =>
                             {
@@ -752,7 +752,7 @@ namespace AfterSchool.Areas.User.Controllers
             // if this is the parent and owner of this account
             if (registrant.IsParentOrGuardian && registrant.GetOwner(msgs, dc)?.ID == SessionVariables.CurrentAccount.GetAccountOwner(msgs, dc).ID)
             {
-                var students = SessionVariables.CurrentAccount.GetChildrenRegistrants(msgs, dc);
+                var students = SessionVariables.CurrentAccount.GetStudentRegistrants(msgs, dc);
 
                 // copy parent answers to students
                 registrant.GetAnswers(msgs, dc)

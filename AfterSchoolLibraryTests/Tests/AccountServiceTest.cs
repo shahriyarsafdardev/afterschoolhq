@@ -2045,7 +2045,7 @@ namespace AfterSchoolLibraryTests.Tests
             var account = AccountFactory.Create(user, msgs, dc);
 
             // Act                
-            var newRegistrant = account.CreateRegistrant("Allen", "Donald", "test@test.com", user, canBeAccessedBy,
+            var newRegistrant = account.CreateParentOrStudentRegistrant("Allen", "Donald", "test@test.com", user, canBeAccessedBy,
                 RegistrantType.Individual, false, false, true, 6067, RegistrantProfileStatus.Completed, webUser, msgs,
                 dc);
 

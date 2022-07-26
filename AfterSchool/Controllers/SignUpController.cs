@@ -1085,7 +1085,7 @@ namespace AfterSchool.Controllers
                             dc: adc);
 
                         if (user.IsNotEmpty())
-                            account = user.AddNewRegistrantAccount(userType: UserType.Owner, isActive: true,
+                            account = user.AddNewParentOrStudentRegistrantAccount(userType: UserType.Owner, isActive: true,
                                 isAfterSchool: true, loggedInUser: user, msgs: amsgs, dc: adc);
                     },
                     onSuccess: (SystemMessages smsgs) =>

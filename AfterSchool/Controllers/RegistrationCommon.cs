@@ -83,13 +83,13 @@ namespace AfterSchool.Controllers
             return user;
         }
 
-        public static Account GetOrCreateRegistrantAccount(WebUser user, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Account GetOrCreateParentOrStudentRegistrantAccount(WebUser user, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var account = user.GetRegistrantAccount(msgs, dc);
 
             // create account
             if (account.IsEmpty())
-                account = user.AddNewRegistrantAccount(
+                account = user.AddNewParentOrStudentRegistrantAccount(
                     UserType.Owner,
                     true,
                     true,
@@ -124,7 +124,7 @@ namespace AfterSchool.Controllers
 
             if (registrant.IsEmpty())
                 // create parent registrant record
-                registrant = account.CreateRegistrant(
+                registrant = account.CreateParentOrStudentRegistrant(
                     user,
                     user.AsList(),
                     RegistrantType.Individual,

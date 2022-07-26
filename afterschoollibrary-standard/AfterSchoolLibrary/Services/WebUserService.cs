@@ -599,7 +599,7 @@ namespace AfterSchoolLibrary.Services
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static Account AddNewRegistrantAccount(this WebUser user, UserType userType, bool isActive, int? packageId, BillingPeriodType? packageBillingPeriod, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Account AddNewParentOrStudentRegistrantAccount(this WebUser user, UserType userType, bool isActive, int? packageId, BillingPeriodType? packageBillingPeriod, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Account account = null;
 
@@ -626,7 +626,7 @@ namespace AfterSchoolLibrary.Services
 
                     user.AddAccount(account, userType, loggedInUser, amsgs, adc);
 
-                    account.CreateRegistrant(
+                    account.CreateParentOrStudentRegistrant(
                         firstName: user.FirstName,
                         lastName: user.LastName,
                         email: user.Email,
@@ -788,7 +788,7 @@ namespace AfterSchoolLibrary.Services
 
                     user.AddAccount(account, userType, loggedInUser, amsgs, adc);
 
-                    account.CreateRegistrant(
+                    account.CreateParentOrStudentRegistrant(
                         firstName: firstName,
                         lastName: lastName,
                         email: email,
@@ -813,9 +813,9 @@ namespace AfterSchoolLibrary.Services
             return account;
         }
 
-        public static Account AddNewRegistrantAccount(this WebUser accountOwner, UserType userType, bool isActive, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Account AddNewParentOrStudentRegistrantAccount(this WebUser accountOwner, UserType userType, bool isActive, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AddNewRegistrantAccount(accountOwner, userType, isActive, null, null, isAfterSchool, loggedInUser, msgs, dc);
+            return AddNewParentOrStudentRegistrantAccount(accountOwner, userType, isActive, null, null, isAfterSchool, loggedInUser, msgs, dc);
         }
 
         public static Account AddNewAccountWithDefaultPackage(this WebUser accountOwner, string orgName, AccountType accountType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
