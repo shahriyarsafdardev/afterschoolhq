@@ -594,11 +594,15 @@
 
                     //.. calculated this value on back end side and updated the UI on the fly
                     // if coupon is invalid amounts will be regular amount of activity
+                    console.log(data);
+                    
                     if (data.postPayPlanAmount <= 0 && data.calculatedAmountCC == 0 && data.calculatedAmountACH == 0 && data.calculatedCCFee == 0) {
+                        console.log('SHOW PAYMENT ZERO');
                         $('#payment-info-ach').hide()
                         $('#payment-info').hide()
                         $('#payment-for-zero-checkout').show();
                     } else {
+                        console.log('HIDE PAYMENT ZERO');
                         $('#payment-for-zero-checkout').hide();
                         $('#payment-info-ach').show()
                         $('#payment-info').show()

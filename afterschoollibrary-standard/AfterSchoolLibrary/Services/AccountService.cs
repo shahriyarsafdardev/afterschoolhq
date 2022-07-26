@@ -4218,7 +4218,10 @@ namespace AfterSchoolLibrary.Services
         public static void ProcessRegistrationFee(CheckoutObject checkoutObject, WebUser loggedInUser,
             SystemMessages msgs, DatabaseConnection dc = null)
         {
-            if (checkoutObject.RegistrationCost(msgs, dc) > 0)
+            // need to include the coupon here,
+            // because if it is 100% off, it will be $0 and we don't collect any payment info
+            // this causes an error when we don't collect payment info, we need to skip stripe
+            if (checkoutObject.RegistrationCostWithCoupon(msgs, dc) > 0)
                 ProcessPaymentWithStripe(checkoutObject, msgs, dc);
 
             // must wait until after charges happen to know what card id is charged for sure

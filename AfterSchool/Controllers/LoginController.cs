@@ -193,7 +193,7 @@ namespace AfterSchool.Controllers
                     remember = false;
 
                 ClearCookies();
-                LoadSessionInfo(SessionVariables.CurrentUser, account, remember);
+                LoadSessionInfo(currentUser, account, remember);
 
                 HandleInvite(invite, account, currentUser, msgs);
 

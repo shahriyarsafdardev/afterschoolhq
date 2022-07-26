@@ -22,7 +22,8 @@
     var btnText = "";
     var registerUrl = Url.Action("setstudent", "account", new { id = Model.Uid });
     var btnUrl = $"javascript:checkEligibility('{Model.Uid}', '{registerUrl}', 'btn-register-{Model.Uid}')";
-    var registrantGradeText = Model.GetAnswer(QuestionDataType.RegistrantGrade).Text;
+    var registrantGrade = Model.GetAnswer(QuestionDataType.RegistrantGrade);
+    var registrantGradeText = registrantGrade.Text;
     var canStillRegister = false;
 
     if (participationObject.CanRegisterPerClass)

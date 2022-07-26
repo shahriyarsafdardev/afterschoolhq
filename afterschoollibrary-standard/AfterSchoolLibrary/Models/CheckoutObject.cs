@@ -295,6 +295,11 @@ namespace AfterSchoolLibrary.Models
             return Math.Max(RegistrationCostNoFees, 0);
         }
 
+        public decimal RegistrationCostWithCoupon(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Math.Max(RegistrationCostNoFees - CouponValue(msgs, dc), 0); 
+        }
+
         public decimal GetRegistrationCostWithFees(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return GetRegistrationCostWithConvenienceFee(msgs, dc) + GetRegistrationCreditCardFee(msgs, dc);

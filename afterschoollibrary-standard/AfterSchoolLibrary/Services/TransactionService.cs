@@ -191,7 +191,7 @@ namespace AfterSchoolLibrary.Services
                 checkoutObject.PaymentSourceType,
                 usePlatformFees ? checkoutObject.GetPlatformFlatFeeWithCoupon(msgs, dc) : new decimal?(), 
                 usePlatformFees ? checkoutObject.GetPlatformPercentFeeWithCoupon(msgs, dc) : new decimal?(),
-                checkoutObject.ConvenienceFeeOverrideAmount ?? checkoutObject.GetTotalConvenienceFeesToday(msgs, dc),
+                checkoutObject.ConvenienceFeeOverrideAmount ?? checkoutObject.GetTotalConvenienceFeesToday(msgs, dc), //NOTE: Should be 0 with 100% off coupon applied
                 checkoutObject.PaymentTypeFeeOverrideAmount ?? checkoutObject.GetTotalCreditCardFeesToday(msgs, dc),
                 checkoutObject.StripeChargeId,
                 checkoutObject.Description,
