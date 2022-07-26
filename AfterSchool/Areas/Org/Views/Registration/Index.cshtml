@@ -1,12 +1,21 @@
-﻿@model List<Registration>
+﻿@model AfterSchool.Areas.Org.Assemblers.Registration.RegistrationIndexResult
 @{
-    var msgs = (SystemMessages) ViewBag.Messages;
-    var paging = (PagingModel) ViewBag.PagingModel;
-    var studentCRMEnabled = SessionVariables.CurrentAccount.HasFeature(FeatureType.StudentCRM);
-    var studentCRMPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.StudentCRM, SessionVariables.AccountPackage);
+    var msgs = (SystemMessages)Model.Messages;
+    var paging = (PagingModel)Model.PagingModel;
+    var studentCRMEnabled = Model.IsStudentCRMEnabled;
+    var studentCRMPackage = Model.StudentCRMPackage;
+    var currentAccount = Model.CurrentAccount;
+    var isVolunteer = Request.QueryString["Volunteers"];
+    var returnUrlEditAction = isVolunteer.IsBool() && isVolunteer.ToBoolean() ? Url.Action("index", "registration", new
+    {
+        volunteers = "true"
+    }) : Url.Action("index", "registration");
 }
 
-@{ Html.RenderPartial("OrgAccountHeader"); }
+@{ Html.RenderPartial("OrgAccountHeader", new ViewDataDictionary
+   {
+       { "IsFullScreen", Model.IsFullScreen }
+   }); }
 
 <div class="main-content">
 
@@ -16,11 +25,30 @@
 
     <div id="studentcrmcontainer" class="panel panel-default">
         <div class="panel-heading">
-            <i class="s7-id"></i> @UILabel.RegistrantLabel(true)
+            @{
+                if (isVolunteer.IsBool() && isVolunteer.ToBoolean())
+                {
+                    <i class="s7-smile"></i>
+                    @UILabel.RegistrantLabel(ActivityType.VolunteerOpportunity, true)
+                }
+                else
+                {
+                    <i class="s7-id"></i>
+                    @UILabel.RegistrantLabel(true)
+                }
+            }
         </div>
         <div class="panel-body">
 
-            @{ Html.RenderPartial("_RegistrationSearchBar"); }
+            @{ Html.RenderPartial("_RegistrationSearchBar", new ViewDataDictionary
+               {
+                   { "Volunteer", isVolunteer },
+                   { "Activities", Model.Activities },
+                   { "Groups", Model.Groups },
+                   { "Questions", Model.Questions },
+                   { "QuestionGroups", Model.QuestionGroups },
+                   { "IsReadOnly", Model.SearchBarReadOnly }
+               }); }
 
             <div class="row">
                 <div class="col-md-12">
@@ -30,23 +58,25 @@
                 </div>
             </div>
 
-            @{ Html.RenderPartial("_Registrations", Model, new ViewDataDictionary
-               {
-                   {"NavAction", "index"},
-                   {"NavController", "registration"},
-                   {"NavId", ""},
-                   {"EditAction", "edit"},
-                   {"EditController", "registration"},
-                   {"Account", SessionVariables.CurrentAccount},
-                   {"Paging", paging},
-                   {"ReturnUrl", Url.Action("index", "registration")},
-               }); }
+            @{
+                Html.RenderPartial("_Registrations", Model.Registrations, new ViewDataDictionary
+                {
+                    { "NavAction", "index" },
+                    { "NavController", "registration" },
+                    { "NavId", "" },
+                    { "EditAction", "edit" },
+                    { "EditController", "registration" },
+                    { "Account", currentAccount },
+                    { "Paging", paging },
+                    { "ReturnUrl", returnUrlEditAction },
+                });
+            }
 
         </div>
     </div>
 </div>
 
-@{ Html.RenderPartial("_EmailRegistrationReportModal", SessionVariables.CurrentAccount, new ViewDataDictionary {{"PostAction", "emailreport"}, {"PostController", "registration"}, {"PostId", ""}}); }
+@{ Html.RenderPartial("_EmailRegistrationReportModal", currentAccount, new ViewDataDictionary { { "PostAction", "emailreport" }, { "PostController", "registration" }, { "PostId", "" } }); }
 
 @section scripts
 {
@@ -66,11 +96,11 @@
     <script>
 
         function sendMessages() {
-            location.href = `@Url.Action("messageadd", "registration")?${getQuery()}&${getActivityOrGroup()}${getFilterQuestionQS()}&${getRegStatus()}&${getAssignmentType()}`;
+            location.href = `@Url.Action("messageadd", "registration")?${isVolunteer()}&${getQuery()}&${getActivityOrGroup()}${getFilterQuestionQS()}&${getRegStatus()}&${getAssignmentType()}`; 
         }
 
         function doSearch(){
-            location.href = `@Url.Action("index", "registration")?${getQuery()}&${getActivityOrGroup()}${getFilterQuestionQS()}&${getRegStatus()}&${getAssignmentType()}`;
+            location.href = `@Url.Action("index", "registration")?${isVolunteer()}&${getQuery()}&${getActivityOrGroup()}${getFilterQuestionQS()}&${getRegStatus()}&${getAssignmentType()}`;
         }
     </script>
 }

@@ -52,8 +52,14 @@
             leagueexternalactive = "active";
             break;
         case "registration":
-            var queryString = ViewContext.HttpContext.Request.QueryString;
-            if (queryString.HasKeys() && queryString.GetKey(0) == "volunteers")
+            var queryString = ViewContext.RequestContext.HttpContext.Request.QueryString;
+            var isVolunteers = queryString.HasKeys() && queryString["volunteers"]?.ToLower() == "true";
+            if (!isVolunteers && ViewBag.Volunteers != null)
+            {
+                string viewBagVolunteers = ViewBag.Volunteers.ToString();
+                isVolunteers = viewBagVolunteers.IsBoolean() && viewBagVolunteers.ToBoolean();
+            }
+            if (isVolunteers)
             {
                 volunteercontactsactive = "active";
             }
@@ -218,9 +224,7 @@
                     @if (CanView(FeatureType.ManageVolunteerOpportunities, SessionVariables.AccountUserType, PermissionType.VolunteerOpportunitiesView))
                     {
                         <li class="@volunteercontactsactive">
-                            <a href="@Url.Action("index", "registration", new {
-                                         volunteers = true
-                                     })">
+                            <a href="@Url.Action("index", "registration", new {volunteers = "true"})">
                                 <i class="icon s7-smile"></i> @UILabel.RegistrantLabel(ActivityType.VolunteerOpportunity, true)
                             </a>
                         </li>

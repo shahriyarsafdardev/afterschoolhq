@@ -32,7 +32,7 @@ namespace AfterSchool.Areas.Org.Assemblers.Activity
             Account currentAccount, WebUser currentUser, RegistrationAssignmentType assignmentType, AccountPackage accountPackage, bool isReadOnlySeatStatus,
             ActivitySchedule activitySchedule, UserType userType, bool userIsActivityLeader, SystemMessages messages)
         {
-            var registrantCount = registrantActivities.Count(x => x.AssignmentTypeId.In(Registration.ReservedStatuses));
+            var registrantCount = registrantActivities.Count(x => x.AssignmentTypeId.In(AfterSchoolLibrary.Models.Registration.ReservedStatuses));
             var waitingListCount = registrantActivities.Count(x => x.AssignmentTypeId == RegistrationAssignmentType.WaitingList);
             var applicationCount = registrantActivities.Count(x => x.AssignmentTypeId == RegistrationAssignmentType.Applied);
             var invitationCount = registrantActivities.Count(x => x.AssignmentTypeId == RegistrationAssignmentType.Invited);

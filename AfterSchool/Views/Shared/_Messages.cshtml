@@ -1,12 +1,12 @@
 ﻿@model List<ActivityMessage>
 
 @{
-    var sendNewLink = (string)ViewData["SendNewMessageLink"];
-    var viewController = (string)ViewData["ViewLinkController"];
-    var viewAction = (string)ViewData["ViewLinkAction"];
-    var viewId = (string)ViewData["ViewLinkId"];
-    var account = (Account)ViewData["Account"];
-    var paging = (PagingModel)ViewData["PagingModel"];
+    var sendNewLink = (string) ViewData["SendNewMessageLink"];
+    var viewController = (string) ViewData["ViewLinkController"];
+    var viewAction = (string) ViewData["ViewLinkAction"];
+    var viewId = (string) ViewData["ViewLinkId"];
+    var account = (Account) ViewData["Account"];
+    var paging = (PagingModel) ViewData["PagingModel"];
     var showAddMessage = ViewData["ShowAddMessage"] == null || !ViewData["ShowAddMessage"].ToString().IsBoolean()
                          || ViewData["ShowAddMessage"].ToString().ToBoolean();
     var activityType = ViewData["ActivityType"] != null ? (ActivityType) ViewData["ActivityType"] : ActivityType.Activity;
@@ -23,49 +23,56 @@
 <div class="table-responsive">
     <table class="table table-hover">
         <thead>
-            <tr>
-                <th></th>
-                <th>Sent By</th>
-                <th>Date Sent</th>
-                <th>Subject</th>
-                <th># Sent</th>
-                <th># Unsent</th>
-            </tr>
+        <tr>
+            <th></th>
+            <th>Sent By</th>
+            <th>Date Sent</th>
+            <th>Subject</th>
+            <th># Sent</th>
+            <th># Unsent</th>
+        </tr>
         </thead>
         <tbody>
-            @if (Model.Any())
-            {
-                foreach (var message in Model)
-                {
-                    <tr>
-                        <td><a href="@Url.Action("messagedetail", viewController, new { id = message.Uid })" class="btn btn-primary btn-sm">View</a></td>
-                        <td>@message.GetCreatedBy().DisplayName</td>
-                        <td>@(message.DateSent.HasValue ? account.ConvertToAccountTimeZone(message.DateSent.Value).ToLongDateTimeString() : "N/A")</td>
-                        <td>@message.Subject</td>
-                        <td>@message.GetSentCount()</td>
-                        <td>@message.GetUnsentCount()</td>
-                    </tr>
-                }
-            }
-            else
+        @if (Model.Any())
+        {
+            foreach (var message in Model)
             {
                 <tr>
-                    <td colspan="5">You haven't sent any messages to your @UILabel.RegistrantLabel(activityType, true).ToLower()</td>
+                    <td>
+                        @{
+                            var routeValues = activityType == ActivityType.VolunteerOpportunity
+                                ? (object) new {id = message.Uid, volunteers = "true"}
+                                : new {id = message.Uid};
+                        }
+                        <a href="@Url.Action("messagedetail", viewController, routeValues)" class="btn btn-primary btn-sm">View</a>
+                    </td>
+                    <td>@message.GetCreatedBy().DisplayName</td>
+                    <td>@(message.DateSent.HasValue ? account.ConvertToAccountTimeZone(message.DateSent.Value).ToLongDateTimeString() : "N/A")</td>
+                    <td>@message.Subject</td>
+                    <td>@message.GetSentCount()</td>
+                    <td>@message.GetUnsentCount()</td>
                 </tr>
             }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5">You haven't sent any messages to your @UILabel.RegistrantLabel(activityType, true).ToLower()</td>
+            </tr>
+        }
         </tbody>
     </table>
 </div>
 
-@{ 
+@{
     Html.RenderPartial(
         "~/Views/Shared/_Paging.cshtml",
         paging,
-        new ViewDataDictionary()
+        new ViewDataDictionary
         {
-            { "id", viewId },
-            { "action", viewAction },
-            { "controller", viewController }
+            {"id", viewId},
+            {"action", viewAction},
+            {"controller", viewController}
         }
     );
 }

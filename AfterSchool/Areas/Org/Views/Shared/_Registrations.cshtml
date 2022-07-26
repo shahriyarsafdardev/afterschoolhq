@@ -27,6 +27,8 @@
             nextLink = Url.Action(navAction, navController, new { id = navId, pn = paging.PageNumber + 1, rpp = Request["rpp"], q = Request["q"], regstatus = Request["regstatus"], activity = Request["activity"], group = Request["group"], at = Request["at"] });
         }
     }
+    var queryString = ViewContext.RequestContext.HttpContext.Request.QueryString;
+    var isVolunteerList = queryString.HasKeys() && queryString["volunteers"] == "true";
 }
 
 <div class="table-responsive">
@@ -45,7 +47,10 @@
             {
                 foreach (var registration in Model)
                 {
-                    var editLink = Url.Action(editAction, editController, new { id = registration.Uid.ToString(), returnUrl });
+                    var routeValues = isVolunteerList 
+                        ? (object) new {id = registration.Uid.ToString(), volunteers = "true", returnUrl} 
+                        : new {id = registration.Uid.ToString(), returnUrl};
+                    var editLink = Url.Action(editAction, editController, routeValues);
                     var registrant = registration.ToRegistrant();
                         <tr>
                             <td>

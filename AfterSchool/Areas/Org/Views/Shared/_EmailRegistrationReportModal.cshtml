@@ -3,6 +3,12 @@
     var action = ViewData["PostAction"].ToString();
     var controller = ViewData["PostController"].ToString();
     var id = ViewData["PostId"].ToString();
+    
+    var isVolunteers = Request.QueryString["Volunteers"]; 
+    if (isVolunteers == null)
+    {
+        isVolunteers = "false";
+    }
 }
 <div id="modal-emails" class="md-modal colored-header custom-width md-effect-9">
     <form id="form-emails" action="@Url.Action(action, controller, new { id = id, q = Request["q"], question = Request["question"], regstatus = Request["regstatus"], activity = Request["activity"], group = Request["group"], at = Request["at"] })" method="post">
@@ -66,6 +72,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+                <input type="hidden" name="volunteers" value="@isVolunteers"/>
                 <button type="submit" class="btn btn-primary">Send Report</button>
             </div>
         </div>

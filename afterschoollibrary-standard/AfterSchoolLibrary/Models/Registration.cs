@@ -729,7 +729,7 @@ namespace AfterSchoolLibrary.Models
             var activityIdWhere = "";
 
 
-            activityJoin = "inner join RegistrantActivity ra on r2.ID = ra.RegistrationId";
+            activityJoin = $"inner join RegistrantActivity ra on r2.ID = ra.RegistrationId inner join Activity a on ra.ParticipationObjectId = a.ID and ra.ParticipationObjectTypeId = {(int)participationObjectType}";
 
             if (hasAssignmentTypes)
                 assignmentTypeWhere =
@@ -742,10 +742,6 @@ namespace AfterSchoolLibrary.Models
 
             var regStatusJoin = "";
             var regStatusWhere = "";
-
-            // Require future attention
-            regStatusJoin = $"inner join Activity a on ra.ParticipationObjectId = a.ID and ra.ParticipationObjectTypeId = {(int)participationObjectType}";
-            //  inner join ActivityInstance ai on a.ActivityScheduleId = ai.ActivityScheduleId
             
             var activityTypeWhere = getVolunteers
                 ? $"a.ActivityTypeId = {(int)ActivityType.VolunteerOpportunity}"
@@ -753,6 +749,7 @@ namespace AfterSchoolLibrary.Models
 
             if (hasRegStatus)
             {
+                regStatusJoin = "inner join ActivityInstance ai on a.ActivityScheduleId = ai.ActivityScheduleId";
                 switch (regStatus)
                 {
                     case RegistrationStatus.Past:

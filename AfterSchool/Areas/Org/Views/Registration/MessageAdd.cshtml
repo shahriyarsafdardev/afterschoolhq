@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     ViewBag.Title = SessionVariables.CurrentAccount.Name;
     var msgs = (SystemMessages)ViewBag.Messages;
     var totalCount = (int)ViewBag.TotalCount;
@@ -7,16 +6,20 @@
     var selectedActivities = (List<Activity>)ViewBag.SelectedActivities;
     var selectedGroups = (List<ActivityGroup>)ViewBag.SelectedGroups;
     var registrations = (List<Registration>)ViewBag.Registrations;
-    var sendButtonText = $"Send Message to {UILabel.RegistrantLabel(true)}";
+    var queryString = ViewContext.RequestContext.HttpContext.Request.QueryString;
+    var isVolunteers = queryString.HasKeys() && queryString["volunteers"] == "true";
+    var recipients = UILabel.RegistrantLabel(isVolunteers ? ActivityType.VolunteerOpportunity : ActivityType.Activity, true);
+    var sendButtonText = $"Send Message to {recipients}";
+    var sendMessagesUrl = isVolunteers ? Url.Action("messages", "registration", new { volunteers = "true" }) : Url.Action("messages", "registration");
 }
 
-@{Html.RenderPartial("OrgAccountHeader");}
+@{ Html.RenderPartial("OrgAccountHeader"); }
 
 <div class="main-content">
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{Html.RenderPartial("_RegistrationHeader");}
+    @{ Html.RenderPartial("_RegistrationHeader"); }
 
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -25,13 +28,12 @@
         <div class="panel-body">
 
             <form method="post" action="@Url.Action("messageadd", "registration")" class="form-horizontal">
-
                 @if (Request["q"].IsNotEmpty())
                 {
                     <div class="form-group">
                         <label class="col-sm-3 control-label">Search Term</label>
                         <div class="col-sm-6">
-                            <input type="text" readonly="readonly" class="form-control" value="@Request["q"]" />
+                            <input type="text" readonly="readonly" class="form-control" value="@Request["q"]"/>
                         </div>
                     </div>
                 }
@@ -41,11 +43,11 @@
                     <div class="col-sm-6">
                         @if (selectedActivities.Any() || selectedGroups.Any())
                         {
-                            <input type="text" readonly="readonly" class="form-control" value="@selectedGroups.Select(group => group.Name).Union(selectedActivities.Select(activity => activity.Name)).JoinWith(",")" />
+                            <input type="text" readonly="readonly" class="form-control" value="@string.Join(",", selectedGroups.Select(group => group.Name).Union(selectedActivities.Select(activity => activity.Name)))"/>
                         }
                         else
                         {
-                            <input type="text" readonly="readonly" class="form-control" value="All @UILabel.ActivityLabel(plural: true)" />
+                            <input type="text" readonly="readonly" class="form-control" value="All @UILabel.ActivityLabel(plural: true)"/>
                         }
                     </div>
                 </div>
@@ -55,11 +57,11 @@
                     <div class="col-sm-6">
                         @if (Request["at"].IsNotEmpty() && Request["at"].IsNumber())
                         {
-                            <input type="text" readonly="readonly" class="form-control" value="@(Request["at"].ToInteger().ToEnum<RegistrationAssignmentType>().ToString().SplitByUpperCase())" />
+                            <input type="text" readonly="readonly" class="form-control" value="@(Request["at"].ToInteger().ToEnum<RegistrationAssignmentType>().ToString().SplitByUpperCase())"/>
                         }
                         else
                         {
-                            <input type="text" readonly="readonly" class="form-control" value="All Seat Assignments" />
+                            <input type="text" readonly="readonly" class="form-control" value="All Seat Assignments"/>
                         }
                     </div>
                 </div>
@@ -69,11 +71,11 @@
                     <div class="col-sm-6">
                         @if (Request["regstatus"].IsNotEmpty() && Request["regstatus"].IsNumber())
                         {
-                            <input type="text" readonly="readonly" class="form-control" value="@(Request["regstatus"].ToInteger().ToEnum<RegistrationAssignmentType>().ToString().SplitByUpperCase())" />
+                            <input type="text" readonly="readonly" class="form-control" value="@(Request["regstatus"].ToInteger().ToEnum<RegistrationAssignmentType>().ToString().SplitByUpperCase())"/>
                         }
                         else
                         {
-                            <input type="text" readonly="readonly" class="form-control" value="All Students" />
+                            <input type="text" readonly="readonly" class="form-control" value="All @recipients"/>
                         }
                     </div>
                 </div>
@@ -91,11 +93,12 @@
                     </div>
                 </div>
 
-                <input type="hidden" name="q" value="@Request["q"]" />
-                <input type="hidden" name="activity" value="@Request["activity"]" />
-                <input type="hidden" name="group" value="@Request["group"]" />
-                <input type="hidden" name="at" value="@Request["at"]" />
-                <input type="hidden" name="regstatus" value="@Request["regstatus"]" />
+                <input type="hidden" name="q" value="@Request["q"]"/>
+                <input type="hidden" name="activity" value="@Request["activity"]"/>
+                <input type="hidden" name="group" value="@Request["group"]"/>
+                <input type="hidden" name="at" value="@Request["at"]"/>
+                <input type="hidden" name="regstatus" value="@Request["regstatus"]"/>
+                <input type="hidden" name="volunteers" value="@isVolunteers.ToString()">
 
                 <div class="form-group">
                     <label class="col-sm-3 control-label">Message Body</label>
@@ -109,19 +112,19 @@
                     <label class="col-sm-3 control-label"></label>
                     <div class="col-sm-6">
                         <div class="am-checkbox">
-                            <input type="checkbox" id="sendtostaff" name="sendtostaff" value="1" checked="checked" />
+                            <input type="checkbox" id="sendtostaff" name="sendtostaff" value="1" checked="checked"/>
                             <label for="sendtostaff">Send Message To Staff</label>
                         </div>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="col-sm-3 control-label">Selected Students</label>
+                    <label class="col-sm-3 control-label">Selected @recipients</label>
                     <div class="col-sm-6">
                         <div class="panel panel-default panel-borders">
                             <div class="panel-body">
                                 <div style="height: 200px; overflow: auto;">
-                                    @Html.Raw(registrations.Select(registration => $"{registration.RegistrantName}").JoinWith("<br />"))
+                                    @Html.Raw(string.Join("<br />", registrations.Select(registration => $"{registration.RegistrantName}")))
                                 </div>
                             </div>
                         </div>
@@ -134,9 +137,9 @@
                         <div class="panel panel-default panel-borders">
                             <div class="panel-body">
                                 <div class="am-checkbox">
-                                    <input type="checkbox" id="confirmed" name="confirmed" value="1" required onclick="checkForm()" />
+                                    <input type="checkbox" id="confirmed" name="confirmed" value="1" required onclick="checkForm()"/>
                                     <label for="confirmed" id="lblconfirmed">
-                                        I acknowledge that clicking <strong>'@sendButtonText'</strong> will send the message above to <strong>@totalCount @UILabel.RegistrantLabel(true).ToLower()</strong>. <strong>Once the message is sent it is non-reversible and it cannot be undone</strong>. Please carefully review your message and the list of @UILabel.RegistrantLabel(true).ToLower() before you click '@sendButtonText' below.
+                                        I acknowledge that clicking <strong>'@sendButtonText'</strong> will send the message above to <strong>@totalCount @recipients.ToLower()</strong>. <strong>Once the message is sent it is non-reversible and it cannot be undone</strong>. Please carefully review your message and the list of @recipients.ToLower() before you click '@sendButtonText' below.
                                     </label>
                                 </div>
                             </div>
@@ -148,7 +151,7 @@
                     <label class="col-sm-3 control-label"></label>
                     <div class="col-sm-6">
                         <div class="pull-left">
-                            <a href="@Url.Action("messages", "registration")" class="text-muted">
+                            <a href="@sendMessagesUrl" class="text-muted">
                                 &laquo; Cancel
                             </a>
                         </div>

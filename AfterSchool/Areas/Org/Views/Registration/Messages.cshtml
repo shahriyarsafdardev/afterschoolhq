@@ -2,6 +2,9 @@
 @{
     ViewBag.Title = $"Messages - {SessionVariables.CurrentAccount.Name}";
     var msgs = (SystemMessages)ViewBag.Messages;
+    var isVolunteers = Request.QueryString["volunteers"] == "true";
+    var SendNewMessageUrl = isVolunteers ? Url.Action("messageadd", "registration", new {volunteers = "true"}) : Url.Action("messageadd", "registration");
+    var receiptants = isVolunteers ? "Volunteers" : "Students"; //Verify how it is done in other locations
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -10,7 +13,10 @@
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{Html.RenderPartial("_RegistrationHeader");}
+    @{Html.RenderPartial("_RegistrationHeader" ,  new ViewDataDictionary()
+      {
+          { "Volunteer", isVolunteers },
+      });}
 
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -22,7 +28,7 @@
 
                 <div class="panel-body">
 
-                    <h3>Filter Students</h3>
+                    <h3>Filter @receiptants</h3>
 
                     @{ Html.RenderPartial("_RegistrationSearchBar"); }
 
@@ -37,15 +43,16 @@
             @{Html.RenderPartial(
                   "~/Views/Shared/_Messages.cshtml",
                   Model,
-                  new ViewDataDictionary()
+                  new ViewDataDictionary
                   {
-                    { "SendNewMessageLink", Url.Action("messageadd", "registration") },
+                    { "SendNewMessageLink", @SendNewMessageUrl },
                     { "Account", SessionVariables.CurrentAccount },
                     { "ViewLinkController", "registration" },
                     { "ShowAddMessage", false },
-                    { "PagingModel", ViewBag.PagingModel }
+                    { "PagingModel", ViewBag.PagingModel },
+                    { "ActivityType", isVolunteers ? ActivityType.VolunteerOpportunity : ActivityType.Activity },
                   }
-                  );}
+                );}
         </div>
     </div>
 </div>
@@ -54,16 +61,16 @@
 {
     <script>
         function sendMessages() {
-            location.href = `@Url.Action("messageadd", "registration")?${getQuery()}&${getActivityOrGroup()}${getFilterQuestionQS()}&${getRegStatus()}&${getAssignmentType()}`;
+            location.href = `@Url.Action("messageadd", "registration")?${isVolunteer()}&${getQuery()}&${getActivityOrGroup()}${getFilterQuestionQS()}&${getRegStatus()}&${getAssignmentType()}`;
         }
 
         function toggleFilter() {
-
             if ($('#student-filter').hasClass('hide')) {
                 $('#student-filter').removeClass('hide');
             } else {
                 $('#student-filter').addClass('hide');
             }
         }
+       
     </script>
 }

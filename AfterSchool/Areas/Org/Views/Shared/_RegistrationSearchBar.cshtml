@@ -1,13 +1,14 @@
 @{
-    var activities = (List<Activity>)ViewBag.Activities;
-    var groups = (List<ActivityGroup>)ViewBag.Groups;
-    var questions = (List<FormQuestion>)ViewBag.Questions;
-    var questionGroups = (List<FormQuestionGroup>)ViewBag.QuestionGroups;
+    var activities = (List<Activity>)ViewData["Activities"];
+    var groups = (List<ActivityGroup>)ViewData["Groups"];
+    var questions = (List<FormQuestion>)ViewData["Questions"];
+    var questionGroups = (List<FormQuestionGroup>)ViewData["QuestionGroups"];
     var isReadyOnly = false;
+    var isVolunteers =Request.QueryString["volunteers"] == "true";
 
-    if (ViewBag.SearchBarReadOnly != null)
+    if (ViewData["SearchBarReadOnly"] != null)
     {
-        isReadyOnly = (bool)ViewBag.SearchBarReadOnly;
+        isReadyOnly = (bool)ViewData["SearchBarReadOnly"];
     }
 }
 
@@ -41,7 +42,7 @@
         <div class="form-group">
             <select id="activities" class="form-control select2 hide" multiple placeholder="Select student activities" @(isReadyOnly ? "readonly=\"readonly\"": "")>
                 <option value="0" @(Request["activity"].IsBlank() && Request["group"].IsBlank() ? "selected=\"selected\"" : "")>
-                    All Student Activities
+                     @( isVolunteers ? "All Volunteer Opportunities" : "All Student Activities")
                 </option>
                 @foreach (var groupType in Enum.GetValues(typeof(ActivityGroupType)).Cast<ActivityGroupType>().Where(item => item != ActivityGroupType.NotSet))
                 {
@@ -82,7 +83,7 @@
                 }
                 @if (activities.Where(x => !x.ActivityGroupId.HasValue).Any())
                 {
-                    <optgroup label="All @UILabel.ActivityLabel(ActivityType.Activity, true)">
+                    <optgroup label="All @UILabel.ActivityLabel(isVolunteers ? ActivityType.VolunteerOpportunity : ActivityType.Activity, true)">
                         @foreach (var activity in activities.Where(x => !x.ActivityGroupId.HasValue))
                         {
                             var selectedActivity = "";
@@ -104,9 +105,23 @@
         <div class="form-group">
             <select id="assignmenttype" class="form-control" @(isReadyOnly ? "readonly=\"readonly\"": "")>
                 <option value="">All Seat Assignments</option>
+                @{
+                    var displayAssignments = Enum.GetValues(typeof(RegistrationAssignmentType));
+                    var notToDisplay = new List<RegistrationAssignmentType>();
+                    if (isVolunteers)
+                    {
+                        notToDisplay.Add(RegistrationAssignmentType.ReservedPendingPayment);
+                        notToDisplay.Add(RegistrationAssignmentType.ReservedPendingParentalConsent);
+                        notToDisplay.Add(RegistrationAssignmentType.Applied);
+                    }
+                    else
+                    {
+                        notToDisplay.Add(RegistrationAssignmentType.ReservedPendingBackgroundCheck);
+                    }
+                }
                 @foreach (RegistrationAssignmentType item in Enum.GetValues(typeof(RegistrationAssignmentType)))
                 {
-                    if (item == RegistrationAssignmentType.NotSet || item == RegistrationAssignmentType.ReservedPendingBackgroundCheck)
+                    if (item == RegistrationAssignmentType.NotSet || item.In(notToDisplay))
                     {
                         continue;
                     }
@@ -122,7 +137,7 @@
     <div class="col-md-2">
         <div class="form-group">
             <select id="regstatus" class="form-control" @(isReadyOnly ? "readonly=\"readonly\"": "")>
-                <option value="">All @UILabel.RegistrantLabel(true)</option>
+                <option value="">All @UILabel.RegistrantLabel(isVolunteers ? ActivityType.VolunteerOpportunity : ActivityType.Activity, true)</option>
                 @foreach (var item in Enum.GetValues(typeof(RegistrationStatus)).Cast<RegistrationStatus>().Where(x => x != RegistrationStatus.NotSet))
                 {
                     <option value="@((int)item)"
@@ -156,7 +171,7 @@
         return `regstatus=${$('#regstatus').val()}`;
     }
 
-    function getActivityOrGroup() {
+    function getActivityOrGroup() { 
 
         var arr = $('#activities').val();
         var activity = '';
@@ -179,17 +194,23 @@
 
         return `activity=${activity}&group=${group}`;
     }
-
+    function isVolunteer(){
+        if ('@isVolunteers' === 'True')
+        {
+            return 'volunteers=true';
+        }
+        return '';
+    }
     function getAssignmentType(){
         return `at=${$('#assignmenttype').val()}`;
     }
-        
+    
     function checkFilters() {
         if ($('#filter-question').val().length > 0) {
             $.get(
                 '/org/services/getansweroptions/' + $('#filter-question').val(),
                 function (data) {
-                    if (data && data.status == 'ok') {
+                    if (data && data.status === 'ok') {
                         if (data.answers.length > 0) {
 
                             $('#filter-answer').html('');
@@ -215,7 +236,7 @@
             showOpenSearch();
         }
     }
-
+    
     function hideOpenSearch() {
         $('#filter-answer').removeClass('hide');
         $('#opensearch').addClass('hide');

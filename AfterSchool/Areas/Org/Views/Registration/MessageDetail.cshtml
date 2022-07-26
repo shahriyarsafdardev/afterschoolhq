@@ -5,20 +5,29 @@
 
     var amrs = (List<ActivityMessageRegistrant>)ViewBag.Registrants;
     var registrantsPerColumn = 0;
-    
-    if(amrs.IsNotEmpty())
+
+    if (amrs.IsNotEmpty())
     {
         registrantsPerColumn = Math.Ceiling(amrs.Count / 3.0).ToInteger();
     }
+    var viewBagIsVolunteer = false;
+
+    if (ViewBag.Volunteers != null)
+    {
+        viewBagIsVolunteer = (bool)ViewBag.Volunteers;
+    }
+
+    var isVolunteers = Request.QueryString["volunteers"] == "true" || viewBagIsVolunteer;
+    var routeValues = isVolunteers ? new { volunteers = "true" } : null;
 }
 
-@{Html.RenderPartial("OrgAccountHeader");}
+@{ Html.RenderPartial("OrgAccountHeader"); }
 
 <div class="main-content">
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{Html.RenderPartial("_RegistrationHeader");}
+    @{ Html.RenderPartial("_RegistrationHeader"); }
 
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -36,11 +45,11 @@
                                 Resend Message to Unreached Recipients
                             </button>
                         }
-                        <a href="@Url.Action("messages", "registration")" class="btn btn-default">&laquo; Back to List</a>
+                        <a href="@Url.Action("messages", "registration", routeValues)" class="btn btn-default">&laquo; Back to List</a>
                     </div>
                 </div>
 
-                <form method="post" action="@Url.Action("messageadd", "registration")" class="form-horizontal">
+                <form method="post" action="@Url.Action("messageadd", "registration", routeValues)" class="form-horizontal">
 
                     <div class="form-group">
                         <label class="col-sm-3 control-label">Subject</label>
@@ -115,7 +124,7 @@
     }
 </script>
 
-@{ 
+@{
     Html.RenderPartial(
         "~/Views/Shared/_Modal.cshtml",
         new ModalViewModel()
@@ -126,5 +135,5 @@
             ActionButtonHtml = "Send Message &raquo;",
             ActionButtonId = "btn-confirm"
         }
-    ); 
+        );
 }

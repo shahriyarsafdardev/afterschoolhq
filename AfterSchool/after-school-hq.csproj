@@ -604,6 +604,7 @@
     <Compile Include="Areas\Org\Assemblers\Activity\EditSetupAssembler.cs" />
     <Compile Include="Areas\Org\Assemblers\Activity\RegistrantsAssembler.cs" />
     <Compile Include="Areas\Org\Assemblers\Activity\SummaryAssembler.cs" />
+    <Compile Include="Areas\Org\Assemblers\Registration\RegistrationIndexAssembler.cs" />
     <Compile Include="Areas\Org\Controllers\AccountController.cs" />
     <Compile Include="Areas\Org\Controllers\AccountingController.cs" />
     <Compile Include="Areas\Org\Controllers\EditHelpers.cs" />
@@ -2539,8 +2540,8 @@
     <Folder Include="Areas\Admin\Views\StripeHooks\" />
     <Folder Include="Areas\District\Models\" />
     <Folder Include="Areas\Org\Models\" />
-    <Folder Include="Areas\Org\Views\Period" />
-    <Folder Include="Areas\Org\Views\Registrant" />
+    <Folder Include="Areas\Org\Views\Period\" />
+    <Folder Include="Areas\Org\Views\Registrant\" />
     <Folder Include="Areas\StripeHooks\Models\" />
     <Folder Include="Areas\StripeHooks\Views\Shared\" />
     <Folder Include="Areas\StripeHooks\Views\Test\" />
