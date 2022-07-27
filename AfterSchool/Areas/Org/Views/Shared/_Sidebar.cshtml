@@ -195,18 +195,18 @@
                                 </a>
                             </li>
                         }
+                        @if (CanView(FeatureType.ManageVolunteerOpportunities, SessionVariables.AccountUserType, PermissionType.VolunteerOpportunitiesView))
+                        {
+                            <li>
+                                <a data-test="volunteer-opportunities" href="@Url.Action("index", "activity", new { type = (int)ActivityType.VolunteerOpportunity })">
+                                    <i class="icon s7-smile"></i> Volunteer Opportunities
+                                </a>
+                            </li>
+                        }
                     </ul>
                 </li>
             }
-            
-            @if (CanView(FeatureType.ManageVolunteerOpportunities, SessionVariables.AccountUserType, PermissionType.VolunteerOpportunitiesView))
-            {
-                <li>
-                    <a data-test="volunteer-opportunities" href="@Url.Action("index", "activity", new { type = (int)ActivityType.VolunteerOpportunity })">
-                        <i class="icon s7-smile"></i> Volunteer Opportunities
-                    </a>
-                </li>
-            }
+
 
             <li class="parent @contactmenuactive">
                 <a href="#">
@@ -224,7 +224,7 @@
                     @if (CanView(FeatureType.ManageVolunteerOpportunities, SessionVariables.AccountUserType, PermissionType.VolunteerOpportunitiesView))
                     {
                         <li class="@volunteercontactsactive">
-                            <a href="@Url.Action("index", "registration", new {volunteers = "true"})">
+                            <a href="@Url.Action("index", "registration", new { volunteers = "true" })">
                                 <i class="icon s7-smile"></i> @UILabel.RegistrantLabel(ActivityType.VolunteerOpportunity, true)
                             </a>
                         </li>
