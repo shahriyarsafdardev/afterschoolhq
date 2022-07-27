@@ -192,6 +192,11 @@ namespace AfterSchool.Controllers
                     if (hasCompletedParentProfile)
                         return RedirectToAction("select");
                 }
+                else if (masterRegistrant.IsStudent)
+                {
+                    SessionVariables.CurrentRegistrant = masterRegistrant;
+                    return RedirectToAction("register");
+                }
             }
 
             return null;
@@ -1557,6 +1562,7 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
 
             // Case 3 - New Student Register with Parent Exists
+            // This needs more explanation
             if (SessionVariables.AccountUserType == UserType.Student)
                 return RedirectToAction("Home", "User");
 
@@ -1571,6 +1577,7 @@ namespace AfterSchool.Controllers
             if (!masterRegistrant.IsParentOrGuardian)
             {
                 // Case 2 - new Student Register with New Parent Email
+                // This needs more explanation
                 if (masterRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed)
                     return RedirectToAction("Home", "User");
 
