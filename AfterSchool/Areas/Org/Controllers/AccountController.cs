@@ -1481,27 +1481,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var customer = currentAccount.GetStripeCustomer(StripeAccountType.SubscriberAccount, msgs);
 
             // check if finally added payment
-            if (!currentAccount.HasDefaultPaymentMethod.IsTrue() && currentAccount.GetAllStripePaymentMethods(StripeAccountType.SubscriberAccount, msgs).Any())
-            {
-                currentAccount.SetStripeDefaultPaymentMethod(StripeAccountType.SubscriberAccount, msgs);
-                
-                currentAccount.HasDefaultPaymentMethod = true;
-                msgs.AddRange(currentAccount.Save());
-            }
-            
-            // check if package has changed
-            var accountPackage = currentAccount.GetActiveAccountPackage(msgs);
-            var stripeSubscription = accountPackage.GetStripeSubscription(msgs);
-            var packageFromStripe = Package.LoadByUid(stripeSubscription.Plan.ProductId.ToGuid(), msgs);
-
-            // needs to match stripe
-            if (accountPackage.PackageId != packageFromStripe.ID)
-                currentAccount.SwitchPackages(
-                    packageFromStripe, 
-                    stripeSubscription.Plan.Interval.ToEnum<BillingPeriodType>(), 
-                    stripeSubscription.Id, 
-                    currentUser, 
-                    msgs);
+            currentAccount.CheckIfSubscriberAccountHasPaymentMethod(null, msgs);
+            currentAccount.CheckIfSubscriberAccountSubscriptionChanged(currentUser, msgs);
 
             return new RedirectResult(Url.Action("index", "home"));
         }
