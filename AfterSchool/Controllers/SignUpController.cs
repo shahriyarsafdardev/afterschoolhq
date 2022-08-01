@@ -32,20 +32,25 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
-        public ActionResult Index(string invite, bool isrequestonlyaccess = false)
+        public ActionResult Index(string invite, string orgName, AccountType orgType = AccountType.NotSet, SignUpType signUpType = SignUpType.NotSet, bool quickStart = false, bool isRequestOnlyAccess = false)
         {
-            if (invite.IsBlank())
-            {
+            if (invite.IsBlank() && !quickStart)
                 return RedirectToAction("Welcome");
-            }
 
             var signupIndexVM = new SignUpIndexViewModel()
             {
-                IsRequestOnlyAccess = isrequestonlyaccess,
+                IsRequestOnlyAccess = isRequestOnlyAccess,
                 InviteCodeToShare = invite,
+                OrgName = orgName,
+                SignupType = signUpType,
+                OrgType = orgType
             };
 
             ViewBag.Messages = new SystemMessages();
+            
+            if (quickStart)
+                return View("IndexNew", signupIndexVM);
+            
             return View(signupIndexVM);
         }
 
