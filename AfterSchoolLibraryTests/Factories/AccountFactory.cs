@@ -142,7 +142,7 @@ namespace AfterSchoolLibraryTests.Factories
                                     signupType != SignUpType.ChangePackage &&
                                     signupType != SignUpType.ChangePackageDuringTrial)
                                 {
-                                    var subscription = new AfterSchoolLibrary.Billing.StripeHelper().GetSubscription(currentPackage?.StripeSubscriptionId, "", msgs);
+                                    var subscription = new AfterSchoolLibrary.Billing.StripeHelper().GetSubscription(currentPackage?.StripeSubscriptionId, msgs);
                                     if (subscription.IsNotEmpty() && subscription.Status == "active")
                                         newap.StripeSubscriptionId = subscription.Id;
                                 }
@@ -175,7 +175,7 @@ namespace AfterSchoolLibraryTests.Factories
                         }
 
                         if (amsgs.HasNoErrors() && newap.ID.HasValue)
-                            package.CopyFeaturesToAccountPackage(newap, loggedInUserId, amsgs, adc);
+                            package.CopyFeaturesToAccountPackage(newap, loggedInUser, amsgs, adc);
 
                         // ensure package features are added
                         AfterSchoolLibrary.Services.AccountService.EnsureDefaultPackageFeatures(account, newap, loggedInUser, msgs, dc);

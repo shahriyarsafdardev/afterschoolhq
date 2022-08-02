@@ -290,7 +290,7 @@ namespace AfterSchoolLibrary.Models
         #endregion
 
         #region "UserDefined"
-
+        
         public bool HasFeature(FeatureType featureType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return GetFeatures(msgs, dc).Any(x => x.FeatureTypeId == featureType && x.Max.HasValue && x.Max > 0);
@@ -449,10 +449,10 @@ namespace AfterSchoolLibrary.Models
             return PricePerYear.Value == 0.ToDecimal();
         }
 
-        public void CopyFeaturesToAccountPackage(AccountPackage ap, int loggedInUserId, SystemMessages msgs,
+        public void CopyFeaturesToAccountPackage(AccountPackage ap, WebUser loggedInUser, SystemMessages msgs,
             DatabaseConnection dc = null)
         {
-            GetFeatures(dc: dc).ForEach(pf => ap.AddPackageFeature(pf, new WebUser {ID = loggedInUserId}, msgs, dc));
+            GetFeatures(dc: dc).ForEach(pf => ap.AddPackageFeature(pf, loggedInUser, msgs, dc));
         }
 
         #endregion

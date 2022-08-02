@@ -1473,6 +1473,39 @@ namespace AfterSchool.Areas.Org.Controllers
             return View("Billing", currentAccount);
         }
 
+        public ActionResult AfterStripeUpdate(string id)
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var customer = currentAccount.GetStripeCustomer(StripeAccountType.SubscriberAccount, msgs);
+
+            // check if finally added payment
+            if (!currentAccount.HasDefaultPaymentMethod.IsTrue() && currentAccount.GetAllStripePaymentMethods(StripeAccountType.SubscriberAccount, msgs).Any())
+            {
+                currentAccount.SetStripeDefaultPaymentMethod(StripeAccountType.SubscriberAccount, msgs);
+                
+                currentAccount.HasDefaultPaymentMethod = true;
+                msgs.AddRange(currentAccount.Save());
+            }
+            
+            // check if package has changed
+            var accountPackage = currentAccount.GetActiveAccountPackage(msgs);
+            var stripeSubscription = accountPackage.GetStripeSubscription(msgs);
+            var packageFromStripe = Package.LoadByUid(stripeSubscription.Plan.ProductId.ToGuid(), msgs);
+
+            // needs to match stripe
+            if (accountPackage.PackageId != packageFromStripe.ID)
+                currentAccount.SwitchPackages(
+                    packageFromStripe, 
+                    stripeSubscription.Plan.Interval.ToEnum<BillingPeriodType>(), 
+                    stripeSubscription.Id, 
+                    currentUser, 
+                    msgs);
+
+            return new RedirectResult(Url.Action("index", "home"));
+        }
+
         public static class PackageFeatureMapper
         {
             public static IEnumerable<PackageFeaturesPlanListing> FilterAndMapPackageFeatures(IEnumerable<(FeatureType type, decimal value)> features)
@@ -1514,5 +1547,6 @@ namespace AfterSchool.Areas.Org.Controllers
             public string type { get; }
             public decimal value { get; }
         }
+        
     }
 }

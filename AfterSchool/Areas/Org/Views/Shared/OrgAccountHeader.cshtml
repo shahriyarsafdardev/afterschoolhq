@@ -7,22 +7,44 @@
     }
 }
 
+<script>
+
+    function getStripeBillingLink() {
+        $.get(
+            '@Url.Action("GetStripeBillingLink", "services")',
+            function (data) {
+                if (data && data.status == 'ok') {
+                    location.href = data.link;
+                } else {
+                    Notifications.showErrors(data.messages);
+                }
+            }
+        );
+    }
+</script>
+
 @if (!isFullScreen)
 {
     var currentAccount = SessionVariables.CurrentAccount;
     var accountPackage = SessionVariables.AccountPackage;
-    if (accountPackage.IsNotEmpty())
+    if (accountPackage.IsNotEmpty() && !currentAccount.HasDefaultPaymentMethod.IsTrue())
     {
         if (accountPackage.IsDuringTrial)
         {
-            <div class="trial-header text-center text-white bg-warning">
-                You have @accountPackage.TrialDaysRemaining day(s) remaining in your trial <a href="@Url.Action("newbilling", "account", new {id = accountPackage.PackageUid})" class="btn btn-alt5 margin-h-10">Purchase Now &raquo;</a>
+            <div class="trial-header text-center text-white bg-danger">
+                You have @accountPackage.TrialDaysRemaining day(s) remaining in your trial 
+                <button onclick="getStripeBillingLink()" url="@Url.Action("newbilling", "account", new { id = accountPackage.PackageUid })" class="btn btn-alt5 margin-h-10">
+                    Add Payment Method &raquo;
+                </button>
             </div>
         }
         else if (accountPackage.IsTrialExpired(currentAccount))
         {
             <div class="trial-header text-center text-white bg-danger">
-                It looks like your trial has expired. <a href="@Url.Action("newbilling", "account", new {id = accountPackage.PackageUid})" class="btn btn-alt5 margin-h-10">Purchase Now &raquo;</a>
+                It looks like your trial has expired. 
+                <button onclick="getStripeBillingLink()" url="@Url.Action("newbilling", "account", new { id = accountPackage.PackageUid })" class="btn btn-alt5 margin-h-10">
+                    Purchase Now &raquo;
+                </button>
             </div>
         }
     }
@@ -31,7 +53,10 @@
     if (!currentUser.VerifiedAccount)
     {
         <div class="trial-header text-center text-white bg-danger">
-            Please verify your email address in order to accept @UILabel.ActivityLabel().ToLower() registrations. <a href="javascript:AccountSetup.sendVerificationEmail('')" class="white">Resend Email Verification Email &raquo;</a>
+            Please verify your email address in order to accept @UILabel.ActivityLabel().ToLower() registrations. 
+            <a href="javascript:AccountSetup.sendVerificationEmail('')" class="white">
+                Resend Email Verification Email &raquo;
+            </a>
         </div>
     }
 

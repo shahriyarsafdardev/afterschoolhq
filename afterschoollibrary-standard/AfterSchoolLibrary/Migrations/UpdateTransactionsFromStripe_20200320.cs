@@ -37,7 +37,7 @@ namespace AfterSchoolLibrary.Migrations
                                 if (transaction.IsEmpty())
                                 {
                                     var invoice = stripeHelper.GetInvoice(charge.InvoiceId, amsgs);
-                                    var subscription = stripeHelper.GetSubscription(invoice.SubscriptionId, null, amsgs);
+                                    var subscription = stripeHelper.GetSubscription(invoice.SubscriptionId, amsgs);
 
                                     if (subscription.IsNotEmpty())
                                     {

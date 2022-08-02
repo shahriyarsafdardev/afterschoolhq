@@ -3,6 +3,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using AfterSchool.Models;
+using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
@@ -603,6 +604,30 @@ namespace AfterSchool.Areas.Org.Controllers
                         url,
                     }, JsonRequestBehavior.AllowGet);
                 }
+            }
+
+            return Json(new {status = "error", messages = msgs}, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public ActionResult GetStripeBillingLink()
+        {
+            var msgs = new SystemMessages();
+            
+            if (msgs.HasNoErrors())
+            {
+                var currentAccount = SessionVariables.CurrentAccount;
+                var stripeHelper = StripeHelper.GetStripeHelperSubscriberAccount();
+                var session = stripeHelper.GetBillingPortalSession(
+                    currentAccount.StripeCustomerId, 
+                    $"{AfterSchoolLibrary.Helpers.Utilities.BaseUrl()}{Url.Action("afterstripeupdate", "account")}", 
+                    msgs);
+
+                return Json(new
+                {
+                    status = "ok",
+                    link = session.Url
+                }, JsonRequestBehavior.AllowGet);
             }
 
             return Json(new {status = "error", messages = msgs}, JsonRequestBehavior.AllowGet);

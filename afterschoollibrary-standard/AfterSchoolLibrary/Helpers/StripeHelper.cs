@@ -908,6 +908,26 @@ namespace AfterSchoolLibrary.Billing
             return new Stripe.CustomerService(StripeClient);
         }
 
+        public void SetDefaultPaymentMethod(string customerId, string paymentMethodId, SystemMessages msgs)
+        {
+            try
+            {
+                var options = new Stripe.CustomerUpdateOptions()
+                {
+                    InvoiceSettings = new CustomerInvoiceSettingsOptions()
+                    {
+                        DefaultPaymentMethod = paymentMethodId
+                    }
+                };
+
+                GetCustomerService().Update(customerId, options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add($"Cannot set default payment option", MessageType.Error, ex);
+            }
+        }
+
         public Stripe.Customer CreateCustomer(string accountName, string email, string phone, string description, string sourceId, Dictionary<string, string> metaData, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -1198,6 +1218,37 @@ namespace AfterSchoolLibrary.Billing
 
         #endregion
 
+        #region StripePaymentMethods
+        
+        private Stripe.PaymentMethodService GetPaymentMethodService()
+        {
+            return new Stripe.PaymentMethodService(StripeClient);
+        }
+        
+        public List<Stripe.PaymentMethod> GetPaymentMethods(string customerId, StripePaymentMethodType paymentMethodType, SystemMessages msgs)
+        {
+            var paymentMethods = new List<Stripe.PaymentMethod>();
+
+            try
+            {
+                var options = new Stripe.PaymentMethodListOptions()
+                {
+                    Customer = customerId,
+                    Type = paymentMethodType.ToString()
+                };
+
+                paymentMethods.AddRange(GetPaymentMethodService().List(options).ToList());
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add($"Cannot get list of payment methods", MessageType.Error, ex);
+            }
+
+            return paymentMethods;
+        }
+        
+        #endregion
+        
         #region StripeCreditNotes
 
         private Stripe.CreditNoteService GetCreditNoteService()
@@ -1517,25 +1568,20 @@ namespace AfterSchoolLibrary.Billing
             catch (StripeException ex)
             {
                 msgs.Add(ex.Message, MessageType.UserError, ex);
-                msgs.Add($"Subscription ({subscriptionId}) was not cancelled", MessageType.UserError);
+                msgs.Add($"Subscription ({subscriptionId}) was not canceled", MessageType.UserError);
             }
 
             return msgs;
         }
 
-        public Stripe.Subscription GetSubscription(string subscriptionId, string stripeAccountId, SystemMessages msgs)
+        public Stripe.Subscription GetSubscription(string subscriptionId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            var requestOptions = new Stripe.RequestOptions();
-            if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeAccount = stripeAccountId;
-
             Stripe.Subscription subscription = null;
 
             try
             {
-                subscription = GetSubscriptionService().Get(subscriptionId, null, requestOptions);
+                subscription = GetSubscriptionService().Get(subscriptionId);
             }
             catch (StripeException ex)
             {
@@ -2373,6 +2419,39 @@ namespace AfterSchoolLibrary.Billing
         }
 
         #endregion
+        
+        #region StripeBillingPortalSession
+
+        private Stripe.BillingPortal.SessionService GetBillingPortalSessionService()
+        {
+            return new Stripe.BillingPortal.SessionService(StripeClient);
+        }
+
+        public Stripe.BillingPortal.Session GetBillingPortalSession(string customerId, string redirectUrl, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Stripe.BillingPortal.Session session = null;
+            var options = new Stripe.BillingPortal.SessionCreateOptions()
+            {
+                Customer = customerId,
+                ReturnUrl = redirectUrl
+            };
+
+            try
+            {
+                session = GetBillingPortalSessionService().Create(options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.Error, ex);
+                msgs.Add($"Error creating session", MessageType.UserError);
+            }
+
+            return session;
+        }
+        
+        #endregion
     }
 
     public enum StripeTestCardType
@@ -2391,6 +2470,12 @@ namespace AfterSchoolLibrary.Billing
         DinersClub2,
         JCB,
         UnionPay
+    }
+
+    public enum StripePaymentMethodType
+    {
+        card,
+        us_bank_account
     }
 
     public enum StripeFilePurpose

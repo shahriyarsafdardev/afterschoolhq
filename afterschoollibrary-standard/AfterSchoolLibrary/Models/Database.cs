@@ -262,6 +262,8 @@ namespace AfterSchoolLibrary.Models
                 new Hashtable {{"IsAdminAccount", DBNull.Value}}, Account.ObjectMap, dc);
             BaseObject.Update(new Hashtable {{"IsActive", false}}, new Hashtable {{"IsActive", DBNull.Value}},
                 Account.ObjectMap, dc);
+            BaseObject.Update(new Hashtable {{"HasDefaultPaymentMethod", false}}, new Hashtable {{"HasDefaultPaymentMethod", DBNull.Value}},
+                Account.ObjectMap, dc);
             BaseObject.Update(new Hashtable {{"IsAfterSchool", false}},
                 new Hashtable {{"IsAfterSchool", DBNull.Value}}, Account.ObjectMap, dc);
             BaseObject.Update(new Hashtable {{"AccountTypeId", 0}}, new Hashtable {{"AccountTypeId", DBNull.Value}},

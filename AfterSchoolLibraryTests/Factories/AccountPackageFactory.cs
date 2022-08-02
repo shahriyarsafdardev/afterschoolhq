@@ -21,7 +21,7 @@ namespace AfterSchoolLibraryTests.Factories
             };
             msgs.AddRange(obj.Save(dc));
 
-            package.CopyFeaturesToAccountPackage(obj, 0, msgs, dc);
+            package.CopyFeaturesToAccountPackage(obj, new WebUser() { ID = 0 }, msgs, dc);
 
             return obj;
         }

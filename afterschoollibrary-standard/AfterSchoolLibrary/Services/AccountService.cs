@@ -1580,7 +1580,7 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        private static void SetStripeCustomer(this Account account, Customer customer, SystemMessages msgs = null,
+        private static void SetStripeCustomer(this Account account, Customer customer, SystemMessages msgs,
             DatabaseConnection dc = null)
         {
             account.StripeCustomerId = customer.Id;
@@ -1621,6 +1621,27 @@ namespace AfterSchoolLibrary.Services
             account.SetStripeCustomer(customer, msgs, dc);
 
             return customer;
+        }
+
+        public static void SetStripeDefaultPaymentMethod(this Account account, StripeAccountType stripeAccountType, SystemMessages msgs = null)
+        {
+            var methods = account.GetAllStripePaymentMethods(StripeAccountType.SubscriberAccount, msgs);
+            StripeHelper.GetStripeHelper(stripeAccountType).SetDefaultPaymentMethod(account.StripeCustomerId, methods.Last().Id, msgs);
+        }
+
+        public static List<PaymentMethod> GetAllStripePaymentMethods(this Account account, StripeAccountType stripeAccountType, SystemMessages msgs = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            var customer = account.GetStripeCustomer(stripeAccountType, msgs);
+
+            if (customer.IsNotEmpty())
+            {
+                var methods = StripeHelper.GetStripeHelper(stripeAccountType).GetPaymentMethods(customer.Id, StripePaymentMethodType.card, msgs);
+                methods.AddRange(StripeHelper.GetStripeHelper(stripeAccountType).GetPaymentMethods(customer.Id, StripePaymentMethodType.us_bank_account, msgs));
+                return methods;
+            }
+
+            return new List<PaymentMethod>();
         }
 
         public static List<Source> GetStripeSources(this Account account, StripeAccountType stripeAccountType, SystemMessages msgs = null)
@@ -2316,6 +2337,15 @@ namespace AfterSchoolLibrary.Services
             return uniqueName;
         }
 
+        public static AccountPackage SwitchPackages(this Account account, Package newPackage, BillingPeriodType billingPeriodTypeId, string stripeSubscriptionId, WebUser loggedInUser, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            var activeAccountPackage = account.GetActiveAccountPackage(msgs, dc);
+            msgs.AddRange(activeAccountPackage.CancelPackage(dc));
+
+            return AccountPackageService.CreateNewAccountPackage(account.ID.Value, newPackage, billingPeriodTypeId, stripeSubscriptionId, loggedInUser, msgs, dc);
+        }        
+
         public static SignUpType GetSignUpType(this Account account, Package p, AccountPackage activePackage,
             BillingPeriodType billingPeriodType, ref int trialDayCount, SystemMessages msgs = null,
             DatabaseConnection dc = null)
@@ -2462,7 +2492,7 @@ namespace AfterSchoolLibrary.Services
                                     signupType != SignUpType.ChangePackageDuringTrial)
                                 {
                                     var subscription = StripeHelper.GetStripeHelperSubscriberAccount()
-                                        .GetSubscription(currentPackage?.StripeSubscriptionId, "", msgs);
+                                        .GetSubscription(currentPackage?.StripeSubscriptionId, msgs);
                                     if (subscription.IsNotEmpty() && subscription.Status == "active")
                                         newap.StripeSubscriptionId = subscription.Id;
                                 }
@@ -2500,7 +2530,7 @@ namespace AfterSchoolLibrary.Services
                         }
 
                         if (amsgs.HasNoErrors() && newap.ID.HasValue)
-                            package.CopyFeaturesToAccountPackage(newap, loggedInUserId, amsgs, adc);
+                            package.CopyFeaturesToAccountPackage(newap, loggedInUser, amsgs, adc);
 
                         // ensure package features are added
                         account.EnsureDefaultPackageFeatures(newap, loggedInUser, msgs, dc);

@@ -1,4 +1,6 @@
-﻿using AfterSchoolLibrary.Models;
+﻿using System;
+using AfterSchoolLibrary.Billing;
+using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 
@@ -26,6 +28,40 @@ namespace AfterSchoolLibrary.Services
                 if (apf.IsNotEmpty())
                     msgs.AddRange(apf.Delete(dc));
             }
+        }
+
+        public static Stripe.Subscription GetStripeSubscription(this AccountPackage accountPackage, SystemMessages msgs = null)
+        {
+            if (accountPackage.StripeSubscriptionId.IsNotEmpty())
+                return StripeHelper.GetStripeHelperSubscriberAccount().GetSubscription(accountPackage.StripeSubscriptionId, msgs);
+
+            return null;
+        }
+
+        public static AccountPackage CreateNewAccountPackage(int accountId, Package package, BillingPeriodType billingPeriodType, string stripeSubscriptionId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var accountPackage = new AccountPackage
+            {
+                AccountId = accountId,
+                PackageId = package.ID,
+                BillingPeriodTypeId = billingPeriodType,
+                CreateDate = DateTime.UtcNow,
+                CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                LastModifiedDate = DateTime.UtcNow,
+                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                IsActive = true,
+                Price = billingPeriodType == BillingPeriodType.Month
+                    ? package.Price
+                    : package.PricePerYear,
+                StripeSubscriptionId = stripeSubscriptionId,
+                StartDate = DateTime.UtcNow
+            };
+
+            msgs.AddRange(accountPackage.Save(dc));
+            
+            package.CopyFeaturesToAccountPackage(accountPackage, loggedInUser, msgs, dc);
+
+            return accountPackage;
         }
     }
 }

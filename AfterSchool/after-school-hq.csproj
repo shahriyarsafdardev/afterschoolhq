@@ -631,6 +631,7 @@
     <Compile Include="Areas\User\Models\RegistrantActivityViewModel.cs" />
     <Compile Include="Areas\User\UserAreaRegistration.cs" />
     <Compile Include="Areas\WebHooks\Controllers\StripeController.cs" />
+    <Compile Include="Areas\WebHooks\Controllers\StripeSubscriberController.cs" />
     <Compile Include="Areas\WebHooks\Controllers\TwilioController.cs" />
     <Compile Include="Areas\WebHooks\WebHooksAreaRegistration.cs" />
     <Compile Include="Assemblers\AddEmergencyContactAssembler.cs" />
