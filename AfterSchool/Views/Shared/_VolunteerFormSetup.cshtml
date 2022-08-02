@@ -191,9 +191,11 @@
         $('input[name=registrationclosedate],input[name=registrationopendate],#registrationopentime,#registrationclosetime').on('change', function () {
             validateSetup(0, event);
         });
-
+        $('.costfrequencytype').click(function () {
+            toggleCostFrequencyType($(this));
+        });
         isContinuousEnabled();
-
+        toggleCostFrequencyType($('#costfrequencytype-@((int) ActivityCostFrequencyType.PerClass)'));
         $("#isContinuousEnrollmentEnabled").on('change', function () {
             isContinuousEnabled();
         })
@@ -223,6 +225,19 @@
 
         return month + '/' + day + '/' + year;
     }
+    
+    function toggleCostFrequencyType(obj) {
+            if (obj.val() === '@((int)ActivityCostFrequencyType.PerClass)' && obj.is(':checked')) {
+                $('.regmode').prop('disabled', true);
+                $('#regmode-@RegistrationMode.Register.ToString()').prop('checked', true);
+                $('#cutoffhours-container').removeClass('hide');
+                // $('.registrationperiod-container').addClass('hide');
+            } else {
+                $('.regmode').prop('disabled', false);
+                $('#cutoffhours-container').addClass('hide');
+                // $('.registrationperiod-container').removeClass('hide');
+            }
+        }
 
     function changeHrefAndVisibilityForEditFormLink() {
         if ($('#form').val().length > 0 && $('#form').val() !== "0") {
