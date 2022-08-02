@@ -1,102 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
 <url>
-	<loc>https://afterschoolhq.com/manage-programs.html</loc>
-	<lastmod>2022-05-09</lastmod>
-	<changefreq>Weekly</changefreq>
-	<priority>0.5</priority>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-logo.png</image:loc>
-	<image:title>logo</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/icon-ideabubble-1.png</image:loc>
-	<image:title>icon%20ideabubble-1</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/icon-connectedhands-1.png</image:loc>
-	<image:title>icon%20connectedhands-1</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/icon-chatbubbles-1.png</image:loc>
-	<image:title>icon%20chatbubbles-1</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/icon-chart-1.png</image:loc>
-	<image:title>icon%20chart-1</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/icon-thumbsup.png</image:loc>
-	<image:title>icon%20thumbsup</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/icon-webui.png</image:loc>
-	<image:title>icon%20webui</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/icon-speaker.png</image:loc>
-	<image:title>icon%20speaker</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/icon-graduate-1.png</image:loc>
-	<image:title>icon%20graduate</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/icon-attendance-1.png</image:loc>
-	<image:title>icon%20attendance</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/icon-belonging-1.png</image:loc>
-	<image:title>icon%20belonging</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/icon-family-1.png</image:loc>
-	<image:title>icon%20family</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/icon-student-1.png</image:loc>
-	<image:title>icon%20student</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/icon-school-1.png</image:loc>
-	<image:title>icon%20school</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/icon-rocket.png</image:loc>
-	<image:title>icon%20rocket</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/IPS-1.png</image:loc>
-	<image:title>IPS</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/BCALogo-1.jpg</image:loc>
-	<image:title>BCALogo</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/logo-1.png</image:loc>
-	<image:title>logo</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/mccoy-color-1.jpg</image:loc>
-	<image:title>ian%20logo</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/AMA-Partial-White-1.png</image:loc>
-	<image:title>AMA%20Partial-White-1</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ISYP_PrimaryLogo_FC-1.png</image:loc>
-	<image:title>cropped%20isyp-big-sypf-blue-1</image:title>
-	</image:image>
-</url>
-<url>
 	<loc>https://afterschoolhq.com/new-programs.html</loc>
-	<lastmod>2022-05-09</lastmod>
+	<lastmod>2022-07-29</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-logo.png</image:loc>
+	<image:loc>https://afterschoolhq.com/img/ahq-logo-2-1.png</image:loc>
 	<image:title>logo</image:title>
 	</image:image>
 	<image:image>
@@ -178,61 +88,61 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/tos.html</loc>
-	<lastmod>2022-05-09</lastmod>
+	<lastmod>2022-07-29</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-logo.png</image:loc>
+	<image:loc>https://afterschoolhq.com/img/ahq-logo-2-1.png</image:loc>
 	<image:title>logo</image:title>
 	</image:image>
 </url>
 <url>
 	<loc>https://afterschoolhq.com/privacy.html</loc>
-	<lastmod>2022-05-09</lastmod>
+	<lastmod>2022-07-29</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-logo.png</image:loc>
+	<image:loc>https://afterschoolhq.com/img/ahq-logo-2-1.png</image:loc>
 	<image:title>logo</image:title>
 	</image:image>
 </url>
 <url>
 	<loc>https://afterschoolhq.com/copyright.html</loc>
-	<lastmod>2022-05-09</lastmod>
+	<lastmod>2022-07-29</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-logo.png</image:loc>
+	<image:loc>https://afterschoolhq.com/img/ahq-logo-2-1.png</image:loc>
 	<image:title>logo</image:title>
 	</image:image>
 </url>
 <url>
 	<loc>https://afterschoolhq.com/parent-faq.html</loc>
-	<lastmod>2022-05-09</lastmod>
+	<lastmod>2022-07-29</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-logo.png</image:loc>
+	<image:loc>https://afterschoolhq.com/img/ahq-logo-2-1.png</image:loc>
 	<image:title>logo</image:title>
 	</image:image>
 </url>
 <url>
 	<loc>https://afterschoolhq.com/contact.html</loc>
-	<lastmod>2022-05-09</lastmod>
+	<lastmod>2022-07-29</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-logo.png</image:loc>
+	<image:loc>https://afterschoolhq.com/img/ahq-logo-2-1.png</image:loc>
 	<image:title>logo</image:title>
 	</image:image>
 </url>
 <url>
 	<loc>https://afterschoolhq.com/teachers.html</loc>
-	<lastmod>2022-05-09</lastmod>
+	<lastmod>2022-07-29</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-logo.png</image:loc>
+	<image:loc>https://afterschoolhq.com/img/ahq-logo-2-1.png</image:loc>
 	<image:title>logo</image:title>
 	</image:image>
 	<image:image>
@@ -298,21 +208,21 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/provider-faq.html</loc>
-	<lastmod>2022-05-09</lastmod>
+	<lastmod>2022-07-29</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-logo.png</image:loc>
+	<image:loc>https://afterschoolhq.com/img/ahq-logo-2-1.png</image:loc>
 	<image:title>logo</image:title>
 	</image:image>
 </url>
 <url>
 	<loc>https://afterschoolhq.com/case-study-cfi70.html</loc>
-	<lastmod>2022-05-09</lastmod>
+	<lastmod>2022-07-29</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-logo.png</image:loc>
+	<image:loc>https://afterschoolhq.com/img/ahq-logo-2-1.png</image:loc>
 	<image:title>logo</image:title>
 	</image:image>
 	<image:image>
@@ -342,11 +252,11 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/about.html</loc>
-	<lastmod>2022-05-09</lastmod>
+	<lastmod>2022-07-29</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-logo.png</image:loc>
+	<image:loc>https://afterschoolhq.com/img/ahq-logo-2-1.png</image:loc>
 	<image:title>logo</image:title>
 	</image:image>
 	<image:image>
@@ -376,11 +286,11 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/ips.html</loc>
-	<lastmod>2022-05-09</lastmod>
+	<lastmod>2022-07-29</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-logo.png</image:loc>
+	<image:loc>https://afterschoolhq.com/img/ahq-logo-2-1.png</image:loc>
 	<image:title>logo</image:title>
 	</image:image>
 	<image:image>
@@ -392,33 +302,21 @@
 	<image:title>IPS</image:title>
 	</image:image>
 	<image:image>
-	<image:loc>https://afterschoolhq.com/img/BCALogo-1.jpg</image:loc>
-	<image:title>BCALogo</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/logo-1.png</image:loc>
-	<image:title>logo</image:title>
+	<image:loc>https://afterschoolhq.com/img/ISYP_PrimaryLogo_FC-1.png</image:loc>
+	<image:title>cropped%20isyp-big-sypf-blue-1</image:title>
 	</image:image>
 	<image:image>
 	<image:loc>https://afterschoolhq.com/img/mccoy-color-1.jpg</image:loc>
 	<image:title>ian%20logo</image:title>
 	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/AMA-Partial-White-1.png</image:loc>
-	<image:title>AMA%20Partial-White-1</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ISYP_PrimaryLogo_FC-1.png</image:loc>
-	<image:title>cropped%20isyp-big-sypf-blue-1</image:title>
-	</image:image>
 </url>
 <url>
 	<loc>https://afterschoolhq.com/404.html</loc>
-	<lastmod>2022-05-09</lastmod>
+	<lastmod>2022-07-29</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-logo.png</image:loc>
+	<image:loc>https://afterschoolhq.com/img/ahq-logo-2-1.png</image:loc>
 	<image:title>logo</image:title>
 	</image:image>
 	<image:image>
@@ -428,11 +326,11 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/error.html</loc>
-	<lastmod>2022-05-09</lastmod>
+	<lastmod>2022-07-29</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-logo.png</image:loc>
+	<image:loc>https://afterschoolhq.com/img/ahq-logo-2-1.png</image:loc>
 	<image:title>logo</image:title>
 	</image:image>
 	<image:image>
@@ -442,11 +340,11 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/unsupportedbrowser.html</loc>
-	<lastmod>2022-05-09</lastmod>
+	<lastmod>2022-07-29</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-logo.png</image:loc>
+	<image:loc>https://afterschoolhq.com/img/ahq-logo-2-1.png</image:loc>
 	<image:title>logo</image:title>
 	</image:image>
 	<image:image>
@@ -456,17 +354,17 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/parents.html</loc>
-	<lastmod>2022-05-09</lastmod>
+	<lastmod>2022-07-29</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-logo.png</image:loc>
+	<image:loc>https://afterschoolhq.com/img/ahq-logo-2-1.png</image:loc>
 	<image:title>logo</image:title>
 	</image:image>
 </url>
 <url>
 	<loc>https://afterschoolhq.com/mccoy.html</loc>
-	<lastmod>2022-05-09</lastmod>
+	<lastmod>2022-07-29</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -503,112 +401,12 @@
 	</image:image>
 </url>
 <url>
-	<loc>https://afterschoolhq.com/team.html</loc>
-	<lastmod>2022-05-09</lastmod>
-	<changefreq>Weekly</changefreq>
-	<priority>0.5</priority>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-logo.png</image:loc>
-	<image:title>logo</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/darye.png</image:loc>
-	<image:title>darye</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/san.png</image:loc>
-	<image:title>san</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/placeholder-image.png</image:loc>
-	<image:title>mike%20lee</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/tatiana.png</image:loc>
-	<image:title>sophie</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/allison.png</image:loc>
-	<image:title>placeholder%20image</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/sophie.png</image:loc>
-	<image:title>placeholder%20image</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/billy2.png</image:loc>
-	<image:title>placeholder%20image</image:title>
-	</image:image>
-</url>
-<url>
-	<loc>https://afterschoolhq.com/providers.html</loc>
-	<lastmod>2022-05-09</lastmod>
-	<changefreq>Weekly</changefreq>
-	<priority>0.5</priority>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-logo.png</image:loc>
-	<image:title>logo</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/flourish.png</image:loc>
-	<image:title>flourish</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/clipboard.png</image:loc>
-	<image:title>clipboard</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/teacher.png</image:loc>
-	<image:title>teacher</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/onboarding-page.png</image:loc>
-	<image:title>Screen%2520Shot%25202020%2008-25%2520at%25202.36.03%2520PM</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/enrichment-club-page.png</image:loc>
-	<image:title>Screen%2520Shot%25202020%2008-25%2520at%25202.59.14%2520PM</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-activity-page.png</image:loc>
-	<image:title>Screen%2520Shot%25202020%2008-25%2520at%25205.12.37%2520PM</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/helping.png</image:loc>
-	<image:title>Parent</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/search.png</image:loc>
-	<image:title>Provider</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/fee.png</image:loc>
-	<image:title>marketplace</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/enrichment-club-page.png</image:loc>
-	<image:title>image%202</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/Screen%20Shot%202020-09-23%20at%204.17.41%20PM.png</image:loc>
-	<image:title>Screen%2520Shot%25202020%2009-23%2520at%25204.17.41%2520PM</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/myIPS%20Logo.jpg</image:loc>
-	<image:title>IYI%20logo_highres_opt</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/5e1cfc6e7fd5a.image.jpg</image:loc>
-	<image:title>ian</image:title>
-	</image:image>
-</url>
-<url>
 	<loc>https://afterschoolhq.com/press-kit.html</loc>
-	<lastmod>2022-05-09</lastmod>
+	<lastmod>2022-07-29</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-logo.png</image:loc>
+	<image:loc>https://afterschoolhq.com/img/ahq-logo-2-1.png</image:loc>
 	<image:title>logo</image:title>
 	</image:image>
 	<image:image>
@@ -634,7 +432,7 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/joinisyp.html</loc>
-	<lastmod>2022-05-09</lastmod>
+	<lastmod>2022-07-29</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -671,74 +469,12 @@
 	</image:image>
 </url>
 <url>
-	<loc>https://afterschoolhq.com/</loc>
-	<lastmod>2022-05-09</lastmod>
-	<changefreq>Weekly</changefreq>
-	<priority>1.0</priority>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-logo.png</image:loc>
-	<image:title>logo</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/onboarding-page.png</image:loc>
-	<image:title>Onboarding%20preview</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/enrichment-club-page.png</image:loc>
-	<image:title>Activity%20homepage%20preview</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-activity-page.png</image:loc>
-	<image:title>Register%20for%20activity%20preview</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/enrichment-club-page.png</image:loc>
-	<image:title>image%202</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/s-weinbrecht.png</image:loc>
-	<image:title>Samantha%20Weinbrecht</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/v-hernly.png</image:loc>
-	<image:title>Vince%20Hernly</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/a-bekele.png</image:loc>
-	<image:title>Aster%20Bekele</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/IPS-1.png</image:loc>
-	<image:title>IPS</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/BCALogo-1.jpg</image:loc>
-	<image:title>BCALogo</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/logo-1.png</image:loc>
-	<image:title>logo</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/mccoy-color-1.jpg</image:loc>
-	<image:title>ian%20logo</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/AMA-Partial-White-1.png</image:loc>
-	<image:title>AMA%20Partial-White-1</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ISYP_PrimaryLogo_FC-1.png</image:loc>
-	<image:title>cropped%20isyp-big-sypf-blue-1</image:title>
-	</image:image>
-</url>
-<url>
 	<loc>https://afterschoolhq.com/esser.html</loc>
-	<lastmod>2022-05-09</lastmod>
+	<lastmod>2022-07-29</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-logo.png</image:loc>
+	<image:loc>https://afterschoolhq.com/img/ahq-logo-2-1.png</image:loc>
 	<image:title>logo</image:title>
 	</image:image>
 	<image:image>
@@ -772,11 +508,11 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/eans.html</loc>
-	<lastmod>2022-05-09</lastmod>
+	<lastmod>2022-07-29</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-logo.png</image:loc>
+	<image:loc>https://afterschoolhq.com/img/ahq-logo-2-1.png</image:loc>
 	<image:title>logo</image:title>
 	</image:image>
 	<image:image>
@@ -809,62 +545,12 @@
 	</image:image>
 </url>
 <url>
-	<loc>https://afterschoolhq.com/bpm-free-trial.html</loc>
-	<lastmod>2022-05-09</lastmod>
-	<changefreq>Weekly</changefreq>
-	<priority>0.5</priority>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/BlackProfessionalMen-Logo.jpg</image:loc>
-	<image:title>BlackProfessionalMen%20Logo</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/onboarding-page.png</image:loc>
-	<image:title>Screen%2520Shot%25202020%2008-25%2520at%25202.36.03%2520PM</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/enrichment-club-page.png</image:loc>
-	<image:title>Screen%2520Shot%25202020%2008-25%2520at%25202.59.14%2520PM</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-activity-page.png</image:loc>
-	<image:title>Screen%2520Shot%25202020%2008-25%2520at%25205.12.37%2520PM</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/enrichment-club-page.png</image:loc>
-	<image:title>image%202</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/s-weinbrecht.png</image:loc>
-	<image:title>s%20weinbrecht</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/v-hernly.png</image:loc>
-	<image:title>v%20hernly</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/a-bekele.png</image:loc>
-	<image:title>a%20bekele</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/Frame%201.png</image:loc>
-	<image:title>Frame%25201</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/</image:loc>
-	<image:title>Twitter Social Card Image</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/</image:loc>
-	<image:title>Facebook Social Card Image</image:title>
-	</image:image>
-</url>
-<url>
 	<loc>https://afterschoolhq.com/news.html</loc>
-	<lastmod>2022-05-09</lastmod>
+	<lastmod>2022-07-29</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-logo.png</image:loc>
+	<image:loc>https://afterschoolhq.com/img/ahq-logo-2-1.png</image:loc>
 	<image:title>logo</image:title>
 	</image:image>
 	<image:image>
@@ -878,11 +564,11 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/ahq-partners-with-mccoy.html</loc>
-	<lastmod>2022-05-09</lastmod>
+	<lastmod>2022-07-29</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-logo.png</image:loc>
+	<image:loc>https://afterschoolhq.com/img/ahq-logo-2-1.png</image:loc>
 	<image:title>logo</image:title>
 	</image:image>
 	<image:image>
@@ -896,17 +582,111 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/afterschoolhq-partners-with-ips.html</loc>
-	<lastmod>2022-05-09</lastmod>
+	<lastmod>2022-07-29</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-logo.png</image:loc>
+	<image:loc>https://afterschoolhq.com/img/ahq-logo-2-1.png</image:loc>
 	<image:title>logo</image:title>
 	</image:image>
 	<video:video>
 	<video:content_loc>https://afterschoolhq.com/vid/DaryeHenry-WishTV.mp4</video:content_loc>
 	<video:title>DaryeHenry-WishTV</video:title>
 	</video:video>
+	<image:image>
+	<image:loc>https://afterschoolhq.com/img/</image:loc>
+	<image:title>Twitter Social Card Image</image:title>
+	</image:image>
+	<image:image>
+	<image:loc>https://afterschoolhq.com/img/</image:loc>
+	<image:title>Facebook Social Card Image</image:title>
+	</image:image>
+</url>
+<url>
+	<loc>https://afterschoolhq.com/</loc>
+	<lastmod>2022-07-29</lastmod>
+	<changefreq>Weekly</changefreq>
+	<priority>1.0</priority>
+	<image:image>
+	<image:loc>https://afterschoolhq.com/img/ahq-logo-2-1.png</image:loc>
+	<image:title>logo</image:title>
+	</image:image>
+	<image:image>
+	<image:loc>https://afterschoolhq.com/img/multi-device-clay-mockup-16.png</image:loc>
+	<image:title>Frame%25201%25289%2529</image:title>
+	</image:image>
+	<image:image>
+	<image:loc>https://afterschoolhq.com/img/Frame%204%286%29.png</image:loc>
+	<image:title>placeholder%20image</image:title>
+	</image:image>
+	<image:image>
+	<image:loc>https://afterschoolhq.com/img/Frame%203%284%29.png</image:loc>
+	<image:title>placeholder%20image</image:title>
+	</image:image>
+	<image:image>
+	<image:loc>https://afterschoolhq.com/img/Frame%205%287%29.png</image:loc>
+	<image:title>placeholder%20image</image:title>
+	</image:image>
+	<image:image>
+	<image:loc>https://afterschoolhq.com/img/Screen%20Shot%202022-07-26%20at%2011.55.49%20AM.png</image:loc>
+	<image:title>Screen%2520Shot%25202022%2007-26%2520at%252011.55.49%2520AM</image:title>
+	</image:image>
+	<image:image>
+	<image:loc>https://afterschoolhq.com/img/</image:loc>
+	<image:title>Twitter Social Card Image</image:title>
+	</image:image>
+	<image:image>
+	<image:loc>https://afterschoolhq.com/img/</image:loc>
+	<image:title>Facebook Social Card Image</image:title>
+	</image:image>
+</url>
+<url>
+	<loc>https://afterschoolhq.com/providers.html</loc>
+	<lastmod>2022-07-29</lastmod>
+	<changefreq>Weekly</changefreq>
+	<priority>0.5</priority>
+	<image:image>
+	<image:loc>https://afterschoolhq.com/img/ahq-logo-2-1.png</image:loc>
+	<image:title>logo</image:title>
+	</image:image>
+	<image:image>
+	<image:loc>https://afterschoolhq.com/img/Frame%206%287%29.png</image:loc>
+	<image:title>Speech%20bubbles%20with%20common%20complaints%20providers%20have%20about%20paper%20registration</image:title>
+	</image:image>
+	<image:image>
+	<image:loc>https://afterschoolhq.com/img/phone%282%29.png</image:loc>
+	<image:title>iPhone%20showing%20two%20programs%20available%20for%20registration</image:title>
+	</image:image>
+	<image:image>
+	<image:loc>https://afterschoolhq.com/img/Screen%20Shot%202022-07-26%20at%2011.55.49%20AM-1.png</image:loc>
+	<image:title>Screen%2520Shot%25202022%2007-26%2520at%252011.55.49%2520AM</image:title>
+	</image:image>
+	<image:image>
+	<image:loc>https://afterschoolhq.com/img/</image:loc>
+	<image:title>Twitter Social Card Image</image:title>
+	</image:image>
+	<image:image>
+	<image:loc>https://afterschoolhq.com/img/</image:loc>
+	<image:title>Facebook Social Card Image</image:title>
+	</image:image>
+</url>
+<url>
+	<loc>https://afterschoolhq.com/manage-programs.html</loc>
+	<lastmod>2022-07-29</lastmod>
+	<changefreq>Weekly</changefreq>
+	<priority>0.5</priority>
+	<image:image>
+	<image:loc>https://afterschoolhq.com/img/ahq-logo-2-1.png</image:loc>
+	<image:title>logo</image:title>
+	</image:image>
+	<image:image>
+	<image:loc>https://afterschoolhq.com/img/Frame%201%287%29.png</image:loc>
+	<image:title>Frame%25201%25287%2529</image:title>
+	</image:image>
+	<image:image>
+	<image:loc>https://afterschoolhq.com/img/Screen%20Shot%202022-07-28%20at%2012.27.44%20PM.png</image:loc>
+	<image:title>Screen%2520Shot%25202022%2007-26%2520at%252011.55.49%2520AM</image:title>
+	</image:image>
 	<image:image>
 	<image:loc>https://afterschoolhq.com/img/</image:loc>
 	<image:title>Twitter Social Card Image</image:title>
