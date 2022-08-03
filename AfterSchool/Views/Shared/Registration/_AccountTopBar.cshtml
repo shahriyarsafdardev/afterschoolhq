@@ -6,7 +6,7 @@
     var accountOrDashboard = "Account";
     var participationObject = (ParticipationObject) ViewData["ParticipationObject"];
     var canPublishActivity = ViewData["CanPublishActivity"].IsNotEmpty() && ViewData["CanPublishActivity"].ToString().ToBoolean();
-    var dashboardUrl = Url.Action("index", "home", new {area = "user"});
+    var dashboardUrl = Url.Action("Index", "Home", new {area = "User"});
     var isDuringProfileSetup = false;
     var returnUrl = SessionVariables.RegistrationStartPageAccount?.HomePageUrl;
     var registrationStartPage = SessionVariables.RegistrationStartPageAccount;
@@ -20,10 +20,10 @@
                               participationObject.IsExternalToAccount(currentAccount) &&
                               !participationObject.IsAccountActivityGroup();
 
-    if (currentAccount.IsNotEmpty() && currentAccount.AccountTypeId.NotIn(new AccountType[] { AccountType.Registrant, AccountType.Volunteer}))
+    if (currentAccount.IsNotEmpty() && currentAccount.AccountTypeId.NotIn(new[] {AccountType.Registrant, AccountType.Volunteer}))
     {
         accountOrDashboard = "Dashboard";
-        dashboardUrl = Url.Action("index", "home", new {area = "org"});
+        dashboardUrl = Url.Action("Index", "Home", new {area = "Org"});
     }
 
     if (ViewData["IsDuringProfileSetup"].IsNotEmpty() && ViewData["IsDuringProfileSetup"].ToString().IsBoolean())
@@ -60,7 +60,7 @@
 
     var cleverSsoEnabled = ViewData["CleverSsoEnabled"];
 
-    //set redirection url for clever login to redirect user to home page if they try to login from account topbar
+    // Set redirection URL for Clever login to redirect user to home page if they try to login from account top bar.
     TempData["redirectUrl"] = loginReturnUrl.IsNotEmpty() ? loginReturnUrl.ToString() : returnUrl;
 }
 
@@ -259,13 +259,13 @@ else if (currentUser.IsNotEmpty())
         {
             if (enableApproveButton)
             {
-                <a href="@Url.Action("publishdetail", "activity", new {Area = "org", id = participationObject.Uid})"
+                <a href="@Url.Action("PublishDetail", "Activity", new {Area = "Org", id = participationObject.Uid})"
                    class="btn btn-primary btn-sm">
                     Approve &amp; Publish Activity &raquo;
                 </a>
             }
 
-            if (currentUser.IsActive && currentAccount.AccountTypeId != AccountType.Volunteer)
+            if (currentUser.IsActive && currentAccount.IsNotEmpty() && currentAccount.AccountTypeId != AccountType.Volunteer)
             {
                 <a href="@dashboardUrl" class="btn btn-link">@accountOrDashboard</a>
             }
@@ -295,9 +295,9 @@ else if (currentUser.IsNotEmpty())
 
             if (currentUser.HasMultipleAccounts())
             {
-                <a href="@Url.Action("switch", "logout", new {returnurl = returnUrl})" class="btn btn-link">Switch Accounts</a>
+                <a href="@Url.Action("Switch", "Logout", new {returnurl = returnUrl})" class="btn btn-link">Switch Accounts</a>
             }
-            <a href="@Url.Action("index", "logout", new {returnurl = Context.Request.Path})" class="btn btn-link">Logout</a>
+            <a href="@Url.Action("Index", "Logout", new {returnurl = Context.Request.Path})" class="btn btn-link">Logout</a>
         }
         else
         {
@@ -330,29 +330,29 @@ else if (currentUser.IsNotEmpty())
     }
 
     function toggleList() {
-        var itm = $('#ddl-finish-setup');
+        let itm = $('#ddl-finish-setup');
         $(itm).parent().toggleClass('open');
     }
 
     function redirectUser(item) {
         showLoader()
 
-        if (item == '@GettingStartedOptions.CreateProfile') {
-            location.href = '@Url.Action("programinfo", "onboarding", new {area = "org"})';
-        } else if (item == '@GettingStartedOptions.CreateFirstActivity') {
-            location.href = '@Html.Raw(Url.Action("editsetup", "activity", new {area = "org", isnew = 1, type = (int) ActivityType.Activity}))';
-        } else if (item == '@GettingStartedOptions.PublishActivity') {
+        if (item === '@GettingStartedOptions.CreateProfile') {
+            location.href = '@Url.Action("ProgramInfo", "Onboarding", new {area = "org"})';
+        } else if (item === '@GettingStartedOptions.CreateFirstActivity') {
+            location.href = '@Html.Raw(Url.Action("EditSetup", "Activity", new {area = "org", isnew = 1, type = (int) ActivityType.Activity}))';
+        } else if (item === '@GettingStartedOptions.PublishActivity') {
             location.href = '@url';
-        } else if (item == '@GettingStartedOptions.ValidateEmail') {
+        } else if (item === '@GettingStartedOptions.ValidateEmail') {
            AccountSetup.sendVerificationEmail();
-        } else if (item == '@GettingStartedOptions.AcceptPayments') {
+        } else if (item === '@GettingStartedOptions.AcceptPayments') {
             hideLoader();
             LoadPaymentModal();
         }
     }
 
     function setOnboardingStepsAcknowledge() {
-        var url = '@Url.Action("SetOnboardingStepsAcknowledged", "Services", new {Area = ""})';
+        let url = '@Url.Action("SetOnboardingStepsAcknowledged", "Services", new {Area = ""})';
         $.ajax({
             type: "POST",
             url: url
