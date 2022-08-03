@@ -1459,25 +1459,7 @@
     text-align: center !important;
 }
 
-.navTop > .nav-btn {
-    display: none;
-}
-
-.navTop > .nav-links {
-    display: inline;
-    float: right;
-    font-size: 18px;
-}
-
-.navTop > .nav-links > a {
-    display: inline-block;
-    padding: 13px 10px 13px 10px;
-    text-decoration: none;
-    color: #efefef;
-}
-
 .transparent-bg {
-    background-color: none !important;
     border: 3px solid white !important;
     background: transparent !important
 }
