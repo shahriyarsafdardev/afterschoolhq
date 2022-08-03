@@ -74,11 +74,21 @@
     	display: none;
     }
     
+    .navigation-links > ul {
+        display: flex;
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .navigation-links > ul > li > a {
+        display: block;
+    }
 </style>
 
 <style media="all and (max-width: 768px)">
     .mobile-menu-toggle-button + a,
-    .nav-links {
+    .navigation-links {
         display: none;
     }
     
@@ -94,16 +104,19 @@
         text-decoration: none;
     }
     
-    [id^=dropmenu]:checked + .nav-links {
-        display: flex;
+    [id^=dropmenu]:checked + .navigation-links {
+        display: block;
+        flex-basis: 100%;
+    }
+    
+    .navigation-links > ul {
         flex-direction: column;
         justify-content: center;
-        flex-basis: 100%;
     }
 </style>
 
 
-<div class="reg-login-bar">
+<header class="reg-login-bar">
 @if (isAccount && isAccountAndLoggedInUserIsOwner && Model.OnboardingCompletionStatus() != GettingStartedOptions.ProcessCompleted && isOnboardingStepsAcknowledged != "True" && !isInEditMode)
 {
     <div id="popover-container" class="dropdown popover-dropdown">
@@ -254,58 +267,74 @@ else if (currentUser.IsNotEmpty())
 {
     <label for="dropmenu" class="mobile-menu-toggle-button">Menu</label>
     <input type="checkbox" id="dropmenu"/>
-    <div class="nav-links">
-        @if (currentUser.IsNotEmpty())
-        {
-            if (enableApproveButton)
+    <nav class="navigation-links">
+        <ul>
+            @if (currentUser.IsNotEmpty())
             {
-                <a href="@Url.Action("PublishDetail", "Activity", new {Area = "Org", id = participationObject.Uid})"
-                   class="btn btn-primary btn-sm">
-                    Approve &amp; Publish Activity &raquo;
-                </a>
-            }
-
-            if (currentUser.IsActive && currentAccount.IsNotEmpty() && currentAccount.AccountTypeId != AccountType.Volunteer)
-            {
-                <a href="@dashboardUrl" class="btn btn-link">@accountOrDashboard</a>
-            }
-            else if (!currentUser.IsRegistered)
-            {
-                <a href="@Utilities.CompleteSignUpUrl(currentUser.Uid, Request.Url.ToString())" class="btn btn-link">Complete account setup &raquo;</a>
-            }
-
-            if (Model.HasAccountProfile() && currentUser.HasAccessTo(Model))
-            {
-                var editModeUrl = Model.HomePageUrl;
-
-                if (!isInEditMode)
+                if (enableApproveButton)
                 {
-                    if (editModeUrl.Contains("?"))
-                    {
-                        editModeUrl += "&";
-                    }
-                    else
-                    {
-                        editModeUrl += "?";
-                    }
+                    <li>
+                        <a href="@Url.Action("PublishDetail", "Activity", new {Area = "Org", id = participationObject.Uid})"
+                           class="btn btn-primary btn-sm">
+                            Approve &amp; Publish Activity &raquo;
+                        </a>
+                    </li>
                 }
 
-                <a href="@(editModeUrl)@(!isInEditMode ? "edit=1" : "")" class="btn btn-link">Toggle Edit Mode</a>
-            }
+                if (currentUser.IsActive && currentAccount.IsNotEmpty() && currentAccount.AccountTypeId != AccountType.Volunteer)
+                {
+                    <li>
+                        <a href="@dashboardUrl" class="btn btn-link">@accountOrDashboard</a>
+                    </li>
+                }
+                else if (!currentUser.IsRegistered)
+                {
+                    <li>
+                        <a href="@Utilities.CompleteSignUpUrl(currentUser.Uid, Request.Url.ToString())" class="btn btn-link">Complete account setup &raquo;</a>
+                    </li>
+                }
 
-            if (currentUser.HasMultipleAccounts())
-            {
-                <a href="@Url.Action("Switch", "Logout", new {returnurl = returnUrl})" class="btn btn-link">Switch Accounts</a>
+                if (Model.HasAccountProfile() && currentUser.HasAccessTo(Model))
+                {
+                    var editModeUrl = Model.HomePageUrl;
+
+                    if (!isInEditMode)
+                    {
+                        if (editModeUrl.Contains("?"))
+                        {
+                            editModeUrl += "&";
+                        }
+                        else
+                        {
+                            editModeUrl += "?";
+                        }
+                    }
+
+                    <li>
+                        <a href="@(editModeUrl)@(!isInEditMode ? "edit=1" : "")" class="btn btn-link">Toggle Edit Mode</a>
+                    </li>
+                }
+
+                if (currentUser.HasMultipleAccounts())
+                {
+                    <li>
+                        <a href="@Url.Action("Switch", "Logout", new {returnurl = returnUrl})" class="btn btn-link">Switch Accounts</a>
+                    </li>
+                }
+                <li>
+                    <a href="@Url.Action("Index", "Logout", new {returnurl = Context.Request.Path})" class="btn btn-link">Logout</a>
+                </li>
             }
-            <a href="@Url.Action("Index", "Logout", new {returnurl = Context.Request.Path})" class="btn btn-link">Logout</a>
-        }
-        else
-        {
-            <button type="button" class="btn btn-link md-trigger" onclick="return showModal('modal-login')">Login</button>
-        }
-    </div>
+            else
+            {
+                <li>
+                    <button type="button" class="btn btn-link md-trigger" onclick="return showModal('modal-login')">Login</button>
+                </li>
+            }
+        </ul>
+    </nav>
 }
-</div>
+</header>
 
 @{
     Html.RenderPartial("~/Views/Shared/Registration/_LoginModalWithUpdatedDesign.cshtml", null, new ViewDataDictionary
