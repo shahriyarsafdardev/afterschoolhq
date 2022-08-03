@@ -46,10 +46,6 @@
         font-size: initial;
     }
     
-    .col-md-3 > .margin-t-20
-    {
-        width: 261px;
-    }
     
     .panel-h3 > h3
     {
@@ -114,10 +110,9 @@
             </div>
         </div>
     }
+    <div  onclick="location.href='@Model.GetHomePageUrl(true)'" style="cursor:pointer">
 
-    <div onclick="location.href='@Model.GetHomePageUrl(true)'" style="cursor:pointer">
-
-        <div class="col-md-3 notranslate" style="padding: 0">
+        <div class="col-lg-3 col-md-4 notranslate">
 
             <div class="heading panel-h3">
                 <p>
@@ -184,7 +179,7 @@
             </div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-lg-6 col-md-5">
             <div class="padding-v-10" >
 
                 @if (Model.StartDate.HasValue)
@@ -222,7 +217,7 @@
             </div>
         </div>
 
-        <div class="col-md-3" style="padding: 0 0 0 301px">
+        <div class="col-lg-3 col-md-3">
 
             <div class="margin-t-20">
                 @if (Model.IsActivity() && Model.GetActivity().IsNotEmpty() && Model.GetActivity().ActivityGroupId.HasValue)
