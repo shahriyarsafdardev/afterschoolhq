@@ -393,7 +393,7 @@ namespace AfterSchool.Areas.District.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult Edit(string id, string name, string description, string regmode, string form, string isinviteonly, string genderrestrictions, string mingrade, string maxgrade, string schedule, string scheduledetails, string requiresalldays, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string isongoing)
+        public ActionResult Edit(string id, string name, string description, string details, string regmode, string form, string isinviteonly, string genderrestrictions, string mingrade, string maxgrade, string schedule, string scheduledetails, string requiresalldays, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string isongoing)
         {
             var msgs = new SystemMessages();
             var inSessionDates = new List<ActivityInstance>();
@@ -405,6 +405,7 @@ namespace AfterSchool.Areas.District.Controllers
             {
                 { "name", name },
                 { "description", description },
+                { "details", details },
                 { "regmode", ((int)RegistrationMode.Register).ToString() },
                 { "form", form },
                 { "isinviteonly", 0.ToString() },
