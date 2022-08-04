@@ -1,0 +1,49 @@
+variables:
+  - name: BuildParameters.solution
+    value: AfterSchoolHQ - Darye.sln
+trigger: none
+pr: none # Disable triggering a build on every pull request.
+resources:
+  repositories:
+    - repository: self
+      type: git
+      ref: refs/heads/main
+jobs:
+  - job: Job_1
+    displayName: Agent job 1
+    pool:
+      vmImage: windows-latest
+    steps:
+      - checkout: self
+        clean: true
+      - task: NuGetToolInstaller@1
+        displayName: Use NuGet
+        inputs:
+          checkLatest: true
+      - task: NuGetCommand@2
+        displayName: NuGet restore
+        inputs:
+          solution: $(BuildParameters.solution)
+      - task: VSBuild@1
+        displayName: Build solution
+        inputs:
+          solution: $(BuildParameters.solution)
+          msbuildArgs: /p:DeployOnBuild=true /p:DeployDefaultTarget=WebPublish /p:WebPublishMethod=FileSystem /p:publishUrl="$(Pipeline.Workspace)\\publish"
+          platform: $(BuildPlatform)
+          configuration: $(BuildConfiguration)
+      - task: VSTest@2
+        displayName: Isolated Tests
+        inputs:
+          testAssemblyVer2: >-
+            **\*.Tests.dll
+            
+            !**\*TestAdapter.dll
+            
+            !**\obj\**
+          codeCoverageEnabled: false
+          publishRunAttachments: false
+      - task: PublishPipelineArtifact@1
+        displayName: Publish Pipeline Artifact
+        inputs:
+          path: $(Pipeline.Workspace)\publish
+          artifactName: AfterSchoolHQ-Pipeline-Artifact
