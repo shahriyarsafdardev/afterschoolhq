@@ -49,9 +49,15 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         private IHttpActionResult PaymentMethodAttached(Stripe.Event stripeEvent, SystemMessages msgs)
         {
             var paymentMethod = (Stripe.PaymentMethod)stripeEvent.Data.Object;
-            var account = Account.LoadByStripeCustomerId(paymentMethod.CustomerId, msgs);
+            var currentAccount = Account.LoadByStripeCustomerId(paymentMethod.CustomerId, msgs);
             
-            account.CheckIfSubscriberAccountHasPaymentMethod(paymentMethod, msgs);
+            if (currentAccount.IsEmpty())
+            {
+                msgs.Add("Account not found for some reason", MessageType.Notice);
+                return ReturnOK(msgs);
+            }
+            
+            currentAccount.CheckIfSubscriberAccountHasPaymentMethod(paymentMethod, msgs);
 
             if (msgs.HasErrors())
                 return Return500(msgs);
@@ -63,6 +69,12 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         {
             var subscription = (Stripe.Subscription)stripeEvent.Data.Object;
             var currentAccount = Account.LoadByStripeCustomerId(subscription.CustomerId);
+            
+            if (currentAccount.IsEmpty())
+            {
+                msgs.Add("Account not found for some reason", MessageType.Notice);
+                return ReturnOK(msgs);
+            }
 
             currentAccount.CheckIfSubscriberAccountSubscriptionChanged(new WebUser() { ID = 0 }, msgs);
 
@@ -74,11 +86,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         
         private void SendLogEmail(SystemMessages msgs)
         {
-            string toEmail = "dev@afterschoolhq.com";
-            string subject = $"Stripe Webhook Errors - {AfterSchoolLibrary.Helpers.Utilities.HostName}";
-            string body = msgs.RenderMessageList(MessageOutputType.Html);
-
-            AfterSchoolLibrary.Helpers.EmailHelper.SendEmail(toEmail, subject, body, true);
+            AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(msgs);
         }
 
         private IHttpActionResult ReturnOK(SystemMessages msgs)
