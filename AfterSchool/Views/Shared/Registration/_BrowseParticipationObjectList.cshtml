@@ -5,7 +5,6 @@
     var perPage = 10M;
     var numberOfPages = Math.Ceiling(Model.Count / perPage);
 }
-
 <div class="row">
     <div class="col-md-12 text-center">
         <h3>@title</h3>
@@ -13,7 +12,7 @@
 
     @foreach (var item in Model)
     {
-        Html.RenderPartial("~/Views/Shared/Registration/_BrowseParticipationObjectWide.cshtml", 
+        Html.RenderPartial("~/Views/Shared/Registration/_BrowseAllActivities.cshtml", 
             item, 
             new ViewDataDictionary() { { "accountprofile", ViewData["accountProfile"] } });
     }
@@ -31,4 +30,3 @@
     }
 
 </div>
-<hr />

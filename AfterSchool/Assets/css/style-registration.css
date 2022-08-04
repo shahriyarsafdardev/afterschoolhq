@@ -8,14 +8,14 @@ body.registration {
 .panel {
     margin: 20px;
     border: 1px solid #f9f9f9;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.12);
-    padding: 0px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+    padding: 0;
 }
 
 .reg-header {
     color: #fff;
     /*background-color: #00ae85;*/
-    padding: 90px 20px;
+    padding: 40px 20px;
     background: #00d7bb; /* Old browsers */
     background: -moz-linear-gradient(top, #00d7bb 0%, #00ae85 100%); /* FF3.6-15 */
     background: -webkit-linear-gradient(top, #00d7bb 0%, #00ae85 100%); /* Chrome10-25,Safari5.1-6 */
@@ -24,7 +24,7 @@ body.registration {
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
-    min-height: 400px;
+    min-height: 275px;
     justify-content: center;
     align-items: center;
 }
@@ -48,7 +48,7 @@ body.registration {
     margin: auto;
     width: 100%;
     object-fit: contain;
-    max-height: 200px;
+    max-height: 138px;
 }
 
 .reg-header-overlay {
@@ -151,8 +151,7 @@ body.registration {
 }
 
 .panel-h3 {
-    /*font-family: "Montserrat", "Open Sans", sans-serif;*/
-    color: #00ae85;
+    color: #494949;
     font-size: 28px;
     font-weight: 600;
     padding-left: 20px;
@@ -202,14 +201,15 @@ body.registration {
 }
 
 .activity-description {
-    padding: 10px 0px;
+    padding: 10px 0;
     height: 60px;
     font-size: 1.15em;
 }
 
 .activity-detail-block {
-    padding: 5px 0px;
+    padding: 5px 0;
     font-size: 1.15em;
+    font-weight: 300;
 }
 
 .activity-detail-block h3 {
@@ -229,23 +229,21 @@ body.registration {
 }
 
 .btn-register, .btn-register-default {
-    /* background: #00ae85;*/
-    background-color: #333;
+    background-color: #494949;
     color: #fff;
-    padding: 11px 0px;
+    padding: 11px 0;
     width: 100%;
     border-radius: 10px;
     font-weight: 600;
     letter-spacing: 2.5px;
     text-transform: uppercase;
     word-break: break-word;
-    margin: 5px 0px;
+    margin: 5px 0;
     transition: all 0.3s;
     border: none;
 }
 
 .btn-register:hover, .btn-register-default:hover {
-    /* background: #139476; */
     background-color: #444;
     color: #fff;
     transition: all 0.3s;
@@ -261,14 +259,14 @@ body.registration {
 .btn-register-primary {
     background-color: #00ae85;
     color: #fff;
-    padding: 11px 0px;
+    padding: 11px 0;
     width: 100%;
     border-radius: 10px;
     font-weight: 600;
     letter-spacing: 2.5px;
     text-transform: uppercase;
     word-break: break-word;
-    margin: 5px 0px;
+    margin: 5px 0;
     transition: all 0.3s;
     border: none;
 }
@@ -302,14 +300,14 @@ body.registration {
 .btn-header-action {
     background-color: #00AE83;
     color: #fff;
-    padding: 11px 0px;
+    padding: 11px 0;
     width: 100%;
     border-radius: 10px;
     font-weight: 600;
     letter-spacing: 2.5px;
     text-transform: uppercase;
     word-break: break-word;
-    margin: 5px 0px;
+    margin: 5px 0;
     transition: all 0.3s;
     border: none;
 }
@@ -329,14 +327,14 @@ body.registration {
 .btn-header-action-callout {
     background-color: #ed4b4b;
     color: #fff;
-    padding: 11px 0px;
+    padding: 11px 0;
     width: 100%;
     border-radius: 10px;
     font-weight: 600;
     letter-spacing: 2.5px;
     text-transform: uppercase;
     word-break: break-word;
-    margin: 5px 0px;
+    margin: 5px 0;
     transition: all 0.3s;
     border: none;
 }
@@ -356,7 +354,7 @@ body.registration {
 .btn-waitlist {
     background: #ffad49;
     color: #fff;
-    padding: 11px 0px;
+    padding: 11px 0;
     width: 100%;
     border-radius: 24px;
     font-weight: 600;
@@ -416,54 +414,42 @@ body.registration {
     background-color: #2f3c40; /*#264770; /* #212a2d;*/
 }
 
-.participation-object-add > .panel > .panel-body {
-}
-
-.participation-object-wide > .panel {
-    position: relative;
-    border-radius: 10px;
-}
-
-.participation-object-wide > .panel .panel-h3 {
-    padding-left: 0px;
+.participation-object-wide .panel-h3 {
+    padding-left: 0;
     padding-top: 10px;
 }
 
 .participation-object-wide > .panel .panel-h3 > h3 {
     color: #555;
     font-size: 1.10em;
-    margin-top: 0px;
+    margin-top: 0;
+    margin-bottom: 10px;
 }
 
-.participation-object-wide > .panel .panel-h3 > p {
+.participation-object-wide .panel-h3 > p {
     color: #999;
     font-size: .4em;
-    margin-bottom: 0px;
+    margin-bottom: 0;
 }
 
-.participation-object-wide > .panel > .panel-footer {
+.participation-object-wide .panel-footer {
     position: absolute;
     bottom: 0;
     width: 100%;
 }
 
+.participation-object-wide .panel-body {
+    padding: 25px 0;
+}
+
 .registration-titlebar .org-logo-container {
     max-width: 900px;
     max-height: 200px;
-    margin: auto;
-    /*overflow: hidden;*/
     text-align: center;
     border-radius: 5px;
     border-color: #f5f5f5;
     border-width: 1px;
     border-style: solid;
-    /*
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-size: cover;
-    position:relative;
-        */
-    /*box-shadow: 1px 1px 10px rgba(0, 0, 0, .1) inset;*/
     margin: 20px auto;
     position: relative;
 }
@@ -504,7 +490,7 @@ body.registration {
 }
 
 .registration-titlebar .org-title-area {
-    margin: 10px 10px 0px;
+    margin: 10px 10px 0;
     width: 90%;
 }
 
@@ -525,7 +511,7 @@ body.registration {
     background-color: #fff;
     position: relative;
     top: 50px;
-    box-shadow: rgba(150, 150, 150, .4) 0px 3px 10px;
+    box-shadow: rgba(150, 150, 150, .4) 0 3px 10px;
 }
 
 .activity-seats-left {
@@ -536,11 +522,6 @@ body.registration {
 
 .participation-object-detail {
     margin-top: 24px;
-}
-
-.participation-object-detail > .panel {
-    border-radius: 10px;
-    overflow: hidden;
 }
 
 @media screen and (max-width: 375px) {

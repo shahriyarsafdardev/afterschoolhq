@@ -1,0 +1,280 @@
+﻿@model ParticipationObject
+@{
+    var showSeatsRemaining = true;
+    var showLocation = false;
+    var accountProfile = (AccountProfile)ViewBag.AccountProfile;
+
+    if (Model.SeatsRemaining.HasValue && Model.SeatsRemaining.Value <= 40)
+    {
+        if (Model.IsActivityGroup() && Model.ActivityGroupType.Value != ActivityGroupType.League)
+        {
+            showSeatsRemaining = false;
+        }
+        else if (Model.IsActivity() && Model.ActivityType.Value.In(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
+        {
+            showSeatsRemaining = false;
+        }
+    }
+    else
+    {
+        showSeatsRemaining = false;
+    }
+
+    if (Model.Location.IsNotEmpty())
+    {
+        if (Model.IsActivity())
+        {
+            if (Model.ActivityLocationType == ActivityLocationType.Physical)
+            {
+                showLocation = true;
+            }
+        }
+        else
+        {
+            showLocation = true;
+        }
+    }
+}
+
+<style>
+    .participation-object-wide {
+        padding: 15px 0px;
+    }
+    .padding-v-10 > span
+    {
+        font-size: initial;
+    }
+    
+    
+    .panel-h3 > h3
+    {
+        margin-top: 0px;
+    }
+    
+    .activity-rectangle {
+    border-radius: 8px;
+    box-shadow: 0 2px 10px 0 rgb(178 178 180 / 30%);
+    background-color: #FFFFFF;
+    margin: 0px 10px;
+    }
+    
+    .participation-object-wide .panel-body{
+    padding: 25px 56px;
+    }
+    
+    @@media(max-width: 992px) {
+          .participation-object-wide .panel-body {
+             padding: 25px 25px;
+          }
+          .btn-register {
+            font-size: 16px;
+            padding: 15px 0px;
+          }
+        }
+    
+</style>
+
+<div class="col-sm-12 participation-object-wide searchable-object"
+     id="@Model.Uid"
+     mingrade="@Model.MinGradeId"
+     maxgrade="@Model.MaxGradeId"
+     mingradetext="@(Model.GetMinGradeLevel()?.Name)"
+     maxgradetext="@(Model.GetMaxGradeLevel()?.Name)"
+     agestart="@Model.AgeStart"
+     ageend="@Model.AgeEnd"
+     hasseatsremaining="@Model.HasSeatsAvailable().ToString().ToLower()"
+     days="@ParticipationObjectUI.PrintDaysOfWeekList(Model)"
+     location="@(Model.Location?.FormatAddress(false))"
+     gender="@((int)Model.GenderRestriction)"
+     name="@Model.Name"
+     isvirtual="@((Model.ActivityLocationType == ActivityLocationType.Virtual) ? "1" : "0")"
+     isphysical="@((Model.ActivityLocationType == ActivityLocationType.Physical || Model.ActivityLocationType == ActivityLocationType.NotSet) ? "1" : "0")"
+     issport="@((Model.IsAccountActivityGroup()) ? "1" : "0")">
+
+<div class="activity-rectangle" style="overflow: hidden;">
+
+    @if (accountProfile.IsNotEmpty())
+    {
+        var hasProvider = Model.Provider.IsNotEmpty();
+        var isProviderProfile = hasProvider && Model.Provider.ID == accountProfile.AccountId;
+        var isProvidedAtHostAccount = Model.Location?.HostAccountId == accountProfile.AccountId || !hasProvider;
+        <!-- badge-success badge-blue badge-dark-gray -->
+        <div style="padding: 5px 5px 5px 20px;" class="badge-dark-gray">
+            <div class="text-white text-bold">
+                @if (Model.ActivityLocationType == ActivityLocationType.Virtual)
+                {
+                    <span>Virtual</span>
+                }
+                else
+                {
+                    <span>In-person</span>
+                }
+
+                <span>activity</span>
+
+                @if (isProviderProfile)
+                {
+                    <span>at <a href="@Model.OwnerAccount.HomePageUrl" class="text-white">@Model.OwnerAccount.Name</a></span>
+                }
+                else
+                {
+                    if (hasProvider)
+                    {
+                        <span>by <a href="@Model.Provider.HomePageUrl" class="text-white">@Model.Provider.Name</a></span>
+                    }
+                    else
+                    {
+                        <span>by <a href="@Model.OwnerAccount.HomePageUrl" class="text-white">@Model.OwnerAccount.Name</a></span>
+                    }
+                }
+            </div>
+        </div>
+    }
+    <div class="panel-body" onclick="location.href='@Model.GetHomePageUrl(true)'" style="cursor:pointer">
+        <div>
+        <div class="col-lg-3 col-md-4 notranslate">
+
+            <div class="heading panel-h3">
+                <p>
+                    @Model.OwnerAccount.Name
+                </p>
+                <h3>
+                    <strong title="@Model.Name">@Model.Name</strong>
+                    @if (!Model.ObjectID.HasValue)
+                    {
+                        <span class="badge badge-danger">DEMO</span>
+                    }
+                </h3>
+            </div>
+
+            <div class="margin-t-20">
+                <p class="text-medium-small">
+                    @if (showLocation && Model.Location.ID != Model.OwnerAccount.DefaultLocationId)
+                    {
+                        <span>
+                            @@
+                            @Model.Location.Name
+                        </span>
+                    }
+                </p>
+            </div>
+
+            <p class="activity-description text-muted hide">
+                @Html.Raw(Model.Description.MaxChars(80, "...").IfEmpty(BasicLibrary.Utilities.RemoveHTMLAndEntities(Model.Details).MaxChars(80, "...")))
+            </p>
+
+            <div class="seats-remaining">
+                @if (showSeatsRemaining)
+                {
+                    <strong style="color: #ff7070">
+                        <em>
+                            @if (!Model.RegistrationPeriod.IsClosed(Model.OwnerAccount))
+                            {
+                                var remainingSeats = Model.SeatsRemaining.ToString();
+                                if (Model.ActivityType == ActivityType.VolunteerOpportunity)
+                                {
+                                    remainingSeats += " volunteers needed";
+                                }
+                                else
+                                {
+                                    remainingSeats += " seats";
+                                    remainingSeats += Model.RegistrationMode == RegistrationMode.Register ? " left" : "";
+
+                                    if (Model.CanRegisterPerClass)
+                                    {
+                                        remainingSeats += " for next class";
+                                    }
+                                }
+
+                                <span>@remainingSeats</span>
+                            }
+                            else if (!Model.RegistrationPeriod.WillOpen(Model.OwnerAccount))
+                            {
+                                @:Closed
+                            }
+
+                        </em>
+                    </strong>
+                }
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-md-5">
+            <div class="padding-v-10">
+
+                @if (Model.StartDate.HasValue)
+                {
+                    <span>
+                        <b>@(Model.ActivityType == ActivityType.VolunteerOpportunity && Model.Schedule.RepeatsWeekly == true ? "Start Date" : "Date")</b>: @Model.StartDate.ToShortDateString() @Model.StartDate.ToShortTimeString()
+                    </span>
+                    <br/>
+                }
+                @if (Model.Schedule.IsNotEmpty())
+                {
+                    <span>
+                        <b>@(Model.ActivityType == ActivityType.VolunteerOpportunity ? (Model.Schedule.RepeatsWeekly == true ? "Days of the Week" : "Days") : "Days of the Week:")</b>: @Model.Schedule.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().Substring(0, 3)).ToStringList(", ")
+                    </span>
+                    <br/>
+                }
+                @if (Model.ActivityType != ActivityType.VolunteerOpportunity)
+                {
+                    <span>
+                        @Html.Raw(ParticipationObjectUI.PrintAgeGradeRestrictions(Model).Insert(0, "<b>").Insert(7, "</b>"))
+                    </span>
+                    <br/>
+                    <span>
+                        <b>Gender Restrictions</b>: @ParticipationObjectUI.PrintGenderRestrictions(Model)
+                    </span>
+                }
+                else
+                {
+                    <span>
+                        <b>Restrictions</b>: @ParticipationObjectUI.PrintGenderRestrictions(Model)
+                    </span>
+                }
+
+
+            </div>
+        </div>
+
+            <div class="col-lg-3 col-md-3">
+
+                <div class="margin-t-20">
+                    @if (Model.IsActivity() && Model.GetActivity().IsNotEmpty() && Model.GetActivity().ActivityGroupId.HasValue)
+                    {
+                        var isOpen = Model.RegistrationPeriod.IsOpen();
+                        var learnMoreColSize = isOpen ? "col-md-9" : "col-md-12";
+                        var learnMoreStyle = isOpen ? "btn-register-default" : "btn-register";
+
+                        <div class="row">
+                            <div class="@learnMoreColSize">
+                                <a href="@Model.GetHomePageUrl(true)" class="btn @learnMoreStyle">
+                                    View Details &raquo;
+                                </a>
+                            </div>
+                            @if (isOpen)
+                            {
+                                <div class="col-md-3">
+                                    <button class="btn btn-register btn-cart" in-cart="0" uid="@Model.Uid">
+                                        <span><i class="s7-plus icon-medium"></i><i class="s7-cart icon-medium"></i></span>
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <a href="@Model.GetHomePageUrl(true)" class="btn btn-register btn-block">
+                            View Details &raquo;
+                        </a>
+                    }
+
+                    <p class="text-center">
+                        @Html.Raw(ParticipationObjectUI.PrintRegistrationPeriod(Model))
+                    </p>
+                </div>
+            </div>
+            </div>
+    </div>
+</div>
+</div>
