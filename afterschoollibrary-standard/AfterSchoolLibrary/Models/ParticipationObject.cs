@@ -226,7 +226,7 @@ namespace AfterSchoolLibrary.Models
             ObjectType = ParticipationObjectType.AccountActivityGroup;
             Uid = activityGroup.Uid;
             Name = activityGroup.Name;
-            Details = activityGroup.Description;
+            Details = activityGroup.Details.IfEmpty(activityGroup.Description);
             GenderRestriction = activityGroup.GenderRestriction;
             MinGradeId = activityGroup.MinGradeLevelId;
             MaxGradeId = activityGroup.MaxGradeLevelId;

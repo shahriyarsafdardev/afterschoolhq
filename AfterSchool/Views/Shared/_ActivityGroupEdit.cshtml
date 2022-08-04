@@ -25,11 +25,11 @@
         <div class="col-md-9">
             @{ Html.RenderPartial(
             "~/Views/Shared/_TextEditor.cshtml",
-            Model.Description,
+            Model.Details,
             new ViewDataDictionary() {
                 { "required", true },
-                { "name", "description" },
-                { "id", "description" }
+                { "name", "details" },
+                { "id", "details" }
             }
             ); }
             <p class="text-muted">
