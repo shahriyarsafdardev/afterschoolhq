@@ -66,6 +66,18 @@
     }
 }
 
+<style>
+    #activityHeaderbtns
+    {
+        padding-top: 35px;
+    }
+    
+    #activityHeaderbtns > div > .btn-view-all
+    {
+        width: 245px;
+    }
+</style>
+
 @helper renderEditButtion(string anchor, WebUser currentUser)
 {
     if (currentUser.IsNotEmpty() && currentUser.HasAccessTo(Model.Account) && Request["edit"] == "1")
@@ -202,10 +214,10 @@
                     <div class="padding-v-20 text-center" id="activityHeaderbtns">
                         <div>
                             @{
-                                var displayActivity = Model.ParticipationObject?.ActivityType  != ActivityType.VolunteerOpportunity;
+                                var displayActivity = Model.ParticipationObject?.ActivityType != ActivityType.VolunteerOpportunity;
                                 var browseActivitiesOrOpportunitiesUrl = displayActivity ? Model.Account.BrowseUrl : Model.Account.BrowseVolunteerOpportunitiesUrl;
-                                var buttonText = displayActivity 
-                                    ? "View All " + UILabel.ActivityLabel(ActivityType.Activity, true) 
+                                var buttonText = displayActivity
+                                    ? "View All " + UILabel.ActivityLabel(ActivityType.Activity, true)
                                     : "View " + UILabel.ActivityLabel(ActivityType.VolunteerOpportunity, true);
                             }
                             @RenderViewActivitiesButton(isInEditMode, browseActivitiesOrOpportunitiesUrl, buttonText)
@@ -534,12 +546,14 @@
 </script>
 
 @functions {
+
     private bool ShowViewActivitiesButton(bool isInEditMode)
     {
         return Request.Url is null || Request.Url.ToString().IsSameAs(Model.Account.BrowseUrl)
                || Request.Url.ToString().IsSameAs(Model.Account.BrowseVolunteerOpportunitiesUrl)
                || (isInEditMode && !Model.Account.HasActivities());
     }
+
 }
 
 @helper RenderViewActivitiesButton(bool isInEditMode, string browseUrl, string buttonText)

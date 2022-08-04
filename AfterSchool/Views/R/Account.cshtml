@@ -70,18 +70,17 @@
         height: 100%;
     }
     
-    div > .activity-section-header
-    {
+    div > .activity-section-header {
         border-top-left-radius : 8px;
         border-top-right-radius : 8px;
     }
     
-    .am-wrapper.notopmenu.am-nosidebar-left
-    {
+    .am-wrapper.notopmenu.am-nosidebar-left {
         background-color: #fff;
     }
-    #about-section{
-    padding-left: 25px; padding-right: 25px
+    #about-section {
+        padding-left: 25px;
+        padding-right: 25px;
     }
        
 </style>
@@ -177,108 +176,104 @@
 <div>
 <div class="panel-body">
 
-        @if (participationObjects.Any() || isInEditMode)
-        {
-            <div>
+@if (participationObjects.Any() || isInEditMode)
+{
+    <div>
 
-                @{
-                    var activities = participationObjects.Where(po => po.ActivityType != ActivityType.VolunteerOpportunity).ToList();
-                    Html.RenderPartial("Registration/_ParticipationObjectSection",
-                        activities.Take(takeActivities).ToList(),
-                        new ViewDataDictionary
-                        {
+        @{
+            var activities = participationObjects.Where(po => po.ActivityType != ActivityType.VolunteerOpportunity).ToList();
+            Html.RenderPartial("Registration/_ParticipationObjectSection",
+                activities.Take(takeActivities).ToList(),
+                new ViewDataDictionary
+                {
                     {"BrowseUrl", Model.BrowseUrl},
                     {"ActivityType", ActivityType.Activity},
                     {"ShowViewMore", activities.Count > takeActivities},
                     {"IsInEditMode", isInEditMode},
                     {"AccountUid", Model.Uid},
-                    {"ActivityLabel", UILabel.ActivityLabel(ActivityType.Activity, true)}
-                    });
+                    {"ActivityLabel", UILabel.ActivityLabel(ActivityType.Activity, true)},
+                });
 
-                    if (Model.HasAccountPackageFeature(FeatureType.ManageVolunteerOpportunities))
+            if (Model.HasAccountPackageFeature(FeatureType.ManageVolunteerOpportunities))
+            {
+                var volunteerOpportunities = participationObjects.Where(po => po.ActivityType == ActivityType.VolunteerOpportunity).ToList();
+                Html.RenderPartial("Registration/_ParticipationObjectSection",
+                    volunteerOpportunities.Take(takeActivities).ToList(),
+                    new ViewDataDictionary
                     {
-                        var volunteerOpportunities = participationObjects.Where(po => po.ActivityType == ActivityType.VolunteerOpportunity).ToList();
-                        Html.RenderPartial("Registration/_ParticipationObjectSection",
-                            volunteerOpportunities.Take(takeActivities).ToList(),
-                            new ViewDataDictionary
-                            {
                         {"BrowseUrl", Model.BrowseVolunteerOpportunitiesUrl},
                         {"ActivityType", ActivityType.VolunteerOpportunity},
                         {"ShowViewMore", volunteerOpportunities.Count > takeActivities},
                         {"IsInEditMode", isInEditMode},
                         {"AccountUid", Model.Uid},
                         {"ActivityLabel", UILabel.ActivityLabel(ActivityType.VolunteerOpportunity, true)},
-                        });
-                    }
-                }
+                    });
+            }
+        }
+    </div>
+}
+
+<div>
+    <div class="activity-section-header">
+        <div>
+            <h2 class="section-title">About @Model.Name.ToUpper()</h2>
+        </div>
+    </div>
+
+    <div class="activity-section" id="about-section" style="">
+        <div class="margin-t-20">
+            @if (showPhotoGallery)
+            {
+                <div class="row">
+                    <div style="position: relative;">
+                        @RenderEditButton(Model, "photos", "Edit Photo Gallery")
+                    </div>
+                </div>
+            }
+
+            <div id="frameContainer" class="row iframe-container">
+                <iframe id="frameVideoUrl" frameborder="0" allowfullscreen></iframe>
+            </div>
+            @if (showPhotoGallery)
+            {
+                <div class="row">
+                    <div style="position: relative;">
+                        @{ Html.RenderPartial("~/Views/Shared/Registration/_ProfilePhotoGallery.cshtml", photos); }
+                    </div>
+                </div>
+            }
+        </div>
+
+        @if (servicesOffered.Any() || isInEditMode)
+        {
+            <div class="margin-t-20">
+                <div class="row padding-h-30">
+                    <div class="activity-detail-block">
+                        <h2 class="font-weight-500">Services Offered @RenderEditButton(Model, "services")</h2>
+                    </div>
+
+                    @RenderAccountProperties(servicesOffered, Math.Ceiling(servicesOffered.Count() / 3.0).ToInteger())
+
+                </div>
             </div>
         }
 
-        <div>
-            <div class="activity-section-header">
-                        <div>
-                            <h2 class="section-title">About @Model.Name.ToUpper()</h2>
-                        </div>
+        @if (skillsAndMethods.Any() || isInEditMode)
+        {
+            <div class="margin-t-20">
+                <div class="row padding-h-30">
+                    <div class="activity-detail-block">
+                        <h2 class="font-weight-500">Skills &amp; Teaching Methods @RenderEditButton(Model, "services")</h2>
+                    </div>
+
+                    @RenderAccountProperties(skillsAndMethods, Math.Ceiling(skillsAndMethods.Count() / 3.0).ToInteger())
+
+                </div>
             </div>
-            
-                <div class="activity-section" id="about-section" style="">
-                        <div class="margin-t-20">
-                                    @if (showPhotoGallery)
-                                    {
-                                        <div class="row">
-                                            <div style="position: relative;">
-                                                @RenderEditButton(Model, "photos", "Edit Photo Gallery")
-                                            </div>
-                                        </div>
-                                    }
-                        
-                                    <div id="frameContainer" class="row iframe-container">
-                                        <iframe id="frameVideoUrl" frameborder="0" allowfullscreen></iframe>
-                                    </div>
-                        @if (showPhotoGallery)
-                                    {
-                                        <div class="row">
-                                            <div style="position: relative;">
-                                                @{ Html.RenderPartial("~/Views/Shared/Registration/_ProfilePhotoGallery.cshtml", photos); }
-                                            </div>
-                                        </div>
-                                    }
-                                </div>
-                        
-                                @if (servicesOffered.Any() || isInEditMode)
-                                {
-                                    <div class="margin-t-20">
-                                        <div class="row padding-h-30">
-                                            <div class="activity-detail-block">
-                                                <h2 class="font-weight-500">Services Offered @RenderEditButton(Model, "services")</h2>
-                                            </div>
-                        
-                                            @RenderAccountProperties(servicesOffered, Math.Ceiling(servicesOffered.Count() / 3.0).ToInteger())
-                        
-                                        </div>
-                                    </div>
-                        
-                        
-                                }
-                        
-                                @if (skillsAndMethods.Any() || isInEditMode)
-                                {
-                                    <div class="margin-t-20">
-                                        <div class="row padding-h-30">
-                                            <div class="activity-detail-block">
-                                                <h2 class="font-weight-500">Skills &amp; Teaching Methods @RenderEditButton(Model, "services")</h2>
-                                            </div>
-                        
-                                            @RenderAccountProperties(skillsAndMethods, Math.Ceiling(skillsAndMethods.Count() / 3.0).ToInteger())
-                        
-                                        </div>
-                                    </div>
-                        
-                                   
-                                }
-                                
-                        
-            @if (specialNeedsOffered.Any() || isInEditMode)
+        }
+
+
+        @if (specialNeedsOffered.Any() || isInEditMode)
         {
             <div class="margin-t-20">
                 <div class="row padding-h-30">
@@ -290,7 +285,6 @@
 
                 </div>
             </div>
-            
         }
 
         @if (awards.Any() || certifications.Any() || isInEditMode)
@@ -383,11 +377,11 @@
             </div>
         }
 
-            
-                </div>
-        </div>
 
     </div>
+</div>
+
+</div>
 <div class="panel-footer">
     <div class="col-md-12 text-center">
         <div class="padding-v-20 padding-h-30">

@@ -1,20 +1,20 @@
 ﻿@model Account
 @{
     Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml";
-    var msgs = (SystemMessages)ViewBag.Messages;
-    var title = (string)ViewBag.Title;
-    var headline = (string)ViewBag.Headline;
+    var msgs = (SystemMessages) ViewBag.Messages;
+    var title = (string) ViewBag.Title;
+    var headline = (string) ViewBag.Headline;
     var isProgram = Model.AccountTypeId == AccountType.Teacher;
     var genderRestriction = ViewBag.GenderRestriction;
 
     var organizationLabel = Model.AccountTypeId.ToString().SplitByUpperCase();
     var organizationExampleNames = "";
-    var headerText = $"Enter info about your organization.";
+    var headerText = "Enter info about your organization.";
 
     if (Model.AccountTypeId == AccountType.ActivityProvider)
     {
         organizationLabel = "Organization";
-        headerText = $"Enter info about your organization";
+        headerText = "Enter info about your organization";
     }
 
     if (isProgram)
@@ -22,7 +22,7 @@
         organizationLabel = "Program";
         headerText = "Let's get some info about your organization.";
         organizationExampleNames = "Ex. Math Club, Chess Club, Elite Track &amp; Field";
-    } 
+    }
 }
 
 <div class="row main-content main-content-welcome-pages">
@@ -35,11 +35,11 @@
                 <form class="form form-horizontal" method="post" action="@Url.Action("programinfo", "onboarding")">
 
                     @{ Html.RenderPartial("~/Views/Shared/_Loaders.cshtml",
-                             new ViewDataDictionary() {
-                               { "count", 6 },
-                               { "activeDotNumber", 1 }
-                             });
-                    }
+                           new ViewDataDictionary
+                           {
+                               {"count", 6},
+                               {"activeDotNumber", 1},
+                           }); }
 
                     <div class="col-md-12 onboarding-form-group">
                         <h1 class="text-center register-thankyou-2">@headerText</h1>
@@ -55,7 +55,7 @@
 
                     <div class="col-md-12 onboarding-form-group">
                         <label class="onboarding-label"> SHORT DESCRIPTION </label>
-                        <input id="headline" name="headline" class="form-control onboarding-input" type="text" value="@headline">
+                        <input id="headline" name="headline" class="form-control onboarding-input" type="text" maxlength="100" value="@headline">
                         <p class="text-muted" style="padding: 5px 0;">Short tagline describing what you do. Max 100 characters.</p>
                     </div>
                     <div class="clearfix"></div>
@@ -66,26 +66,26 @@
                         <div class="am-radio program-radio">
                             <input type="radio"
                                    name="genderrestrictions"
-                                   id="genderrestrictions-@((int)GenderRestrictionType.None)"
-                                   value="@((int)GenderRestrictionType.None)"
-                                   @(genderRestriction == (int)GenderRestrictionType.None ? "checked='true'" : "") />
-                            <label for="genderrestrictions-@((int)GenderRestrictionType.None)">All Genders</label>
+                                   id="genderrestrictions-@((int) GenderRestrictionType.None)"
+                                   value="@((int) GenderRestrictionType.None)"
+                                   @(genderRestriction == (int) GenderRestrictionType.None ? "checked='true'" : "")/>
+                            <label for="genderrestrictions-@((int) GenderRestrictionType.None)">All Genders</label>
                         </div>
                         <div class="am-radio program-radio">
                             <input type="radio"
                                    name="genderrestrictions"
-                                   id="genderrestrictions-@((int)GenderRestrictionType.MaleOnly)"
-                                   value="@((int)GenderRestrictionType.MaleOnly)"
-                                   @(genderRestriction == (int)GenderRestrictionType.MaleOnly ? "checked='true'" : "") />
-                            <label for="genderrestrictions-@((int)GenderRestrictionType.MaleOnly)">Boys</label>
+                                   id="genderrestrictions-@((int) GenderRestrictionType.MaleOnly)"
+                                   value="@((int) GenderRestrictionType.MaleOnly)"
+                                   @(genderRestriction == (int) GenderRestrictionType.MaleOnly ? "checked='true'" : "")/>
+                            <label for="genderrestrictions-@((int) GenderRestrictionType.MaleOnly)">Boys</label>
                         </div>
                         <div class="am-radio program-radio">
                             <input type="radio"
                                    name="genderrestrictions"
-                                   id="genderrestrictions-@((int)GenderRestrictionType.FemaleOnly)"
-                                   value="@((int)GenderRestrictionType.FemaleOnly)"
-                                   @(genderRestriction == (int)GenderRestrictionType.FemaleOnly ? "checked='true'" : "") />
-                            <label for="genderrestrictions-@((int)GenderRestrictionType.FemaleOnly)">Girls</label>
+                                   id="genderrestrictions-@((int) GenderRestrictionType.FemaleOnly)"
+                                   value="@((int) GenderRestrictionType.FemaleOnly)"
+                                   @(genderRestriction == (int) GenderRestrictionType.FemaleOnly ? "checked='true'" : "")/>
+                            <label for="genderrestrictions-@((int) GenderRestrictionType.FemaleOnly)">Girls</label>
                         </div>
                     </div>
                     <div class="clearfix"></div>
@@ -96,7 +96,7 @@
                         <div class="clearfix"></div>
                         <div style="padding: 0;">
                             <select id="select-program-timezone" class="form-control onboarding-input" name="timeZone" style="height: 44px;" required>
-                                @foreach (var zone in new string[] { "Eastern - EST", "Central - CST", "Mountain - MST", "Pacific - PST", "Alaska - AKST", "Hawaii - HAST" })
+                                @foreach (var zone in new[] {"Eastern - EST", "Central - CST", "Mountain - MST", "Pacific - PST", "Alaska - AKST", "Hawaii - HAST"})
                                 {
                                     var selected = "";
                                     if (zone == Model.TimeZone.IfEmpty(""))

@@ -68,6 +68,7 @@
         font-size: 20px;
         font-weight: 300;
         color: #494949;
+        white-space: nowrap;
     }
     .activity-section-footer > .view-all-link
     {
@@ -108,13 +109,13 @@
     {
         Html.RenderPartial("~/Views/Shared/Registration/_BrowseParticipationObjectWide.cshtml", item);
     }
-    
+
     <div class="activity-section-footer">
-            <a href="@browseUrl" class="view-all-link">
-                @Html.Raw(activityType == ActivityType.Activity ? "View All Activities &raquo" : "View All Oppurtunities &raquo")
-            </a>
+        <a href="@browseUrl" class="view-all-link">
+            @Html.Raw(activityType == ActivityType.Activity ? "View All Activities &raquo" : "View All Opportunities &raquo")
+        </a>
     </div>
-        
+
     @if (showViewMore)
     {
         <div class="row hide">
