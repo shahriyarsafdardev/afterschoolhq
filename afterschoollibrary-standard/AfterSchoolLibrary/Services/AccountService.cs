@@ -4195,10 +4195,6 @@ namespace AfterSchoolLibrary.Services
                         amsgs,
                         adc
                     );
-
-                    // cancel stripe subscription at end of term
-                    // this logic is based on total periods, we don't need it anymore since we used subscription cancellation via CancelAt property
-                    // plan.CheckAndCancelPlan(registrantSubscriptionPlan, billingAccount, amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
@@ -4243,20 +4239,9 @@ namespace AfterSchoolLibrary.Services
             {
                 registrant.ProcessActivityPayment(checkoutObject, transaction, loggedInUser, msgs, dc);
 
-                // if successful payment and reserved pending payment then it should be reserved
-                // TODO: Needs review!! 
+                // Ensure the seat is reserved
                 if (msgs.HasNoErrors())
-                {
-                    var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
-                        checkoutObject.ParticipationObject.ObjectID.Value,
-                        checkoutObject.ParticipationObject.ObjectType,
-                        registrant.ID.Value,
-                        msgs,
-                        dc);
-
-                    if (ra.IsNotEmpty() && !ra.IsAssigned(RegistrationAssignmentType.Reserved))
-                        ra.ChangeSeatAssignment(RegistrationAssignmentType.Reserved, loggedInUser, msgs, dc);
-                }
+                    checkoutObject.EnsureSeat(RegistrationAssignmentType.Reserved, loggedInUser, msgs, dc);
             }
         }
 
@@ -4306,6 +4291,10 @@ namespace AfterSchoolLibrary.Services
 
             if (msgs.HasNoErrors())
                 CreatePurchase(checkoutObject, loggedInUser, msgs, dc);
+            
+            // assuming if there's a subscription that they should be RPP until first payment clears
+            if (msgs.HasNoErrors())
+                checkoutObject.EnsureSeat(RegistrationAssignmentType.ReservedPendingPayment, loggedInUser, msgs, dc);
         }
 
         public static void ProcessPaymentPlan(CheckoutObject checkoutObject, Registrant submittedRecord,
@@ -4331,11 +4320,14 @@ namespace AfterSchoolLibrary.Services
                 );
             }
 
-            submittedRecord.StartPaymentPlan(checkoutObject: checkoutObject, loggedInUser: loggedInUser, msgs: msgs,
-                dc: dc);
+            submittedRecord.StartPaymentPlan(checkoutObject, loggedInUser, msgs, dc);
 
             if (msgs.HasNoErrors())
                 CreatePurchase(checkoutObject, loggedInUser, msgs, dc);
+            
+            // assuming if there's a payment plan that they should be RPP until first payment clears
+            if (msgs.HasNoErrors())
+                checkoutObject.EnsureSeat(RegistrationAssignmentType.ReservedPendingPayment, loggedInUser, msgs, dc);
         }
 
         public static void ProcessStudentRegistration(CheckoutObject checkoutObject, bool sendConfirmationEmail,

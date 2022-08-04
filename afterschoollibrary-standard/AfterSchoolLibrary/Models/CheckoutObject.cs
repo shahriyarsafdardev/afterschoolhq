@@ -629,5 +629,14 @@ namespace AfterSchoolLibrary.Models
             return totalAHQFees;
         }
 
+        public void EnsureSeat(RegistrationAssignmentType rat, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var ra = this.Registration.GetRegistrantActivity(this.ParticipationObject, msgs, dc);
+
+            // seems like if they're already reserved we shouldn't downgrade them, that decision should be left to provider
+            if (ra.IsNotEmpty() && !ra.IsAssigned(rat) && ra.AssignmentTypeId != RegistrationAssignmentType.Reserved)
+                ra.ChangeSeatAssignment(rat, loggedInUser, msgs, dc);
+        }
+
     }
 }
