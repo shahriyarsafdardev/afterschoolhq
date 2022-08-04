@@ -1605,16 +1605,16 @@ namespace AfterSchoolLibrary.Services
             if (accountOwner.IsNotEmpty())
                 metadata = new Dictionary<string, string>()
                 {
-                    { "Customer First Name", accountOwner.FirstName },
-                    { "Customer Last Name", accountOwner.LastName },
-                    { "How did you hear about us", accountOwner.HowHearAboutUs },
+                    {"Customer First Name", accountOwner.FirstName},
+                    {"Customer Last Name", accountOwner.LastName},
+                    {"How did you hear about us", accountOwner.HowHearAboutUs},
                 };
-            
+
             customer = StripeHelper.GetStripeHelper(stripeAccountType).CreateCustomer(
-                account.Name ?? accountOwner?.DisplayName, 
-                account.Email ?? accountOwner?.Email, 
-                account.Phone ?? accountOwner?.Phone, 
-                account.AccountTypeId.ToString().SplitByUpperCase(), 
+                account.Name ?? accountOwner?.DisplayName,
+                account.Email ?? accountOwner?.Email,
+                account.Phone ?? accountOwner?.Phone,
+                account.AccountTypeId.ToString().SplitByUpperCase(),
                 null,
                 metadata,
                 msgs);
@@ -1629,18 +1629,21 @@ namespace AfterSchoolLibrary.Services
             StripeHelper.GetStripeHelper(stripeAccountType).SetDefaultPaymentMethod(account.StripeCustomerId, methods.Last().Id, msgs);
         }
 
-        public static void CheckIfSubscriberAccountHasPaymentMethod(this Account account, Stripe.PaymentMethod paymentMethod = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void CheckIfSubscriberAccountHasPaymentMethod(this Account account, PaymentMethod paymentMethod = null, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
-            if (!account.HasDefaultPaymentMethod.IsTrue() && (paymentMethod.IsNotEmpty() || account.GetAllStripePaymentMethods(StripeAccountType.SubscriberAccount, msgs).Any()))
+            if (!account.HasDefaultPaymentMethod.IsTrue() &&
+                (paymentMethod.IsNotEmpty() || account.GetAllStripePaymentMethods(StripeAccountType.SubscriberAccount, msgs).Any()))
             {
                 account.SetStripeDefaultPaymentMethod(StripeAccountType.SubscriberAccount, msgs);
-                
+
                 account.HasDefaultPaymentMethod = true;
                 msgs.AddRange(account.Save(dc));
             }
         }
 
-        public static void CheckIfSubscriberAccountSubscriptionChanged(this Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void CheckIfSubscriberAccountSubscriptionChanged(this Account account, WebUser loggedInUser, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             // check if package has changed
             var accountPackage = account.GetActiveAccountPackage(msgs, dc);
@@ -1650,10 +1653,10 @@ namespace AfterSchoolLibrary.Services
             // needs to match stripe
             if (accountPackage.PackageId != packageFromStripe.ID)
                 account.SwitchPackages(
-                    packageFromStripe, 
-                    stripeSubscription.Plan.Interval.ToEnum<BillingPeriodType>(), 
-                    stripeSubscription.Id, 
-                    loggedInUser, 
+                    packageFromStripe,
+                    stripeSubscription.Plan.Interval.ToEnum<BillingPeriodType>(),
+                    stripeSubscription.Id,
+                    loggedInUser,
                     msgs,
                     dc);
         }
@@ -2366,23 +2369,24 @@ namespace AfterSchoolLibrary.Services
             return uniqueName;
         }
 
-        public static AccountPackage SwitchPackages(this Account account, Package newPackage, BillingPeriodType billingPeriodTypeId, string stripeSubscriptionId, WebUser loggedInUser, SystemMessages msgs = null,
+        public static AccountPackage SwitchPackages(this Account account, Package newPackage, BillingPeriodType billingPeriodTypeId,
+            string stripeSubscriptionId, WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             var packageToRemove = account.GetActiveAccountPackage(msgs, dc);
             msgs.AddRange(packageToRemove.CancelPackage(dc));
 
             var newAccountPackage = AccountPackageService.CreateNewAccountPackage(
-                                        account.ID.Value, 
-                                        newPackage, 
-                                        billingPeriodTypeId, 
-                                        stripeSubscriptionId, 
-                                        loggedInUser, 
-                                        msgs, 
-                                        dc);
+                account.ID.Value,
+                newPackage,
+                billingPeriodTypeId,
+                stripeSubscriptionId,
+                loggedInUser,
+                msgs,
+                dc);
 
             return newAccountPackage;
-        }        
+        }
 
         public static SignUpType GetSignUpType(this Account account, Package p, AccountPackage activePackage,
             BillingPeriodType billingPeriodType, ref int trialDayCount, SystemMessages msgs = null,
@@ -3475,7 +3479,7 @@ namespace AfterSchoolLibrary.Services
                 .OrderBy(registrant => registrant.ID)
                 .FirstOrDefault();
         }
-        
+
         public static Registrant GetFirstParentOrGuardianRegistrant(this Account account, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
@@ -3592,7 +3596,7 @@ namespace AfterSchoolLibrary.Services
                         LastName = lastName,
                         Email = email,
                         IsDeleted = false,
-                        PersonTypeId = isParentOrGuardian ? RegistrantPersonType.Parent : RegistrantPersonType.Student
+                        PersonTypeId = isParentOrGuardian ? RegistrantPersonType.Parent : RegistrantPersonType.Student,
                     };
                     amsgs.AddRange(registrant.Save(adc));
 
@@ -3644,7 +3648,7 @@ namespace AfterSchoolLibrary.Services
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
                 IsDeleted = false,
-                PersonTypeId = RegistrantPersonType.Volunteer
+                PersonTypeId = RegistrantPersonType.Volunteer,
             };
             msgs.AddRange(registrant.Save(dc));
 
@@ -3691,7 +3695,7 @@ namespace AfterSchoolLibrary.Services
                         LastName = lastName,
                         Email = email,
                         IsDeleted = false,
-                        PersonTypeId = RegistrantPersonType.Volunteer
+                        PersonTypeId = RegistrantPersonType.Volunteer,
                     };
                     amsgs.AddRange(registrant.Save(adc));
 
@@ -4292,7 +4296,7 @@ namespace AfterSchoolLibrary.Services
 
             if (msgs.HasNoErrors())
                 CreatePurchase(checkoutObject, loggedInUser, msgs, dc);
-            
+
             // assuming if there's a subscription that they should be RPP until first payment clears
             if (msgs.HasNoErrors())
                 checkoutObject.EnsureSeat(RegistrationAssignmentType.ReservedPendingPayment, loggedInUser, msgs, dc);
@@ -4325,7 +4329,7 @@ namespace AfterSchoolLibrary.Services
 
             if (msgs.HasNoErrors())
                 CreatePurchase(checkoutObject, loggedInUser, msgs, dc);
-            
+
             // assuming if there's a payment plan that they should be RPP until first payment clears
             if (msgs.HasNoErrors())
                 checkoutObject.EnsureSeat(RegistrationAssignmentType.ReservedPendingPayment, loggedInUser, msgs, dc);
@@ -4358,8 +4362,7 @@ namespace AfterSchoolLibrary.Services
                     msgs.AddRange(smsgs);
 
                     if (sendConfirmationEmail)
-                        checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, msgs,
-                            dc);
+                        checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, null, msgs, dc);
                 },
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                 onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
@@ -4368,7 +4371,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static void ProcessRegistrationWithoutPayment(CheckoutObject checkoutObject, bool sendConfirmationEmail,
-            WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+            WebUser loggedInUser, string inviteLink, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
             (
@@ -4397,8 +4400,7 @@ namespace AfterSchoolLibrary.Services
                     msgs.AddRange(smsgs);
 
                     if (sendConfirmationEmail)
-                        checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, msgs,
-                            dc);
+                        checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, inviteLink, msgs, dc);
                 },
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                 onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
@@ -4417,12 +4419,7 @@ namespace AfterSchoolLibrary.Services
                     // get the registrant record that was created just for the account
                     var submittedRecord = checkoutObject.Registration.GetRegistrant(amsgs, adc);
 
-                    ProcessRegistrationWithoutPayment(
-                        checkoutObject: checkoutObject,
-                        sendConfirmationEmail: false,
-                        loggedInUser: loggedInUser,
-                        msgs: amsgs,
-                        dc: adc);
+                    ProcessRegistrationWithoutPayment(checkoutObject, false, loggedInUser, null, amsgs, adc);
 
                     // process payment by to account, includes registration fee
                     var isRegFree = checkoutObject.ParticipationObject.IsRegistrationFree;
@@ -4451,7 +4448,7 @@ namespace AfterSchoolLibrary.Services
                     if (checkoutObject.Coupon.IsNotEmpty() && checkoutObject.Coupon.ID.IsNotEmpty())
                         checkoutObject.PayingAccount.MarkCouponAsUsed(checkoutObject.Coupon);
 
-                    checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
+                    checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, null, msgs, dc);
                 },
                 onFailure: (SystemMessages amsgs) => msgs.AddRange(amsgs),
                 onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
