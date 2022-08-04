@@ -1629,6 +1629,34 @@ namespace AfterSchoolLibrary.Services
             StripeHelper.GetStripeHelper(stripeAccountType).SetDefaultPaymentMethod(account.StripeCustomerId, methods.Last().Id, msgs);
         }
 
+        public static void CheckIfSubscriberAccountHasPaymentMethod(this Account account, Stripe.PaymentMethod paymentMethod = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (!account.HasDefaultPaymentMethod.IsTrue() && (paymentMethod.IsNotEmpty() || account.GetAllStripePaymentMethods(StripeAccountType.SubscriberAccount, msgs).Any()))
+            {
+                account.SetStripeDefaultPaymentMethod(StripeAccountType.SubscriberAccount, msgs);
+                
+                account.HasDefaultPaymentMethod = true;
+                msgs.AddRange(account.Save(dc));
+            }
+        }
+
+        public static void CheckIfSubscriberAccountSubscriptionChanged(this Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            // check if package has changed
+            var accountPackage = account.GetActiveAccountPackage(msgs);
+            var stripeSubscription = accountPackage.GetStripeSubscription(msgs);
+            var packageFromStripe = Package.LoadByUid(stripeSubscription.Plan.ProductId.ToGuid(), msgs);
+
+            // needs to match stripe
+            if (accountPackage.PackageId != packageFromStripe.ID)
+                account.SwitchPackages(
+                    packageFromStripe, 
+                    stripeSubscription.Plan.Interval.ToEnum<BillingPeriodType>(), 
+                    stripeSubscription.Id, 
+                    loggedInUser, 
+                    msgs);
+        }
+
         public static List<PaymentMethod> GetAllStripePaymentMethods(this Account account, StripeAccountType stripeAccountType, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -2340,10 +2368,19 @@ namespace AfterSchoolLibrary.Services
         public static AccountPackage SwitchPackages(this Account account, Package newPackage, BillingPeriodType billingPeriodTypeId, string stripeSubscriptionId, WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            var activeAccountPackage = account.GetActiveAccountPackage(msgs, dc);
-            msgs.AddRange(activeAccountPackage.CancelPackage(dc));
+            var packageToRemove = account.GetActiveAccountPackage(msgs, dc);
+            msgs.AddRange(packageToRemove.CancelPackage(dc));
 
-            return AccountPackageService.CreateNewAccountPackage(account.ID.Value, newPackage, billingPeriodTypeId, stripeSubscriptionId, loggedInUser, msgs, dc);
+            var newAccountPackage = AccountPackageService.CreateNewAccountPackage(
+                                        account.ID.Value, 
+                                        newPackage, 
+                                        billingPeriodTypeId, 
+                                        stripeSubscriptionId, 
+                                        loggedInUser, 
+                                        msgs, 
+                                        dc);
+
+            return newAccountPackage;
         }        
 
         public static SignUpType GetSignUpType(this Account account, Package p, AccountPackage activePackage,

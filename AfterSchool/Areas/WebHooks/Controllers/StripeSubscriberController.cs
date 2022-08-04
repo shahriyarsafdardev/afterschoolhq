@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 using Account = AfterSchoolLibrary.Models.Account;
+using AccountService = AfterSchoolLibrary.Services.AccountService;
 
 namespace AfterSchool.Areas.WebHooks.Controllers
 {
@@ -29,6 +30,10 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
                 switch (stripeEvent.Type)
                 {
+                    case Events.PaymentMethodAttached:
+                        return PaymentMethodAttached(stripeEvent, msgs);
+                    case Events.CustomerSubscriptionUpdated:
+                        return CustomerSubscriptionUpdated(stripeEvent, msgs);
                     default:
                         return ReturnOK(msgs);
                 }
@@ -41,13 +46,47 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             }
         }
         
+        private IHttpActionResult PaymentMethodAttached(Stripe.Event stripeEvent, SystemMessages msgs)
+        {
+            var paymentMethod = (Stripe.PaymentMethod)stripeEvent.Data.Object;
+            var currentAccount = Account.LoadByStripeCustomerId(paymentMethod.CustomerId, msgs);
+            
+            if (currentAccount.IsEmpty())
+            {
+                msgs.Add("Account not found for some reason", MessageType.Notice);
+                return ReturnOK(msgs);
+            }
+            
+            currentAccount.CheckIfSubscriberAccountHasPaymentMethod(paymentMethod, msgs);
+
+            if (msgs.HasErrors())
+                return Return500(msgs);
+            
+            return ReturnOK(msgs);
+        }
+        
+        private IHttpActionResult CustomerSubscriptionUpdated(Stripe.Event stripeEvent, SystemMessages msgs)
+        {
+            var subscription = (Stripe.Subscription)stripeEvent.Data.Object;
+            var currentAccount = Account.LoadByStripeCustomerId(subscription.CustomerId);
+            
+            if (currentAccount.IsEmpty())
+            {
+                msgs.Add("Account not found for some reason", MessageType.Notice);
+                return ReturnOK(msgs);
+            }
+
+            currentAccount.CheckIfSubscriberAccountSubscriptionChanged(new WebUser() { ID = 0 }, msgs);
+
+            if (msgs.HasErrors())
+                return Return500(msgs);
+            
+            return ReturnOK(msgs);
+        }
+        
         private void SendLogEmail(SystemMessages msgs)
         {
-            string toEmail = "dev@afterschoolhq.com";
-            string subject = $"Stripe Webhook Errors - {AfterSchoolLibrary.Helpers.Utilities.HostName}";
-            string body = msgs.RenderMessageList(MessageOutputType.Html);
-
-            AfterSchoolLibrary.Helpers.EmailHelper.SendEmail(toEmail, subject, body, true);
+            AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(msgs);
         }
 
         private IHttpActionResult ReturnOK(SystemMessages msgs)
@@ -60,5 +99,6 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             SendLogEmail(msgs);
             return InternalServerError(new Exception(msgs.RenderMessageList(MessageOutputType.Text)));
         }
+
     }
 }
