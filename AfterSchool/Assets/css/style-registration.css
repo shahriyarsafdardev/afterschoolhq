@@ -15,7 +15,7 @@ body.registration {
 .reg-header {
     color: #fff;
     /*background-color: #00ae85;*/
-    padding: 40px 20px;
+    padding: 90px 20px;
     background: #00d7bb; /* Old browsers */
     background: -moz-linear-gradient(top, #00d7bb 0%, #00ae85 100%); /* FF3.6-15 */
     background: -webkit-linear-gradient(top, #00d7bb 0%, #00ae85 100%); /* Chrome10-25,Safari5.1-6 */
@@ -24,7 +24,7 @@ body.registration {
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
-    min-height: 275px;
+    min-height: 400px;
     justify-content: center;
     align-items: center;
 }
@@ -48,7 +48,7 @@ body.registration {
     margin: auto;
     width: 100%;
     object-fit: contain;
-    max-height: 138px;
+    max-height: 200px;
 }
 
 .reg-header-overlay {
@@ -152,7 +152,7 @@ body.registration {
 
 .panel-h3 {
     /*font-family: "Montserrat", "Open Sans", sans-serif;*/
-    color: #494949;
+    color: #00ae85;
     font-size: 28px;
     font-weight: 600;
     padding-left: 20px;
@@ -210,8 +210,6 @@ body.registration {
 .activity-detail-block {
     padding: 5px 0px;
     font-size: 1.15em;
-    font-weight: 300;
-    
 }
 
 .activity-detail-block h3 {
@@ -232,7 +230,7 @@ body.registration {
 
 .btn-register, .btn-register-default {
     /* background: #00ae85;*/
-    background-color: #494949; /*#333*/
+    background-color: #333;
     color: #fff;
     padding: 11px 0px;
     width: 100%;
@@ -418,7 +416,15 @@ body.registration {
     background-color: #2f3c40; /*#264770; /* #212a2d;*/
 }
 
-.participation-object-wide .panel-h3 {
+.participation-object-add > .panel > .panel-body {
+}
+
+.participation-object-wide > .panel {
+    position: relative;
+    border-radius: 10px;
+}
+
+.participation-object-wide > .panel .panel-h3 {
     padding-left: 0px;
     padding-top: 10px;
 }
@@ -427,22 +433,18 @@ body.registration {
     color: #555;
     font-size: 1.10em;
     margin-top: 0px;
-    margin-bottom: 10px;
 }
 
-.participation-object-wide .panel-h3 > p {
+.participation-object-wide > .panel .panel-h3 > p {
     color: #999;
     font-size: .4em;
     margin-bottom: 0px;
 }
 
-.participation-object-wide .panel-footer {
+.participation-object-wide > .panel > .panel-footer {
     position: absolute;
     bottom: 0;
     width: 100%;
-}
-.participation-object-wide .panel-body {
-    padding: 25px 0px;
 }
 
 .registration-titlebar .org-logo-container {
@@ -534,6 +536,11 @@ body.registration {
 
 .participation-object-detail {
     margin-top: 24px;
+}
+
+.participation-object-detail > .panel {
+    border-radius: 10px;
+    overflow: hidden;
 }
 
 @media screen and (max-width: 375px) {

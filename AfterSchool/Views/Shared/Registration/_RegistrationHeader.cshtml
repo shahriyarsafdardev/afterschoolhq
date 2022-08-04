@@ -66,18 +66,6 @@
     }
 }
 
-<style>
-    #activityHeaderbtns
-    {
-        padding-top: 35px;
-    }
-    
-    #activityHeaderbtns > div > .btn-view-all
-    {
-        width: 245px;
-    }
-</style>
-
 @helper renderEditButtion(string anchor, WebUser currentUser)
 {
     if (currentUser.IsNotEmpty() && currentUser.HasAccessTo(Model.Account) && Request["edit"] == "1")
