@@ -80,8 +80,10 @@
     {
         background-color: #fff;
     }
-    
-    
+    #about-section{
+    padding-left: 25px; padding-right: 25px
+    }
+       
 </style>
 
 @{
@@ -219,7 +221,7 @@
                         </div>
             </div>
             
-                <div class="activity-section" style="padding-left: 50px; padding-right: 50px">
+                <div class="activity-section" id="about-section" style="">
                         <div class="margin-t-20">
                                     @if (showPhotoGallery)
                                     {
@@ -236,7 +238,7 @@
                         @if (showPhotoGallery)
                                     {
                                         <div class="row">
-                                            <div style="position: relative;"> <!--margin-left: -20px; margin-right: -20px;-->
+                                            <div style="position: relative;">
                                                 @{ Html.RenderPartial("~/Views/Shared/Registration/_ProfilePhotoGallery.cshtml", photos); }
                                             </div>
                                         </div>
