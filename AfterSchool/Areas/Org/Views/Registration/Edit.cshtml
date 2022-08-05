@@ -8,6 +8,8 @@
     var registrations = (List<Registration>) ViewBag.Registrations;
     var listUrl = ViewBag.ListUrl;
     var selectedRegistration = (Registration) ViewBag.SelectedRegistration;
+    var isVolunteerRegistration = registrantActivities.Any() && registrantActivities.First().IsForActivity() &&
+                                  registrantActivities.First().GetParticipationObject().ActivityType == ActivityType.VolunteerOpportunity;
 }
 
 @{ Html.RenderPartial("OrgAccountHeader"); }
@@ -20,7 +22,15 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            <i class="s7-id"></i> @UILabel.RegistrantLabel(registrantActivities.FirstOrDefault()?.GetParticipationObject().GetActivity().ActivityTypeId ?? ActivityType.Activity) Detail
+            <i class="s7-id"></i>
+            @if (isVolunteerRegistration)
+            {
+                <span>@UILabel.RegistrantLabel(ActivityType.VolunteerOpportunity) Detail</span>
+            }
+            else
+            {
+                <span>@UILabel.RegistrantLabel(ActivityType.Activity) Detail</span>
+            }
         </div>
         <div class="panel-body no-padding">
 
@@ -122,16 +132,20 @@
                             <div class="panel panel-default">
                                 <div class="panel-heading">
                                     <div class="btn-group pull-right">
-                                        <button class="btn btn-default md-trigger" data-modal="modal-move-seat" onclick="moveSeat(@ra.ID, @((int) ra.AssignmentTypeId), @((int) ra.GetParticipationObject().ActivityType))">
+                                        
+                                        <button class="btn btn-default md-trigger" 
+                                                data-modal="modal-move-seat" 
+                                                onclick="moveSeat(@ra.ID, @((int)ra.AssignmentTypeId), @isVolunteerRegistration.ToString().ToLower())">
                                             <i class="s7-gleam"></i> <span>Change Seat Assignment Type</span>
                                         </button>
-
-                                        @if (participationObject.IsActivity() && participationObject.GetActivity().ActivityTypeId == ActivityType.Activity)
+                                        
+                                        @if (participationObject.IsActivity() && participationObject.ActivityType == ActivityType.Activity)
                                         {
                                             <button class="btn btn-default md-trigger" data-modal="modal-confirmation-activity" onclick="deleteActivity(@ra.ID, '@UI.JavascriptSafeString(participationObject.Name)')">
                                                 <i class="s7-trash text-danger"></i> <span class="text-danger">Delete</span>
                                             </button>
                                         }
+                                        
                                     </div>
                                     <a href="@poLink">
                                         @participationObject.Name
@@ -237,12 +251,14 @@
         link = link.replace("ID", id);
         location.href = link;
     }
-    function moveSeat(ra, rat, activityType) {
+    function moveSeat(ra, rat, isVolunteerRegistration) {
+        
         $('#form-move-seat').attr('action', '@Url.Action("moveseat", "registration", new {id = Model.Uid.ToString(), r = selectedRegistration.Uid.ToString()})&returnurl=@listUrl');
         $('#activity-ra').val(ra);
         $('#move-to').html('');
-        let registrationAssignmentTypes = getEnumValues(activityType === @((int) ActivityType.VolunteerOpportunity));
-        console.log("registrationAssignmentTypes", registrationAssignmentTypes);
+        
+        let registrationAssignmentTypes = getEnumValues(isVolunteerRegistration);
+        
         for (let item of registrationAssignmentTypes)
         {
             if(item.id !== rat)
