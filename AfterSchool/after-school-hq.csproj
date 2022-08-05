@@ -1357,6 +1357,7 @@
     <Content Include="fonts\feather-webfont.woff" />
     <Content Include="fonts\ionicons.svg" />
     <Content Include="home.html" />
+    <Content Include="img\092515-SeattleHigh5-Globalist-JT006.jpg" />
     <Content Include="img\4k-wallpaper-adorable-blur-boy-1148998-small.jpg" />
     <Content Include="img\5e1cfc6e7fd5a.image.jpg" />
     <Content Include="img\a-bekele.png" />
@@ -1383,6 +1384,7 @@
     <Content Include="img\Frame 4(6).png" />
     <Content Include="img\Frame 5(7).png" />
     <Content Include="img\Frame 6(7).png" />
+    <Content Include="img\Frame 8(6).png" />
     <Content Include="img\frank-mckenna-LhOjrOlcLx4-unsplash.jpg" />
     <Content Include="img\gabriel-baranski-vGICUyYW2CE-unsplash.jpg" />
     <Content Include="img\girls-with-impact.png" />
