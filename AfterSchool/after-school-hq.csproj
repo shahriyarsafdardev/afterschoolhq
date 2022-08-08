@@ -732,7 +732,6 @@
     <Content Include="Assets\css\media_sm.css" />
     <Content Include="Assets\css\media_xs.css" />
     <Content Include="Assets\css\survey.css" />
-    <Content Include="Assets\img\4k-wallpaper-adorable-blur-boy-1148998-small.jpg" />
     <Content Include="Assets\img\ahq-logo-2-1-1.png" />
     <Content Include="Assets\img\AHQ-logo.png" />
     <Content Include="Assets\img\arrow.png" />
@@ -1358,6 +1357,7 @@
     <Content Include="fonts\ionicons.svg" />
     <Content Include="home.html" />
     <Content Include="img\092515-SeattleHigh5-Globalist-JT006.jpg" />
+    <Content Include="img\4k-wallpaper-adorable-blur-boy-1148998-small.jpg" />
     <Content Include="img\5e1cfc6e7fd5a.image.jpg" />
     <Content Include="img\a-bekele.png" />
     <Content Include="img\adam-winger-jemgmDw4LJ4-unsplash.jpg" />
