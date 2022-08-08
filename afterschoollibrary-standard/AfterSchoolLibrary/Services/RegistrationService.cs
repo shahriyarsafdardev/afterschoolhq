@@ -467,9 +467,10 @@ namespace AfterSchoolLibrary.Services
                 registrantActivities.DistinctBy(ra => new {ra.ParticipationObjectId, ra.ParticipationObjectTypeId})
                     .ToList().ForEach(ra =>
                     {
-                        activitySchedules.Add(new ActivitySchedules()
+                        var daysOfTheWeek = ra.GetSchedule(msgs, dc)?.GetDaysOfTheWeek(msgs, dc) ?? new List<DayOfWeekASL>();
+                        activitySchedules.Add(new ActivitySchedules
                         {
-                            DaysOfTheWeek = ra.GetSchedule(msgs, dc).GetDaysOfTheWeek(msgs, dc),
+                            DaysOfTheWeek = daysOfTheWeek,
                             ParticipationObjectId = ra.ParticipationObjectId.Value,
                             ParticipationObjectTypeId = ra.ParticipationObjectTypeId,
                         });
