@@ -1643,9 +1643,9 @@ namespace AfterSchoolLibrary.Services
         public static void CheckIfSubscriberAccountSubscriptionChanged(this Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             // check if package has changed
-            var accountPackage = account.GetActiveAccountPackage(msgs);
+            var accountPackage = account.GetActiveAccountPackage(msgs, dc);
             var stripeSubscription = accountPackage.GetStripeSubscription(msgs);
-            var packageFromStripe = Package.LoadByUid(stripeSubscription.Plan.ProductId.ToGuid(), msgs);
+            var packageFromStripe = Package.LoadByUid(stripeSubscription.Plan.ProductId.ToGuid(), msgs, dc);
 
             // needs to match stripe
             if (accountPackage.PackageId != packageFromStripe.ID)
@@ -1654,7 +1654,8 @@ namespace AfterSchoolLibrary.Services
                     stripeSubscription.Plan.Interval.ToEnum<BillingPeriodType>(), 
                     stripeSubscription.Id, 
                     loggedInUser, 
-                    msgs);
+                    msgs,
+                    dc);
         }
 
         public static List<PaymentMethod> GetAllStripePaymentMethods(this Account account, StripeAccountType stripeAccountType, SystemMessages msgs = null)

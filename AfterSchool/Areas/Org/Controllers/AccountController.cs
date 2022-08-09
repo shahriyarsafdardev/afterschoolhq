@@ -50,63 +50,90 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult Edit(string id, string name, string email, string phone, string uniquename, string isactive,
-            string timezone)
+        public ActionResult Edit(string id, string name, string email, string phone, string uniqueName,
+            string timeZone, string stripeCustomerId, string stripeSubscriptionId)
         {
             var msgs = new SystemMessages();
-            var a = SessionVariables.CurrentAccount;
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var accountPackage = SessionVariables.AccountPackage;
+            var isNewCustomer = false;
+            var isNewSubscription = false;
+            var isSuperAdmin = SessionVariables.OriginalLoggedInUser.IsNotEmpty();
 
             if (name.IsEmpty())
                 msgs.Add("Organization Name is required", MessageType.UserError);
 
-            Database.ExecuteTransaction(
-                action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                {
-                    // ..update profile title if account name has been changed 
-                    if (name.IsNotEmpty() && a.Name != name)
+            if (msgs.HasNoErrors())
+                Database.ExecuteTransaction(
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        var profile = a.GetAccountProfile(amsgs, adc);
+                        currentAccount.Name = name;
+                        currentAccount.Phone = phone;
+                        currentAccount.TimeZone = timeZone;
+                        currentAccount.Email = email;
 
-                        if (profile.IsNotEmpty())
+                        if (!currentAccount.UniqueName.IsSameAs(uniqueName))
                         {
-                            profile.Title = name;
-                            amsgs.AddRange(profile.Save(adc));
+                            if (currentAccount.UniqueName.IsEmpty() && uniqueName.IsEmpty())
+                                currentAccount.UniqueName = AccountService.GenerateUniqueName(name, currentAccount.ID, amsgs, adc);
+                            else
+                                currentAccount.UniqueName = AccountService.GenerateUniqueName(uniqueName, currentAccount.ID, amsgs, adc);
                         }
-                    }
 
-                    a.Name = name;
-                    a.Phone = phone;
-                    a.UniqueName = uniquename;
-                    a.TimeZone = timezone;
-                    a.Email = email;
+                        currentAccount.LastModifiedDate = DateTime.UtcNow;
+                        currentAccount.LastModifiedBy = currentUser.ID;
 
-                    if (amsgs.HasNoErrors())
+                        if (isSuperAdmin && !currentAccount.StripeCustomerId.IsSameAs(stripeCustomerId))
+                        {
+                            currentAccount.StripeCustomerId = stripeCustomerId;
+                            currentAccount.HasDefaultPaymentMethod = false; //reset
+                            isNewCustomer = true;
+                        }
+                        
+                        amsgs.AddRange(currentAccount.Save(adc));
+
+                        if (amsgs.HasNoErrors() && isSuperAdmin && !accountPackage.StripeSubscriptionId.IsSameAs(stripeCustomerId))
+                        {
+                            accountPackage.StripeSubscriptionId = stripeSubscriptionId;
+                            amsgs.AddRange(accountPackage.Save(adc));
+                            isNewSubscription = true;
+                        }
+
+                        if (isNewCustomer || isNewCustomer)
+                        {
+                            currentAccount.CheckIfSubscriberAccountHasPaymentMethod(null, amsgs, adc);
+                            currentAccount.CheckIfSubscriberAccountSubscriptionChanged(currentUser, amsgs, adc);
+                        }
+                        
+                        // ..update profile title if account name has been changed 
+                        // Should we do this?
+                        if (amsgs.HasNoErrors() && name.IsNotEmpty() && currentAccount.Name != name)
+                        {
+                            var profile = currentAccount.GetAccountProfile(amsgs, adc);
+
+                            if (profile.IsNotEmpty())
+                            {
+                                profile.Title = name;
+                                amsgs.AddRange(profile.Save(adc));
+                            }
+                        }
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
                     {
-                        if (a.UniqueName.IsEmpty() && uniquename.IsEmpty())
-                            a.UniqueName = AccountService.GenerateUniqueName(name, a.ID, amsgs, adc);
-                        else
-                            a.UniqueName = AccountService.GenerateUniqueName(uniquename, a.ID, amsgs, adc);
+                        msgs.AddRange(smsgs);
 
-                        a.LastModifiedDate = DateTime.UtcNow;
-                        a.LastModifiedBy = SessionVariables.CurrentUser.ID;
-                        amsgs.AddRange(a.SaveWithStripe(StripeAccountType.SubscriberAccount, adc));
-                    }
-                },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
-
-                    if (msgs.HasNoErrors())
-                        msgs.Add("Saved Successfully", MessageType.Success);
-                },
-                onFailure: (SystemMessages fmsgs) => { msgs.AddRange(fmsgs); },
-                onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
-            );
+                        if (msgs.HasNoErrors())
+                            msgs.Add("Saved Successfully", MessageType.Success);
+                    },
+                    onFailure: (SystemMessages fmsgs) => { msgs.AddRange(fmsgs); },
+                    onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
+                );
 
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.IsFullScreen = GetIsFullScreen();
-            return View(a);
+            return View(currentAccount);
         }
 
         [HttpGet]
