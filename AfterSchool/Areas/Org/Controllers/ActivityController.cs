@@ -1528,7 +1528,8 @@ namespace AfterSchool.Areas.Org.Controllers
             if (group.IsGuid())
                 activityGroup = currentAccount.GetActivityGroup(group.ToGuid(), msgs);
 
-            var fullScreenExitUrl = GetFullScreenExitUrl(activity);
+            var fullScreenExitUrl = GetFullScreenExitUrl(activity, group);
+            
             if (cmd == "next")
             {
                 switch (activity.ActivityTypeId)
@@ -1593,8 +1594,15 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             if (groupUid.IsNotEmpty())
                 return Url.Action("Activities", "Group", new {id = groupUid});
+            
             if (activity.ActivityGroupId.HasValue)
-                return Url.Action("Activities", "Group", new {id = activity.ActivityGroupUid});
+            {
+                // you have to reload after a save to make sure the ActivityGroupUid is there
+                if (activity.ActivityGroupUid.IsEmpty())
+                    activity = activity.Reload();
+                
+                return Url.Action("Activities", "Group", new { id = activity.ActivityGroupUid });
+            }
 
             return Url.Action("index", "activity", new {type = (int) activity.ActivityTypeId});
         }
