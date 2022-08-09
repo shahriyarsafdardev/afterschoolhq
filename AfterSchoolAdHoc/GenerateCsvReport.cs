@@ -19,8 +19,9 @@ public static class GenerateCsvReport
         var account = Account.Load(accountId, msgs, dc);
         if (account is null) throw new Exception("Account not found");
         var byteData = RegistrationService.GetCsvByteArray(account, null, null, participationObjectIds, ParticipationObjectType.Activity,
-            RegistrationReportType.Dismissal, null, RegistrationStatus.NotSet, false, msgs, dc);
-        File.WriteAllBytes("report.csv", byteData);
-        Console.WriteLine("Report successfully saved");
+            RegistrationReportType.DismissalForHostedActivities, null, RegistrationStatus.NotSet, false, msgs, dc);
+        var filename = $"report-{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.csv";
+        File.WriteAllBytes(filename, byteData);
+        Console.WriteLine($@"File {filename} successfully saved");
     }
 }

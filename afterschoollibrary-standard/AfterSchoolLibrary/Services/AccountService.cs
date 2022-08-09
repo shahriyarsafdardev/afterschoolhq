@@ -2032,6 +2032,12 @@ namespace AfterSchoolLibrary.Services
                 participationObjectType, regStatus, rats, start, length, getVolunteers, msgs: msgs, dc: dc);
         }
 
+        public static List<Registration> SearchRegistrationsForActiveActivitiesHostedByAccount(IReadOnlyList<int> activityIds, SystemMessages msgs,
+            DatabaseConnection dc)
+        {
+            return Registration.LoadByActivityIds(activityIds, msgs, dc);
+        }
+
         public static int SearchRegistrationCount(this Account account, string searchText, int? questionId,
             List<int> participationObjectIds, ParticipationObjectType participationObjectType,
             RegistrationStatus regStatus, List<RegistrationAssignmentType> rats, bool getVolunteers, SystemMessages msgs = null,

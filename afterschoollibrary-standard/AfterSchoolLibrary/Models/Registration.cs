@@ -682,7 +682,7 @@ namespace AfterSchoolLibrary.Models
             msgs.AddRange(Save(dc));
         }
 
-        private static string GetSearchSQL(string searchText, int accountId, int? questionId,
+        private static string GetSearchSql(string searchText, int accountId, int? questionId,
             RegistrationStatus regStatus, bool getVolunteers, List<int> participationObjectIds = null,
             ParticipationObjectType participationObjectType = ParticipationObjectType.NotSet,
             List<RegistrationAssignmentType> rats = null, bool getCount = false)
@@ -823,6 +823,37 @@ namespace AfterSchoolLibrary.Models
             return sql;
         }
 
+        private static string GetSearchSqlByActivityIds(IReadOnlyCollection<int> activityIds)
+        {
+            if (activityIds.IsEmpty() || !activityIds.Any()) throw new Exception("No activity IDs were passed in for the search");
+
+            var validCompletionStatuses = ValidCompletionStatus.Select(x => (int) x).ToStrings().ToStringList();
+            var activityIdList = activityIds.ToStrings().ToStringList();
+            const int activityParticipationType = (int) ParticipationObjectType.Activity;
+            var sql = $@"select r.*,
+                            reg.FirstName as RegistrantFirstName,
+                            reg.LastName as RegistrantLastName,
+                            reg.Email as RegistrantEmail,
+                            reg.RegistrantTypeId as RegistrantRegistrantTypeId,
+                            reg.Uid as RegistrantUid,
+                            reg.Phone as RegistrantPhone,
+                            reg.Company as RegistrantCompany
+                        from 
+	                        Registration r
+	                        inner join Registrant reg on r.RegistrantId = reg.ID
+                            inner join RegistrantActivity ra on r.ID = ra.RegistrationId
+	                        inner join Activity a on ra.ParticipationObjectId = a.ID and ra.ParticipationObjectTypeId = {activityParticipationType}
+                        where
+                            r.CompletionStatusId in ({validCompletionStatuses})
+                            and ra.ParticipationObjectId in ({activityIdList}) and ra.ParticipationObjectTypeId = {activityParticipationType}
+                            and a.ActivityTypeId != {(int) ActivityType.VolunteerOpportunity}
+                        order by
+                            reg.FirstName,
+                            reg.LastName";
+
+            return sql;
+        }
+
         public static List<Registration> Search(string searchText, int accountId, int? questionId,
             List<int> participationObjectIds, ParticipationObjectType participationObjectType,
             RegistrationStatus regStatus, List<RegistrationAssignmentType> rats, int? start, int? length,
@@ -831,10 +862,19 @@ namespace AfterSchoolLibrary.Models
             // var dq = GetSearchQuery(searchText, accountId, questionId, regStatus, participationObjectIds, participationObjectType, rats, msgs, dc);
             var dq = DatabaseQuery;
             dq.Connection = dc;
-            var sql = GetSearchSQL(searchText, accountId, questionId, regStatus, getVolunteers, participationObjectIds,
+            var sql = GetSearchSql(searchText, accountId, questionId, regStatus, getVolunteers, participationObjectIds,
                 participationObjectType, rats);
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
+
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<Registration> LoadByActivityIds(IReadOnlyCollection<int> activityIds, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            var sql = GetSearchSqlByActivityIds(activityIds);
 
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
@@ -846,7 +886,7 @@ namespace AfterSchoolLibrary.Models
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
-            var sql = GetSearchSQL(searchText, accountId, questionId, regStatus, getVolunteers, participationObjectIds,
+            var sql = GetSearchSql(searchText, accountId, questionId, regStatus, getVolunteers, participationObjectIds,
                 participationObjectType, rats, true);
             return dq.ExecuteSelect(sql).Rows[0][0].ToString().ToInteger();
         }
