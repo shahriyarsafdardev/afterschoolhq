@@ -325,11 +325,9 @@ namespace AfterSchoolLibrary.Services
 
         #region CSVReport
 
-        public static SystemMessages EmailCsvReport(int accountId, string searchText, int? questionId,
-            List<int> participationObjectIds, ParticipationObjectType participationObjectType, string filename,
-            RegistrationReportType reportType, List<RegistrationAssignmentType> rats,
-            RegistrationStatus registrationStatus, string uiActivityLabel, string emails, string subject, string body,
-            bool getVolunteers,
+        public static SystemMessages EmailCsvReport(int accountId, string searchText, int? questionId, List<int> participationObjectIds,
+            ParticipationObjectType participationObjectType, string filename, RegistrationReportType reportType, List<RegistrationAssignmentType> rats,
+            RegistrationStatus registrationStatus, string uiActivityLabel, string emails, string subject, string body, bool getVolunteers,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty())
@@ -337,6 +335,19 @@ namespace AfterSchoolLibrary.Services
 
             var account = Account.Load(accountId, msgs, dc);
 
+            var csvByteData = GetCsvByteArray(account, searchText, questionId, participationObjectIds, participationObjectType, reportType, rats,
+                registrationStatus,
+                getVolunteers, msgs, dc);
+
+            EmailCsv(account, emails, subject, body, uiActivityLabel, CreateRegistrationsCsvFilename(filename), msgs, csvByteData);
+
+            return msgs;
+        }
+
+        public static byte[] GetCsvByteArray(Account account, string searchText, int? questionId, List<int> participationObjectIds,
+            ParticipationObjectType participationObjectType, RegistrationReportType reportType, List<RegistrationAssignmentType> rats,
+            RegistrationStatus registrationStatus, bool getVolunteers, SystemMessages msgs, DatabaseConnection dc)
+        {
             var registrations = account.SearchRegistrations(
                 searchText,
                 questionId,
@@ -360,11 +371,7 @@ namespace AfterSchoolLibrary.Services
                 rats,
                 msgs,
                 dc);
-            var csvByteData = Encoding.UTF8.GetBytes(csvText);
-
-            EmailCsv(account, emails, subject, body, uiActivityLabel, CreateRegistrationsCsvFilename(filename), msgs, csvByteData);
-
-            return msgs;
+            return Encoding.UTF8.GetBytes(csvText);
         }
 
         private static void EmailCsv(Account account, string emails, string subject, string body,
