@@ -62,17 +62,18 @@
                         </div>
                     </div>
 
-                    @if (SessionVariables.CurrentAccount.IsAdminAccount)
+                    @if (SessionVariables.OriginalLoggedInUser.IsNotEmpty())
                     {
                         <div class="form-group">
-                            <label class="col-sm-3 control-label">Is Active</label>
+                            <label class="col-sm-3 control-label">Stripe Customer Id</label>
                             <div class="col-sm-9">
-                                <div class="switch-button switch-button-yesno">
-                                    <input type="checkbox" @(Model.IsActive ? " checked=\"checked\" " : "") name="isactive" id="isactive">
-                                    <span>
-                                        <label for="isactive"></label>
-                                    </span>
-                                </div>
+                                <input type="text" class="form-control" id="stripeCustomerId" name="stripeCustomerId" value="@Model.StripeCustomerId" onfocus="this.select()" required />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Stripe Subscription Id</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="stripeSubscriptionId" name="stripeSubscriptionId" value="@accountPackage.StripeSubscriptionId" onfocus="this.select()" required />
                             </div>
                         </div>
                     }
