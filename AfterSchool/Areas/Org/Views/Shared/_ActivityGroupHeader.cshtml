@@ -86,7 +86,10 @@
                     </ul>
                 </div>
             }
-            <a href="@Url.Action("publishdetail", "group", new { id = Model.Uid })" class="btn @publishClass"><i class="s7-link"></i> Publish</a>
+            
+            <a href="@Url.Action("publishdetail", "group", new { id = Model.Uid })" class="btn @publishClass">
+                <i class="s7-link"></i> Publish
+            </a>
         </div>
         <div class="hidden-lg hidden-sm hidden-md">
             <select class="form-control" onchange="location.href=this.value;">

@@ -102,7 +102,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 group = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
 
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Forms = currentAccount.GetForms(msgs);
+            ViewBag.Forms = currentAccount.GetForms(FormType.StudentForm, msgs);
             ViewBag.Messages = msgs;
 
             return View(group);
