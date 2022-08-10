@@ -411,8 +411,10 @@ namespace AfterSchoolLibrary.Services
 
         private static bool DoesSubscriptionNeedBillingAnchorSet(ParticipationObject participationObject, SubscriptionPlan plan)
         {
-            return plan.PlanTypeId == SubscriptionPlanType.Subscription && participationObject.Schedule.IsEmpty() &&
-                   DateTime.UtcNow.Date != DateTime.Now.FirstDateOfMonth().Date;
+            return plan.PlanTypeId == SubscriptionPlanType.Subscription && 
+                   participationObject.Schedule.IsEmpty() &&
+                   DateTime.UtcNow.Date != DateTime.Now.FirstDateOfMonth().Date &&
+                   plan.PaymentStartTypeId != PlanPaymentStartType.OnCheckout;
         }
 
         public static bool CheckRegistrantChargeForWeeklyBillingType(this Registrant registrant, Activity activity)
