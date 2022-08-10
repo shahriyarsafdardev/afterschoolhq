@@ -841,11 +841,12 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var league = ActivityGroup.LoadByUid(id.ToGuid());
-            var aag = league.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
+            var currentAccount = SessionVariables.CurrentAccount;
+            var aag = league.GetAccountActivityGroup(currentAccount, msgs);
             var period = new RegistrationPeriod()
             {
-                StartDateTime = SessionVariables.CurrentAccount.ConvertToAccountTimeZone(DateTime.UtcNow.Date),
-                EndDateTime = SessionVariables.CurrentAccount.ConvertToAccountTimeZone(DateTime.UtcNow.Date).AddWeeks(1)
+                StartDateTime = currentAccount.ConvertToAccountTimeZone(DateTime.UtcNow.Date),
+                EndDateTime = currentAccount.ConvertToAccountTimeZone(DateTime.UtcNow.Date).AddWeeks(1)
             };
 
             ViewBag.Messages = msgs;
@@ -925,6 +926,96 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [HttpGet]
         public ActionResult PublishWizard3(string id)
+        {
+            var msgs = new SystemMessages();
+            var league = ActivityGroup.LoadByUid(id.ToGuid());
+            var aag = league.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
+
+            if (aag.MinGradeLevelId.IsEmpty())
+                aag.MinGradeLevelId = league.MinGradeLevelId;
+            if (aag.MaxGradeLevelId.IsEmpty())
+                aag.MaxGradeLevelId = league.MaxGradeLevelId;
+
+            msgs.AddRange(aag.Save());
+            
+            ViewBag.AccountActivityGroup = aag;
+            ViewBag.Messages = msgs;
+            ViewBag.Grades = GradeLevel.Load(msgs: msgs);
+
+            return View(league);
+        }
+
+        [HttpPost]
+        public ActionResult PublishWizard3(string id, string mingrade, string maxgrade)
+        {
+            var msgs = new SystemMessages();
+            var league = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
+            var aag = league.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
+
+            if (mingrade.IsEmpty())
+                msgs.Add("Min Grade Level is required", MessageType.UserError);
+
+            if (maxgrade.IsEmpty())
+                msgs.Add("Max Grade Level is required", MessageType.UserError);
+
+            aag.MinGradeLevelId = mingrade.ToInteger();
+            aag.MaxGradeLevelId = maxgrade.ToInteger();
+            msgs.AddRange(aag.Save());
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("publishwizard4", new { id = league.Uid });
+
+            ViewBag.Messages = msgs;
+            ViewBag.AccountActivityGroup = aag;
+            ViewBag.Grades = GradeLevel.Load(msgs: msgs);
+
+            return View(league);
+        }
+
+        [HttpGet]
+        public ActionResult PublishWizard4(string id)
+        {
+            var msgs = new SystemMessages();
+            var league = ActivityGroup.LoadByUid(id.ToGuid());
+            var aag = league.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
+
+            if (aag.Details.IsEmpty())
+            {
+                aag.Details = league.Details;
+                msgs.AddRange(aag.Save());
+            }
+
+            ViewBag.AccountActivityGroup = aag;
+            ViewBag.Messages = msgs;
+
+            return View(league);
+        }
+
+        [ValidateInput(false)]
+        [HttpPost]
+        public ActionResult PublishWizard4(string id, string details)
+        {
+            var msgs = new SystemMessages();
+            var league = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
+            var aag = league.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
+
+            if (details.IsEmpty())
+                msgs.Add("Details are required", MessageType.UserError);
+
+            aag.Details = details;
+            msgs.AddRange(aag.Save());
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("publishwizard5", new { id = league.Uid });
+
+            ViewBag.Messages = msgs;
+            ViewBag.AccountActivityGroup = aag;
+
+            return View(league);
+        }
+
+        [HttpGet]
+        public ActionResult PublishWizard5(string id)
         {
             var msgs = new SystemMessages();
             var league = ActivityGroup.LoadByUid(id.ToGuid());

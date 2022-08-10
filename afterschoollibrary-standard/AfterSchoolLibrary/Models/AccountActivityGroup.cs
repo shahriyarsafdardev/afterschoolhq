@@ -33,7 +33,10 @@ namespace AfterSchoolLibrary.Models
 		public string ContactName { get { return (string)MDV["ContactName"].Value; } set { MDV["ContactName"].Value = value; } }
 		public string ContactPhone { get { return (string)MDV["ContactPhone"].Value; } set { MDV["ContactPhone"].Value = value; } }
 		public string ContactEmail { get { return (string)MDV["ContactEmail"].Value; } set { MDV["ContactEmail"].Value = value; } }
-		public int? FormId { get { return (int?)MDV["FormId"].Value; } set { MDV["FormId"].Value = value; } }
+        public int? FormId { get { return (int?)MDV["FormId"].Value; } set { MDV["FormId"].Value = value; } }
+        public int? MinGradeLevelId { get { return (int?)MDV["MinGradeLevelId"].Value; } set { MDV["MinGradeLevelId"].Value = value; } }
+        public int? MaxGradeLevelId { get { return (int?)MDV["MaxGradeLevelId"].Value; } set { MDV["MaxGradeLevelId"].Value = value; } }
+        public string Details { get { return (string)MDV["Details"].Value; } set { MDV["Details"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		public string ActivityGroupUid { get { return (string)MDV["ActivityGroupUid"].Value; } }
 		public ActivityGroupType ActivityGroupActivityGroupTypeId { get { return (ActivityGroupType)MDV["ActivityGroupActivityGroupTypeId"].Value; } }
@@ -69,6 +72,9 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "ContactPhone", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "ContactEmail", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "FormId", System.Data.SqlDbType.Int);
+                _dp.Add(className, "MinGradeLevelId", System.Data.SqlDbType.Int);
+                _dp.Add(className, "MaxGradeLevelId", System.Data.SqlDbType.Int);
+                _dp.Add(className, "Details", System.Data.SqlDbType.NVarChar , "4000");
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "ActivityGroupUid", typeof(ActivityGroup).Name, "Uid", System.Data.SqlDbType.NVarChar, "ActivityGroup");
 				_dp.Add(className, "ActivityGroupActivityGroupTypeId", typeof(ActivityGroup).Name, "ActivityGroupTypeId", System.Data.SqlDbType.Int, "ActivityGroup");
@@ -193,6 +199,18 @@ namespace AfterSchoolLibrary.Models
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["FormId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps.Add(ObjectMap["MinGradeLevelId"]);
+            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps.Add(ObjectMap["MaxGradeLevelId"]);
+            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps.Add(ObjectMap["Details"]);
+            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
 
