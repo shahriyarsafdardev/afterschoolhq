@@ -1,0 +1,36 @@
+﻿@model ActivityGroup
+@{
+    Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
+    ViewBag.Title = Model.Name;
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var aag = (AccountActivityGroup)ViewBag.AccountActivityGroup;
+    var period = (RegistrationPeriod)ViewBag.Period;
+}
+
+<div>
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            @{Html.RenderPartial("~/Views/Shared/_ActivityGroupTitle.cshtml", $"Published"); }
+        </div>
+        <div class="panel-body">
+
+            <p class="text-center text-success text-medium">
+                <i class="s7-check-circle icon-xxlarge"></i>
+            </p>
+            <p class="text-center text-success text-medium padding-v-10">
+                Your League has been published!
+            </p>
+            <p class="text-center text-success text-medium padding-v-10">
+                <a href="@SessionVariables.CurrentAccount.HomePageUrl" target="_blank">View your activity home page.</a>
+            </p>
+            <p class="text-center padding-v-20">
+                <a href="@Url.Action("summary", "league", new { id = Model.Uid })" class="btn btn-default btn-xl btn-space">Manage League</a>
+                <a href="@Url.Action("indexexternal", "league" , new { id=Model.Uid })" class="btn btn-primary btn-xl btn-space">Accept More League Invites &raquo;</a>
+            </p>
+
+        </div>
+    </div>
+</div>

@@ -4,7 +4,9 @@
     ViewBag.Title = Model.Name;
     var msgs = (SystemMessages)ViewBag.Messages;
     var aag = (AccountActivityGroup)ViewBag.AccountActivityGroup;
-    var period = (RegistrationPeriod)ViewBag.Period;
+    var minGradeLevel = (GradeLevel)ViewBag.MinGradeLevel;
+    var maxGradeLevel = (GradeLevel)ViewBag.MaxGradeLevel;
+    var grades = (List<GradeLevel>)ViewBag.Grades;
 }
 
 <div>
@@ -13,23 +15,64 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            @{Html.RenderPartial("~/Views/Shared/_ActivityGroupTitle.cshtml", $"Published"); }
+            @{Html.RenderPartial("~/Views/Shared/_ActivityGroupTitle.cshtml", $"Publish {Model.Name} - Step 3 of 4 - Confirm Grades "); }
         </div>
         <div class="panel-body">
 
-            <p class="text-center text-success text-medium">
-                <i class="s7-check-circle icon-xxlarge"></i>
-            </p>
-            <p class="text-center text-success text-medium padding-v-10">
-                Your League has been published!
-            </p>
-            <p class="text-center text-success text-medium padding-v-10">
-                <a href="@SessionVariables.CurrentAccount.HomePageUrl" target="_blank">View your activity home page.</a>
-            </p>
-            <p class="text-center padding-v-20">
-                <a href="@Url.Action("summary", "league", new { id = Model.Uid })" class="btn btn-default btn-xl btn-space">Manage League</a>
-                <a href="@Url.Action("indexexternal", "league" , new { id=Model.Uid })" class="btn btn-primary btn-xl btn-space">Accept More League Invites &raquo;</a>
-            </p>
+            <div class="row">
+                <div class="col-md-2"></div>
+                <div class="col-md-7">
+                    <div role="alert" class="alert alert-success alert-icon">
+                        <div class="icon">
+                            <span class="s7-check-circle"></span>
+                        </div>
+                        <div class="message text-medium-small">
+                            <p class="text-center">
+                                Please enter the grades that eligible to participate
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <form id="form1" method="post" action="@Url.Action("publishwizard3", "league", new { id = Model.Uid })" class="form-horizontal">
+
+                <div class="form-group">
+                    <label class="col-md-3 control-label">
+                        Grade Restrictions
+                    </label>
+                    <div class="col-md-6" id="grade">
+                        <select id="mingrade" name="mingrade" class="form-control">
+                            @foreach (var grade in grades)
+                            {
+                                <option value="@grade.ID" @(aag.MinGradeLevelId == grade.ID ? " selected=\"selected\" " : "")>@grade.Name</option>
+                            }
+                        </select>
+                        <p class="margin-v-10">
+                            To
+                        </p>
+                        <select id="maxgrade" name="maxgrade" class="form-control">
+                            @foreach (var grade in grades)
+                            {
+                                <option value="@grade.ID" @(aag.MaxGradeLevelId == grade.ID ? " selected=\"selected\" " : "")>@grade.Name</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label"></label>
+                    <div class="col-sm-6">
+                        <div class="btn-group pull-left">
+                            <a href="@Url.Action("publishwizard2", "league", new { id = Model.Uid })" class="text-muted">&laquo; Back</a>
+                        </div>
+                        <div class="btn-group pull-right">
+                            <button type="submit" class="btn btn-primary btn-lg">Save &amp; Continue &raquo;</button>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
 
         </div>
     </div>
