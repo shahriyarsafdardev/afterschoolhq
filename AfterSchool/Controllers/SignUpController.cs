@@ -32,7 +32,8 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
-        public ActionResult Index(string invite, string orgName, AccountType orgType = AccountType.NotSet, SignUpType signUpType = SignUpType.NotSet, bool quickStart = false, bool isRequestOnlyAccess = false)
+        public ActionResult Index(string invite, string orgName, AccountType orgType = AccountType.NotSet, SignUpType signUpType = SignUpType.NotSet, 
+            bool quickStart = false, bool isRequestOnlyAccess = false)
         {
             if (invite.IsBlank() && !quickStart)
                 return RedirectToAction("Welcome");
@@ -217,6 +218,7 @@ namespace AfterSchool.Controllers
 
                         // teachers aren't looking to pay and people coming in from an invite should just start on the free account
                         if (model.SignupType == SignUpType.Teacher1099 || invitingAccount.IsNotEmpty())
+                        {
                             account = user.AddNewAccount(
                                 orgName: model.OrgName,
                                 phone: model.Phone,
@@ -229,13 +231,32 @@ namespace AfterSchool.Controllers
                                 loggedInUser: user,
                                 msgs: amsgs,
                                 dc: adc);
+                        }
                         else
-                            account = user.AddNewAccountWithDefaultPackageWithStripe(
-                                orgName: model.OrgName,
-                                accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
-                                loggedInUser: user,
-                                msgs: amsgs,
-                                dc: adc);
+                        {
+                            if (model.Package.IsGuid() && model.SubscriptionPeriod.IsNotEmpty())
+                            {
+                                var package = Package.LoadByUid(model.Package.ToGuid(), amsgs, adc);
+                                
+                                if (package.IsNotEmpty())
+                                    account = user.AddNewAccountWithPackageWithStripe(
+                                        orgName: model.OrgName,
+                                        accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
+                                        package: package,
+                                        billingPeriodType: model.SubscriptionPeriod.ParseEnum<BillingPeriodType>(),
+                                        loggedInUser: user,
+                                        msgs: amsgs,
+                                        dc: adc);
+                            }
+                            
+                            if (amsgs.HasNoErrors() && account.IsEmpty())
+                                account = user.AddNewAccountWithDefaultPackageWithStripe(
+                                    orgName: model.OrgName,
+                                    accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
+                                    loggedInUser: user,
+                                    msgs: amsgs,
+                                    dc: adc);
+                        }
 
                         if (user.IsNotEmpty() && account.IsNotEmpty() && amsgs.HasNoErrors())
                         {
@@ -1120,7 +1141,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
-        public ActionResult Welcome(string invite, string isrequestonlyaccess, string signuptype)
+        public ActionResult Welcome(string invite, string isrequestonlyaccess, string signuptype, string package, string period)
         {
             Account invitingAccount = null;
 
@@ -1146,6 +1167,8 @@ namespace AfterSchool.Controllers
                     ? (SignUpType) signuptype.ToInteger()
                     : SignUpType.NotSet,
                 InvitingAccount = invitingAccount,
+                Package = package,
+                SubscriptionPeriod = period
             };
             return View(model);
         }
