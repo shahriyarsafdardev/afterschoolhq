@@ -100,6 +100,7 @@ namespace AfterSchool
             services.AddTransient<ISterlingCreateCandidateQuery, SterlingCreateCandidateQuery>();
             services.AddTransient<ISterlingCreateScreeningQuery, SterlingCreateScreeningQuery>();
             services.AddTransient<IInfluxLogger, InfluxLogger>();
+            services.AddTransient<IWebUserRepository, WebUserRepository>();
 
             DependencyInjectionConfig.ConfigureServices(services);
             AfterSchoolLibrary.DependencyInjectionConfig.ConfigureServices(services);

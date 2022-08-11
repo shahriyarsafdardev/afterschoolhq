@@ -89,6 +89,9 @@
       <HintPath>..\packages\Dapper.2.0.123\lib\net461\Dapper.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Emmersion.Http, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Emmersion.Http.5.0.2\lib\netstandard2.0\Emmersion.Http.dll</HintPath>
+    </Reference>
     <Reference Include="Hangfire.Core, Version=1.7.9.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Hangfire.Core.1.7.9\lib\net46\Hangfire.Core.dll</HintPath>
     </Reference>

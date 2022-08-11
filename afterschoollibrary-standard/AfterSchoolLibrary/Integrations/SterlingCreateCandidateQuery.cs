@@ -15,21 +15,24 @@ namespace AfterSchoolLibrary.Integrations
     {
         private readonly IHttpClient httpClient;
         private readonly IJsonSerializer jsonSerializer;
+        private readonly IWebUserRepository webUserRepository;
 
-        public SterlingCreateCandidateQuery(IHttpClient httpClient, IJsonSerializer jsonSerializer)
+        public SterlingCreateCandidateQuery(IHttpClient httpClient, IJsonSerializer jsonSerializer, IWebUserRepository webUserRepository)
         {
             this.httpClient = httpClient;
             this.jsonSerializer = jsonSerializer;
+            this.webUserRepository = webUserRepository;
         }
 
         public async Task<string> CreateAsync(SterlingCredentials credentials, string bearerToken, Registrant registrant)
         {
+            var webUser = webUserRepository.LoadById(registrant.WebUserId.Value);
             var sterlingRequest = new SterlingCandidateRequest
             {
                 GivenName = registrant.FirstName,
                 FamilyName = registrant.LastName,
                 Email = registrant.Email,
-                ClientReferenceId = registrant.WebUserId.ToString(),
+                ClientReferenceId = webUser.Uid.ToString(),
             };
             var request = new HttpRequest
             {
