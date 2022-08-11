@@ -280,7 +280,7 @@ namespace AfterSchool.Controllers
                         BackgroundJob.Enqueue(() =>
                             WebUserService.SendWelcomePurchase(user.FirstName, user.Email, account.IsAfterSchool));
 
-                        //.. send support email to AHQ just to notifiy the team that a profile completed.
+                        //.. send support email to AHQ just to notifiy the team that a account has been created
                         BackgroundJob.Enqueue(() =>
                             EmailHelper.SendEmail(
                                 Email.AppCustomersEmailAddress,
