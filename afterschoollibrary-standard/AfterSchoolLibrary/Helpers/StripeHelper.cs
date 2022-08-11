@@ -1482,23 +1482,21 @@ namespace AfterSchoolLibrary.Billing
             return CreateRegistrantSubscription(customer.Id, plan.Id, isProrated, sourceId, platformFeePercent, startDate, null, null, stripeAccountId, stripeCouponId, metaData, msgs);
         }
 
-        public Stripe.Subscription UpdateSubscription(string subscriptionId, string priceId, bool? billingCycleAnchorNow, bool? billingCycleAnchorUnchanged, bool? endTrialNow, bool? prorate, string stripeAccountId, SystemMessages msgs)
+        public Stripe.Subscription UpdateSubscription(string subscriptionId, string priceId, bool? billingCycleAnchorNow, bool? billingCycleAnchorUnchanged, DateTime? trialEndDate, bool? prorate, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var options = new Stripe.SubscriptionUpdateOptions();
 
             if (priceId.IsNotBlank())
-            {
                 options.Items = new List<Stripe.SubscriptionItemOptions>()
+                {
+                    new Stripe.SubscriptionItemOptions()
                     {
-                        new Stripe.SubscriptionItemOptions()
-                        {
-                            Price = priceId,
-                            Quantity = 1
-                        }
-                    };
-            }
+                        Price = priceId,
+                        Quantity = 1
+                    }
+                };
 
             if (billingCycleAnchorNow.HasValue)
                 options.BillingCycleAnchor = SubscriptionBillingCycleAnchor.Now;
@@ -1506,15 +1504,11 @@ namespace AfterSchoolLibrary.Billing
             if (billingCycleAnchorUnchanged.HasValue)
                 options.BillingCycleAnchor = SubscriptionBillingCycleAnchor.Unchanged;
 
-            if (endTrialNow.HasValue)
-                options.TrialEnd = DateTime.UtcNow;
+            if (trialEndDate.HasValue)
+                options.TrialEnd = trialEndDate;
 
             if (prorate.HasValue)
                 options.Prorate = prorate.Value;
-
-            var requestOptions = new Stripe.RequestOptions();
-            if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeAccount = stripeAccountId;
 
             Stripe.Subscription subscription = null;
 
@@ -1522,7 +1516,7 @@ namespace AfterSchoolLibrary.Billing
             {
                 var service = GetSubscriptionService();
                 if (service.IsNotEmpty())
-                    subscription = service.Update(subscriptionId, options, requestOptions);
+                    subscription = service.Update(subscriptionId, options);
                 
             }
             catch (StripeException ex)

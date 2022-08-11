@@ -469,16 +469,6 @@ namespace AfterSchoolLibrary.Models
             return AccountPackageFeature.LoadByAccountPackageId(ID.Value, msgs, dc);
         }
 
-        public SystemMessages UpdateTrialDays(int trialDays, DatabaseConnection dc)
-        {
-            var msgs = new SystemMessages();
-
-            TrialEndDate = TrialStartDate.Value.AddDays(trialDays);
-            msgs.AddRange(Save(dc));
-
-            return msgs;
-        }
-
         public static AccountPackage LoadFirstFromListByAccountIdByIsActiveByOrderProperty(int AccountId, bool IsActive,
             string OrderByProperty, OrderByDirectionEnum orderByDirection, SystemMessages msgs = null,
             DatabaseConnection dc = null)

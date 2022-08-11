@@ -63,5 +63,26 @@ namespace AfterSchoolLibrary.Services
 
             return accountPackage;
         }
+
+        public static void UpdateTrialDaysWithStripe(this AccountPackage accountPackage, int trialDays, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            accountPackage.UpdateTrialDays(trialDays, msgs, dc);
+
+            if (msgs.HasNoErrors())
+                StripeHelper.GetStripeHelperSubscriberAccount().UpdateSubscription(
+                    subscriptionId: accountPackage.StripeSubscriptionId,
+                    priceId: null,
+                    billingCycleAnchorNow: null,
+                    billingCycleAnchorUnchanged: null,
+                    trialEndDate: accountPackage.TrialStartDate.Value.AddDays(trialDays),
+                    prorate: null,
+                    msgs: msgs);
+        }
+        
+        public static void UpdateTrialDays(this AccountPackage accountPackage, int trialDays, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            accountPackage.TrialEndDate = accountPackage.TrialStartDate.Value.AddDays(trialDays);
+            msgs.AddRange(accountPackage.Save(dc));
+        }
     }
 }

@@ -356,28 +356,30 @@ namespace AfterSchool.Areas.Org.Controllers
                     {
                         if (Request[type.ToString()].IsNotEmpty())
                         {
-                            var accountFeature =
-                                AccountPackageFeature.LoadByAccountPackageIdByFeatureTypeId(accountPackage.ID.Value,
-                                    type, msgs: amsgs, dc: adc);
+                            var accountFeature = AccountPackageFeature.LoadByAccountPackageIdByFeatureTypeId(
+                                                    accountPackage.ID.Value,
+                                                    type, 
+                                                    msgs: amsgs, 
+                                                    dc: adc);
+                            
                             if (accountFeature.IsEmpty())
-                            {
-                                accountFeature = new AccountPackageFeature();
-                                accountFeature.AccountPackageId = accountPackage.ID;
-                                accountFeature.CreateDate = DateTime.UtcNow;
-                                accountFeature.CreatedBy = currentUser.ID;
-                                accountFeature.FeatureTypeId = type;
-                            }
+                                accountFeature = new AccountPackageFeature
+                                {
+                                    AccountPackageId = accountPackage.ID,
+                                    CreateDate = DateTime.UtcNow,
+                                    CreatedBy = currentUser.ID,
+                                    FeatureTypeId = type
+                                };
 
                             accountFeature.Max = Request[type.ToString()].ToDecimal();
                             accountFeature.LastModifiedBy = currentUser.ID;
                             accountFeature.LastModifiedDate = DateTime.UtcNow;
                             amsgs.AddRange(accountFeature.Save(adc));
-
+                            
                             if (accountFeature.FeatureTypeId == FeatureType.TrialDays &&
                                 accountPackage.TrialStartDate.HasValue)
                             {
-                                amsgs.AddRange(
-                                    accountPackage.UpdateTrialDays(accountFeature.Max.Value.ToInteger(), adc));
+                                accountPackage.UpdateTrialDaysWithStripe(accountFeature.Max.Value.ToInteger(), amsgs, adc);
                             }
                             else if (accountFeature.FeatureTypeId == FeatureType.ManualStripePayouts &&
                                      currentAccount.StripeUserId.IsNotEmpty())
