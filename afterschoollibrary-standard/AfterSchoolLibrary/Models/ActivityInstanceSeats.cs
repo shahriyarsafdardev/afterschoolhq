@@ -186,12 +186,14 @@ namespace AfterSchoolLibrary.Models
 			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
 			dq.Connection = dc;
 
-			dq.SelectParameters.Clear();
-			dq.SelectParameters.Add(ObjectMap["NumberOfSeats"], "SumOfSeats", $"ISNULL(SUM({DatabaseQuery.FunctionReplaceValue}), 0)");
+            dq.SelectParameters.Clear();
+            dq.SelectParameters.Add(ObjectMap["NumberOfSeats"], "SumOfSeats", $"ISNULL(SUM({DatabaseQuery.FunctionReplaceValue}), 0)");
 
-			dq.Criterias.Add(ObjectMap["ActivityInstanceId"], ActivityInstanceId);
+            dq.Criterias.Add(ObjectMap["ActivityInstanceId"], ActivityInstanceId);
+            //dq.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], Registration.ReservedStatuses);
+            //dq.Joins.Add(RegistrantActivity.ObjectMap["ID"], ObjectMap["RegistrantActivityId"], DatabaseJoinTypeEnum.InnerJoin);
 
-			var dt = dq.Select(msgs);
+            var dt = dq.Select(msgs);
 
 			if (dt.Rows.Count > 0)
 				return dt.Rows[0][0].ToString().ToInteger();
