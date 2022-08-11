@@ -305,12 +305,13 @@
 
                         @if (participationObject.SubscriptionPlans.Any())
                         {
+                            var accountDate = participationObject.OwnerAccount.ConvertToAccountTimeZone(System.DateTime.UtcNow);
                             var subpricetoday = subscriptionPlan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount);
                             var subtransfeetoday = subscriptionPlan.GetCreditCardFee(paymentAccount);
                             var learningPodSplitEvenly = subscriptionPlan.SplitCostEvenly && !participationObject.RegistrationFinalized;
                             var activityStartIsInFuture = subscriptionPlan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts &&
                                                           participationObject.StartDate.HasValue &&
-                                                          participationObject.StartDate.Value.Date.IsAfter(System.DateTime.UtcNow.Date);
+                                                          participationObject.StartDate.Value.Date.IsAfter(accountDate.Date);
 
                             if (learningPodSplitEvenly || activityStartIsInFuture)
                             {
