@@ -310,7 +310,7 @@
                             var learningPodSplitEvenly = subscriptionPlan.SplitCostEvenly && !participationObject.RegistrationFinalized;
                             var activityStartIsInFuture = subscriptionPlan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts &&
                                                           participationObject.StartDate.HasValue &&
-                                                          participationObject.StartDate.Value.IsAfter(System.DateTime.UtcNow);
+                                                          participationObject.StartDate.Value.Date.IsAfter(System.DateTime.UtcNow.Date);
 
                             if (learningPodSplitEvenly || activityStartIsInFuture)
                             {
