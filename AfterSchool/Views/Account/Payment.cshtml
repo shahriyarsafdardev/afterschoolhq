@@ -307,8 +307,12 @@
                         {
                             var subpricetoday = subscriptionPlan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount);
                             var subtransfeetoday = subscriptionPlan.GetCreditCardFee(paymentAccount);
+                            var learningPodSplitEvenly = subscriptionPlan.SplitCostEvenly && !participationObject.RegistrationFinalized;
+                            var activityStartIsInFuture = subscriptionPlan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts &&
+                                                          participationObject.StartDate.HasValue &&
+                                                          participationObject.StartDate.Value.IsAfter(System.DateTime.UtcNow);
 
-                            if (subscriptionPlan.SplitCostEvenly && !participationObject.RegistrationFinalized)
+                            if (learningPodSplitEvenly || activityStartIsInFuture)
                             {
                                 subpricetoday = 0;
                                 subtransfeetoday = 0;
