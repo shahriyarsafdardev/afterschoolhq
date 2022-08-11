@@ -41,7 +41,7 @@ if "%DEPLOYMENT_GROUP_NAME%"=="" (
     Echo Something failed & goto :eof
 
     :finish
-    Powershell.exe -ExecutionPolicy unrestricted -Command "Invoke-WebRequest -Uri http://localhost/db/update/eibfeiwalncdsja32rq9yfwbfg32yewody7832re7ywofaudisfh7238qoweiafb7328qwoadg78027rweubfad -UseBasicParsing"
+    %systemroot%\System32\WindowsPowerShell\v1.0\Powershell.exe -ExecutionPolicy unrestricted -Command "Invoke-WebRequest -Uri http://localhost/db/update/eibfeiwalncdsja32rq9yfwbfg32yewody7832re7ywofaudisfh7238qoweiafb7328qwoadg78027rweubfad -UseBasicParsing"
     
     Echo All done, no fatal errors.
 )
