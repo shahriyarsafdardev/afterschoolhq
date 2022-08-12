@@ -76,6 +76,19 @@
                                 <input type="text" class="form-control" id="stripeSubscriptionId" name="stripeSubscriptionId" value="@accountPackage.StripeSubscriptionId" onfocus="this.select()" required />
                             </div>
                         </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Start New Trial?</label>
+                            <div class="col-sm-9">
+                                @{ 
+                                    Html.RenderPartial("~/Views/Shared/_SwitchButton.cshtml", false, new ViewDataDictionary
+                                   {
+                                       { "checkboxname", "startnewtrial" },
+                                       { "checkboxid", "startnewtrial" },
+                                       { "disabled", false },
+                                   }); 
+                                }
+                            </div>
+                        </div>
                     }
 
                     <div class="form-group">

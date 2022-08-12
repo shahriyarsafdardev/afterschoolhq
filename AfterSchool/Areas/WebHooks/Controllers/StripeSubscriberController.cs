@@ -76,7 +76,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 return ReturnOK(msgs);
             }
 
-            currentAccount.CheckIfSubscriberAccountSubscriptionChanged(new WebUser() { ID = 0 }, msgs);
+            currentAccount.CheckIfSubscriberAccountSubscriptionChanged(false, new WebUser() { ID = 0 }, msgs);
 
             if (msgs.HasErrors())
                 return Return500(msgs);

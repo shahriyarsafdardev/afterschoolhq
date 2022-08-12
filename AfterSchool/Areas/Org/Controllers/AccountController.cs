@@ -51,7 +51,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [HttpPost]
         public ActionResult Edit(string id, string name, string email, string phone, string uniqueName,
-            string timeZone, string stripeCustomerId, string stripeSubscriptionId)
+            string timeZone, string stripeCustomerId, string stripeSubscriptionId, string startnewtrial)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
@@ -100,10 +100,10 @@ namespace AfterSchool.Areas.Org.Controllers
                             isNewSubscription = true;
                         }
 
-                        if (isNewCustomer || isNewCustomer)
+                        if (isNewCustomer || isNewSubscription)
                         {
                             currentAccount.CheckIfSubscriberAccountHasPaymentMethod(null, amsgs, adc);
-                            currentAccount.CheckIfSubscriberAccountSubscriptionChanged(currentUser, amsgs, adc);
+                            currentAccount.CheckIfSubscriberAccountSubscriptionChanged(startnewtrial.IsBoolean(), currentUser, amsgs, adc);
                         }
                         
                         // ..update profile title if account name has been changed 
@@ -356,28 +356,30 @@ namespace AfterSchool.Areas.Org.Controllers
                     {
                         if (Request[type.ToString()].IsNotEmpty())
                         {
-                            var accountFeature =
-                                AccountPackageFeature.LoadByAccountPackageIdByFeatureTypeId(accountPackage.ID.Value,
-                                    type, msgs: amsgs, dc: adc);
+                            var accountFeature = AccountPackageFeature.LoadByAccountPackageIdByFeatureTypeId(
+                                                    accountPackage.ID.Value,
+                                                    type, 
+                                                    msgs: amsgs, 
+                                                    dc: adc);
+                            
                             if (accountFeature.IsEmpty())
-                            {
-                                accountFeature = new AccountPackageFeature();
-                                accountFeature.AccountPackageId = accountPackage.ID;
-                                accountFeature.CreateDate = DateTime.UtcNow;
-                                accountFeature.CreatedBy = currentUser.ID;
-                                accountFeature.FeatureTypeId = type;
-                            }
+                                accountFeature = new AccountPackageFeature
+                                {
+                                    AccountPackageId = accountPackage.ID,
+                                    CreateDate = DateTime.UtcNow,
+                                    CreatedBy = currentUser.ID,
+                                    FeatureTypeId = type
+                                };
 
                             accountFeature.Max = Request[type.ToString()].ToDecimal();
                             accountFeature.LastModifiedBy = currentUser.ID;
                             accountFeature.LastModifiedDate = DateTime.UtcNow;
                             amsgs.AddRange(accountFeature.Save(adc));
-
+                            
                             if (accountFeature.FeatureTypeId == FeatureType.TrialDays &&
                                 accountPackage.TrialStartDate.HasValue)
                             {
-                                amsgs.AddRange(
-                                    accountPackage.UpdateTrialDays(accountFeature.Max.Value.ToInteger(), adc));
+                                accountPackage.UpdateTrialDaysWithStripe(accountFeature.Max.Value.ToInteger(), amsgs, adc);
                             }
                             else if (accountFeature.FeatureTypeId == FeatureType.ManualStripePayouts &&
                                      currentAccount.StripeUserId.IsNotEmpty())
@@ -1509,7 +1511,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             // check if finally added payment
             currentAccount.CheckIfSubscriberAccountHasPaymentMethod(null, msgs);
-            currentAccount.CheckIfSubscriberAccountSubscriptionChanged(currentUser, msgs);
+            currentAccount.CheckIfSubscriberAccountSubscriptionChanged(false, currentUser, msgs);
 
             return new RedirectResult(Url.Action("index", "home"));
         }
