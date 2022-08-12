@@ -51,7 +51,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [HttpPost]
         public ActionResult Edit(string id, string name, string email, string phone, string uniqueName,
-            string timeZone, string stripeCustomerId, string stripeSubscriptionId)
+            string timeZone, string stripeCustomerId, string stripeSubscriptionId, string startnewtrial)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
@@ -100,10 +100,10 @@ namespace AfterSchool.Areas.Org.Controllers
                             isNewSubscription = true;
                         }
 
-                        if (isNewCustomer || isNewCustomer)
+                        if (isNewCustomer || isNewSubscription)
                         {
                             currentAccount.CheckIfSubscriberAccountHasPaymentMethod(null, amsgs, adc);
-                            currentAccount.CheckIfSubscriberAccountSubscriptionChanged(currentUser, amsgs, adc);
+                            currentAccount.CheckIfSubscriberAccountSubscriptionChanged(startnewtrial.IsBoolean(), currentUser, amsgs, adc);
                         }
                         
                         // ..update profile title if account name has been changed 
@@ -1511,7 +1511,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             // check if finally added payment
             currentAccount.CheckIfSubscriberAccountHasPaymentMethod(null, msgs);
-            currentAccount.CheckIfSubscriberAccountSubscriptionChanged(currentUser, msgs);
+            currentAccount.CheckIfSubscriberAccountSubscriptionChanged(false, currentUser, msgs);
 
             return new RedirectResult(Url.Action("index", "home"));
         }
