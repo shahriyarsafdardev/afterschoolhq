@@ -116,49 +116,45 @@ namespace AfterSchoolLibrary.Services
             registration.DeleteWithRelatedRecords(msgs, dc);
         }
 
-        private static RegistrationAssignmentType GetRegistrationAssignmentType(ParticipationObject participationObject,
-            Registrant masterRegistrant, int numberOfSeatsRequested, RegistrantActivity ra, WebUser loggedInUser,
-            SystemMessages msgs, DatabaseConnection dc = null)
+        internal static RegistrationAssignmentType GetRegistrationAssignmentType(ParticipationObject participationObject, Registrant masterRegistrant,
+            int numberOfSeatsRequested, RegistrationAssignmentType? existingAssignmentTypeId, decimal? amountPaidByRegistrant, int? loggedInWebUserId,
+            bool requiresBackgroundCheck)
         {
             var seatsAvailable = participationObject.SeatsRemaining;
-            var isExistingAndIsPendingOrReserved =
-                ra.IsNotEmpty() && ra.AssignmentTypeId.In(Registration.ReservedStatuses);
 
             if (participationObject.RegistrationMode == RegistrationMode.Apply)
                 return RegistrationAssignmentType.Applied;
 
             // if they're paying for a registration they already completed
-            // or could be just esigning for a student so this will need to be double checked
-            if (isExistingAndIsPendingOrReserved)
+            // or could be just e-signing for a student so this will need to be double checked
+            if (existingAssignmentTypeId.HasValue && existingAssignmentTypeId.Value.In(Registration.ReservedStatuses))
                 return RegistrationAssignmentType.Reserved;
 
             // if there is room
             if (!seatsAvailable.HasValue || seatsAvailable >= numberOfSeatsRequested)
             {
                 var isStudentOrTeacherRegistering = masterRegistrant.IsEmpty() ||
-                                                    (masterRegistrant.WebUserId.HasValue &&
-                                                     loggedInUser.ID == masterRegistrant.WebUserId);
+                                                    (masterRegistrant.WebUserId.HasValue && loggedInWebUserId == masterRegistrant.WebUserId);
 
                 // if the person registering is the student
                 if (participationObject.RequiresParentalConsent && isStudentOrTeacherRegistering)
                     return RegistrationAssignmentType.ReservedPendingParentalConsent;
 
-                // if the person didn't pay yet
-                var isCompletelyFree = participationObject.IsFree;
-                var noPayments = ra.IsEmpty() ||
-                                 participationObject.GetAmountPaidByRegistrant(ra.RegistrantId.Value, msgs, dc) ==
-                                 0.ToDecimal();
+                var registrantHasNotYetPaid = !amountPaidByRegistrant.HasValue || amountPaidByRegistrant.Value == 0m;
 
-                if (!isCompletelyFree && noPayments && !participationObject.PostPayPlans.Any())
+                if (!participationObject.IsFree && registrantHasNotYetPaid && !participationObject.PostPayPlans.Any())
                     return RegistrationAssignmentType.ReservedPendingPayment;
+
+                if (requiresBackgroundCheck)
+                    return RegistrationAssignmentType.ReservedPendingBackgroundCheck;
 
                 return RegistrationAssignmentType.Reserved;
             }
 
             // this is probably temporary and will break if something else changes
             // assuming that for sessions there are no reserved seat setting saved
-            else if (participationObject.IsActivityGroup() &&
-                     participationObject.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.Session)
+            if (participationObject.IsActivityGroup() &&
+                participationObject.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.Session)
                 return RegistrationAssignmentType.Reserved;
 
             // forget the limit on waiting list seats, just dump people there for now
@@ -216,14 +212,12 @@ namespace AfterSchoolLibrary.Services
             // but could be problem in the future
             var ra = registration.GetRegistrantActivity(participationObject, msgs, dc);
 
-            var assignmentType = GetRegistrationAssignmentType(
-                participationObject,
-                masterRegistrant,
-                seatsRequested,
-                ra,
-                loggedInUser,
-                msgs,
-                dc);
+            var amountPaidByRegistrant = ra.IsNotEmpty() && ra.RegistrantId.HasValue
+                ? participationObject.GetAmountPaidByRegistrant(ra.RegistrantId.Value, msgs, dc)
+                : (decimal?) null;
+            var requiresBackgroundCheck = IsBackgroundCheckRequired(participationObject.ActivityType, loggedInUser.ID);
+            var assignmentType = GetRegistrationAssignmentType(participationObject, masterRegistrant, seatsRequested, ra?.AssignmentTypeId,
+                amountPaidByRegistrant, loggedInUser.ID, requiresBackgroundCheck);
 
             if (assignmentType == RegistrationAssignmentType.NotSet)
             {
@@ -262,6 +256,15 @@ namespace AfterSchoolLibrary.Services
                         instanceSeats = instance.AddInstanceSeats(ra, loggedInUser, msgs, dc);
                 });
             }
+        }
+
+        internal static bool IsBackgroundCheckRequired(ActivityType? participationObjectActivityType, int? webUserId)
+        {
+            if (participationObjectActivityType != ActivityType.VolunteerOpportunity)
+                return false;
+            
+            // TODO: Check if Web User has a valid background check with a completed result.
+            return true;
         }
 
         public static void AddESignature(this Registration registration, string esignature, string userAgent,
