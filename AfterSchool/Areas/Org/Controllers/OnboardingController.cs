@@ -9,6 +9,7 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using Hangfire;
 using Email = AfterSchoolLibrary.Helpers.Email;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
@@ -624,25 +625,27 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors() && account.IsNotEmpty() && currentUser.IsNotEmpty())
             {
                 //.. send support email to AHQ just to notifiy the team that a profile completed.
-                EmailHelper.SendEmail(
-                    Email.AppCustomersEmailAddress,
-                    $"AHQ Profile Completed - {account.Name}",
-                    $"<p>Organization: {account.Name}<br />" +
-                    $"Main Contact Name: {currentUser.FirstName} {currentUser.LastName}<br />" +
-                    $"Email: {currentUser.Email}<br />" +
-                    $"Profile Link: {account.HomePageUrl}<br />" +
-                    $"How did you hear about us: {currentUser.HowHearAboutUs} <br />" +
-                    $"Location: {profile.GetLocation(msgs) ?? account.GetDefaultLocation(msgs)}<br />" +
-                    $"Host Account(s): {hostAccountString}" +
-                    $"</p>",
-                    true);
+                var location = profile.GetLocation() ?? account.GetDefaultLocation();
+
+                BackgroundJob.Enqueue(() =>
+                    EmailHelper.SendEmail(
+                        Email.AppCustomersEmailAddress,
+                        $"AHQ Profile Completed - {account.Name}",
+                        $"<p>Organization: {account.Name}<br />" +
+                        $"Main Contact Name: {currentUser.DisplayName}<br />" +
+                        $"Email: {currentUser.Email}<br />" +
+                        $"Profile Link: {account.HomePageUrl}<br />" +
+                        $"How did you hear about us: {currentUser.HowHearAboutUs} <br />" +
+                        $"Location: {location.ToString()}<br />" +
+                        $"Host Account(s): {hostAccountString}" +
+                        $"</p>",
+                        true)
+                );
 
                 var user = account.GetAccountOwner(msgs);
 
                 if (user.IsNotEmpty() && account.IsNotEmpty())
-                {
                     SendGridHelper.AddOrUpdateContact(account, user, msgs);
-                }
             }
 
             ViewBag.Messages = msgs;

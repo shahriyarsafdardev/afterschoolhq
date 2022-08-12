@@ -237,7 +237,7 @@ namespace AfterSchool.Controllers
                             if (model.Package.IsGuid() && model.SubscriptionPeriod.IsNotEmpty())
                             {
                                 var package = Package.LoadByUid(model.Package.ToGuid(), amsgs, adc);
-                                
+
                                 if (package.IsNotEmpty())
                                     account = user.AddNewAccountWithPackageWithStripe(
                                         orgName: model.OrgName,
@@ -248,7 +248,7 @@ namespace AfterSchool.Controllers
                                         msgs: amsgs,
                                         dc: adc);
                             }
-                            
+
                             if (amsgs.HasNoErrors() && account.IsEmpty())
                                 account = user.AddNewAccountWithDefaultPackageWithStripe(
                                     orgName: model.OrgName,
@@ -256,31 +256,6 @@ namespace AfterSchool.Controllers
                                     loggedInUser: user,
                                     msgs: amsgs,
                                     dc: adc);
-                        }
-
-                        if (user.IsNotEmpty() && account.IsNotEmpty() && amsgs.HasNoErrors())
-                        {
-                            var webSession = SessionVariables.WebSession;
-
-                            // LOG: WebUserName Created Account Account
-                            webSession.LogActivity(
-                                account: account,
-                                actor: user,
-                                actionType: WebSessionActionType.Created,
-                                objectType: ObjectType.Account,
-                                objectId: account.ID.Value,
-                                objectText: account.Name
-                            );
-
-                            // LOG: WebUserName SignedUp
-                            webSession.LogActivity(
-                                account: account,
-                                actor: user,
-                                actionType: WebSessionActionType.SignedUp,
-                                objectType: ObjectType.WebUser,
-                                objectId: user.ID.Value,
-                                objectText: user.DisplayName
-                            );
                         }
 
                         if (invitingAccount.IsNotEmpty())
@@ -295,6 +270,7 @@ namespace AfterSchool.Controllers
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         msgs.AddRange(smsgs);
+                        
                         LoadSessionInfo(user, account, msgs: msgs);
 
                         if (user.IsNotEmpty() && account.IsNotEmpty())
@@ -303,6 +279,42 @@ namespace AfterSchool.Controllers
                         BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(user, null, true));
                         BackgroundJob.Enqueue(() =>
                             WebUserService.SendWelcomePurchase(user.FirstName, user.Email, account.IsAfterSchool));
+
+                        //.. send support email to AHQ just to notifiy the team that a account has been created
+                        BackgroundJob.Enqueue(() =>
+                            EmailHelper.SendEmail(
+                                Email.AppCustomersEmailAddress,
+                                $"AHQ Account Created - {account.Name}",
+                                $"<p>Organization: {account.Name}<br />" +
+                                $"Main Contact Name: {user.DisplayName}<br />" +
+                                $"Email: {user.Email}<br />" +
+                                $"How did you hear about us: {user.HowHearAboutUs} <br />" +
+                                $"Host Account(s): {model.InviteCodeToShare}" +
+                                $"</p>",
+                                true)
+                        );
+                        
+                        var webSession = SessionVariables.WebSession;
+
+                        // LOG: WebUserName Created Account Account
+                        webSession.LogActivity(
+                            account: account,
+                            actor: user,
+                            actionType: WebSessionActionType.Created,
+                            objectType: ObjectType.Account,
+                            objectId: account.ID.Value,
+                            objectText: account.Name
+                        );
+
+                        // LOG: WebUserName SignedUp
+                        webSession.LogActivity(
+                            account: account,
+                            actor: user,
+                            actionType: WebSessionActionType.SignedUp,
+                            objectType: ObjectType.WebUser,
+                            objectId: user.ID.Value,
+                            objectText: user.DisplayName
+                        );
                     },
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     onException: (SystemMessages emsgs) => msgs.AddRange(emsgs)
