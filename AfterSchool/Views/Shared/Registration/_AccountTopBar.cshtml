@@ -4,13 +4,13 @@
     var currentUser = SessionVariables.CurrentUser;
     var currentAccount = SessionVariables.CurrentAccount;
     var accountOrDashboard = "Account";
-    var participationObject = (ParticipationObject) ViewData["ParticipationObject"];
+    var participationObject = (ParticipationObject)ViewData["ParticipationObject"];
     var canPublishActivity = ViewData["CanPublishActivity"].IsNotEmpty() && ViewData["CanPublishActivity"].ToString().ToBoolean();
-    var dashboardUrl = Url.Action("Index", "Home", new {area = "User"});
+    var dashboardUrl = Url.Action("Index", "Home", new { area = "User" });
     var isDuringProfileSetup = false;
     var returnUrl = SessionVariables.RegistrationStartPageAccount?.HomePageUrl;
     var registrationStartPage = SessionVariables.RegistrationStartPageAccount;
-    var isAccount = ViewData["IsAccount"] != null && (bool) ViewData["IsAccount"];
+    var isAccount = ViewData["IsAccount"] != null && (bool)ViewData["IsAccount"];
     var isOnboardingStepsAcknowledged = CookieVariables.OnboardingStepsAcknowledged;
     var isInEditMode = Request["edit"] == "1";
 
@@ -20,10 +20,10 @@
                               participationObject.IsExternalToAccount(currentAccount) &&
                               !participationObject.IsAccountActivityGroup();
 
-    if (currentAccount.IsNotEmpty() && currentAccount.AccountTypeId.NotIn(new[] {AccountType.Registrant, AccountType.Volunteer}))
+    if (currentAccount.IsNotEmpty() && currentAccount.AccountTypeId.NotIn(new[] { AccountType.Registrant, AccountType.Volunteer }))
     {
         accountOrDashboard = "Dashboard";
-        dashboardUrl = Url.Action("Index", "Home", new {area = "Org"});
+        dashboardUrl = Url.Action("Index", "Home", new { area = "Org" });
     }
 
     if (ViewData["IsDuringProfileSetup"].IsNotEmpty() && ViewData["IsDuringProfileSetup"].ToString().IsBoolean())
@@ -37,7 +37,7 @@
     var hasAnyPaidActivity = currentAccount.IsNotEmpty() && currentAccount.HasPaidActivities();
     //If there is no paid activity configured then we should not display Payment Modal and Progressbar to user
     var totalStepsLeft = hasAnyPaidActivity ? totalNumberOfOnboardingSteps : totalNumberOfOnboardingSteps - 1;
-    var progressPercentage = (decimal) currentProgress.Count / totalStepsLeft * 100;
+    var progressPercentage = (decimal)currentProgress.Count / totalStepsLeft * 100;
 
 
     var isAccountAndLoggedInUserIsOwner = currentAccount.IsNotEmpty() &&
@@ -239,8 +239,14 @@
 {
     <div class="reg-login-bar-title">
         <a href="@registrationStartPage.HomePageUrl">
-            <span class="reg-login-bar-title-item notranslate" style="@(ViewData["InsideActDetails"] != null ? "color:#b2b2b4" : "")">@registrationStartPage.Name</span>
+            <span class="reg-login-bar-title-item notranslate" style="@(ViewData["sessionName"] != null ? "color:#b2b2b4" : "")">@registrationStartPage.Name</span>
         </a>
+        @if (ViewData["sessionName"].IsNotEmpty())
+        {
+            <a href="@registrationStartPage.HomePageUrl/session/@ViewData["sessionName"]">
+                <span class="reg-login-bar-title-item notranslate" style="@(ViewData["InsideActDetails"] != null ? "color:#b2b2b4" : "")"> > @ViewData["sessionName"]</span>
+            </a>
+        }
         @if (ViewData["InsideActDetails"] != null)
         {
             <span class="reg-login-bar-title-item notranslate"> > @ViewData["InsideActDetails"]</span>
@@ -274,7 +280,7 @@ else if (currentUser.IsNotEmpty())
                 if (enableApproveButton)
                 {
                     <li>
-                        <a href="@Url.Action("PublishDetail", "Activity", new {Area = "Org", id = participationObject.Uid})"
+                        <a href="@Url.Action("PublishDetail", "Activity", new { Area = "Org", id = participationObject.Uid })"
                            class="btn btn-primary btn-sm">
                             Approve &amp; Publish Activity &raquo;
                         </a>
@@ -318,11 +324,11 @@ else if (currentUser.IsNotEmpty())
                 if (currentUser.HasMultipleAccounts())
                 {
                     <li>
-                        <a href="@Url.Action("Switch", "Logout", new {returnurl = returnUrl})" class="btn btn-link">Switch Accounts</a>
+                        <a href="@Url.Action("Switch", "Logout", new { returnurl = returnUrl })" class="btn btn-link">Switch Accounts</a>
                     </li>
                 }
                 <li>
-                    <a href="@Url.Action("Index", "Logout", new {returnurl = Context.Request.Path})" class="btn btn-link">Logout</a>
+                    <a href="@Url.Action("Index", "Logout", new { returnurl = Context.Request.Path })" class="btn btn-link">Logout</a>
                 </li>
             }
             else
@@ -339,8 +345,8 @@ else if (currentUser.IsNotEmpty())
 @{
     Html.RenderPartial("~/Views/Shared/Registration/_LoginModalWithUpdatedDesign.cshtml", null, new ViewDataDictionary
     {
-        {"ReturnUrl", loginReturnUrl},
-        {"CleverSsoEnabled", cleverSsoEnabled},
+        { "ReturnUrl", loginReturnUrl },
+        { "CleverSsoEnabled", cleverSsoEnabled }
     });
 }
 
@@ -367,9 +373,9 @@ else if (currentUser.IsNotEmpty())
         showLoader()
 
         if (item === '@GettingStartedOptions.CreateProfile') {
-            location.href = '@Url.Action("ProgramInfo", "Onboarding", new {area = "org"})';
+            location.href = '@Url.Action("ProgramInfo", "Onboarding", new { area = "org" })';
         } else if (item === '@GettingStartedOptions.CreateFirstActivity') {
-            location.href = '@Html.Raw(Url.Action("EditSetup", "Activity", new {area = "org", isnew = 1, type = (int) ActivityType.Activity}))';
+            location.href = '@Html.Raw(Url.Action("EditSetup", "Activity", new { area = "org", isnew = 1, type = (int)ActivityType.Activity }))';
         } else if (item === '@GettingStartedOptions.PublishActivity') {
             location.href = '@url';
         } else if (item === '@GettingStartedOptions.ValidateEmail') {
@@ -381,7 +387,7 @@ else if (currentUser.IsNotEmpty())
     }
 
     function setOnboardingStepsAcknowledge() {
-        let url = '@Url.Action("SetOnboardingStepsAcknowledged", "Services", new {Area = ""})';
+        let url = '@Url.Action("SetOnboardingStepsAcknowledged", "Services", new { Area = "" })';
         $.ajax({
             type: "POST",
             url: url

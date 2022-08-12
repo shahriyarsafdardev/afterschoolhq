@@ -13,31 +13,31 @@
     var cleverSsoEnabled = Model.CleverSsoEnabled;
 }
 
-@{ Html.RenderPartial (
+@{ Html.RenderPartial(
        "~/Views/Shared/Registration/_AccountTopBar.cshtml",
        Model.Account,
        new ViewDataDictionary
        {
            { "LoginReturnUrl", Model.Account.HomePageUrl },
            { "CleverSsoEnabled", cleverSsoEnabled },
-       });
-}
+           { "sessionName", session?.UniqueName }
+       }); }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
 @{ Html.RenderPartial(
-         "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
-         new RegistrationHeaderViewModel(
-             Model.Account,
-             accountProfile,
-             session)); }
+       "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
+       new RegistrationHeaderViewModel(
+           Model.Account,
+           accountProfile,
+           session)); }
 
 @{ Html.RenderPartial("~/Views/Shared/Registration/_FirstTimeInformation.cshtml", Model.Account); }
 
 @{ Html.RenderPartial("~/Views/Shared/Registration/_BrowseFilterBar.cshtml", Model.Account, new ViewDataDictionary
    {
-       {"Grades", Model.Grades},
-       {"Locations", Model.Locations},
+       { "Grades", Model.Grades },
+       { "Locations", Model.Locations }
    }); }
 
 <div class="margin-10">
@@ -88,7 +88,7 @@
                     <h3>Explore profiles of providers at @Model.Account.Name</h3>
                 </div>
 
-                @foreach(var item in featuredProviders)
+                @foreach (var item in featuredProviders)
                 {
                     var featuredProfile = item.GetAccountProfile();
 
@@ -102,7 +102,7 @@
         }
 
     </div>
-    
+
 </div>
 
 @if (session.IsNotEmpty())
@@ -110,6 +110,6 @@
     Html.RenderPartial("~/Views/Shared/Registration/_BrowseCart.cshtml", session);
 }
 
-@{Html.RenderPartial("~/Views/Shared/Modals/_LeadForm.cshtml", Model.Account);}
+@{ Html.RenderPartial("~/Views/Shared/Modals/_LeadForm.cshtml", Model.Account); }
 
-@{Html.RenderPartial("~/Views/Shared/Modals/_FirstTimeDemoOrgName.cshtml", Model.Account);}
+@{ Html.RenderPartial("~/Views/Shared/Modals/_FirstTimeDemoOrgName.cshtml", Model.Account); }

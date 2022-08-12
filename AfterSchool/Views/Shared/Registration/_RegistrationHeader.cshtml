@@ -82,10 +82,10 @@
 {
     if (currentUser.IsNotEmpty() && currentUser.HasAccessTo(Model.Account) && Request["edit"] == "1")
     {
-        var redirectUrl = $"{Url.Action("style", "account", new {area = "org", isfullscreen = 1, returnurl = Request.Url})}#{anchor}";
+        var redirectUrl = $"{Url.Action("style", "account", new { area = "org", isfullscreen = 1, returnurl = Request.Url })}#{anchor}";
 
         <span>
-            <a href="@Url.Action("switch", "logout", new {id = Model.Account.Uid, redirectUrl})#@anchor"
+            <a href="@Url.Action("switch", "logout", new { id = Model.Account.Uid, redirectUrl })#@anchor"
                class="btn btn-alt7 btn-sm">
                 Edit &raquo;
             </a>
@@ -98,7 +98,7 @@
     @if (!Model.Account.HasAccountProfile() && currentUser.IsNotEmpty() && currentUser.HasAccessTo(Model.Account))
     {
         <div class="profile-edit-bar text-center">
-            <a href="@Url.Action("style", "account", new {area = "org", isfullscreen = 1, returnurl = Request.Url})"
+            <a href="@Url.Action("style", "account", new { area = "org", isfullscreen = 1, returnurl = Request.Url })"
                class="btn btn-alt7 btn-lg btn-block">
                 Customize your Profile &raquo;
             </a>
@@ -211,46 +211,49 @@
             @if (!hideButtons)
             {
                 <div class="col-lg-3 col-md-6 col-sm-12">
-                    <div class="padding-v-20 text-center" id="activityHeaderbtns">
-                        <div>
-                            @{
-                                var displayActivity = Model.ParticipationObject?.ActivityType != ActivityType.VolunteerOpportunity;
-                                var browseActivitiesOrOpportunitiesUrl = displayActivity ? Model.Account.BrowseUrl : Model.Account.BrowseVolunteerOpportunitiesUrl;
-                                var buttonText = displayActivity
-                                    ? "View All " + UILabel.ActivityLabel(ActivityType.Activity, true)
-                                    : "View " + UILabel.ActivityLabel(ActivityType.VolunteerOpportunity, true);
-                            }
-                            @RenderViewActivitiesButton(isInEditMode, browseActivitiesOrOpportunitiesUrl, buttonText)
-                        </div>
-                        <div style="margin-top:10px" class="icons-div">
-                            @if (!Model.Account.IsClaimed)
-                            {
-                                <span id="model-claim" class="icon-span" data-modal="modal-claim-profile" onclick="resetClaimForm()">
-                                    <i class="icon icon-left s7-door-lock"></i>
+                    @if (!Model.SessionName.IsNotEmpty() && ViewData["sessionName"] == null)
+                    {
+                        <div class="padding-v-20 text-center" id="activityHeaderbtns">
+                            <div>
+                                @{
+                                    var displayActivity = Model.ParticipationObject?.ActivityType != ActivityType.VolunteerOpportunity;
+                                    var browseActivitiesOrOpportunitiesUrl = displayActivity ? Model.Account.BrowseUrl : Model.Account.BrowseVolunteerOpportunitiesUrl;
+                                    var buttonText = displayActivity
+                                        ? "View All " + UILabel.ActivityLabel(ActivityType.Activity, true)
+                                        : "View " + UILabel.ActivityLabel(ActivityType.VolunteerOpportunity, true);
+                                }
+                                @RenderViewActivitiesButton(isInEditMode, browseActivitiesOrOpportunitiesUrl, buttonText)
+                            </div>
+                            <div style="margin-top:10px" class="icons-div">
+                                @if (!Model.Account.IsClaimed)
+                                {
+                                    <span id="model-claim" class="icon-span" data-modal="modal-claim-profile" onclick="resetClaimForm()">
+                                        <i class="icon icon-left s7-door-lock"></i>
+                                    </span>
+                                }
+                                <span class="icon-span @(!isFollowing ? "" : "hide")" id="btn-follow" style="cursor:pointer" onclick="follow()" title="Follow">
+                                    <svg viewBox="0 0 24 24">
+                                        <use href="~/Assets/img/user-add.svg#svg"></use>
+                                    </svg>
                                 </span>
-                            }
-                            <span class="icon-span @(!isFollowing ? "" : "hide")" id="btn-follow" style="cursor:pointer" onclick="follow()" title="Follow">
-                                <svg viewBox="0 0 24 24">
-                                    <use href="~/Assets/img/user-add.svg#svg"></use>
-                                </svg>
-                            </span>
-                            <span class="icon-span @(!isFollowing ? "hide" : "")" id="btn-unfollow" style="cursor:pointer" onclick="unfollow()" title="Unfollow">
-                                <svg viewBox="0 0 24 24">
-                                    <use href="~/Assets/img/user-remove.svg#svg"></use>
-                                </svg>
-                            </span>
-                            <span class="icon-span btn-share" style="cursor:pointer" title="Share">
-                                <svg viewBox="0 0 24 24">
-                                    <use href="~/Assets/img/share.svg#svg"></use>
-                                </svg>
-                            </span>
-                            <span class="icon-span" title="Contact" style="cursor:pointer" data-modal="modal-contact-provider" onclick="@(Model.Account.ContactFormId.HasValue ? "location.href='" + Model.Account.ContactUrl + "'" : "resetContactProviderForm()")">
-                                <svg viewBox="0 0 20 20">
-                                    <use href="~/Assets/img/envelope.svg#svg"></use>
-                                </svg>
-                            </span>
+                                <span class="icon-span @(!isFollowing ? "hide" : "")" id="btn-unfollow" style="cursor:pointer" onclick="unfollow()" title="Unfollow">
+                                    <svg viewBox="0 0 24 24">
+                                        <use href="~/Assets/img/user-remove.svg#svg"></use>
+                                    </svg>
+                                </span>
+                                <span class="icon-span btn-share" style="cursor:pointer" title="Share">
+                                    <svg viewBox="0 0 24 24">
+                                        <use href="~/Assets/img/share.svg#svg"></use>
+                                    </svg>
+                                </span>
+                                <span class="icon-span" title="Contact" style="cursor:pointer" data-modal="modal-contact-provider" onclick="@(Model.Account.ContactFormId.HasValue ? "location.href='" + Model.Account.ContactUrl + "'" : "resetContactProviderForm()")">
+                                    <svg viewBox="0 0 20 20">
+                                        <use href="~/Assets/img/envelope.svg#svg"></use>
+                                    </svg>
+                                </span>
+                            </div>
                         </div>
-                    </div>
+                    }
                     <div class="clearfix"></div>
                 </div>
             }
@@ -278,7 +281,7 @@
                         @{
                             Html.RenderPartial("~/Views/Shared/Registration/_ShareLinks.cshtml", new ViewDataDictionary
                             {
-                                {"ShareObject", shareObject}, {"ShareUrl", shareUrl},
+                                { "ShareObject", shareObject }, { "ShareUrl", shareUrl }
                             });
                         }
                     </div>
