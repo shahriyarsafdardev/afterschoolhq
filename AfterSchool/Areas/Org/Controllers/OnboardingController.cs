@@ -593,7 +593,12 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (msgs.HasNoErrors())
+            {
+                if (currentUser.Email.Contains("@afterschoolhq.com"))
+                    return RedirectToAction("Done");
+                
                 return RedirectToAction("Done", new {accounttype = account.AccountTypeId.ToString()});
+            }
 
             ViewBag.IsIsypAccount = AccountService.CheckIfIsypAccount(account, msgs);
             ViewBag.Messages = msgs;
