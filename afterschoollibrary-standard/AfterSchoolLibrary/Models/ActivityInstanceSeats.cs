@@ -23,7 +23,9 @@ namespace AfterSchoolLibrary.Models
             dq.SelectParameters.Add(ObjectMap["NumberOfSeats"], "SumOfSeats", $"ISNULL(SUM({DatabaseQuery.FunctionReplaceValue}), 0)");
 
             dq.Criterias.Add(ObjectMap["ActivityInstanceId"], ActivityInstanceId);
-            dq.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], Registration.ReservedStatuses, DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"],
+                Registration.ReservedStatuses.Select(x => (int)x).ToList(),
+                DatabaseCriteriaOperatorEnum.In);
             dq.Joins.Add(RegistrantActivity.ObjectMap["ID"], ObjectMap["RegistrantActivityId"], DatabaseJoinTypeEnum.InnerJoin);
 
             var dt = dq.Select(msgs);
