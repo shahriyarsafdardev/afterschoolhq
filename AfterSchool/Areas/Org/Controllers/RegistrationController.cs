@@ -519,10 +519,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             ParticipationObject = act.GetParticipationObject(msgs),
                             Registration = selectedRegistration,
                         },
-                        null,
-                        currentUser,
-                        true,
-                        msgs);
+                        null, currentUser, true, null, msgs);
 
                 // LOG:  CurrentWebUser added Registrant RegistrantName to Activity ActivityName
                 SessionVariables.WebSession.LogActivity(

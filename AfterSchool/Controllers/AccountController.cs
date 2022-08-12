@@ -364,10 +364,10 @@ namespace AfterSchool.Controllers
                             );
                         }
 
-                        if (amsgs.HasNoErrors()) 
+                        if (amsgs.HasNoErrors())
                             registrant = RegistrationCommon.GetOrCreateParentOrGuardianRegistrant(account, user, amsgs, adc);
 
-                        if (amsgs.HasNoErrors()) 
+                        if (amsgs.HasNoErrors())
                             RegistrationCommon.AddOrUpdateStandardAnswers(qvms, registrant, user, amsgs, adc);
                     },
                     smsgs =>
@@ -1555,7 +1555,7 @@ namespace AfterSchool.Controllers
         {
             if (!RegistrationCommon.IsValidLogin(AccountType.Registrant))
                 return Logout(Request.Url.ToString(), true);
-            
+
             var results = CheckRedirect(true);
             if (results.IsNotEmpty()) return Redirect(results);
 
@@ -1763,9 +1763,7 @@ namespace AfterSchool.Controllers
                         SubscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault(),
                         SelectedDates = selectedDates,
                     },
-                    true,
-                    SessionVariables.CurrentUser,
-                    msgs);
+                    true, SessionVariables.CurrentUser, null, msgs);
 
             if (msgs.HasNoErrors())
                 return RedirectToAction("thankyou", new {id = registration.Uid});
@@ -2189,7 +2187,8 @@ namespace AfterSchool.Controllers
             var registrant = registration.GetRegistrant(msgs);
             var masterRegistrant = registrant.GetMasterRegistrant(msgs);
             var isSelfRegistered = masterRegistrant.WebUserId == currentUser.ID;
-            var result = new ThankYouResultAssembler().AssembleThankYouResult(participationObject, account, currentUser, registrant, isSelfRegistered, assignmentType, msgs);
+            var result = new ThankYouResultAssembler().AssembleThankYouResult(participationObject, account, currentUser, registrant, isSelfRegistered,
+                assignmentType, msgs);
             return View(result);
         }
 

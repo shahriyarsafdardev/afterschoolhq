@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web.Mvc;
 using AfterSchool;
 using AfterSchoolLibrary.FeatureFlag;
+using AfterSchoolLibrary.Integrations;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
@@ -18,7 +19,7 @@ using Owin;
 
 namespace AfterSchool
 {
-    public partial class Startup
+    public class Startup
     {
         private readonly IConfigurationRoot configurationRoot;
 
@@ -60,27 +61,49 @@ namespace AfterSchool
             RecurringJob.AddOrUpdate(() => AccountService.PreparePayouts(null, null), Cron.Daily(3, 00));
         }
 
-        public void ConfigureServices(IServiceCollection services)
+        private void ConfigureServices(IServiceCollection services)
         {
-            services.AddTransient(provider => new DatabaseCredentials(
-                configurationRoot.GetValue<string>("SqlServer:ServerName"),
-                configurationRoot.GetValue<string>("SqlServer:DatabaseName"),
-                configurationRoot.GetValue<string>("SqlServer:UserName"),
-                configurationRoot.GetValue<string>("SqlServer:Password")));
-            services.AddTransient<IFeatureFlagRepository, FeatureFlagRepository>();
+            SetConfigurationValues(services, configurationRoot);
+            SetDependencyInjection(services);
 
             services.AddControllersAsServices(typeof(Startup).Assembly.GetExportedTypes()
                 .Where(t => !t.IsAbstract && !t.IsGenericTypeDefinition)
                 .Where(t => typeof(IController).IsAssignableFrom(t)
                             || t.Name.EndsWith("Controller", StringComparison.OrdinalIgnoreCase)));
+        }
 
+        private static void SetConfigurationValues(IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddTransient(provider => new DatabaseCredentials(
+                configuration.GetValue<string>("SqlServer:ServerName"),
+                configuration.GetValue<string>("SqlServer:DatabaseName"),
+                configuration.GetValue<string>("SqlServer:UserName"),
+                configuration.GetValue<string>("SqlServer:Password")));
+            services.AddTransient(provider => new SterlingCredentials(
+                configuration.GetValue<string>("Sterling:Endpoint"),
+                configuration.GetValue<string>("Sterling:ClientId"),
+                configuration.GetValue<string>("Sterling:ClientSecret"),
+                configuration.GetValue<string>("Sterling:PackageId")));
             services.AddTransient<IInfluxSettings>(provider => new InfluxSettings(
-                configurationRoot.GetValue<string>("InfluxDB:Hostname"),
-                configurationRoot.GetValue<string>("InfluxDB:OrgName"),
-                configurationRoot.GetValue<string>("InfluxDB:BucketName"),
-                configurationRoot.GetValue<string>("InfluxDB:ApiToken")));
+                configuration.GetValue<string>("InfluxDB:Hostname"),
+                configuration.GetValue<string>("InfluxDB:OrgName"),
+                configuration.GetValue<string>("InfluxDB:BucketName"),
+                configuration.GetValue<string>("InfluxDB:ApiToken")));
+        }
+
+        private static void SetDependencyInjection(IServiceCollection services)
+        {
+            services.AddTransient<IFeatureFlagRepository, FeatureFlagRepository>();
+            services.AddTransient<IBackgroundCheckWorkflow, BackgroundCheckWorkflow>();
+            services.AddTransient<IJsonSerializer, JsonSerializer>();
+            services.AddTransient<ISterlingBearerTokenQuery, SterlingBearerTokenQuery>();
+            services.AddTransient<ISterlingCreateCandidateQuery, SterlingCreateCandidateQuery>();
+            services.AddTransient<ISterlingCreateScreeningQuery, SterlingCreateScreeningQuery>();
             services.AddTransient<IInfluxLogger, InfluxLogger>();
+            services.AddTransient<IWebUserRepository, WebUserRepository>();
+
             DependencyInjectionConfig.ConfigureServices(services);
+            AfterSchoolLibrary.DependencyInjectionConfig.ConfigureServices(services);
         }
     }
 }
