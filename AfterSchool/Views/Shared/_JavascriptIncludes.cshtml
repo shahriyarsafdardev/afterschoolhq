@@ -1,4 +1,4 @@
-﻿
+﻿@using Utilities = AfterSchoolLibrary.Helpers.Utilities
 <script src="/assets/lib/jquery/jquery.min.js" type="text/javascript"></script>
 <script src="/assets/lib/jquery.nanoscroller/javascripts/jquery.nanoscroller.min.js" type="text/javascript"></script>
 <script src="/assets/js/main.js?v=1.0" type="text/javascript"></script>
@@ -36,26 +36,23 @@
 
 <script src="/assets/js/main-mods.js?v=1.0.16" type="text/javascript"></script>
 
-@if (AfterSchoolLibrary.Helpers.Utilities.IsProduction && (SessionVariables.CurrentAccount.IsEmpty() || SessionVariables.CurrentAccount.AccountTypeId != AccountType.AfterSchool))
+@if (Utilities.IsSmartlookEnabled(SessionVariables.CurrentAccount, SessionVariables.CurrentUser, SessionVariables.OriginalLoggedInUser))
 {
-<script>
-        @if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentAccount.IsNotEmpty())
-        {
-            @:smartlook('identify', '@SessionVariables.CurrentUser.Uid', {
-            @:    "name": "@SessionVariables.CurrentUser.DisplayName",
-            @:    "email": "@SessionVariables.CurrentUser.Email",
-            @:    "userType": "@SessionVariables.AccountUserType.ToString()",
-            @:    "accountType": "@SessionVariables.CurrentAccount.AccountTypeId.ToString()",
-            @:    "account": "@SessionVariables.CurrentAccount.Name"
-            @:    });
-        }
-</script>
+    <script>
+        smartlook('identify', '@SessionVariables.CurrentUser.Uid', {
+            "name": "@SessionVariables.CurrentUser.DisplayName",
+            "email": "@SessionVariables.CurrentUser.Email",
+            "userType": "@SessionVariables.AccountUserType.ToString()",
+            "accountType": "@SessionVariables.CurrentAccount.AccountTypeId.ToString()",
+            "account": "@SessionVariables.CurrentAccount.Name"
+        });
+    </script>
 }
 
 <script type="text/javascript">
 
     //.. timezones
-    var appTimezones = {
+    let appTimezones = {
         'America/New_York' : 'Eastern - EST',
         'America/Chicago': 'Central - CST',
         'America/Denver': 'Mountain - MST',
@@ -71,7 +68,7 @@
         return ((key >= 48 && key <= 57) || // Allow number line
             (key >= 96 && key <= 105) // Allow number pad
         );
-    };
+    }
 
     function isModifierKey(event)  {
         const key = event.keyCode;
@@ -83,14 +80,14 @@
                 (event.ctrlKey === true || event.metaKey === true) &&
                 (key === 65 || key === 67 || key === 86 || key === 88 || key === 90)
             )
-    };
+    }
 
     function enforceFormat (event)  {
         // Input must be of a valid number format or a modifier key, and not longer than ten digits
         if (!isNumericInput(event) && !isModifierKey(event)) {
             event.preventDefault();
         }
-    };
+    }
 
     function formatToPhone(event)  {
         // if (isModifierKey(event)) { return; }
@@ -103,7 +100,7 @@
         if (input.length > 6) { target.value = `(${zip}) ${middle} ${last}`; } //(xxx) xxx xxxx
         else if (input.length > 3) { target.value = `(${zip}) ${middle}`; }
         else if (input.length > 0) { target.value = `(${zip}`; }
-    };
+    }
 
     // #endregion: phone number validation
 

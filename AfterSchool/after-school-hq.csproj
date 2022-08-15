@@ -2350,7 +2350,7 @@
     <Content Include="Views\Shared\_LoginReg.cshtml" />
     <Content Include="Views\Shared\_RegCreateAccount.cshtml" />
     <Content Include="Views\Shared\_OrgTitle.cshtml" />
-    <Content Include="Views\Shared\_FullStory.cshtml" />
+    <Content Include="Views\Shared\_Smartlook.cshtml" />
     <Content Include="Views\Services\SetGender.cshtml" />
     <Content Include="Views\Services\SetGrade.cshtml" />
     <Content Include="Views\Services\SetAge.cshtml" />
