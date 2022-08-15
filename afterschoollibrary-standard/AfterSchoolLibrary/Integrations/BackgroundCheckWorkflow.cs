@@ -1,11 +1,13 @@
+using System;
 using System.Threading.Tasks;
 using AfterSchoolLibrary.Models;
+using BasicLibrary;
 
 namespace AfterSchoolLibrary.Integrations
 {
     public interface IBackgroundCheckWorkflow
     {
-        Task<BackgroundCheckRequestResult> RequestBackgroundCheck(Registrant registrant);
+        Task<BackgroundCheckRequestResult> RequestBackgroundCheck(Registrant registrant, SystemMessages messages);
     }
 
     public class BackgroundCheckWorkflow : IBackgroundCheckWorkflow
@@ -24,24 +26,26 @@ namespace AfterSchoolLibrary.Integrations
             this.createScreeningQuery = createScreeningQuery;
         }
 
-        public async Task<BackgroundCheckRequestResult> RequestBackgroundCheck(Registrant registrant)
+        public async Task<BackgroundCheckRequestResult> RequestBackgroundCheck(Registrant registrant, SystemMessages messages)
         {
-            var token = await tokenQuery.GetAsync(credentials);
-            var candidateId = await createCandidateQuery.CreateAsync(credentials, token.Token, registrant);
-            var inviteLink = await createScreeningQuery.CreateAsync(credentials, token.Token, candidateId);
-
-            return new BackgroundCheckRequestResult
+            try
             {
-                IsSuccessful = true,
-                InviteLink = inviteLink,
-            };
+                var token = await tokenQuery.GetAsync(credentials);
+                var candidateId = await createCandidateQuery.CreateAsync(credentials, token.Token, registrant);
+                var backgroundCheckUrl = await createScreeningQuery.CreateAsync(credentials, token.Token, candidateId);
+                return new BackgroundCheckRequestResult {BackgroundCheckUrl = backgroundCheckUrl};
+            }
+            catch (Exception ex)
+            {
+                messages.Add(new SystemMessage(ex.Message, MessageType.ApiError));
+                return new BackgroundCheckRequestResult {BackgroundCheckUrl = null};
+            }
         }
     }
 
     public class BackgroundCheckRequestResult
     {
-        public bool IsSuccessful { get; set; }
-        public string InviteLink { get; set; }
+        public string BackgroundCheckUrl { get; set; }
     }
 
     public class SterlingCredentials

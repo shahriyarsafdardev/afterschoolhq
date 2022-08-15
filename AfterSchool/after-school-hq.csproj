@@ -2257,7 +2257,6 @@
     <Content Include="Views\VolunteerRegistration\AddEmergencyContacts.cshtml" />
     <Content Include="Views\VolunteerRegistration\AddHomeAddress.cshtml" />
     <Content Include="Views\VolunteerRegistration\GetStarted.cshtml" />
-    <Content Include="Views\VolunteerRegistration\RegisterActivity.cshtml" />
     <Content Include="Views\VolunteerRegistration\Register.cshtml" />
     <Content Include="Views\VolunteerRegistration\Select.cshtml" />
     <Content Include="Views\VolunteerRegistration\ThankYou.cshtml" />

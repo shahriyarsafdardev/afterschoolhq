@@ -13,8 +13,8 @@ namespace AfterSchool.Assemblers
         public Account RegistrationStartPageAccount { get; set; }
         public Registrant Registrant { get; set; }
         public SystemMessages Messages { get; set; }
-        public bool RequiresBackgroundCheck { get; set; }
-        public bool UserIsApproved { get; set; }
+        public bool BackgroundCheckIsEnabled { get; set; }
+        public bool UserHasHadApprovedBackgroundCheck { get; set; }
     }
 
     public class VolunteerRegisterAssembler
@@ -36,8 +36,8 @@ namespace AfterSchool.Assemblers
                 RegistrationStartPageAccount = registrationStartPageAccount,
                 Registrant = registrant,
                 Messages = messages,
-                RequiresBackgroundCheck = featureFlagRepository.IsEnabled("background-check"),
-                UserIsApproved = false,
+                BackgroundCheckIsEnabled = featureFlagRepository.IsEnabled("background-check"),
+                UserHasHadApprovedBackgroundCheck = false,
             };
         }
     }

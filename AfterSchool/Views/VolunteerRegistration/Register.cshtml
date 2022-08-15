@@ -40,21 +40,35 @@
     <div class="col-md-12">
         <div class="panel">
             <div class="panel-body">
-                <h2 class="text-center reg-instructions">
-                    Confirm Registration
-                </h2>
-                @if (Model.UserIsApproved)
+                @if (Model.BackgroundCheckIsEnabled)
                 {
-                    <p class="register-instructions">
-                        You have already been approved to volunteer.<br/>
-                        Please e-sign below to complete registration.
-                    </p>
+                    <h2 class="text-center reg-instructions">
+                        Confirm Registration
+                    </h2>
+                    if (Model.UserHasHadApprovedBackgroundCheck)
+                    {
+                        <p class="register-instructions">
+                            You have already been approved to volunteer.<br/>
+                            Please e-sign below to complete registration.
+                        </p>
+                    }
+                    else
+                    {
+                        <p class="register-instructions">
+                            Once you complete registration, we will collect the information needed to complete your background check. You will receive an email letting you know the results of this review.
+                        </p>
+                    }
                 }
                 else
                 {
-                    <p class="register-instructions">
-                        Once you complete registration, we will collect the information needed to complete your background check. You will receive an email letting you know the results of this review.
-                    </p>
+                    <div class="text-center reg-instructions">
+                        <p>
+                            <strong>Step 3 of 3: Finalize Registration</strong>
+                        </p>
+                    </div>
+                    <h3 class="text-center reg-instructions">
+                        You must e-sign to finalize registration
+                    </h3>
                 }
                 <form class="form-horizontal" id="register-form" method="post" action="@Url.Action("register", "VolunteerRegistration")" enctype="multipart/form-data">
                     @foreach (var group in groups)
@@ -74,15 +88,7 @@
                     <div class="row padding-v-20">
                         <div class="col-md-6 col-md-offset-3">
                             <button type="submit" id="btn-register" class="btn btn-register-primary btn-lg">
-                                @if (Model.UserIsApproved)
-                                {
-                                    <span>Complete Registration</span>
-                                }
-                                else
-                                {
-                                    <span>Sign and Continue</span>
-                                }
-                                <span> &raquo;</span>
+                                Complete Registration &raquo;
                             </button>
                         </div>
                     </div>
