@@ -4,6 +4,7 @@ using System.Configuration;
 using System.IO;
 using System.Net.Mail;
 using System.Web;
+using AfterSchoolLibrary.Models;
 using Amazon;
 using BasicLibrary;
 using Newtonsoft.Json;
@@ -233,6 +234,16 @@ namespace AfterSchoolLibrary.Helpers
                 data.AddRange(JsonConvert.DeserializeObject<List<KeyValuePair>>(s)); //For json array
 
             return data;
+        }
+
+        public static bool IsSmartlookDefined(Account currentAccount, WebUser originalLoggedInUser)
+        {
+            return IsProduction && originalLoggedInUser.IsEmpty() && (currentAccount.IsEmpty() || currentAccount.AccountTypeId != AccountType.AfterSchool);
+        }
+
+        public static bool IsSmartlookIdentifyEnabled(Account currentAccount, WebUser currentUser, WebUser originalLoggedInUser)
+        {
+            return IsProduction && currentAccount.IsNotEmpty() && currentAccount.AccountTypeId != AccountType.AfterSchool && currentUser.IsNotEmpty() && originalLoggedInUser.IsEmpty();
         }
     }
 
