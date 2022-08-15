@@ -500,7 +500,7 @@ namespace AfterSchool.Controllers
                 if (CurrentRegistrantHasAlreadySubmitted(registration.CompletionStatusId))
                     return new RedirectResult(SessionVariables.RegistrationStartPageAccount.HomePageUrl);
 
-                var backgroundCheckUrl = await BackgroundCheckUrl(msgs, currentRegistrant);
+                var backgroundCheckUrl = await CheckIfBackgroundCheckIsEnabledAndRequestUrl(msgs, currentRegistrant);
 
                 if (msgs.HasNoErrors())
                     ProcessRegistration(currentRegistrant, participationObject, registration, backgroundCheckUrl, msgs);
@@ -581,7 +581,7 @@ namespace AfterSchool.Controllers
                 if (CurrentRegistrantHasAlreadySubmitted(registration.CompletionStatusId))
                     return RedirectToAction("Select");
 
-                var backgroundCheckUrl = await BackgroundCheckUrl(msgs, currentRegistrant);
+                var backgroundCheckUrl = await CheckIfBackgroundCheckIsEnabledAndRequestUrl(msgs, currentRegistrant);
 
                 if (msgs.HasNoErrors())
                     ProcessRegistration(currentRegistrant, participationObject, registration, backgroundCheckUrl, msgs);
@@ -593,7 +593,7 @@ namespace AfterSchool.Controllers
             return AssembleResultAndGoToRegisterView(participationObject, msgs, qvms, currentRegistrant);
         }
 
-        private async Task<string> BackgroundCheckUrl(SystemMessages msgs, Registrant currentRegistrant)
+        private async Task<string> CheckIfBackgroundCheckIsEnabledAndRequestUrl(SystemMessages msgs, Registrant currentRegistrant)
         {
             if (msgs.HasErrors() || !featureFlagRepository.IsEnabled("background-check")) return null;
             var backgroundCheckResult = await backgroundCheckWorkflow.RequestBackgroundCheck(currentRegistrant, msgs);
