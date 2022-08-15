@@ -15,6 +15,11 @@ namespace AfterSchoolLibrary.Helpers
 {
     public class Utilities
     {
+        private const string Production = "Production";
+        private const string Staging = "Staging";
+        private const string Qa = "QA";
+        private const string Local = "Local";
+
         public static string[] FullTextSearchWordsToIgnore =
         {
             "an", "and", "as", "at", "be", "by", "do", "for", "from", "if", "in", "is", "it", "of", "on", "or", "so",
@@ -24,25 +29,36 @@ namespace AfterSchoolLibrary.Helpers
 
         public static int ImageUploadMaxBytes => 1024 * 1024 * 4;
 
-        public static string SurveyBaseUrl
+        public static string SurveyBaseUrl => Environment switch
+        {
+            Production => "app.afterschoolhq.com",
+            Staging => "app-staging.afterschoolhq.com",
+            Qa => "app-staging.afterschoolhq.com",
+            _ => "http://localhost:54849",
+        };
+
+        public static string Environment
         {
             get
             {
-                if (IsStaging)
-                    return "app-staging.afterschoolhq.com";
-                if (IsProduction)
-                    return "app.afterschoolhq.com";
-                return "http://localhost:54849";
+                var environment = ConfigurationManager.AppSettings["NET_ENV"];
+                switch (environment)
+                {
+                    case Production:
+                    case Staging:
+                    case Qa:
+                        return environment;
+                    default:
+                        return Local;
+                }
             }
         }
 
-        public static string Environment => IsLocalHost ? "Local" : ConfigurationManager.AppSettings["NET_ENV"];
+        public static bool IsProduction => Environment == Production;
 
-        public static bool IsProduction => ConfigurationManager.AppSettings["NET_ENV"] == "Production";
+        public static bool IsStaging => Environment == Staging;
 
-        public static bool IsStaging => ConfigurationManager.AppSettings["NET_ENV"] == "Staging";
-
-        public static bool IsLocalHost => !IsProduction && !IsStaging;
+        public static bool IsLocalHost => Environment == Local;
 
         public static string RollbarAccessToken => ConfigurationManager.AppSettings["Rollbar.AccessToken"];
 
@@ -136,9 +152,7 @@ namespace AfterSchoolLibrary.Helpers
 
         public static string GetRollbarEnvironment()
         {
-            if (IsProduction) return "production";
-            if (IsStaging) return "staging";
-            return "local";
+            return Environment.ToLower();
         }
 
         public static string ShortBaseUrl()
