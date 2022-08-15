@@ -1,5 +1,5 @@
 ﻿@using Utilities = AfterSchoolLibrary.Helpers.Utilities
-@if (Utilities.IsSmartlookEnabled(SessionVariables.CurrentAccount, SessionVariables.CurrentUser, SessionVariables.OriginalLoggedInUser))
+@if (Utilities.IsSmartlookDefined(SessionVariables.CurrentAccount, SessionVariables.OriginalLoggedInUser))
 {
     <script type='text/javascript'>
         window.smartlook || (function (d) {

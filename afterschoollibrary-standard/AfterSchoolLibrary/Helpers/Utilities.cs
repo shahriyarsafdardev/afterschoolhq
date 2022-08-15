@@ -236,7 +236,12 @@ namespace AfterSchoolLibrary.Helpers
             return data;
         }
 
-        public static bool IsSmartlookEnabled(Account currentAccount, WebUser currentUser, WebUser originalLoggedInUser)
+        public static bool IsSmartlookDefined(Account currentAccount, WebUser originalLoggedInUser)
+        {
+            return IsProduction && originalLoggedInUser.IsEmpty() && (currentAccount.IsEmpty() || currentAccount.AccountTypeId != AccountType.AfterSchool);
+        }
+
+        public static bool IsSmartlookIdentifyEnabled(Account currentAccount, WebUser currentUser, WebUser originalLoggedInUser)
         {
             return IsProduction && currentAccount.IsNotEmpty() && currentAccount.AccountTypeId != AccountType.AfterSchool && currentUser.IsNotEmpty() && originalLoggedInUser.IsEmpty();
         }
