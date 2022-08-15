@@ -38,7 +38,7 @@ namespace AfterSchoolLibrary.Integrations
             var response = await httpClient.ExecuteAsync(request);
 
             if (response.StatusCode != 200)
-                throw new Exception($"Sterling login request failed with status code {response.StatusCode}; body: {response.Body}");
+                throw new Exception($"Sterling token request failed with status code {response.StatusCode}; body: {response.Body}");
 
             var responseBody = jsonSerializer.Deserialize<SterlingTokenResponse>(response.Body);
             return new SterlingToken

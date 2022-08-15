@@ -1642,7 +1642,8 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-        public static void CheckIfSubscriberAccountSubscriptionChanged(this Account account, bool startNewTrial, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void CheckIfSubscriberAccountSubscriptionChanged(this Account account, bool startNewTrial, WebUser loggedInUser,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             // check if package has changed
             var oldAccountPackage = account.GetActiveAccountPackage(msgs, dc);
@@ -1659,15 +1660,13 @@ namespace AfterSchoolLibrary.Services
                     loggedInUser,
                     msgs,
                     dc);
-                
+
                 if (startNewTrial)
                     newAccountPackage.UpdateTrialDaysWithStripe(
                         newAccountPackage.GetFeature(FeatureType.TrialDays, msgs, dc).Max.Value.ToInteger(),
                         msgs,
                         dc);
             }
-
-
         }
 
         public static List<PaymentMethod> GetAllStripePaymentMethods(this Account account, StripeAccountType stripeAccountType, SystemMessages msgs = null)
@@ -4380,7 +4379,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static void ProcessRegistrationWithoutPayment(CheckoutObject checkoutObject, bool sendConfirmationEmail,
-            WebUser loggedInUser, string inviteLink, SystemMessages msgs = null, DatabaseConnection dc = null)
+            WebUser loggedInUser, string backgroundCheckUrl, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
             (
@@ -4409,7 +4408,7 @@ namespace AfterSchoolLibrary.Services
                     msgs.AddRange(smsgs);
 
                     if (sendConfirmationEmail)
-                        checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, inviteLink, msgs, dc);
+                        checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, backgroundCheckUrl, msgs, dc);
                 },
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                 onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
