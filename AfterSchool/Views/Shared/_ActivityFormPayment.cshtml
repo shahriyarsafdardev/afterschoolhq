@@ -334,14 +334,21 @@
                     </span>
                 </p>
                 <div>
-                    <div class="am-checkbox">
-                        <input type="checkbox"
-                               name="isparentpricepostpay"
-                               id="isparentpricepostpay"
-                               value="1"
-                               @(postPayPlan.IsNotEmpty() && postPayPlan.IsConvenienceFeeTakenOutOfCost ? "checked=\"checked\"" : "")/>
-                        <label for="isparentpricepostpay">Price is the amount the parent pays</label>
-                    </div>
+                    @if (postPayPlan.IsEmpty() || postPayPlan.IsConvenienceFeeTakenOutOfCost)
+                    {
+                        <input type="hidden" name="isparentpricepostpay" id="isparentpricepostpay" value="1" />
+                    }
+                    else
+                    {
+                        <div class="am-checkbox">
+                            <input type="checkbox"
+                                   name="isparentpricepostpay"
+                                   id="isparentpricepostpay"
+                                   value="1"
+                                   @(postPayPlan.IsNotEmpty() && postPayPlan.IsConvenienceFeeTakenOutOfCost ? "checked=\"checked\"" : "")/>
+                            <label for="isparentpricepostpay">Price is the amount the parent pays</label>
+                        </div>
+                    }
                 </div>
             </div>
             <div class="clearfix"></div>
