@@ -145,7 +145,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     WebUserService.DisconnectCleverIdentity(SessionVariables.CurrentUser, msgs);
             }
 
-            SetTempMessage(msgs);
+            SetTempMessages(msgs);
             return RedirectToAction("edit");
         }
     }

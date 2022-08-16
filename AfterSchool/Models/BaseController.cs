@@ -306,7 +306,7 @@ namespace AfterSchool.Models
                 msgs.AddRange((SystemMessages) TempData["msgs"]);
         }
 
-        internal void SetTempMessage(SystemMessages msgs)
+        internal void SetTempMessages(SystemMessages msgs)
         {
             TempData["msgs"] = msgs;
         }
@@ -361,7 +361,7 @@ namespace AfterSchool.Models
         public void LoadTempMsgAndLogErrors(SystemMessages msgs = null)
         {
             // store temp msgs
-            SetTempMessage(msgs);
+            SetTempMessages(msgs);
 
             if (msgs.HasErrors())
                 AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(msgs); // log all error msgs 

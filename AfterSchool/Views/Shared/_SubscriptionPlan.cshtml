@@ -59,10 +59,17 @@
                     </span>
                 </p>
                 <div>
-                    <div class="am-checkbox">
-                        <input type="checkbox" name="isparentpricesubscription" id="isparentpricesubscription" value="1" @(subscriptionPlan.IsNotEmpty() && subscriptionPlan.IsConvenienceFeeTakenOutOfCost ? "checked=\"checked\"" : "") />
-                        <label for="isparentpricesubscription">Price is the amount the parent pays</label>
-                    </div>
+                    @if (subscriptionPlan.IsEmpty() || subscriptionPlan.IsConvenienceFeeTakenOutOfCost)
+                    {
+                        <input type="hidden" name="isparentpricesubscription" id="isparentpricesubscription" value="1" />
+                    }
+                    else
+                    {
+                        <div class="am-checkbox">
+                            <input type="checkbox" name="isparentpricesubscription" id="isparentpricesubscription" value="1" @(subscriptionPlan.IsNotEmpty() && subscriptionPlan.IsConvenienceFeeTakenOutOfCost ? "checked=\"checked\"" : "")/>
+                            <label for="isparentpricesubscription">Price is the amount the parent pays</label>
+                        </div>
+                    }
                 </div>
             </div>
             <div class="clearfix"></div>

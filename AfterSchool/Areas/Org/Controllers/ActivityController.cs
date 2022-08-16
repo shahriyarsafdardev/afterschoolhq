@@ -610,7 +610,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, SessionVariables.AccountUserType, currentUserIsActivityLeader);
             ViewBag.IsFullScreen = isNewActivity;
             ViewBag.Messages = msgs;
-            SetTempMessage(msgs);
+            SetTempMessages(msgs);
 
             if (isFromActivityHome)
                 return Redirect(activity.ShortHomePageUrl);
@@ -729,7 +729,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Unpublish(string id, bool isFromActivityHome = false)
+        public ActionResult Unpublish(string id, string redirectUrl, bool isFromActivityHome = false)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -770,6 +770,12 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (isFromActivityHome)
                 return Redirect(activity.ShortHomePageUrl);
+
+            if (redirectUrl.IsNotEmpty())
+            {
+                SetTempMessages(msgs);
+                return Redirect(redirectUrl);
+            }
 
             return View("publishdetail", activity);
         }
@@ -1416,8 +1422,11 @@ namespace AfterSchool.Areas.Org.Controllers
                 {"cutoffhours", cutoffhours},
                 {"isContinuousEnrollmentEnabled", isContinuousEnrollmentEnabled.IsNotEmpty() && isContinuousEnrollmentEnabled.ToBoolean()},
                 {"activitylocationtype", activityLocationTypeId},
+                {"isparentpricecost", true},
             };
+            
             var isNew = Request[IsNewRequest] == "1";
+            
             if (isNew && activityLocationTypeId == (int) ActivityLocationType.Physical && activity.IsEmpty())
             {
                 var location = currentAccount.GetDefaultLocation();
@@ -2239,6 +2248,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+            HandleTempMessages(msgs);
             var result = GatherDataForAndAssembleEditCostResult(activity, msgs, currentAccount, SessionVariables.CurrentUser, Request[IsNewRequest]);
             return View(result);
         }

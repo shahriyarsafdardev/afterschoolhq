@@ -906,7 +906,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             ViewBag.Messages = msgs;
-            SetTempMessage(msgs);
+            SetTempMessages(msgs);
 
             return RedirectToAction("FormEdit",
                 new {id = questionToDelete.FormId, qg = questionToDelete.FormQuestionGroupId});
@@ -953,7 +953,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             ViewBag.Messages = msgs;
-            SetTempMessage(msgs);
+            SetTempMessages(msgs);
 
             return RedirectToAction("FormEdit", new {id = sectionToDelete.FormId, qg = ""});
         }

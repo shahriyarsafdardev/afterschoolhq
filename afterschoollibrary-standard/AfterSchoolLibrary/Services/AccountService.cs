@@ -2674,6 +2674,7 @@ namespace AfterSchoolLibrary.Services
                 AgeEnd = profile?.AgeEnd,
                 IsContinuousEnrollment = false,
                 ActivityLocationTypeId = ActivityLocationType.Physical,
+                IsConvenienceFeeTakenOutOfCost = true,
             };
         }
 
