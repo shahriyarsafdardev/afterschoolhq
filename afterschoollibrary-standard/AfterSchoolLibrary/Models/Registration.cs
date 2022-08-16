@@ -750,17 +750,19 @@ namespace AfterSchoolLibrary.Models
             if (hasRegStatus)
             {
                 regStatusJoin = "inner join ActivityInstance ai on a.ActivityScheduleId = ai.ActivityScheduleId";
+                var firstDateOfWeek = DateTime.UtcNow.FirstDateOfWeek().Date;
+                var lastDateOfWeek = firstDateOfWeek.AddDays(7);
                 switch (regStatus)
                 {
                     case RegistrationStatus.Past:
-                        regStatusWhere = $"ai.EndDateTime < '{DateTime.UtcNow.LastDateOfWeek()}'";
+                        regStatusWhere = $"ai.EndDateTime < '{firstDateOfWeek}'";
                         break;
                     case RegistrationStatus.Current:
                         regStatusWhere =
-                            $"ai.StartDateTime <= '{DateTime.UtcNow.FirstDateOfWeek()}' and ai.EndDateTime >= '{DateTime.UtcNow.LastDateOfWeek()}'";
+                            $"ai.StartDateTime < '{lastDateOfWeek}' and ai.EndDateTime >= '{firstDateOfWeek}'";
                         break;
                     case RegistrationStatus.Future:
-                        regStatusWhere = $"ai.StartDateTime > '{DateTime.UtcNow.FirstDateOfWeek()}'";
+                        regStatusWhere = $"ai.StartDateTime >= '{lastDateOfWeek}'";
                         break;
                 }
             }
