@@ -161,8 +161,8 @@ Public Module Extensions
         Return aList.OrderBy(Function(x) Math.Abs((bDate - x).Ticks)).First()
     End Function
     <Extension>
-    Public Function ClosestPastDate(ByVal aList As IEnumerable(Of DateTime), ByVal bDate As DateTime, ByVal comparisonDate As DateTime) As DateTime
-        Return aList.Where(Function(x) bDate.IsBefore(comparisonDate)).OrderBy(Function(x) Math.Abs((bDate - x).Ticks)).First()
+    Public Function ClosestPastDate(ByVal aList As IEnumerable(Of DateTime), ByVal comparisonDate As DateTime) As DateTime
+        Return aList.Where(Function(x) x.IsBefore(comparisonDate)).OrderBy(Function(x) Math.Abs((comparisonDate - x).Ticks)).First()
     End Function
     <Extension>
     Public Function ClosestFutureDate(ByVal aList As IEnumerable(Of DateTime), ByVal bDate As DateTime, ByVal comparisonDate As DateTime) As DateTime

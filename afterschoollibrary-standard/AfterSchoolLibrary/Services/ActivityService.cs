@@ -1952,7 +1952,7 @@ namespace AfterSchoolLibrary.Services
             }
 
             // check if most recent activityinstance has an attendance
-            var closestActivityInstance = activity.GetClosestPastActivityInstanceToDate(DateTime.UtcNow, msgs, dc);
+            var closestActivityInstance = activity.GetClosestPastActivityInstanceToDate(msgs, dc);
             if (closestActivityInstance.IsEmpty())
                 return null;
 
@@ -2009,7 +2009,7 @@ namespace AfterSchoolLibrary.Services
             return newAttendanceRegistrants;
         }
 
-        public static ActivityInstance GetClosestPastActivityInstanceToDate(this Activity activity, DateTime date,
+        public static ActivityInstance GetClosestPastActivityInstanceToDate(this Activity activity,
             SystemMessages msgs, DatabaseConnection dc)
         {
             var instances = activity
@@ -2017,13 +2017,12 @@ namespace AfterSchoolLibrary.Services
                 .GetInstances(msgs: msgs, dc: dc);
 
             var account = activity.GetAccount(msgs, dc);
-            var dateInTimeZone = account.ConvertToAccountTimeZone(date);
             var nowInTimeZone = account.ConvertToAccountTimeZone(DateTime.UtcNow);
             var closestPastDate = instances
                 .Select(y => y.StartDateTime.Value)
-                .ClosestPastDate(dateInTimeZone, nowInTimeZone);
+                .ClosestPastDate(nowInTimeZone);
 
-            return instances.Where(x => x.StartDateTime.Value == closestPastDate).First();
+            return instances.First(x => x.StartDateTime.Value == closestPastDate);
         }
 
         public static ActivityInstance GetClosestActivityInstanceToDate(this Activity activity, DateTime date,
