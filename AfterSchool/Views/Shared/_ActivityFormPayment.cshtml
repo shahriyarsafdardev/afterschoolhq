@@ -20,6 +20,8 @@
 
     var showAllowPaymentPlans = accountPackage.HasFeature(FeatureType.AllowPaymentPlans);
     var showAllowPaymentPlansPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowPaymentPlans, SessionVariables.AccountPackage);
+    
+    var cannotEdit = Model.IsPublished;
 }
 
 <div class="panel panel-default panel-small-padding">
@@ -30,27 +32,30 @@
     <div class="panel-body">
         @if (Model.IsPublished)
         {
-            <p>Cost cannot be changed while activity is published and accepting registrations.</p>
-            <a href="@Url.Action("PublishDetail", "Activity", new {id = Model.Uid.ToString()})">Unpublish your activity here first. </a>
-        }
-        else
-        {
             <div class="form-group">
-                <label class="col-sm-3 control-label" for="do-parents-pay">
-                    Do parents pay? <span class="text-danger">*</span>
-                </label>
+                <label class="col-sm-3 control-label"></label>
                 <div class="col-sm-9">
-                    <div class="am-radio inline">
-                        <input type="radio" class="form-control" name="doparentspay" id="do-parents-pay-no" required @(Model.IsFree ? "checked=\"checked\"" : "")/>
-                        <label for="do-parents-pay-no">No</label>
-                    </div>
-                    <div class="am-radio inline">
-                        <input type="radio" class="form-control" name="doparentspay" id="do-parents-pay-yes" required/>
-                        <label for="do-parents-pay-yes">Yes</label>
-                    </div>
+                    <p>Cost cannot be changed while activity is published and accepting registrations.</p>
+                    <a href="@Url.Action("unpublish", "activity", new {id = Model.Uid, redirectUrl = Request.Url.ToString()})">Click here to unpublish your activity.</a>
                 </div>
             </div>
         }
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="do-parents-pay">
+                Do parents pay? <span class="text-danger">*</span>
+            </label>
+            <div class="col-sm-9">
+                <div class="am-radio inline">
+                    <input type="radio" class="form-control" name="doparentspay" id="do-parents-pay-no" required @(Model.IsFree ? "checked=\"checked\"" : "")/>
+                    <label for="do-parents-pay-no">No</label>
+                </div>
+                <div class="am-radio inline">
+                    <input type="radio" class="form-control" name="doparentspay" id="do-parents-pay-yes" required/>
+                    <label for="do-parents-pay-yes">Yes</label>
+                </div>
+            </div>
+        </div>
 
 
         <div id="tuition-costs" class="hide">
@@ -70,12 +75,21 @@
                             <em>The total amount you will receive is <span class="text-bold">$<span id="amounttoprovider">0.00</span></span></em>.
                         </span>
                     </p>
-                    <div>
-                        <div class="am-checkbox">
-                            <input type="checkbox" name="isparentpricecost" id="isparentpricecost" value="1" @(Model.IsConvenienceFeeTakenOutOfCost ? "checked=\"checked\"" : "")/>
-                            <label for="isparentpricecost">Price is the amount the parent pays</label>
+                    
+                    @if (!Model.IsConvenienceFeeTakenOutOfCost)
+                    {
+                        <div>
+                            <div class="am-checkbox">
+                                <input type="checkbox" name="isparentpricecost" id="isparentpricecost" value="1" @(Model.IsConvenienceFeeTakenOutOfCost ? "checked=\"checked\"" : "")/>
+                                <label for="isparentpricecost">Price is the amount the parent pays</label>
+                            </div>
                         </div>
-                    </div>
+                    }
+                    else
+                    {
+                        <input type="hidden" name="isparentpricecost" id="isparentpricecost" value="1" />
+                    }
+                    
                 </div>
             </div>
 
@@ -189,10 +203,20 @@
                     </span>
                 </p>
                 <div>
-                    <div class="am-checkbox">
-                        <input type="checkbox" name="isparentpricepaymentplan" id="isparentpricepaymentplan" value="1" @(paymentPlan.IsNotEmpty() && paymentPlan.IsConvenienceFeeTakenOutOfCost ? "checked=\"checked\"" : "")/>
-                        <label for="isparentpricepaymentplan">Price is the amount the parent pays</label>
-                    </div>
+                    @if (paymentPlan.IsEmpty() || paymentPlan.IsConvenienceFeeTakenOutOfCost)
+                    {
+                        <input type="hidden" name="isparentpricepaymentplan" id="isparentpricepaymentplan" value="1" />
+                    }
+                    else
+                    {
+                        <div class="am-checkbox">
+                            <input type="checkbox" 
+                                   name="isparentpricepaymentplan" 
+                                   id="isparentpricepaymentplan" 
+                                   value="1" @(paymentPlan.IsNotEmpty() && paymentPlan.IsConvenienceFeeTakenOutOfCost ? "checked=\"checked\"" : "")/>
+                            <label for="isparentpricepaymentplan">Price is the amount the parent pays</label>
+                        </div>
+                    }
                 </div>
             </div>
             <div class="col-md-3"></div>
@@ -310,14 +334,21 @@
                     </span>
                 </p>
                 <div>
-                    <div class="am-checkbox">
-                        <input type="checkbox"
-                               name="isparentpricepostpay"
-                               id="isparentpricepostpay"
-                               value="1"
-                               @(postPayPlan.IsNotEmpty() && postPayPlan.IsConvenienceFeeTakenOutOfCost ? "checked=\"checked\"" : "")/>
-                        <label for="isparentpricepostpay">Price is the amount the parent pays</label>
-                    </div>
+                    @if (postPayPlan.IsEmpty() || postPayPlan.IsConvenienceFeeTakenOutOfCost)
+                    {
+                        <input type="hidden" name="isparentpricepostpay" id="isparentpricepostpay" value="1" />
+                    }
+                    else
+                    {
+                        <div class="am-checkbox">
+                            <input type="checkbox"
+                                   name="isparentpricepostpay"
+                                   id="isparentpricepostpay"
+                                   value="1"
+                                   @(postPayPlan.IsNotEmpty() && postPayPlan.IsConvenienceFeeTakenOutOfCost ? "checked=\"checked\"" : "")/>
+                            <label for="isparentpricepostpay">Price is the amount the parent pays</label>
+                        </div>
+                    }
                 </div>
             </div>
             <div class="clearfix"></div>
@@ -376,6 +407,12 @@
     var paymentplanTimeOut = null;
     var subscriptionTimeOut = null;
 
+    function disableAll() {
+        $('input,textarea').each(function (){
+            $(this).prop('disabled', true);
+        });
+    }
+    
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         setSubscriptionPlanSection();
         setPaymentPlanSection();
@@ -499,6 +536,11 @@
         $('#subscriptionperiodstartmonthday').change(function () {
             toggleSubscriptionPeriodWeek();
         });
+                
+        @if (cannotEdit)
+        {   
+            @:disableAll();
+        }
     });
 
     function toggleSubscriptionPeriodWeek() {
@@ -612,7 +654,7 @@
 
         var takenOutOfCost = 0;
 
-        if (takenOutOfCostChk.is(':checked')) {
+        if ((takenOutOfCostChk.is('[type="checkbox"]') && takenOutOfCostChk.is(':checked')) || (takenOutOfCostChk.is('[type="hidden"]') && takenOutOfCostChk.val() == "1")) {
             takenOutOfCost = 1;
         }
 
