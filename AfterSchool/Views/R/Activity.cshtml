@@ -71,7 +71,7 @@
         { "ParticipationObject", Model },
         { "CleverSsoEnabled", cleverSsoEnabled },
         { "InsideActDetails", Model.Name },
-        { "sessionName", session?.Name.Trim() }
+        { "sessionName", session?.Name }
     });
 }
 
@@ -79,7 +79,7 @@
 
 @{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, accountProfile), new ViewDataDictionary
    {
-       { "sessionName", session?.Name }
+       { "sessionName", session?.Name.Replace(" ","") }
    }); }
 
 <div>

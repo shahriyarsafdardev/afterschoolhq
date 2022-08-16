@@ -74,7 +74,7 @@
     
     #activityHeaderbtns > div > .btn-view-all
     {
-        width: 245px;
+        width: 270px;
     }
 </style>
 
@@ -251,6 +251,16 @@
                                         <use href="~/Assets/img/envelope.svg#svg"></use>
                                     </svg>
                                 </span>
+                            </div>
+                        </div>
+                    }
+                    @if (ViewData["sessionName"] != null)
+                    {
+                        <div class="padding-v-20 padding-h-20 text-center" id="activityHeaderbtns">
+                            <div>
+                                <button onclick="location.href='@Model.Account.ShortHomePageUrl/session/@ViewData["sessionName"]/browse'" class="btn btn-header-action btn-view-all" type="button">
+                                    View Session Activities
+                                </button>
                             </div>
                         </div>
                     }

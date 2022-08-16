@@ -243,7 +243,7 @@
         </a>
         @if (ViewData["sessionName"].IsNotEmpty())
         {
-            <a href="@registrationStartPage.HomePageUrl/session/@ViewData["sessionName"]">
+            <a href="@registrationStartPage.HomePageUrl/session/@ViewData["sessionName"].ToString().Replace(" ","")/browse">
                 <span class="reg-login-bar-title-item notranslate" style="@(ViewData["InsideActDetails"] != null ? "color:#b2b2b4" : "")"> > @ViewData["sessionName"]</span>
             </a>
         }
