@@ -4,6 +4,7 @@
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
     var accountPackage = (AccountPackage)ViewBag.AccountPackage;
     var value = Model.UniqueName;
+    var packages = (List<Package>)ViewBag.Packages;
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.ID.ToString());}
@@ -88,14 +89,42 @@
                             <div class="col-sm-9">
                                 @{ 
                                     Html.RenderPartial("~/Views/Shared/_SwitchButton.cshtml", false, new ViewDataDictionary
-                                   {
-                                       { "checkboxname", "startnewtrial" },
-                                       { "checkboxid", "startnewtrial" },
-                                       { "disabled", false },
-                                   }); 
+                                    {
+                                        { "checkboxname", "startnewtrial" },
+                                        { "checkboxid", "startnewtrial" },
+                                        { "disabled", false },
+                                    }); 
                                 }
                             </div>
                         </div>
+                        <div class="form-group hide">
+                            <label class="col-sm-3 control-label">Packages</label>
+                            <div class="col-sm-9">
+                                <select name="newpackage" class="form-control">
+                                    @foreach (var package in packages.OrderBy(x => x.Price))
+                                    {
+                                        <option value="@package.ID.Value" @(accountPackage.PackageId == package.ID ? "selected=\"selected\"" : "")>
+                                            @package.Name
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group hide">
+                            <label class="col-sm-3 control-label">Billing Period</label>
+                            <div class="col-sm-9">
+                                <select name="billingperiod" class="form-control">
+                                    @foreach (var periodType in Enum.GetValues(typeof(BillingPeriodType)).Cast<BillingPeriodType>().Where(x => x != BillingPeriodType.NotSet))
+                                    {
+                                        <option value="@((int)periodType)"
+                                                @(accountPackage.BillingPeriodTypeId == periodType ? "selected=\"selected\"" : "")>
+                                            @periodType.ToString().SplitByUpperCase()
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        
                     }
 
                     <div class="form-group">

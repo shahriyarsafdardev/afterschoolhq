@@ -43,7 +43,9 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Edit(string id)
         {
-            ViewBag.Messages = new SystemMessages();
+            var msgs = new SystemMessages();
+            ViewBag.Packages = Package.LoadByIsActive(true, msgs);
+            ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.IsFullScreen = GetIsFullScreen();
             return View(SessionVariables.CurrentAccount);
@@ -51,7 +53,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [HttpPost]
         public ActionResult Edit(string id, string name, string email, string phone, string uniqueName,
-            string timeZone, string stripeCustomerId, string stripeSubscriptionId, string startnewtrial)
+            string timeZone, string stripeCustomerId, string stripeSubscriptionId, string startnewtrial, string newpackage, string billingperiod)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
@@ -104,6 +106,17 @@ namespace AfterSchool.Areas.Org.Controllers
                         {
                             currentAccount.CheckIfSubscriberAccountHasPaymentMethod(null, amsgs, adc);
                             currentAccount.CheckIfSubscriberAccountSubscriptionChanged(startnewtrial.IsBoolean(), currentUser, amsgs, adc);
+                        }
+
+                        if (newpackage.IsNumber() && newpackage.ToInteger() != accountPackage.PackageId)
+                        {
+                            currentAccount.SwitchPackages(
+                                newPackage: Package.Load(newpackage.ToInteger(), msgs),
+                                billingPeriodTypeId: billingperiod.ToEnum<BillingPeriodType>(),
+                                stripeSubscriptionId: accountPackage.StripeSubscriptionId,
+                                loggedInUser: currentUser,
+                                msgs: amsgs,
+                                dc: adc);
                         }
                         
                         // ..update profile title if account name has been changed 
