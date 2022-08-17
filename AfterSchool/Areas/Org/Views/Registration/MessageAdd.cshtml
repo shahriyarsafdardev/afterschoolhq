@@ -11,6 +11,7 @@
     var recipients = UILabel.RegistrantLabel(isVolunteers ? ActivityType.VolunteerOpportunity : ActivityType.Activity, true);
     var sendButtonText = $"Send Message to {recipients}";
     var sendMessagesUrl = isVolunteers ? Url.Action("messages", "registration", new { volunteers = "true" }) : Url.Action("messages", "registration");
+    var activityLabel = isVolunteers ? @UILabel.ActivityLabel(ActivityType.VolunteerOpportunity, true) : @UILabel.ActivityLabel(plural:true);
 }
 
 @{ Html.RenderPartial("OrgAccountHeader"); }
@@ -39,7 +40,7 @@
                 }
 
                 <div class="form-group">
-                    <label class="col-sm-3 control-label">@UILabel.ActivityLabel(plural: true)</label>
+                    <label class="col-sm-3 control-label">@activityLabel</label>
                     <div class="col-sm-6">
                         @if (selectedActivities.Any() || selectedGroups.Any())
                         {
@@ -47,7 +48,7 @@
                         }
                         else
                         {
-                            <input type="text" readonly="readonly" class="form-control" value="All @UILabel.ActivityLabel(plural: true)"/>
+                            <input type="text" readonly="readonly" class="form-control" value="All @activityLabel"/>
                         }
                     </div>
                 </div>
@@ -85,9 +86,23 @@
                     <div class="col-sm-6">
                         <select name="subject" id="subject" class="form-control" required>
                             <option value="">Select a Message Reason...</option>
-                            @foreach (var reason in Enum.GetValues(typeof(ActivityMessageReason)).Cast<ActivityMessageReason>().Except(ActivityMessageReason.NotSet.AsList()).OrderBy(x => x.ToString()))
-                            {
-                                <option value="@reason.ToString().SplitByUpperCase()">@reason.ToString().SplitByUpperCase()</option>
+                            @{
+                                IEnumerable<ActivityMessageReason> reasons = Enum.GetValues(typeof(ActivityMessageReason)).Cast<ActivityMessageReason>().Except(ActivityMessageReason.NotSet.AsList()).OrderBy(x => x.ToString());
+                                if (isVolunteers)
+                                {
+                                    // Allowed Messages Reasons for Volunteers
+                                    var volunteerReasons = new List<ActivityMessageReason>
+                                    {
+                                        ActivityMessageReason.ActivityCancellationNotice,
+                                        ActivityMessageReason.GeneralUpdate,
+                                        ActivityMessageReason.UrgentUpdate
+                                    };
+                                    reasons = reasons.Where(x => x.In(volunteerReasons));
+                                }
+                                foreach (var reason in reasons)
+                                {
+                                    <option value="@reason.ToString().SplitByUpperCase()">@reason.ToString().SplitByUpperCase()</option>
+                                }
                             }
                         </select>
                     </div>
