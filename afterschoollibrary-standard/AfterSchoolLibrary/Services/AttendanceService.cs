@@ -1,16 +1,17 @@
-﻿using AfterSchoolLibrary.Models;
-using BasicLibrary;
-using BasicLibrary.DataAccess;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using AfterSchoolLibrary.Models;
+using BasicLibrary;
+using BasicLibrary.DataAccess;
+using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchoolLibrary.Services
 {
     public static class AttendanceService
     {
-        public static void InitAttendance(this Attendance attendance, Activity activity, WebUser loggedInUser, ActivityInstance activityInstance = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void InitAttendance(this Attendance attendance, Activity activity, WebUser loggedInUser, ActivityInstance activityInstance = null,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             attendance.IsCompleted = false;
             attendance.LastModifiedDate = attendance.CreateDate = DateTime.UtcNow;
@@ -21,14 +22,13 @@ namespace AfterSchoolLibrary.Services
             {
                 attendance.ActivityInstanceId = activityInstance.ID.Value;
                 attendance.Date = activityInstance.StartDateTime;
-            }     
+            }
             else
             {
-                var closestActivityInstance = activity.GetClosestActivityInstanceToDate(DateTime.UtcNow, msgs, dc);
+                var closestActivityInstance = activity.GetClosestActivityInstance(msgs, dc);
 
                 attendance.ActivityInstanceId = closestActivityInstance.ID;
                 attendance.Date = closestActivityInstance.StartDateTime;
-             
             }
 
             msgs.AddRange(attendance.Save(dc));
@@ -36,18 +36,21 @@ namespace AfterSchoolLibrary.Services
             attendance.InitAttendanceRegistrants(activity, loggedInUser, msgs, dc);
         }
 
-        private static void InitAttendanceRegistrants(this Attendance attendance, Activity activity, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        private static void InitAttendanceRegistrants(this Attendance attendance, Activity activity, WebUser loggedInUser, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             var registrantActivities = activity.GetRegistrantActivities(msgs, dc);
 
             registrantActivities.Where(registrant => registrant.AssignmentTypeId.In(Registration.ReservedStatuses))
                 .ToList()
-                .ForEach(registrantActivity => {
+                .ForEach(registrantActivity =>
+                {
                     AttendanceRegistrantService.CreateNew(attendance.ID.Value, registrantActivity.RegistrantId.Value, loggedInUser, msgs, dc);
-            });
+                });
         }
 
-        public static void UpdateAttendance(this Attendance attendance, int activityInstanceId, List<int> attendanceRegistrantIds, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void UpdateAttendance(this Attendance attendance, int activityInstanceId, List<int> attendanceRegistrantIds, WebUser loggedInUser,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
             (
@@ -70,7 +73,7 @@ namespace AfterSchoolLibrary.Services
                     msgs.Add("Attendance saved", MessageType.Success);
                 },
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
         }
@@ -85,7 +88,8 @@ namespace AfterSchoolLibrary.Services
             return AttendanceRegistrant.LoadByAttendanceId(attendance.ID.Value, dc: dc);
         }
 
-        public static AttendanceRegistrant GetAttendanceRegistrant(this Attendance attendance, int registrantId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static AttendanceRegistrant GetAttendanceRegistrant(this Attendance attendance, int registrantId, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             return AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value, registrantId, msgs, dc).LastOrDefault();
         }
@@ -107,8 +111,5 @@ namespace AfterSchoolLibrary.Services
 
             return null;
         }
-
     }
-
-   
 }

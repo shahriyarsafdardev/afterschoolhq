@@ -113,7 +113,7 @@ namespace AfterSchoolLibrary.Services
         public static string BuildHomePageUrl(string accountUniqueName, ActivityType activityType,
             string activityUniqueName)
         {
-            var activityTypeSlug = activityType != ActivityType.VolunteerOpportunity ?  activityType.ToString().ToLower() : "opportunity";
+            var activityTypeSlug = activityType != ActivityType.VolunteerOpportunity ? activityType.ToString().ToLower() : "opportunity";
             return $"{Helpers.Utilities.BaseUrl()}/{accountUniqueName}/{activityTypeSlug}/{activityUniqueName?.ToLower()}";
         }
 
@@ -931,7 +931,7 @@ namespace AfterSchoolLibrary.Services
             if (name.IsNotEmpty())
             {
                 activity.Name = name.ToString();
-                
+
                 // would be better to know if the activity has been published at least once
                 if (activity.UniqueName.IsEmpty())
                     activity.UniqueName = GenerateUniqueName(name.ToString(), activity.ID, activity.AccountId, msgs, dc);
@@ -1952,7 +1952,7 @@ namespace AfterSchoolLibrary.Services
             }
 
             // check if most recent activityinstance has an attendance
-            var closestActivityInstance = activity.GetClosestPastActivityInstanceToDate(msgs, dc);
+            var closestActivityInstance = activity.GetClosestPastActivityInstance(msgs, dc);
             if (closestActivityInstance.IsEmpty())
                 return null;
 
@@ -2009,34 +2009,49 @@ namespace AfterSchoolLibrary.Services
             return newAttendanceRegistrants;
         }
 
-        public static ActivityInstance GetClosestPastActivityInstanceToDate(this Activity activity,
-            SystemMessages msgs, DatabaseConnection dc)
+        private static ActivityInstance GetClosestPastActivityInstance(this Activity activity, SystemMessages msgs, DatabaseConnection dc)
         {
             var instances = activity
                 .GetSchedule(msgs: msgs, dc: dc)
                 .GetInstances(msgs: msgs, dc: dc);
 
             var account = activity.GetAccount(msgs, dc);
-            var nowInTimeZone = account.ConvertToAccountTimeZone(DateTime.UtcNow);
-            var closestPastDate = instances
-                .Select(y => y.StartDateTime.Value)
-                .ClosestPastDate(nowInTimeZone);
-
-            return instances.First(x => x.StartDateTime.Value == closestPastDate);
+            return GetClosestPastActivityInstance(instances, account);
         }
 
-        public static ActivityInstance GetClosestActivityInstanceToDate(this Activity activity, DateTime date,
-            SystemMessages msgs, DatabaseConnection dc)
+        internal static ActivityInstance GetClosestPastActivityInstance(IEnumerable<ActivityInstance> instances, Account account)
+        {
+            var nowInAccountTimeZone = account.ConvertToAccountTimeZone(DateTime.UtcNow);
+
+            var closestInstancesToNow = instances
+                .Where(x => x.StartDateTime.HasValue)
+                .OrderBy(x => Math.Abs((nowInAccountTimeZone - x.StartDateTime.Value).Ticks)).ToArray();
+            if (closestInstancesToNow.Length == 0)
+                return null;
+
+            var closestPastActivity = closestInstancesToNow.FirstOrDefault(x => x.StartDateTime!.Value.IsBefore(nowInAccountTimeZone));
+
+            return closestPastActivity.IsNotEmpty() ? closestPastActivity : closestInstancesToNow.First();
+        }
+
+        public static ActivityInstance GetClosestActivityInstance(this Activity activity, SystemMessages msgs, DatabaseConnection dc)
         {
             var instances = activity
                 .GetSchedule(msgs: msgs, dc: dc)
                 .GetInstances(msgs: msgs, dc: dc);
 
-            var closestDate = instances
-                .Select(y => y.StartDateTime.Value)
-                .ClosestDate(activity.GetAccount(msgs, dc).ConvertToAccountTimeZone(date));
+            var account = activity.GetAccount(msgs, dc);
+            return GetClosestActivityInstance(instances, account);
+        }
 
-            return instances.Where(x => x.StartDateTime.Value == closestDate).First();
+        internal static ActivityInstance GetClosestActivityInstance(IEnumerable<ActivityInstance> instances, Account account)
+        {
+            var dateInAccountTimeZone = account.ConvertToAccountTimeZone(DateTime.UtcNow);
+
+            return instances
+                .Where(x => x.StartDateTime.HasValue)
+                .OrderBy(x => Math.Abs((dateInAccountTimeZone - x.StartDateTime.Value).Ticks))
+                .First();
         }
 
         public static Attendance CreateNewAttendance(this Activity activity, int? activityInstanceId,
