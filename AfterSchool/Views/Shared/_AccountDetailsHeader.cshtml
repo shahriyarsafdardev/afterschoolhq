@@ -30,9 +30,12 @@
             {
                 <a href="@Url.Action("hosts", "account")" class="hide btn btn-alt6@(actionName == "visitors" ? "-active" : "")">Schools</a>
             }
-            <a href="@Url.Action("newbilling", "account")" class="btn btn-alt6@(actionName == "newbilling" ? "-active" : "")">Packages</a>
+            <a href="@Url.Action("newbilling", "account")" class="hide btn btn-alt6@(actionName == "newbilling" ? "-active" : "")">Packages</a>
 
-            <a href="@Url.Action("billing", "account")" class="btn btn-alt6@(actionName == "billing" ? "-active" : "")">Billing</a>
+            @if (Model.StripeCustomerId.IsNotEmpty())
+            {
+                <a href="@Url.Action("billing", "account")" class="btn btn-alt6@(actionName == "billing" ? "-active" : "")">Billing</a>
+            }
 
             @if (SessionVariables.OriginalLoggedInUser.IsNotEmpty())
             {

@@ -64,6 +64,13 @@
 
                     @if (SessionVariables.OriginalLoggedInUser.IsNotEmpty())
                     {
+                        <hr />
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label"></label>
+                            <div class="col-sm-9">
+                                Admin Only
+                            </div>
+                        </div>
                         <div class="form-group">
                             <label class="col-sm-3 control-label">Stripe Customer Id</label>
                             <div class="col-sm-9">

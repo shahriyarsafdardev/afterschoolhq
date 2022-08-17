@@ -1513,7 +1513,7 @@ namespace AfterSchool.Areas.Org.Controllers
             currentAccount.CheckIfSubscriberAccountHasPaymentMethod(null, msgs);
             currentAccount.CheckIfSubscriberAccountSubscriptionChanged(false, currentUser, msgs);
 
-            return new RedirectResult(Url.Action("index", "home"));
+            return new RedirectResult(Url.Action("billing", "account"));
         }
 
         public static class PackageFeatureMapper

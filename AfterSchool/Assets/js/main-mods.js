@@ -373,7 +373,7 @@ var ActivitySetup = {
 }
 
 var AccountSetup = {
-      
+
     sendVerificationEmail: function (redirectUrl) {
 
         if (redirectUrl)
@@ -401,6 +401,19 @@ var AccountSetup = {
                 }
             }
         );
+    },
+
+    getStripeBillingLink: function (redirectUrl) {
+        $.get(
+            '/org/services/getstripebillinglink?redirectUrl=' + redirectUrl,
+            function (data) {
+                if (data && data.status == 'ok') {
+                    location.href = data.link;
+                } else {
+                    Notifications.showErrors(data.messages);
+                }
+            }
+        )
     }
 }
 

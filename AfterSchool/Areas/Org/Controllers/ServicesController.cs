@@ -610,17 +610,20 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult GetStripeBillingLink()
+        public ActionResult GetStripeBillingLink(string redirectUrl)
         {
             var msgs = new SystemMessages();
             
             if (msgs.HasNoErrors())
             {
+                if (redirectUrl.IsEmpty())
+                    redirectUrl = $"{Utilities.BaseUrl()}{Url.Action("afterstripeupdate", "account")}";
+                
                 var currentAccount = SessionVariables.CurrentAccount;
                 var stripeHelper = StripeHelper.GetStripeHelperSubscriberAccount();
                 var session = stripeHelper.GetBillingPortalSession(
                     currentAccount.StripeCustomerId, 
-                    $"{AfterSchoolLibrary.Helpers.Utilities.BaseUrl()}{Url.Action("afterstripeupdate", "account")}", 
+                    redirectUrl, 
                     msgs);
 
                 return Json(new
