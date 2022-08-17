@@ -280,6 +280,8 @@ namespace AfterSchool.Controllers
                         BackgroundJob.Enqueue(() =>
                             WebUserService.SendWelcomePurchase(user.FirstName, user.Email, account.IsAfterSchool));
 
+                        var invitingAccountName = invitingAccount?.Name ?? "";
+                        
                         //.. send support email to AHQ just to notifiy the team that a account has been created
                         BackgroundJob.Enqueue(() =>
                             EmailHelper.SendEmail(
@@ -289,7 +291,7 @@ namespace AfterSchool.Controllers
                                 $"Main Contact Name: {user.DisplayName}<br />" +
                                 $"Email: {user.Email}<br />" +
                                 $"How did you hear about us: {user.HowHearAboutUs} <br />" +
-                                $"Host Account(s): {invitingAccount?.Name}" +
+                                $"Host Account(s): {invitingAccountName}" +
                                 $"</p>",
                                 true)
                         );
