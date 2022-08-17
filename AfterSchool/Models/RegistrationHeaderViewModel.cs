@@ -6,59 +6,8 @@ namespace AfterSchool.Models
 {
     public class RegistrationHeaderViewModel
     {
-        public string Headline { get; set; }
-        public string Title { get; set; }
-        public string LogoUrl { get; set; }
-        public string HeaderUrl { get; set; }
-        public bool IsDemo { get; set; }
-        public string SessionName { get; set; }
-        public string PrimaryColor { get; set; }
-        public Account Account { get; set; }
-        public AccountProfile AccountProfile { get; set; }
-        public ParticipationObject ParticipationObject { get; set; }
-        public decimal NumberOfHoursEnrolled { get; set; }
-        public decimal NumberOfStudentsServed { get; set; }
-        public int Followers { get; set; }
-        public string NumberOfHoursEnrolledFormatted
-        {
-            get
-            {
-                if (NumberOfHoursEnrolled >= 1000000)
-                    return $"{(NumberOfHoursEnrolled / 1000000M).ToString("#.0")}M";
-                else if (NumberOfHoursEnrolled >= 1000)
-                    return $"{(NumberOfHoursEnrolled / 1000M).ToString("#.0")}k";
-
-                return $"{NumberOfHoursEnrolled.ToString()}";
-            }
-        }
-        public string NumberOfStudentsServedFormatted
-        {
-            get
-            {
-                if (NumberOfStudentsServed >= 1000000)
-                    return $"{(NumberOfStudentsServed / 100000M).ToString("#.0")}M";
-                else if (NumberOfStudentsServed >= 1000)
-                    return $"{(NumberOfStudentsServed / 1000M).ToString("#.0")}k";
-
-                return $"{NumberOfStudentsServed.ToString()}";
-            }
-        }
-        public string FollowersFormatted
-        {
-            get
-            {
-                if (Followers >= 1000000)
-                    return $"{(Followers / 1000000M).ToString("#.0")}M";
-                else if (Followers >= 1000)
-                    return $"{(Followers / 1000M).ToString("#.0")}k";
-
-                return $"{Followers.ToString()}";
-            }
-        }
-
         public RegistrationHeaderViewModel()
         {
-
         }
 
         public RegistrationHeaderViewModel(ParticipationObject participationObject, AccountProfile profile)
@@ -149,7 +98,70 @@ namespace AfterSchool.Models
             NumberOfStudentsServed = Account.GetTotalStudentsServed();
 
             if (session.IsNotEmpty())
+            {
+                Session = session;
                 SessionName = session.Name;
+            }
+        }
+
+        public RegistrationHeaderViewModel(ParticipationObject participationObject, AccountProfile profile, ParticipationObject session) : this(
+            participationObject, profile)
+        {
+            Session = session;
+        }
+
+        public string Headline { get; set; }
+        public string Title { get; set; }
+        public string LogoUrl { get; set; }
+        public string HeaderUrl { get; set; }
+        public bool IsDemo { get; set; }
+        public ParticipationObject Session { get; set; }
+        public string SessionName { get; set; }
+        public string PrimaryColor { get; set; }
+        public Account Account { get; set; }
+        public AccountProfile AccountProfile { get; set; }
+        public ParticipationObject ParticipationObject { get; set; }
+        public decimal NumberOfHoursEnrolled { get; set; }
+        public decimal NumberOfStudentsServed { get; set; }
+        public int Followers { get; set; }
+
+        public string NumberOfHoursEnrolledFormatted
+        {
+            get
+            {
+                if (NumberOfHoursEnrolled >= 1000000)
+                    return $"{(NumberOfHoursEnrolled / 1000000M).ToString("#.0")}M";
+                if (NumberOfHoursEnrolled >= 1000)
+                    return $"{(NumberOfHoursEnrolled / 1000M).ToString("#.0")}k";
+
+                return $"{NumberOfHoursEnrolled.ToString()}";
+            }
+        }
+
+        public string NumberOfStudentsServedFormatted
+        {
+            get
+            {
+                if (NumberOfStudentsServed >= 1000000)
+                    return $"{(NumberOfStudentsServed / 100000M).ToString("#.0")}M";
+                if (NumberOfStudentsServed >= 1000)
+                    return $"{(NumberOfStudentsServed / 1000M).ToString("#.0")}k";
+
+                return $"{NumberOfStudentsServed.ToString()}";
+            }
+        }
+
+        public string FollowersFormatted
+        {
+            get
+            {
+                if (Followers >= 1000000)
+                    return $"{(Followers / 1000000M).ToString("#.0")}M";
+                if (Followers >= 1000)
+                    return $"{(Followers / 1000M).ToString("#.0")}k";
+
+                return $"{Followers.ToString()}";
+            }
         }
     }
 }

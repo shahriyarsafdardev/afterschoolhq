@@ -6,15 +6,12 @@
     var logoUrl = "";
     var isFollowing = false;
     var midColSpan = 7;
-    var showFollow = false;
-    var showUnfollow = true;
     var hideButtons = false;
     var shareUrl = Model.Account.ShortHomePageUrl;
     var shareObject = Model.Account.Name;
     var isInEditMode = currentUser.IsNotEmpty() && currentUser.HasAccessTo(Model.Account) && Request["edit"] == "1";
-    var session = (ParticipationObject)ViewData["session"];
-    
-    
+    var session = Model.Session;
+
     if (Model.ParticipationObject.IsNotEmpty())
     {
         shareUrl = Model.ParticipationObject.GetHomePageUrl();
@@ -34,9 +31,6 @@
     if (currentUser.IsNotEmpty())
     {
         isFollowing = currentUser.IsSubscribedTo(Model.Account);
-
-        showFollow = !isFollowing;
-        showUnfollow = isFollowing;
     }
 
     if (ViewData["hidebuttons"] != null)
@@ -47,7 +41,6 @@
     if (hideButtons)
     {
         midColSpan = 10;
-        hideButtons = true;
     }
 
     if (Model.AccountProfile.IsEmpty())
@@ -84,10 +77,10 @@
 {
     if (currentUser.IsNotEmpty() && currentUser.HasAccessTo(Model.Account) && Request["edit"] == "1")
     {
-        var redirectUrl = $"{Url.Action("style", "account", new { area = "org", isfullscreen = 1, returnurl = Request.Url })}#{anchor}";
+        var redirectUrl = $"{Url.Action("style", "account", new {area = "org", isfullscreen = 1, returnurl = Request.Url})}#{anchor}";
 
         <span>
-            <a href="@Url.Action("switch", "logout", new { id = Model.Account.Uid, redirectUrl })#@anchor"
+            <a href="@Url.Action("switch", "logout", new {id = Model.Account.Uid, redirectUrl})#@anchor"
                class="btn btn-alt7 btn-sm">
                 Edit &raquo;
             </a>
@@ -100,7 +93,7 @@
     @if (!Model.Account.HasAccountProfile() && currentUser.IsNotEmpty() && currentUser.HasAccessTo(Model.Account))
     {
         <div class="profile-edit-bar text-center">
-            <a href="@Url.Action("style", "account", new { area = "org", isfullscreen = 1, returnurl = Request.Url })"
+            <a href="@Url.Action("style", "account", new {area = "org", isfullscreen = 1, returnurl = Request.Url})"
                class="btn btn-alt7 btn-lg btn-block">
                 Customize your Profile &raquo;
             </a>
@@ -293,7 +286,7 @@
                         @{
                             Html.RenderPartial("~/Views/Shared/Registration/_ShareLinks.cshtml", new ViewDataDictionary
                             {
-                                { "ShareObject", shareObject }, { "ShareUrl", shareUrl }
+                                {"ShareObject", shareObject}, {"ShareUrl", shareUrl},
                             });
                         }
                     </div>

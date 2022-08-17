@@ -4,13 +4,13 @@
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = Model.Name;
 
-    var account = (Account)ViewBag.Account;
-    var msgs = (SystemMessages)ViewBag.Messages;
-    var session = (ParticipationObject)ViewBag.Session;
+    var account = (Account) ViewBag.Account;
+    var msgs = (SystemMessages) ViewBag.Messages;
+    var session = (ParticipationObject) ViewBag.Session;
     var showLocation = false;
     var hidePreciseLocation = false;
-    var accountProfile = (AccountProfile)ViewBag.AccountProfile;
-    var canPublishActivity = (bool)ViewBag.CanPublishActivity;
+    var accountProfile = (AccountProfile) ViewBag.AccountProfile;
+    var canPublishActivity = (bool) ViewBag.CanPublishActivity;
     var instruction = "";
     var currentAccount = SessionVariables.CurrentAccount;
     var currentUser = SessionVariables.CurrentUser;
@@ -66,21 +66,18 @@
 @{
     Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", account, new ViewDataDictionary
     {
-        { "LoginReturnUrl", Model.GetHomePageUrl() },
-        { "CanPublishActivity", ViewBag.CanPublishActivity },
-        { "ParticipationObject", Model },
-        { "CleverSsoEnabled", cleverSsoEnabled },
-        { "InsideActDetails", Model.Name },
-        { "session", session }
+        {"LoginReturnUrl", Model.GetHomePageUrl()},
+        {"CanPublishActivity", ViewBag.CanPublishActivity},
+        {"ParticipationObject", Model},
+        {"CleverSsoEnabled", cleverSsoEnabled},
+        {"InsideActDetails", Model.Name},
+        {"session", session},
     });
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, accountProfile) , new ViewDataDictionary
-   {
-       {"session", session }
-   }); }
+@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, accountProfile, session)); }
 
 <div>
 <div class="col-lg-10 col-lg-offset-1 col-md-12 participation-object participation-object-detail"
@@ -92,7 +89,7 @@
      hasseatsremaining="@Model.HasSeatsAvailable().ToString().ToLower()"
      days="@ParticipationObjectUI.PrintDaysOfWeekList(Model)"
      location="@(Model.Location?.FormatAddress(false))"
-     gender="@((int)Model.GenderRestriction)"
+     gender="@((int) Model.GenderRestriction)"
      name="@Model.Name">
 
 <div class="panel panel-alt6">
@@ -102,7 +99,7 @@
             <h3 class="text-center">
                 @{
                     var hasSchedule = Model.Schedule.IsNotEmpty();
-                    var displayAgeGradeRestrictions = !Model.ActivityType.HasValue || Model.ActivityType.Value.NotIn(new[] { ActivityType.PermissionSlip, ActivityType.FieldTrip, ActivityType.VolunteerOpportunity });
+                    var displayAgeGradeRestrictions = !Model.ActivityType.HasValue || Model.ActivityType.Value.NotIn(new[] {ActivityType.PermissionSlip, ActivityType.FieldTrip, ActivityType.VolunteerOpportunity});
                     var displayGenderRestrictions = Model.GenderRestriction != GenderRestrictionType.None;
                 }
                 @if (hasSchedule)
@@ -134,10 +131,10 @@
                     Model,
                     new ViewDataDictionary
                     {
-                        { "condensed", true },
-                        { "canRegisterFor", ViewBag.CanRegisterFor },
-                        { "session", session },
-                        { "accountprofile", ViewBag.AccountProfile }
+                        {"condensed", true},
+                        {"canRegisterFor", ViewBag.CanRegisterFor},
+                        {"session", session},
+                        {"accountprofile", ViewBag.AccountProfile},
                     }
                     );
             }
@@ -165,7 +162,7 @@
             }
 
             <div class="activity-detail-block">
-                @{ Html.RenderPartial("ParticipationObject/_PaymentInfo", Model, new ViewDataDictionary { { "CurrentAccount", currentAccount } }); }
+                @{ Html.RenderPartial("ParticipationObject/_PaymentInfo", Model, new ViewDataDictionary {{"CurrentAccount", currentAccount}}); }
 
                 @if (Model.IsActivityGroup() && Model.GetActivityGroup().IsInviteOnly)
                 {
@@ -315,7 +312,7 @@
         {
             <button class="btn btn-default btn-activity-footer btn-share" type="button">Share</button>
             <a class="btn btn-default btn-activity-footer"
-               href="@Url.Action("editsetup", "activity", new { id = Model.Uid, area = "org" })">
+               href="@Url.Action("editsetup", "activity", new {id = Model.Uid, area = "org"})">
                 Edit Activity
             </a>
         }
@@ -323,13 +320,13 @@
         {
             <button class="btn btn-default btn-activity-footer" disabled type="button">Share</button>
             <a class="btn btn-default btn-activity-footer"
-               href="@Url.Action("editsetup", "activity", new { id = Model.Uid, area = "org" })">
+               href="@Url.Action("editsetup", "activity", new {id = Model.Uid, area = "org"})">
                 Return to Edit
             </a>
             if (Model.IsPublished)
             {
                 <a class="btn btn-default btn-activity-footer"
-                   href="@Url.Action("unpublish", "activity", new { id = Model.Uid, isFromActivityHome = true, area = "org" })">
+                   href="@Url.Action("unpublish", "activity", new {id = Model.Uid, isFromActivityHome = true, area = "org"})">
                     Unpublish
                 </a>
             }
@@ -339,7 +336,7 @@
                 {
                     <a class="btn btn-default btn-activity-footer"
                        id="publish-activity"
-                       href="@Url.Action("publish", "activity", new { id = Model.Uid, isFromActivityHome = true, area = "org" })">
+                       href="@Url.Action("publish", "activity", new {id = Model.Uid, isFromActivityHome = true, area = "org"})">
                         Publish
                     </a>
                 }
@@ -347,14 +344,14 @@
                 {
                     <a
                         class="btn btn-default btn-activity-footer"
-                        href="@Url.Action("requesttopublish", "activity", new { id = Model.Uid, isFromActivityHome = true, area = "org" })">
+                        href="@Url.Action("requesttopublish", "activity", new {id = Model.Uid, isFromActivityHome = true, area = "org"})">
                         Request to Publish
                     </a>
                 }
             }
         }
     </div>
-    Html.RenderPartial("~/Views/Shared/_GettingStartedModal.cshtml", Model.OwnerAccount, new ViewDataDictionary { { "ActivityUid", Model.Uid }, { "IsActivityFree", Model.IsFree } });
+    Html.RenderPartial("~/Views/Shared/_GettingStartedModal.cshtml", Model.OwnerAccount, new ViewDataDictionary {{"ActivityUid", Model.Uid}, {"IsActivityFree", Model.IsFree}});
 }
 
 @if (session.IsNotEmpty())
