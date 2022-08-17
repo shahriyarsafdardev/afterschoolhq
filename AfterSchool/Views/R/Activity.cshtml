@@ -71,12 +71,13 @@
         {"ParticipationObject", Model},
         {"CleverSsoEnabled", cleverSsoEnabled},
         {"InsideActDetails", Model.Name},
+        {"session", session},
     });
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, accountProfile)); }
+@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, accountProfile, session)); }
 
 <div>
 <div class="col-lg-10 col-lg-offset-1 col-md-12 participation-object participation-object-detail"
@@ -92,211 +93,211 @@
      name="@Model.Name">
 
 <div class="panel panel-alt6">
-    <div class="panel-heading">
-        <div class="row">
-            <div class="col-lg-8 col-md-12">
-                <h3 class="text-center">
-                    @{
-                        var hasSchedule = Model.Schedule.IsNotEmpty();
-                        var displayAgeGradeRestrictions = !Model.ActivityType.HasValue || Model.ActivityType.Value.NotIn(new[] {ActivityType.PermissionSlip, ActivityType.FieldTrip, ActivityType.VolunteerOpportunity});
-                        var displayGenderRestrictions = Model.GenderRestriction != GenderRestrictionType.None;
-                    }
-                    @if (hasSchedule)
-                    {
-                        @ParticipationObjectUI.PrintDaysOfWeekOrStartDate(Model)
-                    }
-                    @if (hasSchedule && displayAgeGradeRestrictions)
-                    {
-                        <span role="separator">&bull;</span>
-                    }
-                    @if (displayAgeGradeRestrictions)
-                    {
-                        @ParticipationObjectUI.PrintAgeGradeRestrictions(Model)
-                    }
-                    @if ((hasSchedule || displayAgeGradeRestrictions) && displayGenderRestrictions)
-                    {
-                        <span role="separator">&bull;</span>
-                    }
-                    @if (displayGenderRestrictions)
-                    {
-                        @ParticipationObjectUI.PrintGenderRestrictions(Model)
-                    }
-                </h3>
-            </div>
-            <div class="col-lg-4 col-md-12">
+<div class="panel-heading">
+    <div class="row">
+        <div class="col-lg-8 col-md-12">
+            <h3 class="text-center">
                 @{
-                    Html.RenderPartial(
-                        "~/Views/Shared/Registration/_RegisterButton.cshtml",
-                        Model,
-                        new ViewDataDictionary
-                        {
-                            {"condensed", true},
-                            {"canRegisterFor", ViewBag.CanRegisterFor},
-                            {"session", session},
-                            {"accountprofile", ViewBag.AccountProfile},
-                        }
-                        );
+                    var hasSchedule = Model.Schedule.IsNotEmpty();
+                    var displayAgeGradeRestrictions = !Model.ActivityType.HasValue || Model.ActivityType.Value.NotIn(new[] {ActivityType.PermissionSlip, ActivityType.FieldTrip, ActivityType.VolunteerOpportunity});
+                    var displayGenderRestrictions = Model.GenderRestriction != GenderRestrictionType.None;
                 }
-            </div>
+                @if (hasSchedule)
+                {
+                    @ParticipationObjectUI.PrintDaysOfWeekOrStartDate(Model)
+                }
+                @if (hasSchedule && displayAgeGradeRestrictions)
+                {
+                    <span role="separator">&bull;</span>
+                }
+                @if (displayAgeGradeRestrictions)
+                {
+                    @ParticipationObjectUI.PrintAgeGradeRestrictions(Model)
+                }
+                @if ((hasSchedule || displayAgeGradeRestrictions) && displayGenderRestrictions)
+                {
+                    <span role="separator">&bull;</span>
+                }
+                @if (displayGenderRestrictions)
+                {
+                    @ParticipationObjectUI.PrintGenderRestrictions(Model)
+                }
+            </h3>
+        </div>
+        <div class="col-lg-4 col-md-12">
+            @{
+                Html.RenderPartial(
+                    "~/Views/Shared/Registration/_RegisterButton.cshtml",
+                    Model,
+                    new ViewDataDictionary
+                    {
+                        {"condensed", true},
+                        {"canRegisterFor", ViewBag.CanRegisterFor},
+                        {"session", session},
+                        {"accountprofile", ViewBag.AccountProfile},
+                    }
+                    );
+            }
         </div>
     </div>
-    <div class="panel-body">
+</div>
+<div class="panel-body">
 
-        <div class="row">
-            <div class="col-lg-8 col-md-12">
+    <div class="row">
+        <div class="col-lg-8 col-md-12">
 
-                <div class="activity-detail-block">
-                    <h3>Description</h3>
-                    @Html.Raw(Model.Details)
-                </div>
-
+            <div class="activity-detail-block">
+                <h3>Description</h3>
+                @Html.Raw(Model.Details)
             </div>
-            <div class="col-lg-4 col-md-12">
 
-                @if (instruction.IsNotEmpty())
+        </div>
+        <div class="col-lg-4 col-md-12">
+
+            @if (instruction.IsNotEmpty())
+            {
+                <div class="activity-detail-block">
+                    <h3>@instruction</h3>
+                </div>
+            }
+
+            <div class="activity-detail-block">
+                @{ Html.RenderPartial("ParticipationObject/_PaymentInfo", Model, new ViewDataDictionary {{"CurrentAccount", currentAccount}}); }
+
+                @if (Model.IsActivityGroup() && Model.GetActivityGroup().IsInviteOnly)
                 {
                     <div class="activity-detail-block">
-                        <h3>@instruction</h3>
+                        <strong>Registration unavailable: Requires Invite to Register</strong>
+                    </div>
+                }
+
+                @if (hasSchedule || Model.StartDate.HasValue)
+                {
+                    <div class="activity-detail-block">
+                        <h3>Schedule</h3>
+
+                        @if (hasSchedule && Model.Schedule.RepeatsWeekly && !Model.Schedule.IsOngoing)
+                        {
+                            if (Model.StartDate.HasValue && (!Model.EndDate.HasValue || Model.StartDate.Value.Date != Model.EndDate.Value.Date))
+                            {
+                                <p>
+                                    Starts: <strong>@Model.StartDate.Value.ToLongDateString()</strong><br/>
+
+                                    @if (Model.EndDate.HasValue)
+                                    {
+                                        <span>
+                                            Ends: <strong>@Model.EndDate.Value.ToLongDateString()</strong>
+                                        </span>
+                                    }
+                                </p>
+                            }
+                        }
+
+                        @if (hasSchedule)
+                        {
+                            <p>
+                                @{ Html.RenderPartial("_ActivityScheduleHtml", Model.Schedule); }
+                            </p>
+                        }
+
+                        @if (Model.IsPublished && Model.CanRegisterPerClass)
+                        {
+                            <p>
+                                <a href="@Model.GetActivityDateSelectionUrl()">Select Dates to Register &raquo;</a>
+                            </p>
+                        }
                     </div>
                 }
 
                 <div class="activity-detail-block">
-                    @{ Html.RenderPartial("ParticipationObject/_PaymentInfo", Model, new ViewDataDictionary{{"CurrentAccount", currentAccount}}); }
-
-                    @if (Model.IsActivityGroup() && Model.GetActivityGroup().IsInviteOnly)
-                    {
-                        <div class="activity-detail-block">
-                            <strong>Registration unavailable: Requires Invite to Register</strong>
-                        </div>
-                    }
-
-                    @if (hasSchedule || Model.StartDate.HasValue)
-                    {
-                        <div class="activity-detail-block">
-                            <h3>Schedule</h3>
-
-                            @if (hasSchedule && Model.Schedule.RepeatsWeekly && !Model.Schedule.IsOngoing)
-                            {
-                                if (Model.StartDate.HasValue && (!Model.EndDate.HasValue || Model.StartDate.Value.Date != Model.EndDate.Value.Date))
-                                {
-                                    <p>
-                                        Starts: <strong>@Model.StartDate.Value.ToLongDateString()</strong><br/>
-
-                                        @if (Model.EndDate.HasValue)
-                                        {
-                                            <span>
-                                                Ends: <strong>@Model.EndDate.Value.ToLongDateString()</strong>
-                                            </span>
-                                        }
-                                    </p>
-                                }
-                            }
-
-                            @if (hasSchedule)
-                            {
-                                <p>
-                                    @{ Html.RenderPartial("_ActivityScheduleHtml", Model.Schedule); }
-                                </p>
-                            }
-
-                            @if (Model.IsPublished && Model.CanRegisterPerClass)
-                            {
-                                <p>
-                                    <a href="@Model.GetActivityDateSelectionUrl()">Select Dates to Register &raquo;</a>
-                                </p>
-                            }
-                        </div>
-                    }
-
-                    <div class="activity-detail-block">
-                        <h3>Contact</h3>
-                        <p>
-                            @Model.ContactName.IfEmpty(Model.OwnerAccount.Name)<br/>
-                            @if (Model.ContactPhone.IfEmpty(Model.OwnerAccount.Phone).IsNotBlank())
-                            {
-                                <span>@Model.ContactPhone.IfEmpty(Model.OwnerAccount.Phone)</span>
-                                <br/>
-                            }
-                            <a href="mailto:@Model.ContactEmail.IfEmpty(Model.OwnerAccount.Email)">Send Email</a><br/>
-                        </p>
-                    </div>
-
-                    @if (Model.RequiresParentalConsent)
-                    {
-                        <div class="activity-detail-block">
-                            <strong>Requires Parental Consent</strong>
-                        </div>
-                    }
-
-                    @if (Model.OwnerAccount.IsNotEmpty() && Model.OwnerAccount.TimeZone.IsNotEmpty())
-                    {
-                        <div class="activity-detail-block">
-                            <strong>All times are in @Model.OwnerAccount.TimeZone</strong>
-                        </div>
-                    }
+                    <h3>Contact</h3>
+                    <p>
+                        @Model.ContactName.IfEmpty(Model.OwnerAccount.Name)<br/>
+                        @if (Model.ContactPhone.IfEmpty(Model.OwnerAccount.Phone).IsNotBlank())
+                        {
+                            <span>@Model.ContactPhone.IfEmpty(Model.OwnerAccount.Phone)</span>
+                            <br/>
+                        }
+                        <a href="mailto:@Model.ContactEmail.IfEmpty(Model.OwnerAccount.Email)">Send Email</a><br/>
+                    </p>
                 </div>
 
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="margin-b-20">
-                &nbsp;
-            </div>
-
-            <hr/>
-        </div>
-
-        @if (showLocation)
-        {
-            <div class="margin-t-20">
-                <div class="col-md-12">
+                @if (Model.RequiresParentalConsent)
+                {
                     <div class="activity-detail-block">
-                        <div class="row">
-                            <div>
-                                <h3>Location</h3>
-                            </div>
-                            <div>
-                                @if (hidePreciseLocation)
+                        <strong>Requires Parental Consent</strong>
+                    </div>
+                }
+
+                @if (Model.OwnerAccount.IsNotEmpty() && Model.OwnerAccount.TimeZone.IsNotEmpty())
+                {
+                    <div class="activity-detail-block">
+                        <strong>All times are in @Model.OwnerAccount.TimeZone</strong>
+                    </div>
+                }
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="margin-b-20">
+            &nbsp;
+        </div>
+
+        <hr/>
+    </div>
+
+    @if (showLocation)
+    {
+        <div class="margin-t-20">
+            <div class="col-md-12">
+                <div class="activity-detail-block">
+                    <div class="row">
+                        <div>
+                            <h3>Location</h3>
+                        </div>
+                        <div>
+                            @if (hidePreciseLocation)
+                            {
+                                <p> @Model.Location.City, @Model.Location.State @Model.Location.PostalCode @Model.Location.Country </p>
+                            }
+                            else
+                            {
+                                <p>
+                                    @ParticipationObjectUI.PrintLocation(Model)
+                                </p>
+                                if (Model.LocationDetails.IsNotEmpty())
                                 {
-                                    <p> @Model.Location.City, @Model.Location.State @Model.Location.PostalCode @Model.Location.Country </p>
+                                    @:@Html.Raw(Model.LocationDetails)
                                 }
-                                else
-                                {
-                                    <p>
-                                        @ParticipationObjectUI.PrintLocation(Model)
-                                    </p>
-                                    if (Model.LocationDetails.IsNotEmpty())
-                                    {
-                                        @:@Html.Raw(Model.LocationDetails)
-                                    }
-                                }
-                            </div>
+                            }
                         </div>
                     </div>
                 </div>
-                <div style="position: relative; margin-left: -20px; margin-right: -20px">
-                    <iframe width="100%" height="300" frameborder="0" style="border:0"
-                            src="https://www.google.com/maps/embed/v1/place?q=@Url.Encode(hidePreciseLocation ? $"{Model.Location.FormatImpreciseAddress()}" : $"{Model.Location.FormatAddressWithoutName()}")&key=@Maps.ApiKey" allowfullscreen>
-                    </iframe>
-                </div>
-
             </div>
-        }
+            <div style="position: relative; margin-left: -20px; margin-right: -20px">
+                <iframe width="100%" height="300" frameborder="0" style="border:0"
+                        src="https://www.google.com/maps/embed/v1/place?q=@Url.Encode(hidePreciseLocation ? $"{Model.Location.FormatImpreciseAddress()}" : $"{Model.Location.FormatAddressWithoutName()}")&key=@Maps.ApiKey" allowfullscreen>
+                </iframe>
+            </div>
 
-        <div class="row">
-            <div class="col-md-8 col-md-offset-2">
-                <div class="margin-v-30">
-                    @{ Html.RenderPartial("~/Views/Shared/Registration/_RegisterButton.cshtml", Model); }
-                </div>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            <div class="margin-v-30">
+                @{ Html.RenderPartial("~/Views/Shared/Registration/_RegisterButton.cshtml", Model); }
             </div>
         </div>
     </div>
-    <div class="panel-footer">
-        <p class="text-center">
-            @Html.Raw(ParticipationObjectUI.PrintRegistrationPeriod(Model))
-        </p>
-    </div>
+</div>
+<div class="panel-footer">
+    <p class="text-center">
+        @Html.Raw(ParticipationObjectUI.PrintRegistrationPeriod(Model))
+    </p>
+</div>
 </div>
 </div>
 </div>
