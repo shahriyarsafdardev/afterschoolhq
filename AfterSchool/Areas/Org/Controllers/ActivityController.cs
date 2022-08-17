@@ -109,7 +109,8 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             var totalActivityCount = GetActivityCount(q, currentAccount, isArchived, activityType, accountUserType, currentUser, activityGroup, msgs);
-            var hasArchivedActivities = isArchived || GetActivityCount(q, currentAccount, true, activityType, accountUserType, currentUser, activityGroup, msgs) > 0;
+            var hasArchivedActivities =
+                isArchived || GetActivityCount(q, currentAccount, true, activityType, accountUserType, currentUser, activityGroup, msgs) > 0;
 
             var totalPages = Math.Ceiling(totalActivityCount.ToDouble() / recordsPerPage).ToInteger();
             var finalActivities = activities.OrderBy(x => x.Name).ToList();
@@ -117,7 +118,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 TotalActivityCount: totalActivityCount, TotalPages: totalPages);
         }
 
-        private static List<Activity> GetActivities(ActivityGroup activityGroup, bool isArchived, int start, int length, Account currentAccount, 
+        private static List<Activity> GetActivities(ActivityGroup activityGroup, bool isArchived, int start, int length, Account currentAccount,
             UserType accountUserType, WebUser currentUser, string textToMatch, ActivityType activityType, SystemMessages msgs)
         {
             return activityGroup.IsNotEmpty()
@@ -131,7 +132,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             return activityGroup.IsNotEmpty()
                 ? activityGroup.GetActivityCount(ActivityType.Activity, isArchived, false, null, msgs)
-                : currentAccount.GetActivityCount(accountUserType, currentUser, q, activityType, isArchived, false, 
+                : currentAccount.GetActivityCount(accountUserType, currentUser, q, activityType, isArchived, false,
                     currentAccount.AccountTypeId == AccountType.School, msgs);
         }
 
@@ -197,10 +198,10 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add(msg, msg.ToLower().Contains("error") ? MessageType.UserError : MessageType.Success);
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var result = GatherDataForAndAssembleRegistrantsResult(activity, atype, currentAccount, currentUser, msgs);
-            
+
             if (activity.ActivityTypeId == ActivityType.VolunteerOpportunity)
                 return View("VolunteerRegistrants", result);
-            
+
             return View(result);
         }
 
@@ -212,7 +213,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (assignmentTypeAsString.IsNotEmpty())
             {
-                assignmentType = (RegistrationAssignmentType)assignmentTypeAsString.ToInteger();
+                assignmentType = (RegistrationAssignmentType) assignmentTypeAsString.ToInteger();
                 if (assignmentType == RegistrationAssignmentType.Invited)
                     registrantActivities = activity.GetRegistrantActivities(true, msgs);
             }
@@ -220,7 +221,7 @@ namespace AfterSchool.Areas.Org.Controllers
             //Review: we will bring all data to provider review but we will disable those in UI so provider will have proper idea.            
             if (registrantActivities.IsEmpty())
                 registrantActivities = activity.GetRegistrantActivities(includeInvited: true, msgs);
-            
+
             var currentUserIsActivityLeader = SessionVariables.CurrentUser.IsActivityLeader(activity, msgs);
             var accountUserType = SessionVariables.AccountUserType;
             var isReadOnlySeatStatus = activity.GetParticipationObject(msgs).IsExternalToAccount(currentAccount);
@@ -1494,7 +1495,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     var defaultForm = currentAccount.GetDefaultForm(activity, msgs);
                     var newForm = defaultForm.Copy(currentUser.ID.Value, currentAccount.ID.Value,
                         defaultForm.FormTypeId, (name + " form").MaxChars(100, "..."), msgs);
-                    
+
                     if (msgs.HasNoErrors())
                     {
                         if (values.Any(m => m.Key == "form"))
@@ -1538,7 +1539,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 activityGroup = currentAccount.GetActivityGroup(group.ToGuid(), msgs);
 
             var fullScreenExitUrl = GetFullScreenExitUrl(activity, group);
-            
+
             if (cmd == "next")
             {
                 switch (activity.ActivityTypeId)
@@ -1593,7 +1594,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var editSetupAssembler = new EditSetupAssembler();
             var fullScreenExitUrl = GetFullScreenExitUrl(activity, activityGroup?.Uid.ToString());
             var forms = currentAccount.GetForms(activity.ActivityTypeId, msgs);
-            
+
             return editSetupAssembler.AssembleEditSetupResult(activity, activityGroup, msgs, currentAccount, activeMenu, periods, activePeriod, activeForm,
                 SessionVariables.AccountPackage, SessionVariables.AccountUserType, currentUserIsActivityLeader, isNew, forms,
                 fullScreenExitUrl);
@@ -1603,14 +1604,14 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             if (groupUid.IsNotEmpty())
                 return Url.Action("Activities", "Group", new {id = groupUid});
-            
+
             if (activity.ActivityGroupId.HasValue)
             {
                 // you have to reload after a save to make sure the ActivityGroupUid is there
                 if (activity.ActivityGroupUid.IsEmpty())
                     activity = activity.Reload();
-                
-                return Url.Action("Activities", "Group", new { id = activity.ActivityGroupUid });
+
+                return Url.Action("Activities", "Group", new {id = activity.ActivityGroupUid});
             }
 
             return Url.Action("index", "activity", new {type = (int) activity.ActivityTypeId});
@@ -2650,8 +2651,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             if (msg.IsNotEmpty())
-                msgs.Add(msg,
-                    msg.Contains("error") || msg.Contains("Error") ? MessageType.UserError : MessageType.Success);
+                msgs.Add(msg, msg.Contains("error") || msg.Contains("Error") ? MessageType.UserError : MessageType.Success);
 
             int pageNumber = 1;
             int recordsPerPage = 10;
@@ -2713,11 +2713,10 @@ namespace AfterSchool.Areas.Org.Controllers
             var activityInstanceId = actinst.IsNumber() ? actinst.ToInteger() : new int?();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var attendance = activity.GetOrCreateNewAttendance(attendanceId, activityInstanceId, currentUser, msgs);
-            var activitySchedule = activity.GetSchedule(msgs);
-
             if (attendance.IsEmpty())
                 return RedirectToAction("Attendance", new {id, msg = "Error: No classes have taken place yet"});
 
+            var activitySchedule = activity.GetSchedule(msgs);
             var attendanceRegistrants = GetAttendanceRegistrants(attendance, activity, activitySchedule, msgs);
 
             ViewBag.AttendanceRegistrants = attendanceRegistrants;
@@ -3192,7 +3191,8 @@ namespace AfterSchool.Areas.Org.Controllers
             periods.Add(activePeriod);
             periods = periods.OrderBy(period => period.StartDateTime.Value).ToList();
             var formsList = forms.OrderBy(x => x.Name).ToList();
-            var isActivityLeader = EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, SessionVariables.AccountUserType, currentUserIsActivityLeader);
+            var isActivityLeader =
+                EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, SessionVariables.AccountUserType, currentUserIsActivityLeader);
             var isFullScreen = EditHelpers.GetIsFullScreen(activity, isNew == "1");
 
             ViewBag.Group = activityGroup;
