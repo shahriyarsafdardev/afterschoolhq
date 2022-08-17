@@ -20,7 +20,7 @@
        {
            { "LoginReturnUrl", Model.Account.HomePageUrl },
            { "CleverSsoEnabled", cleverSsoEnabled },
-           { "sessionName", session?.Name }
+           { "session", session }
        }); }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }

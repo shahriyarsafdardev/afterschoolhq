@@ -71,15 +71,15 @@
         { "ParticipationObject", Model },
         { "CleverSsoEnabled", cleverSsoEnabled },
         { "InsideActDetails", Model.Name },
-        { "sessionName", session?.Name }
+        { "session", session }
     });
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, accountProfile), new ViewDataDictionary
+@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, accountProfile) , new ViewDataDictionary
    {
-       { "sessionName", session?.Name.Replace(" ","") }
+       {"session", session }
    }); }
 
 <div>

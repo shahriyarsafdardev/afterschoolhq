@@ -12,7 +12,9 @@
     var shareUrl = Model.Account.ShortHomePageUrl;
     var shareObject = Model.Account.Name;
     var isInEditMode = currentUser.IsNotEmpty() && currentUser.HasAccessTo(Model.Account) && Request["edit"] == "1";
-
+    var session = (ParticipationObject)ViewData["session"];
+    
+    
     if (Model.ParticipationObject.IsNotEmpty())
     {
         shareUrl = Model.ParticipationObject.GetHomePageUrl();
@@ -74,7 +76,7 @@
     
     #activityHeaderbtns > div > .btn-view-all
     {
-        width: 270px;
+        min-width: 270px;
     }
 </style>
 
@@ -211,7 +213,7 @@
             @if (!hideButtons)
             {
                 <div class="col-lg-3 col-md-6 col-sm-12">
-                    @if (!Model.SessionName.IsNotEmpty() && ViewData["sessionName"] == null)
+                    @if (Model.ParticipationObject?.ActivityGroupType != ActivityGroupType.Session && session.IsEmpty())
                     {
                         <div class="padding-v-20 text-center" id="activityHeaderbtns">
                             <div>
@@ -254,11 +256,11 @@
                             </div>
                         </div>
                     }
-                    @if (ViewData["sessionName"] != null)
+                    @if (session.IsNotEmpty())
                     {
                         <div class="padding-v-20 padding-h-20 text-center" id="activityHeaderbtns">
                             <div>
-                                <button onclick="location.href='@Model.Account.ShortHomePageUrl/session/@ViewData["sessionName"]/browse'" class="btn btn-header-action btn-view-all" type="button">
+                                <button onclick="location.href='@session.GetBrowseUrl()'" class="btn btn-header-action btn-view-all" type="button">
                                     View Session Activities
                                 </button>
                             </div>

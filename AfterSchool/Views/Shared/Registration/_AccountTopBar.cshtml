@@ -13,6 +13,7 @@
     var isAccount = ViewData["IsAccount"] != null && (bool)ViewData["IsAccount"];
     var isOnboardingStepsAcknowledged = CookieVariables.OnboardingStepsAcknowledged;
     var isInEditMode = Request["edit"] == "1";
+    var session = (ParticipationObject)ViewData["session"];
 
     var enableApproveButton = canPublishActivity &&
                               !participationObject.IsPublished &&
@@ -239,12 +240,12 @@
 {
     <div class="reg-login-bar-title">
         <a href="@registrationStartPage.HomePageUrl">
-            <span class="reg-login-bar-title-item notranslate" style="@(ViewData["sessionName"] != null ? "color:#b2b2b4" : "")">@registrationStartPage.Name</span>
+            <span class="reg-login-bar-title-item notranslate" style="@(ViewData["InsideActDetails"] != null || session.IsNotEmpty() ? "color:#b2b2b4" : "")">@registrationStartPage.Name</span>
         </a>
-        @if (ViewData["sessionName"].IsNotEmpty())
+        @if (session.IsNotEmpty())
         {
-            <a href="@registrationStartPage.HomePageUrl/session/@ViewData["sessionName"].ToString().Replace(" ","")/browse">
-                <span class="reg-login-bar-title-item notranslate" style="@(ViewData["InsideActDetails"] != null ? "color:#b2b2b4" : "")"> > @ViewData["sessionName"]</span>
+            <a href="@session.GetBrowseUrl()">
+                <span class="reg-login-bar-title-item notranslate" style="@(ViewData["InsideActDetails"] != null ? "color:#b2b2b4" : "")"> > @session.Name</span>
             </a>
         }
         @if (ViewData["InsideActDetails"] != null)
