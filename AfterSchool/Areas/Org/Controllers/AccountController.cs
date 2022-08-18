@@ -43,9 +43,7 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Edit(string id)
         {
-            var msgs = new SystemMessages();
-            ViewBag.Packages = Package.LoadByIsActive(true, msgs);
-            ViewBag.Messages = msgs;
+            ViewBag.Messages = new SystemMessages();
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.IsFullScreen = GetIsFullScreen();
             return View(SessionVariables.CurrentAccount);
