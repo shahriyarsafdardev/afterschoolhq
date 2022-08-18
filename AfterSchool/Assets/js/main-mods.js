@@ -387,7 +387,7 @@ var AccountSetup = {
         $.get(
             '/org/services/sendverificationemail/?redirectUrl=' + redirectUrl,
             function (data) {
-                if (data && data.status == 'ok') {
+                if (data && data.status === 'ok') {
                     Notifications.showBar({
                         title: 'Success',
                         message: 'A verification email has been sent. Please check your email.'
@@ -407,7 +407,7 @@ var AccountSetup = {
         $.get(
             '/org/services/getstripebillinglink?redirectUrl=' + redirectUrl,
             function (data) {
-                if (data && data.status == 'ok') {
+                if (data && data.status === 'ok') {
                     location.href = data.link;
                 } else {
                     Notifications.showErrors(data.messages);
@@ -418,7 +418,7 @@ var AccountSetup = {
 }
 
 PageEvent.add(PageEvent.AFTER_INIT, function () {
-    if (WebPage.getUrlParamValue('saved') == '1') {
+    if (WebPage.getUrlParamValue('saved') === '1') {
         Notifications.showMessage('Success', 'Saved', true);
     }
 })

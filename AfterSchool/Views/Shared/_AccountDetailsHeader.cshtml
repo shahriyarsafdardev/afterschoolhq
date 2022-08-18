@@ -30,7 +30,6 @@
             {
                 <a href="@Url.Action("hosts", "account")" class="hide btn btn-alt6@(actionName == "visitors" ? "-active" : "")">Schools</a>
             }
-            <a href="@Url.Action("newbilling", "account")" class="hide btn btn-alt6@(actionName == "newbilling" ? "-active" : "")">Packages</a>
 
             @if (Model.StripeCustomerId.IsNotEmpty())
             {
