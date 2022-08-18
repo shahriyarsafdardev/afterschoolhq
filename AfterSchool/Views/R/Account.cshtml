@@ -82,6 +82,21 @@
         padding-left: 25px;
         padding-right: 25px;
     }
+    .activity-section-header {
+            align-items: center;
+            background: #f1f1f1;
+            display: flex;
+            justify-content: space-between;    
+            padding: 16px 59px 18px 45px;
+    }
+    .activity-section {
+            border-radius: 8px;
+            box-shadow: 0 2px 10px 0 rgba(178, 178, 180, 0.3);
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 25px;
+            overflow: hidden;
+    }
 </style>
 
 @{
@@ -170,7 +185,6 @@
 <div>
 <div class="col-md-12 col-lg-10 col-lg-offset-1 participation-object participation-object-detail">
 
-<!--<div class="panel panel-alt6"> !-->
 
 <div>
 <div class="panel-body">
@@ -179,7 +193,7 @@
 {
     <div>
 
-        @{
+        @{ 
             var activities = participationObjects.Where(po => po.ActivityType != ActivityType.VolunteerOpportunity).ToList();
             Html.RenderPartial("Registration/_ParticipationObjectSection",
                 activities.Take(takeActivities).ToList(),
@@ -210,12 +224,13 @@
             }
         }
     </div>
+    
 }
 
 <div>
     <div class="activity-section-header">
         <div>
-            <h2 class="section-title">About @Model.Name.ToUpper()</h2>
+            <h2 class="section-title">About @Model.Name</h2>
         </div>
     </div>
 
