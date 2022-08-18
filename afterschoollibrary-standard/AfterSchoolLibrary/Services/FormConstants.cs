@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using BasicLibrary;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -133,6 +136,21 @@ namespace AfterSchoolLibrary.Services
                 list.Add(QuestionDataType.RegistrantGrade);
 
             return list;
+        }
+
+        public static List<ActivityMessageReason> StudentMessageReasons()
+        {
+            return Enum.GetValues(typeof(ActivityMessageReason)).Cast<ActivityMessageReason>().Except(ActivityMessageReason.NotSet.AsList()).OrderBy(x => x.ToString()).ToList();
+        }
+
+        public static List<ActivityMessageReason> VolunteerMessageReasons()
+        {
+            return new List<ActivityMessageReason>
+            {
+                ActivityMessageReason.ActivityCancellationNotice,
+                ActivityMessageReason.GeneralUpdate,
+                ActivityMessageReason.UrgentUpdate
+            };
         }
     }
 }

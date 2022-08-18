@@ -87,18 +87,8 @@
                         <select name="subject" id="subject" class="form-control" required>
                             <option value="">Select a Message Reason...</option>
                             @{
-                                IEnumerable<ActivityMessageReason> reasons = Enum.GetValues(typeof(ActivityMessageReason)).Cast<ActivityMessageReason>().Except(ActivityMessageReason.NotSet.AsList()).OrderBy(x => x.ToString());
-                                if (isVolunteers)
-                                {
-                                    // Allowed Messages Reasons for Volunteers
-                                    var volunteerReasons = new List<ActivityMessageReason>
-                                    {
-                                        ActivityMessageReason.ActivityCancellationNotice,
-                                        ActivityMessageReason.GeneralUpdate,
-                                        ActivityMessageReason.UrgentUpdate
-                                    };
-                                    reasons = reasons.Where(x => x.In(volunteerReasons));
-                                }
+                                var reasons = isVolunteers ? FormConstants.VolunteerMessageReasons() : FormConstants.StudentMessageReasons();
+                                
                                 foreach (var reason in reasons)
                                 {
                                     <option value="@reason.ToString().SplitByUpperCase()">@reason.ToString().SplitByUpperCase()</option>
