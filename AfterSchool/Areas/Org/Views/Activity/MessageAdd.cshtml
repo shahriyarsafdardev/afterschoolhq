@@ -24,6 +24,7 @@
     var currentAccount = SessionVariables.CurrentAccount;
     var currentUser = SessionVariables.CurrentUser;
     var activityType = Model.ActivityTypeId;
+    var isVolunteer = activityType == ActivityType.VolunteerOpportunity;
     var registrantsLabel = UILabel.RegistrantLabel(activityType, true);
 }
 
@@ -67,9 +68,12 @@
                         <div class="col-sm-6">
                             <select name="subject" id="subject" class="form-control">
                                 <option value="">Select a Message Reason...</option>
-                                @foreach(var reason in Enum.GetValues(typeof(ActivityMessageReason)).Cast<ActivityMessageReason>().Except(ActivityMessageReason.NotSet.AsList()).OrderBy(x => x.ToString()))
-                                {
-                                    <option value="@reason.ToString().SplitByUpperCase()">@reason.ToString().SplitByUpperCase()</option>
+                                @{
+                                    var reasons = isVolunteer ? FormConstants.VolunteerMessageReasons() : FormConstants.StudentMessageReasons();
+                                    foreach (var reason in reasons)
+                                    {
+                                        <option value="@reason.ToString().SplitByUpperCase()">@reason.ToString().SplitByUpperCase()</option>
+                                    }
                                 }
                             </select>
                         </div>
