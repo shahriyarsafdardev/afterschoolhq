@@ -243,9 +243,9 @@ namespace AfterSchoolLibrary.Helpers
 
             var stringInput = s.Trim();
             if (stringInput.StartsWith("{") && stringInput.EndsWith("}"))
-                data.Add(JsonConvert.DeserializeObject<KeyValuePair>(s)); //For json object
+                stringInput = "[" + stringInput + "]"; //For json object
             if (stringInput.StartsWith("[") && stringInput.EndsWith("]"))
-                data.AddRange(JsonConvert.DeserializeObject<List<KeyValuePair>>(s)); //For json array
+                data.AddRange(JsonConvert.DeserializeObject<List<KeyValuePair>>(stringInput)); //For json array
 
             return data;
         }
