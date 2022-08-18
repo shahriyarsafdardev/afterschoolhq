@@ -4,7 +4,6 @@
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
     var accountPackage = (AccountPackage)ViewBag.AccountPackage;
     var value = Model.UniqueName;
-    var packages = (List<Package>)ViewBag.Packages;
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.ID.ToString());}
