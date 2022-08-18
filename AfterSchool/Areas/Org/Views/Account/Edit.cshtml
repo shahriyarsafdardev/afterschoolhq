@@ -64,6 +64,13 @@
 
                     @if (SessionVariables.OriginalLoggedInUser.IsNotEmpty())
                     {
+                        <hr />
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label"></label>
+                            <div class="col-sm-9">
+                                Admin Only
+                            </div>
+                        </div>
                         <div class="form-group">
                             <label class="col-sm-3 control-label">Stripe Customer Id</label>
                             <div class="col-sm-9">
@@ -81,11 +88,37 @@
                             <div class="col-sm-9">
                                 @{ 
                                     Html.RenderPartial("~/Views/Shared/_SwitchButton.cshtml", false, new ViewDataDictionary
-                                   {
-                                       { "checkboxname", "startnewtrial" },
-                                       { "checkboxid", "startnewtrial" },
-                                       { "disabled", false },
-                                   }); 
+                                    {
+                                        { "checkboxname", "startnewtrial" },
+                                        { "checkboxid", "startnewtrial" },
+                                        { "disabled", false },
+                                    }); 
+                                }
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Resync from Stripe</label>
+                            <div class="col-sm-9">
+                                @{ 
+                                    Html.RenderPartial("~/Views/Shared/_SwitchButton.cshtml", false, new ViewDataDictionary
+                                    {
+                                        { "checkboxname", "resyncfromstripe" },
+                                        { "checkboxid", "resyncfromstripe" },
+                                        { "disabled", false },
+                                    }); 
+                                }
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Resync from Package Features</label>
+                            <div class="col-sm-9">
+                                @{ 
+                                    Html.RenderPartial("~/Views/Shared/_SwitchButton.cshtml", false, new ViewDataDictionary
+                                    {
+                                        { "checkboxname", "resyncpackagefeatures" },
+                                        { "checkboxid", "resyncpackagefeatures" },
+                                        { "disabled", false },
+                                    }); 
                                 }
                             </div>
                         </div>

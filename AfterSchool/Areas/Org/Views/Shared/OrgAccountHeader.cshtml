@@ -7,22 +7,6 @@
     }
 }
 
-<script>
-
-    function getStripeBillingLink() {
-        $.get(
-            '@Url.Action("GetStripeBillingLink", "services")',
-            function (data) {
-                if (data && data.status == 'ok') {
-                    location.href = data.link;
-                } else {
-                    Notifications.showErrors(data.messages);
-                }
-            }
-        );
-    }
-</script>
-
 @if (!isFullScreen)
 {
     var currentAccount = SessionVariables.CurrentAccount;
@@ -32,8 +16,8 @@
         if (accountPackage.IsDuringTrial)
         {
             <div class="trial-header text-center text-white bg-danger">
-                You have @accountPackage.TrialDaysRemaining day(s) remaining in your trial 
-                <button onclick="getStripeBillingLink()" url="@Url.Action("newbilling", "account", new { id = accountPackage.PackageUid })" class="btn btn-alt5 margin-h-10">
+                You have @accountPackage.TrialDaysRemaining day(s) remaining in your @accountPackage.PackageName trial 
+                <button onclick="AccountSetup.getStripeBillingLink('')" class="btn btn-alt5 margin-h-10">
                     Add Payment Method &raquo;
                 </button>
             </div>
@@ -42,7 +26,7 @@
         {
             <div class="trial-header text-center text-white bg-danger">
                 It looks like your trial has expired. 
-                <button onclick="getStripeBillingLink()" url="@Url.Action("newbilling", "account", new { id = accountPackage.PackageUid })" class="btn btn-alt5 margin-h-10">
+                <button onclick="AccountSetup.getStripeBillingLink('')" class="btn btn-alt5 margin-h-10">
                     Purchase Now &raquo;
                 </button>
             </div>
@@ -75,6 +59,9 @@
             <div class="col-md-2 col-md-offset-3">
                 <div class="pull-right padding-10">
                     Logged in as: <a href="@Url.Action("edit", "user")">@currentUser.DisplayName</a> <br/>
+                    <a href="javascript:AccountSetup.getStripeBillingLink('@Request.Url.ToString()')">
+                        @accountPackage.PackageName Plan
+                    </a>
                 </div>
             </div>
         </div>
