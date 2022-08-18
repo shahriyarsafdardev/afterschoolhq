@@ -265,16 +265,16 @@
                 </a>
                 <ul class="sub-menu">
 
-                    @if (CanView(FeatureType.TeamAccounts, SessionVariables.AccountUserType, PermissionType.TeamView))
-                    {
-                        <li class="@teamactive">
-                            <a href="@Url.Action("team", "account")"><i class="icon s7-users"></i> Staff</a>
-                        </li>
-                    }
                     @if (CanView(SessionVariables.AccountUserType, PermissionType.AccountSettingsView))
                     {
                         <li class="@accountactive">
                             <a href="@Url.Action("edit", "account")"><i class="icon s7-edit"></i> Settings</a>
+                        </li>
+                    }
+                    @if (CanView(FeatureType.TeamAccounts, SessionVariables.AccountUserType, PermissionType.TeamView))
+                    {
+                        <li class="@teamactive">
+                            <a href="@Url.Action("team", "account")"><i class="icon s7-users"></i> Staff</a>
                         </li>
                     }
                     <li class="@profileactive">

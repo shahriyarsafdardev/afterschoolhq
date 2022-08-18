@@ -1646,12 +1646,12 @@ namespace AfterSchoolLibrary.Services
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             // check if package has changed
-            var oldAccountPackage = account.GetActiveAccountPackage(msgs, dc);
-            var stripeSubscription = oldAccountPackage.GetStripeSubscription(msgs);
+            var currentAccountPackage = account.GetActiveAccountPackage(msgs, dc);
+            var stripeSubscription = currentAccountPackage.GetStripeSubscription(msgs);
             var packageFromStripe = Package.LoadByUid(stripeSubscription.Plan.ProductId.ToGuid(), msgs, dc);
 
             // needs to match stripe
-            if (oldAccountPackage.PackageId != packageFromStripe.ID)
+            if (currentAccountPackage.PackageId != packageFromStripe.ID)
             {
                 var newAccountPackage = account.SwitchPackages(
                     packageFromStripe,

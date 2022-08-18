@@ -53,7 +53,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [HttpPost]
         public ActionResult Edit(string id, string name, string email, string phone, string uniqueName,
-            string timeZone, string stripeCustomerId, string stripeSubscriptionId, string startnewtrial, string newpackage, string billingperiod)
+            string timeZone, string stripeCustomerId, string stripeSubscriptionId, string startnewtrial, string resyncfromstripe, string resyncpackagefeatures)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
@@ -102,21 +102,16 @@ namespace AfterSchool.Areas.Org.Controllers
                             isNewSubscription = true;
                         }
 
-                        if (isNewCustomer || isNewSubscription)
+                        if (isNewCustomer || isNewSubscription || resyncfromstripe.IsBoolean())
                         {
                             currentAccount.CheckIfSubscriberAccountHasPaymentMethod(null, amsgs, adc);
                             currentAccount.CheckIfSubscriberAccountSubscriptionChanged(startnewtrial.IsBoolean(), currentUser, amsgs, adc);
                         }
 
-                        if (newpackage.IsNumber() && newpackage.ToInteger() != accountPackage.PackageId)
+                        if (resyncpackagefeatures.IsBoolean())
                         {
-                            currentAccount.SwitchPackages(
-                                newPackage: Package.Load(newpackage.ToInteger(), msgs),
-                                billingPeriodTypeId: billingperiod.ToEnum<BillingPeriodType>(),
-                                stripeSubscriptionId: accountPackage.StripeSubscriptionId,
-                                loggedInUser: currentUser,
-                                msgs: amsgs,
-                                dc: adc);
+                            accountPackage = currentAccount.GetActiveAccountPackage(amsgs, adc);
+                            accountPackage.GetPackage(amsgs, adc).CopyFeaturesToAccountPackage(accountPackage, currentUser, amsgs, adc);
                         }
                         
                         // ..update profile title if account name has been changed 
