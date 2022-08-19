@@ -18,13 +18,7 @@
         SearchSchool = 8
     };
 
-    var showInviteWelcome = false;
-
-    if (Model.InviteCodeToShare.IsNotEmpty())
-    {
-        showInviteWelcome = true;
-    }
-
+    var showInviteWelcome = Model.InvitingAccount.IsNotEmpty();
 }
 
 @helper PrintWelcomeParagraph1()
@@ -36,7 +30,10 @@
 {
     if (showInviteWelcome)
     {
-        <span>You have been invited you to take the first step towards streamlining the promotion and management of your enrichment program at <strong>@(Model.InvitingAccount.IsNotEmpty() ? Model.InvitingAccount.Name : "'Invited Account'")</strong>.</span>
+        <span>
+            You have been invited to take the first step towards streamlining the 
+            promotion and management of your enrichment program at <strong>@Model.InvitingAccount.Name</strong>.
+        </span>
     }
     else
     {
@@ -48,12 +45,26 @@
 {
     if (showInviteWelcome)
     {
-        <span>We are starting you off with a free plan. You will not have to enter payment information until you are ready to upgrade. For now, to get your program up and running on our platform, we just need a few bits of information from you!</span>
+        <span>
+            We are starting you off with a free plan. You will not have to enter payment information until you are ready to upgrade. For now, to get your 
+            program up and running on our platform, we just need a few bits of information from you!
+        </span>
     }
     else
-    {
+    {   
         // To Do Here: From URL?
-        <span>We start everyone out with a <em>no-obligation</em> @(Model.SubscriptionPeriod.IsNotEmpty() ? Model.SubscriptionPeriod : "14")-day free trial of our @(Model.Package.IsNotEmpty() ? Model.Package : "Pro") Plan so you can get a feel for what AfterSchool HQ has to offer. You can upgrade or return to the Free Plan at any time. Now, we just need to collect a few bits of information from you to get started!</span>
+        <span>We start everyone out with 
+            @if (Model.TrialDays > 0)
+            {
+                <span>
+                    a <em>no-obligation</em>  @Model.TrialDays.ToInteger()-day free trial of
+                </span>
+            }
+            our @Model.PackageName Plan 
+            so you can get a feel for what AfterSchool HQ has to offer. 
+            You can choose a different plan at any time. 
+            Now, we just need to collect a few bits of information from you to get started!
+        </span>
     }
 }
 
@@ -414,7 +425,7 @@
                     <div class="clearfix"></div>
 
                     <div class="col-md-12 onboarding-form-group text-center" style="margin-top: 20px;">
-                        @if (Utilities.IsProduction || Utilities.IsStaging)
+                        @if (!Utilities.IsLocalHost)
                         {
                             Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "");
                         }
