@@ -25,7 +25,11 @@ namespace AfterSchool.Models
         public bool IsRequestOnlyAccess { get; set; }
         public SignUpType SignupType { get; set; }
         public Account InvitingAccount { get; set; }
-        public string Package { get; set; }
+        
+        public string PackageName { get; set; }
+        public string PackageUid { get; set; }
+        
+        public decimal TrialDays { get; set; }
         public string SubscriptionPeriod { get; set; }
     }
 }
