@@ -772,7 +772,6 @@
     <Content Include="Assets\js\ahq-directory-map.js" />
     <Content Include="Assets\js\ahq-directory-search.js" />
     <Content Include="Assets\img\alert-2.svg" />
-    <Content Include="Assets\js\ahq-profiles.js" />
     <Content Include="Assets\js\app-charts-morris.js" />
     <Content Include="Assets\js\app-charts-sparkline.js" />
     <Content Include="Assets\js\app-charts.js" />
@@ -1424,7 +1423,6 @@
     <Content Include="img\v-hernly.png" />
     <Content Include="img\warning.png" />
     <Content Include="img\website.svg" />
-    <Content Include="index-profiles.html" />
     <Content Include="index.html" />
     <Content Include="ips.html" />
     <Content Include="joinips.html" />
