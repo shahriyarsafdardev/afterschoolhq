@@ -1508,7 +1508,7 @@ namespace AfterSchool.Areas.Org.Controllers
             return View("Billing", currentAccount);
         }
 
-        public ActionResult AfterStripeUpdate(string id)
+        public ActionResult AfterStripeUpdate(string id, string returnUrl)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
@@ -1519,6 +1519,9 @@ namespace AfterSchool.Areas.Org.Controllers
             currentAccount.CheckIfSubscriberAccountHasPaymentMethod(null, msgs);
             currentAccount.CheckIfSubscriberAccountSubscriptionChanged(false, currentUser, msgs);
 
+            if (returnUrl.IsNotEmpty())
+                return new RedirectResult(returnUrl);
+            
             return new RedirectResult(Url.Action("billing", "account"));
         }
 

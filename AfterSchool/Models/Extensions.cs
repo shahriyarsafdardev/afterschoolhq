@@ -203,8 +203,11 @@ namespace AfterSchool.Models
                     PackageService.GetPackageWithFeatureLowestPrice(FeatureType.FreeActivityLimit, SessionVariables.AccountPackage);
                 var editCostLink =
                     $"<a href=\"/org/activity/editcost/{activity.Uid}\">update pricing and payment for this activity</a>";
+                var billingReturnUrl =
+                    $"{AfterSchoolLibrary.Helpers.Utilities.BaseUrl()}/org/account/afterstripeupdate?returnurl=/org/activity/publishdetail/{activity.Uid}";
                 var upgradePackageLink =
-                    $"<a href=\"#\" onclick=\"setFeatureIdAndLoadUpgradePage('{freeActivityLimitPackage.ID}')\">upgrade your account for more free activities</a>";
+                    $"<a href=\"javascript:AccountSetup.getStripeBillingLink('{billingReturnUrl}')\">upgrade your account to the {freeActivityLimitPackage.Name} Plan for more free activities</a>";
+                    //$"<a href=\"#\" onclick=\"setFeatureIdAndLoadUpgradePage('{freeActivityLimitPackage.ID}')\">upgrade your account for more free activities</a>";
 
                 msgs.Add(
                     $"<p class=\"no-bullet\">You've reached your limit on free activities, please take one of the following actions:</p><ul>" +

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Configuration;
+using Stripe.BillingPortal;
 using Twilio.Types;
 
 namespace AfterSchoolLibrary.Billing
@@ -2429,8 +2430,33 @@ namespace AfterSchoolLibrary.Billing
             var options = new Stripe.BillingPortal.SessionCreateOptions()
             {
                 Customer = customerId,
-                ReturnUrl = redirectUrl
+                ReturnUrl = redirectUrl,
             };
+
+            try
+            {
+                session = GetBillingPortalSessionService().Create(options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.Error, ex);
+                msgs.Add($"Error creating session", MessageType.UserError);
+            }
+
+            return session;
+        }
+
+        public Stripe.BillingPortal.Session GetBillingPortalSessionAddCardOnly(string customerId, string redirectUrl, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Stripe.BillingPortal.Session session = null;
+            var options = new Stripe.BillingPortal.SessionCreateOptions()
+            {
+                Customer = customerId,
+                ReturnUrl = redirectUrl,
+            };
+            
 
             try
             {
