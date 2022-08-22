@@ -31,32 +31,32 @@
 {
     <div class="btn-toolbar">
         <div class="btn-group hidden-xs">
-            <a href="@Url.Action("summary", "activity", new {id = Model.Activity.Uid})" class="btn btn-alt6@(actionName == "summary" ? "-active" : "")"><i class="s7-graph2"></i> Summary</a>
+            <a href="@Url.Action("summary", "activity", new { id = Model.Activity.Uid })" class="btn btn-alt6@(actionName == "summary" ? "-active" : "")"><i class="s7-graph2"></i> Summary</a>
 
             @if (isActivityLeader)
             {
-                <a href="@Url.Action("editsetup", "activity", new {id = Model.Activity.Uid})" class="btn btn-alt6@(actionName == "editsetup" ? "-active" : "")"><i class="s7-edit"></i> Setup</a>
+                <a href="@Url.Action("editsetup", "activity", new { id = Model.Activity.Uid })" class="btn btn-alt6@(actionName == "editsetup" ? "-active" : "")"><i class="s7-edit"></i> Setup</a>
             }
 
             @if (Model.Activity.IsPublished || registrantCount > 0)
             {
-                <a href="@Url.Action("registrants", "activity", new {id = Model.Activity.Uid})" class="btn btn-alt6@(actionName == "registrants" ? "-active" : "")">
+                <a href="@Url.Action("registrants", "activity", new { id = Model.Activity.Uid })" class="btn btn-alt6@(actionName == "registrants" ? "-active" : "")">
                     <i class="s7-user"></i> @(UILabel.RegistrantLabel(Model.Activity.ActivityTypeId, true))
                 </a>
 
-                if (Model.Activity.HasSchedule && Model.Activity.ActivityTypeId.NotIn(new[] {ActivityType.FieldTrip, ActivityType.PermissionSlip}))
+                if (Model.Activity.HasSchedule && Model.Activity.ActivityTypeId.NotIn(new[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
                 {
-                    <a href="@Url.Action("attendance", "activity", new {id = Model.Activity.Uid})" class="btn btn-alt6@(actionName == "attendance" ? "-active" : "")"><i class="s7-check"></i> Attendance</a>
+                    <a href="@Url.Action("attendance", "activity", new { id = Model.Activity.Uid })" class="btn btn-alt6@(actionName == "attendance" ? "-active" : "")"><i class="s7-check"></i> Attendance</a>
                 }
 
-                <a href="@Url.Action("messages", "activity", new {id = Model.Activity.Uid})" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")"><i class="s7-mail"></i> Messaging</a>
+                <a href="@Url.Action("messages", "activity", new { id = Model.Activity.Uid })" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")"><i class="s7-mail"></i> Messaging</a>
             }
 
             @if (isActivityLeader)
             {
                 if (Model.AccountPackage.GetFeature(FeatureType.TeamAccounts).Max.Value > 1)
                 {
-                    <a href="@Url.Action("team", "activity", new {id = Model.Activity.Uid})" class="btn btn-alt6@(actionName == "team" ? "-active" : "")">
+                    <a href="@Url.Action("team", "activity", new { id = Model.Activity.Uid })" class="btn btn-alt6@(actionName == "team" ? "-active" : "")">
                         <i class="s7-users"></i> Staff
                     </a>
                 }
@@ -64,61 +64,64 @@
 
             @if (Model.AccountPackage.HasFeature(FeatureType.Survey))
             {
-                <a href="@Url.Action("surveys", "activity", new {id = Model.Activity.Uid})" class="btn btn-alt6@(actionName == "surveys" || actionName == "newsurvey" ? "-active" : "")"><i class="s7-cloud"></i> Surveys</a>
+                if ((int)Model.Activity.ActivityTypeId != 6)
+                {
+                    <a href="@Url.Action("surveys", "activity", new { id = Model.Activity.Uid })" class="btn btn-alt6@(actionName == "surveys" || actionName == "newsurvey" ? "-active" : "")"><i class="s7-cloud"></i> Surveys</a>
+                }
             }
 
             @if (Model.Activity.ActivityTypeId != ActivityType.Team && (isActivityLeader || Model.CurrentUser.CanPublishActivity(Model.CurrentAccount, Model.Activity)))
             {
-                <a href="@Url.Action("publishdetail", "activity", new {id = Model.Activity.Uid})" class="btn @publishClass"><i class="s7-link"></i> Publish...</a>
+                <a href="@Url.Action("publishdetail", "activity", new { id = Model.Activity.Uid })" class="btn @publishClass"><i class="s7-link"></i> Publish...</a>
             }
 
             @if (Model.Activity.ActivityGroupId.HasValue && Model.Activity.BelongsTo(Model.CurrentAccount))
             {
-                <a href="@Url.Action("activities", "group", new {id = group.Uid})" class="btn btn-alt5">
+                <a href="@Url.Action("activities", "group", new { id = group.Uid })" class="btn btn-alt5">
                     <i class="s7-date"></i> @UILabel.ActivityGroupLabel(group.ActivityGroupTypeId) &raquo;
                 </a>
             }
             else
             {
-                <a href="@Url.Action("index", "activity", new {type = (int) Model.Activity.ActivityTypeId})" class="btn btn-alt5">&laquo; All @UILabel.ActivityLabel(Model.Activity.ActivityTypeId, true)</a>
+                <a href="@Url.Action("index", "activity", new { type = (int)Model.Activity.ActivityTypeId })" class="btn btn-alt5">&laquo; All @UILabel.ActivityLabel(Model.Activity.ActivityTypeId, true)</a>
             }
         </div>
         <div class="hidden-lg hidden-sm hidden-md">
             <select class="form-control" onchange="this.value === '#' ? showUpgradeMyPlan(this.packagename,this.packageid) : location.href = this.value">
                 <option value="">Navigation</option>
-                <option value="@Url.Action("summary", "activity", new {id = Model.Activity.Uid})">Summary</option>
+                <option value="@Url.Action("summary", "activity", new { id = Model.Activity.Uid })">Summary</option>
                 @if (isActivityLeader)
                 {
-                    <option value="@Url.Action("editsetup", "activity", new {id = Model.Activity.Uid})">Setup</option>
+                    <option value="@Url.Action("editsetup", "activity", new { id = Model.Activity.Uid })">Setup</option>
                 }
                 @if (Model.Activity.IsPublished || registrantCount > 0)
                 {
-                    <option value="@Url.Action("registrants", "activity", new {id = Model.Activity.Uid})">@UILabel.RegistrantLabel(true)</option>
+                    <option value="@Url.Action("registrants", "activity", new { id = Model.Activity.Uid })">@UILabel.RegistrantLabel(true)</option>
 
-                    if (Model.Activity.HasSchedule && Model.Activity.ActivityTypeId.NotIn(new[] {ActivityType.FieldTrip, ActivityType.PermissionSlip}))
+                    if (Model.Activity.HasSchedule && Model.Activity.ActivityTypeId.NotIn(new[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
                     {
-                        <option value="@Url.Action("attendance", "activity", new {id = Model.Activity.Uid})">Attendance</option>
+                        <option value="@Url.Action("attendance", "activity", new { id = Model.Activity.Uid })">Attendance</option>
                     }
 
-                    <option value="@Url.Action("messages", "activity", new {id = Model.Activity.Uid})">Messaging</option>
+                    <option value="@Url.Action("messages", "activity", new { id = Model.Activity.Uid })">Messaging</option>
                 }
-                <option value="@Url.Action("surveys", "activity", new {id = Model.Activity.Uid})">Surveys</option>
+                <option value="@Url.Action("surveys", "activity", new { id = Model.Activity.Uid })">Surveys</option>
 
                 @if (isActivityLeader)
                 {
                     if (Model.AccountPackage.GetFeature(FeatureType.TeamAccounts).Max.Value > 1)
                     {
-                        <option value="@Url.Action("team", "activity", new {id = Model.Activity.Uid})">Team</option>
+                        <option value="@Url.Action("team", "activity", new { id = Model.Activity.Uid })">Team</option>
                     }
-                    <option value="@Url.Action("publishdetail", "activity", new {id = Model.Activity.Uid})">Publish...</option>
+                    <option value="@Url.Action("publishdetail", "activity", new { id = Model.Activity.Uid })">Publish...</option>
                 }
                 @if (Model.Activity.ActivityGroupId.HasValue && Model.Activity.BelongsTo(Model.CurrentAccount))
                 {
-                    <option value="@Url.Action("summary", "group", new {id = group.Uid})">@UILabel.ActivityGroupLabel(group.ActivityGroupTypeId) &raquo;</option>
+                    <option value="@Url.Action("summary", "group", new { id = group.Uid })">@UILabel.ActivityGroupLabel(group.ActivityGroupTypeId) &raquo;</option>
                 }
                 else
                 {
-                    <option value="@Url.Action("index", "activity", new {type = (int) Model.Activity.ActivityTypeId})">All @UILabel.ActivityLabel(Model.Activity.ActivityTypeId, true)</option>
+                    <option value="@Url.Action("index", "activity", new { type = (int)Model.Activity.ActivityTypeId })">All @UILabel.ActivityLabel(Model.Activity.ActivityTypeId, true)</option>
                 }
             </select>
         </div>
