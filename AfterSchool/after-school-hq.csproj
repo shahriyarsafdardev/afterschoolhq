@@ -2021,6 +2021,7 @@
     <Content Include="Scripts\umd\popper.js" />
     <Content Include="Scripts\umd\popper.min.js" />
     <Content Include="Views\R\BrowseVolunteerOpportunities.cshtml" />
+    <Content Include="Views\Shared\JavascriptIncludes\_Beamer.cshtml" />
     <Content Include="Views\Shared\Layouts\_PrintScreen.cshtml" />
     <Content Include="Views\Shared\Registration\_BrowseAllActivities.cshtml" />
     <Content Include="Views\Shared\Registration\_BrowseVolunteerOpportunitiesFilterBar.cshtml" />

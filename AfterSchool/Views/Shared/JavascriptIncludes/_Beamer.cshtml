@@ -1,0 +1,14 @@
+﻿@if (SessionVariables.CurrentUser.IsNotEmpty())
+{
+    <script>
+	    var beamer_config = {
+		    product_id : 'igfOVTZz27012', //DO NOT CHANGE: This is your product code on Beamer
+		    //user_created_at : '2010-01-00T00:00:00Z' /*Optional: Date in which this user was created. Accepts a string in ISO-8601 format or a numeric UNIX timestamp (in milliseconds).*/
+		    user_id : "@SessionVariables.CurrentUser.ID.Value",
+            user_firstname : "@SessionVariables.CurrentUser.FirstName",
+            user_lastname : "@SessionVariables.CurrentUser.LastName",
+            user_email : "@SessionVariables.CurrentUser.Email",
+	    };
+    </script>
+    <script type="text/javascript" src="https://app.getbeamer.com/js/beamer-embed.js" defer="defer"></script> 
+}
