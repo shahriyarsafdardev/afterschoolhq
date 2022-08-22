@@ -1427,7 +1427,6 @@
     <Content Include="ips.html" />
     <Content Include="joinips.html" />
     <Content Include="joinisyp.html" />
-    <Content Include="iyi-providers.html" />
     <Content Include="js\blocs.min.js" />
     <Content Include="js\bootstrap.bundle.min.js" />
     <Content Include="js\jquery-3.5.1.min.js" />
