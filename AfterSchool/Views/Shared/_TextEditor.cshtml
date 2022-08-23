@@ -39,7 +39,7 @@
             const regex = /<p>[<br>| ]*<\/p>/gm;
             let html = @(javascriptVarName).root.innerHTML;
             if (html.replace(regex, "").length === 0) {
-                $('#@ViewData["id"]').val('');  
+                $('#@ViewData["id"]').val('');
             } else {
                 $('#@ViewData["id"]').val(@(javascriptVarName).root.innerHTML);
             }
