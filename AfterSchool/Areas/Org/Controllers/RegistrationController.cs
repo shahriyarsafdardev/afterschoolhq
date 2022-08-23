@@ -12,7 +12,6 @@ using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using Hangfire;
-using StringExtensions = System.Web.WebPages.StringExtensions;
 using Utilities = BasicLibrary.Utilities;
 
 namespace AfterSchool.Areas.Org.Controllers
@@ -39,7 +38,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var getVolunteers = volunteers.IsBoolean() && volunteers.ToBoolean();
             var currentAccount = SessionVariables.CurrentAccount;
-            
+
             var currentUser = SessionVariables.CurrentUser;
             var start = recordsPerPage * ((int?)pageNumber - 1);
             var activityIds = new List<int>();
@@ -49,12 +48,12 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 activityIds = activity.Split(',').Select(x => x.ToInteger()).ToList();
             }
-            
+
             if (at.IsNumber())
-                registrationAssignmentTypes.Add((RegistrationAssignmentType) at.ToInteger());
+                registrationAssignmentTypes.Add((RegistrationAssignmentType)at.ToInteger());
 
             var registrationStatus = int.TryParse(regstatus, out var parsed)
-                ? (RegistrationStatus) parsed
+                ? (RegistrationStatus)parsed
                 : RegistrationStatus.NotSet;
 
             var registrations1 = currentAccount.SearchRegistrations(q, null, activityIds,
@@ -75,15 +74,16 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 activities = activities.Where(a => a.ActivityTypeId != ActivityType.VolunteerOpportunity).ToList();
             }
-            var groups = getVolunteers ? new List<ActivityGroup>() :  currentAccount.GetActivityGroups(msgs);
-            
+
+            var groups = getVolunteers ? new List<ActivityGroup>() : currentAccount.GetActivityGroups(msgs);
+
             var (registrations, totalCount) = ((List<Registration>, int))(registrations: registrations1, totalCount: totalCount1);
-            
+
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
 
             if (emailed.IsBoolean() && emailed.ToBoolean())
                 msgs.Add("An email will be sent shortly", MessageType.Success);
-            
+
             var isStudentCRMEnabled = SessionVariables.CurrentAccount.HasFeature(FeatureType.StudentCRM);
             var studentCRMPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.StudentCRM, SessionVariables.AccountPackage);
             var pagingModel = new PagingModel
@@ -91,9 +91,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 TotalCount = totalCount,
                 PageNumber = pageNumber,
                 RecordsPerPage = recordsPerPage,
-                TotalPages = totalPages,
+                TotalPages = totalPages
             };
-            
+
             var result = new RegistrationIndexAssembler().AssembleRegistrationIndexResult(isStudentCRMEnabled, studentCRMPackage, registrations, msgs,
                 pagingModel, false, activities, groups, new List<FormQuestion>(), new List<FormQuestionGroup>(), false, currentAccount);
             return View(result);
@@ -127,13 +127,13 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (at.IsNumber())
-                rat = (RegistrationAssignmentType) at.ToInteger();
+                rat = (RegistrationAssignmentType)at.ToInteger();
 
             if (question.IsNumber())
                 questionId = question.ToInteger();
 
             if (regstatus.IsNumber())
-                registrationStatus = (RegistrationStatus) regstatus.ToInteger();
+                registrationStatus = (RegistrationStatus)regstatus.ToInteger();
 
             var getVolunteers = volunteers.IsBoolean() && volunteers.ToBoolean();
             BackgroundJob.Enqueue(() =>
@@ -144,7 +144,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     activityIds,
                     ParticipationObjectType.Activity,
                     filename,
-                    (RegistrationReportType) reporttype.ToInteger(),
+                    (RegistrationReportType)reporttype.ToInteger(),
                     rat.HasValue ? rat.Value.AsList() : null,
                     registrationStatus,
                     UILabel.ActivityLabel(ActivityType.Activity, false),
@@ -158,7 +158,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = msgs;
 
-            return RedirectToAction("index", new {volunteers = volunteers ,q, activity, emailed = "1", question, group, at, regstatus});
+            return RedirectToAction("index", new { volunteers = volunteers, q, activity, emailed = "1", question, group, at, regstatus });
         }
 
         [HttpGet]
@@ -323,7 +323,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("edit", new {id = registration.Uid, returnUrl});
+                return RedirectToAction("edit", new { id = registration.Uid, returnUrl });
 
             ViewBag.Messages = msgs;
             ViewBag.ReturnURl = returnUrl;
@@ -342,7 +342,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var registration = currentAccount.GetRegistration(id.ToGuid(), msgs);
             LoadRegistrationViewBag(registration, r, msgs);
 
-            var answers = (List<FormQuestionAnswer>) ViewBag.Answers;
+            var answers = (List<FormQuestionAnswer>)ViewBag.Answers;
             var answer = answers.Find(item => item.ID.ToString() == file);
 
             if (answer.IsNotEmpty())
@@ -354,7 +354,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             ViewBag.Messages = msgs;
-            return RedirectToAction("Edit", new {id, r, returnUrl});
+            return RedirectToAction("Edit", new { id, r, returnUrl });
         }
 
         [HttpPost]
@@ -402,7 +402,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var ratTo = RegistrationAssignmentType.NotSet;
 
             if (to.IsNotEmpty())
-                ratTo = (RegistrationAssignmentType) to.ToInteger();
+                ratTo = (RegistrationAssignmentType)to.ToInteger();
 
             if (ratTo != RegistrationAssignmentType.NotSet)
                 registrantActivity.ChangeSeatAssignment(ratTo, currentUser, msgs);
@@ -484,7 +484,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var act = currentAccount.GetActivity(activity.ToGuid(), msgs);
             var registrant = selectedRegistration.GetRegistrant(msgs);
             var regperiod = act.GetActiveRegistrationPeriod(msgs);
-            var assignmentType = (RegistrationAssignmentType) activityassignment.ToInteger();
+            var assignmentType = (RegistrationAssignmentType)activityassignment.ToInteger();
             var choiceNumber = 1;
             var registrationPeriodId = new int?();
             if (regperiod.IsNotEmpty())
@@ -517,7 +517,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             MasterRegistrant = masterRegistrant,
                             NumberOfSeats = 1,
                             ParticipationObject = act.GetParticipationObject(msgs),
-                            Registration = selectedRegistration,
+                            Registration = selectedRegistration
                         },
                         null, currentUser, true, null, msgs);
 
@@ -608,7 +608,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 TempData["msgs"] = msgs;
 
                 if (returnurl.IsNotEmpty() && returnurl.Contains("registrant") && activityUid.IsNotEmpty())
-                    return RedirectToAction("registrants", "activity", new {id = activityUid, atype = ""});
+                    return RedirectToAction("registrants", "activity", new { id = activityUid, atype = "" });
 
                 if (returnurl.IsNotEmpty())
                     return Redirect(returnurl);
@@ -733,10 +733,10 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (at.IsNumber())
-                registrationAssignmentTypes.Add((RegistrationAssignmentType) at.ToInteger());
+                registrationAssignmentTypes.Add((RegistrationAssignmentType)at.ToInteger());
 
             var registrationStatus = int.TryParse(registrationStatusNumber, out var parsed)
-                ? (RegistrationStatus) parsed
+                ? (RegistrationStatus)parsed
                 : RegistrationStatus.NotSet;
 
             var registrations = currentAccount.SearchRegistrations(q, null, activityIds,
@@ -750,9 +750,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 .OrderBy(x => x.Name).ToList();
 
             activities = getVolunteers
-                ? activities.Where(a => a.ActivityTypeId == ActivityType.VolunteerOpportunity).ToList() 
+                ? activities.Where(a => a.ActivityTypeId == ActivityType.VolunteerOpportunity).ToList()
                 : activities.Where(a => a.ActivityTypeId != ActivityType.VolunteerOpportunity).ToList();
-            
+
             var groups = currentAccount.GetActivityGroups(msgs);
 
             ViewBag.Activities = activities;
@@ -782,7 +782,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var length = recordsPerPage;
 
             var activityMessages = currentAccount.GetActivityMessages(start, length, msgs);
-            
+
             var totalCount = currentAccount.GetActivityMessageCount(msgs);
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
             var getVolunteers = volunteers.IsBoolean() && volunteers.ToBoolean();
@@ -794,7 +794,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 TotalCount = totalCount,
                 PageNumber = pageNumber,
                 RecordsPerPage = recordsPerPage,
-                TotalPages = totalPages,
+                TotalPages = totalPages
             };
             return View(activityMessages);
         }

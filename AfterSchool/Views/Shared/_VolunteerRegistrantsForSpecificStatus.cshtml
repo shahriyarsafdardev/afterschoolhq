@@ -147,10 +147,13 @@
 
                                         <option value="@((int)x)" @selected>@x.ToString().SplitByUpperCase()</option>
                                     }
-                                </select>
+                                </select>@ra = RegistrantActivity
                             </td>
                             <td>
-                                <a href="" class="btn btn-primary">Message</a>
+                                @{
+                                    var messageLink = $"?volunteers=true&activity={ra.GetActivityId()}&regstatus={(int)ra.AssignmentTypeId}&q={ra.RegistrantName}";
+                                }
+                                <a href='@Url.Action("messageadd", "registration")@messageLink' target="_blank" class="btn btn-primary">Message</a>
                             </td>
                             <td>
                                 <a href="" class="btn btn-danger">Withdraw</a>
