@@ -32,21 +32,18 @@
         theme: 'snow'
     });
 
-    var valueOnPageLoadFor_@javascriptVarName = "";
+    let valueOnPageLoadFor_@javascriptVarName = "";
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         $('form').submit(function () {
-            
+
             const regex = /<p>[<br>| ]*<\/p>/gm;
-            var html = @(javascriptVarName).root.innerHTML;
-            if (html.replace(regex, "").length == 0)
-            {
+            let html = @(javascriptVarName).root.innerHTML;
+            if (html.replace(regex, "").length === 0) {
                 $('#@ViewData["id"]').val('');  
-            }
-            else
-            {
+            } else {
                 $('#@ViewData["id"]').val(@(javascriptVarName).root.innerHTML);
             }
-           
+
         });
 
         @(javascriptVarName).getModule('toolbar').addHandler('image', () => {

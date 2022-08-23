@@ -1847,10 +1847,10 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (id.IsEmpty() || id.IsNotGuid())
                 return HttpNotFound();
-            
+
             if (details.IsEmpty())
                 msgs.Add($"{UILabel.ActivityLabel()} Details is required", MessageType.UserError);
-                
+
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             if (activity.IsNotEmpty())
             {
