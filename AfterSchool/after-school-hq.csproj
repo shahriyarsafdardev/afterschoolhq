@@ -1427,6 +1427,7 @@
     <Content Include="ips.html" />
     <Content Include="joinips.html" />
     <Content Include="joinisyp.html" />
+    <Content Include="joinmccoy.html" />
     <Content Include="js\blocs.min.js" />
     <Content Include="js\bootstrap.bundle.min.js" />
     <Content Include="js\jquery-3.5.1.min.js" />
@@ -1434,8 +1435,6 @@
     <Content Include="js\scrollFX.js" />
     <Content Include="js\universal-parallax.min.js" />
     <Content Include="manage-programs.html" />
-    <Content Include="joinmccoy.html" />
-    <Content Include="mccoy.html" />
     <Content Include="new-programs.html" />
     <Content Include="news.html" />
     <Content Include="parent-faq.html" />
