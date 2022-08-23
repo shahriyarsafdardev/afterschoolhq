@@ -59,7 +59,7 @@
             <div class="col-md-2 col-md-offset-3">
                 <div class="pull-right padding-10">
                     Logged in as: <a href="@Url.Action("edit", "user")">@currentUser.DisplayName</a> <br/>
-                    <a href="javascript:AccountSetup.getStripeBillingLink('@Request.Url.ToString()', @((int)AfterSchoolLibrary.Enums.BillingPortalConfigurationType.SubscriptionUpdate))">
+                    <a href="javascript:AccountSetup.getStripeBillingLink('@Request.Url.AbsolutePath', @((int)AfterSchoolLibrary.Enums.BillingPortalConfigurationType.SubscriptionUpdate))">
                         @accountPackage.PackageName Plan
                     </a>
                 </div>

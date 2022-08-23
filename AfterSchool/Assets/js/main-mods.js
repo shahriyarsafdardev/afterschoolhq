@@ -403,9 +403,9 @@ var AccountSetup = {
         );
     },
 
-    getStripeBillingLink: function (redirectUrl, config) {
+    getStripeBillingLink: function (returnUrl, config) {
         $.get(
-            '/org/services/getstripebillinglink?redirectUrl=' + redirectUrl + '&config=' + config,
+            '/org/services/getstripebillinglink?returnUrl=' + returnUrl + '&config=' + config,
             function (data) {
                 if (data && data.status === 'ok') {
                     location.href = data.link;

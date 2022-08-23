@@ -612,14 +612,16 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult GetStripeBillingLink(string redirectUrl, int config = 0)
+        public ActionResult GetStripeBillingLink(string returnUrl, int config = 0)
         {
             var msgs = new SystemMessages();
             
             if (msgs.HasNoErrors())
             {
-                if (redirectUrl.IsEmpty())
-                    redirectUrl = $"{Utilities.BaseUrl()}{Url.Action("afterstripeupdate", "account")}";
+                var fullReturnUrl = $"{Utilities.BaseUrl()}{Url.Action("afterstripeupdate", "account")}";
+
+                if (returnUrl.IsNotEmpty())
+                    fullReturnUrl = $"{fullReturnUrl}?returnUrl={returnUrl}";
                 
                 var currentAccount = SessionVariables.CurrentAccount;
                 var stripeHelper = StripeHelper.GetStripeHelperSubscriberAccount();
@@ -631,7 +633,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 var session = stripeHelper.GetBillingPortalSession(
                     currentAccount.StripeCustomerId,
                     bpc?.StripeId,
-                    redirectUrl, 
+                    fullReturnUrl, 
                     msgs);
 
                 return Json(new
