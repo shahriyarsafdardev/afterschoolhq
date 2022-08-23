@@ -17,18 +17,18 @@
         <div class="div-group pull-right">
             @if (activity.BelongsTo(account))
             {
-                <a href="@Url.Action("edit", "registration", new { id = registration.Uid.ToString(), returnUrl = Request.Url.ToString() })" class="btn btn-primary">
+                <a href="@Url.Action("edit", "registration", new {id = registration.Uid.ToString(), returnUrl = Request.Url.ToString()})" class="btn btn-primary">
                     View Full Registration
                 </a>
             }
-            <a href="@Url.Action(backToListAction, backToListController, new { id = activity.Uid })" class="btn btn-default">&laquo; Back to List</a>
+            <a href="@Url.Action(backToListAction, backToListController, new {id = activity.Uid})" class="btn btn-default">&laquo; Back to List</a>
         </div>
     }
-    
+
     <div class="pull-left" style="margin-top: 10px;">@Model.RegistrantName</div>
     <div style="clear:both"></div>
 </div>
-    
+
 <div class="panel-body" style="padding:0">
 <div class="table-responsive">
     <table class="table table-striped @tableCondensed">
@@ -72,16 +72,16 @@
     </table>
 </div>
 
-@{ Html.RenderPartial("~/Views/Shared/Registrant/_Answers.cshtml", answers, new ViewDataDictionary(){{ "IsPrintView", isPrintView}}); }
+@{ Html.RenderPartial("~/Views/Shared/Registrant/_Answers.cshtml", answers, new ViewDataDictionary {{"IsPrintView", isPrintView}}); }
 
-@if (!activity.IsFree  && Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && !isPrintView)
+@if (!activity.IsFree() && Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && !isPrintView)
 {
     <div class="panel panel-default">
         <div class="panel-heading">
             Payment Information
         </div>
         <div class="panel-body" style="padding:0">
-            <form id="form-add-payment" action="@Url.Action("AddPayment", "activity", new { id = Model.Uid })" method="post">
+            <form id="form-add-payment" action="@Url.Action("AddPayment", "activity", new {id = Model.Uid})" method="post">
                 <div class="table-responsive">
                     <table class="table table-striped">
                         <tr>
@@ -101,12 +101,12 @@
                                     @{
                                         Html.RenderPartial(
                                             "~/Views/Shared/Components/_Date.cshtml",
-                                            new FormInputViewModel()
+                                            new FormInputViewModel
                                             {
                                                 Id = "datepaid",
                                                 Name = "datepaid",
                                                 Placeholder = "Date Paid",
-                                                Value = ""
+                                                Value = "",
                                             }
                                             );
                                     }
@@ -119,7 +119,7 @@
                                 <div class="col-md-6">
                                     <div class="input-group input-group-lg xs-mb-15">
                                         <span class="input-group-addon">$</span>
-                                        <input type="number" class="form-control" id="amountpaid" name="amountpaid" onfocus="this.select()" value="" min="0.00" step=".01" />
+                                        <input type="number" class="form-control" id="amountpaid" name="amountpaid" onfocus="this.select()" value="" min="0.00" step=".01"/>
                                     </div>
                                 </div>
                             </td>
@@ -130,11 +130,11 @@
                                 <div class="col-md-6">
                                     <select name="paymenttype" id="paymenttype" class="form-control">
                                         <option value="">Select...</option>
-                                        @foreach (PaymentType type in System.Enum.GetValues(typeof(PaymentType)))
+                                        @foreach (PaymentType type in Enum.GetValues(typeof(PaymentType)))
                                         {
                                             if (type != PaymentType.NotSet)
                                             {
-                                                <option value="@((int)type)">@type.ToString().SplitByUpperCase()</option>
+                                                <option value="@((int) type)">@type.ToString().SplitByUpperCase()</option>
                                             }
                                         }
                                     </select>
@@ -281,7 +281,7 @@
     });
 
     function toggleDiscountType(type) {
-        if (type == @((int)CouponAmountType.FlatAmount)) {
+        if (type == @((int) CouponAmountType.FlatAmount)) {
             $('#amounttype-flat').removeClass('hide');
             $('#amounttype-percentage').addClass('hide');
         } else {

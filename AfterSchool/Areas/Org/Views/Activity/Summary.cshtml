@@ -1,4 +1,5 @@
-﻿@model AfterSchool.Areas.Org.Assemblers.Activity.SummaryResult
+﻿@using AfterSchool.Helpers
+@model AfterSchool.Areas.Org.Assemblers.Activity.SummaryResult
 @{
     var participationObject = Model.ParticipationObject;
     var msgs = Model.Messages;
@@ -22,10 +23,10 @@
     var currentUser = Model.CurrentUser;
 }
 
-@{Html.RenderPartial("OrgAccountHeader", currentAccount.ID.Value.ToString(), new ViewDataDictionary
-  {
-      { "IsFullScreen", false }
-  });}
+@{ Html.RenderPartial("OrgAccountHeader", currentAccount.ID.Value.ToString(), new ViewDataDictionary
+   {
+       {"IsFullScreen", false},
+   }); }
 
 <div class="main-content">
 
@@ -43,21 +44,20 @@
 
     <div class="panel panel-default">
         <div class="panel-heading text-center-sm">
-            @{Html.RenderPartial("_ActivityTitle", Model.Activity.Name + " - Summary", new ViewDataDictionary
-              {
-                  {"IconClass", AfterSchool.Helpers.IconForActivityType.GetIconClassForActivityType(Model.Activity.ActivityTypeId)},
-              }); }
+            @{ Html.RenderPartial("_ActivityTitle", Model.Activity.Name + " - Summary", new ViewDataDictionary
+               {
+                   {"IconClass", IconForActivityType.GetIconClassForActivityType(Model.Activity.ActivityTypeId)},
+               }); }
 
             @if (isActivityLeader)
-            {           
+            {
                 <div class="pull-right visible-lg visible-md">
-                    <a href="@Url.Action("EditSetup", "Activity", new {id = Model.Activity.Uid })" class="btn btn-default">Edit @UILabel.ActivityLabel(Model.Activity.ActivityTypeId) &raquo;</a>
+                    <a href="@Url.Action("EditSetup", "Activity", new {id = Model.Activity.Uid})" class="btn btn-default">Edit @UILabel.ActivityLabel(Model.Activity.ActivityTypeId) &raquo;</a>
                 </div>
-           
-                <div class="visible-xs visible-sm">                
-                    <a href="@Url.Action("EditSetup", "Activity", new {id = Model.Activity.Uid })" class="btn btn-default">Edit @UILabel.ActivityLabel(Model.Activity.ActivityTypeId) &raquo;</a>                
-                </div>             
 
+                <div class="visible-xs visible-sm">
+                    <a href="@Url.Action("EditSetup", "Activity", new {id = Model.Activity.Uid})" class="btn btn-default">Edit @UILabel.ActivityLabel(Model.Activity.ActivityTypeId) &raquo;</a>
+                </div>
             }
 
         </div>
@@ -71,7 +71,9 @@
                                 <div data-toggle="counter" data-end="@registrantCount" data-decimals="0" data-suffix="" class="value">@registrantCount</div>
                                 <div class="desc">Total @(UILabel.RegistrantLabel(Model.Activity.ActivityTypeId, true))</div>
                             </div>
-                            <div class="icon"><span class="s7-users"></span></div>
+                            <div class="icon">
+                                <span class="s7-users"></span>
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -83,7 +85,9 @@
                                     <div data-end="@totalPaid" data-decimals="2" data-suffix="" class="value">@totalPaid.ToCurrency()</div>
                                     <div class="desc">Total Paid</div>
                                 </div>
-                                <div class="icon"><span class="s7-cash"></span></div>
+                                <div class="icon">
+                                    <span class="s7-cash"></span>
+                                </div>
                             </div>
                         }
                         else
@@ -93,7 +97,9 @@
                                     <div data-toggle="counter" data-end="@waitingListCount" data-decimals="0" data-suffix="" class="value">@waitingListCount</div>
                                     <div class="desc">On Waiting List</div>
                                 </div>
-                                <div class="icon"><span class="s7-users"></span></div>
+                                <div class="icon">
+                                    <span class="s7-users"></span>
+                                </div>
                             </div>
                         }
 
@@ -104,7 +110,9 @@
                                 <div data-toggle="counter" data-end="@classes.Count" data-decimals="0" data-suffix="" class="value">@classes.Count</div>
                                 <div class="desc">Total @UILabel.ActivityLabel(Model.Activity.ActivityTypeId) Meetings</div>
                             </div>
-                            <div class="icon"><span class="s7-users"></span></div>
+                            <div class="icon">
+                                <span class="s7-users"></span>
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -114,7 +122,9 @@
                                 <div data-end="@attendanceRate.IfBlank("0")" data-decimals="0" data-suffix="" class="value">@attendanceRate.IfBlank("0")%</div>
                                 <div class="desc">Attendance Rate</div>
                             </div>
-                            <div class="icon"><span class="s7-check-circle"></span></div>
+                            <div class="icon">
+                                <span class="s7-check-circle"></span>
+                            </div>
                         </div>
 
                     </div>
@@ -138,8 +148,8 @@
                 </div>
 
                 <div class="col-md-4">
-                    
-                    @if (!Model.Activity.IsFree)
+
+                    @if (!Model.Activity.IsFree())
                     {
                         <div class="panel panel-default">
                             <div class="panel-heading">
@@ -147,7 +157,7 @@
                                 @if (isActivityLeader)
                                 {
                                     <div class="pull-right">
-                                        <a href="@Url.Action("EditCost", "Activity", new { id = Model.Activity.Uid })" class="btn btn-sm btn-link">Edit &raquo;</a>
+                                        <a href="@Url.Action("EditCost", "Activity", new {id = Model.Activity.Uid})" class="btn btn-sm btn-link">Edit &raquo;</a>
                                     </div>
                                 }
                             </div>
@@ -166,7 +176,7 @@
                                     {
                                         IsCheckoutCost = false,
                                         ParticipationObject = participationObject,
-                                    }, new ViewDataDictionary{{"CurrentAccount", currentAccount}});
+                                    }, new ViewDataDictionary {{"CurrentAccount", currentAccount}});
                                 }
                                 else
                                 {
@@ -189,7 +199,7 @@
                                 @if (isActivityLeader)
                                 {
                                     <div class="pull-right">
-                                        <a href="@Url.Action("EditSchedule", "Activity", new { id = Model.Activity.Uid })" class="btn btn-sm btn-link">Edit &raquo;</a>
+                                        <a href="@Url.Action("EditSchedule", "Activity", new {id = Model.Activity.Uid})" class="btn btn-sm btn-link">Edit &raquo;</a>
                                     </div>
                                 }
 
@@ -215,7 +225,8 @@
             // Chart data records -- each entry in this array corresponds to a point on
             // the chart.
             data: [
-                @foreach(var date in dates){
+                @foreach (var date in dates)
+                {
                     @:{ date: '@date', value: @registrants.Count(x => currentAccount.ConvertToAccountTimeZone(x.CreateDate.Value).ToShortDateString() == date) },
                 }
             ],

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -17,7 +18,7 @@ namespace AfterSchoolLibrary
 
         public static string DecodeBase64(this string value)
         {
-            var valueBytes = System.Convert.FromBase64String(value);
+            var valueBytes = Convert.FromBase64String(value);
             return Encoding.UTF8.GetString(valueBytes);
         }
 
@@ -31,7 +32,7 @@ namespace AfterSchoolLibrary
 
         public static string GetDescription(this StripeVerificationFailedCode stripeVerificationFailedCode)
         {
-            switch(stripeVerificationFailedCode)
+            switch (stripeVerificationFailedCode)
             {
                 case StripeVerificationFailedCode.FailedKeyedIdentity:
                     return "the supplied identity information could not be verified";
@@ -54,27 +55,26 @@ namespace AfterSchoolLibrary
                 case StripeVerificationFailedCode.ScanFailedTestMode:
                     return "verification failed - test mode";
             }
+
             return "unknown";
         }
 
         public static DayOfWeek ToDayOfWeek(this DayOfWeekASL day)
         {
-            return (DayOfWeek)((int)day - 1);
+            return (DayOfWeek) ((int) day - 1);
         }
+
         public static DayOfWeekASL ToDayOfWeekASL(this DayOfWeek day)
         {
-            return (DayOfWeekASL)((int)day + 1);
+            return (DayOfWeekASL) ((int) day + 1);
         }
-        public static IEnumerable<System.Data.DataRow> AsEnumerable(this System.Data.DataTable dt)
+
+        public static IEnumerable<DataRow> AsEnumerable(this DataTable dt)
         {
-            var rows = new List<System.Data.DataRow>();
+            var rows = new List<DataRow>();
             if (dt != null)
-            {
-                foreach (System.Data.DataRow dr in dt.Rows)
-                {
+                foreach (DataRow dr in dt.Rows)
                     rows.Add(dr);
-                }
-            }
             return rows.AsEnumerable();
         }
 
@@ -84,12 +84,10 @@ namespace AfterSchoolLibrary
             var finalSlug = "";
 
             foreach (var word in words)
-            {
                 if (word.Length + finalSlug.Length <= maxChars)
                     finalSlug += word;
                 else
                     break;
-            }
 
             if (finalSlug.IsEmpty())
                 finalSlug = aString.MaxChars(maxChars);
@@ -137,19 +135,18 @@ namespace AfterSchoolLibrary
             return objectType;
         }
 
-        public static TValue GetValueOrDefault<TKey,TValue> (this IDictionary<TKey, TValue> dictionary, TKey key) =>
-            dictionary.TryGetValue(key, out var ret) ? ret : default;
+        public static TValue GetValueOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key)
+        {
+            return dictionary.TryGetValue(key, out var ret) ? ret : default;
+        }
 
         public static void ValidateStartAndEndDate(string startdate, string enddate, SystemMessages msgs)
         {
             if (startdate.IsNotEmpty() && enddate.IsNotEmpty())
             {
-                DateTime startDate = startdate.ToDateTime();
-                DateTime endDate = enddate.ToDateTime();
-                if (endDate < startDate)
-                {
-                    msgs.Add("Please ensure start date is earlier than the corresponding end date", MessageType.UserError);
-                }
+                var startDate = startdate.ToDateTime();
+                var endDate = enddate.ToDateTime();
+                if (endDate < startDate) msgs.Add("Please ensure start date is earlier than the corresponding end date", MessageType.UserError);
             }
         }
 
@@ -157,16 +154,14 @@ namespace AfterSchoolLibrary
         {
             if (startdate.IsNotEmpty() && enddate.IsNotEmpty())
             {
-                DateTime startDate = startdate.ToDateTime();
-                DateTime endDate = enddate.ToDateTime();
+                var startDate = startdate.ToDateTime();
+                var endDate = enddate.ToDateTime();
 
-                TimeSpan exactStartTime = starttime.ToDateTime().TimeOfDay;
-                TimeSpan exactEndTime = endtime.ToDateTime().TimeOfDay;
+                var exactStartTime = starttime.ToDateTime().TimeOfDay;
+                var exactEndTime = endtime.ToDateTime().TimeOfDay;
 
                 if (endDate.Add(exactEndTime) < startDate.Add(exactStartTime))
-                {
                     msgs.Add("Please ensure start date, start time is earlier than the corresponding end date, end time", MessageType.UserError);
-                }
             }
         }
     }
@@ -194,7 +189,13 @@ namespace AfterSchoolLibrary
             TotalDays = totalDays;
         }
 
-        enum Phase { Years, Months, Days, Done }
+        private enum Phase
+        {
+            Years,
+            Months,
+            Days,
+            Done,
+        }
 
         public static DateTimeSpan CompareDates(DateTime date1, DateTime date2)
         {
@@ -205,18 +206,17 @@ namespace AfterSchoolLibrary
                 date2 = sub;
             }
 
-            DateTime current = date1;
-            int years = 0;
-            int months = 0;
-            int days = 0;
-            int totalDays = (date2.Date - date1.Date).Days;
+            var current = date1;
+            var years = 0;
+            var months = 0;
+            var days = 0;
+            var totalDays = (date2.Date - date1.Date).Days;
 
-            Phase phase = Phase.Years;
-            DateTimeSpan span = new DateTimeSpan();
-            int officialDay = current.Day;
+            var phase = Phase.Years;
+            var span = new DateTimeSpan();
+            var officialDay = current.Day;
 
             while (phase != Phase.Done)
-            {
                 switch (phase)
                 {
                     case Phase.Years:
@@ -229,6 +229,7 @@ namespace AfterSchoolLibrary
                         {
                             years++;
                         }
+
                         break;
                     case Phase.Months:
                         if (current.AddMonths(months + 1) > date2)
@@ -242,6 +243,7 @@ namespace AfterSchoolLibrary
                         {
                             months++;
                         }
+
                         break;
                     case Phase.Days:
                         if (current.AddDays(days + 1) > date2)
@@ -255,9 +257,9 @@ namespace AfterSchoolLibrary
                         {
                             days++;
                         }
+
                         break;
                 }
-            }
 
             return span;
         }
@@ -266,29 +268,36 @@ namespace AfterSchoolLibrary
     public static class DateTimeExtensions
     {
         /// <summary>
-        /// Use to get the DateTime for the start of the week.
-        /// DateTime dt = DateTime.Now.StartOfWeek(DayOfWeek.Monday);
-        /// DateTime dt = DateTime.Now.StartOfWeek(DayOfWeek.Sunday);
+        ///     Use to get the DateTime for the start of the week.
+        ///     DateTime dt = DateTime.Now.StartOfWeek(DayOfWeek.Monday);
+        ///     DateTime dt = DateTime.Now.StartOfWeek(DayOfWeek.Sunday);
         /// </summary>
         /// <param name="dt"></param>
         /// <param name="startOfWeek"></param>
         /// <returns></returns>
         public static DateTime StartOfWeek(this DateTime dt, DayOfWeek startOfWeek)
         {
-            int diff = (7 + (dt.DayOfWeek - startOfWeek)) % 7;
+            var diff = (7 + (dt.DayOfWeek - startOfWeek)) % 7;
             return dt.AddDays(-1 * diff).Date;
         }
 
         public static DateTime EndOfWeek(this DateTime dt, DayOfWeek startOfWeek)
         {
-            int diff = (7 - (dt.DayOfWeek - startOfWeek)) % 7;
+            var diff = (7 - (dt.DayOfWeek - startOfWeek)) % 7;
             return dt.AddDays(1 * diff).Date;
         }
     }
-    
+
     public static class StringExtensions
     {
-        public static bool IsMatch(this string s, string regex) => Regex.IsMatch(s, regex);
-        public static string Truncate(this string s, int length) => s.Length <= length ? s : s.Substring(0, length - 1) + "…";
+        public static bool IsMatch(this string s, string regex)
+        {
+            return Regex.IsMatch(s, regex);
+        }
+
+        public static string Truncate(this string s, int length)
+        {
+            return s.Length <= length ? s : s.Substring(0, length - 1) + "…";
+        }
     }
 }

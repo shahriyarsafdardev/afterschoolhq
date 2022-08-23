@@ -1,21 +1,24 @@
 ﻿@model Activity
 @{
-    var accountPackage = (AccountPackage)ViewData["AccountPackage"];
+    var accountPackage = (AccountPackage) ViewData["AccountPackage"];
 }
 <div class="col-sm-10 col-md-offset-1">
 
-    <div class="pull-right"><button type="submit" class="btn btn-primary"><i class="s7-diskette"></i> Save</button></div>
-    
-    @{Html.RenderPartial("~/Views/Shared/_ActivityFormSetup.cshtml", Model, new ViewDataDictionary() { { "AccountPackage", accountPackage } });}
+    <div class="pull-right">
+        <button type="submit" class="btn btn-primary"><i class="s7-diskette"></i> Save</button>
+    </div>
 
-    @{Html.RenderPartial("~/Views/Shared/_ActivityFormContactInfo.cshtml", Model);}
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityFormSetup.cshtml", Model, new ViewDataDictionary {{"AccountPackage", accountPackage}}); }
 
-    @{Html.RenderPartial("~/Views/Shared/_ActivityFormDetails.cshtml", Model);}
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityFormContactInfo.cshtml", Model); }
 
-    @{Html.RenderPartial("~/Views/Shared/_ActivityFormLocation.cshtml", Model);}
-    
-    @{Html.RenderPartial("~/Views/Shared/_ActivityFormPayment.cshtml", Model, new ViewDataDictionary() { { "AccountPackage", accountPackage } });}
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityFormDetails.cshtml",
+           new ActivityFormDetailsViewModel {Activity = Model, Details = Model.GetActivityDetails()?.Value}); }
 
-    @{Html.RenderPartial("~/Views/Shared/_ActivityFormConfirmation.cshtml", Model);}
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityFormLocation.cshtml", Model); }
+
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityFormPayment.cshtml", Model, new ViewDataDictionary {{"AccountPackage", accountPackage}}); }
+
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityFormConfirmation.cshtml", Model); }
 
 </div>

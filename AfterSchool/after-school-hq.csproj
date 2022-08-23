@@ -645,6 +645,7 @@
     <Compile Include="Controllers\RegistrationCommon.cs" />
     <Compile Include="Controllers\VolunteerRegistrationController.cs" />
     <Compile Include="Helpers\IconForActivityType.cs" />
+    <Compile Include="Models\ActivityFormDetailsViewModel.cs" />
     <Compile Include="Models\ActivityHeaderModel.cs" />
     <Compile Include="Models\ParticipationObjectViewModel.cs" />
     <Compile Include="RecordControllerActionsToInfluxMiddleware.cs" />

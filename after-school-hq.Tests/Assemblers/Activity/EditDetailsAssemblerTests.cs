@@ -22,9 +22,9 @@ namespace after_school_hq.Tests.Assemblers.Activity
             };
             var fullScreenExitUrl = string.Empty;
             var accountPackage = new AccountPackage();
-            var result = assembler.AssembleEditDetailsResult(currentAccount, msgs, activity, fullScreenExitUrl, false, accountPackage, true );
+            var result = assembler.AssembleEditDetailsResult(currentAccount, activity, fullScreenExitUrl, false, accountPackage, true, "Edit Details", msgs);
 
-            Assert.That(result.ActiveMenu, Is.EqualTo("EditDetails"));
+            Assert.That(result.Details, Is.EqualTo("Edit Details"));
             Assert.That(result.IsFullScreen, Is.True);
             Assert.That(result.Messages, Is.SameAs(msgs));
             Assert.That(result.Activity, Is.SameAs(activity));

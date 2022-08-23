@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Specialized;
+﻿using System.Collections.Specialized;
 using System.Linq;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
@@ -93,13 +92,8 @@ namespace AfterSchool.Models
             DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var setupMsgs = new SystemMessages();
-            var detailMsgs = new SystemMessages();
-            var contactMsgs = new SystemMessages();
-            var paymentMsgs = new SystemMessages();
-            var confirmationMsgs = new SystemMessages();
-            var archiveMsgs = new SystemMessages();
 
+            var setupMsgs = new SystemMessages();
             if (activity.Name.IsEmpty())
                 setupMsgs.Add("Activity Name", MessageType.UserError);
 
@@ -124,7 +118,9 @@ namespace AfterSchool.Models
                 msgs.AddRange(setupMsgs);
             }
 
-            if (BasicLibrary.Utilities.RemoveHTMLAndEntities(activity.Details).IsBlank())
+            var detailMsgs = new SystemMessages();
+            var details = activity.GetActivityDetails();
+            if (BasicLibrary.Utilities.RemoveHTMLAndEntities(details?.Value).IsBlank())
                 detailMsgs.Add("Description", MessageType.UserError);
 
             if (detailMsgs.HasErrors())
@@ -136,6 +132,7 @@ namespace AfterSchool.Models
                 msgs.AddRange(detailMsgs);
             }
 
+            var contactMsgs = new SystemMessages();
             if (activity.ContactName.IsBlank())
                 contactMsgs.Add("Contact Name", MessageType.UserError);
 
@@ -154,15 +151,7 @@ namespace AfterSchool.Models
                 msgs.AddRange(contactMsgs);
             }
 
-            if (paymentMsgs.HasErrors())
-            {
-                paymentMsgs.Insert(0,
-                    new SystemMessage(
-                        $"<a href=\"/org/activity/editcost/{activity.Uid}\" class=\"publish-error-title\">Payment</a>",
-                        MessageType.UserError));
-                msgs.AddRange(paymentMsgs);
-            }
-
+            var confirmationMsgs = new SystemMessages();
             if (!activity.ActivityGroupId.HasValue)
             {
                 if (activity.GetActivityProperty(AccountPropertyType.ApplicationThankYouEmail).IsEmpty() ||
@@ -185,6 +174,7 @@ namespace AfterSchool.Models
                 msgs.AddRange(confirmationMsgs);
             }
 
+            var archiveMsgs = new SystemMessages();
             if (activity.IsArchived)
                 archiveMsgs.Add(
                     $"<a href=\"/org/activity/restore/{activity.Uid}\">Restore {activity.Name}</a>. It is currently archived",
@@ -195,8 +185,8 @@ namespace AfterSchool.Models
                     $"<a href=\"/org/group/restore/{activity.GetActivityGroup().Uid}\">Restore {activity.GetActivityGroup().Name}</a>. It is currently archived",
                     MessageType.Error);
 
+            // Not on other method
             var account = activity.GetAccount(msgs, dc);
-
             if (activity.CostPerRegistrant <= 0 && !account.CanPublishFreeActivity(msgs, dc))
             {
                 var freeActivityLimitPackage =
@@ -207,9 +197,9 @@ namespace AfterSchool.Models
                     $"<a href=\"#\" onclick=\"setFeatureIdAndLoadUpgradePage('{freeActivityLimitPackage.ID}')\">upgrade your account for more free activities</a>";
 
                 msgs.Add(
-                    $"<p class=\"no-bullet\">You've reached your limit on free activities, please take one of the following actions:</p><ul>" +
+                    "<p class=\"no-bullet\">You've reached your limit on free activities, please take one of the following actions:</p><ul>" +
                     $"<li>{editCostLink}</li><li>{upgradePackageLink}</li>" +
-                    $"  </ul>",
+                    "  </ul>",
                     MessageType.UserError);
             }
 

@@ -70,7 +70,7 @@ namespace AfterSchoolLibraryTests.Tests
             var activity = ActivityFactory.Create(account: account, msgs: msgs, dc: dc);
 
             // Act
-            var expected = Activity.LoadByIdByAccountId(Id: activity.ID.Value, AccountId: account.ID.Value, msgs: msgs, dc: dc);
+            var expected = Activity.LoadByIdByAccountId(id: activity.ID.Value, accountId: account.ID.Value, msgs: msgs, dc: dc);
 
             // Assert
             Assert.Equal(expected: expected.ID, actual: activity.ID);

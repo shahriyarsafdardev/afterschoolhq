@@ -1,4 +1,5 @@
-﻿@model Activity
+﻿@using AfterSchool.Helpers
+@model Activity
 @{
     ViewBag.Title = Model.AccountName;
     var msgs = (SystemMessages) ViewBag.Messages;
@@ -11,7 +12,7 @@
     var showSetupPayments = Model.ProviderAccountId.IsEmpty() &&
                             !currentAccount.CanReceivePaymentDeposits() &&
                             !currentAccount.HasTreasurer() &&
-                            !Model.IsFree;
+                            !Model.IsFree();
     var accountPackage = SessionVariables.AccountPackage;
     var allowInvitesPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowInvites, accountPackage);
 
@@ -22,7 +23,7 @@
 
     var publishUrl = "#";
     var btnDisabled = "disabled";
-    var isPublishable = Model.IsPublishable && publishMsgs.Count == 0;
+    var isPublishable = Model.IsPublishable() && publishMsgs.Count == 0;
     if (isPublishable)
     {
         publishUrl = Url.Action("publish", "activity", new {id = Model.Uid});
@@ -66,7 +67,7 @@
 <div class="panel-heading">
     @{ Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name + " - Publish", new ViewDataDictionary
        {
-           {"IconClass", AfterSchool.Helpers.IconForActivityType.GetIconClassForActivityType(Model.ActivityTypeId)},
+           {"IconClass", IconForActivityType.GetIconClassForActivityType(Model.ActivityTypeId)},
        }); }
 </div>
 <div class="panel-body">

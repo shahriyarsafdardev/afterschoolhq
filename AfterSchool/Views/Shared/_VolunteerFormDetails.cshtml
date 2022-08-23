@@ -1,24 +1,21 @@
-﻿@model Activity
+﻿@model ActivityFormDetailsViewModel
 
 <div class="panel panel-default panel-small-padding margin-bottom-zero">
     <div class="panel-heading activity-heading">
-        About Your @UILabel.ActivityLabel(Model.ActivityTypeId)
+        About Your @UILabel.ActivityLabel(Model.Activity.ActivityTypeId)
     </div>
     <div class="panel-body">
         <div class="form-group">
             <label class="col-md-3 control-label">
-                Enter details about your @UILabel.ActivityLabel(Model.ActivityTypeId).ToLower() <span class="text-danger">*</span>                                
+                Enter details about your @UILabel.ActivityLabel(Model.Activity.ActivityTypeId).ToLower() <span class="text-danger">*</span>
             </label>
             <div class="col-md-9">
-                @{ Html.RenderPartial(
-               "~/Views/Shared/_TextEditor.cshtml",
-               Model.Details,
-               new ViewDataDictionary() {
-                    { "required", false },
-                    { "name", "details" },
-                    { "id", "details" }
-               }
-               ); }
+                @{ Html.RenderPartial("~/Views/Shared/_TextEditor.cshtml", Model.Details, new ViewDataDictionary
+                   {
+                       {"required", false},
+                       {"name", "details"},
+                       {"id", "details"},
+                   }); }
 
                 <p class="text-muted">
                     <em>
@@ -29,4 +26,3 @@
         </div>
     </div>
 </div>
-

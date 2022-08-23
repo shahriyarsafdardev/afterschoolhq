@@ -1,37 +1,38 @@
 ﻿@model Activity
 @{
     ViewBag.Title = Model.AccountName;
-    var msgs = (SystemMessages)ViewBag.Messages;
+    var msgs = (SystemMessages) ViewBag.Messages;
     var publishMsgs = Model.GetItemsRequiredToPublish();
     var group = Model.GetActivityGroup();
 
     var publishUrl = "#";
     var btnDisabled = "disabled";
-    if (Model.IsPublishable)
+    var isPublishable = Model.IsPublishable();
+    if (isPublishable)
     {
-        publishUrl = Url.Action("publish", "activity", new { id = Model.Uid });
+        publishUrl = Url.Action("publish", "activity", new {id = Model.Uid});
         btnDisabled = "";
     }
 }
 
-@{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
+@{ Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString()); }
 
 <div class="main-content">
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{Html.RenderPartial("~/Views/Shared/_LeagueActivityHeader.cshtml", Model);}
+    @{ Html.RenderPartial("~/Views/Shared/_LeagueActivityHeader.cshtml", Model); }
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name + " - Publish"); }
+            @{ Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name + " - Publish"); }
         </div>
         <div class="panel-body">
 
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <div class="btn-group pull-right">
-                        @if (Model.IsPublishable)
+                        @if (isPublishable)
                         {
                             if (SessionVariables.CurrentUser.VerifiedAccount)
                             {
@@ -58,46 +59,47 @@
                 <div class="panel-body">
                     <div class="widget col-md-10 col-md-offset-1">
                         <div class="widget-head">
-                                @if (Model.IsPublishable)
+                            @if (isPublishable)
+                            {
+                                if (Model.IsPublished)
                                 {
-                                    if (Model.IsPublished)
-                                    {
-
-                                        <p class="text-success text-xlarge">
-                                            <i class="s7-check-circle"></i>
-                                            Your @UILabel.ActivityLabel(Model.ActivityTypeId) is published :)
-                                        </p>
-                                    }
-                                    else
-                                    {
-                                        <p class="text-warning text-xlarge">
-                                            <i class="s7-next-2"></i>
-                                            Your @UILabel.ActivityLabel(Model.ActivityTypeId) is ready to publish
-                                        </p>
-                                    }
+                                    <p class="text-success text-xlarge">
+                                        <i class="s7-check-circle"></i>
+                                        Your @UILabel.ActivityLabel(Model.ActivityTypeId) is published :)
+                                    </p>
                                 }
                                 else
                                 {
-                                    <p class="text-danger text-xlarge">
-                                        <i class="s7-close-circle"></i>
-                                        Your @UILabel.ActivityLabel(Model.ActivityTypeId) is <em>not</em> ready to publish
+                                    <p class="text-warning text-xlarge">
+                                        <i class="s7-next-2"></i>
+                                        Your @UILabel.ActivityLabel(Model.ActivityTypeId) is ready to publish
                                     </p>
                                 }
+                            }
+                            else
+                            {
+                                <p class="text-danger text-xlarge">
+                                    <i class="s7-close-circle"></i>
+                                    Your @UILabel.ActivityLabel(Model.ActivityTypeId) is <em>not</em> ready to publish
+                                </p>
+                            }
                         </div>
                         <div class="widget-tile">
-                            @if (!Model.IsPublishable)
+                            @if (!isPublishable)
                             {
                                 <h3>Please review the items below and save your updates in order to publish your registration form</h3>
                                 foreach (SystemMessage msg in publishMsgs)
                                 {
                                     if (msg.Text.Contains("publish-error-title"))
                                     {
-                                        <br />
-                                        <p>@Html.Raw(msg.Text) <i class="s7-link"></i></p>
+                                        <br/>
+                                        <p>
+                                            @Html.Raw(msg.Text) <i class="s7-link"></i>
+                                        </p>
                                     }
                                     else
                                     {
-                                        @:&nbsp;&bull; @Html.Raw(msg.Text)<br />
+                                        @:&nbsp;&bull; @Html.Raw(msg.Text)<br/>
                                     }
                                 }
                             }
@@ -108,7 +110,9 @@
                                         <td>Organization Home Page</td>
                                         <td>
                                             <a href="@SessionVariables.CurrentAccount.HomePageUrl" target="_blank">@SessionVariables.CurrentAccount.HomePageUrl</a>
-                                            <a href="@SessionVariables.CurrentAccount.HomePageUrl" target="_blank"><i class="s7-link"></i></a>
+                                            <a href="@SessionVariables.CurrentAccount.HomePageUrl" target="_blank">
+                                                <i class="s7-link"></i>
+                                            </a>
                                         </td>
                                     </tr>
                                     @if (Model.IsPublished)
@@ -119,7 +123,9 @@
                                                 <td>@UILabel.ActivityGroupLabel(group.ActivityGroupTypeId) URL</td>
                                                 <td>
                                                     <a href="@group.HomePageUrl" target="_blank">@group.HomePageUrl</a>
-                                                    <a href="@group.HomePageUrl" target="_blank"><i class="s7-link"></i></a>
+                                                    <a href="@group.HomePageUrl" target="_blank">
+                                                        <i class="s7-link"></i>
+                                                    </a>
                                                 </td>
                                             </tr>
                                         }
@@ -129,7 +135,9 @@
                                                 <td>@UILabel.ActivityLabel(Model.ActivityTypeId) URL</td>
                                                 <td>
                                                     <a href="@Model.HomePageUrl" target="_blank">@Model.HomePageUrl</a>
-                                                    <a href="@Model.HomePageUrl" target="_blank"><i class="s7-link"></i></a>
+                                                    <a href="@Model.HomePageUrl" target="_blank">
+                                                        <i class="s7-link"></i>
+                                                    </a>
                                                 </td>
                                             </tr>
                                         }
@@ -140,7 +148,9 @@
                                             <td>Preview URL (do not share)</td>
                                             <td>
                                                 <a href="@Model.PreviewUrl" target="_blank">@Model.PreviewUrl</a>
-                                                <a href="@Model.PreviewUrl" target="_blank"><i class="s7-link"></i></a>
+                                                <a href="@Model.PreviewUrl" target="_blank">
+                                                    <i class="s7-link"></i>
+                                                </a>
                                             </td>
                                         </tr>
                                     }
@@ -166,11 +176,11 @@
         <div class="modal-body form">
 
             <p>Are you sure you want to unpublish the @UILabel.ActivityLabel(Model.ActivityTypeId).ToLower()? This will make it inaccessible to potential @UILabel.RegistrantLabel(true).ToLower()</p>
-            
+
         </div>
         <div class="modal-footer">
             <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-            <a href="@Url.Action("unpublish", "activity", new { id = Model.Uid })" class="btn btn-primary">
+            <a href="@Url.Action("unpublish", "activity", new {id = Model.Uid})" class="btn btn-primary">
                 Unpublish @UILabel.ActivityLabel(Model.ActivityTypeId) &raquo;
             </a>
         </div>

@@ -20,7 +20,7 @@
 
     var showAllowPaymentPlans = accountPackage.HasFeature(FeatureType.AllowPaymentPlans);
     var showAllowPaymentPlansPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowPaymentPlans, SessionVariables.AccountPackage);
-    
+
     var cannotEdit = Model.IsPublished;
 }
 
@@ -47,7 +47,7 @@
             </label>
             <div class="col-sm-9">
                 <div class="am-radio inline">
-                    <input type="radio" class="form-control" name="doparentspay" id="do-parents-pay-no" required @(Model.IsFree ? "checked=\"checked\"" : "")/>
+                    <input type="radio" class="form-control" name="doparentspay" id="do-parents-pay-no" required @(Model.IsFree() ? "checked=\"checked\"" : "")/>
                     <label for="do-parents-pay-no">No</label>
                 </div>
                 <div class="am-radio inline">
@@ -75,7 +75,7 @@
                             <em>The total amount you will receive is <span class="text-bold">$<span id="amounttoprovider">0.00</span></span></em>.
                         </span>
                     </p>
-                    
+
                     @if (!Model.IsConvenienceFeeTakenOutOfCost)
                     {
                         <div>
@@ -87,9 +87,9 @@
                     }
                     else
                     {
-                        <input type="hidden" name="isparentpricecost" id="isparentpricecost" value="1" />
+                        <input type="hidden" name="isparentpricecost" id="isparentpricecost" value="1"/>
                     }
-                    
+
                 </div>
             </div>
 
@@ -205,14 +205,14 @@
                 <div>
                     @if (paymentPlan.IsEmpty() || paymentPlan.IsConvenienceFeeTakenOutOfCost)
                     {
-                        <input type="hidden" name="isparentpricepaymentplan" id="isparentpricepaymentplan" value="1" />
+                        <input type="hidden" name="isparentpricepaymentplan" id="isparentpricepaymentplan" value="1"/>
                     }
                     else
                     {
                         <div class="am-checkbox">
-                            <input type="checkbox" 
-                                   name="isparentpricepaymentplan" 
-                                   id="isparentpricepaymentplan" 
+                            <input type="checkbox"
+                                   name="isparentpricepaymentplan"
+                                   id="isparentpricepaymentplan"
                                    value="1" @(paymentPlan.IsNotEmpty() && paymentPlan.IsConvenienceFeeTakenOutOfCost ? "checked=\"checked\"" : "")/>
                             <label for="isparentpricepaymentplan">Price is the amount the parent pays</label>
                         </div>
@@ -336,7 +336,7 @@
                 <div>
                     @if (postPayPlan.IsEmpty() || postPayPlan.IsConvenienceFeeTakenOutOfCost)
                     {
-                        <input type="hidden" name="isparentpricepostpay" id="isparentpricepostpay" value="1" />
+                        <input type="hidden" name="isparentpricepostpay" id="isparentpricepostpay" value="1"/>
                     }
                     else
                     {
@@ -462,7 +462,7 @@
             $('#postpayprepaybillingperiod').text(updatedBillingPeriod);
         });
 
-        if ('@Model.IsFree' == '@false') {
+        if ('@Model.IsFree()' == '@false') {
             $('#do-parents-pay-yes').prop('checked', true);
             $('#do-parents-pay-yes').trigger('click');
 
@@ -538,7 +538,7 @@
         });
                 
         @if (cannotEdit)
-        {   
+        {
             @:disableAll();
         }
     });

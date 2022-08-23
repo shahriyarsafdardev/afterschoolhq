@@ -652,8 +652,8 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc = null)
         {
             return account.HasActivities(msgs, dc) &&
-                   (account.GetActivities(msgs, dc).Any(activity => !activity.GetIsFree(msgs, dc)) ||
-                    account.GetExternallyProvidedActivities(msgs, dc).Any(activity => !activity.GetIsFree(msgs, dc)));
+                   (account.GetActivities(msgs, dc).Any(activity => !activity.IsFree(msgs, dc)) ||
+                    account.GetExternallyProvidedActivities(msgs, dc).Any(activity => !activity.IsFree(msgs, dc)));
             // return account.GetAllActiveAndNonPublishedActivities(msgs, dc).Any(activity => !activity.IsFree);
         }
 

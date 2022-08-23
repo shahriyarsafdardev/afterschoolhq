@@ -188,12 +188,13 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
 
-            var loginLink = StripeHelper.GetStripeHelperConnectAccount().CreateLoginLink(currentAccount.StripeUserId, $"{AfterSchoolLibrary.Helpers.Utilities.BaseUrl()}/org/accounting/", msgs);
+            var loginLink = StripeHelper.GetStripeHelperConnectAccount()
+                .CreateLoginLink(currentAccount.StripeUserId, $"{AfterSchoolLibrary.Helpers.Utilities.BaseUrl()}/org/accounting/", msgs);
 
             if (loginLink.IsNotEmpty())
-                return Json(new { status = "ok", link = loginLink.Url }, JsonRequestBehavior.AllowGet);
+                return Json(new {status = "ok", link = loginLink.Url}, JsonRequestBehavior.AllowGet);
 
-            return Json(new { status = "error", messages = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
+            return Json(new {status = "error", messages = msgs.ToList().Select(msg => new {msg.Text})}, JsonRequestBehavior.AllowGet);
         }
 
         #region Payouts
@@ -576,7 +577,7 @@ namespace AfterSchool.Areas.Org.Controllers
             try
             {
                 var activities = currentAccount.GetActivities(msgs)?
-                    .Where(activity => activity.IsOpenOrUpcoming(msgs) && !activity.IsFree && !activity.HasPostPayPlan(msgs) &&
+                    .Where(activity => activity.IsOpenOrUpcoming(msgs) && !activity.IsFree() && !activity.HasPostPayPlan(msgs) &&
                                        !activity.HasSubscriptionPlan(msgs))
                     .Select(m => new ModalViewModel()
                     {
@@ -725,6 +726,5 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         #endregion
-        
     }
 }
