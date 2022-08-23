@@ -110,7 +110,7 @@ namespace AfterSchoolLibrary.Billing
 
             return account;
         }
-        
+
         public Stripe.Account ToggleStripePayoutForConnectedAccount(string customAccountsStripeUserId, string accountName, PayoutIntervalType payoutIntervalType, SystemMessages msgs)
         {
             var options = new AccountUpdateOptions()

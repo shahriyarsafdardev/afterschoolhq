@@ -133,7 +133,7 @@ namespace AfterSchoolLibrary.Models
 			return BillingPortalConfiguration.Load(this.ID.Value, msgs, dc: dc);
 		}
 
-        public static BillingPortalConfiguration LoadByBillingPortalConfigurationId(int StripeId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static BillingPortalConfiguration LoadByStripeId(int StripeId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
