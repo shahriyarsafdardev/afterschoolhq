@@ -92,24 +92,6 @@ namespace AfterSchoolLibrary.Billing
             return account;
         }
 
-        public Stripe.Account CreateCustomAccount(AccountCreateOptions options, SystemMessages msgs)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-            Stripe.Account account = null;
-
-            try
-            {
-                account = GetAccountService().Create(options);
-            }
-            catch (StripeException ex)
-            {
-                msgs.Add(ex.Message, MessageType.UserError, ex);
-                msgs.Add("Error creating payment account", MessageType.UserError);
-            }
-
-            return account;
-        }
-
         public Stripe.Account UpdateCustomAccount(string stripeAccountId, AccountUpdateOptions options, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -127,165 +109,7 @@ namespace AfterSchoolLibrary.Billing
 
             return account;
         }
-
-        [Obsolete]
-        public Stripe.Account CreateCustomAccount(string businessName, string email, LegalEntityType entityType, SystemMessages msgs)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            var options = new AccountCreateOptions()
-            {
-                Type = "custom",
-                Country = "US",
-                DefaultCurrency = "usd",
-                Company = new AccountCompanyOptions()
-                {
-                    Name = businessName,
-                },
-                Email = email,
-                Settings = new AccountSettingsOptions()
-                {
-                    Payouts = new AccountSettingsPayoutsOptions()
-                    {
-                        DebitNegativeBalances = true,
-                        StatementDescriptor = "AHQ transfer".MaxChars(22),
-                        Schedule = new AccountSettingsPayoutsScheduleOptions()
-                        {
-                            Interval = "manual",
-                        }
-                    }
-                },
-                BusinessType = entityType.ToString().ToLower(),
-                RequestedCapabilities = new List<string>() { "card_payments" }
-            };
-
-            Stripe.Account account = null;
-
-            try
-            {
-                account = GetAccountService().Create(options);
-            }
-            catch (StripeException ex)
-            {
-                msgs.Add(ex.Message, MessageType.UserError, ex);
-                msgs.Add("Error creating payment account", MessageType.UserError);
-            }
-
-            return account;
-        }
-
-        public ExternalAccountService GetExternalAccountService()
-        {
-            return new ExternalAccountService(StripeClient);
-        }
-
-        public Stripe.BankAccount CreateCustomBankAccount(string stripeAccountId, string routingNumber, string accountNumber, SystemMessages msgs)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            var options = new ExternalAccountCreateOptions()
-            {                                
-                ExternalAccount = new AccountBankAccountOptions()
-                {
-                    RoutingNumber = routingNumber,
-                    AccountNumber = accountNumber,
-                    Country = "US",
-                    Currency = "usd"
-                }
-            };
-
-            BankAccount bankAccount = null;
-
-            try
-            {
-                bankAccount = (BankAccount)GetExternalAccountService().Create(stripeAccountId, options);
-            }
-            catch (StripeException ex)
-            {
-                msgs.Add(ex.Message, MessageType.UserError, ex);
-                msgs.Add("Error creating bank account", MessageType.UserError);
-            }
-
-            return bankAccount;
-        }
-
-        public Stripe.Account UpdateCustomAccountLegalEntity(string stripeAccountId, LegalEntityType entityType, string firstName, string lastName, string ssnLast4, string fullSSN, DateTime? dateOfBirth, string address1, string address2, string city, string state, string postalCode, string supportPhone, string supportEmail, string businessName, string ein, string businessUrl, string businessPhone, string productDescription, string documentFileId, DateTime tosAcceptanceDate, string tosIPAddress, string tosUserAgent, SystemMessages msgs)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            var address = new AddressOptions()
-            {
-                City = city,
-                State = state,
-                PostalCode = postalCode,
-                Country = "US",
-                Line1 = address1,
-                Line2 = address2,
-            };
-
-            var options = new AccountUpdateOptions()
-            {
-                BusinessProfile = new AccountBusinessProfileOptions()
-                {
-                    SupportEmail = supportEmail,
-                    SupportPhone = supportPhone,
-                    Url = businessUrl,
-                    ProductDescription = productDescription
-                },
-                BusinessType = entityType.ToString().ToLower(),
-                TosAcceptance = new AccountTosAcceptanceOptions()
-                {
-                    Date = tosAcceptanceDate,
-                    Ip = tosIPAddress
-                },
-            };
-
-            if (entityType == LegalEntityType.Company)
-            {
-                options.BusinessProfile.Name = businessName;
-                options.Company = new AccountCompanyOptions()
-                {
-                    Address = address,
-                    TaxId = ein,
-                    Phone = businessPhone,     
-                };
-            }
-            else
-                options.Individual = new PersonUpdateOptions()
-                {
-                    FirstName = firstName,
-                    LastName = lastName,
-                    Dob = new DobOptions()
-                    {
-                        Day = dateOfBirth.Value.Day,
-                        Month = dateOfBirth.Value.Month,
-                        Year = dateOfBirth.Value.Year,
-                    },
-                    SSNLast4 = ssnLast4,
-                    Address = address
-                };
-
-            // if (fullSSN.IsNotEmpty())
-            //    options.Individual.PersonalIdNumber = fullSSN;
-
-            // if (documentFileId.IsNotEmpty())
-            //    options.Individual.Verification.Document.FrontFileId = documentFileId;
-
-            Stripe.Account account = null;
-
-            try
-            {
-                account = GetAccountService().Update(stripeAccountId, options);               
-            }
-            catch (StripeException ex)
-            {
-                msgs.Add(ex.Message, MessageType.UserError, ex);
-                msgs.Add("Error updating payment account", MessageType.UserError);
-            }
-
-            return account;
-        }
-
+        
         public Stripe.Account ToggleStripePayoutForConnectedAccount(string customAccountsStripeUserId, string accountName, PayoutIntervalType payoutIntervalType, SystemMessages msgs)
         {
             var options = new AccountUpdateOptions()
@@ -1353,7 +1177,7 @@ namespace AfterSchoolLibrary.Billing
                 Coupon = stripeCouponId,
                 Items = new List<SubscriptionItemOptions>() { new SubscriptionItemOptions() { Plan = planId, Quantity = 1 } },
                 Metadata = metaData,
-                Prorate = isProrated, //prorate only if ongoing activity and not paymentplan, else we will handle this manually
+                ProrationBehavior = isProrated ? "create_prorations" : "none",
                 BillingCycleAnchor = billingCycleAnchor
             };
 
@@ -1397,7 +1221,7 @@ namespace AfterSchoolLibrary.Billing
                 Customer = customerId,
                 CollectionMethod = "charge_automatically",
                 Metadata = metaData,
-                Prorate = false,
+                ProrationBehavior = "none",
             };
 
             if (sourceId.IsNotEmpty())
@@ -1509,7 +1333,7 @@ namespace AfterSchoolLibrary.Billing
                 options.TrialEnd = trialEndDate;
 
             if (prorate.HasValue)
-                options.Prorate = prorate.Value;
+                options.ProrationBehavior = prorate.Value ? "create_prorations" : "none";
 
             Stripe.Subscription subscription = null;
 
@@ -1895,13 +1719,11 @@ namespace AfterSchoolLibrary.Billing
             };
 
             if (platformFee.HasValue)
-            {
-                options.Destination = new ChargeDestinationCreateOptions()
+                options.Destination = new ChargeDestinationOptions()
                 {
                     Account = destinationAccountId,
                     Amount = (totalAmount * 100).ToInteger() - (platformFee.Value * 100).ToInteger()
                 };
-            }
 
             Stripe.Charge charge = null;
 
@@ -2048,82 +1870,6 @@ namespace AfterSchoolLibrary.Billing
             }
 
             return paymentIntent;
-        }
-
-        //..TODO: 
-        //..Intialized payment intent to check if refund works properly for below task.
-        //..I've kept this code as this will be usefull in future.
-        //..Review Refund Process(https://app.clickup.com/t/k50ay4)
-
-        public Stripe.PaymentIntent CreatePaymentIntent(string fromCustomerId, string destinationAccountId, string tokenOrSourceId, decimal totalAmount, decimal? platformFee, string description, string statementDescriptor, Dictionary<string, string> metaData, SystemMessages msgs)
-        {
-            var createOptions = new PaymentIntentCreateOptions
-            {
-                Amount = (totalAmount * 100).ToInteger(),
-                ApplicationFeeAmount = (platformFee.Value * 100).ToInteger(),
-                Currency = "usd",
-                Customer = fromCustomerId,
-                Description = description,
-                Source = tokenOrSourceId,
-                StatementDescriptorSuffix = statementDescriptor.Replace("'", "").MaxChars(22),
-                TransferData = new PaymentIntentTransferDataOptions
-                {
-                    Destination = destinationAccountId,
-                },
-            };
-
-            Stripe.PaymentIntent charge = null;
-
-            try
-            {
-                charge = GetPaymentIntentService().Create(createOptions);
-                GetPaymentIntentService().Confirm(charge.Id);
-            }
-            catch (StripeException ex)
-            {
-                msgs.Add(ex.Message, MessageType.UserError, ex);
-                msgs.Add($"Error charging payment source", MessageType.UserError);
-            }
-
-            return charge;
-        }
-
-        #endregion
-
-        #region StripeTokens
-
-        private Stripe.TokenService GetTokenService()
-        {
-            return new Stripe.TokenService(StripeClient);
-        }
-
-        public Stripe.Token CreateCustomerToken(string customerId, string stripeAccountId, string sourceId, SystemMessages msgs)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            var options = new Stripe.TokenCreateOptions()
-            {
-                Customer = customerId,
-                Card = new AnyOf<string, CreditCardOptions>(sourceId)
-            };
-
-            var requestOptions = new Stripe.RequestOptions();
-            if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeAccount = stripeAccountId;
-
-            Stripe.Token token = null;
-
-            try
-            {
-                token = GetTokenService().Create(options, requestOptions);
-            }
-            catch (StripeException ex)
-            {
-                msgs.Add("Error charging payment source", MessageType.Error, ex);
-                msgs.Add(ex.Message, MessageType.Error, ex);
-            }
-
-            return token;
         }
 
         #endregion
@@ -2393,16 +2139,15 @@ namespace AfterSchoolLibrary.Billing
             return new Stripe.LoginLinkService(StripeClient);
         }
 
-        public Stripe.LoginLink CreateLoginLink(string stripeAccountId, string redirectUrl, SystemMessages msgs)
+        public Stripe.LoginLink CreateLoginLink(string stripeAccountId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             Stripe.LoginLink loginLink = null;
-            var options = new Stripe.LoginLinkCreateOptions() { RedirectUrl = redirectUrl };
 
             try
             {
-                loginLink = GetLoginLinkService().Create(stripeAccountId, options);
+                loginLink = GetLoginLinkService().Create(stripeAccountId);
             }
             catch (StripeException ex)
             {
@@ -2422,7 +2167,7 @@ namespace AfterSchoolLibrary.Billing
             return new Stripe.BillingPortal.SessionService(StripeClient);
         }
 
-        public Stripe.BillingPortal.Session GetBillingPortalSession(string customerId, string redirectUrl, SystemMessages msgs)
+        public Stripe.BillingPortal.Session GetBillingPortalSession(string customerId, string billingPortalConfigId, string redirectUrl, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -2431,6 +2176,7 @@ namespace AfterSchoolLibrary.Billing
             {
                 Customer = customerId,
                 ReturnUrl = redirectUrl,
+                Configuration = billingPortalConfigId,
             };
 
             try
@@ -2445,30 +2191,74 @@ namespace AfterSchoolLibrary.Billing
 
             return session;
         }
-
-        public Stripe.BillingPortal.Session GetBillingPortalSessionAddCardOnly(string customerId, string redirectUrl, SystemMessages msgs)
+        
+        #endregion
+        
+        #region BillingPortalConfiguration
+        
+        private Stripe.BillingPortal.ConfigurationService GetBillingPortalConfigurationService()
+        {
+            return new Stripe.BillingPortal.ConfigurationService(StripeClient);
+        }
+        
+        public Stripe.BillingPortal.Configuration CreateBillingPortalConfigurationPaymentMethodUpdate(SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            Stripe.BillingPortal.Session session = null;
-            var options = new Stripe.BillingPortal.SessionCreateOptions()
+            Stripe.BillingPortal.Configuration configuration = null;
+            var options = new Stripe.BillingPortal.ConfigurationCreateOptions()
             {
-                Customer = customerId,
-                ReturnUrl = redirectUrl,
+                Features = new ConfigurationFeaturesOptions()
+                {
+                    PaymentMethodUpdate = new ConfigurationFeaturesPaymentMethodUpdateOptions()
+                    {
+                        Enabled = true
+                    }
+                }
             };
-            
 
             try
             {
-                session = GetBillingPortalSessionService().Create(options);
+                configuration = GetBillingPortalConfigurationService().Create(options);
             }
             catch (StripeException ex)
             {
                 msgs.Add(ex.Message, MessageType.Error, ex);
-                msgs.Add($"Error creating session", MessageType.UserError);
+                msgs.Add($"Error creating configuration", MessageType.UserError);
             }
 
-            return session;
+            return configuration;
+        }
+        
+        public Stripe.BillingPortal.Configuration CreateBillingPortalConfigurationSubscriptionUpdate(List<ConfigurationFeaturesSubscriptionUpdateProductOptions> productOptionsList, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Stripe.BillingPortal.Configuration configuration = null;
+            var options = new Stripe.BillingPortal.ConfigurationCreateOptions()
+            {
+                Features = new ConfigurationFeaturesOptions()
+                {
+                    SubscriptionUpdate = new ConfigurationFeaturesSubscriptionUpdateOptions()
+                    {
+                        Enabled = true,
+                        DefaultAllowedUpdates = new List<string>() { "price", "promotion_code" },
+                        Products = productOptionsList,
+                    }
+                }
+            };
+
+            try
+            {
+                configuration = GetBillingPortalConfigurationService().Create(options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.Error, ex);
+                msgs.Add($"Error creating configuration", MessageType.UserError);
+            }
+
+            return configuration;
         }
         
         #endregion

@@ -207,8 +207,8 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Remotion.Linq, Version=2.1.0.0, Culture=neutral, PublicKeyToken=fee00910d6e5f53b, processorArchitecture=MSIL">
       <HintPath>..\packages\Remotion.Linq.2.1.1\lib\net45\Remotion.Linq.dll</HintPath>
@@ -621,8 +621,6 @@
     <Compile Include="Areas\Org\Controllers\ScheduleController.cs" />
     <Compile Include="Areas\Org\Controllers\ServicesController.cs" />
     <Compile Include="Areas\Org\Controllers\UserController.cs" />
-    <Compile Include="Areas\StripeHooks\Controllers\ReceiveController.cs" />
-    <Compile Include="Areas\StripeHooks\StripeHooksAreaRegistration.cs" />
     <Compile Include="Areas\User\Controllers\ActivityController.cs" />
     <Compile Include="Areas\User\Controllers\FamilyController.cs" />
     <Compile Include="Areas\User\Controllers\HomeController.cs" />
@@ -700,7 +698,6 @@
     <Compile Include="Models\Extensions.cs" />
     <Compile Include="Models\ParticipationObjectUI.cs" />
     <Compile Include="Models\ParticipationViewModel.cs" />
-    <Compile Include="Models\PaymentsEntityViewModel.cs" />
     <Compile Include="Models\RebornImage.cs" />
     <Compile Include="Models\RegistrantImportField.cs" />
     <Compile Include="Models\RegistrationHeaderViewModel.cs" />
@@ -1870,11 +1867,8 @@
     <Content Include="Areas\Org\Views\LeagueActivity\EditStudents.cshtml" />
     <Content Include="Areas\Org\Views\League\IndexExternal.cshtml" />
     <Content Include="Areas\Org\Views\League\PublishDetail.cshtml" />
-    <Content Include="Areas\Org\Views\Account\PaymentsBank.cshtml" />
-    <Content Include="Areas\Org\Views\Account\PaymentsEntity.cshtml" />
     <Content Include="Areas\Admin\Views\Upload\Index.cshtml" />
     <Content Include="Areas\Admin\Views\Upload\LocationsSubmitted.cshtml" />
-    <Content Include="Areas\StripeHooks\Views\web.config" />
     <Content Include="Areas\Org\Views\Account\Visitors.cshtml" />
     <Content Include="Areas\Org\Views\Account\VisitorsInvite.cshtml" />
     <Content Include="Areas\District\Views\Provider\Index.cshtml" />
@@ -2515,9 +2509,6 @@
     <Folder Include="Areas\Org\Models\" />
     <Folder Include="Areas\Org\Views\Period\" />
     <Folder Include="Areas\Org\Views\Registrant\" />
-    <Folder Include="Areas\StripeHooks\Models\" />
-    <Folder Include="Areas\StripeHooks\Views\Shared\" />
-    <Folder Include="Areas\StripeHooks\Views\Test\" />
     <Folder Include="Areas\WebHooks\Models\" />
     <Folder Include="Areas\WebHooks\Views\Shared\" />
     <Folder Include="Areas\WebHooks\Views\Stripe\" />

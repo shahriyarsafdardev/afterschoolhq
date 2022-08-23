@@ -4,10 +4,12 @@ using System.Web;
 using System.Web.Mvc;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Billing;
+using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using Stripe.BillingPortal;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Areas.Org.Controllers
@@ -610,7 +612,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult GetStripeBillingLink(string redirectUrl)
+        public ActionResult GetStripeBillingLink(string redirectUrl, int config = 0)
         {
             var msgs = new SystemMessages();
             
@@ -621,8 +623,47 @@ namespace AfterSchool.Areas.Org.Controllers
                 
                 var currentAccount = SessionVariables.CurrentAccount;
                 var stripeHelper = StripeHelper.GetStripeHelperSubscriberAccount();
+                Stripe.BillingPortal.Configuration stripeBillingPortalConfig = null;
+
+                if (config != 0)
+                {
+                    var billingConfigType = config.ToEnum<BillingPortalConfigurationType>();
+                    var billingConfig = BillingPortalConfiguration.LoadByBillingPortalConfigurationTypeId(billingConfigType, msgs);
+
+                    if (billingConfig.IsEmpty())
+                    {
+                        if (billingConfigType == BillingPortalConfigurationType.SubscriptionUpdate)
+                        {
+                            var packageOptionsList = new List<ConfigurationFeaturesSubscriptionUpdateProductOptions>();
+                            Package.Load(msgs: msgs).ForEach(package =>
+                            {
+                                packageOptionsList.Add(new ConfigurationFeaturesSubscriptionUpdateProductOptions()
+                                {
+                                    Product = package.Uid.ToString(),
+                                    Prices = new List<string>() { package.StripePricePerMonthId, package.StripePricePerYearId }
+                                });
+                            });
+                            
+                            stripeBillingPortalConfig = stripeHelper.CreateBillingPortalConfigurationSubscriptionUpdate(packageOptionsList, msgs);
+                        }
+                        else if (billingConfigType == BillingPortalConfigurationType.PaymentMethodUpdate)
+                        {
+                            stripeBillingPortalConfig = stripeHelper.CreateBillingPortalConfigurationPaymentMethodUpdate(msgs);
+                        }
+
+                        if (stripeBillingPortalConfig.IsNotEmpty())
+                            msgs.AddRange((new BillingPortalConfiguration()
+                            {
+                                StripeId = stripeBillingPortalConfig.Id,
+                                BillingPortalConfigurationTypeId = billingConfigType,
+                            }).Save());
+
+                    }
+                }
+                
                 var session = stripeHelper.GetBillingPortalSession(
-                    currentAccount.StripeCustomerId, 
+                    currentAccount.StripeCustomerId,
+                    stripeBillingPortalConfig?.Id,
                     redirectUrl, 
                     msgs);
 

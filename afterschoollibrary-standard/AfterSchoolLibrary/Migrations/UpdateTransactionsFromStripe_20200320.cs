@@ -41,7 +41,7 @@ namespace AfterSchoolLibrary.Migrations
 
                                     if (subscription.IsNotEmpty())
                                     {
-                                        var stripePlan = subscription.Plan;
+                                        var stripePlan = subscription.Items.First();
                                         var plan = SubscriptionPlan.Load(new Hashtable() { { "StripePlanId", stripePlan.Id } }, null, null, amsgs, adc).FirstOrDefault();
                                         var rsp = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(subscription.Id, amsgs, adc);
                                         var registrant = rsp.GetRegistrant(amsgs, adc);
