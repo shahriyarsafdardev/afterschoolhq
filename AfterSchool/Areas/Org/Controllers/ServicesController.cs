@@ -623,50 +623,14 @@ namespace AfterSchool.Areas.Org.Controllers
                 
                 var currentAccount = SessionVariables.CurrentAccount;
                 var stripeHelper = StripeHelper.GetStripeHelperSubscriberAccount();
-                Stripe.BillingPortal.Configuration stripeBillingPortalConfig = null;
+                BillingPortalConfiguration bpc = null;
 
                 if (config != 0)
-                {
-                    var billingConfigType = config.ToEnum<BillingPortalConfigurationType>();
-                    var billingConfig = BillingPortalConfiguration.LoadByBillingPortalConfigurationTypeId(billingConfigType, msgs);
-                    
-                    if (billingConfigType == BillingPortalConfigurationType.SubscriptionUpdate)
-                    {
-                        var packageOptionsList = new List<ConfigurationFeaturesSubscriptionUpdateProductOptions>();
-                        Package.LoadByIsActive(true, msgs).ForEach(package =>
-                        {
-                            packageOptionsList.Add(new ConfigurationFeaturesSubscriptionUpdateProductOptions()
-                            {
-                                Product = package.Uid.ToString(),
-                                Prices = new List<string>() { package.StripePricePerMonthId, package.StripePricePerYearId }
-                            });
-                        });
-
-                        if (billingConfig.IsEmpty())
-                            stripeBillingPortalConfig = stripeHelper.CreateBillingPortalConfigurationSubscriptionUpdate(packageOptionsList, msgs);
-                        else
-                            stripeBillingPortalConfig =
-                                stripeHelper.UpdateBillingPortalConfigurationSubscriptionUpdate(billingConfig.StripeId, packageOptionsList, msgs);
-                    }
-                    else if (billingConfigType == BillingPortalConfigurationType.PaymentMethodUpdate)
-                    {
-                        if (billingConfig.IsEmpty())
-                            stripeBillingPortalConfig = stripeHelper.CreateBillingPortalConfigurationPaymentMethodUpdate(msgs);
-                        else
-                            stripeBillingPortalConfig = stripeHelper.UpdateBillingPortalConfigurationPaymentMethodUpdate(billingConfig.StripeId, msgs);
-                    }
-
-                    if (billingConfig.IsEmpty() && stripeBillingPortalConfig.IsNotEmpty())
-                        msgs.AddRange((new BillingPortalConfiguration()
-                        {
-                            StripeId = stripeBillingPortalConfig.Id,
-                            BillingPortalConfigurationTypeId = billingConfigType,
-                        }).Save());
-                }
+                    bpc = BillingPortalConfigurationService.GetBillingPortalConfiguration(config.ToEnum<BillingPortalConfigurationType>(), msgs);
 
                 var session = stripeHelper.GetBillingPortalSession(
                     currentAccount.StripeCustomerId,
-                    stripeBillingPortalConfig?.Id,
+                    bpc?.StripeId,
                     redirectUrl, 
                     msgs);
 
