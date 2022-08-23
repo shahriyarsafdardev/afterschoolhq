@@ -629,38 +629,41 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     var billingConfigType = config.ToEnum<BillingPortalConfigurationType>();
                     var billingConfig = BillingPortalConfiguration.LoadByBillingPortalConfigurationTypeId(billingConfigType, msgs);
-
-                    if (billingConfig.IsEmpty())
+                    
+                    if (billingConfigType == BillingPortalConfigurationType.SubscriptionUpdate)
                     {
-                        if (billingConfigType == BillingPortalConfigurationType.SubscriptionUpdate)
+                        var packageOptionsList = new List<ConfigurationFeaturesSubscriptionUpdateProductOptions>();
+                        Package.LoadByIsActive(true, msgs).ForEach(package =>
                         {
-                            var packageOptionsList = new List<ConfigurationFeaturesSubscriptionUpdateProductOptions>();
-                            Package.Load(msgs: msgs).ForEach(package =>
+                            packageOptionsList.Add(new ConfigurationFeaturesSubscriptionUpdateProductOptions()
                             {
-                                packageOptionsList.Add(new ConfigurationFeaturesSubscriptionUpdateProductOptions()
-                                {
-                                    Product = package.Uid.ToString(),
-                                    Prices = new List<string>() { package.StripePricePerMonthId, package.StripePricePerYearId }
-                                });
+                                Product = package.Uid.ToString(),
+                                Prices = new List<string>() { package.StripePricePerMonthId, package.StripePricePerYearId }
                             });
-                            
+                        });
+
+                        if (billingConfig.IsEmpty())
                             stripeBillingPortalConfig = stripeHelper.CreateBillingPortalConfigurationSubscriptionUpdate(packageOptionsList, msgs);
-                        }
-                        else if (billingConfigType == BillingPortalConfigurationType.PaymentMethodUpdate)
-                        {
-                            stripeBillingPortalConfig = stripeHelper.CreateBillingPortalConfigurationPaymentMethodUpdate(msgs);
-                        }
-
-                        if (stripeBillingPortalConfig.IsNotEmpty())
-                            msgs.AddRange((new BillingPortalConfiguration()
-                            {
-                                StripeId = stripeBillingPortalConfig.Id,
-                                BillingPortalConfigurationTypeId = billingConfigType,
-                            }).Save());
-
+                        else
+                            stripeBillingPortalConfig =
+                                stripeHelper.UpdateBillingPortalConfigurationSubscriptionUpdate(billingConfig.StripeId, packageOptionsList, msgs);
                     }
+                    else if (billingConfigType == BillingPortalConfigurationType.PaymentMethodUpdate)
+                    {
+                        if (billingConfig.IsEmpty())
+                            stripeBillingPortalConfig = stripeHelper.CreateBillingPortalConfigurationPaymentMethodUpdate(msgs);
+                        else
+                            stripeBillingPortalConfig = stripeHelper.UpdateBillingPortalConfigurationPaymentMethodUpdate(billingConfig.StripeId, msgs);
+                    }
+
+                    if (billingConfig.IsEmpty() && stripeBillingPortalConfig.IsNotEmpty())
+                        msgs.AddRange((new BillingPortalConfiguration()
+                        {
+                            StripeId = stripeBillingPortalConfig.Id,
+                            BillingPortalConfigurationTypeId = billingConfigType,
+                        }).Save());
                 }
-                
+
                 var session = stripeHelper.GetBillingPortalSession(
                     currentAccount.StripeCustomerId,
                     stripeBillingPortalConfig?.Id,

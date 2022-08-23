@@ -17,7 +17,7 @@
         {
             <div class="trial-header text-center text-white bg-danger">
                 You have @accountPackage.TrialDaysRemaining day(s) remaining in your @accountPackage.PackageName trial 
-                <button onclick="AccountSetup.getStripeBillingLink('')" class="btn btn-alt5 margin-h-10">
+                <button onclick="AccountSetup.getStripeBillingLink('', @((int)AfterSchoolLibrary.Enums.BillingPortalConfigurationType.SubscriptionUpdate))" class="btn btn-alt5 margin-h-10">
                     Add Payment Method &raquo;
                 </button>
             </div>
@@ -26,7 +26,7 @@
         {
             <div class="trial-header text-center text-white bg-danger">
                 It looks like your trial has expired. 
-                <button onclick="AccountSetup.getStripeBillingLink('')" class="btn btn-alt5 margin-h-10">
+                <button onclick="AccountSetup.getStripeBillingLink('', @((int)AfterSchoolLibrary.Enums.BillingPortalConfigurationType.SubscriptionUpdate))" class="btn btn-alt5 margin-h-10">
                     Purchase Now &raquo;
                 </button>
             </div>

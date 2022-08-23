@@ -7,6 +7,7 @@ using System.IO;
 using System.Configuration;
 using Stripe.BillingPortal;
 using Twilio.Types;
+using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchoolLibrary.Billing
 {
@@ -2208,13 +2209,60 @@ namespace AfterSchoolLibrary.Billing
             Stripe.BillingPortal.Configuration configuration = null;
             var options = new Stripe.BillingPortal.ConfigurationCreateOptions()
             {
+                BusinessProfile = GetConfigurationBusinessProfileOptions(),
                 Features = new ConfigurationFeaturesOptions()
                 {
                     PaymentMethodUpdate = new ConfigurationFeaturesPaymentMethodUpdateOptions()
                     {
                         Enabled = true
                     }
-                }
+                },
+            };
+
+            try
+            {
+                configuration = GetBillingPortalConfigurationService().Create(options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.Error, ex);
+                msgs.Add($"Error creating configuration", MessageType.UserError);
+            }
+
+            return configuration;
+        }
+
+        private ConfigurationBusinessProfileOptions GetConfigurationBusinessProfileOptions()
+        {
+            return new ConfigurationBusinessProfileOptions()
+            {
+                Headline = "AfterSchool HQ partners with Stripe for simplified billing",
+                PrivacyPolicyUrl = $"{Utilities.BaseUrl()}/privacy",
+                TermsOfServiceUrl = $"{Utilities.BaseUrl()}/tos",
+            };
+        }
+        
+        public Stripe.BillingPortal.Configuration CreateBillingPortalConfigurationSubscriptionUpdate(List<ConfigurationFeaturesSubscriptionUpdateProductOptions> productOptionsList, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Stripe.BillingPortal.Configuration configuration = null;
+            var options = new Stripe.BillingPortal.ConfigurationCreateOptions()
+            {
+                BusinessProfile = GetConfigurationBusinessProfileOptions(),
+                Features = new ConfigurationFeaturesOptions()
+                {
+                    SubscriptionUpdate = new ConfigurationFeaturesSubscriptionUpdateOptions()
+                    {
+                        Enabled = true,
+                        DefaultAllowedUpdates = new List<string>() { "price", "promotion_code" },
+                        Products = productOptionsList,
+                    },
+                    PaymentMethodUpdate = new ConfigurationFeaturesPaymentMethodUpdateOptions()
+                    {
+                        Enabled = true
+                    },
+                },
             };
 
             try
@@ -2230,13 +2278,44 @@ namespace AfterSchoolLibrary.Billing
             return configuration;
         }
         
-        public Stripe.BillingPortal.Configuration CreateBillingPortalConfigurationSubscriptionUpdate(List<ConfigurationFeaturesSubscriptionUpdateProductOptions> productOptionsList, SystemMessages msgs)
+        public Stripe.BillingPortal.Configuration UpdateBillingPortalConfigurationPaymentMethodUpdate(string billingPortalConfigId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             Stripe.BillingPortal.Configuration configuration = null;
-            var options = new Stripe.BillingPortal.ConfigurationCreateOptions()
+            var options = new Stripe.BillingPortal.ConfigurationUpdateOptions()
             {
+                BusinessProfile = GetConfigurationBusinessProfileOptions(),
+                Features = new ConfigurationFeaturesOptions()
+                {
+                    PaymentMethodUpdate = new ConfigurationFeaturesPaymentMethodUpdateOptions()
+                    {
+                        Enabled = true
+                    }
+                },
+            };
+
+            try
+            {
+                configuration = GetBillingPortalConfigurationService().Update(billingPortalConfigId, options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.Error, ex);
+                msgs.Add($"Error creating configuration", MessageType.UserError);
+            }
+
+            return configuration;
+        }
+        
+        public Stripe.BillingPortal.Configuration UpdateBillingPortalConfigurationSubscriptionUpdate(string billingPortalConfigId, List<ConfigurationFeaturesSubscriptionUpdateProductOptions> productOptionsList, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Stripe.BillingPortal.Configuration configuration = null;
+            var options = new Stripe.BillingPortal.ConfigurationUpdateOptions()
+            {
+                BusinessProfile = GetConfigurationBusinessProfileOptions(),
                 Features = new ConfigurationFeaturesOptions()
                 {
                     SubscriptionUpdate = new ConfigurationFeaturesSubscriptionUpdateOptions()
@@ -2245,12 +2324,12 @@ namespace AfterSchoolLibrary.Billing
                         DefaultAllowedUpdates = new List<string>() { "price", "promotion_code" },
                         Products = productOptionsList,
                     }
-                }
+                },
             };
 
             try
             {
-                configuration = GetBillingPortalConfigurationService().Create(options);
+                configuration = GetBillingPortalConfigurationService().Update(billingPortalConfigId, options);
             }
             catch (StripeException ex)
             {

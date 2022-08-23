@@ -195,7 +195,7 @@ namespace AfterSchool.Models
                 var billingReturnUrl =
                     $"{AfterSchoolLibrary.Helpers.Utilities.BaseUrl()}/org/account/afterstripeupdate?returnurl=/org/activity/publishdetail/{activity.Uid}";
                 var upgradePackageLink =
-                    $"<a href=\"javascript:AccountSetup.getStripeBillingLink('{billingReturnUrl}', {BillingPortalConfigurationType.SubscriptionUpdate})\">upgrade your account to the {freeActivityLimitPackage.Name} Plan for more free activities</a>";
+                    $"<a href=\"javascript:AccountSetup.getStripeBillingLink('{billingReturnUrl}', {(int)BillingPortalConfigurationType.SubscriptionUpdate})\">upgrade your account to the {freeActivityLimitPackage.Name} Plan for more free activities</a>";
                     //$"<a href=\"#\" onclick=\"setFeatureIdAndLoadUpgradePage('{freeActivityLimitPackage.ID}')\">upgrade your account for more free activities</a>";
 
                 msgs.Add(
