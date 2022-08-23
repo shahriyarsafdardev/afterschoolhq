@@ -32,13 +32,13 @@
         theme: 'snow'
     });
 
-    var valueOnPageLoadFor_@javascriptVarName = "";
+    let valueOnPageLoadFor_@javascriptVarName = "";
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         $('form').submit(function () {
 
-            var text = @(javascriptVarName).getText().trim();
-
-            if (text.length == 0) {
+            const regex = /<p>[<br>| ]*<\/p>/gm;
+            let html = @(javascriptVarName).root.innerHTML;
+            if (html.replace(regex, "").length === 0) {
                 $('#@ViewData["id"]').val('');
             } else {
                 $('#@ViewData["id"]').val(@(javascriptVarName).root.innerHTML);
