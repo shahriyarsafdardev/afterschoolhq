@@ -1013,7 +1013,7 @@ namespace AfterSchoolLibrary.Services
                 activity.ContactEmail = contactEmail.ToString().IfBlank("").MaxChars(100);
 
             if (details.IsNotEmpty())
-                activity.Details = details.ToString().IfBlank("").MaxChars(4000);
+                activity.Details = details.ToString().IfBlank("");
 
             if (description.IsNotEmpty())
                 activity.Description = description.ToString().IfBlank("").MaxChars(1000);
