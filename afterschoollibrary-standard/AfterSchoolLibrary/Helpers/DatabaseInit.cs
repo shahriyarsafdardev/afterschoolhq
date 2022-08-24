@@ -58,7 +58,7 @@ namespace AfterSchoolLibrary.Helpers
                     UpdatePlanPaymentStartType_20191230.Do(amsgs, adc);
                     AddFieldTripsFeatureToSchools_20200126.Do(amsgs, adc);
                     CleanUpExtraParentAccounts_20200215.Do(amsgs, adc);
-                    ReattachTransactionsToNonDeletedAccounts_20200216.Do(amsgs, adc);   
+                    ReattachTransactionsToNonDeletedAccounts_20200216.Do(amsgs, adc);
                     FixTransactionsForDeletedAccounts_20200227.Do(amsgs, adc);
                     FixAccountPackageIsActive_20210603.Do(amsgs, adc);
                     UpdateRefundRequests_20200323.Do(amsgs, adc);
@@ -114,6 +114,7 @@ namespace AfterSchoolLibrary.Helpers
                     Migration_20220709_AddPersonTypeToRegistrant.Do(amsgs, adc);
                     Migration_20220709_AddPersonTypeToRegistrant2.Do(amsgs, adc);
                     Migration_20220803_ActivityGroupUseDetailsNotDescription.Do(amsgs, adc);
+                    Migration_20220824_AlterActivityAlterDetails.Do(amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs)
