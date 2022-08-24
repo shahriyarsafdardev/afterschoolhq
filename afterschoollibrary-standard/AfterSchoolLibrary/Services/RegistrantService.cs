@@ -257,7 +257,7 @@ namespace AfterSchoolLibrary.Services
                             new Dictionary<string, string>()
                             {
                             { "Subscription Id", subscription.Id },
-                            { "Plan Id", subscription.Plan.Id },
+                            { "Plan Id", subscription.Items.First().Plan.Id },
                             { "BillingAccountUid", billingAccount.Uid.ToString() },
                             { "BillingAccountName", billingAccount.Name.ToString() },
                             { "PayingAccountUid", purchasingAccount.Uid.ToString() },
