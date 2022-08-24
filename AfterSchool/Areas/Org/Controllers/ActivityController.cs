@@ -712,10 +712,6 @@ namespace AfterSchool.Areas.Org.Controllers
                 );
             }
 
-            var user = currentAccount.GetAccountOwner(msgs);
-            if (user.IsNotEmpty() && currentAccount.IsNotEmpty())
-                SendGridHelper.AddOrUpdateContact(currentAccount, user, msgs);
-
             ViewBag.IsFullScreen = Request[IsNewRequest] == "1";
             ViewBag.MustRequestToPublish = mustRequestToPublish;
             ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity, msgs);

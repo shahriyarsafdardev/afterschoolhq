@@ -314,8 +314,6 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Account = account;
             ViewBag.IsFullScreen = GetIsFullScreen();
 
-            var user = account.GetAccountOwner(msgs);
-
             //.. send support email to AHQ just to notifiy the team that a payment has been added/updated.
             var body = $"<p>Account: {account.Name}<br />" +
                        $"Account Profile Url: {account.HomePageUrl}<br />" +
@@ -326,9 +324,6 @@ namespace AfterSchool.Areas.Org.Controllers
                 subject: $"{account.Name} has connected their stripe account",
                 body,
                 isAfterSchool: true);
-
-            if (user.IsNotEmpty() && account.IsNotEmpty())
-                SendGridHelper.AddOrUpdateContact(account, user, msgs);
 
             ViewBag.Messages = msgs;
             return View();
