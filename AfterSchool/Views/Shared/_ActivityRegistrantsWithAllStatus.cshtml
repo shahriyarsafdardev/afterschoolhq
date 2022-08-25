@@ -24,71 +24,35 @@
 <div class="clearfix"></div>
 @if (reservedButPendingPayment.IsNotEmpty() && reservedButPendingPayment.Count > 0)
 {
-    if (!isVolunteer)
-    {
-        Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
-            reservedButPendingPayment,
-            new ViewDataDictionary
-            {
-                { "Activity", activity },
-                { "Account", account },
-                { "EditAction", editaction },
-                { "EditController", editcontroller },
-                { "HeaderTitle", RegistrationAssignmentType.ReservedPendingPayment },
-                { "IsReadOnly", isReadOnlySeatStatus }
-            }
-            );
-    }
-    else
-    {
-        Html.RenderPartial("~/Views/Shared/_VolunteerRegistrantsForSpecificStatus.cshtml",
-            reservedButPendingPayment,
-            new ViewDataDictionary
-            {
-                { "Activity", activity },
-                { "Account", account },
-                { "EditAction", editaction },
-                { "EditController", editcontroller },
-                { "HeaderTitle", RegistrationAssignmentType.ReservedPendingPayment },
-                { "IsReadOnly", isReadOnlySeatStatus }
-            }
-            );
-    }
+    Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
+        reservedButPendingPayment,
+        new ViewDataDictionary
+        {
+            { "Activity", activity },
+            { "Account", account },
+            { "EditAction", editaction },
+            { "EditController", editcontroller },
+            { "HeaderTitle", RegistrationAssignmentType.ReservedPendingPayment },
+            { "IsReadOnly", isReadOnlySeatStatus }
+        }
+        );
 }
 
 <div class="clearfix"></div>
 @if (reservedPendingParentalConsent.IsNotEmpty() && reservedPendingParentalConsent.Count > 0)
 {
-    if (!isVolunteer)
-    {
-        Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
-            reservedPendingParentalConsent,
-            new ViewDataDictionary
-            {
-                { "Activity", activity },
-                { "Account", account },
-                { "EditAction", editaction },
-                { "EditController", editcontroller },
-                { "HeaderTitle", RegistrationAssignmentType.ReservedPendingParentalConsent },
-                { "IsReadOnly", isReadOnlySeatStatus }
-            }
-            );
-    }
-    else
-    {
-        Html.RenderPartial("~/Views/Shared/_VolunteerRegistrantsForSpecificStatus.cshtml",
-            reservedPendingParentalConsent,
-            new ViewDataDictionary
-            {
-                { "Activity", activity },
-                { "Account", account },
-                { "EditAction", editaction },
-                { "EditController", editcontroller },
-                { "HeaderTitle", RegistrationAssignmentType.ReservedPendingParentalConsent },
-                { "IsReadOnly", isReadOnlySeatStatus }
-            }
-            );
-    }
+    Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
+        reservedPendingParentalConsent,
+        new ViewDataDictionary
+        {
+            { "Activity", activity },
+            { "Account", account },
+            { "EditAction", editaction },
+            { "EditController", editcontroller },
+            { "HeaderTitle", RegistrationAssignmentType.ReservedPendingParentalConsent },
+            { "IsReadOnly", isReadOnlySeatStatus }
+        }
+        );
 }
 
 <div class="clearfix"></div>
@@ -164,71 +128,69 @@
 <div class="clearfix"></div>
 @if (invited.IsNotEmpty() && invited.Count > 0)
 {
-    if (!isVolunteer)
-    {
-        Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
-            invited,
-            new ViewDataDictionary
-            {
-                { "Activity", activity },
-                { "Account", account },
-                { "EditAction", editaction },
-                { "EditController", editcontroller },
-                { "HeaderTitle", RegistrationAssignmentType.Invited },
-                { "IsReadOnly", isReadOnlySeatStatus }
-            }
-            );
-    }
-    else
-    {
-        Html.RenderPartial("~/Views/Shared/_VolunteerRegistrantsForSpecificStatus.cshtml",
-            invited,
-            new ViewDataDictionary
-            {
-                { "Activity", activity },
-                { "Account", account },
-                { "EditAction", editaction },
-                { "EditController", editcontroller },
-                { "HeaderTitle", RegistrationAssignmentType.Invited },
-                { "IsReadOnly", isReadOnlySeatStatus }
-            }
-            );
-    }
+    Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
+        invited,
+        new ViewDataDictionary
+        {
+            { "Activity", activity },
+            { "Account", account },
+            { "EditAction", editaction },
+            { "EditController", editcontroller },
+            { "HeaderTitle", RegistrationAssignmentType.Invited },
+            { "IsReadOnly", isReadOnlySeatStatus }
+        }
+        );
 }
 
 <div class="clearfix"></div>
 @if (applied.IsNotEmpty() && applied.Count > 0)
 {
-    if (!isVolunteer)
-    {
-        Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
-            applied,
-            new ViewDataDictionary
-            {
-                { "Activity", activity },
-                { "Account", account },
-                { "EditAction", editaction },
-                { "EditController", editcontroller },
-                { "HeaderTitle", RegistrationAssignmentType.Applied },
-                { "IsReadOnly", isReadOnlySeatStatus }
-            }
-            );
-    }
-    else
-    {
-        Html.RenderPartial("~/Views/Shared/_VolunteerRegistrantsForSpecificStatus.cshtml",
-            applied,
-            new ViewDataDictionary
-            {
-                { "Activity", activity },
-                { "Account", account },
-                { "EditAction", editaction },
-                { "EditController", editcontroller },
-                { "HeaderTitle", RegistrationAssignmentType.Applied },
-                { "IsReadOnly", isReadOnlySeatStatus }
-            }
-            );
-    }
+    Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
+        applied,
+        new ViewDataDictionary
+        {
+            { "Activity", activity },
+            { "Account", account },
+            { "EditAction", editaction },
+            { "EditController", editcontroller },
+            { "HeaderTitle", RegistrationAssignmentType.Applied },
+            { "IsReadOnly", isReadOnlySeatStatus }
+        }
+        );
+}
+
+<div class="clearfix"></div>
+@if (declined.IsNotEmpty() && declined.Count > 0)
+{
+    Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
+        declined,
+        new ViewDataDictionary
+        {
+            { "Activity", activity },
+            { "Account", account },
+            { "EditAction", editaction },
+            { "EditController", editcontroller },
+            { "HeaderTitle", RegistrationAssignmentType.Declined },
+            { "IsReadOnly", isReadOnlySeatStatus }
+        }
+        );
+}
+
+<div class="clearfix"></div>
+@if (reservedPendingBackgroundCheck.IsNotEmpty() && reservedPendingBackgroundCheck.Count > 0)
+{
+    Html.RenderPartial("~/Views/Shared/_VolunteerRegistrantsForSpecificStatus.cshtml",
+        reservedPendingBackgroundCheck,
+        new ViewDataDictionary
+        {
+            { "Activity", activity },
+            { "Account", account },
+            { "EditAction", editaction },
+            { "EditController", editcontroller },
+            { "HeaderTitle", RegistrationAssignmentType.ReservedPendingBackgroundCheck },
+            { "IsReadOnly", isReadOnlySeatStatus }
+        }
+        );
 }
 
 <div class="clearfix"></div>
@@ -260,76 +222,6 @@
                 { "EditAction", editaction },
                 { "EditController", editcontroller },
                 { "HeaderTitle", RegistrationAssignmentType.Withdrawn },
-                { "IsReadOnly", isReadOnlySeatStatus }
-            }
-            );
-    }
-}
-
-<div class="clearfix"></div>
-@if (declined.IsNotEmpty() && declined.Count > 0)
-{
-    if (!isVolunteer)
-    {
-        Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
-            declined,
-            new ViewDataDictionary
-            {
-                { "Activity", activity },
-                { "Account", account },
-                { "EditAction", editaction },
-                { "EditController", editcontroller },
-                { "HeaderTitle", RegistrationAssignmentType.Declined },
-                { "IsReadOnly", isReadOnlySeatStatus }
-            }
-            );
-    }
-    else
-    {
-        Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
-            declined,
-            new ViewDataDictionary
-            {
-                { "Activity", activity },
-                { "Account", account },
-                { "EditAction", editaction },
-                { "EditController", editcontroller },
-                { "HeaderTitle", RegistrationAssignmentType.Declined },
-                { "IsReadOnly", isReadOnlySeatStatus }
-            }
-            );
-    }
-}
-
-<div class="clearfix"></div>
-@if (reservedPendingBackgroundCheck.IsNotEmpty() && reservedPendingBackgroundCheck.Count > 0)
-{
-    if (!isVolunteer)
-    {
-        Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
-            reservedPendingBackgroundCheck,
-            new ViewDataDictionary
-            {
-                { "Activity", activity },
-                { "Account", account },
-                { "EditAction", editaction },
-                { "EditController", editcontroller },
-                { "HeaderTitle", RegistrationAssignmentType.ReservedPendingBackgroundCheck },
-                { "IsReadOnly", isReadOnlySeatStatus }
-            }
-            );
-    }
-    else
-    {
-        Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
-            reservedPendingBackgroundCheck,
-            new ViewDataDictionary
-            {
-                { "Activity", activity },
-                { "Account", account },
-                { "EditAction", editaction },
-                { "EditController", editcontroller },
-                { "HeaderTitle", RegistrationAssignmentType.ReservedPendingBackgroundCheck },
                 { "IsReadOnly", isReadOnlySeatStatus }
             }
             );
@@ -401,7 +293,7 @@
 
                 <div class="modal-footer textCenterImportant">
                     <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-                    <button type="button" id="btn-manual-withdraw" class="btn btn-danger padding-h-20" onclick="return withdraw('<%= participationObjectId %>', '<%= registrantId %>', '<%= type %>', '<%= registrantActivityUId %>', '<%= registrantActivityId %>', 'true')">Withdraw &amp; Cancel Payments &raquo;</button>
+                    <button type="button" id="btn-manual-withdraw" class="btn btn-danger padding-h-20" onclick="return withdraw('<%= participationObjectId %>', '<%= registrantId %>', '<%= type %>', '<%= registrantActivityUId %>', '<%= registrantActivityId %>', 'true')">@Html.Raw( isVolunteer  ? "Withdraw" : "Withdraw &amp; Cancel Payments ") &raquo;</button>
                 </div>
             </div>
         </div>
@@ -428,6 +320,7 @@
                         title: 'Success',
                         message: `${registrantName}'s seat has been moved to ${newAssignmentText}.`
                     });
+                    location.reload();
                 } else {
                     Notifications.showBar({
                         title: 'Error',
@@ -468,8 +361,9 @@
         );
     }
 
-    function processWithdraw(registrantActivityUId, registrantActivityId, registrantId, participationObjectId, type, registrantName, count, hasPaymentPlan) {
+    function processWithdraw(registrantActivityUId, registrantActivityId, registrantId, participationObjectId, type, registrantName, count = 0, hasPaymentPlan = false) {
         //.. prepare source and template
+        
         var source = $("#script-withdraw-template").html();
         var compiled = _.template(source);
 
@@ -518,6 +412,7 @@
                             message: 'Registrant Withdrawn successfully.',
                             success: true
                         });
+                        location.reload();
                     } else {
                         if (data && data.status == 'error') {
                             $('#search-result').html('');

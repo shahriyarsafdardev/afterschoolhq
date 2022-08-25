@@ -1,13 +1,10 @@
 ﻿@model List<RegistrantActivity>
 @{
-    var account = (Account)ViewData["Account"];
     var activity = (Activity)ViewData["Activity"];
-    var participationObject = activity.GetParticipationObject();
     var editaction = ViewData["EditAction"].ToString();
     var editcontroller = ViewData["EditController"].ToString();
     var headerTitle = (RegistrationAssignmentType)ViewData["HeaderTitle"];
     var isTechSupport = SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
-    var isReadOnly = (bool)ViewData["IsReadOnly"];
     var assignmentTypesForActivity = activity.GetRegistrationAssignmentTypes();
 }
 <style>
@@ -15,7 +12,7 @@
     color: #00b492 ; 
     background-color: #ffffff;
     }
-    .btn-primary, .btn-danger {
+    .local-btn {
     width: 100%
     }
 </style>
@@ -30,11 +27,7 @@
                 <tr>
                     <th></th>
                     <th>Registrant Name</th>
-                    <th>Background Status Status</th>
-                    @if (!participationObject.CanRegisterPerClass)
-                    {
-                        <th>Status</th>
-                    }
+                    <th>Background Check Status</th>
                     <th>Phone Number</th>
                     <th>Registration Status</th>
                     <th></th>
@@ -51,7 +44,6 @@
                         <tr class="instance @instanceSeats.Select(x => $"instance-{x.ActivityInstanceId.ToString()}").ToStringList(" ")">
                             <td>
                                 @if (ra.RegistrationId.HasValue && ra.AssignmentTypeId != RegistrationAssignmentType.Invited)
-
                                 {
                                     <a href="@Url.Action(editaction, editcontroller, new { id = ra.Uid })" class="btn btn-default btn-sm">
                                         <i class="icon icon-left s7-user"></i> View Details
@@ -59,104 +51,44 @@
                                 }
                             </td>
                             <td>@(!isTechSupport ? ra.RegistrantName.IfBlank(ra.RegistrantEmail) : ra.RegistrantName.IfBlank(ra.RegistrantEmail).MaskString(3, 3))</td>
+                            <!--When Background check will complete then here we will need to do changes-->
                             <td>Pending Review</td>
-                            @{
-                                var hasPaymentPlan = ra.HasPaymentPlan();
-                                var registrant = ra.GetRegistrant();
-                                var amountPaid = ra.GetAmountPaid();
-                            }
-                            @if (!participationObject.CanRegisterPerClass)
-                            {
-                                <td>
-                                    @if (ra.IsRegistrantActivityStatusAccessible())
-                                    {
-                                        <select name="newassignmenttype"
-                                                id="newassignmenttype-@ra.ID"
-                                                class="form-control"
-                                                onchange="moveRegistrantAssignment(@ra.RegistrantId, '@UI.JavascriptSafeString(ra.RegistrantName)', this)"
-                                                @(isReadOnly ? "disable" : "")>
-
-                                            @foreach (var assignmenttype in assignmentTypesForActivity)
-                                            {
-                                                <option value="@((int)assignmenttype)" @(assignmenttype == ra.AssignmentTypeId ? "selected=\"selected\"" : "")>
-                                                    @assignmenttype.ToString().SplitByUpperCase()
-                                                </option>
-                                            }
-                                        </select>
-                                    }
-                                    else
-                                    {
-                                        <label>@ra.AssignmentTypeId</label>
-                                    }
-                                </td>
-                                <td>
-                                    @if (ra.IsWithdrawEnabled() && !isReadOnly)
-                                    {
-                                        var subCount = ra.GetRegistrant().GetSubscriptionCount(participationObject);
-
-                                        <button id="btn-withdraw-@ra.Uid" class="btn btn-danger btn-sm"
-                                                onclick="return processWithdraw('@ra.Uid', '@ra.ID', '@ra.RegistrantUid', '@ra.ParticipationObjectId', '@ra.ParticipationObjectTypeId', '@ra.RegistrantFirstName','@subCount', '@hasPaymentPlan');">
-                                            Withdraw
-                                        </button>
-                                    }
-                                    @if (ra.IsSendInvoiceEnabled() &&
-                                         Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) &&
-                                         participationObject.IsNotFreeAndCanAcceptPayments &&
-                                         amountPaid == 0 && registrant.ParentRegistrantId.HasValue && !isReadOnly)
-                                    {
-                                        var showButton = true;
-
-                                        if (activity.HasSubscriptionPlan())
-                                        {
-                                            var subscriptionPlan = activity.GetSubscriptionPlan();
-
-                                            if (subscriptionPlan.SplitCostEvenly && !activity.RegistrationFinalized)
-                                            {
-                                                showButton = false;
-                                            }
-                                        }
-                                        if (hasPaymentPlan)
-                                        {
-                                            showButton = false;
-                                        }
-                                        if (showButton)
-                                        {
-                                            <button class="btn btn-default btn-sm"
-                                                    data-modal="modal-waitinglist"
-                                                    id="btnsendinvoice-@ra.ID"
-                                                    onclick="sendPaymentReminder(this, @ra.RegistrantId, '@UI.JavascriptSafeString(ra.RegistrantName)')">
-                                                Send Invoice
-                                            </button>
-                                        }
-                                    }
-                                </td>
-                            }
-
                             <td>@ra.RegistrantPhone</td>
                             <td>
-                                <select id="assignmentType" onchange="changeAssignment()" class="form-control">
-                                    <option value="">View All Assignments</option>
+                                @if (ra.AssignmentTypeId == RegistrationAssignmentType.Withdrawn)
+                                {
+                                    assignmentTypesForActivity.Add(RegistrationAssignmentType.Withdrawn);
+                                    <select disabled id="assignmentType" class="form-control">
+                                        <option value="@((int)RegistrationAssignmentType.Withdrawn)" selected="selected">@RegistrationAssignmentType.Withdrawn.ToString().SplitByUpperCase()</option>
+                                    </select>
 
-                                    @foreach (var x in assignmentTypesForActivity)
-                                    {
-                                        var selected = "";
-                                        if (ra.AssignmentTypeId == x)
-                                        {
-                                            selected = "selected=\"selected\"";
-                                        }
-
-                                        <option value="@((int)x)" @selected>@x.ToString().SplitByUpperCase()</option>
-                                    }
-                                </select>@ra = RegistrantActivity
-                            </td>
-                            <td>
-                                @{
-                                    var messageLink = $"?volunteers=true&activity={ra.GetActivityId()}&regstatus={(int)ra.AssignmentTypeId}&q={ra.RegistrantName}";
                                 }
-                                <a href='@Url.Action("messageadd", "registration")@messageLink' target="_blank" class="btn btn-primary">Message</a>
+                                else
+                                {
+                                    <select id="assignmentType" class="form-control" onchange="moveRegistrantAssignment(@ra.RegistrantId, '@UI.JavascriptSafeString(ra.RegistrantName)', this)">
+                                        @foreach (var x in assignmentTypesForActivity)
+                                        {
+                                            var selected = "";
+                                            if (ra.AssignmentTypeId == x)
+                                            {
+                                                selected = "selected=\"selected\"";
+                                            }
+
+                                            <option value="@((int)x)" @selected>@x.ToString().SplitByUpperCase()</option>
+                                        }
+                                    </select>
+                                }
                             </td>
                             <td>
-                                <a href="" class="btn btn-danger">Withdraw</a>
+                                <a href=@(Url.Action("messageadd", "activity", new { id = ra.GetActivity().Uid, uid = ra.RegistrantUid })) new class="btn btn-primary local-btn">Message</a>
+                            </td>
+                            <td>
+
+                                @if (ra.AssignmentTypeId != RegistrationAssignmentType.Withdrawn)
+                                {
+                                    <a onclick="return processWithdraw('@ra.Uid', '@ra.ID', '@ra.RegistrantUid', '@ra.ParticipationObjectId', '@ra.ParticipationObjectTypeId', '@ra.RegistrantFirstName');" class="btn btn-danger local-btn">Withdraw</a>
+                                }
+                                
                             </td>
                         </tr>
                     }

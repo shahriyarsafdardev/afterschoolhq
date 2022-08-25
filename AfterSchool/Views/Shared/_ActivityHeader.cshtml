@@ -40,16 +40,14 @@
 
             @if (Model.Activity.IsPublished || registrantCount > 0)
             {
-                <a href="@Url.Action("registrants", "activity", new { id = Model.Activity.Uid })" class="btn btn-alt6@(actionName == "registrants" ? "-active" : "")">
+                <a href="@Url.Action("registrants", "activity", new { id = Model.Activity.Uid })" class="btn btn-alt6@(actionName == "registrants" || actionName == "registrantsummary" ? "-active" : "")">
                     <i class="s7-user"></i> @(UILabel.RegistrantLabel(Model.Activity.ActivityTypeId, true))
                 </a>
-
                 if (Model.Activity.HasSchedule && Model.Activity.ActivityTypeId.NotIn(new[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
                 {
                     <a href="@Url.Action("attendance", "activity", new { id = Model.Activity.Uid })" class="btn btn-alt6@(actionName == "attendance" ? "-active" : "")"><i class="s7-check"></i> Attendance</a>
                 }
-
-                <a href="@Url.Action("messages", "activity", new { id = Model.Activity.Uid })" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")"><i class="s7-mail"></i> Messaging</a>
+                <a href="@Url.Action("messages", "activity", new { id = Model.Activity.Uid })" class="btn btn-alt6@(actionName == "messages" || actionName == "messageadd" ? "-active" : "")"><i class="s7-mail"></i> Messaging</a>
             }
 
             @if (isActivityLeader)
@@ -64,7 +62,7 @@
 
             @if (Model.AccountPackage.HasFeature(FeatureType.Survey))
             {
-                if ((int)Model.Activity.ActivityTypeId != 6)
+                if (Model.Activity.ActivityTypeId != ActivityType.VolunteerOpportunity)
                 {
                     <a href="@Url.Action("surveys", "activity", new { id = Model.Activity.Uid })" class="btn btn-alt6@(actionName == "surveys" || actionName == "newsurvey" ? "-active" : "")"><i class="s7-cloud"></i> Surveys</a>
                 }
