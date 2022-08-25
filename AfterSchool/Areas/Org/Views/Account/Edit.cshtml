@@ -1,7 +1,7 @@
 ﻿@model Account
 @{
     ViewBag.Title = Model.Name;
-    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+    var msgs = (SystemMessages)ViewBag.Messages;
     var accountPackage = (AccountPackage)ViewBag.AccountPackage;
     var value = Model.UniqueName;
 }
@@ -122,6 +122,28 @@
                                 }
                             </div>
                         </div>
+
+                        if (accountPackage.IsDuringTrial || accountPackage.IsTrialExpiredAndUnpaid(Model))
+                        {
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">End Trial</label>
+                                <div class="col-sm-9">
+                                    @{
+                                        Html.RenderPartial
+                                        (
+                                            "~/Views/Shared/_SwitchButton.cshtml",
+                                            false,
+                                            new ViewDataDictionary
+                                            {
+                                                { "checkboxname", "endtrial" },
+                                                { "checkboxid", "endtrial" },
+                                                { "disabled", false },
+                                            }
+                                        );
+                                    }
+                                </div>
+                            </div>
+                        }
                     }
 
                     <div class="form-group">
