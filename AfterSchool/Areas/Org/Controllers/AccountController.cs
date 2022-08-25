@@ -51,7 +51,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [HttpPost]
         public ActionResult Edit(string id, string name, string email, string phone, string uniqueName,
-            string timeZone, string stripeCustomerId, string stripeSubscriptionId, string startnewtrial, string resyncfromstripe, string resyncpackagefeatures)
+            string timeZone, string stripeCustomerId, string stripeSubscriptionId, string startnewtrial, string resyncfromstripe, 
+            string resyncpackagefeatures, string endtrial)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
@@ -111,6 +112,9 @@ namespace AfterSchool.Areas.Org.Controllers
                             accountPackage = currentAccount.GetActiveAccountPackage(amsgs, adc);
                             accountPackage.GetPackage(amsgs, adc).CopyFeaturesToAccountPackage(accountPackage, currentUser, amsgs, adc);
                         }
+
+                        if (endtrial.IsBoolean())
+                            accountPackage.EndTrialNow(msgs);
                         
                         // ..update profile title if account name has been changed 
                         // Should we do this?

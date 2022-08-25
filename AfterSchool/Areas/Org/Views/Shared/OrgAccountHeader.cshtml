@@ -22,7 +22,7 @@
                 </button>
             </div>
         }
-        else if (accountPackage.IsTrialExpired(currentAccount))
+        else if (accountPackage.IsTrialExpiredAndUnpaid(currentAccount))
         {
             <div class="trial-header text-center text-white bg-danger">
                 It looks like your trial has expired. 
