@@ -19,18 +19,37 @@ namespace AfterSchoolLibrary.Models
             Config(ObjectMap, DatabaseQuery, nameof(BackgroundCheck), "ID");
             LoadObjectValues(ObjectMap);
             BackgroundCheckStatusId = BackgroundCheckStatus.NotSet;
+            SterlingProcessStepId = SterlingProcessStep.NotStarted;
         }
 
-        public int WebUserId
+        public int RegistrantId
         {
-            get => (int) MDV["WebUserId"].Value;
-            set => MDV["WebUserId"].Value = value;
+            get => (int) MDV["RegistrantId"].Value;
+            set => MDV["RegistrantId"].Value = value;
         }
 
         public BackgroundCheckStatus BackgroundCheckStatusId
         {
-            get => (BackgroundCheckStatus) MDV["BackgroundCheckStatus"].Value;
-            set => MDV["BackgroundCheckStatus"].Value = value;
+            get => (BackgroundCheckStatus) MDV["BackgroundCheckStatusId"].Value;
+            set => MDV["BackgroundCheckStatusId"].Value = value;
+        }
+
+        public SterlingProcessStep SterlingProcessStepId
+        {
+            get => (SterlingProcessStep) MDV["SterlingProcessStepId"].Value;
+            set => MDV["SterlingProcessStepId"].Value = value;
+        }
+
+        public string CandidateId
+        {
+            get => (string) MDV["CandidateId"].Value;
+            set => MDV["CandidateId"].Value = value;
+        }
+
+        public string SterlingUrl
+        {
+            get => (string) MDV["SterlingUrl"].Value;
+            set => MDV["SterlingUrl"].Value = value;
         }
 
         public static DatabaseParameters ObjectMap
@@ -39,8 +58,11 @@ namespace AfterSchoolLibrary.Models
             {
                 const string className = nameof(BackgroundCheck);
                 var dp = get_BaseObjectMap(className);
-                dp.Add(className, "WebUserId", SqlDbType.Int);
+                dp.Add(className, "RegistrantId", SqlDbType.Int);
                 dp.Add(className, "BackgroundCheckStatusId", SqlDbType.Int);
+                dp.Add(className, "SterlingProcessStepId", SqlDbType.Int);
+                dp.Add(className, "CandidateId", SqlDbType.NVarChar, "500");
+                dp.Add(className, "SterlingUrl", SqlDbType.NVarChar, "500");
 
                 return dp;
             }
@@ -92,10 +114,12 @@ namespace AfterSchoolLibrary.Models
         {
             var msgs = new SystemMessages();
 
-            if (WebUserId.IsEmpty())
-                msgs.Add("WebUserId is required on BackgroundCheck object", MessageType.Error);
+            if (RegistrantId.IsEmpty())
+                msgs.Add("RegistrantId is required on BackgroundCheck object", MessageType.Error);
             if (BackgroundCheckStatusId.IsEmpty())
                 msgs.Add("BackgroundCheckStatusId is required on BackgroundCheck object", MessageType.Error);
+            if (SterlingProcessStepId.IsEmpty())
+                msgs.Add("SterlingProcessStepId is required on BackgroundCheck object", MessageType.Error);
 
             if (msgs.HasNoErrors())
                 msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, nameof(BackgroundCheck)));
@@ -117,10 +141,19 @@ namespace AfterSchoolLibrary.Models
         {
             var msgs = new SystemMessages();
 
-            var dps = new DatabaseParameters {ObjectMap["WebUserId"]};
+            var dps = new DatabaseParameters {ObjectMap["RegistrantId"]};
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
             dps = new DatabaseParameters {ObjectMap["BackgroundCheckStatusId"]};
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+            dps = new DatabaseParameters {ObjectMap["SterlingProcessStepId"]};
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+            dps = new DatabaseParameters {ObjectMap["CandidateId"]};
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+            dps = new DatabaseParameters {ObjectMap["SterlingUrl"]};
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
             return msgs;
@@ -131,11 +164,11 @@ namespace AfterSchoolLibrary.Models
             return ID.HasValue ? Load(ID.Value, msgs, dc) : null;
         }
 
-        public static List<BackgroundCheck> LoadByWebUserId(string webUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<BackgroundCheck> LoadByRegistrantId(string registrantId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["WebUserId"], webUserId);
+            dq.Criterias.Add(ObjectMap["RegistrantId"], registrantId);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
