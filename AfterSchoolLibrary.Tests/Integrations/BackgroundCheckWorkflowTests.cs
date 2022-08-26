@@ -15,6 +15,7 @@ namespace AfterSchoolLibrary.Tests.Integrations
         private const string CandidateId = "candidate-id";
         private Mock<ISterlingCreateCandidateQuery> createCandidateQuery;
         private Mock<ISterlingCreateScreeningQuery> createScreeningQuery;
+        private Mock<IBackgroundCheckRepository> backgroundCheckRepository;
         private SterlingCredentials credentials;
         private SystemMessages messages;
         private Registrant registrant;
@@ -28,7 +29,9 @@ namespace AfterSchoolLibrary.Tests.Integrations
             tokenQuery = new Mock<ISterlingBearerTokenQuery>();
             createCandidateQuery = new Mock<ISterlingCreateCandidateQuery>();
             createScreeningQuery = new Mock<ISterlingCreateScreeningQuery>();
-            workflow = new BackgroundCheckWorkflow(credentials, tokenQuery.Object, createCandidateQuery.Object, createScreeningQuery.Object);
+            backgroundCheckRepository = new Mock<IBackgroundCheckRepository>();
+            workflow = new BackgroundCheckWorkflow(credentials, tokenQuery.Object, createCandidateQuery.Object, createScreeningQuery.Object,
+                backgroundCheckRepository.Object);
 
             registrant = new Registrant();
             messages = new SystemMessages();
@@ -42,9 +45,11 @@ namespace AfterSchoolLibrary.Tests.Integrations
                 Token = "new-token",
                 ExpiresIn = TimeSpan.FromHours(1),
             };
+            BackgroundCheck capturedBackgroundCheck = null;
             tokenQuery.Setup(x => x.GetAsync(credentials)).ReturnsAsync(token);
             createCandidateQuery.Setup(x => x.CreateAsync(credentials, token.Token, registrant)).ReturnsAsync(CandidateId);
             createScreeningQuery.Setup(x => x.CreateAsync(credentials, token.Token, CandidateId)).ReturnsAsync(BackgroundCheckUrl);
+            backgroundCheckRepository.Setup(x => x.Save(It.IsAny<BackgroundCheck>())).Callback<BackgroundCheck>(x => capturedBackgroundCheck = x);
 
             var result = await workflow.RequestBackgroundCheck(registrant, messages);
 
