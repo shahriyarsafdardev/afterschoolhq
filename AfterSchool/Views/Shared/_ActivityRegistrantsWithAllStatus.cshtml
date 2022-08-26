@@ -1,13 +1,13 @@
 ﻿@using Email = AfterSchoolLibrary.Helpers.Email
 @model List<RegistrantActivity>
 @{
-    var account = (Account)ViewData["Account"];
-    var activity = (Activity)ViewData["Activity"];
+    var account = (Account) ViewData["Account"];
+    var activity = (Activity) ViewData["Activity"];
     var participationObject = activity.GetParticipationObject();
     var editaction = ViewData["EditAction"].ToString();
     var editcontroller = ViewData["EditController"].ToString();
     var isTechSupport = SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
-    var isReadOnlySeatStatus = ViewData["IsReadOnlySeatStatus"].IsNotEmpty() && (bool)ViewData["IsReadOnlySeatStatus"];
+    var isReadOnlySeatStatus = ViewData["IsReadOnlySeatStatus"].IsNotEmpty() && (bool) ViewData["IsReadOnlySeatStatus"];
 
     var reservedButPendingPayment = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment).ToList();
     var reservedPendingParentalConsent = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingParentalConsent).ToList();
@@ -28,12 +28,12 @@
         reservedButPendingPayment,
         new ViewDataDictionary
         {
-            { "Activity", activity },
-            { "Account", account },
-            { "EditAction", editaction },
-            { "EditController", editcontroller },
-            { "HeaderTitle", RegistrationAssignmentType.ReservedPendingPayment },
-            { "IsReadOnly", isReadOnlySeatStatus }
+            {"Activity", activity},
+            {"Account", account},
+            {"EditAction", editaction},
+            {"EditController", editcontroller},
+            {"HeaderTitle", RegistrationAssignmentType.ReservedPendingPayment},
+            {"IsReadOnly", isReadOnlySeatStatus},
         }
         );
 }
@@ -45,12 +45,12 @@
         reservedPendingParentalConsent,
         new ViewDataDictionary
         {
-            { "Activity", activity },
-            { "Account", account },
-            { "EditAction", editaction },
-            { "EditController", editcontroller },
-            { "HeaderTitle", RegistrationAssignmentType.ReservedPendingParentalConsent },
-            { "IsReadOnly", isReadOnlySeatStatus }
+            {"Activity", activity},
+            {"Account", account},
+            {"EditAction", editaction},
+            {"EditController", editcontroller},
+            {"HeaderTitle", RegistrationAssignmentType.ReservedPendingParentalConsent},
+            {"IsReadOnly", isReadOnlySeatStatus},
         }
         );
 }
@@ -64,12 +64,12 @@
             reserved,
             new ViewDataDictionary
             {
-                { "Activity", activity },
-                { "Account", account },
-                { "EditAction", editaction },
-                { "EditController", editcontroller },
-                { "HeaderTitle", RegistrationAssignmentType.Reserved },
-                { "IsReadOnly", isReadOnlySeatStatus }
+                {"Activity", activity},
+                {"Account", account},
+                {"EditAction", editaction},
+                {"EditController", editcontroller},
+                {"HeaderTitle", RegistrationAssignmentType.Reserved},
+                {"IsReadOnly", isReadOnlySeatStatus},
             }
             );
     }
@@ -79,12 +79,12 @@
             reserved,
             new ViewDataDictionary
             {
-                { "Activity", activity },
-                { "Account", account },
-                { "EditAction", editaction },
-                { "EditController", editcontroller },
-                { "HeaderTitle", RegistrationAssignmentType.Reserved },
-                { "IsReadOnly", isReadOnlySeatStatus }
+                {"Activity", activity},
+                {"Account", account},
+                {"EditAction", editaction},
+                {"EditController", editcontroller},
+                {"HeaderTitle", RegistrationAssignmentType.Reserved},
+                {"IsReadOnly", isReadOnlySeatStatus},
             }
             );
     }
@@ -99,12 +99,12 @@
             waiting,
             new ViewDataDictionary
             {
-                { "Activity", activity },
-                { "Account", account },
-                { "EditAction", editaction },
-                { "EditController", editcontroller },
-                { "HeaderTitle", RegistrationAssignmentType.WaitingList },
-                { "IsReadOnly", isReadOnlySeatStatus }
+                {"Activity", activity},
+                {"Account", account},
+                {"EditAction", editaction},
+                {"EditController", editcontroller},
+                {"HeaderTitle", RegistrationAssignmentType.WaitingList},
+                {"IsReadOnly", isReadOnlySeatStatus},
             }
             );
     }
@@ -114,12 +114,12 @@
             waiting,
             new ViewDataDictionary
             {
-                { "Activity", activity },
-                { "Account", account },
-                { "EditAction", editaction },
-                { "EditController", editcontroller },
-                { "HeaderTitle", RegistrationAssignmentType.WaitingList },
-                { "IsReadOnly", isReadOnlySeatStatus }
+                {"Activity", activity},
+                {"Account", account},
+                {"EditAction", editaction},
+                {"EditController", editcontroller},
+                {"HeaderTitle", RegistrationAssignmentType.WaitingList},
+                {"IsReadOnly", isReadOnlySeatStatus},
             }
             );
     }
@@ -132,12 +132,12 @@
         invited,
         new ViewDataDictionary
         {
-            { "Activity", activity },
-            { "Account", account },
-            { "EditAction", editaction },
-            { "EditController", editcontroller },
-            { "HeaderTitle", RegistrationAssignmentType.Invited },
-            { "IsReadOnly", isReadOnlySeatStatus }
+            {"Activity", activity},
+            {"Account", account},
+            {"EditAction", editaction},
+            {"EditController", editcontroller},
+            {"HeaderTitle", RegistrationAssignmentType.Invited},
+            {"IsReadOnly", isReadOnlySeatStatus},
         }
         );
 }
@@ -149,12 +149,12 @@
         applied,
         new ViewDataDictionary
         {
-            { "Activity", activity },
-            { "Account", account },
-            { "EditAction", editaction },
-            { "EditController", editcontroller },
-            { "HeaderTitle", RegistrationAssignmentType.Applied },
-            { "IsReadOnly", isReadOnlySeatStatus }
+            {"Activity", activity},
+            {"Account", account},
+            {"EditAction", editaction},
+            {"EditController", editcontroller},
+            {"HeaderTitle", RegistrationAssignmentType.Applied},
+            {"IsReadOnly", isReadOnlySeatStatus},
         }
         );
 }
@@ -166,12 +166,12 @@
         declined,
         new ViewDataDictionary
         {
-            { "Activity", activity },
-            { "Account", account },
-            { "EditAction", editaction },
-            { "EditController", editcontroller },
-            { "HeaderTitle", RegistrationAssignmentType.Declined },
-            { "IsReadOnly", isReadOnlySeatStatus }
+            {"Activity", activity},
+            {"Account", account},
+            {"EditAction", editaction},
+            {"EditController", editcontroller},
+            {"HeaderTitle", RegistrationAssignmentType.Declined},
+            {"IsReadOnly", isReadOnlySeatStatus},
         }
         );
 }
@@ -183,12 +183,12 @@
         reservedPendingBackgroundCheck,
         new ViewDataDictionary
         {
-            { "Activity", activity },
-            { "Account", account },
-            { "EditAction", editaction },
-            { "EditController", editcontroller },
-            { "HeaderTitle", RegistrationAssignmentType.ReservedPendingBackgroundCheck },
-            { "IsReadOnly", isReadOnlySeatStatus }
+            {"Activity", activity},
+            {"Account", account},
+            {"EditAction", editaction},
+            {"EditController", editcontroller},
+            {"HeaderTitle", RegistrationAssignmentType.ReservedPendingBackgroundCheck},
+            {"IsReadOnly", isReadOnlySeatStatus},
         }
         );
 }
@@ -202,12 +202,12 @@
             withdrawn,
             new ViewDataDictionary
             {
-                { "Activity", activity },
-                { "Account", account },
-                { "EditAction", editaction },
-                { "EditController", editcontroller },
-                { "HeaderTitle", RegistrationAssignmentType.Withdrawn },
-                { "IsReadOnly", isReadOnlySeatStatus }
+                {"Activity", activity},
+                {"Account", account},
+                {"EditAction", editaction},
+                {"EditController", editcontroller},
+                {"HeaderTitle", RegistrationAssignmentType.Withdrawn},
+                {"IsReadOnly", isReadOnlySeatStatus},
             }
             );
     }
@@ -217,12 +217,12 @@
             withdrawn,
             new ViewDataDictionary
             {
-                { "Activity", activity },
-                { "Account", account },
-                { "EditAction", editaction },
-                { "EditController", editcontroller },
-                { "HeaderTitle", RegistrationAssignmentType.Withdrawn },
-                { "IsReadOnly", isReadOnlySeatStatus }
+                {"Activity", activity},
+                {"Account", account},
+                {"EditAction", editaction},
+                {"EditController", editcontroller},
+                {"HeaderTitle", RegistrationAssignmentType.Withdrawn},
+                {"IsReadOnly", isReadOnlySeatStatus},
             }
             );
     }
@@ -293,7 +293,7 @@
 
                 <div class="modal-footer textCenterImportant">
                     <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-                    <button type="button" id="btn-manual-withdraw" class="btn btn-danger padding-h-20" onclick="return withdraw('<%= participationObjectId %>', '<%= registrantId %>', '<%= type %>', '<%= registrantActivityUId %>', '<%= registrantActivityId %>', 'true')">@Html.Raw( isVolunteer  ? "Withdraw" : "Withdraw &amp; Cancel Payments ") &raquo;</button>
+                    <button type="button" id="btn-manual-withdraw" class="btn btn-danger padding-h-20" onclick="return withdraw('<%= participationObjectId %>', '<%= registrantId %>', '<%= type %>', '<%= registrantActivityUId %>', '<%= registrantActivityId %>', 'true')">@Html.Raw(isVolunteer ? "Withdraw" : "Withdraw &amp; Cancel Payments ") &raquo;</button>
                 </div>
             </div>
         </div>
@@ -313,7 +313,7 @@
 
     function moveRegistrantAssignment2(registrant, registrantName, newAssignment, newAssignmentText) {
         $.get(
-            `@Url.Action("moveregistrantassignment", "services", new { id = activity.Uid })?registrant=${registrant}&assignmenttype=${newAssignment}`,
+            `@Url.Action("moveregistrantassignment", "services", new {id = activity.Uid})?registrant=${registrant}&assignmenttype=${newAssignment}`,
             function (data) {
                 if (data && data.status == 'ok') {
                     Notifications.showBar({
@@ -339,7 +339,7 @@
         $(obj).prop('disabled', true);
 
         $.get(
-            `@Url.Action("sendpaymentreminder", "services", new { id = activity.Uid })?registrant=${registrant}`,
+            `@Url.Action("sendpaymentreminder", "services", new {id = activity.Uid})?registrant=${registrant}`,
             function (data) {
                 if (data && data.status == 'ok') {
                     Notifications.showBar({
@@ -392,7 +392,7 @@
         if (participationObjectId && registrantId) {
             showLoader();
 
-            var url = '@Url.Action("WithdrawRegistrant", "Activity", new { Area = "Org" })';
+            var url = '@Url.Action("WithdrawRegistrant", "Activity", new {Area = "Org"})';
             $.ajax({
                 type: "POST",
                 url: url,

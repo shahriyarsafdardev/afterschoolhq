@@ -34,10 +34,10 @@
    {
        Activity = Model.Activity,
        IsActivityLeader = Model.IsActivityLeader,
-       IsFullScreen = (bool?)ViewData["IsFullScreen"],
+       IsFullScreen = (bool?) ViewData["IsFullScreen"],
        AccountPackage = accountPackage,
        CurrentAccount = account,
-       CurrentUser = currentUser
+       CurrentUser = currentUser,
    }); }
 
 <div class="panel panel-default">
@@ -45,7 +45,7 @@
     @{ Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Activity.Name + " - " + UILabel.RegistrantLabel(Model.Activity.ActivityTypeId, true),
            new ViewDataDictionary
            {
-               { "IconClass", IconForActivityType.GetIconClassForActivityType(Model.Activity.ActivityTypeId) }
+               {"IconClass", IconForActivityType.GetIconClassForActivityType(Model.Activity.ActivityTypeId)},
            }); }
 </div>
 <div class="panel-body">
@@ -142,7 +142,7 @@
                         selected = "selected=\"selected\"";
                     }
 
-                    <option value="@((int)x)" @selected>@x.ToString().SplitByUpperCase()</option>
+                    <option value="@((int) x)" @selected>@x.ToString().SplitByUpperCase()</option>
                 }
             }
         </select>
@@ -177,12 +177,12 @@
                         Finalize Registration
                     </button>
 
-                    Html.RenderPartial("~/Views/Shared/_Modal.cshtml", new ModalViewModel { ActionButtonHtml = "Finalize Registration &raquo;", ActionButtonId = "btn-confirm-finalize", HtmlBody = $"{minWarning}<p>Are you sure you want to finalize registration? This will close registration and send emails to existing parents with information about how to pay.</p><p><strong>Emails are only sent to parents of students with the status {RegistrationAssignmentType.ReservedPendingPayment.ToString().SplitByUpperCase()}</strong></p><p><strong>This action cannot be undone</strong></p>", ID = "modal-confirm-finalize", Title = "Finalize Registration" });
+                    Html.RenderPartial("~/Views/Shared/_Modal.cshtml", new ModalViewModel {ActionButtonHtml = "Finalize Registration &raquo;", ActionButtonId = "btn-confirm-finalize", HtmlBody = $"{minWarning}<p>Are you sure you want to finalize registration? This will close registration and send emails to existing parents with information about how to pay.</p><p><strong>Emails are only sent to parents of students with the status {RegistrationAssignmentType.ReservedPendingPayment.ToString().SplitByUpperCase()}</strong></p><p><strong>This action cannot be undone</strong></p>", ID = "modal-confirm-finalize", Title = "Finalize Registration"});
 
                     <script>
                                     PageEvent.add(PageEvent.AFTER_INIT, function () {
                                         $('#btn-confirm-finalize').click(function () {
-                                            location.href = '@Url.Action("finalizeregistration", "activity", new { id = Model.Activity.Uid })';
+                                            location.href = '@Url.Action("finalizeregistration", "activity", new {id = Model.Activity.Uid})';
                                         });
                                     });
                                 </script>
@@ -190,7 +190,7 @@
 
                 if (showStudentCRM)
                 {
-                    <a href="@Url.Action("addregistration", "activity", new { id = Model.Activity.Uid })" class="btn btn-default btn-space">
+                    <a href="@Url.Action("addregistration", "activity", new {id = Model.Activity.Uid})" class="btn btn-default btn-space">
                         Add Student
                     </a>
                 }
@@ -202,11 +202,11 @@
                 }
             }
 
-            <a href="@Url.Action("registrantsummary", "activity", new { id = Model.Activity.Uid })" class="btn btn-default btn-space">
+            <a href="@Url.Action("registrantsummary", "activity", new {id = Model.Activity.Uid})" class="btn btn-default btn-space">
                 Send Registration Report
             </a>
 
-            <a href="@Url.Action("printregistrants", "activity", new { id = Model.Activity.Uid })" class="btn btn-default btn-space" target="_blank">
+            <a href="@Url.Action("printregistrants", "activity", new {id = Model.Activity.Uid})" class="btn btn-default btn-space" target="_blank">
                 Print Registrations
             </a>
 
@@ -214,7 +214,7 @@
             {
                 if (showAllowInvites)
                 {
-                    <a href="@Url.Action("inviteto", "contact", new { id = activeRegistrationPeriod.Uid, type = "period" })" class="btn btn-default btn-space">
+                    <a href="@Url.Action("inviteto", "contact", new {id = activeRegistrationPeriod.Uid, type = "period"})" class="btn btn-default btn-space">
                         Invite Contacts
                     </a>
                 }
@@ -227,7 +227,7 @@
             }
         </div>
 
-        <a href="@Url.Action("registrantdownload", "activity", new { id = Model.Activity.Uid })" class="btn btn-primary btn-space hide">
+        <a href="@Url.Action("registrantdownload", "activity", new {id = Model.Activity.Uid})" class="btn btn-primary btn-space hide">
             <i class="icon icon-left s7-download"></i> Download Registration Data
         </a>
     </div>
@@ -247,12 +247,12 @@ else
         ras,
         new ViewDataDictionary
         {
-            { "Activity", Model.Activity },
-            { "Account", account },
-            { "EditAction", "registrantdetail" },
-            { "EditController", "activity" },
-            { "AssignmentType", assignmentType },
-            { "IsReadOnlySeatStatus", isReadOnlySeatStatus }
+            {"Activity", Model.Activity},
+            {"Account", account},
+            {"EditAction", "registrantdetail"},
+            {"EditController", "activity"},
+            {"AssignmentType", assignmentType},
+            {"IsReadOnlySeatStatus", isReadOnlySeatStatus},
         }
         );
 }
@@ -263,7 +263,7 @@ else
 
 <script>
     function changeAssignment() {
-        location.href = '@Url.Action("registrants", "activity", new { id = Model.Activity.Uid })?atype=' + $('#assignmentType').val();
+        location.href = '@Url.Action("registrants", "activity", new {id = Model.Activity.Uid})?atype=' + $('#assignmentType').val();
     }
     function changeClass() {
         $('.instance').addClass('hide');
