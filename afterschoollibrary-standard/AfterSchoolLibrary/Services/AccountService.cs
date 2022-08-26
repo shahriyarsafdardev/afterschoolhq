@@ -1648,14 +1648,15 @@ namespace AfterSchoolLibrary.Services
             // check if package has changed
             var currentAccountPackage = account.GetActiveAccountPackage(msgs, dc);
             var stripeSubscription = currentAccountPackage.GetStripeSubscription(msgs);
-            var packageFromStripe = Package.LoadByUid(stripeSubscription.Plan.ProductId.ToGuid(), msgs, dc);
+            var stripePlan = stripeSubscription.Items.First().Plan; // assuming only one subscription plan
+            var packageFromStripe = Package.LoadByUid(stripePlan.ProductId.ToGuid(), msgs, dc);
 
             // needs to match stripe
             if (currentAccountPackage.PackageId != packageFromStripe.ID)
             {
                 var newAccountPackage = account.SwitchPackages(
                     packageFromStripe,
-                    stripeSubscription.Plan.Interval.ToEnum<BillingPeriodType>(),
+                    stripePlan.Interval.ToEnum<BillingPeriodType>(),
                     stripeSubscription.Id,
                     loggedInUser,
                     msgs,

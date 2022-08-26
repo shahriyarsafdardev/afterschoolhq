@@ -93,5 +93,11 @@ namespace AfterSchoolLibrary.Services
             accountPackage.TrialStartDate = DateTime.UtcNow;
             msgs.AddRange(accountPackage.Save(dc));
         }
+
+        public static void EndTrialNow(this AccountPackage accountPackage, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            accountPackage.TrialEndDate = DateTime.UtcNow;
+            msgs.AddRange(accountPackage.Save(dc));
+        }
     }
 }

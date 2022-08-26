@@ -31,7 +31,7 @@ namespace AfterSchoolLibrary.Services
             return packageFeature;
         }
 
-        public static Package GetFreePackage(SystemMessages msgs, DatabaseConnection dc = null)
+        public static Package GetFreePackage(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Package.Load(new Hashtable() { { "IsActive", true }, { "Price", 0 } }, null, null, msgs, dc).FirstOrDefault();
         }

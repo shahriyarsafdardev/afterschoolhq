@@ -174,7 +174,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "CostPerRegistrant", System.Data.SqlDbType.Money);
 				_dp.Add(className, "CostDescription", System.Data.SqlDbType.NVarChar , "1000");
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
-				_dp.Add(className, "Details", System.Data.SqlDbType.NVarChar , "4000");
+                _dp.Add(className, "Details", System.Data.SqlDbType.NVarChar , "MAX");
 				_dp.Add(className, "LocationDetails", System.Data.SqlDbType.NVarChar , "4000");
 				_dp.Add(className, "ScheduleDetails", System.Data.SqlDbType.NVarChar , "4000");
 				_dp.Add(className, "InstructorId", System.Data.SqlDbType.Int);

@@ -133,9 +133,6 @@ namespace AfterSchool.Controllers
                         msgs.AddRange(smsgs);
                         LoadSessionInfo(user, account, msgs: msgs);
 
-                        if (user.IsNotEmpty() && account.IsNotEmpty())
-                            SendGridHelper.AddOrUpdateContact(account, user, msgs);
-
                         BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(user, null, true));
                         BackgroundJob.Enqueue(() =>
                             WebUserService.SendWelcomePurchase(user.FirstName, user.Email, account.IsAfterSchool));
@@ -152,7 +149,54 @@ namespace AfterSchool.Controllers
 
             return View(model);
         }
+        
+        [HttpGet]
+        public ActionResult Welcome(string invite, string isrequestonlyaccess, string signuptype, string package, string period)
+        {
+            Account invitingAccount = null;
 
+            if (invite.IsGuid())
+            {
+                invitingAccount = Account.LoadByInviteCodeToShare(invite.ToGuid());
+
+                var currentAccount = SessionVariables.CurrentAccount;
+                var currentUser = SessionVariables.CurrentUser;
+
+                if (currentAccount.IsNotEmpty() && currentUser.IsNotEmpty())
+                {
+                    if (currentUser.HasMultipleAccounts() || currentAccount.AccountTypeId != AccountType.Registrant)
+                        return RedirectToAction("index", "login", new {returnurl = Request["returnurl"], invite});
+                }
+            }
+
+            var msgs = new SystemMessages();
+            Package selectedPackage = null;
+
+            if (package.IsGuid())
+                selectedPackage = Package.LoadByUid(package.ToGuid(), msgs);
+
+            if (selectedPackage.IsEmpty() && invitingAccount.IsNotEmpty())
+                selectedPackage = PackageService.GetFreePackage(msgs);
+                
+            if (selectedPackage.IsEmpty())
+                selectedPackage = PackageService.GetDefaultCustomerPackage(msgs);
+            
+            var model = new SignUpIndexViewModel()
+            {
+                IsRequestOnlyAccess = isrequestonlyaccess.IsBoolean() && isrequestonlyaccess.ToBoolean(),
+                InviteCodeToShare = invite.IsNotEmpty() ? invite : "",
+                SignupType = signuptype.IsNotEmpty() && signuptype.IsInteger()
+                    ? (SignUpType) signuptype.ToInteger()
+                    : SignUpType.NotSet,
+                InvitingAccount = invitingAccount,
+                PackageUid = package,
+                PackageName = selectedPackage.Name,
+                SubscriptionPeriod = period,
+                TrialDays = selectedPackage.GetFeature(FeatureType.TrialDays).GetMaxValue(),
+            };
+            return View(model);
+        }
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult IndexNew(SignUpIndexViewModel model)
@@ -234,9 +278,9 @@ namespace AfterSchool.Controllers
                         }
                         else
                         {
-                            if (model.Package.IsGuid() && model.SubscriptionPeriod.IsNotEmpty())
+                            if (model.PackageUid.IsGuid() && model.SubscriptionPeriod.IsNotEmpty())
                             {
-                                var package = Package.LoadByUid(model.Package.ToGuid(), amsgs, adc);
+                                var package = Package.LoadByUid(model.PackageUid.ToGuid(), amsgs, adc);
 
                                 if (package.IsNotEmpty())
                                     account = user.AddNewAccountWithPackageWithStripe(
@@ -272,9 +316,6 @@ namespace AfterSchool.Controllers
                         msgs.AddRange(smsgs);
                         
                         LoadSessionInfo(user, account, msgs: msgs);
-
-                        if (user.IsNotEmpty() && account.IsNotEmpty())
-                            SendGridHelper.AddOrUpdateContact(account, user, msgs);
 
                         BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(user, null, true));
                         BackgroundJob.Enqueue(() =>
@@ -528,9 +569,6 @@ namespace AfterSchool.Controllers
                     }
                     else
                     {
-                        // NOTE: this code should go here, but it is not important right now, we need to use hubspot anyway moving forward
-                        SendGridHelper.AddOrUpdateContact(currentAccount, user, msgs);
-                        
                         switch (currentAccount.OnboardingStepDone)
                         {
                             case OnboardingStepType.AccountType:
@@ -1152,39 +1190,6 @@ namespace AfterSchool.Controllers
 
             return Json(new {status = "error", messages = msgs.ToList().Select(msg => new {msg.Text})},
                 JsonRequestBehavior.AllowGet);
-        }
-
-        [HttpGet]
-        public ActionResult Welcome(string invite, string isrequestonlyaccess, string signuptype, string package, string period)
-        {
-            Account invitingAccount = null;
-
-            if (invite.IsGuid())
-            {
-                invitingAccount = Account.LoadByInviteCodeToShare(invite.ToGuid());
-
-                var currentAccount = SessionVariables.CurrentAccount;
-                var currentUser = SessionVariables.CurrentUser;
-
-                if (currentAccount.IsNotEmpty() && currentUser.IsNotEmpty())
-                {
-                    if (currentUser.HasMultipleAccounts() || currentAccount.AccountTypeId != AccountType.Registrant)
-                        return RedirectToAction("index", "login", new {returnurl = Request["returnurl"], invite});
-                }
-            }
-
-            var model = new SignUpIndexViewModel()
-            {
-                IsRequestOnlyAccess = isrequestonlyaccess.IsBoolean() && isrequestonlyaccess.ToBoolean(),
-                InviteCodeToShare = invite.IsNotEmpty() ? invite : "",
-                SignupType = signuptype.IsNotEmpty() && signuptype.IsInteger()
-                    ? (SignUpType) signuptype.ToInteger()
-                    : SignUpType.NotSet,
-                InvitingAccount = invitingAccount,
-                Package = package,
-                SubscriptionPeriod = period
-            };
-            return View(model);
         }
 
         /// <summary>
