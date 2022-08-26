@@ -22,10 +22,17 @@ namespace AfterSchoolLibrary.Models
             SterlingProcessStepId = SterlingProcessStep.NotStarted;
         }
 
-        public int RegistrantId
+
+        public int WebUserId
         {
-            get => (int) MDV["RegistrantId"].Value;
-            set => MDV["RegistrantId"].Value = value;
+            get => (int) MDV["WebUserId"].Value;
+            set => MDV["WebUserId"].Value = value;
+        }
+        
+        public int AccountId
+        {
+            get => (int) MDV["AccountId"].Value;
+            set => MDV["AccountId"].Value = value;
         }
 
         public BackgroundCheckStatus BackgroundCheckStatusId
@@ -40,17 +47,24 @@ namespace AfterSchoolLibrary.Models
             set => MDV["SterlingProcessStepId"].Value = value;
         }
 
-        public string CandidateId
+        public BackgroundCheckSource BackgroundCheckSourceId
         {
-            get => (string) MDV["CandidateId"].Value;
-            set => MDV["CandidateId"].Value = value;
+            get => (BackgroundCheckSource) MDV["BackgroundCheckSourceId"].Value;
+            set => MDV["BackgroundCheckSourceId"].Value = value;
         }
 
-        public string SterlingUrl
+        public string ExternalCandidateId
         {
-            get => (string) MDV["SterlingUrl"].Value;
-            set => MDV["SterlingUrl"].Value = value;
+            get => (string) MDV["ExternalCandidateId"].Value;
+            set => MDV["ExternalCandidateId"].Value = value;
         }
+
+        public string SterlingInviteUrl
+        {
+            get => (string) MDV["SterlingInviteUrl"].Value;
+            set => MDV["SterlingInviteUrl"].Value = value;
+        }
+
 
         public static DatabaseParameters ObjectMap
         {
@@ -58,11 +72,11 @@ namespace AfterSchoolLibrary.Models
             {
                 const string className = nameof(BackgroundCheck);
                 var dp = get_BaseObjectMap(className);
-                dp.Add(className, "RegistrantId", SqlDbType.Int);
+                dp.Add(className, "WebUserId", SqlDbType.Int);
                 dp.Add(className, "BackgroundCheckStatusId", SqlDbType.Int);
                 dp.Add(className, "SterlingProcessStepId", SqlDbType.Int);
-                dp.Add(className, "CandidateId", SqlDbType.NVarChar, "500");
-                dp.Add(className, "SterlingUrl", SqlDbType.NVarChar, "500");
+                dp.Add(className, "ExternalCandidateId", SqlDbType.NVarChar, "500");
+                dp.Add(className, "SterlingInviteUrl", SqlDbType.NVarChar, "500");
 
                 return dp;
             }
@@ -114,8 +128,8 @@ namespace AfterSchoolLibrary.Models
         {
             var msgs = new SystemMessages();
 
-            if (RegistrantId.IsEmpty())
-                msgs.Add("RegistrantId is required on BackgroundCheck object", MessageType.Error);
+            if (WebUserId.IsEmpty())
+                msgs.Add("WebUserId is required on BackgroundCheck object", MessageType.Error);
             if (BackgroundCheckStatusId.IsEmpty())
                 msgs.Add("BackgroundCheckStatusId is required on BackgroundCheck object", MessageType.Error);
             if (SterlingProcessStepId.IsEmpty())
@@ -141,7 +155,7 @@ namespace AfterSchoolLibrary.Models
         {
             var msgs = new SystemMessages();
 
-            var dps = new DatabaseParameters {ObjectMap["RegistrantId"]};
+            var dps = new DatabaseParameters {ObjectMap["WebUserId"]};
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
             dps = new DatabaseParameters {ObjectMap["BackgroundCheckStatusId"]};
@@ -150,10 +164,10 @@ namespace AfterSchoolLibrary.Models
             dps = new DatabaseParameters {ObjectMap["SterlingProcessStepId"]};
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-            dps = new DatabaseParameters {ObjectMap["CandidateId"]};
+            dps = new DatabaseParameters {ObjectMap["ExternalCandidateId"]};
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-            dps = new DatabaseParameters {ObjectMap["SterlingUrl"]};
+            dps = new DatabaseParameters {ObjectMap["SterlingInviteUrl"]};
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
             return msgs;
@@ -164,11 +178,11 @@ namespace AfterSchoolLibrary.Models
             return ID.HasValue ? Load(ID.Value, msgs, dc) : null;
         }
 
-        public static List<BackgroundCheck> LoadByRegistrantId(string registrantId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<BackgroundCheck> LoadByWebUserId(string webUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["RegistrantId"], registrantId);
+            dq.Criterias.Add(ObjectMap["WebUserId"], webUserId);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 

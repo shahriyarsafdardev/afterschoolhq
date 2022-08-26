@@ -500,7 +500,7 @@ namespace AfterSchool.Controllers
                 if (CurrentRegistrantHasAlreadySubmitted(registration.CompletionStatusId))
                     return new RedirectResult(SessionVariables.RegistrationStartPageAccount.HomePageUrl);
 
-                var backgroundCheckUrl = await CheckIfBackgroundCheckIsEnabledAndRequestUrl(msgs, currentRegistrant);
+                var backgroundCheckUrl = await CheckIfBackgroundCheckIsEnabledAndRequestUrl(msgs, currentUser);
 
                 if (msgs.HasNoErrors())
                     ProcessRegistration(currentRegistrant, participationObject, registration, backgroundCheckUrl, msgs);
@@ -581,7 +581,7 @@ namespace AfterSchool.Controllers
                 if (CurrentRegistrantHasAlreadySubmitted(registration.CompletionStatusId))
                     return RedirectToAction("Select");
 
-                var backgroundCheckUrl = await CheckIfBackgroundCheckIsEnabledAndRequestUrl(msgs, currentRegistrant);
+                var backgroundCheckUrl = await CheckIfBackgroundCheckIsEnabledAndRequestUrl(msgs, SessionVariables.CurrentUser);
 
                 if (msgs.HasNoErrors())
                     ProcessRegistration(currentRegistrant, participationObject, registration, backgroundCheckUrl, msgs);
@@ -593,10 +593,10 @@ namespace AfterSchool.Controllers
             return AssembleResultAndGoToRegisterView(participationObject, msgs, qvms, currentRegistrant);
         }
 
-        private async Task<string> CheckIfBackgroundCheckIsEnabledAndRequestUrl(SystemMessages msgs, Registrant currentRegistrant)
+        private async Task<string> CheckIfBackgroundCheckIsEnabledAndRequestUrl(SystemMessages msgs, WebUser webUser)
         {
             if (msgs.HasErrors() || !featureFlagRepository.IsEnabled("background-check")) return null;
-            var backgroundCheckResult = await backgroundCheckWorkflow.RequestBackgroundCheck(currentRegistrant, msgs);
+            var backgroundCheckResult = await backgroundCheckWorkflow.RequestBackgroundCheck(webUser, msgs);
             return backgroundCheckResult.BackgroundCheckUrl;
         }
     }

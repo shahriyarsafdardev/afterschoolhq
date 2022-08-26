@@ -18,7 +18,7 @@ namespace AfterSchoolLibrary.Tests.Integrations
         private Mock<IBackgroundCheckRepository> backgroundCheckRepository;
         private SterlingCredentials credentials;
         private SystemMessages messages;
-        private Registrant registrant;
+        private WebUser webUser;
         private Mock<ISterlingBearerTokenQuery> tokenQuery;
         private BackgroundCheckWorkflow workflow;
 
@@ -33,7 +33,7 @@ namespace AfterSchoolLibrary.Tests.Integrations
             workflow = new BackgroundCheckWorkflow(credentials, tokenQuery.Object, createCandidateQuery.Object, createScreeningQuery.Object,
                 backgroundCheckRepository.Object);
 
-            registrant = new Registrant();
+            webUser = new WebUser();
             messages = new SystemMessages();
         }
 
@@ -47,24 +47,33 @@ namespace AfterSchoolLibrary.Tests.Integrations
             };
             BackgroundCheck capturedBackgroundCheck = null;
             tokenQuery.Setup(x => x.GetAsync(credentials)).ReturnsAsync(token);
-            createCandidateQuery.Setup(x => x.CreateAsync(credentials, token.Token, registrant)).ReturnsAsync(CandidateId);
+            createCandidateQuery.Setup(x => x.CreateAsync(credentials, token.Token, webUser)).ReturnsAsync(CandidateId);
             createScreeningQuery.Setup(x => x.CreateAsync(credentials, token.Token, CandidateId)).ReturnsAsync(BackgroundCheckUrl);
             backgroundCheckRepository.Setup(x => x.Save(It.IsAny<BackgroundCheck>())).Callback<BackgroundCheck>(x => capturedBackgroundCheck = x);
 
-            var result = await workflow.RequestBackgroundCheck(registrant, messages);
+            var result = await workflow.RequestBackgroundCheck(webUser, messages);
 
             Assert.That(result.BackgroundCheckUrl, Is.EqualTo(BackgroundCheckUrl));
             Assert.That(messages, Has.Count.EqualTo(0));
             Assert.That(messages.HasNoErrors());
+            Assert.That(capturedBackgroundCheck.WebUserId, Is.EqualTo(1));
+            Assert.That(capturedBackgroundCheck.AccountId, Is.EqualTo(1));
+            Assert.That(capturedBackgroundCheck.BackgroundCheckStatusId, Is.EqualTo(1));
+            Assert.That(capturedBackgroundCheck.SterlingProcessStepId, Is.EqualTo(1));
+            Assert.That(capturedBackgroundCheck.BackgroundCheckSourceId, Is.EqualTo(1));
+            Assert.That(capturedBackgroundCheck.ExternalCandidateId, Is.EqualTo(1));
+            Assert.That(capturedBackgroundCheck.SterlingInviteUrl, Is.EqualTo(1));
         }
 
         [Test]
         public async Task RequestBackgroundCheckHasAnErrorTest()
         {
             const string exceptionText = "Unable to reach host";
+            BackgroundCheck capturedBackgroundCheck = null;
             tokenQuery.Setup(x => x.GetAsync(credentials)).ThrowsAsync(new Exception(exceptionText));
+            backgroundCheckRepository.Setup(x => x.Save(It.IsAny<BackgroundCheck>())).Callback<BackgroundCheck>(x => capturedBackgroundCheck = x);
 
-            var result = await workflow.RequestBackgroundCheck(registrant, messages);
+            var result = await workflow.RequestBackgroundCheck(webUser, messages);
 
             Assert.That(result.BackgroundCheckUrl, Is.Null);
             Assert.That(messages, Has.Count.EqualTo(1));
@@ -73,6 +82,13 @@ namespace AfterSchoolLibrary.Tests.Integrations
             var systemMessage = messages.ToList().First();
             Assert.That(systemMessage.MessageType, Is.EqualTo(MessageType.ApiError));
             Assert.That(systemMessage.Text, Is.EqualTo(exceptionText));
+            Assert.That(capturedBackgroundCheck.WebUserId, Is.EqualTo(1));
+            Assert.That(capturedBackgroundCheck.AccountId, Is.EqualTo(1));
+            Assert.That(capturedBackgroundCheck.BackgroundCheckStatusId, Is.EqualTo(1));
+            Assert.That(capturedBackgroundCheck.SterlingProcessStepId, Is.EqualTo(1));
+            Assert.That(capturedBackgroundCheck.BackgroundCheckSourceId, Is.EqualTo(1));
+            Assert.That(capturedBackgroundCheck.ExternalCandidateId, Is.EqualTo(1));
+            Assert.That(capturedBackgroundCheck.SterlingInviteUrl, Is.EqualTo(1));
         }
     }
 }

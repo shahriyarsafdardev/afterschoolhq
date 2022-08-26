@@ -7,7 +7,7 @@ namespace AfterSchoolLibrary.Integrations
 {
     public interface IBackgroundCheckWorkflow
     {
-        Task<BackgroundCheckRequestResult> RequestBackgroundCheck(Registrant registrant, SystemMessages messages);
+        Task<BackgroundCheckRequestResult> RequestBackgroundCheck(WebUser webUser, SystemMessages messages);
     }
 
     public class BackgroundCheckWorkflow : IBackgroundCheckWorkflow
@@ -29,7 +29,7 @@ namespace AfterSchoolLibrary.Integrations
             this.backgroundCheckRepository = backgroundCheckRepository;
         }
 
-        public async Task<BackgroundCheckRequestResult> RequestBackgroundCheck(Registrant registrant, SystemMessages messages)
+        public async Task<BackgroundCheckRequestResult> RequestBackgroundCheck(WebUser webUser, SystemMessages messages)
         {
             var currentSterlingProcessStep = SterlingProcessStep.FailedToAuthenticate;
             string candidateId = null;
@@ -39,7 +39,7 @@ namespace AfterSchoolLibrary.Integrations
                 var token = await tokenQuery.GetAsync(credentials);
 
                 currentSterlingProcessStep = SterlingProcessStep.FailedToCreateCandidate;
-                candidateId = await createCandidateQuery.CreateAsync(credentials, token.Token, registrant);
+                candidateId = await createCandidateQuery.CreateAsync(credentials, token.Token, webUser);
 
                 currentSterlingProcessStep = SterlingProcessStep.FailedToCreateScreening;
                 backgroundCheckUrl = await createScreeningQuery.CreateAsync(credentials, token.Token, candidateId);
@@ -56,11 +56,11 @@ namespace AfterSchoolLibrary.Integrations
             {
                 var backgroundCheck = new BackgroundCheck
                 {
-                    RegistrantId = registrant.ID!.Value,
+                    WebUserId = webUser.ID!.Value,
                     SterlingProcessStepId = currentSterlingProcessStep,
                     BackgroundCheckStatusId = BackgroundCheckStatus.PendingReview,
-                    CandidateId = candidateId,
-                    SterlingUrl = backgroundCheckUrl,
+                    ExternalCandidateId = candidateId,
+                    SterlingInviteUrl = backgroundCheckUrl,
                 };
                 backgroundCheckRepository.Save(backgroundCheck);
             }

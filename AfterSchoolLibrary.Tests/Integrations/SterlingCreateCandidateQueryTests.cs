@@ -32,27 +32,19 @@ namespace AfterSchoolLibrary.Tests.Integrations
                 Id = candidateId,
             });
 
-            var webUser = new WebUser
-            {
-                ID = 789,
-                Uid = Guid.NewGuid(),
-            };
-            var webUserRepository = new Mock<IWebUserRepository>();
-            webUserRepository.Setup(x => x.LoadById(webUser.ID.Value)).Returns(webUser);
-
-            var query = new SterlingCreateCandidateQuery(http.Object, json.Object, webUserRepository.Object);
+            var query = new SterlingCreateCandidateQuery(http.Object, json.Object);
 
             var credentials = new SterlingCredentials("endpoint", "clientId", "clientSecret", "packageId");
             const string token = "my-token";
-            var registrant = new Registrant
+            var webUser = new WebUser
             {
                 FirstName = "first-name",
                 LastName = "last-name",
                 Email = "email",
-                WebUserId = webUser.ID.Value,
+                Uid = Guid.NewGuid(),
             };
 
-            var result = await query.CreateAsync(credentials, token, registrant);
+            var result = await query.CreateAsync(credentials, token, webUser);
 
             Assert.That(result, Is.EqualTo(candidateId));
 
@@ -61,9 +53,9 @@ namespace AfterSchoolLibrary.Tests.Integrations
             Assert.That(capturedRequest.Headers.GetValue("Authorization"), Is.EqualTo($"Bearer {token}"));
             Assert.That(capturedRequest.Headers.GetValue("Content-Type"), Is.EqualTo("application/json"));
 
-            Assert.That(capturedCandidateRequest.GivenName, Is.EqualTo(registrant.FirstName));
-            Assert.That(capturedCandidateRequest.FamilyName, Is.EqualTo(registrant.LastName));
-            Assert.That(capturedCandidateRequest.Email, Is.EqualTo(registrant.Email));
+            Assert.That(capturedCandidateRequest.GivenName, Is.EqualTo(webUser.FirstName));
+            Assert.That(capturedCandidateRequest.FamilyName, Is.EqualTo(webUser.LastName));
+            Assert.That(capturedCandidateRequest.Email, Is.EqualTo(webUser.Email));
             Assert.That(capturedCandidateRequest.ClientReferenceId, Is.EqualTo(webUser.Uid.ToString()));
         }
 
@@ -78,24 +70,16 @@ namespace AfterSchoolLibrary.Tests.Integrations
             var credentials = new SterlingCredentials("endpoint", "clientId", "clientSecret", "packageId");
             var json = new Mock<IJsonSerializer>();
 
+            var query = new SterlingCreateCandidateQuery(http.Object, json.Object);
             var webUser = new WebUser
-            {
-                ID = 789,
-                Uid = Guid.NewGuid(),
-            };
-            var webUserRepository = new Mock<IWebUserRepository>();
-            webUserRepository.Setup(x => x.LoadById(webUser.ID.Value)).Returns(webUser);
-
-            var query = new SterlingCreateCandidateQuery(http.Object, json.Object, webUserRepository.Object);
-            var registrant = new Registrant
             {
                 FirstName = "first-name",
                 LastName = "last-name",
                 Email = "email",
-                WebUserId = webUser.ID.Value,
+                Uid = Guid.NewGuid(),
             };
 
-            Assert.ThrowsAsync<Exception>(async () => await query.CreateAsync(credentials, "token", registrant));
+            Assert.ThrowsAsync<Exception>(async () => await query.CreateAsync(credentials, "token", webUser));
         }
 
         [Test]
