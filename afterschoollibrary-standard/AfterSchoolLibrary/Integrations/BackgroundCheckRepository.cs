@@ -1,17 +1,18 @@
 using AfterSchoolLibrary.Models;
+using BasicLibrary;
 
 namespace AfterSchoolLibrary.Integrations
 {
     public interface IBackgroundCheckRepository
     {
-        void Save(BackgroundCheck backgroundCheck);
+        SystemMessages Save(BackgroundCheck backgroundCheck);
     }
 
     public class BackgroundCheckRepository : IBackgroundCheckRepository
     {
-        public void Save(BackgroundCheck backgroundCheck)
+        public SystemMessages Save(BackgroundCheck backgroundCheck)
         {
-            backgroundCheck.Save();
+            return backgroundCheck.Save();
         }
     }
 }

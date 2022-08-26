@@ -28,7 +28,7 @@ namespace AfterSchoolLibrary.Models
             get => (int) MDV["WebUserId"].Value;
             set => MDV["WebUserId"].Value = value;
         }
-        
+
         public int AccountId
         {
             get => (int) MDV["AccountId"].Value;
@@ -73,8 +73,10 @@ namespace AfterSchoolLibrary.Models
                 const string className = nameof(BackgroundCheck);
                 var dp = get_BaseObjectMap(className);
                 dp.Add(className, "WebUserId", SqlDbType.Int);
+                dp.Add(className, "AccountId", SqlDbType.Int);
                 dp.Add(className, "BackgroundCheckStatusId", SqlDbType.Int);
                 dp.Add(className, "SterlingProcessStepId", SqlDbType.Int);
+                dp.Add(className, "BackgroundCheckSourceId", SqlDbType.Int);
                 dp.Add(className, "ExternalCandidateId", SqlDbType.NVarChar, "500");
                 dp.Add(className, "SterlingInviteUrl", SqlDbType.NVarChar, "500");
 
@@ -130,6 +132,8 @@ namespace AfterSchoolLibrary.Models
 
             if (WebUserId.IsEmpty())
                 msgs.Add("WebUserId is required on BackgroundCheck object", MessageType.Error);
+            if (AccountId.IsEmpty())
+                msgs.Add("AccountId is required on BackgroundCheck object", MessageType.Error);
             if (BackgroundCheckStatusId.IsEmpty())
                 msgs.Add("BackgroundCheckStatusId is required on BackgroundCheck object", MessageType.Error);
             if (SterlingProcessStepId.IsEmpty())
@@ -158,10 +162,16 @@ namespace AfterSchoolLibrary.Models
             var dps = new DatabaseParameters {ObjectMap["WebUserId"]};
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
+            dps = new DatabaseParameters {ObjectMap["AccountId"]};
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
             dps = new DatabaseParameters {ObjectMap["BackgroundCheckStatusId"]};
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
             dps = new DatabaseParameters {ObjectMap["SterlingProcessStepId"]};
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+            dps = new DatabaseParameters {ObjectMap["BackgroundCheckSourceId"]};
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
             dps = new DatabaseParameters {ObjectMap["ExternalCandidateId"]};

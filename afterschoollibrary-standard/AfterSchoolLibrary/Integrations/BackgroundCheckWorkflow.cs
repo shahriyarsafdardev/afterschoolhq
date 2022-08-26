@@ -31,39 +31,42 @@ namespace AfterSchoolLibrary.Integrations
 
         public async Task<BackgroundCheckRequestResult> RequestBackgroundCheck(WebUser webUser, SystemMessages messages)
         {
-            var currentSterlingProcessStep = SterlingProcessStep.FailedToAuthenticate;
+            var authenticated = false;
             string candidateId = null;
             string backgroundCheckUrl = null;
             try
             {
                 var token = await tokenQuery.GetAsync(credentials);
-
-                currentSterlingProcessStep = SterlingProcessStep.FailedToCreateCandidate;
+                authenticated = true;
                 candidateId = await createCandidateQuery.CreateAsync(credentials, token.Token, webUser);
-
-                currentSterlingProcessStep = SterlingProcessStep.FailedToCreateScreening;
                 backgroundCheckUrl = await createScreeningQuery.CreateAsync(credentials, token.Token, candidateId);
-
-                currentSterlingProcessStep = SterlingProcessStep.SuccessfullyCreatedScreening;
-                return new BackgroundCheckRequestResult {BackgroundCheckUrl = backgroundCheckUrl};
             }
             catch (Exception ex)
             {
                 messages.Add(new SystemMessage(ex.Message, MessageType.ApiError));
-                return new BackgroundCheckRequestResult {BackgroundCheckUrl = null};
             }
-            finally
+
+            SterlingProcessStep currentSterlingProcessStep;
+            if (!authenticated)
+                currentSterlingProcessStep = SterlingProcessStep.FailedToAuthenticate;
+            else if (candidateId is null)
+                currentSterlingProcessStep = SterlingProcessStep.FailedToCreateCandidate;
+            else if (backgroundCheckUrl is null)
+                currentSterlingProcessStep = SterlingProcessStep.FailedToCreateScreening;
+            else
+                currentSterlingProcessStep = SterlingProcessStep.SuccessfullyCreatedScreening;
+
+            var backgroundCheck = new BackgroundCheck
             {
-                var backgroundCheck = new BackgroundCheck
-                {
-                    WebUserId = webUser.ID!.Value,
-                    SterlingProcessStepId = currentSterlingProcessStep,
-                    BackgroundCheckStatusId = BackgroundCheckStatus.PendingReview,
-                    ExternalCandidateId = candidateId,
-                    SterlingInviteUrl = backgroundCheckUrl,
-                };
-                backgroundCheckRepository.Save(backgroundCheck);
-            }
+                WebUserId = webUser.ID!.Value,
+                SterlingProcessStepId = currentSterlingProcessStep,
+                BackgroundCheckStatusId = BackgroundCheckStatus.PendingReview,
+                ExternalCandidateId = candidateId,
+                SterlingInviteUrl = backgroundCheckUrl,
+                BackgroundCheckSourceId = BackgroundCheckSource.Sterling,
+            };
+            messages.AddRange(backgroundCheckRepository.Save(backgroundCheck));
+            return new BackgroundCheckRequestResult {BackgroundCheckUrl = backgroundCheckUrl};
         }
     }
 
