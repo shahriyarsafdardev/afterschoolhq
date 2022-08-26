@@ -21,7 +21,7 @@ namespace AfterSchool.Areas.User.Controllers
         public ActionResult Index()
         {
             var msgs = new SystemMessages();
-            var registrants = SessionVariables.CurrentUser.GetChildrenRegistrants(msgs);
+            var registrants = SessionVariables.CurrentUser.GetStudentRegistrants(msgs);
             var studentActivities = new List<RegistrantActivityViewModel>();
 
             registrants.ForEach(registrant =>

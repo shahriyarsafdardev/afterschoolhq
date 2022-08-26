@@ -18,7 +18,7 @@ namespace AfterSchool.Areas.User.Controllers
         {
             var msgs = new SystemMessages();
             var masterRegistrant = SessionVariables.CurrentUser.GetMasterParentOrStudentRegistrant(msgs);
-            var registrants = SessionVariables.CurrentUser.GetChildrenRegistrants(msgs);
+            var registrants = SessionVariables.CurrentUser.GetStudentRegistrants(msgs);
 
             if (registrants.All(registrant => registrant.ID != masterRegistrant.ID) && masterRegistrant.IsNotEmpty())
                 registrants.Add(masterRegistrant);

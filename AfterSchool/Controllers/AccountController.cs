@@ -1586,7 +1586,7 @@ namespace AfterSchool.Controllers
                 return RedirectToAction("registerstudent");
             }
 
-            var students = SessionVariables.CurrentUser.GetChildrenRegistrants(msgs);
+            var students = SessionVariables.CurrentUser.GetStudentRegistrants(msgs);
 
             ViewBag.Messages = msgs;
             ViewBag.ParticipationObject = RegistrationCommon.GetParticipationObjectFromCart();

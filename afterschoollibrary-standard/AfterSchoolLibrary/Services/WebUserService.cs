@@ -305,11 +305,11 @@ namespace AfterSchoolLibrary.Services
                 .ToList();
         }
 
-        public static List<Registrant> GetChildrenRegistrants(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Registrant> GetStudentRegistrants(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RegistrantWebUser.LoadByWebUserIdByIsDeleted(user.ID.Value, false, msgs, dc)
                 .Select(rwu => Registrant.Load(rwu.RegistrantId.Value, msgs, dc))
-                .Where(registrant => !registrant.IsParentOrGuardian)
+                .Where(registrant => registrant.PersonTypeId == RegistrantPersonType.Student)
                 .ToList();
         }
 
