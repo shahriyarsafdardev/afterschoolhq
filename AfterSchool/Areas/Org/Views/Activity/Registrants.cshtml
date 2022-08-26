@@ -1,3 +1,4 @@
+@using AfterSchool.Helpers
 @model AfterSchool.Areas.Org.Assemblers.Activity.RegistrantsResult
 @{
     var msgs = Model.Messages;
@@ -23,235 +24,246 @@
 }
 
 
-@{Html.RenderPartial("OrgAccountHeader", Model.CurrentAccount.ID.ToString());}
+@{ Html.RenderPartial("OrgAccountHeader", Model.CurrentAccount.ID.ToString()); }
 
 <div class="main-content">
 
-    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{ Html.RenderPartial("_ActivityHeader", new ActivityHeaderModel
-       {
-           Activity = Model.Activity,
-           IsActivityLeader = Model.IsActivityLeader,
-           IsFullScreen = (bool?) ViewData["IsFullScreen"],
-           AccountPackage = accountPackage,
-           CurrentAccount = account,
-           CurrentUser = currentUser,
-       }); }
+@{ Html.RenderPartial("_ActivityHeader", new ActivityHeaderModel
+   {
+       Activity = Model.Activity,
+       IsActivityLeader = Model.IsActivityLeader,
+       IsFullScreen = (bool?) ViewData["IsFullScreen"],
+       AccountPackage = accountPackage,
+       CurrentAccount = account,
+       CurrentUser = currentUser,
+   }); }
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Activity.Name + " - " + UILabel.RegistrantLabel(Model.Activity.ActivityTypeId, true),
-                  new ViewDataDictionary
-                  {
-                      {"IconClass", AfterSchool.Helpers.IconForActivityType.GetIconClassForActivityType(Model.Activity.ActivityTypeId)},
-                  }); }
-        </div>
-        <div class="panel-body">
-            <div class="row">
+<div class="panel panel-default">
+<div class="panel-heading">
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Activity.Name + " - " + UILabel.RegistrantLabel(Model.Activity.ActivityTypeId, true),
+           new ViewDataDictionary
+           {
+               {"IconClass", IconForActivityType.GetIconClassForActivityType(Model.Activity.ActivityTypeId)},
+           }); }
+</div>
+<div class="panel-body">
+<div class="row">
 
-                <div class="col-md-2 hide">
-                    <div class="widget widget-tile widget-bordered">
-                        <div class="data-info">
-                            <div data-toggle="counter" data-end="@invitationCount" data-decimals="0" data-suffix="" class="value">@invitationCount</div>
-                            <div class="desc">Invited</div>
-                        </div>
-                        <div class="icon"><span class="s7-users"></span></div>
-                    </div>
-                </div>
-
-                <div class="col-md-2 hide">
-                    <div class="widget widget-tile widget-bordered">
-                        <div class="data-info">
-                            <div data-toggle="counter" data-end="@declinedCount" data-decimals="0" data-suffix="" class="value">@declinedCount</div>
-                            <div class="desc">Declined</div>
-                        </div>
-                        <div class="icon"><span class="s7-users"></span></div>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
-                    <div class="widget widget-tile widget-bordered">
-                        <div class="data-info">
-                            <div data-toggle="counter" data-end="@registrantCount" data-decimals="0" data-suffix="" class="value">@registrantCount</div>
-                            <div class="desc">Reserved</div>
-                        </div>
-                        <div class="icon"><span class="s7-users"></span></div>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
-                    <div class="widget widget-tile widget-bordered">
-                        <div class="data-info">
-                            <div data-toggle="counter" data-end="@waitingListCount" data-decimals="0" data-suffix="" class="value">@waitingListCount</div>
-                            <div class="desc">Waiting</div>
-                        </div>
-                        <div class="icon"><span class="s7-users"></span></div>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
-                    <div class="widget widget-tile widget-bordered">
-                        <div class="data-info">
-                            <div data-toggle="counter" data-end="@applicationCount" data-decimals="0" data-suffix="" class="value">@applicationCount</div>
-                            <div class="desc">Applied</div>
-                        </div>
-                        <div class="icon"><span class="s7-users"></span></div>
-                    </div>
-                </div>
-
-                @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && Model.Activity.CostPerRegistrant > 0)
-                {
-                    <div class="col-md-3">
-                        <div class="widget widget-tile widget-bordered">
-                            <div class="data-info">
-                                <div data-end="@totalPaid" data-decimals="2" data-suffix="" class="value">@totalPaid.ToCurrency()</div>
-                                <div class="desc">Total Paid</div>
-                            </div>
-                            <div class="icon"><span class="s7-cash"></span></div>
-                        </div>
-                    </div>
-                }
+    <div class="col-md-2 hide">
+        <div class="widget widget-tile widget-bordered">
+            <div class="data-info">
+                <div data-toggle="counter" data-end="@invitationCount" data-decimals="0" data-suffix="" class="value">@invitationCount</div>
+                <div class="desc">Invited</div>
             </div>
+            <div class="icon">
+                <span class="s7-users"></span>
+            </div>
+        </div>
+    </div>
 
-            <div class="row">
-                <div class="col-md-3">
-                    <select id="assignmentType" onchange="changeAssignment()" class="form-control">
-                        <option value="">View All Assignments</option>
+    <div class="col-md-2 hide">
+        <div class="widget widget-tile widget-bordered">
+            <div class="data-info">
+                <div data-toggle="counter" data-end="@declinedCount" data-decimals="0" data-suffix="" class="value">@declinedCount</div>
+                <div class="desc">Declined</div>
+            </div>
+            <div class="icon">
+                <span class="s7-users"></span>
+            </div>
+        </div>
+    </div>
 
-                        @foreach (var x in Enum.GetValues(typeof(RegistrationAssignmentType)).Cast<RegistrationAssignmentType>().Where(x => x != RegistrationAssignmentType.NotSet && x != RegistrationAssignmentType.ReservedPendingBackgroundCheck))
-                        {
-                            if (account.HasFeature(FeatureType.AllowApplications) || x != RegistrationAssignmentType.Applied)
-                            {
-                                var selected = "";
-                                if (assignmentType == x)
-                                {
-                                    selected = "selected=\"selected\"";
-                                }
+    <div class="col-md-3">
+        <div class="widget widget-tile widget-bordered">
+            <div class="data-info">
+                <div data-toggle="counter" data-end="@registrantCount" data-decimals="0" data-suffix="" class="value">@registrantCount</div>
+                <div class="desc">Reserved</div>
+            </div>
+            <div class="icon">
+                <span class="s7-users"></span>
+            </div>
+        </div>
+    </div>
 
-                                <option value="@((int)x)" @selected>@x.ToString().SplitByUpperCase()</option>
-                            }
-                        }
-                    </select>
+    <div class="col-md-3">
+        <div class="widget widget-tile widget-bordered">
+            <div class="data-info">
+                <div data-toggle="counter" data-end="@waitingListCount" data-decimals="0" data-suffix="" class="value">@waitingListCount</div>
+                <div class="desc">Waiting</div>
+            </div>
+            <div class="icon">
+                <span class="s7-users"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="widget widget-tile widget-bordered">
+            <div class="data-info">
+                <div data-toggle="counter" data-end="@applicationCount" data-decimals="0" data-suffix="" class="value">@applicationCount</div>
+                <div class="desc">Applied</div>
+            </div>
+            <div class="icon">
+                <span class="s7-users"></span>
+            </div>
+        </div>
+    </div>
+
+    @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && Model.Activity.CostPerRegistrant > 0)
+    {
+        <div class="col-md-3">
+            <div class="widget widget-tile widget-bordered">
+                <div class="data-info">
+                    <div data-end="@totalPaid" data-decimals="2" data-suffix="" class="value">@totalPaid.ToCurrency()</div>
+                    <div class="desc">Total Paid</div>
                 </div>
-                <div class="col-md-3">
-                    @if (Model.Activity.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
+                <div class="icon">
+                    <span class="s7-cash"></span>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <select id="assignmentType" onchange="changeAssignment()" class="form-control">
+            <option value="">View All Assignments</option>
+
+            @foreach (var x in Enum.GetValues(typeof(RegistrationAssignmentType)).Cast<RegistrationAssignmentType>().Where(x => x != RegistrationAssignmentType.NotSet && x != RegistrationAssignmentType.ReservedPendingBackgroundCheck))
+            {
+                if (account.HasFeature(FeatureType.AllowApplications) || x != RegistrationAssignmentType.Applied)
+                {
+                    var selected = "";
+                    if (assignmentType == x)
                     {
-                        <select id="classes" onchange="changeClass()" class="form-control">
-                            <option value="">All Dates</option>
-                            @foreach (var instance in Model.ActivitySchedule.GetInSessionInstances())
-                            {
-                                <option value="@instance.ID">@instance.StartDateTime.ToShortDateTimeString()</option>
-                            }
-                        </select>
+                        selected = "selected=\"selected\"";
                     }
-                </div>
-                <div class="col-md-6">
-                    <div class="btn-group pull-right @(Model.Activity.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass ? "hide" : "")">
 
-                        @if (Model.IsActivityLeader)
-                        {
+                    <option value="@((int) x)" @selected>@x.ToString().SplitByUpperCase()</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="col-md-3">
+        @if (Model.Activity.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
+        {
+            <select id="classes" onchange="changeClass()" class="form-control">
+                <option value="">All Dates</option>
+                @foreach (var instance in Model.ActivitySchedule.GetInSessionInstances())
+                {
+                    <option value="@instance.ID">@instance.StartDateTime.ToShortDateTimeString()</option>
+                }
+            </select>
+        }
+    </div>
+    <div class="col-md-6">
+        <div class="btn-group pull-right @(Model.Activity.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass ? "hide" : "")">
 
-                            if (Model.Activity.ActivityTypeId == ActivityType.LearningPod)
-                            {
-                                var minWarning = $"<p>You have {Model.Activity.GetSeatsTaken()} registrations.</p>";
+            @if (Model.IsActivityLeader)
+            {
+                if (Model.Activity.ActivityTypeId == ActivityType.LearningPod)
+                {
+                    var minWarning = $"<p>You have {Model.Activity.GetSeatsTaken()} registrations.</p>";
 
-                                if (Model.Activity.MinSeatsRequired.HasValue && Model.Activity.MinSeatsRequired.Value > Model.Activity.GetSeatsTaken())
-                                {
-                                    minWarning = $"<p class=\"text-danger\"><strong>You have not reached your minimum of {Model.Activity.MinSeatsRequired.Value}</strong></p>";
-                                }
+                    if (Model.Activity.MinSeatsRequired.HasValue && Model.Activity.MinSeatsRequired.Value > Model.Activity.GetSeatsTaken())
+                    {
+                        minWarning = $"<p class=\"text-danger\"><strong>You have not reached your minimum of {Model.Activity.MinSeatsRequired.Value}</strong></p>";
+                    }
 
-                                <button type="button" class="btn btn-default btn-space md-trigger" data-modal="modal-confirm-finalize" @(Model.Activity.RegistrationFinalized ? "disabled=\"disabled\"" : "")>
-                                    Finalize Registration
-                                </button>
+                    <button type="button" class="btn btn-default btn-space md-trigger" data-modal="modal-confirm-finalize" @(Model.Activity.RegistrationFinalized ? "disabled=\"disabled\"" : "")>
+                        Finalize Registration
+                    </button>
 
-                                Html.RenderPartial("~/Views/Shared/_Modal.cshtml", new ModalViewModel() { ActionButtonHtml = "Finalize Registration &raquo;", ActionButtonId = "btn-confirm-finalize", HtmlBody = $"{minWarning}<p>Are you sure you want to finalize registration? This will close registration and send emails to existing parents with information about how to pay.</p><p><strong>Emails are only sent to parents of students with the status {RegistrationAssignmentType.ReservedPendingPayment.ToString().SplitByUpperCase()}</strong></p><p><strong>This action cannot be undone</strong></p>", ID = "modal-confirm-finalize", Title = "Finalize Registration" });
+                    Html.RenderPartial("~/Views/Shared/_Modal.cshtml", new ModalViewModel {ActionButtonHtml = "Finalize Registration &raquo;", ActionButtonId = "btn-confirm-finalize", HtmlBody = $"{minWarning}<p>Are you sure you want to finalize registration? This will close registration and send emails to existing parents with information about how to pay.</p><p><strong>Emails are only sent to parents of students with the status {RegistrationAssignmentType.ReservedPendingPayment.ToString().SplitByUpperCase()}</strong></p><p><strong>This action cannot be undone</strong></p>", ID = "modal-confirm-finalize", Title = "Finalize Registration"});
 
-                                <script>
+                    <script>
                                     PageEvent.add(PageEvent.AFTER_INIT, function () {
                                         $('#btn-confirm-finalize').click(function () {
-                                            location.href = '@Url.Action("finalizeregistration", "activity", new { id = Model.Activity.Uid })';
+                                            location.href = '@Url.Action("finalizeregistration", "activity", new {id = Model.Activity.Uid})';
                                         });
                                     });
                                 </script>
-                            }
+                }
 
-                            if (showStudentCRM)
-                            {
-                                <a href="@Url.Action("addregistration", "activity", new { id = Model.Activity.Uid })" class="btn btn-default btn-space">
-                                    Add Student
-                                </a>
-                            }
-                            else
-                            {
-                                <a href="#" class="btn btn-default btn-space" onclick="return showUpgradeMyPlan('@(studentCRMPackage?.Name)',@(studentCRMPackage?.ID))" disabled="disabled">
-                                    Add Student
-                                </a>
-                            }
-
-                        }
-
-                        <a href="@Url.Action("registrantsummary", "activity" , new { id = Model.Activity.Uid })" class="btn btn-default btn-space">
-                            Send Registration Report
-                        </a>
-
-                        <a href="@Url.Action("printregistrants", "activity" , new { id = Model.Activity.Uid })" class="btn btn-default btn-space" target="_blank">
-                            Print Registrations
-                        </a>
-
-                        @if (activeRegistrationPeriod.IsNotEmpty())
-                        {
-                            if (showAllowInvites)
-                            {
-                                <a href="@Url.Action("inviteto", "contact", new { id = activeRegistrationPeriod.Uid, type = "period" })" class="btn btn-default btn-space">
-                                    Invite Contacts
-                                </a>
-                            }
-                            else
-                            {
-                                <a href="#" class="btn btn-default btn-space" onclick="return showUpgradeMyPlan('@(allowInvitesPackage?.Name)',@(allowInvitesPackage?.ID))" disabled="disabled">
-                                    Invite Contacts
-                                </a>
-                            }
-
-                        }
-                    </div>
-
-                    <a href="@Url.Action("registrantdownload", "activity", new { id = Model.Activity.Uid })" class="btn btn-primary btn-space hide">
-                        <i class="icon icon-left s7-download"></i> Download Registration Data
+                if (showStudentCRM)
+                {
+                    <a href="@Url.Action("addregistration", "activity", new {id = Model.Activity.Uid})" class="btn btn-default btn-space">
+                        Add Student
                     </a>
-                </div>
-            </div>
-
-            <div class="clearfix"></div>
-            <br />
-            @if(ras.IsEmpty() || ras.Count() == 0)
-            {
-              <hr style="width:100%" />
-              <div class="text-center text-bold">No students have registered yet</div>
+                }
+                else
+                {
+                    <a href="#" class="btn btn-default btn-space" onclick="return showUpgradeMyPlan('@(studentCRMPackage?.Name)',@(studentCRMPackage?.ID))" disabled="disabled">
+                        Add Student
+                    </a>
+                }
             }
-            else
-            {Html.RenderPartial(
-                  "~/Views/Shared/_ActivityRegistrantsWithAllStatus.cshtml",
-                  ras,
-                  new ViewDataDictionary()
-                  {
-                        { "Activity", Model.Activity },
-                        { "Account", account },
-                        { "EditAction", "registrantdetail" },
-                        { "EditController", "activity" },
-                        { "AssignmentType", assignmentType },
-                        { "IsReadOnlySeatStatus", isReadOnlySeatStatus }
-                  }
-              );}
 
+            <a href="@Url.Action("registrantsummary", "activity", new {id = Model.Activity.Uid})" class="btn btn-default btn-space">
+                Send Registration Report
+            </a>
+
+            <a href="@Url.Action("printregistrants", "activity", new {id = Model.Activity.Uid})" class="btn btn-default btn-space" target="_blank">
+                Print Registrations
+            </a>
+
+            @if (activeRegistrationPeriod.IsNotEmpty())
+            {
+                if (showAllowInvites)
+                {
+                    <a href="@Url.Action("inviteto", "contact", new {id = activeRegistrationPeriod.Uid, type = "period"})" class="btn btn-default btn-space">
+                        Invite Contacts
+                    </a>
+                }
+                else
+                {
+                    <a href="#" class="btn btn-default btn-space" onclick="return showUpgradeMyPlan('@(allowInvitesPackage?.Name)',@(allowInvitesPackage?.ID))" disabled="disabled">
+                        Invite Contacts
+                    </a>
+                }
+            }
         </div>
+
+        <a href="@Url.Action("registrantdownload", "activity", new {id = Model.Activity.Uid})" class="btn btn-primary btn-space hide">
+            <i class="icon icon-left s7-download"></i> Download Registration Data
+        </a>
     </div>
+</div>
+
+<div class="clearfix"></div>
+<br/>
+@if (ras.IsEmpty() || ras.Count() == 0)
+{
+    <hr style="width:100%"/>
+    <div class="text-center text-bold">No students have registered yet</div>
+}
+else
+{
+    Html.RenderPartial(
+        "~/Views/Shared/_ActivityRegistrantsWithAllStatus.cshtml",
+        ras,
+        new ViewDataDictionary
+        {
+            {"Activity", Model.Activity},
+            {"Account", account},
+            {"EditAction", "registrantdetail"},
+            {"EditController", "activity"},
+            {"AssignmentType", assignmentType},
+            {"IsReadOnlySeatStatus", isReadOnlySeatStatus},
+        }
+        );
+}
+
+</div>
+</div>
 </div>
 
 <script>
     function changeAssignment() {
-        location.href = '@Url.Action("registrants", "activity", new { id = Model.Activity.Uid })?atype=' + $('#assignmentType').val();
+        location.href = '@Url.Action("registrants", "activity", new {id = Model.Activity.Uid})?atype=' + $('#assignmentType').val();
     }
     function changeClass() {
         $('.instance').addClass('hide');

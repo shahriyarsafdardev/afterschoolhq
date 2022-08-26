@@ -2943,12 +2943,22 @@ namespace AfterSchoolLibrary.Services
                 RegistrationAssignmentType.ReservedPendingParentalConsent,
             };
 
-            if (activity.ActivityTypeId == ActivityType.PermissionSlip)
+            if (activity.ActivityTypeId == ActivityType.VolunteerOpportunity)
+            {
+                dropdownOptions = new List<RegistrationAssignmentType>
+                {
+                    RegistrationAssignmentType.Reserved,
+                    RegistrationAssignmentType.WaitingList,
+                    RegistrationAssignmentType.ReservedPendingBackgroundCheck,
+                };
+            }
+            
+            else if (activity.ActivityTypeId == ActivityType.PermissionSlip)
             {
                 dropdownOptions.Remove(RegistrationAssignmentType.WaitingList);
                 dropdownOptions.Remove(RegistrationAssignmentType.Applied);
             }
-
+            
             return dropdownOptions;
         }
 

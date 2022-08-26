@@ -2015,6 +2015,7 @@
     <Content Include="Views\Shared\Registration\_BrowseAllActivities.cshtml" />
     <Content Include="Views\Shared\Registration\_BrowseVolunteerOpportunitiesFilterBar.cshtml" />
     <Content Include="Views\Shared\Registration\_ParticipationObjectSection.cshtml" />
+    <Content Include="Views\Shared\_VolunteerRegistrantsForSpecificStatus.cshtml" />
     <Content Include="Views\Shared\_CopyActivityModal.cshtml" />
     <Content Include="Views\Shared\_Users.cshtml" />
     <Content Include="Areas\Admin\Views\Package\Index.cshtml" />

@@ -287,6 +287,9 @@ namespace AfterSchool.Areas.Org.Controllers
             msgs.Add("Your report will be sent shortly", MessageType.Success);
 
             var result = GatherDataForAndAssembleRegistrantsResult(activity, "", currentAccount, currentUser, msgs);
+            if (getVolunteers)
+                return View("VolunteerRegistrants", result);
+
             return View("Registrants", result);
         }
 
@@ -958,7 +961,6 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentUserIsActivityLeader = SessionVariables.CurrentUser.IsActivityLeader(activity, msgs);
             ViewBag.IsActivityLeader =
                 EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, SessionVariables.AccountUserType, currentUserIsActivityLeader);
-
             var assignmentTypes = new[]
             {
                 RegistrationAssignmentType.Applied, RegistrationAssignmentType.WaitingList,
@@ -1421,9 +1423,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 {"activitylocationtype", activityLocationTypeId},
                 {"isparentpricecost", true},
             };
-            
+
             var isNew = Request[IsNewRequest] == "1";
-            
+
             if (isNew && activityLocationTypeId == (int) ActivityLocationType.Physical && activity.IsEmpty())
             {
                 var location = currentAccount.GetDefaultLocation();
