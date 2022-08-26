@@ -956,7 +956,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult MessageAdd(string id)
+        public ActionResult MessageAdd(string id , string uid = "")
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
@@ -970,13 +970,25 @@ namespace AfterSchool.Areas.Org.Controllers
                 RegistrationAssignmentType.Applied, RegistrationAssignmentType.WaitingList,
                 RegistrationAssignmentType.Reserved, RegistrationAssignmentType.ReservedPendingParentalConsent,
                 RegistrationAssignmentType.ReservedPendingPayment, RegistrationAssignmentType.Invited,
+                RegistrationAssignmentType.Withdrawn
             };
 
-            ViewBag.Registrants = activity.GetRegistrantActivities(true, msgs)
-                .Where(ra => ra.AssignmentTypeId.In(assignmentTypes))
-                .Select(ra => ra.ToRegistrant())
-                .OrderBy(x => x.FirstName)
-                .ToList();
+            if (uid.IsNotEmpty())
+            {
+                ViewBag.Registrants = activity.GetRegistrantActivities(true, msgs)
+                    .Where(ra => ra.AssignmentTypeId.In(assignmentTypes) && ra.RegistrantUid == uid.ToGuid())
+                    .Select(ra => ra.ToRegistrant())
+                    .OrderBy(x => x.FirstName)
+                    .ToList();
+            }
+            else
+            {
+                ViewBag.Registrants = activity.GetRegistrantActivities(true, msgs)
+                    .Where(ra => ra.AssignmentTypeId.In(assignmentTypes))
+                    .Select(ra => ra.ToRegistrant())
+                    .OrderBy(x => x.FirstName)
+                    .ToList();
+            }
 
             // If the user does have the messages feature, and the user tries to send a message, validate the user hasn't used up their quota of emails, and/or text messages, if they have exceeded their quota, show the upgrade.
             // If the user has hit or exceeded the email quota then show the upgrade modal

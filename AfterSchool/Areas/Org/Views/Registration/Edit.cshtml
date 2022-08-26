@@ -1,3 +1,4 @@
+@using System.Activities.Expressions
 @model Registration
 @{
     var msgs = (SystemMessages) ViewBag.Messages;
@@ -271,7 +272,15 @@
         if (isVolunteerOpportunity) {
             return @Html.Raw(Json.Encode(Enum.GetValues(typeof(RegistrationAssignmentType))
                        .Cast<RegistrationAssignmentType>()
-                       .Where(x => x != RegistrationAssignmentType.NotSet && x != RegistrationAssignmentType.ReservedPendingPayment && x != RegistrationAssignmentType.ReservedPendingParentalConsent)
+                       .Where(x => x.NotIn(new[]
+                       {
+                           RegistrationAssignmentType.NotSet,
+                           RegistrationAssignmentType.Applied,
+                           RegistrationAssignmentType.ReservedPendingPayment,
+                           RegistrationAssignmentType.ReservedPendingParentalConsent,
+                           RegistrationAssignmentType.Invited,
+                           RegistrationAssignmentType.Declined,
+                       }))
                        .Select(x => new {id = (int) x, name = x.ToString().SplitByUpperCase()})
                        .ToArray()));
         } else {
