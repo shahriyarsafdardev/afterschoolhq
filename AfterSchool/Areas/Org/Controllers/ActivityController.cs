@@ -973,7 +973,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 RegistrationAssignmentType.Withdrawn
             };
 
-            if (uid.IsNotEmpty())
+            if (uid.IsGuid())
             {
                 ViewBag.Registrants = activity.GetRegistrantActivities(true, msgs)
                     .Where(ra => ra.AssignmentTypeId.In(assignmentTypes) && ra.RegistrantUid == uid.ToGuid())
