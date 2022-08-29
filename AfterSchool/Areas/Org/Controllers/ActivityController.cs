@@ -965,16 +965,18 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentUserIsActivityLeader = SessionVariables.CurrentUser.IsActivityLeader(activity, msgs);
             ViewBag.IsActivityLeader =
                 EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, SessionVariables.AccountUserType, currentUserIsActivityLeader);
-            var assignmentTypes = new[]
+            var assignmentTypes = new List<RegistrationAssignmentType>
             {
                 RegistrationAssignmentType.Applied, RegistrationAssignmentType.WaitingList,
                 RegistrationAssignmentType.Reserved, RegistrationAssignmentType.ReservedPendingParentalConsent,
                 RegistrationAssignmentType.ReservedPendingPayment, RegistrationAssignmentType.Invited,
-                RegistrationAssignmentType.Withdrawn
+                RegistrationAssignmentType.ReservedPendingBackgroundCheck
             };
 
             if (uid.IsGuid())
             {
+                assignmentTypes.Add(RegistrationAssignmentType.Withdrawn);
+                
                 ViewBag.Registrants = activity.GetRegistrantActivities(true, msgs)
                     .Where(ra => ra.AssignmentTypeId.In(assignmentTypes) && ra.RegistrantUid == uid.ToGuid())
                     .Select(ra => ra.ToRegistrant())
