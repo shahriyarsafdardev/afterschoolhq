@@ -76,7 +76,7 @@ namespace AfterSchool.Areas.User.Controllers
         public ActionResult Plans()
         {
             var msgs = new SystemMessages();
-            var registrants = SessionVariables.CurrentUser.GetChildrenRegistrants(msgs);
+            var registrants = SessionVariables.CurrentUser.GetStudentRegistrants(msgs);
             var plans = new List<RegistrantSubscriptionPlan>();
 
             registrants.ForEach(registrant => {
