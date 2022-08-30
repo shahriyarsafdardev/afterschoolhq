@@ -1,7 +1,7 @@
 ﻿@model List<RegistrantActivityViewModel>
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
-    var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
+    var isTechSupport = SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
 }
 
 @{ Html.RenderPartial("_UserAccountHeader"); }
@@ -11,7 +11,11 @@
     @foreach (var item in Model)
     {
         <div class="row">
-            <h3 class="margin-h-30">@(!isTechSupport ? item.Registrant.Name : item.Registrant.GetFirstNameLastInitial())</h3>
+
+            @if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Volunteer)
+            {
+                <h3 class="margin-h-30">@(!isTechSupport ? item.Registrant.Name : item.Registrant.GetFirstNameLastInitial())</h3>
+            }
 
             @foreach (var regStatus in Enum.GetValues(typeof(RegistrationStatus)).Cast<RegistrationStatus>().Except(RegistrationStatus.NotSet.AsList()).OrderBy(x => x.ToString()))
             {
@@ -20,11 +24,11 @@
                         Html.RenderPartial(
                             "Activities/_BrowseGroupedActivities",
                             item.Participations,
-                            new ViewDataDictionary()
+                            new ViewDataDictionary
                             {
                                 { "Status", (int)regStatus }
                             }
-                        );
+                            );
                     }
                 </div>
             }
@@ -36,5 +40,5 @@
 
 @section header
 {
-    <link href="~/Assets/css/style-registration.css?v=1.01" type="text/css" rel="stylesheet" />
+    <link href="~/Assets/css/style-registration.css?v=1.01" type="text/css" rel="stylesheet"/>
 }

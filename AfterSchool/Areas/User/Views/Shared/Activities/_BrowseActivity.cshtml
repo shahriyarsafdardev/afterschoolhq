@@ -1,6 +1,6 @@
 ﻿@model ParticipationViewModel
 
-@{ 
+@{
     var statusClass = "warning";
 
     if (Model.RegistrantActivity.AssignmentTypeId == RegistrationAssignmentType.Reserved)
@@ -16,7 +16,7 @@
 <div class="col-sm-12 col-md-6 col-lg-4">
     <div class="panel">
         <div class="heading panel-h3" style="background-color: #2f3c40; height: 80px;">
-            
+
             <div class="pull-right">
                 <div class="btn-group btn-hspace">
                     <button class="btn btn-alt5 dropdown-toggle" data-toggle="dropdown">
@@ -24,7 +24,7 @@
                     </button>
                     <div class="dropdown-menu dropdown-menu-right">
 
-                        @if (Model.RegistrantActivity.AssignmentTypeId.NotIn(new RegistrationAssignmentType[] { RegistrationAssignmentType.Withdrawn, RegistrationAssignmentType.Declined }))
+                        @if (Model.RegistrantActivity.AssignmentTypeId.NotIn(new[] {RegistrationAssignmentType.Withdrawn, RegistrationAssignmentType.Declined}))
                         {
                             Html.RenderPartial("Activities/_WithdrawLink", Model);
                         }
@@ -32,15 +32,15 @@
                         @if (!Model.ParticipationObject.IsFree)
                         {
                             <a class="padding-10"
-                                style="display:block"
-                                href="mailto:@Model.ParticipationObject.ContactEmail?subject=@UI.JavascriptSafeString($"Refund Request for {Model.ParticipationObject.Name}")">
+                               style="display:block"
+                               href="mailto:@Model.ParticipationObject.ContactEmail?subject=@UI.JavascriptSafeString($"Refund Request for {Model.ParticipationObject.Name}")">
                                 Request Refund &raquo;
                             </a>
                         }
 
                         <a class="padding-10"
-                            style="display:block"
-                            href="mailto:@Model.ParticipationObject.ContactEmail">
+                           style="display:block"
+                           href="mailto:@Model.ParticipationObject.ContactEmail">
                             Send Message &raquo;
                         </a>
 

@@ -386,8 +386,8 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static List<ParticipationObject> GetPublishedParticipationObjects(this Account account,
-            SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<ParticipationObject> GetAllPublishedParticipationObjects(this Account account,
+            SystemMessages msgs = null, DatabaseConnection dc = null) 
         {
             var participationObjects = new List<ParticipationObject>();
             var topParticipationObjects = new List<ParticipationObject>();
@@ -427,6 +427,19 @@ namespace AfterSchoolLibrary.Services
             return participationObjects
                 .DistinctBy(participationObject => new {participationObject.ObjectID, participationObject.ObjectType})
                 .ToList();
+        }
+        
+        // Target: How to improve below 2 functions?
+        public static List<ParticipationObject> GetPublishedActivitiesParticipationObjects(this Account account,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.GetAllPublishedParticipationObjects().Where( x=> x.ActivityType != ActivityType.VolunteerOpportunity).ToList();
+        }
+        
+        public static List<ParticipationObject> GetPublishedOpportunitiesParticipationObjects(this Account account,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.GetAllPublishedParticipationObjects().Where( x=> x.ActivityType == ActivityType.VolunteerOpportunity).ToList();
         }
 
         public static List<Activity> GetPublishedActivities(this Account account, SystemMessages msgs = null,
@@ -914,7 +927,7 @@ namespace AfterSchoolLibrary.Services
         public static bool IsNowEnrolling(this Account account, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            return account.GetPublishedParticipationObjects(msgs, dc)
+            return account.GetAllPublishedParticipationObjects(msgs, dc)
                 .Any(participationObject => participationObject.GetCurrentRegistrationPeriod(msgs, dc).IsNotEmpty());
         }
 

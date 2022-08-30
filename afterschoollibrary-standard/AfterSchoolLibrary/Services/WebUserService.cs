@@ -312,6 +312,13 @@ namespace AfterSchoolLibrary.Services
                 .Where(registrant => registrant.PersonTypeId == RegistrantPersonType.Student)
                 .ToList();
         }
+        public static List<Registrant> GetVolunteerRegistrants(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantWebUser.LoadByWebUserIdByIsDeleted(user.ID.Value, false, msgs, dc)
+                .Select(rwu => Registrant.Load(rwu.RegistrantId.Value, msgs, dc))
+                .Where(registrant => registrant.PersonTypeId == RegistrantPersonType.Volunteer)
+                .ToList();
+        }
 
         public static string GetInviteUrl(this WebUser user, Account account)
         {

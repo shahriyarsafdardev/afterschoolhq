@@ -1,4 +1,4 @@
-﻿using AfterSchool.Models;
+using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
@@ -12,7 +12,7 @@ namespace AfterSchool.Areas.User.Controllers
 {
     public class ActivityController : BaseLoggedInController
     {
-        public ActivityController() : base(new List<AccountType>() { AccountType.Registrant })
+        public ActivityController() : base(new List<AccountType> { AccountType.Registrant, AccountType.Volunteer })
         {
 
         }
@@ -21,7 +21,8 @@ namespace AfterSchool.Areas.User.Controllers
         public ActionResult Index()
         {
             var msgs = new SystemMessages();
-            var registrants = SessionVariables.CurrentUser.GetStudentRegistrants(msgs);
+            var isVolunteer = SessionVariables.CurrentAccount.AccountTypeId == AccountType.Volunteer;
+            var registrants = isVolunteer? SessionVariables.CurrentUser.GetVolunteerRegistrants(msgs) : SessionVariables.CurrentUser.GetStudentRegistrants(msgs);
             var studentActivities = new List<RegistrantActivityViewModel>();
 
             registrants.ForEach(registrant =>

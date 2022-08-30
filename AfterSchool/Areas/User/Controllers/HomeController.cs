@@ -9,7 +9,7 @@ namespace AfterSchool.Areas.User.Controllers
 {
     public class HomeController : BaseLoggedInController
     {
-        public HomeController() : base(new List<AccountType> {AccountType.Registrant})
+        public HomeController() : base(new List<AccountType> {AccountType.Registrant, AccountType.Volunteer})
         {
         }
 
@@ -17,12 +17,14 @@ namespace AfterSchool.Areas.User.Controllers
         public ActionResult Index()
         {
             var msgs = new SystemMessages();
-            var masterRegistrant = SessionVariables.CurrentUser.GetMasterParentOrStudentRegistrant(msgs);
-            var registrants = SessionVariables.CurrentUser.GetStudentRegistrants(msgs);
+            var isVolunteer = SessionVariables.CurrentAccount.AccountTypeId == AccountType.Volunteer;
+            var masterRegistrant = isVolunteer? SessionVariables.CurrentUser.GetMasterVolunteerRegistrant(msgs) : SessionVariables.CurrentUser.GetMasterParentOrStudentRegistrant(msgs);
+            // Volunteer will have registrants?
+            var registrants = isVolunteer? SessionVariables.CurrentUser.GetVolunteerRegistrants(msgs) : SessionVariables.CurrentUser.GetStudentRegistrants(msgs);
 
             if (registrants.All(registrant => registrant.ID != masterRegistrant.ID) && masterRegistrant.IsNotEmpty())
                 registrants.Add(masterRegistrant);
-
+            
             var registrantModel = registrants.PrepareRegistrantDetails(masterRegistrant, msgs);
 
             ViewBag.ActivityInstances = registrantModel.ActivityInstances;
