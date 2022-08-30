@@ -279,15 +279,6 @@ else
 @section scripts{
     <script>
         $(document).ready(function () {
-            if (window.location.hash.startsWith('#success-')) {
-                let successText = decodeURI(window.location.hash.replace('#success-', ''));
-                Notifications.showBar({
-                    title: 'Success',
-                    message: successText,
-                    success: true
-                });
-                window.location.hash = '';
-            }
             $(document).on("change", ".yesno", function () {
                 let manualWithdrawButton = $("#btn-manual-withdraw");
                 if ($(this).val() === "yes") {

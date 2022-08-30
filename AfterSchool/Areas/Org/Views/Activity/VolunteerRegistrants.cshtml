@@ -158,7 +158,7 @@
     function changeClass() {
         $('.instance').addClass('hide');
 
-        if ($('#classes').val() == '') {
+        if ($('#classes').val() === '') {
             $('.instance').removeClass('hide');
         } else {
             $('.instance-' + $('#classes').val()).removeClass('hide');
@@ -169,25 +169,17 @@
 @section scripts{
     <script>
         $(document).ready(function () {
-            if (window.location.hash.startsWith('#success-')) {
-                let successText = decodeURI(window.location.hash.replace('#success-', ''));
-                Notifications.showBar({
-                    title: 'Success',
-                    message: successText,
-                    success: true
-                });
-                window.location.hash = '';
-            }
             $(document).on("change", ".yesno", function () {
-                if ($(this).val() == "yes") {
-                    $("#btn-manual-withdraw").text('Withdraw & Cancel Payments »').button("refresh");
-                    let value = $("#btn-manual-withdraw").attr('onclick');
-                    $("#btn-manual-withdraw").attr('onclick', value.replace('false', 'true'));
+                let manualWithdrawButton = $("#btn-manual-withdraw");
+                if ($(this).val() === "yes") {
+                    manualWithdrawButton.text('Withdraw & Cancel Payments »').button("refresh");
+                    let value = manualWithdrawButton.attr('onclick');
+                    manualWithdrawButton.attr('onclick', value.replace('false', 'true'));
                 }
                 else {
-                    $("#btn-manual-withdraw").text('Withdraw & Continue Payments »').button("refresh");
-                    let value = $("#btn-manual-withdraw").attr('onclick');
-                    $("#btn-manual-withdraw").attr('onclick', value.replace('true', 'false'));
+                    manualWithdrawButton.text('Withdraw & Continue Payments »').button("refresh");
+                    let value = manualWithdrawButton.attr('onclick');
+                    manualWithdrawButton.attr('onclick', value.replace('true', 'false'));
                 }
 
             })

@@ -388,9 +388,14 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (msgs.HasNoErrors())
+            {
+                var registrantName = registrant.Name;
+                var successMessage = new SystemMessage($"{registrantName} Withdrawn successfully.", MessageType.Success);
+                SetTempMessages(new SystemMessages {successMessage});
                 return Json(new {success = true, status = "ok"}, JsonRequestBehavior.AllowGet);
+            }
 
-            //.. something went wrong, error occured
+            // something went wrong, error occured
             return Json(new {success = false, status = "error", data = msgs.ToList().Select(msg => new {msg.Text})},
                 JsonRequestBehavior.AllowGet);
         }

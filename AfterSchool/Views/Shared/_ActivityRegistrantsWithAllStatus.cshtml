@@ -302,17 +302,10 @@
 <script>
     function moveRegistrantAssignment(registrant, registrantName, selectBox) {
         let newAssignment = selectBox.value;
-        let newAssignmentText = selectBox.options[selectBox.selectedIndex].text;
-        console.log(newAssignment, selectBox.selectedIndex, newAssignmentText)
-        moveRegistrantAssignment2(registrant, registrantName, newAssignment, newAssignmentText);
-    }
-
-    function moveRegistrantAssignment2(registrant, registrantName, newAssignment, newAssignmentText) {
         $.get(
             `@Url.Action("moveregistrantassignment", "services", new {id = activity.Uid})?registrant=${registrant}&assignmenttype=${newAssignment}`,
             function (data) {
                 if (data && data.status === 'ok') {
-                    location.hash = `success-${registrantName}'s seat has been moved to ${newAssignmentText}.`;
                     location.reload();
                 } else {
                     Notifications.showBar({
@@ -400,7 +393,6 @@
                         $('#btn-withdraw-' + registrantActivityUId).attr('disabled', 'disabled');
                         hideLoader();
 
-                        location.hash = `success-Registrant Withdrawn successfully.`;
                         location.reload();
                     } else {
                         if (data && data.status === 'error') {
