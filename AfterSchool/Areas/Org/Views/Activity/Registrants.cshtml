@@ -289,7 +289,8 @@ else
                 window.location.hash = '';
             }
             $(document).on("change", ".yesno", function () {
-                let manualWithdrawButton = $("#btn-manual-withdraw");if ($(this).val() === "yes") {
+                let manualWithdrawButton = $("#btn-manual-withdraw");
+                if ($(this).val() === "yes") {
                     manualWithdrawButton.text('Withdraw & Cancel Payments »').button("refresh");
                     let value = manualWithdrawButton.attr('onclick');
                     manualWithdrawButton.attr('onclick', value.replace('false', 'true'));
