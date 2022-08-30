@@ -178,6 +178,10 @@ namespace AfterSchool.Areas.Org.Controllers
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         msgs.AddRange(smsgs);
+                        var registrantName = ra.ToRegistrant().Name;
+                        var newAssignmentText = newAssignmentType.ToString().SplitByUpperCase();
+                        var successMessage = new SystemMessage($"{registrantName}'s seat has been moved to {newAssignmentText}.", MessageType.Success);
+                        SetTempMessages(new SystemMessages {successMessage});
                         WriteOutput(new {status = "ok"}, ResponseType.JSON);
                     },
                     onFailure: (SystemMessages fmsgs) =>

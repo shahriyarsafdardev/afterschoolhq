@@ -280,15 +280,16 @@ else
     <script>
         $(document).ready(function () {
             $(document).on("change", ".yesno", function () {
-                if ($(this).val() == "yes") {
-                    $("#btn-manual-withdraw").text('Withdraw & Cancel Payments »').button("refresh");
-                    var value = $("#btn-manual-withdraw").attr('onclick');
-                    $("#btn-manual-withdraw").attr('onclick', value.replace('false', 'true'));
+                let manualWithdrawButton = $("#btn-manual-withdraw");
+                if ($(this).val() === "yes") {
+                    manualWithdrawButton.text('Withdraw & Cancel Payments »').button("refresh");
+                    let value = manualWithdrawButton.attr('onclick');
+                    manualWithdrawButton.attr('onclick', value.replace('false', 'true'));
                 }
                 else {
-                    $("#btn-manual-withdraw").text('Withdraw & Continue Payments »').button("refresh");
-                    var value = $("#btn-manual-withdraw").attr('onclick');
-                    $("#btn-manual-withdraw").attr('onclick', value.replace('true', 'false'));
+                    manualWithdrawButton.text('Withdraw & Continue Payments »').button("refresh");
+                    let value = manualWithdrawButton.attr('onclick');
+                    manualWithdrawButton.attr('onclick', value.replace('true', 'false'));
                 }
 
             })

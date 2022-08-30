@@ -3,10 +3,8 @@
 @{
     var account = (Account) ViewData["Account"];
     var activity = (Activity) ViewData["Activity"];
-    var participationObject = activity.GetParticipationObject();
     var editaction = ViewData["EditAction"].ToString();
     var editcontroller = ViewData["EditController"].ToString();
-    var isTechSupport = SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
     var isReadOnlySeatStatus = ViewData["IsReadOnlySeatStatus"].IsNotEmpty() && (bool) ViewData["IsReadOnlySeatStatus"];
 
     var reservedButPendingPayment = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment).ToList();
@@ -302,24 +300,12 @@
 </script>
 
 <script>
-
-
     function moveRegistrantAssignment(registrant, registrantName, selectBox) {
         let newAssignment = selectBox.value;
-        let newAssignmentText = selectBox.options[selectBox.selectedIndex].text;
-        console.log(newAssignment, selectBox.selectedIndex, newAssignmentText)
-        moveRegistrantAssignment2(registrant, registrantName, newAssignment, newAssignmentText);
-    }
-
-    function moveRegistrantAssignment2(registrant, registrantName, newAssignment, newAssignmentText) {
         $.get(
             `@Url.Action("moveregistrantassignment", "services", new {id = activity.Uid})?registrant=${registrant}&assignmenttype=${newAssignment}`,
             function (data) {
-                if (data && data.status == 'ok') {
-                    Notifications.showBar({
-                        title: 'Success',
-                        message: `${registrantName}'s seat has been moved to ${newAssignmentText}.`
-                    });
+                if (data && data.status === 'ok') {
                     location.reload();
                 } else {
                     Notifications.showBar({
@@ -341,7 +327,7 @@
         $.get(
             `@Url.Action("sendpaymentreminder", "services", new {id = activity.Uid})?registrant=${registrant}`,
             function (data) {
-                if (data && data.status == 'ok') {
+                if (data && data.status === 'ok') {
                     Notifications.showBar({
                         title: 'Success',
                         message: `A payment reminder email has been sent to ${registrantName}.`
@@ -364,11 +350,11 @@
     function processWithdraw(registrantActivityUId, registrantActivityId, registrantId, participationObjectId, type, registrantName, count = 0, hasPaymentPlan = false) {
         //.. prepare source and template
         
-        var source = $("#script-withdraw-template").html();
-        var compiled = _.template(source);
+        let source = $("#script-withdraw-template").html();
+        let compiled = _.template(source);
 
         //.. format data as JSON and combine with template
-        var compiledHtml = compiled({
+        let compiledHtml = compiled({
             registrantActivityUId: registrantActivityUId,
             registrantActivityId: registrantActivityId,
             registrantId: registrantId,
@@ -392,32 +378,27 @@
         if (participationObjectId && registrantId) {
             showLoader();
 
-            var url = '@Url.Action("WithdrawRegistrant", "Activity", new {Area = "Org"})';
+            let url = '@Url.Action("WithdrawRegistrant", "Activity", new {Area = "Org"})';
             $.ajax({
                 type: "POST",
                 url: url,
                 data: { participationObjectId: participationObjectId, registrantUId: registrantId, type, isWithdrawAndCancelClicked },
                 success: function (data) {
-                    if (data && data.success == true) {
+                    if (data && data.success === true) {
 
                         $('#modal-withdraw-registrant-' + registrantActivityUId).modal('hide');
 
-                        var withdrawn = '@Json.Encode(RegistrationAssignmentType.Withdrawn)';
-                        $('#newassignmenttype-' + registrantActivityId).val(withdrawn); //status udpate to withdrawn
+                        let withdrawn = '@Json.Encode(RegistrationAssignmentType.Withdrawn)';
+                        $('#newassignmenttype-' + registrantActivityId).val(withdrawn); //status update to withdrawn
                         $('#btn-withdraw-' + registrantActivityUId).attr('disabled', 'disabled');
                         hideLoader();
 
-                        Notifications.showBar({
-                            title: 'Success',
-                            message: 'Registrant Withdrawn successfully.',
-                            success: true
-                        });
                         location.reload();
                     } else {
-                        if (data && data.status == 'error') {
+                        if (data && data.status === 'error') {
                             $('#search-result').html('');
 
-                            var error = '';
+                            let error = '';
 
                             _.each(data.data, function (msg) {
                                 error += msg?.Text + '<br />';
