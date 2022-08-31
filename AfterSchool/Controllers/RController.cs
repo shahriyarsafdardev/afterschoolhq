@@ -203,7 +203,7 @@ namespace AfterSchool.Controllers
         private List<ParticipationObject> GetParticipationObjects(Account account, SystemMessages msgs)
         {
             var participationObjects = new List<ParticipationObject>();
-            participationObjects.AddRange(account.GetPublishedParticipationObjects(msgs));
+            participationObjects.AddRange(account.GetAllPublishedParticipationObjects(msgs));
 
             return participationObjects
                 .Where(po => (!po.IsActivity() || !po.GetActivity().ActivityGroupId.HasValue) && !po.IsInviteOnly)
@@ -216,7 +216,7 @@ namespace AfterSchool.Controllers
         private List<ParticipationObject> GetBrowseActivitiesParticipationObjects(Account account, SystemMessages msgs)
         {
             var participationObjects = new List<ParticipationObject>();
-            participationObjects.AddRange(account.GetPublishedParticipationObjects(msgs));
+            participationObjects.AddRange(account.GetAllPublishedParticipationObjects(msgs));
 
             return participationObjects
                 .Where(ShouldDisplayOnBrowseActivities)
@@ -235,7 +235,7 @@ namespace AfterSchool.Controllers
         private List<ParticipationObject> GetVolunteerOpportunityParticipationObjects(Account account, SystemMessages msgs)
         {
             var participationObjects = new List<ParticipationObject>();
-            participationObjects.AddRange(account.GetPublishedParticipationObjects(msgs));
+            participationObjects.AddRange(account.GetAllPublishedParticipationObjects(msgs));
 
             return participationObjects
                 .Where(po => po.IsActivity() && po.GetActivity().ActivityTypeId == ActivityType.VolunteerOpportunity && !po.IsInviteOnly)

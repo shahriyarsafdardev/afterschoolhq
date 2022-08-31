@@ -1,8 +1,7 @@
-﻿using AfterSchool.Models;
+using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
-using System;
 using System.Collections.Generic;
 using System.Web.Mvc;
 using AfterSchool.Areas.User.Models;
@@ -12,46 +11,48 @@ namespace AfterSchool.Areas.User.Controllers
 {
     public class ActivityController : BaseLoggedInController
     {
-        public ActivityController() : base(new List<AccountType>() { AccountType.Registrant })
+        public ActivityController() : base(new List<AccountType> {AccountType.Registrant, AccountType.Volunteer})
         {
-
         }
 
         // GET: User/Activity
         public ActionResult Index()
         {
             var msgs = new SystemMessages();
-            var registrants = SessionVariables.CurrentUser.GetStudentRegistrants(msgs);
-            var studentActivities = new List<RegistrantActivityViewModel>();
+            var isVolunteer = SessionVariables.CurrentAccount.AccountTypeId == AccountType.Volunteer;
+            var registrants = isVolunteer
+                ? new List<Registrant> {SessionVariables.CurrentUser.GetMasterVolunteerRegistrant(msgs)}
+                : SessionVariables.CurrentUser.GetStudentRegistrants(msgs);
+            var registeredActivities = new List<RegistrantActivityViewModel>();
 
             registrants.ForEach(registrant =>
             {
-                var studentPOs = new List<ParticipationViewModel>();
+                var participationViewModels = new List<ParticipationViewModel>();
 
                 registrant.GetSubmittedRecords(msgs).ForEach(submittedRecord =>
                 {
                     var ras = submittedRecord.GetRegistrantActivities(msgs)
-                                .Where(ra => ra.ParticipationObjectTypeId != ParticipationObjectType.ActivityGroup)
-                                .ToList();                    
+                        .Where(ra => ra.ParticipationObjectTypeId != ParticipationObjectType.ActivityGroup)
+                        .ToList();
 
-                    ras.ForEach(ra => {
+                    ras.ForEach(ra =>
+                    {
                         var participationObject = ra.GetParticipationObject(msgs);
                         var isPast = participationObject.IsOutOfSession(msgs) || ra.AssignmentTypeId == RegistrationAssignmentType.Withdrawn;
 
                         if (isPast)
-                            studentPOs.Add(new ParticipationViewModel(participationObject, ra, submittedRecord, RegistrationStatus.Past));
+                            participationViewModels.Add(new ParticipationViewModel(participationObject, ra, submittedRecord, RegistrationStatus.Past));
                         else if (participationObject.IsInSession(msgs))
-                            studentPOs.Add(new ParticipationViewModel(participationObject, ra, submittedRecord, RegistrationStatus.Current));
+                            participationViewModels.Add(new ParticipationViewModel(participationObject, ra, submittedRecord, RegistrationStatus.Current));
                         else if (participationObject.WillBeInSession(msgs))
-                            studentPOs.Add(new ParticipationViewModel(participationObject, ra, submittedRecord, RegistrationStatus.Future));
+                            participationViewModels.Add(new ParticipationViewModel(participationObject, ra, submittedRecord, RegistrationStatus.Future));
                     });
-                    
                 });
 
-                studentActivities.Add(new RegistrantActivityViewModel(registrant, studentPOs));
+                registeredActivities.Add(new RegistrantActivityViewModel(registrant, participationViewModels));
             });
 
-            return View(studentActivities);
+            return View(registeredActivities);
         }
 
         [HttpGet]
@@ -61,8 +62,8 @@ namespace AfterSchool.Areas.User.Controllers
             var registrant = Registrant.LoadByUid(id.ToGuid());
 
             registrant.WithdrawRegistration(
-                participationObjectId: po.ToInteger(), 
-                participationObjectType: (ParticipationObjectType)type.ToInteger(), 
+                participationObjectId: po.ToInteger(),
+                participationObjectType: (ParticipationObjectType) type.ToInteger(),
                 loggedInUser: SessionVariables.CurrentUser,
                 account: SessionVariables.CurrentAccount,
                 isCancelPayment: true,
