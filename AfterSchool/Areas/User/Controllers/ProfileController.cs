@@ -11,7 +11,7 @@ namespace AfterSchool.Areas.User.Controllers
 {
     public class ProfileController : BaseLoggedInController
     {
-        public ProfileController() : base(new List<AccountType>() { AccountType.Registrant, AccountType.Volunteer })
+        public ProfileController() : base(new List<AccountType> { AccountType.Registrant, AccountType.Volunteer })
         {
 
         }

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Web.Mvc;
 using AfterSchool.Models;
+using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 
@@ -18,13 +19,14 @@ namespace AfterSchool.Areas.User.Controllers
         {
             var msgs = new SystemMessages();
             var isVolunteer = SessionVariables.CurrentAccount.AccountTypeId == AccountType.Volunteer;
-            var masterRegistrant = isVolunteer? SessionVariables.CurrentUser.GetMasterVolunteerRegistrant(msgs) : SessionVariables.CurrentUser.GetMasterParentOrStudentRegistrant(msgs);
-            // Volunteer will have registrants?
-            var registrants = isVolunteer? SessionVariables.CurrentUser.GetVolunteerRegistrants(msgs) : SessionVariables.CurrentUser.GetStudentRegistrants(msgs);
+            var masterRegistrant = isVolunteer
+                ? SessionVariables.CurrentUser.GetMasterVolunteerRegistrant(msgs)
+                : SessionVariables.CurrentUser.GetMasterParentOrStudentRegistrant(msgs);
+            var registrants = isVolunteer ? new List<Registrant> {masterRegistrant} : SessionVariables.CurrentUser.GetStudentRegistrants(msgs);
 
             if (registrants.All(registrant => registrant.ID != masterRegistrant.ID) && masterRegistrant.IsNotEmpty())
                 registrants.Add(masterRegistrant);
-            
+
             var registrantModel = registrants.PrepareRegistrantDetails(masterRegistrant, msgs);
 
             ViewBag.ActivityInstances = registrantModel.ActivityInstances;

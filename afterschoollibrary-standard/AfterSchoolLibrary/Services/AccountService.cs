@@ -387,7 +387,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static List<ParticipationObject> GetAllPublishedParticipationObjects(this Account account,
-            SystemMessages msgs = null, DatabaseConnection dc = null) 
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var participationObjects = new List<ParticipationObject>();
             var topParticipationObjects = new List<ParticipationObject>();
@@ -428,18 +428,15 @@ namespace AfterSchoolLibrary.Services
                 .DistinctBy(participationObject => new {participationObject.ObjectID, participationObject.ObjectType})
                 .ToList();
         }
-        
-        // Target: How to improve below 2 functions?
-        public static List<ParticipationObject> GetPublishedActivitiesParticipationObjects(this Account account,
-            SystemMessages msgs = null, DatabaseConnection dc = null)
+
+        public static int GetPublishedActivitiesParticipationObjectCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.GetAllPublishedParticipationObjects().Where( x=> x.ActivityType != ActivityType.VolunteerOpportunity).ToList();
+            return account.GetAllPublishedParticipationObjects().Count(x => x.ActivityType != ActivityType.VolunteerOpportunity);
         }
-        
-        public static List<ParticipationObject> GetPublishedOpportunitiesParticipationObjects(this Account account,
-            SystemMessages msgs = null, DatabaseConnection dc = null)
+
+        public static int GetPublishedOpportunitiesParticipationObjectCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.GetAllPublishedParticipationObjects().Where( x=> x.ActivityType == ActivityType.VolunteerOpportunity).ToList();
+            return account.GetAllPublishedParticipationObjects().Count(x => x.ActivityType == ActivityType.VolunteerOpportunity);
         }
 
         public static List<Activity> GetPublishedActivities(this Account account, SystemMessages msgs = null,

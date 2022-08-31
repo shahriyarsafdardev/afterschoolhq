@@ -1,6 +1,5 @@
 ﻿@model List<RegistrantActivityViewModel>
 @{
-    var msgs = (SystemMessages)ViewBag.Messages;
     var isTechSupport = SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
 }
 
