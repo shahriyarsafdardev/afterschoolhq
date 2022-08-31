@@ -957,8 +957,9 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult MessageAdd(string id , string uid = "")
+        public ActionResult MessageAdd(string id , string toUid = "")
         {
+            
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
@@ -974,15 +975,16 @@ namespace AfterSchool.Areas.Org.Controllers
                 RegistrationAssignmentType.ReservedPendingBackgroundCheck
             };
 
-            if (uid.IsGuid())
+            if (toUid.IsGuid())
             {
                 assignmentTypes.Add(RegistrationAssignmentType.Withdrawn);
                 
                 ViewBag.Registrants = activity.GetRegistrantActivities(true, msgs)
-                    .Where(ra => ra.AssignmentTypeId.In(assignmentTypes) && ra.RegistrantUid == uid.ToGuid())
+                    .Where(ra => ra.AssignmentTypeId.In(assignmentTypes) && ra.RegistrantUid == toUid.ToGuid())
                     .Select(ra => ra.ToRegistrant())
                     .OrderBy(x => x.FirstName)
                     .ToList();
+                if (Request.UrlReferrer != null) ViewBag.RedirectUrl = Request.UrlReferrer.AbsoluteUri;
             }
             else
             {
