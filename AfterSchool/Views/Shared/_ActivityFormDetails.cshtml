@@ -1,6 +1,6 @@
 ﻿@model Activity
-@{ 
-    var accountPackage = (AccountPackage)ViewData["AccountPackage"];
+@{
+    var accountPackage = (AccountPackage) ViewData["AccountPackage"];
 }
 
 <div class="panel panel-default panel-small-padding margin-bottom-zero">
@@ -19,25 +19,30 @@
         <div class="form-group">
 
             <label class="col-md-3 control-label">
-                Enter details about your @UILabel.ActivityLabel(Model.ActivityTypeId).ToLower() <span class="text-danger">*</span>                                
+                Enter details about your @UILabel.ActivityLabel(Model.ActivityTypeId).ToLower() <span class="text-danger">*</span>
             </label>
             <div class="col-md-9">
                 @{ Html.RenderPartial(
-               "~/Views/Shared/_TextEditor.cshtml",
-               Model.Details,
-               new ViewDataDictionary() {
-                    { "required", false },
-                    { "name", "details" },
-                    { "id", "details" }
-               }
-               ); }
+                       "~/Views/Shared/_TextEditor.cshtml",
+                       Model.Details,
+                       new ViewDataDictionary
+                       {
+                           {"required", false},
+                           {"name", "details"},
+                           {"id", "details"},
+                       }
+                       ); }
 
                 <p class="text-muted">
                     <em>Tell us why we should sign up. What will we get out of it?. What should we expect?</em>
+                    <br>
+                    <em style="color: #B2B2B4;font-size: 12px;">
+                        To ensure you are complying with activity guidelines, please see Section 6 of our
+                        <a href="/tos.html" target="_blank">Terms of Service</a>.
+                    </em>
                 </p>
             </div>
         </div>
 
     </div>
 </div>
-
