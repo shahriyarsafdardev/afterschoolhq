@@ -1160,7 +1160,7 @@ namespace AfterSchoolLibrary.Services
                             activity.ActivityLocationTypeId = activityLocationType.ToString().ToInteger()
                                 .ToEnum<ActivityLocationType>();
 
-                            if (activity.ActivityLocationTypeId == ActivityLocationType.Virtual)
+                            if (activity.ActivityLocationTypeId == ActivityLocationType.Virtual && virtualLocation.IsNotEmpty())
                                 activity.VirtualLocationInfo = virtualLocation.ToString();
 
                             if (amsgs.HasNoErrors())
