@@ -1368,6 +1368,7 @@ namespace AfterSchool.Areas.Org.Controllers
             
             ViewBag.CurrentPackage = currentPackage;
             ViewBag.Packages = Package.LoadByIsActive(true, msgs);
+            ViewBag.SetupIntentClientSecret = StripeHelper.GetStripeHelperSubscriberAccount().CreateSetupIntent(currentAccount.StripeCustomerId, msgs).ClientSecret;
             ViewBag.Messages = msgs;
 
             return View(currentAccount);

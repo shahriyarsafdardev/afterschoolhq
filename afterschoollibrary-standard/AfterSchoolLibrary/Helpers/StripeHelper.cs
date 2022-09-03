@@ -1420,28 +1420,34 @@ namespace AfterSchoolLibrary.Billing
 
         #endregion
         
-        #region SubscriptionItem
+        #region SetupIntent
 
-        private Stripe.SubscriptionItemService GetSubscriptionItemService()
+        private Stripe.SetupIntentService GetSetupIntentService()
         {
-            return new Stripe.SubscriptionItemService(StripeClient);
+            return new Stripe.SetupIntentService(StripeClient);
         }
 
-        public Stripe.SubscriptionItem RemoveSubscriptionItem(string subscriptionItemId, SystemMessages msgs)
+        public Stripe.SetupIntent CreateSetupIntent(string customerId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
-            Stripe.SubscriptionItem item = null;
+            Stripe.SetupIntent setupIntent = null;
+
+            var options = new SetupIntentCreateOptions()
+            {
+                Customer = customerId,
+                PaymentMethodTypes = new List<string>() {"card", "us_bank_account"}
+            };
 
             try
             {
-                item = GetSubscriptionItemService().Delete(subscriptionItemId);
+                setupIntent = GetSetupIntentService().Create(options);
             }
             catch (StripeException ex)
             {
-                msgs.Add($"Error deleting stripe subscription item with ID: {subscriptionItemId}", MessageType.Notice, ex);
+                msgs.Add($"Error creating setup intent", MessageType.Notice, ex);
             }
 
-            return item;
+            return setupIntent;
         }
         
         #endregion
