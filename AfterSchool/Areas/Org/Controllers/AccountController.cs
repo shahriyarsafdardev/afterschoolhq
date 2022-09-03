@@ -7,6 +7,7 @@ using System.Web.Mvc;
 using AfterSchool.Models;
 using AfterSchoolLibrary;
 using AfterSchoolLibrary.Billing;
+using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
@@ -1288,6 +1289,23 @@ namespace AfterSchool.Areas.Org.Controllers
             return Json(new {success = false, status = "error", data = msgs.ToList().Select(msg => new {msg.Text})},
                 JsonRequestBehavior.AllowGet);
         }
+        
+        public ActionResult Billing()
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+            var packages = currentAccount.GetAccountPackages(msgs);
+
+            if (packages.Count <= 0 || !packages.Any(m => !m.IsFree))
+                return RedirectToAction("NewBilling");
+
+            ViewBag.BillingHistory = currentAccount.GetStripeBillingHistory(StripeAccountType.SubscriberAccount, msgs);
+            ViewBag.RefundHistory = currentAccount.GetStripeRefundHistory(StripeAccountType.SubscriberAccount, msgs);
+            ViewBag.Cards = currentAccount.GetStripeCards(StripeAccountType.SubscriberAccount, msgs);
+            ViewBag.Messages = msgs;
+
+            return View(currentAccount);
+        }
 
         public ActionResult OAuthStripe()
         {
@@ -1345,9 +1363,55 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult SelectPlan()
         {
             var msgs = new SystemMessages();
+            var currentPackage = SessionVariables.AccountPackage;
+            var currentAccount = SessionVariables.CurrentAccount;
+            
+            ViewBag.CurrentPackage = currentPackage;
+            ViewBag.Packages = Package.LoadByIsActive(true, msgs);
             ViewBag.Messages = msgs;
 
-            return View(SessionVariables.CurrentAccount);
+            return View(currentAccount);
+        }
+
+        [HttpGet]
+        public ActionResult SelectPlanDone(Guid package, BillingPeriodType period, string returnUrl)
+        {
+            var msgs = new SystemMessages();
+            var currentPackage = SessionVariables.AccountPackage;
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+
+            ViewBag.CurrentPackage = currentPackage;
+            ViewBag.Packages = Package.LoadByIsActive(true, msgs);
+            ViewBag.Messages = msgs;
+            
+            if (currentPackage.PackageUid != package)
+                currentAccount.SwitchPackagesWithStripe(
+                    newPackage: Package.LoadByUid(package, msgs),
+                    billingPeriodTypeId: period,
+                    keepTrialDays: true,
+                    stripeSubscriptionId: currentPackage.StripeSubscriptionId,
+                    loggedInUser: currentUser,
+                    msgs: msgs
+                );
+
+            if (msgs.HasNoErrors())
+            {
+                var fullReturnUrl = $"{Utilities.BaseUrl()}{Url.Action("afterstripeupdate", "account")}";
+
+                if (returnUrl.IsNotEmpty())
+                    fullReturnUrl = $"{fullReturnUrl}?returnUrl={returnUrl}";
+                
+                var link = BillingPortalConfigurationService.GetBillingPortalSessionLink(
+                    SessionVariables.CurrentAccount,
+                    fullReturnUrl,
+                    BillingPortalConfigurationType.PaymentMethodUpdate,
+                    msgs);
+
+                return new RedirectResult(link);
+            }
+            
+            return View("SelectPlan", currentAccount);
         }
 
         public ActionResult AfterStripeUpdate(string id, string returnUrl)
@@ -1363,8 +1427,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (returnUrl.IsNotEmpty())
                 return new RedirectResult(returnUrl);
-            
-            return new RedirectResult(Url.Action("billing", "account"));
+
+            return RedirectToAction("Billing");
         }
 
         public static class PackageFeatureMapper

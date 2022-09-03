@@ -45,7 +45,8 @@ namespace AfterSchool.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public ActionResult Edit(string id, string name, string price, string priceperyear, string isactive, string ispopular, string isafterschool, string description, string isdefaultcustomerpackage)
+        public ActionResult Edit(string id, string name, string price, string priceperyear, string isactive, string ispopular, string isafterschool, 
+            string description, string isdefaultcustomerpackage, string featureDescription)
         {
             SystemMessages msgs = new SystemMessages();
             var package = new Package();
@@ -94,6 +95,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                         package.IsPopular = ispopular.IsNotEmpty();
                         package.IsAfterSchool = isafterschool.IsNotEmpty();
                         package.Description = description;
+                        package.FeatureDescription = featureDescription;
                         amsgs.AddRange(package.SaveWithStripe(adc));
 
                         if (isdefaultcustomerpackage.IsBoolean() && isdefaultcustomerpackage.ToBoolean())

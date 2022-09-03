@@ -99,5 +99,27 @@ namespace AfterSchoolLibrary.Services
             accountPackage.TrialEndDate = DateTime.UtcNow;
             msgs.AddRange(accountPackage.Save(dc));
         }
+
+        public static void ContinueTrialFromPreviousPackage(this AccountPackage accountPackage, AccountPackage previousPackage, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            accountPackage.TrialStartDate = previousPackage.TrialStartDate;
+            accountPackage.AddOrUpdatePackageFeature(
+                FeatureType.TrialDays, 
+                previousPackage.GetFeature(FeatureType.TrialDays).GetMaxValue(), 
+                loggedInUser, 
+                msgs,
+                dc);
+        }
+
+        public static DateTime? GetTrialEndDate(this AccountPackage accountPackage, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (accountPackage.TrialEndDate.HasValue)
+                return accountPackage.TrialEndDate.Value;
+
+            if (accountPackage.TrialStartDate.HasValue)
+                return accountPackage.TrialStartDate.Value.AddDays((double) accountPackage.GetFeature(FeatureType.TrialDays, msgs, dc).GetMaxValue());
+
+            return new DateTime?();
+        }
     }
 }
