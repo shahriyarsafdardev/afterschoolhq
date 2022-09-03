@@ -1,4 +1,5 @@
-﻿@using AfterSchoolLibrary.Enums
+﻿@using AfterSchoolLibrary.Billing
+@using AfterSchoolLibrary.Enums
 @model Account
 @{ 
     ViewBag.Title = Model.Name;
@@ -6,6 +7,7 @@
     var packages = (List<Package>) ViewBag.Packages;
     var currentPackage = (AccountPackage)ViewBag.CurrentPackage;
     var suggestedPackage = (Package)ViewBag.SuggestedPackage;
+    var setupIntentClientSecret = (string) ViewBag.SetupIntentClientSecret;
     var returnUrl = "";
     var maxFeatureLines = packages.Max(package => package.FeatureDescription.Split('\n').Length);
     
@@ -48,16 +50,22 @@
         </div>
         <div class="panel-body padding-lr-zero-sm">
             <div class="col-md-12">
-                <form method="post" id="new-billing-form" action="" class="form-horizontal">
 
+                <div id="select-plan">
                     <div class="panel panel-default panel-small-padding">
-                        <div class="panel-heading">
-                            Choose the best plan for your program!
+                        
+                        <div class="panel-heading" id="select-plan-panel-heading">
+                            <div class="pull-left">
+                                1. Choose the best plan for your program
+                            </div>
+                            <div class="pull-right hide" id="selected-package-container">
+                                <span id="selected-package"></span> Plan - <span id="selected-price"></span> <span id="selected-period"></span>
+                            </div>
+                            <div class="clearfix"></div>
                         </div>
 
-                        <div class="panel-body">
-                        
-                            
+                        <div class="panel-body" id="select-plan-panel-body">
+
                             <div class="row">
                                 <table class="" style="margin-left: auto; margin-right: auto;">
                                     <tr>
@@ -73,20 +81,17 @@
                                                         {"checkboxid", "annual"},
                                                         {"disabled", false},
                                                         {"onclick", "annualClick()"},
-                                                        {"customoptions", new List<string>() {"Monthly","Annually"}},
+                                                        {"customoptions", new List<string>() {"Monthly", "Annually"}},
                                                     });
                                             }
                                         </td>
                                     </tr>
                                 </table>
                             </div>
-                            
                             <div class="row text-center padding-20">
                                 <p>**2 Months free with all annual contracts**</p>
                             </div>
-                            
                             <div class="row">
-                                
                                 @foreach (var package in packages.OrderBy(x => x.Price))
                                 {
                                     <div class="col-md-12 col-lg-3">
@@ -97,13 +102,13 @@
                                             <div class="pull-right">
                                                 <h3 class="text-success text-right">
                                                     <span class="monthly hide">@package.Price.ToCurrency() / Mo</span>
-                                                    <span class="annually">@((package.PricePerYear/12).ToCurrency()) / Mo</span>
+                                                    <span class="annually">@((package.PricePerYear / 12).ToCurrency()) / Mo</span>
                                                 </h3>
                                                 <p class="text-right">
                                                     @if (!package.IsFree(BillingPeriodType.Month))
                                                     {
-                                                        <span class="monthly hide">@package.Price.ToCurrency() Billed Monthly</span>
-                                                        <span class="annually">@package.PricePerYear.ToCurrency() Billed Annually</span>
+                                                        <span class="monthly hide"><span id="monthly-price-@package.Uid">@package.Price.ToCurrency()</span> Billed Monthly</span>
+                                                        <span class="annually"><span id="annual-price-@package.Uid">@package.PricePerYear.ToCurrency()</span> Billed Annually</span>
                                                     }
                                                     else
                                                     {
@@ -124,26 +129,82 @@
                                             }
                                         </p>
                                         <p class="text-center">
-                                            <button type="button" 
-                                                    class="btn @(package.IsFree(BillingPeriodType.Month) ? "btn-default" : "btn-primary") btn-lg btn-block" 
-                                                    onclick="selectPlan('@package.Uid.ToString()')">
+                                            <button type="button"
+                                                    class="btn @(package.IsFree(BillingPeriodType.Month) ? "btn-default" : "btn-primary") btn-lg btn-block"
+                                                    onclick="selectPackage('@package.Uid.ToString()', '@package.Name')">
                                                 Choose <strong>@package.Name</strong> Plan
                                             </button>
                                         </p>
                                     </div>
                                 }
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+                <div id="enter-payment-details">
+                    
+                    <div class="panel panel-default panel-small-padding">
+                        <div class="panel-heading">
+                            2. Enter your payment details
+                        </div>
+                    
+                        <div class="panel-body hide" id="enter-payment-details-panel-body">
+                            <div class="row">
+                                <div class="col-lg-6 col-lg-offset-3 col-md-12">
+                                    <form id="payment-form" class="form">
+                                        <div id="payment-element" class="padding-v-20">
+                                            <!-- Elements will create form elements here -->
+                                        </div>
+                                        <div>
+                                            <div class="pull-left">
+                                                <a href="javascript:updatePlan()">&laquo; Back</a>
+                                            </div>
+                                            <div class="pull-right">
+                                                <button id="submit" class="btn btn-primary btn-lg">
+                                                    Save Payment Details &raquo;
+                                                </button>
+                                            </div>
+                                            <div class="clearfix"></div>
+                                        </div>
+                                        <div id="error-message">
+                                            <!-- Display error message to your customers here -->
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <div id="confirm">
+                                    
+                    <div class="panel panel-default panel-small-padding">
+                        <div class="panel-heading" id="confirm-panel-heading">
+                            3. Confirm
+                        </div>
+                    
+                        <div class="panel-body hide" id="confirm-panel-body">
+                            <div class="row">
                                 
                             </div>
-                        
                         </div>
-                        
                     </div>
-
-                </form>
+                    
+                </div>
+                
             </div>
         </div>
     </div>
 </div>
+
+@section head
+{
+    <script src="https://js.stripe.com/v3/"></script>
+}
 
 @section scripts
 {
@@ -159,15 +220,97 @@
             }            
         }
         
-        function selectPlan(package){
+        function selectPackage(packageUid, packageName, pricePerMonth){
             
-            var period = @((int)BillingPeriodType.Month);
+            var period = @((int) BillingPeriodType.Month);
+            var periodName = "Monthly";
+            var price = $('#monthly-price-' + packageUid).html();            
             
             if ($('#annual').is(':checked')){
-                period = @((int)BillingPeriodType.Year);
+                period = @((int) BillingPeriodType.Year);
+                periodName = 'Annually';
+                price = $('#annual-price-' + packageUid).html();
             }
             
-            location.href = '@Url.Action("SelectPlanDone", "account")?package=' + package + '&period=' + period + '&returnUrl=' + encodeURI('@Request["returnUrl"]');    
+            if (packageName === 'Free'){
+                price = '$0.00';
+                periodName = '';
+            }
+            
+            $('#selected-package').html(packageName);
+            $('#selected-price').html(price);
+            $('#selected-period').html(periodName);
+            $('#selected-package-container').removeClass('hide');
+            
+            $('#select-plan-panel-body').addClass('hide');
+            $('#enter-payment-details-panel-body').removeClass('hide');
+            
+            //location.href = '@Url.Action("SelectPlanDone", "account")?package=' + package + '&period=' + period + '&returnUrl=' + encodeURI('@Request["returnUrl"]');    
+        }        
+        
+        function updatePlan(){
+            $('#select-plan-panel-body').removeClass('hide');
+            $('#enter-payment-details-panel-body').addClass('hide');
         }
+        
+        PageEvent.add(PageEvent.AFTER_INIT, function () {
+            
+            $('#select-plan-panel-heading').click(function (){
+                updatePlan();
+            });
+            
+            const stripe = Stripe('@StripeHelper.SubscriptionsPublishableKey');
+            const options = {
+                clientSecret: '@setupIntentClientSecret',
+                // Fully customizable with appearance API.
+                appearance: {
+                    theme: 'stripe',
+                    variables: {
+                        colorPrimary: '#00b492',
+                        colorBackground: '#ffffff',
+                        colorText: '#30313d',
+                        colorDanger: '#df1b41',
+                        fontFamily: 'Montserrat, Ideal Sans, system-ui, sans-serif',
+                        spacingUnit: '2px',
+                        borderRadius: '0px',
+                    }
+                },
+            };
+            
+            // Set up Stripe.js and Elements to use in checkout form, passing the client secret obtained in step 2
+            const elements = stripe.elements(options);
+            
+            // Create and mount the Payment Element
+            const paymentElement = elements.create('payment');
+            paymentElement.mount('#payment-element');
+            
+            const form = document.getElementById('payment-form');
+            
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                
+                const {error} = await stripe.confirmSetup({
+                    //`Elements` instance that was used to create the Payment Element
+                    elements,
+                    confirmParams: {
+                        /*return_url: 'https://example.com/account/payments/setup-complete',*/
+                    }
+                });
+                
+                if (error) {
+                    // This point will only be reached if there is an immediate error when
+                    // confirming the payment. Show error to your customer (for example, payment
+                    // details incomplete)
+                    const messageContainer = document.querySelector('#error-message');
+                    messageContainer.textContent = error.message;
+                } else {
+                    alert('here');
+                    // Your customer will be redirected to your `return_url`. For some payment
+                    // methods like iDEAL, your customer will be redirected to an intermediate
+                    // site first to authorize the payment, then redirected to the `return_url`.
+                }
+            });
+        });
+        
     </script>
 }
