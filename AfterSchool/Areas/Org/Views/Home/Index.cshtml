@@ -1,30 +1,29 @@
 @model Account
+
 @{
-    var msgs = (SystemMessages)ViewBag.Messages;
-    var registrations = (List<Registration>)ViewBag.CurrentRegistrations;
-    var totalPaid = (decimal)ViewBag.TotalPaid;
-    int registrationCount = (int)ViewBag.RegistrationCount;
-    var activityCount = (int)ViewBag.ActivityCount;
-    var dates = registrations.Select(x => SessionVariables.CurrentAccount.ConvertToAccountTimeZone(x.CreateDate.Value).ToShortDateString()).Distinct();
+    var msgs = (SystemMessages) ViewBag.Messages;
+    var registrations = (List<Registration>) ViewBag.CurrentRegistrations;
+    var totalPaid = (decimal) ViewBag.TotalPaid;
+    var registrationCount = (int) ViewBag.RegistrationCount;
+    var activityCount = (int) ViewBag.ActivityCount;
+    var dates = registrations.Where(x => x.CreateDate.HasValue)
+        .GroupBy(x => Model.ConvertToAccountTimeZone(x.CreateDate.Value).ToShortDateString())
+        .Select(group => new {Date = group.Key, Count = group.Count()});
 
-    var classesCount = (int)ViewBag.TotalCompleted;
-    var totalPresent = (int)ViewBag.TotalPresent;
-    var totalPossible = (int)ViewBag.TotalPossible;
+    var classesCount = (int) ViewBag.TotalCompleted;
+    var totalPresent = (int) ViewBag.TotalPresent;
+    var totalPossible = (int) ViewBag.TotalPossible;
     var totalAbsent = totalPossible - totalPresent;
-    var attendanceRate = "0";
-    var hasVisitorAccountsToApprove = (bool)ViewBag.HasVisitorAccountsToApprove;
-    var hasOutstandingLeagueInvites = (bool)ViewBag.HasOutstandingLeagueInvites;
-    var externalLeagueCount = (int)ViewBag.ExternalLeagueCount;
+    var hasVisitorAccountsToApprove = (bool) ViewBag.HasVisitorAccountsToApprove;
+    var hasOutstandingLeagueInvites = (bool) ViewBag.HasOutstandingLeagueInvites;
+    var externalLeagueCount = (int) ViewBag.ExternalLeagueCount;
 
-    if (totalPresent > 0)
-    {
-        attendanceRate = ((totalPresent.ToDouble() / (totalPresent + totalAbsent)) * 100).Round(1).ToString("###.#");
-    }
+    var attendanceRate = totalPresent > 0 ? (totalPresent.ToDouble() / (totalPresent + totalAbsent) * 100).Round(1).ToString("###.#") : "0";
 
-    var addUrl = Url.Action("editsetup", "activity", new { isnew = 1, type = (int)ActivityType.Activity });
+    var addUrl = Url.Action("editsetup", "activity", new {isnew = 1, type = (int) ActivityType.Activity});
 }
 
-@{Html.RenderPartial("OrgAccountHeader");}
+@{ Html.RenderPartial("OrgAccountHeader"); }
 
 <div class="main-content">
 
@@ -35,17 +34,17 @@
             Welcome @SessionVariables.CurrentUser.FirstName
 
             @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.ActivitiesEdit))
-             {
+            {
                 <div class="pull-right">
-                    <a href="@Url.Action("editsetup", "activity", new { isnew = 1, type = (int)ActivityType.Activity })" class="btn btn-primary">
+                    <a href="@Url.Action("editsetup", "activity", new {isnew = 1, type = (int) ActivityType.Activity})" class="btn btn-primary">
                         <i class="icon icon-left s7-plus"></i>
-                        Add @UILabel.ActivityLabel(ActivityType.Activity)
+                        Add @UILabel.ActivityLabel()
                     </a>
                 </div>
-             }
+            }
             <div class="clearfix"></div>
         </div>
-        <div class="panel-body">            
+        <div class="panel-body">
 
             @if (hasVisitorAccountsToApprove)
             {
@@ -83,11 +82,11 @@
                             <h1>@UILabel.ActivityLabel(ActivityType.Activity, true)</h1>
                         </div>
                         <div class="widget-tile">
-                            <hr />
-                            <p>You haven't created any @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() yet. In order to get started, <a href="@addUrl">create your first @UILabel.ActivityLabel(ActivityType.Activity).ToLower()</a>.</p>
+                            <hr/>
+                            <p>You haven't created any @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() yet. In order to get started, <a href="@addUrl">create your first @UILabel.ActivityLabel().ToLower()</a>.</p>
                             <p>&nbsp;</p>
                             <p>
-                                <a href="@addUrl" class="btn btn-primary btn-lg">Create Your First @UILabel.ActivityLabel(ActivityType.Activity) &raquo;</a>
+                                <a href="@addUrl" class="btn btn-primary btn-lg">Create Your First @UILabel.ActivityLabel() &raquo;</a>
                             </p>
                         </div>
                     </div>
@@ -97,28 +96,27 @@
                 {
                     <div class="col-md-6 col-sm-12">
                         <div class="widget">
-                        <div class="widget-head">
-                            <h1>Leagues</h1>
+                            <div class="widget-head">
+                                <h1>Leagues</h1>
+                            </div>
+                            <div class="widget-tile">
+                                <hr/>
+                                @if (hasOutstandingLeagueInvites)
+                                {
+                                    <p>You have new invites to join leagues. <a href="@Url.Action("indexexternal", "league")">Review league invites</a>.</p>
+                                }
+                                else
+                                {
+                                    <p>You have league teams to manage.</p>
+                                }
+                                <p>&nbsp;</p>
+                                <p>
+                                    <a href="@Url.Action("indexexternal", "league")" class="btn btn-primary btn-lg">Manage your teams &raquo;</a>
+                                </p>
+                            </div>
                         </div>
-                        <div class="widget-tile">
-                            <hr />
-                            @if (hasOutstandingLeagueInvites)
-                            {
-                                <p>You have new invites to join leagues. <a href="@Url.Action("indexexternal", "league")">Review league invites</a>.</p>
-                            }
-                            else
-                            {
-                                <p>You have league teams to manage.</p>
-                            }
-                            <p>&nbsp;</p>
-                            <p>
-                                <a href="@Url.Action("indexexternal", "league")" class="btn btn-primary btn-lg">Manage your teams &raquo;</a>
-                            </p>
-                        </div>
-                    </div>
                     </div>
                 }
-
             }
             else
             {
@@ -127,10 +125,12 @@
                         <div class="col-md-6">
                             <div class="widget widget-tile widget-bordered">
                                 <div class="data-info">
-                                    <div  data-end="@registrationCount" data-decimals="0" data-suffix="" class="value">@registrationCount</div>
+                                    <div data-end="@registrationCount" data-decimals="0" data-suffix="" class="value">@registrationCount</div>
                                     <div class="desc desc-mobile-width">Total Registrations (30 days)</div>
                                 </div>
-                                <div class="icon"><span class="s7-users"></span></div>
+                                <div class="icon">
+                                    <span class="s7-users"></span>
+                                </div>
                             </div>
                         </div>
 
@@ -142,7 +142,9 @@
                                         <div data-end="@totalPaid" data-decimals="2" data-suffix="" class="value">@totalPaid.ToCurrency()</div>
                                         <div class="desc">Total Earned</div>
                                     </div>
-                                    <div class="icon"><span class="s7-cash"></span></div>
+                                    <div class="icon">
+                                        <span class="s7-cash"></span>
+                                    </div>
                                 </div>
                             </div>
                         }
@@ -151,9 +153,11 @@
                             <div class="widget widget-tile widget-bordered">
                                 <div class="data-info">
                                     <div data-toggle="counter" data-end="@classesCount" data-decimals="0" data-suffix="" class="value">@classesCount</div>
-                                    <div class="desc">@UILabel.ActivityLabel(ActivityType.Activity) Meetings</div>
+                                    <div class="desc">@UILabel.ActivityLabel() Meetings</div>
                                 </div>
-                                <div class="icon"><span class="s7-users"></span></div>
+                                <div class="icon">
+                                    <span class="s7-users"></span>
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -163,7 +167,9 @@
                                     <div data-end="@attendanceRate.IfBlank("0")" data-decimals="0" data-suffix="" class="value">@attendanceRate.IfBlank("0")%</div>
                                     <div class="desc">Attendance Rate</div>
                                 </div>
-                                <div class="icon"><span class="s7-check-circle"></span></div>
+                                <div class="icon">
+                                    <span class="s7-check-circle"></span>
+                                </div>
                             </div>
 
                         </div>
@@ -187,7 +193,7 @@
                     </div>
                 </div>
             }
-            
+
         </div>
     </div>
 </div>
@@ -201,8 +207,9 @@
             // Chart data records -- each entry in this array corresponds to a point on
             // the chart.
             data: [
-                @foreach(var date in dates){
-                    @:{ date: '@date', value: @registrations.Where(x => SessionVariables.CurrentAccount.ConvertToAccountTimeZone(x.CreateDate.Value).ToShortDateString() == date).Count() },
+                @foreach (var date in dates)
+                {
+                    @:{ date: '@date.Date', value: @date.Count },
                 }
             ],
             // The name of the data record attribute that contains x-values.
