@@ -2388,6 +2388,48 @@ namespace AfterSchoolLibrary.Services
             return uniqueName;
         }
 
+        public static AccountPackage SwitchPackagesWithStripe(this Account account, Package newPackage, BillingPeriodType billingPeriodTypeId, bool keepTrialDays,
+            string stripeSubscriptionId, WebUser loggedInUser, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            AccountPackage newAccountPackage = null;
+            
+            Database.ExecuteTransaction(
+                action: (amsgs, adc) =>
+                {
+                    var packageToRemove = account.GetActiveAccountPackage(amsgs, adc);
+                    amsgs.AddRange(packageToRemove.CancelPackage(adc));
+
+                    newAccountPackage = AccountPackageService.CreateNewAccountPackage(
+                        account.ID.Value,
+                        newPackage,
+                        billingPeriodTypeId,
+                        stripeSubscriptionId,
+                        loggedInUser,
+                        amsgs,
+                        adc);
+
+                    if (keepTrialDays && packageToRemove.IsDuringTrial)
+                        newAccountPackage.ContinueTrialFromPreviousPackage(packageToRemove, loggedInUser, amsgs, adc);
+
+                    StripeHelper.GetStripeHelperSubscriberAccount().UpdateSubscription(
+                        stripeSubscriptionId,
+                        billingPeriodTypeId == BillingPeriodType.Month ? newPackage.StripePricePerMonthId : newPackage.StripePricePerYearId,
+                        null,
+                        null,
+                        newAccountPackage.GetTrialEndDate(amsgs, adc),
+                        null,
+                        amsgs);
+                },
+                onSuccess: smsgs => msgs.AddRange(smsgs),
+                onFailure: fmsgs => msgs.AddRange(fmsgs),
+                onException: emsgs => Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+            
+            return newAccountPackage;
+        }
+
         public static AccountPackage SwitchPackages(this Account account, Package newPackage, BillingPeriodType billingPeriodTypeId,
             string stripeSubscriptionId, WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)

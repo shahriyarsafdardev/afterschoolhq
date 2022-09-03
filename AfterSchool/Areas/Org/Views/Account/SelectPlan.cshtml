@@ -1,10 +1,22 @@
-﻿@model Account
+﻿@using AfterSchoolLibrary.Enums
+@model Account
 @{ 
     ViewBag.Title = Model.Name;
     var msgs = (SystemMessages)ViewBag.Messages;
-    var currentPackage = SessionVariables.AccountPackage;
+    var packages = (List<Package>) ViewBag.Packages;
+    var currentPackage = (AccountPackage)ViewBag.CurrentPackage;
     var suggestedPackage = (Package)ViewBag.SuggestedPackage;
     var returnUrl = "";
+    var maxFeatureLines = packages.Max(package => package.FeatureDescription.Split('\n').Length);
+    
+    packages.ForEach(package =>
+    {
+        var featureLines = package.FeatureDescription.Split('\n').Length;
+        if (featureLines < maxFeatureLines)
+        {
+            package.FeatureDescription += "\n".Repeat(maxFeatureLines - featureLines);
+        }
+    });
     
     if (ViewBag.ReturnUrl != null)
     {
@@ -74,155 +86,46 @@
                             </div>
                             
                             <div class="row">
-                                <div class="col-md-12 col-lg-3">
-                                    <div>
-                                        <div class="pull-left">
-                                            <h3 class="text-success">Free</h3>
+                                
+                                @foreach (var package in packages.OrderBy(x => x.Price))
+                                {
+                                    <div class="col-md-12 col-lg-3">
+                                        <div>
+                                            <div class="pull-left">
+                                                <h3 class="text-success">@package.Name</h3>
+                                            </div>
+                                            <div class="pull-right">
+                                                <h3 class="text-success text-right">
+                                                    <span class="monthly hide">@package.Price.ToCurrency() / Mo</span>
+                                                    <span class="annually">@((package.PricePerYear/12).ToCurrency()) / Mo</span>
+                                                </h3>
+                                                <p class="text-right">
+                                                    <span class="monthly hide">@package.Price.ToCurrency() Billed Monthly</span>
+                                                    <span class="annually">@package.PricePerYear.ToCurrency() Billed Annually</span>
+                                                </p>
+                                            </div>
+                                            <div class="clearfix"></div>
                                         </div>
-                                        <div class="pull-right">
-                                            <h3 class="text-success">
-                                                <span class="monthly hide">$0 / Mo</span>
-                                                <span class="annually">$0 / Mo</span>
-                                            </h3>
-                                            <p>&nbsp;</p>
-                                        </div>
-                                        <div class="clearfix"></div>
+                                        <p class="package-description">
+                                            @package.Description
+                                        </p>
+                                        <hr/>
+                                        <p class="padding-v-20">
+                                            @foreach (var featureLine in package.FeatureDescription.Split('\n'))
+                                            {
+                                                <span>@featureLine</span><br/>
+                                            }
+                                        </p>
+                                        <p class="text-center">
+                                            <button type="button" 
+                                                    class="btn @(package.IsFree(BillingPeriodType.Month) ? "btn-default" : "btn-primary") btn-lg btn-block" 
+                                                    onclick="selectPlan('@package.Uid.ToString()')">
+                                                Choose <strong>@package.Name</strong> Plan
+                                            </button>
+                                        </p>
                                     </div>
-                                    <p class="package-description">
-                                        For organizations with parent paid programs or organizations with free programs looking to try out the platform
-                                    </p>
-                                    <hr/>
-                                    <p class="padding-v-20">
-                                        1 User account<br/>
-                                        Unlimited Paid Activities<br/>
-                                        1 Free Activities<br/>
-                                        1 Custom Forms<br/>
-                                        1 Location<br/>
-                                        50 SMS/mo<br/>
-                                        50 Emails/mo<br/>
-                                        Live chat & Ticket support<br/>
-                                        5% Registration Fee<br/>
-                                        &nbsp;<br/>
-                                        &nbsp;<br/>
-                                    </p>
-                                    <p class="text-center">
-                                        <button type="button" class="btn btn-default btn-lg btn-block">Choose Free Plan</button>
-                                    </p>
-                                </div>
-                                <div class="col-md-12 col-lg-3">
-                                    <div>
-                                        <div class="pull-left">
-                                            <h3 class="text-success">Lite</h3>
-                                        </div>
-                                        <div class="pull-right">
-                                            <h3 class="text-success text-right">
-                                                <span class="monthly hide">$39 / Mo</span>
-                                                <span class="annually">$32.50 / Mo</span>
-                                            </h3>
-                                            <p class="text-right">
-                                                <span class="monthly hide">billed monthly</span>
-                                                <span class="annually">$390 billed annually</span>
-                                            </p>
-                                        </div>
-                                        <div class="clearfix"></div>
-                                    </div>
-                                    <p class="package-description">
-                                        For solopreneurs with one location that are looking to take their program to the next level
-                                    </p>
-                                    <hr/>
-                                    <p class="padding-v-20">
-                                        2 User Accounts<br/>
-                                        Unlimited Paid Activities<br/>
-                                        5 Free Activities<br/>
-                                        2 Custom Forms<br/>
-                                        Data Export<br/>
-                                        1 Location (Same timezone)<br/>
-                                        5 Active Permission Slips & Field Trips<br/>
-                                        100 SMS/mo<br/>
-                                        100 Emails/mo<br/>
-                                        Live chat & Ticket support<br/>
-                                        5% Registration Fee<br/>
-                                    </p>
-                                    <p class="text-center">
-                                        <button type="button" class="btn btn-primary btn-lg btn-block">Choose Lite Plan</button>
-                                    </p>
-                                </div>
-                                <div class="col-md-12 col-lg-3">
-                                    <div>
-                                        <div class="pull-left">
-                                            <h3 class="text-success">Premium</h3>
-                                        </div>
-                                        <div class="pull-right">
-                                            <h3 class="text-success text-right">
-                                                <span class="monthly hide">$99 / Mo</span>
-                                                <span class="annually">$82.50 / Mo</span>
-                                            </h3>
-                                            <p class="text-right">
-                                                <span class="monthly hide">billed monthly</span>
-                                                <span class="annually">$990 billed annually</span>
-                                            </p>
-                                        </div>
-                                        <div class="clearfix"></div>
-                                    </div>
-                                    <p class="package-description">
-                                        For small teams with multiple programs serving at more than one location
-                                    </p>
-                                    <hr/>
-                                    <p class="padding-v-20">
-                                        5 User accounts<br/>
-                                        Unlimited Paid Activities<br/>
-                                        15 Free Activities<br/>
-                                        5 Custom Forms<br/>
-                                        Student CRM<br/>
-                                        2 Locations (Same Timezone)<br/>
-                                        15 Active Permission Slips & Field Trips<br/>
-                                        500 SMS/mo<br/>
-                                        500 Emails/mo<br/>
-                                        Live chat & Ticket support<br/>
-                                        3% Registration Fee<br/>
-                                    </p>
-                                    <p class="text-center">
-                                        <button type="button" class="btn btn-primary btn-lg btn-block">Choose Premium Plan</button>
-                                    </p>
-                                </div>
-                                <div class="col-md-12 col-lg-3">
-                                    <div>
-                                        <div class="pull-left">
-                                            <h3 class="text-success">Pro</h3>
-                                        </div>
-                                        <div class="pull-right">
-                                            <h3 class="text-success text-right">
-                                                <span class="monthly hide">$199 / Mo</span>
-                                                <span class="annually">$165.83 / Mo</span>
-                                            </h3>
-                                            <p class="text-right">
-                                                <span class="monthly hide">billed monthly</span>
-                                                <span class="annually">$1,990 billed annually</span>
-                                            </p>
-                                        </div>
-                                        <div class="clearfix"></div>
-                                    </div>
-                                    <p class="package-description">
-                                        For larger teams with more sophisticated needs
-                                    </p>
-                                    <hr/>
-                                    <p class="padding-v-20">
-                                        20 User Accounts<br/>
-                                        Unlimited Paid Activities<br/>
-                                        25 Free Activities<br/>
-                                        10 Custom Forms<br/>
-                                        Student CRM<br/>
-                                        5 Locations (Same Timezone)<br/>
-                                        25 Active Permission Slips and Field Trips<br/>
-                                        2000 SMS/mo<br/>
-                                        2000 Emails/mo<br/>
-                                        Email, Phone & Video  Support<br/>
-                                        1% Registration Fee<br/>
-                                    </p>
-                                    <p class="text-center">
-                                        <button type="button" class="btn btn-primary btn-lg btn-block">Choose Pro Plan</button>
-                                    </p>
-                                </div>
+                                }
+                                
                             </div>
                         
                         </div>
@@ -239,7 +142,6 @@
 {
     <script>
         function annualClick(){
-            
             $('.annually').addClass('hide');
             $('.monthly').addClass('hide');
             
@@ -247,8 +149,18 @@
                 $('.annually').removeClass('hide');
             } else {
                 $('.monthly').removeClass('hide');
+            }            
+        }
+        
+        function selectPlan(package){
+            
+            var period = @((int)BillingPeriodType.Month);
+            
+            if ($('#annual').is(':checked')){
+                period = @((int)BillingPeriodType.Year);
             }
             
+            location.href = '@Url.Action("SelectPlanDone", "account")?package=' + package + '&period=' + period;    
         }
     </script>
 }
