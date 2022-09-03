@@ -1341,6 +1341,15 @@ namespace AfterSchool.Areas.Org.Controllers
             return RedirectToAction("PaymentsOptions");
         }
 
+        [HttpGet]
+        public ActionResult SelectPlan()
+        {
+            var msgs = new SystemMessages();
+            ViewBag.Messages = msgs;
+
+            return View(SessionVariables.CurrentAccount);
+        }
+
         public ActionResult AfterStripeUpdate(string id, string returnUrl)
         {
             var msgs = new SystemMessages();
