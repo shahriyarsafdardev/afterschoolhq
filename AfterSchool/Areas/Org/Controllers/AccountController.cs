@@ -498,6 +498,9 @@ namespace AfterSchool.Areas.Org.Controllers
             return View("Team", account);
         }
 
+        /***
+         * NOTE: Needs Refactoring
+         */
         public ActionResult UpdateUserType(string userid, string newusertypeid)
         {
             var msgs = new SystemMessages();
@@ -881,6 +884,9 @@ namespace AfterSchool.Areas.Org.Controllers
             }
         }
 
+        /***
+         * NOTE: should be called DeleteFormQuestion
+         */
         [HttpGet]
         public ActionResult Delete(string id)
         {
@@ -1265,68 +1271,6 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Billing()
-        {
-            var currentAccount = SessionVariables.CurrentAccount;
-            var msgs = new SystemMessages();
-            var packages = currentAccount.GetAccountPackages(msgs);
-
-            if (packages.Count <= 0 || !packages.Any(m => !m.IsFree))
-                return RedirectToAction("NewBilling");
-
-            ViewBag.BillingHistory = currentAccount.GetStripeBillingHistory(StripeAccountType.SubscriberAccount, msgs);
-            ViewBag.RefundHistory = currentAccount.GetStripeRefundHistory(StripeAccountType.SubscriberAccount, msgs);
-            ViewBag.Cards = currentAccount.GetStripeCards(StripeAccountType.SubscriberAccount, msgs);
-            ViewBag.Messages = msgs;
-
-            return View(currentAccount);
-        }
-
-        [HttpGet]
-        public ActionResult NewBilling(string id, string ReturnUrl, string featureId)
-        {
-            var currentAccount = SessionVariables.CurrentAccount;
-            var accountPackage = SessionVariables.AccountPackage;
-            var msgs = new SystemMessages();
-
-            if (accountPackage.IsEmpty())
-            {
-                var accountPackages = currentAccount.GetAccountPackages(msgs).Where(ap => ap.IsActive);
-
-                if (!accountPackages.Any())
-                {
-                    var defaultPackage = Package.Load(msgs: msgs).First();
-                    SessionVariables.AccountPackage = currentAccount.AddPackage(defaultPackage.ID.Value,
-                        BillingPeriodType.Month, SessionVariables.LoggedInUser, msgs);
-                }
-                else
-                    SessionVariables.AccountPackage = accountPackages.First(ap => ap.IsActive);
-
-                return LoginRedirect();
-            }
-
-            if (ReturnUrl.IsNotEmpty())
-                ViewBag.ReturnUrl = ReturnUrl;
-
-            var package = id.IsGuid() ? Package.LoadByUid(id.ToGuid(), msgs) : accountPackage?.ToPackage();
-
-            Package suggestedPackage = null;
-
-            if (int.TryParse(featureId, out var featureIdNumber))
-            {
-                suggestedPackage =
-                    PackageService.GetPackageWithFeatureLowestPrice((FeatureType) featureIdNumber, accountPackage,
-                        msgs);
-            }
-
-            ViewBag.SuggestedPackage = suggestedPackage;
-            ViewBag.Package = package;
-            ViewBag.Packages = Package.LoadByIsActiveByIsAfterSchool(true, SessionVariables.IsAfterSchool.Value, msgs);
-            ViewBag.Messages = msgs;
-            return View(currentAccount);
-        }
-
-        [HttpGet]
         public ActionResult GetFeatures(int id)
         {
             var msgs = new SystemMessages();
@@ -1343,94 +1287,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
             return Json(new {success = false, status = "error", data = msgs.ToList().Select(msg => new {msg.Text})},
                 JsonRequestBehavior.AllowGet);
-        }
-
-        [HttpPost]
-        public ActionResult NewPayment(string selectedpackage, string stripetoken, string cardId)
-        {
-            var currentAccount = SessionVariables.CurrentAccount;
-            var accountPackage = SessionVariables.AccountPackage;
-            var msgs = new SystemMessages();
-
-            Package package = null;
-            AccountPackage newlyAddedPackage = null;
-            Customer customer = null;
-
-            var isFromTrialAccount = accountPackage?.IsDuringTrial ?? false;
-
-            if (stripetoken.IsEmail() || cardId.IsEmpty())
-                msgs.Add("Please select valid card to proceed further.", MessageType.UserError);
-
-            if (msgs.HasNoErrors())
-            {
-                Database.ExecuteTransaction(
-                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                    {
-                        var selectedPackageArr = selectedpackage.Split('_');
-                        var billingPeriod = (BillingPeriodType) selectedPackageArr[0].ToInteger();
-
-                        package = Package.LoadByUid(selectedPackageArr[1].ToGuid(), amsgs, adc);
-
-                        customer = currentAccount.CreateStripeCustomer(StripeAccountType.SubscriberAccount, null, amsgs, adc);
-
-                        if (stripetoken.IsNotEmpty())
-                            currentAccount.CreateStripeCardFromToken(stripetoken, customer, StripeAccountType.SubscriberAccount, amsgs, adc);
-                        else if (cardId.IsNotEmpty())
-                            currentAccount.UpdateStripeCard(cardId, customer, StripeAccountType.SubscriberAccount, amsgs, adc);
-
-                        if (amsgs.HasNoErrors())
-                        {
-                            newlyAddedPackage = currentAccount.AddPackage(package.ID.Value, billingPeriod,
-                                SessionVariables.LoggedInUser, amsgs, adc);
-
-                            if (currentAccount.StripeUserId.IsNotEmpty())
-                            {
-                                var manualStripePayouts =
-                                    newlyAddedPackage.HasFeature(featureType: FeatureType.ManualStripePayouts,
-                                        msgs: amsgs, dc: adc);
-                                
-                                StripeHelper.GetStripeHelperConnectAccount().ToggleStripePayoutForConnectedAccount(
-                                    customAccountsStripeUserId: currentAccount.StripeUserId,
-                                    accountName: currentAccount.Name, 
-                                    payoutIntervalType: manualStripePayouts ? PayoutIntervalType.Manual : PayoutIntervalType.Daily,
-                                    msgs: amsgs);
-                            }
-                        }
-                    },
-                    onSuccess: (SystemMessages smsgs) =>
-                    {
-                        msgs.Clear(MessageType.Success);
-                        msgs.Add(string.Format("The '{0} Package' has been added to your account", package.Name),
-                            MessageType.Success);
-
-                        if (isFromTrialAccount)
-                            currentAccount.SendWelcomeEmailPurchase(currentAccount.GetAccountOwner(smsgs));
-
-                        msgs.AddRange(smsgs);
-                    },
-                    onFailure: (SystemMessages fmsgs) => { msgs.AddRange(fmsgs); }
-                );
-            }
-
-            if (newlyAddedPackage.IsNotEmpty())
-                SessionVariables.AccountPackage = currentAccount.GetAccountPackage(newlyAddedPackage.Uid, msgs);
-
-            if (msgs.HasNoErrors())
-            {
-                ViewBag.BillingHistory = currentAccount.GetStripeBillingHistory(StripeAccountType.SubscriberAccount, msgs);
-                ViewBag.RefundHistory = currentAccount.GetStripeRefundHistory(StripeAccountType.SubscriberAccount, msgs);
-                ViewBag.Cards = currentAccount.GetStripeCards(StripeAccountType.SubscriberAccount, msgs);
-                ViewBag.Messages = msgs;
-                return View("Billing", currentAccount);
-            }
-            else
-            {
-                ViewBag.Package = package;
-                ViewBag.Packages =
-                    Package.LoadByIsActiveByIsAfterSchool(true, SessionVariables.IsAfterSchool.Value, msgs);
-                ViewBag.Messages = msgs;
-                return View("NewBilling", currentAccount);
-            }
         }
 
         public ActionResult OAuthStripe()
@@ -1483,28 +1339,6 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
 
             return RedirectToAction("PaymentsOptions");
-        }
-
-        public ActionResult SetDefaultCard(string id)
-        {
-            var msgs = new SystemMessages();
-            var currentAccount = SessionVariables.CurrentAccount;
-
-            if (id.IsBlank())
-                msgs.Add("Card not found.", MessageType.UserError);
-
-            if (msgs.HasNoErrors())
-            {
-                var customer = currentAccount.GetStripeCustomer(StripeAccountType.SubscriberAccount, msgs);
-                currentAccount.UpdateStripeCard(id, customer, StripeAccountType.SubscriberAccount, msgs);
-            }
-
-            ViewBag.BillingHistory = currentAccount.GetStripeBillingHistory(StripeAccountType.SubscriberAccount, msgs);
-            ViewBag.RefundHistory = currentAccount.GetStripeRefundHistory(StripeAccountType.SubscriberAccount, msgs);
-            ViewBag.Cards = currentAccount.GetStripeCards(StripeAccountType.SubscriberAccount, msgs);
-            ViewBag.Messages = msgs;
-
-            return View("Billing", currentAccount);
         }
 
         public ActionResult AfterStripeUpdate(string id, string returnUrl)
