@@ -394,7 +394,7 @@ namespace AfterSchoolLibrary.Models
             var msgs = CancelPackage(dc);
 
             if (StripeSubscriptionId.IsNotEmpty())
-                msgs.AddRange(StripeHelper.GetStripeHelperSubscriberAccount().CancelSubscription(StripeSubscriptionId, null, cancelAtPeriodEnd));
+                StripeHelper.GetStripeHelperSubscriberAccount().CancelSubscription(StripeSubscriptionId, cancelAtPeriodEnd, msgs);
 
             return msgs;
         }

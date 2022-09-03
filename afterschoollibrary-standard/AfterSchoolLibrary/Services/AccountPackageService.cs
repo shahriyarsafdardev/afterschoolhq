@@ -105,7 +105,7 @@ namespace AfterSchoolLibrary.Services
             accountPackage.TrialStartDate = previousPackage.TrialStartDate;
             accountPackage.AddOrUpdatePackageFeature(
                 FeatureType.TrialDays, 
-                previousPackage.GetFeature(FeatureType.TrialDays).GetMaxValue(), 
+                previousPackage.GetFeature(FeatureType.TrialDays, msgs, dc).GetMaxValue(), 
                 loggedInUser, 
                 msgs,
                 dc);
@@ -120,6 +120,12 @@ namespace AfterSchoolLibrary.Services
                 return accountPackage.TrialStartDate.Value.AddDays((double) accountPackage.GetFeature(FeatureType.TrialDays, msgs, dc).GetMaxValue());
 
             return new DateTime?();
+        }
+
+        public static void UpdateStripeSubscriptionId(this AccountPackage accountPackage, string stripeSubscriptionId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            accountPackage.StripeSubscriptionId = stripeSubscriptionId;
+            msgs.AddRange(accountPackage.Save(dc));
         }
     }
 }
