@@ -1311,8 +1311,9 @@ namespace AfterSchoolLibrary.Billing
         public Stripe.Subscription UpdateSubscription(string subscriptionId, string priceId, bool? billingCycleAnchorNow, bool? billingCycleAnchorUnchanged, DateTime? trialEndDate, bool? prorate, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
-
+            
             var options = new Stripe.SubscriptionUpdateOptions();
+            Stripe.Subscription subscription = null;
 
             if (priceId.IsNotBlank())
                 options.Items = new List<Stripe.SubscriptionItemOptions>()
@@ -1336,14 +1337,9 @@ namespace AfterSchoolLibrary.Billing
             if (prorate.HasValue)
                 options.ProrationBehavior = prorate.Value ? "create_prorations" : "none";
 
-            Stripe.Subscription subscription = null;
-
             try
             {
-                var service = GetSubscriptionService();
-                if (service.IsNotEmpty())
-                    subscription = service.Update(subscriptionId, options);
-                
+                subscription = GetSubscriptionService().Update(subscriptionId, options);
             }
             catch (StripeException ex)
             {
@@ -1354,9 +1350,9 @@ namespace AfterSchoolLibrary.Billing
             return subscription;
         }
 
-        public SystemMessages CancelSubscription(string subscriptionId, string stripeAccountId, bool cancelAtPeriodEnd = true)
+        public void CancelSubscription(string subscriptionId, bool cancelAtPeriodEnd = true, SystemMessages msgs = null)
         {
-            var msgs = new SystemMessages();
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             Stripe.SubscriptionUpdateOptions options;
 
@@ -1371,27 +1367,19 @@ namespace AfterSchoolLibrary.Billing
             {
                 options = new Stripe.SubscriptionUpdateOptions()
                 {
-                    CancelAt = DateTime.Now.AddSeconds(15),
-                    ProrationDate = DateTime.Now
+                    CancelAt = DateTime.UtcNow.AddSeconds(15),
                 };
             }
 
-
-            var requestOptions = new Stripe.RequestOptions();
-            if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeAccount = stripeAccountId;
-
             try
             {
-                var subscription = GetSubscriptionService().Update(subscriptionId, options, requestOptions);
+                var subscription = GetSubscriptionService().Update(subscriptionId, options);
             }
             catch (StripeException ex)
             {
                 msgs.Add(ex.Message, MessageType.UserError, ex);
                 msgs.Add($"Subscription ({subscriptionId}) was not canceled", MessageType.UserError);
             }
-
-            return msgs;
         }
 
         public Stripe.Subscription GetSubscription(string subscriptionId, SystemMessages msgs)
@@ -1411,6 +1399,32 @@ namespace AfterSchoolLibrary.Billing
             return subscription;
         }
 
+        #endregion
+        
+        #region SubscriptionItem
+
+        private Stripe.SubscriptionItemService GetSubscriptionItemService()
+        {
+            return new Stripe.SubscriptionItemService(StripeClient);
+        }
+
+        public Stripe.SubscriptionItem RemoveSubscriptionItem(string subscriptionItemId, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            Stripe.SubscriptionItem item = null;
+
+            try
+            {
+                item = GetSubscriptionItemService().Delete(subscriptionItemId);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add($"Error deleting stripe subscription item with ID: {subscriptionItemId}", MessageType.Notice, ex);
+            }
+
+            return item;
+        }
+        
         #endregion
 
         #region StripeCard

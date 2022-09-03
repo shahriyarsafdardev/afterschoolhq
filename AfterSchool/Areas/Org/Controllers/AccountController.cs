@@ -1419,7 +1419,6 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
-            var customer = currentAccount.GetStripeCustomer(StripeAccountType.SubscriberAccount, msgs);
 
             // check if finally added payment
             currentAccount.CheckIfSubscriberAccountHasPaymentMethod(null, msgs);

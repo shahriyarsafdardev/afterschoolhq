@@ -100,8 +100,15 @@
                                                     <span class="annually">@((package.PricePerYear/12).ToCurrency()) / Mo</span>
                                                 </h3>
                                                 <p class="text-right">
-                                                    <span class="monthly hide">@package.Price.ToCurrency() Billed Monthly</span>
-                                                    <span class="annually">@package.PricePerYear.ToCurrency() Billed Annually</span>
+                                                    @if (!package.IsFree(BillingPeriodType.Month))
+                                                    {
+                                                        <span class="monthly hide">@package.Price.ToCurrency() Billed Monthly</span>
+                                                        <span class="annually">@package.PricePerYear.ToCurrency() Billed Annually</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>&nbsp;</span>
+                                                    }
                                                 </p>
                                             </div>
                                             <div class="clearfix"></div>
@@ -160,7 +167,7 @@
                 period = @((int)BillingPeriodType.Year);
             }
             
-            location.href = '@Url.Action("SelectPlanDone", "account")?package=' + package + '&period=' + period;    
+            location.href = '@Url.Action("SelectPlanDone", "account")?package=' + package + '&period=' + period + '&returnUrl=' + encodeURI('@Request["returnUrl"]');    
         }
     </script>
 }

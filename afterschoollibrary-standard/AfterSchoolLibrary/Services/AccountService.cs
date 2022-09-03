@@ -2411,15 +2411,21 @@ namespace AfterSchoolLibrary.Services
 
                     if (keepTrialDays && packageToRemove.IsDuringTrial)
                         newAccountPackage.ContinueTrialFromPreviousPackage(packageToRemove, loggedInUser, amsgs, adc);
+                    
+                    var stripeHelper = StripeHelper.GetStripeHelperSubscriberAccount();
+                    
+                    stripeHelper.CancelSubscription(stripeSubscriptionId, false, msgs);
 
-                    StripeHelper.GetStripeHelperSubscriberAccount().UpdateSubscription(
-                        stripeSubscriptionId,
+                    var newStripeSubscription = stripeHelper.CreatePackageSubscription(
+                        account.StripeCustomerId,
                         billingPeriodTypeId == BillingPeriodType.Month ? newPackage.StripePricePerMonthId : newPackage.StripePricePerYearId,
-                        null,
                         null,
                         newAccountPackage.GetTrialEndDate(amsgs, adc),
                         null,
+                        null,
                         amsgs);
+
+                    newAccountPackage.UpdateStripeSubscriptionId(newStripeSubscription.Id, amsgs, adc);
                 },
                 onSuccess: smsgs => msgs.AddRange(smsgs),
                 onFailure: fmsgs => msgs.AddRange(fmsgs),
