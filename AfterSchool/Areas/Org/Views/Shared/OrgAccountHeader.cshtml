@@ -25,7 +25,7 @@
         else if (accountPackage.IsTrialExpiredAndUnpaid(currentAccount))
         {
             <div class="trial-header text-center text-white bg-danger">
-                It looks like your trial has expired. 
+                Your trial has expired. 
                 <button onclick="location.href='@Url.Action("selectplan", "account", new {returnUrl = Request.Url.ToString()})'" class="btn btn-alt5 margin-h-10">
                     Purchase Now &raquo;
                 </button>

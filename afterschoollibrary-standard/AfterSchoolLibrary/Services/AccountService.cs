@@ -2461,31 +2461,6 @@ namespace AfterSchoolLibrary.Services
         {
             var signupType = SignUpType.NotSet;
 
-            // has payment info
-            //if (account.StripeDefaultCardId.IsNotEmpty())
-            //{
-            //    // paying as soon as they sign up
-            //    if (activePackage.IsEmpty())
-            //    {
-            //        signupType = SignUpType.NewAccountSignUp;
-            //    }
-            //    // changing packages but have already paid, force those upgrading from trials to upgrade on current plan
-            //    else if (activePackage.PackageId != p.ID)
-            //    {
-            //        signupType = SignUpType.ChangePackage;
-            //    }
-            //    // if same package but the billing period is changing
-            //    else if (activePackage.PackageId == p.ID && activePackage.BillingPeriodTypeId != billingPeriodType)
-            //    {
-            //        signupType = SignUpType.ChangeBillingPeriodType;
-            //    }
-            //    // simply converting from the same package from trial
-            //    else if (activePackage.TrialEndDate.HasValue)
-            //    {
-            //        signupType = SignUpType.ConvertingFromTrial;
-            //    }
-            //}
-
             if ((p.IsNotEmpty() && p.IsFree(billingPeriodType)) || (activePackage.IsNotEmpty() && activePackage.IsFree))
             {
                 // new sign up
@@ -2527,6 +2502,72 @@ namespace AfterSchoolLibrary.Services
             }
 
             return signupType;
+        }
+
+        public static AccountPackage AddFirstPackage(this Account account, int packageId,
+            BillingPeriodType billingPeriodType, SignUpType signUpType, WebUser loggedInUser, SystemMessages msgs,
+            DatabaseConnection dc = null)
+        {
+            
+            Package package = null;
+            AccountPackage currentPackage = null;
+            var newap = new AccountPackage();
+            var loggedInUserId = loggedInUser.IsNotEmpty() ? loggedInUser.ID.Value : 0;
+            
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    package = Package.Load(packageId, amsgs, adc);
+                    var trialDayCount = package.GetFeature(FeatureType.TrialDays, amsgs, adc).GetMaxValue().ToInteger();
+                    
+                    var priceId = billingPeriodType == BillingPeriodType.Month
+                        ? package.StripePricePerMonthId
+                        : package.StripePricePerYearId;
+                    var price = billingPeriodType == BillingPeriodType.Month
+                        ? package.Price
+                        : package.PricePerYear;
+                    
+                    newap.AccountId = account.ID;
+                    newap.PackageId = packageId;
+                    newap.BillingPeriodTypeId = billingPeriodType;
+                    newap.CreateDate = DateTime.UtcNow;
+                    newap.CreatedBy = loggedInUserId;
+                    newap.LastModifiedDate = DateTime.UtcNow;
+                    newap.LastModifiedBy = loggedInUserId;
+                    newap.IsActive = true;
+                    newap.Price = price;
+                    newap.StripeSubscriptionId = null;
+
+                    if (signUpType == SignUpType.TrialSignUp && trialDayCount > 0)
+                    {
+                        newap.TrialStartDate = DateTime.UtcNow;
+                        newap.TrialEndDate = DateTime.UtcNow.AddDays(trialDayCount);
+                    }
+                    else
+                    {
+                        trialDayCount = 0;
+                        newap.StartDate = DateTime.UtcNow;
+                    }
+
+                    amsgs.AddRange(newap.SaveWithStripe(account.StripeCustomerId, false, priceId, adc));
+                    
+                    if (amsgs.HasNoErrors() && newap.ID.HasValue)
+                        package.CopyFeaturesToAccountPackage(newap, loggedInUser, amsgs, adc);
+
+                    // ensure package features are added
+                    account.EnsureDefaultPackageFeatures(newap, loggedInUser, msgs, dc);
+
+                    // ensure trial days are set properly
+                    account.AddOrUpdatePackageFeature(FeatureType.TrialDays, trialDayCount, loggedInUser, amsgs, adc);
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+
+            return newap;
+            
         }
 
         public static AccountPackage AddPackage(this Account account, int packageId,

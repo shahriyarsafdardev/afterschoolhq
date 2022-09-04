@@ -154,6 +154,7 @@ namespace AfterSchool.Controllers
         public ActionResult Welcome(string invite, string isrequestonlyaccess, string signuptype, string package, string period)
         {
             Account invitingAccount = null;
+            var signupTypeId = SignUpType.NotSet;
 
             if (invite.IsGuid())
             {
@@ -167,6 +168,12 @@ namespace AfterSchool.Controllers
                     if (currentUser.HasMultipleAccounts() || currentAccount.AccountTypeId != AccountType.Registrant)
                         return RedirectToAction("index", "login", new {returnurl = Request["returnurl"], invite});
                 }
+            }
+            else
+            {
+                signupTypeId = signuptype.IsNotEmpty() && signuptype.IsInteger()
+                    ? (SignUpType) signuptype.ToInteger()
+                    : SignUpType.TrialSignUp;
             }
 
             var msgs = new SystemMessages();
@@ -185,9 +192,7 @@ namespace AfterSchool.Controllers
             {
                 IsRequestOnlyAccess = isrequestonlyaccess.IsBoolean() && isrequestonlyaccess.ToBoolean(),
                 InviteCodeToShare = invite.IsNotEmpty() ? invite : "",
-                SignupType = signuptype.IsNotEmpty() && signuptype.IsInteger()
-                    ? (SignUpType) signuptype.ToInteger()
-                    : SignUpType.NotSet,
+                SignupType = signupTypeId,
                 InvitingAccount = invitingAccount,
                 PackageUid = package,
                 PackageName = selectedPackage.Name,

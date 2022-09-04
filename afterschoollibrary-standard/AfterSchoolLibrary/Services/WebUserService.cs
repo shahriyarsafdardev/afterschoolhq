@@ -841,14 +841,14 @@ namespace AfterSchoolLibrary.Services
             return account;
         }
 
-        public static Account AddNewAccountWithPackageWithStripe(this WebUser accountOwner, string orgName, AccountType accountType, Package package, BillingPeriodType billingPeriodType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Account AddNewAccountWithPackageWithStripe(this WebUser accountOwner, string orgName, AccountType accountType, Package package, BillingPeriodType billingPeriodType, SignUpType signUpType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var account = AddNewAccount(accountOwner, orgName, null, true, accountType, null, null, null, true, loggedInUser, msgs, dc);
 
             if (account.IsNotEmpty())
             {
                 account.CreateStripeCustomer(StripeAccountType.SubscriberAccount, accountOwner, msgs, dc);
-                account.AddPackage(package.ID.Value, billingPeriodType, loggedInUser, msgs, dc);
+                account.AddFirstPackage(package.ID.Value, billingPeriodType, signUpType, loggedInUser, msgs, dc);
             }
 
             return account;
