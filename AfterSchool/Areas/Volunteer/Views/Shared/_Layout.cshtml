@@ -1,0 +1,42 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="/favicon.png">
+    <meta name="keywords" content="">
+    <title>@UILabel.ProductName()</title>
+
+    @{Html.RenderPartial("~/Views/Shared/_HeadIncludes.cshtml");}
+    @{Html.RenderPartial("~/Views/Shared/_ZendeskWidget.cshtml");}
+
+    @RenderSection("header", required: false)
+    <link href="~/Content/googleTranslate.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="am-wrapper notopmenu">
+        <!-- sidebar-->
+        @Html.Partial("_Sidebar")
+        <!-- Main section-->
+        <div class="am-content">
+            <div class="visible-xs am-toggle-left-sidebar pointer padding-10" style="background-color: #333;">
+                <table>
+                    <tr>
+                        <td><i class="s7-menu icon-large text-white"></i> </td>
+                        <td><span class="text-medium-small text-white d-inline-block padding-h-10">Menu</span></td>
+                    </tr>
+                </table>
+            </div>
+            @RenderBody()
+        </div>
+    </div>
+
+    @{Html.RenderPartial("~/Views/Shared/_JavascriptIncludes.cshtml");}
+
+    @RenderSection("scripts", required: false)
+    <script src="~/Assets/js/google-translate.js"></script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>
+</html>
