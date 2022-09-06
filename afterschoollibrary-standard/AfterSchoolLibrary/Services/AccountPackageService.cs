@@ -103,6 +103,10 @@ namespace AfterSchoolLibrary.Services
         public static void ContinueTrialFromPreviousPackage(this AccountPackage accountPackage, AccountPackage previousPackage, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             accountPackage.TrialStartDate = previousPackage.TrialStartDate;
+            accountPackage.TrialEndDate = previousPackage.TrialEndDate;
+            
+            msgs.AddRange(accountPackage.Save(dc));
+            
             accountPackage.AddOrUpdatePackageFeature(
                 FeatureType.TrialDays, 
                 previousPackage.GetFeature(FeatureType.TrialDays, msgs, dc).GetMaxValue(), 
