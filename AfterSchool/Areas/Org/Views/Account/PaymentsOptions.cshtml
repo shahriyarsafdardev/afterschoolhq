@@ -8,9 +8,10 @@
     var supportEmail = (string) ViewBag.SupportEmail;
     var supportEmailHref = $"mailto:{supportEmail}";
     //var openPaymentNotificationModal = ViewBag.ShowPaymentNotificationPopup != null ? ((string)ViewBag.ShowPaymentNotificationPopup).ToBoolean() : false; 
+    var stripeSupportLink = "https://support.stripe.com/questions/change-the-bank-account-or-debit-card-details-associated-with-an-express-account";
 
     ViewBag.Title = account.Name;
-
+    
     if (isFullScreen)
     {
         Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
@@ -72,11 +73,22 @@
                         <h1 class=""><i class="s7-check-circle text-success"></i> Your payment account has been setup.</h1>
                     </div>
                 }
+
                 <div class="text-center">
                     <p class="margin-v-30">
-                        <button type="button" class="btn btn-default md-trigger" data-modal="modal-disconnect-confirm" onclick="disconnectPaymentAccount()">Disconnect Payment Account</button>
+                        All payment changes are handled within Stripe. For help changing your bank account, please <a href="@stripeSupportLink" target="_blank">click here</a>. To disconnect payment altogether, email <a href="@supportEmailHref">@supportEmail</a> (Note: Payment Method cannot be disconnected if there are pending payments).
                     </p>
+                    <p class="margin-v-30">
+                        <button type="button" class="btn btn-default md-trigger" data-modal="modal-disconnect-confirm">Manage Payment With Stripe</button>
+                    </p>
+                    @if (SessionVariables.IsAfterSchool.IsTrue())
+                    {
+                        <p class="margin-v-30">
+                            <button type="button" class="btn btn-default md-trigger" data-modal="modal-disconnect-confirm" onclick="disconnectPaymentAccount()">Disconnect Payment Account</button>
+                        </p>
+                    }
                 </div>
+                
 
                 Html.RenderPartial("~/Views/Shared/_Modal.cshtml", new ModalViewModel {ActionButtonHtml = "Disconnect Payment Account &raquo;", ActionButtonId = "btn-disconnect-confirm", HtmlBody = "<p>Are you sure you want to disconnect your payment account? You will not be able to process payments unless you re-connect.</p><p><strong>This action cannot be undone</strong></p>", ID = "modal-disconnect-confirm", Title = "Disconnect Payment Account"});
 
