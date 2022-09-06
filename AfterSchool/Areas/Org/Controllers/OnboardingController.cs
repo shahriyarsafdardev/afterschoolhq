@@ -651,31 +651,31 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Done()
         {
             var msgs = new SystemMessages();
-            var account = SessionVariables.CurrentAccount;
+            var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
-            var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
-            var hostAccounts = account.GetHostAccounts();
+            var profile = currentAccount.GetOrCreateAccountProfile(currentUser, msgs);
+            var hostAccounts = currentAccount.GetHostAccounts();
             var hostAccountString = string.Join(",",
                 hostAccounts?.Select(hostAccount => hostAccount.Name) ?? Array.Empty<string>());
 
             HandleTempMessages(msgs);
 
-            account.OnboardingStepDone = OnboardingStepType.All;
-            msgs.AddRange(account.Save());
+            currentAccount.OnboardingStepDone = OnboardingStepType.All;
+            msgs.AddRange(currentAccount.Save());
 
-            if (msgs.HasNoErrors() && account.IsNotEmpty() && currentUser.IsNotEmpty())
+            if (msgs.HasNoErrors() && currentAccount.IsNotEmpty() && currentUser.IsNotEmpty())
             {
-                //.. send support email to AHQ just to notifiy the team that a profile completed.
-                var location = profile.GetLocation() ?? account.GetDefaultLocation();
+                //.. send support email to AHQ just to notify the team that a profile completed.
+                var location = profile.GetLocation() ?? currentAccount.GetDefaultLocation();
 
                 BackgroundJob.Enqueue(() =>
                     EmailHelper.SendEmail(
                         Email.AppCustomersEmailAddress,
-                        $"AHQ Profile Completed - {account.Name}",
-                        $"<p>Organization: {account.Name}<br />" +
+                        $"AHQ Profile Completed - {currentAccount.Name}",
+                        $"<p>Organization: {currentAccount.Name}<br />" +
                         $"Main Contact Name: {currentUser.DisplayName}<br />" +
                         $"Email: {currentUser.Email}<br />" +
-                        $"Profile Link: {account.HomePageUrl}<br />" +
+                        $"Profile Link: {currentAccount.HomePageUrl}<br />" +
                         $"How did you hear about us: {currentUser.HowHearAboutUs} <br />" +
                         $"Location: {location.ToString()}<br />" +
                         $"Host Account(s): {hostAccountString}" +
@@ -684,9 +684,11 @@ namespace AfterSchool.Areas.Org.Controllers
                 );
             }
 
+            ViewBag.HostAccounts = hostAccounts;
+            ViewBag.HasActivities = currentAccount.HasActivities(msgs);
             ViewBag.Messages = msgs;
 
-            return View(account);
+            return View(currentAccount);
         }
 
         [HttpGet]
