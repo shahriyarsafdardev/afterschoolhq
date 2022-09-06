@@ -725,6 +725,9 @@
     <Content Include="Areas\Org\Views\League\PublishWizard4.cshtml" />
     <Content Include="Areas\Org\Views\League\PublishWizard5.cshtml" />
     <Content Include="Areas\Org\Views\Onboarding\FreeTrial.cshtml" />
+    <Content Include="Areas\Org\Views\Onboarding\StartSubscription.cshtml" />
+    <Content Include="Areas\Org\Views\Onboarding\SubscriptionFail.cshtml" />
+    <Content Include="Areas\Org\Views\Onboarding\SubscriptionSuccess.cshtml" />
     <Content Include="Areas\Org\Views\Shared\_RegistrationForm.cshtml" />
     <Content Include="Assets\css\common.css" />
     <Content Include="Assets\css\font-awesome-4.6.3\fonts\fontawesome-webfont.svg" />

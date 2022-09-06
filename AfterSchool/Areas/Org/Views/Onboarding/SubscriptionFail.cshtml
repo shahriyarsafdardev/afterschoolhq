@@ -1,0 +1,27 @@
+﻿@{ 
+    var account = SessionVariables.CurrentAccount;
+    Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml"; 
+}
+
+@if (account.IsNotEmpty())
+{
+    <div class="row main-content main-content-welcome-pages">
+        <div class="welcome-box-width">
+            <div class="welcome-outer-ring">
+                <div class="onboarding-inner-ring">
+                    <img class="thumbs-up" src="~/Assets/img/thumbs-up.svg" alt="thumbs up"/>
+                    <h3 class="lets-get-started">Let’s get started!</h3>
+                    <p class="free-trial-p">
+                        Uh-Oh, looks like something went wrong. Having trouble getting your payment details entered? Please reach out to <a href="mailto:support@afterschoolhq.com">support@afterschoolhq.com</a>.
+                    </p>
+                    <p class="free-trial-p">
+                        Clicking on the &lsquo;Continue to Payment&rsquo; button below will take you through our checkout experience. You will just need to enter your payment details, and that's it!
+                    </p>
+                    <a class="free-trial-continue" href="@Url.Action("continuetopayment", "onboarding", new { area = "org" })">
+                        Continue to Payment &raquo;
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+}

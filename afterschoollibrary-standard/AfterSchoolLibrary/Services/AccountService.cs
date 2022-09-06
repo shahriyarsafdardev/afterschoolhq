@@ -1585,7 +1585,7 @@ namespace AfterSchoolLibrary.Services
         public static Customer GetStripeCustomer(this Account account, StripeAccountType stripeAccountType, SystemMessages msgs)
         {
             if (account.StripeCustomerId.IsNotEmpty())
-                return StripeHelper.GetStripeHelper(stripeAccountType).GetCustomer(account.StripeCustomerId, null, msgs);
+                return StripeHelper.GetStripeHelper(stripeAccountType).GetCustomer(account.StripeCustomerId, msgs);
 
             return null;
         }
@@ -1649,6 +1649,10 @@ namespace AfterSchoolLibrary.Services
 
                 account.HasDefaultPaymentMethod = true;
                 msgs.AddRange(account.Save(dc));
+
+                var accountPackage = account.GetActiveAccountPackage(msgs, dc);
+                accountPackage.StartDate = DateTime.UtcNow;
+                msgs.AddRange(accountPackage.Save(dc));
             }
         }
 
@@ -1658,7 +1662,13 @@ namespace AfterSchoolLibrary.Services
             // check if package has changed
             var currentAccountPackage = account.GetActiveAccountPackage(msgs, dc);
             var stripeSubscription = currentAccountPackage.GetStripeSubscription(msgs);
-            var stripePlan = stripeSubscription.Items.First().Plan; // assuming only one subscription plan
+            Stripe.Plan stripePlan = null;
+
+            if (stripeSubscription.IsNotEmpty())
+                stripePlan = stripeSubscription.Items.First().Plan; // assuming only one subscription plan
+            else
+                stripePlan = StripeHelper.GetStripeHelperSubscriberAccount().GetSubscriptions(account.StripeCustomerId, msgs).First().Items.First().Plan;
+            
             var packageFromStripe = Package.LoadByUid(stripePlan.ProductId.ToGuid(), msgs, dc);
 
             // needs to match stripe
@@ -2542,14 +2552,15 @@ namespace AfterSchoolLibrary.Services
                     {
                         newap.TrialStartDate = DateTime.UtcNow;
                         newap.TrialEndDate = DateTime.UtcNow.AddDays(trialDayCount);
+                        amsgs.AddRange(newap.SaveWithStripe(account.StripeCustomerId, false, priceId, adc));
                     }
                     else
                     {
                         trialDayCount = 0;
                         newap.StartDate = DateTime.UtcNow;
+                        amsgs.AddRange(newap.Save(adc));
                     }
 
-                    amsgs.AddRange(newap.SaveWithStripe(account.StripeCustomerId, false, priceId, adc));
                     
                     if (amsgs.HasNoErrors() && newap.ID.HasValue)
                         package.CopyFeaturesToAccountPackage(newap, loggedInUser, amsgs, adc);

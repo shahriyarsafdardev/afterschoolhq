@@ -1,0 +1,27 @@
+﻿@{ 
+    var account = SessionVariables.CurrentAccount;
+    Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml"; 
+}
+
+@if (account.IsNotEmpty())
+{
+    <div class="row main-content main-content-welcome-pages">
+        <div class="welcome-box-width">
+            <div class="welcome-outer-ring">
+                <div class="onboarding-inner-ring">
+                    <img class="thumbs-up" src="~/Assets/img/thumbs-up.svg" alt="thumbs up"/>
+                    <h3 class="lets-get-started">Let’s get started!</h3>
+                    <p class="free-trial-p">
+                        You have successfully started your subsription.
+                    </p>
+                    <p class="free-trial-p">
+                        We just need to ask a few more questions to get you all set up.
+                    </p>
+                    <a class="free-trial-continue" href="@Url.Action("programinfo", "onboarding", new { area = "org" })">
+                        Continue
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+}

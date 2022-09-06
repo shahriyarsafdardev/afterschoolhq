@@ -3,6 +3,7 @@ using System.Linq;
 using System.Web.Mvc;
 using AfterSchool.Models;
 using AfterSchoolLibrary;
+using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.FeatureFlag;
 using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
@@ -36,6 +37,53 @@ namespace AfterSchool.Areas.Org.Controllers
                 return RedirectToAction("GettingStarted");
 
             return RedirectToAction("ProgramInfo");
+        }
+
+        public ActionResult StartSubscription()
+        {
+            var msgs = new SystemMessages();
+            HandleTempMessages(msgs);
+            ViewBag.Messages = msgs;
+            return View();
+        }
+
+        public ActionResult ContinueToPayment()
+        {
+            var msgs = new SystemMessages();
+            HandleTempMessages(msgs);
+
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentAccountPackage = SessionVariables.AccountPackage;
+
+            var session = StripeHelper.GetStripeHelperSubscriberAccount().GetCheckoutSession(
+                currentAccount.StripeCustomerId,
+                currentAccountPackage.GetStripePriceId(msgs),
+                $"{Utilities.BaseUrl()}{Url.Action("AfterStripeUpdate", "Account", new {Area = "org"})}" +
+                $"?returnurl={Url.Action("SubscriptionSuccess", "Onboarding", new {Area = "org"})}",
+                $"{Utilities.BaseUrl()}/{Url.Action("SubscriptionFail", "Onboarding", new {Area = "org"})}",
+                msgs);
+
+            if (msgs.HasNoErrors() && session.IsNotEmpty())
+                return new RedirectResult(session.Url);
+            
+            ViewBag.Messages = msgs;
+            return View("StartSubscription");
+        }
+
+        public ActionResult SubscriptionSuccess()
+        {
+            var msgs = new SystemMessages();
+            HandleTempMessages(msgs);
+            ViewBag.Messages = msgs;
+            return View();
+        }
+
+        public ActionResult SubscriptionFail()
+        {
+            var msgs = new SystemMessages();
+            HandleTempMessages(msgs);
+            ViewBag.Messages = msgs;
+            return View();
         }
 
         [HttpGet]

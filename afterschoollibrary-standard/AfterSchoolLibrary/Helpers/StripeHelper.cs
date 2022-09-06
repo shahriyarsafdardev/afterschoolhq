@@ -6,6 +6,7 @@ using System.Linq;
 using System.IO;
 using System.Configuration;
 using Stripe.BillingPortal;
+using Stripe.Checkout;
 using Twilio.Types;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
@@ -884,19 +885,15 @@ namespace AfterSchoolLibrary.Billing
             return msgs;
         }
 
-        public Stripe.Customer GetCustomer(string customerId, string stripeAccountId, SystemMessages msgs)
+        public Stripe.Customer GetCustomer(string customerId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
-            var requestOptions = new Stripe.RequestOptions();
-
-            if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeAccount = stripeAccountId;
 
             Stripe.Customer customer = null;
 
             try
             {
-                customer = GetCustomerService().Get(customerId, null, requestOptions);
+                customer = GetCustomerService().Get(customerId);
             }
             catch (StripeException)
             {
@@ -1397,6 +1394,28 @@ namespace AfterSchoolLibrary.Billing
             }
 
             return subscription;
+        }
+        
+        public List<Stripe.Subscription> GetSubscriptions(string customerId, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            var subscriptions = new List<Stripe.Subscription>();
+
+            var options = new SubscriptionListOptions()
+            {
+                Customer = customerId,
+            };
+
+            try
+            {
+                subscriptions = GetSubscriptionService().List(options).ToList();
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add($"No stripe subscriptions found with customer ID: {customerId}", MessageType.Notice, ex);
+            }
+
+            return subscriptions;
         }
 
         #endregion
@@ -2352,6 +2371,59 @@ namespace AfterSchoolLibrary.Billing
             }
 
             return configuration;
+        }
+        
+        #endregion
+        
+        #region StripeCheckoutSession
+        
+        private Stripe.Checkout.SessionService GetCheckoutSessionService()
+        {
+            return new Stripe.Checkout.SessionService(StripeClient);
+        }
+
+        public Stripe.Checkout.Session GetCheckoutSession(string customerId, string priceId, string successUrl, string cancelUrl, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Stripe.Checkout.Session session = null;
+            var options = new Stripe.Checkout.SessionCreateOptions()
+            {
+                Customer = customerId,
+                AllowPromotionCodes = true,
+                AutomaticTax = new SessionAutomaticTaxOptions()
+                {
+                    Enabled = true,
+                },
+                CancelUrl = cancelUrl,
+                SuccessUrl = successUrl,
+                Mode = "subscription",
+                BillingAddressCollection = "required",
+                LineItems = new List<SessionLineItemOptions>()
+                {
+                    new SessionLineItemOptions()
+                    {
+                        Price = priceId,
+                        Quantity = 1,
+                    },
+                },
+                CustomerUpdate = new SessionCustomerUpdateOptions()
+                {
+                    Address = "auto",
+                },
+            };
+
+            try
+            {
+                session = GetCheckoutSessionService().Create(options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.Error, ex);
+                msgs.Add($"Error creating session", MessageType.UserError);
+            }
+
+            return session;
         }
         
         #endregion

@@ -127,5 +127,11 @@ namespace AfterSchoolLibrary.Services
             accountPackage.StripeSubscriptionId = stripeSubscriptionId;
             msgs.AddRange(accountPackage.Save(dc));
         }
+
+        public static string GetStripePriceId(this AccountPackage accountPackage, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var package = accountPackage.GetPackage(msgs, dc);
+            return accountPackage.BillingPeriodTypeId == BillingPeriodType.Month ? package.StripePricePerMonthId : package.StripePricePerYearId;
+        }
     }
 }

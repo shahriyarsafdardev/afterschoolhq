@@ -17,6 +17,7 @@ using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using Hangfire;
+using Microsoft.AspNet.SignalR.Hubs;
 using Email = AfterSchoolLibrary.Helpers.Email;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
@@ -292,6 +293,7 @@ namespace AfterSchool.Controllers
                                         orgName: model.OrgName,
                                         accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
                                         package: package,
+                                        signUpType: model.SignupType,
                                         billingPeriodType: model.SubscriptionPeriod.ParseEnum<BillingPeriodType>(),
                                         loggedInUser: user,
                                         msgs: amsgs,
@@ -374,6 +376,8 @@ namespace AfterSchool.Controllers
                 if (model.SignupType == SignUpType.Teacher1099)
                     return RedirectToAction("paymentsoptions", "account",
                         new {area = "org", isfullscreen = 1, signuptype = (int) model.SignupType});
+                else if (model.SignupType == SignUpType.DirectPurchase)
+                    return RedirectToAction("startsubscription", "onboarding", new {area = "org"});
                 else if (invitingAccount.IsNotEmpty())
                     return RedirectToAction("index", "onboarding", new {area = "org", showGettingStarted = true});
                 
