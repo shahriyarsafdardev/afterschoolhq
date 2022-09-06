@@ -3,7 +3,11 @@
     var showSeatsRemaining = true;
     var showLocation = false;
     var accountProfile = (AccountProfile)ViewBag.AccountProfile;
-
+    var genderOrGradeRestriction = ParticipationObjectUI.PrintAgeGradeRestrictions(Model);
+    if (genderOrGradeRestriction.Contains(':'))
+    {
+        genderOrGradeRestriction = genderOrGradeRestriction.Insert(genderOrGradeRestriction.IndexOf(":") ,  "</b>").Insert(0 ,  "<b>");
+    }
     if (Model.SeatsRemaining.HasValue && Model.SeatsRemaining.Value <= 40)
     {
         if (Model.IsActivityGroup() && Model.ActivityGroupType.Value != ActivityGroupType.League)
@@ -209,7 +213,7 @@
                 @if (Model.ActivityType != ActivityType.VolunteerOpportunity)
                 {
                     <span>
-                        @Html.Raw(ParticipationObjectUI.PrintAgeGradeRestrictions(Model).Insert(0,"<b>").Insert(7,"</b>"))
+                        @Html.Raw(@genderOrGradeRestriction)
                     </span>
                     <br />
                     <span>
