@@ -81,7 +81,7 @@
                     <p class="margin-v-30">
                         <button type="button" class="btn btn-default md-trigger" data-modal="modal-disconnect-confirm">Manage Payment With Stripe</button>
                     </p>
-                    @if (SessionVariables.IsAfterSchool.IsTrue())
+                    @if (SessionVariables.OriginalLoggedInUser.IsNotEmpty())
                     {
                         <p class="margin-v-30">
                             <button type="button" class="btn btn-default md-trigger" data-modal="modal-disconnect-confirm" onclick="disconnectPaymentAccount()">Disconnect Payment Account</button>
