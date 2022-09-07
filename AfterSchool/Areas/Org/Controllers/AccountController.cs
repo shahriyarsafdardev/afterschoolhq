@@ -114,7 +114,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         }
 
                         if (endtrial.IsBoolean())
-                            accountPackage.EndTrialNow(msgs);
+                            accountPackage.EndTrialNow(amsgs, adc);
                         
                         // ..update profile title if account name has been changed 
                         // Should we do this?
