@@ -1375,44 +1375,12 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult SelectPlanDone(Guid package, BillingPeriodType period, string returnUrl)
+        public ActionResult SelectPlanDone()
         {
-            var msgs = new SystemMessages();
-            var currentPackage = SessionVariables.AccountPackage;
-            var currentAccount = SessionVariables.CurrentAccount;
-            var currentUser = SessionVariables.CurrentUser;
-
-            ViewBag.CurrentPackage = currentPackage;
-            ViewBag.Packages = Package.LoadByIsActive(true, msgs);
+            var msgs = new SystemMessages(); 
+            ViewBag.CurrentPackage = SessionVariables.AccountPackage;
             ViewBag.Messages = msgs;
-            
-            if (currentPackage.PackageUid != package)
-                currentAccount.SwitchPackagesWithStripe(
-                    newPackage: Package.LoadByUid(package, msgs),
-                    billingPeriodTypeId: period,
-                    keepTrialDays: true,
-                    stripeSubscriptionId: currentPackage.StripeSubscriptionId,
-                    loggedInUser: currentUser,
-                    msgs: msgs
-                );
-
-            if (msgs.HasNoErrors())
-            {
-                var fullReturnUrl = $"{Utilities.BaseUrl()}{Url.Action("afterstripeupdate", "account")}";
-
-                if (returnUrl.IsNotEmpty())
-                    fullReturnUrl = $"{fullReturnUrl}?returnUrl={returnUrl}";
-                
-                var link = BillingPortalConfigurationService.GetBillingPortalSessionLink(
-                    SessionVariables.CurrentAccount,
-                    fullReturnUrl,
-                    BillingPortalConfigurationType.PaymentMethodUpdate,
-                    msgs);
-
-                return new RedirectResult(link);
-            }
-            
-            return View("SelectPlan", currentAccount);
+            return View(SessionVariables.CurrentAccount);
         }
 
         public ActionResult AfterStripeUpdate(string id, string returnUrl)

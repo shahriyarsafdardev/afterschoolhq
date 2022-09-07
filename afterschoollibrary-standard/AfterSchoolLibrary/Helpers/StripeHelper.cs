@@ -1435,7 +1435,7 @@ namespace AfterSchoolLibrary.Billing
             var options = new SetupIntentCreateOptions()
             {
                 Customer = customerId,
-                PaymentMethodTypes = new List<string>() {"card"}
+                PaymentMethodTypes = new List<string>() {"card"},
             };
 
             try

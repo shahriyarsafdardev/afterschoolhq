@@ -1,5 +1,6 @@
 ﻿@using AfterSchoolLibrary.Billing
 @using AfterSchoolLibrary.Enums
+@using Utilities = AfterSchoolLibrary.Helpers.Utilities
 @model Account
 @{ 
     ViewBag.Title = Model.Name;
@@ -326,6 +327,7 @@
                         fontFamily: 'Montserrat, Ideal Sans, system-ui, sans-serif',
                         spacingUnit: '2px',
                         borderRadius: '0px',
+                        fontSizeBase: '18px',
                     }
                 },
             };
@@ -346,7 +348,7 @@
                     //`Elements` instance that was used to create the Payment Element
                     elements,
                     confirmParams: {
-                        /*return_url: 'https://example.com/account/payments/setup-complete',*/
+                        return_url: '@($"{Utilities.BaseUrl()}{@Url.Action("AfterStripeUpdate", "Account")}?returnUrl={Url.Action("SelectPlanDone", "Account")}")',
                     }
                 });
                 
@@ -357,7 +359,6 @@
                     const messageContainer = document.querySelector('#error-message');
                     messageContainer.textContent = error.message;
                 } else {
-                    alert('here');
                     // Your customer will be redirected to your `return_url`. For some payment
                     // methods like iDEAL, your customer will be redirected to an intermediate
                     // site first to authorize the payment, then redirected to the `return_url`.
