@@ -61,10 +61,6 @@ namespace AfterSchoolLibrary.Helpers
                     ReattachTransactionsToNonDeletedAccounts_20200216.Do(amsgs, adc);
                     FixTransactionsForDeletedAccounts_20200227.Do(amsgs, adc);
                     FixAccountPackageIsActive_20210603.Do(amsgs, adc);
-
-                    if (Utilities.IsProduction)
-                        UpdateTransactionsFromStripe_20200320.Do(amsgs, adc);
-
                     UpdateRefundRequests_20200323.Do(amsgs, adc);
                     UpdateMissingActivityLocationTypes_20200328.Do(amsgs, adc);
                     UpdateFollowers_20200331.Do(amsgs, adc);
@@ -118,6 +114,7 @@ namespace AfterSchoolLibrary.Helpers
                     Migration_20220709_AddPersonTypeToRegistrant.Do(amsgs, adc);
                     Migration_20220709_AddPersonTypeToRegistrant2.Do(amsgs, adc);
                     Migration_20220803_ActivityGroupUseDetailsNotDescription.Do(amsgs, adc);
+                    Migration_20220824_AlterActivityAlterDetails.Do(amsgs, adc);
                     Migration_20220823_InitializeActivityDetailsTable.Do(amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),

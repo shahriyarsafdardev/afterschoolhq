@@ -1,0 +1,107 @@
+﻿@model List<RegistrantActivity>
+@{
+    var activity = (Activity)ViewData["Activity"];
+    var editaction = ViewData["EditAction"].ToString();
+    var editcontroller = ViewData["EditController"].ToString();
+    var headerTitle = (RegistrationAssignmentType)ViewData["HeaderTitle"];
+    var isTechSupport = SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
+    var assignmentTypesForActivity = activity.GetRegistrationAssignmentTypes();
+}
+<style>
+    .btn-primary{
+    color: #00b492 ; 
+    background-color: #ffffff;
+    }
+    .local-btn {
+    width: 100%
+    }
+</style>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">@headerTitle.ToString().SplitByUpperCase()</h3>
+    </div>
+    <div class="panel-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>Registrant Name</th>
+                    <th>Background Check Status</th>
+                    <th>Phone Number</th>
+                    <th>Registration Status</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                @if (Model.Count > 0)
+                {
+                    foreach (var ra in Model)
+                    {
+                        var instanceSeats = ra.GetInstanceSeats();
+
+                        <tr class="instance @instanceSeats.Select(x => $"instance-{x.ActivityInstanceId.ToString()}").ToStringList(" ")">
+                            <td>
+                                @if (ra.RegistrationId.HasValue && ra.AssignmentTypeId != RegistrationAssignmentType.Invited)
+                                {
+                                    <a href="@Url.Action(editaction, editcontroller, new { id = ra.Uid })" class="btn btn-default btn-sm">
+                                        <i class="icon icon-left s7-user"></i> View Details
+                                    </a>
+                                }
+                            </td>
+                            <td>@(!isTechSupport ? ra.RegistrantName.IfBlank(ra.RegistrantEmail) : ra.RegistrantName.IfBlank(ra.RegistrantEmail).MaskString(3, 3))</td>
+                            <!--When Background check will complete then here we will need to do changes-->
+                            <td>Pending Review</td>
+                            <td>@ra.RegistrantPhone</td>
+                            <td>
+                                @if (ra.AssignmentTypeId == RegistrationAssignmentType.Withdrawn)
+                                {
+                                    assignmentTypesForActivity.Add(RegistrationAssignmentType.Withdrawn);
+                                    <select disabled id="assignmentType" class="form-control">
+                                        <option value="@((int)RegistrationAssignmentType.Withdrawn)" selected="selected">@RegistrationAssignmentType.Withdrawn.ToString().SplitByUpperCase()</option>
+                                    </select>
+
+                                }
+                                else
+                                {
+                                    <select id="assignmentType" class="form-control" onchange="moveRegistrantAssignment(@ra.RegistrantId, '@UI.JavascriptSafeString(ra.RegistrantName)', this)">
+                                        @foreach (var x in assignmentTypesForActivity)
+                                        {
+                                            var selected = "";
+                                            if (ra.AssignmentTypeId == x)
+                                            {
+                                                selected = "selected=\"selected\"";
+                                            }
+
+                                            <option value="@((int)x)" @selected>@x.ToString().SplitByUpperCase()</option>
+                                        }
+                                    </select>
+                                }
+                            </td>
+                            <td>
+                                <a href=@(Url.Action("messageadd", "activity", new { id = ra.GetActivity().Uid, uid = ra.RegistrantUid })) new class="btn btn-primary local-btn">Message</a>
+                            </td>
+                            <td>
+
+                                @if (ra.AssignmentTypeId != RegistrationAssignmentType.Withdrawn)
+                                {
+                                    <a onclick="return processWithdraw('@ra.Uid', '@ra.ID', '@ra.RegistrantUid', '@ra.ParticipationObjectId', '@ra.ParticipationObjectTypeId', '@ra.RegistrantFirstName');" class="btn btn-danger local-btn">Withdraw</a>
+                                }
+                                
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8">There are no @UILabel.RegistrantLabel(true).ToLower()</td>
+                    </tr>
+                }
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+</div>

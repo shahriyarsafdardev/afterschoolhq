@@ -12,7 +12,6 @@ using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using Hangfire;
-using StringExtensions = System.Web.WebPages.StringExtensions;
 using Utilities = BasicLibrary.Utilities;
 
 namespace AfterSchool.Areas.Org.Controllers
@@ -39,9 +38,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var getVolunteers = volunteers.IsBoolean() && volunteers.ToBoolean();
             var currentAccount = SessionVariables.CurrentAccount;
-            
+
             var currentUser = SessionVariables.CurrentUser;
-            var start = recordsPerPage * ((int?)pageNumber - 1);
+            var start = recordsPerPage * ((int?) pageNumber - 1);
             var activityIds = new List<int>();
             var registrationAssignmentTypes = new List<RegistrationAssignmentType>();
 
@@ -49,7 +48,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 activityIds = activity.Split(',').Select(x => x.ToInteger()).ToList();
             }
-            
+
             if (at.IsNumber())
                 registrationAssignmentTypes.Add((RegistrationAssignmentType) at.ToInteger());
 
@@ -75,15 +74,16 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 activities = activities.Where(a => a.ActivityTypeId != ActivityType.VolunteerOpportunity).ToList();
             }
-            var groups = getVolunteers ? new List<ActivityGroup>() :  currentAccount.GetActivityGroups(msgs);
-            
-            var (registrations, totalCount) = ((List<Registration>, int))(registrations: registrations1, totalCount: totalCount1);
-            
+
+            var groups = getVolunteers ? new List<ActivityGroup>() : currentAccount.GetActivityGroups(msgs);
+
+            var (registrations, totalCount) = ((List<Registration>, int)) (registrations: registrations1, totalCount: totalCount1);
+
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
 
             if (emailed.IsBoolean() && emailed.ToBoolean())
                 msgs.Add("An email will be sent shortly", MessageType.Success);
-            
+
             var isStudentCRMEnabled = SessionVariables.CurrentAccount.HasFeature(FeatureType.StudentCRM);
             var studentCRMPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.StudentCRM, SessionVariables.AccountPackage);
             var pagingModel = new PagingModel
@@ -93,7 +93,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 RecordsPerPage = recordsPerPage,
                 TotalPages = totalPages,
             };
-            
+
             var result = new RegistrationIndexAssembler().AssembleRegistrationIndexResult(isStudentCRMEnabled, studentCRMPackage, registrations, msgs,
                 pagingModel, false, activities, groups, new List<FormQuestion>(), new List<FormQuestionGroup>(), false, currentAccount);
             return View(result);
@@ -158,7 +158,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = msgs;
 
-            return RedirectToAction("index", new {volunteers = volunteers ,q, activity, emailed = "1", question, group, at, regstatus});
+            return RedirectToAction("index", new {volunteers = volunteers, q, activity, emailed = "1", question, group, at, regstatus});
         }
 
         [HttpGet]
@@ -750,9 +750,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 .OrderBy(x => x.Name).ToList();
 
             activities = getVolunteers
-                ? activities.Where(a => a.ActivityTypeId == ActivityType.VolunteerOpportunity).ToList() 
+                ? activities.Where(a => a.ActivityTypeId == ActivityType.VolunteerOpportunity).ToList()
                 : activities.Where(a => a.ActivityTypeId != ActivityType.VolunteerOpportunity).ToList();
-            
+
             var groups = currentAccount.GetActivityGroups(msgs);
 
             ViewBag.Activities = activities;
@@ -782,7 +782,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var length = recordsPerPage;
 
             var activityMessages = currentAccount.GetActivityMessages(start, length, msgs);
-            
+
             var totalCount = currentAccount.GetActivityMessageCount(msgs);
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
             var getVolunteers = volunteers.IsBoolean() && volunteers.ToBoolean();

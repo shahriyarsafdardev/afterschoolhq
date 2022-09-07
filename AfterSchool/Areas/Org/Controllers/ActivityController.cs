@@ -287,6 +287,9 @@ namespace AfterSchool.Areas.Org.Controllers
             msgs.Add("Your report will be sent shortly", MessageType.Success);
 
             var result = GatherDataForAndAssembleRegistrantsResult(activity, "", currentAccount, currentUser, msgs);
+            if (getVolunteers)
+                return View("VolunteerRegistrants", result);
+
             return View("Registrants", result);
         }
 
@@ -385,9 +388,14 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (msgs.HasNoErrors())
+            {
+                var registrantName = registrant.Name;
+                var successMessage = new SystemMessage($"{registrantName} Withdrawn successfully.", MessageType.Success);
+                SetTempMessages(new SystemMessages {successMessage});
                 return Json(new {success = true, status = "ok"}, JsonRequestBehavior.AllowGet);
+            }
 
-            //.. something went wrong, error occured
+            // something went wrong, error occured
             return Json(new {success = false, status = "error", data = msgs.ToList().Select(msg => new {msg.Text})},
                 JsonRequestBehavior.AllowGet);
         }
@@ -712,10 +720,6 @@ namespace AfterSchool.Areas.Org.Controllers
                 );
             }
 
-            var user = currentAccount.GetAccountOwner(msgs);
-            if (user.IsNotEmpty() && currentAccount.IsNotEmpty())
-                SendGridHelper.AddOrUpdateContact(currentAccount, user, msgs);
-
             ViewBag.IsFullScreen = Request[IsNewRequest] == "1";
             ViewBag.MustRequestToPublish = mustRequestToPublish;
             ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity, msgs);
@@ -953,7 +957,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult MessageAdd(string id)
+        public ActionResult MessageAdd(string id , string uid = "")
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
@@ -962,19 +966,32 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentUserIsActivityLeader = SessionVariables.CurrentUser.IsActivityLeader(activity, msgs);
             ViewBag.IsActivityLeader =
                 EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, SessionVariables.AccountUserType, currentUserIsActivityLeader);
-
-            var assignmentTypes = new[]
+            var assignmentTypes = new List<RegistrationAssignmentType>
             {
                 RegistrationAssignmentType.Applied, RegistrationAssignmentType.WaitingList,
                 RegistrationAssignmentType.Reserved, RegistrationAssignmentType.ReservedPendingParentalConsent,
                 RegistrationAssignmentType.ReservedPendingPayment, RegistrationAssignmentType.Invited,
+                RegistrationAssignmentType.ReservedPendingBackgroundCheck
             };
 
-            ViewBag.Registrants = activity.GetRegistrantActivities(true, msgs)
-                .Where(ra => ra.AssignmentTypeId.In(assignmentTypes))
-                .Select(ra => ra.ToRegistrant())
-                .OrderBy(x => x.FirstName)
-                .ToList();
+            if (uid.IsGuid())
+            {
+                assignmentTypes.Add(RegistrationAssignmentType.Withdrawn);
+                
+                ViewBag.Registrants = activity.GetRegistrantActivities(true, msgs)
+                    .Where(ra => ra.AssignmentTypeId.In(assignmentTypes) && ra.RegistrantUid == uid.ToGuid())
+                    .Select(ra => ra.ToRegistrant())
+                    .OrderBy(x => x.FirstName)
+                    .ToList();
+            }
+            else
+            {
+                ViewBag.Registrants = activity.GetRegistrantActivities(true, msgs)
+                    .Where(ra => ra.AssignmentTypeId.In(assignmentTypes))
+                    .Select(ra => ra.ToRegistrant())
+                    .OrderBy(x => x.FirstName)
+                    .ToList();
+            }
 
             // If the user does have the messages feature, and the user tries to send a message, validate the user hasn't used up their quota of emails, and/or text messages, if they have exceeded their quota, show the upgrade.
             // If the user has hit or exceeded the email quota then show the upgrade modal
@@ -1425,9 +1442,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 {"activitylocationtype", activityLocationTypeId},
                 {"isparentpricecost", true},
             };
-            
+
             var isNew = Request[IsNewRequest] == "1";
-            
+
             if (isNew && activityLocationTypeId == (int) ActivityLocationType.Physical && activity.IsEmpty())
             {
                 var location = currentAccount.GetDefaultLocation();

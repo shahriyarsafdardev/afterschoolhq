@@ -3,10 +3,8 @@
 @{
     var account = (Account) ViewData["Account"];
     var activity = (Activity) ViewData["Activity"];
-    var participationObject = activity.GetParticipationObject();
     var editaction = ViewData["EditAction"].ToString();
     var editcontroller = ViewData["EditController"].ToString();
-    var isTechSupport = SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
     var isReadOnlySeatStatus = ViewData["IsReadOnlySeatStatus"].IsNotEmpty() && (bool) ViewData["IsReadOnlySeatStatus"];
 
     var reservedButPendingPayment = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment).ToList();
@@ -18,6 +16,7 @@
     var withdrawn = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.Withdrawn).ToList();
     var declined = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.Declined).ToList();
     var reservedPendingBackgroundCheck = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingBackgroundCheck).ToList();
+    var isVolunteer = activity.ActivityTypeId == ActivityType.VolunteerOpportunity;
 }
 
 <div class="clearfix"></div>
@@ -57,35 +56,71 @@
 <div class="clearfix"></div>
 @if (reserved.IsNotEmpty() && reserved.Count > 0)
 {
-    Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
-        reserved,
-        new ViewDataDictionary
-        {
-            {"Activity", activity},
-            {"Account", account},
-            {"EditAction", editaction},
-            {"EditController", editcontroller},
-            {"HeaderTitle", RegistrationAssignmentType.Reserved},
-            {"IsReadOnly", isReadOnlySeatStatus},
-        }
-        );
+    if (!isVolunteer)
+    {
+        Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
+            reserved,
+            new ViewDataDictionary
+            {
+                {"Activity", activity},
+                {"Account", account},
+                {"EditAction", editaction},
+                {"EditController", editcontroller},
+                {"HeaderTitle", RegistrationAssignmentType.Reserved},
+                {"IsReadOnly", isReadOnlySeatStatus},
+            }
+            );
+    }
+    else
+    {
+        Html.RenderPartial("~/Views/Shared/_VolunteerRegistrantsForSpecificStatus.cshtml",
+            reserved,
+            new ViewDataDictionary
+            {
+                {"Activity", activity},
+                {"Account", account},
+                {"EditAction", editaction},
+                {"EditController", editcontroller},
+                {"HeaderTitle", RegistrationAssignmentType.Reserved},
+                {"IsReadOnly", isReadOnlySeatStatus},
+            }
+            );
+    }
 }
 
 <div class="clearfix"></div>
 @if (waiting.IsNotEmpty() && waiting.Count > 0)
 {
-    Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
-        waiting,
-        new ViewDataDictionary
-        {
-            {"Activity", activity},
-            {"Account", account},
-            {"EditAction", editaction},
-            {"EditController", editcontroller},
-            {"HeaderTitle", RegistrationAssignmentType.WaitingList},
-            {"IsReadOnly", isReadOnlySeatStatus},
-        }
-        );
+    if (!isVolunteer)
+    {
+        Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
+            waiting,
+            new ViewDataDictionary
+            {
+                {"Activity", activity},
+                {"Account", account},
+                {"EditAction", editaction},
+                {"EditController", editcontroller},
+                {"HeaderTitle", RegistrationAssignmentType.WaitingList},
+                {"IsReadOnly", isReadOnlySeatStatus},
+            }
+            );
+    }
+    else
+    {
+        Html.RenderPartial("~/Views/Shared/_VolunteerRegistrantsForSpecificStatus.cshtml",
+            waiting,
+            new ViewDataDictionary
+            {
+                {"Activity", activity},
+                {"Account", account},
+                {"EditAction", editaction},
+                {"EditController", editcontroller},
+                {"HeaderTitle", RegistrationAssignmentType.WaitingList},
+                {"IsReadOnly", isReadOnlySeatStatus},
+            }
+            );
+    }
 }
 
 <div class="clearfix"></div>
@@ -123,23 +158,6 @@
 }
 
 <div class="clearfix"></div>
-@if (withdrawn.IsNotEmpty() && withdrawn.Count > 0)
-{
-    Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
-        withdrawn,
-        new ViewDataDictionary
-        {
-            {"Activity", activity},
-            {"Account", account},
-            {"EditAction", editaction},
-            {"EditController", editcontroller},
-            {"HeaderTitle", RegistrationAssignmentType.Withdrawn},
-            {"IsReadOnly", isReadOnlySeatStatus},
-        }
-        );
-}
-
-<div class="clearfix"></div>
 @if (declined.IsNotEmpty() && declined.Count > 0)
 {
     Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
@@ -159,7 +177,7 @@
 <div class="clearfix"></div>
 @if (reservedPendingBackgroundCheck.IsNotEmpty() && reservedPendingBackgroundCheck.Count > 0)
 {
-    Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
+    Html.RenderPartial("~/Views/Shared/_VolunteerRegistrantsForSpecificStatus.cshtml",
         reservedPendingBackgroundCheck,
         new ViewDataDictionary
         {
@@ -171,6 +189,41 @@
             {"IsReadOnly", isReadOnlySeatStatus},
         }
         );
+}
+
+<div class="clearfix"></div>
+@if (withdrawn.IsNotEmpty() && withdrawn.Count > 0)
+{
+    if (!isVolunteer)
+    {
+        Html.RenderPartial("~/Views/Shared/_ActivityRegistrantsForSpecificStatus.cshtml",
+            withdrawn,
+            new ViewDataDictionary
+            {
+                {"Activity", activity},
+                {"Account", account},
+                {"EditAction", editaction},
+                {"EditController", editcontroller},
+                {"HeaderTitle", RegistrationAssignmentType.Withdrawn},
+                {"IsReadOnly", isReadOnlySeatStatus},
+            }
+            );
+    }
+    else
+    {
+        Html.RenderPartial("~/Views/Shared/_VolunteerRegistrantsForSpecificStatus.cshtml",
+            withdrawn,
+            new ViewDataDictionary
+            {
+                {"Activity", activity},
+                {"Account", account},
+                {"EditAction", editaction},
+                {"EditController", editcontroller},
+                {"HeaderTitle", RegistrationAssignmentType.Withdrawn},
+                {"IsReadOnly", isReadOnlySeatStatus},
+            }
+            );
+    }
 }
 
 <div id="modal-waitinglist" class="md-modal colored-header custom-width md-effect-9">
@@ -238,7 +291,7 @@
 
                 <div class="modal-footer textCenterImportant">
                     <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-                    <button type="button" id="btn-manual-withdraw" class="btn btn-danger padding-h-20" onclick="return withdraw('<%= participationObjectId %>', '<%= registrantId %>', '<%= type %>', '<%= registrantActivityUId %>', '<%= registrantActivityId %>', 'true')">Withdraw &amp; Cancel Payments &raquo;</button>
+                    <button type="button" id="btn-manual-withdraw" class="btn btn-danger padding-h-20" onclick="return withdraw('<%= participationObjectId %>', '<%= registrantId %>', '<%= type %>', '<%= registrantActivityUId %>', '<%= registrantActivityId %>', 'true')">@Html.Raw(isVolunteer ? "Withdraw" : "Withdraw &amp; Cancel Payments ") &raquo;</button>
                 </div>
             </div>
         </div>
@@ -247,24 +300,13 @@
 </script>
 
 <script>
-
-
     function moveRegistrantAssignment(registrant, registrantName, selectBox) {
         let newAssignment = selectBox.value;
-        let newAssignmentText = selectBox.options[selectBox.selectedIndex].text;
-        console.log(newAssignment, selectBox.selectedIndex, newAssignmentText)
-        moveRegistrantAssignment2(registrant, registrantName, newAssignment, newAssignmentText);
-    }
-
-    function moveRegistrantAssignment2(registrant, registrantName, newAssignment, newAssignmentText) {
         $.get(
             `@Url.Action("moveregistrantassignment", "services", new {id = activity.Uid})?registrant=${registrant}&assignmenttype=${newAssignment}`,
             function (data) {
-                if (data && data.status == 'ok') {
-                    Notifications.showBar({
-                        title: 'Success',
-                        message: `${registrantName}'s seat has been moved to ${newAssignmentText}.`
-                    });
+                if (data && data.status === 'ok') {
+                    location.reload();
                 } else {
                     Notifications.showBar({
                         title: 'Error',
@@ -285,7 +327,7 @@
         $.get(
             `@Url.Action("sendpaymentreminder", "services", new {id = activity.Uid})?registrant=${registrant}`,
             function (data) {
-                if (data && data.status == 'ok') {
+                if (data && data.status === 'ok') {
                     Notifications.showBar({
                         title: 'Success',
                         message: `A payment reminder email has been sent to ${registrantName}.`
@@ -305,13 +347,14 @@
         );
     }
 
-    function processWithdraw(registrantActivityUId, registrantActivityId, registrantId, participationObjectId, type, registrantName, count, hasPaymentPlan) {
+    function processWithdraw(registrantActivityUId, registrantActivityId, registrantId, participationObjectId, type, registrantName, count = 0, hasPaymentPlan = false) {
         //.. prepare source and template
-        var source = $("#script-withdraw-template").html();
-        var compiled = _.template(source);
+        
+        let source = $("#script-withdraw-template").html();
+        let compiled = _.template(source);
 
         //.. format data as JSON and combine with template
-        var compiledHtml = compiled({
+        let compiledHtml = compiled({
             registrantActivityUId: registrantActivityUId,
             registrantActivityId: registrantActivityId,
             registrantId: registrantId,
@@ -335,31 +378,27 @@
         if (participationObjectId && registrantId) {
             showLoader();
 
-            var url = '@Url.Action("WithdrawRegistrant", "Activity", new {Area = "Org"})';
+            let url = '@Url.Action("WithdrawRegistrant", "Activity", new {Area = "Org"})';
             $.ajax({
                 type: "POST",
                 url: url,
                 data: { participationObjectId: participationObjectId, registrantUId: registrantId, type, isWithdrawAndCancelClicked },
                 success: function (data) {
-                    if (data && data.success == true) {
+                    if (data && data.success === true) {
 
                         $('#modal-withdraw-registrant-' + registrantActivityUId).modal('hide');
 
-                        var withdrawn = '@Json.Encode(RegistrationAssignmentType.Withdrawn)';
-                        $('#newassignmenttype-' + registrantActivityId).val(withdrawn); //status udpate to withdrawn
+                        let withdrawn = '@Json.Encode(RegistrationAssignmentType.Withdrawn)';
+                        $('#newassignmenttype-' + registrantActivityId).val(withdrawn); //status update to withdrawn
                         $('#btn-withdraw-' + registrantActivityUId).attr('disabled', 'disabled');
                         hideLoader();
 
-                        Notifications.showBar({
-                            title: 'Success',
-                            message: 'Registrant Withdrawn successfully.',
-                            success: true
-                        });
+                        location.reload();
                     } else {
-                        if (data && data.status == 'error') {
+                        if (data && data.status === 'error') {
                             $('#search-result').html('');
 
-                            var error = '';
+                            let error = '';
 
                             _.each(data.data, function (msg) {
                                 error += msg?.Text + '<br />';

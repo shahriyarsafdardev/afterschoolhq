@@ -19,15 +19,24 @@
                 Enter details about your @UILabel.ActivityLabel(Model.Activity.ActivityTypeId).ToLower() <span class="text-danger">*</span>
             </label>
             <div class="col-md-9">
-                @{ Html.RenderPartial("~/Views/Shared/_TextEditor.cshtml", Model.Details, new ViewDataDictionary
-                   {
-                       {"required", false},
-                       {"name", "details"},
-                       {"id", "details"},
-                   }); }
+                @{ Html.RenderPartial(
+                       "~/Views/Shared/_TextEditor.cshtml",
+                       Model.Details,
+                       new ViewDataDictionary
+                       {
+                           {"required", false},
+                           {"name", "details"},
+                           {"id", "details"},
+                       }
+                       ); }
 
                 <p class="text-muted">
                     <em>Tell us why we should sign up. What will we get out of it? What should we expect?</em>
+                    <br>
+                    <em>
+                        To ensure you are complying with activity guidelines, please see Section 6 of our
+                        <a href="/tos.html" target="_blank">Terms of Service</a>.
+                    </em>
                 </p>
             </div>
         </div>

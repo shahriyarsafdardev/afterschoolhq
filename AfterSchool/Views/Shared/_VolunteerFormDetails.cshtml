@@ -10,16 +10,25 @@
                 Enter details about your @UILabel.ActivityLabel(Model.Activity.ActivityTypeId).ToLower() <span class="text-danger">*</span>
             </label>
             <div class="col-md-9">
-                @{ Html.RenderPartial("~/Views/Shared/_TextEditor.cshtml", Model.Details, new ViewDataDictionary
-                   {
-                       {"required", false},
-                       {"name", "details"},
-                       {"id", "details"},
-                   }); }
+                @{ Html.RenderPartial(
+                       "~/Views/Shared/_TextEditor.cshtml",
+                       Model.Details,
+                       new ViewDataDictionary
+                       {
+                           {"required", false},
+                           {"name", "details"},
+                           {"id", "details"},
+                       }
+                       ); }
 
                 <p class="text-muted">
                     <em>
                         Share information about this opportunity. What can volunteers expect? Are there any requirements (i.e. wear comfortable shoes)?
+                    </em>
+                    <br>
+                    <em>
+                        To ensure you are complying with activity guidelines, please see Section 6 of our
+                        <a href="/tos.html" target="_blank">Terms of Service</a>.
                     </em>
                 </p>
             </div>

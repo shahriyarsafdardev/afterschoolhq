@@ -13,6 +13,7 @@
         const components = place.address_components;
 
         if (typeof components !== 'undefined') {
+            let city = '';
             for (let component of components) {
 
                 const type = component.types[0];
@@ -30,10 +31,12 @@
                         break;
                     case 'sublocality_level_1':
                         mainAddress = mainAddress + " " + shortName;
+                        if (city.length === 0)
+                            city = shortName;
                         break;
                     case 'locality':
                         $(input).val(mainAddress);
-                        $form.find('input').eq(2).val(shortName);
+                        city = shortName;
                         break;
                     case 'postal_code':
                         $form.find('input').eq(3).val(longName);
@@ -48,6 +51,7 @@
                         break;
                 }
             }
+            $form.find('input').eq(2).val(city);
         }
     });
     $(input).attr('placeholder', '');

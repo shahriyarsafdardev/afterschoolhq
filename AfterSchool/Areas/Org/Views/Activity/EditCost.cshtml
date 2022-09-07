@@ -45,45 +45,204 @@
         <div class="panel-body padding-lr-zero-sm">
 
             <div class="col-md-10 col-lg-9">
-                <form id="form1" method="post" action="@Url.Action("editcost", "activity", new {id = Model.Activity.Uid, isnew = Request["isnew"], source = Request["source"]})" class="form-horizontal">
-
-
-                    @if (!Model.Activity.ActivityGroupId.HasValue)
+                <form id="form1" 
+                      method="post" 
+                      action="@Url.Action("editcost", "activity", new {id = Model.Activity.Uid, isnew = Request["isnew"], source = Request["source"]})"
+                      class="form-horizontal">
+                    
+                    @if (Model.Activity.ActivityGroupId.HasValue)
                     {
-                        @Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editcost", "next", true, true, Request))
+                        @Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editcost", "publish", true, true, Request))
+                        @Html.Raw(ActivitySetupHelper.SaveButton(true, false))
                     }
                     else
                     {
-                        @Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editcost", "publish", true, true, Request))
+                        <button type="button"
+                                class="btn pull-right btn-space btn-primary md-trigger"
+                                onclick="loadFinalPricing('save-next')">
+                            &raquo;
+                        </button>
+                        <button type="button"
+                                class="btn pull-right btn-space btn-default md-trigger"
+                                onclick="loadFinalPricing('save')">
+                            <i class="s7-diskette"></i> Save
+                        </button>
                     }
-                    @Html.Raw(ActivitySetupHelper.SaveButton(true, false))
+                    
 
-                    @{ Html.RenderPartial("~/Views/Shared/_ActivityFormPayment.cshtml", Model.Activity, new ViewDataDictionary
-                       {
-                           {"SubscriptionPlan", Model.SubscriptionPlan},
-                           {"PaymentPlan", Model.PaymentPlan},
-                           {"PostPayPlan", Model.PostPayPlan},
-                           {"AccountPackage", Model.AccountPackage},
-                           {"hasSchedule", Model.Activity.HasSchedule},
-                       }); }
+                    @{
+                        Html.RenderPartial("~/Views/Shared/_ActivityFormPayment.cshtml", Model.Activity, new ViewDataDictionary
+                        {
+                            { "SubscriptionPlan", Model.SubscriptionPlan },
+                            { "PaymentPlan", Model.PaymentPlan },
+                            { "PostPayPlan", Model.PostPayPlan },
+                            { "AccountPackage", Model.AccountPackage },
+                            { "hasSchedule", Model.Activity.HasSchedule },
+                        });
+                    }
 
                     <div class="form-group">
                         <div class="col-sm-6 col-sm-offset-3">
-                            @Html.Raw(ActivitySetupHelper.SaveButton(false, false))
-                        </div>
-                        <div class="col-sm-3">
-                            @if (!Model.Activity.ActivityGroupId.HasValue)
+                            @if (Model.Activity.ActivityGroupId.HasValue)
                             {
-                                @:@Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editcost", "next", false, true, Request))
+                                @Html.Raw(ActivitySetupHelper.SaveButton(false, false))
                             }
                             else
                             {
-                                @:@Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editcost", "publish", false, true, Request))
+                                <button type="button"
+                                        class="btn btn-space btn-lg btn-block btn-default md-trigger"
+                                        onclick="loadFinalPricing('save')">
+                                    Save
+                                </button>
+                            }
+                        </div>
+                        <div class="col-sm-3">
+                            @if (Model.Activity.ActivityGroupId.HasValue)
+                            {
+                                @Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editcost", "publish", false, true, Request))
+                            }
+                            else
+                            {
+                                <button type="button"
+                                        class="btn btn-space btn-lg btn-block btn-primary md-trigger"
+                                        onclick="loadFinalPricing('save-next')">
+                                    Save &amp; Next
+                                </button>
                             }
                         </div>
 
                     </div>
+                    
+                    <div>
+                        <script>
+                            function loadFinalPricing(cmd){
+                                
+                                if ($('#do-parents-pay-yes').is(':checked')) {
+                                    $('#modal-confirm-pricing').addClass('md-show');
+                                } else {
+                                    if (cmd === 'save') {
+                                        $('#confirm-save-button').children().first().trigger('click');
+                                    } else if (cmd === 'save-next') {
+                                        $('#confirm-savenext-button').children().first().trigger('click');
+                                    }
+                                }
+                                
+                                $('#pricetoparent-confirm').html($('#pricetoparent').html());
+                                $('#pricetoparent-paymentplan-confirm').html($('#pricetoparent-paymentplan').html());
+                                $('#pricetoparent-subscription-confirm').html($('#pricetoparent-subscription').html());
+                                $('#pricetoparent-postpay-confirm').html($('#pricetoparent-postpay').html());
+                                
+                                $('#amounttoprovider-confirm').html($('#amounttoprovider').html());
+                                $('#amounttoprovider-paymentplan-confirm').html($('#amounttoprovider-paymentplan').html());
+                                $('#amounttoprovider-subscription-confirm').html($('#amounttoprovider-subscription').html());
+                                $('#amounttoprovider-postpay-confirm').html($('#amounttoprovider-postpay').html());
+                                
+                                let feeConfirm = parseFloat($('#pricetoparent').html()) - parseFloat($('#amounttoprovider').html());
+                                let feePaymentPlanConfirm = parseFloat($('#pricetoparent-paymentplan').html()) - parseFloat($('#amounttoprovider-paymentplan').html());
+                                let feeSubscriptionConfirm = parseFloat($('#pricetoparent-subscription').html()) - parseFloat($('#amounttoprovider-subscription').html());
+                                let feePostPayConfirm = parseFloat($('#pricetoparent-postpay').html()) - parseFloat($('#amounttoprovider-postpay').html());
+                                
+                                $('#fee-confirm').html(feeConfirm.toFixed(2));
+                                $('#fee-paymentplan-confirm').html(feePaymentPlanConfirm.toFixed(2));
+                                $('#fee-subscription-confirm').html(feeSubscriptionConfirm.toFixed(2));
+                                $('#fee-postpay-confirm').html(feePostPayConfirm.toFixed(2));
+                                
+                                $('#confirm-save-button').addClass('hide');            
+                                $('#confirm-savenext-button').addClass('hide');
+                                    
+                                if (cmd === "save") {
+                                    $('#confirm-save-button').removeClass('hide');
+                                }
+                                else if (cmd === "save-next") {
+                                    $('#confirm-savenext-button').removeClass('hide');
+                                }
+                            }
+                            
+                            function closeConfirmModal(){
+                                $('#modal-confirm-pricing').removeClass('md-show');
+                            }
+                        </script>
 
+                        <div id="modal-confirm-pricing" class="md-modal colored-header modal-colored-header modal-colored-header-dark custom-width md-effect-9">
+                            <div class="md-content">
+                                <div class="modal-header">
+                                    <button type="button"
+                                            ata-dismiss="modal"
+                                            aria-hidden="true"
+                                            class="close md-close"
+                                            onclick="closeConfirmModal()">
+                                        <i class="icon s7-close" id="modal-demoorgname-form-close"></i>
+                                    </button>
+                                    <h2 class="modal-title">
+                                        <i class="s7-attention"></i>
+                                        Confirm Pricing
+                                    </h2>
+                                </div>
+                                <div class="modal-body">
+                                    <div id="confirm-pricing-form">
+                                        <div>
+                                            <p>
+                                                Please carefully review your pricing to ensure accuracy before you continue.
+                                            </p>
+                                        </div>
+                                        <div class="padding-20">
+                                            <table class="table">
+                                                <thead>
+                                                <tr>
+                                                    <th></th>
+                                                    <th class="text-center">Parents Pay</th>
+                                                    <th class="text-center">Fees</th>
+                                                    <th class="text-center">You Receive</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <tr>
+                                                    <td>Registration Fee</td>
+                                                    <td class="text-center">$<span id="pricetoparent-confirm"></span></td>
+                                                    <td class="text-center">$<span id="fee-confirm"></span></td>
+                                                    <td class="text-center">$<span id="amounttoprovider-confirm"></span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Payment Plan</td>
+                                                    <td class="text-center">$<span id="pricetoparent-paymentplan-confirm"></span></td>
+                                                    <td class="text-center">$<span id="fee-paymentplan-confirm"></span></td>
+                                                    <td class="text-center">$<span id="amounttoprovider-paymentplan-confirm"></span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Subscription Plan</td>
+                                                    <td class="text-center">$<span id="pricetoparent-subscription-confirm"></span></td>
+                                                    <td class="text-center">$<span id="fee-subscription-confirm"></span></td>
+                                                    <td class="text-center">$<span id="amounttoprovider-subscription-confirm"></span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Attendance Based Billing</td>
+                                                    <td class="text-center">$<span id="pricetoparent-postpay-confirm"></span></td>
+                                                    <td class="text-center">$<span id="fee-postpay-confirm"></span></td>
+                                                    <td class="text-center">$<span id="amounttoprovider-postpay-confirm"></span></td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer" id="confirm-pricing-form-footer">
+                                    <button type="button"
+                                            data-dismiss="modal"
+                                            class="btn btn-block btn-lg md-close btn-warning btn-space"
+                                            onclick="closeConfirmModal()">
+                                        Edit Prices
+                                    </button>
+                                    <div id="confirm-save-button">
+                                        @Html.Raw(ActivitySetupHelper.SaveButton(false, false))
+                                    </div>
+                                    <div id="confirm-savenext-button">
+                                        @Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editcost", "next", false, true, Request))
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                 </form>
             </div>
 

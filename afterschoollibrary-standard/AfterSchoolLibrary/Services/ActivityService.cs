@@ -1047,7 +1047,7 @@ namespace AfterSchoolLibrary.Services
                             activity.ActivityLocationTypeId = activityLocationType.ToString().ToInteger()
                                 .ToEnum<ActivityLocationType>();
 
-                            if (activity.ActivityLocationTypeId == ActivityLocationType.Virtual)
+                            if (activity.ActivityLocationTypeId == ActivityLocationType.Virtual && virtualLocation.IsNotEmpty())
                                 activity.VirtualLocationInfo = virtualLocation.ToString();
 
                             if (amsgs.HasNoErrors())
@@ -2845,7 +2845,17 @@ namespace AfterSchoolLibrary.Services
                 RegistrationAssignmentType.ReservedPendingParentalConsent,
             };
 
-            if (activity.ActivityTypeId == ActivityType.PermissionSlip)
+            if (activity.ActivityTypeId == ActivityType.VolunteerOpportunity)
+            {
+                dropdownOptions = new List<RegistrationAssignmentType>
+                {
+                    RegistrationAssignmentType.Reserved,
+                    RegistrationAssignmentType.WaitingList,
+                    RegistrationAssignmentType.ReservedPendingBackgroundCheck,
+                };
+            }
+            
+            else if (activity.ActivityTypeId == ActivityType.PermissionSlip)
             {
                 dropdownOptions.Remove(RegistrationAssignmentType.WaitingList);
                 dropdownOptions.Remove(RegistrationAssignmentType.Applied);
