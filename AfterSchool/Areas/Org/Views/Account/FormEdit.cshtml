@@ -302,7 +302,7 @@
                                                               });}
                                                     </td>
                                                     <td>
-                                                        <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteQuestion('@question.Text', '@Url.Action("delete","Account", new { id = question.ID.ToString()})')"><span class="text-danger"><i class="s7-trash"></i></span></button>
+                                                        <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteQuestion('@UI.JavascriptSafeString(question.Text)', '@Url.Action("delete","Account", new { id = question.ID.ToString()})')"><span class="text-danger"><i class="s7-trash"></i></span></button>
                                                     </td>
                                                 </tr>
                                                 count++;
