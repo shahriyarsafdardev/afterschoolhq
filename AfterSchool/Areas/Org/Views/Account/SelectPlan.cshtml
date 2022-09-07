@@ -49,28 +49,72 @@
             @{Html.RenderPartial("_ExitFullScreen", returnUrl); }
         </div>
         <div class="panel-body padding-lr-zero-sm">
-            <div class="col-md-12">
+            <div class="col-lg-8 col-lg-offset-2 col-md-12">
 
+                <div id="instructions">
+                    <div class="panel panel-default">
+                        <div class="panel-heading" id="instructions-panel-heading">
+                            <div class="pull-left">
+                                1. Review Steps
+                            </div>
+                            <div class="pull-right hide text-success text-bold">
+                                
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        
+                        <div class="panel-body" id="instructions-panel-body">
+                            <div class="row padding-20">
+                                <div class="col-md-6 col-md-offset-3">
+                                    <p class="text-medium-small">
+                                        @if (currentPackage.IsDuringTrial)
+                                        {
+                                            <span>
+                                                Enter your payment details early so you don't lose access to your trial.<br/>
+                                                <br/>
+                                                Your card won't be charged until your trial ends.
+                                            </span>
+                                        }
+                                        else if (currentPackage.IsTrialExpiredAndUnpaid(Model))
+                                        {
+                                            <span>Please pick your plan and enter your payment details to continue using AfterSchool HQ</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Feel free to upgrade or downgrade as needed.</span>
+                                        }
+                                    </p>
+                                    <p class="padding-v-20">
+                                        <button type="button" class="btn btn-primary btn-lg" onclick="showPlans()">
+                                            Continue
+                                        </button>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <div id="select-plan">
-                    <div class="panel panel-default panel-small-padding">
+                    <div class="panel panel-default">
                         
                         <div class="panel-heading" id="select-plan-panel-heading">
                             <div class="pull-left">
-                                1. Choose the best plan for your program
+                                2. Choose the best plan for your program
                             </div>
-                            <div class="pull-right hide" id="selected-package-container">
+                            <div class="pull-right hide text-success text-bold" id="selected-package-container">
                                 <span id="selected-package"></span> Plan - <span id="selected-price"></span> <span id="selected-period"></span>
                             </div>
                             <div class="clearfix"></div>
                         </div>
 
-                        <div class="panel-body" id="select-plan-panel-body">
+                        <div class="panel-body hide" id="select-plan-panel-body">
 
                             <div class="row">
                                 <table class="" style="margin-left: auto; margin-right: auto;">
                                     <tr>
-                                        <td class="padding-10">Billing Cycle</td>
-                                        <td class="padding-10">
+                                        <td class="padding-10 text-medium-small">Billing Cycle</td>
+                                        <td class="padding-10 text-medium-small">
                                             @{
                                                 Html.RenderPartial(
                                                     "~/Views/Shared/_SwitchButton.cshtml",
@@ -89,22 +133,26 @@
                                 </table>
                             </div>
                             <div class="row text-center padding-20">
-                                <p>**2 Months free with all annual contracts**</p>
+                                <p class="text-medium-small">**2 Months free with all annual contracts**</p>
                             </div>
                             <div class="row">
                                 @foreach (var package in packages.OrderBy(x => x.Price))
                                 {
-                                    <div class="col-md-12 col-lg-3">
+                                    <div class="col-lg-12 col-xl-3 padding-20" style="@(currentPackage.PackageId == package.ID ? "border: solid 1px #999; background-color: #DDEAE0;":"")">
                                         <div>
-                                            <div class="pull-left">
-                                                <h3 class="text-success">@package.Name</h3>
-                                            </div>
-                                            <div class="pull-right">
-                                                <h3 class="text-success text-right">
-                                                    <span class="monthly hide">@package.Price.ToCurrency() / Mo</span>
-                                                    <span class="annually">@((package.PricePerYear / 12).ToCurrency()) / Mo</span>
+                                            <div>
+                                                <h3 class="text-success">
+                                                    <span>@package.Name</span>
+                                                    @if (!package.IsFree(BillingPeriodType.Month))
+                                                    {
+                                                        <span>-</span>
+                                                        <span class="monthly hide">@package.Price.ToCurrency() / Mo</span>
+                                                        <span class="annually">@((package.PricePerYear / 12).ToCurrency()) / Mo</span>
+                                                    }
                                                 </h3>
-                                                <p class="text-right">
+                                            </div>
+                                            <div>
+                                                <p>
                                                     @if (!package.IsFree(BillingPeriodType.Month))
                                                     {
                                                         <span class="monthly hide"><span id="monthly-price-@package.Uid">@package.Price.ToCurrency()</span> Billed Monthly</span>
@@ -116,9 +164,8 @@
                                                     }
                                                 </p>
                                             </div>
-                                            <div class="clearfix"></div>
                                         </div>
-                                        <p class="package-description">
+                                        <p class="package-description text-medium-small">
                                             @package.Description
                                         </p>
                                         <hr/>
@@ -132,7 +179,20 @@
                                             <button type="button"
                                                     class="btn @(package.IsFree(BillingPeriodType.Month) ? "btn-default" : "btn-primary") btn-lg btn-block"
                                                     onclick="selectPackage('@package.Uid.ToString()', '@package.Name')">
-                                                Choose <strong>@package.Name</strong> Plan
+                                                
+                                                @if (currentPackage.PackageId == package.ID)
+                                                {
+                                                    <span>Continue with the <strong>@package.Name</strong> Plan</span>
+                                                }
+                                                else if (package.Price > currentPackage.PackagePrice)
+                                                {
+                                                    <span>Upgrade to the <strong>@package.Name</strong> Plan</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>Downgrade to the <strong>@package.Name</strong> Plan</span>
+                                                }
+
                                             </button>
                                         </p>
                                     </div>
@@ -146,25 +206,25 @@
 
                 <div id="enter-payment-details">
                     
-                    <div class="panel panel-default panel-small-padding">
+                    <div class="panel panel-default">
                         <div class="panel-heading">
-                            2. Enter your payment details
+                            3. Enter your payment details
                         </div>
                     
                         <div class="panel-body hide" id="enter-payment-details-panel-body">
                             <div class="row">
-                                <div class="col-lg-6 col-lg-offset-3 col-md-12">
+                                <div class="col-lg-6 col-lg-offset-3 col-md-12 text-medium-small">
                                     <form id="payment-form" class="form">
                                         <div id="payment-element" class="padding-v-20">
                                             <!-- Elements will create form elements here -->
                                         </div>
                                         <div>
                                             <div class="pull-left">
-                                                <a href="javascript:updatePlan()">&laquo; Back</a>
+                                                <a href="javascript:updatePlan()">Change Plan</a>
                                             </div>
                                             <div class="pull-right">
                                                 <button id="submit" class="btn btn-primary btn-lg">
-                                                    Save Payment Details &raquo;
+                                                    Save Payment Details
                                                 </button>
                                             </div>
                                             <div class="clearfix"></div>
@@ -179,23 +239,7 @@
                     </div>
                     
                 </div>
-                
-                <div id="confirm">
-                                    
-                    <div class="panel panel-default panel-small-padding">
-                        <div class="panel-heading" id="confirm-panel-heading">
-                            3. Confirm
-                        </div>
-                    
-                        <div class="panel-body hide" id="confirm-panel-body">
-                            <div class="row">
-                                
-                            </div>
-                        </div>
-                    </div>
-                    
-                </div>
-                
+
             </div>
         </div>
     </div>
@@ -209,6 +253,11 @@
 @section scripts
 {
     <script>
+        function showPlans(){        
+            $('#select-plan-panel-body').removeClass('hide');
+            $('#instructions-panel-body').addClass('hide');
+        }
+        
         function annualClick(){
             $('.annually').addClass('hide');
             $('.monthly').addClass('hide');
@@ -218,6 +267,8 @@
             } else {
                 $('.monthly').removeClass('hide');
             }            
+            
+            $('#selected-package-container').addClass('hide');   
         }
         
         function selectPackage(packageUid, packageName, pricePerMonth){
@@ -237,16 +288,18 @@
                 periodName = '';
             }
             
+            setPlanDetails(packageName, price, periodName);
+            
+            $('#selected-package-container').removeClass('hide');            
+            $('#select-plan-panel-body').addClass('hide');
+            $('#enter-payment-details-panel-body').removeClass('hide');             
+        }        
+        
+        function setPlanDetails(packageName, price, periodName){
             $('#selected-package').html(packageName);
             $('#selected-price').html(price);
             $('#selected-period').html(periodName);
-            $('#selected-package-container').removeClass('hide');
-            
-            $('#select-plan-panel-body').addClass('hide');
-            $('#enter-payment-details-panel-body').removeClass('hide');
-            
-            //location.href = '@Url.Action("SelectPlanDone", "account")?package=' + package + '&period=' + period + '&returnUrl=' + encodeURI('@Request["returnUrl"]');    
-        }        
+        }
         
         function updatePlan(){
             $('#select-plan-panel-body').removeClass('hide');
