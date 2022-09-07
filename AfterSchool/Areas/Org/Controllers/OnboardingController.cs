@@ -93,13 +93,6 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.Title = account.Name;
 
-            var user = account.GetAccountOwner(msgs);
-
-            if (user.IsNotEmpty() && account.IsNotEmpty())
-            {
-                SendGridHelper.AddOrUpdateContact(account, user, msgs);
-            }
-
             return View(account);
         }
 
@@ -641,11 +634,6 @@ namespace AfterSchool.Areas.Org.Controllers
                         $"</p>",
                         true)
                 );
-
-                var user = account.GetAccountOwner(msgs);
-
-                if (user.IsNotEmpty() && account.IsNotEmpty())
-                    SendGridHelper.AddOrUpdateContact(account, user, msgs);
             }
 
             ViewBag.Messages = msgs;

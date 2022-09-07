@@ -661,7 +661,7 @@
         $.get(
             '@Url.Action("calculatefinalprice", "services")?cost=' + cost + '&activityUid=@Model.Uid.ToString()&takenoutofcost=' + takenOutOfCost,
             function (data) {
-                if (data && data.status == 'ok') {
+                if (data && data.status === 'ok') {
                     priceToParentSpan.html(parseFloat(data.priceToParent).toFixed(2));
                     amountToProviderSpan.html(parseFloat(data.amountToProvider).toFixed(2));
                 } else {
@@ -745,6 +745,12 @@
         $('#cost').val(0.00);
         $('#pricetoparent').html(0.00);
         $('#amounttoprovider').html(0.00);
+        $('#paymentplancost').val(0.00);
+        $('#pricetoparent-paymentplan').html(0.00);
+        $('#amounttoprovider-paymentplan').html(0.00);
+        $('#subscriptionplancost').val(0.00);
+        $('#pricetoparent-subscription').html(0.00);
+        $('#amounttoprovider-subscription').html(0.00);
 
         $('#hassubscriptionplan').prop('disabled', true);
         $('#haspaymentplan').prop('disabled', true);

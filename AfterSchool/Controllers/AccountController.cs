@@ -1586,7 +1586,7 @@ namespace AfterSchool.Controllers
                 return RedirectToAction("registerstudent");
             }
 
-            var students = SessionVariables.CurrentUser.GetChildrenRegistrants(msgs);
+            var students = SessionVariables.CurrentUser.GetStudentRegistrants(msgs);
 
             ViewBag.Messages = msgs;
             ViewBag.ParticipationObject = RegistrationCommon.GetParticipationObjectFromCart();
@@ -2747,14 +2747,15 @@ namespace AfterSchool.Controllers
 
         public string CheckRedirect(bool checkForEmptyCart = false)
         {
-            var currentAccountNotRegistrant = SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant;
+            var isCurrentAccountNotRegistrant = SessionVariables.CurrentAccount.IsNotEmpty() &&
+                                                SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant;
             var isEmptyCart = checkForEmptyCart && SessionVariables.Cart.IsEmpty();
             if (SessionVariables.RegistrationStartPageAccount.IsNotEmpty())
             {
                 var redirectUrl = SessionVariables.RegistrationStartPageAccount.HomePageUrl;
 
-                var isEmptyUserOrAccount = SessionVariables.CurrentUser.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty();
-                if (isEmptyUserOrAccount || currentAccountNotRegistrant || isEmptyCart)
+                var isUserOrAccountEmpty = SessionVariables.CurrentUser.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty();
+                if (isUserOrAccountEmpty || isCurrentAccountNotRegistrant || isEmptyCart)
                     return redirectUrl;
             }
 
@@ -2764,10 +2765,7 @@ namespace AfterSchool.Controllers
             if (SessionVariables.CurrentAccount.IsEmpty())
                 return new UrlHelper(ControllerContext.RequestContext).Action("select", "login");
 
-            if (currentAccountNotRegistrant)
-                return DetermineUrlForLoginRedirect(null, null);
-
-            if (isEmptyCart)
+            if (isCurrentAccountNotRegistrant || isEmptyCart)
                 return DetermineUrlForLoginRedirect(null, null);
 
             return null;

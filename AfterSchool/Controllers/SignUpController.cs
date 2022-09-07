@@ -133,9 +133,6 @@ namespace AfterSchool.Controllers
                         msgs.AddRange(smsgs);
                         LoadSessionInfo(user, account, msgs: msgs);
 
-                        if (user.IsNotEmpty() && account.IsNotEmpty())
-                            SendGridHelper.AddOrUpdateContact(account, user, msgs);
-
                         BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(user, null, true));
                         BackgroundJob.Enqueue(() =>
                             WebUserService.SendWelcomePurchase(user.FirstName, user.Email, account.IsAfterSchool));
@@ -319,9 +316,6 @@ namespace AfterSchool.Controllers
                         msgs.AddRange(smsgs);
                         
                         LoadSessionInfo(user, account, msgs: msgs);
-
-                        if (user.IsNotEmpty() && account.IsNotEmpty())
-                            SendGridHelper.AddOrUpdateContact(account, user, msgs);
 
                         BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(user, null, true));
                         BackgroundJob.Enqueue(() =>
@@ -575,9 +569,6 @@ namespace AfterSchool.Controllers
                     }
                     else
                     {
-                        // NOTE: this code should go here, but it is not important right now, we need to use hubspot anyway moving forward
-                        SendGridHelper.AddOrUpdateContact(currentAccount, user, msgs);
-                        
                         switch (currentAccount.OnboardingStepDone)
                         {
                             case OnboardingStepType.AccountType:

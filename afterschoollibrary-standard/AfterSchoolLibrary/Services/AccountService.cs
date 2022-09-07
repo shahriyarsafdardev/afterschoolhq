@@ -386,7 +386,7 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static List<ParticipationObject> GetPublishedParticipationObjects(this Account account,
+        public static List<ParticipationObject> GetAllPublishedParticipationObjects(this Account account,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var participationObjects = new List<ParticipationObject>();
@@ -427,6 +427,16 @@ namespace AfterSchoolLibrary.Services
             return participationObjects
                 .DistinctBy(participationObject => new {participationObject.ObjectID, participationObject.ObjectType})
                 .ToList();
+        }
+
+        public static int GetPublishedActivitiesParticipationObjectCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.GetAllPublishedParticipationObjects().Count(x => x.ActivityType != ActivityType.VolunteerOpportunity);
+        }
+
+        public static int GetPublishedOpportunitiesParticipationObjectCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.GetAllPublishedParticipationObjects().Count(x => x.ActivityType == ActivityType.VolunteerOpportunity);
         }
 
         public static List<Activity> GetPublishedActivities(this Account account, SystemMessages msgs = null,
@@ -914,7 +924,7 @@ namespace AfterSchoolLibrary.Services
         public static bool IsNowEnrolling(this Account account, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            return account.GetPublishedParticipationObjects(msgs, dc)
+            return account.GetAllPublishedParticipationObjects(msgs, dc)
                 .Any(participationObject => participationObject.GetCurrentRegistrationPeriod(msgs, dc).IsNotEmpty());
         }
 
@@ -1648,14 +1658,15 @@ namespace AfterSchoolLibrary.Services
             // check if package has changed
             var currentAccountPackage = account.GetActiveAccountPackage(msgs, dc);
             var stripeSubscription = currentAccountPackage.GetStripeSubscription(msgs);
-            var packageFromStripe = Package.LoadByUid(stripeSubscription.Plan.ProductId.ToGuid(), msgs, dc);
+            var stripePlan = stripeSubscription.Items.First().Plan; // assuming only one subscription plan
+            var packageFromStripe = Package.LoadByUid(stripePlan.ProductId.ToGuid(), msgs, dc);
 
             // needs to match stripe
             if (currentAccountPackage.PackageId != packageFromStripe.ID)
             {
                 var newAccountPackage = account.SwitchPackages(
                     packageFromStripe,
-                    stripeSubscription.Plan.Interval.ToEnum<BillingPeriodType>(),
+                    stripePlan.Interval.ToEnum<BillingPeriodType>(),
                     stripeSubscription.Id,
                     loggedInUser,
                     msgs,

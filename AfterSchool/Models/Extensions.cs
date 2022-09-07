@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.Linq;
+using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
@@ -19,18 +20,6 @@ namespace AfterSchool.Models
         public static FormQuestionViewModel ToFormQuestionViewModel(this FormQuestion question)
         {
             return new FormQuestionViewModel(question);
-        }
-
-        public static AddressViewModel ToAddressViewModel(this PaymentsEntityViewModel paymentsEntityViewModel)
-        {
-            return new AddressViewModel
-            {
-                Address1 = paymentsEntityViewModel.Address1,
-                Address2 = paymentsEntityViewModel.Address2,
-                City = paymentsEntityViewModel.City,
-                State = paymentsEntityViewModel.State,
-                PostalCode = paymentsEntityViewModel.PostalCode,
-            };
         }
 
         public static AddressViewModel ToAddressViewModel(this CheckPaymentAccount checkPaymentAccount)
@@ -203,8 +192,10 @@ namespace AfterSchool.Models
                     PackageService.GetPackageWithFeatureLowestPrice(FeatureType.FreeActivityLimit, SessionVariables.AccountPackage);
                 var editCostLink =
                     $"<a href=\"/org/activity/editcost/{activity.Uid}\">update pricing and payment for this activity</a>";
+                var billingReturnUrl =
+                    $"{AfterSchoolLibrary.Helpers.Utilities.BaseUrl()}/org/account/afterstripeupdate?returnurl=/org/activity/publishdetail/{activity.Uid}";
                 var upgradePackageLink =
-                    $"<a href=\"#\" onclick=\"setFeatureIdAndLoadUpgradePage('{freeActivityLimitPackage.ID}')\">upgrade your account for more free activities</a>";
+                    $"<a href=\"javascript:AccountSetup.getStripeBillingLink('{billingReturnUrl}', {(int)BillingPortalConfigurationType.SubscriptionUpdate})\">upgrade your account to the {freeActivityLimitPackage.Name} Plan for more free activities</a>";
 
                 msgs.Add(
                     $"<p class=\"no-bullet\">You've reached your limit on free activities, please take one of the following actions:</p><ul>" +

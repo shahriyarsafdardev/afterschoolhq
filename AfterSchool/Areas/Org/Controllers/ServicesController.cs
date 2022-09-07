@@ -4,10 +4,12 @@ using System.Web;
 using System.Web.Mvc;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Billing;
+using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using Stripe.BillingPortal;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Areas.Org.Controllers
@@ -176,6 +178,10 @@ namespace AfterSchool.Areas.Org.Controllers
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         msgs.AddRange(smsgs);
+                        var registrantName = ra.ToRegistrant().Name;
+                        var newAssignmentText = newAssignmentType.ToString().SplitByUpperCase();
+                        var successMessage = new SystemMessage($"{registrantName}'s seat has been moved to {newAssignmentText}.", MessageType.Success);
+                        SetTempMessages(new SystemMessages {successMessage});
                         WriteOutput(new {status = "ok"}, ResponseType.JSON);
                     },
                     onFailure: (SystemMessages fmsgs) =>
@@ -610,20 +616,28 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult GetStripeBillingLink(string redirectUrl)
+        public ActionResult GetStripeBillingLink(string returnUrl, int config = 0)
         {
             var msgs = new SystemMessages();
             
             if (msgs.HasNoErrors())
             {
-                if (redirectUrl.IsEmpty())
-                    redirectUrl = $"{Utilities.BaseUrl()}{Url.Action("afterstripeupdate", "account")}";
+                var fullReturnUrl = $"{Utilities.BaseUrl()}{Url.Action("afterstripeupdate", "account")}";
+
+                if (returnUrl.IsNotEmpty())
+                    fullReturnUrl = $"{fullReturnUrl}?returnUrl={returnUrl}";
                 
                 var currentAccount = SessionVariables.CurrentAccount;
                 var stripeHelper = StripeHelper.GetStripeHelperSubscriberAccount();
+                BillingPortalConfiguration bpc = null;
+
+                if (config != 0)
+                    bpc = BillingPortalConfigurationService.GetBillingPortalConfiguration(config.ToEnum<BillingPortalConfigurationType>(), msgs);
+
                 var session = stripeHelper.GetBillingPortalSession(
-                    currentAccount.StripeCustomerId, 
-                    redirectUrl, 
+                    currentAccount.StripeCustomerId,
+                    bpc?.StripeId,
+                    fullReturnUrl, 
                     msgs);
 
                 return Json(new

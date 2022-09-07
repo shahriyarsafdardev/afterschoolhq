@@ -51,7 +51,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [HttpPost]
         public ActionResult Edit(string id, string name, string email, string phone, string uniqueName,
-            string timeZone, string stripeCustomerId, string stripeSubscriptionId, string startnewtrial, string resyncfromstripe, string resyncpackagefeatures)
+            string timeZone, string stripeCustomerId, string stripeSubscriptionId, string startnewtrial, string resyncfromstripe, 
+            string resyncpackagefeatures, string endtrial)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
@@ -111,6 +112,9 @@ namespace AfterSchool.Areas.Org.Controllers
                             accountPackage = currentAccount.GetActiveAccountPackage(amsgs, adc);
                             accountPackage.GetPackage(amsgs, adc).CopyFeaturesToAccountPackage(accountPackage, currentUser, amsgs, adc);
                         }
+
+                        if (endtrial.IsBoolean())
+                            accountPackage.EndTrialNow(msgs);
                         
                         // ..update profile title if account name has been changed 
                         // Should we do this?
@@ -314,8 +318,6 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Account = account;
             ViewBag.IsFullScreen = GetIsFullScreen();
 
-            var user = account.GetAccountOwner(msgs);
-
             //.. send support email to AHQ just to notifiy the team that a payment has been added/updated.
             var body = $"<p>Account: {account.Name}<br />" +
                        $"Account Profile Url: {account.HomePageUrl}<br />" +
@@ -326,9 +328,6 @@ namespace AfterSchool.Areas.Org.Controllers
                 subject: $"{account.Name} has connected their stripe account",
                 body,
                 isAfterSchool: true);
-
-            if (user.IsNotEmpty() && account.IsNotEmpty())
-                SendGridHelper.AddOrUpdateContact(account, user, msgs);
 
             ViewBag.Messages = msgs;
             return View();
@@ -1508,7 +1507,7 @@ namespace AfterSchool.Areas.Org.Controllers
             return View("Billing", currentAccount);
         }
 
-        public ActionResult AfterStripeUpdate(string id)
+        public ActionResult AfterStripeUpdate(string id, string returnUrl)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
@@ -1519,6 +1518,9 @@ namespace AfterSchool.Areas.Org.Controllers
             currentAccount.CheckIfSubscriberAccountHasPaymentMethod(null, msgs);
             currentAccount.CheckIfSubscriberAccountSubscriptionChanged(false, currentUser, msgs);
 
+            if (returnUrl.IsNotEmpty())
+                return new RedirectResult(returnUrl);
+            
             return new RedirectResult(Url.Action("billing", "account"));
         }
 
