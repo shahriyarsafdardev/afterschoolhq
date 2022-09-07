@@ -957,7 +957,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult MessageAdd(string id , string toUid = "")
+        public ActionResult MessageAdd(string id , string toUid = "", string returnUrl="")
         {
             
             var currentAccount = SessionVariables.CurrentAccount;
@@ -984,7 +984,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     .Select(ra => ra.ToRegistrant())
                     .OrderBy(x => x.FirstName)
                     .ToList();
-                if (Request.UrlReferrer != null) ViewBag.RedirectUrl = Request.UrlReferrer.AbsoluteUri;
+                ViewBag.RedirectUrl = returnUrl;
             }
             else
             {
