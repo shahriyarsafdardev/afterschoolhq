@@ -8,6 +8,7 @@
     var supportEmail = (string) ViewBag.SupportEmail;
     var supportEmailHref = $"mailto:{supportEmail}";
     //var openPaymentNotificationModal = ViewBag.ShowPaymentNotificationPopup != null ? ((string)ViewBag.ShowPaymentNotificationPopup).ToBoolean() : false; 
+    var stripeSupportLink = "https://support.stripe.com/questions/change-the-bank-account-or-debit-card-details-associated-with-an-express-account";
 
     ViewBag.Title = account.Name;
 
@@ -29,214 +30,233 @@
 @{ Html.RenderPartial("~/Views/Shared/_AccountDetailsHeader.cshtml", account); }
 
 <div class="panel panel-default">
-    <div class="panel-heading">
-        <i class="s7-edit"></i> Settings - Setup Payment Account
+<div class="panel-heading">
+    <i class="s7-edit"></i> Settings - Setup Payment Account
 
-        @if (isFullScreen)
+    @if (isFullScreen)
+    {
+        Html.RenderPartial("_ExitFullScreen", "");
+    }
+</div>
+<div class="panel-body">
+
+    <div class="col-md-12">
+        @if (account.HasStripeConnectedAccount)
         {
-            Html.RenderPartial("_ExitFullScreen", "");
-        }
-    </div>
-    <div class="panel-body">
-
-        <div class="col-md-12">
-            @if (account.HasStripeConnectedAccount)
+            if (!account.CanReceiveStripeDeposits())
             {
-                if (!account.CanReceiveStripeDeposits())
+                var chargesEnabledIcon = "s7-close-circle text-danger";
+                var chargesEnabledText = "Your account does NOT have charges enabled, so you won't be able to charge fees to parents.";
+                var payoutsEnabledIcon = "s7-close-circle text-danger";
+                var payoutsEnabledText = "Your account does NOT have payout enabled, so you won't be able to receive any money parents may have paid until this is enabled.";
+                if (account.StripeChargesEnabled)
                 {
-                    var chargesEnabledIcon = "s7-close-circle text-danger";
-                    var chargesEnabledText = "Your account does NOT have charges enabled, so you won't be able to charge fees to parents.";
-                    var payoutsEnabledIcon = "s7-close-circle text-danger";
-                    var payoutsEnabledText = "Your account does NOT have payout enabled, so you won't be able to receive any money parents may have paid until this is enabled.";
-                    if (account.StripeChargesEnabled)
-                    {
-                        chargesEnabledIcon = "s7-check-circle text-succes";
-                    }
-                    
-                    <div class="text-center">
-                        <h1 class=""><i class="s7-check-circle text-success"></i> Your account has been connected to Stripe, however it is missing a few things:</h1>
-                        <div class="text-left offset-2">
-                            <h4>
-                                <i class="@chargesEnabledIcon"></i> @chargesEnabledText
-                            </h4>
-                            <h4>
-                                <i class="@payoutsEnabledIcon"></i> @payoutsEnabledText
-                            </h4>
-                        </div>
-                        <p class="margin-v-30">Please check for an email from Stripe to complete your payment setup. If you have any questions please contact support at <a href="@supportEmailHref">@supportEmail</a></p>
-                    </div>
+                    chargesEnabledIcon = "s7-check-circle text-succes";
                 }
-                else
-                {
-                    <div class="text-center">
-                        <h1 class=""><i class="s7-check-circle text-success"></i> Your payment account has been setup.</h1>
-                    </div>
-                }
+
                 <div class="text-center">
+                    <h1 class=""><i class="s7-check-circle text-success"></i> Your account has been connected to Stripe, however it is missing a few things:</h1>
+                    <div class="text-left offset-2">
+                        <h4>
+                            <i class="@chargesEnabledIcon"></i> @chargesEnabledText
+                        </h4>
+                        <h4>
+                            <i class="@payoutsEnabledIcon"></i> @payoutsEnabledText
+                        </h4>
+                    </div>
+                    <p class="margin-v-30">Please check for an email from Stripe to complete your payment setup. If you have any questions please contact support at <a href="@supportEmailHref">@supportEmail</a></p>
+                </div>
+            }
+            else
+            {
+                <div class="text-center">
+                    <h1 class=""><i class="s7-check-circle text-success"></i> Your payment account has been setup.</h1>
+                    <p class="margin-v-30">
+                        To change bank account details or review your deposits, click Login to Stripe Dashboard. For additional help changing your bank account, please <a href="@stripeSupportLink" target="_blank">click here</a>.
+                    </p>
+                    <p class="margin-v-30">
+                        To disconnect payment altogether, email <a href="@supportEmailHref">@supportEmail</a> (Note: Payment Method cannot be disconnected if there are pending payments).
+                    </p>
+                </div>
+            }
+
+            <div class="text-center">
+                <p class="margin-v-30">
+                    <button type="button" class="btn btn-default md-trigger" onclick="getStripeLoginLink()">Login to Stripe Dashboard</button>
+                </p>
+                @if (SessionVariables.OriginalLoggedInUser.IsNotEmpty())
+                {
                     <p class="margin-v-30">
                         <button type="button" class="btn btn-default md-trigger" data-modal="modal-disconnect-confirm" onclick="disconnectPaymentAccount()">Disconnect Payment Account</button>
                     </p>
-                </div>
+                }
+            </div>
 
-                Html.RenderPartial("~/Views/Shared/_Modal.cshtml", new ModalViewModel {ActionButtonHtml = "Disconnect Payment Account &raquo;", ActionButtonId = "btn-disconnect-confirm", HtmlBody = "<p>Are you sure you want to disconnect your payment account? You will not be able to process payments unless you re-connect.</p><p><strong>This action cannot be undone</strong></p>", ID = "modal-disconnect-confirm", Title = "Disconnect Payment Account"});
 
-                <script>
+            Html.RenderPartial("~/Views/Shared/_Modal.cshtml", new ModalViewModel {ActionButtonHtml = "Disconnect Payment Account &raquo;", ActionButtonId = "btn-disconnect-confirm", HtmlBody = "<p>Are you sure you want to disconnect your payment account? You will not be able to process payments unless you re-connect.</p><p><strong>This action cannot be undone</strong></p>", ID = "modal-disconnect-confirm", Title = "Disconnect Payment Account"});
+
+            <script>
                         PageEvent.add(PageEvent.AFTER_INIT, function () {
                             $('#btn-disconnect-confirm').click(function () {
                                 location.href = '@Url.Action("DisconnectStripe", "account")';
                             });
                         });
                     </script>
-            }
-            else
-            {
-                <div class="margin-20">
-                    <h2 class="text-center">Please choose how you want us to pay you.</h2>
-                </div>
-                <div class="row">
-                    <div class="col-xl-3 col-lg-2 visible-xl visible-lg"></div>
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
-                        <table class="table table-bordered">
-                            <thead>
-                            <tr class="bg-success">
-                                <th class="text-center text-bold text-white">
-                                    <h3>
-                                        Get Paid<br/>via Direct Deposit
-                                    </h3>
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td class="text-center">
-                                    <div class="padding-10 text-medium-small">Get payouts daily</div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="text-center">
-                                    <div class="padding-10 text-medium-small">Deposits take only 2 days</div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="text-center">
-                                    <div class="padding-10 text-medium-small">No more trips to the bank</div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="text-center">
-                                    <div class="padding-10 text-medium-small">Automated payouts</div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    @if (!account.HasStripeConnectedAccount)
-                                    {
-                                        var redirectUri = Server.UrlEncode($"{Utilities.BaseUrl()}/org/account/oauthstripe/");
-                                        var email = currentUser.Email.IsEmail() ? Server.UrlEncode(currentUser.Email) : Server.UrlEncode(account.Email);
-                                        var website = Server.UrlEncode(account.ShortHomePageUrl);
-                                        var linkUrl = $"https://connect.stripe.com/express/oauth/authorize?redirect_uri={redirectUri}&state={Request["source"]}&client_id={StripeHelper.PlatformClientId}&stripe_user[email]={email}&stripe_user[url]={website}";
+        }
+        else
+        {
+            <div class="margin-20">
+                <h2 class="text-center">Please choose how you want us to pay you.</h2>
+            </div>
+            <div class="row">
+                <div class="col-xl-3 col-lg-2 visible-xl visible-lg"></div>
+                <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr class="bg-success">
+                            <th class="text-center text-bold text-white">
+                                <h3>
+                                    Get Paid<br/>via Direct Deposit
+                                </h3>
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td class="text-center">
+                                <div class="padding-10 text-medium-small">Get payouts daily</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center">
+                                <div class="padding-10 text-medium-small">Deposits take only 2 days</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center">
+                                <div class="padding-10 text-medium-small">No more trips to the bank</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center">
+                                <div class="padding-10 text-medium-small">Automated payouts</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                @if (!account.HasStripeConnectedAccount)
+                                {
+                                    var redirectUri = Server.UrlEncode($"{Utilities.BaseUrl()}/org/account/oauthstripe/");
+                                    var email = currentUser.Email.IsEmail() ? Server.UrlEncode(currentUser.Email) : Server.UrlEncode(account.Email);
+                                    var website = Server.UrlEncode(account.ShortHomePageUrl);
+                                    var linkUrl = $"https://connect.stripe.com/express/oauth/authorize?redirect_uri={redirectUri}&state={Request["source"]}&client_id={StripeHelper.PlatformClientId}&stripe_user[email]={email}&stripe_user[url]={website}";
 
-                                        <a href="@linkUrl" class="btn btn-alt5 btn-xl btn-block">
-                                            @if (account.CanReceiveACHDeposits())
-                                            {
-                                                @:Upgrade to Automated Deposits
-                                            }
-                                            else
-                                            {
-                                                @:Choose Direct Deposits &raquo;
-                                            }
+                                    <a href="@linkUrl" class="btn btn-alt5 btn-xl btn-block">
+                                        @if (account.CanReceiveACHDeposits())
+                                        {
+                                            @:Upgrade to Automated Deposits
+                                        }
+                                        else
+                                        {
+                                            @:Choose Direct Deposits &raquo;
+                                        }
+                                    </a>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-alt5 btn-xl btn-block" disabled="disabled">
+                                        <i class="s7-check-circle"></i> Connected
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr class="bg-success">
+                            <th class="text-center text-bold text-white">
+                                <h3>
+                                    Get Paid<br/>via Check
+                                </h3>
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td class="text-center">
+                                <div class="padding-10 text-medium-small">Get payouts bi-weekly</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center">
+                                <div class="padding-10 text-medium-small">Checks take 5 - 7 days</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center">
+                                <div class="padding-10 text-medium-small">You'll still have to deposit your check</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center">
+                                <div class="padding-10 text-medium-small">Must request payout</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                @if (account.AccountTypeId.In(FormConstants.LocationProviderAccountTypes))
+                                {
+                                    if (account.GetCheckPaymentAccount().IsEmpty())
+                                    {
+                                        <a href="@Url.Action("checksetup", "account", new {isnew = 1})" class="btn btn-default btn-xl btn-block">
+                                            Choose Checks &raquo;
                                         </a>
                                     }
                                     else
                                     {
-                                        <button class="btn btn-alt5 btn-xl btn-block" disabled="disabled">
-                                            <i class="s7-check-circle"></i> Connected
-                                        </button>
+                                        <a href="@Url.Action("checksetup", "account")" class="btn btn-default btn-xl btn-block">
+                                            Update Payout Details &raquo;
+                                        </a>
                                     }
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
-                        <table class="table table-bordered">
-                            <thead>
-                            <tr class="bg-success">
-                                <th class="text-center text-bold text-white">
-                                    <h3>
-                                        Get Paid<br/>via Check
-                                    </h3>
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td class="text-center">
-                                    <div class="padding-10 text-medium-small">Get payouts bi-weekly</div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="text-center">
-                                    <div class="padding-10 text-medium-small">Checks take 5 - 7 days</div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="text-center">
-                                    <div class="padding-10 text-medium-small">You'll still have to deposit your check</div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="text-center">
-                                    <div class="padding-10 text-medium-small">Must request payout</div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    @if (account.AccountTypeId.In(FormConstants.LocationProviderAccountTypes))
-                                    {
-                                        if (account.GetCheckPaymentAccount().IsEmpty())
-                                        {
-                                            <a href="@Url.Action("checksetup", "account", new {isnew = 1})" class="btn btn-default btn-xl btn-block">
-                                                Choose Checks &raquo;
-                                            </a>
-                                        }
-                                        else
-                                        {
-                                            <a href="@Url.Action("checksetup", "account")" class="btn btn-default btn-xl btn-block">
-                                                Update Payout Details &raquo;
-                                            </a>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <button type="button" class="btn btn-default btn-xl btn-block" disabled>
-                                            Must be a school, community center, or church
-                                        </button>
-                                    }
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="clearfix"></div>
-                    <br/>
-                    <div class="col-md-12" style="text-align:center">
-                        <p>If you have any questions about how to setup your payments, our Support team will be happy to help! <a href="@supportEmailHref">@supportEmail</a> </p>
-                    </div>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-default btn-xl btn-block" disabled>
+                                        Must be a school, community center, or church
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
-            }
-        </div>
+
+                <div class="clearfix"></div>
+                <br/>
+                <div class="col-md-12" style="text-align:center">
+                    <p>If you have any questions about how to setup your payments, our Support team will be happy to help! <a href="@supportEmailHref">@supportEmail</a> </p>
+                </div>
+            </div>
+        }
     </div>
+</div>
 </div>
 </div>
 
 <script type="text/javascript">
-    @*PageEvent.add(PageEvent.AFTER_INIT, function () {
-        var openPaymentNotificationModal = @Json.Encode(openPaymentNotificationModal);
-        if (openPaymentNotificationModal) {
-            loadPaymentNotificationModal();
-            return false;
-        }
-    });*@
+function getStripeLoginLink() {
+        $.get(
+            '@Url.Action("getstripeloginlink", "accounting")',
+            function (data) {
+                if (data && data.status == 'ok') {
+                    location.href = data.link;
+                } else {
+                    Notifications.showErrors(data.messages);
+                }
+            }
+        );
+    }
 </script>
