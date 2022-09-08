@@ -4382,7 +4382,7 @@ namespace AfterSchoolLibrary.Services
                     msgs.AddRange(smsgs);
 
                     if (sendConfirmationEmail)
-                        checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, null, msgs, dc);
+                        checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
                 },
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                 onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
@@ -4391,7 +4391,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static void ProcessRegistrationWithoutPayment(CheckoutObject checkoutObject, bool sendConfirmationEmail,
-            WebUser loggedInUser, string backgroundCheckUrl, SystemMessages msgs = null, DatabaseConnection dc = null)
+            WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
             (
@@ -4420,7 +4420,7 @@ namespace AfterSchoolLibrary.Services
                     msgs.AddRange(smsgs);
 
                     if (sendConfirmationEmail)
-                        checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, backgroundCheckUrl, msgs, dc);
+                        checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
                 },
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                 onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
@@ -4439,7 +4439,7 @@ namespace AfterSchoolLibrary.Services
                     // get the registrant record that was created just for the account
                     var submittedRecord = checkoutObject.Registration.GetRegistrant(amsgs, adc);
 
-                    ProcessRegistrationWithoutPayment(checkoutObject, false, loggedInUser, null, amsgs, adc);
+                    ProcessRegistrationWithoutPayment(checkoutObject, false, loggedInUser, amsgs, adc);
 
                     // process payment by to account, includes registration fee
                     var isRegFree = checkoutObject.ParticipationObject.IsRegistrationFree;
@@ -4468,7 +4468,7 @@ namespace AfterSchoolLibrary.Services
                     if (checkoutObject.Coupon.IsNotEmpty() && checkoutObject.Coupon.ID.IsNotEmpty())
                         checkoutObject.PayingAccount.MarkCouponAsUsed(checkoutObject.Coupon);
 
-                    checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, null, msgs, dc);
+                    checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
                 },
                 onFailure: (SystemMessages amsgs) => msgs.AddRange(amsgs),
                 onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),

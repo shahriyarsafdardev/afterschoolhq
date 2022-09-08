@@ -25,17 +25,11 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static void SendConfirmation(this Registration registration, CheckoutObject checkoutObject,
-            string customMessage, WebUser loggedInUser, bool sendBcc, string backgroundCheckUrl, SystemMessages msgs, DatabaseConnection dc = null)
+            string customMessage, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (checkoutObject.ParticipationObject.ActivityType == ActivityType.VolunteerOpportunity)
             {
                 msgs.AddRange(EmailHelper.SendVolunteerRegistrationConfirmed(checkoutObject, customMessage, loggedInUser, sendBcc, dc));
-                if (backgroundCheckUrl.IsNotEmpty())
-                {
-                    msgs.AddRange(EmailHelper.SendVolunteerBackgroundCheckRequest(checkoutObject, customMessage, loggedInUser, sendBcc, backgroundCheckUrl,
-                        dc));
-                }
-
                 return;
             }
 
