@@ -41,7 +41,7 @@
 <div class="panel-body">
 
     <div class="col-md-12">
-        @if (account.HasStripeConnectedAccount) 
+        @if (account.HasStripeConnectedAccount)
         {
             if (!account.CanReceiveStripeDeposits())
             {
@@ -72,7 +72,9 @@
                 <div class="text-center">
                     <h1 class=""><i class="s7-check-circle text-success"></i> Your payment account has been setup.</h1>
                     <p class="margin-v-30">
-                        To change bank account details or review your deposits, click Login to Stripe Dashboard. For additional help changing your bank account, please <a href="@stripeSupportLink" target="_blank">click here</a>.<br>
+                        To change bank account details or review your deposits, click Login to Stripe Dashboard. For additional help changing your bank account, please <a href="@stripeSupportLink" target="_blank">click here</a>.
+                    </p>
+                    <p class="margin-v-30">
                         To disconnect payment altogether, email <a href="@supportEmailHref">@supportEmail</a> (Note: Payment Method cannot be disconnected if there are pending payments).
                     </p>
                 </div>
