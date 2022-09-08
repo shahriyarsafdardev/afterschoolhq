@@ -1403,6 +1403,7 @@
     <Content Include="img\logo-vertical.png" />
     <Content Include="img\logo-white.png" />
     <Content Include="img\logo.png" />
+    <Content Include="img\man-with-backpack.jpg" />
     <Content Include="img\mccoy-color-1.jpg" />
     <Content Include="img\mccoy-color.jpg" />
     <Content Include="img\multi-device-clay-mockup-16.png" />
@@ -1422,6 +1423,7 @@
     <Content Include="img\v-hernly.png" />
     <Content Include="img\warning.png" />
     <Content Include="img\website.svg" />
+    <Content Include="img\Wooten 2021 Web Logo.webp" />
     <Content Include="index.html" />
     <Content Include="ips.html" />
     <Content Include="joinips.html" />
@@ -1451,6 +1453,7 @@
     <Content Include="tos.html" />
     <Content Include="UnsupportedBrowser.html" />
     <Content Include="404.html" />
+    <Content Include="wooten-center.html" />
     <Content Include="Assets\bootstrap3-wysiwyg\bootstrap3-wysihtml5.all.min.js" />
     <Content Include="Assets\bootstrap3-wysiwyg\bootstrap3-wysihtml5.min.css" />
     <Content Include="Assets\css\font-awesome-4.6.3\css\font-awesome.css" />
