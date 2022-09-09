@@ -19,9 +19,8 @@ namespace AfterSchoolLibrary.Models
             Config(ObjectMap, DatabaseQuery, nameof(BackgroundCheck), "ID");
             LoadObjectValues(ObjectMap);
             BackgroundCheckStatusId = BackgroundCheckStatus.NotSet;
-            SterlingProcessStepId = SterlingProcessStep.NotStarted;
+            BackgroundCheckSourceId = BackgroundCheckSource.NotSet;
         }
-
 
         public int WebUserId
         {
@@ -41,22 +40,16 @@ namespace AfterSchoolLibrary.Models
             set => MDV["BackgroundCheckStatusId"].Value = value;
         }
 
-        public SterlingProcessStep SterlingProcessStepId
-        {
-            get => (SterlingProcessStep) MDV["SterlingProcessStepId"].Value;
-            set => MDV["SterlingProcessStepId"].Value = value;
-        }
-
         public BackgroundCheckSource BackgroundCheckSourceId
         {
             get => (BackgroundCheckSource) MDV["BackgroundCheckSourceId"].Value;
             set => MDV["BackgroundCheckSourceId"].Value = value;
         }
 
-        public string ExternalCandidateId
+        public string SterlingCandidateId
         {
-            get => (string) MDV["ExternalCandidateId"].Value;
-            set => MDV["ExternalCandidateId"].Value = value;
+            get => (string) MDV["SterlingCandidateId"].Value;
+            set => MDV["SterlingCandidateId"].Value = value;
         }
 
         public string SterlingInviteUrl
@@ -65,6 +58,35 @@ namespace AfterSchoolLibrary.Models
             set => MDV["SterlingInviteUrl"].Value = value;
         }
 
+        public DateTime? ExpirationDate
+        {
+            get => (DateTime?) MDV["ExpirationDate"].Value;
+            set => MDV["ExpirationDate"].Value = value;
+        }
+
+        public DateTime? SterlingEmailSentDate
+        {
+            get => (DateTime?) MDV["SterlingEmailSentDate"].Value;
+            set => MDV["SterlingEmailSentDate"].Value = value;
+        }
+
+        public DateTime? VolunteerCompletedDate
+        {
+            get => (DateTime?) MDV["VolunteerCompletedDate"].Value;
+            set => MDV["VolunteerCompletedDate"].Value = value;
+        }
+
+        public DateTime? SterlingReviewCompleteDate
+        {
+            get => (DateTime?) MDV["SterlingReviewCompleteDate"].Value;
+            set => MDV["SterlingReviewCompleteDate"].Value = value;
+        }
+
+        public DateTime? ManualReviewCompleteDate
+        {
+            get => (DateTime?) MDV["ManualReviewCompleteDate"].Value;
+            set => MDV["ManualReviewCompleteDate"].Value = value;
+        }
 
         public static DatabaseParameters ObjectMap
         {
@@ -75,10 +97,14 @@ namespace AfterSchoolLibrary.Models
                 dp.Add(className, "WebUserId", SqlDbType.Int);
                 dp.Add(className, "AccountId", SqlDbType.Int);
                 dp.Add(className, "BackgroundCheckStatusId", SqlDbType.Int);
-                dp.Add(className, "SterlingProcessStepId", SqlDbType.Int);
                 dp.Add(className, "BackgroundCheckSourceId", SqlDbType.Int);
-                dp.Add(className, "ExternalCandidateId", SqlDbType.NVarChar, "500");
+                dp.Add(className, "SterlingCandidateId", SqlDbType.NVarChar, "500");
                 dp.Add(className, "SterlingInviteUrl", SqlDbType.NVarChar, "500");
+                dp.Add(className, "ExpirationDate", SqlDbType.DateTime);
+                dp.Add(className, "SterlingEmailSentDate", SqlDbType.DateTime);
+                dp.Add(className, "VolunteerCompletedDate", SqlDbType.DateTime);
+                dp.Add(className, "SterlingReviewCompleteDate", SqlDbType.DateTime);
+                dp.Add(className, "ManualReviewCompleteDate", SqlDbType.DateTime);
 
                 return dp;
             }
@@ -136,8 +162,6 @@ namespace AfterSchoolLibrary.Models
                 msgs.Add("AccountId is required on BackgroundCheck object", MessageType.Error);
             if (BackgroundCheckStatusId.IsEmpty())
                 msgs.Add("BackgroundCheckStatusId is required on BackgroundCheck object", MessageType.Error);
-            if (SterlingProcessStepId.IsEmpty())
-                msgs.Add("SterlingProcessStepId is required on BackgroundCheck object", MessageType.Error);
 
             if (msgs.HasNoErrors())
                 msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, nameof(BackgroundCheck)));
@@ -159,26 +183,17 @@ namespace AfterSchoolLibrary.Models
         {
             var msgs = new SystemMessages();
 
-            var dps = new DatabaseParameters {ObjectMap["WebUserId"]};
-            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
-
-            dps = new DatabaseParameters {ObjectMap["AccountId"]};
-            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
-
-            dps = new DatabaseParameters {ObjectMap["BackgroundCheckStatusId"]};
-            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
-
-            dps = new DatabaseParameters {ObjectMap["SterlingProcessStepId"]};
-            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
-
-            dps = new DatabaseParameters {ObjectMap["BackgroundCheckSourceId"]};
-            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
-
-            dps = new DatabaseParameters {ObjectMap["ExternalCandidateId"]};
-            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
-
-            dps = new DatabaseParameters {ObjectMap["SterlingInviteUrl"]};
-            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+            msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["WebUserId"]}));
+            msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["AccountId"]}));
+            msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["BackgroundCheckStatusId"]}));
+            msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["BackgroundCheckSourceId"]}));
+            msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["SterlingCandidateId"]}));
+            msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["SterlingInviteUrl"]}));
+            msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["ExpirationDate"]}));
+            msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["SterlingEmailSentDate"]}));
+            msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["VolunteerCompletedDate"]}));
+            msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["SterlingReviewCompleteDate"]}));
+            msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["ManualReviewCompleteDate"]}));
 
             return msgs;
         }

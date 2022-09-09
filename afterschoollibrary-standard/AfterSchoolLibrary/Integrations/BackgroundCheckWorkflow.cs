@@ -7,7 +7,7 @@ namespace AfterSchoolLibrary.Integrations
 {
     public interface IBackgroundCheckWorkflow
     {
-        Task<BackgroundCheckRequestResult> RequestBackgroundCheck(WebUser webUser, SystemMessages messages);
+        Task<BackgroundCheckRequestResult> RequestBackgroundCheck(WebUser webUser, int accountId, SystemMessages messages);
     }
 
     public class BackgroundCheckWorkflow : IBackgroundCheckWorkflow
@@ -29,15 +29,13 @@ namespace AfterSchoolLibrary.Integrations
             this.backgroundCheckRepository = backgroundCheckRepository;
         }
 
-        public async Task<BackgroundCheckRequestResult> RequestBackgroundCheck(WebUser webUser, SystemMessages messages)
+        public async Task<BackgroundCheckRequestResult> RequestBackgroundCheck(WebUser webUser, int accountId, SystemMessages messages)
         {
-            var authenticated = false;
             string candidateId = null;
             string backgroundCheckUrl = null;
             try
             {
                 var token = await tokenQuery.GetAsync(credentials);
-                authenticated = true;
                 candidateId = await createCandidateQuery.CreateAsync(credentials, token.Token, webUser);
                 backgroundCheckUrl = await createScreeningQuery.CreateAsync(credentials, token.Token, candidateId);
             }
@@ -46,24 +44,19 @@ namespace AfterSchoolLibrary.Integrations
                 messages.Add(new SystemMessage(ex.Message, MessageType.ApiError));
             }
 
-            SterlingProcessStep currentSterlingProcessStep;
-            if (!authenticated)
-                currentSterlingProcessStep = SterlingProcessStep.FailedToAuthenticate;
-            else if (candidateId is null)
-                currentSterlingProcessStep = SterlingProcessStep.FailedToCreateCandidate;
-            else if (backgroundCheckUrl is null)
-                currentSterlingProcessStep = SterlingProcessStep.FailedToCreateScreening;
-            else
-                currentSterlingProcessStep = SterlingProcessStep.SuccessfullyCreatedScreening;
+            var status = candidateId is null || backgroundCheckUrl is null
+                ? BackgroundCheckStatus.BackgroundCheckRequested
+                : BackgroundCheckStatus.EmailSentToVolunteer;
 
             var backgroundCheck = new BackgroundCheck
             {
                 WebUserId = webUser.ID!.Value,
-                SterlingProcessStepId = currentSterlingProcessStep,
-                BackgroundCheckStatusId = BackgroundCheckStatus.PendingReview,
-                ExternalCandidateId = candidateId,
+                AccountId = accountId,
+                BackgroundCheckStatusId = status,
+                SterlingCandidateId = candidateId,
                 SterlingInviteUrl = backgroundCheckUrl,
                 BackgroundCheckSourceId = BackgroundCheckSource.Sterling,
+                SterlingEmailSentDate = backgroundCheckUrl is null ? (DateTime?) null : DateTime.Now,
             };
             messages.AddRange(backgroundCheckRepository.Save(backgroundCheck));
             return new BackgroundCheckRequestResult {BackgroundCheckUrl = backgroundCheckUrl};
