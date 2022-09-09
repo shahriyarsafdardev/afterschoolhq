@@ -4,6 +4,6 @@ namespace AfterSchoolLibrary.Models
     {
         NotSet = 0,
         Sterling = 1,
-        Other = 2,
+        Unknown = 2,
     }
 }

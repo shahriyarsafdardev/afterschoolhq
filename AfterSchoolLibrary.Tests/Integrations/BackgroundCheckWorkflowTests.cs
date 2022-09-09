@@ -62,7 +62,7 @@ namespace AfterSchoolLibrary.Tests.Integrations
             Assert.That(messages, Has.Count.EqualTo(0));
             Assert.That(messages.HasNoErrors());
             Assert.That(capturedBackgroundCheck.WebUserId, Is.EqualTo(WebUserId));
-            Assert.That(capturedBackgroundCheck.AccountId, Is.EqualTo(AccountId));
+            Assert.That(capturedBackgroundCheck.RequestedForFiscalAccountId, Is.EqualTo(AccountId));
             Assert.That(capturedBackgroundCheck.BackgroundCheckStatusId, Is.EqualTo(BackgroundCheckStatus.EmailSentToVolunteer));
             Assert.That(capturedBackgroundCheck.BackgroundCheckSourceId, Is.EqualTo(BackgroundCheckSource.Sterling));
             Assert.That(capturedBackgroundCheck.SterlingCandidateId, Is.EqualTo(CandidateId));
@@ -90,7 +90,7 @@ namespace AfterSchoolLibrary.Tests.Integrations
             Assert.That(systemMessage.MessageType, Is.EqualTo(MessageType.ApiError));
             Assert.That(systemMessage.Text, Is.EqualTo(exceptionText));
             Assert.That(capturedBackgroundCheck.WebUserId, Is.EqualTo(WebUserId));
-            Assert.That(capturedBackgroundCheck.AccountId, Is.EqualTo(AccountId));
+            Assert.That(capturedBackgroundCheck.RequestedForFiscalAccountId, Is.EqualTo(AccountId));
             Assert.That(capturedBackgroundCheck.BackgroundCheckStatusId, Is.EqualTo(BackgroundCheckStatus.BackgroundCheckRequested));
             Assert.That(capturedBackgroundCheck.BackgroundCheckSourceId, Is.EqualTo(BackgroundCheckSource.Sterling));
             Assert.That(capturedBackgroundCheck.SterlingCandidateId, Is.Null);
@@ -125,7 +125,7 @@ namespace AfterSchoolLibrary.Tests.Integrations
             Assert.That(systemMessage.MessageType, Is.EqualTo(MessageType.ApiError));
             Assert.That(systemMessage.Text, Is.EqualTo(exceptionText));
             Assert.That(capturedBackgroundCheck.WebUserId, Is.EqualTo(WebUserId));
-            Assert.That(capturedBackgroundCheck.AccountId, Is.EqualTo(AccountId));
+            Assert.That(capturedBackgroundCheck.RequestedForFiscalAccountId, Is.EqualTo(AccountId));
             Assert.That(capturedBackgroundCheck.BackgroundCheckStatusId, Is.EqualTo(BackgroundCheckStatus.BackgroundCheckRequested));
             Assert.That(capturedBackgroundCheck.BackgroundCheckSourceId, Is.EqualTo(BackgroundCheckSource.Sterling));
             Assert.That(capturedBackgroundCheck.SterlingCandidateId, Is.EqualTo(CandidateId));

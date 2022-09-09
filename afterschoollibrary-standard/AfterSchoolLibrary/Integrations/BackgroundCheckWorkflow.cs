@@ -51,7 +51,7 @@ namespace AfterSchoolLibrary.Integrations
             var backgroundCheck = new BackgroundCheck
             {
                 WebUserId = webUser.ID!.Value,
-                AccountId = accountId,
+                RequestedForFiscalAccountId = accountId,
                 BackgroundCheckStatusId = status,
                 SterlingCandidateId = candidateId,
                 SterlingInviteUrl = backgroundCheckUrl,
