@@ -512,7 +512,7 @@ namespace AfterSchool.Controllers
             List<FormQuestionViewModel> questions, Registrant currentRegistrant)
         {
             var registrationStartPageAccount = SessionVariables.RegistrationStartPageAccount;
-            var result = new VolunteerRegisterAssembler(featureFlagRepository).AssembleRegisterResult(questions, participationObject,
+            var result = new VolunteerRegisterAssembler().AssembleRegisterResult(questions, participationObject,
                 registrationStartPageAccount, currentRegistrant, msgs);
             return View("Register", result);
         }
