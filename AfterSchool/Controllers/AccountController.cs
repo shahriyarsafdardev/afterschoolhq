@@ -1763,7 +1763,7 @@ namespace AfterSchool.Controllers
                         SubscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault(),
                         SelectedDates = selectedDates,
                     },
-                    true, SessionVariables.CurrentUser, null, msgs);
+                    true, SessionVariables.CurrentUser, msgs);
 
             if (msgs.HasNoErrors())
                 return RedirectToAction("thankyou", new {id = registration.Uid});

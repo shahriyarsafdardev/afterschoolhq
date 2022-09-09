@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using AfterSchool.Models;
-using AfterSchoolLibrary.FeatureFlag;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 
@@ -13,19 +12,10 @@ namespace AfterSchool.Assemblers
         public Account RegistrationStartPageAccount { get; set; }
         public Registrant Registrant { get; set; }
         public SystemMessages Messages { get; set; }
-        public bool BackgroundCheckIsEnabled { get; set; }
-        public bool UserHasHadApprovedBackgroundCheck { get; set; }
     }
 
     public class VolunteerRegisterAssembler
     {
-        private readonly IFeatureFlagRepository featureFlagRepository;
-
-        public VolunteerRegisterAssembler(IFeatureFlagRepository featureFlagRepository)
-        {
-            this.featureFlagRepository = featureFlagRepository;
-        }
-
         public VolunteerRegisterResult AssembleRegisterResult(List<FormQuestionViewModel> questions, ParticipationObject participationObject,
             Account registrationStartPageAccount, Registrant registrant, SystemMessages messages)
         {
@@ -36,8 +26,6 @@ namespace AfterSchool.Assemblers
                 RegistrationStartPageAccount = registrationStartPageAccount,
                 Registrant = registrant,
                 Messages = messages,
-                BackgroundCheckIsEnabled = featureFlagRepository.IsEnabled("background-check"),
-                UserHasHadApprovedBackgroundCheck = false,
             };
         }
     }
