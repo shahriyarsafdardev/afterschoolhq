@@ -78,7 +78,7 @@
         var redirectUrl = Url.Action("editsetup", "activity", new {area = "org", isnew = 1, source = "profile", type = (int) activityType});
 
         <div class="row">
-            <div style="position: relative;">
+            <div style="position: relative;padding-left: 10px">
                 <span>
                     <a href="@Url.Action("switch", "logout", new {id = accountUid, redirectUrl})"
                        class="btn btn-alt7 btn-sm">
