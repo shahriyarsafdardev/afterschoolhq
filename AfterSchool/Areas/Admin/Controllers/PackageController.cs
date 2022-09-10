@@ -93,7 +93,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                         package.Name = name;
                         package.IsActive = isactive.IsNotEmpty();
                         package.IsPopular = ispopular.IsNotEmpty();
-                        package.IsAfterSchool = isafterschool.IsNotEmpty();
+                        package.IsAfterSchool = true;
                         package.Description = description;
                         package.FeatureDescription = featureDescription;
                         amsgs.AddRange(package.SaveWithStripe(adc));
