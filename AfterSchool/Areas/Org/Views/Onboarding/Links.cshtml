@@ -142,7 +142,7 @@
                     </div>
                     <div class="clearfix"></div>
                     <div class="visible-sm visible-xs margin-v-30">
-                        <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right col-xs-12 register-continue">Save and Continue</button>
+                        <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right col-xs-12 register-continue">Save &amp; Continue</button>
                         <div class="clearfix"></div>
                         <div class="text-center margin-v-30">
                             <a href="@Url.Action("servicesoffered", "onboarding")" class="text-muted">Back</a>
@@ -153,10 +153,13 @@
                         <a href="@Url.Action("servicesoffered", "onboarding")" class="process-back">
                             <img src="~/Assets/img/welcome-back-arrow.png"/>
                         </a>
-                        <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right register-continue">Save and Continue</button>
+                        <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right register-continue">Save &amp; Continue</button>
                     </div>
 
                     <div class="clearfix"></div>
+                    <div class="text-center">
+                        <a href="@Url.Action("RedirectToDone", "onboarding")" class="text-muted" style="font-size: 16px; font-weight: normal; font-stretch: normal; font-style: normal; line-height: normal; letter-spacing: normal; color: #979797; text-align: center; text-decoration: underline;">I'll do this later</a>
+                    </div>
 
                 </form>
             </div>

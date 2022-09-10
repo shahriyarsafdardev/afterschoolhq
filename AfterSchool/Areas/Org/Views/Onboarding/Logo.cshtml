@@ -1,9 +1,12 @@
 ﻿@model Account
-@{ Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml";
+@{ 
+    Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml";
     var msgs = (SystemMessages)ViewBag.Messages;
     var logoUrl = (string)ViewBag.LogoUrl;
     var headerImageUrl = (string)ViewBag.HeaderImageUrl;
-    }
+    var accountPackage = (AccountPackage) ViewBag.AccountPackage;
+    var totalStepCount = accountPackage.IsFree ? 6 : 5;
+}
 
 <div class="row main-content main-content-welcome-pages">
     <div class="welcome-box-width">
@@ -14,11 +17,13 @@
 
                 <form class="form form-horizontal" method="post" action="@Url.Action("logo", "onboarding")" enctype="multipart/form-data">
 
-                    @{ Html.RenderPartial("~/Views/Shared/_Loaders.cshtml",
-                              new ViewDataDictionary() {
-                                                        { "count", 6 },
-                                                        { "activeDotNumber", 4 }
-                              });
+                    @{
+                        Html.RenderPartial("~/Views/Shared/_Loaders.cshtml",
+                            new ViewDataDictionary()
+                            {
+                                {"count", totalStepCount},
+                                {"activeDotNumber", 4}
+                            });
                     }
 
                     <div class="col-md-12 onboarding-form-group">
@@ -67,7 +72,7 @@
 
                     <div class="clearfix"></div>
                     <div class="visible-sm visible-xs margin-v-30">
-                        <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right col-xs-12 register-continue">Save and Continue</button>
+                        <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right col-xs-12 register-continue">Save &amp; Continue</button>
 
                         <div class="clearfix"></div>
                         <div class="text-center margin-v-30">
@@ -79,7 +84,7 @@
                         <a href="@Url.Action("contactinfo", "onboarding")" class="process-back">
                             <img src="~/Assets/img/welcome-back-arrow.png" />
                         </a>
-                        <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right register-continue">Save and Continue</button>
+                        <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right register-continue">Save &amp; Continue</button>
                     </div>
 
                     <div class="clearfix"></div>

@@ -143,6 +143,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.GenderRestriction = genderrestrictions;
             ViewBag.Messages = msgs;
             ViewBag.Title = account.Name;
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
 
             return View(account);
         }
@@ -192,6 +193,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.Title = Request["title"] ?? account.Name;
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
 
             return View(account);
         }
@@ -214,7 +216,7 @@ namespace AfterSchool.Areas.Org.Controllers
             HandleTempMessages(msgs);
 
             ViewBag.IsNewProfile = profile.CostLow.IsEmpty() && profile.CostHigh.IsEmpty();
-
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Grades = grades;
             ViewBag.Messages = msgs;
             ViewBag.IsVirtualProgram = profile.IsNotEmpty() && profile.IsVirtualProgram;
@@ -281,6 +283,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.CostLow = costlow;
             ViewBag.CostHigh = costhigh;
             ViewBag.IsNewProfile = false;
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
 
             return View(account);
         }
@@ -301,6 +304,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IsProfileEmail = profile.ProfileEmail.IsNotEmpty();
             ViewBag.IsProfilePhone = profile.ProfilePhone.IsNotEmpty();
             ViewBag.Messages = msgs;
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
             return View(account);
         }
 
@@ -392,6 +396,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Phone = Request["phone"] ?? currentUser.Phone;
             ViewBag.IsProfileEmail = publicemail.IsBoolean() && publicemail.ToBoolean();
             ViewBag.IsProfilePhone = publicphone.IsBoolean() && publicphone.ToBoolean();
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
 
             ViewBag.Messages = msgs;
             return View(account);
@@ -414,6 +419,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 ViewBag.HeaderImageUrl = ah.GetFileLink(profile.HeaderImage);
 
             ViewBag.Messages = msgs;
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
             return View(account);
         }
 
@@ -424,6 +430,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var account = SessionVariables.CurrentAccount;
             var profile = account.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
             var allowedFiles = new string[] {".png", ".jpg", ".jpeg"};
+            var accountPackage = SessionVariables.AccountPackage;
 
             HandleTempMessages(msgs);
 
@@ -466,9 +473,10 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("ServicesOffered");
+                return RedirectToAction(accountPackage.IsFree ? "ServicesOffered" : "Links");
 
             ViewBag.Messages = msgs;
+            ViewBag.AccountPackage = accountPackage;
             return View(account);
         }
 
@@ -567,6 +575,7 @@ namespace AfterSchool.Areas.Org.Controllers
             HandleTempMessages(msgs);
 
             ViewBag.Messages = msgs;
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
             return View(account);
         }
 
@@ -647,7 +656,17 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.IsIsypAccount = AccountService.CheckIfIsypAccount(account, msgs);
             ViewBag.Messages = msgs;
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
             return View(account);
+        }
+
+        [HttpGet]
+        public ActionResult RedirectToDone()
+        {
+            if (SessionVariables.CurrentUser.Email.Contains("@afterschoolhq.com"))
+                return RedirectToAction("Done");
+                
+            return RedirectToAction("Done", new {accounttype = SessionVariables.CurrentAccount.AccountTypeId.ToString()});
         }
 
         [HttpGet]

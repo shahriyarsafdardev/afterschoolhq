@@ -2417,6 +2417,7 @@ namespace AfterSchoolLibrary.Billing
                 {
                     Address = "auto",
                 },
+                PaymentMethodTypes = new List<string>() {"card"},
             };
 
             try
