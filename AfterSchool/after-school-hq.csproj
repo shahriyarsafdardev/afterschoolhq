@@ -743,6 +743,7 @@
     <Content Include="Assets\img\AHQ-logo.png" />
     <Content Include="Assets\img\arrow.png" />
     <Content Include="Assets\img\ashq-logo.png" />
+    <Content Include="Assets\img\celebration.svg" />
     <Content Include="Assets\img\clever-login.png" />
     <Content Include="Assets\img\clever-signup.png" />
     <Content Include="Assets\img\client_success_manager_color.jpeg" />
@@ -770,6 +771,7 @@
     <Content Include="Assets\img\clock.svg" />
     <Content Include="Assets\img\graduation-cap.svg" />
     <Content Include="Assets\img\user.svg" />
+    <Content Include="Assets\img\warning.png" />
     <Content Include="Assets\img\welcome-back-arrow.png" />
     <Content Include="Assets\js\ahq-directory-map.js" />
     <Content Include="Assets\js\ahq-directory-search.js" />

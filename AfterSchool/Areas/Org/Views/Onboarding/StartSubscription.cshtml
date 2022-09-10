@@ -3,23 +3,59 @@
     Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml"; 
 }
 
+<style>
+    .top-icon{
+        width:  87px;    
+    }
+    .onboarding-inner-ring{
+        font-size: 18px;
+        font-weight: 300;
+        text-align: center;
+        color: #282828;
+    }
+    h3 {
+        font-weight: bold;
+        font-size: 30px;
+    }
+    p {
+        margin: 25px;
+        max-width: 600px;
+    }
+    
+    .continue {
+        padding: 15px 104px;
+        border-radius: 6px;
+        border-color: transparent;
+        background-color: #00c5a3;
+        color:  white;
+        margin:  20px;
+    }
+    
+    .continue:hover {
+        color:  white;
+    }
+</style>
+
 @if (account.IsNotEmpty())
 {
     <div class="row main-content main-content-welcome-pages">
         <div class="welcome-box-width">
             <div class="welcome-outer-ring">
                 <div class="onboarding-inner-ring">
-                    <img class="thumbs-up" src="~/Assets/img/thumbs-up.svg" alt="thumbs up"/>
+                    <img class="top-icon" src="~/Assets/img/thumbs-up.svg" alt="thumbs up" />
                     <h3 class="lets-get-started">Let’s get started!</h3>
                     <p class="free-trial-p">
                         You have successfully created your account. Your next step is to set up your payment.
                     </p>
-                    <p class="free-trial-p">
-                        Clicking on the &lsquo;Continue to Payment&rsquo; button below will take you through our checkout experience. You will just need to enter your payment details, and that's it!
+                    <p>
+                        Clicking on the &lsquo;Continue to Payment&rsquo; button below will take you through our checkout experience. 
                     </p>
-                    <a class="free-trial-continue" href="@Url.Action("continuetopayment", "onboarding", new { area = "org" })">
-                        Continue to Payment &raquo;
-                    </a>
+                    <p>
+                        You will just need to enter your payment details, and that's it!
+                    </p>
+                    <button class="continue" onclick="location.href='@Url.Action("continuetopayment", "onboarding", new { area = "org" })'">
+                        Continue to Payment
+                    </button>
                 </div>
             </div>
         </div>

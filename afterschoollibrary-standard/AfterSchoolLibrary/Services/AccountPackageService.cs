@@ -97,6 +97,14 @@ namespace AfterSchoolLibrary.Services
         public static void EndTrialNow(this AccountPackage accountPackage, SystemMessages msgs, DatabaseConnection dc = null)
         {
             accountPackage.TrialEndDate = DateTime.UtcNow;
+            accountPackage.StartDate = DateTime.UtcNow;
+            msgs.AddRange(accountPackage.Save(dc));
+        }
+
+        public static void SyncTrialDates(this AccountPackage accountPackage, DateTime? trialStartDate, DateTime? trialEndDate, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            accountPackage.TrialStartDate = trialStartDate;
+            accountPackage.TrialEndDate = trialEndDate;
             msgs.AddRange(accountPackage.Save(dc));
         }
 
@@ -136,6 +144,19 @@ namespace AfterSchoolLibrary.Services
         {
             var package = accountPackage.GetPackage(msgs, dc);
             return accountPackage.BillingPeriodTypeId == BillingPeriodType.Month ? package.StripePricePerMonthId : package.StripePricePerYearId;
+        }
+
+        public static DateTime? GetRenewalDate(this AccountPackage accountPackage)
+        {
+            if (accountPackage.StartDate.HasValue)
+            {
+                if (accountPackage.BillingPeriodTypeId == BillingPeriodType.Month)
+                    return accountPackage.StartDate.Value.AddMonths(1);
+                else if (accountPackage.BillingPeriodTypeId == BillingPeriodType.Year)
+                    return accountPackage.StartDate.Value.AddYears(1);
+            }
+
+            return null;
         }
     }
 }

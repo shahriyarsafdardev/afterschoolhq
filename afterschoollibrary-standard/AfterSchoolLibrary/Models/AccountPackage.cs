@@ -444,9 +444,9 @@ namespace AfterSchoolLibrary.Models
 
         public bool IsFree => Price.Value == 0.ToDecimal();
 
-        public bool IsDuringTrial => TrialEndDate.HasValue ? TrialEndDate.Value.IsAfter(DateTime.UtcNow) : false;
+        public bool IsDuringTrial => TrialEndDate?.IsAfter(DateTime.UtcNow) ?? false;
 
-        public bool IsTrialOver => TrialDaysRemaining == 0;
+        public bool IsTrialOver => TrialEndDate.HasValue && TrialEndDate.Value.IsBefore(DateTime.UtcNow);
 
         public int TrialDaysRemaining
         {
@@ -461,7 +461,7 @@ namespace AfterSchoolLibrary.Models
 
         public bool IsTrialExpiredAndUnpaid(Account account)
         {
-            return !IsFree && IsTrialOver && !account.HasPaymentCard && !TrialEndDate.HasValue;
+            return !IsFree && IsTrialOver && !account.HasPaymentCard && !StartDate.HasValue;
         }
 
         public List<AccountPackageFeature> GetFeatures(SystemMessages msgs = null, DatabaseConnection dc = null)

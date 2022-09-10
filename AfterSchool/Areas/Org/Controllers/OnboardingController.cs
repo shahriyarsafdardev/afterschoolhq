@@ -73,7 +73,10 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult SubscriptionSuccess()
         {
             var msgs = new SystemMessages();
+            var currentPackage = SessionVariables.AccountPackage;
             HandleTempMessages(msgs);
+            ViewBag.RenewalDate = currentPackage.GetRenewalDate().ToLongDateString();
+            ViewBag.RenewalAmount = currentPackage.Price.ToCurrency();
             ViewBag.Messages = msgs;
             return View();
         }

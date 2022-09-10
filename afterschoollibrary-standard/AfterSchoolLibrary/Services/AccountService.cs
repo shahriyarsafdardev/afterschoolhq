@@ -1649,10 +1649,6 @@ namespace AfterSchoolLibrary.Services
 
                 account.HasDefaultPaymentMethod = true;
                 msgs.AddRange(account.Save(dc));
-
-                var accountPackage = account.GetActiveAccountPackage(msgs, dc);
-                accountPackage.StartDate = DateTime.UtcNow;
-                msgs.AddRange(accountPackage.Save(dc));
             }
         }
 
@@ -1662,15 +1658,23 @@ namespace AfterSchoolLibrary.Services
             // check if package has changed
             var currentAccountPackage = account.GetActiveAccountPackage(msgs, dc);
             var stripeSubscription = currentAccountPackage.GetStripeSubscription(msgs);
-            Stripe.Plan stripePlan = null;
 
-            if (stripeSubscription.IsNotEmpty())
-                stripePlan = stripeSubscription.Items.First().Plan; // assuming only one subscription plan
-            else
-                stripePlan = StripeHelper.GetStripeHelperSubscriberAccount().GetSubscriptions(account.StripeCustomerId, msgs).First().Items.First().Plan;
+            if (stripeSubscription.IsEmpty())
+                stripeSubscription = StripeHelper.GetStripeHelperSubscriberAccount().GetSubscriptions(account.StripeCustomerId, msgs).First();
+
+            if (stripeSubscription.IsEmpty())
+                return;
             
+            var stripePlan = stripeSubscription.Items.First().Plan;
             var packageFromStripe = Package.LoadByUid(stripePlan.ProductId.ToGuid(), msgs, dc);
-
+                
+            // no trial or trial has ended
+            if (!stripeSubscription.TrialStart.HasValue ||
+                (stripeSubscription.TrialEnd.HasValue && stripeSubscription.TrialEnd.Value.IsBefore(DateTime.UtcNow)))
+                currentAccountPackage.EndTrialNow(msgs, dc);
+            else
+                currentAccountPackage.SyncTrialDates(stripeSubscription.TrialStart, stripeSubscription.TrialEnd, msgs, dc);
+            
             // needs to match stripe
             if (currentAccountPackage.PackageId != packageFromStripe.ID)
             {
