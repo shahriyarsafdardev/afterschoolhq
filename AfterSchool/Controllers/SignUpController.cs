@@ -274,10 +274,10 @@ namespace AfterSchool.Controllers
                                 phone: model.Phone,
                                 isActive: true,
                                 accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
-                                packageId: PackageService.GetFreePackage(amsgs, adc).ID.Value,
+                                packageId: PackageService.GetFreePackage(amsgs, adc).ID,
                                 BillingPeriodType.Month,
-                                timeZone: null,
-                                isAfterSchool: true,
+                                timeZone: null, 
+                                signUpTypeId: model.SignupType,
                                 loggedInUser: user,
                                 msgs: amsgs,
                                 dc: adc);
@@ -293,7 +293,7 @@ namespace AfterSchool.Controllers
                                         orgName: model.OrgName,
                                         accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
                                         package: package,
-                                        signUpType: model.SignupType,
+                                        signUpTypeId: model.SignupType,
                                         billingPeriodType: model.SubscriptionPeriod.ParseEnum<BillingPeriodType>(),
                                         loggedInUser: user,
                                         msgs: amsgs,
@@ -304,6 +304,7 @@ namespace AfterSchool.Controllers
                                 account = user.AddNewAccountWithDefaultPackageWithStripe(
                                     orgName: model.OrgName,
                                     accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
+                                    signUpTypeId: model.SignupType,
                                     loggedInUser: user,
                                     msgs: amsgs,
                                     dc: adc);
@@ -969,7 +970,6 @@ namespace AfterSchool.Controllers
                             packageBillingPeriod: BillingPeriodType.Month,
                             timeZone: null,
                             loggedInUser: SessionVariables.CurrentUser,
-                            isAfterSchool: true,
                             createWithStripe: true,
                             msgs: amsgs,
                             dc: adc);
@@ -1173,7 +1173,7 @@ namespace AfterSchool.Controllers
 
                         if (user.IsNotEmpty())
                             account = user.AddNewParentOrStudentRegistrantAccount(userType: UserType.Owner, isActive: true,
-                                isAfterSchool: true, loggedInUser: user, msgs: amsgs, dc: adc);
+                                loggedInUser: user, msgs: amsgs, dc: adc);
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {

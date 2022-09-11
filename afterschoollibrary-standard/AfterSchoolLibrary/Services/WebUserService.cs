@@ -599,7 +599,7 @@ namespace AfterSchoolLibrary.Services
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static Account AddNewParentOrStudentRegistrantAccount(this WebUser user, UserType userType, bool isActive, int? packageId, BillingPeriodType? packageBillingPeriod, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Account AddNewParentOrStudentRegistrantAccount(this WebUser user, UserType userType, bool isActive, int? packageId, BillingPeriodType? packageBillingPeriod, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Account account = null;
 
@@ -620,7 +620,6 @@ namespace AfterSchoolLibrary.Services
                                     createWithStripe: true,
                                     stripeAccountType: StripeAccountType.ConnectAccount,
                                     loggedInUser: loggedInUser,
-                                    isAfterSchool: isAfterSchool,
                                     msgs: amsgs,
                                     dc: adc);
 
@@ -664,7 +663,7 @@ namespace AfterSchoolLibrary.Services
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static Account AddNewVolunteerAccount(this WebUser user, UserType userType, bool isActive, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Account AddNewVolunteerAccount(this WebUser user, UserType userType, bool isActive, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Account account = null;
 
@@ -684,7 +683,6 @@ namespace AfterSchoolLibrary.Services
                                     timeZone: null,
                                     createWithStripe: false,
                                     loggedInUser: loggedInUser,
-                                    isAfterSchool: isAfterSchool,
                                     msgs: amsgs,
                                     dc: adc);
 
@@ -712,7 +710,7 @@ namespace AfterSchoolLibrary.Services
             return account;
         }
 
-        public static Account AddNewStudentAccount(this WebUser user, UserType userType, bool isActive, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Account AddNewStudentAccount(this WebUser user, UserType userType, bool isActive, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Account account = null;
 
@@ -732,7 +730,6 @@ namespace AfterSchoolLibrary.Services
                                     timeZone: null,
                                     createWithStripe: true,
                                     loggedInUser: loggedInUser,
-                                    isAfterSchool: isAfterSchool,
                                     msgs: amsgs,
                                     dc: adc);
 
@@ -762,7 +759,7 @@ namespace AfterSchoolLibrary.Services
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static Account AddNewRegistrantAccountWithUserName(this WebUser user, UserType userType, string firstName, string lastName, string email,bool isActive, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Account AddNewRegistrantAccountWithUserName(this WebUser user, UserType userType, string firstName, string lastName, string email,bool isActive, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Account account = null;
 
@@ -782,7 +779,6 @@ namespace AfterSchoolLibrary.Services
                                     timeZone: null,
                                     createWithStripe: true,
                                     loggedInUser: loggedInUser,
-                                    isAfterSchool: isAfterSchool,
                                     msgs: amsgs,
                                     dc: adc);
 
@@ -813,14 +809,26 @@ namespace AfterSchoolLibrary.Services
             return account;
         }
 
-        public static Account AddNewParentOrStudentRegistrantAccount(this WebUser accountOwner, UserType userType, bool isActive, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Account AddNewParentOrStudentRegistrantAccount(this WebUser accountOwner, UserType userType, bool isActive, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AddNewParentOrStudentRegistrantAccount(accountOwner, userType, isActive, null, null, isAfterSchool, loggedInUser, msgs, dc);
+            return AddNewParentOrStudentRegistrantAccount(accountOwner, userType, isActive, null, null, loggedInUser, msgs, dc);
         }
 
         public static Account AddNewAccountWithDefaultPackage(this WebUser accountOwner, string orgName, AccountType accountType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var account = AddNewAccount(accountOwner, orgName, null, true, accountType, null, null, null, true, loggedInUser, msgs, dc);
+            var account = AddNewAccount(
+                accountOwner, 
+                orgName, 
+                null, 
+                true, 
+                accountType, 
+                null, 
+                null, 
+                null,
+                SignUpType.NotSet,
+                loggedInUser, 
+                msgs, 
+                dc);
 
             if (account.IsNotEmpty())
                 account.SetDefaultAccountPackage(loggedInUser, msgs, dc);
@@ -828,9 +836,11 @@ namespace AfterSchoolLibrary.Services
             return account;
         }
 
-        public static Account AddNewAccountWithDefaultPackageWithStripe(this WebUser accountOwner, string orgName, AccountType accountType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Account AddNewAccountWithDefaultPackageWithStripe(this WebUser accountOwner, string orgName, AccountType accountType, SignUpType signUpTypeId, 
+            WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var account = AddNewAccount(accountOwner, orgName, null, true, accountType, null, null, null, true, loggedInUser, msgs, dc);
+            var account = AddNewAccount(accountOwner, orgName, null, true, accountType, null, null, null, 
+                signUpTypeId, loggedInUser, msgs, dc);
 
             if (account.IsNotEmpty())
             {
@@ -841,20 +851,23 @@ namespace AfterSchoolLibrary.Services
             return account;
         }
 
-        public static Account AddNewAccountWithPackageWithStripe(this WebUser accountOwner, string orgName, AccountType accountType, Package package, BillingPeriodType billingPeriodType, SignUpType signUpType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Account AddNewAccountWithPackageWithStripe(this WebUser accountOwner, string orgName, AccountType accountType, Package package, 
+            BillingPeriodType billingPeriodType, SignUpType signUpTypeId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var account = AddNewAccount(accountOwner, orgName, null, true, accountType, null, null, null, true, loggedInUser, msgs, dc);
+            var account = AddNewAccount(accountOwner, orgName, null, true, accountType, null, null, null, 
+                signUpTypeId, loggedInUser, msgs, dc);
 
             if (account.IsNotEmpty())
             {
                 account.CreateStripeCustomer(StripeAccountType.SubscriberAccount, accountOwner, msgs, dc);
-                account.AddFirstPackage(package.ID.Value, billingPeriodType, signUpType, loggedInUser, msgs, dc);
+                account.AddFirstPackage(package.ID.Value, billingPeriodType, signUpTypeId, loggedInUser, msgs, dc);
             }
 
             return account;
         }
 
-        public static Account AddNewAccount(this WebUser accountOwner, string orgName, string phone, bool isActive, AccountType accountType, int? packageId, BillingPeriodType? packageBillingPeriod, string timeZone, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Account AddNewAccount(this WebUser accountOwner, string orgName, string phone, bool isActive, AccountType accountType, int? packageId, 
+            BillingPeriodType? packageBillingPeriod, string timeZone, SignUpType signUpTypeId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var account = AccountService.CreateNew(
                 orgName: orgName, 
@@ -867,8 +880,8 @@ namespace AfterSchoolLibrary.Services
                 packageBillingPeriod: packageBillingPeriod,
                 timeZone: timeZone,
                 createWithStripe: false,
+                signUpTypeId: signUpTypeId,
                 loggedInUser: loggedInUser, 
-                isAfterSchool: isAfterSchool, 
                 msgs: msgs, 
                 dc: dc);
 
@@ -877,7 +890,9 @@ namespace AfterSchoolLibrary.Services
             return account;
         }
 
-        public static Account AddNewAccount(this WebUser accountOwner, string orgName, string claimemaildomain, string phone, bool isActive, AccountType accountType, int? packageId, BillingPeriodType? packageBillingPeriod, string timeZone, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Account AddNewAccount(this WebUser accountOwner, string orgName, string claimemaildomain, string phone, bool isActive, 
+            AccountType accountType, int? packageId, BillingPeriodType? packageBillingPeriod, string timeZone, WebUser loggedInUser, 
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var account = AccountService.CreateNew(
                 orgName: orgName,
@@ -892,7 +907,6 @@ namespace AfterSchoolLibrary.Services
                 timeZone: timeZone,
                 createWithStripe: false,
                 loggedInUser: loggedInUser,
-                isAfterSchool: isAfterSchool,
                 msgs: msgs,
                 dc: dc);
 

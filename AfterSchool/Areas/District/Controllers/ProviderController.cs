@@ -97,7 +97,7 @@ namespace AfterSchool.Areas.District.Controllers
                             packageId: null,
                             packageBillingPeriod: null,
                             timeZone: null,
-                            isAfterSchool: SessionVariables.IsAfterSchool.Value,
+                            signUpTypeId: SignUpType.NotSet,
                             loggedInUser: SessionVariables.CurrentUser,
                             msgs: amsgs,
                             dc: adc);

@@ -1566,7 +1566,6 @@ namespace AfterSchoolLibrary.Services
                         packageBillingPeriod: null,
                         timeZone: activityAccount.TimeZone,
                         loggedInUser: loggedInUser,
-                        isAfterSchool: true,
                         createWithStripe: false,
                         msgs: msgs,
                         dc: dc);

@@ -74,7 +74,11 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var currentPackage = SessionVariables.AccountPackage;
+            var currentAccount = SessionVariables.CurrentAccount;
             HandleTempMessages(msgs);
+
+            currentAccount.UpdateOnboardingStep(OnboardingStepType.AccountType, msgs);
+            
             ViewBag.RenewalDate = currentPackage.GetRenewalDate().ToLongDateString();
             ViewBag.RenewalAmount = currentPackage.Price.ToCurrency();
             ViewBag.Messages = msgs;
