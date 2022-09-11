@@ -47,7 +47,10 @@
         <div class="panel-heading">
             <i class="s7-cash"></i> Select Plan
 
-            @{Html.RenderPartial("_ExitFullScreen", returnUrl); }
+            @if (currentPackage.IsDuringTrial)
+            {
+                Html.RenderPartial("_ExitFullScreen", returnUrl);
+            }
         </div>
         <div class="panel-body padding-lr-zero-sm">
             <div class="col-lg-8 col-lg-offset-2 col-md-12">
@@ -67,11 +70,13 @@
                         <div class="panel-body" id="instructions-panel-body">
                             <div class="row padding-20">
                                 <div class="col-md-6 col-md-offset-3">
-                                    <p class="text-medium-small">
+                                    <p class="text-medium">
                                         @if (currentPackage.IsDuringTrial)
                                         {
                                             <span>
-                                                Enter your payment details early so you don't lose access to your trial.<br/>
+                                                Your trial expires @currentPackage.TrialEndDate.ToLongDateString()<br />
+                                                <br />
+                                                Enter your payment details early to ensure you don't lose access when your trial expires.<br/>
                                                 <br/>
                                                 Your card won't be charged until your trial ends.
                                             </span>
@@ -101,7 +106,7 @@
                         
                         <div class="panel-heading" id="select-plan-panel-heading">
                             <div class="pull-left">
-                                2. Choose the best plan for your program
+                                2. Choose the best plan for your organization
                             </div>
                             <div class="pull-right hide text-success text-bold" id="selected-package-container">
                                 <span id="selected-package"></span> Plan - <span id="selected-price"></span> <span id="selected-period"></span>
@@ -183,15 +188,15 @@
                                                 
                                                 @if (currentPackage.PackageId == package.ID)
                                                 {
-                                                    <span>Continue with the <strong>@package.Name</strong> Plan</span>
+                                                    <span>Continue with <strong>@package.Name</strong></span>
                                                 }
                                                 else if (package.Price > currentPackage.PackagePrice)
                                                 {
-                                                    <span>Upgrade to the <strong>@package.Name</strong> Plan</span>
+                                                    <span>Upgrade to <strong>@package.Name</strong></span>
                                                 }
                                                 else
                                                 {
-                                                    <span>Downgrade to the <strong>@package.Name</strong> Plan</span>
+                                                    <span>Downgrade to <strong>@package.Name</strong></span>
                                                 }
 
                                             </button>
@@ -254,6 +259,9 @@
 @section scripts
 {
     <script>
+        var selectedPackageUid = '';
+        var selectedPeriod = @((int)BillingPeriodType.Year);
+        
         function showPlans(){        
             $('#select-plan-panel-body').removeClass('hide');
             $('#instructions-panel-body').addClass('hide');
@@ -273,7 +281,7 @@
         }
         
         function selectPackage(packageUid, packageName, pricePerMonth){
-            
+                        
             var period = @((int) BillingPeriodType.Month);
             var periodName = "Monthly";
             var price = $('#monthly-price-' + packageUid).html();            
@@ -283,6 +291,9 @@
                 periodName = 'Annually';
                 price = $('#annual-price-' + packageUid).html();
             }
+            
+            selectedPeriod = period;
+            selectedPackageUid = packageUid;
             
             if (packageName === 'Free'){
                 price = '$0.00';
@@ -348,7 +359,8 @@
                     //`Elements` instance that was used to create the Payment Element
                     elements,
                     confirmParams: {
-                        return_url: '@($"{Utilities.BaseUrl()}{@Url.Action("AfterStripeUpdate", "Account")}?returnUrl={Url.Action("SelectPlanDone", "Account")}")',
+                        return_url: '@Html.Raw($"{Utilities.BaseUrl()}{@Url.Action("AfterStripeUpdate", "Account")}" +
+                                       $"?newplan=' + selectedPackageUid + '&period=' + selectedPeriod + '&returnUrl={Url.Action("SelectPlanDone", "Account")}")',
                     }
                 });
                 

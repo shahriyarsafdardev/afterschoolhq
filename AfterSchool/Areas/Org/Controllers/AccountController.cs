@@ -1383,15 +1383,36 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(SessionVariables.CurrentAccount);
         }
 
-        public ActionResult AfterStripeUpdate(string id, string returnUrl)
+        public ActionResult AfterStripeUpdate(string id, string newPlan, string period, string returnUrl)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
+            var accountPackage = SessionVariables.AccountPackage;
 
-            // check if finally added payment
-            currentAccount.CheckIfSubscriberAccountHasPaymentMethod(null, msgs);
-            currentAccount.CheckIfSubscriberAccountSubscriptionChanged(false, currentUser, msgs);
+            Database.ExecuteTransaction(
+                action: (amsgs, adc) =>
+                {
+                    // if coming from select plan, need to potentially change subscription if changed on select plan screen
+                    var newPlanSelected = newPlan.IsGuid() && period.IsInteger();
+                    var isPlanDifferent = newPlanSelected && (accountPackage.PackageUid != newPlan.ToGuid() || accountPackage.BillingPeriodTypeId != (BillingPeriodType) period.ToInteger());
+                    if (newPlanSelected && isPlanDifferent)
+                        currentAccount.SwitchPackagesWithStripe
+                        (
+                            Package.LoadByUid(newPlan.ToGuid(), amsgs, adc),
+                            (BillingPeriodType)period.ToInteger(),
+                            true,
+                            accountPackage.StripeSubscriptionId,
+                            currentUser,
+                            amsgs,
+                            adc
+                        );
+
+                    // check if finally added payment
+                    currentAccount.CheckIfSubscriberAccountHasPaymentMethod(null, amsgs, adc);
+                    currentAccount.CheckIfSubscriberAccountSubscriptionChanged(false, currentUser, amsgs, adc);
+                }
+            );
 
             if (returnUrl.IsNotEmpty())
                 return new RedirectResult(returnUrl);

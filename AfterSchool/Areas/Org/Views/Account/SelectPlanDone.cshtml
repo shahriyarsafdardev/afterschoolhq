@@ -21,8 +21,11 @@
 }
 
 <style>
-    p.package-description {
-        min-height: 60px;
+    .top-icon{
+        width:  87px;    
+    }
+    p {
+        margin: 30px;
     }
 </style>
 
@@ -35,12 +38,22 @@
             <i class="s7-cash"></i> Select Plan - Completed
         </div>
         <div class="panel-body padding-lr-zero-sm">
-            <div class="col-lg-8 col-lg-offset-2 col-md-12">
-
-                <p class="text-medium-small">
+            <div class="col-lg-8 col-lg-offset-2 col-md-12 text-center">
+                <img class="top-icon" src="~/Assets/img/celebration.svg" alt="Celebration"/>
+                <p class="text-medium">
                     Great Job. You now are subscribed to the @currentPackage.PackageName Plan.
                 </p>
-                
+                <p class="text-medium">
+                    @if (currentPackage.IsDuringTrial)
+                    {
+                        <span>Your card will be charged automatically when your trial ends on @currentPackage.TrialEndDate.ToLongDateString().</span>
+                    }
+                    else
+                    {
+                        <span>Your subscription will automatically renew on <br/><b>@currentPackage.GetRenewalDate()</b> for <b>@currentPackage.Price.ToCurrency()</b>.</span>
+                    }
+                </p>
+
                 <p>
                     <button type="button" class="btn btn-primary btn-lg" onclick="location.href='@Url.Action("index", "home")'">Return to Dashboard</button>
                 </p>
