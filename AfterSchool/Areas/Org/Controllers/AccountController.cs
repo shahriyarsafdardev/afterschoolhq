@@ -1366,12 +1366,41 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentPackage = SessionVariables.AccountPackage;
             var currentAccount = SessionVariables.CurrentAccount;
             
+            HandleTempMessages(msgs);
+            
             ViewBag.CurrentPackage = currentPackage;
             ViewBag.Packages = Package.LoadByIsActive(true, msgs);
             ViewBag.SetupIntentClientSecret = StripeHelper.GetStripeHelperSubscriberAccount().CreateSetupIntent(currentAccount.StripeCustomerId, msgs).ClientSecret;
             ViewBag.Messages = msgs;
 
             return View(currentAccount);
+        }
+
+        [HttpGet]
+        public ActionResult DowngradeToFree(string newPlan)
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var accountPackage = SessionVariables.AccountPackage;
+            
+            currentAccount.SwitchPackagesWithStripe
+            (
+                Package.LoadByUid(newPlan.ToGuid(), msgs),
+                BillingPeriodType.Month,
+                true,
+                accountPackage.StripeSubscriptionId,
+                currentUser,
+                msgs
+            );
+
+            if (msgs.HasErrors())
+            {
+                SetTempMessages(msgs);
+                return RedirectToAction("SelectPlan");
+            }
+
+            return RedirectToAction("SelectPlanDone");
         }
 
         [HttpGet]
