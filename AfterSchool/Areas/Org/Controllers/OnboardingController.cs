@@ -112,11 +112,11 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult SetAccountType(AccountType type)
         {
             var msgs = new SystemMessages();
-            var account = SessionVariables.CurrentAccount;
+            var currentAccount = SessionVariables.CurrentAccount;
 
-            account.AccountTypeId = type;
-            account.OnboardingStepDone = OnboardingStepType.AccountType;
-            msgs.AddRange(account.Save());
+            currentAccount.AccountTypeId = type;
+            currentAccount.OnboardingStepDone = OnboardingStepType.AccountType;
+            msgs.AddRange(currentAccount.Save());
 
             return RedirectToAction("ProgramInfo");
         }
@@ -134,9 +134,9 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult ProgramInfo()
         {
             var msgs = new SystemMessages();
-            var account = SessionVariables.CurrentAccount;
+            var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
-            var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
+            var profile = currentAccount.GetOrCreateAccountProfile(currentUser, msgs);
             var headline = profile.IsNotEmpty() ? profile.Headline : "";
             var genderrestrictions =
                 profile.IsNotEmpty() ? (int) profile.GenderRestriction : (int) GenderRestrictionType.None;
@@ -146,19 +146,19 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Headline = headline;
             ViewBag.GenderRestriction = genderrestrictions;
             ViewBag.Messages = msgs;
-            ViewBag.Title = account.Name;
+            ViewBag.Title = currentAccount.Name;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
 
-            return View(account);
+            return View(currentAccount);
         }
 
         [HttpPost]
         public ActionResult ProgramInfo(string title, string headline, string genderrestrictions, string timeZone)
         {
             var msgs = new SystemMessages();
-            var account = SessionVariables.CurrentAccount;
+            var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
-            var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
+            var profile = currentAccount.GetOrCreateAccountProfile(currentUser, msgs);
 
             HandleTempMessages(msgs);
 
@@ -171,11 +171,11 @@ namespace AfterSchool.Areas.Org.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        account.Name = title.MaxChars(50);
-                        account.UniqueName = AccountService.GenerateUniqueName(title, account.ID, amsgs, adc);
-                        account.OnboardingStepDone = OnboardingStepType.ProgramInfo;
-                        account.TimeZone = timeZone.IsNotEmpty() ? timeZone : null;
-                        amsgs.AddRange(account.Save(adc));
+                        currentAccount.Name = title.MaxChars(50);
+                        currentAccount.UniqueName = AccountService.GenerateUniqueName(title, currentAccount.ID, amsgs, adc);
+                        currentAccount.OnboardingStepDone = OnboardingStepType.ProgramInfo;
+                        currentAccount.TimeZone = timeZone.IsNotEmpty() ? timeZone : null;
+                        amsgs.AddRange(currentAccount.Save(adc));
 
                         profile.UpdateProfileProgramInfo(
                             title: title,
@@ -196,19 +196,19 @@ namespace AfterSchool.Areas.Org.Controllers
 
 
             ViewBag.Messages = msgs;
-            ViewBag.Title = Request["title"] ?? account.Name;
+            ViewBag.Title = Request["title"] ?? currentAccount.Name;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
 
-            return View(account);
+            return View(currentAccount);
         }
 
         [HttpGet]
         public ActionResult AdditionalInfo()
         {
             var msgs = new SystemMessages();
-            var account = SessionVariables.CurrentAccount;
+            var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
-            var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
+            var profile = currentAccount.GetOrCreateAccountProfile(currentUser, msgs);
             var grades = GradeLevel.Load(msgs: msgs);
             var minGradeId = grades.First().ID.Value;
             var gradeStart = profile.GetGradeLevelStart();
@@ -232,7 +232,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.CostLow = profile.CostLow.HasValue ? profile.CostLow.Value.ToString("0.00") : "";
             ViewBag.CostHigh = profile.CostHigh.HasValue ? profile.CostHigh.Value.ToString("0.00") : "";
 
-            return View(account);
+            return View(currentAccount);
         }
 
         [HttpPost]
@@ -240,9 +240,9 @@ namespace AfterSchool.Areas.Org.Controllers
             string isvirtualprogram, string costlow, string costhigh)
         {
             var msgs = new SystemMessages();
-            var account = SessionVariables.CurrentAccount;
+            var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
-            var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
+            var profile = currentAccount.GetOrCreateAccountProfile(currentUser, msgs);
 
             HandleTempMessages(msgs);
 
@@ -254,8 +254,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        account.OnboardingStepDone = OnboardingStepType.AdditionalInfo;
-                        amsgs.AddRange(account.Save(adc));
+                        currentAccount.UpdateOnboardingStep(OnboardingStepType.AdditionalInfo, amsgs, adc);
 
                         profile.UpdateProfileAdditionalInfo(
                             mingrade: mingrade,
@@ -289,27 +288,27 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IsNewProfile = false;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
 
-            return View(account);
+            return View(currentAccount);
         }
 
         [HttpGet]
         public ActionResult ContactInfo()
         {
             var msgs = new SystemMessages();
-            var account = SessionVariables.CurrentAccount;
-            var profile = account.GetAccountProfile(msgs);
+            var currentAccount = SessionVariables.CurrentAccount;
+            var profile = currentAccount.GetAccountProfile(msgs);
             var location = profile.GetLocation();
 
             HandleTempMessages(msgs);
 
             ViewBag.Location = location ?? new Location();
-            ViewBag.Email = profile.ProfileEmail.IsNotEmpty() ? profile.ProfileEmail : account.Email;
-            ViewBag.Phone = profile.ProfilePhone.IsNotEmpty() ? profile.ProfilePhone : account.Phone;
+            ViewBag.Email = profile.ProfileEmail.IsNotEmpty() ? profile.ProfileEmail : currentAccount.Email;
+            ViewBag.Phone = profile.ProfilePhone.IsNotEmpty() ? profile.ProfilePhone : currentAccount.Phone;
             ViewBag.IsProfileEmail = profile.ProfileEmail.IsNotEmpty();
             ViewBag.IsProfilePhone = profile.ProfilePhone.IsNotEmpty();
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            return View(account);
+            return View(currentAccount);
         }
 
         [HttpPost]
@@ -320,9 +319,9 @@ namespace AfterSchool.Areas.Org.Controllers
             string county, string country, string placeid, string latitude, string longitude)
         {
             var msgs = new SystemMessages();
-            var account = SessionVariables.CurrentAccount;
+            var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
-            var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
+            var profile = currentAccount.GetOrCreateAccountProfile(currentUser, msgs);
 
             HandleTempMessages(msgs);
 
@@ -344,10 +343,10 @@ namespace AfterSchool.Areas.Org.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        account.Email = email;
-                        account.Phone = extractedPhoneNumber;
-                        account.OnboardingStepDone = OnboardingStepType.ContactInfo;
-                        amsgs.AddRange(account.Save(adc));
+                        currentAccount.Email = email;
+                        currentAccount.Phone = extractedPhoneNumber;
+                        currentAccount.OnboardingStepDone = OnboardingStepType.ContactInfo;
+                        amsgs.AddRange(currentAccount.Save(adc));
 
                         profile.UpdateProfileContactinfo(
                             profileemail: publicemail.IsBoolean() ? email : null,
@@ -403,15 +402,15 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
 
             ViewBag.Messages = msgs;
-            return View(account);
+            return View(currentAccount);
         }
 
         [HttpGet]
         public ActionResult Logo()
         {
             var msgs = new SystemMessages();
-            var account = SessionVariables.CurrentAccount;
-            var profile = account.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
+            var currentAccount = SessionVariables.CurrentAccount;
+            var profile = currentAccount.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
             var ah = Utilities.GetNewAmazonHelper();
 
             HandleTempMessages(msgs);
@@ -424,15 +423,15 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            return View(account);
+            return View(currentAccount);
         }
 
         [HttpPost]
         public ActionResult Logo(string logo, string headerimage)
         {
             var msgs = new SystemMessages();
-            var account = SessionVariables.CurrentAccount;
-            var profile = account.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
+            var currentAccount = SessionVariables.CurrentAccount;
+            var profile = currentAccount.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
             var allowedFiles = new string[] {".png", ".jpg", ".jpeg"};
             var accountPackage = SessionVariables.AccountPackage;
 
@@ -472,8 +471,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         SessionVariables.CurrentUser,
                         msgs);
 
-                account.OnboardingStepDone = OnboardingStepType.LogoAndHeader;
-                msgs.AddRange(account.Save());
+                currentAccount.UpdateOnboardingStep(OnboardingStepType.LogoAndHeader, msgs);
             }
 
             if (msgs.HasNoErrors())
@@ -481,15 +479,15 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = accountPackage;
-            return View(account);
+            return View(currentAccount);
         }
 
         [HttpGet]
         public ActionResult ServicesOffered()
         {
             var msgs = new SystemMessages();
-            var account = SessionVariables.CurrentAccount;
-            var profile = account.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
+            var currentAccount = SessionVariables.CurrentAccount;
+            var profile = currentAccount.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
 
             HandleTempMessages(msgs);
 
@@ -506,7 +504,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = msgs;
 
-            return View(account);
+            return View(currentAccount);
         }
 
         [HttpPost]
@@ -514,9 +512,9 @@ namespace AfterSchool.Areas.Org.Controllers
             string teachingmethods, string programsalldayduringworkweek)
         {
             var msgs = new SystemMessages();
-            var account = SessionVariables.CurrentAccount;
+            var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
-            var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
+            var profile = currentAccount.GetOrCreateAccountProfile(currentUser, msgs);
 
             HandleTempMessages(msgs);
 
@@ -526,8 +524,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        account.OnboardingStepDone = OnboardingStepType.ServicesOffered;
-                        amsgs.AddRange(account.Save(adc));
+                        currentAccount.UpdateOnboardingStep(OnboardingStepType.ServicesOffered, amsgs, adc);
 
                         profile.UpdateProfileServicesOffered(
                             servicesOffered: Request.Params.Filter("services-offered-"),
@@ -564,7 +561,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 profile.GetProperties(AccountPropertyType.ProgramsAllDayDuringWorkWeek, msgs);
             ViewBag.Messages = msgs;
 
-            return View(account);
+            return View(currentAccount);
         }
 
 
@@ -590,9 +587,9 @@ namespace AfterSchool.Areas.Org.Controllers
             string calendar, string registrationurl, string buttontext, string collectregistration)
         {
             var msgs = new SystemMessages();
-            var account = SessionVariables.CurrentAccount;
+            var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
-            var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
+            var profile = currentAccount.GetOrCreateAccountProfile(currentUser, msgs);
 
             HandleTempMessages(msgs);
 
@@ -626,9 +623,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        account.OnboardingStepDone = OnboardingStepType.SocialLinks;
-                        account.Website = website;
-                        amsgs.AddRange(account.Save(adc));
+                        currentAccount.OnboardingStepDone = OnboardingStepType.SocialLinks;
+                        currentAccount.Website = website;
+                        amsgs.AddRange(currentAccount.Save(adc));
 
                         profile.UpdateProfileLinks(
                             website: website,
@@ -655,13 +652,13 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (currentUser.Email.Contains("@afterschoolhq.com"))
                     return RedirectToAction("Done");
                 
-                return RedirectToAction("Done", new {accounttype = account.AccountTypeId.ToString()});
+                return RedirectToAction("Done", new {accounttype = currentAccount.AccountTypeId.ToString()});
             }
 
-            ViewBag.IsIsypAccount = AccountService.CheckIfIsypAccount(account, msgs);
+            ViewBag.IsIsypAccount = AccountService.CheckIfIsypAccount(currentAccount, msgs);
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            return View(account);
+            return View(currentAccount);
         }
 
         [HttpGet]
@@ -686,8 +683,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             HandleTempMessages(msgs);
 
-            currentAccount.OnboardingStepDone = OnboardingStepType.All;
-            msgs.AddRange(currentAccount.Save());
+            currentAccount.UpdateOnboardingStep(OnboardingStepType.All, msgs);
 
             if (msgs.HasNoErrors() && currentAccount.IsNotEmpty() && currentUser.IsNotEmpty())
             {

@@ -2824,7 +2824,7 @@ namespace AfterSchoolLibrary.Services
 
         public static void UpdateOnboardingStep(this Account account, OnboardingStepType onboardingStep, SystemMessages msgs, DatabaseConnection dc = null)
         {            
-            account.OnboardingStepDone = OnboardingStepType.AccountType;
+            account.OnboardingStepDone = onboardingStep;
             msgs.AddRange(account.Save(dc));
         }
 
