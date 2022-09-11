@@ -648,12 +648,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (msgs.HasNoErrors())
-            {
-                if (currentUser.Email.Contains("@afterschoolhq.com"))
-                    return RedirectToAction("Done");
-                
-                return RedirectToAction("Done", new {accounttype = currentAccount.AccountTypeId.ToString()});
-            }
+                return RedirectToDone(currentAccount, currentUser);
 
             ViewBag.IsIsypAccount = AccountService.CheckIfIsypAccount(currentAccount, msgs);
             ViewBag.Messages = msgs;
@@ -662,12 +657,15 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult RedirectToDone()
+        public ActionResult RedirectToDone(Account currentAccount = null, WebUser currentUser = null)
         {
-            if (SessionVariables.CurrentUser.Email.Contains("@afterschoolhq.com"))
+            currentAccount ??= SessionVariables.CurrentAccount;
+            currentUser ??= SessionVariables.CurrentUser;
+            
+            if (currentUser.Email.Contains("@afterschoolhq.com"))
                 return RedirectToAction("Done");
                 
-            return RedirectToAction("Done", new {accounttype = SessionVariables.CurrentAccount.AccountTypeId.ToString()});
+            return RedirectToAction("Done", new {accounttype = currentAccount.AccountTypeId.ToString()});
         }
 
         [HttpGet]
