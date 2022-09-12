@@ -1221,8 +1221,10 @@ namespace AfterSchoolLibrary.Billing
                 CollectionMethod = "charge_automatically",
                 Metadata = metaData,
                 ProrationBehavior = "none",
-                DefaultPaymentMethod = defaultPaymentMethod,
             };
+
+            if (defaultPaymentMethod.IsNotEmpty())
+                options.DefaultPaymentMethod = defaultPaymentMethod;
 
             if (sourceId.IsNotEmpty())
                 options.DefaultSource = sourceId;
