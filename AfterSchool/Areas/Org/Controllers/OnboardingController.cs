@@ -39,6 +39,7 @@ namespace AfterSchool.Areas.Org.Controllers
             return RedirectToAction("ProgramInfo");
         }
 
+        [HttpGet]
         public ActionResult StartSubscription()
         {
             var msgs = new SystemMessages();
@@ -47,6 +48,7 @@ namespace AfterSchool.Areas.Org.Controllers
             return View();
         }
 
+        [HttpGet]
         public ActionResult ContinueToPayment()
         {
             var msgs = new SystemMessages();
@@ -70,6 +72,7 @@ namespace AfterSchool.Areas.Org.Controllers
             return View("StartSubscription");
         }
 
+        [HttpGet]
         public ActionResult SubscriptionSuccess()
         {
             var msgs = new SystemMessages();
@@ -85,6 +88,7 @@ namespace AfterSchool.Areas.Org.Controllers
             return View();
         }
 
+        [HttpGet]
         public ActionResult SubscriptionFail()
         {
             var msgs = new SystemMessages();

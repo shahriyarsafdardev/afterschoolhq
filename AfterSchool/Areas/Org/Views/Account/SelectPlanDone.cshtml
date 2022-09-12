@@ -1,21 +1,8 @@
-﻿@using AfterSchoolLibrary.Billing
-@using AfterSchoolLibrary.Enums
-@using Utilities = AfterSchoolLibrary.Helpers.Utilities
-@model Account
+﻿@model Account
 @{ 
     ViewBag.Title = Model.Name;
     var msgs = (SystemMessages)ViewBag.Messages;
     var currentPackage = (AccountPackage)ViewBag.CurrentPackage;
-    var returnUrl = "";
-    
-    if (ViewBag.ReturnUrl != null)
-    {
-        returnUrl = (string)ViewBag.ReturnUrl;
-    }
-    else
-    {
-        returnUrl = Url.Action("index", "activity");
-    }
 
     Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
 }

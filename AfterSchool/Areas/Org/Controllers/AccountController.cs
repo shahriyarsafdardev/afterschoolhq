@@ -500,7 +500,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         /***
-         * NOTE: Needs Refactoring
+         * NOTE: Needs Refactoring to change from userid to a more abstract value
          */
         public ActionResult UpdateUserType(string userid, string newusertypeid)
         {
@@ -1289,7 +1289,8 @@ namespace AfterSchool.Areas.Org.Controllers
             return Json(new {success = false, status = "error", data = msgs.ToList().Select(msg => new {msg.Text})},
                 JsonRequestBehavior.AllowGet);
         }
-        
+
+        [HttpGet]
         public ActionResult Billing()
         {
             var currentAccount = SessionVariables.CurrentAccount;
