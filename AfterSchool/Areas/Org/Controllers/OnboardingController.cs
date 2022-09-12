@@ -569,15 +569,15 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Links()
         {
             var msgs = new SystemMessages();
-            var account = SessionVariables.CurrentAccount;
-
-            ViewBag.IsIsypAccount = AccountService.CheckIfIsypAccount(account, msgs);
-
+            var currentAccount = SessionVariables.CurrentAccount;
+            
             HandleTempMessages(msgs);
 
+            ViewBag.IsIsypAccount = AccountService.CheckIfIsypAccount(currentAccount, msgs);
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            return View(account);
+            ViewBag.Profile = currentAccount.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
+            return View(currentAccount);
         }
 
 

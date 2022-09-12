@@ -2,7 +2,8 @@
 @{
     Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml";
     var msgs = (SystemMessages) ViewBag.Messages;
-    var profile = Model.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
+    var accountPackage = (AccountPackage) ViewBag.AccountPackage;
+    var profile = (AccountProfile)ViewBag.Profile;
     var website = profile.IsNotEmpty() ? profile.Website ?? Request["website"] : "";
     var twitter = profile.IsNotEmpty() ? profile.TwitterUrl ?? Request["twitter"] : "";
     var instagram = profile.IsNotEmpty() ? profile.InstagramUrl ?? Request["instagram"] : "";
@@ -145,12 +146,12 @@
                         <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right col-xs-12 register-continue">Save &amp; Continue</button>
                         <div class="clearfix"></div>
                         <div class="text-center margin-v-30">
-                            <a href="@Url.Action("servicesoffered", "onboarding")" class="text-muted">Back</a>
+                            <a href="@Url.Action(accountPackage.IsFree? "servicesoffered" : "Logo", "onboarding")" class="text-muted">Back</a>
                         </div>
                     </div>
 
                     <div class="visible-md visible-lg margin-v-30">
-                        <a href="@Url.Action("servicesoffered", "onboarding")" class="process-back">
+                        <a href="@Url.Action(accountPackage.IsFree? "servicesoffered" : "Logo", "onboarding")" class="process-back">
                             <img src="~/Assets/img/welcome-back-arrow.png"/>
                         </a>
                         <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right register-continue">Save &amp; Continue</button>
