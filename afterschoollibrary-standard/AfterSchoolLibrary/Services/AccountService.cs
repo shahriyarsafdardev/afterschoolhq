@@ -2430,12 +2430,20 @@ namespace AfterSchoolLibrary.Services
                     
                     stripeHelper.CancelSubscription(stripeSubscriptionId, false, msgs);
 
+                    var trialEndDate = packageToRemove.IsDuringTrial ? newAccountPackage.GetTrialEndDate(amsgs, adc) : new DateTime?();
+                    var defaultPaymentMethod = "";
+
+                    if (!packageToRemove.IsDuringTrial)
+                        defaultPaymentMethod = stripeHelper.GetPaymentMethods(account.StripeCustomerId, StripePaymentMethodType.card, amsgs).LastOrDefault()
+                            ?.Id;
+                    
                     var newStripeSubscription = stripeHelper.CreatePackageSubscription(
                         account.StripeCustomerId,
                         billingPeriodTypeId == BillingPeriodType.Month ? newPackage.StripePricePerMonthId : newPackage.StripePricePerYearId,
                         null,
-                        newAccountPackage.GetTrialEndDate(amsgs, adc),
+                        trialEndDate,
                         null,
+                        defaultPaymentMethod,
                         null,
                         amsgs);
 

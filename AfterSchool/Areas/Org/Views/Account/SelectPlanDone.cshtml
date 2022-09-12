@@ -50,7 +50,7 @@
                     }
                     else
                     {
-                        <span>Your subscription will automatically renew on <br/><b>@currentPackage.GetRenewalDate()</b> for <b>@currentPackage.Price.ToCurrency()</b>.</span>
+                        <span>Your subscription will automatically renew on <br/><b>@currentPackage.GetRenewalDate().ToLongDateString()</b> for <b>@currentPackage.Price.ToCurrency()</b>.</span>
                     }
                 </p>
 

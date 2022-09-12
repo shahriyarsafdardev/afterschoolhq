@@ -83,7 +83,11 @@
                                         }
                                         else if (currentPackage.IsTrialExpiredAndUnpaid(Model))
                                         {
-                                            <span>Please pick your plan and enter your payment details to continue using AfterSchool HQ</span>
+                                            <span>
+                                                Your trial has expired.<br />
+                                                <br />
+                                                Please pick your plan and enter your payment details to continue using AfterSchool HQ
+                                            </span>
                                         }
                                         else
                                         {
@@ -235,7 +239,18 @@
                                             </div>
                                             <div class="pull-right">
                                                 <button id="submit" class="btn btn-primary btn-lg">
-                                                    Save Payment Details
+                                                    @if (currentPackage.IsDuringTrial)
+                                                    {
+                                                        <span>
+                                                            Save Payment Details
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>
+                                                            Submit Payment and Start Subscription
+                                                        </span>
+                                                    }
                                                 </button>
                                             </div>
                                             <div class="clearfix"></div>
@@ -336,7 +351,7 @@
         
         function updatePlan(){
             $('#select-plan-panel-body').removeClass('hide');
-            $('#enter-payment-details-free-panel-body').removeClass('hide');  
+            $('#enter-payment-details-free-panel-body').addClass('hide');  
             $('#enter-payment-details-panel-body').addClass('hide');
         }
         

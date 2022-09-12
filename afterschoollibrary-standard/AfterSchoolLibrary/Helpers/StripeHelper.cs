@@ -1208,7 +1208,8 @@ namespace AfterSchoolLibrary.Billing
             return subscription;
         }
 
-        public Stripe.Subscription CreatePackageSubscription(string customerId, string priceId, string sourceId, DateTime? trialEndDate, string stripeCouponId, Dictionary<string, string> metaData, SystemMessages msgs)
+        public Stripe.Subscription CreatePackageSubscription(string customerId, string priceId, string sourceId, DateTime? trialEndDate, string stripeCouponId, 
+            string defaultPaymentMethod, Dictionary<string, string> metaData, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -1220,6 +1221,7 @@ namespace AfterSchoolLibrary.Billing
                 CollectionMethod = "charge_automatically",
                 Metadata = metaData,
                 ProrationBehavior = "none",
+                DefaultPaymentMethod = defaultPaymentMethod,
             };
 
             if (sourceId.IsNotEmpty())
