@@ -248,6 +248,12 @@ namespace AfterSchoolLibrary.Models
             set => MDV["HasDefaultPaymentMethod"].Value = value;
         }
 
+        public SignUpType SignUpTypeId
+        {
+            get => (SignUpType) MDV["SignUpTypeId"].Value;
+            set => MDV["SignUpTypeId"].Value = value;
+        }
+
 
         public Account()
         {
@@ -268,6 +274,7 @@ namespace AfterSchoolLibrary.Models
             IsClaimed = false;
             OnboardingStepDone = OnboardingStepType.NotSet;
             HasDefaultPaymentMethod = false;
+            SignUpTypeId = SignUpType.NotSet;
         }
 
         public static DatabaseParameters ObjectMap
@@ -312,6 +319,7 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "Subdomain", SqlDbType.NVarChar, "100");
                 _dp.Add(className, "DefaultVolunteerFormId", SqlDbType.Int);
                 _dp.Add(className, "HasDefaultPaymentMethod", SqlDbType.Bit);
+                _dp.Add(className, "SignUpTypeId", SqlDbType.Int);
                 return _dp;
             }
         }
@@ -527,6 +535,10 @@ namespace AfterSchoolLibrary.Models
 
             dps = new DatabaseParameters();
             dps.Add(ObjectMap["HasDefaultPaymentMethod"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["SignUpTypeId"]);
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
 

@@ -154,6 +154,7 @@ namespace AfterSchool.Controllers
         public ActionResult Welcome(string invite, string isrequestonlyaccess, string signuptype, string package, string period)
         {
             Account invitingAccount = null;
+            var signupTypeId = SignUpType.NotSet;
 
             if (invite.IsGuid())
             {
@@ -167,6 +168,12 @@ namespace AfterSchool.Controllers
                     if (currentUser.HasMultipleAccounts() || currentAccount.AccountTypeId != AccountType.Registrant)
                         return RedirectToAction("index", "login", new {returnurl = Request["returnurl"], invite});
                 }
+            }
+            else
+            {
+                signupTypeId = signuptype.IsNotEmpty() && signuptype.IsInteger()
+                    ? (SignUpType) signuptype.ToInteger()
+                    : SignUpType.TrialSignUp;
             }
 
             var msgs = new SystemMessages();
@@ -185,9 +192,7 @@ namespace AfterSchool.Controllers
             {
                 IsRequestOnlyAccess = isrequestonlyaccess.IsBoolean() && isrequestonlyaccess.ToBoolean(),
                 InviteCodeToShare = invite.IsNotEmpty() ? invite : "",
-                SignupType = signuptype.IsNotEmpty() && signuptype.IsInteger()
-                    ? (SignUpType) signuptype.ToInteger()
-                    : SignUpType.NotSet,
+                SignupType = signupTypeId,
                 InvitingAccount = invitingAccount,
                 PackageUid = package,
                 PackageName = selectedPackage.Name,
@@ -268,10 +273,10 @@ namespace AfterSchool.Controllers
                                 phone: model.Phone,
                                 isActive: true,
                                 accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
-                                packageId: PackageService.GetFreePackage(amsgs, adc).ID.Value,
+                                packageId: PackageService.GetFreePackage(amsgs, adc).ID,
                                 BillingPeriodType.Month,
-                                timeZone: null,
-                                isAfterSchool: true,
+                                timeZone: null, 
+                                signUpTypeId: model.SignupType,
                                 loggedInUser: user,
                                 msgs: amsgs,
                                 dc: adc);
@@ -287,6 +292,7 @@ namespace AfterSchool.Controllers
                                         orgName: model.OrgName,
                                         accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
                                         package: package,
+                                        signUpTypeId: model.SignupType,
                                         billingPeriodType: model.SubscriptionPeriod.ParseEnum<BillingPeriodType>(),
                                         loggedInUser: user,
                                         msgs: amsgs,
@@ -297,6 +303,7 @@ namespace AfterSchool.Controllers
                                 account = user.AddNewAccountWithDefaultPackageWithStripe(
                                     orgName: model.OrgName,
                                     accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
+                                    signUpTypeId: model.SignupType,
                                     loggedInUser: user,
                                     msgs: amsgs,
                                     dc: adc);
@@ -369,6 +376,8 @@ namespace AfterSchool.Controllers
                 if (model.SignupType == SignUpType.Teacher1099)
                     return RedirectToAction("paymentsoptions", "account",
                         new {area = "org", isfullscreen = 1, signuptype = (int) model.SignupType});
+                else if (model.SignupType == SignUpType.DirectPurchase)
+                    return RedirectToAction("startsubscription", "onboarding", new {area = "org"});
                 else if (invitingAccount.IsNotEmpty())
                     return RedirectToAction("index", "onboarding", new {area = "org", showGettingStarted = true});
                 
@@ -960,7 +969,6 @@ namespace AfterSchool.Controllers
                             packageBillingPeriod: BillingPeriodType.Month,
                             timeZone: null,
                             loggedInUser: SessionVariables.CurrentUser,
-                            isAfterSchool: true,
                             createWithStripe: true,
                             msgs: amsgs,
                             dc: adc);
@@ -1164,7 +1172,7 @@ namespace AfterSchool.Controllers
 
                         if (user.IsNotEmpty())
                             account = user.AddNewParentOrStudentRegistrantAccount(userType: UserType.Owner, isActive: true,
-                                isAfterSchool: true, loggedInUser: user, msgs: amsgs, dc: adc);
+                                loggedInUser: user, msgs: amsgs, dc: adc);
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {

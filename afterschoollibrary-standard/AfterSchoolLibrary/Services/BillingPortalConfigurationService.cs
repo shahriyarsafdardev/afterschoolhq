@@ -56,5 +56,22 @@ namespace AfterSchoolLibrary.Services
 
             return billingConfig;
         }
+
+        public static string GetBillingPortalSessionLink(Account currentAccount, string fullReturnUrl, BillingPortalConfigurationType config, SystemMessages msgs)
+        {       
+            var stripeHelper = StripeHelper.GetStripeHelperSubscriberAccount();
+            BillingPortalConfiguration bpc = null;
+
+            if (config != 0)
+                bpc = GetBillingPortalConfiguration(config, msgs);
+
+            var session = stripeHelper.GetBillingPortalSession(
+                currentAccount.StripeCustomerId,
+                bpc?.StripeId,
+                fullReturnUrl, 
+                msgs);
+
+            return session.Url;
+        }
     }
 }

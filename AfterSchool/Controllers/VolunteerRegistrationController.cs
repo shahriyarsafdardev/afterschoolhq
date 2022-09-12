@@ -45,7 +45,7 @@ namespace AfterSchool.Controllers
 
                     // if no parent account, then create one real quick
                     if (registrantAccount.IsEmpty())
-                        registrantAccount = currentUser.AddNewVolunteerAccount(UserType.Owner, true, true, currentUser, msgs);
+                        registrantAccount = currentUser.AddNewVolunteerAccount(UserType.Owner, true, currentUser, msgs);
                 }
 
                 var masterRegistrant = currentUser.GetMasterVolunteerRegistrant(msgs);
