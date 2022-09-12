@@ -1440,11 +1440,17 @@ namespace AfterSchool.Areas.Org.Controllers
                     // check if finally added payment
                     currentAccount.CheckIfSubscriberAccountHasPaymentMethod(null, amsgs, adc);
                     currentAccount.CheckIfSubscriberAccountSubscriptionChanged(false, currentUser, amsgs, adc);
-                }
+                },
+                onSuccess: (smsgs) => msgs.AddRange(smsgs),
+                onFailure: (fmsgs) => msgs.AddRange(fmsgs),
+                onException: (emsgs) => Utilities.SystemErrorLog(emsgs)
             );
 
-            if (returnUrl.IsNotEmpty())
+            if (msgs.HasNoErrors() && returnUrl.IsNotEmpty())
                 return new RedirectResult(returnUrl);
+            
+            if (msgs.HasErrors())
+                SetTempMessages(msgs);
 
             return RedirectToAction("Billing");
         }
