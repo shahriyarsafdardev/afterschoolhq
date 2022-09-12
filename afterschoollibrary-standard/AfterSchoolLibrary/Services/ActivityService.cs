@@ -848,6 +848,7 @@ namespace AfterSchoolLibrary.Services
             var costFrequencyType = values.GetValueOrDefault("costfrequencytype");
             var cutoffHours = values.GetValueOrDefault("cutoffhours");
             var isContinuousEnrollmentEnabled = values.GetValueOrDefault("isContinuousEnrollmentEnabled");
+            var strictgenderrestrictions = values.GetValueOrDefault("strictgenderrestrictions");
 
             var activityType = ActivityType.NotSet;
 
@@ -1057,6 +1058,9 @@ namespace AfterSchoolLibrary.Services
 
             if (cutoffHours.IsNotEmpty() && cutoffHours.IsNumber())
                 activity.RegistrationCutoffHours = cutoffHours.ToString().ToInteger();
+            
+            if (strictgenderrestrictions.IsNumber())
+                activity.IsGenderEnforced = strictgenderrestrictions.ToString().ToBoolean();
 
             if (msgs.HasNoErrors())
             {

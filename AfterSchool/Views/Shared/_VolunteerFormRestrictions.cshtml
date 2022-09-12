@@ -16,7 +16,7 @@
                                name="genderrestrictions"
                                id="genderrestrictions-@((int) item)"
                                @(Model.GenderRestriction == item ? " checked=\"checked\" " : "")
-                               value="@((int) item)"/>
+                               value="@((int) item)" onclick="handleCheck(this)" />
                         <label for="genderrestrictions-@((int) item)" class="margin-h-10">
                             @item.ToString().SplitByUpperCase()
                         </label>
@@ -24,5 +24,54 @@
                 </div>
             </div>
         </div>
+        <div class="form-group" id="strictGenderRestrictions">
+                        <label class="col-md-3 control-label">
+                            Stricly Enforce Gender Restrictions
+                        </label>
+                        <div class="col-md-9 margin-left">
+                            <div class="am-radio inline">
+                                <input id="genderrestrictions1" name="strictgenderrestrictions" @(!Model.IsGenderEnforced ? " checked=\"checked\" " : "") type="radio" value="0" />
+                                <label for="genderrestrictions1" class="margin-h-10">
+                                    No
+                                </label>
+                                <input id="genderrestrictions2" name="strictgenderrestrictions" @(Model.IsGenderEnforced ? " checked=\"checked\" " : "") type="radio" value="1"/>
+                                <label for="genderrestrictions2" class="margin-h-10">
+                                    Yes
+                                </label>
+                            </div>
+                            <div class="margin-h-10" style="color: #b3b3b3;">
+                                <i>
+                                    Stops volunteers of the restricted gender from signing up. Volunteers who select “Other” for gender will not be able to register for this opportunity.
+                                </i>
+                            </div>
+                        </div>
+                    </div>
     </div>
 </div>
+
+<script>
+    function showStrictGender() {
+            var genderrestrictions = $("#genderrestrictions-0").is(":checked");
+            if (genderrestrictions) {
+                $('#strictGenderRestrictions').addClass("hidden");
+            }
+            else {
+                $('#strictGenderRestrictions').removeClass("hidden");
+            }
+    }
+    
+    function handleCheck(obj) {
+            if (obj.getAttribute("value") != 0)
+                {
+                    $('#strictGenderRestrictions').removeClass("hidden");
+                }
+            else
+            {
+                $('#strictGenderRestrictions').addClass("hidden");
+            }
+    }
+    
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        showStrictGender();
+    }); 
+</script>

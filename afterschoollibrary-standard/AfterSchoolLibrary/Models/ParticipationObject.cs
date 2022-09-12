@@ -544,6 +544,17 @@ namespace AfterSchoolLibrary.Models
                 return IsGradeInRange(registrantGradeLevelAnswer.Text,msgs,dc);
             return false;
         }
+        
+        public GenderType StudentGender(Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var registrantGender = registrant.GetAnswer(QuestionDataType.RegistrantGender, msgs, dc);
+            if (registrantGender.Text.IsNotEmpty())
+            {
+                return Helpers.Utilities.GetKeyValuePairs(registrantGender.Text).First().value == "Male" ? GenderType.Male : GenderType.Female;
+            }
+
+            return GenderType.NotSet;
+        }
 
         public bool IsGradeInRange(string answer, SystemMessages msgs = null, DatabaseConnection dc = null)
         {

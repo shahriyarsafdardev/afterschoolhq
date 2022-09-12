@@ -1,8 +1,8 @@
 ﻿@model Registrant
 
 @{
-    var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
-    var selectedDates = (List<DateTime>)ViewBag.SelectedDates;
+    var participationObject = (ParticipationObject) ViewBag.ParticipationObject;
+    var selectedDates = (List<DateTime>) ViewBag.SelectedDates;
 
     var registered = "Enrolled";
     var register = "Enroll";
@@ -20,11 +20,20 @@
 
     var disabledText = "";
     var btnText = "";
-    var registerUrl = Url.Action("setstudent", "account", new { id = Model.Uid });
+    var registerUrl = Url.Action("setstudent", "account", new {id = Model.Uid});
     var btnUrl = $"javascript:checkEligibility('{Model.Uid}', '{registerUrl}', 'btn-register-{Model.Uid}')";
     var registrantGrade = Model.GetAnswer(QuestionDataType.RegistrantGrade);
     var registrantGradeText = registrantGrade.Text;
     var canStillRegister = false;
+
+
+    var inElegibleText = "";
+
+    var isAgeRestricted = participationObject.IsNotEmpty() && participationObject.RestrictByGrade() && !participationObject.IsStudentGradeInRange(Model);
+    var isGradeRestricted = participationObject.IsNotEmpty() && !participationObject.RestrictByGrade() && !participationObject.IsStudentAgeInRange(Model);
+    var isGenderEnforced = participationObject.IsNotEmpty() && participationObject.GetActivity().IsGenderEnforced
+                           && (int) participationObject.GenderRestriction != (int) participationObject.StudentGender(Model);
+
 
     if (participationObject.CanRegisterPerClass)
     {
@@ -38,11 +47,11 @@
         {
             if (participationObject.SubscriptionPlans.Any() && Model.HasCancelledSubscription(participationObject))
             {
-                btnText = $"Re-Enroll";
+                btnText = "Re-Enroll" + " &raquo";
             }
             else
             {
-                btnText = $"Withdrawn";
+                btnText = "Withdrawn";
                 disabledText = " disabled=\"disabled\" ";
                 btnUrl = "#";
             }
@@ -53,7 +62,7 @@
         }
         else if (Model.OnWaitingListFor(participationObject))
         {
-            btnText = $"On Waiting List";
+            btnText = "On Waiting List";
             disabledText = " disabled=\"disabled\" ";
             btnUrl = "#";
         }
@@ -69,14 +78,13 @@
             }
             else
             {
-                btnText = "Pay Now";
-                btnUrl = Url.Action("makepayment", "account", new { id = Model.GetRegistrationWithParticipationObject(participationObject).Uid });
+                btnText = "Pay Now" + " &raquo";
+                btnUrl = Url.Action("makepayment", "account", new {id = Model.GetRegistrationWithParticipationObject(participationObject).Uid});
             }
-
         }
         else if (participationObject.IsSession()) //&& registered != "Applied" (NOTE: removed by Darye, not sure what this is doing, logic is not obvious - basing code on a text field doesn't seem right and needs more explanation if this is the right thing to do.
         {
-            btnText = $"Add To Existing Registration";
+            btnText = "Add To Existing Registration" + " &raquo";
         }
         else
         {
@@ -89,26 +97,45 @@
     {
         // if incomplete let them "update and enroll" which will really force them to update their profiles
         // then it checks again after the profile is updated
+
         if (!Model.IsProfileCompleted)
         {
-            btnText = "Update Profile &amp; Enroll";
+            btnText = "Update Profile &amp; Enroll" + " &raquo";
             btnUrl = registerUrl;
-        }
-        else if (participationObject.IsNotEmpty() && participationObject.RestrictByGrade() && !participationObject.IsStudentGradeInRange(Model))
-        {
-            btnText = "Ineligible - Grade";
-            // disabledText = " disabled=\"disabled\" ";
-            // btnUrl = "#";
-        }
-        else if (participationObject.IsNotEmpty() && !participationObject.RestrictByGrade() && !participationObject.IsStudentAgeInRange(Model))
-        {
-            btnText = "Ineligible - Age";
-            disabledText = " disabled=\"disabled\" ";
-            // btnUrl = "#";
         }
         else
         {
-            btnText = register;
+            switch (isGenderEnforced)
+            {
+                case true when isAgeRestricted:
+                    btnText = "Ineligible";
+                    disabledText = " disabled=\"disabled\" ";
+                    inElegibleText = "Student must be in " + participationObject.GetActivity().AgeStart + " - " + participationObject.GetActivity().AgeEnd + " and a " + participationObject.GetActivity().GenderRestriction.ToString().Remove(participationObject.GetActivity().GenderRestriction.ToString().Length - 4, 4) + " to register for this activity";
+                    break;
+                case true when isGradeRestricted:
+                    btnText = "Ineligible";
+                    disabledText = " disabled=\"disabled\" ";
+                    inElegibleText = "Student must be in " + participationObject.GetActivity().GradeLevelStart + " - " + participationObject.GetActivity().GradeLevelEnd + " and a " + participationObject.GetActivity().GenderRestriction.ToString().Remove(participationObject.GetActivity().GenderRestriction.ToString().Length - 4, 4) + " to register for this activity";
+                    break;
+                case false when isGradeRestricted:
+                    btnText = "Ineligible";
+                    disabledText = " disabled=\"disabled\" ";
+                    inElegibleText = "Student must be in " + participationObject.GetActivity().GradeLevelStart + " - " + participationObject.GetActivity().GradeLevelEnd + " to register for this activity";
+                    break;
+                case false when isAgeRestricted:
+                    btnText = "Ineligible";
+                    disabledText = " disabled=\"disabled\" ";
+                    inElegibleText = "Student must be in" + participationObject.GetActivity().AgeStart + " - " + participationObject.GetActivity().AgeEnd + " to register for this activity";
+                    break;
+                case true:
+                    btnText = "Ineligible";
+                    disabledText = " disabled=\"disabled\" ";
+                    inElegibleText = "Student must be " + participationObject.GetActivity().GenderRestriction.ToString().Remove(participationObject.GetActivity().GenderRestriction.ToString().Length - 4, 4) + " to register for this activity";
+                    break;
+                default:
+                    btnText = register + " &raquo";
+                    break;
+            }
         }
     }
 }
@@ -117,7 +144,7 @@
         <div class="heading panel-h3 text-center bg-color-f0f0 p-l-0">
             <div class="student-register-fn-ln">
                 <div class="font-size-20 font-weight-bold long-text-ellipses notranslate">@Model.FirstName</div>
-                <div class="font-size-18 notranslate">@Model.LastName</div>              
+                <div class="font-size-18 notranslate">@Model.LastName</div>
             </div>
         </div>
         <div class="panel-body p-15-25">
@@ -130,13 +157,13 @@
                    class="btn btn-register-primary btn-lg"
                    @disabledText>
                     @Html.Raw(btnText)
-                    &raquo;
                 </a>
             </p>
+            <p class="text-center" style="color: #b3b3b3;">@Html.Raw(inElegibleText.IsNotEmpty() ? inElegibleText : "<br>")</p>
             <p class="text-center">
                 @if (Model.IsProfileCompleted)
                 {
-                    <a href="@Url.Action("editstudentpersonal", "family", new { Area = "user", id = Model.Uid, student = Model?.Uid, returnUrl = Request.Url.AbsolutePath })">Update Profile</a>
+                    <a href="@Url.Action("editstudentpersonal", "family", new {Area = "user", id = Model.Uid, student = Model?.Uid, returnUrl = Request.Url.AbsolutePath})">Update Profile</a>
                 }
                 else
                 {
