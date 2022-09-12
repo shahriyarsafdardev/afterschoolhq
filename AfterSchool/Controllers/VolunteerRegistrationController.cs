@@ -18,13 +18,11 @@ namespace AfterSchool.Controllers
 {
     public class VolunteerRegistrationController : BaseController
     {
-        private readonly IBackgroundCheckWorkflow backgroundCheckWorkflow;
         private readonly IFeatureFlagRepository featureFlagRepository;
 
         public VolunteerRegistrationController(IFeatureFlagRepository featureFlagRepository, IBackgroundCheckWorkflow backgroundCheckWorkflow)
         {
             this.featureFlagRepository = featureFlagRepository;
-            this.backgroundCheckWorkflow = backgroundCheckWorkflow;
         }
 
         [HttpGet]
@@ -467,7 +465,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> Register()
+        public ActionResult Register()
         {
             if (!RegistrationCommon.IsValidLogin(AccountType.Volunteer))
                 return Logout(Request.Url.ToString(), true);
@@ -500,10 +498,8 @@ namespace AfterSchool.Controllers
                 if (CurrentRegistrantHasAlreadySubmitted(registration.CompletionStatusId))
                     return new RedirectResult(SessionVariables.RegistrationStartPageAccount.HomePageUrl);
 
-                var backgroundCheckUrl = await CheckIfBackgroundCheckIsEnabledAndRequestUrl(msgs, currentUser);
-
                 if (msgs.HasNoErrors())
-                    ProcessRegistration(currentRegistrant, participationObject, registration, backgroundCheckUrl, msgs);
+                    ProcessRegistration(currentRegistrant, participationObject, registration, msgs);
 
                 if (msgs.HasNoErrors())
                     return RedirectToAction("ThankYou", new {id = registration.Uid});
@@ -516,13 +512,13 @@ namespace AfterSchool.Controllers
             List<FormQuestionViewModel> questions, Registrant currentRegistrant)
         {
             var registrationStartPageAccount = SessionVariables.RegistrationStartPageAccount;
-            var result = new VolunteerRegisterAssembler(featureFlagRepository).AssembleRegisterResult(questions, participationObject,
+            var result = new VolunteerRegisterAssembler().AssembleRegisterResult(questions, participationObject,
                 registrationStartPageAccount, currentRegistrant, msgs);
             return View("Register", result);
         }
 
         private static void ProcessRegistration(Registrant currentRegistrant, ParticipationObject participationObject, Registration registration,
-            string backgroundCheckUrl, SystemMessages msgs)
+            SystemMessages msgs)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var selectedDates = GatherAvailableSelectedDates(currentRegistrant, participationObject);
@@ -538,7 +534,7 @@ namespace AfterSchool.Controllers
                     SubscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault(),
                     SelectedDates = selectedDates,
                 },
-                true, SessionVariables.CurrentUser, backgroundCheckUrl, msgs);
+                true, SessionVariables.CurrentUser, msgs);
         }
 
         private static bool CurrentRegistrantHasAlreadySubmitted(RegistrationCompletionStatus registrationCompletionStatusId)
@@ -554,7 +550,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Register(string signature)
+        public ActionResult Register(string signature)
         {
             if (!RegistrationCommon.IsValidLogin(AccountType.Volunteer))
                 return Logout(Request.Url.ToString(), true);
@@ -581,23 +577,14 @@ namespace AfterSchool.Controllers
                 if (CurrentRegistrantHasAlreadySubmitted(registration.CompletionStatusId))
                     return RedirectToAction("Select");
 
-                var backgroundCheckUrl = await CheckIfBackgroundCheckIsEnabledAndRequestUrl(msgs, SessionVariables.CurrentUser);
-
                 if (msgs.HasNoErrors())
-                    ProcessRegistration(currentRegistrant, participationObject, registration, backgroundCheckUrl, msgs);
+                    ProcessRegistration(currentRegistrant, participationObject, registration, msgs);
 
                 if (msgs.HasNoErrors())
                     return RedirectToAction("ThankYou", new {id = registration.Uid});
             }
 
             return AssembleResultAndGoToRegisterView(participationObject, msgs, qvms, currentRegistrant);
-        }
-
-        private async Task<string> CheckIfBackgroundCheckIsEnabledAndRequestUrl(SystemMessages msgs, WebUser webUser)
-        {
-            if (msgs.HasErrors() || !featureFlagRepository.IsEnabled("background-check")) return null;
-            var backgroundCheckResult = await backgroundCheckWorkflow.RequestBackgroundCheck(webUser, msgs);
-            return backgroundCheckResult.BackgroundCheckUrl;
         }
     }
 }
