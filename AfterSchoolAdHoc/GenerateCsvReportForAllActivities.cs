@@ -6,7 +6,7 @@ using File = System.IO.File;
 
 namespace AfterSchoolAdHoc;
 
-public static class GenerateCsvReport
+public static class GenerateCsvReportForAllActivities
 {
     public static void Run(DatabaseConnection dc)
     {
@@ -20,7 +20,7 @@ public static class GenerateCsvReport
         if (account is null) throw new Exception("Account not found");
         var byteData = RegistrationService.GetCsvByteArray(account, null, null, participationObjectIds, ParticipationObjectType.Activity,
             RegistrationReportType.Dismissal, null, RegistrationStatus.NotSet, false, msgs, dc);
-        File.WriteAllBytes("report.csv", byteData);
-        Console.WriteLine("Report successfully saved");
+        File.WriteAllBytes($"report-{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.csv", byteData);
+        Console.WriteLine(@"Report successfully saved");
     }
 }

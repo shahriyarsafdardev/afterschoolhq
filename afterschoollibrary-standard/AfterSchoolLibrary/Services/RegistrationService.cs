@@ -262,7 +262,7 @@ namespace AfterSchoolLibrary.Services
         {
             if (participationObjectActivityType != ActivityType.VolunteerOpportunity)
                 return false;
-            
+
             // TODO: Check if Web User has a valid background check with a completed result.
             return true;
         }
@@ -494,7 +494,7 @@ namespace AfterSchoolLibrary.Services
 
             var questions = FormQuestion.LoadList(questionIds, msgs, dc)
                 .OrderBy(x => x.DisplayOrder)
-                .OrderBy(x => x.FormQuestionGroupDisplayOrder)
+                .ThenBy(x => x.FormQuestionGroupDisplayOrder)
                 .ToList();
 
             var standardQuestions = questions
