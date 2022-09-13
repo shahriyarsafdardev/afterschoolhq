@@ -45,8 +45,6 @@ namespace AfterSchoolLibrary.Billing
             return Math.Round(fee, 2, MidpointRounding.AwayFromZero);
         }
 
-        public static string ReferralCouponId => Helpers.Utilities.IsProduction ? "4BOLxUYy" : "5zMx3Z7l";
-
         public static string SecretKey => Helpers.Utilities.IsLocalHost ? TestSecretKey : LiveSecretKey;
         public static string PublishableKey  => Helpers.Utilities.IsLocalHost ? TestPublishableKey : LivePublishableKey;
         public static string PlatformClientId => Helpers.Utilities.IsLocalHost ? DevPlatformClientId : LivePlatformClientId;
@@ -2394,7 +2392,7 @@ namespace AfterSchoolLibrary.Billing
             return new Stripe.Checkout.SessionService(StripeClient);
         }
 
-        public Stripe.Checkout.Session GetCheckoutSession(string customerId, string priceId, string successUrl, string cancelUrl, string couponCode, SystemMessages msgs)
+        public Stripe.Checkout.Session GetCheckoutSession(string customerId, string priceId, string successUrl, string cancelUrl, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -2402,6 +2400,7 @@ namespace AfterSchoolLibrary.Billing
             var options = new Stripe.Checkout.SessionCreateOptions()
             {
                 Customer = customerId,
+                AllowPromotionCodes = true,
                 AutomaticTax = new SessionAutomaticTaxOptions()
                 {
                     Enabled = true,
@@ -2424,17 +2423,6 @@ namespace AfterSchoolLibrary.Billing
                 },
                 PaymentMethodTypes = new List<string>() {"card"},
             };
-
-            if (couponCode.IsNotEmpty())
-                options.Discounts = new List<SessionDiscountOptions>()
-                {
-                    new SessionDiscountOptions()
-                    {
-                        Coupon = couponCode,
-                    },
-                };
-            else
-                options.AllowPromotionCodes = true;
 
             try
             {
