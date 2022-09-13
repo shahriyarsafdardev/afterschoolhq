@@ -493,8 +493,8 @@ namespace AfterSchoolLibrary.Services
             var questionIds = answers.Select(x => x.FormQuestionId.Value).Distinct().ToList();
 
             var questions = FormQuestion.LoadList(questionIds, msgs, dc)
-                .OrderBy(x => x.DisplayOrder)
-                .ThenBy(x => x.FormQuestionGroupDisplayOrder)
+                .OrderBy(x => x.FormQuestionGroupDisplayOrder)
+                .ThenBy(x => x.DisplayOrder)
                 .ToList();
 
             var standardQuestions = questions
