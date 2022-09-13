@@ -151,25 +151,35 @@ namespace AfterSchool.Controllers
         }
         
         [HttpGet]
-        public ActionResult Welcome(string invite, string isrequestonlyaccess, string signuptype, string package, string period)
+        public ActionResult Welcome(string invite, string isrequestonlyaccess, string signuptype, string package, string period, string referrer)
         {
+            var msgs = new SystemMessages();
             Account invitingAccount = null;
+            Account referrerAccount = null;
+            var signupTypeId = SignUpType.NotSet;
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
 
             if (invite.IsGuid())
             {
-                invitingAccount = Account.LoadByInviteCodeToShare(invite.ToGuid());
-
-                var currentAccount = SessionVariables.CurrentAccount;
-                var currentUser = SessionVariables.CurrentUser;
-
+                invitingAccount = Account.LoadByInviteCodeToShare(invite.ToGuid(), msgs);
+                
                 if (currentAccount.IsNotEmpty() && currentUser.IsNotEmpty())
                 {
                     if (currentUser.HasMultipleAccounts() || currentAccount.AccountTypeId != AccountType.Registrant)
                         return RedirectToAction("index", "login", new {returnurl = Request["returnurl"], invite});
                 }
             }
+            else
+            {
+                signupTypeId = signuptype.IsNotEmpty() && signuptype.IsInteger()
+                    ? (SignUpType) signuptype.ToInteger()
+                    : SignUpType.TrialSignUp;
+            }
+            
+            if (referrer.IsGuid())
+                referrerAccount = Account.LoadByReferralCode(referrer.ToGuid(), msgs);
 
-            var msgs = new SystemMessages();
             Package selectedPackage = null;
 
             if (package.IsGuid())
@@ -185,14 +195,14 @@ namespace AfterSchool.Controllers
             {
                 IsRequestOnlyAccess = isrequestonlyaccess.IsBoolean() && isrequestonlyaccess.ToBoolean(),
                 InviteCodeToShare = invite.IsNotEmpty() ? invite : "",
-                SignupType = signuptype.IsNotEmpty() && signuptype.IsInteger()
-                    ? (SignUpType) signuptype.ToInteger()
-                    : SignUpType.NotSet,
+                SignupType = signupTypeId,
                 InvitingAccount = invitingAccount,
                 PackageUid = package,
                 PackageName = selectedPackage.Name,
                 SubscriptionPeriod = period,
                 TrialDays = selectedPackage.GetFeature(FeatureType.TrialDays).GetMaxValue(),
+                ReferrerAccount = referrerAccount,
+                ReferralCode = referrer,
             };
             return View(model);
         }
@@ -203,6 +213,7 @@ namespace AfterSchool.Controllers
         {
             var msgs = new SystemMessages();
             Account invitingAccount = null;
+            Account referrerAccount = null;
 
             if (model.FirstName.IsEmpty())
                 msgs.Add("First Name is required", MessageType.UserError);
@@ -232,6 +243,16 @@ namespace AfterSchool.Controllers
                 invitingAccount = Account.LoadByInviteCodeToShare(model.InviteCodeToShare.ToGuid());
                 if (invitingAccount.IsEmpty())
                     msgs.Add("Invalid invitation code", MessageType.UserError);
+            }
+
+            if (model.ReferralCode.IsNotEmpty())
+            {
+                if (!model.ReferralCode.IsGuid())
+                    msgs.Add("Invalid referral code", MessageType.UserError);
+
+                referrerAccount = Account.LoadByReferralCode(model.ReferralCode.ToGuid());
+                if (referrerAccount.IsEmpty())
+                    msgs.Add("Invalid referral code", MessageType.UserError);
             }
 
             if (msgs.HasNoErrors())
@@ -268,10 +289,10 @@ namespace AfterSchool.Controllers
                                 phone: model.Phone,
                                 isActive: true,
                                 accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
-                                packageId: PackageService.GetFreePackage(amsgs, adc).ID.Value,
+                                packageId: PackageService.GetFreePackage(amsgs, adc).ID,
                                 BillingPeriodType.Month,
-                                timeZone: null,
-                                isAfterSchool: true,
+                                timeZone: null, 
+                                signUpTypeId: model.SignupType,
                                 loggedInUser: user,
                                 msgs: amsgs,
                                 dc: adc);
@@ -287,6 +308,7 @@ namespace AfterSchool.Controllers
                                         orgName: model.OrgName,
                                         accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
                                         package: package,
+                                        signUpTypeId: model.SignupType,
                                         billingPeriodType: model.SubscriptionPeriod.ParseEnum<BillingPeriodType>(),
                                         loggedInUser: user,
                                         msgs: amsgs,
@@ -297,6 +319,7 @@ namespace AfterSchool.Controllers
                                 account = user.AddNewAccountWithDefaultPackageWithStripe(
                                     orgName: model.OrgName,
                                     accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
+                                    signUpTypeId: model.SignupType,
                                     loggedInUser: user,
                                     msgs: amsgs,
                                     dc: adc);
@@ -310,6 +333,10 @@ namespace AfterSchool.Controllers
                             else
                                 invitingAccount.ApproveAccessToAccount(account, user, amsgs, adc);
                         }
+
+                        if (referrerAccount.IsNotEmpty())
+                            account.AddReferrerAccount(referrerAccount, amsgs, adc);
+                        
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
@@ -369,6 +396,8 @@ namespace AfterSchool.Controllers
                 if (model.SignupType == SignUpType.Teacher1099)
                     return RedirectToAction("paymentsoptions", "account",
                         new {area = "org", isfullscreen = 1, signuptype = (int) model.SignupType});
+                else if (model.SignupType == SignUpType.DirectPurchase)
+                    return RedirectToAction("startsubscription", "onboarding", new {area = "org"});
                 else if (invitingAccount.IsNotEmpty())
                     return RedirectToAction("index", "onboarding", new {area = "org", showGettingStarted = true});
                 
@@ -960,7 +989,6 @@ namespace AfterSchool.Controllers
                             packageBillingPeriod: BillingPeriodType.Month,
                             timeZone: null,
                             loggedInUser: SessionVariables.CurrentUser,
-                            isAfterSchool: true,
                             createWithStripe: true,
                             msgs: amsgs,
                             dc: adc);
@@ -1164,7 +1192,7 @@ namespace AfterSchool.Controllers
 
                         if (user.IsNotEmpty())
                             account = user.AddNewParentOrStudentRegistrantAccount(userType: UserType.Owner, isActive: true,
-                                isAfterSchool: true, loggedInUser: user, msgs: amsgs, dc: adc);
+                                loggedInUser: user, msgs: amsgs, dc: adc);
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {

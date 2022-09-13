@@ -178,7 +178,6 @@ namespace AfterSchool.Areas.Admin.Controllers
                                     packageId: package.ToInteger(),
                                     packageBillingPeriod: (BillingPeriodType) billingperiod.ToInteger(),
                                     timeZone: timezone,
-                                    isAfterSchool: true,
                                     loggedInUser: currentUser,
                                     msgs: amsgs,
                                     dc: adc);
@@ -197,7 +196,6 @@ namespace AfterSchool.Areas.Admin.Controllers
                                     packageBillingPeriod: (BillingPeriodType) billingperiod.ToInteger(),
                                     timeZone: timezone,
                                     loggedInUser: currentUser,
-                                    isAfterSchool: true,
                                     createWithStripe: false,
                                     msgs: amsgs,
                                     dc: adc);

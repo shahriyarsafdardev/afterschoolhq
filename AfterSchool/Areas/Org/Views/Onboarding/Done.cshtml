@@ -1,5 +1,9 @@
 ﻿@model Account
-@{ Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml"; }
+@{
+    Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml";
+
+    var hostAccounts = (List<Account>) ViewBag.HostAccounts;
+}
 
 
 <div class="row main-content main-content-welcome-pages">
@@ -19,30 +23,34 @@
                     </p>
                 </div>
                 <div class="clearfix"></div>
-                <div class="col-md-12 onboarding-form-group text-center">
-                    <h4 id="hidetxt" class="text-center font-styling-18" style="font-weight:bold">Hold tight while we build your profile...</h4>
-                </div>
-                <div class="clearfix"></div>
 
                 <div class="margin-v-30 text-center">
-                    <a id="btnGoProfile"href="@Model.HomePageUrl" class="btn btn-primary btn-free-profile" style="display:none">Go to Your Profile</a>
+                    @if (!hostAccounts.Any())
+                    {
+                        <div>
+                            <a id="btnGoProfile"
+                               href="@Url.Action("editsetup", "activity", new {isnew = 1, type = (int) ActivityType.Activity})" 
+                               class="btn btn-primary btn-free-profile">
+                                Create Your First @UILabel.ActivityLabel(ActivityType.Activity)
+                            </a>
+                        </div>
+                        <div class="padding-v-20">
+                            <a href="@Url.Action("index", "activity")" class="text-muted text-small">Explore on my own</a> |
+                            <a href="@Model.HomePageUrl" class="text-muted text-small">View My Profile</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <a id="btnGoProfile"
+                           href="@Model.HomePageUrl" 
+                           class="btn btn-primary btn-free-profile">
+                            Go to Your Profile
+                        </a>
+                    }
+                    
                 </div>
                 <div class="clearfix"></div>
             </div>
         </div>
     </div>
 </div>
-
-@section Scripts
-{
-    <script type="text/javascript">
-                
-        $(document).ready(function () {            
-            setTimeout(function () {
-                $('#hidetxt').hide();
-                $('#btnGoProfile').show();
-            }, 5000);           
-        });
-
-    </script>
-}

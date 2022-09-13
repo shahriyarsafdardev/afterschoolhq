@@ -1,0 +1,60 @@
+﻿@{ 
+    var account = SessionVariables.CurrentAccount;
+    Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml";
+}
+
+<style>
+    .top-icon{
+        width:  87px;    
+    }
+    .onboarding-inner-ring{
+        font-size: 18px;
+        font-weight: 300;
+        text-align: center;
+        color: #282828;
+    }
+    h3 {
+        font-weight: bold;
+        font-size: 30px;
+    }
+    p {
+        margin: 25px;
+        max-width: 600px;
+    }
+    
+    .continue {
+        padding: 15px 104px;
+        border-radius: 6px;
+        border-color: transparent;
+        background-color: #00c5a3;
+        color:  white;
+        margin:  20px;
+    }
+    
+    .continue:hover {
+        color:  white;
+    }
+</style>
+
+@if (account.IsNotEmpty())
+{
+    <div class="row main-content main-content-welcome-pages">
+        <div class="welcome-box-width">
+            <div class="welcome-outer-ring">
+                <div class="onboarding-inner-ring">
+                    <img class="top-icon" src="~/Assets/img/celebration.svg" alt="Celebration"/>
+                    <h3 class="lets-get-started">You have successfully started your subsription.</h3>
+                    <p>
+                        Your subscription will automatically renew on <br /><b>@ViewBag.RenewalDate</b> for <b>@ViewBag.RenewalAmount</b>.
+                    </p>
+                    <p>
+                        We just need to ask a few more questions to get you all set up.
+                    </p>
+                    <button class="continue" onclick="location.href='@Url.Action("programinfo", "onboarding", new { area = "org" })'">
+                        Continue
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

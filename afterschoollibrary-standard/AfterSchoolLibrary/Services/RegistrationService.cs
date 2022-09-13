@@ -260,11 +260,10 @@ namespace AfterSchoolLibrary.Services
 
         internal static bool IsBackgroundCheckRequired(ActivityType? participationObjectActivityType, int? webUserId)
         {
-            if (participationObjectActivityType != ActivityType.VolunteerOpportunity)
-                return false;
-
+            // TODO: Blocked pending some way to approve background checks.
+            // TODO: Check if Account wants to use background checks as not all will.
             // TODO: Check if Web User has a valid background check with a completed result.
-            return true;
+            return false;
         }
 
         public static void AddESignature(this Registration registration, string esignature, string userAgent,

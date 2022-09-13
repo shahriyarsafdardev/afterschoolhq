@@ -108,9 +108,9 @@ namespace AfterSchoolLibrary.Tests
         }
 
         [Test]
-        public void IsBackgroundCheckTrueForVolunteerOpportunitiesTest()
+        public void IsBackgroundCheckRequiredFalseEvenForVolunteerOpportunitiesTest()
         {
-            Assert.That(RegistrationService.IsBackgroundCheckRequired(ActivityType.VolunteerOpportunity, 1234), Is.True);
+            Assert.That(RegistrationService.IsBackgroundCheckRequired(ActivityType.VolunteerOpportunity, 1234), Is.False);
         }
     }
 }

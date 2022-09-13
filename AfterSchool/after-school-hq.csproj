@@ -719,11 +719,16 @@
     <Content Include="afterschoolhq-partners-with-ips.html" />
     <Content Include="ahq-partners-with-mccoy.html" />
     <Content Include="appsettings.json" />
+    <Content Include="Areas\Org\Views\Account\SelectPlan.cshtml" />
+    <Content Include="Areas\Org\Views\Account\SelectPlanDone.cshtml" />
     <Content Include="Areas\Org\Views\Activity\PrintRegistrants.cshtml" />
     <Content Include="Areas\Org\Views\Activity\VolunteerRegistrants.cshtml" />
     <Content Include="Areas\Org\Views\League\PublishWizard4.cshtml" />
     <Content Include="Areas\Org\Views\League\PublishWizard5.cshtml" />
     <Content Include="Areas\Org\Views\Onboarding\FreeTrial.cshtml" />
+    <Content Include="Areas\Org\Views\Onboarding\StartSubscription.cshtml" />
+    <Content Include="Areas\Org\Views\Onboarding\SubscriptionFail.cshtml" />
+    <Content Include="Areas\Org\Views\Onboarding\SubscriptionSuccess.cshtml" />
     <Content Include="Areas\Org\Views\Shared\_RegistrationForm.cshtml" />
     <Content Include="Assets\css\common.css" />
     <Content Include="Assets\css\font-awesome-4.6.3\fonts\fontawesome-webfont.svg" />
@@ -738,6 +743,7 @@
     <Content Include="Assets\img\AHQ-logo.png" />
     <Content Include="Assets\img\arrow.png" />
     <Content Include="Assets\img\ashq-logo.png" />
+    <Content Include="Assets\img\celebration.svg" />
     <Content Include="Assets\img\clever-login.png" />
     <Content Include="Assets\img\clever-signup.png" />
     <Content Include="Assets\img\client_success_manager_color.jpeg" />
@@ -765,6 +771,7 @@
     <Content Include="Assets\img\clock.svg" />
     <Content Include="Assets\img\graduation-cap.svg" />
     <Content Include="Assets\img\user.svg" />
+    <Content Include="Assets\img\warning.png" />
     <Content Include="Assets\img\welcome-back-arrow.png" />
     <Content Include="Assets\js\ahq-directory-map.js" />
     <Content Include="Assets\js\ahq-directory-search.js" />
@@ -1771,7 +1778,6 @@
     <Content Include="Areas\Org\Views\Shared\_EmailRegistrationReportModal.cshtml" />
     <Content Include="Areas\Org\Views\Schedule\_EditButtons.cshtml" />
     <Content Include="Areas\Org\Views\Shared\_Actions.cshtml" />
-    <Content Include="Areas\Org\Views\Account\Integrations.cshtml" />
     <Content Include="Areas\Org\Views\Schedule\EditForActivity.cshtml" />
     <Content Include="Areas\Org\Views\Group\Schedules.cshtml" />
     <Content Include="Areas\Org\Views\Services\GetScheduleActivities.cshtml" />
@@ -1910,7 +1916,6 @@
     <Content Include="Areas\Org\Views\Account\PaymentsOptions.cshtml" />
     <Content Include="Areas\Org\Views\Account\CheckSetup.cshtml" />
     <Content Include="Areas\Admin\Views\Payout\Index.cshtml" />
-    <Content Include="Areas\Org\Views\Account\BankSetup.cshtml" />
     <Content Include="Areas\District\Views\Account\Team.cshtml" />
     <Content Include="Areas\District\Views\Account\TeamInvite.cshtml" />
     <Content Include="Areas\Org\Views\Accounting\RequestPayout.cshtml" />
@@ -2023,10 +2028,7 @@
     <Content Include="Areas\Admin\Views\Shared\AdminHeader.cshtml" />
     <Content Include="Areas\Org\Views\Web.config" />
     <Content Include="Areas\Org\Views\Account\Billing.cshtml" />
-    <Content Include="Areas\Org\Views\Account\Detail.cshtml" />
     <Content Include="Areas\Org\Views\Account\Edit.cshtml" />
-    <Content Include="Areas\Org\Views\Account\Index.cshtml" />
-    <Content Include="Areas\Org\Views\Account\Stripe.cshtml" />
     <Content Include="Areas\Org\Views\Account\Team.cshtml" />
     <Content Include="Areas\Org\Views\Activity\Add.cshtml" />
     <Content Include="Areas\Org\Views\Activity\Attendance.cshtml" />
@@ -2040,7 +2042,6 @@
     <Content Include="Areas\Org\Views\Shared\OrgAccountHeader.cshtml" />
     <Content Include="Areas\Org\Views\Shared\_Layout.cshtml" />
     <Content Include="Areas\Org\Views\_ViewStart.cshtml" />
-    <Content Include="Areas\Org\Views\Account\NewBilling.cshtml" />
     <Content Include="Areas\Org\Views\Activity\Messages.cshtml" />
     <Content Include="Areas\Org\Views\Activity\MessageDetail.cshtml" />
     <Content Include="Areas\Org\Views\Activity\MessageAdd.cshtml" />
