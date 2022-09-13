@@ -254,6 +254,18 @@ namespace AfterSchoolLibrary.Models
             set => MDV["SignUpTypeId"].Value = value;
         }
 
+        public Guid ReferralCode
+        {
+            get => (Guid) MDV["ReferralCode"].Value;
+            set => MDV["ReferralCode"].Value = value;
+        }
+
+        public int? ReferrerAccountId
+        {
+            get => (int?) MDV["ReferrerAccountId"].Value;
+            set => MDV["ReferrerAccountId"].Value = value;
+        }
+
 
         public Account()
         {
@@ -275,6 +287,7 @@ namespace AfterSchoolLibrary.Models
             OnboardingStepDone = OnboardingStepType.NotSet;
             HasDefaultPaymentMethod = false;
             SignUpTypeId = SignUpType.NotSet;
+            ReferralCode = Guid.NewGuid();
         }
 
         public static DatabaseParameters ObjectMap
@@ -320,6 +333,8 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "DefaultVolunteerFormId", SqlDbType.Int);
                 _dp.Add(className, "HasDefaultPaymentMethod", SqlDbType.Bit);
                 _dp.Add(className, "SignUpTypeId", SqlDbType.Int);
+                _dp.Add(className, "ReferralCode", SqlDbType.UniqueIdentifier);
+                _dp.Add(className, "ReferrerAccountId", SqlDbType.Int);
                 return _dp;
             }
         }
@@ -541,6 +556,14 @@ namespace AfterSchoolLibrary.Models
             dps.Add(ObjectMap["SignUpTypeId"]);
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["ReferralCode"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["ReferrerAccountId"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
 
             return msgs;
         }
@@ -620,6 +643,24 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
+        public static Account LoadByReferralCode(Guid referralCode, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["referralCode"], referralCode);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
+        public static List<Account> LoadByReferrerAccountId(int referrerAccountId, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["ReferrerAccountId"], referrerAccountId);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
         public static Account LoadBySubdomain(string Subdomain, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
@@ -677,6 +718,8 @@ namespace AfterSchoolLibrary.Models
         public string ShortHomePageUrl => $"{Utilities.ShortBaseUrl()}/{UniqueName}";
 
         public string HostAccountInviteUrl => $"{Utilities.BaseUrl()}/signup/welcome?invite={InviteCodeToShare}";
+
+        public string ReferralUrl => $"{Utilities.BaseUrl()}/signup/welcome?referrer={ReferralCode}";
 
         public string HostAccountShortInviteUrl =>
             $"{Utilities.ShortBaseUrl()}/signup/welcome?invite={InviteCodeToShare}";

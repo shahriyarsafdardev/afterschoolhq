@@ -151,18 +151,19 @@ namespace AfterSchool.Controllers
         }
         
         [HttpGet]
-        public ActionResult Welcome(string invite, string isrequestonlyaccess, string signuptype, string package, string period)
+        public ActionResult Welcome(string invite, string isrequestonlyaccess, string signuptype, string package, string period, string referrer)
         {
+            var msgs = new SystemMessages();
             Account invitingAccount = null;
+            Account referrerAccount = null;
             var signupTypeId = SignUpType.NotSet;
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
 
             if (invite.IsGuid())
             {
-                invitingAccount = Account.LoadByInviteCodeToShare(invite.ToGuid());
-
-                var currentAccount = SessionVariables.CurrentAccount;
-                var currentUser = SessionVariables.CurrentUser;
-
+                invitingAccount = Account.LoadByInviteCodeToShare(invite.ToGuid(), msgs);
+                
                 if (currentAccount.IsNotEmpty() && currentUser.IsNotEmpty())
                 {
                     if (currentUser.HasMultipleAccounts() || currentAccount.AccountTypeId != AccountType.Registrant)
@@ -175,8 +176,10 @@ namespace AfterSchool.Controllers
                     ? (SignUpType) signuptype.ToInteger()
                     : SignUpType.TrialSignUp;
             }
+            
+            if (referrer.IsGuid())
+                referrerAccount = Account.LoadByReferralCode(referrer.ToGuid(), msgs);
 
-            var msgs = new SystemMessages();
             Package selectedPackage = null;
 
             if (package.IsGuid())
@@ -198,6 +201,8 @@ namespace AfterSchool.Controllers
                 PackageName = selectedPackage.Name,
                 SubscriptionPeriod = period,
                 TrialDays = selectedPackage.GetFeature(FeatureType.TrialDays).GetMaxValue(),
+                ReferrerAccount = referrerAccount,
+                ReferralCode = referrer,
             };
             return View(model);
         }
@@ -208,6 +213,7 @@ namespace AfterSchool.Controllers
         {
             var msgs = new SystemMessages();
             Account invitingAccount = null;
+            Account referrerAccount = null;
 
             if (model.FirstName.IsEmpty())
                 msgs.Add("First Name is required", MessageType.UserError);
@@ -237,6 +243,16 @@ namespace AfterSchool.Controllers
                 invitingAccount = Account.LoadByInviteCodeToShare(model.InviteCodeToShare.ToGuid());
                 if (invitingAccount.IsEmpty())
                     msgs.Add("Invalid invitation code", MessageType.UserError);
+            }
+
+            if (model.ReferralCode.IsNotEmpty())
+            {
+                if (!model.ReferralCode.IsGuid())
+                    msgs.Add("Invalid referral code", MessageType.UserError);
+
+                referrerAccount = Account.LoadByReferralCode(model.ReferralCode.ToGuid());
+                if (referrerAccount.IsEmpty())
+                    msgs.Add("Invalid referral code", MessageType.UserError);
             }
 
             if (msgs.HasNoErrors())
@@ -317,6 +333,10 @@ namespace AfterSchool.Controllers
                             else
                                 invitingAccount.ApproveAccessToAccount(account, user, amsgs, adc);
                         }
+
+                        if (referrerAccount.IsNotEmpty())
+                            account.AddReferrerAccount(referrerAccount, amsgs, adc);
+                        
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {

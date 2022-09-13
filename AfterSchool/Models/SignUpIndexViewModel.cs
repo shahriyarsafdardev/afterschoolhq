@@ -19,12 +19,14 @@ namespace AfterSchool.Models
         public string Password2 { get; set; }
         public string TimeZone { get; set; }
         public string InviteCodeToShare { get; set; }
+        public string ReferralCode { get; set; }
         public string HowHearAboutUs { get; set; }
         public bool IsClaimProcess { get; set; }
         public Account Account { get; set; }
         public bool IsRequestOnlyAccess { get; set; }
         public SignUpType SignupType { get; set; }
         public Account InvitingAccount { get; set; }
+        public Account ReferrerAccount { get; set; }
         
         public string PackageName { get; set; }
         public string PackageUid { get; set; }
