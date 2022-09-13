@@ -1661,43 +1661,63 @@ namespace AfterSchoolLibrary.Services
         public static void CheckIfSubscriberAccountSubscriptionChanged(this Account account, bool startNewTrial, WebUser loggedInUser,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            // check if package has changed
-            var currentAccountPackage = account.GetActiveAccountPackage(msgs, dc);
-            var stripeSubscription = currentAccountPackage.GetStripeSubscription(msgs);
+            Database.ExecuteTransaction
+            (
+                action: (amsgs, adc) =>
+                {
+                    // check if package has changed
+                    var currentAccountPackage = account.GetActiveAccountPackage(amsgs, adc);
+                    var stripeSubscription = currentAccountPackage.GetStripeSubscription(amsgs);
 
-            if (stripeSubscription.IsEmpty())
-                stripeSubscription = StripeHelper.GetStripeHelperSubscriberAccount().GetSubscriptions(account.StripeCustomerId, msgs).First();
+                    if (stripeSubscription.IsEmpty())
+                        stripeSubscription = StripeHelper.GetStripeHelperSubscriberAccount().GetSubscriptions(account.StripeCustomerId, amsgs).First();
 
-            if (stripeSubscription.IsEmpty())
-                return;
-            
-            var stripePlan = stripeSubscription.Items.First().Plan;
-            var packageFromStripe = Package.LoadByUid(stripePlan.ProductId.ToGuid(), msgs, dc);
-                
-            // no trial or trial has ended
-            if (!stripeSubscription.TrialStart.HasValue ||
-                (stripeSubscription.TrialEnd.HasValue && stripeSubscription.TrialEnd.Value.IsBefore(DateTime.UtcNow)))
-                currentAccountPackage.EndTrialNow(msgs, dc);
-            else
-                currentAccountPackage.SyncTrialDates(stripeSubscription.TrialStart, stripeSubscription.TrialEnd, msgs, dc);
-            
-            // needs to match stripe
-            if (currentAccountPackage.PackageId != packageFromStripe.ID)
-            {
-                var newAccountPackage = account.SwitchPackages(
-                    packageFromStripe,
-                    stripePlan.Interval.ToEnum<BillingPeriodType>(),
-                    stripeSubscription.Id,
-                    loggedInUser,
-                    msgs,
-                    dc);
+                    if (stripeSubscription.IsEmpty())
+                        return;
 
-                if (startNewTrial)
-                    newAccountPackage.UpdateTrialDaysWithStripe(
-                        newAccountPackage.GetFeature(FeatureType.TrialDays, msgs, dc).Max.Value.ToInteger(),
-                        msgs,
-                        dc);
-            }
+                    var stripePlan = stripeSubscription.Items.First().Plan;
+                    var packageFromStripe = Package.LoadByUid(stripePlan.ProductId.ToGuid(), amsgs, adc);
+
+                    // no trial or trial has ended
+                    if (!stripeSubscription.TrialStart.HasValue ||
+                        (stripeSubscription.TrialEnd.HasValue && stripeSubscription.TrialEnd.Value.IsBefore(DateTime.UtcNow)))
+                        currentAccountPackage.EndTrialNow(amsgs, adc);
+                    else
+                        currentAccountPackage.SyncTrialDates(stripeSubscription.TrialStart, stripeSubscription.TrialEnd, amsgs, adc);
+
+                    // needs to match stripe
+                    if (currentAccountPackage.PackageId != packageFromStripe.ID)
+                    {
+                        var newAccountPackage = account.SwitchPackages(
+                            packageFromStripe,
+                            stripePlan.Interval.ToEnum<BillingPeriodType>(),
+                            stripeSubscription.Id,
+                            loggedInUser,
+                            amsgs,
+                            adc);
+
+                        if (startNewTrial)
+                            newAccountPackage.UpdateTrialDaysWithStripe(
+                                newAccountPackage.GetFeature(FeatureType.TrialDays, amsgs, adc).Max.Value.ToInteger(),
+                                amsgs,
+                                adc);
+
+                        currentAccountPackage = newAccountPackage;
+                    }
+
+                    // check and update price changes
+                    if (stripePlan.AmountDecimal != currentAccountPackage.Price)
+                    {
+                        currentAccountPackage.Price = stripePlan.AmountDecimal / 100;
+                        amsgs.AddRange(currentAccountPackage.Save(adc));
+                    }
+
+                },
+                onSuccess: (smsgs) => msgs.AddRange(smsgs),
+                onFailure: (fmsgs) => msgs.AddRange(fmsgs),
+                onException: (emsgs) => Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
         }
 
         public static List<PaymentMethod> GetAllStripePaymentMethods(this Account account, StripeAccountType stripeAccountType, SystemMessages msgs = null)
@@ -2454,6 +2474,9 @@ namespace AfterSchoolLibrary.Services
                         amsgs);
 
                     newAccountPackage.UpdateStripeSubscriptionId(newStripeSubscription.Id, amsgs, adc);
+                    
+                    StripeHelper.GetStripeHelperSubscriberAccount().UpdateSubscription(newAccountPackage.StripeSubscriptionId, null,
+                        null, null, null, null, StripeHelper.ReferralCouponId, amsgs);
                 },
                 onSuccess: smsgs => msgs.AddRange(smsgs),
                 onFailure: fmsgs => msgs.AddRange(fmsgs),

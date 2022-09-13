@@ -157,40 +157,41 @@
                                     var pricePerYear = Model.ReferrerAccountId.HasValue ? package.PricePerYear.Value * .9M : package.PricePerYear;
                                     
                                     <div class="col-lg-12 col-xl-@colSize padding-20" style="@(currentPackage.PackageId == package.ID ? "border: solid 1px #999; background-color: #DDEAE0;":"")">
-                                        <div>
-                                            <div>
-                                                <h3 class="text-success">
-                                                    <span>@package.Name</span>
-                                                    @if (!package.IsFree(BillingPeriodType.Month))
-                                                    {
-                                                        <span>-</span>
-                                                        <span class="monthly hide">
-                                                            @pricePerMonth.ToCurrency() / Mo
-                                                        </span>
-                                                        <span class="annually">
-                                                            @((pricePerYear / 12).ToCurrency()) / Mo
-                                                        </span>
-                                                    }
-                                                </h3>
-                                            </div>
-                                            <div>
-                                                <p>
-                                                    @if (!package.IsFree(BillingPeriodType.Month))
-                                                    {
-                                                        <span class="monthly hide"><span id="monthly-price-@package.Uid">
-                                                            @pricePerMonth.ToCurrency()
-                                                        </span> Billed Monthly</span>
-                                                        <span class="annually"><span id="annual-price-@package.Uid">
-                                                            @pricePerYear.ToCurrency()
-                                                        </span> Billed Annually</span>
-                                                    }
-                                                    else
-                                                    {
-                                                        <span>&nbsp;</span>
-                                                    }
-                                                </p>
-                                            </div>
-                                        </div>
+                                        <p class="text-muted">
+                                            @Html.Raw(Model.ReferrerAccountId.HasValue && !package.IsFree(BillingPeriodType.Month) ? "10% Referral Discount" : "&nbsp;")
+                                        </p>
+                                        <h3 class="text-success">
+                                            <span>@package.Name</span>
+                                            @if (!package.IsFree(BillingPeriodType.Month))
+                                            {
+                                                <span>-</span>
+                                                <span class="monthly hide">
+                                                    @pricePerMonth.ToCurrency() / Mo
+                                                </span>
+                                                <span class="annually">
+                                                    @((pricePerYear / 12).ToCurrency()) / Mo
+                                                </span>
+                                            }
+                                        </h3>
+                                        <p>
+                                            @if (!package.IsFree(BillingPeriodType.Month))
+                                            {
+                                                <span class="monthly hide">
+                                                    <span id="monthly-price-@package.Uid">
+                                                        @pricePerMonth.ToCurrency()
+                                                    </span> Billed Monthly
+                                                </span>
+                                                <span class="annually">
+                                                    <span id="annual-price-@package.Uid">
+                                                        @pricePerYear.ToCurrency()
+                                                    </span> Billed Annually
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span>&nbsp;</span>
+                                            }
+                                        </p>
                                         <p class="package-description text-medium-small">
                                             @package.Description
                                         </p>
