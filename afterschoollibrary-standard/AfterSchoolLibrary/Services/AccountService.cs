@@ -145,6 +145,13 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(account.Save(dc));
         }
 
+        public static void AddReferrerAccount(this Account account, Account referrerAccount, SystemMessages msgs,
+            DatabaseConnection dc = null)
+        {
+            account.ReferrerAccountId = referrerAccount.ID;
+            msgs.AddRange(account.Save(dc));
+        }
+
         #region SubscriptionPlans
 
         public static List<SubscriptionPlan> GetSubscriptionPlans(this Account account, SystemMessages msgs,
@@ -184,8 +191,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         #endregion
-
-
+        
         #region ActivitySchedule
 
         public static ActivitySchedule GetActivitySchedule(this Account account, int Id, SystemMessages msgs = null,
