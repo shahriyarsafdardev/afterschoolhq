@@ -652,7 +652,7 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<Account> LoadByReferrerAccountId(Guid referrerAccountId, SystemMessages msgs = null,
+        public static List<Account> LoadByReferrerAccountId(int referrerAccountId, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
