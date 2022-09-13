@@ -2448,7 +2448,7 @@ namespace AfterSchoolLibrary.Services
                         billingPeriodTypeId == BillingPeriodType.Month ? newPackage.StripePricePerMonthId : newPackage.StripePricePerYearId,
                         null,
                         trialEndDate,
-                        null,
+                        account.ReferrerAccountId.HasValue ? StripeHelper.ReferralCouponId : null,
                         defaultPaymentMethod,
                         null,
                         amsgs);
