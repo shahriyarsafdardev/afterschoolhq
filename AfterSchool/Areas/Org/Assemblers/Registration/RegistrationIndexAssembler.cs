@@ -16,15 +16,14 @@ namespace AfterSchool.Areas.Org.Assemblers.Registration
         public List<ActivityGroup> Groups { get; set; }
         public List<FormQuestion> Questions { get; set; }
         public List<FormQuestionGroup> QuestionGroups { get; set; }
-        public bool SearchBarReadOnly { get; set; }
         public Account CurrentAccount { get; set; }
     }
 
-    public class RegistrationIndexAssembler
+    public static class RegistrationIndexAssembler
     {
-        public RegistrationIndexResult AssembleRegistrationIndexResult(bool isStudentCrmEnabled, Package studentCrmPackage,
+        public static RegistrationIndexResult AssembleRegistrationIndexResult(bool isStudentCrmEnabled, Package studentCrmPackage,
             List<AfterSchoolLibrary.Models.Registration> registrations, SystemMessages messages, PagingModel pagingModel,
-            List<AfterSchoolLibrary.Models.Activity> activities, List<ActivityGroup> groups, bool searchBarReadOnly, Account currentAccount)
+            List<AfterSchoolLibrary.Models.Activity> activities, List<ActivityGroup> groups, Account currentAccount)
         {
             return new RegistrationIndexResult
             {
@@ -37,7 +36,6 @@ namespace AfterSchool.Areas.Org.Assemblers.Registration
                 Groups = groups,
                 Questions = new List<FormQuestion>(),
                 QuestionGroups = new List<FormQuestionGroup>(),
-                SearchBarReadOnly = searchBarReadOnly,
                 CurrentAccount = currentAccount,
             };
         }
