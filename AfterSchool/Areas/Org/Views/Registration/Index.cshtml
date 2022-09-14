@@ -1,21 +1,18 @@
 ﻿@model AfterSchool.Areas.Org.Assemblers.Registration.RegistrationIndexResult
 @{
-    var msgs = (SystemMessages)Model.Messages;
-    var paging = (PagingModel)Model.PagingModel;
-    var studentCRMEnabled = Model.IsStudentCRMEnabled;
-    var studentCRMPackage = Model.StudentCRMPackage;
+    var msgs = Model.Messages;
+    var paging = Model.PagingModel;
+    var isStudentCrmEnabled = Model.IsStudentCrmEnabled;
+    var studentCrmPackage = Model.StudentCrmPackage;
     var currentAccount = Model.CurrentAccount;
     var isVolunteer = Request.QueryString["Volunteers"];
     var returnUrlEditAction = isVolunteer.IsBool() && isVolunteer.ToBoolean() ? Url.Action("index", "registration", new
     {
-        volunteers = "true"
+        volunteers = "true",
     }) : Url.Action("index", "registration");
 }
 
-@{ Html.RenderPartial("OrgAccountHeader", new ViewDataDictionary
-   {
-       { "IsFullScreen", Model.IsFullScreen }
-   }); }
+@{ Html.RenderPartial("OrgAccountHeader"); }
 
 <div class="main-content">
 
@@ -42,12 +39,12 @@
 
             @{ Html.RenderPartial("_RegistrationSearchBar", new ViewDataDictionary
                {
-                   { "Volunteer", isVolunteer },
-                   { "Activities", Model.Activities },
-                   { "Groups", Model.Groups },
-                   { "Questions", Model.Questions },
-                   { "QuestionGroups", Model.QuestionGroups },
-                   { "IsReadOnly", Model.SearchBarReadOnly }
+                   {"Volunteer", isVolunteer},
+                   {"Activities", Model.Activities},
+                   {"Groups", Model.Groups},
+                   {"Questions", Model.Questions},
+                   {"QuestionGroups", Model.QuestionGroups},
+                   {"IsReadOnly", Model.SearchBarReadOnly},
                }); }
 
             <div class="row">
@@ -61,14 +58,14 @@
             @{
                 Html.RenderPartial("_Registrations", Model.Registrations, new ViewDataDictionary
                 {
-                    { "NavAction", "index" },
-                    { "NavController", "registration" },
-                    { "NavId", "" },
-                    { "EditAction", "edit" },
-                    { "EditController", "registration" },
-                    { "Account", currentAccount },
-                    { "Paging", paging },
-                    { "ReturnUrl", returnUrlEditAction },
+                    {"NavAction", "index"},
+                    {"NavController", "registration"},
+                    {"NavId", ""},
+                    {"EditAction", "edit"},
+                    {"EditController", "registration"},
+                    {"Account", currentAccount},
+                    {"Paging", paging},
+                    {"ReturnUrl", returnUrlEditAction},
                 });
             }
 
@@ -76,20 +73,20 @@
     </div>
 </div>
 
-@{ Html.RenderPartial("_EmailRegistrationReportModal", currentAccount, new ViewDataDictionary { { "PostAction", "emailreport" }, { "PostController", "registration" }, { "PostId", "" } }); }
+@{ Html.RenderPartial("_EmailRegistrationReportModal", currentAccount, new ViewDataDictionary {{"PostAction", "emailreport"}, {"PostController", "registration"}, {"PostId", ""}}); }
 
 @section scripts
 {
     <script>
     PageEvent.add(PageEvent.AFTER_INIT, function () {
-        if (!@(studentCRMEnabled.ToString().ToLower())) {
+        if (!@(isStudentCrmEnabled.ToString().ToLower())) {
             $("#studentcrmcontainer").find("button").addClass("disabled");
             $("#studentcrmcontainer").find("a").addClass("disabled");
             $("#studentcrmcontainer").find("input").addClass("disabled");
             $("#studentcrmcontainer").find("a").on("click", function (e) {
                 e.preventDefault();
             });
-            showUpgradeMyPlan('@(studentCRMPackage?.Name)','@(studentCRMPackage?.ID)',true)
+            showUpgradeMyPlan('@(studentCrmPackage?.Name)','@(studentCrmPackage?.ID)',true)
         }
     });
     </script>

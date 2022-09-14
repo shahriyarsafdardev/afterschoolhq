@@ -38,54 +38,16 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var getVolunteers = volunteers.IsBoolean() && volunteers.ToBoolean();
             var currentAccount = SessionVariables.CurrentAccount;
-
             var currentUser = SessionVariables.CurrentUser;
-            var start = recordsPerPage * ((int?) pageNumber - 1);
-            var activityIds = new List<int>();
-            var registrationAssignmentTypes = new List<RegistrationAssignmentType>();
-
-            if (activity.IsNotEmpty())
-            {
-                activityIds = activity.Split(',').Select(x => x.ToInteger()).ToList();
-            }
-
-            if (at.IsNumber())
-                registrationAssignmentTypes.Add((RegistrationAssignmentType) at.ToInteger());
-
-            var registrationStatus = int.TryParse(regstatus, out var parsed)
-                ? (RegistrationStatus) parsed
-                : RegistrationStatus.NotSet;
-
-            var registrations1 = currentAccount.SearchRegistrations(q, null, activityIds,
-                ParticipationObjectType.Activity, registrationStatus, registrationAssignmentTypes, start, recordsPerPage, getVolunteers, msgs);
-
-            var totalCount1 = currentAccount.SearchRegistrationCount(q, null, activityIds,
-                ParticipationObjectType.Activity, registrationStatus, registrationAssignmentTypes, getVolunteers, msgs);
-
-            var activities = currentAccount
-                .GetActivities(UserType.Administrator, currentUser, null, null, false, false, null, msgs: msgs)
-                .OrderBy(x => x.Name).ToList();
-
-            if (getVolunteers)
-            {
-                activities = activities.Where(a => a.ActivityTypeId == ActivityType.VolunteerOpportunity).ToList();
-            }
-            else
-            {
-                activities = activities.Where(a => a.ActivityTypeId != ActivityType.VolunteerOpportunity).ToList();
-            }
-
-            var groups = getVolunteers ? new List<ActivityGroup>() : currentAccount.GetActivityGroups(msgs);
-
-            var (registrations, totalCount) = ((List<Registration>, int)) (registrations: registrations1, totalCount: totalCount1);
-
+            var (registrations, totalCount, activities, groups, _, _) =
+                LoadSearch(activity, group, q, regstatus, at, getVolunteers, currentAccount, currentUser, msgs, pageNumber, recordsPerPage);
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
 
             if (emailed.IsBoolean() && emailed.ToBoolean())
                 msgs.Add("An email will be sent shortly", MessageType.Success);
 
-            var isStudentCRMEnabled = SessionVariables.CurrentAccount.HasFeature(FeatureType.StudentCRM);
-            var studentCRMPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.StudentCRM, SessionVariables.AccountPackage);
+            var isStudentCrmEnabled = SessionVariables.CurrentAccount.HasFeature(FeatureType.StudentCRM);
+            var studentCrmPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.StudentCRM, SessionVariables.AccountPackage);
             var pagingModel = new PagingModel
             {
                 TotalCount = totalCount,
@@ -94,8 +56,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 TotalPages = totalPages,
             };
 
-            var result = new RegistrationIndexAssembler().AssembleRegistrationIndexResult(isStudentCRMEnabled, studentCRMPackage, registrations, msgs,
-                pagingModel, false, activities, groups, new List<FormQuestion>(), new List<FormQuestionGroup>(), false, currentAccount);
+            var result = new RegistrationIndexAssembler().AssembleRegistrationIndexResult(isStudentCrmEnabled, studentCrmPackage, registrations, msgs,
+                pagingModel, activities, groups, false, currentAccount);
             return View(result);
         }
 
@@ -704,16 +666,14 @@ namespace AfterSchool.Areas.Org.Controllers
                 ViewBag.ListUrl = Url.Action("index", "registration");
         }
 
-        private (List<Registration>, int) LoadSearch(string activity, string group, string q,
-            string registrationStatusNumber, string at, bool isReadOnly, bool getVolunteers, SystemMessages msgs = null,
-            int? pageNumber = null, int? recordsPerPage = null)
+        private (List<Registration> registrations, int totalCount, List<Activity> activities, List<ActivityGroup> groups, List<Activity> selectedActivities,
+            List<ActivityGroup> selectedGroups)
+            LoadSearch(string activity, string group, string q, string registrationStatusNumber, string at, bool getVolunteers, Account currentAccount,
+                WebUser currentUser, SystemMessages msgs = null, int? pageNumber = null, int? recordsPerPage = null)
         {
             if (msgs.IsEmpty())
                 msgs = new SystemMessages();
 
-            var currentAccount = SessionVariables.CurrentAccount;
-            var currentUser = SessionVariables.CurrentUser;
-            var selectedGroups = new List<ActivityGroup>();
             var selectedActivities = new List<Activity>();
             var start = recordsPerPage * (pageNumber - 1);
             var activityIds = new List<int>();
@@ -721,15 +681,19 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (activity.IsNotEmpty())
             {
-                activityIds = activity.Split(',').Select(x => x.ToInteger()).ToList();
-                selectedActivities = currentAccount.GetActivities(activityIds, msgs);
+                selectedActivities.AddRange(currentAccount.GetActivities(activityIds, msgs));
+                activityIds.AddRange(activity.Split(',').Select(x => x.ToInteger()));
             }
 
+            var selectedGroups = new List<ActivityGroup>();
             if (group.IsNotEmpty())
             {
                 var groupIds = group.Split(',').Select(x => x.ToInteger()).ToList();
-                selectedGroups = currentAccount.GetActivityGroups(groupIds, msgs);
-                selectedGroups.ForEach(x => { activityIds.AddRange(x.GetActivities(null, false, false, null, null).Select(y => y.ID.Value)); });
+                selectedGroups.AddRange(currentAccount.GetActivityGroups(groupIds, msgs));
+                foreach (var selectedGroup in selectedGroups)
+                {
+                    activityIds.AddRange(selectedGroup.GetActivities(null, false, false, null, null).Select(y => y.ID.Value));
+                }
             }
 
             if (at.IsNumber())
@@ -745,23 +709,17 @@ namespace AfterSchool.Areas.Org.Controllers
             var totalCount = currentAccount.SearchRegistrationCount(q, null, activityIds,
                 ParticipationObjectType.Activity, registrationStatus, registrationAssignmentTypes, getVolunteers, msgs);
 
-            var activities = currentAccount
+            var allActivities = currentAccount
                 .GetActivities(UserType.Administrator, currentUser, null, null, false, false, null, msgs: msgs)
                 .OrderBy(x => x.Name).ToList();
 
-            activities = getVolunteers
-                ? activities.Where(a => a.ActivityTypeId == ActivityType.VolunteerOpportunity).ToList()
-                : activities.Where(a => a.ActivityTypeId != ActivityType.VolunteerOpportunity).ToList();
+            var activities = getVolunteers
+                ? allActivities.Where(a => a.ActivityTypeId == ActivityType.VolunteerOpportunity).ToList()
+                : allActivities.Where(a => a.ActivityTypeId != ActivityType.VolunteerOpportunity).ToList();
 
-            var groups = currentAccount.GetActivityGroups(msgs);
+            var groups = getVolunteers ? new List<ActivityGroup>() : currentAccount.GetActivityGroups(msgs);
 
-            ViewBag.Activities = activities;
-            ViewBag.Groups = groups;
-            ViewBag.SelectedActivities = selectedActivities;
-            ViewBag.SelectedGroups = selectedGroups;
-            ViewBag.SearchBarReadOnly = isReadOnly;
-
-            return (registrations, totalCount);
+            return (registrations, totalCount, activities, groups, selectedActivities, selectedGroups);
         }
 
         [HttpGet]
@@ -786,7 +744,13 @@ namespace AfterSchool.Areas.Org.Controllers
             var totalCount = currentAccount.GetActivityMessageCount(msgs);
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
             var getVolunteers = volunteers.IsBoolean() && volunteers.ToBoolean();
-            LoadSearch(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, false, getVolunteers, msgs);
+            var (_, _, activities, groups, selectedActivities, selectedGroups) = LoadSearch(string.Empty, string.Empty, string.Empty, string.Empty,
+                string.Empty, getVolunteers, currentAccount, SessionVariables.CurrentUser, msgs);
+            ViewBag.Activities = activities;
+            ViewBag.Groups = groups;
+            ViewBag.SelectedActivities = selectedActivities;
+            ViewBag.SelectedGroups = selectedGroups;
+            ViewBag.SearchBarReadOnly = false;
 
             ViewBag.Messages = msgs;
             ViewBag.PagingModel = new PagingModel
@@ -820,7 +784,13 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var getVolunteers = volunteers.IsBoolean() && volunteers.ToBoolean();
-            var (registrations, totalCount) = LoadSearch(activity, group, q, regstatus, at, true, getVolunteers, msgs);
+            var (registrations, totalCount, activities, groups, selectedActivities, selectedGroups) =
+                LoadSearch(activity, group, q, regstatus, at, getVolunteers, SessionVariables.CurrentAccount, SessionVariables.CurrentUser, msgs);
+            ViewBag.Activities = activities;
+            ViewBag.Groups = groups;
+            ViewBag.SelectedActivities = selectedActivities;
+            ViewBag.SelectedGroups = selectedGroups;
+            ViewBag.SearchBarReadOnly = true;
 
             ViewBag.Registrations = registrations;
             ViewBag.TotalCount = totalCount;
@@ -845,7 +815,13 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ActivityMessage am = null;
             var getVolunteers = volunteers.IsBoolean() && volunteers.ToBoolean();
-            var (registrations, totalCount) = LoadSearch(activity, group, q, regstatus, at, true, getVolunteers, msgs);
+            var (registrations, totalCount, activities, groups, selectedActivities, selectedGroups) =
+                LoadSearch(activity, group, q, regstatus, at, getVolunteers, currentAccount, currentUser, msgs);
+            ViewBag.Activities = activities;
+            ViewBag.Groups = groups;
+            ViewBag.SelectedActivities = selectedActivities;
+            ViewBag.SelectedGroups = selectedGroups;
+            ViewBag.SearchBarReadOnly = true;
 
             if (msgs.HasNoErrors())
             {
