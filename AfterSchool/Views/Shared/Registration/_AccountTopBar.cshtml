@@ -3,7 +3,7 @@
 @{
     var currentUser = SessionVariables.CurrentUser;
     var currentAccount = SessionVariables.CurrentAccount;
-    var isVolunteer = currentAccount.AccountTypeId == AccountType.Volunteer;
+    var isVolunteer = currentAccount?.AccountTypeId == AccountType.Volunteer;
     var accountOrDashboard = "Account";
     var participationObject = (ParticipationObject)ViewData["ParticipationObject"];
     var canPublishActivity = ViewData["CanPublishActivity"].IsNotEmpty() && ViewData["CanPublishActivity"].ToString().ToBoolean();
