@@ -10,7 +10,7 @@ public static class GenerateCsvReportForAllActivities
 {
     public static void Run(DatabaseConnection dc)
     {
-        const int accountId = 1;
+        const int accountId = 1148;
 
         var msgs = new SystemMessages();
         var list = Activity.LoadByAccountId(accountId, null, null, null, false, false, null, null, null, null, msgs, dc);
