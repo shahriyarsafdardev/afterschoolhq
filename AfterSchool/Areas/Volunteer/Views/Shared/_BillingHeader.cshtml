@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     var actionName = ViewContext.RouteData.Values["action"].ToString().ToLower();
 }
 
@@ -8,15 +7,11 @@
         <a class="btn btn-alt6@(actionName == "transactions" ? "-active" : "")" href="@Url.Action("transactions", "billing")">
             Transactions
         </a>
-        <a class="btn btn-alt6@(actionName == "plans" ? "-active" : "")" href="@Url.Action("plans", "billing")">
-            Plans
-        </a>
     </div>
     <div class="hidden-lg hidden-sm hidden-md">
         <select class="form-control" onchange="handleNav(this.value)">
             <optgroup label="Navigation">
                 <option value="@Url.Action("transactions", "billing")">Transactions</option>
-                <option value="@Url.Action("plans", "billing")">Plans</option>
             </optgroup>
         </select>
     </div>

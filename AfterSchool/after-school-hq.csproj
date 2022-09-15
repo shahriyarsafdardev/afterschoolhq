@@ -632,6 +632,7 @@
     <Compile Include="Areas\Volunteer\Controllers\OpportunityController.cs" />
     <Compile Include="Areas\Volunteer\Controllers\HomeController.cs" />
     <Compile Include="Areas\Volunteer\Controllers\ProfileController.cs" />
+    <Compile Include="Areas\Volunteer\Controllers\SettingController.cs" />
     <Compile Include="Areas\Volunteer\VolunteerAreaRegistration.cs" />
     <Compile Include="Areas\WebHooks\Controllers\StripeController.cs" />
     <Compile Include="Areas\WebHooks\Controllers\StripeSubscriberController.cs" />
@@ -731,8 +732,8 @@
     <Content Include="Areas\Org\Views\Shared\_RegistrationForm.cshtml" />
     <Content Include="Areas\Volunteer\Views\Opportunity\Index.cshtml" />
     <Content Include="Areas\Volunteer\Views\Home\Index.cshtml" />
-    <Content Include="Areas\Volunteer\Views\Profile\Edit.cshtml" />
-    <Content Include="Areas\Volunteer\Views\Schedule\Index.cshtml" />
+    <Content Include="Areas\Volunteer\Views\Setting\Edit.cshtml" />
+    <Content Include="Areas\Volunteer\Views\Profile\EditPersonal.cshtml" />
     <Content Include="Areas\Volunteer\Views\Shared\Opportunities\_BrowseOpportunity.cshtml" />
     <Content Include="Areas\Volunteer\Views\Shared\Opportunities\_BrowseGroupedOpportunities.cshtml" />
     <Content Include="Areas\Volunteer\Views\Shared\Opportunities\_NoOpportunities.cshtml" />
@@ -744,7 +745,6 @@
     <Content Include="Areas\Volunteer\Views\Shared\Schedule\_BrowseOpportunityInstance.cshtml" />
     <Content Include="Areas\Volunteer\Views\Shared\_BillingHeader.cshtml" />
     <Content Include="Areas\Volunteer\Views\Shared\_Layout.cshtml" />
-    <Content Include="Areas\Volunteer\Views\Shared\_ScheduledActivities.cshtml" />
     <Content Include="Areas\Volunteer\Views\Shared\_Sidebar.cshtml" />
     <Content Include="Areas\Volunteer\Views\Shared\_ToDos.cshtml" />
     <Content Include="Areas\Volunteer\Views\Shared\_VolunteerAccountHeader.cshtml" />
@@ -1808,7 +1808,6 @@
     <Content Include="Areas\Org\Views\Services\GetActivityDays.cshtml" />
     <Content Include="Areas\Org\Views\Services\GetRegistrationMaxChoiceNumbersForDay.cshtml" />
     <Content Include="Areas\Org\Views\Services\SendVerificationEmail.cshtml" />
-    <Content Include="Areas\User\Views\Shared\_ScheduledActivities.cshtml" />
     <Content Include="Areas\District\Views\web.config" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />

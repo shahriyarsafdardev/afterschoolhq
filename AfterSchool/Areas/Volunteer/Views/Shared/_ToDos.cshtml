@@ -1,7 +1,7 @@
 ﻿@model List<Registrant>
 
 @{
-    var activitiesRequiringAttention = (List<RegistrantActivity>)ViewBag.ActivitiesRequiringAttention;
+    var activitiesRequiringAttention = (List<RegistrantActivity>) ViewBag.ActivitiesRequiringAttention;
 }
 
 <div class="panel" style="overflow: hidden;">
@@ -12,7 +12,9 @@
     </div>
     <div class="panel-body">
 
-        @if (Model.Any(registrant => registrant.ProfileStatusId != RegistrantProfileStatus.Completed))
+        @*Ask if Volunteer will ever view this because their profile will always be completed. *@
+
+        @*@if (Model.Any(registrant => registrant.ProfileStatusId != RegistrantProfileStatus.Completed))
         {
             <div class="text-medium padding-10">
                 <strong>Finalize Profiles</strong>
@@ -40,9 +42,8 @@
                     }
                 </thead>
             </table>
-        }
-
-        @if (activitiesRequiringAttention.Any())
+        }*@
+        @*@if (activitiesRequiringAttention.Any())
         {
             <div class="text-medium margin-t-20">
                 <strong>Finalize Registrations</strong>
@@ -96,5 +97,7 @@
                 </tbody>
             </table>
         }
+        *@
+
     </div>
 </div>

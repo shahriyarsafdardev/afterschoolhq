@@ -27,9 +27,14 @@
                 </a>
             </li>*@
 
-            <li class="@(controller == "profile" ? "active" : "")">
-                <a href="@Url.Action("edit", "profile")">
-                    <i class="icon s7-user"></i><span>Profile</span>
+            @*<li class="@(controller == "profile" ? "active" : "")">
+                <a href="@Url.Action("EditPersonal", "profile", new {id = SessionVariables.CurrentUser.GetMasterVolunteerRegistrant().Uid})">
+                    <i class="icon s7-user"></i><span>Volunteer Profile</span>
+                </a>
+            </li>*@
+            <li class="@(controller == "setting" ? "active" : "")">
+                <a href="@Url.Action("edit", "setting")">
+                    <i class="icon s7-settings"></i><span>Change Login</span>
                 </a>
             </li>
             @if (SessionVariables.CurrentUser.HasMultipleAccounts())
