@@ -1678,12 +1678,15 @@ namespace AfterSchoolLibrary.Services
                     var stripePlan = stripeSubscription.Items.First().Plan;
                     var packageFromStripe = Package.LoadByUid(stripePlan.ProductId.ToGuid(), amsgs, adc);
 
-                    // no trial or trial has ended
-                    if (!stripeSubscription.TrialStart.HasValue ||
-                        (stripeSubscription.TrialEnd.HasValue && stripeSubscription.TrialEnd.Value.IsBefore(DateTime.UtcNow)))
-                        currentAccountPackage.EndTrialNow(amsgs, adc);
-                    else
-                        currentAccountPackage.SyncTrialDates(stripeSubscription.TrialStart, stripeSubscription.TrialEnd, amsgs, adc);
+                    if (!currentAccountPackage.StartDate.HasValue)
+                    {
+                        // no trial or trial has ended
+                        if (!stripeSubscription.TrialStart.HasValue ||
+                            (stripeSubscription.TrialEnd.HasValue && stripeSubscription.TrialEnd.Value.IsBefore(DateTime.UtcNow)))
+                            currentAccountPackage.EndTrialNow(amsgs, adc);
+                        else
+                            currentAccountPackage.SyncTrialDates(stripeSubscription.TrialStart, stripeSubscription.TrialEnd, amsgs, adc);
+                    }
 
                     // needs to match stripe
                     if (currentAccountPackage.PackageId != packageFromStripe.ID)
@@ -1706,7 +1709,12 @@ namespace AfterSchoolLibrary.Services
                     }
 
                     // check and update price changes
-                    if (stripePlan.AmountDecimal != currentAccountPackage.Price)
+                    if (stripeSubscription.Discount.Coupon?.PercentOff > 0)
+                    {
+                        currentAccountPackage.Price = (stripePlan.AmountDecimal / 100) * (1 - (stripeSubscription.Discount.Coupon?.PercentOff / 100));
+                        amsgs.AddRange(currentAccountPackage.Save(adc));
+                    }
+                    else if ((stripePlan.AmountDecimal / 100) != currentAccountPackage.Price)
                     {
                         currentAccountPackage.Price = stripePlan.AmountDecimal / 100;
                         amsgs.AddRange(currentAccountPackage.Save(adc));
