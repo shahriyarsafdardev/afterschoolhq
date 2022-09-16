@@ -1708,15 +1708,17 @@ namespace AfterSchoolLibrary.Services
                         currentAccountPackage = newAccountPackage;
                     }
 
+                    var stripePlanAmountInDollars = stripePlan.AmountDecimal / 100;
+                    
                     // check and update price changes
                     if (stripeSubscription.Discount.Coupon?.PercentOff > 0)
                     {
-                        currentAccountPackage.Price = (stripePlan.AmountDecimal / 100) * (1 - (stripeSubscription.Discount.Coupon?.PercentOff / 100));
+                        currentAccountPackage.Price = stripePlanAmountInDollars * (1 - (stripeSubscription.Discount.Coupon?.PercentOff / 100));
                         amsgs.AddRange(currentAccountPackage.Save(adc));
                     }
-                    else if ((stripePlan.AmountDecimal / 100) != currentAccountPackage.Price)
+                    else if (stripePlanAmountInDollars != currentAccountPackage.Price)
                     {
-                        currentAccountPackage.Price = stripePlan.AmountDecimal / 100;
+                        currentAccountPackage.Price = stripePlanAmountInDollars;
                         amsgs.AddRange(currentAccountPackage.Save(adc));
                     }
 
