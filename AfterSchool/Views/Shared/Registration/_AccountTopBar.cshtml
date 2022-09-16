@@ -3,10 +3,11 @@
 @{
     var currentUser = SessionVariables.CurrentUser;
     var currentAccount = SessionVariables.CurrentAccount;
+    var isVolunteer = currentAccount?.AccountTypeId == AccountType.Volunteer;
     var accountOrDashboard = "Account";
     var participationObject = (ParticipationObject)ViewData["ParticipationObject"];
     var canPublishActivity = ViewData["CanPublishActivity"].IsNotEmpty() && ViewData["CanPublishActivity"].ToString().ToBoolean();
-    var dashboardUrl = Url.Action("Index", "Home", new { area = "User" });
+    var dashboardUrl = isVolunteer? Url.Action("Index", "Home", new { area = "Volunteer" }) : Url.Action("Index", "Home", new { area = "User" });
     var isDuringProfileSetup = false;
     var returnUrl = SessionVariables.RegistrationStartPageAccount?.HomePageUrl;
     var registrationStartPage = SessionVariables.RegistrationStartPageAccount;
@@ -288,8 +289,9 @@ else if (currentUser.IsNotEmpty())
                     </li>
                 }
 
-                if (currentUser.IsActive && currentAccount.IsNotEmpty() && currentAccount.AccountTypeId != AccountType.Volunteer)
+                if (currentUser.IsActive && currentAccount.IsNotEmpty())
                 {
+                    
                     <li>
                         <a href="@dashboardUrl" class="btn btn-link">@accountOrDashboard</a>
                     </li>

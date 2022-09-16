@@ -1,0 +1,52 @@
+@{
+    var controller = ViewContext.RouteData.Values["controller"].ToString().ToLower();
+}
+<div class="am-left-sidebar">
+    <div class="content">
+        <div class="am-logo hide"></div>
+
+        <ul class="sidebar-elements">
+            <li>
+                <img src="/assets/img/footer-icon.png" class="side-menu-logo"/>
+            </li>
+            <li class="@(controller == "home" ? "active" : "")">
+                <a href="@Url.Action("index", "home")">
+                    <i class="icon s7-home"></i><span>Home</span>
+                </a>
+            </li>
+            <li class="@(controller == "opportunity" ? "active" : "")">
+                <a href="@Url.Action("index", "opportunity")">
+                    <i class="icon s7-smile"></i><span>Volunteer Center</span>
+                </a>
+            </li>
+
+            <!-- Billing Code will be used in Future-->
+            @*<li class="hide @(controller == "billing" ? "active" : "")">
+                <a href="@Url.Action("transactions", "billing")">
+                    <i class="icon s7-credit"></i><span>Billing</span>
+                </a>
+            </li>*@
+
+            @*<li class="@(controller == "profile" ? "active" : "")">
+                <a href="@Url.Action("EditPersonal", "profile", new {id = SessionVariables.CurrentUser.GetMasterVolunteerRegistrant().Uid})">
+                    <i class="icon s7-user"></i><span>Volunteer Profile</span>
+                </a>
+            </li>*@
+            <li class="@(controller == "setting" ? "active" : "")">
+                <a href="@Url.Action("edit", "setting")">
+                    <i class="icon s7-settings"></i><span>Change Login</span>
+                </a>
+            </li>
+            @if (SessionVariables.CurrentUser.HasMultipleAccounts())
+            {
+                <li class="">
+                    <a href="@Url.Action("switch", "logout", new {area = ""})"><i class="icon s7-shuffle"></i> Switch Accounts </a>
+                </li>
+            }
+            <li>
+                <a href="@Url.Action("index", "logout", new {area = ""})"><i class="icon s7-power"></i> Logout</a>
+            </li>
+        </ul>
+        <!--Sidebar bottom content-->
+    </div>
+</div>

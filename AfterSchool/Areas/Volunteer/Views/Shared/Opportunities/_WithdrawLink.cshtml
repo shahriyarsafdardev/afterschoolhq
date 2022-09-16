@@ -1,0 +1,12 @@
+﻿@model ParticipationViewModel
+
+@{
+    var returnUrl = (string)ViewData["returnurl"];
+}
+
+<a class="padding-10 md-trigger"
+   data-modal="modal-withdraw"
+   style="display:block"
+   href="javascript:withdraw('@Model.SubmittedRecord.Uid', '@Model.ParticipationObject.ObjectID', '@((int)Model.ParticipationObject.ObjectType)', '@UI.JavascriptSafeString(Model.SubmittedRecord.FirstName)', '@UI.JavascriptSafeString(Model.ParticipationObject.Name)', '@UI.JavascriptSafeString(Model.ParticipationObject.ContactName)', '@UI.JavascriptSafeString(returnUrl)')">
+    Withdraw &raquo;
+</a>

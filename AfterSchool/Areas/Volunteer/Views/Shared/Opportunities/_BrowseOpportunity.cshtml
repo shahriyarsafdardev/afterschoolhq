@@ -1,0 +1,71 @@
+﻿@model ParticipationViewModel
+
+@{
+    var statusClass = "warning";
+
+    if (Model.RegistrantActivity.AssignmentTypeId == RegistrationAssignmentType.Reserved)
+    {
+        statusClass = "success";
+    }
+    else if (Model.RegistrantActivity.AssignmentTypeId == RegistrationAssignmentType.Declined)
+    {
+        statusClass = "danger";
+    }
+}
+
+<div class="col-sm-12 col-md-6 col-lg-4">
+    <div class="panel">
+        <div class="heading panel-h3" style="background-color: #2f3c40; height: 80px;">
+
+            <div class="pull-right">
+                <div class="btn-group btn-hspace">
+                    <button class="btn btn-alt5 dropdown-toggle" data-toggle="dropdown">
+                        <span class="caret"></span>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right">
+
+                        @if (Model.RegistrantActivity.AssignmentTypeId.NotIn(new[] {RegistrationAssignmentType.Withdrawn, RegistrationAssignmentType.Declined}))
+                        {
+                            Html.RenderPartial("Opportunities/_WithdrawLink", Model);
+                        }
+
+                        <a class="padding-10"
+                           style="display:block"
+                           href="mailto:@Model.ParticipationObject.ContactEmail">
+                            Send Email &raquo;
+                        </a>
+
+                    </div>
+                </div>
+            </div>
+
+            <h3 style="vertical-align: middle; display: table-cell; width: 100%; height: 80px; padding-right: 20px;" class="text-white notranslate">
+                <strong title="@Model.ParticipationObject.Name">@Model.ParticipationObject.Name</strong>
+            </h3>
+        </div>
+        <div class="panel-body">
+            <div class="margin-20">
+                <div class="row">
+
+                    <p class="pull-right badge badge-@statusClass">
+                        <strong>
+                            <em>
+                                @Model.RegistrantActivity.AssignmentTypeId.ToString().SplitByUpperCase()
+                            </em>
+                        </strong>
+                    </p>
+
+                    <p class="text-medium pull-left notranslate">
+                        <span>
+                            @Model.ParticipationObject.OwnerAccount.Name
+                        </span>
+                    </p>
+                </div>
+
+            </div>
+        </div>
+        <div class="panel-footer">
+            @{ Html.RenderPartial("/Areas/Volunteer/Views/Shared/Providers/_ProviderContactInfo.cshtml", Model.ParticipationObject); }
+        </div>
+    </div>
+</div>

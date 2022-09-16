@@ -1,0 +1,70 @@
+﻿@model List<Registrant>
+@{
+    var msgs = (SystemMessages) ViewBag.Messages;
+    var activityInstances = (List<(ActivityInstance ActivityInstance, Registrant Registrant, int? ParticipationObjectId, ParticipationObjectType ParticipationObjectType)>) ViewBag.ActivityInstances;
+    var providers = (List<Account>) ViewBag.Providers;
+    var activitiesRequiringAttention = (List<RegistrantActivity>) ViewBag.ActivitiesRequiringAttention;
+    var showToDos = activitiesRequiringAttention.Any() || Model.Any(registrant => registrant.ProfileStatusId != RegistrantProfileStatus.Completed);
+    var showProviders = providers.Any();
+    var showRightColumn = showToDos || showProviders;
+    var showLeftColumn = activityInstances.Any();
+    var upcomingDivClass = "col-md-12 col-lg-6";
+
+    if (!showRightColumn || !showLeftColumn)
+    {
+        upcomingDivClass = "col-md-12 col-lg-8 col-lg-offset-2";
+    }
+}
+
+@{ Html.RenderPartial("_VolunteerAccountHeader"); }
+
+<div class="main-content">
+
+    @if (showLeftColumn)
+    {
+        <div class="@upcomingDivClass">
+            @if (activityInstances.Any())
+            {
+                foreach (var activityInstance in activityInstances)
+                {
+                    Html.RenderPartial("Schedule/_BrowseOpportunityInstance", activityInstance);
+                }
+
+                <div class="text-medium-small text-center hide">
+                    <a href="@Url.Action("index", "schedule")">View More &raquo;</a>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="@upcomingDivClass">
+            @{ Html.RenderPartial("Opportunities/_NoOpportunities"); }
+        </div>
+    }
+
+    @if (showRightColumn)
+    {
+        <div class="@upcomingDivClass">
+
+            @if (showToDos)
+            {
+                Html.RenderPartial("_ToDos", Model);
+            }
+
+            @if (showProviders)
+            {
+                foreach (var provider in providers)
+                {
+                    Html.RenderPartial("Providers/_BrowseProvider", provider);
+                }
+            }
+
+        </div>
+    }
+</div>
+
+@section header
+{
+    <link href="~/Assets/css/style-registration.css?v=1.01" type="text/css" rel="stylesheet"/>
+}

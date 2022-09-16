@@ -1,13 +1,8 @@
 ﻿@model Account
-
 @{
-    var isVolunteer = SessionVariables.CurrentAccount.AccountTypeId == AccountType.Volunteer;
 
-    var participationObjectCount = isVolunteer
-        ? Model.GetPublishedOpportunitiesParticipationObjectCount()
-        : Model.GetPublishedActivitiesParticipationObjectCount();
-
-    var activityLabel = UILabel.ActivityLabel(isVolunteer ? ActivityType.VolunteerOpportunity : ActivityType.Activity, participationObjectCount != 1);
+    var participationObjectCount = Model.GetPublishedActivitiesParticipationObjectCount();
+    var activityLabel = UILabel.ActivityLabel(ActivityType.Activity, participationObjectCount != 1);
 }
 
 <div class="panel" style="overflow: hidden;">
