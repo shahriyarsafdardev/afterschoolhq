@@ -11,8 +11,8 @@ public static class GenerateCsvReportForSession
     public static void Run(DatabaseConnection dc)
     {
         const int accountId = 1148;
-        const RegistrationReportType reportType = RegistrationReportType.Dismissal;
-        const string commaSeparatedActivityGroupIds = "168"; // "166,167,168";
+        const RegistrationReportType reportType = RegistrationReportType.Detailed;
+        const string commaSeparatedActivityGroupIds = "166,167,168";
         var msgs = new SystemMessages();
 
         var account = Account.Load(accountId, msgs, dc);
@@ -31,7 +31,8 @@ public static class GenerateCsvReportForSession
         var byteData = RegistrationService.GetCsvByteArray(account, null, null, activityIds, ParticipationObjectType.Activity, reportType, null,
             RegistrationStatus.NotSet, false, msgs, dc);
 
-        File.WriteAllBytes($"report-{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.csv", byteData);
-        Console.WriteLine(@"Report successfully saved");
+        var filename = $"report-{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.csv";
+        File.WriteAllBytes(filename, byteData);
+        Console.WriteLine($@"File {filename} successfully saved");
     }
 }
