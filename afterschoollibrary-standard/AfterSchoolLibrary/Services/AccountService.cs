@@ -2445,29 +2445,30 @@ namespace AfterSchoolLibrary.Services
             Database.ExecuteTransaction(
                 action: (amsgs, adc) =>
                 {
-                    var packageToRemove = account.GetActiveAccountPackage(amsgs, adc);
-                    amsgs.AddRange(packageToRemove.CancelPackage(adc));
+                    var accountPackageToRemove = account.GetActiveAccountPackage(amsgs, adc);
+                    amsgs.AddRange(accountPackageToRemove.CancelPackage(adc));
 
                     newAccountPackage = AccountPackageService.CreateNewAccountPackage(
                         account.ID.Value,
                         newPackage,
                         billingPeriodTypeId,
                         stripeSubscriptionId,
+                        accountPackageToRemove.StartDate.HasValue ? DateTime.UtcNow : new DateTime?(),
                         loggedInUser,
                         amsgs,
                         adc);
 
-                    if (keepTrialDays && packageToRemove.IsDuringTrial)
-                        newAccountPackage.ContinueTrialFromPreviousPackage(packageToRemove, loggedInUser, amsgs, adc);
+                    if (keepTrialDays && accountPackageToRemove.IsDuringTrial)
+                        newAccountPackage.ContinueTrialFromPreviousPackage(accountPackageToRemove, loggedInUser, amsgs, adc);
                     
                     var stripeHelper = StripeHelper.GetStripeHelperSubscriberAccount();
                     
                     stripeHelper.CancelSubscription(stripeSubscriptionId, false, msgs);
 
-                    var trialEndDate = packageToRemove.IsDuringTrial ? newAccountPackage.GetTrialEndDate(amsgs, adc) : new DateTime?();
+                    var trialEndDate = accountPackageToRemove.IsDuringTrial ? newAccountPackage.GetTrialEndDate(amsgs, adc) : new DateTime?();
                     var defaultPaymentMethod = "";
 
-                    if (!packageToRemove.IsDuringTrial)
+                    if (!accountPackageToRemove.IsDuringTrial)
                         defaultPaymentMethod = stripeHelper.GetPaymentMethods(account.StripeCustomerId, StripePaymentMethodType.card, amsgs).LastOrDefault()
                             ?.Id;
                     
@@ -2499,14 +2500,15 @@ namespace AfterSchoolLibrary.Services
             string stripeSubscriptionId, WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            var packageToRemove = account.GetActiveAccountPackage(msgs, dc);
-            msgs.AddRange(packageToRemove.CancelPackage(dc));
+            var accountPackageToRemove = account.GetActiveAccountPackage(msgs, dc);
+            msgs.AddRange(accountPackageToRemove.CancelPackage(dc));
 
             var newAccountPackage = AccountPackageService.CreateNewAccountPackage(
                 account.ID.Value,
                 newPackage,
                 billingPeriodTypeId,
                 stripeSubscriptionId,
+                accountPackageToRemove.StartDate.HasValue ? DateTime.UtcNow : new DateTime?(),
                 loggedInUser,
                 msgs,
                 dc);

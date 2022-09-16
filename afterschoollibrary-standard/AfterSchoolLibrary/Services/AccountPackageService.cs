@@ -38,7 +38,7 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static AccountPackage CreateNewAccountPackage(int accountId, Package package, BillingPeriodType billingPeriodType, string stripeSubscriptionId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static AccountPackage CreateNewAccountPackage(int accountId, Package package, BillingPeriodType billingPeriodType, string stripeSubscriptionId, DateTime? startDate, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var accountPackage = new AccountPackage
             {
@@ -54,7 +54,7 @@ namespace AfterSchoolLibrary.Services
                     ? package.Price
                     : package.PricePerYear,
                 StripeSubscriptionId = stripeSubscriptionId,
-                StartDate = DateTime.UtcNow
+                StartDate = startDate
             };
 
             msgs.AddRange(accountPackage.Save(dc));
@@ -156,6 +156,8 @@ namespace AfterSchoolLibrary.Services
                 else if (accountPackage.BillingPeriodTypeId == BillingPeriodType.Year)
                     return accountPackage.StartDate.Value.AddYears(1);
             }
+            else if (accountPackage.TrialEndDate.HasValue)
+                return accountPackage.TrialEndDate.Value;
 
             return null;
         }
