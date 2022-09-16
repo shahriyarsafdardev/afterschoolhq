@@ -63,6 +63,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 $"{Utilities.BaseUrl()}{Url.Action("AfterStripeUpdate", "Account", new {Area = "org"})}" +
                 $"?returnurl={Url.Action("SubscriptionSuccess", "Onboarding", new {Area = "org"})}",
                 $"{Utilities.BaseUrl()}/{Url.Action("SubscriptionFail", "Onboarding", new {Area = "org"})}",
+                currentAccount.ReferrerAccountId.HasValue ? StripeHelper.ReferralCouponId : null,
                 msgs);
 
             if (msgs.HasNoErrors() && session.IsNotEmpty())
@@ -82,7 +83,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             currentAccount.UpdateOnboardingStep(OnboardingStepType.AccountType, msgs);
             
-            ViewBag.RenewalDate = currentPackage.GetRenewalDate().ToLongDateString();
+            ViewBag.RenewalDate = currentPackage.GetFirstRenewalDate().ToLongDateString();
             ViewBag.RenewalAmount = currentPackage.Price.ToCurrency();
             ViewBag.Messages = msgs;
             return View();

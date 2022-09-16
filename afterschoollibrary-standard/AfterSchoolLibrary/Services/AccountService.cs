@@ -1661,43 +1661,73 @@ namespace AfterSchoolLibrary.Services
         public static void CheckIfSubscriberAccountSubscriptionChanged(this Account account, bool startNewTrial, WebUser loggedInUser,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            // check if package has changed
-            var currentAccountPackage = account.GetActiveAccountPackage(msgs, dc);
-            var stripeSubscription = currentAccountPackage.GetStripeSubscription(msgs);
+            Database.ExecuteTransaction
+            (
+                action: (amsgs, adc) =>
+                {
+                    // check if package has changed
+                    var currentAccountPackage = account.GetActiveAccountPackage(amsgs, adc);
+                    var stripeSubscription = currentAccountPackage.GetStripeSubscription(amsgs);
 
-            if (stripeSubscription.IsEmpty())
-                stripeSubscription = StripeHelper.GetStripeHelperSubscriberAccount().GetSubscriptions(account.StripeCustomerId, msgs).First();
+                    if (stripeSubscription.IsEmpty())
+                        stripeSubscription = StripeHelper.GetStripeHelperSubscriberAccount().GetSubscriptions(account.StripeCustomerId, amsgs).First();
 
-            if (stripeSubscription.IsEmpty())
-                return;
-            
-            var stripePlan = stripeSubscription.Items.First().Plan;
-            var packageFromStripe = Package.LoadByUid(stripePlan.ProductId.ToGuid(), msgs, dc);
-                
-            // no trial or trial has ended
-            if (!stripeSubscription.TrialStart.HasValue ||
-                (stripeSubscription.TrialEnd.HasValue && stripeSubscription.TrialEnd.Value.IsBefore(DateTime.UtcNow)))
-                currentAccountPackage.EndTrialNow(msgs, dc);
-            else
-                currentAccountPackage.SyncTrialDates(stripeSubscription.TrialStart, stripeSubscription.TrialEnd, msgs, dc);
-            
-            // needs to match stripe
-            if (currentAccountPackage.PackageId != packageFromStripe.ID)
-            {
-                var newAccountPackage = account.SwitchPackages(
-                    packageFromStripe,
-                    stripePlan.Interval.ToEnum<BillingPeriodType>(),
-                    stripeSubscription.Id,
-                    loggedInUser,
-                    msgs,
-                    dc);
+                    if (stripeSubscription.IsEmpty())
+                        return;
 
-                if (startNewTrial)
-                    newAccountPackage.UpdateTrialDaysWithStripe(
-                        newAccountPackage.GetFeature(FeatureType.TrialDays, msgs, dc).Max.Value.ToInteger(),
-                        msgs,
-                        dc);
-            }
+                    var stripePlan = stripeSubscription.Items.First().Plan;
+                    var packageFromStripe = Package.LoadByUid(stripePlan.ProductId.ToGuid(), amsgs, adc);
+
+                    if (!currentAccountPackage.StartDate.HasValue)
+                    {
+                        // no trial or trial has ended
+                        if (!stripeSubscription.TrialStart.HasValue ||
+                            (stripeSubscription.TrialEnd.HasValue && stripeSubscription.TrialEnd.Value.IsBefore(DateTime.UtcNow)))
+                            currentAccountPackage.EndTrialNow(amsgs, adc);
+                        else
+                            currentAccountPackage.SyncTrialDates(stripeSubscription.TrialStart, stripeSubscription.TrialEnd, amsgs, adc);
+                    }
+
+                    // needs to match stripe
+                    if (currentAccountPackage.PackageId != packageFromStripe.ID)
+                    {
+                        var newAccountPackage = account.SwitchPackages(
+                            packageFromStripe,
+                            stripePlan.Interval.ToEnum<BillingPeriodType>(),
+                            stripeSubscription.Id,
+                            loggedInUser,
+                            amsgs,
+                            adc);
+
+                        if (startNewTrial)
+                            newAccountPackage.UpdateTrialDaysWithStripe(
+                                newAccountPackage.GetFeature(FeatureType.TrialDays, amsgs, adc).Max.Value.ToInteger(),
+                                amsgs,
+                                adc);
+
+                        currentAccountPackage = newAccountPackage;
+                    }
+
+                    var stripePlanAmountInDollars = stripePlan.AmountDecimal / 100;
+                    
+                    // check and update price changes
+                    if (stripeSubscription.Discount.Coupon?.PercentOff > 0)
+                    {
+                        currentAccountPackage.Price = stripePlanAmountInDollars * (1 - (stripeSubscription.Discount.Coupon?.PercentOff / 100));
+                        amsgs.AddRange(currentAccountPackage.Save(adc));
+                    }
+                    else if (stripePlanAmountInDollars != currentAccountPackage.Price)
+                    {
+                        currentAccountPackage.Price = stripePlanAmountInDollars;
+                        amsgs.AddRange(currentAccountPackage.Save(adc));
+                    }
+
+                },
+                onSuccess: (smsgs) => msgs.AddRange(smsgs),
+                onFailure: (fmsgs) => msgs.AddRange(fmsgs),
+                onException: (emsgs) => Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
         }
 
         public static List<PaymentMethod> GetAllStripePaymentMethods(this Account account, StripeAccountType stripeAccountType, SystemMessages msgs = null)
@@ -2417,29 +2447,30 @@ namespace AfterSchoolLibrary.Services
             Database.ExecuteTransaction(
                 action: (amsgs, adc) =>
                 {
-                    var packageToRemove = account.GetActiveAccountPackage(amsgs, adc);
-                    amsgs.AddRange(packageToRemove.CancelPackage(adc));
+                    var accountPackageToRemove = account.GetActiveAccountPackage(amsgs, adc);
+                    amsgs.AddRange(accountPackageToRemove.CancelPackage(adc));
 
                     newAccountPackage = AccountPackageService.CreateNewAccountPackage(
                         account.ID.Value,
                         newPackage,
                         billingPeriodTypeId,
                         stripeSubscriptionId,
+                        accountPackageToRemove.StartDate.HasValue ? DateTime.UtcNow : new DateTime?(),
                         loggedInUser,
                         amsgs,
                         adc);
 
-                    if (keepTrialDays && packageToRemove.IsDuringTrial)
-                        newAccountPackage.ContinueTrialFromPreviousPackage(packageToRemove, loggedInUser, amsgs, adc);
+                    if (keepTrialDays && accountPackageToRemove.IsDuringTrial)
+                        newAccountPackage.ContinueTrialFromPreviousPackage(accountPackageToRemove, loggedInUser, amsgs, adc);
                     
                     var stripeHelper = StripeHelper.GetStripeHelperSubscriberAccount();
                     
                     stripeHelper.CancelSubscription(stripeSubscriptionId, false, msgs);
 
-                    var trialEndDate = packageToRemove.IsDuringTrial ? newAccountPackage.GetTrialEndDate(amsgs, adc) : new DateTime?();
+                    var trialEndDate = accountPackageToRemove.IsDuringTrial ? newAccountPackage.GetTrialEndDate(amsgs, adc) : new DateTime?();
                     var defaultPaymentMethod = "";
 
-                    if (!packageToRemove.IsDuringTrial)
+                    if (!accountPackageToRemove.IsDuringTrial)
                         defaultPaymentMethod = stripeHelper.GetPaymentMethods(account.StripeCustomerId, StripePaymentMethodType.card, amsgs).LastOrDefault()
                             ?.Id;
                     
@@ -2448,12 +2479,15 @@ namespace AfterSchoolLibrary.Services
                         billingPeriodTypeId == BillingPeriodType.Month ? newPackage.StripePricePerMonthId : newPackage.StripePricePerYearId,
                         null,
                         trialEndDate,
-                        null,
+                        account.ReferrerAccountId.HasValue ? StripeHelper.ReferralCouponId : null,
                         defaultPaymentMethod,
                         null,
                         amsgs);
 
                     newAccountPackage.UpdateStripeSubscriptionId(newStripeSubscription.Id, amsgs, adc);
+                    
+                    StripeHelper.GetStripeHelperSubscriberAccount().UpdateSubscription(newAccountPackage.StripeSubscriptionId, null,
+                        null, null, null, null, StripeHelper.ReferralCouponId, amsgs);
                 },
                 onSuccess: smsgs => msgs.AddRange(smsgs),
                 onFailure: fmsgs => msgs.AddRange(fmsgs),
@@ -2468,14 +2502,15 @@ namespace AfterSchoolLibrary.Services
             string stripeSubscriptionId, WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            var packageToRemove = account.GetActiveAccountPackage(msgs, dc);
-            msgs.AddRange(packageToRemove.CancelPackage(dc));
+            var accountPackageToRemove = account.GetActiveAccountPackage(msgs, dc);
+            msgs.AddRange(accountPackageToRemove.CancelPackage(dc));
 
             var newAccountPackage = AccountPackageService.CreateNewAccountPackage(
                 account.ID.Value,
                 newPackage,
                 billingPeriodTypeId,
                 stripeSubscriptionId,
+                accountPackageToRemove.StartDate.HasValue ? DateTime.UtcNow : new DateTime?(),
                 loggedInUser,
                 msgs,
                 dc);

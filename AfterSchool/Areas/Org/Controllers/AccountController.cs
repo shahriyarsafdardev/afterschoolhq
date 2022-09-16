@@ -1426,17 +1426,23 @@ namespace AfterSchool.Areas.Org.Controllers
                     // if coming from select plan, need to potentially change subscription if changed on select plan screen
                     var newPlanSelected = newPlan.IsGuid() && period.IsInteger();
                     var isPlanDifferent = newPlanSelected && (accountPackage.PackageUid != newPlan.ToGuid() || accountPackage.BillingPeriodTypeId != (BillingPeriodType) period.ToInteger());
-                    if (newPlanSelected && isPlanDifferent)
-                        currentAccount.SwitchPackagesWithStripe
-                        (
-                            Package.LoadByUid(newPlan.ToGuid(), amsgs, adc),
-                            (BillingPeriodType)period.ToInteger(),
-                            true,
-                            accountPackage.StripeSubscriptionId,
-                            currentUser,
-                            amsgs,
-                            adc
-                        );
+                    if (newPlanSelected)
+                    {
+                        if (isPlanDifferent)
+                            currentAccount.SwitchPackagesWithStripe
+                            (
+                                Package.LoadByUid(newPlan.ToGuid(), amsgs, adc),
+                                (BillingPeriodType) period.ToInteger(),
+                                true,
+                                accountPackage.StripeSubscriptionId,
+                                currentUser,
+                                amsgs,
+                                adc
+                            );
+                        else if (currentAccount.ReferrerAccountId.HasValue)
+                            StripeHelper.GetStripeHelperSubscriberAccount().UpdateSubscription(accountPackage.StripeSubscriptionId, null,
+                                null, null, null, null, StripeHelper.ReferralCouponId, amsgs);
+                    }
 
                     // check if finally added payment
                     currentAccount.CheckIfSubscriberAccountHasPaymentMethod(null, amsgs, adc);

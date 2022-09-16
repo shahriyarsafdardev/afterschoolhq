@@ -45,6 +45,8 @@ namespace AfterSchoolLibrary.Billing
             return Math.Round(fee, 2, MidpointRounding.AwayFromZero);
         }
 
+        public static string ReferralCouponId => Helpers.Utilities.IsProduction ? "4BOLxUYy" : "5zMx3Z7l";
+
         public static string SecretKey => Helpers.Utilities.IsLocalHost ? TestSecretKey : LiveSecretKey;
         public static string PublishableKey  => Helpers.Utilities.IsLocalHost ? TestPublishableKey : LivePublishableKey;
         public static string PlatformClientId => Helpers.Utilities.IsLocalHost ? DevPlatformClientId : LivePlatformClientId;
@@ -1309,7 +1311,7 @@ namespace AfterSchoolLibrary.Billing
             return CreateRegistrantSubscription(customer.Id, plan.Id, isProrated, sourceId, platformFeePercent, startDate, null, null, stripeAccountId, stripeCouponId, metaData, msgs);
         }
 
-        public Stripe.Subscription UpdateSubscription(string subscriptionId, string priceId, bool? billingCycleAnchorNow, bool? billingCycleAnchorUnchanged, DateTime? trialEndDate, bool? prorate, SystemMessages msgs)
+        public Stripe.Subscription UpdateSubscription(string subscriptionId, string priceId, bool? billingCycleAnchorNow, bool? billingCycleAnchorUnchanged, DateTime? trialEndDate, bool? prorate, string couponId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             
@@ -1326,6 +1328,9 @@ namespace AfterSchoolLibrary.Billing
                     }
                 };
 
+            if (couponId.IsNotEmpty())
+                options.Coupon = couponId;
+            
             if (billingCycleAnchorNow.HasValue)
                 options.BillingCycleAnchor = SubscriptionBillingCycleAnchor.Now;
 
@@ -2392,7 +2397,7 @@ namespace AfterSchoolLibrary.Billing
             return new Stripe.Checkout.SessionService(StripeClient);
         }
 
-        public Stripe.Checkout.Session GetCheckoutSession(string customerId, string priceId, string successUrl, string cancelUrl, SystemMessages msgs)
+        public Stripe.Checkout.Session GetCheckoutSession(string customerId, string priceId, string successUrl, string cancelUrl, string couponId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -2400,7 +2405,6 @@ namespace AfterSchoolLibrary.Billing
             var options = new Stripe.Checkout.SessionCreateOptions()
             {
                 Customer = customerId,
-                AllowPromotionCodes = true,
                 AutomaticTax = new SessionAutomaticTaxOptions()
                 {
                     Enabled = true,
@@ -2423,6 +2427,17 @@ namespace AfterSchoolLibrary.Billing
                 },
                 PaymentMethodTypes = new List<string>() {"card"},
             };
+
+            if (couponId.IsNotEmpty())
+                options.Discounts = new List<SessionDiscountOptions>()
+                {
+                    new SessionDiscountOptions()
+                    {
+                        Coupon = couponId,
+                    },
+                };
+            else
+                options.AllowPromotionCodes = true;
 
             try
             {
