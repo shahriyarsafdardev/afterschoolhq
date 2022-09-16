@@ -1447,6 +1447,7 @@
     <Content Include="providers.html" />
     <Content Include="Scripts\emojionearea.min.js" />
     <Content Include="Scripts\quill.min.js" />
+    <Content Include="service-fee-schedule.html" />
     <Content Include="sitemap-home.xml" />
     <Content Include="style.css" />
     <Content Include="teachers.html" />
